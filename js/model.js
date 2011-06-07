@@ -7,42 +7,72 @@ if(typeof formdesigner === 'undefined'){
 
 formdesigner.model = (function(){
     var that = {};
-    var mug = (function(){
+
+    /**
+     * A mug is the standard object within a form
+     * and represents the combined Data, Bind and Control
+     * elements (accessible through the Mug) in all their
+     * valid combinations. Validity of a mug is determined
+     * by the Definition object.
+     *
+     * possible constructor params:
+     * {
+     *  bindElement,
+     *  dataElement,
+     *  controlElement,
+     *  }
+     */
+    var Mug = function(spec){
         var that = {};
+        var mySpec;
+
+        var dataElement,bindElement,controlElement;
+
+        if(typeof spec === 'undefined'){
+            mySpec = {};
+        }else{
+            mySpec = spec;
+        }
+
+        (function construct(spec){
+            if(spec.bindElement){ bindElement = spec.bindElement; }
+            if(spec.dataElement){ dataElement = spec.dataElement; }
+            if(spec.controlElement){ controlElement = spec.controlElement; }
+        }(mySpec));
+
+
+        that.bindElement = bindElement;
+        that.dataElement = dataElement;
+        that.controlElement = controlElement;
         //make the object event aware
         formdesigner.util.eventuality(that);
-        var moo = 'mooooooo';
-        var get_moo = function(){
-            return this.moo;
-        };
-        that.moo = moo;
-        that.get_moo = get_moo;
         return that;
-    }());
-    that.mug = mug;
+    };
+    that.Mug = Mug;
 
-    var form = (function(){
+    var Form = function(){
         var that = {};
         //make the object event aware
         formdesigner.util.eventuality(that);
-    }());
-    that.form = form;
+        return that;
+    };
+    that.Form = Form;
 
-    var xhtml = (function(){
+    var Xhtml = function(){
         var that = {};
         //make the object event aware
         formdesigner.util.eventuality(that);
-    }());
-    that.xhtml = xhtml;
+    };
+    that.xhtml = Xhtml;
 
-    var localization = (function(){
+    var Localization = function(){
         var that = {};
         //make the object event aware
         formdesigner.util.eventuality(that);
-    }());
-    that.localization = localization;
+    };
+    that.Localization = Localization;
 
-    var bindElement = (function(){
+    var BindElement = function(){
         var that = {};
         var attributes = {
             nodeset: "",
@@ -56,13 +86,42 @@ formdesigner.model = (function(){
         //make the object event aware
         formdesigner.util.eventuality(that);
         return that;
-    }());
-    that.bindElement = bindElement;
+    };
+    that.BindElement = BindElement;
 
-    var liveText = (function(){
+    /**
+     * A LiveText object is able to
+     * take in Strings and Objects (with their specified
+     * callback functions that produce strings) in order
+     * render a LiveString with the latest changes to the objects
+     * it is tracking, on command.
+     */
+    var LiveText = function(){
         var that = {};
 
         var phrases = [];
+
+        /**
+         * Renders the token in the phrases list specified by tokenIndex
+         * and returns it as a string
+         * @param tokenIndex
+         */
+        var getRenderedToken = function(tokenIndex){
+            var tObj;
+            var outString = '';
+            if(tokenIndex > phrases.length-1){
+                return undefined;
+            }
+            tObj = phrases[tokenIndex];
+            if(typeof tObj.refObj === 'undefined'){
+                throw "incorrect Live Object added to LiveText! Can't render string.";
+            }else if(typeof tObj.refObj === 'string'){
+                outString += tObj.refObj;
+            }else{
+                outString += tObj.callback.apply(tObj.refObj,tObj.params);
+            }
+            return outString;
+        };
 
         /**
          * Get the string this liveText represents
@@ -72,21 +131,9 @@ formdesigner.model = (function(){
          */
         var renderString = function(){
             var outString = "";
-            var tObj;
             var i;
             for(i=0;i<phrases.length;i++){
-                tObj = phrases[i];
-                if(typeof tObj.refObj === 'undefined'){
-                    throw "incorrect Live Object added to LiveText! Can't render string.";
-                }else if(typeof tObj.refObj === 'string'){
-                    outString += tObj.refObj;
-                }else{
-                    if(typeof tObj.params === 'undefined'){
-                      outString += tObj.callback();
-                    }else{
-                        outString += tObj.callback(tObj.params);
-                    }
-                }
+                outString += getRenderedToken(i);
             }
             return outString;
         };
@@ -100,8 +147,9 @@ formdesigner.model = (function(){
          * adding anything else, specify a callback function
          * to call (with or without params). If no callback
          * is specified in that case, an exception will be thrown
-         * @param token
-         * @param callback
+         * @param token - the object (or string) that represents the string data
+         * @param callback - the callback function that should be used on the token obj to retrieve a string (if token is an object)
+         * @param params is an array of arguments to be applied to the callback function (if a callback was specified)
          */
         var addToken = function(token, callback, params){
             var tObj = {};
@@ -116,23 +164,32 @@ formdesigner.model = (function(){
         };
         that.addToken = addToken;
 
+        /**
+         * Returns the list of token objects
+         * (an array of mixed strings and/or objects)
+         */
+        var getTokenList = function(){
+            return phrases;
+        };
+        that.getTokenList = getTokenList;
+
         //make this object event aware.
         formdesigner.util.eventuality(that);
         return that;
-    }());
-    that.liveText = liveText;
+    };
+    that.LiveText = LiveText;
 
     /**
      * DataElement is the object representing the final resting (storage)
      * place of data entered by the user and/or manipulated by the form.
      */
-    var dataElement = (function(){
+    var DataElement = function(){
         var that = {};
         //make the object event aware
         formdesigner.util.eventuality(that);
         return that;
-    }());
-    that.dataElement = dataElement;
+    };
+    that.DataElement = DataElement;
 
     /**
      * The controlElement represents the object seen by the user during
@@ -140,49 +197,15 @@ formdesigner.model = (function(){
      * prompt, but can also be a notification message, or some other type
      * of user viewable content.
      */
-    var controlElement = (function(){
+    var ControlElement = function(){
         var that = {};
         //make the object event aware
         formdesigner.util.eventuality(that);
         return that;
-    }());
-    that.controlElement = controlElement;
+    };
+    that.ControlElement = ControlElement;
 
     return that;
 }());
-/* Object template
 
-var myObj = (function(){
-    var that = {};
-
-    //private members
-    var myPrivateThing = 'foo';
-
-    //public members
-    var myPublicThing = 'bar';
-
-    //add public members here
-    that.myPublicThing = myPublicThing;
-
-    //private methods
-    var prvMethod = function(){
-        //...
-    };
-
-    //public methods
-    var pubMethod = function(){
-        //...
-    };
-
-    //add public methods here
-    that.pubMethod = pubMethod;
-
-
-    //Make the object event aware
-    formdesigner.util.eventuality(that);
-
-    //return the object
-    return that;
-}());
- */
 
