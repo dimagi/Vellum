@@ -9,29 +9,46 @@
       <link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css" rel="stylesheet" type="text/css"/>
       <link href="css/formdesigner.css" rel="stylesheet" type="text/css"/>
     <script type="text/javascript" src="js/jquery-1.6.1.js"></script>
-    <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js" type="text/javascript"></script>
 
     <!--<script type="text/javascript" src="js/util.js"></script>-->
     <!--<script type="text/javascript" src="js/model.js"></script>-->
+          <!--<script type="text/javascript" src="js/controller.js"></script>-->
 
     <script type="text/javascript">
     $(document).ready(function() {
         var pbar = $("#progressbar");
-        pbar.show(500);
-        $("#content").show(500);
-        $("#loadingBar").show();
 
-        pbar.progressbar({ value: 0 })
+        var content = $("#content");
+        content.show();
 
-        $("#loadingInfo").html("downloading util.js")
+        var loadingBar = $("#loadingBar");
+        loadingBar.fadeIn(100);
+
+        pbar.progressbar({ value: 0 });
+
+        $("#loadingInfo").html("downloading util.js");
         $.getScript("js/util.js", function(){
-            pbar.progressbar({ value: 15 })
+            pbar.progressbar({ value: (pbar.progressbar( "option", "value" )+33)});
         });
 
         $("#loadingInfo").html("downloading model.js");
         $.getScript("js/model.js", function(){
-        pbar.progressbar({ value: 85 })
-    });
+            pbar.progressbar({ value: (pbar.progressbar( "option", "value" )+33)});
+
+        });
+
+        $("#loadingInfo").html("downloading controller.js");
+        $.getScript("js/controller.js", function(){
+            pbar.progressbar({ value: (pbar.progressbar( "option", "value" )+33)});
+            loadingBar.delay(500).fadeOut(1000);
+        });
+
+
+
+
+
+
   });
 
   </script>
@@ -43,7 +60,7 @@
     <div id="loadingBar" class="loadingBar">
         <br>Loading...</br>
         <p/>
-        <div id="loadingInfo"></div>
+        <div id="loadingInfo" class="terminal"></div>
         <div id="progressbar" class="myProgressBar"></div>
     </div>
 </div>

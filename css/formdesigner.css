@@ -1,11 +1,8 @@
 .terminal{
-    background-color:#080808;
-    color:#5fba3d;
     font-family:monospace, prestige;
     z-index:999;
     position:absolute;
-    width:100%;
-    height:100%;
+    padding: 5px;
 }
 
 a{

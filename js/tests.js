@@ -101,7 +101,7 @@ $(document).ready(function(){
         ok(typeof otherData === 'object', "Is it an object? (with args)");
         equal(otherData.name,name,"Was the name attribute set correctly?");
         equal(otherData.defaultData,initialData,"Is initialData correct?");
-        console.log(otherData.ufid);
+        console.log("DataElement.ufid:"+otherData.ufid);
         equal(typeof otherData.ufid, 'string', "Is ufid a string and exists?");
         notEqual(otherData,myData,"Test that data elements are unique");
     });
@@ -192,7 +192,6 @@ $(document).ready(function(){
         myMug.initWithSpec(mugSpec);
 
         ok(typeof myMug === 'object',"Is this populated mug an object?");
-        console.log(myMug);
         equal(typeof myMug.definition,'undefined', "Is the definition undefined?");
         deepEqual(myMug.controlElement,myControl,"Control Element check");
         deepEqual(myMug.bindElement,myBind, "Bind Element check");
@@ -204,6 +203,11 @@ $(document).ready(function(){
 
 
     });
+
+//    module("Messing around");
+//    test("Definition Object", function(){
+//
+//    });
 
 
 
