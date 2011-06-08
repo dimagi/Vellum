@@ -6,17 +6,49 @@
   <head>
     <title>Test Point</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-
-    <script type="text/javascript" src="js/util.js"></script>
-    <script type="text/javascript" src="js/model.js"></script>
+      <link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css" rel="stylesheet" type="text/css"/>
+      <link href="css/formdesigner.css" rel="stylesheet" type="text/css"/>
     <script type="text/javascript" src="js/jquery-1.6.1.js"></script>
-    <script type="text/javascript" src="js/qunit.js"></script>
-    <script type="text/javascript" src="js/tests.js" ></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
 
+    <!--<script type="text/javascript" src="js/util.js"></script>-->
+    <!--<script type="text/javascript" src="js/model.js"></script>-->
+
+    <script type="text/javascript">
+    $(document).ready(function() {
+        var pbar = $("#progressbar");
+        pbar.show(500);
+        $("#content").show(500);
+        $("#loadingBar").show();
+
+        pbar.progressbar({ value: 0 })
+
+        $("#loadingInfo").html("downloading util.js")
+        $.getScript("js/util.js", function(){
+            pbar.progressbar({ value: 15 })
+        });
+
+        $("#loadingInfo").html("downloading model.js");
+        $.getScript("js/model.js", function(){
+        pbar.progressbar({ value: 85 })
+    });
+  });
+
+  </script>
   </head>
 
   <body>
 
-  </body>
+<div id="content">
+    <div id="loadingBar" class="loadingBar">
+        <br>Loading...</br>
+        <p/>
+        <div id="loadingInfo"></div>
+        <div id="progressbar" class="myProgressBar"></div>
+    </div>
+</div>
+
+
+</body>
 
 </html>
