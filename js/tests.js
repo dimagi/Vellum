@@ -1,5 +1,56 @@
 $(document).ready(function(){
 
+    var make_control_bind_data_mug = function(){
+        var myMug = new formdesigner.model.Mug();
+
+        //Control Element
+        var typeName = formdesigner.model.TYPE_NAMES.input;
+        var myControl = new formdesigner.model.ControlElement(
+                {
+                    typeName:typeName,
+                    label:"What is your name?",
+                    hintLabel:"Enter the client's name",
+                    labelItext:"Q1EN",
+                    hintItext:"Q1ENH"
+                }
+        );
+
+        //Data Element
+        var name = "question1";
+        var initialData = "foo";
+        var spec = {
+            name: name,
+            defaultData: initialData
+        }
+        var myData = formdesigner.model.DataElement(spec);
+
+        //Bind Element
+        var attributes = {
+            dataRef: "question1",
+            dataType: "text",
+            constraint: "length(.) > 5",
+            constraintMsg: "Town Name must be longer than 5!"
+        };
+        spec = {
+            attributes : attributes
+        };
+        var myBind = new formdesigner.model.BindElement(spec);
+
+        var mugSpec = {
+            dataElement: myData,
+            bindElement: myBind,
+            controlElement: myControl
+        }
+        myMug.initWithSpec(mugSpec);
+
+        return {
+            control: myControl,
+            data: myData,
+            bind: myBind,
+            mug: myMug
+        };
+    }
+
     module("LiveText Unit Tests");
     test("Create and Verify LiveText", function(){
         expect(4);
@@ -34,9 +85,7 @@ $(document).ready(function(){
         liveText.addToken(otherObj,otherObj.cbFunc,[5]);
         equal(liveText.renderString(),"Test StringSome Text Meow Mix times: 5", "rendering with callback + params");
     });
-
-
-    test("Test additional object", function(){
+    test("Test additional LiveText object", function(){
         expect(2);
 
         ///////
@@ -52,7 +101,7 @@ $(document).ready(function(){
 
     module("Bind Element");
     test("Create a bind with and without arguments", function(){
-       expect(8);
+       expect(9);
        var myBind = new formdesigner.model.BindElement();
        ok(typeof myBind === 'object', "Is it an object?");
 
@@ -61,7 +110,8 @@ $(document).ready(function(){
             dataRef: "question1",
             dataType: "text",
             constraint: "length(.) > 5",
-            constraintMsg: "Town Name must be longer than 5!"
+            constraintMsg: "Town Name must be longer than 5!",
+            id: "someUniqueBindID"
         };
         var spec = {
             attributes : attributes
@@ -75,6 +125,7 @@ $(document).ready(function(){
         equal(myOtherBind.dataType, attributes.dataType, "Shortcut to dataRef correctly set");
         equal(myOtherBind.constraint, attributes.constraint, "Shortcut to dataRef correctly set");
         equal(myOtherBind.constraintMsg, attributes.constraintMsg, "Shortcut to dataRef correctly set");
+        equal(myOtherBind.id, attributes.id, "Shortcut to id correctly set");
 
         //test that a unique formdesigner id was generated for this object (well, kind of)
         equal(typeof myOtherBind.ufid, 'string', "Is the ufid a string?");
@@ -107,8 +158,8 @@ $(document).ready(function(){
     });
 
     module("Control Element");
-    test("Control Element", function(){
-        expect(4);
+    test("Control Element Default", function(){
+        expect(2);
         var emptyControl = new formdesigner.model.ControlElement();
         ok(typeof emptyControl === 'object', "Is emptyControl and object?");
 
@@ -119,11 +170,27 @@ $(document).ready(function(){
                 }
         );
 
-        equal(fullControl.typeName,typeName, "Was type name set?");
-        equal(typeof fullControl.ufid,'string', "Does ufid exist?")
         console.log("Control node ufid:"+fullControl.ufid);
         notEqual(emptyControl.ufid,fullControl.ufid,"Check that ufids are not equal for ControlElements");
         
+    });
+    test("Control Element with additional init value", function(){
+        expect(2);
+               //Control Element
+        var typeName = formdesigner.model.TYPE_NAMES.input;
+        var myControl = new formdesigner.model.ControlElement(
+                {
+                    typeName:typeName,
+                    label:"What is your name?",
+                    hintLabel:"Enter the client's name",
+                    labelItext:"Q1EN",
+                    hintItext:"Q1ENH"
+                }
+        );
+
+        equal(myControl.typeName,typeName, "Was type name set?");
+        equal(typeof myControl.ufid,'string', "Does ufid exist?")
+        console.log("Control node ufid:"+myControl.ufid);
     });
 
     module("Mug Unit Tests");
@@ -153,44 +220,11 @@ $(document).ready(function(){
     });
     test("Create populated Mug", function(){
        expect(5);
-        var myMug = new formdesigner.model.Mug();
-
-        //Control Element
-        var typeName = formdesigner.model.TYPE_NAMES.input;
-        var myControl = new formdesigner.model.ControlElement(
-                {
-                    typeName:typeName
-                }
-        );
-
-        //Data Element
-        var name = "question1";
-        var initialData = "foo";
-        var spec = {
-            name: name,
-            defaultData: initialData
-        }
-        var myData = formdesigner.model.DataElement(spec);
-
-        //Bind Element
-        var attributes = {
-            dataRef: "question1",
-            dataType: "text",
-            constraint: "length(.) > 5",
-            constraintMsg: "Town Name must be longer than 5!"
-        };
-        spec = {
-            attributes : attributes
-        };
-        var myBind = new formdesigner.model.BindElement(spec);
-
-        var mugSpec = {
-            dataElement: myData,
-            bindElement: myBind,
-            controlElement: myControl
-        }
-        myMug.initWithSpec(mugSpec);
-
+        var testData = make_control_bind_data_mug();
+        var myMug = testData.mug;
+        var myControl = testData.control;
+        var myBind = testData.bind;
+        var myData = testData.data;
         ok(typeof myMug === 'object',"Is this populated mug an object?");
         equal(typeof myMug.definition,'undefined', "Is the definition undefined?");
         deepEqual(myMug.controlElement,myControl,"Control Element check");
@@ -204,14 +238,54 @@ $(document).ready(function(){
 
     });
 
-//    module("Messing around");
-//    test("Definition Object", function(){
-//
-//    });
+    module("Definition Object Tests");
+    test("Definition Object Creation and addition to tree", function(){
+        expect(4);
+        var testData = make_control_bind_data_mug();
+        var example_template = formdesigner.model.definition_example;
+
+        //first we create a definition using the example template
+        var textQDefinition = new formdesigner.model.Definition(example_template);
+
+        //then modify the definition fields such that it's a correct definition
+        textQDefinition.mug = testData.mug;
+        textQDefinition.dataNode.dataElement = testData.data;
+        textQDefinition.bindNode.bindElement = testData.bind;
+        textQDefinition.controlNode.controlElement = testData.control;
+        var tqd = textQDefinition;
+
+        equal(tqd.defName,"A Standard Text Question Definition", "Name set correctly");
+        deepEqual(tqd.bindNode.bindElement,testData.bind,"Bind element stored correctly");
+        deepEqual(tqd.dataNode.dataElement,testData.data,"Bind element stored correctly");
+        deepEqual(tqd.controlNode.controlElement,testData.control,"Bind element stored correctly");
+
+
+    });
+
+    /**
+     * Remember to set the values that aren't 'real'
+     * in the example template!
+     */
+    var creat_text_question_definition = function(){
+        var example_template = formdesigner.model.definition_example;
+        //first we create a definition using the example template
+        var textQDefinition = new formdesigner.model.Definition(example_template);
+        return textQDefinition;
+    };
+
+    var attach_elements_to_def = function(definition,bind,control,data,mug){
+        definition.dataNode.dataElement = data;
+        definition.bindNode.bindElement = bind;
+        definition.controlNode.controlElement = control;
+        definition.mug = mug;
+    }
+
 
 
 
 });
+
+
 
 function divide(a,b){
     return a/b;
