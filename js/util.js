@@ -108,6 +108,14 @@ formdesigner.util = (function(){
         return (S4()+S4()+S4()+S4()+S4()+S4()+S4()+S4());
     }
 
+    /**
+     * Shortcut func because I'm tired of typing this out all the time.
+     * @param obj
+     */
+    var exists = function(obj){
+        return typeof obj !== 'undefined';
+    };
+    that.exists = exists;
 
     return that;
 

@@ -9,7 +9,7 @@ if(typeof formdesigner === 'undefined'){
 
 formdesigner.model = (function(){
     var that = {};
-
+    var exists = formdesigner.util.exists; //jack it from the util module
     /**
      * A mug is the standard object within a form
      * and represents the combined Data, Bind and Control
@@ -139,7 +139,6 @@ formdesigner.model = (function(){
      * Constructor object (spec) can have the following attributes
      * {
      * attributes = {
-     *  dataRefName,  //typically the end of 'nodeset' attribute ('questionID')
      *  dataType, //typically the xsd:dataType
      *  relevant,
      *  calculate,
@@ -316,7 +315,7 @@ formdesigner.model = (function(){
      * {
      *  typeName, //the type string indicating what type of Control Element this is
      *            //see the control_definitions (tag_name) object
-     *  controlName
+     *  controlName //control_definition.controlElement.controlType.name;
      *  //optional:
      *  label
      *  hintLabel
@@ -464,6 +463,78 @@ formdesigner.model = (function(){
     };
     that.control_definitions = control_definitions;
 
+
+    //////////////////////////////////////////////////////////////////
+    //The Following fields (the ones in ALL CAPS) give a dictionary of
+    // definition parameters and whether or not they're required
+    // in the form of { param_name: required, ... } (where 'required' is a boolean)
+    // this is super useful for validating the definition objects
+    // especially when definitions are generated dynamically (making sure the code that
+    // does so is doing the right thing) and for making assumptions about definitions
+    // in general.
+    var DEFINITION_FIELDS = {
+        defName: true,
+        mug: true //can be null
+    };
+
+    var CONTROL_DEF_FIELDS = {
+        parentDef: true,
+        childrenDef: true,
+        controlNodeRequired: true,
+        controlElement: true,
+        controlType: false, //object with more spec params (see CONTROL_TYPE_DEF_FIELDS)
+        hasID: false
+    };
+
+    //takes the form of { fieldName: required_field, .... }, requied_field is a boolean
+    var CONTROL_TYPE_DEF_FIELDS = {  //this should be used in the ControlElement constructor to check that the passed in spec is valid
+        name: true,
+        tagName: true,
+        canHaveChildren: true,
+        childrenType: false, //if above is true but childrenType is not present, assume all children types allowed.
+        label: false,
+        itext: false,
+        hintLabel: false,
+        hintItext: false,
+        defaultValue: false
+    };
+
+    var BIND_DEF_FIELDS = {
+        bindNodeRequired: true,
+        hasID: false,
+        xsdType: false,
+        bindElement: true, //can be null
+        bindType: false //object with more spec params (see BIND_TYPE_DEF_FIELDS)
+    };
+
+    var BIND_TYPE_DEF_FIELDS = {
+        dataType: true,
+        relevant: false,
+        calculate: false,
+        constraint: false,
+        constraintMsg: false,
+        required: false
+    };
+
+    var DATA_DEF_FIELDS = {
+
+    };
+
+
+    //TODO
+    //FINISH DEFINITION SCHEMA (stuff above)
+    //make the constructors use this schema to check input when building control/data/bind Elements
+    //make a validator function that checks a def against the schema
+    //make a validator that checks an Element object against a def
+    //make a mug validator that checks a mug against a def.
+    //finish the mug builder that takes in a def and gives a fully constructed mug (with elements as needed)
+    
+
+    //
+    //
+    /////////////////////////////////////////////////////////////////////////
+
+    var bind
      /**
      * Definition Object example (useful for unit testing purposes)
      * and as a reference.
@@ -480,12 +551,17 @@ formdesigner.model = (function(){
         },
         bindNode: {
             bindNodeRequired: false,
-            hasID: true
-//            bindElement: some_bind, //some_bind_element
+            hasID: true,
+            dataType: "xsd:text",
+            hasRelevant: true,
+            hasCalculate: false,
+            hasConstraint: false,
+            hasConstraintMsg: false,
+            bindElement: 'some_bind' //shoudl actually refer to a bindElement object
         },
         controlNode: {
             parentDef: rootControlDef,
-            childrenDef: null,
+            childrenDef: null,//should be a list [] of def objects
             controlNodeRequired: true,
             controlElement: 'some_control_element', //should be an object ref!
             controlType: control_definitions.text
@@ -591,34 +667,71 @@ formdesigner.model = (function(){
         //Below three functions read the given
         //spec object and init a respective object as appropriate
         function deal_with_control_spec(spec){
-            var s = {}; //spec to be passed to the control element constructor
-            var i = null;
-
+            var controlElement;
+            if(!exists(spec) || typeof spec !== 'object'){ throw 'A controlNode spec must exist in a definition!'; }
+            if(!exists(spec.controlNodeRequired) || spec.controlNodeRequired === null){ throw 'A controlNodeRequired field must be set in the controlNode definition!';}
+            
             //check if a controlType def is here if controlNodeRequired == true
             if(spec.controlNodeRequired){
                 if(typeof spec.controlType === 'undefined' ||
                         !spec.controlType){
                     throw 'A controlElement is Required but no controlType spec is given in the definition!';
                 }
+                else{
+                    var cdef = spec.controlType;
+                    var constructorSpec = {};
 
-                s.typeName = spec.controlType.name;
-                s.controlName = spec.controlType.tagName;
-                if(spec.controlType.label){ s.label = null };
-                if(spec.controlType.)
+                    // the required properties
+                    if(!exists(cdef.tagName) || typeof cdef.tagName !== 'string'){
+                        throw "Error: tagName needs to be specified (as a string!) in the controlType section of the definition!";
+                    }else{
+                        constructorSpec.typeName = cdef.tagName; //property used for ControlElement creation
+                    }
+                    if(!exists(cdef.name) || typeof cdef.name !== 'string'){
+                        throw "Error: name needs to be specified (as a string!) in the controlType section of the definition!";
+                    }else{
+                        constructorSpec.name = cdef.controlName; //property used for ControlElement creation
+                    }
+
+                    //the optional properties
+                    if(exists(cdef.label) && cdef.label == true){ constructorSpec.label = "Question Label";}
+                    if(exists(cdef.itext) && cdef.itext == true){ constructorSpec.labelItext = formdesigner.controller.getUniqueItextID();}
+                    if(exists(cdef.hintLabel) && cdef.hintLabel == true){ constructorSpec.hintLabel = "Some Default Hint Text";}
+                    if(exists(cdef.hintItext) && cdef.hintItext == true){ constructorSpec.hintItext = formdesigner.controller.getUniqueItextID();}
+                    if(exists(cdef.defaultValue) && cdef.defaultValue == true){ constructorSpec.defaultValue = "DEFAULT_VALUE"; }
+
+                    controlElement = new ControlElement(constructorSpec);
+                }
             }
 
-
-            for(i in spec){
-                if(!spec.hasOwnProperty(i)){continue;}
-
-            }
+            return controlElement;
         }
 
         function deal_with_data_spec(spec){
+            var constructorSpec = {};
+            var dataElement;
+            if(!exists(spec) || typeof spec !== 'object'){ throw 'A dataNode spec must be present in the Definition object!';}
+            if(!exists(spec.dataNodeRequired)){ throw 'dataNodeRequired property must be set in dataNode section of Definition!';}
 
+            if(spec.dataNodeRequired){
+                if(exists(spec.hasInitialData) && spec.hasInitialData){ constructorSpec.defaultData == "DEFAULT_VALUE";}
+                constructorSpec.name = formdesigner.util.getUniqueQuestionID();
+                dataElement = DataElement(constructorSpec);
+            }
+            return dataElement;
         }
 
         function deal_with_bind_spec(spec){
+            var constructorSpec = {};
+            var bindElement;
+            if(!exists(spec) || typeof spec !== 'object'){ throw 'A dataNode spec must be present in the Definition object!';}
+            if(!exists(spec.bindNodeRequired)){ throw 'bindNodeRequired property must be set in dataNode section of Definition!';}
+
+            if(spec.bindNodeRequired){
+                if(!exists(spec.hasID) && spec.hasID){
+                    constructorSpec.bindID = formdesigner.util.getUniqueBindID();
+                }
+            }
 
         }
 
@@ -636,7 +749,7 @@ formdesigner.model = (function(){
 
             if(curProp === 'dataNode'){ data = deal_with_data_spec(curVal);}
             else if(curProp === 'bindNode'){ bind = deal_with_bind_spec(curVal);}
-            else if(curProp === 'controlNode'){ bind = deal_with_control_spec(curVal);}
+            else if(curProp === 'controlNode'){ control = deal_with_control_spec(curVal);}
         }
         var mugSpec = {}
         if(data){ mugSpec.dataElement = data;}
