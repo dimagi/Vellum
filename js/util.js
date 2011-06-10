@@ -26,6 +26,12 @@ formdesigner.util = (function(){
     };
     that.VERIFY_CODES = VERIFY_CODES;
 
+    var DefinitionValidationException = function(message){
+        this.message = message;
+        this.name = "DefinitionValidationException";
+    }
+    that.DefinitionValidationException = DefinitionValidationException;
+
     var verify_mug = function(mug, definition){
         return VERIFY_CODES.VERIFY_ERROR; //not implemented yet!
     };

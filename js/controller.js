@@ -33,5 +33,13 @@ formdesigner.controller = (function(){
     that.create_question_from_template = create_question_from_template;
 
 
+    var create_question = function (qtype){
+        if(qtype === "string"){
+            var mug_type = get_text_mug_type();
+            var questionID = generate_question_id();
+            return create_question_from_template(mug_type,questionID);
+        }
+    }
+
     return that;
 })();

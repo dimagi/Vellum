@@ -46,9 +46,8 @@ formdesigner.model = (function(){
          * consisting of various elements (see Mug comments)
          */
         (function construct(spec){
-            if(spec.bindElement){
-                bindElement = spec.bindElement;
-            }
+                that.bindElement = spec.bindElement || undefined;
+            //TODO FIXME
             if(spec.dataElement){
                 dataElement = spec.dataElement;
             }
@@ -92,6 +91,9 @@ formdesigner.model = (function(){
             that.definition = definition;
         };
         that.initWithSpec = initWithSpec;
+
+
+        //refactor initWithSpec to be used in constructor
 
         /**
          * Checks this mug against its definition object
@@ -190,6 +192,8 @@ formdesigner.model = (function(){
      * to get a... rendered string).
      */
     var LiveText = function(){
+        //Todo eventually: add checking for null pointer tokens
+
         var that = {};
 
         var phrases = [];
@@ -231,6 +235,10 @@ formdesigner.model = (function(){
             return outString;
         };
         that.renderString = renderString;
+
+
+        //////TODO REMOVE CALLBACK PARAMS
+
 
         /**
          * Add a token to the list
@@ -314,8 +322,8 @@ formdesigner.model = (function(){
      * spec:
      * {
      *  typeName, //the type string indicating what type of Control Element this is
-     *            //see the control_definitions (tag_name) object
-     *  controlName //control_definition.controlElement.controlType.name;
+     *            //see the control_definitions (tag_name) object e.g. "input"
+     *  controlName //control_definition.controlElement.controlType.name; e.g. "text"
      *  //optional:
      *  label
      *  hintLabel
@@ -356,7 +364,7 @@ formdesigner.model = (function(){
 
 
     ///////////////////////////////////////////////////////////////////////////////////////
-    //    DEFINITION CODE /////////////////////////////////////////////////////////////////
+//////    DEFINITION CODE /////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////////////////////
 
     /**
@@ -464,19 +472,22 @@ formdesigner.model = (function(){
     that.control_definitions = control_definitions;
 
 
-    //////////////////////////////////////////////////////////////////
-    //The Following fields (the ones in ALL CAPS) give a dictionary of
-    // definition parameters and whether or not they're required
-    // in the form of { param_name: required, ... } (where 'required' is a boolean)
-    // this is super useful for validating the definition objects
-    // especially when definitions are generated dynamically (making sure the code that
-    // does so is doing the right thing) and for making assumptions about definitions
-    // in general.
+        //////////////////////////////////////////////////////////////////
+        //The Following fields (the ones in ALL CAPS) give a dictionary of
+        // definition parameters and whether or not they're required
+        // in the form of { param_name: required, ... } (where 'required' is a boolean)
+        // this is super useful for validating the definition objects
+        // especially when definitions are generated dynamically (making sure the code that
+        // does so is doing the right thing) and for making assumptions about definitions
+        // in general.
+        //////////////////////////////////////////////////////////////////
     var DEFINITION_FIELDS = {
         defName: true,
-        mug: true //can be null
+        mug: true, //can be null value
+        dataNode: true,//can be null value
+        bindNode: true,//can be null value
+        controlNode: true //can be null value
     };
-
     var CONTROL_DEF_FIELDS = {
         parentDef: true,
         childrenDef: true,
@@ -485,8 +496,6 @@ formdesigner.model = (function(){
         controlType: false, //object with more spec params (see CONTROL_TYPE_DEF_FIELDS)
         hasID: false
     };
-
-    //takes the form of { fieldName: required_field, .... }, requied_field is a boolean
     var CONTROL_TYPE_DEF_FIELDS = {  //this should be used in the ControlElement constructor to check that the passed in spec is valid
         name: true,
         tagName: true,
@@ -498,7 +507,6 @@ formdesigner.model = (function(){
         hintItext: false,
         defaultValue: false
     };
-
     var BIND_DEF_FIELDS = {
         bindNodeRequired: true,
         hasID: false,
@@ -506,7 +514,6 @@ formdesigner.model = (function(){
         bindElement: true, //can be null
         bindType: false //object with more spec params (see BIND_TYPE_DEF_FIELDS)
     };
-
     var BIND_TYPE_DEF_FIELDS = {
         dataType: true,
         relevant: false,
@@ -515,9 +522,13 @@ formdesigner.model = (function(){
         constraintMsg: false,
         required: false
     };
-
     var DATA_DEF_FIELDS = {
-
+        dataNodeRequired: false,
+        dataElement: true,
+        parentDef: true,
+        childrenDef: true,
+        hasInitialData: false,
+        hasID: true //should always have a value of true in a definition.
     };
 
 
@@ -528,20 +539,76 @@ formdesigner.model = (function(){
     //make a validator that checks an Element object against a def
     //make a mug validator that checks a mug against a def.
     //finish the mug builder that takes in a def and gives a fully constructed mug (with elements as needed)
-    
 
-    //
-    //
-    /////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Validates a given definition object against
+     * the schema specification to ensure that it's valid.
+     * If not valid then throws an exception
+     * @param definition
+     * @throws formdesigner.util.DefinitionValidationException if a problem is detected in the schema
+     */
+    var validateDefinition = function(definition){
+        var i;
+        if(!exists(definition)){
+            throw 'Must specify a Definition object to validate!'
+        }
+
+        //check that the definition object is event aware
+        if(typeof definition.on !== 'function' || typeof definition.fire !== 'function'){
+            console.log(typeof definition.on);
+            throw new formdesigner.util.DefinitionValidationException("Definition Object is not event aware!");
+        }
+
+        //compare the schema against this definition.
+        fieldCompare(DEFINITION_FIELDS,definition,"Main Definition Block");
+        if(definition.controlNode){
+            fieldCompare(CONTROL_DEF_FIELDS,definition.controlNode, "ControlNode Block");
+            fieldCompare(CONTROL_TYPE_DEF_FIELDS,definition.controlNode.controlType,"ControlNodeType Block");
+        }
+        if(definition.bindNode){
+            fieldCompare(BIND_DEF_FIELDS,definition.bindNode, "BindNode Block");
+            fieldCompare(BIND_TYPE_DEF_FIELDS,definition.bindNode.bindType, "BindNodeType Block");
+        }
+        if(definition.dataNode){
+            fieldCompare(DATA_DEF_FIELDS,definition.dataNode,"DataNode Block");
+        }
+
+        
+        return true;
+
+        function fieldCompare(FIELD_OBJECT, definition_block,block_name){
+            //check that required fields are present
+            for(i in FIELD_OBJECT){
+                var required = FIELD_OBJECT[i];
+                if(!exists(definition_block[i] && required)){
+                    throw new formdesigner.util.DefinitionValidationException("Definition is missing a required field::: "+i
+                    +" ::: "+block_name+" :::");
+                }
+            }
+
+            //check that there aren't any fields we don't recognize in the definition object
+            for(i in definition_block){
+                if(!exists(FIELD_OBJECT[i])){
+                    if((i === 'on' || i === 'fire') && block_name === 'Main Definition Block'){ continue; }// skip event framework fields
+                    throw new formdesigner.util.DefinitionValidationException("Unrecognized property specified in Definition object!"+i
+                    +". In block: "+block_name);
+                }
+            }
+        }
+    }
+    that.validateDefinition = validateDefinition;
+
+/////////////////////////////////////////////////////////////////////////////////////////////
 
     var bind
      /**
      * Definition Object example (useful for unit testing purposes)
      * and as a reference.
      */
-    var definition_example = {
+    var definition_example = {  //now mugType
         defName: "A Standard Text Question Definition",
-        mug: 'my_first_mug', //should actually be an object ref!
+        mug: 'my_first_mug', //should actually be an object ref!   ///MUG SHOULD ONLY POINT AT DEF
         dataNode: {
             dataNodeRequired: true,
             dataElement: 'some_data_object_ref', //should actually be a ref!
@@ -767,3 +834,4 @@ formdesigner.model = (function(){
 }());
 
 
+    

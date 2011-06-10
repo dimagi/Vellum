@@ -4,7 +4,7 @@ $(document).ready(function(){
         var myMug = new formdesigner.model.Mug();
 
         //Control Element
-        var typeName = formdesigner.model.TYPE_NAMES.input;
+        var typeName = "input";
         var myControl = new formdesigner.model.ControlElement(
                 {
                     typeName:typeName,
@@ -161,9 +161,9 @@ $(document).ready(function(){
     test("Control Element Default", function(){
         expect(2);
         var emptyControl = new formdesigner.model.ControlElement();
-        ok(typeof emptyControl === 'object', "Is emptyControl and object?");
+        ok(typeof emptyControl === 'object', "Is emptyControl an object?");
 
-        var typeName = formdesigner.model.TYPE_NAMES.input;
+        var typeName = "input";
         var fullControl = new formdesigner.model.ControlElement(
                 {
                     typeName:typeName
@@ -172,12 +172,12 @@ $(document).ready(function(){
 
         console.log("Control node ufid:"+fullControl.ufid);
         notEqual(emptyControl.ufid,fullControl.ufid,"Check that ufids are not equal for ControlElements");
-        
+
     });
     test("Control Element with additional init value", function(){
         expect(2);
                //Control Element
-        var typeName = formdesigner.model.TYPE_NAMES.input;
+        var typeName = "input";
         var myControl = new formdesigner.model.ControlElement(
                 {
                     typeName:typeName,
@@ -261,7 +261,24 @@ $(document).ready(function(){
 
 
     });
+    test("Validate Definition Object against schema", function(){
+        expect(1);
+        var testData = make_control_bind_data_mug();
+        var example_template = formdesigner.model.definition_example;
 
+        //first we create a definition using the example template
+        var textQDefinition = new formdesigner.model.Definition(example_template);
+
+        //then modify the definition fields such that it's a correct definition
+        textQDefinition.mug = testData.mug;
+        textQDefinition.dataNode.dataElement = testData.data;
+        textQDefinition.bindNode.bindElement = testData.bind;
+        textQDefinition.controlNode.controlElement = testData.control;
+        var tqd = textQDefinition;
+        ok(formdesigner.model.validateDefinition(tqd), "Definition Object passes schema validation");
+
+        raises(formdesigner.model.validateDefinition({}), formdesigner.util.DefinitionValidationException, "Empty Definition causes an error");
+    });
     /**
      * Remember to set the values that aren't 'real'
      * in the example template!
