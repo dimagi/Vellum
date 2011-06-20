@@ -46,54 +46,11 @@ formdesigner.model = (function(){
          * consisting of various elements (see Mug comments)
          */
         (function construct(spec){
-                that.bindElement = spec.bindElement || undefined;
-            //TODO FIXME
-            if(spec.dataElement){
-                dataElement = spec.dataElement;
-            }
-            if(spec.controlElement){
-                controlElement = spec.controlElement;
-            }
-            if(spec.definition){
-                definition = spec.definition;
-            }
-
-            that.bindElement = bindElement;
-            that.dataElement = dataElement;
-            that.controlElement = controlElement;
-            that.definition = definition;
+            that.bindElement = spec.bindElement || undefined;
+            that.dataElement = spec.dataElement || undefined;
+            that.controlElement = spec.controlElement || undefined;
+            that.definition = spec.definition || undefined;
         }(mySpec));
-
-
-        /**
-         * Have this mug take in a spec
-         * and init it's fields according to it.
-         *
-         * @param spec
-         */
-        var initWithSpec = function(spec){
-            if(spec.bindElement){
-                bindElement = spec.bindElement;
-            }
-            if(spec.dataElement){
-                dataElement = spec.dataElement;
-            }
-            if(spec.controlElement){
-                controlElement = spec.controlElement;
-            }
-            if(spec.definition){
-                definition = spec.definition;
-            }
-
-            that.bindElement = bindElement;
-            that.dataElement = dataElement;
-            that.controlElement = controlElement;
-            that.definition = definition;
-        };
-        that.initWithSpec = initWithSpec;
-
-
-        //refactor initWithSpec to be used in constructor
 
         /**
          * Checks this mug against its definition object
@@ -140,14 +97,12 @@ formdesigner.model = (function(){
      *
      * Constructor object (spec) can have the following attributes
      * {
-     * attributes = {
      *  dataType, //typically the xsd:dataType
      *  relevant,
      *  calculate,
      *  constraint,
      *  constraintMsg, //jr:constraintMsg
-     *  id //optional
-     *  }
+     *  nodeID //optional
      * }
      *
      * @param spec
@@ -293,16 +248,12 @@ formdesigner.model = (function(){
     var DataElement = function(spec){
         var that = {};
 
-        var name, defaultData;
-
         (function constructor (mySpec){
             if(typeof mySpec !== 'undefined'){
-                name = mySpec.name;
-                defaultData = mySpec.defaultData;
+                that.name = mySpec.name || undefined;
+                that.defaultData = mySpec.defaultData || undefined;
+                that.nodeID = mySpec.nodeID || undefined;
             }
-
-            that.name = name;
-            that.defaultData = defaultData;
         }(spec));
 
         //give this object a unqiue fd id
@@ -364,471 +315,234 @@ formdesigner.model = (function(){
 
 
     ///////////////////////////////////////////////////////////////////////////////////////
-//////    DEFINITION CODE /////////////////////////////////////////////////////////////////
+//////    DEFINITION (MUG TYPE) CODE /////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////////////////////
 
-    /**
-     * The core Control Element definitions
-     * Add a definition here if you want to make
-     * a new question type available for use
-     * (e.g. GPS, video capture, whatever)
-     */
-    var control_definitions = {
-        sselect : {
-            name: "Single Select",
-            tagName: "1select",
-            canHasChildren: true,
-            childrenType: ["item","itemset"],
-            label: true,
-            itext: true,
-            hintItext: true,
-            defaultValue: false,
-            xsdType: "xsd:1select"
-        },
-        mselect : {
-            name: "Multi Select",
-            tagName: "select",
-            canHasChildren: true,
-            childrenType: ["item","itemset"],
-            label: true,
-            itext: true,
-            hintItext: true,
-            defaultValue: false,
-            xsdType: "xsd:select"
-        },
-        text : {
-            name: "Text",
-            tagName: "input",
-            canHasChildren: false,
-            label: true,
-            itext: true,
-            hintItext: true,
-            defaultValue: true,
-            xsdType: "xsd:text"
-        },
-        numberInt : {
-            name: "Integer Number",
-            tagName: "input",
-            canHasChildren: false,
-            label: true,
-            itext: true,
-            hintItext: true,
-            defaultValue: true,
-            xsdType: "xsd:int"
-        },
-        numberDouble : {
-            name: "Double Number",
-            tagName: "input",
-            canHasChildren: false,
-            label: true,
-            itext: true,
-            hintItext: true,
-            defaultValue: true,
-            xsdType: "xsd:double"
-        },
-        numberFloat : {
-            name: "Float Number",
-            tagName: "input",
-            canHasChildren: false,
-            label: true,
-            itext: true,
-            hintItext: true,
-            defaultValue: true,
-            xsdType: "xsd:float"
-        },
-        group: {
-            name: "Group",
-            tagName: "group",
-            canHasChildren: true,
-            childrenType: ["all"],
-            notChildrenType: ["item","itemset"], //special case for when using "all" in childrenType
-            label: true,
-            itext: true,
-            hintItext: false,
-            defaultValue: false
-        },
-        repeat: {
-            name: "Repeat Group",
-            tagName: "repeat",
-            canHasChildren: true,
-            childrenType: ["all"],
-            notChildrenType: ["item","itemset"], //special case for when using "all" in childrenType
-            label: true,
-            itext: true,
-            hintItext: false,
-            defaultValue: false
-        },
-        item: {
-            name: "Option Item",
-            tagName: "item",
-            canHasChildren:false,
-            label: true,
-            defaultValue: true,
-            valueRequired: true,
-            itext: true,
-            hintItext: false
-        }
-    };
-    that.control_definitions = control_definitions;
 
+    var TYPE_FLAG_OPTIONAL = '_optional';
+    var TYPE_FLAG_REQUIRED = '_required';
+    var TYPE_FLAG_NOT_ALLOWED = '_notallowed';
 
-        //////////////////////////////////////////////////////////////////
-        //The Following fields (the ones in ALL CAPS) give a dictionary of
-        // definition parameters and whether or not they're required
-        // in the form of { param_name: required, ... } (where 'required' is a boolean)
-        // this is super useful for validating the definition objects
-        // especially when definitions are generated dynamically (making sure the code that
-        // does so is doing the right thing) and for making assumptions about definitions
-        // in general.
-        //////////////////////////////////////////////////////////////////
-    var DEFINITION_FIELDS = {
-        defName: true,
-        mug: true, //can be null value
-        dataNode: true,//can be null value
-        bindNode: true,//can be null value
-        controlNode: true //can be null value
-    };
-    var CONTROL_DEF_FIELDS = {
-        parentDef: true,
-        childrenDef: true,
-        controlNodeRequired: true,
-        controlElement: true,
-        controlType: false, //object with more spec params (see CONTROL_TYPE_DEF_FIELDS)
-        hasID: false
-    };
-    var CONTROL_TYPE_DEF_FIELDS = {  //this should be used in the ControlElement constructor to check that the passed in spec is valid
-        name: true,
-        tagName: true,
-        canHaveChildren: true,
-        childrenType: false, //if above is true but childrenType is not present, assume all children types allowed.
-        label: false,
-        itext: false,
-        hintLabel: false,
-        hintItext: false,
-        defaultValue: false
-    };
-    var BIND_DEF_FIELDS = {
-        bindNodeRequired: true,
-        hasID: false,
-        xsdType: false,
-        bindElement: true, //can be null
-        bindType: false //object with more spec params (see BIND_TYPE_DEF_FIELDS)
-    };
-    var BIND_TYPE_DEF_FIELDS = {
-        dataType: true,
-        relevant: false,
-        calculate: false,
-        constraint: false,
-        constraintMsg: false,
-        required: false
-    };
-    var DATA_DEF_FIELDS = {
-        dataNodeRequired: false,
-        dataElement: true,
-        parentDef: true,
-        childrenDef: true,
-        hasInitialData: false,
-        hasID: true //should always have a value of true in a definition.
-    };
-
-
-    //TODO
-    //FINISH DEFINITION SCHEMA (stuff above)
-    //make the constructors use this schema to check input when building control/data/bind Elements
-    //make a validator function that checks a def against the schema
-    //make a validator that checks an Element object against a def
-    //make a mug validator that checks a mug against a def.
-    //finish the mug builder that takes in a def and gives a fully constructed mug (with elements as needed)
-
-
-    /**
-     * Validates a given definition object against
-     * the schema specification to ensure that it's valid.
-     * If not valid then throws an exception
-     * @param definition
-     * @throws formdesigner.util.DefinitionValidationException if a problem is detected in the schema
-     */
-    var validateDefinition = function(definition){
-        var i;
-        if(!exists(definition)){
-            throw 'Must specify a Definition object to validate!'
-        }
-
-        //check that the definition object is event aware
-        if(typeof definition.on !== 'function' || typeof definition.fire !== 'function'){
-            console.log(typeof definition.on);
-            throw new formdesigner.util.DefinitionValidationException("Definition Object is not event aware!");
-        }
-
-        //compare the schema against this definition.
-        fieldCompare(DEFINITION_FIELDS,definition,"Main Definition Block");
-        if(definition.controlNode){
-            fieldCompare(CONTROL_DEF_FIELDS,definition.controlNode, "ControlNode Block");
-            fieldCompare(CONTROL_TYPE_DEF_FIELDS,definition.controlNode.controlType,"ControlNodeType Block");
-        }
-        if(definition.bindNode){
-            fieldCompare(BIND_DEF_FIELDS,definition.bindNode, "BindNode Block");
-            fieldCompare(BIND_TYPE_DEF_FIELDS,definition.bindNode.bindType, "BindNodeType Block");
-        }
-        if(definition.dataNode){
-            fieldCompare(DATA_DEF_FIELDS,definition.dataNode,"DataNode Block");
-        }
-
-        
-        return true;
-
-        function fieldCompare(FIELD_OBJECT, definition_block,block_name){
-            //check that required fields are present
-            for(i in FIELD_OBJECT){
-                var required = FIELD_OBJECT[i];
-                if(!exists(definition_block[i] && required)){
-                    throw new formdesigner.util.DefinitionValidationException("Definition is missing a required field::: "+i
-                    +" ::: "+block_name+" :::");
+    var RootMugType = {
+        typeName: "The Abstract Mug Type Definition",
+        //set initial properties
+        /**
+         * A property is a key:value pair.
+         * Properties values can take one of 4 forms.
+         * Property keys are the name of the field in the actual mug to be looked at during validation.
+         * The four (4) forms of property values:
+         *  - One of the type flags (e.g. TYPE_FLAG_REQUIRED)
+         *  - A string, representing the actual string value a field should have in the mug
+         *  - A dictionary (of key value pairs) illustrating a 'block' (e.g. see the bindElement property below)
+         *  - a function (taking a block of fields from the mug as its only argument). The function MUST return either
+         *     the string 'pass' or an error string.
+         */
+        properties : {
+            dataElement: {
+                nodeID: TYPE_FLAG_REQUIRED,
+                dataValue: TYPE_FLAG_OPTIONAL
+            },
+            bindElement: {
+                nodeID: TYPE_FLAG_OPTIONAL,
+                dataType: "xsd:text",
+                relevantAttr: TYPE_FLAG_OPTIONAL,
+                calculateAttr: TYPE_FLAG_OPTIONAL,
+                constraintAttr: TYPE_FLAG_OPTIONAL,
+                constraintMsgAttr: function(bindBlock){
+                    var hasConstraint = (typeof bindBlock.constraintAttr !== 'undefined');
+                    var hasConstraintMsg = (typeof bindBlock.constraintMsgAttr !== 'undefined');
+                    if(hasConstraintMsg && !hasConstraint){
+                        return 'ERROR: Bind cannot have a Constraint Message with no Constraint!';
+                    }else{
+                        return 'pass';
+                    }
                 }
+            },
+            controlElement: {
+                name: "Text",
+                tagName: "input",
+                label: TYPE_FLAG_REQUIRED,
+                itext: TYPE_FLAG_OPTIONAL,
+                hintItext: TYPE_FLAG_OPTIONAL,
+                defaultValue: TYPE_FLAG_OPTIONAL,
+                xsdType: "xsd:text"
             }
-
-            //check that there aren't any fields we don't recognize in the definition object
-            for(i in definition_block){
-                if(!exists(FIELD_OBJECT[i])){
-                    if((i === 'on' || i === 'fire') && block_name === 'Main Definition Block'){ continue; }// skip event framework fields
-                    throw new formdesigner.util.DefinitionValidationException("Unrecognized property specified in Definition object!"+i
-                    +". In block: "+block_name);
-                }
-            }
-        }
-    }
-    that.validateDefinition = validateDefinition;
-
-/////////////////////////////////////////////////////////////////////////////////////////////
-
-    var bind
-     /**
-     * Definition Object example (useful for unit testing purposes)
-     * and as a reference.
-     */
-    var definition_example = {  //now mugType
-        defName: "A Standard Text Question Definition",
-        mug: 'my_first_mug', //should actually be an object ref!   ///MUG SHOULD ONLY POINT AT DEF
-        dataNode: {
-            dataNodeRequired: true,
-            dataElement: 'some_data_object_ref', //should actually be a ref!
-            parentDef: rootDataDef, //either some parent def, or root
-            hasInitialData: true,
-            childrenDef: null //Should be a list [] of children definition objects if hasChildren
         },
-        bindNode: {
-            bindNodeRequired: false,
-            hasID: true,
-            dataType: "xsd:text",
-            hasRelevant: true,
-            hasCalculate: false,
-            hasConstraint: false,
-            hasConstraintMsg: false,
-            bindElement: 'some_bind' //shoudl actually refer to a bindElement object
-        },
-        controlNode: {
-            parentDef: rootControlDef,
-            childrenDef: null,//should be a list [] of def objects
-            controlNodeRequired: true,
-            controlElement: 'some_control_element', //should be an object ref!
-            controlType: control_definitions.text
-        }
-    };
-    that.definition_example = definition_example;
-
-
-    /**
-     * Root Definition object for Data Nodes
-     * (sits at the top of the DataDefTree in the FormObject
-     */
-    var rootDataDef = {
-        defName: "Root Data Node Definition",
-        isRoot: true,
-        parentDef: null,
-        childrenDef: null,
-        formObject: null
-    };
-    that.rootDataDef = rootDataDef;
-
-    /**
-     * Root Definition object for Control Nodes
-     * (sits at the top of the DataDefTree in the FormObject
-     */
-    var rootControlDef = {
-        defName: "Root Control Node Defintion",
-        isRoot: true,
-        parentDef: null,
-        childrenDef: null,
-        formObject: null
-
-    };
-    that.rootControlDef = rootControlDef;
-
-
-
-    /**
-     * Adds a child Definition object to the reference Definition
-     * object (and performs the required linking.
-     * @param childDef
-     * @param refDef
-     * @param typeOfParent - can be one of "dataNode","bindNode","controlNode"
-     */
-    var addDefinitionAsChild = function(childDef, refDef, typeOfParent){
-        if(typeof refDef === 'undefined' || typeof childDef === 'undefined'){
-            console.log("Attempted to add Child Definition, but reference or child def was null. Child:"+childDef+", Reference:"+refDef);
-            return;
-        }
-        if(!refDef.children){
-            refDef.children = [];
-        }
-
-        refDef.children.push(childDef);
-        childDef[typeOfParent].parentDef = refDef;
-    };
-    that.addDefinitionAsChild = addDefinitionAsChild;
-
-    /**
-     * Create a new Definition object according
-     * to the params given by spec.
-     *
-     * If spec is not given, will create a blank Definition
-     * object (defaults will be set)
-     *
-     * An example spec can be found at
-     * this.definition_example;
-     *
-     * @param spec
-     */
-    var Definition = function(spec){
-        var that = {};
-        var i = null;
-
-        (function constructor(mySpec, parent){
-            if(typeof mySpec !== 'undefined'){
-                for(i in mySpec){
-                    that[i] = mySpec[i];
-                }
-            }else{
-                that.defName = "Blank Definition Object";
-            }
-        }(spec));
-
-        //make the object event aware:
-        formdesigner.util.eventuality(that);
-
-        return that;
-    };
-    that.Definition = Definition;
-
-    /**
-     * Creates a complete Mug object (with default values where appropriate),
-     * including Control,Bind and Data elements as specified in the Definition
-     * and returns it
-     */
-    var createMugFromDefinition = function(def){
-        var mug,control,bind,data;
-        var i = null;
-        var curProp,curVal;
-
-
-        //Below three functions read the given
-        //spec object and init a respective object as appropriate
-        function deal_with_control_spec(spec){
-            var controlElement;
-            if(!exists(spec) || typeof spec !== 'object'){ throw 'A controlNode spec must exist in a definition!'; }
-            if(!exists(spec.controlNodeRequired) || spec.controlNodeRequired === null){ throw 'A controlNodeRequired field must be set in the controlNode definition!';}
-            
-            //check if a controlType def is here if controlNodeRequired == true
-            if(spec.controlNodeRequired){
-                if(typeof spec.controlType === 'undefined' ||
-                        !spec.controlType){
-                    throw 'A controlElement is Required but no controlType spec is given in the definition!';
+        parentDataMug: null, //for keeping a tree like structure of all the Data nodes
+        parentControlMug: null, //for keeping a tree like structure of all the Control nodes
+        controlNodeCanHaveChildren: false,
+        dataNodeCanHaveChildren: true,
+        //for validating a mug against this internal definition we have.
+        validateMug : function(mug){
+            /**
+             * Takes in a key-val pair like {"controlNode": TYPE_FLAG_REQUIRED}
+             * and an object to check against, and tell you if the object lives up to the rule
+             * returns true if the object abides by the rule.
+             *
+             * For example, if the rule above is used, we pass in a mug to check if it has a controlNode.
+             * If a property with the name of "controlNode" exists, true will be returned since it is required and present.
+             *
+             * if the TYPE_FLAG is TYPE_FLAG_OPTIONAL, true will always be returned.
+             * if TYPE_FLAG_NOT_ALLOWED and a property with it's corresponding key IS present in the testing object,
+             * false will be returned.
+             *
+             * if a TYPE_FLAG is not used, check the value. (implies that this property is required)
+             * @param ruleKey
+             * @param ruleValue
+             * @param testingObj
+             */
+            var validateRule = function(ruleKey, ruleValue, testingObj, blockName){
+                if(ruleValue === TYPE_FLAG_OPTIONAL){
+                    return {
+                        result: 'pass',
+                        resultMessage: '"'+ ruleKey + '" is Optional in block:'+blockName,
+                        'ruleKey': ruleKey,
+                        'ruleValue': ruleValue,
+                        'objectValue': testingObj
+                    };
+                }else if(ruleValue === TYPE_FLAG_REQUIRED){
+                    if(typeof testingObj[ruleKey] !== 'undefined'){
+                        return {
+                            result: 'pass',
+                            resultMessage: '"'+ ruleKey + '" is Required and Present in block:'+blockName,
+                            'ruleKey': ruleKey,
+                            'ruleValue': ruleValue,
+                            'objectValue': testingObj
+                        };
+                    }else{
+                        return {
+                            result: 'fail',
+                            resultMessage:'"'+ ruleKey + '" VALUE IS REQUIRED in block:'+blockName,
+                            'ruleKey': ruleKey,
+                            'ruleValue': ruleValue
+                        };
+                    }
+                }else if(ruleValue === TYPE_FLAG_NOT_ALLOWED){
+                    if(typeof testingObj[ruleKey] === 'undefined'){ //note the equivalency modification from the above
+                        return {result: true};
+                    }else{
+                        return {
+                            result: 'fail',
+                            resultMessage:'"'+ ruleKey + '" IS NOT ALLOWED IN THIS OBJECT in block:'+blockName,
+                            'ruleKey': ruleKey,
+                            'ruleValue': ruleValue
+                        };
+                    }
+                }else if(typeof ruleValue === 'string'){
+                    return {
+                            result: 'pass',
+                            resultMessage: '"'+ ruleKey + '" is a string value (Required) and Present in block:'+blockName,
+                            'ruleKey': ruleKey,
+                            'ruleValue': ruleValue,
+                            'objectValue': testingObj
+                        };
+                }else if(typeof ruleValue === 'function'){
+                    var funcRetVal = ruleValue(testingObj);
+                    if(funcRetVal === 'pass'){
+                        return {
+                            result: 'pass',
+                            resultMessage: '"'+ ruleKey + '" is a string value (Required) and Present in block:'+blockName,
+                            'ruleKey': ruleKey,
+                            'ruleValue': ruleValue,
+                            'objectValue': testingObj
+                        }
+                    }else{
+                        return {
+                            result: 'fail',
+                            resultMessage:'"'+ ruleKey + '" ::: '+funcRetVal+' in block:'+blockName,
+                            'ruleKey': ruleKey,
+                            'ruleValue': ruleValue
+                        }
+                    }
                 }
                 else{
-                    var cdef = spec.controlType;
-                    var constructorSpec = {};
+                    return {
+                            result: 'fail',
+                            resultMessage:'"'+ ruleKey + '" MUST BE OF TYPE_OPTIONAL,REQUIRED,NOT_ALLOWED or a "string" in block:'+blockName,
+                            'ruleKey': ruleKey,
+                            'ruleValue': ruleValue
+                    };
 
-                    // the required properties
-                    if(!exists(cdef.tagName) || typeof cdef.tagName !== 'string'){
-                        throw "Error: tagName needs to be specified (as a string!) in the controlType section of the definition!";
-                    }else{
-                        constructorSpec.typeName = cdef.tagName; //property used for ControlElement creation
-                    }
-                    if(!exists(cdef.name) || typeof cdef.name !== 'string'){
-                        throw "Error: name needs to be specified (as a string!) in the controlType section of the definition!";
-                    }else{
-                        constructorSpec.name = cdef.controlName; //property used for ControlElement creation
-                    }
-
-                    //the optional properties
-                    if(exists(cdef.label) && cdef.label == true){ constructorSpec.label = "Question Label";}
-                    if(exists(cdef.itext) && cdef.itext == true){ constructorSpec.labelItext = formdesigner.controller.getUniqueItextID();}
-                    if(exists(cdef.hintLabel) && cdef.hintLabel == true){ constructorSpec.hintLabel = "Some Default Hint Text";}
-                    if(exists(cdef.hintItext) && cdef.hintItext == true){ constructorSpec.hintItext = formdesigner.controller.getUniqueItextID();}
-                    if(exists(cdef.defaultValue) && cdef.defaultValue == true){ constructorSpec.defaultValue = "DEFAULT_VALUE"; }
-
-                    controlElement = new ControlElement(constructorSpec);
                 }
-            }
+            };
 
-            return controlElement;
-        }
+            /**
+             * internal method that loops through the properties in this type definition
+             * recursively and compares that with the state of the mug (using validateRule
+             * to run the actual comparisons).
+             *
+             * The object that is returned is a JSON object that contains information
+             * about the validation. returnObject["status"] will be either "pass" or "fail"
+             * "status" will be set to fail if any one property is not in the required state
+             * in the mug.
+             * @param propertiesObj
+             * @param testingObj
+             * @param blockName
+             */
+            var recurse = function(propertiesObj, testingObj, blockName){
+                var i, results;
 
-        function deal_with_data_spec(spec){
-            var constructorSpec = {};
-            var dataElement;
-            if(!exists(spec) || typeof spec !== 'object'){ throw 'A dataNode spec must be present in the Definition object!';}
-            if(!exists(spec.dataNodeRequired)){ throw 'dataNodeRequired property must be set in dataNode section of Definition!';}
-
-            if(spec.dataNodeRequired){
-                if(exists(spec.hasInitialData) && spec.hasInitialData){ constructorSpec.defaultData == "DEFAULT_VALUE";}
-                constructorSpec.name = formdesigner.util.getUniqueQuestionID();
-                dataElement = DataElement(constructorSpec);
-            }
-            return dataElement;
-        }
-
-        function deal_with_bind_spec(spec){
-            var constructorSpec = {};
-            var bindElement;
-            if(!exists(spec) || typeof spec !== 'object'){ throw 'A dataNode spec must be present in the Definition object!';}
-            if(!exists(spec.bindNodeRequired)){ throw 'bindNodeRequired property must be set in dataNode section of Definition!';}
-
-            if(spec.bindNodeRequired){
-                if(!exists(spec.hasID) && spec.hasID){
-                    constructorSpec.bindID = formdesigner.util.getUniqueBindID();
+                results = {"status": "pass"}; //set initial status
+                results["blockName"] = blockName;
+                if(!(testingObj || undefined)){
+                    results["status"] = "fail"
+                    results["message"] = "No testing object passed for propertiesObj " + JSON.stringify(propertiesObj);
+                    results["errorType"] = "NullPointer";
+                    return results;
                 }
-            }
+
+                for(i in propertiesObj){
+                    //go deeper if required
+                    if(typeof propertiesObj[i] === 'object'){
+                        results[i] = recurse(propertiesObj[i],testingObj[i],i);
+
+                        //see if the recursion went ok, flip out if not.
+                        if(results[i].status === "fail"){
+                            results["status"] = "fail"
+                            results["message"] = "Recursion Failure on block: "+i;
+                            results["errorBlockName"] = i;
+                            results["errorType"] = 'recursion';
+                            return results;
+                        }else{
+                            results["status"] = "pass";
+                        }
+                    }else{
+                        results[i] = validateRule(i,propertiesObj[i],testingObj, blockName);
+                        if(results[i].result === 'fail'){
+                            results["status"] = "fail";
+                            results["message"] = "Validation Rule Failure on Property: "+i;
+                            results["errorBlockName"] = i;
+                            results["errorType"] = 'validation';
+                            return results; //short circuit the validation
+                        }else{
+                            results["status"] = "pass";
+                        }
+                    }
+                }
+                return results;
+            };
+
+            return recurse(this.properties,mug,"Mug Top Level");
+
+
 
         }
-
-
-        //begin actual function code
-
-        //walk through def:
-        for(i in def){
-            if(!def.hasOwnProperty(i)){ continue; }
-
-            curProp = i;
-            curVal = def[i];
-
-            if(!curVal){ continue; }
-
-            if(curProp === 'dataNode'){ data = deal_with_data_spec(curVal);}
-            else if(curProp === 'bindNode'){ bind = deal_with_bind_spec(curVal);}
-            else if(curProp === 'controlNode'){ control = deal_with_control_spec(curVal);}
-        }
-        var mugSpec = {}
-        if(data){ mugSpec.dataElement = data;}
-        if(control){ mugSpec.controlElement = control;}
-        if(bind){ mugSpec.bindElement = bind;}
-        mugSpec.definition = def;
-
-        mug = new Mug(mugSpec);
-
-        return mug;
+        
     };
-    that.createMugFromDefition = createMugFromDefinition;
+    that.RootMugType = RootMugType;
+
+    var otherMugType = formdesigner.util.clone(RootMugType);
+    otherMugType.properties.bindElement["SOME_PROPERTeYE"] = TYPE_FLAG_REQUIRED;
+    that.otherMugType = otherMugType;
+//
+    var createMugFromMugType = function(mugType){
+       return false;
+    };
+    that.createMugFromMugType = createMugFromMugType;
+
+
+
+
 
     return that;
 }());

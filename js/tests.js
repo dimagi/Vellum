@@ -1,7 +1,7 @@
 $(document).ready(function(){
 
     var make_control_bind_data_mug = function(){
-        var myMug = new formdesigner.model.Mug();
+        var myMug;
 
         //Control Element
         var typeName = "input";
@@ -20,7 +20,8 @@ $(document).ready(function(){
         var initialData = "foo";
         var spec = {
             name: name,
-            defaultData: initialData
+            defaultData: initialData,
+            nodeID: "data_for_question1"
         }
         var myData = formdesigner.model.DataElement(spec);
 
@@ -29,11 +30,10 @@ $(document).ready(function(){
             dataRef: "question1",
             dataType: "text",
             constraint: "length(.) > 5",
-            constraintMsg: "Town Name must be longer than 5!"
+            constraintMsg: "Town Name must be longer than 5!",
+            nodeID: "question1"
         };
-        spec = {
-            attributes : attributes
-        };
+        spec =  attributes;
         var myBind = new formdesigner.model.BindElement(spec);
 
         var mugSpec = {
@@ -41,7 +41,7 @@ $(document).ready(function(){
             bindElement: myBind,
             controlElement: myControl
         }
-        myMug.initWithSpec(mugSpec);
+        myMug = new formdesigner.model.Mug(mugSpec);
 
         return {
             control: myControl,
@@ -237,67 +237,43 @@ $(document).ready(function(){
 
 
     });
-
-    module("Definition Object Tests");
-    test("Definition Object Creation and addition to tree", function(){
-        expect(4);
+    module("MugType tests");
+    test("Validate example mug against definition", function(){
+        expect(3);
         var testData = make_control_bind_data_mug();
-        var example_template = formdesigner.model.definition_example;
+        var myMug = testData.mug;
 
-        //first we create a definition using the example template
-        var textQDefinition = new formdesigner.model.Definition(example_template);
+        var MugType = formdesigner.model.RootMugType; //simulates a 'standard' text question
 
-        //then modify the definition fields such that it's a correct definition
-        textQDefinition.mug = testData.mug;
-        textQDefinition.dataNode.dataElement = testData.data;
-        textQDefinition.bindNode.bindElement = testData.bind;
-        textQDefinition.controlNode.controlElement = testData.control;
-        var tqd = textQDefinition;
+        var validationObject = MugType.validateMug(myMug);
+//        console.log(myMug);
+        equal(MugType.typeName, "The Abstract Mug Type Definition");
+        equal(validationObject.status, "pass");
 
-        equal(tqd.defName,"A Standard Text Question Definition", "Name set correctly");
-        deepEqual(tqd.bindNode.bindElement,testData.bind,"Bind element stored correctly");
-        deepEqual(tqd.dataNode.dataElement,testData.data,"Bind element stored correctly");
-        deepEqual(tqd.controlNode.controlElement,testData.control,"Bind element stored correctly");
-
+        var otherType = formdesigner.model.otherMugType;
+        var vObj = otherType.validateMug(myMug);
+        equal(vObj.status,'fail', "This should fail because the mug does not contain the required property");
 
     });
-    test("Validate Definition Object against schema", function(){
-        expect(1);
+
+    test("Test custom validation function in bind block definition", function(){
+        expect(2);
         var testData = make_control_bind_data_mug();
-        var example_template = formdesigner.model.definition_example;
+        var myMug = testData.mug;
+        myMug.bindElement.constraintAttr = "foo";
+        myMug.bindElement.constraintMsgAttr = undefined;
+        var MugType = formdesigner.model.RootMugType; //simulates a 'standard' text question
 
-        //first we create a definition using the example template
-        var textQDefinition = new formdesigner.model.Definition(example_template);
+        var validationObject = MugType.validateMug(myMug);
+        equal(validationObject.status,'pass', "Mug has a constraint but no constraint message which is OK");
 
-        //then modify the definition fields such that it's a correct definition
-        textQDefinition.mug = testData.mug;
-        textQDefinition.dataNode.dataElement = testData.data;
-        textQDefinition.bindNode.bindElement = testData.bind;
-        textQDefinition.controlNode.controlElement = testData.control;
-        var tqd = textQDefinition;
-        ok(formdesigner.model.validateDefinition(tqd), "Definition Object passes schema validation");
-
-        raises(formdesigner.model.validateDefinition({}), formdesigner.util.DefinitionValidationException, "Empty Definition causes an error");
+        //now remove constraint but add a constraint message
+        myMug.bindElement.constraintAttr = undefined;
+        myMug.bindElement.constraintMsgAttr = "foo";
+        validationObject = MugType.validateMug(myMug);
+        console.log(validationObject);
+        equal(validationObject.status,'fail', "Special validation function has detected a constraintMsg but no constraint attribute in the bindElement");
     });
-    /**
-     * Remember to set the values that aren't 'real'
-     * in the example template!
-     */
-    var creat_text_question_definition = function(){
-        var example_template = formdesigner.model.definition_example;
-        //first we create a definition using the example template
-        var textQDefinition = new formdesigner.model.Definition(example_template);
-        return textQDefinition;
-    };
-
-    var attach_elements_to_def = function(definition,bind,control,data,mug){
-        definition.dataNode.dataElement = data;
-        definition.bindNode.bindElement = bind;
-        definition.controlNode.controlElement = control;
-        definition.mug = mug;
-    }
-
-
 
 
 });
