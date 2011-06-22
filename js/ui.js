@@ -17,12 +17,12 @@
 
             $("#loadingInfo").html("downloading util.js");
             $.getScript("js/util.js", function (){
-                pbar.progressbar({ value: (pbar.progressbar( "option", "value" )+33)});
+                pbar.progressbar({ value: (pbar.progressbar( "option", "value" )+35)});
             });
 
             $("#loadingInfo").html("downloading model.js");
             $.getScript("js/model.js", function(){
-                pbar.progressbar({ value: (pbar.progressbar( "option", "value" )+33)});
+                pbar.progressbar({ value: (pbar.progressbar( "option", "value" )+32)});
 
             });
 
@@ -64,10 +64,37 @@
                 .css("float", "left");
     }
 
+    function do_nav_bar(){
+        $(function() {
+            var d=300;
+            $('#navigation a').each(function(){
+                $(this).stop().animate({
+                    'marginTop':'-80px'
+                },d+=150);
+            });
 
+            $('#navigation > li').hover(
+                function () {
+                    $('a',$(this)).stop().animate({
+                        'marginTop':'-2px'
+                    },200);
+                },
+                function () {
+                    $('a',$(this)).stop().animate({
+                        'marginTop':'-80px'
+                    },200);
+                }
+            );
+        });
+    }
 
     $(document).ready(function () {
         do_loading_bar();
         init_toolbar();
+        do_nav_bar();
     });
+
+
+
+
 }());

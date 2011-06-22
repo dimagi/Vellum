@@ -25,14 +25,6 @@ img{
     height:0px;
 }
 
-li{
-    background-color:#080808;
-}
-
-.a{
-    background-color:#080808;
-}
-
 .redback{
     background-color:#d5381a;
     color:#080808;
@@ -72,8 +64,11 @@ li{
 }
 
 .loadingBar{
-    z-index:999;
-    position:absolute;
+    z-index:9999;
+    position: fixed;
+    margin: 0px;
+    padding: 0px;
+    top: 0px;
     width:100%;
     height:100%;
     /*display:none*/
@@ -81,4 +76,9 @@ li{
 
 .myProgressBar{
     width:90%;
+}
+
+body{
+    font-family:Arial;
+    height:2000px;
 }

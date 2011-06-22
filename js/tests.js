@@ -129,7 +129,6 @@ $(document).ready(function(){
 
         //test that a unique formdesigner id was generated for this object (well, kind of)
         equal(typeof myOtherBind.ufid, 'string', "Is the ufid a string?");
-        console.log("myOtherBind.ufid is:"+myOtherBind.ufid);
 
         notEqual(myBind.ufid,myOtherBind.ufid, "Make sure that the ufids are unique");
 //        ok(typeof myOtherBind.ufid === 'string', "Is the ufid a string?");
@@ -152,7 +151,6 @@ $(document).ready(function(){
         ok(typeof otherData === 'object', "Is it an object? (with args)");
         equal(otherData.name,name,"Was the name attribute set correctly?");
         equal(otherData.defaultData,initialData,"Is initialData correct?");
-        console.log("DataElement.ufid:"+otherData.ufid);
         equal(typeof otherData.ufid, 'string', "Is ufid a string and exists?");
         notEqual(otherData,myData,"Test that data elements are unique");
     });
@@ -170,7 +168,6 @@ $(document).ready(function(){
                 }
         );
 
-        console.log("Control node ufid:"+fullControl.ufid);
         notEqual(emptyControl.ufid,fullControl.ufid,"Check that ufids are not equal for ControlElements");
 
     });
@@ -271,8 +268,22 @@ $(document).ready(function(){
         myMug.bindElement.constraintAttr = undefined;
         myMug.bindElement.constraintMsgAttr = "foo";
         validationObject = MugType.validateMug(myMug);
-        console.log(validationObject);
         equal(validationObject.status,'fail', "Special validation function has detected a constraintMsg but no constraint attribute in the bindElement");
+    });
+
+    test("MugType creation tools", function(){
+        expect(1);
+        var testData = make_control_bind_data_mug();
+        var myMug = testData.mug;
+        myMug.bindElement.constraintAttr = "foo";
+        myMug.bindElement.constraintMsgAttr = undefined;
+        var MugType = formdesigner.model.RootMugType; //simulates a 'standard' text question
+
+        var OtherMugType = formdesigner.util.clone(MugType);
+        console.log(MugType);
+        console.log(OtherMugType);
+        notDeepEqual(MugType,OtherMugType);
+
     });
 
 

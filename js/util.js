@@ -76,6 +76,18 @@ formdesigner.util = (function(){
     };
     that.clone = clone;
 
+    /**
+     * Takes in a reference mug and makes a copy of
+     * the object (the copy is returned).
+     * @param refMug
+     */
+    var getNewMug = function(refMug){
+        var newMug = formdesigner.util.clone(refMug);
+        formdesigner.util.give_ufid(newMug);
+        return newMug;
+    };
+    that.getNewMug = getNewMug;
+
     var DefinitionValidationException = function(message){
         this.message = message;
         this.name = "DefinitionValidationException";
