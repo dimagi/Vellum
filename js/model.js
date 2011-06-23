@@ -563,12 +563,14 @@ formdesigner.model = (function(){
             var mType = formdesigner.util.clone(RootMugType);
             mType.typeName = "Data+Control Question Mug";
             delete mType.properties.bindElement;
+            return mType;
         }(),
         dataOnly: function(){
             var mType = formdesigner.util.clone(RootMugType);
             mType.typeName = "Data ONLY Mug";
-            delete mType.properties.dataElement;
+            delete mType.properties.controlElement;
             delete mType.properties.bindElement;
+            return mType;
         }()
     };
     that.mugTypes = mugTypes;

@@ -294,19 +294,47 @@ $(document).ready(function(){
         equal(mugType.validateMug(mug).status,'pass', "Mug passes validation");
     });
     test("Test sub MugType and Mug creation",function(){
-        expect(3);
+        expect(20);
         //capital A for 'Abstract'
-        var AdbType = formdesigner.model.mugTypes.dataBind,
-        AdbcType = formdesigner.model.mugTypes.dataBindControlQuestion,
-        AdcType = formdesigner.model.mugTypes.dataControlQuestion,
-        AdType = formdesigner.model.mugTypes.dataOnly,
-        dbType,dbcType,dcType,dType;
+        var AdbType  = formdesigner.model.mugTypes.dataBind,
+            AdbcType = formdesigner.model.mugTypes.dataBindControlQuestion,
+            AdcType  = formdesigner.model.mugTypes.dataControlQuestion,
+            AdType   = formdesigner.model.mugTypes.dataOnly,
+        tMug,Mug;
 
-        dbType = formdesigner.util.getNewMugType(AdbType);
-        ok(typeof dbType === 'object', "MugType creation succesful for 'Data+Bind' Mug");
-        var dbMug = formdesigner.controller.createMugFromMugType(dbType);
-        ok(dbType.validateMug(dbMug).status === 'pass', "Mug created from '"+dbType.typeName+"' MugType passes validation");
-        ok(dbMug.controlElement === undefined, "Mug's ControlElement is undefined");
+        tMug = formdesigner.util.getNewMugType(AdbType);
+        Mug = formdesigner.controller.createMugFromMugType(tMug);
+        ok(typeof tMug === 'object', "MugType creation successful for '"+tMug.typeName+"' MugType");
+        ok(tMug.validateMug(Mug).status === 'pass', "Mug created from '"+tMug.typeName+"' MugType passes validation");
+        ok(typeof Mug.controlElement === 'undefined', "Mug's ControlElement is undefined");
+        ok(typeof Mug.bindElement === 'object', "Mug's bindElement exists");
+        ok(typeof Mug.dataElement === 'object', "Mug's dataElement exists");
+
+        tMug = formdesigner.util.getNewMugType(AdbcType);
+        Mug = formdesigner.controller.createMugFromMugType(tMug);
+        ok(typeof tMug === 'object', "MugType creation successful for '"+tMug.typeName+"' MugType");
+        ok(tMug.validateMug(Mug).status === 'pass', "Mug created from '"+tMug.typeName+"' MugType passes validation");
+        ok(typeof Mug.controlElement === 'object', "Mug's ControlElement exists");
+        ok(typeof Mug.bindElement === 'object', "Mug's bindElement exists");
+        ok(typeof Mug.dataElement === 'object', "Mug's dataElement exists");
+
+        tMug = formdesigner.util.getNewMugType(AdcType);
+        Mug = formdesigner.controller.createMugFromMugType(tMug);
+        ok(typeof tMug === 'object', "MugType creation successful for '"+tMug.typeName+"' MugType");
+        ok(tMug.validateMug(Mug).status === 'pass', "Mug created from '"+tMug.typeName+"' MugType passes validation");
+        ok(typeof Mug.controlElement === 'object', "Mug's ControlElement exists");
+        ok(typeof Mug.bindElement === 'undefined', "Mug's bindElement is undefined");
+        ok(typeof Mug.dataElement === 'object', "Mug's dataElement exists");
+
+        tMug = formdesigner.util.getNewMugType(AdType);
+        Mug = formdesigner.controller.createMugFromMugType(tMug);
+        console.log(tMug);
+        console.log(Mug);
+        ok(typeof tMug === 'object', "MugType creation successful for '"+tMug.typeName+"' MugType");
+        ok(tMug.validateMug(Mug).status === 'pass', "Mug created from '"+tMug.typeName+"' MugType passes validation");
+        ok(typeof Mug.controlElement === 'undefined', "Mug's ControlElement is undefined");
+        ok(typeof Mug.bindElement === 'undefined', "Mug's bindElement is undefined");
+        ok(typeof Mug.dataElement === 'object', "Mug's dataElement exists");
         
     });
 
