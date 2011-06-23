@@ -527,9 +527,6 @@ formdesigner.model = (function(){
         parentControlMugType: null, //for keeping a tree like structure of all the Control nodes
         controlNodeCanHaveChildren: false,
         dataNodeCanHaveChildren: true,
-        dataNodeRequired: true,
-        bindNodeRequired: true,
-        controlNodeRequired: true,
 
         mug: null
 
@@ -552,6 +549,7 @@ formdesigner.model = (function(){
         //the four basic valid combinations of Data, Bind and Control elements
         dataBind: function(){
             var mType = formdesigner.util.clone(RootMugType);
+
             mType.typeName = "Data+Bind Only Mug";
             delete mType.properties.controlElement;
             return mType;

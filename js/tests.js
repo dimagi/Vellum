@@ -187,7 +187,6 @@ $(document).ready(function(){
 
         equal(myControl.typeName,typeName, "Was type name set?");
         equal(typeof myControl.ufid,'string', "Does ufid exist?")
-        console.log("Control node ufid:"+myControl.ufid);
     });
 
     module("Mug Unit Tests");
@@ -243,7 +242,6 @@ $(document).ready(function(){
         var MugType = formdesigner.model.RootMugType; //simulates a 'standard' text question
 
         var validationObject = MugType.validateMug(myMug);
-//        console.log(myMug);
         equal(MugType.typeName, "The Abstract Mug Type Definition");
         equal(validationObject.status, "pass");
 
@@ -295,8 +293,8 @@ $(document).ready(function(){
         ok(typeof mug === 'object', "Mug is an Object");
         equal(mugType.validateMug(mug).status,'pass', "Mug passes validation");
     });
-    test("Test sub MugType creation",function(){
-        expect(1);
+    test("Test sub MugType and Mug creation",function(){
+        expect(3);
         //capital A for 'Abstract'
         var AdbType = formdesigner.model.mugTypes.dataBind,
         AdbcType = formdesigner.model.mugTypes.dataBindControlQuestion,
@@ -305,8 +303,11 @@ $(document).ready(function(){
         dbType,dbcType,dcType,dType;
 
         dbType = formdesigner.util.getNewMugType(AdbType);
-        console.log(dbType);
-        ok(dbType === 'object', "MugType creation succesful for 'Data+Bind' Mug");
+        ok(typeof dbType === 'object', "MugType creation succesful for 'Data+Bind' Mug");
+        var dbMug = formdesigner.controller.createMugFromMugType(dbType);
+        ok(dbType.validateMug(dbMug).status === 'pass', "Mug created from '"+dbType.typeName+"' MugType passes validation");
+        ok(dbMug.controlElement === undefined, "Mug's ControlElement is undefined");
+        
     });
 
 
