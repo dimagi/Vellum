@@ -30,7 +30,6 @@ formdesigner.model = (function(){
         var mySpec;
 
         var dataElement,bindElement,controlElement;
-        var definition;
 
         //give this object a unqiue fd id
         formdesigner.util.give_ufid(that);
@@ -49,18 +48,7 @@ formdesigner.model = (function(){
             that.bindElement = spec.bindElement || undefined;
             that.dataElement = spec.dataElement || undefined;
             that.controlElement = spec.controlElement || undefined;
-            that.definition = spec.definition || undefined;
         }(mySpec));
-
-        /**
-         * Checks this mug against its definition object
-         * to verify that it is in a correct state.
-         * Returns a VERIFY_CODE (see util.VERIFY_CODE)
-         */
-        var verify_mug = function(){
-            return formdesigner.util.verify_mug(that,definition);
-        };
-        that.verify_mug = verify_mug;
 
         //make the object event aware
         formdesigner.util.eventuality(that);
@@ -264,7 +252,7 @@ formdesigner.model = (function(){
         return that;
     };
     that.DataElement = DataElement;
-    
+
     /**
      * The controlElement represents the object seen by the user during
      * an entry session.  This object usually takes the form of a question
@@ -322,6 +310,9 @@ formdesigner.model = (function(){
     var TYPE_FLAG_OPTIONAL = '_optional';
     var TYPE_FLAG_REQUIRED = '_required';
     var TYPE_FLAG_NOT_ALLOWED = '_notallowed';
+    that.TYPE_FLAG_OPTIONAL = TYPE_FLAG_OPTIONAL;
+    that.TYPE_FLAG_REQUIRED = TYPE_FLAG_REQUIRED;
+    that.TYPE_FLAG_NOT_ALLOWED = TYPE_FLAG_NOT_ALLOWED;
 
     var RootMugType = {
         typeName: "The Abstract Mug Type Definition",
@@ -368,12 +359,9 @@ formdesigner.model = (function(){
                 xsdType: "xsd:text"
             }
         },
-        parentDataMug: null, //for keeping a tree like structure of all the Data nodes
-        parentControlMug: null, //for keeping a tree like structure of all the Control nodes
-        controlNodeCanHaveChildren: false,
-        dataNodeCanHaveChildren: true,
+
         //for validating a mug against this internal definition we have.
-        validateMug : function(mug){
+        validateMug : function(aMug){
             /**
              * Takes in a key-val pair like {"controlNode": TYPE_FLAG_REQUIRED}
              * and an object to check against, and tell you if the object lives up to the rule
@@ -391,6 +379,8 @@ formdesigner.model = (function(){
              * @param ruleValue
              * @param testingObj
              */
+
+            //TODO: CLEANUP
             var validateRule = function(ruleKey, ruleValue, testingObj, blockName){
                 if(ruleValue === TYPE_FLAG_OPTIONAL){
                     return {
@@ -520,20 +510,71 @@ formdesigner.model = (function(){
                     }
                 }
                 return results;
-            };
-
+            },
+                    mug;
+            mug = aMug || this.mug || null;
+            if(!mug){
+                throw 'MUST HAVE A MUG TO VALIDATE!';
+            }
             return recurse(this.properties,mug,"Mug Top Level");
 
 
 
-        }
-        
+        },
+
+        //OBJECT FIELDS//
+        parentDataMugType: null, //for keeping a tree like structure of all the Data nodes
+        parentControlMugType: null, //for keeping a tree like structure of all the Control nodes
+        controlNodeCanHaveChildren: false,
+        dataNodeCanHaveChildren: true,
+        dataNodeRequired: true,
+        bindNodeRequired: true,
+        controlNodeRequired: true,
+
+        mug: null
+
     };
     that.RootMugType = RootMugType;
 
+    //Testing mugType for unit testing.  Ignore:
     var otherMugType = formdesigner.util.clone(RootMugType);
     otherMugType.properties.bindElement["SOME_PROPERTeYE"] = TYPE_FLAG_REQUIRED;
     that.otherMugType = otherMugType;
+
+    /**
+     * WARNING: These are 'abstract' MugTypes!
+     * To bring them kicking and screaming into the world, you must call
+     * formdesigner.util.getNewMugType(someMT), this will return a fully init'd mugType,
+     * where someMT can be either one of the below abstract MugTypes or a 'real' MugType.
+     *
+     */
+    var mugTypes = {
+        //the four basic valid combinations of Data, Bind and Control elements
+        dataBind: function(){
+            var mType = formdesigner.util.clone(RootMugType);
+            mType.typeName = "Data+Bind Only Mug";
+            delete mType.properties.controlElement;
+            return mType;
+        }(),
+        dataBindControlQuestion: function(){
+            var mType = formdesigner.util.clone(RootMugType);
+            mType.typeName = "Data Bind Control Question Mug";
+            return mType;
+        }(),
+        dataControlQuestion: function(){
+            var mType = formdesigner.util.clone(RootMugType);
+            mType.typeName = "Data+Control Question Mug";
+            delete mType.properties.bindElement;
+        }(),
+        dataOnly: function(){
+            var mType = formdesigner.util.clone(RootMugType);
+            mType.typeName = "Data ONLY Mug";
+            delete mType.properties.dataElement;
+            delete mType.properties.bindElement;
+        }()
+    };
+    that.mugTypes = mugTypes;
+
 //
     var createMugFromMugType = function(mugType){
        return false;

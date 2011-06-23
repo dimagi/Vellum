@@ -272,18 +272,41 @@ $(document).ready(function(){
     });
 
     test("MugType creation tools", function(){
-        expect(1);
+        expect(2);
         var testData = make_control_bind_data_mug();
         var myMug = testData.mug;
         myMug.bindElement.constraintAttr = "foo";
         myMug.bindElement.constraintMsgAttr = undefined;
         var MugType = formdesigner.model.RootMugType; //simulates a 'standard' text question
 
-        var OtherMugType = formdesigner.util.clone(MugType);
-        console.log(MugType);
-        console.log(OtherMugType);
+        var OtherMugType = formdesigner.util.getNewMugType(MugType);
         notDeepEqual(MugType,OtherMugType);
 
+        OtherMugType.typeName = "This is a different Mug";
+        notEqual(MugType.typeName,OtherMugType.typeName);
+
+    });
+
+    module("Automatic Mug Creation from MugType");
+    test("Create mug from root MugType", function(){
+        expect(2);
+        var mugType = formdesigner.util.getNewMugType(formdesigner.model.RootMugType);
+        var mug = formdesigner.controller.createMugFromMugType(mugType);
+        ok(typeof mug === 'object', "Mug is an Object");
+        equal(mugType.validateMug(mug).status,'pass', "Mug passes validation");
+    });
+    test("Test sub MugType creation",function(){
+        expect(1);
+        //capital A for 'Abstract'
+        var AdbType = formdesigner.model.mugTypes.dataBind,
+        AdbcType = formdesigner.model.mugTypes.dataBindControlQuestion,
+        AdcType = formdesigner.model.mugTypes.dataControlQuestion,
+        AdType = formdesigner.model.mugTypes.dataOnly,
+        dbType,dbcType,dcType,dType;
+
+        dbType = formdesigner.util.getNewMugType(AdbType);
+        console.log(dbType);
+        ok(dbType === 'object', "MugType creation succesful for 'Data+Bind' Mug");
     });
 
 
