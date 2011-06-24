@@ -7,11 +7,13 @@ $(document).ready(function(){
         var typeName = "input";
         var myControl = new formdesigner.model.ControlElement(
                 {
-                    typeName:typeName,
+                    name:"Text",
+                    tagName: "input",
                     label:"What is your name?",
                     hintLabel:"Enter the client's name",
-                    labelItext:"Q1EN",
-                    hintItext:"Q1ENH"
+                    itext:"Q1EN",
+                    hintItext:"Q1ENH",
+                    xsdType: "xsd:text"
                 }
         );
 
@@ -28,9 +30,9 @@ $(document).ready(function(){
         //Bind Element
         var attributes = {
             dataRef: "question1",
-            dataType: "text",
-            constraint: "length(.) > 5",
-            constraintMsg: "Town Name must be longer than 5!",
+            dataType: "xsd:text",
+            constraintAttr: "length(.) > 5",
+            constraintMsgAttr: "Town Name must be longer than 5!",
             nodeID: "question1"
         };
         spec =  attributes;
@@ -236,7 +238,7 @@ $(document).ready(function(){
         var testData = make_control_bind_data_mug();
         var myMug = testData.mug;
 
-        var MugType = formdesigner.model.RootMugType; //simulates a 'standard' text question
+        var MugType = formdesigner.util.getNewMugType(formdesigner.model.RootMugType); //simulates a 'standard' text question
 
         var validationObject = MugType.validateMug(myMug);
         equal(MugType.typeName, "The Abstract Mug Type Definition");

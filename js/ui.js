@@ -9,34 +9,60 @@ formdesigner.ui = (function () {
     var that = {}, question_list = [];
 
     function do_loading_bar(){
-            var pbar = $("#progressbar"),
-            content = $("#content"),
-            loadingBar = $("#loadingBar");
+        var pbar = $("#progressbar"),
+        content = $("#content"),
+        loadingBar = $("#loadingBar"),
+                doneController = false,
+                doneUtil = false,
+                doneModel = false,
+                allDone = false,
+                tryComplete = function(){
+                    allDone = doneUtil && doneController && doneModel;
+                    if(allDone){
+                        loadingBar.delay(500).fadeOut(500);
+                    }
+                };
 
-            content.show();
-            loadingBar.css("background-color", "white");
-            loadingBar.fadeIn(100);
+        content.show();
+        loadingBar.css("background-color", "white");
+        loadingBar.fadeIn(100);
 
-            pbar.progressbar({ value: 0 });
+        pbar.progressbar({ value: 0 });
 
-//            $("#loadingInfo").html("downloading util.js");
-//            $.getScript("js/util.js", function (){
-//                pbar.progressbar({ value: (pbar.progressbar( "option", "value" )+35)});
-//            });
-//
-//            $("#loadingInfo").html("downloading model.js");
-//            $.getScript("js/model.js", function(){
-//                pbar.progressbar({ value: (pbar.progressbar( "option", "value" )+32)});
-//
-//            });
-//
-//            $("#loadingInfo").html("downloading controller.js");
-//            $.getScript("js/controller.js", function(){
-//                pbar.progressbar({ value: (pbar.progressbar( "option", "value" )+33)});
-//                loadingBar.delay(500).fadeOut(500);
-//            });
+        $("#loadingInfo").html("downloading util.js");
+        $.getScript("js/util.js", function (){
+            pbar.progressbar({ value: (pbar.progressbar( "option", "value" )+35)});
+            doneUtil = true;
+            tryComplete();
+        });
 
-        loadingBar.delay(500).fadeOut(500);
+        $("#loadingInfo").html("downloading model.js");
+        $.getScript("js/model.js", function(){
+            pbar.progressbar({ value: (pbar.progressbar( "option", "value" )+32)});
+            doneModel = true;
+            tryComplete();
+        });
+
+        $("#loadingInfo").html("downloading controller.js");
+        $.getScript("js/controller.js", function(){
+            pbar.progressbar({ value: (pbar.progressbar( "option", "value" )+33)});
+            doneController = true;
+            tryComplete();
+        });
+
+        window.setTimeout(function(){
+            if(!allDone){
+                    allDone = doneUtil && doneController && doneModel;
+                    if(allDone){
+                        loadingBar.delay(500).fadeOut(500);
+                    }else{
+                        alert("Problem loading FormDesigner! Haha!");
+                    }
+            }
+                },5000);
+
+
+
     }
 
     function init_toolbar(){

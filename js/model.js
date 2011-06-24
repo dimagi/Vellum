@@ -356,6 +356,7 @@ formdesigner.model = (function(){
                 name: "Text",
                 tagName: "input",
                 label: TYPE_FLAG_REQUIRED,
+                hintLabel: TYPE_FLAG_OPTIONAL,
                 itext: TYPE_FLAG_OPTIONAL,
                 hintItext: TYPE_FLAG_OPTIONAL,
                 defaultValue: TYPE_FLAG_OPTIONAL,
