@@ -101,31 +101,28 @@ $(document).ready(function(){
 
     module("Bind Element");
     test("Create a bind with and without arguments", function(){
-       expect(9);
+       expect(8);
        var myBind = new formdesigner.model.BindElement();
        ok(typeof myBind === 'object', "Is it an object?");
 
        //make the spec object for the bind constructor
-        var attributes = {
+        var spec = {
             dataRef: "question1",
             dataType: "text",
             constraint: "length(.) > 5",
             constraintMsg: "Town Name must be longer than 5!",
             id: "someUniqueBindID"
         };
-        var spec = {
-            attributes : attributes
-        };
+
 
         var myOtherBind = new formdesigner.model.BindElement(spec);
 
         //check if the bind was created properly
-        equal(myOtherBind.attributes, attributes, "Attributes correctly set");
-        equal(myOtherBind.dataRef, attributes.dataRef, "Shortcut to dataRef correctly set");
-        equal(myOtherBind.dataType, attributes.dataType, "Shortcut to dataRef correctly set");
-        equal(myOtherBind.constraint, attributes.constraint, "Shortcut to dataRef correctly set");
-        equal(myOtherBind.constraintMsg, attributes.constraintMsg, "Shortcut to dataRef correctly set");
-        equal(myOtherBind.id, attributes.id, "Shortcut to id correctly set");
+        equal(myOtherBind.dataRef, spec.dataRef, "Shortcut to dataRef correctly set");
+        equal(myOtherBind.dataType, spec.dataType, "Shortcut to dataRef correctly set");
+        equal(myOtherBind.constraint, spec.constraint, "Shortcut to dataRef correctly set");
+        equal(myOtherBind.constraintMsg, spec.constraintMsg, "Shortcut to dataRef correctly set");
+        equal(myOtherBind.id, spec.id, "Shortcut to id correctly set");
 
         //test that a unique formdesigner id was generated for this object (well, kind of)
         equal(typeof myOtherBind.ufid, 'string', "Is the ufid a string?");
@@ -294,7 +291,7 @@ $(document).ready(function(){
         equal(mugType.validateMug(mug).status,'pass', "Mug passes validation");
     });
     test("Test sub MugType and Mug creation",function(){
-        expect(20);
+        expect(23);
         //capital A for 'Abstract'
         var AdbType  = formdesigner.model.mugTypes.dataBind,
             AdbcType = formdesigner.model.mugTypes.dataBindControlQuestion,
@@ -304,22 +301,30 @@ $(document).ready(function(){
 
         tMug = formdesigner.util.getNewMugType(AdbType);
         Mug = formdesigner.controller.createMugFromMugType(tMug);
+        console.log(tMug);
+        console.log(Mug);
         ok(typeof tMug === 'object', "MugType creation successful for '"+tMug.typeName+"' MugType");
         ok(tMug.validateMug(Mug).status === 'pass', "Mug created from '"+tMug.typeName+"' MugType passes validation");
         ok(typeof Mug.controlElement === 'undefined', "Mug's ControlElement is undefined");
         ok(typeof Mug.bindElement === 'object', "Mug's bindElement exists");
         ok(typeof Mug.dataElement === 'object', "Mug's dataElement exists");
+        equal(Mug.dataElement.nodeID,Mug.bindElement.nodeID);
 
         tMug = formdesigner.util.getNewMugType(AdbcType);
         Mug = formdesigner.controller.createMugFromMugType(tMug);
+        console.log(tMug);
+        console.log(Mug);
         ok(typeof tMug === 'object', "MugType creation successful for '"+tMug.typeName+"' MugType");
         ok(tMug.validateMug(Mug).status === 'pass', "Mug created from '"+tMug.typeName+"' MugType passes validation");
         ok(typeof Mug.controlElement === 'object', "Mug's ControlElement exists");
         ok(typeof Mug.bindElement === 'object', "Mug's bindElement exists");
         ok(typeof Mug.dataElement === 'object', "Mug's dataElement exists");
+        equal(Mug.dataElement.nodeID,Mug.bindElement.nodeID);
 
         tMug = formdesigner.util.getNewMugType(AdcType);
         Mug = formdesigner.controller.createMugFromMugType(tMug);
+        console.log(tMug);
+        console.log(Mug);
         ok(typeof tMug === 'object', "MugType creation successful for '"+tMug.typeName+"' MugType");
         ok(tMug.validateMug(Mug).status === 'pass', "Mug created from '"+tMug.typeName+"' MugType passes validation");
         ok(typeof Mug.controlElement === 'object', "Mug's ControlElement exists");
@@ -335,6 +340,7 @@ $(document).ready(function(){
         ok(typeof Mug.controlElement === 'undefined', "Mug's ControlElement is undefined");
         ok(typeof Mug.bindElement === 'undefined', "Mug's bindElement is undefined");
         ok(typeof Mug.dataElement === 'object', "Mug's dataElement exists");
+        ok(Mug.dataElement.nodeID.toLocaleLowerCase().indexOf('question') != -1);
         
     });
 

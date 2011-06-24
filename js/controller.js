@@ -17,7 +17,7 @@ formdesigner.controller = (function(){
      * returns it as a string.
      */
     var generate_question_id = function(){
-        var ret = 'question'+(Math.ceil(Math.random()*question_counter));
+        var ret = 'question'+question_counter;
         question_counter += 1;
         return ret;
     };
@@ -49,7 +49,7 @@ formdesigner.controller = (function(){
                 }else{
                     switch(block[i]){
                         case formdesigner.model.TYPE_FLAG_OPTIONAL:
-                            spec[i] = null;
+                            spec[i] = " ";
                             break;
                         case formdesigner.model.TYPE_FLAG_REQUIRED:
                             spec[i] = " ";
@@ -75,6 +75,8 @@ formdesigner.controller = (function(){
         dataElSpec = specBlob.dataElement || undefined;
         bindElSpec = specBlob.bindElement || undefined;
         controlElSpec = specBlob.controlElement || undefined;
+        console.log('bind spec below:');
+        console.log(bindElSpec);
 
         //create the various elements, mug itself, and linkup.
         if(mugSpec){
@@ -83,9 +85,19 @@ formdesigner.controller = (function(){
                 mug.controlElement = new formdesigner.model.ControlElement(controlElSpec);
             }
             if(dataElSpec){
+                if(dataElSpec.nodeID){
+                    dataElSpec.nodeID = generate_question_id();
+                }
                 mug.dataElement = new formdesigner.model.DataElement(dataElSpec);
             }
             if(bindElSpec){
+                if(bindElSpec.nodeID){
+                    if(dataElSpec.nodeID){
+                        bindElSpec.nodeID = dataElSpec.nodeID; //make bind id match data id for convenience
+                    }else{
+                        bindElSpec.nodeID = generate_question_id();
+                    }
+                }
                 mug.bindElement = new formdesigner.model.BindElement(bindElSpec);
             }
         }

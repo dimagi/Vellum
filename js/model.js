@@ -106,15 +106,11 @@ formdesigner.model = (function(){
             if(typeof the_spec === 'undefined'){
                 return null; //nothing to be done.
             }else{
-                if(typeof the_spec.attributes !== 'undefined'){
-                    var i = {};
-                    attributes = the_spec.attributes;
-                    that.attributes = attributes;
-                    //also attach the attributes to the root 'that' object:
-                    for(i in attributes){
-                        if(attributes.hasOwnProperty(i)){
-                            that[i] = attributes[i];
-                        }
+                var i;
+                //also attach the attributes to the root 'that' object:
+                for(i in the_spec){
+                    if(the_spec.hasOwnProperty(i)){
+                        that[i] = the_spec[i];
                     }
                 }
             }
