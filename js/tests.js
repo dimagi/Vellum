@@ -301,8 +301,6 @@ $(document).ready(function(){
 
         tMug = formdesigner.util.getNewMugType(AdbType);
         Mug = formdesigner.controller.createMugFromMugType(tMug);
-        console.log(tMug);
-        console.log(Mug);
         ok(typeof tMug === 'object', "MugType creation successful for '"+tMug.typeName+"' MugType");
         ok(tMug.validateMug(Mug).status === 'pass', "Mug created from '"+tMug.typeName+"' MugType passes validation");
         ok(typeof Mug.controlElement === 'undefined', "Mug's ControlElement is undefined");
@@ -312,8 +310,6 @@ $(document).ready(function(){
 
         tMug = formdesigner.util.getNewMugType(AdbcType);
         Mug = formdesigner.controller.createMugFromMugType(tMug);
-        console.log(tMug);
-        console.log(Mug);
         ok(typeof tMug === 'object', "MugType creation successful for '"+tMug.typeName+"' MugType");
         ok(tMug.validateMug(Mug).status === 'pass', "Mug created from '"+tMug.typeName+"' MugType passes validation");
         ok(typeof Mug.controlElement === 'object', "Mug's ControlElement exists");
@@ -323,8 +319,6 @@ $(document).ready(function(){
 
         tMug = formdesigner.util.getNewMugType(AdcType);
         Mug = formdesigner.controller.createMugFromMugType(tMug);
-        console.log(tMug);
-        console.log(Mug);
         ok(typeof tMug === 'object', "MugType creation successful for '"+tMug.typeName+"' MugType");
         ok(tMug.validateMug(Mug).status === 'pass', "Mug created from '"+tMug.typeName+"' MugType passes validation");
         ok(typeof Mug.controlElement === 'object', "Mug's ControlElement exists");
@@ -333,8 +327,6 @@ $(document).ready(function(){
 
         tMug = formdesigner.util.getNewMugType(AdType);
         Mug = formdesigner.controller.createMugFromMugType(tMug);
-        console.log(tMug);
-        console.log(Mug);
         ok(typeof tMug === 'object', "MugType creation successful for '"+tMug.typeName+"' MugType");
         ok(tMug.validateMug(Mug).status === 'pass', "Mug created from '"+tMug.typeName+"' MugType passes validation");
         ok(typeof Mug.controlElement === 'undefined', "Mug's ControlElement is undefined");

@@ -101,7 +101,7 @@ formdesigner.util = (function(){
 
     //Simple Event Framework
     //Just run your object through this function to make it event aware
-    //Take from 'JavaScript: The Good Parts'
+    //Taken from 'JavaScript: The Good Parts'
     var eventuality = function (that) {
         var registry = {};
         that.fire = function (event) {

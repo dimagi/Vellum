@@ -1,8 +1,12 @@
 /*jslint maxerr: 50, indent: 4 */
 /*globals $,document,console*/
+if(typeof formdesigner === 'undefined'){
+    var formdesigner = {};
+}
 
-(function () {
+formdesigner.ui = (function () {
     "use strict";
+    var that = {}, question_list = [];
 
     function do_loading_bar(){
             var pbar = $("#progressbar"),
@@ -15,49 +19,32 @@
 
             pbar.progressbar({ value: 0 });
 
-            $("#loadingInfo").html("downloading util.js");
-            $.getScript("js/util.js", function (){
-                pbar.progressbar({ value: (pbar.progressbar( "option", "value" )+35)});
-            });
+//            $("#loadingInfo").html("downloading util.js");
+//            $.getScript("js/util.js", function (){
+//                pbar.progressbar({ value: (pbar.progressbar( "option", "value" )+35)});
+//            });
+//
+//            $("#loadingInfo").html("downloading model.js");
+//            $.getScript("js/model.js", function(){
+//                pbar.progressbar({ value: (pbar.progressbar( "option", "value" )+32)});
+//
+//            });
+//
+//            $("#loadingInfo").html("downloading controller.js");
+//            $.getScript("js/controller.js", function(){
+//                pbar.progressbar({ value: (pbar.progressbar( "option", "value" )+33)});
+//                loadingBar.delay(500).fadeOut(500);
+//            });
 
-            $("#loadingInfo").html("downloading model.js");
-            $.getScript("js/model.js", function(){
-                pbar.progressbar({ value: (pbar.progressbar( "option", "value" )+32)});
-
-            });
-
-            $("#loadingInfo").html("downloading controller.js");
-            $.getScript("js/controller.js", function(){
-                pbar.progressbar({ value: (pbar.progressbar( "option", "value" )+33)});
-                loadingBar.delay(500).fadeOut(500);
-            });
-    }
-
-    function switch_question(question){
-        function add_row(prop, val){
-            var row;
-                row = $("<tr></tr>").appendTo($("#properties-table-body"));
-
-                $("<td>" + prop +"</td>").appendTo(row);
-                $("<td><input value=\""+val+"\"</td>").appendTo(row);
-        }
-        
-        var i;
-        for(i in question){
-            if(question.hasOwnProperty(i)){
-                add_row(i,question[i]);
-            }
-        }
-
+        loadingBar.delay(500).fadeOut(500);
     }
 
     function init_toolbar(){
         $("#add-question").button().click(function(){
-           switch_question({
-               foo:"foo",
-               bar:"bar",
-               bash:"bash"
-           });
+            var mug = formdesigner.controller.createQuestion(),
+            uiQuestion = new Question(mug);
+            question_list.push(mug)
+            $('#question-properties').append('<br>');
         });
         $("#add-question-button")
                 .addClass("ui-corner-all ui-icon ui-icon-plusthick")
@@ -94,7 +81,120 @@
         do_nav_bar();
     });
 
+    var Question = function(mug){
+        var that = {}, qTable, qTHeader,qTBody, questionHolder, localMug = mug;
+
+        questionHolder = $("#question-table-body")
+
+        that.qTable = qTable;
+        that.qTHeader = qTHeader;
+        that.qTBody = qTBody;
+
+        var create = function (mug, title){
+            var i,
+                monWin = $('<div class="monitor-window"></div>');
+            $('#question-properties').append(monWin);
+            monWin.append('<textarea id="monitor-window-'+mug.ufid+'" class="monitor-window-textarea">'+JSON.stringify(mug,null,'\t')+'</textarea>');
+            qTable = $('<table id="question-table" class="'+title+'"></table>');
+            $('#question-properties').append(qTable);
+
+//            qTable.css("border","1");
+
+            qTHeader = $('<thead class="question-table-header"></thead>');
+            qTHeader.append('<tr><td colspan=2><b><h2>Question Properties: '+mug.dataElement.nodeID+'</h1 ></b></td></tr>');
+            qTHeader.append("<tr><td><b>Property Name</b></td><td><b>Property Value</b></td></tr>");
+            qTable.append(qTHeader);
+            qTBody = $("<tbody></tbody>");
+            qTable.append(qTBody);
 
 
 
+
+            i = 'ufid';
+            var row, col1,col2;
+
+            row = $("<tr></tr>");
+            qTBody.append(row);
+            row.attr('id', i);
+            row.attr('class', "question-property-row");
+            col1 = $("<td></td>");
+            col2 = $("<td></td>");
+            row.append(col1);
+            row.append(col2);
+
+            col1.html(i);
+            col2.html(mug[i]);
+
+            for(var p in mug){
+                var block = mug[p];
+                if(!mug.hasOwnProperty(p)){
+                    continue;
+                }
+                if(typeof block === 'function' || typeof block === 'string'){
+                    continue;
+                }
+
+                qTBody.append("<hr />");
+                qTBody.append('<tr><td colspan=2><h2>'+p+' Properties:</h2></tr>')
+
+                for(i in block){
+                    var inputBox;
+                    if(!block.hasOwnProperty(i) || typeof block[i] === 'function'){
+                        continue;
+                    }
+                    row = $("<tr></tr>");
+                    qTBody.append(row);
+                    row.attr('id', i);
+                    row.attr('class', "question-property-row");
+                    col1 = $('<td>'+i+'</td>');
+                    col2 = $('<td></td>');
+                    inputBox = $('<input value="'+block[i]+'" name="'+i+'" class="'+p+'" />');
+                    col2.append(inputBox);
+                    inputBox.change(function(e){
+                        var target = $(e.target);
+
+                        mug[target.attr("class")][target.attr("name")] = target.val();
+                       console.log("asdasd");
+                        console.log(e.target);
+                       mug.fire('property-changed');
+                    });
+                    row.append(col1);
+                    row.append(col2);
+
+                }
+
+            }
+
+            mug.on('property-changed',function(){
+                console.log(mug);
+                $('#monitor-window-'+mug.ufid).filter(":input").text(JSON.stringify(mug,null,'\t'));
+            },null);
+
+
+
+
+        }(localMug, localMug.ufid);
+
+
+        function setPropertyValForUI(property, value){
+            $(".question-property-row "+property+" td:nth-child(2)").html(value);
+        }
+        that.setPropertValForUI = setPropertyValForUI;
+
+        /**
+         *
+         * @param element can be one of (string) 'bind','data','control'
+         * @param property (string) property name
+         * @param val new value the property should be set to.
+         */
+        function setPropertyValForModel(element,property, val){
+            mug[element][property] = val;
+            mug.fire('property-changed');
+        }
+
+        return that;
+    };
+    that.Question = Question;
+
+    return that;
 }());

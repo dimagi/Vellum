@@ -10,14 +10,14 @@ if(typeof formdesigner === 'undefined'){
 
 formdesigner.controller = (function(){
     var that = {};
-    var question_counter = 0; //used in generate_question_id();
+    var question_counter = 1; //used in generate_question_id();
 
     /**
      * Generates a unique question ID (unique in this form) and
      * returns it as a string.
      */
     var generate_question_id = function(){
-        var ret = 'question'+question_counter;
+        var ret = 'Question '+question_counter;
         question_counter += 1;
         return ret;
     };
@@ -61,7 +61,6 @@ formdesigner.controller = (function(){
                     }
                 }
             }
-//            retSpec[name] = spec;
             return spec;
         }
         //loop through mugType.properties and construct a spec to be passed to the Mug Constructor.
@@ -75,8 +74,6 @@ formdesigner.controller = (function(){
         dataElSpec = specBlob.dataElement || undefined;
         bindElSpec = specBlob.bindElement || undefined;
         controlElSpec = specBlob.controlElement || undefined;
-        console.log('bind spec below:');
-        console.log(bindElSpec);
 
         //create the various elements, mug itself, and linkup.
         if(mugSpec){
@@ -120,5 +117,19 @@ formdesigner.controller = (function(){
     };
     that.createMugFromMugType = createMugFromMugType;
 
+
+    /**
+     * Convenience method for generating mug and mugType, calling UI and throwing
+     * it the 'question' object
+     *
+     * @param qType = type of question to be created. ||| Currently does nothing |||
+     */
+    var createQuestion = function(qType){
+        var mugType = formdesigner.util.getNewMugType(formdesigner.model.mugTypes.dataBindControlQuestion),
+        mug = createMugFromMugType(mugType);
+        return mug;
+
+    };
+    that.createQuestion = createQuestion;
     return that;
 })();

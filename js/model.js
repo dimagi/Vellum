@@ -233,10 +233,16 @@ formdesigner.model = (function(){
         var that = {};
 
         (function constructor (mySpec){
-            if(typeof mySpec !== 'undefined'){
-                that.name = mySpec.name || undefined;
-                that.defaultData = mySpec.defaultData || undefined;
-                that.nodeID = mySpec.nodeID || undefined;
+            if(typeof mySpec === 'undefined'){
+                return null; //nothing to be done.
+            }else{
+                var i;
+                //also attach the attributes to the root 'that' object:
+                for(i in mySpec){
+                    if(mySpec.hasOwnProperty(i)){
+                        that[i] = mySpec[i];
+                    }
+                }
             }
         }(spec));
 
@@ -276,15 +282,16 @@ formdesigner.model = (function(){
         formdesigner.util.give_ufid(that);
 
         (function constructor(mySpec){
-            if(typeof mySpec !== 'undefined'){
-                typeName = that.typeName = mySpec.typeName;
-                controlName = that.controlName = mySpec.controlName;
-                //optional values in the spec
-                if(typeof mySpec.label !== 'undefined'){ label = that.label = mySpec.label; }
-                if(typeof mySpec.hintLabel !== 'undefined'){ hintLabel = that.hintLabel = mySpec.hintLabel; }
-                if(typeof mySpec.labelItext !== 'undefined'){ labelItext = that.labelItext = mySpec.labelItext; }
-                if(typeof mySpec.hintItext !== 'undefined'){ hintItext = that.hintItext = mySpec.hintItext; }
-                if(typeof mySpec.defaultValue !== 'undefined'){ defaultValue = that.defaultValue = mySpec.defaultValue; }
+            if(typeof mySpec === 'undefined'){
+                return null; //nothing to be done.
+            }else{
+                var i;
+                //also attach the attributes to the root 'that' object:
+                for(i in mySpec){
+                    if(mySpec.hasOwnProperty(i)){
+                        that[i] = mySpec[i];
+                    }
+                }
             }
         }(spec));
 
@@ -415,13 +422,23 @@ formdesigner.model = (function(){
                         };
                     }
                 }else if(typeof ruleValue === 'string'){
-                    return {
-                            result: 'pass',
-                            resultMessage: '"'+ ruleKey + '" is a string value (Required) and Present in block:'+blockName,
+                    if(testingObj[ruleKey] !== ruleValue){
+                        return {
+                            result: 'fail',
+                            resultMessage: '"'+ ruleKey +'" in "'+testingObj+'" is not equal to ruleValue:"'+ruleValue+'". Actual value:"'+testingObj[ruleKey]+'". (Required) in block:'+blockName,
                             'ruleKey': ruleKey,
                             'ruleValue': ruleValue,
                             'objectValue': testingObj
                         };
+                    }else{
+                        return {
+                                result: 'pass',
+                                resultMessage: '"'+ ruleKey + '" is a string value (Required) and Present in block:'+blockName,
+                                'ruleKey': ruleKey,
+                                'ruleValue': ruleValue,
+                                'objectValue': testingObj
+                            };
+                    }
                 }else if(typeof ruleValue === 'function'){
                     var funcRetVal = ruleValue(testingObj);
                     if(funcRetVal === 'pass'){
@@ -512,7 +529,13 @@ formdesigner.model = (function(){
             if(!mug){
                 throw 'MUST HAVE A MUG TO VALIDATE!';
             }
-            return recurse(this.properties,mug,"Mug Top Level");
+            var validationResult = recurse(this.properties,mug,"Mug Top Level");
+            if(validationResult.status === 'fail'){
+                console.log("A MUG OBJECT HAS FAILED VALIDATION. VALIDATION OBJECT BELOW");
+                console.log(validationResult);
+            }
+
+            return validationResult;
 
 
 
