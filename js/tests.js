@@ -11,9 +11,8 @@ $(document).ready(function(){
                     tagName: "input",
                     label:"What is your name?",
                     hintLabel:"Enter the client's name",
-                    itext:"Q1EN",
-                    hintItext:"Q1ENH",
-                    xsdType: "xsd:text"
+                    labelItext:"Q1EN",
+                    hintItext:"Q1ENH"
                 }
         );
 
@@ -21,15 +20,13 @@ $(document).ready(function(){
         var name = "question1";
         var initialData = "foo";
         var spec = {
-            name: name,
-            defaultData: initialData,
+            dataValue: initialData,
             nodeID: "data_for_question1"
         }
         var myData = formdesigner.model.DataElement(spec);
 
         //Bind Element
         var attributes = {
-            dataRef: "question1",
             dataType: "xsd:text",
             constraintAttr: "length(.) > 5",
             constraintMsgAttr: "Town Name must be longer than 5!",

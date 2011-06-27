@@ -452,7 +452,7 @@ formdesigner.model = (function(){
              * @param blockName
              */
             var recurse = function(propertiesObj, testingObj, blockName){
-                var i, results;
+                var i,j, results, testObjProperties;
 
                 results = {"status": "pass"}; //set initial status
                 results["blockName"] = blockName;
@@ -462,7 +462,7 @@ formdesigner.model = (function(){
                     results["errorType"] = "NullPointer";
                     return results;
                 }
-
+                //recurse through properties given by the definition object
                 for(i in propertiesObj){
                     //go deeper if required
                     if(typeof propertiesObj[i] === 'object'){
@@ -471,9 +471,12 @@ formdesigner.model = (function(){
                         //see if the recursion went ok, flip out if not.
                         if(results[i].status === "fail"){
                             results["status"] = "fail"
-                            results["message"] = "Recursion Failure on block: "+i;
-                            results["errorBlockName"] = i;
-                            results["errorType"] = 'recursion';
+                            results["message"] = results[i].message;
+                            results["errorBlockName"] = results[i]['errorBlockName'];
+                            results["errorType"] = results[i]['errorType'];
+                            if(results[i]['errorProperty']){
+                                results['errorProperty'] = results[i]['errorProperty'];
+                            }
                             return results;
                         }else{
                             results["status"] = "pass";
@@ -489,6 +492,27 @@ formdesigner.model = (function(){
                         }else{
                             results["status"] = "pass";
                         }
+                    }
+                }
+
+                //recurse through the properties in the actual mug/*Element
+                testObjProperties = testingObj.properties
+                for(j in testObjProperties){
+                    if(!testObjProperties.hasOwnProperty(j)){ continue; }
+                    if(typeof propertiesObj[j] === 'undefined'){
+                        results["status"] = "fail";
+                        results["message"] = blockName+" block has property '"+j+"' but no rule is present for that property in the MugType!";
+                        results["errorBlockName"] = blockName;
+                        results["errorProperty"] = j
+                        results["errorType"] = 'MissingRuleValidation';
+                        results["propertiesBlock"] = propertiesObj;
+                    }else if(propertiesObj[j] === TYPE_FLAG_NOT_ALLOWED){
+                        results["status"] = "fail";
+                        results["message"] = blockName+" block has property '"+j+"' but this property is NOT ALLOWED in the MugType definition!";
+                        results["errorBlockName"] = blockName;
+                        results["errorProperty"] = j
+                        results["errorType"] = 'NotAllowedRuleValidation';
+                        results["propertiesBlock"] = propertiesObj;
                     }
                 }
                 return results;
