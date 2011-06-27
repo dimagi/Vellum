@@ -34,6 +34,7 @@ formdesigner.model = (function(){
         //give this object a unqiue fd id
         formdesigner.util.give_ufid(that);
 
+        that['properties'] = {};
         if(typeof spec === 'undefined'){
             mySpec = {};
         }else{
@@ -45,9 +46,9 @@ formdesigner.model = (function(){
          * consisting of various elements (see Mug comments)
          */
         (function construct(spec){
-            that.bindElement = spec.bindElement || undefined;
-            that.dataElement = spec.dataElement || undefined;
-            that.controlElement = spec.controlElement || undefined;
+            that.properties.bindElement = spec.bindElement || undefined;
+            that.properties.dataElement = spec.dataElement || undefined;
+            that.properties.controlElement = spec.controlElement || undefined;
         }(mySpec));
 
         //make the object event aware
@@ -97,6 +98,7 @@ formdesigner.model = (function(){
      */
     var BindElement = function(spec){
         var that = {};
+        that['properties'] = {};
 
         //give this object a unqiue fd id
         formdesigner.util.give_ufid(that);
@@ -110,7 +112,7 @@ formdesigner.model = (function(){
                 //also attach the attributes to the root 'that' object:
                 for(i in the_spec){
                     if(the_spec.hasOwnProperty(i)){
-                        that[i] = the_spec[i];
+                        that.properties[i] = the_spec[i];
                     }
                 }
             }
@@ -231,6 +233,7 @@ formdesigner.model = (function(){
      */
     var DataElement = function(spec){
         var that = {};
+        that['properties'] = {};
 
         (function constructor (mySpec){
             if(typeof mySpec === 'undefined'){
@@ -240,7 +243,7 @@ formdesigner.model = (function(){
                 //also attach the attributes to the root 'that' object:
                 for(i in mySpec){
                     if(mySpec.hasOwnProperty(i)){
-                        that[i] = mySpec[i];
+                        that.properties[i] = mySpec[i];
                     }
                 }
             }
@@ -276,6 +279,7 @@ formdesigner.model = (function(){
      */
     var ControlElement = function(spec){
         var that = {};
+        that['properties'] = {};
 
         var typeName,controlName,label,hintLabel,labelItext,hintItext,defaultValue;
         //give this object a unique fd id
@@ -289,7 +293,7 @@ formdesigner.model = (function(){
                 //also attach the attributes to the root 'that' object:
                 for(i in mySpec){
                     if(mySpec.hasOwnProperty(i)){
-                        that[i] = mySpec[i];
+                        that.properties[i] = mySpec[i];
                     }
                 }
             }
@@ -310,12 +314,9 @@ formdesigner.model = (function(){
     ///////////////////////////////////////////////////////////////////////////////////////
 
 
-    var TYPE_FLAG_OPTIONAL = '_optional';
-    var TYPE_FLAG_REQUIRED = '_required';
-    var TYPE_FLAG_NOT_ALLOWED = '_notallowed';
-    that.TYPE_FLAG_OPTIONAL = TYPE_FLAG_OPTIONAL;
-    that.TYPE_FLAG_REQUIRED = TYPE_FLAG_REQUIRED;
-    that.TYPE_FLAG_NOT_ALLOWED = TYPE_FLAG_NOT_ALLOWED;
+    var TYPE_FLAG_OPTIONAL = that.TYPE_FLAG_OPTIONAL = '_optional';
+    var TYPE_FLAG_REQUIRED = that.TYPE_FLAG_REQUIRED = '_required';
+    var TYPE_FLAG_NOT_ALLOWED = that.TYPE_FLAG_NOT_ALLOWED = '_notallowed';
 
     var RootMugType = {
         typeName: "The Abstract Mug Type Definition",
@@ -357,10 +358,9 @@ formdesigner.model = (function(){
                 tagName: "input",
                 label: TYPE_FLAG_REQUIRED,
                 hintLabel: TYPE_FLAG_OPTIONAL,
-                itext: TYPE_FLAG_OPTIONAL,
+                labelItext: TYPE_FLAG_OPTIONAL,
                 hintItext: TYPE_FLAG_OPTIONAL,
-                defaultValue: TYPE_FLAG_OPTIONAL,
-                xsdType: "xsd:text"
+                defaultValue: TYPE_FLAG_OPTIONAL
             }
         },
 
@@ -386,88 +386,56 @@ formdesigner.model = (function(){
 
             //TODO: CLEANUP
             var validateRule = function(ruleKey, ruleValue, testingObj, blockName){
+                var retBlock = {};
+                retBlock['ruleKey'] = ruleKey;
+                retBlock['ruleValue'] = ruleValue;
+                retBlock['objectValue'] = testingObj;
+                retBlock['blockName'] = blockName;
+                retBlock['result'] = 'fail';
+                if(!testingObj){ return retBlock; }
+                
                 if(ruleValue === TYPE_FLAG_OPTIONAL){
-                    return {
-                        result: 'pass',
-                        resultMessage: '"'+ ruleKey + '" is Optional in block:'+blockName,
-                        'ruleKey': ruleKey,
-                        'ruleValue': ruleValue,
-                        'objectValue': testingObj
-                    };
+                    retBlock['result'] = 'pass';
+                    retBlock['resultMessage'] = '"'+ ruleKey + '" is Optional in block:'+blockName;
                 }else if(ruleValue === TYPE_FLAG_REQUIRED){
                     if(typeof testingObj[ruleKey] !== 'undefined'){
-                        return {
-                            result: 'pass',
-                            resultMessage: '"'+ ruleKey + '" is Required and Present in block:'+blockName,
-                            'ruleKey': ruleKey,
-                            'ruleValue': ruleValue,
-                            'objectValue': testingObj
-                        };
+                        retBlock['result'] = 'pass';
+                        retBlock['resultMessage'] =  '"'+ ruleKey + '" is Required and Present in block:'+blockName;
                     }else{
-                        return {
-                            result: 'fail',
-                            resultMessage:'"'+ ruleKey + '" VALUE IS REQUIRED in block:'+blockName,
-                            'ruleKey': ruleKey,
-                            'ruleValue': ruleValue
-                        };
+                        retBlock['result'] = 'fail';
+                        retBlock['resultMessage'] ='"'+ ruleKey + '" VALUE IS REQUIRED in block:'+blockName+', but is NOT present!';
                     }
                 }else if(ruleValue === TYPE_FLAG_NOT_ALLOWED){
                     if(typeof testingObj[ruleKey] === 'undefined'){ //note the equivalency modification from the above
-                        return {result: true};
+                        retBlock['result'] = 'pass';
                     }else{
-                        return {
-                            result: 'fail',
-                            resultMessage:'"'+ ruleKey + '" IS NOT ALLOWED IN THIS OBJECT in block:'+blockName,
-                            'ruleKey': ruleKey,
-                            'ruleValue': ruleValue
-                        };
+                        retBlock['result'] = 'fail';
+                        retBlock['resultMessage'] ='"'+ ruleKey + '" IS NOT ALLOWED IN THIS OBJECT in block:'+blockName;
                     }
                 }else if(typeof ruleValue === 'string'){
                     if(testingObj[ruleKey] !== ruleValue){
-                        return {
-                            result: 'fail',
-                            resultMessage: '"'+ ruleKey +'" in "'+testingObj+'" is not equal to ruleValue:"'+ruleValue+'". Actual value:"'+testingObj[ruleKey]+'". (Required) in block:'+blockName,
-                            'ruleKey': ruleKey,
-                            'ruleValue': ruleValue,
-                            'objectValue': testingObj
-                        };
+                        retBlock['result'] = 'fail';
+                        retBlock['resultMessage'] = '"'+ ruleKey +'" in "'+testingObj+'" is not equal to ruleValue:"'+ruleValue+'". Actual value:"'+testingObj[ruleKey]+'". (Required) in block:'+blockName;
                     }else{
-                        return {
-                                result: 'pass',
-                                resultMessage: '"'+ ruleKey + '" is a string value (Required) and Present in block:'+blockName,
-                                'ruleKey': ruleKey,
-                                'ruleValue': ruleValue,
-                                'objectValue': testingObj
-                            };
+                        retBlock['result'] = 'pass';
+                        retBlock['resultMessage'] = '"'+ ruleKey + '" is a string value (Required) and Present in block:'+blockName;
                     }
                 }else if(typeof ruleValue === 'function'){
                     var funcRetVal = ruleValue(testingObj);
                     if(funcRetVal === 'pass'){
-                        return {
-                            result: 'pass',
-                            resultMessage: '"'+ ruleKey + '" is a string value (Required) and Present in block:'+blockName,
-                            'ruleKey': ruleKey,
-                            'ruleValue': ruleValue,
-                            'objectValue': testingObj
-                        }
+                        retBlock['result'] = 'pass';
+                        retBlock['resultMessage'] = '"'+ ruleKey + '" is a string value (Required) and Present in block:'+blockName;
                     }else{
-                        return {
-                            result: 'fail',
-                            resultMessage:'"'+ ruleKey + '" ::: '+funcRetVal+' in block:'+blockName,
-                            'ruleKey': ruleKey,
-                            'ruleValue': ruleValue
-                        }
+                        retBlock['result'] = 'fail';
+                        retBlock['resultMessage'] ='"'+ ruleKey + '" ::: '+funcRetVal+' in block:'+blockName+',Message:'+funcRetVal;
                     }
                 }
                 else{
-                    return {
-                            result: 'fail',
-                            resultMessage:'"'+ ruleKey + '" MUST BE OF TYPE_OPTIONAL,REQUIRED,NOT_ALLOWED or a "string" in block:'+blockName,
-                            'ruleKey': ruleKey,
-                            'ruleValue': ruleValue
-                    };
-
+                    retBlock['result'] = 'fail';
+                    retBlock['resultMessage'] ='"'+ ruleKey + '" MUST BE OF TYPE_OPTIONAL,REQUIRED,NOT_ALLOWED or a "string" in block:'+blockName;
                 }
+
+                return retBlock;
             };
 
             /**
@@ -511,12 +479,12 @@ formdesigner.model = (function(){
                             results["status"] = "pass";
                         }
                     }else{
-                        results[i] = validateRule(i,propertiesObj[i],testingObj, blockName);
+                        results[i] = validateRule(i,propertiesObj[i],testingObj.properties, blockName);
                         if(results[i].result === 'fail'){
                             results["status"] = "fail";
                             results["message"] = "Validation Rule Failure on Property: "+i;
                             results["errorBlockName"] = i;
-                            results["errorType"] = 'validation';
+                            results["errorType"] = 'RuleValidation';
                             return results; //short circuit the validation
                         }else{
                             results["status"] = "pass";
@@ -525,12 +493,13 @@ formdesigner.model = (function(){
                 }
                 return results;
             },
-                    mug;
+            mug;
             mug = aMug || this.mug || null;
+
             if(!mug){
                 throw 'MUST HAVE A MUG TO VALIDATE!';
             }
-            var validationResult = recurse(this.properties,mug,"Mug Top Level");
+            var validationResult = recurse(this.properties,mug.properties,"Mug Top Level");
             if(validationResult.status === 'fail'){
                 console.log("A MUG OBJECT HAS FAILED VALIDATION. VALIDATION OBJECT BELOW");
                 console.log(validationResult);

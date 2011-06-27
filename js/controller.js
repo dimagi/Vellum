@@ -54,7 +54,7 @@ formdesigner.controller = (function(){
                         case formdesigner.model.TYPE_FLAG_REQUIRED:
                             spec[i] = " ";
                             break;
-                        case formdesigner.model.TYPE_FLAG_REQUIRED:
+                        case formdesigner.model.TYPE_FLAG_NOT_ALLOWED:
                             break;
                         default:
                             spec[i] = block[i]; //text value;
@@ -79,13 +79,13 @@ formdesigner.controller = (function(){
         if(mugSpec){
             mug = new formdesigner.model.Mug(mugSpec);
             if(controlElSpec){
-                mug.controlElement = new formdesigner.model.ControlElement(controlElSpec);
+                mug.properties.controlElement = new formdesigner.model.ControlElement(controlElSpec);
             }
             if(dataElSpec){
                 if(dataElSpec.nodeID){
                     dataElSpec.nodeID = generate_question_id();
                 }
-                mug.dataElement = new formdesigner.model.DataElement(dataElSpec);
+                mug.properties.dataElement = new formdesigner.model.DataElement(dataElSpec);
             }
             if(bindElSpec){
                 if(bindElSpec.nodeID){
@@ -95,7 +95,7 @@ formdesigner.controller = (function(){
                         bindElSpec.nodeID = generate_question_id();
                     }
                 }
-                mug.bindElement = new formdesigner.model.BindElement(bindElSpec);
+                mug.properties.bindElement = new formdesigner.model.BindElement(bindElSpec);
             }
         }
 

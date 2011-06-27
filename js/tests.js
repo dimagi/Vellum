@@ -120,11 +120,11 @@ $(document).ready(function(){
         var myOtherBind = new formdesigner.model.BindElement(spec);
 
         //check if the bind was created properly
-        equal(myOtherBind.dataRef, spec.dataRef, "Shortcut to dataRef correctly set");
-        equal(myOtherBind.dataType, spec.dataType, "Shortcut to dataRef correctly set");
-        equal(myOtherBind.constraint, spec.constraint, "Shortcut to dataRef correctly set");
-        equal(myOtherBind.constraintMsg, spec.constraintMsg, "Shortcut to dataRef correctly set");
-        equal(myOtherBind.id, spec.id, "Shortcut to id correctly set");
+        equal(myOtherBind.properties.dataRef, spec.dataRef, "Shortcut to dataRef correctly set");
+        equal(myOtherBind.properties.dataType, spec.dataType, "Shortcut to dataRef correctly set");
+        equal(myOtherBind.properties.constraint, spec.constraint, "Shortcut to dataRef correctly set");
+        equal(myOtherBind.properties.constraintMsg, spec.constraintMsg, "Shortcut to dataRef correctly set");
+        equal(myOtherBind.properties.id, spec.id, "Shortcut to id correctly set");
 
         //test that a unique formdesigner id was generated for this object (well, kind of)
         equal(typeof myOtherBind.ufid, 'string', "Is the ufid a string?");
@@ -148,8 +148,8 @@ $(document).ready(function(){
 
         var otherData = formdesigner.model.DataElement(spec);
         ok(typeof otherData === 'object', "Is it an object? (with args)");
-        equal(otherData.name,name,"Was the name attribute set correctly?");
-        equal(otherData.defaultData,initialData,"Is initialData correct?");
+        equal(otherData.properties.name,name,"Was the name attribute set correctly?");
+        equal(otherData.properties.defaultData,initialData,"Is initialData correct?");
         equal(typeof otherData.ufid, 'string', "Is ufid a string and exists?");
         notEqual(otherData,myData,"Test that data elements are unique");
     });
@@ -184,7 +184,7 @@ $(document).ready(function(){
                 }
         );
 
-        equal(myControl.typeName,typeName, "Was type name set?");
+        equal(myControl.properties.typeName,typeName, "Was type name set?");
         equal(typeof myControl.ufid,'string', "Does ufid exist?")
     });
 
@@ -194,9 +194,9 @@ $(document).ready(function(){
         var myMug = new formdesigner.model.Mug();
         ok(typeof myMug === 'object',"Test that the object is an object");
 
-        ok(typeof myMug.bindElement === 'undefined', "BindElement should not exist in object constructed with no params");
-        ok(typeof myMug.controlElement === 'undefined', "ControlElement should not exist in object constructed with no params");
-        ok(typeof myMug.dataElement === 'undefined', "DataElement should not exist in object constructed with no params");
+        ok(typeof myMug.properties.bindElement === 'undefined', "BindElement should not exist in object constructed with no params");
+        ok(typeof myMug.properties.controlElement === 'undefined', "ControlElement should not exist in object constructed with no params");
+        ok(typeof myMug.properties.dataElement === 'undefined', "DataElement should not exist in object constructed with no params");
 
     });
     test("Create and Verify Mug with fake Bind,Control and Data element specified in Constructor", function(){
@@ -209,9 +209,9 @@ $(document).ready(function(){
         var myMug = new formdesigner.model.Mug(specObj);
         ok(typeof myMug === 'object',"Test that the object is an object");
 
-        ok(typeof myMug.bindElement === 'object', "BindElement should exist in object constructed with params");
-        ok(typeof myMug.controlElement === 'object', "ControlElement should exist in object constructed with params");
-        ok(typeof myMug.dataElement === 'object', "DataElement should exist in object constructed with params");
+        ok(typeof myMug.properties.bindElement === 'object', "BindElement should exist in object constructed with params");
+        ok(typeof myMug.properties.controlElement === 'object', "ControlElement should exist in object constructed with params");
+        ok(typeof myMug.properties.dataElement === 'object', "DataElement should exist in object constructed with params");
     });
     test("Create populated Mug", function(){
        expect(5);
@@ -222,9 +222,9 @@ $(document).ready(function(){
         var myData = testData.data;
         ok(typeof myMug === 'object',"Is this populated mug an object?");
         equal(typeof myMug.definition,'undefined', "Is the definition undefined?");
-        deepEqual(myMug.controlElement,myControl,"Control Element check");
-        deepEqual(myMug.bindElement,myBind, "Bind Element check");
-        deepEqual(myMug.dataElement,myData, "Data Element check");
+        deepEqual(myMug.properties.controlElement,myControl,"Control Element check");
+        deepEqual(myMug.properties.bindElement,myBind, "Bind Element check");
+        deepEqual(myMug.properties.dataElement,myData, "Data Element check");
 
 
 
@@ -242,7 +242,7 @@ $(document).ready(function(){
 
         var validationObject = MugType.validateMug(myMug);
         equal(MugType.typeName, "The Abstract Mug Type Definition");
-        equal(validationObject.status, "pass");
+        equal(validationObject.status, "pass", 'Does the mug validate against the MugType?');
 
         var otherType = formdesigner.model.otherMugType;
         var vObj = otherType.validateMug(myMug);
@@ -254,16 +254,16 @@ $(document).ready(function(){
         expect(2);
         var testData = make_control_bind_data_mug();
         var myMug = testData.mug;
-        myMug.bindElement.constraintAttr = "foo";
-        myMug.bindElement.constraintMsgAttr = undefined;
+        myMug.properties.bindElement.properties.constraintAttr = "foo";
+        myMug.properties.bindElement.properties.constraintMsgAttr = undefined;
         var MugType = formdesigner.model.RootMugType; //simulates a 'standard' text question
 
         var validationObject = MugType.validateMug(myMug);
         equal(validationObject.status,'pass', "Mug has a constraint but no constraint message which is OK");
 
         //now remove constraint but add a constraint message
-        myMug.bindElement.constraintAttr = undefined;
-        myMug.bindElement.constraintMsgAttr = "foo";
+        myMug.properties.bindElement.properties.constraintAttr = undefined;
+        myMug.properties.bindElement.properties.constraintMsgAttr = "foo";
         validationObject = MugType.validateMug(myMug);
         equal(validationObject.status,'fail', "Special validation function has detected a constraintMsg but no constraint attribute in the bindElement");
     });
@@ -272,8 +272,8 @@ $(document).ready(function(){
         expect(2);
         var testData = make_control_bind_data_mug();
         var myMug = testData.mug;
-        myMug.bindElement.constraintAttr = "foo";
-        myMug.bindElement.constraintMsgAttr = undefined;
+        myMug.properties.bindElement.constraintAttr = "foo";
+        myMug.properties.bindElement.constraintMsgAttr = undefined;
         var MugType = formdesigner.model.RootMugType; //simulates a 'standard' text question
 
         var OtherMugType = formdesigner.util.getNewMugType(MugType);
@@ -305,36 +305,36 @@ $(document).ready(function(){
         Mug = formdesigner.controller.createMugFromMugType(tMug);
         ok(typeof tMug === 'object', "MugType creation successful for '"+tMug.typeName+"' MugType");
         ok(tMug.validateMug(Mug).status === 'pass', "Mug created from '"+tMug.typeName+"' MugType passes validation");
-        ok(typeof Mug.controlElement === 'undefined', "Mug's ControlElement is undefined");
-        ok(typeof Mug.bindElement === 'object', "Mug's bindElement exists");
-        ok(typeof Mug.dataElement === 'object', "Mug's dataElement exists");
-        equal(Mug.dataElement.nodeID,Mug.bindElement.nodeID);
+        ok(typeof Mug.properties.controlElement === 'undefined', "Mug's ControlElement is undefined");
+        ok(typeof Mug.properties.bindElement === 'object', "Mug's bindElement exists");
+        ok(typeof Mug.properties.dataElement === 'object', "Mug's dataElement exists");
+        equal(Mug.properties.dataElement.properties.nodeID,Mug.properties.bindElement.properties.nodeID);
 
         tMug = formdesigner.util.getNewMugType(AdbcType);
         Mug = formdesigner.controller.createMugFromMugType(tMug);
         ok(typeof tMug === 'object', "MugType creation successful for '"+tMug.typeName+"' MugType");
         ok(tMug.validateMug(Mug).status === 'pass', "Mug created from '"+tMug.typeName+"' MugType passes validation");
-        ok(typeof Mug.controlElement === 'object', "Mug's ControlElement exists");
-        ok(typeof Mug.bindElement === 'object', "Mug's bindElement exists");
-        ok(typeof Mug.dataElement === 'object', "Mug's dataElement exists");
-        equal(Mug.dataElement.nodeID,Mug.bindElement.nodeID);
+        ok(typeof Mug.properties.controlElement === 'object', "Mug's ControlElement exists");
+        ok(typeof Mug.properties.bindElement === 'object', "Mug's bindElement exists");
+        ok(typeof Mug.properties.dataElement === 'object', "Mug's dataElement exists");
+        equal(Mug.properties.dataElement.properties.nodeID,Mug.properties.bindElement.properties.nodeID);
 
         tMug = formdesigner.util.getNewMugType(AdcType);
         Mug = formdesigner.controller.createMugFromMugType(tMug);
         ok(typeof tMug === 'object', "MugType creation successful for '"+tMug.typeName+"' MugType");
         ok(tMug.validateMug(Mug).status === 'pass', "Mug created from '"+tMug.typeName+"' MugType passes validation");
-        ok(typeof Mug.controlElement === 'object', "Mug's ControlElement exists");
-        ok(typeof Mug.bindElement === 'undefined', "Mug's bindElement is undefined");
-        ok(typeof Mug.dataElement === 'object', "Mug's dataElement exists");
+        ok(typeof Mug.properties.controlElement === 'object', "Mug's ControlElement exists");
+        ok(typeof Mug.properties.bindElement === 'undefined', "Mug's bindElement is undefined");
+        ok(typeof Mug.properties.dataElement === 'object', "Mug's dataElement exists");
 
         tMug = formdesigner.util.getNewMugType(AdType);
         Mug = formdesigner.controller.createMugFromMugType(tMug);
         ok(typeof tMug === 'object', "MugType creation successful for '"+tMug.typeName+"' MugType");
         ok(tMug.validateMug(Mug).status === 'pass', "Mug created from '"+tMug.typeName+"' MugType passes validation");
-        ok(typeof Mug.controlElement === 'undefined', "Mug's ControlElement is undefined");
-        ok(typeof Mug.bindElement === 'undefined', "Mug's bindElement is undefined");
-        ok(typeof Mug.dataElement === 'object', "Mug's dataElement exists");
-        ok(Mug.dataElement.nodeID.toLocaleLowerCase().indexOf('question') != -1);
+        ok(typeof Mug.properties.controlElement === 'undefined', "Mug's ControlElement is undefined");
+        ok(typeof Mug.properties.bindElement === 'undefined', "Mug's bindElement is undefined");
+        ok(typeof Mug.properties.dataElement === 'object', "Mug's dataElement exists");
+        ok(Mug.properties.dataElement.properties.nodeID.toLocaleLowerCase().indexOf('question') != -1);
         
     });
 
