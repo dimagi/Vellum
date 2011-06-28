@@ -391,8 +391,6 @@ formdesigner.model = (function(){
              * @param ruleValue
              * @param testingObj
              */
-
-            //TODO: CLEANUP
             var validateRule = function(ruleKey, ruleValue, testingObj, blockName){
                 var retBlock = {};
                 retBlock['ruleKey'] = ruleKey;
@@ -533,8 +531,10 @@ formdesigner.model = (function(){
             }
             var validationResult = recurse(this.properties,mug.properties,"Mug Top Level");
             if(validationResult.status === 'fail'){
-                console.log("A MUG OBJECT HAS FAILED VALIDATION. VALIDATION OBJECT BELOW");
+                console.log("1/2 A MUG OBJECT HAS FAILED VALIDATION. VALIDATION OBJECT BELOW");
                 console.log(validationResult);
+                console.log("2/2 FAILED MUG BELOW");
+                console.log(mug);
             }
 
             return validationResult;
@@ -553,11 +553,6 @@ formdesigner.model = (function(){
 
     };
     that.RootMugType = RootMugType;
-
-    //Testing mugType for unit testing.  Ignore:
-    var otherMugType = formdesigner.util.clone(RootMugType);
-    otherMugType.properties.bindElement["SOME_PROPERTeYE"] = TYPE_FLAG_REQUIRED;
-    that.otherMugType = otherMugType;
 
     /**
      * WARNING: These are 'abstract' MugTypes!
@@ -612,60 +607,37 @@ formdesigner.model = (function(){
         var that = {}, rootNode, treeType = 'data';
 
         /**
-         * Parent is any javascript object.  Children is a list of objects.
-         * @param parent - optional
+         * Children is a list of objects.
          * @param children - optional
          * @param value - that value object that this node should contain (should be a MugType)
          */
-        var Node = function(parent, children, value){
-            var that = {}, isRootNode = false, val;
+        var Node = function(children, value){
+            var that = {}, isRootNode = false, nodeValue,children;
 
-            var init = function(nParent, nChildren, val){
+            var init = function(nChildren, val){
                 if(!val){
                     throw 'Cannot create a node without specifying a value object for the node!';
                 }
-                that[children] = nChildren || undefined;
-                that[parent] = nParent || undefined;
-                that[value] = val;
-            }(parent, children, val);
-
-            var getParent = that.getParent = function(){
-                return that[parent];
-            };
+                children = nChildren || undefined;
+                nodeValue = val;
+            }(children, value);
 
             var getChildren = that.getChildren = function(){
-                return that[children];
+                return children;
             };
+
+            var getValue = that.getValue = function(){
+                return nodeValue;
+            }
 
             /**
-             * Looks for a node specified by the argument.
-             * will return self if the given node = this node. If not,
-             * will do the call recursively through children.
-             *
-             * If the node is not found, null is returned;
+             * DOES NOT CHECK TO SEE IF NODE IS IN TREE ALREADY!
              */
-            var getNode = that.getNode = function(node){
-                var i, ret;
-                if(this === node){
-                    return this;
-                }else{
-                    if(this.children === null){ return null; }
-                    for(i in this.children){
-                        ret = this.children[i].getNode(node);
-                        if(ret){ return ret; }
-                    }
-                }
-
-                return null;
-            };
-
             var addChild = that.addChild = function(node){
-                if(!this.children){
-                    this.children = [];
+                if(!children){
+                    children = [];
                 }
-
-                this.children.push(node);
-                node.parent = this;
+                children.push(node);
             }
 
             /**
@@ -673,8 +645,9 @@ formdesigner.model = (function(){
              * if it is not the current node, will recursively look through children node (depth first search)
              */
             var getNodeFromMugType = that.getNodeFromMugType = function(MugType){
+                if(MugType === null){ return null; }
                 var retVal;
-                if(this.value === MugType){
+                if(this.getValue() === MugType){
                     return this;
                 }else{
                     for(var i in children){
@@ -682,18 +655,78 @@ formdesigner.model = (function(){
                         if(retVal){ return retVal; }
                     }
                 }
-
                 return null; //we haven't found what we're looking for
             };
+
+            var removeChild = that.removeChild = function(node){
+                if(!node){ throw 'Null child specified! Cannot remove \'null\' from child list'}
+                var childIdx = children.indexOf(node);
+                if(childIdx !== -1){ //if arg node is a member of the children list
+                    children.splice(childIdx,1); //remove it
+                }
+
+                return node;
+            }
+
+            /**
+             * Finds the parentNode of the specified node (recursively going through the tree/children of this node)
+             * Returns the parent if found, else null.
+             */
+            var findParentNode = that.findParentNode = function(node){
+                if(!node){ throw 'No node specified, can\'t find \'null\' in tree!'; }
+                var i, parent = null;
+                if(children.indexOf(node) !== -1){
+                    return this;
+                }
+
+                for(i in children){
+                    parent = children[i].findParentNode(node);
+                }
+                return parent;
+            };
+
+            var getID = that.getID = function(){
+                if(isRootNode){
+                    return 'RootNode';
+                }
+                if(!getValue || typeof getValue().validateMug !== 'function'){
+                    return 'NodeWithNoValue!';
+                }
+                if(treeType === 'data'){
+                    return getValue().mug.getDataElementID();
+                }else if(treeType === 'bind'){
+                    return getValue().mug.getBindElementID();
+                }else{
+                    throw 'Tree does not have a specified treeType! Default is "data" so must have been forcibly removed!';
+                }
+            }
+
+            that.toString = function(){
+                return getID();
+            }
+
+            var prettyPrint = that.prettyPrint = function(){
+                var arr = [], i;
+                for(i in children){
+                    arr.push(children[i].prettyPrint())
+                }
+                if(!children || children.length === 0){
+                    return getID();
+                }else{
+                    return ''+getID()+'['+arr+']';
+                }
+            }
+
+            return that;
         };
 
         var init = function(type){
-            rootNode = new Node(null, null, ' ');
+            rootNode = new Node(null, ' ');
             rootNode.isRootNode = true;
             treeType = type || 'data';
         }(treeType);
-
-        /**
+        that.rootNode = rootNode;
+        /** Private Function
          * Adds a node to the top level (as a child of the abstract root node)
          *
          * @param parentNode - the parent to which the specified node should be added
@@ -701,7 +734,7 @@ formdesigner.model = (function(){
          * of the abstract rootNode).
          * @param node - the specified node to be added to the tree.
          */
-        var addNode = that.addNode = function(parentNode,node){
+        var addNode = function(node, parentNode){
             if(parentNode){
                 parentNode.addChild(node)
             }else{
@@ -718,29 +751,53 @@ formdesigner.model = (function(){
         };
 
         /**
-         * Insert a MugType as a child to the node containing parentMugType
+         * Removes a node (and all it's children) from the tree (regardless of where it is located in the
+         * tree) and returns it.
+         *
+         * If no such node is found in the tree (or node is null/undefined)
+         * null is returned.
+         */
+        var removeNodeFromTree = function(node){
+            if(!node){ return null; }
+            if(!getNodeFromMugType(node.getValue())){ return null; } //node not in tree
+            var parent = findParentNode(node);
+            if(parent){
+                parent.removeChild(node);
+                return node;
+            }else{
+                return null;
+            }
+        }
+
+        var findParentNode = function(node){
+            return rootNode.findParentNode(node);
+        }
+
+        /**
+         * Insert a MugType as a child to the node containing parentMugType.
+         *
+         * Will MOVE the mugType to the new location in the tree if it is already present!
          */
         var insertMugType = that.insertMugType = function(mugType, parentMugType){
-            if(!parentMugType){
-                rootNode.addChild(new Node(rootNode,null,mugType));
-            }
-            var p = getNodeFromMugType(parentMugType), childNode;
-            if(p){
-                childNode = new Node(p,null, mugType);
-            }else{
-                throw 'Specified ParentMug type was not found in this Tree. Unable to add child MugType!'
+            var node = removeNodeFromTree(getNodeFromMugType(mugType)),
+                parentNode = getNodeFromMugType(parentMugType);
+
+            if(!parentNode){
+                parentNode = rootNode; //insert as a child of the rootNode
             }
 
-        };
+            if(!node){ //wasn't in the tree already so make a new Node.
+               node = new Node(null, mugType)
+            }
 
-        var getNode = that.getNode = function(node){
-            return rootNode.getNode(node);
+            parentNode.addChild(node);
+
         };
 
         /**
          * Returns a list of nodes that are in the top level of this tree (i.e. not the abstract rootNode but it's children)
          */
-        var getAllNodes = that.getAllNodes = function(){
+        var getAllNodes = function(){
             return rootNode.getChildren();
         };
 
@@ -749,35 +806,56 @@ formdesigner.model = (function(){
          * the nodeID's are those given by the Mugs (i.e. the node value objects) according to whether this tree is a
          * 'data' (DataElement) tree or a 'bind' (BindElement) tree.  Sorry about the confusing jargon.  It's a little late
          * in the game to be changing things up, unfortunately.
+         *
+         * @param nodeOrMugType - can be a tree Node or a MugType that is a member of this tree (via a Node)
          */
-        var getAbsolutePath = that.getAbsolutePath = function(node){
-            var output, nodeParent = node.getParent(), idFunc;
-
-            if(treeType === 'data'){
-                idFunc = function(mug){
-                    return mug.getDataElementID();
-                }
-            }else if(treeType === 'bind'){
-                idFunc = function(mug){
-                    return mug.getBindElementID();
-                }
+        var getAbsolutePath = that.getAbsolutePath = function(mugType){
+            var node, output, nodeParent;
+            if(typeof mugType.validateMug === 'function'){ //a loose way of checking that it's a MugType...
+                node = getNodeFromMugType(mugType);
             }else{
-                throw 'Tree does not have a specified treeType! Default is "data" so must have been forcibly removed!';
+                throw 'getAbsolutePath argument must be a MugType!';
             }
-
-            output = '/' + idFunc(node.value);
+            if(!node){
+                throw 'Cant find path of MugType that is not present in the Tree!';
+            }
+            nodeParent = findParentNode(node);
+            output = '/' + node.getID();
 
             while(typeof nodeParent !== 'undefined' && typeof nodeParent !== null && !nodeParent.isRootNode ){
-                output = '/' + idFunc(nodeParent.value) + output;
-                nodeParent = nodeParent.getParent();
+                output = '/' + nodeParent.getID() + output;
+                nodeParent = findParentNode(nodeParent);
             }
 
+            return output;
+
         };
+
+        var printTree = that.printTree = function(){
+            return rootNode.prettyPrint();
+        }
+
+        /**
+         * Removes the specified MugType from the tree. If it isn't in the tree
+         * does nothing.  Does nothing if null is specified
+         *
+         * If the MugType is successfully removed, returns that MugType.
+         */
+        var removeMugType = that.removeMugType = function(MugType){
+            var node = getNodeFromMugType(MugType);
+            if(!MugType || !node){ return; }
+            removeNodeFromTree(node);
+            return node;
+        }
+
+
+
+        return that;
 
 
 
     };
-
+    that.Tree = Tree;
 
 
 

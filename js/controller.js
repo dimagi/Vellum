@@ -17,7 +17,7 @@ formdesigner.controller = (function(){
      * returns it as a string.
      */
     var generate_question_id = function(){
-        var ret = 'Question '+question_counter;
+        var ret = 'question'+question_counter;
         question_counter += 1;
         return ret;
     };

@@ -241,8 +241,11 @@ $(document).ready(function(){
         equal(MugType.typeName, "The Abstract Mug Type Definition");
         equal(validationObject.status, "pass", 'Does the mug validate against the MugType?');
 
-        var otherType = formdesigner.model.otherMugType;
+        var otherType = formdesigner.model.mugTypes.dataBindControlQuestion;
+        otherType.properties.bindElement['someProperty'] = 'foo';
+        console.log("==== BEGIN IGNORE FAILED VALIDATION IN LOG");
         var vObj = otherType.validateMug(myMug);
+        console.log("==== END IGNORE FAILED VALIDATION IN LOG");
         equal(vObj.status,'fail', "This should fail because the mug does not contain the required property");
 
     });
@@ -261,7 +264,9 @@ $(document).ready(function(){
         //now remove constraint but add a constraint message
         myMug.properties.bindElement.properties.constraintAttr = undefined;
         myMug.properties.bindElement.properties.constraintMsgAttr = "foo";
+        console.log("==== START IGNORE FAILED VALIDATION IN LOG");
         validationObject = MugType.validateMug(myMug);
+        console.log("==== END IGNORE FAILED VALIDATION IN LOG");
         equal(validationObject.status,'fail', "Special validation function has detected a constraintMsg but no constraint attribute in the bindElement");
     });
 
@@ -333,6 +338,42 @@ $(document).ready(function(){
         ok(typeof Mug.properties.dataElement === 'object', "Mug's dataElement exists");
         ok(Mug.properties.dataElement.properties.nodeID.toLocaleLowerCase().indexOf('question') != -1);
         
+    });
+
+    module("Tree Data Structure Tests");
+    test("Trees", function(){
+        expect(4);
+
+        //first create some mugs.
+        var mugTA = formdesigner.util.getNewMugType(formdesigner.model.mugTypes.dataBindControlQuestion),
+            mugTB = formdesigner.util.getNewMugType(formdesigner.model.mugTypes.dataBindControlQuestion),
+            mugTC = formdesigner.util.getNewMugType(formdesigner.model.mugTypes.dataBindControlQuestion),
+            mugA = formdesigner.controller.createMugFromMugType(mugTA),
+            mugB = formdesigner.controller.createMugFromMugType(mugTB),
+            mugC = formdesigner.controller.createMugFromMugType(mugTC),
+            tree = new formdesigner.model.Tree('data');
+
+
+        tree.insertMugType(mugTA, null); //add mugA as a child of the rootNode
+        tree.insertMugType(mugTB,mugTA); //add mugB as a child of mugA...
+        tree.insertMugType(mugTC,mugTB); //...
+        var actualPath = tree.getAbsolutePath(mugTC);
+        var expectedPath =  '/'+mugTA.mug.properties.dataElement.properties.nodeID+
+                            '/'+mugTB.mug.properties.dataElement.properties.nodeID+
+                            '/'+mugTC.mug.properties.dataElement.properties.nodeID;
+        
+        equal(actualPath, expectedPath, 'Is the generated DataElement path for the mug correct?');
+        tree.insertMugType(mugTC,mugTB);
+        actualPath = tree.getAbsolutePath(mugTC);
+        equal(actualPath,expectedPath, 'Is the path still correct after removal and insertion (into the same place');
+        tree.insertMugType(mugTC,mugTA);
+        actualPath = tree.getAbsolutePath(mugTC);
+        expectedPath =  '/'+mugTA.mug.properties.dataElement.properties.nodeID+
+                        '/'+mugTC.mug.properties.dataElement.properties.nodeID;
+        equal(actualPath, expectedPath, 'After move is the calculated path still correct?');
+
+        tree.removeMugType(mugTB);
+        raises(function(){tree.getAbsolutePath(mugTB)}, "Cant find path of MugType that is not present in the Tree!");
     });
 
 
