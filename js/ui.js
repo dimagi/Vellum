@@ -8,6 +8,11 @@ formdesigner.ui = (function () {
     "use strict";
     var that = {}, question_list = [];
 
+    var appendErrorMessage = that.appendErrorMessage = function(msg){
+        $('#notify').addClass("notice");
+        $('#notify').text($('#notify').text() + msg);
+    };
+    
     function do_loading_bar(){
         var pbar = $("#progressbar"),
         content = $("#content"),
@@ -15,6 +20,7 @@ formdesigner.ui = (function () {
                 doneController = false,
                 doneUtil = false,
                 doneModel = false,
+                doneTree = true,
                 allDone = false,
                 tryComplete = function(){
                     allDone = doneUtil && doneController && doneModel;
@@ -29,39 +35,52 @@ formdesigner.ui = (function () {
 
         pbar.progressbar({ value: 0 });
 
-        $("#loadingInfo").html("downloading util.js");
-        $.getScript("js/util.js", function (){
-            pbar.progressbar({ value: (pbar.progressbar( "option", "value" )+35)});
-            doneUtil = true;
-            tryComplete();
-        });
+//        $("#loadingInfo").html("downloading jstree.js");
+//        $.getScript("js/jquery.jstree.js", function(){
+//            pbar.progressbar({ value: (pbar.progressbar( "option", "value" )+25)});
+//            doneTree = true;
+//            tryComplete();
+//        });
+//
+//        $("#loadingInfo").html("downloading util.js");
+//        $.getScript("js/util.js", function (){
+//            pbar.progressbar({ value: (pbar.progressbar( "option", "value" )+25)});
+//            doneUtil = true;
+//            tryComplete();
+//        });
+//
+//        $("#loadingInfo").html("downloading model.js");
+//        $.getScript("js/model.js", function(){
+//            pbar.progressbar({ value: (pbar.progressbar( "option", "value" )+25)});
+//            doneModel = true;
+//            tryComplete();
+//        });
+//
+//        $("#loadingInfo").html("downloading controller.js");
+//        $.getScript("js/controller.js", function(){
+//            pbar.progressbar({ value: (pbar.progressbar( "option", "value" )+25)});
+//            doneController = true;
+//            tryComplete();
+//        });
+//
+//        window.setTimeout(function(){
+//            if(!allDone){
+//                    allDone = doneUtil && doneController && doneModel && doneTree;
+//                    if(allDone){
+//                        loadingBar.delay(500).fadeOut(500);
+//                    }else{
+//                        var alertString = '';
+//                        if(!doneUtil){ alertString += '[Util.js]'; }
+//                        if(!doneController){ alertString += '[Controller.js]';}
+//                        if(!doneModel){ alertString += '[Model.js]';}
+//                        if(!doneTree){ alertString += '[jsTree]'; }
+//
+//                        alert("Problem loading FormDesigner Libraries! Libraries not loaded: "+alertString);
+//                    }
+//            }
+//                },5000);
 
-        $("#loadingInfo").html("downloading model.js");
-        $.getScript("js/model.js", function(){
-            pbar.progressbar({ value: (pbar.progressbar( "option", "value" )+32)});
-            doneModel = true;
-            tryComplete();
-        });
-
-        $("#loadingInfo").html("downloading controller.js");
-        $.getScript("js/controller.js", function(){
-            pbar.progressbar({ value: (pbar.progressbar( "option", "value" )+33)});
-            doneController = true;
-            tryComplete();
-        });
-
-        window.setTimeout(function(){
-            if(!allDone){
-                    allDone = doneUtil && doneController && doneModel;
-                    if(allDone){
-                        loadingBar.delay(500).fadeOut(500);
-                    }else{
-                        alert("Problem loading FormDesigner! Haha!");
-                    }
-            }
-                },5000);
-
-
+        loadingBar.fadeOut(200);
 
     }
 
@@ -101,9 +120,36 @@ formdesigner.ui = (function () {
         });
     }
 
+    function create_tree(){
+        $("#question-tree").jstree({
+            "json_data" : {
+                "data" : [
+                    {
+                        "data" : "A node",
+                        "metadata" : { id : 23 },
+                        "children" : [ "Child 1", "A Child 2" ]
+                    },
+                    {
+                        "attr" : { "id" : "li.node.id1" },
+                        "metadata" : {id : 54},
+                        "data" : {
+                            "title" : "Long format demo",
+                            "attr" : { "href" : "#" }
+                        }
+                    }
+                ]
+            },
+            "plugins" : [ "json_data", "ui", "themeroller" ]
+	    }).bind("select_node.jstree", function (e, data) {
+                    console.log($.jstree);
+                    console.log(data.rslt.obj[0]);
+        });
+    }
+
     $(document).ready(function () {
         do_loading_bar();
         init_toolbar();
+        create_tree();
         do_nav_bar();
     });
 
@@ -118,16 +164,16 @@ formdesigner.ui = (function () {
 
         var create = function (mug, title){
             var i,
-                monWin = $('<div class="monitor-window"></div>');
-            $('#question-properties').append(monWin);
-            monWin.append('<textarea id="monitor-window-'+mug.ufid+'" class="monitor-window-textarea">'+JSON.stringify(mug,null,'\t')+'</textarea>');
+//                monWin = $('<div class="monitor-window"></div>');
+//            $('#question-properties').append(monWin);
+//            monWin.append('<textarea id="monitor-window-'+mug.ufid+'" class="monitor-window-textarea">'+JSON.stringify(mug,null,'\t')+'</textarea>');
             qTable = $('<table id="question-table" class="'+title+'"></table>');
             $('#question-properties').append(qTable);
 
 //            qTable.css("border","1");
 
             qTHeader = $('<thead class="question-table-header"></thead>');
-            qTHeader.append('<tr><td colspan=2><b><h2>Question Properties: '+mug.dataElement.nodeID+'</h1 ></b></td></tr>');
+            qTHeader.append('<tr><td colspan=2><b><h1>Question Properties: '+mug.properties.dataElement.properties.nodeID+'</h1></b></td></tr>');
             qTHeader.append("<tr><td><b>Property Name</b></td><td><b>Property Value</b></td></tr>");
             qTable.append(qTHeader);
             qTBody = $("<tbody></tbody>");
@@ -137,7 +183,7 @@ formdesigner.ui = (function () {
 
 
             i = 'ufid';
-            var row, col1,col2;
+            var row, col1,col2,mugProps;
 
             row = $("<tr></tr>");
             qTBody.append(row);
@@ -150,10 +196,10 @@ formdesigner.ui = (function () {
 
             col1.html(i);
             col2.html(mug[i]);
-
-            for(var p in mug){
-                var block = mug[p];
-                if(!mug.hasOwnProperty(p)){
+            mugProps = mug.properties;
+            for(var p in mugProps){
+                var block = mugProps[p].properties;
+                if(!mugProps.hasOwnProperty(p)){
                     continue;
                 }
                 if(typeof block === 'function' || typeof block === 'string'){
@@ -161,7 +207,7 @@ formdesigner.ui = (function () {
                 }
 
                 qTBody.append("<hr />");
-                qTBody.append('<tr><td colspan=2><h2>'+p+' Properties:</h2></tr>')
+                qTBody.append('<tr><td colspan=2><h2 class="properties-block-header">'+p+' Properties:</h2></tr>')
 
                 for(i in block){
                     var inputBox;
@@ -179,7 +225,7 @@ formdesigner.ui = (function () {
                     inputBox.change(function(e){
                         var target = $(e.target);
 
-                        mug[target.attr("class")][target.attr("name")] = target.val();
+                        mug.properties[target.attr("class")].properties[target.attr("name")] = target.val();
                        console.log("asdasd");
                         console.log(e.target);
                        mug.fire('property-changed');

@@ -86,7 +86,7 @@ body{
 
 #question-table{
     border: 1px solid black;
-    width: 40em;
+    width: 50em;
 }
 
 .question-property-row td{
@@ -99,4 +99,31 @@ body{
 .monitor-window-textarea{
     width:49em;
     height:30em;
+}
+
+.toolbar{
+    padding: 5px;
+}
+
+.tree{
+    float:left;
+    width:20%;
+    height: 500px;
+    margin: 0;
+    border: 1px solid gray;
+}
+
+.question-properties {
+    border: 1px solid gray;
+    float: left;
+    margin-left: 5px;
+    padding: 5px;
+}
+
+td {
+    text-align: center;
+}
+
+.properties-block-header {
+    text-align:left;
 }

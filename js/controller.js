@@ -46,6 +46,8 @@ formdesigner.controller = (function(){
             for(i in block){
                 if(typeof block[i] === 'object'){
                     spec[i] = recursiveGetSpec(block[i], i);
+                }else if(typeof block[i] === 'function'){
+                    spec[i] = " ";
                 }else{
                     switch(block[i]){
                         case formdesigner.model.TYPE_FLAG_OPTIONAL:
@@ -117,7 +119,10 @@ formdesigner.controller = (function(){
     };
     that.createMugFromMugType = createMugFromMugType;
 
-
+    var showErrorMessage = function(msg){
+        formdesigner.ui.appendErrorMessage(msg);
+    };
+    that.showErrorMessage = showErrorMessage;
     /**
      * Convenience method for generating mug and mugType, calling UI and throwing
      * it the 'question' object
@@ -127,6 +132,9 @@ formdesigner.controller = (function(){
     var createQuestion = function(qType){
         var mugType = formdesigner.util.getNewMugType(formdesigner.model.mugTypes.dataBindControlQuestion),
         mug = createMugFromMugType(mugType);
+        mug.on('property-changed', function(){
+            formdesigner.controller.showErrorMessage("Property Changed in Question:"+mug.properties.dataElement.properties.nodeID+"!");
+        })
         return mug;
 
     };
