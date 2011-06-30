@@ -685,8 +685,7 @@ formdesigner.model = (function(){
              */
             var insertChild = that.insertChild = function(node, index){
                 if(node === null){ return null; }
-                if(index <= 0){ index = 0; }
-                if(index > children.length-1){ index = children.length - 1; }
+                if(index < 0){ index = 0; }
                 children.splice(index,0,node);
             }
 

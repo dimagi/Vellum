@@ -342,7 +342,7 @@ $(document).ready(function(){
 
     module("Tree Data Structure Tests");
     test("Trees", function(){
-        expect(7);
+//        expect(7);
 
         ///////////BEGIN SETUP///////
         var mugTA = formdesigner.util.getNewMugType(formdesigner.model.mugTypes.dataBindControlQuestion),
@@ -352,8 +352,9 @@ $(document).ready(function(){
             mugB = formdesigner.controller.createMugFromMugType(mugTB),
             mugC = formdesigner.controller.createMugFromMugType(mugTC),
             tree = new formdesigner.model.Tree('data');
-//        var GNMT = formdesigner.util.getNewMugType;
-//        var DBCQuestion = formdesigner.model.mugTypes.dataBindControlQuestion;
+        var GNMT = formdesigner.util.getNewMugType;
+        var createMugFromMugType = formdesigner.controller.createMugFromMugType;
+        var DBCQuestion = formdesigner.model.mugTypes.dataBindControlQuestion;
 
         tree.insertMugType(mugTA, null, null); //add mugA as a child of the rootNode
         tree.insertMugType(mugTB, 'into',mugTA ); //add mugB as a child of mugA...
@@ -369,7 +370,7 @@ $(document).ready(function(){
         var treePrettyPrintExpected = ''+tree._getRootNodeID()+'['+
                 tree._getMugTypeNodeID(mugTA)+'['+
                 tree._getMugTypeNodeID(mugTB)+'['+
-                tree._getMugTypeNodeID(mugTC)+']]]'
+                tree._getMugTypeNodeID(mugTC)+']]]';
         equal(treePrettyPrintExpected,tree.printTree(), 'Check the tree structure is correct');
 
         actualPath = tree.getAbsolutePath(mugTC);
@@ -380,7 +381,7 @@ $(document).ready(function(){
         treePrettyPrintExpected = ''+tree._getRootNodeID()+'['+
                 tree._getMugTypeNodeID(mugTA)+'['+
                 tree._getMugTypeNodeID(mugTB)+'['+
-                tree._getMugTypeNodeID(mugTC)+']]]'
+                tree._getMugTypeNodeID(mugTC)+']]]';
         equal(treePrettyPrintExpected,tree.printTree(), 'Check the tree structure is correct');
         
         tree.insertMugType(mugTC, 'into', mugTA);
@@ -392,14 +393,62 @@ $(document).ready(function(){
         treePrettyPrintExpected = ''+tree._getRootNodeID()+'['+
                 tree._getMugTypeNodeID(mugTA)+'['+
                 tree._getMugTypeNodeID(mugTB)+','+
-                tree._getMugTypeNodeID(mugTC)+']]'
+                tree._getMugTypeNodeID(mugTC)+']]';
         equal(treePrettyPrintExpected,tree.printTree(), 'Check the tree structure is correct');
 
         tree.removeMugType(mugTB);
         raises(function(){tree.getAbsolutePath(mugTB)}, "Cant find path of MugType that is not present in the Tree!");
 
-//        var mugTD = GNMT(DBCQuestion);
-//        tree.insertMugType();
+        tree.insertMugType(mugTB,'before',mugTC);
+        treePrettyPrintExpected = ''+tree._getRootNodeID()+'['+
+            tree._getMugTypeNodeID(mugTA)+'['+
+            tree._getMugTypeNodeID(mugTB)+','+
+            tree._getMugTypeNodeID(mugTC)+']]';
+        equal(treePrettyPrintExpected,tree.printTree(), 'Check the tree structure is correct');
+
+        tree.insertMugType(mugTC, 'before', mugTB);
+        treePrettyPrintExpected = ''+tree._getRootNodeID()+'['+
+            tree._getMugTypeNodeID(mugTA)+'['+
+            tree._getMugTypeNodeID(mugTC)+','+
+            tree._getMugTypeNodeID(mugTB)+']]';
+        equal(treePrettyPrintExpected,tree.printTree(), 'Check the tree structure is correct');
+
+        var mugTD = GNMT(DBCQuestion);
+        var mugD = createMugFromMugType(mugTD);
+        tree.insertMugType(mugTD, 'before', mugTA);
+        equal('/'+mugTD.mug.properties.dataElement.properties.nodeID, tree.getAbsolutePath(mugTD),
+             "Check that the newly inserted Mug's generated path is correct");
+
+        treePrettyPrintExpected = ''+tree._getRootNodeID()+'['+
+            tree._getMugTypeNodeID(mugTD)+','+
+            tree._getMugTypeNodeID(mugTA)+'['+
+            tree._getMugTypeNodeID(mugTC)+','+
+            tree._getMugTypeNodeID(mugTB)+']]';
+        equal(treePrettyPrintExpected,tree.printTree(), 'Check the tree structure is correct');
+
+        tree.insertMugType(mugTD,'after',mugTB);
+        treePrettyPrintExpected = ''+tree._getRootNodeID()+'['+
+            tree._getMugTypeNodeID(mugTA)+'['+
+            tree._getMugTypeNodeID(mugTC)+','+
+            tree._getMugTypeNodeID(mugTB)+','+
+            tree._getMugTypeNodeID(mugTD)+']]';
+        equal(treePrettyPrintExpected,tree.printTree(), 'Check the tree structure is correct');
+        console.log('MugTB node ID is:'+ tree._getMugTypeNodeID(mugTB));
+        console.log('MugTD node ID is:'+ tree._getMugTypeNodeID(mugTD));
+        console.log("EXPECTED");
+        console.log(treePrettyPrintExpected);
+        console.log("ACTUAL");
+        console.log(tree.printTree());
+
+        tree.insertMugType(mugTD,'after',mugTC);
+        treePrettyPrintExpected = ''+tree._getRootNodeID()+'['+
+            tree._getMugTypeNodeID(mugTA)+'['+
+            tree._getMugTypeNodeID(mugTC)+','+
+            tree._getMugTypeNodeID(mugTD)+','+
+            tree._getMugTypeNodeID(mugTB)+']]';
+        equal(treePrettyPrintExpected,tree.printTree(), 'Check the tree structure is correct');
+
+
     });
 
 
