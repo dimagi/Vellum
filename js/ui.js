@@ -6,7 +6,8 @@ if(typeof formdesigner === 'undefined'){
 
 formdesigner.ui = (function () {
     "use strict";
-    var that = {}, question_list = [];
+    var that = {}, question_list = [],
+    controller = formdesigner.controller;
 
     var appendErrorMessage = that.appendErrorMessage = function(msg){
         $('#notify').addClass("notice");
@@ -122,16 +123,11 @@ formdesigner.ui = (function () {
     }
 
     function create_tree(){
-        var prevSelectedUfid = null;
         function node_select(e,data){
-            var currentlySelectedUfid = jQuery.data(data.rslt.obj[0],'ufid');
-            if( prevSelectedUfid){
-                if( prevSelectedUfid === currentlySelectedUfid){
-                    console.log("RENAMING HERE. DISABLED");
-//                    $("#question-tree").jstree("rename");
-                }
-            }
-            prevSelectedUfid = currentlySelectedUfid;
+            var curSelUfid = jQuery.data(data.rslt.obj[0],'ufid');
+            formdesigner.controller.setCurrentlySelectedMug(curSelUfid);
+
+            
         };
         $("#question-tree").jstree({
             "json_data" : {
@@ -142,20 +138,63 @@ formdesigner.ui = (function () {
                     "always_copy": false
                 }
             },
-            "plugins" : [ "json_data", "ui", "crrm", "themeroller" ]
+            "types": getJSTreeTypes(),
+            "plugins" : [ "json_data", "ui", "types", "crrm", "themeroller" ]
 	    }).bind("select_node.jstree", function (e, data) {
                    node_select(e,data);
         });
     }
 
+    var treeCreateRootFormNode = function(){
+        var objectData = {};
+        objectData["data"] = "Form";
+        objectData["metadata"] = {'type': "root"};
+
+        $('#question-tree').jstree("create",
+                null, //reference node, use null if using UI plugin for currently selected
+                "inside", //position relative to reference node
+                objectData,
+                null, //callback after creation, better to wait for event
+                true); //skip_rename
+    };
+    that.treeCreateRootFormNode = treeCreateRootFormNode;
+
+    function getJSTreeTypes(){
+        var groupRepeatValidChildren = ["group","repeat","question","selectQuestion"];
+       var types =  {
+            "max_children" : 1,
+			"valid_children" : [ "root" ],
+			"types" : {
+				"root" : {
+					"icon" : {
+						"image" : "http://static.jstree.com/v.1.0rc/_docs/_drive.png"
+					},
+					"valid_children" : groupRepeatValidChildren
+				},
+                "group" : {
+                    "valid_children" : groupRepeatValidChildren
+                },
+                "repeat" : {
+                    "valid_children" : groupRepeatValidChildren
+                },
+                "question" : {
+                    "valid_children" : "none"
+                },
+                "selectQuestion" : {
+                    "valid_children": ["item"]
+                },
+                "item" : {
+                    "valid_children" : "none"
+                },
+				"default" : {
+					"valid_children" : groupRepeatValidChildren
+				}
+			}
+		}
+
+    }
 
 
-    $(document).ready(function () {
-        do_loading_bar();
-        init_toolbar();
-        create_tree();
-        do_nav_bar();
-    });
 
     var Question = function(mug){
         var that = {}, qTable, qTHeader,qTBody, questionHolder, localMug = mug;
@@ -261,32 +300,26 @@ formdesigner.ui = (function () {
             mug.fire('property-changed');
         }
 
-        function createQuestionInUITree(mug){
-            var controlTagName = mug.properties.controlElement.properties.tagName,
-                isGroupOrRepeat = (controlTagName === 'group' || controlTagName === 'repeat'),
-                objectData = {};
-
-            if(isGroupOrRepeat){//should new node be open or closed?, omit for leaf
-                objectData["state"] = 'open';
-            }
-
-            objectData["data"] = mug.properties.dataElement.properties.nodeID;
-            objectData["metadata"] = {'ufid': mug.ufid,
-                                        'dataID':mug.properties.dataElement.properties.nodeID || null,
-                                        'bindID':mug.properties.bindElement.properties.nodeID || null};
-
-            $('#question-tree').jstree("create",
-                null, //reference node, use null if using UI plugin for currently selected
-                "inside", //position relative to reference node
-                objectData,
-                null, //callback after creation, better to wait for event
-                true); //skip_rename
-        };
-
-        createQuestionInUITree(localMug);
         return that;
     };
     that.Question = Question;
+
+
+
+
+
+    $(document).ready(function () {
+        do_loading_bar();
+        init_toolbar();
+        create_tree();
+        do_nav_bar();
+
+        controller = formdesigner.controller;
+        controller.initFormDesigner();
+
+
+    });
+
 
     return that;
 }());

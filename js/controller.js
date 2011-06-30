@@ -10,7 +10,27 @@ if(typeof formdesigner === 'undefined'){
 
 formdesigner.controller = (function(){
     var that = {}, form;
-    var question_counter = 1; //used in generate_question_id();
+    var question_counter = 1, //used in generate_question_id();
+    curSelMugType = null, curSelUfid = null;
+
+    that["form"] = form;
+
+    var initFormDesigner = function(){
+        formdesigner.model.init();
+    };
+    that.initFormDesigner = initFormDesigner;
+    /**
+     *
+     * @param ufid
+     */
+    var setCurrentlySelectedMug = function(ufid){
+        curSelUfid = ufid;
+        curSelMugType = this.form.dataTree.getMugTypeFromUFID(ufid);
+        if(!curSelMugType){ //check controlTree in case it's there.
+            curSelMugType = this.form.controlTree.getMugTypeFromUFID(ufid);
+        }
+    }
+    that.setCurrentlySelectedMug = setCurrentlySelectedMug;
 
     /**
      * Generates a unique question ID (unique in this form) and
@@ -123,6 +143,7 @@ formdesigner.controller = (function(){
         formdesigner.ui.appendErrorMessage(msg);
     };
     that.showErrorMessage = showErrorMessage;
+
     /**
      * Convenience method for generating mug and mugType, calling UI and throwing
      * it the 'question' object
@@ -136,13 +157,55 @@ formdesigner.controller = (function(){
             formdesigner.controller.showErrorMessage("Property Changed in Question:"+mug.properties.dataElement.properties.nodeID+"!");
         })
 
-        form.insertMugType(mugType);
+        insertMugType(mugType);
+        createQuestionInUITree(mug);
         return mug;
 
     };
     that.createQuestion = createQuestion;
 
+    function createQuestionInUITree(mug){
+            if(!curSelMugType){
+                formdesigner.ui.treeCreateRootFormNode();
+            }
 
+            console.log(curSelMugType);
+
+            var controlTagName = mug.properties.controlElement.properties.tagName,
+                isGroupOrRepeat = (controlTagName === 'group' || controlTagName === 'repeat'),
+                objectData = {};
+
+            if(isGroupOrRepeat){//should new node be open or closed?, omit for leaf
+                objectData["state"] = 'open';
+            }
+
+            objectData["data"] = mug.properties.dataElement.properties.nodeID;
+            objectData["metadata"] = {'ufid': mug.ufid,
+                                        'dataID':mug.properties.dataElement.properties.nodeID || null,
+                                        'bindID':mug.properties.bindElement.properties.nodeID || null};
+
+            $('#question-tree').jstree("create",
+                null, //reference node, use null if using UI plugin for currently selected
+                "inside", //position relative to reference node
+                objectData,
+                null, //callback after creation, better to wait for event
+                true); //skip_rename
+    };
+
+
+    /**
+     * Inserts a new MugType into the relevant Trees (and their
+     * relevant positions) according to the specified mugType and
+     * the currently selected mugType.
+     * @param mugType
+     */
+    var insertMugType = function(mugType){
+//        var dataTree = form.dataTree, controlTree = form.controlTree;
+
+
+
+        
+    }
     /**
      * Gets the label used to represent this mug in the UI tree
      * @param mugOrMugType - mug or mugType

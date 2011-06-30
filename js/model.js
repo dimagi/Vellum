@@ -73,37 +73,6 @@ formdesigner.model = (function(){
             that.controlTree = controlTree = new Tree('control');
         })();
 
-        /**
-         * Insert a MugType into the relevant tree (according to the
-         * MugType's internal definition).  The insertion point is
-         * determined by the refMug and position arguments.
-         * @param MugType
-         * @param refMugT - can be either null or another MugType
-         * @param position - can be null, 'before', 'after', 'into'
-         *
-         * if null is used for refMugT, the refMugT will default to
-         * the last child of the RootMugType in the CONTROL TREE.
-         *
-         * if null is used for position, defaults to 'after'.
-         *
-         * 'into' for position means 'as a child of the refMugType'.
-         */
-        var insertMugType = function(MugType, refMugT, position){
-            var treeChildren;
-            if(!MugType){ return; }
-            if(!refMugT){
-                treeChildren = controlTree.getRootChildren();
-                refMugT = treeChildren[treeChildren.length-1];
-            }
-            if(!position){
-                position = 'after';
-            }
-            if(position === 'after'){
-                refMugT
-            }
-        };
-        that.insertMugType = MugType;
-
         //make the object event aware
         formdesigner.util.eventuality(that);
         return that;
@@ -710,11 +679,19 @@ formdesigner.model = (function(){
             /**
              * Given a ufid, finds the mugType that it belongs to.
              * if it is not the current node, will recursively look through children node (depth first search)
+             *
+             * Returns null if not found.
              */
             var getMugTypeFromUFID = that.getMugTypeFromUFID = function(ufid){
                 if(ufid === null){ return null; }
-                var retVal;
-                if(this.getValue().mug.ufid === ufid){
+                var retVal, thisUfid;
+                if(getValue() !== ' '){
+                    thisUfid = getValue().mug.ufid || '';
+                }else{
+                    thisUfid = '';
+                }
+
+                if(thisUfid === ufid){
                     return this.getValue();
                 }else{
                     for(var i in children){
@@ -1036,10 +1013,11 @@ formdesigner.model = (function(){
      * An initialization function that sets up a number of different fields and properties
      */
     var init = function(){
-        that.form = new Form();
+        var form = that.form = new Form();
         //set the form object in the controller so it has access to it as well
-        formdesigner.controller.form = that.form;
-    }
+        formdesigner.controller.form = form;
+    };
+    that.init = init;
 
 
     return that;

@@ -448,6 +448,15 @@ $(document).ready(function(){
             tree._getMugTypeNodeID(mugTB)+']]';
         equal(treePrettyPrintExpected,tree.printTree(), 'Check the tree structure is correct');
 
+        var tempMT = tree.getMugTypeFromUFID(mugTA.mug.ufid);
+        deepEqual(mugTA, tempMT, "Check getMugTypeFromUFID() method works correctly");
+
+        tempMT = tree.getMugTypeFromUFID("foobar");
+        equal(tempMT, null, "Check getMugTypeFromUFID('notAUFID') returns null");
+
+        tempMT = tree.getMugTypeFromUFID(mugTD.mug.ufid);
+        deepEqual(mugTD,tempMT);
+
 
     });
 
