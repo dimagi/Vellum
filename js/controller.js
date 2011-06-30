@@ -9,7 +9,7 @@ if(typeof formdesigner === 'undefined'){
 }
 
 formdesigner.controller = (function(){
-    var that = {};
+    var that = {}, form;
     var question_counter = 1; //used in generate_question_id();
 
     /**
@@ -135,9 +135,59 @@ formdesigner.controller = (function(){
         mug.on('property-changed', function(){
             formdesigner.controller.showErrorMessage("Property Changed in Question:"+mug.properties.dataElement.properties.nodeID+"!");
         })
+
+        form.insertMugType(mugType);
         return mug;
 
     };
     that.createQuestion = createQuestion;
+
+
+    /**
+     * Gets the label used to represent this mug in the UI tree
+     * @param mugOrMugType - mug or mugType
+     */
+    var getTreeLabel = function(mugOrMugType){
+        var mug;
+        if(mugOrMugType instanceof formdesigner.model.Mug){
+            mug = mugOrMugType;
+        }else if(typeof mugOrMugType.validate === 'function'){
+            mug = mugOrMugType.mug;
+        }else{
+            throw 'getTreeLabel() must be given either a Mug or MugType as argument!';
+        }
+
+
+        return mug.properties.controlElement.properties.nodeID; //TODO IMPROVE ME!
+    };
+    that.getTreeLabel = getTreeLabel;
+
+    /**
+     * Looks through both the dataTree and the controlTree
+     * in the form object and returns the Mug that corresponds
+     * to the given UFID string
+     * @param ufid
+     */
+    var getMugFromUFID = function(ufid){
+
+    };
+    that.getMugFromUFID = getMugFromUFID;
+
+    /**
+     * Returns the Tree object specified by treeType from the Form object
+     * @param treeType - string - either 'data' or 'control'
+     */
+    var getTree = function getTree(treeType){
+        if(treeType === 'data'){
+            return form.dataTree;
+        }else if(treeType === 'control'){
+            return form.controlTree;
+        }else{
+            throw "controller.getTree must be given a treeType of either 'data' or 'control'!";
+        }
+    }
+
+
+
     return that;
 })();

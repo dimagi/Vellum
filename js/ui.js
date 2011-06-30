@@ -90,6 +90,7 @@ formdesigner.ui = (function () {
             uiQuestion = new Question(mug);
             question_list.push(mug)
             $('#question-properties').append('<br>');
+
         });
         $("#add-question-button")
                 .addClass("ui-corner-all ui-icon ui-icon-plusthick")
@@ -121,30 +122,33 @@ formdesigner.ui = (function () {
     }
 
     function create_tree(){
+        var prevSelectedUfid = null;
+        function node_select(e,data){
+            var currentlySelectedUfid = jQuery.data(data.rslt.obj[0],'ufid');
+            if( prevSelectedUfid){
+                if( prevSelectedUfid === currentlySelectedUfid){
+                    console.log("RENAMING HERE. DISABLED");
+//                    $("#question-tree").jstree("rename");
+                }
+            }
+            prevSelectedUfid = currentlySelectedUfid;
+        };
         $("#question-tree").jstree({
             "json_data" : {
-                "data" : [
-                    {
-                        "data" : "A node",
-                        "metadata" : { id : 23 },
-                        "children" : [ "Child 1", "A Child 2" ]
-                    },
-                    {
-                        "attr" : { "id" : "li.node.id1" },
-                        "metadata" : {id : 54},
-                        "data" : {
-                            "title" : "Long format demo",
-                            "attr" : { "href" : "#" }
-                        }
-                    }
-                ]
+                "data" : []
             },
-            "plugins" : [ "json_data", "ui", "themeroller" ]
+            "crrm" : {
+                "move": {
+                    "always_copy": false
+                }
+            },
+            "plugins" : [ "json_data", "ui", "crrm", "themeroller" ]
 	    }).bind("select_node.jstree", function (e, data) {
-                    console.log($.jstree);
-                    console.log(data.rslt.obj[0]);
+                   node_select(e,data);
         });
     }
+
+
 
     $(document).ready(function () {
         do_loading_bar();
@@ -162,25 +166,19 @@ formdesigner.ui = (function () {
         that.qTHeader = qTHeader;
         that.qTBody = qTBody;
 
+        /**
+         * Creates the Properties Box on the UI
+         */
         var create = function (mug, title){
             var i,
-//                monWin = $('<div class="monitor-window"></div>');
-//            $('#question-properties').append(monWin);
-//            monWin.append('<textarea id="monitor-window-'+mug.ufid+'" class="monitor-window-textarea">'+JSON.stringify(mug,null,'\t')+'</textarea>');
             qTable = $('<table id="question-table" class="'+title+'"></table>');
             $('#question-properties').append(qTable);
-
-//            qTable.css("border","1");
-
             qTHeader = $('<thead class="question-table-header"></thead>');
             qTHeader.append('<tr><td colspan=2><b><h1>Question Properties: '+mug.properties.dataElement.properties.nodeID+'</h1></b></td></tr>');
             qTHeader.append("<tr><td><b>Property Name</b></td><td><b>Property Value</b></td></tr>");
             qTable.append(qTHeader);
             qTBody = $("<tbody></tbody>");
             qTable.append(qTBody);
-
-
-
 
             i = 'ufid';
             var row, col1,col2,mugProps;
@@ -238,7 +236,6 @@ formdesigner.ui = (function () {
             }
 
             mug.on('property-changed',function(){
-                console.log(mug);
                 $('#monitor-window-'+mug.ufid).filter(":input").text(JSON.stringify(mug,null,'\t'));
             },null);
 
@@ -264,6 +261,29 @@ formdesigner.ui = (function () {
             mug.fire('property-changed');
         }
 
+        function createQuestionInUITree(mug){
+            var controlTagName = mug.properties.controlElement.properties.tagName,
+                isGroupOrRepeat = (controlTagName === 'group' || controlTagName === 'repeat'),
+                objectData = {};
+
+            if(isGroupOrRepeat){//should new node be open or closed?, omit for leaf
+                objectData["state"] = 'open';
+            }
+
+            objectData["data"] = mug.properties.dataElement.properties.nodeID;
+            objectData["metadata"] = {'ufid': mug.ufid,
+                                        'dataID':mug.properties.dataElement.properties.nodeID || null,
+                                        'bindID':mug.properties.bindElement.properties.nodeID || null};
+
+            $('#question-tree').jstree("create",
+                null, //reference node, use null if using UI plugin for currently selected
+                "inside", //position relative to reference node
+                objectData,
+                null, //callback after creation, better to wait for event
+                true); //skip_rename
+        };
+
+        createQuestionInUITree(localMug);
         return that;
     };
     that.Question = Question;
