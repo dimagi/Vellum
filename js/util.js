@@ -158,6 +158,28 @@ formdesigner.util = (function(){
     that.eventuality = eventuality;
 
     /**
+     * Answers the question of whether
+     * the refMugType can have children of type ofTypeMug.
+     * @return list of strings indicating the allowed children types (if any).
+     * can be any of 'group' 'repeat' 'select' 'item' 'question'
+     */
+    var canMugTypeHaveChildren = function(refMugType,ofTypeMug){
+        if(!refMugType || !ofTypeMug){ return false; }
+
+        var childTypes = [];
+        var controlName = refMugType.properties.controlElement.name;
+        switch(controlName){
+            //TODO Use slice notation to set up right combinations for the various question types.
+            //TODO
+            case 'Group':
+            case 'Repeat': childTypes.slice(0,0,")
+        }
+
+        return childTypes;
+    }
+    that.canMugTypeHaveChildren = canMugTypeHaveChildren;
+
+    /**
      * This method gives the passed object
      * a Unique Mug ID plus standardized method(s)
      * for accessing the ID.

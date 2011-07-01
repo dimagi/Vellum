@@ -157,7 +157,7 @@ formdesigner.controller = (function(){
             formdesigner.controller.showErrorMessage("Property Changed in Question:"+mug.properties.dataElement.properties.nodeID+"!");
         })
 
-        insertMugType(mugType);
+        insertMugTypeIntoForm(mugType);
         createQuestionInUITree(mug);
         return mug;
 
@@ -165,22 +165,31 @@ formdesigner.controller = (function(){
     that.createQuestion = createQuestion;
 
     function createQuestionInUITree(mug){
+        function getRelativeInsertPosition(newMug){
+
+            if(curSelMugType)
+        };
+
+
             var controlTagName = mug.properties.controlElement.properties.tagName,
                 isGroupOrRepeat = (controlTagName === 'group' || controlTagName === 'repeat'),
                 objectData = {};
 
-            if(isGroupOrRepeat){//should new node be open or closed?, omit for leaf
-                objectData["state"] = 'open';
+            if(isGroupOrRepeat){
+                objectData["state"] = 'open'; //should new node be open or closed?, omit for leaf
             }
 
             objectData["data"] = mug.properties.dataElement.properties.nodeID;
             objectData["metadata"] = {'ufid': mug.ufid,
                                         'dataID':mug.properties.dataElement.properties.nodeID || null,
                                         'bindID':mug.properties.bindElement.properties.nodeID || null};
+            objectData["attr"] = {
+                "id" : mug.ufid
+            }
 
             $('#question-tree').jstree("create",
                 null, //reference node, use null if using UI plugin for currently selected
-                "inside", //position relative to reference node
+                getRelativeInsertPosition(), //position relative to reference node
                 objectData,
                 null, //callback after creation, better to wait for event
                 true); //skip_rename
@@ -193,7 +202,7 @@ formdesigner.controller = (function(){
      * the currently selected mugType.
      * @param mugType
      */
-    var insertMugType = function(mugType){
+    var insertMugTypeIntoForm = function(mugType){
 //        var dataTree = form.dataTree, controlTree = form.controlTree;
 
 

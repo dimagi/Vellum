@@ -113,7 +113,7 @@ formdesigner.ui = (function () {
     function init_toolbar(){
         (function c_add_text_question(){ //c_ means 'create' here
             $("#add-question").button().click(function(){
-                formdesigner.controller.createQuestion();
+                formdesigner.controller.createQuestion("text");
             });
             $("#add-question-button")
                     .addClass("ui-corner-all ui-icon ui-icon-plusthick")
@@ -122,7 +122,7 @@ formdesigner.ui = (function () {
 
         (function c_add_group(){
             $("#add-group-but").button().click(function(){
-
+                formdesigner.controller.createQuestion("group");
             });
             $("#add-group-button")
                     .addClass("ui-corner-all ui-icon ui-icon-plusthick")
