@@ -165,12 +165,6 @@ formdesigner.controller = (function(){
     that.createQuestion = createQuestion;
 
     function createQuestionInUITree(mug){
-            if(!curSelMugType){
-                formdesigner.ui.treeCreateRootFormNode();
-            }
-
-            console.log(curSelMugType);
-
             var controlTagName = mug.properties.controlElement.properties.tagName,
                 isGroupOrRepeat = (controlTagName === 'group' || controlTagName === 'repeat'),
                 objectData = {};

@@ -7,7 +7,8 @@ if(typeof formdesigner === 'undefined'){
 formdesigner.ui = (function () {
     "use strict";
     var that = {}, question_list = [],
-    controller = formdesigner.controller;
+    controller = formdesigner.controller,
+    questionTree;
 
     var appendErrorMessage = that.appendErrorMessage = function(msg){
         $('#notify').addClass("notice");
@@ -85,19 +86,6 @@ formdesigner.ui = (function () {
 
     }
 
-    function init_toolbar(){
-        $("#add-question").button().click(function(){
-            var mug = formdesigner.controller.createQuestion(),
-            uiQuestion = new Question(mug);
-            question_list.push(mug)
-            $('#question-properties').append('<br>');
-
-        });
-        $("#add-question-button")
-                .addClass("ui-corner-all ui-icon ui-icon-plusthick")
-                .css("float", "left");
-    }
-
     function do_nav_bar(){
         $(function() {
             var d=300;
@@ -122,13 +110,44 @@ formdesigner.ui = (function () {
         });
     }
 
-    function create_tree(){
-        function node_select(e,data){
-            var curSelUfid = jQuery.data(data.rslt.obj[0],'ufid');
-            formdesigner.controller.setCurrentlySelectedMug(curSelUfid);
+    function init_toolbar(){
+        (function c_add_text_question(){ //c_ means 'create' here
+            $("#add-question").button().click(function(){
+                formdesigner.controller.createQuestion();
+            });
+            $("#add-question-button")
+                    .addClass("ui-corner-all ui-icon ui-icon-plusthick")
+                    .css("float", "left");
+        })();
 
-            
-        };
+        (function c_add_group(){
+            $("#add-group-but").button().click(function(){
+
+            });
+            $("#add-group-button")
+                    .addClass("ui-corner-all ui-icon ui-icon-plusthick")
+                    .css("float", "left");
+        })();
+
+    }
+
+
+
+    /**
+     * Private function (to the UI anyway) for handling node_select events.
+     * @param e
+     * @param data
+     */
+    function node_select(e,data){
+        var curSelUfid = jQuery.data(data.rslt.obj[0],'ufid');
+        formdesigner.controller.setCurrentlySelectedMug(curSelUfid);
+    };
+
+    /**
+     * Creates the UI tree
+     * TODO: set up DND plugin, attach event bindings for DND.
+     */
+    function create_tree(){
         $("#question-tree").jstree({
             "json_data" : {
                 "data" : []
@@ -139,38 +158,42 @@ formdesigner.ui = (function () {
                 }
             },
             "types": getJSTreeTypes(),
-            "plugins" : [ "json_data", "ui", "types", "crrm", "themeroller" ]
+            "plugins" : [ "json_data", "ui", "crrm", "types", "themeroller" ]
 	    }).bind("select_node.jstree", function (e, data) {
                    node_select(e,data);
         });
+        questionTree = $("#question-tree");
     }
 
-    var treeCreateRootFormNode = function(){
-        var objectData = {};
-        objectData["data"] = "Form";
-        objectData["metadata"] = {'type': "root"};
-
-        $('#question-tree').jstree("create",
-                null, //reference node, use null if using UI plugin for currently selected
-                "inside", //position relative to reference node
-                objectData,
-                null, //callback after creation, better to wait for event
-                true); //skip_rename
-    };
-    that.treeCreateRootFormNode = treeCreateRootFormNode;
+//    /**
+//     * Create the root form node.
+//     * @param Form - The model form object.
+//     */
+//    var treeCreateRootFormNode = function(){
+//        var objectData = {};
+//        objectData["data"] = "Form";
+//        objectData["attr"] = {
+//            'id' : 'RootFormNode'
+//        }
+//        objectData["metadata"] = {'type': "root"};
+//
+//        $('#question-tree').jstree("create",
+//                null, //reference node, use null if using UI plugin for currently selected
+//                "inside", //position relative to reference node
+//                objectData,
+//                null, //callback after creation, better to wait for event
+//                true); //skip_rename
+//        $('#question-tree').jstree("select_node","#RootFormNode");
+//
+//    };
+//    that.treeCreateRootFormNode = treeCreateRootFormNode;
 
     function getJSTreeTypes(){
         var groupRepeatValidChildren = ["group","repeat","question","selectQuestion"];
        var types =  {
             "max_children" : 1,
-			"valid_children" : [ "root" ],
+			"valid_children" : groupRepeatValidChildren,
 			"types" : {
-				"root" : {
-					"icon" : {
-						"image" : "http://static.jstree.com/v.1.0rc/_docs/_drive.png"
-					},
-					"valid_children" : groupRepeatValidChildren
-				},
                 "group" : {
                     "valid_children" : groupRepeatValidChildren
                 },
@@ -195,8 +218,20 @@ formdesigner.ui = (function () {
     }
 
 
-
-    var Question = function(mug){
+    /**
+     * Updates the properties view such that it reflects the
+     * properties of the currently selected tree item.
+     *
+     * This means it will show only fields that are available for this
+     * specific MugType and whatever properties are already set.
+     *
+     * TODO: Should use the MugType to figure out which fields to display
+     * TODO: create bindings to verify validity on property changes
+     * TODO: show marker (or something) for required fields.
+     * TODO: PARAM SHOULD BE MUGTYPE NOT MUG!
+     * @param mug
+     */
+    var displayMugProperties = function(mug){
         var that = {}, qTable, qTHeader,qTBody, questionHolder, localMug = mug;
 
         questionHolder = $("#question-table-body")
@@ -261,11 +296,8 @@ formdesigner.ui = (function () {
                     col2.append(inputBox);
                     inputBox.change(function(e){
                         var target = $(e.target);
-
                         mug.properties[target.attr("class")].properties[target.attr("name")] = target.val();
-                       console.log("asdasd");
-                        console.log(e.target);
-                       mug.fire('property-changed');
+                        mug.fire('property-changed');
                     });
                     row.append(col1);
                     row.append(col2);
@@ -302,11 +334,7 @@ formdesigner.ui = (function () {
 
         return that;
     };
-    that.Question = Question;
-
-
-
-
+    that.displayMugProperties = displayMugProperties;
 
     $(document).ready(function () {
         do_loading_bar();
@@ -319,7 +347,6 @@ formdesigner.ui = (function () {
 
 
     });
-
 
     return that;
 }());
