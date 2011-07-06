@@ -333,7 +333,13 @@ formdesigner.model = (function(){
     var TYPE_FLAG_NOT_ALLOWED = that.TYPE_FLAG_NOT_ALLOWED = '_notallowed';
 
     var RootMugType = {
-        typeName: "The Abstract Mug Type Definition",
+        typeName: "The Abstract Mug Type Definition", //human readable Type Name
+        type : "root", //easier machine readable value for the above;
+                       //type var can contain the following values: 'd', 'b', 'c', ('data', 'bind' and 'control' respectively)
+                       // or any combination of them. For example, a Mug that contains a dataElement and a controlElement (but no bindElement)
+                       // would be of type 'dc'.  'root' is the exception for the abstract version of the MugType (which should never be directly used anyway).
+                       // use: formdesigner.util.clone(RootMugType); instead. (As done below in the mugTypes object).
+
         //set initial properties
         /**
          * A property is a key:value pair.
@@ -529,19 +535,79 @@ formdesigner.model = (function(){
                 }
                 return results;
             },
+
+            /**
+                     * Checks the type string of a MugType (i.e. the mug.type value)
+                     * to see if the correct properties block Elements are present (and
+                     * that there aren't Elements there that shouldn't be).
+                     * @param mugT - the MugType to be checked
+                     */
+            checkTypeString = function(mugT){
+                var typeString = mugT.type, i,
+                hasD = (mugT.properties.dataElement ? true : false),
+                hasC = (mugT.properties.controlElement ? true : false),
+                hasB = (mugT.properties.bindElement ? true : false);
+
+                if(hasD){
+                    if(typeString.indexOf('d') === -1){
+                        return {status: 'fail', message: "MugType.type has a 'dataElement' in its properties block but no 'd' char in its type value!"};
+                    }
+                }else{
+                    if(typeString.indexOf('d') !== -1){
+                        return {status: 'fail', message: "MugType.type has a 'd' char in it's type value but no 'd' !"};
+                    }
+                }
+                if(hasB){
+                    if(typeString.indexOf('b') === -1){
+                        return {status: 'fail', message: "MugType.type has a 'bindElement' in its properties block but no 'b' char in its type value!"};
+                    }
+                }else{
+                    if(typeString.indexOf('b') !== -1){
+                        return {status: 'fail', message: "MugType.type has a 'b' char in it's type value but no 'b' !"};
+                    }
+                }
+                if(hasC){
+                    if(typeString.indexOf('c') === -1){
+                        return {status: 'fail', message: "MugType.type has a 'controlElement' in its properties block but no 'c' char in its type value!"};
+                    }
+                }else{
+                    if(typeString.indexOf('c') !== -1){
+                        return {status: 'fail', message: "MugType.type has a 'c' char in it's type value but no 'c' !"};
+                    }
+                }
+
+
+
+                return {status: 'pass', message: "typeString for MugType validates correctly"};
+            },
+
             mug;
             mug = aMug || this.mug || null;
+
+
 
             if(!mug){
                 throw 'MUST HAVE A MUG TO VALIDATE!';
             }
+            var selfValidationResult = checkTypeString(this);
             var validationResult = recurse(this.properties,mug.properties,"Mug Top Level");
+
+            if(selfValidationResult.status === 'fail'){
+                console.log("1/2 A MUGTYPE OBJECT HAS FAILED SELF VALIDATION. VALIDATION OBJECT BELOW");
+                console.log(selfValidationResult);
+                console.log("2/2 FAILED MUGTYPE BELOW");
+                console.log(this);
+                validationResult.status = 'fail';
+            }
+
             if(validationResult.status === 'fail'){
                 console.log("1/2 A MUG OBJECT HAS FAILED VALIDATION. VALIDATION OBJECT BELOW");
                 console.log(validationResult);
                 console.log("2/2 FAILED MUG BELOW");
                 console.log(mug);
             }
+
+            validationResult["typeCheck"] = selfValidationResult;
 
             return validationResult;
 
@@ -550,9 +616,10 @@ formdesigner.model = (function(){
         },
 
         //OBJECT FIELDS//
-        parentDataMugType: null, //for keeping a tree like structure of all the Data nodes
-        parentControlMugType: null, //for keeping a tree like structure of all the Control nodes
         controlNodeCanHaveChildren: false,
+
+        /** A list of controlElement.tagName's that are valid children for this control element **/
+        controlNodeAllowedChildren : [],
         dataNodeCanHaveChildren: true,
 
         mug: null
@@ -569,39 +636,58 @@ formdesigner.model = (function(){
      */
     var mugTypes = {
         //the four basic valid combinations of Data, Bind and Control elements
+        //when rolling your own, make sure the 'type' variable corresponds
+        //to the Elements and other settings in your MugType (e.g. in the 'db' MT below
+        //the controlElement is deleted.
         dataBind: function(){
             var mType = formdesigner.util.clone(RootMugType);
 
             mType.typeName = "Data+Bind Only Mug";
+            mType.type = "db";
             delete mType.properties.controlElement;
             return mType;
         }(),
         dataBindControlQuestion: function(){
             var mType = formdesigner.util.clone(RootMugType);
             mType.typeName = "Data Bind Control Question Mug";
+            mType.type = "dbc";
             return mType;
         }(),
         dataControlQuestion: function(){
             var mType = formdesigner.util.clone(RootMugType);
             mType.typeName = "Data+Control Question Mug";
+            mType.type = "dc";
             delete mType.properties.bindElement;
             return mType;
         }(),
         dataOnly: function(){
             var mType = formdesigner.util.clone(RootMugType);
             mType.typeName = "Data ONLY Mug";
+            mType.type = "d";
             delete mType.properties.controlElement;
             delete mType.properties.bindElement;
             return mType;
         }()
     };
-    that.mugTypes = mugTypes;
 
-//
-    var createMugFromMugType = function(mugType){
-       return false;
-    };
-    that.createMugFromMugType = createMugFromMugType;
+ 
+
+
+    that.mugTypes = mugTypes;
+    mugTypes["stdTextQuestion"] = (function(){
+            var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion);
+            mType.controlNodeAllowedChildren = false;
+
+        }());
+
+    mugTypes["stdGroup"] = (function(){
+            var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion),
+                    allowedChildren;
+            mType.controlNodeCanHaveChildren = true;
+            allowedChildren = ['repeat','input','select','select1','group'];
+            mType.controlNodeAllowedChildren = allowedChildren;
+    }());
+
 
 
     /**

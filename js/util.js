@@ -164,18 +164,25 @@ formdesigner.util = (function(){
      * can be any of 'group' 'repeat' 'select' 'item' 'question'
      */
     var canMugTypeHaveChildren = function(refMugType,ofTypeMug){
-        if(!refMugType || !ofTypeMug){ return false; }
+        var allowedChildren, n, targetMugTagName, refMugTagName,
+                makeLower = function(s){
+                    return s.toLowerCase();
+                };
 
-        var childTypes = [];
-        var controlName = refMugType.properties.controlElement.name;
-        switch(controlName){
-            //TODO Use slice notation to set up right combinations for the various question types.
-            //TODO
-            case 'Group':
-            case 'Repeat': childTypes.slice(0,0,")
+        if(!refMugType || !ofTypeMug || !ofTypeMug.controlElement || !refMugType.controlElement){ throw 'Cannot pass null argument or MugType without a controlElement!'; }
+        if(!refMugType.controlNodeCanHaveChildren){ return false; }
+        allowedChildren = refMugType.controlNodeAllowedChildren;
+        allowedChildren = allowedChildren.map(makeLower);
+
+        targetMugTagName = ofTypeMug.mug.properties.controlElement.properties.tagName.toLowerCase();
+        refMugTagName = refMugType.mug.properties.controlElement.properties.tagName.toLowerCase();
+
+        if(allowedChildren.indexOf(targetMugTagName) === -1){
+            return false;
+        }else{
+            return true;
         }
-
-        return childTypes;
+    
     }
     that.canMugTypeHaveChildren = canMugTypeHaveChildren;
 

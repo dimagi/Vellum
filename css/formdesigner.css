@@ -84,28 +84,28 @@ body{
     height:2000px;
 }
 
-#question-table{
+#fd-question-table{
     border: 1px solid black;
     width: 50em;
 }
 
-.question-property-row td{
+.fd-question-property-row td{
     
 }
-.question-table-header{
+.fd-question-table-header{
     font: bold;
 }
 
-.monitor-window-textarea{
+.fd-monitor-window-textarea{
     width:49em;
     height:30em;
 }
 
-.toolbar{
+.fd-toolbar{
     padding: 5px;
 }
 
-.tree{
+.fd-tree{
     float:left;
     width:20%;
     height: 500px;
@@ -113,7 +113,7 @@ body{
     border: 1px solid gray;
 }
 
-.question-properties {
+.fd-question-properties {
     border: 1px solid gray;
     float: left;
     margin-left: 5px;
@@ -124,6 +124,6 @@ td {
     text-align: center;
 }
 
-.properties-block-header {
+.fd-properties-block-header {
     text-align:left;
 }

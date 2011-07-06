@@ -235,7 +235,7 @@ $(document).ready(function(){
         var testData = make_control_bind_data_mug();
         var myMug = testData.mug;
 
-        var MugType = formdesigner.util.getNewMugType(formdesigner.model.RootMugType); //simulates a 'standard' text question
+        var MugType = formdesigner.util.getNewMugType(formdesigner.model.mugTypes["stdTextQuestion"]); //simulates a 'standard' text question
 
         var validationObject = MugType.validateMug(myMug);
         equal(MugType.typeName, "The Abstract Mug Type Definition");

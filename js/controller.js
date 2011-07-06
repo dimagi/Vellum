@@ -127,11 +127,6 @@ formdesigner.controller = (function(){
         //ok,now: validate the mug to make sure everything is peachy.
         validationResult = mugType.validateMug(mug);
         if(validationResult.status !== 'pass'){
-            //uh oh.
-            console.log("FAILED MUG VALIDATION OBJECT BELOW:");
-            console.log(validationResult);
-            console.log("MUG OBJECT BELOW:")
-            console.log(mug);
             throw 'Newly constructed mug did not pass validation!';
         }else{
             return mug;
@@ -166,33 +161,45 @@ formdesigner.controller = (function(){
 
     function createQuestionInUITree(mug){
         function getRelativeInsertPosition(newMug){
+            var canHaveChildren, newMugType;
+            if(!curSelMugType){
+                return "first";
+            }
 
-            if(curSelMugType)
+            newMugType = form.controlTree.getMugTypeFromUFID(newMug.ufid);
+            canHaveChildren = formdesigner.util.canMugTypeHaveChildren;
+
+            if(canHaveChildren(curSelMugType,newMugType)){
+                return "inside";
+            }else{
+                return "after";
+            }
         };
 
 
-            var controlTagName = mug.properties.controlElement.properties.tagName,
-                isGroupOrRepeat = (controlTagName === 'group' || controlTagName === 'repeat'),
-                objectData = {};
+        var controlTagName = mug.properties.controlElement.properties.tagName,
+            isGroupOrRepeat = (controlTagName === 'group' || controlTagName === 'repeat'),
+            objectData = {};
 
-            if(isGroupOrRepeat){
-                objectData["state"] = 'open'; //should new node be open or closed?, omit for leaf
-            }
+        if(isGroupOrRepeat){
+            objectData["state"] = 'open'; //should new node be open or closed?, omit for leaf
+        }
 
-            objectData["data"] = mug.properties.dataElement.properties.nodeID;
-            objectData["metadata"] = {'ufid': mug.ufid,
-                                        'dataID':mug.properties.dataElement.properties.nodeID || null,
-                                        'bindID':mug.properties.bindElement.properties.nodeID || null};
-            objectData["attr"] = {
-                "id" : mug.ufid
-            }
+        objectData["data"] = mug.properties.dataElement.properties.nodeID;
+        objectData["metadata"] = {'ufid': mug.ufid,
+                                    'dataID':mug.properties.dataElement.properties.nodeID || null,
+                                    'bindID':mug.properties.bindElement.properties.nodeID || null};
+        objectData["attr"] = {
+            "id" : mug.ufid
+        }
 
-            $('#question-tree').jstree("create",
-                null, //reference node, use null if using UI plugin for currently selected
-                getRelativeInsertPosition(), //position relative to reference node
-                objectData,
-                null, //callback after creation, better to wait for event
-                true); //skip_rename
+        $('#fd-question-tree').jstree("create",
+            null, //reference node, use null if using UI plugin for currently selected
+            getRelativeInsertPosition(mug), //position relative to reference node
+            objectData,
+            null, //callback after creation, better to wait for event
+            true  //skip_rename
+        );
     };
 
 
@@ -204,7 +211,7 @@ formdesigner.controller = (function(){
      */
     var insertMugTypeIntoForm = function(mugType){
 //        var dataTree = form.dataTree, controlTree = form.controlTree;
-
+        //TODO: You know, implement me.
 
 
         
@@ -229,17 +236,6 @@ formdesigner.controller = (function(){
     that.getTreeLabel = getTreeLabel;
 
     /**
-     * Looks through both the dataTree and the controlTree
-     * in the form object and returns the Mug that corresponds
-     * to the given UFID string
-     * @param ufid
-     */
-    var getMugFromUFID = function(ufid){
-
-    };
-    that.getMugFromUFID = getMugFromUFID;
-
-    /**
      * Returns the Tree object specified by treeType from the Form object
      * @param treeType - string - either 'data' or 'control'
      */
@@ -252,6 +248,16 @@ formdesigner.controller = (function(){
             throw "controller.getTree must be given a treeType of either 'data' or 'control'!";
         }
     }
+
+    var getCurrentlySelectedMug = function(){
+        return curSelMugType.mug;
+    };
+    that.getCurrentlySelectedMug = getCurrentlySelectedMug;
+
+    var getCurrentlySelectedMugType = function(){
+        return curSelMugType;
+    };
+    that.getCurrentlySelectedMugType = getCurrentlySelectedMugType;
 
 
 

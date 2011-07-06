@@ -11,8 +11,8 @@ formdesigner.ui = (function () {
     questionTree;
 
     var appendErrorMessage = that.appendErrorMessage = function(msg){
-        $('#notify').addClass("notice");
-        $('#notify').text($('#notify').text() + msg);
+        $('#fd-notify').addClass("notice");
+        $('#fd-notify').text($('#fd-notify').text() + msg);
     };
     
     function do_loading_bar(){
@@ -112,19 +112,19 @@ formdesigner.ui = (function () {
 
     function init_toolbar(){
         (function c_add_text_question(){ //c_ means 'create' here
-            $("#add-question").button().click(function(){
+            $("#fd-add-question").button().click(function(){
                 formdesigner.controller.createQuestion("text");
             });
-            $("#add-question-button")
+            $("#fd-add-question-button")
                     .addClass("ui-corner-all ui-icon ui-icon-plusthick")
                     .css("float", "left");
         })();
 
         (function c_add_group(){
-            $("#add-group-but").button().click(function(){
+            $("#fd-add-group-but").button().click(function(){
                 formdesigner.controller.createQuestion("group");
             });
-            $("#add-group-button")
+            $("#fd-add-group-button")
                     .addClass("ui-corner-all ui-icon ui-icon-plusthick")
                     .css("float", "left");
         })();
@@ -140,7 +140,9 @@ formdesigner.ui = (function () {
      */
     function node_select(e,data){
         var curSelUfid = jQuery.data(data.rslt.obj[0],'ufid');
+        console.log(curSelUfid);
         formdesigner.controller.setCurrentlySelectedMug(curSelUfid);
+        displayMugProperties(formdesigner.controller.getCurrentlySelectedMug());
     };
 
     /**
@@ -148,7 +150,7 @@ formdesigner.ui = (function () {
      * TODO: set up DND plugin, attach event bindings for DND.
      */
     function create_tree(){
-        $("#question-tree").jstree({
+        $("#fd-question-tree").jstree({
             "json_data" : {
                 "data" : []
             },
@@ -162,31 +164,8 @@ formdesigner.ui = (function () {
 	    }).bind("select_node.jstree", function (e, data) {
                    node_select(e,data);
         });
-        questionTree = $("#question-tree");
+        questionTree = $("#fd-question-tree");
     }
-
-//    /**
-//     * Create the root form node.
-//     * @param Form - The model form object.
-//     */
-//    var treeCreateRootFormNode = function(){
-//        var objectData = {};
-//        objectData["data"] = "Form";
-//        objectData["attr"] = {
-//            'id' : 'RootFormNode'
-//        }
-//        objectData["metadata"] = {'type': "root"};
-//
-//        $('#question-tree').jstree("create",
-//                null, //reference node, use null if using UI plugin for currently selected
-//                "inside", //position relative to reference node
-//                objectData,
-//                null, //callback after creation, better to wait for event
-//                true); //skip_rename
-//        $('#question-tree').jstree("select_node","#RootFormNode");
-//
-//    };
-//    that.treeCreateRootFormNode = treeCreateRootFormNode;
 
     function getJSTreeTypes(){
         var groupRepeatValidChildren = ["group","repeat","question","selectQuestion"];
@@ -234,7 +213,7 @@ formdesigner.ui = (function () {
     var displayMugProperties = function(mug){
         var that = {}, qTable, qTHeader,qTBody, questionHolder, localMug = mug;
 
-        questionHolder = $("#question-table-body")
+        questionHolder = $("#fd-question-table-body")
 
         that.qTable = qTable;
         that.qTHeader = qTHeader;
@@ -245,9 +224,9 @@ formdesigner.ui = (function () {
          */
         var create = function (mug, title){
             var i,
-            qTable = $('<table id="question-table" class="'+title+'"></table>');
-            $('#question-properties').append(qTable);
-            qTHeader = $('<thead class="question-table-header"></thead>');
+            qTable = $('<table id="fd-question-table" class=fd-"'+title+'"></table>');
+            $('#fd-question-properties').append(qTable);
+            qTHeader = $('<thead class="fd-question-table-header"></thead>');
             qTHeader.append('<tr><td colspan=2><b><h1>Question Properties: '+mug.properties.dataElement.properties.nodeID+'</h1></b></td></tr>');
             qTHeader.append("<tr><td><b>Property Name</b></td><td><b>Property Value</b></td></tr>");
             qTable.append(qTHeader);
@@ -259,8 +238,8 @@ formdesigner.ui = (function () {
 
             row = $("<tr></tr>");
             qTBody.append(row);
-            row.attr('id', i);
-            row.attr('class', "question-property-row");
+            row.attr('id', 'fd-'+i);
+            row.attr('class', "fd-question-property-row");
             col1 = $("<td></td>");
             col2 = $("<td></td>");
             row.append(col1);
@@ -279,7 +258,7 @@ formdesigner.ui = (function () {
                 }
 
                 qTBody.append("<hr />");
-                qTBody.append('<tr><td colspan=2><h2 class="properties-block-header">'+p+' Properties:</h2></tr>')
+                qTBody.append('<tr><td colspan=2><h2 class="fd-properties-block-header">'+p+' Properties:</h2></tr>')
 
                 for(i in block){
                     var inputBox;
@@ -288,26 +267,26 @@ formdesigner.ui = (function () {
                     }
                     row = $("<tr></tr>");
                     qTBody.append(row);
-                    row.attr('id', i);
-                    row.attr('class', "question-property-row");
+                    row.attr('id', 'fd-'+i);
+                    row.attr('class', "fd-question-property-row");
                     col1 = $('<td>'+i+'</td>');
                     col2 = $('<td></td>');
-                    inputBox = $('<input value="'+block[i]+'" name="'+i+'" class="'+p+'" />');
+                    inputBox = $('<input value="'+block[i]+'" name=fd-"'+i+'" class=fd-"'+p+'" />');
                     col2.append(inputBox);
                     inputBox.change(function(e){
-                        var target = $(e.target);
-                        mug.properties[target.attr("class")].properties[target.attr("name")] = target.val();
-                        mug.fire('property-changed');
+                        var target = $(e.target),
+                                el = target.attr("class").replace('fd-',''),
+                                prop = target.attr("name").replace('fd-',''),
+                                newVal = target.val();
+                        setPropertyValForModel(el,prop, newVal);
                     });
                     row.append(col1);
                     row.append(col2);
-
                 }
-
             }
 
             mug.on('property-changed',function(){
-                $('#monitor-window-'+mug.ufid).filter(":input").text(JSON.stringify(mug,null,'\t'));
+                $('#fd-monitor-window-'+mug.ufid).filter(":input").text(JSON.stringify(mug,null,'\t'));
             },null);
 
 
@@ -317,7 +296,7 @@ formdesigner.ui = (function () {
 
 
         function setPropertyValForUI(property, value){
-            $(".question-property-row "+property+" td:nth-child(2)").html(value);
+            $(".fd-question-property-row fd-"+property+" td:nth-child(2)").html(value);
         }
         that.setPropertValForUI = setPropertyValForUI;
 
@@ -328,7 +307,7 @@ formdesigner.ui = (function () {
          * @param val new value the property should be set to.
          */
         function setPropertyValForModel(element,property, val){
-            mug[element][property] = val;
+            mug.properties[element].properties[property] = val;
             mug.fire('property-changed');
         }
 
@@ -336,7 +315,34 @@ formdesigner.ui = (function () {
     };
     that.displayMugProperties = displayMugProperties;
 
+    /**
+     *
+     * @param rootElement
+     */
+    var generate_scaffolding = function(rootElement){
+        var root = $(rootElement);
+        root.append('<div id="fd-ui-container"> \
+          <div id="fd-notify"></div> \
+          <div id="fd-toolbar" class="fd-toolbar"> \
+              <div id="fd-add-question"> \
+                <span id="fd-add-question-button"></span>Add a Text Question \
+              </div> \
+              <div id="fd-add-group-but"> \
+                <span id="add-group-button"></span>Add a Group \
+              </div> \
+          </div> \
+          <div id="fd-question-tree" class="fd-tree"> \
+\
+           </div> \
+          <div id="fd-question-properties" class="fd-question-properties"> \
+\
+          </div> \
+      </div>');
+
+    };
+
     $(document).ready(function () {
+        generate_scaffolding($("#formdesigner"));
         do_loading_bar();
         init_toolbar();
         create_tree();
