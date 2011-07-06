@@ -333,7 +333,7 @@ formdesigner.model = (function(){
     var TYPE_FLAG_NOT_ALLOWED = that.TYPE_FLAG_NOT_ALLOWED = '_notallowed';
 
     var RootMugType = {
-        typeName: "The Abstract Mug Type Definition", //human readable Type Name
+        typeName: "The Abstract Mug Type Definition", //human readable Type Name (Can be anything)
         type : "root", //easier machine readable value for the above;
                        //type var can contain the following values: 'd', 'b', 'c', ('data', 'bind' and 'control' respectively)
                        // or any combination of them. For example, a Mug that contains a dataElement and a controlElement (but no bindElement)
@@ -675,19 +675,21 @@ formdesigner.model = (function(){
 
     that.mugTypes = mugTypes;
     mugTypes["stdTextQuestion"] = (function(){
-            var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion);
-            mType.controlNodeAllowedChildren = false;
-
-        }());
-
-    mugTypes["stdGroup"] = (function(){
-            var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion),
-                    allowedChildren;
-            mType.controlNodeCanHaveChildren = true;
-            allowedChildren = ['repeat','input','select','select1','group'];
-            mType.controlNodeAllowedChildren = allowedChildren;
+        var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion);
+        mType.typeName = "Text Question MugType";
+        mType.controlNodeAllowedChildren = false;
+        return mType;
     }());
 
+    mugTypes["stdGroup"] = (function(){
+        var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion),
+                allowedChildren;
+        mType.controlNodeCanHaveChildren = true;
+        allowedChildren = ['repeat','input','select','select1','group'];
+        mType.controlNodeAllowedChildren = allowedChildren;
+        return mType;
+    }());
+    that.mugTypes = mugTypes;
 
 
     /**

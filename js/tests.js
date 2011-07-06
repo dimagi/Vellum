@@ -234,11 +234,10 @@ $(document).ready(function(){
         expect(3);
         var testData = make_control_bind_data_mug();
         var myMug = testData.mug;
-
         var MugType = formdesigner.util.getNewMugType(formdesigner.model.mugTypes["stdTextQuestion"]); //simulates a 'standard' text question
 
         var validationObject = MugType.validateMug(myMug);
-        equal(MugType.typeName, "The Abstract Mug Type Definition");
+        equal(MugType.typeName, "Text Question MugType");
         equal(validationObject.status, "pass", 'Does the mug validate against the MugType?');
 
         var otherType = formdesigner.model.mugTypes.dataBindControlQuestion;
@@ -256,7 +255,7 @@ $(document).ready(function(){
         var myMug = testData.mug;
         myMug.properties.bindElement.properties.constraintAttr = "foo";
         myMug.properties.bindElement.properties.constraintMsgAttr = undefined;
-        var MugType = formdesigner.model.RootMugType; //simulates a 'standard' text question
+        var MugType = formdesigner.util.getNewMugType(formdesigner.model.mugTypes["stdTextQuestion"]); //simulates a 'standard' text question
 
         var validationObject = MugType.validateMug(myMug);
         equal(validationObject.status,'pass', "Mug has a constraint but no constraint message which is OK");
@@ -289,7 +288,7 @@ $(document).ready(function(){
     module("Automatic Mug Creation from MugType");
     test("Create mug from root MugType", function(){
         expect(2);
-        var mugType = formdesigner.util.getNewMugType(formdesigner.model.RootMugType);
+        var mugType = formdesigner.util.getNewMugType(formdesigner.model.mugTypes["stdTextQuestion"]);
         var mug = formdesigner.controller.createMugFromMugType(mugType);
         ok(typeof mug === 'object', "Mug is an Object");
         equal(mugType.validateMug(mug).status,'pass', "Mug passes validation");
