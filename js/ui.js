@@ -7,6 +7,7 @@ if(typeof formdesigner === 'undefined'){
 formdesigner.ui = (function () {
     "use strict";
     var that = {}, question_list = [],
+    buttons = {},
     controller = formdesigner.controller,
     questionTree;
 
@@ -119,6 +120,8 @@ formdesigner.ui = (function () {
             $("#fd-add-question-button")
                     .addClass("ui-corner-all ui-icon ui-icon-plusthick")
                     .css("float", "left");
+
+            buttons.addTextQuestion = $("#fd-add-question");
         })();
 
         (function c_add_group(){
@@ -128,6 +131,7 @@ formdesigner.ui = (function () {
             $("#fd-add-group-button")
                     .addClass("ui-corner-all ui-icon ui-icon-plusthick")
                     .css("float", "left");
+            buttons.addGroup = $("#fd-add-group-but");
         })();
 
         (function c_printDataTreeToConsole(){
@@ -143,9 +147,12 @@ formdesigner.ui = (function () {
             $("#fd-print-tree-button")
                     .addClass("ui-corner-all ui-icon ui-icon-plusthick")
                     .css("float", "left");
+
+            buttons.printTree = printTreeBut;
         })();
 
     }
+    that.buttons = buttons;
 
 
 
@@ -155,9 +162,9 @@ formdesigner.ui = (function () {
      * @param data
      */
     function node_select(e,data){
-        var curSelUfid = jQuery.data(data.rslt.obj[0],'ufid');
-        formdesigner.controller.setCurrentlySelectedMug(curSelUfid);
-        displayMugProperties(formdesigner.controller.getCurrentlySelectedMug());
+        var curSelUfid = jQuery.data(data.rslt.obj[0],'mugTypeUfid');
+        formdesigner.controller.setCurrentlySelectedMugType(curSelUfid);
+        displayMugProperties(formdesigner.controller.getCurrentlySelectedMugType());
     };
 
     /**
@@ -235,8 +242,8 @@ formdesigner.ui = (function () {
      * TODO: PARAM SHOULD BE MUGTYPE NOT MUG!
      * @param mug
      */
-    var displayMugProperties = function(mug){
-        var that = {}, qTable, qTHeader,qTBody, localMug = mug, qPropHolder;
+    var displayMugProperties = function(mugType){
+        var that = {}, qTable, qTHeader,qTBody, localMug = mugType.mug, qPropHolder;
 
         qPropHolder = $('#fd-question-properties');
         qPropHolder.empty();
@@ -247,8 +254,9 @@ formdesigner.ui = (function () {
         /**
          * Creates the Properties Box on the UI
          */
-        var create = function (mug, title){
+        var create = function (mugT, title){
             var i,
+            mug = mugT.mug;
             qTable = $('<table id="fd-question-table" class=fd-"'+title+'"></table>');
             qPropHolder.append(qTable);
             qTHeader = $('<thead class="fd-question-table-header"></thead>');
@@ -318,7 +326,7 @@ formdesigner.ui = (function () {
 
 
 
-        }(localMug, localMug.ufid);
+        }(mugType, localMug.ufid);
 
 
         function setPropertyValForUI(property, value){

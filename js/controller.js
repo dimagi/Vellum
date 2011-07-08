@@ -28,14 +28,20 @@ formdesigner.controller = (function(){
      *
      * @param ufid
      */
-    var setCurrentlySelectedMug = function(ufid){
+    var setCurrentlySelectedMugType = function(ufid){
         curSelUfid = ufid;
-        curSelMugType = this.form.dataTree.getMugTypeFromUFID(ufid);
-        if(!curSelMugType){ //check controlTree in case it's there.
-            curSelMugType = this.form.controlTree.getMugTypeFromUFID(ufid);
-        }
+        curSelMugType = getMTFromFormByUFID(ufid);
     }
-    that.setCurrentlySelectedMug = setCurrentlySelectedMug;
+    that.setCurrentlySelectedMugType = setCurrentlySelectedMugType;
+
+    var getMTFromFormByUFID = function(ufid){
+        curSelMugType = form.dataTree.getMugTypeFromUFID(ufid);
+        if(!curSelMugType){ //check controlTree in case it's there.
+            curSelMugType = form.controlTree.getMugTypeFromUFID(ufid);
+        }
+        return curSelMugType;
+    }
+    that.getMTFromFormByUFID = getMTFromFormByUFID;
 
     /**
      * Generates a unique question ID (unique in this form) and
@@ -151,7 +157,7 @@ formdesigner.controller = (function(){
      * @param qType = type of question to be created. ||| Currently does nothing |||
      */
     var createQuestion = function(qType){
-        var mugType, mug;
+        var mugType, mug, createQuestionEvent = {};
         
         switch(qType.toLowerCase()){
             case 'text':
@@ -171,6 +177,10 @@ formdesigner.controller = (function(){
 
         insertMugTypeIntoForm(curSelMugType,mugType);
         createQuestionInUITree(mugType);
+        createQuestionEvent.type = "question-creation";
+        createQuestionEvent.mugType = mugType;
+        this.fire(createQuestionEvent);
+
         return mug;
 
     };
@@ -182,8 +192,8 @@ formdesigner.controller = (function(){
             var tString = mugType.mug.properties.controlElement.properties.name.toLowerCase(),
                 setType = function(tType){
                     var myTree = $('#fd-question-tree'),
-                        mugUfid = mugType.mug.ufid,
-                        node = $('#'+mugUfid);
+                        mugTUfid = mugType.ufid,
+                        node = $('#'+mugTUfid);
                     return myTree.jstree("set_type",tType,node);
                 };
             
@@ -209,12 +219,13 @@ formdesigner.controller = (function(){
 
         objectData["data"] = mug.properties.dataElement.properties.nodeID;
         objectData["metadata"] = {
-                                'ufid': mug.ufid,
+                                'mugTypeUfid': mugType.ufid,
+                                'mugUfid': mug.ufid,
                                 'dataID':mug.properties.dataElement.properties.nodeID || null,
                                 'bindID':mug.properties.bindElement.properties.nodeID || null
                                 };
         objectData["attr"] = {
-            "id" : mug.ufid
+            "id" : mugType.ufid
         }
 
         insertPosition = formdesigner.util.getRelativeInsertPosition(curSelMugType,mugType);
@@ -292,7 +303,8 @@ formdesigner.controller = (function(){
     };
     that.getCurrentlySelectedMugType = getCurrentlySelectedMugType;
 
-
+    //make controller event capable
+    formdesigner.util.eventuality(that);
 
     return that;
 })();

@@ -593,18 +593,22 @@ formdesigner.model = (function(){
             var validationResult = recurse(this.properties,mug.properties,"Mug Top Level");
 
             if(selfValidationResult.status === 'fail'){
-                console.log("1/2 A MUGTYPE OBJECT HAS FAILED SELF VALIDATION. VALIDATION OBJECT BELOW");
-                console.log(selfValidationResult);
-                console.log("2/2 FAILED MUGTYPE BELOW");
-                console.log(this);
+                console.group("MugType Validation Failed: Self Validation");
+                    console.warn("1/2 A MUGTYPE OBJECT HAS FAILED SELF VALIDATION. VALIDATION OBJECT BELOW");
+                    console.warn(selfValidationResult);
+                    console.warn("2/2 FAILED MUGTYPE BELOW");
+                    console.warn(this);
+                console.groupEnd();
                 validationResult.status = 'fail';
             }
 
             if(validationResult.status === 'fail'){
-                console.log("1/2 A MUG OBJECT HAS FAILED VALIDATION. VALIDATION OBJECT BELOW");
-                console.log(validationResult);
-                console.log("2/2 FAILED MUG BELOW");
-                console.log(mug);
+                console.group("MugType Validation Failed: Mug Validation");
+                    console.warn("1/2 A MUG OBJECT HAS FAILED VALIDATION. VALIDATION OBJECT BELOW");
+                    console.warn(validationResult);
+                    console.warn("2/2 FAILED MUG BELOW");
+                    console.warn(mug);
+                console.groupEnd();
             }
 
             validationResult["typeCheck"] = selfValidationResult;
@@ -778,7 +782,7 @@ formdesigner.model = (function(){
                 if(ufid === null){ return null; }
                 var retVal, thisUfid;
                 if(getValue() !== ' '){
-                    thisUfid = getValue().mug.ufid || '';
+                    thisUfid = getValue().ufid || '';
                 }else{
                     thisUfid = '';
                 }
@@ -1054,8 +1058,12 @@ formdesigner.model = (function(){
 
         };
 
-        var printTree = that.printTree = function(){
-            return rootNode.prettyPrint();
+        var printTree = that.printTree = function(toConsole){
+            var t = rootNode.prettyPrint();
+            if(toConsole){
+                console.debug(t);
+            }
+            return t;
         };
 
         /**

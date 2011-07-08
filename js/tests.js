@@ -242,9 +242,7 @@ $(document).ready(function(){
 
         var otherType = formdesigner.model.mugTypes.dataBindControlQuestion;
         otherType.properties.bindElement['someProperty'] = 'foo';
-        console.log("==== BEGIN IGNORE FAILED VALIDATION IN LOG");
         var vObj = otherType.validateMug(myMug);
-        console.log("==== END IGNORE FAILED VALIDATION IN LOG");
         equal(vObj.status,'fail', "This should fail because the mug does not contain the required property");
 
     });
@@ -263,9 +261,7 @@ $(document).ready(function(){
         //now remove constraint but add a constraint message
         myMug.properties.bindElement.properties.constraintAttr = undefined;
         myMug.properties.bindElement.properties.constraintMsgAttr = "foo";
-        console.log("==== START IGNORE FAILED VALIDATION IN LOG");
         validationObject = MugType.validateMug(myMug);
-        console.log("==== END IGNORE FAILED VALIDATION IN LOG");
         equal(validationObject.status,'fail', "Special validation function has detected a constraintMsg but no constraint attribute in the bindElement");
     });
 
@@ -460,13 +456,13 @@ $(document).ready(function(){
             tree._getMugTypeNodeID(mugTB)+']]';
         equal(treePrettyPrintExpected,tree.printTree(), 'Check the tree structure is correct');
 
-        var tempMT = tree.getMugTypeFromUFID(mugTA.mug.ufid);
+        var tempMT = tree.getMugTypeFromUFID(mugTA.ufid);
         deepEqual(mugTA, tempMT, "Check getMugTypeFromUFID() method works correctly");
 
         tempMT = tree.getMugTypeFromUFID("foobar");
         equal(tempMT, null, "Check getMugTypeFromUFID('notAUFID') returns null");
 
-        tempMT = tree.getMugTypeFromUFID(mugTD.mug.ufid);
+        tempMT = tree.getMugTypeFromUFID(mugTD.ufid);
         deepEqual(mugTD,tempMT);
 
 
@@ -513,9 +509,35 @@ $(document).ready(function(){
         treePrettyPrintExpected = ''+tree._getRootNodeID()+'['+
                                         tree._getMugTypeNodeID(mugTA)+'['+
                                         tree._getMugTypeNodeID(mugTB)+']]';
-        console.log(c.form.dataTree.printTree());
         equal(c.form.dataTree.printTree(),treePrettyPrintExpected, "Tree structure is correct after inserting a 'Text' MT under 'Group'");
         equal(c.form.controlTree.printTree(),treePrettyPrintExpected, "Tree structure is correct after inserting a 'Text' MT under 'Group'");
+    });
+
+    module("UI Create Questions Tests");
+    test("Add A text question", function(){
+        var c = formdesigner.controller,
+                ui = formdesigner.ui,
+                jstree = $("#fd-question-tree"),
+                curMugType;
+        c.initFormDesigner();
+        equal(c.form.controlTree.printTree(false), "NodeWithNoValue!", "Ensure the controlTree is empty after a call to initFormDesigner");
+        equal(c.form.dataTree.printTree(false), "NodeWithNoValue!", "Ensure the dataTree is empty after a call to initFormDesigner");
+
+        //add a listener for question creation events
+        c.on("question-creation", function(e){
+            curMugType = e.mugType;
+        });
+
+        ui.buttons.addTextQuestion.click();
+
+        jstree.jstree("select_node",$('#'+curMugType.ufid));
+
+        var curSelNode = jstree.jstree("get_selected");
+        var curSelMT = c.getMTFromFormByUFID(curSelNode.attr('id'));
+        ok(typeof jstree.jstree("get_selected") !== 'undefined');
+
+        equal(jstree.jstree("get_selected").attr('id'), curMugType.ufid, "Mug that was just created is the same as the one that is currently selected");
+
     });
 
 
