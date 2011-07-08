@@ -339,6 +339,25 @@ $(document).ready(function(){
         
     });
 
+    test("More MugType validation testing", function(){
+        var AdbType  = formdesigner.model.mugTypes.dataBind,
+            AdbcType = formdesigner.model.mugTypes.dataBindControlQuestion,
+            AdcType  = formdesigner.model.mugTypes.dataControlQuestion,
+            AdType   = formdesigner.model.mugTypes.dataOnly,
+        tMug,Mug;
+
+        tMug = formdesigner.util.getNewMugType(AdbType);
+        Mug = formdesigner.controller.createMugFromMugType(tMug);
+        tMug.type="dbc";
+
+
+        var validationResult = tMug.validateMug(Mug);
+        notEqual(validationResult.status,'pass',"MugType is wrong Type ('dbc' instead of 'db')");
+        tMug.type = "";
+        validationResult = tMug.validateMug(Mug);
+        notEqual(validationResult.status,'pass',"MugType is wrong Type ('' instead of 'db')");
+    });
+
     module("Tree Data Structure Tests");
     test("Trees", function(){
 //        expect(7);
@@ -432,12 +451,6 @@ $(document).ready(function(){
             tree._getMugTypeNodeID(mugTB)+','+
             tree._getMugTypeNodeID(mugTD)+']]';
         equal(treePrettyPrintExpected,tree.printTree(), 'Check the tree structure is correct');
-        console.log('MugTB node ID is:'+ tree._getMugTypeNodeID(mugTB));
-        console.log('MugTD node ID is:'+ tree._getMugTypeNodeID(mugTD));
-        console.log("EXPECTED");
-        console.log(treePrettyPrintExpected);
-        console.log("ACTUAL");
-        console.log(tree.printTree());
 
         tree.insertMugType(mugTD,'after',mugTC);
         treePrettyPrintExpected = ''+tree._getRootNodeID()+'['+
@@ -457,6 +470,52 @@ $(document).ready(function(){
         deepEqual(mugTD,tempMT);
 
 
+    });
+    module("UI Tree (JSTree) related tests");
+    test("Children moving/relative location tests", function(){
+            var mugTA = formdesigner.util.getNewMugType(formdesigner.model.mugTypes.stdGroup),
+            mugTB = formdesigner.util.getNewMugType(formdesigner.model.mugTypes.stdTextQuestion),
+            mugTC = formdesigner.util.getNewMugType(formdesigner.model.mugTypes.dataBindControlQuestion),
+            mugA = formdesigner.controller.createMugFromMugType(mugTA),
+            mugB = formdesigner.controller.createMugFromMugType(mugTB), 
+            mugC = formdesigner.controller.createMugFromMugType(mugTC);
+        ok(formdesigner.util.canMugTypeHaveChildren(mugTA,mugTB), "Can a 'Group' MugType have children of type 'Text'?");
+        ok(!formdesigner.util.canMugTypeHaveChildren(mugTB,mugTA), "'Text' mugType can NOT have chilren (of type 'group')");
+        ok(!formdesigner.util.canMugTypeHaveChildren(mugTB,mugTC), "'Text' can't have children of /any/ type");
+
+        var relPos = formdesigner.util.getRelativeInsertPosition,
+        pos = relPos(mugTA,mugTB);
+        equal(pos,'into', "Insert a 'Text' MT into a 'Group' MT");
+        pos = relPos(mugTB,mugTC);
+        equal(pos,'after', "Insert 'Text' after other 'Text'");
+
+
+    });
+
+    test("Tree insertion tests", function(){
+        var mugTA = formdesigner.util.getNewMugType(formdesigner.model.mugTypes.stdGroup),
+            mugTB = formdesigner.util.getNewMugType(formdesigner.model.mugTypes.stdTextQuestion),
+            mugTC = formdesigner.util.getNewMugType(formdesigner.model.mugTypes.dataBindControlQuestion),
+            mugA = formdesigner.controller.createMugFromMugType(mugTA),
+            mugB = formdesigner.controller.createMugFromMugType(mugTB),
+            mugC = formdesigner.controller.createMugFromMugType(mugTC);
+
+        formdesigner.controller.initFormDesigner();
+        var c = formdesigner.controller;
+        c.insertMugTypeIntoForm(null,mugTA);
+        var tree = c.form.dataTree;
+        var treePrettyPrintExpected = ''+tree._getRootNodeID()+'['+
+                                        tree._getMugTypeNodeID(mugTA)+']';
+
+        equal(c.form.dataTree.printTree(),treePrettyPrintExpected, "Tree structure is correct after inserting a 'Group' MT under root");
+        equal(c.form.controlTree.printTree(),treePrettyPrintExpected, "Tree structure is correct after inserting a 'Group' MT under root");
+        c.insertMugTypeIntoForm(mugTA,mugTB);
+        treePrettyPrintExpected = ''+tree._getRootNodeID()+'['+
+                                        tree._getMugTypeNodeID(mugTA)+'['+
+                                        tree._getMugTypeNodeID(mugTB)+']]';
+        console.log(c.form.dataTree.printTree());
+        equal(c.form.dataTree.printTree(),treePrettyPrintExpected, "Tree structure is correct after inserting a 'Text' MT under 'Group'");
+        equal(c.form.controlTree.printTree(),treePrettyPrintExpected, "Tree structure is correct after inserting a 'Text' MT under 'Group'");
     });
 
 

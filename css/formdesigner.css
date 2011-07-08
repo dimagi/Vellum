@@ -111,6 +111,7 @@ body{
     height: 500px;
     margin: 0;
     border: 1px solid gray;
+    overflow: auto;
 }
 
 .fd-question-properties {

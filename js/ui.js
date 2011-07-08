@@ -111,6 +111,7 @@ formdesigner.ui = (function () {
     }
 
     function init_toolbar(){
+        var toolbar = $("#fd-toolbar");
         (function c_add_text_question(){ //c_ means 'create' here
             $("#fd-add-question").button().click(function(){
                 formdesigner.controller.createQuestion("text");
@@ -129,6 +130,21 @@ formdesigner.ui = (function () {
                     .css("float", "left");
         })();
 
+        (function c_printDataTreeToConsole(){
+            var printTreeBut = $(
+                    '<div id="fd-print-tree-but"> \
+                <span id="fd-print-tree-button"></span>Print DATA tree to Console \
+              </div>');
+            toolbar.append(printTreeBut);
+
+            printTreeBut.button().click(function(){
+                console.log(controller.form.dataTree.printTree());
+            });
+            $("#fd-print-tree-button")
+                    .addClass("ui-corner-all ui-icon ui-icon-plusthick")
+                    .css("float", "left");
+        })();
+
     }
 
 
@@ -140,7 +156,6 @@ formdesigner.ui = (function () {
      */
     function node_select(e,data){
         var curSelUfid = jQuery.data(data.rslt.obj[0],'ufid');
-        console.log(curSelUfid);
         formdesigner.controller.setCurrentlySelectedMug(curSelUfid);
         displayMugProperties(formdesigner.controller.getCurrentlySelectedMug());
     };
@@ -150,6 +165,7 @@ formdesigner.ui = (function () {
      * TODO: set up DND plugin, attach event bindings for DND.
      */
     function create_tree(){
+        $.jstree._themes = "themes/";
         $("#fd-question-tree").jstree({
             "json_data" : {
                 "data" : []
@@ -160,7 +176,7 @@ formdesigner.ui = (function () {
                 }
             },
             "types": getJSTreeTypes(),
-            "plugins" : [ "json_data", "ui", "crrm", "types", "themeroller" ]
+            "plugins" : [ "themes", "json_data", "ui", "types", "crrm" ]
 	    }).bind("select_node.jstree", function (e, data) {
                    node_select(e,data);
         });
@@ -170,16 +186,24 @@ formdesigner.ui = (function () {
     function getJSTreeTypes(){
         var groupRepeatValidChildren = ["group","repeat","question","selectQuestion"];
        var types =  {
-            "max_children" : 1,
+            "max_children" : -1,
 			"valid_children" : groupRepeatValidChildren,
 			"types" : {
                 "group" : {
+                    "icon":{
+                        "image" : "css/smoothness/images/ui-icons_888888_256x240.png",
+                        "position": "-16px -96px"
+                    },
                     "valid_children" : groupRepeatValidChildren
                 },
                 "repeat" : {
                     "valid_children" : groupRepeatValidChildren
                 },
                 "question" : {
+                    "icon":{
+                        "image" : "css/smoothness/images/ui-icons_888888_256x240.png",
+                        "position": "-128px -96px"
+                    },
                     "valid_children" : "none"
                 },
                 "selectQuestion" : {
@@ -192,7 +216,8 @@ formdesigner.ui = (function () {
 					"valid_children" : groupRepeatValidChildren
 				}
 			}
-		}
+		};
+        return types;
 
     }
 
@@ -211,10 +236,10 @@ formdesigner.ui = (function () {
      * @param mug
      */
     var displayMugProperties = function(mug){
-        var that = {}, qTable, qTHeader,qTBody, questionHolder, localMug = mug;
+        var that = {}, qTable, qTHeader,qTBody, localMug = mug, qPropHolder;
 
-        questionHolder = $("#fd-question-table-body")
-
+        qPropHolder = $('#fd-question-properties');
+        qPropHolder.empty();
         that.qTable = qTable;
         that.qTHeader = qTHeader;
         that.qTBody = qTBody;
@@ -225,7 +250,7 @@ formdesigner.ui = (function () {
         var create = function (mug, title){
             var i,
             qTable = $('<table id="fd-question-table" class=fd-"'+title+'"></table>');
-            $('#fd-question-properties').append(qTable);
+            qPropHolder.append(qTable);
             qTHeader = $('<thead class="fd-question-table-header"></thead>');
             qTHeader.append('<tr><td colspan=2><b><h1>Question Properties: '+mug.properties.dataElement.properties.nodeID+'</h1></b></td></tr>');
             qTHeader.append("<tr><td><b>Property Name</b></td><td><b>Property Value</b></td></tr>");
@@ -271,23 +296,24 @@ formdesigner.ui = (function () {
                     row.attr('class', "fd-question-property-row");
                     col1 = $('<td>'+i+'</td>');
                     col2 = $('<td></td>');
-                    inputBox = $('<input value="'+block[i]+'" name=fd-"'+i+'" class=fd-"'+p+'" />');
+                    inputBox = $('<input value="'+block[i]+'" name=fd-'+i+' class=fd-'+p+' />');
                     col2.append(inputBox);
                     inputBox.change(function(e){
                         var target = $(e.target),
                                 el = target.attr("class").replace('fd-',''),
                                 prop = target.attr("name").replace('fd-',''),
-                                newVal = target.val();
-                        setPropertyValForModel(el,prop, newVal);
+                                newVal = target.val().replace('"','').replace('"','');
+                        setPropertyValForModel(mug,el,prop, newVal);
                     });
                     row.append(col1);
                     row.append(col2);
                 }
             }
 
-            mug.on('property-changed',function(){
-                $('#fd-monitor-window-'+mug.ufid).filter(":input").text(JSON.stringify(mug,null,'\t'));
-            },null);
+            $('input[class="fd-dataElement"][name="fd-nodeID"]').keyup(function(){
+                var node = $('#'+controller.getCurrentlySelectedMug().ufid);
+                $('#fd-question-tree').jstree("rename_node",node,this.value);
+            })
 
 
 
@@ -306,9 +332,18 @@ formdesigner.ui = (function () {
          * @param property (string) property name
          * @param val new value the property should be set to.
          */
-        function setPropertyValForModel(element,property, val){
-            mug.properties[element].properties[property] = val;
-            mug.fire('property-changed');
+        function setPropertyValForModel(myMug, element,property, val){
+            var rootProps = myMug['properties'];
+            var elProps = rootProps[element].properties,
+                propertyToChange = elProps[property], event = {};
+
+            myMug.properties[element].properties[property] = val;
+            event.type = 'property-changed';
+            event.property = property;
+            event.element = element;
+            event.val = val;
+            myMug.fire(event);
+
         }
 
         return that;

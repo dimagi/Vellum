@@ -169,7 +169,7 @@ formdesigner.util = (function(){
                     return s.toLowerCase();
                 };
 
-        if(!refMugType || !ofTypeMug || !ofTypeMug.controlElement || !refMugType.controlElement){ throw 'Cannot pass null argument or MugType without a controlElement!'; }
+        if(!refMugType || !ofTypeMug || !ofTypeMug.properties.controlElement || !refMugType.properties.controlElement){ throw 'Cannot pass null argument or MugType without a controlElement!'; }
         if(!refMugType.controlNodeCanHaveChildren){ return false; }
         allowedChildren = refMugType.controlNodeAllowedChildren;
         allowedChildren = allowedChildren.map(makeLower);
@@ -185,6 +185,30 @@ formdesigner.util = (function(){
     
     }
     that.canMugTypeHaveChildren = canMugTypeHaveChildren;
+
+    /**
+     * Determines where the newMugType should be inserted relative
+     * to the refMugType.
+     * @param refMugType - the reference MT already in the tree
+     * @param newMugType - the new MT you want a relative position for
+     * @return - String: 'first', 'inside' or 'after'
+     */
+    var getRelativeInsertPosition = function(refMugType, newMugType){
+            var canHaveChildren;
+            if(!refMugType){
+                return "after";
+            }
+
+            canHaveChildren = formdesigner.util.canMugTypeHaveChildren;
+
+            if(canHaveChildren(refMugType,newMugType)){
+                return "into";
+            }else{
+                return "after";
+            }
+    };
+    that.getRelativeInsertPosition = getRelativeInsertPosition;
+
 
     /**
      * This method gives the passed object

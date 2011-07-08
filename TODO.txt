@@ -1,5 +1,3 @@
 fd todo:
-- Write method to figure out what (if any) types of children a mugType can have
-- Write a method to check if a move is legal (maybe making use of the above method).  Before inserting a fresh node into the tree and mode, this checkMove() should be consulted first.
-- Fix questionSelected() thing update display properties instead of appending a new properties table to the existing DOM.
+- Write a method to check if a move is legal (maybe making use of the above method).  Before inserting a fresh node into the tree this checkMove() should be consulted first.
 - Figure out how to write UI unit tests (to test stuff like the UI tree operation programmatically. (!BIG WIN!)

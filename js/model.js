@@ -674,19 +674,23 @@ formdesigner.model = (function(){
 
 
     that.mugTypes = mugTypes;
-    mugTypes["stdTextQuestion"] = (function(){
+    mugTypes.stdTextQuestion = (function(){
         var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion);
         mType.typeName = "Text Question MugType";
         mType.controlNodeAllowedChildren = false;
+        mType.properties.controlElement.name = "Text";
+        mType.properties.controlElement.tagName = "input";
         return mType;
     }());
 
-    mugTypes["stdGroup"] = (function(){
+    mugTypes.stdGroup = (function(){
         var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion),
                 allowedChildren;
         mType.controlNodeCanHaveChildren = true;
         allowedChildren = ['repeat','input','select','select1','group'];
         mType.controlNodeAllowedChildren = allowedChildren;
+        mType.properties.controlElement.name = "Group";
+        mType.properties.controlElement.tagName = "group";
         return mType;
     }());
     that.mugTypes = mugTypes;
@@ -712,7 +716,7 @@ formdesigner.model = (function(){
                 if(!val){
                     throw 'Cannot create a node without specifying a value object for the node!';
                 }
-                children = nChildren || undefined;
+                children = nChildren || [];
                 nodeValue = val;
             }(children, value);
 
@@ -807,7 +811,7 @@ formdesigner.model = (function(){
             var findParentNode = that.findParentNode = function(node){
                 if(!node){ throw "No node specified, can't find 'null' in tree!"; }
                 var i, parent = null;
-                if(!children){
+                if(!children || children.length === 0){
                     return null;
                 }
                 if(children.indexOf(node) !== -1){
@@ -816,6 +820,9 @@ formdesigner.model = (function(){
 
                 for(i in children){
                     parent = children[i].findParentNode(node);
+                    if(parent !== null){
+                        return parent;
+                    }
                 }
                 return parent;
             };
@@ -877,6 +884,7 @@ formdesigner.model = (function(){
             treeType = type || 'data';
         }(treeType);
         that.rootNode = rootNode;
+        
         /** Private Function
          * Adds a node to the top level (as a child of the abstract root node)
          *
@@ -921,7 +929,11 @@ formdesigner.model = (function(){
         }
 
         var getParentNode = function(node){
-            return rootNode.findParentNode(node);
+            if(rootNode === node){ //special case:
+                return rootNode;
+            }else{ //regular case
+                return rootNode.findParentNode(node);
+            }
         }
 
         /**
@@ -954,6 +966,7 @@ formdesigner.model = (function(){
                 var rootChildren = getRootChildren();
                 if(rootChildren.length > 0){
                     refMugType = rootChildren[rootChildren.length-1];
+                    refNode = getNodeFromMugType(refMugType);
                 }else{
                     refNode = rootNode;
                     position = 'into';
@@ -984,8 +997,11 @@ formdesigner.model = (function(){
                 case 'into':
                     refNode.addChild(node);
                     break;
+                case 'first':
+                    refNode.insertChild(node,0);
+                    break;
                 default:
-                    throw "in insertMugType() position argument MUST be null, 'before','after','into'";
+                    throw "in insertMugType() position argument MUST be null, 'before','after','into'.  Argument was: "+position;
             }
         };
         that.insertMugType = insertMugType;
@@ -1029,7 +1045,7 @@ formdesigner.model = (function(){
             nodeParent = getParentNode(node);
             output = '/' + node.getID();
 
-            while(typeof nodeParent !== 'undefined' && typeof nodeParent !== null && !nodeParent.isRootNode ){
+            while(nodeParent && !nodeParent.isRootNode ){
                 output = '/' + nodeParent.getID() + output;
                 nodeParent = getParentNode(nodeParent);
             }
@@ -1103,7 +1119,7 @@ formdesigner.model = (function(){
     var init = function(){
         var form = that.form = new Form();
         //set the form object in the controller so it has access to it as well
-        formdesigner.controller.form = form;
+        formdesigner.controller.setForm(form);
     };
     that.init = init;
 

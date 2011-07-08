@@ -19,6 +19,11 @@ formdesigner.controller = (function(){
         formdesigner.model.init();
     };
     that.initFormDesigner = initFormDesigner;
+
+    var setForm = that.setForm = function(aForm){
+        form = that.form = aForm;
+    }
+
     /**
      *
      * @param ufid
@@ -146,60 +151,82 @@ formdesigner.controller = (function(){
      * @param qType = type of question to be created. ||| Currently does nothing |||
      */
     var createQuestion = function(qType){
-        var mugType = formdesigner.util.getNewMugType(formdesigner.model.mugTypes.dataBindControlQuestion),
+        var mugType, mug;
+        
+        switch(qType.toLowerCase()){
+            case 'text':
+                mugType = formdesigner.util.getNewMugType(formdesigner.model.mugTypes.stdTextQuestion);
+                break;
+            case 'group':
+                mugType = formdesigner.util.getNewMugType(formdesigner.model.mugTypes.stdGroup);
+                break;
+            default:
+                mugType = formdesigner.util.getNewMugType(formdesigner.model.mugTypes.dataBindControlQuestion);
+        };
+        
         mug = createMugFromMugType(mugType);
-        mug.on('property-changed', function(){
-            formdesigner.controller.showErrorMessage("Property Changed in Question:"+mug.properties.dataElement.properties.nodeID+"!");
-        })
+//        mug.on('property-changed', function(e){
+//            formdesigner.controller.showErrorMessage("Property Changed in Question:"+mug.properties.dataElement.properties.nodeID+"!");
+//        })
 
-        insertMugTypeIntoForm(mugType);
-        createQuestionInUITree(mug);
+        insertMugTypeIntoForm(curSelMugType,mugType);
+        createQuestionInUITree(mugType);
         return mug;
 
     };
     that.createQuestion = createQuestion;
 
-    function createQuestionInUITree(mug){
-        function getRelativeInsertPosition(newMug){
-            var canHaveChildren, newMugType;
-            if(!curSelMugType){
-                return "first";
-            }
 
-            newMugType = form.controlTree.getMugTypeFromUFID(newMug.ufid);
-            canHaveChildren = formdesigner.util.canMugTypeHaveChildren;
-
-            if(canHaveChildren(curSelMugType,newMugType)){
-                return "inside";
-            }else{
-                return "after";
-            }
+    function createQuestionInUITree(mugType){
+        function treeSetItemType(mugType){
+            var tString = mugType.mug.properties.controlElement.properties.name.toLowerCase(),
+                setType = function(tType){
+                    var myTree = $('#fd-question-tree'),
+                        mugUfid = mugType.mug.ufid,
+                        node = $('#'+mugUfid);
+                    return myTree.jstree("set_type",tType,node);
+                };
+            
+            switch(tString.toLowerCase()){
+                case 'text':
+                    setType("question");
+                    break;
+                case 'group':
+                    setType("group");
+                    break;
+            };
         };
 
-
-        var controlTagName = mug.properties.controlElement.properties.tagName,
+        var mug = mugType.mug,
+            controlTagName = mug.properties.controlElement.properties.tagName,
             isGroupOrRepeat = (controlTagName === 'group' || controlTagName === 'repeat'),
-            objectData = {};
+            objectData = {},
+            insertPosition;
 
         if(isGroupOrRepeat){
             objectData["state"] = 'open'; //should new node be open or closed?, omit for leaf
         }
 
         objectData["data"] = mug.properties.dataElement.properties.nodeID;
-        objectData["metadata"] = {'ufid': mug.ufid,
-                                    'dataID':mug.properties.dataElement.properties.nodeID || null,
-                                    'bindID':mug.properties.bindElement.properties.nodeID || null};
+        objectData["metadata"] = {
+                                'ufid': mug.ufid,
+                                'dataID':mug.properties.dataElement.properties.nodeID || null,
+                                'bindID':mug.properties.bindElement.properties.nodeID || null
+                                };
         objectData["attr"] = {
             "id" : mug.ufid
         }
 
+        insertPosition = formdesigner.util.getRelativeInsertPosition(curSelMugType,mugType);
+
         $('#fd-question-tree').jstree("create",
             null, //reference node, use null if using UI plugin for currently selected
-            getRelativeInsertPosition(mug), //position relative to reference node
+            insertPosition, //position relative to reference node
             objectData,
             null, //callback after creation, better to wait for event
             true  //skip_rename
         );
+        treeSetItemType(mugType);
     };
 
 
@@ -207,15 +234,21 @@ formdesigner.controller = (function(){
      * Inserts a new MugType into the relevant Trees (and their
      * relevant positions) according to the specified mugType and
      * the currently selected mugType.
-     * @param mugType
+     * @param newMugType - new MT to be inserted into the Form object
+     * @param refMugType - used to determine the relative position of the insertion (relative to the refMT)
      */
-    var insertMugTypeIntoForm = function(mugType){
-//        var dataTree = form.dataTree, controlTree = form.controlTree;
+    var insertMugTypeIntoForm = function(refMugType, newMugType){
+        var dataTree = form.dataTree, controlTree = form.controlTree;
         //TODO: You know, implement me.
+
+        dataTree.insertMugType(newMugType, formdesigner.util.getRelativeInsertPosition(refMugType, newMugType), refMugType);
+        controlTree.insertMugType(newMugType, formdesigner.util.getRelativeInsertPosition(refMugType, newMugType), refMugType);
 
 
         
-    }
+    };
+    that.insertMugTypeIntoForm = insertMugTypeIntoForm;
+
     /**
      * Gets the label used to represent this mug in the UI tree
      * @param mugOrMugType - mug or mugType
