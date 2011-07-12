@@ -257,6 +257,22 @@ formdesigner.controller = (function(){
     that.insertMugTypeIntoForm = insertMugTypeIntoForm;
 
     /**
+     * Move a mugType from its current place (in both the Data and Control trees) to
+     * the position specified by the arguments,
+     * @param mugType - The MT to be moved
+     * @param position - The position relative to the refMugType (can be 'before','after' or 'into')
+     * @param refMugType
+     */
+    var moveMugType = function(mugType, position, refMugType){
+        var dataTree = form.dataTree, controlTree = form.controlTree;
+        if(!checkMoveOp(mugType, position, refMugType)){
+            throw 'MOVE NOT ALLOWED!  MugType Move for MT:'+mugType+', refMT:'+refMugType+", position:"+position+" ABORTED";
+        }
+        dataTree.insertMugType(mugType, position, refMugType);
+        controlTree.insertMugType(mugType, position, refMugType);
+    };
+    that.moveMugType = moveMugType;
+    /**
      * Gets the label used to represent this mug in the UI tree
      * @param mugOrMugType - mug or mugType
      */
@@ -274,6 +290,53 @@ formdesigner.controller = (function(){
         return mug.properties.controlElement.properties.nodeID; //TODO IMPROVE ME!
     };
     that.getTreeLabel = getTreeLabel;
+
+    /**
+     * Checks that the specified move is legal. returns false if problem is found.
+     *
+     * THIS IS FOR NODES THAT HAVE A CONTROLELEMENT ONLY!
+     * @param oType - The type of ControlElement being moved (use tagName!) e.g. "input" or "group"
+     * @param position - position, can be "before', "after", "into"
+     * @param rType - The type of the Reference controlElement being moved (use tagName!) e.g. "input" or "group"
+     *                  if -1 is given, assumes rootNode.
+     */
+    var checkMoveOp = that.checkMoveOp =function(mugType, position, refMugType){
+        var grValidChildren = formdesigner.util.GROUP_OR_REPEAT_VALID_CHILDREN,
+                oType = mugType.mug.properties.controlElement.properties.tagName,
+                rType = (!refMugType || refMugType === -1) ? 'group' : refMugType.mug.properties.controlElement.properties.tagName,
+                oIsGroupOrRepeat = (oType === 'repeat' || oType === 'group'),
+                oIsItemOrInputOrTrigger = (oType === 'item' || oType === 'input' || oType === 'trigger'),
+                oIsSelect = (oType === '1select' || oType === 'select'),
+                oIsItem = (oType === 'item'),
+                rIsSelect = (rType === '1select' || rType === 'select'),
+                rIsItemOrInputOrTrigger = (rType === 'item' || rType === 'input' || rType === 'trigger'),
+                rIsGroupOrRepeat = (rType === 'repeat' || rType === 'group');
+
+        if(position !== 'into'){
+            if(!refMugType){
+                throw "If refMugType is null in checkMoveOp() position MUST be 'into'! Position was: "+position;
+            }
+            var pRefMugType = formdesigner.controller.form.controlTree.getParentMugType(refMugType);
+            return checkMoveOp(mugType,'into',pRefMugType);
+        }
+
+        //from here it's safe to assume that position is always 'into'
+        if(rIsItemOrInputOrTrigger){
+            return false;
+        }
+
+        if(rIsGroupOrRepeat){
+            return !oIsItem;
+        }
+
+        if(rIsSelect){
+            return oIsItem;
+        }
+
+        //we should never get here.
+        throw "Unknown controlElement type used, can't check if the MOVE_OP is valid or not!";
+
+    };
 
     /**
      * Returns the Tree object specified by treeType from the Form object

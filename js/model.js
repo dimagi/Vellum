@@ -593,22 +593,22 @@ formdesigner.model = (function(){
             var validationResult = recurse(this.properties,mug.properties,"Mug Top Level");
 
             if(selfValidationResult.status === 'fail'){
-                console.group("MugType Validation Failed: Self Validation");
-                    console.warn("1/2 A MUGTYPE OBJECT HAS FAILED SELF VALIDATION. VALIDATION OBJECT BELOW");
-                    console.warn(selfValidationResult);
-                    console.warn("2/2 FAILED MUGTYPE BELOW");
-                    console.warn(this);
-                console.groupEnd();
+//                console.group("MugType Validation Failed: Self Validation");
+//                    console.warn("1/2 A MUGTYPE OBJECT HAS FAILED SELF VALIDATION. VALIDATION OBJECT BELOW");
+//                    console.warn(selfValidationResult);
+//                    console.warn("2/2 FAILED MUGTYPE BELOW");
+//                    console.warn(this);
+//                console.groupEnd();
                 validationResult.status = 'fail';
             }
 
             if(validationResult.status === 'fail'){
-                console.group("MugType Validation Failed: Mug Validation");
-                    console.warn("1/2 A MUG OBJECT HAS FAILED VALIDATION. VALIDATION OBJECT BELOW");
-                    console.warn(validationResult);
-                    console.warn("2/2 FAILED MUG BELOW");
-                    console.warn(mug);
-                console.groupEnd();
+//                console.group("MugType Validation Failed: Mug Validation");
+//                    console.warn("1/2 A MUG OBJECT HAS FAILED VALIDATION. VALIDATION OBJECT BELOW");
+//                    console.warn(validationResult);
+//                    console.warn("2/2 FAILED MUG BELOW");
+//                    console.warn(mug);
+//                console.groupEnd();
             }
 
             validationResult["typeCheck"] = selfValidationResult;
@@ -678,6 +678,14 @@ formdesigner.model = (function(){
             delete mType.properties.controlElement;
             delete mType.properties.bindElement;
             return mType;
+        }(),
+        controlOnly: function(){
+            var mType = formdesigner.util.clone(RootMugType);
+            mType.typeName = "Control ONLY Mug";
+            mType.type = "c";
+            delete mType.properties.dataElement;
+            delete mType.properties.bindElement;
+            return mType;
         }()
     };
 
@@ -694,6 +702,38 @@ formdesigner.model = (function(){
         return mType;
     }());
 
+    mugTypes.stdItem = (function(){
+        var mType = formdesigner.util.getNewMugType(mugTypes.controlOnly);
+        mType.typeName = "Item MugType";
+        mType.controlNodeAllowedChildren = false;
+        mType.properties.controlElement.name = "Item";
+        mType.properties.controlElement.tagName = "item";
+        return mType;
+    }());
+
+    mugTypes.stdTrigger = (function(){
+        var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion);
+        mType.typeName = "Trigger/Message MugType";
+        mType.controlNodeAllowedChildren = false;
+        mType.properties.controlElement.name = "Trigger";
+        mType.properties.controlElement.tagName = "trigger";
+
+        delete mType.properties.controlElement.defaultValue;
+        
+        return mType;
+    }());
+
+    mugTypes.stdMSelect = (function(){
+        var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion),
+                allowedChildren;
+        mType.controlNodeCanHaveChildren = true;
+        allowedChildren = ['item'];
+        mType.controlNodeAllowedChildren = allowedChildren;
+        mType.properties.controlElement.name = "Multi Select";
+        mType.properties.controlElement.tagName = "select";
+        return mType;
+    }());
+
     mugTypes.stdGroup = (function(){
         var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion),
                 allowedChildren;
@@ -705,6 +745,8 @@ formdesigner.model = (function(){
         return mType;
     }());
     that.mugTypes = mugTypes;
+
+
 
 
     /**
@@ -972,7 +1014,7 @@ formdesigner.model = (function(){
         var insertMugType = function(mugType, position, refMugType){
             var refNode,refNodeSiblings, refNodeIndex, refNodeParent, node;
 
-            if(!checkMoveOp(mugType,position,refMugType)){
+            if(!formdesigner.controller.checkMoveOp(mugType,position,refMugType)){
                 console.group("Illegal Tree Move Op");
                 console.log("position: "+position);
                 console.log("mugType below");
@@ -1015,8 +1057,8 @@ formdesigner.model = (function(){
 
             switch(position){
                 case 'before':
-                    refNodeParent.insertChild(node,
-                               ( (refNodeIndex > 0) ? refNodeIndex-1 : refNodeIndex));
+                    console.log("REFNODEINDEX!!!!:"+refNodeIndex);
+                    refNodeParent.insertChild(node,refNodeIndex);
                     break;
                 case 'after':
                     refNodeParent.insertChild(node,refNodeIndex+1);
@@ -1027,8 +1069,11 @@ formdesigner.model = (function(){
                 case 'first':
                     refNode.insertChild(node,0);
                     break;
+                case 'last':
+                    refNode.insertChild(node,refNodeSiblings.length+1);
+                    break;
                 default:
-                    throw "in insertMugType() position argument MUST be null, 'before','after','into'.  Argument was: "+position;
+                    throw "in insertMugType() position argument MUST be null, 'before','after','into', 'first' or 'last'.  Argument was: "+position;
             }
         };
         that.insertMugType = insertMugType;
@@ -1135,52 +1180,7 @@ formdesigner.model = (function(){
     };
     that.Tree = Tree;
 
-    /**
-     * Checks that the specified move is legal. returns false if problem is found.
-     *
-     * THIS IS FOR NODES THAT HAVE A CONTROLELEMENT ONLY!
-     * @param oType - The type of ControlElement being moved (use tagName!) e.g. "input" or "group"
-     * @param position - position, can be "before', "after", "into"
-     * @param rType - The type of the Reference controlElement being moved (use tagName!) e.g. "input" or "group"
-     *                  if -1 is given, assumes rootNode.
-     */
-    var checkMoveOp = that.checkMoveOp =function(mugType, position, refMugType){
-        var grValidChildren = formdesigner.util.GROUP_OR_REPEAT_VALID_CHILDREN,
-                oType = mugType.mug.properties.controlElement.properties.tagName,
-                rType = (!refMugType || refMugType === -1) ? 'group' : refMugType.mug.properties.controlElement.properties.tagName,
-                oIsGroupOrRepeat = (oType === 'repeat' || oType === 'group'),
-                oIsItemOrInputOrTrigger = (oType === 'item' || oType === 'input' || oType === 'trigger'),
-                oIsSelect = (oType === '1select' || oType === 'select'),
-                oIsItem = (oType === 'item'),
-                rIsSelect = (rType === '1select' || rType === 'select'),
-                rIsItemOrInputOrTrigger = (rType === 'item' || rType === 'input' || rType === 'trigger'),
-                rIsGroupOrRepeat = (rType === 'repeat' || rType === 'group');
 
-        if(position !== 'into'){
-            if(!refMugType){
-                throw "If refMugType is null in checkMoveOp() position MUST be 'into'! Position was: "+position;
-            }
-            var pRefMugType = formdesigner.controller.form.controlTree.getParentMugType(refMugType);
-            return checkMoveOp(mugType,'into',pRefMugType);
-        }
-
-        //from here it's safe to assume that position is always 'into'
-        if(rIsItemOrInputOrTrigger){
-            return false;
-        }
-
-        if(rIsGroupOrRepeat){
-            return !oIsItem;
-        }
-
-        if(rIsSelect){
-            return oIsItem;
-        }
-
-        //we should never get here.
-        throw "Unknown controlElement type used, can't check if the MOVE_OP is valid or not!";
-
-    };
 
     /**
      * An initialization function that sets up a number of different fields and properties

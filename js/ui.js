@@ -181,23 +181,13 @@ formdesigner.ui = (function () {
                 "move": {
                     "always_copy": false,
                     "check_move" : function (m) {
-//                        console.group("check_mode jstree init function callback");
-//                        console.log(m);
-//                        console.log($(m.o));
                         var controller = formdesigner.controller,
                                 mugType = controller.form.controlTree.getMugTypeFromUFID($(m.o).attr('id')),
                                 refMugType = controller.form.controlTree.getMugTypeFromUFID($(m.r).attr('id')),
                                 position = m.p;
+                        console.log("check_move:"+mugType+":"+position+":"+refMugType);
 
-//                        console.log("MugType...");
-//                        console.log(mugType);
-//                        console.log("refMugType...");
-//                        console.log(refMugType);
-//                        console.log("Position...");
-                        console.log(position);
-                        console.log(Math.random());
-//                        console.groupEnd();
-                        return formdesigner.model.checkMoveOp(mugType,position,refMugType);
+                        return  controller.checkMoveOp(mugType,position,refMugType);;
 				    }
                 }
             },
@@ -209,7 +199,14 @@ formdesigner.ui = (function () {
             "plugins" : [ "themes", "json_data", "ui", "types", "crrm","dnd" ]
 	    }).bind("select_node.jstree", function (e, data) {
                    node_select(e,data);
-        });
+        }).bind("move_node.jstree", function(e,data){
+                    var controller = formdesigner.controller,
+                                mugType = controller.form.controlTree.getMugTypeFromUFID($(data.rslt.o).attr('id')),
+                                refMugType = controller.form.controlTree.getMugTypeFromUFID($(data.rslt.r).attr('id')),
+                                position = data.rslt.p;
+                    console.log("move_node: "+mugType+":"+position+":"+refMugType);
+                    controller.moveMugType(mugType, position, refMugType);
+                });
         questionTree = $("#fd-question-tree");
     }
 
