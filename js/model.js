@@ -47,18 +47,47 @@ formdesigner.model = (function(){
          * consisting of various elements (see Mug comments)
          */
         (function construct(spec){
-            that.properties.bindElement = spec.bindElement || undefined;
-            that.properties.dataElement = spec.dataElement || undefined;
-            that.properties.controlElement = spec.controlElement || undefined;
+            var i;
+            for(i in spec){
+                if(!spec.hasOwnProperty(i)){ continue; }
+                that.properties[i] = spec[i];
+            }
+//            that.properties.bindElement = spec.bindElement || undefined;
+//            that.properties.dataElement = spec.dataElement || undefined;
+//            that.properties.controlElement = spec.controlElement || undefined;
         }(mySpec));
 
         getBindElementID = that.getBindElementID = function(){
-            return that.properties.bindElement.properties.nodeID;
+            if(this.properties.bindElement){
+                return this.properties.bindElement.properties.nodeID;
+            }else{
+                return null;
+            }
         };
 
         getDataElementID = that.getDataElementID = function(){
-            return that.properties.dataElement.properties.nodeID;
+            if(this.properties.dataElement){
+                return this.properties.dataElement.properties.nodeID;
+            }else{
+                return null;
+            }
         }
+
+        var getDisplayName = function(){
+            var retName = getBindElementID();
+            if(!retName){ retName = getDataElementID(); }
+            if(!retName){
+                if(this.properties.controlElement){
+                    retName = this.properties.controlElement.properties.label;
+                }
+            }
+            console.log("model.getDisplayName()! retname="+retName);
+
+
+            return retName;
+        };
+        that.getDisplayName = getDisplayName;
+
         //make the object event aware
         formdesigner.util.eventuality(that);
         return that;
@@ -719,6 +748,7 @@ formdesigner.model = (function(){
         mType.properties.controlElement.tagName = "trigger";
 
         delete mType.properties.controlElement.defaultValue;
+        delete mType.properties.bindElement.dataType;
         
         return mType;
     }());
@@ -731,6 +761,7 @@ formdesigner.model = (function(){
         mType.controlNodeAllowedChildren = allowedChildren;
         mType.properties.controlElement.name = "Multi Select";
         mType.properties.controlElement.tagName = "select";
+        mType.properties.bindElement.dataType = "xsd:select";
         return mType;
     }());
 
@@ -751,7 +782,7 @@ formdesigner.model = (function(){
 
     /**
      * A regular tree (with any amount of leafs per node)
-     * @param treeType - is this a DataElement tree or a BindElement tree (use 'data' or 'bind' for this argument, respectively)
+     * @param treeType - is this a DataElement tree or a controlElement tree (use 'data' or 'control' for this argument, respectively)
      * treeType defaults to 'data'
      */
     var Tree = function(treeType){
@@ -892,8 +923,8 @@ formdesigner.model = (function(){
                 }
                 if(treeType === 'data'){
                     return getValue().mug.getDataElementID();
-                }else if(treeType === 'bind'){
-                    return getValue().mug.getBindElementID();
+                }else if(treeType === 'control'){
+                    return getValue().mug.getDisplayName();
                 }else{
                     throw 'Tree does not have a specified treeType! Default is "data" so must have been forcibly removed!';
                 }

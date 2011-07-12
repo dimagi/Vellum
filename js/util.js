@@ -41,7 +41,7 @@ formdesigner.util = (function(){
     };
     that.VERIFY_CODES = VERIFY_CODES;
 
-    var GROUP_OR_REPEAT_VALID_CHILDREN = that.GROUP_OR_REPEAT_VALID_CHILDREN = ["group","repeat","question","selectQuestion"];
+    var GROUP_OR_REPEAT_VALID_CHILDREN = that.GROUP_OR_REPEAT_VALID_CHILDREN = ["group","repeat","question","selectQuestion","trigger"];
 
 
     //taken from http://stackoverflow.com/questions/728360/copying-an-object-in-javascript

@@ -134,6 +134,36 @@ formdesigner.ui = (function () {
             buttons.addGroup = $("#fd-add-group-but");
         })();
 
+        (function c_add_select(){
+            $("#fd-add-select-but").button().click(function(){
+                formdesigner.controller.createQuestion("select");
+            });
+            $("#fd-add-select-button")
+                    .addClass("ui-corner-all ui-icon ui-icon-plusthick")
+                    .css("float", "left");
+            buttons.addSelect = $("#fd-add-select-but");
+        })();
+
+        (function c_add_item(){
+            $("#fd-add-item-but").button().click(function(){
+                formdesigner.controller.createQuestion("item");
+            });
+            $("#fd-add-item-button")
+                    .addClass("ui-corner-all ui-icon ui-icon-plusthick")
+                    .css("float", "left");
+            buttons.addItem = $("#fd-add-item-but");
+        })();
+
+        (function c_add_trigger(){
+            $("#fd-add-trigger-but").button().click(function(){
+                formdesigner.controller.createQuestion("trigger");
+            });
+            $("#fd-add-trigger-button")
+                    .addClass("ui-corner-all ui-icon ui-icon-plusthick")
+                    .css("float", "left");
+            buttons.addTrigger = $("#fd-add-trigger-but");
+        })();
+
         (function c_printDataTreeToConsole(){
             var printTreeBut = $(
                     '<div id="fd-print-tree-but"> \
@@ -142,7 +172,7 @@ formdesigner.ui = (function () {
             toolbar.append(printTreeBut);
 
             printTreeBut.button().click(function(){
-                console.log(controller.form.dataTree.printTree());
+                console.log(controller.form.controlTree.printTree());
             });
             $("#fd-print-tree-button")
                     .addClass("ui-corner-all ui-icon ui-icon-plusthick")
@@ -185,9 +215,11 @@ formdesigner.ui = (function () {
                                 mugType = controller.form.controlTree.getMugTypeFromUFID($(m.o).attr('id')),
                                 refMugType = controller.form.controlTree.getMugTypeFromUFID($(m.r).attr('id')),
                                 position = m.p;
-                        console.log("check_move:"+mugType+":"+position+":"+refMugType);
 
-                        return  controller.checkMoveOp(mugType,position,refMugType);;
+                        var ret = controller.checkMoveOp(mugType,position,refMugType);
+                        console.log("check_move:"+mugType+":"+position+":"+refMugType+", STATUS_PASS:"+ret);
+
+                        return  ret;
 				    }
                 }
             },
@@ -224,6 +256,10 @@ formdesigner.ui = (function () {
                     "valid_children" : groupRepeatValidChildren
                 },
                 "repeat" : {
+                    "icon":{
+                        "image" : "css/smoothness/images/ui-icons_888888_256x240.png",
+                        "position": "-64px -80px"
+                    },
                     "valid_children" : groupRepeatValidChildren
                 },
                 "question" : {
@@ -234,9 +270,24 @@ formdesigner.ui = (function () {
                     "valid_children" : "none"
                 },
                 "selectQuestion" : {
+                    "icon":{
+                        "image" : "css/smoothness/images/ui-icons_888888_256x240.png",
+                        "position": "-96px -176px"
+                    },
                     "valid_children": ["item"]
                 },
                 "item" : {
+                    "icon":{
+                        "image" : "css/smoothness/images/ui-icons_888888_256x240.png",
+                        "position": "-48px -128px"
+                    },
+                    "valid_children" : "none"
+                },
+                "trigger" : {
+                    "icon":{
+                        "image" : "css/smoothness/images/ui-icons_888888_256x240.png",
+                        "position": "-16px -144px"
+                    },
                     "valid_children" : "none"
                 },
 				"default" : {
@@ -290,7 +341,8 @@ formdesigner.ui = (function () {
             qTable = $('<table id="fd-question-table" class=fd-"'+title+'"></table>');
             qPropHolder.append(qTable);
             qTHeader = $('<thead class="fd-question-table-header"></thead>');
-            qTHeader.append('<tr><td colspan=2><b><h1>Question Properties: '+mug.properties.dataElement.properties.nodeID+'</h1></b></td></tr>');
+            console.log(mugT);
+            qTHeader.append('<tr><td colspan=2><b><h1>Question Properties: '+controller.getTreeLabel(mugT)+'</h1></b></td></tr>');
             qTHeader.append("<tr><td><b>Property Name</b></td><td><b>Property Value</b></td></tr>");
             qTable.append(qTHeader);
             qTBody = $("<tbody></tbody>");
@@ -465,6 +517,15 @@ formdesigner.ui = (function () {
               <div id="fd-add-group-but"> \
                 <span id="add-group-button"></span>Add a Group \
               </div> \
+        <div id="fd-add-select-but"> \
+                <span id="add-select-button"></span>Add a Select Question \
+        </div> \
+          <div id="fd-add-item-but"> \
+            <span id="add-item-button"></span>Add a select Item \
+          </div> \
+        <div id="fd-add-trigger-but"> \
+                <span id="add-trigger-button"></span>Add a Trigger \
+          </div> \
           </div> \
           <div id="fd-question-tree" class="fd-tree"> \
 \

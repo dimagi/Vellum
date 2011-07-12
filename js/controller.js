@@ -166,6 +166,15 @@ formdesigner.controller = (function(){
             case 'group':
                 mugType = formdesigner.util.getNewMugType(formdesigner.model.mugTypes.stdGroup);
                 break;
+            case 'select':
+                mugType = formdesigner.util.getNewMugType(formdesigner.model.mugTypes.stdMSelect);
+                break;
+             case 'item':
+                mugType = formdesigner.util.getNewMugType(formdesigner.model.mugTypes.stdItem);
+                break;
+            case 'trigger':
+                mugType = formdesigner.util.getNewMugType(formdesigner.model.mugTypes.stdTrigger);
+                break;
             default:
                 mugType = formdesigner.util.getNewMugType(formdesigner.model.mugTypes.dataBindControlQuestion);
         };
@@ -204,12 +213,22 @@ formdesigner.controller = (function(){
                 case 'group':
                     setType("group");
                     break;
+                case 'multi select':
+                    setType("selectQuestion");
+                    break;
+                case 'trigger':
+                    setType("trigger");
+                    break;
+                case 'item':
+                    setType("item");
+                    break;
             };
         };
 
         var mug = mugType.mug,
             controlTagName = mug.properties.controlElement.properties.tagName,
             isGroupOrRepeat = (controlTagName === 'group' || controlTagName === 'repeat'),
+            itemID,
             objectData = {},
             insertPosition;
 
@@ -217,12 +236,12 @@ formdesigner.controller = (function(){
             objectData["state"] = 'open'; //should new node be open or closed?, omit for leaf
         }
 
-        objectData["data"] = mug.properties.dataElement.properties.nodeID;
+        objectData["data"] = !(mug.properties.dataElement) ? mug.properties.controlElement.properties.nodeID : mug.properties.dataElement.properties.nodeID;
         objectData["metadata"] = {
                                 'mugTypeUfid': mugType.ufid,
                                 'mugUfid': mug.ufid,
-                                'dataID':mug.properties.dataElement.properties.nodeID || null,
-                                'bindID':mug.properties.bindElement.properties.nodeID || null
+                                'dataID':mug.getDataElementID(),
+                                'bindID':mug.getBindElementID()
                                 };
         objectData["attr"] = {
             "id" : mugType.ufid
@@ -280,14 +299,17 @@ formdesigner.controller = (function(){
         var mug;
         if(mugOrMugType instanceof formdesigner.model.Mug){
             mug = mugOrMugType;
-        }else if(typeof mugOrMugType.validate === 'function'){
+        }else if(typeof mugOrMugType.validateMug === 'function'){
             mug = mugOrMugType.mug;
         }else{
             throw 'getTreeLabel() must be given either a Mug or MugType as argument!';
         }
 
-
-        return mug.properties.controlElement.properties.nodeID; //TODO IMPROVE ME!
+        var retVal = mug.getBindElementID() ? mug.getDataElementID() : mug.getBindElementID();
+        if(!retVal){
+            retVal = mug.properties.controlElement.properties.label;
+        }
+        return retVal;
     };
     that.getTreeLabel = getTreeLabel;
 
@@ -301,8 +323,7 @@ formdesigner.controller = (function(){
      *                  if -1 is given, assumes rootNode.
      */
     var checkMoveOp = that.checkMoveOp =function(mugType, position, refMugType){
-        var grValidChildren = formdesigner.util.GROUP_OR_REPEAT_VALID_CHILDREN,
-                oType = mugType.mug.properties.controlElement.properties.tagName,
+        var oType = mugType.mug.properties.controlElement.properties.tagName,
                 rType = (!refMugType || refMugType === -1) ? 'group' : refMugType.mug.properties.controlElement.properties.tagName,
                 oIsGroupOrRepeat = (oType === 'repeat' || oType === 'group'),
                 oIsItemOrInputOrTrigger = (oType === 'item' || oType === 'input' || oType === 'trigger'),
@@ -321,6 +342,7 @@ formdesigner.controller = (function(){
         }
 
         //from here it's safe to assume that position is always 'into'
+        console.log("CHECKMOVEOP, position"+position+", oType:"+oType+", rType:"+rType);
         if(rIsItemOrInputOrTrigger){
             return false;
         }
