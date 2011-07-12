@@ -356,12 +356,12 @@ $(document).ready(function(){
 
     module("Tree Data Structure Tests");
     test("Trees", function(){
-//        expect(7);
+        expect(16);
 
         ///////////BEGIN SETUP///////
-        var mugTA = formdesigner.util.getNewMugType(formdesigner.model.mugTypes.dataBindControlQuestion),
-            mugTB = formdesigner.util.getNewMugType(formdesigner.model.mugTypes.dataBindControlQuestion),
-            mugTC = formdesigner.util.getNewMugType(formdesigner.model.mugTypes.dataBindControlQuestion),
+        var mugTA = formdesigner.util.getNewMugType(formdesigner.model.mugTypes.stdGroup),
+            mugTB = formdesigner.util.getNewMugType(formdesigner.model.mugTypes.stdGroup),
+            mugTC = formdesigner.util.getNewMugType(formdesigner.model.mugTypes.stdGroup),
             mugA = formdesigner.controller.createMugFromMugType(mugTA),
             mugB = formdesigner.controller.createMugFromMugType(mugTB),
             mugC = formdesigner.controller.createMugFromMugType(mugTC),
@@ -370,7 +370,7 @@ $(document).ready(function(){
         var createMugFromMugType = formdesigner.controller.createMugFromMugType;
         var DBCQuestion = formdesigner.model.mugTypes.dataBindControlQuestion;
 
-        tree.insertMugType(mugTA, null, null); //add mugA as a child of the rootNode
+        tree.insertMugType(mugTA, 'into', null); //add mugA as a child of the rootNode
         tree.insertMugType(mugTB, 'into',mugTA ); //add mugB as a child of mugA...
         tree.insertMugType(mugTC, 'into', mugTB); //...
         //////////END SETUP//////////
@@ -476,7 +476,7 @@ $(document).ready(function(){
             mugB = formdesigner.controller.createMugFromMugType(mugTB), 
             mugC = formdesigner.controller.createMugFromMugType(mugTC);
         ok(formdesigner.util.canMugTypeHaveChildren(mugTA,mugTB), "Can a 'Group' MugType have children of type 'Text'?");
-        ok(!formdesigner.util.canMugTypeHaveChildren(mugTB,mugTA), "'Text' mugType can NOT have chilren (of type 'group')");
+        ok(!formdesigner.util.canMugTypeHaveChildren(mugTB,mugTA), "'Text' mugType can NOT have children (of type 'group')");
         ok(!formdesigner.util.canMugTypeHaveChildren(mugTB,mugTC), "'Text' can't have children of /any/ type");
 
         var relPos = formdesigner.util.getRelativeInsertPosition,
@@ -489,6 +489,7 @@ $(document).ready(function(){
     });
 
     test("Tree insertion tests", function(){
+        expect(4);
         var mugTA = formdesigner.util.getNewMugType(formdesigner.model.mugTypes.stdGroup),
             mugTB = formdesigner.util.getNewMugType(formdesigner.model.mugTypes.stdTextQuestion),
             mugTC = formdesigner.util.getNewMugType(formdesigner.model.mugTypes.dataBindControlQuestion),
@@ -511,6 +512,27 @@ $(document).ready(function(){
                                         tree._getMugTypeNodeID(mugTB)+']]';
         equal(c.form.dataTree.printTree(),treePrettyPrintExpected, "Tree structure is correct after inserting a 'Text' MT under 'Group'");
         equal(c.form.controlTree.printTree(),treePrettyPrintExpected, "Tree structure is correct after inserting a 'Text' MT under 'Group'");
+    });
+
+    test("Does check_move() work correctly?", function(){
+        var mugTA = formdesigner.util.getNewMugType(formdesigner.model.mugTypes.stdTextQuestion),
+            mugTB = formdesigner.util.getNewMugType(formdesigner.model.mugTypes.stdTextQuestion),
+            mugTC = formdesigner.util.getNewMugType(formdesigner.model.mugTypes.stdTextQuestion),
+            mugA = formdesigner.controller.createMugFromMugType(mugTA),
+            mugB = formdesigner.controller.createMugFromMugType(mugTB),
+            mugC = formdesigner.controller.createMugFromMugType(mugTC);
+            formdesigner.controller.initFormDesigner();
+        var c = formdesigner.controller;
+        var tree = c.form.controlTree;
+        console.log(tree.printTree());
+        c.insertMugTypeIntoForm(null,mugTA);
+        console.log(tree.printTree());
+        c.insertMugTypeIntoForm(null,mugTB);
+        console.log(tree.printTree());
+        c.insertMugTypeIntoForm(null,mugTC);
+        console.log(tree.printTree());
+        var tree = c.form.controlTree;
+        console.log(tree.printTree());
     });
 
     module("UI Create Questions Tests");

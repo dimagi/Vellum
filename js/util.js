@@ -41,6 +41,9 @@ formdesigner.util = (function(){
     };
     that.VERIFY_CODES = VERIFY_CODES;
 
+    var GROUP_OR_REPEAT_VALID_CHILDREN = that.GROUP_OR_REPEAT_VALID_CHILDREN = ["group","repeat","question","selectQuestion"];
+
+
     //taken from http://stackoverflow.com/questions/728360/copying-an-object-in-javascript
     //clones a 'simple' object (see link for full description)
     function clone(obj) {
@@ -196,7 +199,7 @@ formdesigner.util = (function(){
     var getRelativeInsertPosition = function(refMugType, newMugType){
             var canHaveChildren;
             if(!refMugType){
-                return "after";
+                return "into";
             }
 
             canHaveChildren = formdesigner.util.canMugTypeHaveChildren;

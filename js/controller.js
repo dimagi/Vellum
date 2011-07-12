@@ -250,13 +250,9 @@ formdesigner.controller = (function(){
      */
     var insertMugTypeIntoForm = function(refMugType, newMugType){
         var dataTree = form.dataTree, controlTree = form.controlTree;
-        //TODO: You know, implement me.
 
         dataTree.insertMugType(newMugType, formdesigner.util.getRelativeInsertPosition(refMugType, newMugType), refMugType);
         controlTree.insertMugType(newMugType, formdesigner.util.getRelativeInsertPosition(refMugType, newMugType), refMugType);
-
-
-        
     };
     that.insertMugTypeIntoForm = insertMugTypeIntoForm;
 

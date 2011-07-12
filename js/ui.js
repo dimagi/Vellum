@@ -179,11 +179,34 @@ formdesigner.ui = (function () {
             },
             "crrm" : {
                 "move": {
-                    "always_copy": false
+                    "always_copy": false,
+                    "check_move" : function (m) {
+//                        console.group("check_mode jstree init function callback");
+//                        console.log(m);
+//                        console.log($(m.o));
+                        var controller = formdesigner.controller,
+                                mugType = controller.form.controlTree.getMugTypeFromUFID($(m.o).attr('id')),
+                                refMugType = controller.form.controlTree.getMugTypeFromUFID($(m.r).attr('id')),
+                                position = m.p;
+
+//                        console.log("MugType...");
+//                        console.log(mugType);
+//                        console.log("refMugType...");
+//                        console.log(refMugType);
+//                        console.log("Position...");
+                        console.log(position);
+                        console.log(Math.random());
+//                        console.groupEnd();
+                        return formdesigner.model.checkMoveOp(mugType,position,refMugType);
+				    }
                 }
             },
+            "dnd" : {
+                        "drop_target" : false,
+                        "drag_target" : false
+            },
             "types": getJSTreeTypes(),
-            "plugins" : [ "themes", "json_data", "ui", "types", "crrm" ]
+            "plugins" : [ "themes", "json_data", "ui", "types", "crrm","dnd" ]
 	    }).bind("select_node.jstree", function (e, data) {
                    node_select(e,data);
         });
@@ -191,7 +214,7 @@ formdesigner.ui = (function () {
     }
 
     function getJSTreeTypes(){
-        var groupRepeatValidChildren = ["group","repeat","question","selectQuestion"];
+        var groupRepeatValidChildren = formdesigner.util.GROUP_OR_REPEAT_VALID_CHILDREN;
        var types =  {
             "max_children" : -1,
 			"valid_children" : groupRepeatValidChildren,
@@ -236,14 +259,22 @@ formdesigner.ui = (function () {
      * This means it will show only fields that are available for this
      * specific MugType and whatever properties are already set.
      *
-     * TODO: Should use the MugType to figure out which fields to display
-     * TODO: create bindings to verify validity on property changes
-     * TODO: show marker (or something) for required fields.
-     * TODO: PARAM SHOULD BE MUGTYPE NOT MUG!
-     * @param mug
+     *
+     * @param mugType
      */
     var displayMugProperties = function(mugType){
-        var that = {}, qTable, qTHeader,qTBody, localMug = mugType.mug, qPropHolder;
+        var that = {},
+                qTable,
+                qTHeader,
+                qTBody,
+                localMug = mugType.mug,
+                qPropHolder,
+                showPropertiesFactory = {};
+
+        if(!mugType.properties.controlElement){
+            //fuggedaboudit
+            throw "Attempted to display properties for a MugType that doesn't have a controlElement!";
+        }
 
         qPropHolder = $('#fd-question-properties');
         qPropHolder.empty();
@@ -257,6 +288,8 @@ formdesigner.ui = (function () {
         var create = function (mugT, title){
             var i,
             mug = mugT.mug;
+
+
             qTable = $('<table id="fd-question-table" class=fd-"'+title+'"></table>');
             qPropHolder.append(qTable);
             qTHeader = $('<thead class="fd-question-table-header"></thead>');
@@ -265,6 +298,7 @@ formdesigner.ui = (function () {
             qTable.append(qTHeader);
             qTBody = $("<tbody></tbody>");
             qTable.append(qTBody);
+
 
             i = 'ufid';
             var row, col1,col2,mugProps;
@@ -327,6 +361,67 @@ formdesigner.ui = (function () {
 
 
         }(mugType, localMug.ufid);
+
+        /**
+         * Used for setting up the basic skeleton for properties editing
+         * (i.e. all the stuff that's common across the different MugTypes)
+         * @param mugT
+         * @return an object containing the various fields/items that are
+         * usefully editable
+         */
+        showPropertiesFactory.generic = function(mugT){
+
+        }
+
+
+
+        /**
+         * Shows the properties that are editable by the user
+         * (as either a repeat or group)
+         * @param mugT - the MugType associated with this group/repeat
+         * @param isRepeat
+         */
+        showPropertiesFactory.group = showPropertiesFactory.repeat = function(mugT){
+            var fields = showPropertiesFactory.generic(mugT);
+        }
+
+        /**
+         * Here 'Normal Question' means whatever
+         * isn't a repeat, group, (1)select, item, trigger
+         * @param mugT
+         */
+        var showNormalQuestionProperties = function(mugT){
+            var fields = showPropertiesFactory.generic(mugT);
+        }
+        var s = showPropertiesFactory;
+        s.text = s.int = s.long = s.double = s.date = s.datetime = s.picture = showNormalQuestionProperties;
+
+        //We use the showProperties object as dictionary to make it easier to select
+        //the right function based on the MugType without a pita long and complex if/switch statement.
+
+        /**
+         * Shows the props for 1selec/select type questions
+         * @param mugT
+         */
+        var showSelectQuestionProperties = function(mugT){
+            var fields = showPropertiesFactory.generic(mugT);
+        }
+
+        /**
+         * Shows props for Items (in a select/1select).
+         * @param itemData - the data object associated with this item
+         */
+        var showSelectItemProperties = function(itemData){
+
+        }
+
+        /**
+         * Shows the props for a Trigger item.
+         * @param mugT
+         */
+        var showTriggerProperties = function(mugT){
+
+        }
 
 
         function setPropertyValForUI(property, value){
