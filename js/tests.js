@@ -470,7 +470,7 @@ $(document).ready(function(){
 
 
     });
-    module("UI Tree (JSTree) related tests");
+    module("UITree");
     test("Children moving/relative location tests", function(){
             var mugTA = formdesigner.util.getNewMugType(formdesigner.model.mugTypes.stdGroup),
             mugTB = formdesigner.util.getNewMugType(formdesigner.model.mugTypes.stdTextQuestion),
@@ -529,7 +529,6 @@ $(document).ready(function(){
         m = formdesigner.model;
 
         var tree = c.form.controlTree;
-        console.log(tree.printTree());
         ok(c.checkMoveOp(mugTA,'before',mugTB));
         ok(!c.checkMoveOp(mugTA,'into',mugTB));
 

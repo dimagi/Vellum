@@ -1,6 +1,6 @@
 /*jslint maxerr: 50, indent: 4 */
 /*globals $,document,console*/
-if(typeof formdesigner === 'undefined'){
+if (typeof formdesigner === 'undefined') {
     var formdesigner = {};
 }
 
@@ -11,12 +11,12 @@ formdesigner.ui = (function () {
     controller = formdesigner.controller,
     questionTree;
 
-    var appendErrorMessage = that.appendErrorMessage = function(msg){
+    var appendErrorMessage = that.appendErrorMessage = function (msg) {
         $('#fd-notify').addClass("notice");
         $('#fd-notify').text($('#fd-notify').text() + msg);
     };
-    
-    function do_loading_bar(){
+
+    function do_loading_bar() {
         var pbar = $("#progressbar"),
         content = $("#content"),
         loadingBar = $("#loadingBar"),
@@ -25,9 +25,9 @@ formdesigner.ui = (function () {
                 doneModel = false,
                 doneTree = true,
                 allDone = false,
-                tryComplete = function(){
+                tryComplete = function () {
                     allDone = doneUtil && doneController && doneModel;
-                    if(allDone){
+                    if (allDone) {
                         loadingBar.delay(500).fadeOut(500);
                     }
                 };
@@ -39,82 +39,82 @@ formdesigner.ui = (function () {
         pbar.progressbar({ value: 0 });
 
 //        $("#loadingInfo").html("downloading jstree.js");
-//        $.getScript("js/jquery.jstree.js", function(){
+//        $.getScript("js/jquery.jstree.js", function () {
 //            pbar.progressbar({ value: (pbar.progressbar( "option", "value" )+25)});
 //            doneTree = true;
 //            tryComplete();
 //        });
 //
 //        $("#loadingInfo").html("downloading util.js");
-//        $.getScript("js/util.js", function (){
+//        $.getScript("js/util.js", function () {
 //            pbar.progressbar({ value: (pbar.progressbar( "option", "value" )+25)});
 //            doneUtil = true;
 //            tryComplete();
 //        });
 //
 //        $("#loadingInfo").html("downloading model.js");
-//        $.getScript("js/model.js", function(){
+//        $.getScript("js/model.js", function () {
 //            pbar.progressbar({ value: (pbar.progressbar( "option", "value" )+25)});
 //            doneModel = true;
 //            tryComplete();
 //        });
 //
 //        $("#loadingInfo").html("downloading controller.js");
-//        $.getScript("js/controller.js", function(){
+//        $.getScript("js/controller.js", function () {
 //            pbar.progressbar({ value: (pbar.progressbar( "option", "value" )+25)});
 //            doneController = true;
 //            tryComplete();
 //        });
 //
-//        window.setTimeout(function(){
-//            if(!allDone){
+//        window.setTimeout(function () {
+//            if (!allDone) {
 //                    allDone = doneUtil && doneController && doneModel && doneTree;
-//                    if(allDone){
+//                    if (allDone) {
 //                        loadingBar.delay(500).fadeOut(500);
 //                    }else{
 //                        var alertString = '';
-//                        if(!doneUtil){ alertString += '[Util.js]'; }
-//                        if(!doneController){ alertString += '[Controller.js]';}
-//                        if(!doneModel){ alertString += '[Model.js]';}
-//                        if(!doneTree){ alertString += '[jsTree]'; }
+//                        if (!doneUtil) { alertString += '[Util.js]'; }
+//                        if (!doneController) { alertString += '[Controller.js]';}
+//                        if (!doneModel) { alertString += '[Model.js]';}
+//                        if (!doneTree) { alertString += '[jsTree]'; }
 //
 //                        alert("Problem loading FormDesigner Libraries! Libraries not loaded: "+alertString);
 //                    }
 //            }
-//                },5000);
+//                }, 5000);
 
         loadingBar.fadeOut(200);
 
     }
 
-    function do_nav_bar(){
-        $(function() {
-            var d=300;
-            $('#navigation a').each(function(){
+    function do_nav_bar() {
+        $(function () {
+            var d = 300;
+            $('#navigation a').each(function () {
                 $(this).stop().animate({
-                    'marginTop':'-80px'
-                },d+=150);
+                    'marginTop': '-80px'
+                }, d += 150);
             });
 
             $('#navigation > li').hover(
                 function () {
-                    $('a',$(this)).stop().animate({
-                        'marginTop':'-2px'
-                    },200);
+                    $('a', $(this)).stop().animate({
+                        'marginTop': '-2px'
+                    }, 200);
                 },
                 function () {
-                    $('a',$(this)).stop().animate({
-                        'marginTop':'-80px'
-                    },200);
+                    $('a', $(this)).stop().animate({
+                        'marginTop': '-80px'
+                    }, 200);
                 }
             );
         });
     }
 
-    function init_toolbar(){
+    function init_toolbar() {
         var toolbar = $("#fd-toolbar");
-        (function c_add_text_question(){ //c_ means 'create' here
-            $("#fd-add-question").button().click(function(){
+        (function c_add_text_question() { //c_ means 'create' here
+            $("#fd-add-question").button().click(function () {
                 formdesigner.controller.createQuestion("text");
             });
             $("#fd-add-question-button")
@@ -124,8 +124,8 @@ formdesigner.ui = (function () {
             buttons.addTextQuestion = $("#fd-add-question");
         })();
 
-        (function c_add_group(){
-            $("#fd-add-group-but").button().click(function(){
+        (function c_add_group() {
+            $("#fd-add-group-but").button().click(function () {
                 formdesigner.controller.createQuestion("group");
             });
             $("#fd-add-group-button")
@@ -134,8 +134,8 @@ formdesigner.ui = (function () {
             buttons.addGroup = $("#fd-add-group-but");
         })();
 
-        (function c_add_select(){
-            $("#fd-add-select-but").button().click(function(){
+        (function c_add_select() {
+            $("#fd-add-select-but").button().click(function () {
                 formdesigner.controller.createQuestion("select");
             });
             $("#fd-add-select-button")
@@ -144,8 +144,8 @@ formdesigner.ui = (function () {
             buttons.addSelect = $("#fd-add-select-but");
         })();
 
-        (function c_add_item(){
-            $("#fd-add-item-but").button().click(function(){
+        (function c_add_item() {
+            $("#fd-add-item-but").button().click(function () {
                 formdesigner.controller.createQuestion("item");
             });
             $("#fd-add-item-button")
@@ -154,8 +154,8 @@ formdesigner.ui = (function () {
             buttons.addItem = $("#fd-add-item-but");
         })();
 
-        (function c_add_trigger(){
-            $("#fd-add-trigger-but").button().click(function(){
+        (function c_add_trigger() {
+            $("#fd-add-trigger-but").button().click(function () {
                 formdesigner.controller.createQuestion("trigger");
             });
             $("#fd-add-trigger-button")
@@ -164,14 +164,14 @@ formdesigner.ui = (function () {
             buttons.addTrigger = $("#fd-add-trigger-but");
         })();
 
-        (function c_printDataTreeToConsole(){
+        (function c_printDataTreeToConsole() {
             var printTreeBut = $(
                     '<div id="fd-print-tree-but"> \
                 <span id="fd-print-tree-button"></span>Print DATA tree to Console \
               </div>');
             toolbar.append(printTreeBut);
 
-            printTreeBut.button().click(function(){
+            printTreeBut.button().click(function () {
                 console.log(controller.form.controlTree.printTree());
             });
             $("#fd-print-tree-button")
@@ -184,107 +184,49 @@ formdesigner.ui = (function () {
     }
     that.buttons = buttons;
 
-
-
-    /**
-     * Private function (to the UI anyway) for handling node_select events.
-     * @param e
-     * @param data
-     */
-    function node_select(e,data){
-        var curSelUfid = jQuery.data(data.rslt.obj[0],'mugTypeUfid');
-        formdesigner.controller.setCurrentlySelectedMugType(curSelUfid);
-        displayMugProperties(formdesigner.controller.getCurrentlySelectedMugType());
-    };
-
-    /**
-     * Creates the UI tree
-     * TODO: set up DND plugin, attach event bindings for DND.
-     */
-    function create_tree(){
-        $.jstree._themes = "themes/";
-        $("#fd-question-tree").jstree({
-            "json_data" : {
-                "data" : []
-            },
-            "crrm" : {
-                "move": {
-                    "always_copy": false,
-                    "check_move" : function (m) {
-                        var controller = formdesigner.controller,
-                                mugType = controller.form.controlTree.getMugTypeFromUFID($(m.o).attr('id')),
-                                refMugType = controller.form.controlTree.getMugTypeFromUFID($(m.r).attr('id')),
-                                position = m.p;
-
-                        var ret = controller.checkMoveOp(mugType,position,refMugType);
-                        console.log("check_move:"+mugType+":"+position+":"+refMugType+", STATUS_PASS:"+ret);
-
-                        return  ret;
-				    }
-                }
-            },
-            "dnd" : {
-                        "drop_target" : false,
-                        "drag_target" : false
-            },
-            "types": getJSTreeTypes(),
-            "plugins" : [ "themes", "json_data", "ui", "types", "crrm","dnd" ]
-	    }).bind("select_node.jstree", function (e, data) {
-                   node_select(e,data);
-        }).bind("move_node.jstree", function(e,data){
-                    var controller = formdesigner.controller,
-                                mugType = controller.form.controlTree.getMugTypeFromUFID($(data.rslt.o).attr('id')),
-                                refMugType = controller.form.controlTree.getMugTypeFromUFID($(data.rslt.r).attr('id')),
-                                position = data.rslt.p;
-                    console.log("move_node: "+mugType+":"+position+":"+refMugType);
-                    controller.moveMugType(mugType, position, refMugType);
-                });
-        questionTree = $("#fd-question-tree");
-    }
-
-    function getJSTreeTypes(){
-        var groupRepeatValidChildren = formdesigner.util.GROUP_OR_REPEAT_VALID_CHILDREN;
-       var types =  {
+    function getJSTreeTypes() {
+        var groupRepeatValidChildren = formdesigner.util.GROUP_OR_REPEAT_VALID_CHILDREN,
+        types =  {
             "max_children" : -1,
 			"valid_children" : groupRepeatValidChildren,
 			"types" : {
                 "group" : {
-                    "icon":{
+                    "icon": {
                         "image" : "css/smoothness/images/ui-icons_888888_256x240.png",
                         "position": "-16px -96px"
                     },
                     "valid_children" : groupRepeatValidChildren
                 },
                 "repeat" : {
-                    "icon":{
+                    "icon": {
                         "image" : "css/smoothness/images/ui-icons_888888_256x240.png",
                         "position": "-64px -80px"
                     },
                     "valid_children" : groupRepeatValidChildren
                 },
                 "question" : {
-                    "icon":{
+                    "icon": {
                         "image" : "css/smoothness/images/ui-icons_888888_256x240.png",
                         "position": "-128px -96px"
                     },
                     "valid_children" : "none"
                 },
                 "selectQuestion" : {
-                    "icon":{
+                    "icon": {
                         "image" : "css/smoothness/images/ui-icons_888888_256x240.png",
                         "position": "-96px -176px"
                     },
                     "valid_children": ["item"]
                 },
                 "item" : {
-                    "icon":{
+                    "icon": {
                         "image" : "css/smoothness/images/ui-icons_888888_256x240.png",
                         "position": "-48px -128px"
                     },
                     "valid_children" : "none"
                 },
                 "trigger" : {
-                    "icon":{
+                    "icon": {
                         "image" : "css/smoothness/images/ui-icons_888888_256x240.png",
                         "position": "-16px -144px"
                     },
@@ -299,7 +241,6 @@ formdesigner.ui = (function () {
 
     }
 
-
     /**
      * Updates the properties view such that it reflects the
      * properties of the currently selected tree item.
@@ -310,7 +251,7 @@ formdesigner.ui = (function () {
      *
      * @param mugType
      */
-    var displayMugProperties = function(mugType){
+    that.displayMugProperties = function (mugType) {
         var that = {},
                 qTable,
                 qTHeader,
@@ -319,7 +260,7 @@ formdesigner.ui = (function () {
                 qPropHolder,
                 showPropertiesFactory = {};
 
-        if(!mugType.properties.controlElement){
+        if (!mugType.properties.controlElement) {
             //fuggedaboudit
             throw "Attempted to display properties for a MugType that doesn't have a controlElement!";
         }
@@ -333,7 +274,7 @@ formdesigner.ui = (function () {
         /**
          * Creates the Properties Box on the UI
          */
-        var create = function (mugT, title){
+        var create = function (mugT, title) {
             var i,
             mug = mugT.mug;
 
@@ -341,8 +282,7 @@ formdesigner.ui = (function () {
             qTable = $('<table id="fd-question-table" class=fd-"'+title+'"></table>');
             qPropHolder.append(qTable);
             qTHeader = $('<thead class="fd-question-table-header"></thead>');
-            console.log(mugT);
-            qTHeader.append('<tr><td colspan=2><b><h1>Question Properties: '+controller.getTreeLabel(mugT)+'</h1></b></td></tr>');
+            qTHeader.append('<tr><td colspan = 2><b><h1>Question Properties: '+controller.getTreeLabel(mugT)+'</h1></b></td></tr>');
             qTHeader.append("<tr><td><b>Property Name</b></td><td><b>Property Value</b></td></tr>");
             qTable.append(qTHeader);
             qTBody = $("<tbody></tbody>");
@@ -350,7 +290,7 @@ formdesigner.ui = (function () {
 
 
             i = 'ufid';
-            var row, col1,col2,mugProps;
+            var row, col1, col2, mugProps;
 
             row = $("<tr></tr>");
             qTBody.append(row);
@@ -364,21 +304,21 @@ formdesigner.ui = (function () {
             col1.html(i);
             col2.html(mug[i]);
             mugProps = mug.properties;
-            for(var p in mugProps){
+            for(var p in mugProps) {
                 var block = mugProps[p].properties;
-                if(!mugProps.hasOwnProperty(p)){
+                if (!mugProps.hasOwnProperty(p)) {
                     continue;
                 }
-                if(typeof block === 'function' || typeof block === 'string'){
+                if (typeof block === 'function' || typeof block === 'string') {
                     continue;
                 }
 
                 qTBody.append("<hr />");
-                qTBody.append('<tr><td colspan=2><h2 class="fd-properties-block-header">'+p+' Properties:</h2></tr>')
+                qTBody.append('<tr><td colspan = 2><h2 class="fd-properties-block-header">'+p+' Properties:</h2></tr>')
 
-                for(i in block){
+                for(i in block) {
                     var inputBox;
-                    if(!block.hasOwnProperty(i) || typeof block[i] === 'function'){
+                    if (!block.hasOwnProperty(i) || typeof block[i] === 'function') {
                         continue;
                     }
                     row = $("<tr></tr>");
@@ -389,21 +329,21 @@ formdesigner.ui = (function () {
                     col2 = $('<td></td>');
                     inputBox = $('<input value="'+block[i]+'" name=fd-'+i+' class=fd-'+p+' />');
                     col2.append(inputBox);
-                    inputBox.change(function(e){
+                    inputBox.change(function (e) {
                         var target = $(e.target),
                                 el = target.attr("class").replace('fd-',''),
                                 prop = target.attr("name").replace('fd-',''),
                                 newVal = target.val().replace('"','').replace('"','');
-                        setPropertyValForModel(mug,el,prop, newVal);
+                        setPropertyValForModel(mug, el, prop, newVal);
                     });
                     row.append(col1);
                     row.append(col2);
                 }
             }
 
-            $('input[class="fd-dataElement"][name="fd-nodeID"]').keyup(function(){
+            $('input[class="fd-dataElement"][name="fd-nodeID"]').keyup(function () {
                 var node = $('#'+controller.getCurrentlySelectedMug().ufid);
-                $('#fd-question-tree').jstree("rename_node",node,this.value);
+                $('#fd-question-tree').jstree("rename_node",node, this.value);
             })
 
 
@@ -418,7 +358,7 @@ formdesigner.ui = (function () {
          * @return an object containing the various fields/items that are
          * usefully editable
          */
-        showPropertiesFactory.generic = function(mugT){
+        showPropertiesFactory.generic = function (mugT) {
 
         }
 
@@ -430,7 +370,7 @@ formdesigner.ui = (function () {
          * @param mugT - the MugType associated with this group/repeat
          * @param isRepeat
          */
-        showPropertiesFactory.group = showPropertiesFactory.repeat = function(mugT){
+        showPropertiesFactory.group = showPropertiesFactory.repeat = function (mugT) {
             var fields = showPropertiesFactory.generic(mugT);
         }
 
@@ -439,7 +379,7 @@ formdesigner.ui = (function () {
          * isn't a repeat, group, (1)select, item, trigger
          * @param mugT
          */
-        var showNormalQuestionProperties = function(mugT){
+        var showNormalQuestionProperties = function (mugT) {
             var fields = showPropertiesFactory.generic(mugT);
         }
         var s = showPropertiesFactory;
@@ -452,7 +392,7 @@ formdesigner.ui = (function () {
          * Shows the props for 1selec/select type questions
          * @param mugT
          */
-        var showSelectQuestionProperties = function(mugT){
+        var showSelectQuestionProperties = function (mugT) {
             var fields = showPropertiesFactory.generic(mugT);
         }
 
@@ -460,7 +400,7 @@ formdesigner.ui = (function () {
          * Shows props for Items (in a select/1select).
          * @param itemData - the data object associated with this item
          */
-        var showSelectItemProperties = function(itemData){
+        var showSelectItemProperties = function (itemData) {
 
         }
 
@@ -468,12 +408,12 @@ formdesigner.ui = (function () {
          * Shows the props for a Trigger item.
          * @param mugT
          */
-        var showTriggerProperties = function(mugT){
+        var showTriggerProperties = function (mugT) {
 
         }
 
 
-        function setPropertyValForUI(property, value){
+        function setPropertyValForUI(property, value) {
             $(".fd-question-property-row fd-"+property+" td:nth-child(2)").html(value);
         }
         that.setPropertValForUI = setPropertyValForUI;
@@ -484,7 +424,7 @@ formdesigner.ui = (function () {
          * @param property (string) property name
          * @param val new value the property should be set to.
          */
-        function setPropertyValForModel(myMug, element,property, val){
+        function setPropertyValForModel(myMug, element, property, val) {
             var rootProps = myMug['properties'];
             var elProps = rootProps[element].properties,
                 propertyToChange = elProps[property], event = {};
@@ -500,13 +440,68 @@ formdesigner.ui = (function () {
 
         return that;
     };
-    that.displayMugProperties = displayMugProperties;
+
+
+
+    /**
+     * Private function (to the UI anyway) for handling node_select events.
+     * @param e
+     * @param data
+     */
+    function node_select(e, data) {
+        var curSelUfid = jQuery.data(data.rslt.obj[0], 'mugTypeUfid');
+        formdesigner.controller.setCurrentlySelectedMugType(curSelUfid);
+        that.displayMugProperties(formdesigner.controller.getCurrentlySelectedMugType());
+    }
+    
+    /**
+     * Creates the UI tree
+     */
+    function create_tree() {
+        $.jstree._themes = "themes/";
+        $("#fd-question-tree").jstree({
+            "json_data" : {
+                "data" : []
+            },
+            "crrm" : {
+                "move": {
+                    "always_copy": false,
+                    "check_move" : function (m) {
+                        var controller = formdesigner.controller,
+                                mugType = controller.form.controlTree.getMugTypeFromUFID($(m.o).attr('id')),
+                                refMugType = controller.form.controlTree.getMugTypeFromUFID($(m.r).attr('id')),
+                                position = m.p;
+                        return controller.checkMoveOp(mugType, position, refMugType);
+				    }
+                }
+            },
+            "dnd" : {
+                "drop_target" : false,
+                "drag_target" : false
+            },
+            "types": getJSTreeTypes(),
+            "plugins" : [ "themes", "json_data", "ui", "types", "crrm", "dnd" ]
+	    }).bind("select_node.jstree", function (e, data) {
+                    node_select(e, data);
+        }).bind("move_node.jstree", function (e, data) {
+                    var controller = formdesigner.controller,
+                                mugType = controller.form.controlTree.getMugTypeFromUFID($(data.rslt.o).attr('id')),
+                                refMugType = controller.form.controlTree.getMugTypeFromUFID($(data.rslt.r).attr('id')),
+                                position = data.rslt.p;
+                    controller.moveMugType(mugType, position, refMugType);
+                });
+        questionTree = $("#fd-question-tree");
+    }
+
+
+
+
 
     /**
      *
      * @param rootElement
      */
-    var generate_scaffolding = function(rootElement){
+    var generate_scaffolding = function (rootElement) {
         var root = $(rootElement);
         root.append('<div id="fd-ui-container"> \
           <div id="fd-notify"></div> \

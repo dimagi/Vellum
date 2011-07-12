@@ -10,21 +10,6 @@ if(typeof Object.create !== 'function') {
     };
 }
 
-if ( typeof Object.getPrototypeOf !== "function" ) {
-  if ( typeof "test".__proto__ === "object" ) {
-    Object.getPrototypeOf = function(object){
-      return object.__proto__;
-    };
-  } else {
-    Object.getPrototypeOf = function(object){
-      // May break if the constructor has been tampered with
-      return object.constructor.prototype;
-    };
-  }
-}
-
-
-
 if(typeof formdesigner === 'undefined'){
     var formdesigner = {};
 }
@@ -47,19 +32,21 @@ formdesigner.util = (function(){
     //taken from http://stackoverflow.com/questions/728360/copying-an-object-in-javascript
     //clones a 'simple' object (see link for full description)
     function clone(obj) {
+        var copy, i;
         // Handle the 3 simple types, and null or undefined
-        if (null == obj || "object" != typeof obj) return obj;
+        if (null === obj || "object" !== typeof obj) return obj;
 
         // Handle Date
         if (obj instanceof Date) {
-            var copy = new Date();
+            copy = new Date();
             copy.setTime(obj.getTime());
             return copy;
         }
 
         // Handle Array
         if (obj instanceof Array) {
-            var copy = [], i , len;
+            var len;
+            copy = [];
             for (i = 0, len = obj.length; i < len; ++i) {
                 copy[i] = clone(obj[i]);
             }
@@ -68,7 +55,7 @@ formdesigner.util = (function(){
 
         // Handle Object
         if (obj instanceof Object) {
-            var copy = {};
+            copy = {};
             for (var attr in obj) {
                 if (obj.hasOwnProperty(attr)) copy[attr] = clone(obj[attr]);
             }
@@ -76,7 +63,7 @@ formdesigner.util = (function(){
         }
 
         throw new Error("Unable to copy obj! Its type isn't supported.");
-    };
+    }
     that.clone = clone;
 
     /**
@@ -186,7 +173,7 @@ formdesigner.util = (function(){
             return true;
         }
     
-    }
+    };
     that.canMugTypeHaveChildren = canMugTypeHaveChildren;
 
     /**
@@ -212,6 +199,13 @@ formdesigner.util = (function(){
     };
     that.getRelativeInsertPosition = getRelativeInsertPosition;
 
+    var generate_guid = function() {
+        // http://stackoverflow.com/questions/105034/how-to-create-a-guid-uuid-in-javascript
+        var S4 = function() {
+            return (((1+Math.random())*0x10000)|0).toString(16).substring(1);
+        };
+        return (S4()+S4()+S4()+S4()+S4()+S4()+S4()+S4());
+    };
 
     /**
      * This method gives the passed object
@@ -224,13 +218,7 @@ formdesigner.util = (function(){
     };
     that.give_ufid = give_ufid;
 
-    var generate_guid = function() {
-        // http://stackoverflow.com/questions/105034/how-to-create-a-guid-uuid-in-javascript
-        var S4 = function() {
-            return (((1+Math.random())*0x10000)|0).toString(16).substring(1);
-        }
-        return (S4()+S4()+S4()+S4()+S4()+S4()+S4()+S4());
-    }
+
 
     /**
      * Shortcut func because I'm tired of typing this out all the time.
