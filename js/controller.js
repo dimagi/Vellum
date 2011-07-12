@@ -4,51 +4,56 @@
  * data into the correct places in the model will be up to the controller code.
  */
 
-if(typeof formdesigner === 'undefined'){
+if (typeof formdesigner === 'undefined') {
     var formdesigner = {};
 }
 
-formdesigner.controller = (function(){
-    var that = {}, form;
-    var question_counter = 1, //used in generate_question_id();
-    curSelMugType = null, curSelUfid = null;
+formdesigner.controller = (function () {
+    "use strict";
+    var that = {}, form, question_counter = 1, //used in generate_question_id();
+        curSelMugType = null,
+        curSelUfid = null,
 
-    that["form"] = form;
-
-    var initFormDesigner = function(){
-        formdesigner.model.init();
-    };
+        initFormDesigner = function () {
+            formdesigner.model.init();
+        };
     that.initFormDesigner = initFormDesigner;
-
-    var setForm = that.setForm = function(aForm){
+    that.form = form;
+    var setForm = that.setForm = function (aForm) {
         form = that.form = aForm;
-    }
+    };
 
-    /**
-     *
-     * @param ufid
-     */
-    var setCurrentlySelectedMugType = function(ufid){
-        curSelUfid = ufid;
-        curSelMugType = getMTFromFormByUFID(ufid);
-    }
-    that.setCurrentlySelectedMugType = setCurrentlySelectedMugType;
-
-    var getMTFromFormByUFID = function(ufid){
+    var getMTFromFormByUFID = function (ufid) {
         curSelMugType = form.dataTree.getMugTypeFromUFID(ufid);
-        if(!curSelMugType){ //check controlTree in case it's there.
+        if (!curSelMugType) { //check controlTree in case it's there.
             curSelMugType = form.controlTree.getMugTypeFromUFID(ufid);
         }
         return curSelMugType;
-    }
+    };
     that.getMTFromFormByUFID = getMTFromFormByUFID;
+
+    /**
+     * Sets the currently selected (in the UI tree) MugType
+     * so that the controller is aware of the currently
+     * being worked on MT without having to do the call
+     * to the UI each time.
+     *
+     * @param ufid - UFID of the selected MugType
+     */
+    var setCurrentlySelectedMugType = function (ufid) {
+        curSelUfid = ufid;
+        curSelMugType = getMTFromFormByUFID(ufid);
+    };
+    that.setCurrentlySelectedMugType = setCurrentlySelectedMugType;
+
+
 
     /**
      * Generates a unique question ID (unique in this form) and
      * returns it as a string.
      */
-    var generate_question_id = function(){
-        var ret = 'question'+question_counter;
+    var generate_question_id = function () {
+        var ret = 'question' + question_counter;
         question_counter += 1;
         return ret;
     };
@@ -61,7 +66,7 @@ formdesigner.controller = (function(){
      *
      * @return the new mug associated with this mugType
      */
-    var createMugFromMugType = function(mugType){
+    var createMugFromMugType = function (mugType) {
         /**
          * Walks through the properties (block) and
          * procedurally generates a spec that can be passed to
@@ -72,15 +77,15 @@ formdesigner.controller = (function(){
          * @param name - name of the spec block being generated
          * @return a dictionary: {spec_name: spec}
          */
-        function recursiveGetSpec(block, name){
+        function recursiveGetSpec(block, name) {
             var spec = {}, i, retSpec = {};
-            for(i in block){
-                if(typeof block[i] === 'object'){
+            for(i in block) {
+                if (typeof block[i] === 'object') {
                     spec[i] = recursiveGetSpec(block[i], i);
-                }else if(typeof block[i] === 'function'){
+                }else if (typeof block[i] === 'function') {
                     spec[i] = " ";
                 }else{
-                    switch(block[i]){
+                    switch(block[i]) {
                         case formdesigner.model.TYPE_FLAG_OPTIONAL:
                             spec[i] = " ";
                             break;
@@ -109,20 +114,20 @@ formdesigner.controller = (function(){
         controlElSpec = specBlob.controlElement || undefined;
 
         //create the various elements, mug itself, and linkup.
-        if(mugSpec){
+        if (mugSpec) {
             mug = new formdesigner.model.Mug(mugSpec);
-            if(controlElSpec){
+            if (controlElSpec) {
                 mug.properties.controlElement = new formdesigner.model.ControlElement(controlElSpec);
             }
-            if(dataElSpec){
-                if(dataElSpec.nodeID){
+            if (dataElSpec) {
+                if (dataElSpec.nodeID) {
                     dataElSpec.nodeID = generate_question_id();
                 }
                 mug.properties.dataElement = new formdesigner.model.DataElement(dataElSpec);
             }
-            if(bindElSpec){
-                if(bindElSpec.nodeID){
-                    if(dataElSpec.nodeID){
+            if (bindElSpec) {
+                if (bindElSpec.nodeID) {
+                    if (dataElSpec.nodeID) {
                         bindElSpec.nodeID = dataElSpec.nodeID; //make bind id match data id for convenience
                     }else{
                         bindElSpec.nodeID = generate_question_id();
@@ -137,7 +142,7 @@ formdesigner.controller = (function(){
 
         //ok,now: validate the mug to make sure everything is peachy.
         validationResult = mugType.validateMug(mug);
-        if(validationResult.status !== 'pass'){
+        if (validationResult.status !== 'pass') {
             throw 'Newly constructed mug did not pass validation!';
         }else{
             return mug;
@@ -145,10 +150,88 @@ formdesigner.controller = (function(){
     };
     that.createMugFromMugType = createMugFromMugType;
 
-    var showErrorMessage = function(msg){
+    /**
+     * Inserts a new MugType into the relevant Trees (and their
+     * relevant positions) according to the specified mugType and
+     * the currently selected mugType.
+     * @param newMugType - new MT to be inserted into the Form object
+     * @param refMugType - used to determine the relative position of the insertion (relative to the refMT)
+     */
+    var insertMugTypeIntoForm = function (refMugType, newMugType) {
+        var dataTree = form.dataTree, controlTree = form.controlTree;
+
+        dataTree.insertMugType(newMugType, formdesigner.util.getRelativeInsertPosition(refMugType, newMugType), refMugType);
+        controlTree.insertMugType(newMugType, formdesigner.util.getRelativeInsertPosition(refMugType, newMugType), refMugType);
+    };
+    that.insertMugTypeIntoForm = insertMugTypeIntoForm;
+
+    var showErrorMessage = function (msg) {
         formdesigner.ui.appendErrorMessage(msg);
     };
     that.showErrorMessage = showErrorMessage;
+
+    function createQuestionInUITree(mugType) {
+        function treeSetItemType(mugType) {
+            var tString = mugType.mug.properties.controlElement.properties.name.toLowerCase(),
+                setType = function (tType) {
+                    var myTree = $('#fd-question-tree'),
+                        mugTUfid = mugType.ufid,
+                        node = $('#'+mugTUfid);
+                    return myTree.jstree("set_type",tType,node);
+                };
+
+            switch(tString.toLowerCase()) {
+                case 'text':
+                    setType("question");
+                    break;
+                case 'group':
+                    setType("group");
+                    break;
+                case 'multi select':
+                    setType("selectQuestion");
+                    break;
+                case 'trigger':
+                    setType("trigger");
+                    break;
+                case 'item':
+                    setType("item");
+                    break;
+            }
+        }
+
+        var mug = mugType.mug,
+            controlTagName = mug.properties.controlElement.properties.tagName,
+            isGroupOrRepeat = (controlTagName === 'group' || controlTagName === 'repeat'),
+            itemID,
+            objectData = {},
+            insertPosition;
+
+        if (isGroupOrRepeat) {
+            objectData.state = 'open'; //should new node be open or closed?, omit for leaf
+        }
+
+        objectData.data = !(mug.properties.dataElement) ? mug.properties.controlElement.properties.nodeID : mug.properties.dataElement.properties.nodeID;
+        objectData.metadata = {
+                                'mugTypeUfid': mugType.ufid,
+                                'mugUfid': mug.ufid,
+                                'dataID':mug.getDataElementID(),
+                                'bindID':mug.getBindElementID()
+                                };
+        objectData.attr = {
+            "id" : mugType.ufid
+        };
+
+        insertPosition = formdesigner.util.getRelativeInsertPosition(curSelMugType,mugType);
+
+        $('#fd-question-tree').jstree("create",
+            null, //reference node, use null if using UI plugin for currently selected
+            insertPosition, //position relative to reference node
+            objectData,
+            null, //callback after creation, better to wait for event
+            true  //skip_rename
+        );
+        treeSetItemType(mugType);
+    }
 
     /**
      * Convenience method for generating mug and mugType, calling UI and throwing
@@ -156,10 +239,10 @@ formdesigner.controller = (function(){
      *
      * @param qType = type of question to be created. ||| Currently does nothing |||
      */
-    var createQuestion = function(qType){
+    var createQuestion = function (qType) {
         var mugType, mug, createQuestionEvent = {};
-        
-        switch(qType.toLowerCase()){
+
+        switch(qType.toLowerCase()) {
             case 'text':
                 mugType = formdesigner.util.getNewMugType(formdesigner.model.mugTypes.stdTextQuestion);
                 break;
@@ -177,10 +260,10 @@ formdesigner.controller = (function(){
                 break;
             default:
                 mugType = formdesigner.util.getNewMugType(formdesigner.model.mugTypes.dataBindControlQuestion);
-        };
-        
+        }
+
         mug = createMugFromMugType(mugType);
-//        mug.on('property-changed', function(e){
+//        mug.on('property-changed', function (e) {
 //            formdesigner.controller.showErrorMessage("Property Changed in Question:"+mug.properties.dataElement.properties.nodeID+"!");
 //        })
 
@@ -196,122 +279,6 @@ formdesigner.controller = (function(){
     that.createQuestion = createQuestion;
 
 
-    function createQuestionInUITree(mugType){
-        function treeSetItemType(mugType){
-            var tString = mugType.mug.properties.controlElement.properties.name.toLowerCase(),
-                setType = function(tType){
-                    var myTree = $('#fd-question-tree'),
-                        mugTUfid = mugType.ufid,
-                        node = $('#'+mugTUfid);
-                    return myTree.jstree("set_type",tType,node);
-                };
-            
-            switch(tString.toLowerCase()){
-                case 'text':
-                    setType("question");
-                    break;
-                case 'group':
-                    setType("group");
-                    break;
-                case 'multi select':
-                    setType("selectQuestion");
-                    break;
-                case 'trigger':
-                    setType("trigger");
-                    break;
-                case 'item':
-                    setType("item");
-                    break;
-            };
-        };
-
-        var mug = mugType.mug,
-            controlTagName = mug.properties.controlElement.properties.tagName,
-            isGroupOrRepeat = (controlTagName === 'group' || controlTagName === 'repeat'),
-            itemID,
-            objectData = {},
-            insertPosition;
-
-        if(isGroupOrRepeat){
-            objectData["state"] = 'open'; //should new node be open or closed?, omit for leaf
-        }
-
-        objectData["data"] = !(mug.properties.dataElement) ? mug.properties.controlElement.properties.nodeID : mug.properties.dataElement.properties.nodeID;
-        objectData["metadata"] = {
-                                'mugTypeUfid': mugType.ufid,
-                                'mugUfid': mug.ufid,
-                                'dataID':mug.getDataElementID(),
-                                'bindID':mug.getBindElementID()
-                                };
-        objectData["attr"] = {
-            "id" : mugType.ufid
-        }
-
-        insertPosition = formdesigner.util.getRelativeInsertPosition(curSelMugType,mugType);
-
-        $('#fd-question-tree').jstree("create",
-            null, //reference node, use null if using UI plugin for currently selected
-            insertPosition, //position relative to reference node
-            objectData,
-            null, //callback after creation, better to wait for event
-            true  //skip_rename
-        );
-        treeSetItemType(mugType);
-    };
-
-
-    /**
-     * Inserts a new MugType into the relevant Trees (and their
-     * relevant positions) according to the specified mugType and
-     * the currently selected mugType.
-     * @param newMugType - new MT to be inserted into the Form object
-     * @param refMugType - used to determine the relative position of the insertion (relative to the refMT)
-     */
-    var insertMugTypeIntoForm = function(refMugType, newMugType){
-        var dataTree = form.dataTree, controlTree = form.controlTree;
-
-        dataTree.insertMugType(newMugType, formdesigner.util.getRelativeInsertPosition(refMugType, newMugType), refMugType);
-        controlTree.insertMugType(newMugType, formdesigner.util.getRelativeInsertPosition(refMugType, newMugType), refMugType);
-    };
-    that.insertMugTypeIntoForm = insertMugTypeIntoForm;
-
-    /**
-     * Move a mugType from its current place (in both the Data and Control trees) to
-     * the position specified by the arguments,
-     * @param mugType - The MT to be moved
-     * @param position - The position relative to the refMugType (can be 'before','after' or 'into')
-     * @param refMugType
-     */
-    var moveMugType = function(mugType, position, refMugType){
-        var dataTree = form.dataTree, controlTree = form.controlTree;
-        if(!checkMoveOp(mugType, position, refMugType)){
-            throw 'MOVE NOT ALLOWED!  MugType Move for MT:'+mugType+', refMT:'+refMugType+", position:"+position+" ABORTED";
-        }
-        dataTree.insertMugType(mugType, position, refMugType);
-        controlTree.insertMugType(mugType, position, refMugType);
-    };
-    that.moveMugType = moveMugType;
-    /**
-     * Gets the label used to represent this mug in the UI tree
-     * @param mugOrMugType - mug or mugType
-     */
-    var getTreeLabel = function(mugOrMugType){
-        var mug;
-        if(mugOrMugType instanceof formdesigner.model.Mug){
-            mug = mugOrMugType;
-        }else if(typeof mugOrMugType.validateMug === 'function'){
-            mug = mugOrMugType.mug;
-        }else{
-            throw 'getTreeLabel() must be given either a Mug or MugType as argument!';
-        }
-
-        var retVal = mug.getBindElementID() ? mug.getDataElementID() : mug.getBindElementID();
-        if(!retVal){
-            retVal = mug.properties.controlElement.properties.label;
-        }
-        return retVal;
-    };
-    that.getTreeLabel = getTreeLabel;
 
     /**
      * Checks that the specified move is legal. returns false if problem is found.
@@ -322,7 +289,7 @@ formdesigner.controller = (function(){
      * @param rType - The type of the Reference controlElement being moved (use tagName!) e.g. "input" or "group"
      *                  if -1 is given, assumes rootNode.
      */
-    var checkMoveOp = that.checkMoveOp =function(mugType, position, refMugType){
+    var checkMoveOp = that.checkMoveOp =function (mugType, position, refMugType) {
         var oType = mugType.mug.properties.controlElement.properties.tagName,
                 rType = (!refMugType || refMugType === -1) ? 'group' : refMugType.mug.properties.controlElement.properties.tagName,
                 oIsGroupOrRepeat = (oType === 'repeat' || oType === 'group'),
@@ -333,8 +300,8 @@ formdesigner.controller = (function(){
                 rIsItemOrInputOrTrigger = (rType === 'item' || rType === 'input' || rType === 'trigger'),
                 rIsGroupOrRepeat = (rType === 'repeat' || rType === 'group');
 
-        if(position !== 'into'){
-            if(!refMugType){
+        if (position !== 'into') {
+            if (!refMugType) {
                 throw "If refMugType is null in checkMoveOp() position MUST be 'into'! Position was: "+position;
             }
             var pRefMugType = formdesigner.controller.form.controlTree.getParentMugType(refMugType);
@@ -342,16 +309,15 @@ formdesigner.controller = (function(){
         }
 
         //from here it's safe to assume that position is always 'into'
-        console.log("CHECKMOVEOP, position"+position+", oType:"+oType+", rType:"+rType);
-        if(rIsItemOrInputOrTrigger){
+        if (rIsItemOrInputOrTrigger) {
             return false;
         }
 
-        if(rIsGroupOrRepeat){
+        if (rIsGroupOrRepeat) {
             return !oIsItem;
         }
 
-        if(rIsSelect){
+        if (rIsSelect) {
             return oIsItem;
         }
 
@@ -360,26 +326,68 @@ formdesigner.controller = (function(){
 
     };
 
+
+
+
+    /**
+     * Move a mugType from its current place (in both the Data and Control trees) to
+     * the position specified by the arguments,
+     * @param mugType - The MT to be moved
+     * @param position - The position relative to the refMugType (can be 'before','after' or 'into')
+     * @param refMugType
+     */
+    var moveMugType = function (mugType, position, refMugType) {
+        var dataTree = form.dataTree, controlTree = form.controlTree;
+        if (!checkMoveOp(mugType, position, refMugType)) {
+            throw 'MOVE NOT ALLOWED!  MugType Move for MT:' + mugType + ', refMT:' + refMugType + ", position:" + position + " ABORTED";
+        }
+        dataTree.insertMugType(mugType, position, refMugType);
+        controlTree.insertMugType(mugType, position, refMugType);
+    };
+    that.moveMugType = moveMugType;
+    /**
+     * Gets the label used to represent this mug in the UI tree
+     * @param mugOrMugType - mug or mugType
+     */
+    var getTreeLabel = function (mugOrMugType) {
+        var mug;
+        if (mugOrMugType instanceof formdesigner.model.Mug) {
+            mug = mugOrMugType;
+        }else if (typeof mugOrMugType.validateMug === 'function') {
+            mug = mugOrMugType.mug;
+        }else{
+            throw 'getTreeLabel() must be given either a Mug or MugType as argument!';
+        }
+
+        var retVal = mug.getBindElementID() ? mug.getDataElementID() : mug.getBindElementID();
+        if (!retVal) {
+            retVal = mug.properties.controlElement.properties.label;
+        }
+        return retVal;
+    };
+    that.getTreeLabel = getTreeLabel;
+
+
     /**
      * Returns the Tree object specified by treeType from the Form object
      * @param treeType - string - either 'data' or 'control'
      */
-    var getTree = function getTree(treeType){
-        if(treeType === 'data'){
+    var getTree = function getTree(treeType) {
+        if (treeType === 'data') {
             return form.dataTree;
-        }else if(treeType === 'control'){
+        }else if (treeType === 'control') {
             return form.controlTree;
         }else{
             throw "controller.getTree must be given a treeType of either 'data' or 'control'!";
         }
-    }
+    };
 
-    var getCurrentlySelectedMug = function(){
+    var getCurrentlySelectedMug = function () {
         return curSelMugType.mug;
     };
     that.getCurrentlySelectedMug = getCurrentlySelectedMug;
 
-    var getCurrentlySelectedMugType = function(){
+    var getCurrentlySelectedMugType = function () {
         return curSelMugType;
     };
     that.getCurrentlySelectedMugType = getCurrentlySelectedMugType;
