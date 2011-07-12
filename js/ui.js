@@ -503,32 +503,15 @@ formdesigner.ui = (function () {
      */
     var generate_scaffolding = function (rootElement) {
         var root = $(rootElement);
-        root.append('<div id="fd-ui-container"> \
-          <div id="fd-notify"></div> \
-          <div id="fd-toolbar" class="fd-toolbar"> \
-              <div id="fd-add-question"> \
-                <span id="fd-add-question-button"></span>Add a Text Question \
-              </div> \
-              <div id="fd-add-group-but"> \
-                <span id="add-group-button"></span>Add a Group \
-              </div> \
-        <div id="fd-add-select-but"> \
-                <span id="add-select-button"></span>Add a Select Question \
-        </div> \
-          <div id="fd-add-item-but"> \
-            <span id="add-item-button"></span>Add a select Item \
-          </div> \
-        <div id="fd-add-trigger-but"> \
-                <span id="add-trigger-button"></span>Add a Trigger \
-          </div> \
-          </div> \
-          <div id="fd-question-tree" class="fd-tree"> \
-\
-           </div> \
-          <div id="fd-question-properties" class="fd-question-properties"> \
-\
-          </div> \
-      </div>');
+        $.ajax({
+            url: 'templates/main.html',
+            async: false,
+            cache: false,
+            success: function(html){
+                root.append(html);
+                console.log("Successfully loaded main template!");
+            }
+        });
 
     };
 
