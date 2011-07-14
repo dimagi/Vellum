@@ -91,95 +91,63 @@ formdesigner.ui = (function () {
         $(function () {
             var d = 300;
             $('#navigation a').each(function () {
-                $(this).stop().animate({
-                    'marginTop': '-80px'
-                }, d += 150);
+//                $(this).stop().animate({
+//                    'marginTop': '-100px'
+//                }, d += 150);
+                $(this).stop(); //.show('slide',{"direction":"down"}, d += 150);
             });
 
             $('#navigation > li').hover(
                 function () {
-                    $('a', $(this)).stop().animate({
-                        'marginTop': '-2px'
-                    }, 200);
-                },
-                function () {
-                    $('a', $(this)).stop().animate({
-                        'marginTop': '-80px'
-                    }, 200);
+                    $('a', $(this)).show('slide',{"direction":"up"});
+//                            .animate({
+//                        'marginTop': '-2px'
+//                    }, 200);
                 }
+//                function () {
+//                    $('a', $(this)).stop().show('slide',{"direction":"up"});
+////                            animate({
+////                        'marginTop': '-100px'
+////                    }, 200);
+//                }
             );
         });
     }
 
     function init_toolbar() {
-        var toolbar = $("#fd-toolbar");
-        (function c_add_text_question() { //c_ means 'create' here
-            $("#fd-add-question").button().click(function () {
-                formdesigner.controller.createQuestion("text");
-            });
-            $("#fd-add-question-button")
-                    .addClass("ui-corner-all ui-icon ui-icon-plusthick")
-                    .css("float", "left");
+        var toolbar = $(".fd-toolbar");
+        var buts =  $(".questionButton");
 
-            buttons.addTextQuestion = $("#fd-add-question");
-        })();
+        //make each element a button
+        buts.button();
 
-        (function c_add_group() {
-            $("#fd-add-group-but").button().click(function () {
-                formdesigner.controller.createQuestion("group");
-            });
-            $("#fd-add-group-button")
-                    .addClass("ui-corner-all ui-icon ui-icon-plusthick")
-                    .css("float", "left");
-            buttons.addGroup = $("#fd-add-group-but");
-        })();
+        //bind a function to the click event for each button
+        buts.each(function (index) {
+           var qType = $(this).attr("id").split('-')[2];
+           $(this).click(function (){
+              formdesigner.controller.createQuestion(qType);
+           });
+        });
 
-        (function c_add_select() {
-            $("#fd-add-select-but").button().click(function () {
-                formdesigner.controller.createQuestion("select");
-            });
-            $("#fd-add-select-button")
-                    .addClass("ui-corner-all ui-icon ui-icon-plusthick")
-                    .css("float", "left");
-            buttons.addSelect = $("#fd-add-select-but");
-        })();
-
-        (function c_add_item() {
-            $("#fd-add-item-but").button().click(function () {
-                formdesigner.controller.createQuestion("item");
-            });
-            $("#fd-add-item-button")
-                    .addClass("ui-corner-all ui-icon ui-icon-plusthick")
-                    .css("float", "left");
-            buttons.addItem = $("#fd-add-item-but");
-        })();
-
-        (function c_add_trigger() {
-            $("#fd-add-trigger-but").button().click(function () {
-                formdesigner.controller.createQuestion("trigger");
-            });
-            $("#fd-add-trigger-button")
-                    .addClass("ui-corner-all ui-icon ui-icon-plusthick")
-                    .css("float", "left");
-            buttons.addTrigger = $("#fd-add-trigger-but");
-        })();
-
+        //debug tools
         (function c_printDataTreeToConsole() {
             var printTreeBut = $(
-                    '<div id="fd-print-tree-but"> \
-                <span id="fd-print-tree-button"></span>Print DATA tree to Console \
-              </div>');
+                    '<div id="fd-print-tree-button">'+
+                '<span id="fd-print-tree-but"></span>Print DATA tree to Console ' +
+              '</div>');
             toolbar.append(printTreeBut);
 
             printTreeBut.button().click(function () {
                 console.log(controller.form.controlTree.printTree());
             });
-            $("#fd-print-tree-button")
+            $("#fd-print-tree-but")
                     .addClass("ui-corner-all ui-icon ui-icon-plusthick")
                     .css("float", "left");
 
             buttons.printTree = printTreeBut;
         })();
+
+
 
     }
     that.buttons = buttons;
@@ -441,8 +409,6 @@ formdesigner.ui = (function () {
         return that;
     };
 
-
-
     /**
      * Private function (to the UI anyway) for handling node_select events.
      * @param e
@@ -493,10 +459,6 @@ formdesigner.ui = (function () {
         questionTree = $("#fd-question-tree");
     }
 
-
-
-
-
     /**
      *
      * @param rootElement
@@ -520,7 +482,7 @@ formdesigner.ui = (function () {
         do_loading_bar();
         init_toolbar();
         create_tree();
-        do_nav_bar();
+//        do_nav_bar();
 
         controller = formdesigner.controller;
         controller.initFormDesigner();
