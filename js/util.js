@@ -66,6 +66,29 @@ formdesigner.util = (function(){
     }
     that.clone = clone;
 
+    var question_counter = 1;
+    /**
+     * Generates a unique question ID (unique in this form) and
+     * returns it as a string.
+     */
+    that.generate_question_id = function () {
+        var ret = 'question' + question_counter;
+        question_counter += 1;
+        return ret;
+    };
+
+    that.throwAndLogValidationError = function(vResult,mType,mug){
+            console.group("Failed Validation Objectss");
+            console.log("Validation Object:");
+            console.log(vResult);
+            console.log("MugType");
+            console.log(mType);
+            console.log("Mug");
+            console.log(mug);
+            console.groupEnd();
+            throw 'Newly created mug did not validate! MugType and Mug logged to console...'
+    }
+
     /**
      * Takes in a reference mugType and makes a copy of
      * the object (the copy is returned).
@@ -218,7 +241,66 @@ formdesigner.util = (function(){
     };
     that.give_ufid = give_ufid;
 
+    that.XSD_DATA_TYPES = [
+            'xsd:anyURI',
+            'xsd:base64Binary',
+            'xsd:boolean',
+            'xsd:byte',
+            'xsd:date',
+            'xsd:dateTime',
+            'xsd:decimal',
+            'xsd:double',
+            'xsd:duration',
+            'xsd:float',
+            'xsd:gDay',
+            'xsd:gMonth',
+            'xsd:gMonthDay',
+            'xsd:gYear',
+            'xsd:gYearMonth',
+            'xsd:hexBinary',
+            'xsd:int',
+            'xsd:integer',
+            'xsd:language',
+            'xsd:long',
+            'xsd:short',
+            'xsd:string',
+            'xsd:time',
+            'xsd:unsignedByte',
+            'xsd:unsignedInt',
+            'xsd:unsignedLong',
+            'xsd:unsignedShort'
+    ];
 
+    that.VALID_CONTROL_TAG_NAMES = [
+            'input',
+            '1select',
+            'select',
+            'group',
+            'repeat',
+            'trigger',
+            'item',
+            'output'
+    ]
+
+    that.VALID_QUESTION_TYPE_NAMES = [
+            'Text',
+            'Group',
+            'Repeat',
+            'Trigger',
+            'Single-Select',
+            'Multi-Select',
+            'Integer',
+            'Double',
+            'Long',
+            'Float',
+            'Date',
+            'DateTime',
+            'Time',
+            'Picture',
+            'Audio',
+            'GPS',
+            'Barcode'
+    ]
 
     /**
      * Shortcut func because I'm tired of typing this out all the time.

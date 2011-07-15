@@ -96,10 +96,12 @@ formdesigner.ui = (function () {
 
         //bind a function to the click event for each button
         buts.each(function (index) {
-           var qType = $(this).attr("id").split('-')[2];
+           var qType = $(this).attr("id").split('-')[2],
+                   name = $(this).attr("id").replace('fd-','').replace('-','').replace('-','');
            $(this).click(function (){
               formdesigner.controller.createQuestion(qType);
            });
+           buttons[name] = $(this);
         });
 
         //debug tools
@@ -185,6 +187,101 @@ formdesigner.ui = (function () {
 
     }
 
+    that.displayMugProperties = that.displayQuestion = function(mugType){
+        if (!mugType.properties.controlElement) {
+            //fuggedaboudit
+            throw "Attempted to display properties for a MugType that doesn't have a controlElement!";
+        }
+
+
+        var displayFuncs = {};
+
+        /**
+         * Runs through a properties block and generates the
+         * correct li elements (and appends them to the given parentUL)
+         *
+         * @param propertiesBlock
+         * @param parentUL
+         */
+        function listDisplay(propertiesBlock,parentUL, mugProps){
+            var i, li;
+            for(i in propertiesBlock){
+                if(propertiesBlock.hasOwnProperty(i) && propertiesBlock[i].visibility === 'visible'){
+                    var pBlock = propertiesBlock[i],
+                            labelStr = pBlock.lstring ? pBlock.lstring : i,
+                            liStr = '<li>'+labelStr+': '+'<input>'+'</li>';
+                    li = $(liStr);
+                    parentUL.append(li);
+                }
+            }
+        }
+
+        function showControlProps(){
+            var properties = mugType.properties.controlElement,
+                    uiBlock = $('#fd-props-control'),
+                    ul;
+
+            uiBlock.empty(); //clear it out first in case there's anything present.
+            ul = $('<ul>Control Props</ul>');
+
+
+            listDisplay(properties,ul,mugType.mug.properties.controlElement.properties);
+            uiBlock.append(ul);
+            uiBlock.show();
+        }
+        displayFuncs.controlElement = showControlProps;
+
+        function showDataProps(){
+            var properties = mugType.properties.dataElement,
+                    uiBlock = $('#fd-props-data'),
+                    ul;
+            uiBlock.empty(); //clear it out first in case there's anything present.
+            ul = $('<ul>Data Props</ul>');
+
+            listDisplay(properties,ul,mugType.mug.properties.dataElement);
+            uiBlock.append(ul);
+            uiBlock.show();
+        }
+        displayFuncs.dataElement = showDataProps;
+
+
+        function showBindProps(){
+            var properties = mugType.properties.bindElement,
+                    uiBlock = $('#fd-props-bind'),
+                    ul;
+            uiBlock.empty(); //clear it out first in case there's anything present.
+            ul = $('<ul>Bind Props</ul>');
+
+
+            listDisplay(properties,ul,mugType.mug.properties.bindElement.properties);
+            uiBlock.append(ul);
+            uiBlock.show();
+        }
+        displayFuncs.bindElement = showBindProps;
+
+        function showItextProps(){
+
+        }
+        displayFuncs.itext = showItextProps; //not sure if this will ever be used like this, but may as well stick with the pattern
+
+        function updateDisplay(){
+            var mugTProps = mugType.properties,
+            i = 0;
+            $('#fd-props-bind').empty();
+            $('#fd-props-data').empty();
+            $('#fd-props-control').empty();
+            for(i in mugTProps){
+                if(mugTProps.hasOwnProperty(i)){
+                    displayFuncs[i]();
+                }
+            }
+        };
+
+        updateDisplay();
+    }
+
+
+
     /**
      * Updates the properties view such that it reflects the
      * properties of the currently selected tree item.
@@ -195,7 +292,7 @@ formdesigner.ui = (function () {
      *
      * @param mugType
      */
-    that.displayMugProperties = function (mugType) {
+    that.displayMugProperties2 = function (mugType) {
         var that = {},
                 qTable,
                 qTHeader,
@@ -215,12 +312,17 @@ formdesigner.ui = (function () {
         that.qTHeader = qTHeader;
         that.qTBody = qTBody;
 
+
+
+
         /**
          * Creates the Properties Box on the UI
          */
         var create = function (mugT, title) {
             var i,
-            mug = mugT.mug;
+            mug = mugT.mug,
+            mugTProps = mugT.properties,
+            mugProps = mug.properties;
 
 
             qTable = $('<table id="fd-question-table" class=fd-"'+title+'"></table>');
@@ -234,7 +336,7 @@ formdesigner.ui = (function () {
 
 
             i = 'ufid';
-            var row, col1, col2, mugProps;
+            var row, col1, col2;
 
             row = $("<tr></tr>");
             qTBody.append(row);
@@ -247,7 +349,6 @@ formdesigner.ui = (function () {
 
             col1.html(i);
             col2.html(mug[i]);
-            mugProps = mug.properties;
             for(var p in mugProps) {
                 var block = mugProps[p].properties;
                 if (!mugProps.hasOwnProperty(p)) {
@@ -465,32 +566,16 @@ formdesigner.ui = (function () {
         min_max.click(function(){
             var b = $("#fd-extra-tools"),
             curRight = b.css('right');
-            console.log(b);
-            console.log(curRight);
             if(curRight === '-255px'){
-                console.log("animating to 0");
                 b.animate({
                     right:'0px'
                 },200);
             }else if(curRight === "0px"){
-                console.log("animating to -255");
                 b.animate({
                     right:'-255px'
                 },200);
             }
         });
-//            if($(this).class)
-//        })
-//        function () {
-//                    $(this).stop().animate({
-//                        'left': '0px'
-//                    }, 200);
-//                },
-//                function () {
-//                    $(this).stop().animate({
-//                        'left': '-260px'
-//                    }, 200);
-//                }
         
     };
 
@@ -509,8 +594,8 @@ formdesigner.ui = (function () {
                 }
             );
 
+        //DATA TREE
         tree = $("#fd-data-tree");
-
         tree.jstree({
             "json_data" : {
                 "data" : []
@@ -541,7 +626,7 @@ formdesigner.ui = (function () {
 //                                refMugType = controller.form.controlTree.getMugTypeFromUFID($(data.rslt.r).attr('id')),
 //                                position = data.rslt.p;
 //                    controller.moveMugType(mugType, position, refMugType);
-                });
+        });
 
 
     };
@@ -557,41 +642,19 @@ formdesigner.ui = (function () {
         controller = formdesigner.controller;
         controller.initFormDesigner();
 
-
-        //////////////fancybox testing
-
-        	/* This is basic - uses default settings */
-
-//	$("a#single_image").fancybox();
-
-	/* Using custom settings */
-
-	$("a#inline").fancybox({
-		hideOnOverlayClick: false,
-        hideOnContentClick: false,
-        enableEscapeButton: false,
-        showCloseButton : true,
-        onClosed: function(){
-            console.log("onClosed called");
-        }
-	});
+        $("a#inline").fancybox({
+            hideOnOverlayClick: false,
+            hideOnContentClick: false,
+            enableEscapeButton: false,
+            showCloseButton : true,
+            onClosed: function(){
+//                console.log("onClosed called");
+            }
+	    });
 
         $('#fancybox-overlay').click(function () {
-            console.log('overlay clicked!');
+//            console.log('overlay clicked!');
         })
-
-	/* Apply fancybox to multiple items */
-
-//	$("a.group").fancybox({
-//		'transitionIn'	:	'elastic',
-//		'transitionOut'	:	'elastic',
-//		'speedIn'		:	600,
-//		'speedOut'		:	200,
-//		'overlayShow'	:	false
-//	});
-
-        //////////////////////////////////////////////
-
 
     });
 

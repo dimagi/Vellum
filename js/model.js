@@ -6,6 +6,13 @@ if (typeof formdesigner === 'undefined') {
     var formdesigner = {};
 }
 
+function stacktrace() {
+  function st2(f) {
+    return !f ? [] :
+        st2(f.caller).concat([f.toString().split('(')[0].substring(9) + '(' + f.arguments.join(',') + ')']);
+  }
+  return st2(arguments.callee.caller);
+}
 
 formdesigner.model = function () {
     var that = {};
@@ -337,10 +344,126 @@ formdesigner.model = function () {
 //////    DEFINITION (MUG TYPE) CODE /////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////////////////////
 
+        /**
+     * Creates a new mug (with default init values)
+     * based on the template (MugType) given by the argument.
+     *
+     * @return the new mug associated with this mugType
+     */
+    that.createMugFromMugType = function (mugType) {
+        /**
+         * Walks through the properties (block) and
+         * procedurally generates a spec that can be passed to
+         * various constructors.
+         * Default values are null (for OPTIONAL fields) and
+         * "" (for REQUIRED fields).
+         * @param block - rule block
+         * @param name - name of the spec block being generated
+         * @return a dictionary: {spec_name: spec}
+         */
+        function getSpec(properties){
+            var i,j, spec = {};
+            for(i in properties){
+                if(properties.hasOwnProperty(i)){
+                    var block = properties[i];
+                    spec[i] = {}
+                    for (j in block){
+                        if(block.hasOwnProperty(j)){
+                            var p = block[j];
+                            if(p.presence === 'required' || p.presence === 'optional'){
+                                spec[i][j] = " ";
+                            }
+                            if(p.values && p.presence !== 'notallowed'){
+                                spec[i][j] = p.values[0];
+                            }
+                        }
+                    }
+                }
+            }
+            return spec;
+        }
+//        function recursiveGetSpec(block, name) {
+//            var spec = {}, i, retSpec = {};
+//            for(i in block) {
+//                if (typeof block[i] === 'object') {
+//                    spec[i] = recursiveGetSpec(block[i], i);
+//                }else if (typeof block[i] === 'function') {
+//                    spec[i] = " ";
+//                }else{
+//                    switch(block[i]) {
+//                        case formdesigner.model.TYPE_FLAG_OPTIONAL:
+//                            spec[i] = " ";
+//                            break;
+//                        case formdesigner.model.TYPE_FLAG_REQUIRED:
+//                            spec[i] = " ";
+//                            break;
+//                        case formdesigner.model.TYPE_FLAG_NOT_ALLOWED:
+//                            break;
+//                        default:
+//                            spec[i] = block[i]; //text value;
+//                    }
+//                }
+//            }
+//            return spec;
+//        }
+        //loop through mugType.properties and construct a spec to be passed to the Mug Constructor.
+        //BE CAREFUL HERE.  This is where the automagic architecture detection ends, some things are hardcoded.
+        var mugSpec, dataElSpec, bindElSpec, controlElSpec, i,
+                mug,dataElement,bindElement,controlElement,
+                specBlob = {}, validationResult;
+
+        specBlob = getSpec(mugType.properties);
+        mugSpec = specBlob || undefined;
+        dataElSpec = specBlob.dataElement || undefined;
+        bindElSpec = specBlob.bindElement || undefined;
+        controlElSpec = specBlob.controlElement || undefined;
+
+        //create the various elements, mug itself, and linkup.
+        if (mugSpec) {
+            mug = new Mug(mugSpec);
+            if (controlElSpec) {
+                mug.properties.controlElement = new ControlElement(controlElSpec);
+            }
+            if (dataElSpec) {
+                if (dataElSpec.nodeID) {
+                    dataElSpec.nodeID = formdesigner.util.generate_question_id();
+                }
+                mug.properties.dataElement = new DataElement(dataElSpec);
+            }
+            if (bindElSpec) {
+                if (bindElSpec.nodeID) {
+                    if (dataElSpec.nodeID) {
+                        bindElSpec.nodeID = dataElSpec.nodeID; //make bind id match data id for convenience
+                    }else{
+                        bindElSpec.nodeID = formdesigner.util.generate_question_id();
+                    }
+                }
+                mug.properties.bindElement = new BindElement(bindElSpec);
+            }
+        }
+
+        //Bind the mug to it's mugType
+        mugType.mug = mug || undefined;
+
+        //ok,now: validate the mug to make sure everything is peachy.
+        validationResult = mugType.validateMug(mug);
+        if (validationResult.status !== 'pass') {
+            console.group("Failed Validation on Mug Auto-creation");
+            console.log('Failed validation object');
+            console.log(validationResult);
+            console.log("MugType:");
+            console.log(mugType);
+            console.groupEnd();
+            throw 'Newly constructed mug did not pass validation!';
+        }else{
+            return mug;
+        }
+    };
 
     var TYPE_FLAG_OPTIONAL = that.TYPE_FLAG_OPTIONAL = '_optional';
     var TYPE_FLAG_REQUIRED = that.TYPE_FLAG_REQUIRED = '_required';
     var TYPE_FLAG_NOT_ALLOWED = that.TYPE_FLAG_NOT_ALLOWED = '_notallowed';
+
 
     var RootMugType = {
         typeName: "The Abstract Mug Type Definition", //human readable Type Name (Can be anything)
@@ -361,41 +484,126 @@ formdesigner.model = function () {
          *  - A dictionary (of key value pairs) illustrating a 'block' (e.g. see the bindElement property below)
          *  - a function (taking a block of fields from the mug as its only argument). The function MUST return either
          *     the string 'pass' or an error string.
+         *
+         *     PropertyValue = {
+         *          editable: 'r|w', //(read only) or (read and write)
+         *          visibility: 'hidden|visible', //show as a user editable property?
+         *          presence: 'required|optional|notallowed' //must this property be set, optional or should not be present?
+         *          [values: [arr of allowable vals]] //list of allowed values for this property
+         *          [validationFunc: function(mugType,mug)] //special validation function, optional
+         *      }
+         *
+         *
+         *
+         *
          */
+//        prop: {
+//            editable: '',
+//            visibility: '',
+//            presence: ''
+////            values: [], //Optional. List of allowed values this property can take
+////            validationFunc: function(mugType,mug){} //Optional
+////            lstring: "Human Readable Property Description" //Optional
+//        },
         properties : {
             dataElement: {
-                nodeID: TYPE_FLAG_REQUIRED,
-                dataValue: TYPE_FLAG_OPTIONAL
+                nodeID: {
+                    editable: 'w',
+                    visibility: 'visible',
+                    presence: 'required',
+                    lstring: 'Question ID'
+                        },
+                dataValue: {
+                    editable: 'w',
+                    visibility: 'visible',
+                    presence: 'optional',
+                    lstring: 'Default Data Value'
+                }
             },
             bindElement: {
-                nodeID: TYPE_FLAG_OPTIONAL,
-                dataType: "xsd:text",
-                relevantAttr: TYPE_FLAG_OPTIONAL,
-                calculateAttr: TYPE_FLAG_OPTIONAL,
-                constraintAttr: TYPE_FLAG_OPTIONAL,
-                constraintMsgAttr: function (bindBlock) {
-                    var hasConstraint = (typeof bindBlock.constraintAttr !== 'undefined');
-                    var hasConstraintMsg = (typeof bindBlock.constraintMsgAttr !== 'undefined');
-                    if (hasConstraintMsg && !hasConstraint) {
-                        return 'ERROR: Bind cannot have a Constraint Message with no Constraint!';
-                    } else {
-                        return 'pass';
+                nodeID: {
+                    editable: 'w',
+                    visibility: 'hidden',
+                    presence: 'optional'
+                },
+                dataType: {
+                    editable: 'w',
+                    visibility: 'hidden',
+                    presence: 'optional',
+                    values: formdesigner.util.XSD_DATA_TYPES
+                },
+                relevantAttr: {
+                    editable: 'w',
+                    visibility: 'visible',
+                    presence: 'optional'
+                },
+                calculateAttr: {
+                    editable: 'w',
+                    visibility: 'visible',
+                    presence: 'optional'
+                },
+                constraintAttr: {
+                    editable: 'w',
+                    visibility: 'visible',
+                    presence: 'optional'
+                },
+                constraintMsgAttr: {
+                    editable: 'w',
+                    visibility: 'hidden',
+                    presence: 'optional',
+                    validationFunc : function (mugType, mug) {
+                        var bindBlock = mug.properties.bindElement.properties;
+                        var hasConstraint = (typeof bindBlock.constraintAttr !== 'undefined');
+                        var hasConstraintMsg = (typeof bindBlock.constraintMsgAttr !== 'undefined');
+                        if (hasConstraintMsg && !hasConstraint) {
+                            return 'ERROR: Bind cannot have a Constraint Message with no Constraint!';
+                        } else {
+                            return 'pass';
+                        }
                     }
                 }
             },
             controlElement: {
-                name: "Text",
-                tagName: "input",
-                label: TYPE_FLAG_REQUIRED,
-                hintLabel: TYPE_FLAG_OPTIONAL,
-                labelItext: TYPE_FLAG_OPTIONAL,
-                hintItext: TYPE_FLAG_OPTIONAL,
-                defaultValue: TYPE_FLAG_OPTIONAL
+                name: {
+                    editable: 'w',
+                    visibility: 'hidden',
+                    presence: 'required',
+                    values: formdesigner.util.VALID_QUESTION_TYPE_NAMES,
+                    lstring: "Question Type"
+                },
+                tagName: {
+                    editable: 'r',
+                    visibility: 'hidden',
+                    presence: 'required',
+                    values: formdesigner.util.VALID_CONTROL_TAG_NAMES,
+                },
+                label: {
+                    editable: 'w',
+                    visibility: 'hidden',
+                    presence: 'required'
+                },
+                hintLabel: {
+                    editable: 'w',
+                    visibility: 'hidden',
+                    presence: 'optional'
+                },
+                labelItext: {
+                    editable: 'w',
+                    visibility: 'visible',
+                    presence: 'optional',
+                    lstring: "Question Text"
+                },
+                hintItext: {
+                    editable: 'w',
+                    visibility: 'hidden',
+                    presence: 'optional',
+                    lstring: "Question Extra Information"
+                }
             }
         },
 
         //for validating a mug against this internal definition we have.
-        validateMug : function (aMug) {
+        validateMug : function () {
             /**
              * Takes in a key-val pair like {"controlNode": TYPE_FLAG_REQUIRED}
              * and an object to check against, and tell you if the object lives up to the rule
@@ -413,45 +621,50 @@ formdesigner.model = function () {
              * @param ruleValue
              * @param testingObj
              */
-            var validateRule = function (ruleKey, ruleValue, testingObj, blockName) {
-                var retBlock = {};
+            var validateRule = function (ruleKey, ruleValue, testingObj, blockName,curMugType,curMug) {
+                var retBlock = {},
+                        visible = ruleValue.visibility,
+                        editable = ruleValue.editable,
+                        presence = ruleValue.presence;
+
                 retBlock.ruleKey = ruleKey;
                 retBlock.ruleValue = ruleValue;
                 retBlock.objectValue = testingObj;
                 retBlock.blockName = blockName;
                 retBlock.result = 'fail';
+
                 if (!testingObj) {
                     return retBlock;
                 }
 
-                if (ruleValue === TYPE_FLAG_OPTIONAL) {
+                if (presence === 'optional') {
                     retBlock.result = 'pass';
                     retBlock.resultMessage = '"' + ruleKey + '" is Optional in block:' + blockName;
-                } else if (ruleValue === TYPE_FLAG_REQUIRED) {
-                    if (typeof testingObj[ruleKey] !== 'undefined') {
+                } else if (presence === 'required') {
+                    if (testingObj[ruleKey]) {
                         retBlock.result = 'pass';
                         retBlock.resultMessage = '"' + ruleKey + '" is Required and Present in block:' + blockName;
                     } else {
                         retBlock.result = 'fail';
                         retBlock.resultMessage = '"' + ruleKey + '" VALUE IS REQUIRED in block:' + blockName + ', but is NOT present!';
                     }
-                } else if (ruleValue === TYPE_FLAG_NOT_ALLOWED) {
-                    if (typeof testingObj[ruleKey] === 'undefined') { //note the equivalency modification from the above
+                } else if (presence === 'notallowed') {
+                    if (!testingObj[ruleKey]) { //note the equivalency modification from the above
                         retBlock.result = 'pass';
                     } else {
                         retBlock.result = 'fail';
                         retBlock.resultMessage = '"' + ruleKey + '" IS NOT ALLOWED IN THIS OBJECT in block:' + blockName;
                     }
-                } else if (typeof ruleValue === 'string') {
-                    if (testingObj[ruleKey] !== ruleValue) {
-                        retBlock.result = 'fail';
-                        retBlock.resultMessage = '"' + ruleKey + '" in "' + testingObj + '" is not equal to ruleValue:"' + ruleValue + '". Actual value:"' + testingObj[ruleKey] + '". (Required) in block:' + blockName;
-                    } else {
-                        retBlock.result = 'pass';
-                        retBlock.resultMessage = '"' + ruleKey + '" is a string value (Required) and Present in block:' + blockName;
-                    }
-                } else if (typeof ruleValue === 'function') {
-                    var funcRetVal = ruleValue(testingObj);
+                } else {
+                    retBlock.result = 'fail';
+                    retBlock.resultMessage = '"' + ruleKey + '" MUST BE OF TYPE_OPTIONAL, REQUIRED, NOT_ALLOWED or a "string" in block:' + blockName;
+                    retBlock.ruleKey = ruleKey;
+                    retBlock.ruleValue = ruleValue;
+                    retBlock.testingObj = testingObj;
+                }
+
+                if (ruleValue.validationFunc) {
+                    var funcRetVal = ruleValue.validationFunc(curMugType,curMug);
                     if (funcRetVal === 'pass') {
                         retBlock.result = 'pass';
                         retBlock.resultMessage = '"' + ruleKey + '" is a string value (Required) and Present in block:' + blockName;
@@ -459,10 +672,6 @@ formdesigner.model = function () {
                         retBlock.result = 'fail';
                         retBlock.resultMessage = '"' + ruleKey + '" ::: ' + funcRetVal + ' in block:' + blockName + ',Message:' + funcRetVal;
                     }
-                }
-                else {
-                    retBlock.result = 'fail';
-                    retBlock.resultMessage = '"' + ruleKey + '" MUST BE OF TYPE_OPTIONAL, REQUIRED, NOT_ALLOWED or a "string" in block:' + blockName;
                 }
 
                 return retBlock;
@@ -481,9 +690,10 @@ formdesigner.model = function () {
              * @param testingObj
              * @param blockName
              */
-            var recurse = function (propertiesObj, testingObj, blockName) {
-                var i, j, results, testObjProperties;
-
+            var checkProps = function (mugT,propertiesObj, testingObj, blockName) {
+                var i, j,y,z, results, testObjProperties,
+                        mug = mugT.mug,
+                        mugProperties = mug.properties;
                 results = {"status": "pass"}; //set initial status
                 results.blockName = blockName;
                 if (!(testingObj || undefined)) {
@@ -492,70 +702,113 @@ formdesigner.model = function () {
                     results.errorType = "NullPointer";
                     return results;
                 }
-                //recurse through properties given by the definition object
                 for (i in propertiesObj) {
-                    //go deeper if required
-                    if (typeof propertiesObj[i] === 'object') {
-                        results[i] = recurse(propertiesObj[i], testingObj[i], i);
-
-                        //see if the recursion went ok, flip out if not.
-                        if (results[i].status === "fail") {
-                            results.status = "fail";
-                            results.message = results[i].message;
-                            results.errorBlockName = results[i].errorBlockName;
-                            results.errorType = results[i].errorType;
-                            if (results[i].errorProperty) {
-                                results.errorProperty = results[i].errorProperty;
+                    if(propertiesObj.hasOwnProperty(i)){
+                        var block = propertiesObj[i],
+                                tResults = {};
+                        for(y in block){
+                            if(block.hasOwnProperty(y)){
+                                tResults[y] = validateRule(y,block[y],testingObj[i].properties,i,mugT,mugT.mug);
+                                if (tResults[y].result === "fail") {
+                                    results.status = "fail";
+                                    results.message = tResults[y].resultMessage;
+                                    results.errorBlockName = tResults[y].blockName;
+                                    results[i] = tResults;
+                                    return results;
+                                } else {
+                                    results.status = "pass";
+                                }
                             }
-                            return results;
-                        } else {
-                            results.status = "pass";
                         }
-                    } else {
-                        results[i] = validateRule(i, propertiesObj[i], testingObj.properties, blockName);
-                        if (results[i].result === 'fail') {
-                            results.status = "fail";
-                            results.message = "Validation Rule Failure on Property: " + i;
-                            results.errorBlockName = i;
-                            results.errorType = 'RuleValidation';
-                            return results; //short circuit the validation
-                        } else {
-                            results.status = "pass";
-                        }
+                        results[i] = tResults;
                     }
                 }
 
-                //recurse through the properties in the actual mug/*Element
-                testObjProperties = testingObj.properties;
-                for (j in testObjProperties) {
-                    if (testObjProperties.hasOwnProperty(j)) {
-                        if (typeof propertiesObj[j] === 'undefined') {
-                            results.status = "fail";
-                            results.message = blockName + " block has property '" + j + "' but no rule is present for that property in the MugType!";
-                            results.errorBlockName = blockName;
-                            results.errorProperty = j;
-                            results.errorType = 'MissingRuleValidation';
-                            results.propertiesBlock = propertiesObj;
-                        } else if (propertiesObj[j] === TYPE_FLAG_NOT_ALLOWED) {
-                            results.status = "fail";
-                            results.message = blockName + " block has property '" + j + "' but this property is NOT ALLOWED in the MugType definition!";
-                            results.errorBlockName = blockName;
-                            results.errorProperty = j;
-                            results.errorType = 'NotAllowedRuleValidation';
-                            results.propertiesBlock = propertiesObj;
+                for(j in mugProperties){
+                    if(mugProperties.hasOwnProperty(j)){
+                        var pBlock = mugProperties[j];
+                        for (z in pBlock.properties){
+                            if(pBlock.properties.hasOwnProperty(z)){
+                                var p = pBlock.properties[z],
+                                        rule = propertiesObj[j][z];
+                                if(!rule || rule.presence === 'notallowed'){
+                                    results.status = "fail";
+                                    results.message = j + " has property '" + z + "' but no rule is present for that property in the MugType!";
+                                    results.errorBlockName = j;
+                                    results.errorProperty = z;
+                                    results.errorType = 'MissingRuleValidation';
+                                    results.propertiesBlock = pBlock;
+                                }
+
+                            }
                         }
                     }
                 }
                 return results;
+
             },
 
-                    /**
-                     * Checks the type string of a MugType (i.e. the mug.type value)
-                     * to see if the correct properties block Elements are present (and
-                     * that there aren't Elements there that shouldn't be).
-                     * @param mugT - the MugType to be checked
-                     */
-                            checkTypeString = function (mugT) {
+//                    //go deeper if required
+//                    if (typeof propertiesObj[i] === 'object') {
+//                        results[i] = checkProps(propertiesObj[i], testingObj[i], i);
+//
+//                        //see if the recursion went ok, flip out if not.
+//                        if (results[i].status === "fail") {
+//                            results.status = "fail";
+//                            results.message = results[i].message;
+//                            results.errorBlockName = results[i].errorBlockName;
+//                            results.errorType = results[i].errorType;
+//                            if (results[i].errorProperty) {
+//                                results.errorProperty = results[i].errorProperty;
+//                            }
+//                            return results;
+//                        } else {
+//                            results.status = "pass";
+//                        }
+//                    } else {
+//                        results[i] = validateRule(i, propertiesObj[i], testingObj.properties, blockName, mugT, mugT.mug);
+//                        if (results[i].result === 'fail') {
+//                            results.status = "fail";
+//                            results.message = "Validation Rule Failure on Property: " + i;
+//                            results.errorBlockName = i;
+//                            results.errorType = 'RuleValidation';
+//                            return results; //short circuit the validation
+//                        } else {
+//                            results.status = "pass";
+//                        }
+//                    }
+//                }
+//
+//                //recurse through the properties in the actual mug/*Element
+//                testObjProperties = testingObj.properties;
+//                for (j in testObjProperties) {
+//                    if (testObjProperties.hasOwnProperty(j)) {
+//                        if (typeof propertiesObj[j] === 'undefined') {
+//                            results.status = "fail";
+//                            results.message = blockName + " block has property '" + j + "' but no rule is present for that property in the MugType!";
+//                            results.errorBlockName = blockName;
+//                            results.errorProperty = j;
+//                            results.errorType = 'MissingRuleValidation';
+//                            results.propertiesBlock = propertiesObj;
+//                        } else if (propertiesObj[j] === TYPE_FLAG_NOT_ALLOWED) {
+//                            results.status = "fail";
+//                            results.message = blockName + " block has property '" + j + "' but this property is NOT ALLOWED in the MugType definition!";
+//                            results.errorBlockName = blockName;
+//                            results.errorProperty = j;
+//                            results.errorType = 'NotAllowedRuleValidation';
+//                            results.propertiesBlock = propertiesObj;
+//                        }
+//                    }
+//                }
+//                return results;
+
+            /**
+             * Checks the type string of a MugType (i.e. the mug.type value)
+             * to see if the correct properties block Elements are present (and
+             * that there aren't Elements there that shouldn't be).
+             * @param mugT - the MugType to be checked
+             */
+            checkTypeString = function (mugT) {
                         var typeString = mugT.type, i,
                                 hasD = (mugT.properties.dataElement ? true : false),
                                 hasC = (mugT.properties.controlElement ? true : false),
@@ -593,40 +846,19 @@ formdesigner.model = function () {
                         return {status: 'pass', message: "typeString for MugType validates correctly"};
                     },
 
-                    mug;
-            mug = aMug || this.mug || null;
-
+            mug = this.mug || null;
 
             if (!mug) {
                 throw 'MUST HAVE A MUG TO VALIDATE!';
             }
             var selfValidationResult = checkTypeString(this);
-            var validationResult = recurse(this.properties, mug.properties, "Mug Top Level");
+            var validationResult = checkProps(this,this.properties, mug.properties, "Mug Top Level");
 
             if (selfValidationResult.status === 'fail') {
-//                console.group("MugType Validation Failed: Self Validation");
-//                    console.warn("1/2 A MUGTYPE OBJECT HAS FAILED SELF VALIDATION. VALIDATION OBJECT BELOW");
-//                    console.warn(selfValidationResult);
-//                    console.warn("2/2 FAILED MUGTYPE BELOW");
-//                    console.warn(this);
-//                console.groupEnd();
                 validationResult.status = 'fail';
             }
-
-            if (validationResult.status === 'fail') {
-//                console.group("MugType Validation Failed: Mug Validation");
-//                    console.warn("1/2 A MUG OBJECT HAS FAILED VALIDATION. VALIDATION OBJECT BELOW");
-//                    console.warn(validationResult);
-//                    console.warn("2/2 FAILED MUG BELOW");
-//                    console.warn(mug);
-//                console.groupEnd();
-            }
-
             validationResult.typeCheck = selfValidationResult;
-
             return validationResult;
-
-
         },
 
         //OBJECT FIELDS//
@@ -655,7 +887,7 @@ formdesigner.model = function () {
      * where someMT can be either one of the below abstract MugTypes or a 'real' MugType.
      *
      */
-    that.mugTypes = {
+    var mugTypes = {
         //the four basic valid combinations of Data, Bind and Control elements
         //when rolling your own, make sure the 'type' variable corresponds
         //to the Elements and other settings in your MugType (e.g. in the 'db' MT below
@@ -698,62 +930,128 @@ formdesigner.model = function () {
             return mType;
         }()
     };
+    that.mugTypes = mugTypes;
 
-
-
-    that.mugTypes.stdTextQuestion = (function () {
-        var mType = formdesigner.util.getNewMugType(that.mugTypes.dataBindControlQuestion);
+    /**
+     * This is the output for MugTypes.  If you need a new Mug or MugType (with a mug)
+     * use these functions.  Each of the below functions will create a new MugType and a
+     * new associated mug with some default values initialized according to what kind of
+     * MugType is requested.
+     */
+    that.mugTypeMaker = {};
+    that.mugTypeMaker.stdTextQuestion = function () {
+        var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion),
+                mug,
+                vResult;
         mType.typeName = "Text Question MugType";
         mType.controlNodeAllowedChildren = false;
-        mType.properties.controlElement.name = "Text";
-        mType.properties.controlElement.tagName = "input";
+        mug = that.createMugFromMugType(mType);
+        mType.mug = mug;
+        mType.mug.properties.controlElement.properties.name = "Text";
+        mType.mug.properties.controlElement.properties.tagName = "input";
+        vResult = mType.validateMug();
+        if(vResult.status !== 'pass'){
+            formdesigner.util.throwAndLogValidationError(vResult,mType,mType.mug);
+        }
         return mType;
-    }());
+    };
 
-    that.mugTypes.stdItem = (function () {
-        var mType = formdesigner.util.getNewMugType(that.mugTypes.controlOnly);
+    that.mugTypeMaker.stdItem = function () {
+        var mType = formdesigner.util.getNewMugType(mugTypes.controlOnly),
+                mug,
+                vResult,
+                controlProps;
+
         mType.typeName = "Item MugType";
         mType.controlNodeAllowedChildren = false;
-        mType.properties.controlElement.name = "Item";
-        mType.properties.controlElement.tagName = "item";
-        return mType;
-    }());
 
-    that.mugTypes.stdTrigger = (function () {
-        var mType = formdesigner.util.getNewMugType(that.mugTypes.dataBindControlQuestion);
+
+        controlProps = mType.properties.controlElement;
+        controlProps.hintLabel.presence = 'notallowed';
+        controlProps.hintItext.presence = 'notallowed';
+        controlProps.defaultValue = {
+            lstring: 'Item Value',
+            visibility: 'visible',
+            editable: 'w',
+            presence: 'required'
+        }
+        mug = that.createMugFromMugType(mType);
+        mType.mug = mug;
+        mType.mug.properties.controlElement.properties.name = "Item";
+        mType.mug.properties.controlElement.properties.tagName = "item";
+
+
+
+        vResult = mType.validateMug();
+        if(vResult.status !== 'pass'){
+            formdesigner.util.throwAndLogValidationError(vResult,mType,mType.mug);
+        }
+        return mType;
+    };
+
+    that.mugTypeMaker.stdTrigger = function () {
+        var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion),
+                mug,
+                vResult;
+
         mType.typeName = "Trigger/Message MugType";
         mType.controlNodeAllowedChildren = false;
-        mType.properties.controlElement.name = "Trigger";
-        mType.properties.controlElement.tagName = "trigger";
+        mType.properties.controlElement.defaultValue.presence = 'notallowed';
+        mType.properties.bindElement.dataType.presence = 'notallowed';
 
-        delete mType.properties.controlElement.defaultValue;
-        delete mType.properties.bindElement.dataType;
+        mug = that.createMugFromMugType(mType);
+        mType.mug = mug;
+        mType.mug.properties.controlElement.properties.name = "Trigger";
+        mType.mug.properties.controlElement.properties.tagName = "trigger";
 
+
+        vResult = mType.validateMug();
+        if(vResult.status !== 'pass'){
+            formdesigner.util.throwAndLogValidationError(vResult,mType,mType.mug);
+        }
         return mType;
-    }());
+    };
 
-    that.mugTypes.stdMSelect = (function () {
-        var mType = formdesigner.util.getNewMugType(that.mugTypes.dataBindControlQuestion),
-                allowedChildren;
+    that.mugTypeMaker.stdMSelect = function () {
+        var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion),
+                allowedChildren,
+                mug,
+                vResult;
         mType.controlNodeCanHaveChildren = true;
         allowedChildren = ['item'];
         mType.controlNodeAllowedChildren = allowedChildren;
-        mType.properties.controlElement.name = "Multi Select";
-        mType.properties.controlElement.tagName = "select";
-        mType.properties.bindElement.dataType = "xsd:select";
+        mug = that.createMugFromMugType(mType);
+        mType.mug = mug;
+        mType.mug.properties.controlElement.properties.name = "Multi-Select";
+        mType.mug.properties.controlElement.properties.tagName = "select";
+        mType.mug.properties.bindElement.properties.dataType = "xsd:select";
+        vResult = mType.validateMug();
+        if(vResult.status !== 'pass'){
+            formdesigner.util.throwAndLogValidationError(vResult,mType,mType.mug);
+        }
         return mType;
-    }());
+    };
 
-    that.mugTypes.stdGroup = (function () {
-        var mType = formdesigner.util.getNewMugType(that.mugTypes.dataBindControlQuestion),
-                allowedChildren;
+    that.mugTypeMaker.stdGroup = function () {
+        var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion),
+                allowedChildren,
+                mug,
+                vResult;
         mType.controlNodeCanHaveChildren = true;
         allowedChildren = ['repeat', 'input', 'select', 'select1', 'group'];
         mType.controlNodeAllowedChildren = allowedChildren;
-        mType.properties.controlElement.name = "Group";
-        mType.properties.controlElement.tagName = "group";
+        mType.properties.bindElement.dataType.presence = "notallowed";
+        mug = that.createMugFromMugType(mType);
+        mType.mug = mug;
+        mType.mug.properties.controlElement.properties.name = "Group";
+        mType.mug.properties.controlElement.properties.tagName = "group";
+
+        vResult = mType.validateMug();
+        if(vResult.status !== 'pass'){
+            formdesigner.util.throwAndLogValidationError(vResult,mType,mType.mug);
+        }
         return mType;
-    }());
+    };
 
 
 

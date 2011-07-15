@@ -234,13 +234,13 @@ $(document).ready(function(){
         expect(3);
         var testData = make_control_bind_data_mug();
         var myMug = testData.mug;
-        var MugType = formdesigner.util.getNewMugType(formdesigner.model.mugTypes["stdTextQuestion"]); //simulates a 'standard' text question
-
+        var MugType = formdesigner.model.mugTypeMaker.stdTextQuestion(); //simulates a 'standard' text question
+        MugType.mug = myMug;
         var validationObject = MugType.validateMug(myMug);
         equal(MugType.typeName, "Text Question MugType");
         equal(validationObject.status, "pass", 'Does the mug validate against the MugType?');
 
-        var otherType = formdesigner.model.mugTypes.dataBindControlQuestion;
+        var otherType = formdesigner.model.mugTypeMaker["stdTextQuestion"]();
         otherType.properties.bindElement['someProperty'] = 'foo';
         var vObj = otherType.validateMug(myMug);
         equal(vObj.status,'fail', "This should fail because the mug does not contain the required property");
@@ -249,12 +249,11 @@ $(document).ready(function(){
 
     test("Test custom validation function in bind block definition", function(){
         expect(2);
-        var testData = make_control_bind_data_mug();
-        var myMug = testData.mug;
+        var myMug;
+        var MugType = formdesigner.model.mugTypeMaker.stdTextQuestion(); //simulates a 'standard' text question
+        myMug = MugType.mug;
         myMug.properties.bindElement.properties.constraintAttr = "foo";
         myMug.properties.bindElement.properties.constraintMsgAttr = undefined;
-        var MugType = formdesigner.util.getNewMugType(formdesigner.model.mugTypes["stdTextQuestion"]); //simulates a 'standard' text question
-
         var validationObject = MugType.validateMug(myMug);
         equal(validationObject.status,'pass', "Mug has a constraint but no constraint message which is OK");
 
@@ -284,8 +283,8 @@ $(document).ready(function(){
     module("Automatic Mug Creation from MugType");
     test("Create mug from root MugType", function(){
         expect(2);
-        var mugType = formdesigner.util.getNewMugType(formdesigner.model.mugTypes["stdTextQuestion"]);
-        var mug = formdesigner.controller.createMugFromMugType(mugType);
+        var mugType = formdesigner.model.mugTypeMaker.stdTextQuestion();
+        var mug = mugType.mug;
         ok(typeof mug === 'object', "Mug is an Object");
         equal(mugType.validateMug(mug).status,'pass', "Mug passes validation");
     });
@@ -299,7 +298,7 @@ $(document).ready(function(){
         tMug,Mug;
 
         tMug = formdesigner.util.getNewMugType(AdbType);
-        Mug = formdesigner.controller.createMugFromMugType(tMug);
+        Mug = formdesigner.model.createMugFromMugType(tMug);
         ok(typeof tMug === 'object', "MugType creation successful for '"+tMug.typeName+"' MugType");
         ok(tMug.validateMug(Mug).status === 'pass', "Mug created from '"+tMug.typeName+"' MugType passes validation");
         ok(typeof Mug.properties.controlElement === 'undefined', "Mug's ControlElement is undefined");
@@ -308,7 +307,7 @@ $(document).ready(function(){
         equal(Mug.properties.dataElement.properties.nodeID,Mug.properties.bindElement.properties.nodeID);
 
         tMug = formdesigner.util.getNewMugType(AdbcType);
-        Mug = formdesigner.controller.createMugFromMugType(tMug);
+        Mug = formdesigner.model.createMugFromMugType(tMug);
         ok(typeof tMug === 'object', "MugType creation successful for '"+tMug.typeName+"' MugType");
         ok(tMug.validateMug(Mug).status === 'pass', "Mug created from '"+tMug.typeName+"' MugType passes validation");
         ok(typeof Mug.properties.controlElement === 'object', "Mug's ControlElement exists");
@@ -317,7 +316,7 @@ $(document).ready(function(){
         equal(Mug.properties.dataElement.properties.nodeID,Mug.properties.bindElement.properties.nodeID);
 
         tMug = formdesigner.util.getNewMugType(AdcType);
-        Mug = formdesigner.controller.createMugFromMugType(tMug);
+        Mug = formdesigner.model.createMugFromMugType(tMug);
         ok(typeof tMug === 'object', "MugType creation successful for '"+tMug.typeName+"' MugType");
         ok(tMug.validateMug(Mug).status === 'pass', "Mug created from '"+tMug.typeName+"' MugType passes validation");
         ok(typeof Mug.properties.controlElement === 'object', "Mug's ControlElement exists");
@@ -325,7 +324,7 @@ $(document).ready(function(){
         ok(typeof Mug.properties.dataElement === 'object', "Mug's dataElement exists");
 
         tMug = formdesigner.util.getNewMugType(AdType);
-        Mug = formdesigner.controller.createMugFromMugType(tMug);
+        Mug = formdesigner.model.createMugFromMugType(tMug);
         ok(typeof tMug === 'object', "MugType creation successful for '"+tMug.typeName+"' MugType");
         ok(tMug.validateMug(Mug).status === 'pass', "Mug created from '"+tMug.typeName+"' MugType passes validation");
         ok(typeof Mug.properties.controlElement === 'undefined', "Mug's ControlElement is undefined");
@@ -343,7 +342,7 @@ $(document).ready(function(){
         tMug,Mug;
 
         tMug = formdesigner.util.getNewMugType(AdbType);
-        Mug = formdesigner.controller.createMugFromMugType(tMug);
+        Mug = formdesigner.model.createMugFromMugType(tMug);
         tMug.type="dbc";
 
 
@@ -354,21 +353,35 @@ $(document).ready(function(){
         notEqual(validationResult.status,'pass',"MugType is wrong Type ('' instead of 'db')");
     });
 
+    test("Check MugType properties alterations",function(){
+        var mugTA = formdesigner.model.mugTypeMaker.stdTextQuestion(),
+            mugTB = formdesigner.model.mugTypeMaker.stdTrigger(),
+            mugTC = formdesigner.model.mugTypeMaker.stdMSelect(),
+            mugA = mugTA.mug,
+            mugB = mugTB.mug,
+            mugC = mugTC.mug;
+
+        notEqual(mugTB.ufid,mugTC.ufid);
+        notEqual(mugTB.properties, mugTC.properties);
+        ok(mugTC.properties.bindElement.nodeID.visibility === 'hidden');
+
+    })
+
     module("Tree Data Structure Tests");
     test("Trees", function(){
 //        expect(16);
 
         ///////////BEGIN SETUP///////
-        var mugTA = formdesigner.util.getNewMugType(formdesigner.model.mugTypes.stdGroup),
-            mugTB = formdesigner.util.getNewMugType(formdesigner.model.mugTypes.stdGroup),
-            mugTC = formdesigner.util.getNewMugType(formdesigner.model.mugTypes.stdGroup),
-            mugA = formdesigner.controller.createMugFromMugType(mugTA),
-            mugB = formdesigner.controller.createMugFromMugType(mugTB),
-            mugC = formdesigner.controller.createMugFromMugType(mugTC),
+        var mugTA = formdesigner.model.mugTypeMaker.stdGroup(),
+            mugTB = formdesigner.model.mugTypeMaker.stdGroup(),
+            mugTC = formdesigner.model.mugTypeMaker.stdGroup(),
+            mugA = mugTA.mug,
+            mugB = mugTB.mug,
+            mugC = mugTC.mug,
             tree = new formdesigner.model.Tree('data');
         var GNMT = formdesigner.util.getNewMugType;
-        var createMugFromMugType = formdesigner.controller.createMugFromMugType;
-        var DBCQuestion = formdesigner.model.mugTypes.dataBindControlQuestion;
+        var createMugFromMugType = formdesigner.model.createMugFromMugType;
+        var DBCQuestion = formdesigner.model.mugTypeMaker.stdTextQuestion();
 
         tree.insertMugType(mugTA, 'into', null); //add mugA as a child of the rootNode
         tree.insertMugType(mugTB, 'into',mugTA ); //add mugB as a child of mugA...
@@ -472,12 +485,12 @@ $(document).ready(function(){
     });
     module("UITree");
     test("Children moving/relative location tests", function(){
-            var mugTA = formdesigner.util.getNewMugType(formdesigner.model.mugTypes.stdGroup),
-            mugTB = formdesigner.util.getNewMugType(formdesigner.model.mugTypes.stdTextQuestion),
-            mugTC = formdesigner.util.getNewMugType(formdesigner.model.mugTypes.dataBindControlQuestion),
-            mugA = formdesigner.controller.createMugFromMugType(mugTA),
-            mugB = formdesigner.controller.createMugFromMugType(mugTB), 
-            mugC = formdesigner.controller.createMugFromMugType(mugTC);
+            var mugTA = formdesigner.model.mugTypeMaker.stdGroup(),
+            mugTB = formdesigner.model.mugTypeMaker.stdTextQuestion(),
+            mugTC = formdesigner.model.mugTypeMaker.stdTextQuestion(),
+            mugA = mugTA.mug,
+            mugB = mugTB.mug,
+            mugC = mugTC.mug;
         ok(formdesigner.util.canMugTypeHaveChildren(mugTA,mugTB), "Can a 'Group' MugType have children of type 'Text'?");
         ok(!formdesigner.util.canMugTypeHaveChildren(mugTB,mugTA), "'Text' mugType can NOT have children (of type 'group')");
         ok(!formdesigner.util.canMugTypeHaveChildren(mugTB,mugTC), "'Text' can't have children of /any/ type");
@@ -493,12 +506,12 @@ $(document).ready(function(){
 
     test("Tree insertion tests", function(){
         expect(4);
-        var mugTA = formdesigner.util.getNewMugType(formdesigner.model.mugTypes.stdGroup),
-            mugTB = formdesigner.util.getNewMugType(formdesigner.model.mugTypes.stdTextQuestion),
-            mugTC = formdesigner.util.getNewMugType(formdesigner.model.mugTypes.dataBindControlQuestion),
-            mugA = formdesigner.controller.createMugFromMugType(mugTA),
-            mugB = formdesigner.controller.createMugFromMugType(mugTB),
-            mugC = formdesigner.controller.createMugFromMugType(mugTC);
+        var mugTA = formdesigner.model.mugTypeMaker.stdGroup(),
+            mugTB = formdesigner.model.mugTypeMaker.stdTextQuestion(),
+            mugTC = formdesigner.model.mugTypeMaker.stdTextQuestion(),
+            mugA = mugTA.mug,
+            mugB = mugTB.mug,
+            mugC = mugTC.mug;
 
         formdesigner.controller.initFormDesigner();
         var c = formdesigner.controller;
@@ -518,12 +531,12 @@ $(document).ready(function(){
     });
 
     test("Does check_move() work correctly?", function(){
-        var mugTA = formdesigner.util.getNewMugType(formdesigner.model.mugTypes.stdTextQuestion),
-            mugTB = formdesigner.util.getNewMugType(formdesigner.model.mugTypes.stdTrigger),
-            mugTC = formdesigner.util.getNewMugType(formdesigner.model.mugTypes.stdItem),
-            mugA = formdesigner.controller.createMugFromMugType(mugTA),
-            mugB = formdesigner.controller.createMugFromMugType(mugTB),
-            mugC = formdesigner.controller.createMugFromMugType(mugTC);
+        var mugTA = formdesigner.model.mugTypeMaker.stdTextQuestion(),
+            mugTB = formdesigner.model.mugTypeMaker.stdTrigger(),
+            mugTC = formdesigner.model.mugTypeMaker.stdItem(),
+            mugA = mugTA.mug,
+            mugB = mugTB.mug,
+            mugC = mugTC.mug;
             formdesigner.controller.initFormDesigner();
         var c = formdesigner.controller,
         m = formdesigner.model;
@@ -532,19 +545,18 @@ $(document).ready(function(){
         ok(c.checkMoveOp(mugTA,'before',mugTB));
         ok(!c.checkMoveOp(mugTA,'into',mugTB));
 
-        var mugTGroupA = formdesigner.util.getNewMugType(formdesigner.model.mugTypes.stdGroup),
-            mugTGroupB = formdesigner.util.getNewMugType(formdesigner.model.mugTypes.stdGroup),
-            mugTGroupC = formdesigner.util.getNewMugType(formdesigner.model.mugTypes.stdGroup),
-            mugGA = formdesigner.controller.createMugFromMugType(mugTGroupA),
-            mugGB = formdesigner.controller.createMugFromMugType(mugTGroupB),
-            mugGC = formdesigner.controller.createMugFromMugType(mugTGroupC);
-//        console.log(mugGA);
+        var mugTGroupA = formdesigner.model.mugTypeMaker.stdGroup(),
+            mugTGroupB = formdesigner.model.mugTypeMaker.stdGroup(),
+            mugTGroupC = formdesigner.model.mugTypeMaker.stdGroup(),
+            mugGA = mugTGroupA.mug,
+            mugGB = mugTGroupB.mug,
+            mugGC = mugTGroupC.mug;
         ok(c.checkMoveOp(mugTA,'into',mugTGroupA));
         ok(c.checkMoveOp(mugTB,'into',mugTGroupA));
         ok(!c.checkMoveOp(mugTC,'into',mugTGroupA));
 
-        var mugTD = formdesigner.util.getNewMugType(formdesigner.model.mugTypes.stdMSelect),
-            mugD = formdesigner.controller.createMugFromMugType(mugTD);
+        var mugTD = formdesigner.model.mugTypeMaker.stdMSelect(),
+            mugD = mugTD.mug;
 
         ok(c.checkMoveOp(mugTD,'into',mugTGroupA));
         ok(c.checkMoveOp(mugTC,'into',mugTD));
@@ -569,8 +581,8 @@ $(document).ready(function(){
         c.on("question-creation", function(e){
             curMugType = e.mugType;
         });
-
-        ui.buttons.addTextQuestion.click();
+        console.log(ui.buttons);
+        ui.buttons.addquestionbutton.click();
 
         jstree.jstree("select_node",$('#'+curMugType.ufid));
 

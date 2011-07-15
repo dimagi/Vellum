@@ -46,109 +46,34 @@ formdesigner.controller = (function () {
     };
     that.setCurrentlySelectedMugType = setCurrentlySelectedMugType;
 
-
-
     /**
-     * Generates a unique question ID (unique in this form) and
-     * returns it as a string.
+     * @param myMug - the mug thats value needs to be set
+     * @param element can be one of (string) 'bind','data','control'
+     * @param property (string) property name
+     * @param val new value the property should be set to.
      */
-    var generate_question_id = function () {
-        var ret = 'question' + question_counter;
-        question_counter += 1;
-        return ret;
+     that.setMugPropertyValue = function (myMug, element, property, val) {
+        var rootProps = myMug['properties'];
+        var elProps = rootProps[element].properties,
+            propertyToChange = elProps[property], event = {};
+
+        myMug.properties[element].properties[property] = val;
+        event.type = 'property-changed';
+        event.property = property;
+        event.element = element;
+        event.val = val;
+        myMug.fire(event);
+
     };
-    that.generate_question_id = generate_question_id;
 
 
-    /**
-     * Creates a new mug (with default init values)
-     * based on the template (MugType) given by the argument.
-     *
-     * @return the new mug associated with this mugType
-     */
-    var createMugFromMugType = function (mugType) {
-        /**
-         * Walks through the properties (block) and
-         * procedurally generates a spec that can be passed to
-         * various constructors.
-         * Default values are null (for OPTIONAL fields) and
-         * "" (for REQUIRED fields).
-         * @param block - rule block
-         * @param name - name of the spec block being generated
-         * @return a dictionary: {spec_name: spec}
-         */
-        function recursiveGetSpec(block, name) {
-            var spec = {}, i, retSpec = {};
-            for(i in block) {
-                if (typeof block[i] === 'object') {
-                    spec[i] = recursiveGetSpec(block[i], i);
-                }else if (typeof block[i] === 'function') {
-                    spec[i] = " ";
-                }else{
-                    switch(block[i]) {
-                        case formdesigner.model.TYPE_FLAG_OPTIONAL:
-                            spec[i] = " ";
-                            break;
-                        case formdesigner.model.TYPE_FLAG_REQUIRED:
-                            spec[i] = " ";
-                            break;
-                        case formdesigner.model.TYPE_FLAG_NOT_ALLOWED:
-                            break;
-                        default:
-                            spec[i] = block[i]; //text value;
-                    }
-                }
-            }
-            return spec;
-        }
-        //loop through mugType.properties and construct a spec to be passed to the Mug Constructor.
-        //BE CAREFUL HERE.  This is where the automagic architecture detection ends, some things are hardcoded.
-        var mugSpec, dataElSpec, bindElSpec, controlElSpec, i,
-                mug,dataElement,bindElement,controlElement,
-                specBlob = {}, validationResult;
 
-        specBlob = recursiveGetSpec(mugType.properties,'mugSpec');
-        mugSpec = specBlob || undefined;
-        dataElSpec = specBlob.dataElement || undefined;
-        bindElSpec = specBlob.bindElement || undefined;
-        controlElSpec = specBlob.controlElement || undefined;
 
-        //create the various elements, mug itself, and linkup.
-        if (mugSpec) {
-            mug = new formdesigner.model.Mug(mugSpec);
-            if (controlElSpec) {
-                mug.properties.controlElement = new formdesigner.model.ControlElement(controlElSpec);
-            }
-            if (dataElSpec) {
-                if (dataElSpec.nodeID) {
-                    dataElSpec.nodeID = generate_question_id();
-                }
-                mug.properties.dataElement = new formdesigner.model.DataElement(dataElSpec);
-            }
-            if (bindElSpec) {
-                if (bindElSpec.nodeID) {
-                    if (dataElSpec.nodeID) {
-                        bindElSpec.nodeID = dataElSpec.nodeID; //make bind id match data id for convenience
-                    }else{
-                        bindElSpec.nodeID = generate_question_id();
-                    }
-                }
-                mug.properties.bindElement = new formdesigner.model.BindElement(bindElSpec);
-            }
-        }
 
-        //Bind the mug to it's mugType
-        mugType.mug = mug || undefined;
 
-        //ok,now: validate the mug to make sure everything is peachy.
-        validationResult = mugType.validateMug(mug);
-        if (validationResult.status !== 'pass') {
-            throw 'Newly constructed mug did not pass validation!';
-        }else{
-            return mug;
-        }
-    };
-    that.createMugFromMugType = createMugFromMugType;
+
+
+
 
     /**
      * Inserts a new MugType into the relevant Trees (and their
@@ -254,25 +179,25 @@ formdesigner.controller = (function () {
 
         switch(qType.toLowerCase()) {
             case 'text':
-                mugType = formdesigner.util.getNewMugType(formdesigner.model.mugTypes.stdTextQuestion);
+                mugType = formdesigner.model.mugTypeMaker.stdTextQuestion();
                 break;
             case 'group':
-                mugType = formdesigner.util.getNewMugType(formdesigner.model.mugTypes.stdGroup);
+                mugType = formdesigner.model.mugTypeMaker.stdGroup();
                 break;
             case 'select':
-                mugType = formdesigner.util.getNewMugType(formdesigner.model.mugTypes.stdMSelect);
+                mugType = formdesigner.model.mugTypeMaker.stdMSelect();
                 break;
              case 'item':
-                mugType = formdesigner.util.getNewMugType(formdesigner.model.mugTypes.stdItem);
+                mugType = formdesigner.model.mugTypeMaker.stdItem();
                 break;
             case 'trigger':
-                mugType = formdesigner.util.getNewMugType(formdesigner.model.mugTypes.stdTrigger);
+                mugType = formdesigner.model.mugTypeMaker.stdTrigger();
                 break;
             default:
-                mugType = formdesigner.util.getNewMugType(formdesigner.model.mugTypes.dataBindControlQuestion);
+                mugType = formdesigner.model.mugTypeMaker.stdTextQuestion();
         }
 
-        mug = createMugFromMugType(mugType);
+        mug = mugType.mug;
 //        mug.on('property-changed', function (e) {
 //            formdesigner.controller.showErrorMessage("Property Changed in Question:"+mug.properties.dataElement.properties.nodeID+"!");
 //        })
