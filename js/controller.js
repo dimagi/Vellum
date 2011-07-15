@@ -174,10 +174,12 @@ formdesigner.controller = (function () {
         function treeSetItemType(mugType) {
             var tString = mugType.mug.properties.controlElement.properties.name.toLowerCase(),
                 setType = function (tType) {
-                    var myTree = $('#fd-question-tree'),
+                    var controlTree = $('#fd-question-tree'),
+                        dataTree = $('#fd-data-tree'),
                         mugTUfid = mugType.ufid,
                         node = $('#'+mugTUfid);
-                    return myTree.jstree("set_type",tType,node);
+                    controlTree.jstree("set_type",tType,node);
+                    dataTree.jstree("set_type",tType,node);
                 };
 
             switch(tString.toLowerCase()) {
@@ -224,6 +226,14 @@ formdesigner.controller = (function () {
         insertPosition = formdesigner.util.getRelativeInsertPosition(curSelMugType,mugType);
 
         $('#fd-question-tree').jstree("create",
+            null, //reference node, use null if using UI plugin for currently selected
+            insertPosition, //position relative to reference node
+            objectData,
+            null, //callback after creation, better to wait for event
+            true  //skip_rename
+        );
+
+        $('#fd-data-tree').jstree("create",
             null, //reference node, use null if using UI plugin for currently selected
             insertPosition, //position relative to reference node
             objectData,

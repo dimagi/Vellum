@@ -87,33 +87,6 @@ formdesigner.ui = (function () {
 
     }
 
-    function do_nav_bar() {
-        $(function () {
-            var d = 300;
-            $('#navigation a').each(function () {
-//                $(this).stop().animate({
-//                    'marginTop': '-100px'
-//                }, d += 150);
-                $(this).stop(); //.show('slide',{"direction":"down"}, d += 150);
-            });
-
-            $('#navigation > li').hover(
-                function () {
-                    $('a', $(this)).show('slide',{"direction":"up"});
-//                            .animate({
-//                        'marginTop': '-2px'
-//                    }, 200);
-                }
-//                function () {
-//                    $('a', $(this)).stop().show('slide',{"direction":"up"});
-////                            animate({
-////                        'marginTop': '-100px'
-////                    }, 200);
-//                }
-            );
-        });
-    }
-
     function init_toolbar() {
         var toolbar = $(".fd-toolbar");
         var buts =  $(".questionButton");
@@ -138,7 +111,10 @@ formdesigner.ui = (function () {
             toolbar.append(printTreeBut);
 
             printTreeBut.button().click(function () {
-                console.log(controller.form.controlTree.printTree());
+                console.group("Tree Pretty Print");
+                console.log("Control Tree:"+controller.form.controlTree.printTree())
+                console.log("Data Tree:   "+controller.form.dataTree.printTree());
+                console.groupEnd();
             });
             $("#fd-print-tree-but")
                     .addClass("ui-corner-all ui-icon ui-icon-plusthick")
@@ -293,9 +269,9 @@ formdesigner.ui = (function () {
                     qTBody.append(row);
                     row.attr('id', 'fd-'+i);
                     row.attr('class', "fd-question-property-row");
-                    col1 = $('<td>'+i+'</td>');
-                    col2 = $('<td></td>');
-                    inputBox = $('<input value="'+block[i]+'" name=fd-'+i+' class=fd-'+p+' />');
+                    col1 = $('<td class="fd-prop-title title">'+i+'</td>');
+                    col2 = $('<td class="fd-value"></td>');
+                    inputBox = $('<input value="'+block[i]+'" name="fd-'+i+'" class="fd-'+p+' fd-edit title" />');
                     col2.append(inputBox);
                     inputBox.change(function (e) {
                         var target = $(e.target),
@@ -423,7 +399,7 @@ formdesigner.ui = (function () {
     /**
      * Creates the UI tree
      */
-    function create_tree() {
+    function create_question_tree() {
         $.jstree._themes = "themes/";
         $("#fd-question-tree").jstree({
             "json_data" : {
@@ -477,18 +453,148 @@ formdesigner.ui = (function () {
 
     };
 
+    var init_extra_tools = function(){
+        var eContainer = $("fd-extra-tools"),
+            accordion = $("#fd-extra-tools-accordion"),
+                min_max = $('#fd-acc-min-max');
+        accordion.accordion({
+            fillSpace: 'true'
+        });
+
+        min_max.button();
+        min_max.click(function(){
+            var b = $("#fd-extra-tools"),
+            curRight = b.css('right');
+            console.log(b);
+            console.log(curRight);
+            if(curRight === '-255px'){
+                console.log("animating to 0");
+                b.animate({
+                    right:'0px'
+                },200);
+            }else if(curRight === "0px"){
+                console.log("animating to -255");
+                b.animate({
+                    right:'-255px'
+                },200);
+            }
+        });
+//            if($(this).class)
+//        })
+//        function () {
+//                    $(this).stop().animate({
+//                        'left': '0px'
+//                    }, 200);
+//                },
+//                function () {
+//                    $(this).stop().animate({
+//                        'left': '-260px'
+//                    }, 200);
+//                }
+        
+    };
+
+    var create_data_tree = function(){
+        var tree = $("#fd-data-tree-container");
+        tree.hover(
+                function () {
+                    $(this).stop().animate({
+                        'left': '0px'
+                    }, 200);
+                },
+                function () {
+                    $(this).stop().animate({
+                        'left': '-260px'
+                    }, 200);
+                }
+            );
+
+        tree = $("#fd-data-tree");
+
+        tree.jstree({
+            "json_data" : {
+                "data" : []
+            },
+            "crrm" : {
+                "move": {
+                    "always_copy": false,
+                    "check_move" : function (m) {
+                        var controller = formdesigner.controller,
+                                mugType = controller.form.controlTree.getMugTypeFromUFID($(m.o).attr('id')),
+                                refMugType = controller.form.controlTree.getMugTypeFromUFID($(m.r).attr('id')),
+                                position = m.p;
+                        return controller.checkMoveOp(mugType, position, refMugType);
+				    }
+                }
+            },
+//            "dnd" : {
+//                "drop_target" : false,
+//                "drag_target" : false
+//            },
+            "types": getJSTreeTypes(),
+            "plugins" : [ "themes", "json_data", "ui", "types", "crrm" ]
+	    }).bind("select_node.jstree", function (e, data) {
+//                    node_select(e, data);
+        }).bind("move_node.jstree", function (e, data) {
+//                    var controller = formdesigner.controller,
+//                                mugType = controller.form.controlTree.getMugTypeFromUFID($(data.rslt.o).attr('id')),
+//                                refMugType = controller.form.controlTree.getMugTypeFromUFID($(data.rslt.r).attr('id')),
+//                                position = data.rslt.p;
+//                    controller.moveMugType(mugType, position, refMugType);
+                });
+
+
+    };
+
     $(document).ready(function () {
         generate_scaffolding($("#formdesigner"));
         do_loading_bar();
         init_toolbar();
-        create_tree();
-//        do_nav_bar();
+        init_extra_tools();
+        create_question_tree();
+        create_data_tree();
 
         controller = formdesigner.controller;
         controller.initFormDesigner();
+
+
+        //////////////fancybox testing
+
+        	/* This is basic - uses default settings */
+
+//	$("a#single_image").fancybox();
+
+	/* Using custom settings */
+
+	$("a#inline").fancybox({
+		hideOnOverlayClick: false,
+        hideOnContentClick: false,
+        enableEscapeButton: false,
+        showCloseButton : true,
+        onClosed: function(){
+            console.log("onClosed called");
+        }
+	});
+
+        $('#fancybox-overlay').click(function () {
+            console.log('overlay clicked!');
+        })
+
+	/* Apply fancybox to multiple items */
+
+//	$("a.group").fancybox({
+//		'transitionIn'	:	'elastic',
+//		'transitionOut'	:	'elastic',
+//		'speedIn'		:	600,
+//		'speedOut'		:	200,
+//		'overlayShow'	:	false
+//	});
+
+        //////////////////////////////////////////////
 
 
     });
 
     return that;
 }());
+
