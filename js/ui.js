@@ -125,6 +125,26 @@ formdesigner.ui = (function () {
             buttons.printTree = printTreeBut;
         })();
 
+       (function c_fancyBox() {
+            var fancyBut = $(
+                    '<div id="fd-fancy-button">'+
+                '<span id="fd-fancy-but"></span>View Source ' +
+              '</div>');
+            toolbar.append(fancyBut);
+
+            fancyBut.button().click(function () {
+                var d = controller.get_form_data();
+                var output = $('#data');
+                output.text(d);
+                $('#inline').click();
+            });
+            $("#fd-print-tree-but")
+                    .addClass("ui-corner-all ui-icon ui-icon-plusthick")
+                    .css("float", "left");
+
+            buttons.fancyBut = fancyBut;
+        })();
+
 
 
     }
@@ -631,6 +651,22 @@ formdesigner.ui = (function () {
 
     };
 
+    function setup_fancybox(){
+        $("a#inline").fancybox({
+            hideOnOverlayClick: false,
+            hideOnContentClick: false,
+            enableEscapeButton: false,
+            showCloseButton : true,
+            onClosed: function(){
+    //                console.log("onClosed called");
+            }
+        });
+
+        $('#fancybox-overlay').click(function () {
+//            console.log('overlay clicked!');
+        })
+    };
+
     $(document).ready(function () {
         generate_scaffolding($("#formdesigner"));
         do_loading_bar();
@@ -642,19 +678,8 @@ formdesigner.ui = (function () {
         controller = formdesigner.controller;
         controller.initFormDesigner();
 
-        $("a#inline").fancybox({
-            hideOnOverlayClick: false,
-            hideOnContentClick: false,
-            enableEscapeButton: false,
-            showCloseButton : true,
-            onClosed: function(){
-//                console.log("onClosed called");
-            }
-	    });
+        setup_fancybox();
 
-        $('#fancybox-overlay').click(function () {
-//            console.log('overlay clicked!');
-        })
 
     });
 

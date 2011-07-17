@@ -105,3 +105,8 @@ td {
 #fd-acc-min-max{
     float:left;
 }
+
+#textDrop{
+    width: 640px;
+    height: 640px;
+}

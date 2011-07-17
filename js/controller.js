@@ -327,6 +327,100 @@ formdesigner.controller = (function () {
     };
     that.getCurrentlySelectedMugType = getCurrentlySelectedMugType;
 
+    that.get_form_data = function(){
+        var trees = [], wTree, i,j, data;
+        trees.push(getTree('data'));
+        trees.push(getTree('control'));
+
+        function printMug(mType){
+            return mType.mug;
+        }
+
+        function recurse(node){
+            var i,d = {}, children;
+            d.parent = printMug(node.getValue());
+            d.children = {};
+            children = node.getChildren();
+            for(i in children){
+                if(children.hasOwnProperty(i)){
+                    d.children[i] = (recurse(children[i]));
+                }
+            }
+
+            return d;
+        }
+
+        data = JSON.stringify(recurse(trees[0].rootNode),null,'\t');
+
+        console.log(data);
+        return data;
+    }
+
+    var Parser = function(spec){
+        var that = {},
+                unusedBits; //the unused elements of a regular XForm are stored here.
+
+        (function constructor(mySpec){
+
+        })(spec);
+
+
+        that.parse = function(XMLString){
+            var jform = xmlToJSON(XMLString);
+            parseDataBlock(jform);
+            parseBindBlock(jform);
+            parseControlBlock(jform);
+
+            storeUnusedBits(jform);
+        }
+
+        /**
+         * Converts an XML string to a JSON
+         * document.
+         * @param xml
+         */
+        var xmlToJSON = function(xml){
+
+        }
+
+        var parseDataBlock = function(form){
+
+        };
+
+        var parseBindBlock = function(form){
+
+        };
+
+        var parseControlBlock = function(form){
+
+        };
+
+        /**
+         * Store the 'rest' of the xform document (as a JSON object)
+         * to be retrieved later during form construction.
+         * @param form
+         */
+        var storeUnusedBits = function(form){
+            unusedBits = form;
+        };
+
+        /**
+         * Retrieve the unused parts (during parse time) of the XForm
+         * as a JSON object.
+         */
+        that.getUnusedDocParts = function(){
+            return unusedBits;
+        };
+
+
+
+
+        //make parser event aware
+        formdesigner.util.eventuality(that);
+
+        return that;
+    }
+
     //make controller event capable
     formdesigner.util.eventuality(that);
 

@@ -132,8 +132,9 @@ formdesigner.model = function () {
      * @param spec
      */
     var BindElement = function (spec) {
-        var that = {};
+        var that = {}, unusedXMLattrs = {};
         that.properties = {};
+
 
         //give this object a unqiue fd id
         formdesigner.util.give_ufid(that);
@@ -152,6 +153,9 @@ formdesigner.model = function () {
                 }
             }
         }(spec));
+
+        //make the object capable of storing unused/unknown xml tag attributes
+        formdesigner.util.allowUnusedXMLAttributes(that);
 
         //make the object event aware
         formdesigner.util.eventuality(that);
@@ -282,6 +286,9 @@ formdesigner.model = function () {
             }
         }(spec));
 
+        //make the object capable of storing unused/unknown xml tag attributes
+        formdesigner.util.allowUnusedXMLAttributes(that);
+
         //give this object a unqiue fd id
         formdesigner.util.give_ufid(that);
 
@@ -332,6 +339,8 @@ formdesigner.model = function () {
             }
         }(spec));
 
+        //make the object capable of storing unused/unknown xml tag attributes
+        formdesigner.util.allowUnusedXMLAttributes(that);
 
         //make the object event aware
         formdesigner.util.eventuality(that);
@@ -575,7 +584,7 @@ formdesigner.model = function () {
                     editable: 'r',
                     visibility: 'hidden',
                     presence: 'required',
-                    values: formdesigner.util.VALID_CONTROL_TAG_NAMES,
+                    values: formdesigner.util.VALID_CONTROL_TAG_NAMES
                 },
                 label: {
                     editable: 'w',
@@ -996,7 +1005,6 @@ formdesigner.model = function () {
 
         mType.typeName = "Trigger/Message MugType";
         mType.controlNodeAllowedChildren = false;
-        mType.properties.controlElement.defaultValue.presence = 'notallowed';
         mType.properties.bindElement.dataType.presence = 'notallowed';
 
         mug = that.createMugFromMugType(mType);
