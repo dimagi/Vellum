@@ -1749,10 +1749,27 @@ formdesigner.model = function () {
          *
          * if a) fails, will throw an exception
          * if b) fails, will return a list of all offending iIDs that need a translation in order to pass validation.
+         *
+         * if everything passes will return true
          */
         that.validateItext = function () {
             var dLang = this.getDefaultLanguage(),
-                    lang;
+                    lang,iID,form,
+                    /**
+                     * Follows form:
+                     * { iID: errorMessage,
+                     *   iID2 : otherErrorMessage,
+                     *   ...
+                     *  }
+                     */
+                    errorIIDs = {};
+
+            function iIDMissing(iID){
+                return 'Missing Itext ID:' + iID;
+            }
+            function iIDFormMissing(iID, form){
+                return 'Missing Special Form:' + form + ' for Itext ID:' + iID;
+            }
             if(!dLang){
                 throw 'No Default Language set! Aborting validation. You should set one!';
             }
@@ -1761,13 +1778,33 @@ formdesigner.model = function () {
                 throw 'Default language is set to a language that does not exist in the Itext DB!';
             }
 
-            for(lang in data){
-                
+            for (lang in data) {
+                if (data.hasOwnProperty(lang)) {
+                    for (iID in data[lang]) {
+                        if (data[lang].hasOwnProperty(iID)) {
+                            if (!data[dLang][iID]) {
+                                errorIIDs[iID] = iIDMissing(iID);
+                            } else {
+                                for (form in data[lang][iID]) {
+                                    if (data[lang][iID].hasOwnProperty(form)) {
+                                       if (!data[dLang][iID][form]) {
+                                           errorIIDs[iID] = iIDFormMissing(iID,form);
+                                       } 
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
 
+            if (Object.keys(errorIIDs).length === 0) {
+                return true;
+            } else {
+                return errorIIDs;
+            }
 
-
-        }
+        };
 
 
 
