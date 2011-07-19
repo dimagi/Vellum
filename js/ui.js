@@ -3,6 +3,7 @@
 if (typeof formdesigner === 'undefined') {
     var formdesigner = {};
 }
+var log = console.log, exports = {};
 
 formdesigner.ui = (function () {
     "use strict";
@@ -667,6 +668,16 @@ formdesigner.ui = (function () {
         })
     };
 
+    function init_form_paste(){
+        var tarea = $("#fd-form-paste-textarea");
+        console.log('tarea',tarea);
+        tarea.change(function(){
+            var parser = new controller.Parser();
+            var out = parser.parse(tarea.val());
+            $("#fd-form-paste-output").val(out);
+        })
+    }
+
     $(document).ready(function () {
         generate_scaffolding($("#formdesigner"));
         do_loading_bar();
@@ -674,6 +685,7 @@ formdesigner.ui = (function () {
         init_extra_tools();
         create_question_tree();
         create_data_tree();
+        init_form_paste();
 
         controller = formdesigner.controller;
         controller.initFormDesigner();

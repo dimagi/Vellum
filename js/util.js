@@ -139,6 +139,29 @@ formdesigner.util = (function(){
             throw 'Newly created mug did not validate! MugType and Mug logged to console...'
     }
 
+
+    that.parseXml = function (xml) {
+       var dom = null;
+       if (window.DOMParser) {
+          try {
+             dom = (new DOMParser()).parseFromString(xml, "text/xml");
+          }
+          catch (e) { dom = null; }
+       }
+       else if (window.ActiveXObject) {
+          try {
+             dom = new ActiveXObject('Microsoft.XMLDOM');
+             dom.async = false;
+             if (!dom.loadXML(xml)) // parse error ..
+
+                window.alert(dom.parseError.reason + dom.parseError.srcText);
+          }
+          catch (e) { dom = null; }
+       }
+       else
+          alert("cannot parse xml string!");
+       return dom;
+    }
     /**
      * Takes in a reference mugType and makes a copy of
      * the object (the copy is returned).
@@ -360,6 +383,26 @@ formdesigner.util = (function(){
         return typeof obj !== 'undefined';
     };
     that.exists = exists;
+
+    (function($) {
+              // duck-punching to make attr() return a map
+              var _old = $.fn.attr;
+              $.fn.attr = function() {
+                  var a, aLength, attributes,	map;
+                  if (this[0] && arguments.length === 0) {
+                            map = {};
+                            attributes = this[0].attributes;
+                            aLength = attributes.length;
+                            for (a = 0; a < aLength; a++) {
+                                      map[attributes[a].name] = attributes[a].value;
+                            }
+                            return map;
+                  } else {
+                            return _old.apply(this, arguments);
+                  }
+        }
+    }(jQuery));
+
 
     return that;
 

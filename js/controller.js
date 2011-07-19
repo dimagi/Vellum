@@ -366,12 +366,22 @@ formdesigner.controller = (function () {
 
 
         that.parse = function(XMLString){
-            var jform = xmlToJSON(XMLString);
+            var jform = xmlToJSON(XMLString),
+                    bindBlock, dataBlock, controlBlock;
+            
+            bindBlock = jform["h:html"]["h:head"].model.bind;
+            dataBlock = jform["h:html"]["h:head"].model.instance;
+            controlBlock = jform["h:html"]["h:body"];
+            console.log(bindBlock);
+            console.log(dataBlock);
+            console.log(controlBlock);
+            console.log('jform',jform)
             parseDataBlock(jform);
             parseBindBlock(jform);
             parseControlBlock(jform);
 
             storeUnusedBits(jform);
+            return json2xml(jform,"");
         }
 
         /**
@@ -380,7 +390,12 @@ formdesigner.controller = (function () {
          * @param xml
          */
         var xmlToJSON = function(xml){
+            var data = xml,output,content;
 
+            content = formdesigner.util.parseXml(data);
+            output = xml2json(content,"\t");
+            output =  eval('(' + output + ')');
+            return output;
         }
 
         var parseDataBlock = function(form){
@@ -420,6 +435,7 @@ formdesigner.controller = (function () {
 
         return that;
     }
+    that.Parser = Parser;
 
     //make controller event capable
     formdesigner.util.eventuality(that);

@@ -1541,6 +1541,242 @@ formdesigner.model = function () {
     };
     that.Form = Form;
 
+    /**
+     * The itext holder object. Access all Itext through this gate.
+     *
+     * Expected forms of itext:
+     * - default (i.e. no special form)
+     * - long
+     * - short
+     * - image
+     * - audio
+     * - hint
+     *
+     * @param langName
+     */
+    var Itext = function(langName){
+        var that = {}, defaultLanguage = "en",
+
+                /**
+                 * Data where it's all stored.
+                 * Takes the shape of:
+                 * { someLang: {
+                 *      itextID1 : {
+                 *          long: longVal,
+                 *          image: imageVal,
+                 *          ...
+                 *          },
+                 *      itextID2 : {
+                 *          long: ...
+                 *          ...
+                 *          }
+                 *      },
+                 *   otherLang: {
+                 *    ....
+                 *   }
+                 *
+                 */
+                data = {};
+
+        function exceptionString(iID, lang, form, val){
+            var s;
+            s = 'iID:' + iID + ', language:' + lang + ', form:' + form;
+            if(val){
+                s += ', value:' + val;
+            }
+            return s;
+        }
+
+        that.addLang = function (name) {
+            if(Object.keys(name).length === 0){
+                this.setDefaultLanguage(name);
+            }
+            if(!data[name]){
+                data[name] = {};
+            }else{
+                return; //do nothing, it already exists.
+            }
+        };
+
+        /**
+         * Returns a list of languages currently being stored in the itext global object.
+         */
+        that.getLanguages = function () {
+            var langs = [], i;
+            for(i in data){
+                if(data.hasOwnProperty(i)){
+                    langs.push(i);
+                }
+            }
+            return langs;
+        }
+
+        /**
+         * Not an undoable operation!
+         * Does what it says on the tin.
+         * @param name
+         */
+        that.removeLang = function (name) {
+            if(this.getDefaultLanguage() === name){
+                this.setDefaultLanguage(Object.keys(data)[0]); //attempt to set default to first available lang.
+            }
+            if(!data[name]) {
+                return;
+            }else{
+                delete data[name];
+            }
+        };
+
+        that.setDefaultLanguage = function (name) {
+            defaultLanguage = name;
+        };
+
+        that.getDefaultLanguage = function (name) {
+            return defaultLanguage;
+        };
+
+        /**
+         * Add an itext item to the global Itext object.
+         * valObject is a dictionary containing values for the various forms.
+         * Can be any combination of forms. E.g.
+         * valObject = {
+         *  en : {
+         *      short : "some short text",
+         *      image : "jr://file/img.png"
+         *      }
+         *  }
+         *
+         *  If the languages in valObject do not exist, they will
+         *  automatically be added.
+         *
+         *  @param iID is the itext ID of this item.
+         */
+        that.addItem = function (iID, valObject) {
+            var lang;
+            for(lang in valObject){
+                if(valObject.hasOwnProperty(lang)){
+                    if(!data[lang]){
+                        data[lang] = {};
+                    }
+                    data[lang][iID] = valObject[lang];
+
+                }
+            }
+        };
+
+        /**
+         * Get the Itext values for a specific Itext item
+         * for a specified language.  If no language is specified,
+         * will return valObject (see addItem())
+         *
+         * if iID does not exist, null is returned.
+         * If lang does not exist, exception is thrown.
+         */
+        that.getItextVals = function (iID, lang) {
+            if(!data.lang){
+                throw 'Language:' + lang + 'does not exist in Itext! Attempted to retrieve Itext data for iID:' + iID;
+            }
+            if(!data.lang.iID){
+                return null;
+            }else{
+                return data.lang.iID;
+            }
+
+        };
+
+        /**
+         * The 'meat' function.  Set a specific Itext element
+         * by specifying the itext ID, language, form and value.
+         * use form = 'default' or null for the default form.
+         *
+         * Will create the Itext item if none exists.
+         * @param iID
+         * @param lang
+         * @param form
+         * @param val
+         */
+        that.setValue = function (iID, lang, form, val){
+            if(!iID || !land || !val){
+                throw 'Must specify all arguments for Itext.setValue()!' + exceptionString(iID, lang, form, val);
+            }
+            if(form === null){
+                form = 'default';
+            }
+            if(!data.lang){
+                data.lang = {};
+            }
+            if(!data.lang.iID){
+                data.lang.iID = {};
+            }
+            if(!data.lang.iID.form){
+                data.lang.iID.form = "";
+            }
+            data.lang.iID.form = val;
+
+        };
+
+        /**
+         * Must specify all params, use form='default' or null for the default (no special form) form.
+         * Throws exception if iID or lang does not exist. If no data is available for that form,
+         * returns null.
+         * @param iID
+         * @param lang
+         * @param form
+         */
+        that.getValue = function(iID, lang, form){
+            if(!data[lang]){
+                throw 'Attempted to retrieve Itext value from language that does not exist!' + exceptionString(iID,lang,form)
+            }
+            if(!data[lang][iID]){
+                throw 'Attempted to retrieve Itext value that does not exist!' + exceptionString(iID,lang,form)
+            }
+
+            if(!form){
+                form = 'default';
+            }
+
+            if(!data[lang][iID][form]){
+                return null;
+            }
+
+            return data[lang][iID][form];
+        };
+
+        /**
+         * Goes through the Itext data and verifies that
+         * a) a default language is set to something that exists
+         * b) That every iID that exists in the DB has a translation in the default language (causes commcare to fail if not the case)
+         *
+         * if a) fails, will throw an exception
+         * if b) fails, will return a list of all offending iIDs that need a translation in order to pass validation.
+         */
+        that.validateItext = function () {
+            var dLang = this.getDefaultLanguage(),
+                    lang;
+            if(!dLang){
+                throw 'No Default Language set! Aborting validation. You should set one!';
+            }
+
+            if(!data[dLang]){
+                throw 'Default language is set to a language that does not exist in the Itext DB!';
+            }
+
+            for(lang in data){
+                
+            }
+
+
+
+        }
+
+
+
+        //make event aware
+        formdesigner.util.eventuality(that);
+
+        return that;
+    }
+
 
     /**
      * An initialization function that sets up a number of different fields and properties
