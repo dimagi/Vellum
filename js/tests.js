@@ -594,6 +594,53 @@ $(document).ready(function(){
 
     });
 
+    module("Itext functionality testing");
+    test("Itext ops", function(){
+        formdesigner.controller.initFormDesigner();
+        var IT = formdesigner.model.Itext;
+        var otherLanguageName = "sw";
+        ok(IT.getLanguages().length === 1, "Test that there is only one language at start");
+
+        IT.addLanguage(otherLanguageName);
+        ok(IT.getLanguages().length === 2);
+
+        equal(IT.getDefaultLanguage(), IT.getLanguages()[0], "Is default language set correctly");
+
+        IT.setDefaultLanguage(otherLanguageName);
+        equal(IT.getDefaultLanguage(), otherLanguageName, "Is default language set to "+otherLanguageName);
+
+        var iID = 'itextID1', form = 'long', val = "The Foo went to the BAR";
+
+        IT.setValue(iID,otherLanguageName,form,val);
+        equal(IT.getValue(iID,otherLanguageName,form),val, "Itext item storage and retrieval");
+
+        ok(IT.validateItext(),"Itext data should be valid at this point");
+
+        var iID2 = 'itextID2',
+        valObject = {
+            en: {
+                short : "Some short text for itextID2",
+                image : "jr://some/image/uri.png"
+            }
+
+        }
+        IT.addItem(iID2,valObject);
+        ok(Object.keys(IT.validateItext()).length > 0, "Errors in Itext validation after adding new Itext to non-default language");
+        
+        var otherValObject = {}
+        otherValObject.sw = valObject.en;
+        IT.addItem(iID2,otherValObject);
+        equal(IT.validateItext(), true, "Itext should now validate, after adding Itext to def language");
+
+        IT.removeLanguage("sw");
+        equal(IT.getDefaultLanguage(), 'en', "Default language should be 'en' after removal of 'sw' language");
+
+        equal(IT.validateItext(), true, 'Itext should still validate after language removal');
+
+        IT.setValue(iID,otherLanguageName,form,val);
+        equal(IT.getItextVals(iID,otherLanguageName)[form], val, "Itext set and retrieval work");
+    });
+
 
 });
 

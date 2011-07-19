@@ -1554,7 +1554,7 @@ formdesigner.model = function () {
      *
      * @param langName
      */
-    var Itext = function(langName){
+    that.Itext = (function(langName){
         var that = {}, defaultLanguage = "en",
 
                 /**
@@ -1587,8 +1587,8 @@ formdesigner.model = function () {
             return s;
         }
 
-        that.addLang = function (name) {
-            if(Object.keys(name).length === 0){
+        that.addLanguage = function (name) {
+            if(Object.keys(data).length === 0){
                 this.setDefaultLanguage(name);
             }
             if(!data[name]){
@@ -1616,7 +1616,7 @@ formdesigner.model = function () {
          * Does what it says on the tin.
          * @param name
          */
-        that.removeLang = function (name) {
+        that.removeLanguage = function (name) {
             if(this.getDefaultLanguage() === name){
                 this.setDefaultLanguage(Object.keys(data)[0]); //attempt to set default to first available lang.
             }
@@ -1673,13 +1673,13 @@ formdesigner.model = function () {
          * If lang does not exist, exception is thrown.
          */
         that.getItextVals = function (iID, lang) {
-            if(!data.lang){
-                throw 'Language:' + lang + 'does not exist in Itext! Attempted to retrieve Itext data for iID:' + iID;
+            if(!data[lang]){
+                throw 'Language:' + lang + ' does not exist in Itext! Attempted to retrieve Itext data for iID:' + iID;
             }
-            if(!data.lang.iID){
+            if(!data[lang][iID]){
                 return null;
             }else{
-                return data.lang.iID;
+                return data[lang][iID];
             }
 
         };
@@ -1696,22 +1696,22 @@ formdesigner.model = function () {
          * @param val
          */
         that.setValue = function (iID, lang, form, val){
-            if(!iID || !land || !val){
+            if(!iID || !lang || !val){
                 throw 'Must specify all arguments for Itext.setValue()!' + exceptionString(iID, lang, form, val);
             }
             if(form === null){
                 form = 'default';
             }
             if(!data.lang){
-                data.lang = {};
+                data[lang] = {};
             }
-            if(!data.lang.iID){
-                data.lang.iID = {};
+            if(!data[lang][iID]){
+                data[lang][iID] = {};
             }
-            if(!data.lang.iID.form){
-                data.lang.iID.form = "";
+            if(!data[lang][iID][form]){
+                data[lang][iID][form] = "";
             }
-            data.lang.iID.form = val;
+            data[lang][iID][form] = val;
 
         };
 
@@ -1748,7 +1748,8 @@ formdesigner.model = function () {
          * b) That every iID that exists in the DB has a translation in the default language (causes commcare to fail if not the case)
          *
          * if a) fails, will throw an exception
-         * if b) fails, will return a list of all offending iIDs that need a translation in order to pass validation.
+         * if b) fails, will return a dict of all offending iIDs that need a translation in order to pass validation with
+         * the KEYs being ItextIDs and the values being descriptive error messages.
          *
          * if everything passes will return true
          */
@@ -1764,8 +1765,8 @@ formdesigner.model = function () {
                      */
                     errorIIDs = {};
 
-            function iIDMissing(iID){
-                return 'Missing Itext ID:' + iID;
+            function iIDMissing(iID, defLang){
+                return 'Missing Itext ID:' + iID + ' in Default Language:' + defLang;
             }
             function iIDFormMissing(iID, form){
                 return 'Missing Special Form:' + form + ' for Itext ID:' + iID;
@@ -1783,7 +1784,7 @@ formdesigner.model = function () {
                     for (iID in data[lang]) {
                         if (data[lang].hasOwnProperty(iID)) {
                             if (!data[dLang][iID]) {
-                                errorIIDs[iID] = iIDMissing(iID);
+                                errorIIDs[iID] = iIDMissing(iID, dLang);
                             } else {
                                 for (form in data[lang][iID]) {
                                     if (data[lang][iID].hasOwnProperty(form)) {
@@ -1806,13 +1807,16 @@ formdesigner.model = function () {
 
         };
 
-
+        (function init(initLang){
+            that.addLanguage(initLang);
+            that.setDefaultLanguage(initLang);
+        })(langName);
 
         //make event aware
         formdesigner.util.eventuality(that);
 
         return that;
-    }
+    })("en");
 
 
     /**
@@ -1824,6 +1828,8 @@ formdesigner.model = function () {
         formdesigner.controller.setForm(form);
     };
     that.init = init;
+
+
 
 
     return that;
