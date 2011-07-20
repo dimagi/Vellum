@@ -513,7 +513,7 @@ $(document).ready(function(){
             mugB = mugTB.mug,
             mugC = mugTC.mug;
 
-        formdesigner.controller.initFormDesigner();
+        formdesigner.controller.resetFormDesigner();
         var c = formdesigner.controller;
         c.insertMugTypeIntoForm(null,mugTA);
         var tree = c.form.dataTree;
@@ -537,7 +537,7 @@ $(document).ready(function(){
             mugA = mugTA.mug,
             mugB = mugTB.mug,
             mugC = mugTC.mug;
-            formdesigner.controller.initFormDesigner();
+            formdesigner.controller.resetFormDesigner();
         var c = formdesigner.controller,
         m = formdesigner.model;
 
@@ -569,34 +569,63 @@ $(document).ready(function(){
 
     module("UI Create Questions Tests");
     test("Add A text question", function(){
-        var c = formdesigner.controller,
-                ui = formdesigner.ui,
-                jstree = $("#fd-question-tree"),
-                curMugType;
-        c.initFormDesigner();
-        equal(c.form.controlTree.printTree(false), "NodeWithNoValue!", "Ensure the controlTree is empty after a call to initFormDesigner");
-        equal(c.form.dataTree.printTree(false), "NodeWithNoValue!", "Ensure the dataTree is empty after a call to initFormDesigner");
+
+        formdesigner.controller.resetFormDesigner();
+
+        var c,ui, jstree, curMugType;
+
+
+        c = formdesigner.controller
+        ui = formdesigner.ui;
+        jstree = $("#fd-question-tree");
+
+        equal(c.form.controlTree.printTree(false), "NodeWithNoValue!", "Ensure the controlTree is empty after a call to resetFormDesigner");
+        equal(c.form.dataTree.printTree(false), "NodeWithNoValue!", "Ensure the dataTree is empty after a call to resetFormDesigner");
 
         //add a listener for question creation events
         c.on("question-creation", function(e){
+            console.log("QUESTION CREATION EVENT FIRED:",e);
             curMugType = e.mugType;
         });
         console.log(ui.buttons);
+        stop(1);
+
         ui.buttons.addquestionbutton.click();
-
+        ui.buttons.addquestionbutton.click();
+        ui.buttons.addquestionbutton.click();
+        console.log(ui.buttons);
+        start();
         jstree.jstree("select_node",$('#'+curMugType.ufid));
-
+        console.log("curMugType.ufid=",curMugType.ufid);
+        console.log('Selected Node', jstree.jstree("get_selected"));
         var curSelNode = jstree.jstree("get_selected");
         var curSelMT = c.getMTFromFormByUFID(curSelNode.attr('id'));
         ok(typeof jstree.jstree("get_selected") !== 'undefined');
+        console.log(c.form.controlTree.printTree(false));
 
         equal(jstree.jstree("get_selected").attr('id'), curMugType.ufid, "Mug that was just created is the same as the one that is currently selected");
 
     });
 
+    test("TreeMap functionality (get Bind List)", function(){
+        var c = formdesigner.controller,
+                ui = formdesigner.ui,
+                jstree = $("#fd-question-tree"),
+                curMugType,
+                addQbut;
+        c.resetFormDesigner();
+        addQbut = ui.buttons.addquestionbutton;
+        addQbut.click();
+        addQbut.click();
+        addQbut.click();
+        addQbut.click();
+        addQbut.click();
+        console.log(c.form.controlTree.printTree(false));
+    })
+
     module("Itext functionality testing");
     test("Itext ops", function(){
-        formdesigner.controller.initFormDesigner();
+        formdesigner.controller.resetFormDesigner();
         var IT = formdesigner.model.Itext;
         var otherLanguageName = "sw";
         ok(IT.getLanguages().length === 1, "Test that there is only one language at start");

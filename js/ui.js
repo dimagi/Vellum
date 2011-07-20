@@ -375,6 +375,7 @@ formdesigner.ui = (function () {
      */
     var generate_scaffolding = function (rootElement) {
         var root = $(rootElement);
+        root.empty();
         $.ajax({
             url: 'templates/main.html',
             async: false,
@@ -492,7 +493,28 @@ formdesigner.ui = (function () {
         })
     }
 
-    $(document).ready(function () {
+    /**
+     * Clears all elements of current form data (like in the Control/Data  tree)
+     * without destroying jqueryUI elements or other widgets.  Should be slightly
+     * faster/easier than rebuilding the entire interface from scratch.
+     */
+    that.resetUI = function(){
+        /**
+         * Clear out all nodes from the given UI jsTree.
+         * @param tree - Jquery selector pointing to jstree instance
+         */
+        function clearUITree(tree){
+            var rootNodes = $(tree.find('ul')[0]).children();
+            rootNodes.each(function (index, element) {
+                tree.jstree("delete_node",element);
+            })
+        };
+
+        clearUITree($('#fd-question-tree'));
+        clearUITree($('#fd-data-tree'));
+    }
+
+    that.init = function(){
         generate_scaffolding($("#formdesigner"));
         do_loading_bar();
         init_toolbar();
@@ -501,11 +523,14 @@ formdesigner.ui = (function () {
         create_data_tree();
         init_form_paste();
 
-        controller = formdesigner.controller;
-        controller.initFormDesigner();
+
 
         setup_fancybox();
+    }
 
+    $(document).ready(function () {
+        controller = formdesigner.controller;
+        controller.initFormDesigner();
 
     });
 

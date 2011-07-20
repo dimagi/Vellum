@@ -15,7 +15,14 @@ formdesigner.controller = (function () {
         curSelUfid = null,
 
         initFormDesigner = function () {
+            question_counter = 1;
+            curSelMugType = null;
+            curSelUfid = null;
+            $('#fd-quesiton-tree').empty();
+            $('#fd-data-tree').empty();
+
             formdesigner.model.init();
+            formdesigner.ui.init();
         };
     that.initFormDesigner = initFormDesigner;
     that.form = form;
@@ -327,6 +334,11 @@ formdesigner.controller = (function () {
     };
     that.getCurrentlySelectedMugType = getCurrentlySelectedMugType;
 
+    /**
+     * Returns a JSON representation of the
+     * Control Tree (tweak this method for data tree)
+     * returns it as well as logging it to console.
+     */
     that.get_form_data = function(){
         var trees = [], wTree, i,j, data;
         trees.push(getTree('data'));
@@ -354,6 +366,28 @@ formdesigner.controller = (function () {
 
         console.log(data);
         return data;
+    }
+
+    /**
+     * Used to reset the state of the controller if a FD wide reset is called
+     * (see resetFormDesigner)
+     */
+    function resetControllerInternal () {
+            question_counter = 1;
+            curSelMugType = null;
+            curSelUfid = null;
+    }
+
+    /**
+     * Used to clear out the state of the FormDesigner
+     * to represent how things were just after the first
+     * init call was made (used for example when wanting
+     * to create a 'New Form'
+     */
+    that.resetFormDesigner = function () {
+        resetControllerInternal();
+        formdesigner.model.reset();
+        formdesigner.ui.resetUI();
     }
 
     var Parser = function(spec){
@@ -437,6 +471,19 @@ formdesigner.controller = (function () {
     }
     that.Parser = Parser;
 
+    /**
+     * Generates and returns a valid XML XForm
+     * based on the data stored in the Form Object
+     */
+    that.buildXForm = function () {
+        if(!form) throw 'No Form object present, cannot create XForm!';
+        var xw = new XMLWriter( 'UTF-8', '1.0' ),
+                dataTree = getTree('data'),
+                controlTree = getTree('control'),
+                bindList = form.getBindList();
+
+        
+    };
     //make controller event capable
     formdesigner.util.eventuality(that);
 

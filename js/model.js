@@ -1273,6 +1273,30 @@ formdesigner.model = function () {
                 }
             };
 
+            /**
+             * calls the given function on each node (the node
+             * is given as the only argument to the given function)
+             * and appends the result (if any) to a flat list
+             * (the store argument) which is then returned
+             * @param nodeFunc
+             * @param store
+             */
+            that.treeMap = function (nodeFunc, store) {
+                var result, child;
+                result = nodeFunc(this); //call on self
+                if(result){
+                    store.push(result);
+                }
+                for(child in this.getChildren()){
+                    if(this.getChildren().hasOwnProperty(child)){
+                        this.getChildren()[child].treeMap(nodeFunc,store); //have each children also perform the func
+                    }
+                }
+                return store; //return the results
+            };
+
+
+
             return that;
         };
 
@@ -1523,6 +1547,15 @@ formdesigner.model = function () {
             return rootNode.getID();
         };
 
+        /**
+         * Performs the given func on each
+         * node of the tree (the Node is given as the only argument to the function)
+         * and returns the result as a list.
+         */
+        that.treeMap = function (func) {
+            return rootNode.treeMap(func, []);
+        };
+
         return that;
     };
     that.Tree = Tree;
@@ -1539,7 +1572,44 @@ formdesigner.model = function () {
          * Loops through the data and the control trees and picks out all the unique bind elements.  Returns a list of BindElements
          */
         that.getBindList = function(){
-            var bList = [];
+            var bList = [],
+                dataTree,controlTree,dBindList,cBindList,i,
+                getBind = function(node){ //the function we will pass to treeMap
+                    if(!node.getValue()){
+                        return null;
+                    }
+                    var MT = node.getValue(),
+                            M = MT.mug,
+                            bind;
+                    if(!MT.properties.bindElement){
+                        return null;
+                    }else{
+                        bind = M.properties.bindElement;
+                        return bind;
+                    }
+                };
+
+            dataTree = this.dataTree;
+            controlTree = this.controlTree;
+            dBindList = dataTree.treeMap(getBind);
+            cBindList = controlTree.treeMap(getBind);
+
+            //compare results, grab uniques
+            for(i in dBindList){
+                if(dBindList.hasOwnProperty(i)){
+                    bList.push(dBindList[i]);
+                }
+            }
+
+            for(i in cBindList){
+                if(cBindList.hasOwnProperty(i)){
+                    if(bList.indexOf(cBindList[i]) === -1){
+                        bList.push(cBindList[i]); //grab only anything that hasn't shown up in the dBindList
+                    }
+                }
+            }
+
+            return bList;
             
         }
 
@@ -1826,6 +1896,14 @@ formdesigner.model = function () {
         return that;
     })("en");
 
+    /**
+     * Called during a reset.  Resets the state of all
+     * saved objects to represent that of a fresh init.
+     */
+    that.reset = function () {
+        that.form = new Form();
+        formdesigner.controller.setForm(that.form);
+    };
 
     /**
      * An initialization function that sets up a number of different fields and properties
