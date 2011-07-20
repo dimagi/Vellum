@@ -639,6 +639,7 @@ $(document).ready(function(){
 
         IT.setValue(iID,otherLanguageName,form,val);
         equal(IT.getItextVals(iID,otherLanguageName)[form], val, "Itext set and retrieval work");
+        
     });
 
 

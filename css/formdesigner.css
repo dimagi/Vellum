@@ -71,10 +71,12 @@ body{
 
 
 #fd-question-properties {
-    /*border: 1px solid gray;*/
+    border: 1px solid gray;
     float: left;
-    width:50em;
-    padding: 5px;
+    margin-top: 5px;
+    padding-left: 5px;
+    height:500px;
+    display:none;
 
 }
 

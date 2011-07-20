@@ -285,227 +285,39 @@ formdesigner.ui = (function () {
         }
         displayFuncs.itext = showItextProps; //not sure if this will ever be used like this, but may as well stick with the pattern
 
+        function showAdvanced(){
+            var str = '<div id="fd-props-adv-accordion"><h3><a href="#">Advanced Properties</a></h3><div>Some Content<br />asdasddas</div></div>'
+            var adv = $(str);
+            $('#fd-props-advanced').append(adv);
+            adv.accordion({
+//                fillSpace: true,
+                autoHeight: false,
+                collapsible: true
+            });
+            adv.accordion("activate",false);
+        }
+
         function updateDisplay(){
             var mugTProps = mugType.properties,
             i = 0;
+            $("#fd-question-properties").hide();
             $('#fd-props-bind').empty();
             $('#fd-props-data').empty();
             $('#fd-props-control').empty();
+            $('#fd-props-advanced').empty();
             for(i in mugTProps){
                 if(mugTProps.hasOwnProperty(i)){
                     displayFuncs[i]();
                 }
-            }
+            };
+            displayFuncs.itext();
+            showAdvanced();
+            $("#fd-question-properties").show();
         };
 
         updateDisplay();
     }
 
-
-
-    /**
-     * Updates the properties view such that it reflects the
-     * properties of the currently selected tree item.
-     *
-     * This means it will show only fields that are available for this
-     * specific MugType and whatever properties are already set.
-     *
-     *
-     * @param mugType
-     */
-    that.displayMugProperties2 = function (mugType) {
-        var that = {},
-                qTable,
-                qTHeader,
-                qTBody,
-                localMug = mugType.mug,
-                qPropHolder,
-                showPropertiesFactory = {};
-
-        if (!mugType.properties.controlElement) {
-            //fuggedaboudit
-            throw "Attempted to display properties for a MugType that doesn't have a controlElement!";
-        }
-
-        qPropHolder = $('#fd-question-properties');
-        qPropHolder.empty();
-        that.qTable = qTable;
-        that.qTHeader = qTHeader;
-        that.qTBody = qTBody;
-
-
-
-
-        /**
-         * Creates the Properties Box on the UI
-         */
-        var create = function (mugT, title) {
-            var i,
-            mug = mugT.mug,
-            mugTProps = mugT.properties,
-            mugProps = mug.properties;
-
-
-            qTable = $('<table id="fd-question-table" class=fd-"'+title+'"></table>');
-            qPropHolder.append(qTable);
-            qTHeader = $('<thead class="fd-question-table-header"></thead>');
-            qTHeader.append('<tr><td colspan = 2><b><h1>Question Properties: '+controller.getTreeLabel(mugT)+'</h1></b></td></tr>');
-            qTHeader.append("<tr><td><b>Property Name</b></td><td><b>Property Value</b></td></tr>");
-            qTable.append(qTHeader);
-            qTBody = $("<tbody></tbody>");
-            qTable.append(qTBody);
-
-
-            i = 'ufid';
-            var row, col1, col2;
-
-            row = $("<tr></tr>");
-            qTBody.append(row);
-            row.attr('id', 'fd-'+i);
-            row.attr('class', "fd-question-property-row");
-            col1 = $("<td></td>");
-            col2 = $("<td></td>");
-            row.append(col1);
-            row.append(col2);
-
-            col1.html(i);
-            col2.html(mug[i]);
-            for(var p in mugProps) {
-                var block = mugProps[p].properties;
-                if (!mugProps.hasOwnProperty(p)) {
-                    continue;
-                }
-                if (typeof block === 'function' || typeof block === 'string') {
-                    continue;
-                }
-
-                qTBody.append("<hr />");
-                qTBody.append('<tr><td colspan = 2><h2 class="fd-properties-block-header">'+p+' Properties:</h2></tr>')
-
-                for(i in block) {
-                    var inputBox;
-                    if (!block.hasOwnProperty(i) || typeof block[i] === 'function') {
-                        continue;
-                    }
-                    row = $("<tr></tr>");
-                    qTBody.append(row);
-                    row.attr('id', 'fd-'+i);
-                    row.attr('class', "fd-question-property-row");
-                    col1 = $('<td class="fd-prop-title title">'+i+'</td>');
-                    col2 = $('<td class="fd-value"></td>');
-                    inputBox = $('<input value="'+block[i]+'" name="fd-'+i+'" class="fd-'+p+' fd-edit title" />');
-                    col2.append(inputBox);
-                    inputBox.change(function (e) {
-                        var target = $(e.target),
-                                el = target.attr("class").replace('fd-',''),
-                                prop = target.attr("name").replace('fd-',''),
-                                newVal = target.val().replace('"','').replace('"','');
-                        setPropertyValForModel(mug, el, prop, newVal);
-                    });
-                    row.append(col1);
-                    row.append(col2);
-                }
-            }
-
-            $('input[class="fd-dataElement"][name="fd-nodeID"]').keyup(function () {
-                var node = $('#'+controller.getCurrentlySelectedMug().ufid);
-                $('#fd-question-tree').jstree("rename_node",node, this.value);
-            })
-
-
-
-
-        }(mugType, localMug.ufid);
-
-        /**
-         * Used for setting up the basic skeleton for properties editing
-         * (i.e. all the stuff that's common across the different MugTypes)
-         * @param mugT
-         * @return an object containing the various fields/items that are
-         * usefully editable
-         */
-        showPropertiesFactory.generic = function (mugT) {
-
-        }
-
-
-
-        /**
-         * Shows the properties that are editable by the user
-         * (as either a repeat or group)
-         * @param mugT - the MugType associated with this group/repeat
-         * @param isRepeat
-         */
-        showPropertiesFactory.group = showPropertiesFactory.repeat = function (mugT) {
-            var fields = showPropertiesFactory.generic(mugT);
-        }
-
-        /**
-         * Here 'Normal Question' means whatever
-         * isn't a repeat, group, (1)select, item, trigger
-         * @param mugT
-         */
-        var showNormalQuestionProperties = function (mugT) {
-            var fields = showPropertiesFactory.generic(mugT);
-        }
-        var s = showPropertiesFactory;
-        s.text = s.int = s.long = s.double = s.date = s.datetime = s.picture = showNormalQuestionProperties;
-
-        //We use the showProperties object as dictionary to make it easier to select
-        //the right function based on the MugType without a pita long and complex if/switch statement.
-
-        /**
-         * Shows the props for 1selec/select type questions
-         * @param mugT
-         */
-        var showSelectQuestionProperties = function (mugT) {
-            var fields = showPropertiesFactory.generic(mugT);
-        }
-
-        /**
-         * Shows props for Items (in a select/1select).
-         * @param itemData - the data object associated with this item
-         */
-        var showSelectItemProperties = function (itemData) {
-
-        }
-
-        /**
-         * Shows the props for a Trigger item.
-         * @param mugT
-         */
-        var showTriggerProperties = function (mugT) {
-
-        }
-
-
-        function setPropertyValForUI(property, value) {
-            $(".fd-question-property-row fd-"+property+" td:nth-child(2)").html(value);
-        }
-        that.setPropertValForUI = setPropertyValForUI;
-
-        /**
-         *
-         * @param element can be one of (string) 'bind','data','control'
-         * @param property (string) property name
-         * @param val new value the property should be set to.
-         */
-        function setPropertyValForModel(myMug, element, property, val) {
-            var rootProps = myMug['properties'];
-            var elProps = rootProps[element].properties,
-                propertyToChange = elProps[property], event = {};
-
-            myMug.properties[element].properties[property] = val;
-            event.type = 'property-changed';
-            event.property = property;
-            event.element = element;
-            event.val = val;
-            myMug.fire(event);
-
-        }
-
-        return that;
-    };
 
     /**
      * Private function (to the UI anyway) for handling node_select events.
@@ -580,8 +392,10 @@ formdesigner.ui = (function () {
             accordion = $("#fd-extra-tools-accordion"),
                 min_max = $('#fd-acc-min-max');
         accordion.accordion({
-            fillSpace: 'true'
+            fillSpace: true,
+            collapsible: true
         });
+        accordion.accordion("activate",false);
 
         min_max.button();
         min_max.click(function(){

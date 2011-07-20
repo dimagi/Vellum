@@ -1535,6 +1535,14 @@ formdesigner.model = function () {
             that.controlTree = controlTree = new Tree('control');
         })();
 
+        /**
+         * Loops through the data and the control trees and picks out all the unique bind elements.  Returns a list of BindElements
+         */
+        that.getBindList = function(){
+            var bList = [];
+            
+        }
+
         //make the object event aware
         formdesigner.util.eventuality(that);
         return that;
