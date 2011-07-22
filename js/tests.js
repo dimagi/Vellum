@@ -11,8 +11,8 @@ $(document).ready(function(){
                     tagName: "input",
                     label:"What is your name?",
                     hintLabel:"Enter the client's name",
-                    labelItext:"Q1EN",
-                    hintItext:"Q1ENH"
+                    labelItextID:"Q1EN",
+                    hintItextID:"Q1ENH"
                 }
         );
 
@@ -48,6 +48,38 @@ $(document).ready(function(){
             bind: myBind,
             mug: myMug
         };
+    }
+
+    var giveMugFakeValues = function (mug, mugType) {
+        function randomString() {
+            var chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz";
+            var string_length = 8;
+            var randomstring = '';
+            for (var i=0; i<string_length; i++) {
+                var rnum = Math.floor(Math.random() * chars.length);
+                randomstring += chars.substring(rnum,rnum+1);
+            }
+            return randomstring;
+        }
+        for (var i in mug.properties) {
+            if(mug.properties.hasOwnProperty(i)) {
+                for (var j in mug.properties[i].properties) {
+                    if(mug.properties[i].properties.hasOwnProperty(j)){
+                        if(!mug.properties[i].properties[j]){ //if value is empty/blank
+                            if(i === 'dataElement' && j === 'nodeID'){
+                                mug.properties[i].properties[j] = formdesigner.util.generate_question_id();
+                                if(mug.properties.bindElement){ //set bindElement.nodeID to same as dataElement.nodeID
+                                    mug.properties.bindElement.properties.nodeID = mug.properties[i].properties[j];
+                                }
+                            }else{
+                                mug.properties[i].properties[j] = randomString();
+                            }
+                        }
+
+                    }
+                }
+            }
+        }
     }
 
     module("LiveText Unit Tests");
@@ -233,11 +265,14 @@ $(document).ready(function(){
     test("Validate example mug against definition", function(){
         expect(3);
         var testData = make_control_bind_data_mug();
-        var myMug = testData.mug;
+        var myMug;
         var MugType = formdesigner.model.mugTypeMaker.stdTextQuestion(); //simulates a 'standard' text question
-        MugType.mug = myMug;
+        myMug = MugType.mug;
+        giveMugFakeValues(myMug,MugType);
+        console.log("MUG WITH FAKE VALUES",myMug);  
         var validationObject = MugType.validateMug(myMug);
         equal(MugType.typeName, "Text Question MugType");
+        console.log("FAILED VALIDATION HERE",validationObject);
         equal(validationObject.status, "pass", 'Does the mug validate against the MugType?');
 
         var otherType = formdesigner.model.mugTypeMaker["stdTextQuestion"]();
@@ -252,8 +287,9 @@ $(document).ready(function(){
         var myMug;
         var MugType = formdesigner.model.mugTypeMaker.stdTextQuestion(); //simulates a 'standard' text question
         myMug = MugType.mug;
+        giveMugFakeValues(myMug,MugType);
         myMug.properties.bindElement.properties.constraintAttr = "foo";
-        myMug.properties.bindElement.properties.constraintMsgAttr = undefined;
+        myMug.properties.bindElement.properties.constraintMsgAttr = null;
         var validationObject = MugType.validateMug(myMug);
         equal(validationObject.status,'pass', "Mug has a constraint but no constraint message which is OK");
 
@@ -281,10 +317,11 @@ $(document).ready(function(){
     });
 
     module("Automatic Mug Creation from MugType");
-    test("Create mug from root MugType", function(){
+    test("Create mug from MugType", function(){
         expect(2);
         var mugType = formdesigner.model.mugTypeMaker.stdTextQuestion();
         var mug = mugType.mug;
+        giveMugFakeValues(mug,mugType);
         ok(typeof mug === 'object', "Mug is an Object");
         equal(mugType.validateMug(mug).status,'pass', "Mug passes validation");
     });
@@ -299,6 +336,7 @@ $(document).ready(function(){
 
         tMug = formdesigner.util.getNewMugType(AdbType);
         Mug = formdesigner.model.createMugFromMugType(tMug);
+        giveMugFakeValues(Mug,tMug);
         ok(typeof tMug === 'object', "MugType creation successful for '"+tMug.typeName+"' MugType");
         ok(tMug.validateMug(Mug).status === 'pass', "Mug created from '"+tMug.typeName+"' MugType passes validation");
         ok(typeof Mug.properties.controlElement === 'undefined', "Mug's ControlElement is undefined");
@@ -308,6 +346,7 @@ $(document).ready(function(){
 
         tMug = formdesigner.util.getNewMugType(AdbcType);
         Mug = formdesigner.model.createMugFromMugType(tMug);
+        giveMugFakeValues(Mug,tMug);
         ok(typeof tMug === 'object', "MugType creation successful for '"+tMug.typeName+"' MugType");
         ok(tMug.validateMug(Mug).status === 'pass', "Mug created from '"+tMug.typeName+"' MugType passes validation");
         ok(typeof Mug.properties.controlElement === 'object', "Mug's ControlElement exists");
@@ -317,6 +356,7 @@ $(document).ready(function(){
 
         tMug = formdesigner.util.getNewMugType(AdcType);
         Mug = formdesigner.model.createMugFromMugType(tMug);
+        giveMugFakeValues(Mug,tMug);
         ok(typeof tMug === 'object', "MugType creation successful for '"+tMug.typeName+"' MugType");
         ok(tMug.validateMug(Mug).status === 'pass', "Mug created from '"+tMug.typeName+"' MugType passes validation");
         ok(typeof Mug.properties.controlElement === 'object', "Mug's ControlElement exists");
@@ -325,6 +365,7 @@ $(document).ready(function(){
 
         tMug = formdesigner.util.getNewMugType(AdType);
         Mug = formdesigner.model.createMugFromMugType(tMug);
+        giveMugFakeValues(Mug,tMug);
         ok(typeof tMug === 'object', "MugType creation successful for '"+tMug.typeName+"' MugType");
         ok(tMug.validateMug(Mug).status === 'pass', "Mug created from '"+tMug.typeName+"' MugType passes validation");
         ok(typeof Mug.properties.controlElement === 'undefined', "Mug's ControlElement is undefined");
@@ -383,6 +424,22 @@ $(document).ready(function(){
         var createMugFromMugType = formdesigner.model.createMugFromMugType;
         var DBCQuestion = formdesigner.model.mugTypeMaker.stdTextQuestion();
 
+        giveMugFakeValues(mugA,mugTA);
+        giveMugFakeValues(mugB,mugTB);
+        giveMugFakeValues(mugC,mugTC);
+
+        var vTA = mugTA.validateMug(),
+                vTB = mugTB.validateMug(),
+                vTC = mugTC.validateMug();
+        if(!((vTA.status === 'pass') && (vTB.status === 'pass') && (vTC.status === 'pass'))){
+            console.group("VALIDATION FAILURE BLOCK");
+            console.log("validation obj A",vTA);
+            console.log("validation obj B",vTB);
+            console.log("validation obj C",vTC);
+            console.groupEnd()
+            throw 'AUTO MUG CREATION FROM MUG DID NOT PASS VALIDATION SEE CONSOLE'
+        }
+
         tree.insertMugType(mugTA, 'into', null); //add mugA as a child of the rootNode
         tree.insertMugType(mugTB, 'into',mugTA ); //add mugB as a child of mugA...
         tree.insertMugType(mugTC, 'into', mugTB); //...
@@ -398,7 +455,7 @@ $(document).ready(function(){
                 tree._getMugTypeNodeID(mugTA)+'['+
                 tree._getMugTypeNodeID(mugTB)+'['+
                 tree._getMugTypeNodeID(mugTC)+']]]';
-        equal(treePrettyPrintExpected,tree.printTree(), 'Check the tree structure is correct');
+        equal(treePrettyPrintExpected,tree.printTree(), 'Check the tree structure is correct1');
 
         actualPath = tree.getAbsolutePath(mugTC);
         tree.removeMugType(mugTC);
@@ -409,7 +466,7 @@ $(document).ready(function(){
                 tree._getMugTypeNodeID(mugTA)+'['+
                 tree._getMugTypeNodeID(mugTB)+'['+
                 tree._getMugTypeNodeID(mugTC)+']]]';
-        equal(treePrettyPrintExpected,tree.printTree(), 'Check the tree structure is correct');
+        equal(treePrettyPrintExpected,tree.printTree(), 'Check the tree structure is correct2');
         
         tree.insertMugType(mugTC, 'into', mugTA);
         actualPath = tree.getAbsolutePath(mugTC);
@@ -421,7 +478,7 @@ $(document).ready(function(){
                 tree._getMugTypeNodeID(mugTA)+'['+
                 tree._getMugTypeNodeID(mugTB)+','+
                 tree._getMugTypeNodeID(mugTC)+']]';
-        equal(treePrettyPrintExpected,tree.printTree(), 'Check the tree structure is correct');
+        equal(treePrettyPrintExpected,tree.printTree(), 'Check the tree structure is correct3');
 
         tree.removeMugType(mugTB);
         raises(function(){tree.getAbsolutePath(mugTB)}, "Cant find path of MugType that is not present in the Tree!");
@@ -431,7 +488,7 @@ $(document).ready(function(){
             tree._getMugTypeNodeID(mugTA)+'['+
             tree._getMugTypeNodeID(mugTB)+','+
             tree._getMugTypeNodeID(mugTC)+']]';
-        equal(treePrettyPrintExpected,tree.printTree(), 'Check the tree structure is correct');
+        equal(treePrettyPrintExpected,tree.printTree(), 'Check the tree structure is correct4');
 
         tree.removeMugType(mugTB);
         raises(function(){tree.getAbsolutePath(mugTB)}, "Cant find path of MugType that is not present in the Tree!");
@@ -441,20 +498,20 @@ $(document).ready(function(){
             tree._getMugTypeNodeID(mugTA)+'['+
             tree._getMugTypeNodeID(mugTB)+','+
             tree._getMugTypeNodeID(mugTC)+']]';
-        equal(treePrettyPrintExpected,tree.printTree(), 'Check the tree structure is correct');
+        equal(treePrettyPrintExpected,tree.printTree(), 'Check the tree structure is correct5');
 
         var mugTD = GNMT(DBCQuestion);
         var mugD = createMugFromMugType(mugTD);
         tree.insertMugType(mugTD, 'before', mugTA);
         equal('/'+mugTD.mug.properties.dataElement.properties.nodeID, tree.getAbsolutePath(mugTD),
              "Check that the newly inserted Mug's generated path is correct");
-
+        console.log("MUGTD",mugTD);
         treePrettyPrintExpected = ''+tree._getRootNodeID()+'['+
             tree._getMugTypeNodeID(mugTD)+','+
             tree._getMugTypeNodeID(mugTA)+'['+
             tree._getMugTypeNodeID(mugTB)+','+
             tree._getMugTypeNodeID(mugTC)+']]';
-        equal(treePrettyPrintExpected,tree.printTree(), 'Check the tree structure is correct');
+        equal(tree.printTree(),treePrettyPrintExpected, 'Check the tree structure is correct6');
 
         tree.insertMugType(mugTD,'after',mugTB);
         treePrettyPrintExpected = ''+tree._getRootNodeID()+'['+
@@ -462,7 +519,7 @@ $(document).ready(function(){
             tree._getMugTypeNodeID(mugTB)+','+
             tree._getMugTypeNodeID(mugTD)+','+
             tree._getMugTypeNodeID(mugTC)+']]';
-        equal(treePrettyPrintExpected,tree.printTree(), 'Check the tree structure is correct');
+        equal(treePrettyPrintExpected,tree.printTree(), 'Check the tree structure is correct7');
 
         tree.insertMugType(mugTD,'after',mugTC);
         treePrettyPrintExpected = ''+tree._getRootNodeID()+'['+
@@ -470,7 +527,7 @@ $(document).ready(function(){
             tree._getMugTypeNodeID(mugTB)+','+
             tree._getMugTypeNodeID(mugTC)+','+
             tree._getMugTypeNodeID(mugTD)+']]';
-        equal(treePrettyPrintExpected,tree.printTree(), 'Check the tree structure is correct');
+        equal(treePrettyPrintExpected,tree.printTree(), 'Check the tree structure is correct8');
 
         var tempMT = tree.getMugTypeFromUFID(mugTA.ufid);
         deepEqual(mugTA, tempMT, "Check getMugTypeFromUFID() method works correctly");
@@ -579,8 +636,8 @@ $(document).ready(function(){
         ui = formdesigner.ui;
         jstree = $("#fd-question-tree");
 
-        equal(c.form.controlTree.printTree(false), "NodeWithNoValue!", "Ensure the controlTree is empty after a call to resetFormDesigner");
-        equal(c.form.dataTree.printTree(false), "NodeWithNoValue!", "Ensure the dataTree is empty after a call to resetFormDesigner");
+        equal(c.form.controlTree.printTree(false), "RootNode", "Ensure the controlTree is empty after a call to resetFormDesigner");
+        equal(c.form.dataTree.printTree(false), "RootNode", "Ensure the dataTree is empty after a call to resetFormDesigner");
 
         //add a listener for question creation events
         c.on("question-creation", function(e){
@@ -588,13 +645,10 @@ $(document).ready(function(){
             curMugType = e.mugType;
         });
         console.log(ui.buttons);
-        stop(1);
 
         ui.buttons.addquestionbutton.click();
         ui.buttons.addquestionbutton.click();
         ui.buttons.addquestionbutton.click();
-        console.log(ui.buttons);
-        start();
         jstree.jstree("select_node",$('#'+curMugType.ufid));
         console.log("curMugType.ufid=",curMugType.ufid);
         console.log('Selected Node', jstree.jstree("get_selected"));
@@ -620,7 +674,12 @@ $(document).ready(function(){
         addQbut.click();
         addQbut.click();
         addQbut.click();
-        console.log(c.form.controlTree.printTree(false));
+        console.log(c.form.controlTree.printTree());
+        var xw = new XMLWriter( 'UTF-8', '1.0' );
+        xw.writeStartDocument(true);
+        c.form.controlTree.createTreeXML('control',xw);
+        xw.writeEndDocument();
+        console.log(xw.flush());
     })
 
     module("Itext functionality testing");

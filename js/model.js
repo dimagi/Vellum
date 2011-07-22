@@ -154,6 +154,10 @@ formdesigner.model = function () {
             }
         }(spec));
 
+        that.toString = function () {
+            return 'Bind Element: ' + this.properties.nodeID;
+        }
+
         //make the object capable of storing unused/unknown xml tag attributes
         formdesigner.util.allowUnusedXMLAttributes(that);
 
@@ -380,7 +384,7 @@ formdesigner.model = function () {
                         if(block.hasOwnProperty(j)){
                             var p = block[j];
                             if(p.presence === 'required' || p.presence === 'optional'){
-                                spec[i][j] = " ";
+                                spec[i][j] = null;
                             }
                             if(p.values && p.presence !== 'notallowed'){
                                 spec[i][j] = p.values[0];
@@ -391,30 +395,7 @@ formdesigner.model = function () {
             }
             return spec;
         }
-//        function recursiveGetSpec(block, name) {
-//            var spec = {}, i, retSpec = {};
-//            for(i in block) {
-//                if (typeof block[i] === 'object') {
-//                    spec[i] = recursiveGetSpec(block[i], i);
-//                }else if (typeof block[i] === 'function') {
-//                    spec[i] = " ";
-//                }else{
-//                    switch(block[i]) {
-//                        case formdesigner.model.TYPE_FLAG_OPTIONAL:
-//                            spec[i] = " ";
-//                            break;
-//                        case formdesigner.model.TYPE_FLAG_REQUIRED:
-//                            spec[i] = " ";
-//                            break;
-//                        case formdesigner.model.TYPE_FLAG_NOT_ALLOWED:
-//                            break;
-//                        default:
-//                            spec[i] = block[i]; //text value;
-//                    }
-//                }
-//            }
-//            return spec;
-//        }
+
         //loop through mugType.properties and construct a spec to be passed to the Mug Constructor.
         //BE CAREFUL HERE.  This is where the automagic architecture detection ends, some things are hardcoded.
         var mugSpec, dataElSpec, bindElSpec, controlElSpec, i,
@@ -434,13 +415,13 @@ formdesigner.model = function () {
                 mug.properties.controlElement = new ControlElement(controlElSpec);
             }
             if (dataElSpec) {
-                if (dataElSpec.nodeID) {
+                if (typeof dataElSpec.nodeID !== 'undefined') {
                     dataElSpec.nodeID = formdesigner.util.generate_question_id();
                 }
                 mug.properties.dataElement = new DataElement(dataElSpec);
             }
             if (bindElSpec) {
-                if (bindElSpec.nodeID) {
+                if (typeof bindElSpec.nodeID !== 'undefined') {
                     if (dataElSpec.nodeID) {
                         bindElSpec.nodeID = dataElSpec.nodeID; //make bind id match data id for convenience
                     }else{
@@ -454,19 +435,19 @@ formdesigner.model = function () {
         //Bind the mug to it's mugType
         mugType.mug = mug || undefined;
 
-        //ok,now: validate the mug to make sure everything is peachy.
-        validationResult = mugType.validateMug(mug);
-        if (validationResult.status !== 'pass') {
-            console.group("Failed Validation on Mug Auto-creation");
-            console.log('Failed validation object');
-            console.log(validationResult);
-            console.log("MugType:");
-            console.log(mugType);
-            console.groupEnd();
-            throw 'Newly constructed mug did not pass validation!';
-        }else{
+//        //ok,now: validate the mug to make sure everything is peachy.
+//        validationResult = mugType.validateMug(mug);
+//        if (validationResult.status !== 'pass') {
+//            console.group("Failed Validation on Mug Auto-creation");
+//            console.log('Failed validation object');
+//            console.log(validationResult);
+//            console.log("MugType:");
+//            console.log(mugType);
+//            console.groupEnd();
+//            throw 'Newly constructed mug did not pass validation!';
+//        }else{
             return mug;
-        }
+//        }
     };
 
     var TYPE_FLAG_OPTIONAL = that.TYPE_FLAG_OPTIONAL = '_optional';
@@ -586,9 +567,9 @@ formdesigner.model = function () {
                     presence: 'required',
                     values: formdesigner.util.VALID_CONTROL_TAG_NAMES
                 },
-                label: {
+                label: { //TODO FIXME MAKE VALIDATION FUNC FOR CHECKING FOR EITHER OR LABEL OR LABELITEXTID
                     editable: 'w',
-                    visibility: 'hidden',
+                    visibility: 'visible',
                     presence: 'required'
                 },
                 hintLabel: {
@@ -596,17 +577,17 @@ formdesigner.model = function () {
                     visibility: 'hidden',
                     presence: 'optional'
                 },
-                labelItext: {
-                    editable: 'w',
-                    visibility: 'visible',
-                    presence: 'optional',
-                    lstring: "Question Text"
-                },
-                hintItext: {
+                labelItextID: {
                     editable: 'w',
                     visibility: 'hidden',
                     presence: 'optional',
-                    lstring: "Question Extra Information"
+                    lstring: "Question Itext ID"
+                },
+                hintItextID: {
+                    editable: 'w',
+                    visibility: 'hidden',
+                    presence: 'optional',
+                    lstring: "Question HINT Itext ID"
                 }
             }
         },
@@ -757,60 +738,6 @@ formdesigner.model = function () {
 
             },
 
-//                    //go deeper if required
-//                    if (typeof propertiesObj[i] === 'object') {
-//                        results[i] = checkProps(propertiesObj[i], testingObj[i], i);
-//
-//                        //see if the recursion went ok, flip out if not.
-//                        if (results[i].status === "fail") {
-//                            results.status = "fail";
-//                            results.message = results[i].message;
-//                            results.errorBlockName = results[i].errorBlockName;
-//                            results.errorType = results[i].errorType;
-//                            if (results[i].errorProperty) {
-//                                results.errorProperty = results[i].errorProperty;
-//                            }
-//                            return results;
-//                        } else {
-//                            results.status = "pass";
-//                        }
-//                    } else {
-//                        results[i] = validateRule(i, propertiesObj[i], testingObj.properties, blockName, mugT, mugT.mug);
-//                        if (results[i].result === 'fail') {
-//                            results.status = "fail";
-//                            results.message = "Validation Rule Failure on Property: " + i;
-//                            results.errorBlockName = i;
-//                            results.errorType = 'RuleValidation';
-//                            return results; //short circuit the validation
-//                        } else {
-//                            results.status = "pass";
-//                        }
-//                    }
-//                }
-//
-//                //recurse through the properties in the actual mug/*Element
-//                testObjProperties = testingObj.properties;
-//                for (j in testObjProperties) {
-//                    if (testObjProperties.hasOwnProperty(j)) {
-//                        if (typeof propertiesObj[j] === 'undefined') {
-//                            results.status = "fail";
-//                            results.message = blockName + " block has property '" + j + "' but no rule is present for that property in the MugType!";
-//                            results.errorBlockName = blockName;
-//                            results.errorProperty = j;
-//                            results.errorType = 'MissingRuleValidation';
-//                            results.propertiesBlock = propertiesObj;
-//                        } else if (propertiesObj[j] === TYPE_FLAG_NOT_ALLOWED) {
-//                            results.status = "fail";
-//                            results.message = blockName + " block has property '" + j + "' but this property is NOT ALLOWED in the MugType definition!";
-//                            results.errorBlockName = blockName;
-//                            results.errorProperty = j;
-//                            results.errorType = 'NotAllowedRuleValidation';
-//                            results.propertiesBlock = propertiesObj;
-//                        }
-//                    }
-//                }
-//                return results;
-
             /**
              * Checks the type string of a MugType (i.e. the mug.type value)
              * to see if the correct properties block Elements are present (and
@@ -959,9 +886,9 @@ formdesigner.model = function () {
         mType.mug.properties.controlElement.properties.name = "Text";
         mType.mug.properties.controlElement.properties.tagName = "input";
         vResult = mType.validateMug();
-        if(vResult.status !== 'pass'){
-            formdesigner.util.throwAndLogValidationError(vResult,mType,mType.mug);
-        }
+//        if(vResult.status !== 'pass'){
+//            formdesigner.util.throwAndLogValidationError(vResult,mType,mType.mug);
+//        }
         return mType;
     };
 
@@ -977,7 +904,7 @@ formdesigner.model = function () {
 
         controlProps = mType.properties.controlElement;
         controlProps.hintLabel.presence = 'notallowed';
-        controlProps.hintItext.presence = 'notallowed';
+        controlProps.hintItextID.presence = 'notallowed';
         controlProps.defaultValue = {
             lstring: 'Item Value',
             visibility: 'visible',
@@ -992,9 +919,9 @@ formdesigner.model = function () {
 
 
         vResult = mType.validateMug();
-        if(vResult.status !== 'pass'){
-            formdesigner.util.throwAndLogValidationError(vResult,mType,mType.mug);
-        }
+//        if(vResult.status !== 'pass'){
+//            formdesigner.util.throwAndLogValidationError(vResult,mType,mType.mug);
+//        }
         return mType;
     };
 
@@ -1014,9 +941,9 @@ formdesigner.model = function () {
 
 
         vResult = mType.validateMug();
-        if(vResult.status !== 'pass'){
-            formdesigner.util.throwAndLogValidationError(vResult,mType,mType.mug);
-        }
+//        if(vResult.status !== 'pass'){
+//            formdesigner.util.throwAndLogValidationError(vResult,mType,mType.mug);
+//        }
         return mType;
     };
 
@@ -1034,9 +961,9 @@ formdesigner.model = function () {
         mType.mug.properties.controlElement.properties.tagName = "select";
         mType.mug.properties.bindElement.properties.dataType = "xsd:select";
         vResult = mType.validateMug();
-        if(vResult.status !== 'pass'){
-            formdesigner.util.throwAndLogValidationError(vResult,mType,mType.mug);
-        }
+//        if(vResult.status !== 'pass'){
+//            formdesigner.util.throwAndLogValidationError(vResult,mType,mType.mug);
+//        }
         return mType;
     };
 
@@ -1055,9 +982,9 @@ formdesigner.model = function () {
         mType.mug.properties.controlElement.properties.tagName = "group";
 
         vResult = mType.validateMug();
-        if(vResult.status !== 'pass'){
-            formdesigner.util.throwAndLogValidationError(vResult,mType,mType.mug);
-        }
+//        if(vResult.status !== 'pass'){
+//            formdesigner.util.throwAndLogValidationError(vResult,mType,mType.mug);
+//        }
         return mType;
     };
 
@@ -1225,7 +1152,7 @@ formdesigner.model = function () {
              * An ID used during prettyPrinting of the Node. (a human readable value for the node)
              */
             that.getID = function () {
-                if (isRootNode) {
+                if (this.isRootNode) {  
                     return 'RootNode';
                 }
                 if (!this.getValue() || typeof this.getValue().validateMug !== 'function') {
@@ -1293,6 +1220,137 @@ formdesigner.model = function () {
                     }
                 }
                 return store; //return the results
+            };
+
+            /**
+             * Walks down the tree and generates XML elements
+             * using the XMLWriter (see http://flesler.blogspot.com/2008/03/xmlwriter-for-javascript.html )
+             * according to the specified treeType.
+             * @param treeType - String, either 'control' or 'data'
+             * @param the XmlWriter object
+             */
+            that.createControlTreeXML = function (xmlWriter) {
+                var mugType, mug, tagName, label, child;
+
+                if(!this.getValue() || this.isRootNode){
+                    for (child in this.getChildren()){
+                        if(this.getChildren().hasOwnProperty(child)){
+                            this.getChildren()[child].createControlTreeXML(xmlWriter); //do the recursion boogey.
+                        }
+                    }
+                    return;
+                }
+
+
+                /**
+                 * Includes the label arg because of the special case with repeats
+                 * (label falls under group, not group->repeat unfortunately)
+                 * @param tagName
+                 * @param elLabel - dictionary: {ref: 'itext ref string', defText: 'default label text'} both are optional
+                 */
+                function createOpenControlTag(tagName,elLabel){
+                    var isGroupOrRepeat = (tagName === 'group' || tagName === 'repeat')
+                    function createLabel(){
+                        if(elLabel){
+                            xmlWriter.writeStartElement('label');
+                            if(elLabel.ref){
+                                xmlWriter.writeAttributeString('ref',elLabel.ref);
+                            }
+                            if(elLabel.defText){
+                                xmlWriter.writeString(elLabel.defText);
+                            }
+                            xmlWriter.writeEndElement(); //close Label tag;
+                        }
+                    };
+
+                    tagName = tagName.toLowerCase();
+                    if(isGroupOrRepeat){
+                        xmlWriter.writeStartElement('group');
+                        createLabel();
+                        if(tagName === 'repeat'){
+                            xmlWriter.writeStartElement('repeat');
+                        }
+                    }else{
+                        xmlWriter.writeStartElement(tagName);
+
+                    }
+
+                    if(tagName !== 'group'){
+                        createLabel();
+                    }
+
+                    if(tagName !== 'item'){
+                        var attr, absPath;
+                        if(tagName === 'repeat'){
+                            attr = 'nodeset';
+                        }else{
+                            attr = 'ref';
+                        }
+                        absPath = formdesigner.controller.form.controlTree.getAbsolutePath(mugType);
+
+
+                        xmlWriter.writeAttributeString(attr, absPath);
+                    }
+                    
+                }
+
+
+
+                mugType = this.getValue();
+                mug = mugType.mug;
+
+
+                if(!mugType.properties.controlElement || !mug.properties.controlElement){
+                    return;
+                }
+
+                tagName = mug.properties.controlElement.properties.tagName;
+
+                var cProps = mug.properties.controlElement.properties;
+                label;
+                if(cProps.label){
+                    label = {};
+                    label.defText = cProps.label;
+                }
+                if(cProps.labelItextID){
+                    if(!label){ label = {}; }
+                    label.ref = "jr:itext('" + cProps.labelItextID + "')";
+                }
+                
+                createOpenControlTag(tagName, label);
+
+                //Do hint label
+                if(cProps.hintLabel || cProps.hintItextID){
+                    xmlWriter.writeStartElement('hint');
+                    if(cProps.hintLabel){
+                        xmlWriter.writeString(cProps.hintLabel);
+                    }
+                    if(cProps.hintItextID){
+                        var ref = "jr:itext('" + cProps.hintItextID + "')";
+                        xmlWriter.writeAttributeString('ref',ref);
+                    }
+                    xmlWriter.writeEndElement();
+                }
+
+                //Do value tag
+                if(cProps.defaultValue){
+                    xmlWriter.writeStartElement();
+                    xmlWriter.writeString(cProps.defaultValue());
+                    xmlWriter.writeEndElement();
+                }
+                console.log("Node:",this,", Children:",this.getChildren());
+                for (child in this.getChildren()){
+                    if(this.getChildren().hasOwnProperty[child]){
+                        this.getChildren()[child].createControlTreeXML(xmlWriter); //do the recursion boogey.
+                    }
+                }
+
+                //finish off
+                xmlWriter.writeEndElement(); //close control tag.
+                if(tagName === 'repeat'){
+                    xmlWriter.writeEndElement(); //special case where we have to close the repeat as well as the group tag.
+                }
+                
             };
 
 
@@ -1556,6 +1614,14 @@ formdesigner.model = function () {
             return rootNode.treeMap(func, []);
         };
 
+        that.createTreeXML = function (treeType,xmlWriter) {
+            if(treeType === 'control'){
+                rootNode.createControlTreeXML(xmlWriter);
+            }else{
+                console.log('CREATE XML NOT IMPLEMENTED FOR DATA TREE YET');
+            }
+        }
+
         return that;
     };
     that.Tree = Tree;
@@ -1575,7 +1641,7 @@ formdesigner.model = function () {
             var bList = [],
                 dataTree,controlTree,dBindList,cBindList,i,
                 getBind = function(node){ //the function we will pass to treeMap
-                    if(!node.getValue()){
+                    if(!node.getValue() || node.isRootNode){
                         return null;
                     }
                     var MT = node.getValue(),
@@ -1883,6 +1949,30 @@ formdesigner.model = function () {
                 return errorIIDs;
             }
 
+        };
+
+        /**
+         * Convenience function takes in a Mug and determines
+         * if there is any kind of itext stored for this mug
+         * that is meant to be viewed by a person (i.e. default, long, short)
+         * If so, return true, if not return false.
+         *
+         * set isHint to true if this query is in reference to hint/help text
+         */
+        that.hasHumanReadableItext = function(mug, isHint){
+            if(!mug.properties.controlElement){
+                return false;
+            }
+
+            var p = mug.properties.controlElement.properties,
+                itextID = isHint ? p.hintItextID : p.labelItextID,
+                ivals = this.getItextVals(itextID,this.getDefaultLanguage());
+
+            if ( ivals['default'] || ivals.long || ivals.short ) {
+                return true;
+            } else {
+                return false;
+            }
         };
 
         (function init(initLang){

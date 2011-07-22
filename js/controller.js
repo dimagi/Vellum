@@ -10,12 +10,12 @@ if (typeof formdesigner === 'undefined') {
 
 formdesigner.controller = (function () {
     "use strict";
-    var that = {}, form, question_counter = 1, //used in generate_question_id();
+    var that = {}, form,
         curSelMugType = null,
         curSelUfid = null,
 
         initFormDesigner = function () {
-            question_counter = 1;
+            formdesigner.util.question_counter = 1;
             curSelMugType = null;
             curSelUfid = null;
             $('#fd-quesiton-tree').empty();
@@ -59,18 +59,21 @@ formdesigner.controller = (function () {
      * @param property (string) property name
      * @param val new value the property should be set to.
      */
-     that.setMugPropertyValue = function (myMug, element, property, val) {
-        var rootProps = myMug['properties'];
-        var elProps = rootProps[element].properties,
+     that.setMugPropertyValue = function (myMug, element, property, val, mugType) {
+         var rootProps = myMug['properties'];
+         var elProps = rootProps[element].properties,
             propertyToChange = elProps[property], event = {};
 
-        myMug.properties[element].properties[property] = val;
-        event.type = 'property-changed';
-        event.property = property;
-        event.element = element;
-        event.val = val;
-        myMug.fire(event);
+         myMug.properties[element].properties[property] = val;
+         event.type = 'property-changed';
+         event.property = property;
+         event.element = element;
+         event.val = val;
+         event.mugUfid = myMug.ufid;
+         event.mugTypeUfid = mugType.ufid;
 
+
+         myMug.fire(event);
     };
 
 
@@ -205,9 +208,10 @@ formdesigner.controller = (function () {
         }
 
         mug = mugType.mug;
-//        mug.on('property-changed', function (e) {
-//            formdesigner.controller.showErrorMessage("Property Changed in Question:"+mug.properties.dataElement.properties.nodeID+"!");
-//        })
+
+        //this allows the mug to respond to certain events in a common way.
+        //see method docs for further info
+        formdesigner.util.setStandardMugEventResponses(mug);
 
         insertMugTypeIntoForm(curSelMugType,mugType);
         createQuestionInUITree(mugType);
@@ -221,7 +225,15 @@ formdesigner.controller = (function () {
     that.createQuestion = createQuestion;
 
 
-
+    that.createXForm = function () {
+        var xw = new XMLWriter( 'UTF-8', '1.0' );
+        xw.writeStartDocument(true);
+        xw.writeStartElement('html');
+        form.controlTree.createTreeXML('control',xw);
+        xw.writeEndElement();
+        xw.writeEndDocument();
+        return xw.flush();
+    }
     /**
      * Checks that the specified move is legal. returns false if problem is found.
      *
@@ -373,7 +385,7 @@ formdesigner.controller = (function () {
      * (see resetFormDesigner)
      */
     function resetControllerInternal () {
-            question_counter = 1;
+            formdesigner.util.question_counter = 1;
             curSelMugType = null;
             curSelUfid = null;
     }

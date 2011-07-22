@@ -66,14 +66,14 @@ formdesigner.util = (function(){
     }
     that.clone = clone;
 
-    var question_counter = 1;
+    that.question_counter = 1;
     /**
      * Generates a unique question ID (unique in this form) and
      * returns it as a string.
      */
     that.generate_question_id = function () {
-        var ret = 'question' + question_counter;
-        question_counter += 1;
+        var ret = 'question' + this.question_counter;
+        this.question_counter += 1;
         return ret;
     };
 
@@ -285,9 +285,9 @@ formdesigner.util = (function(){
                 return "into";
             }
 
-            canHaveChildren = formdesigner.util.canMugTypeHaveChildren;
+            canHaveChildren = formdesigner.util.canMugTypeHaveChildren(refMugType,newMugType);
 
-            if(canHaveChildren(refMugType,newMugType)){
+            if(canHaveChildren){
                 return "into";
             }else{
                 return "after";
@@ -402,6 +402,38 @@ formdesigner.util = (function(){
                   }
         }
     }(jQuery));
+
+
+    /**
+     * Bind a number of standard event responses to a mug
+     * so that it responds in a pre-determined fashion to default things
+     *
+     * Add stuff here when you want most/all mugs to behave in a certain
+     * fashion on FD events.
+     * @param mug
+     */
+    that.setStandardMugEventResponses = function (mug) {
+        //NOTE: 'this' is the mug responding to the event.
+
+        //bind dataElement.nodeID and bindElement.nodeID together
+        mug.on('property-changed',function (e) {
+            if(e.property === 'nodeID'){
+                if(this.properties.dataElement){
+                    this.properties.dataElement.properties.nodeID = e.val;
+                }
+                if(this.properties.bindElement){
+                    this.properties.bindElement.properties.nodeID = e.val;
+                }
+            }
+        });
+
+
+
+        //DEBUG EVENT CONSOLE PRINTER
+        mug.on('property-changed', function(e){
+           console.log("PROPERTY-CHANGED-EVENT (see utils)",e);
+        });
+    }
 
 
     return that;

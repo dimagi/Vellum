@@ -46,7 +46,7 @@ body{
 .fd-tree{
     float:left;
     width:280px;
-    height: 500px;
+    height: 700px;
     margin: 5px;
     border: 1px solid gray;
     overflow: auto;
@@ -61,7 +61,7 @@ body{
 #fd-data-tree-container{
     float: left;
     left: -260px;
-    top:500px;
+    top:700px;
     position: absolute;
     z-index: 0;
     overflow: auto;
@@ -75,7 +75,8 @@ body{
     float: left;
     margin-top: 5px;
     padding-left: 5px;
-    height:500px;
+    height:700px;
+    width: 500px;
     display:none;
 
 }
@@ -111,4 +112,34 @@ td {
 #textDrop{
     width: 640px;
     height: 640px;
+}
+
+#fd-source{
+    width: 800px;
+    height: 800px;
+}
+
+.fd-property-input {
+    float: right;
+    margin-top: 0;
+    padding-bottom: 2px;
+    padding-left: 5px;
+    padding-top: 0;
+    width: 200px;
+}
+
+.fd-property {
+    padding: 5px;
+}
+
+.fd-property-text {
+    float: none;
+}
+
+#fd-question-properties ul {
+    list-style-type: none;
+}
+
+#fd-question-properties ul li:nth-child(odd) {
+    background: #e5ecf9
 }

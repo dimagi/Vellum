@@ -134,9 +134,9 @@ formdesigner.ui = (function () {
             toolbar.append(fancyBut);
 
             fancyBut.button().click(function () {
-                var d = controller.get_form_data();
-                var output = $('#data');
-                output.text(d);
+                var d = controller.createXForm();
+                var output = $('#fd-source');
+                output.val(d);
                 $('#inline').click();
             });
             $("#fd-print-tree-but")
@@ -209,10 +209,10 @@ formdesigner.ui = (function () {
     }
 
     that.displayMugProperties = that.displayQuestion = function(mugType){
-        if (!mugType.properties.controlElement) {
-            //fuggedaboudit
-            throw "Attempted to display properties for a MugType that doesn't have a controlElement!";
-        }
+//        if (!mugType.properties.controlElement) {
+//            //fuggedaboudit
+//            throw "Attempted to display properties for a MugType that doesn't have a controlElement!";
+//        }
 
 
         var displayFuncs = {};
@@ -221,18 +221,48 @@ formdesigner.ui = (function () {
          * Runs through a properties block and generates the
          * correct li elements (and appends them to the given parentUL)
          *
-         * @param propertiesBlock
-         * @param parentUL
+         * @param propertiesBlock - The properties block from the MugType (e.g. mugType.properties.controlElement
+         * @param parentUL - The UL DOM node that an LI should be appended to.
+         * @param mugProps - actual mug properties corresponding to the propertiesBlock above
+         * @param groupName - Name of the current properties block (e.g. 'controlElement'
+         * @param showVisible - Show properties with the visibility flag set to 'visible'
+         * @param showHidden - Show properties with the visibility flag set to 'hidden'
          */
-        function listDisplay(propertiesBlock,parentUL, mugProps){
+        function listDisplay(propertiesBlock,parentUL, mugProps, groupName, showVisible, showHidden){
             var i, li;
             for(i in propertiesBlock){
-                if(propertiesBlock.hasOwnProperty(i) && propertiesBlock[i].visibility === 'visible'){
-                    var pBlock = propertiesBlock[i],
-                            labelStr = pBlock.lstring ? pBlock.lstring : i,
-                            liStr = '<li>'+labelStr+': '+'<input>'+'</li>';
-                    li = $(liStr);
-                    parentUL.append(li);
+                if(propertiesBlock.hasOwnProperty(i)){
+                    var show = (showVisible && propertiesBlock[i].visibility === 'visible') || (showHidden && propertiesBlock[i].visibility === 'hidden');
+                    if(show){
+                        var pBlock = propertiesBlock[i],
+                                labelStr = pBlock.lstring ? pBlock.lstring : i,
+                                liStr = '<li id="' + groupName + '-' + i + '" class="fd-property"><span class="fd-property-text">'+labelStr+': '+'</span><input id="' + groupName + '-' + i + '-' + 'input" class="fd-property-input">'+'</li>',
+                                input;
+
+                        li = $(liStr);
+                        input = $(li).find('input');
+
+                        //set some useful data properties
+                        input.data('propName',i);
+                        input.data('groupName', groupName);
+
+
+                        //set initial value for each input box (if any)
+                        input.val(mugProps[i]);  //<--- POTENTIAL PAIN POINT! Could be something that's not a string!
+
+                        //set event handler
+                        input.keyup(function(e){
+                            var input = $(e.currentTarget),
+                                    groupName = input.data('groupName'),
+                                    propName = input.data('propName'),
+                                    curMug = formdesigner.controller.getCurrentlySelectedMug(),
+                                    curMT = formdesigner.controller.getCurrentlySelectedMugType;
+                            formdesigner.controller.setMugPropertyValue(curMug,groupName,propName,input.val(),curMT);
+                        });
+
+
+                        parentUL.append(li);
+                    }
                 }
             }
         }
@@ -246,7 +276,7 @@ formdesigner.ui = (function () {
             ul = $('<ul>Control Props</ul>');
 
 
-            listDisplay(properties,ul,mugType.mug.properties.controlElement.properties);
+            listDisplay(properties, ul, mugType.mug.properties.controlElement.properties, 'controlElement',true,false);
             uiBlock.append(ul);
             uiBlock.show();
         }
@@ -259,7 +289,7 @@ formdesigner.ui = (function () {
             uiBlock.empty(); //clear it out first in case there's anything present.
             ul = $('<ul>Data Props</ul>');
 
-            listDisplay(properties,ul,mugType.mug.properties.dataElement);
+            listDisplay(properties,ul,mugType.mug.properties.dataElement.properties, 'dataElement', true, false);
             uiBlock.append(ul);
             uiBlock.show();
         }
@@ -274,7 +304,7 @@ formdesigner.ui = (function () {
             ul = $('<ul>Bind Props</ul>');
 
 
-            listDisplay(properties,ul,mugType.mug.properties.bindElement.properties);
+            listDisplay(properties, ul, mugType.mug.properties.bindElement.properties, 'bindElement', true, false);
             uiBlock.append(ul);
             uiBlock.show();
         }
@@ -286,15 +316,101 @@ formdesigner.ui = (function () {
         displayFuncs.itext = showItextProps; //not sure if this will ever be used like this, but may as well stick with the pattern
 
         function showAdvanced(){
-            var str = '<div id="fd-props-adv-accordion"><h3><a href="#">Advanced Properties</a></h3><div>Some Content<br />asdasddas</div></div>'
-            var adv = $(str);
+            var str = '<div id="fd-props-adv-accordion"><h3><a href="#">Advanced Properties</a></h3><div id="fd-adv-props-content">Some Content<br />asdasddas</div></div>',
+                adv = $(str),
+                contentEl,
+                ul,properties;
+
+
             $('#fd-props-advanced').append(adv);
             adv.accordion({
 //                fillSpace: true,
                 autoHeight: false,
                 collapsible: true
             });
+
             adv.accordion("activate",false);
+
+            contentEl = $('#fd-adv-props-content');
+
+            contentEl.empty();
+            ul = $('<ul>Data Element Advanced Properties:</ul>');
+            properties = mugType.properties.dataElement,
+            listDisplay(properties, ul, mugType.mug.properties.dataElement.properties, 'dataElement', false, true);
+            contentEl.append(ul);
+            if(ul.children().length === 0){
+                $(ul).remove();
+            }
+
+            ul = $('<ul>Bind Element Advanced Properties:</ul>');
+            properties = mugType.properties.bindElement,
+            listDisplay(properties, ul, mugType.mug.properties.bindElement.properties, 'bindElement', false, true);
+            contentEl.append(ul);
+            if(ul.children().length === 0){
+                $(ul).remove();
+            }
+
+            ul = $('<ul>Control Element Advanced Properties:</ul>');
+            properties = mugType.properties.controlElement,
+            listDisplay(properties, ul, mugType.mug.properties.controlElement.properties, 'controlElement', false, true);
+            contentEl.append(ul);
+            if(ul.children().length === 0){
+                $(ul).remove();
+            }
+
+
+        }
+
+        function attachCommonEventListeners () {
+            /**
+             * Sets things up such that if you alter one NodeID box (e.g. bind)
+             * the other NodeID (e.g. data) gets changed and the model gets updated too.
+             */
+            function syncNodeIDInputs(){
+                //this spaghetti is terrible :(
+
+                function otherInputUpdate (otherIn) {
+                    var otherInput = $(otherIn),
+                                groupName = otherInput.data('groupName'),
+                                propName = otherInput.data('propName'),
+                                curMug = formdesigner.controller.getCurrentlySelectedMug(),
+                                curMugType = formdesigner.controller.getCurrentlySelectedMugType();
+                            formdesigner.controller.setMugPropertyValue(curMug,groupName,propName,otherInput.val(), curMugType);
+                }
+
+                var nodeIDBoxes = $('input[id*="nodeID"]'); //gets all input boxes with ID attribute containing 'nodeID'
+                if(nodeIDBoxes.length === 2){
+                    $(nodeIDBoxes[0]).keyup(function(e) {
+                        $(nodeIDBoxes[1]).val($(e.currentTarget).val());
+                        otherInputUpdate(nodeIDBoxes[1]);
+
+                    });
+                    $(nodeIDBoxes[1]).keyup(function (e) {
+                        $(nodeIDBoxes[0]).val($(e.currentTarget).val());
+                        otherInputUpdate(nodeIDBoxes[0]);
+                    });
+                }
+            }
+
+            /**
+             * When either bindElement.nodeID or dataElement.nodeID changes value,
+             * the node label in the jstree (UITree) should be updated to reflect that change
+             */
+            function updateUITreeNodeLabel(){
+                var mug = mugType.mug;
+                mug.on('property-changed',function(e){
+                    if(e.property === 'nodeID'){
+                        var node = $('#' + e.mugTypeUfid);
+                        $('#fd-question-tree').jstree('rename_node',node,this.properties[e.element].properties[e.property]);
+                    }
+                });
+
+            }
+
+            syncNodeIDInputs();
+            updateUITreeNodeLabel();
+
+
         }
 
         function updateDisplay(){
@@ -312,6 +428,7 @@ formdesigner.ui = (function () {
             };
             displayFuncs.itext();
             showAdvanced();
+            attachCommonEventListeners();
             $("#fd-question-properties").show();
         };
 
@@ -485,7 +602,6 @@ formdesigner.ui = (function () {
 
     function init_form_paste(){
         var tarea = $("#fd-form-paste-textarea");
-        console.log('tarea',tarea);
         tarea.change(function(){
             var parser = new controller.Parser();
             var out = parser.parse(tarea.val());
@@ -504,15 +620,13 @@ formdesigner.ui = (function () {
          * @param tree - Jquery selector pointing to jstree instance
          */
         function clearUITree(tree){
-            var rootNodes = $(tree.find('ul')[0]).children();
-            rootNodes.each(function (index, element) {
-                tree.jstree("delete_node",element);
-            })
+            tree.jstree('deselect_all');
+            tree.find('ul').empty();
         };
 
         clearUITree($('#fd-question-tree'));
         clearUITree($('#fd-data-tree'));
-    }
+    };
 
     that.init = function(){
         generate_scaffolding($("#formdesigner"));
