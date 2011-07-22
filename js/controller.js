@@ -227,7 +227,7 @@ formdesigner.controller = (function () {
 
     that.createXForm = function () {
         var xw = new XMLWriter( 'UTF-8', '1.0' );
-        xw.writeStartDocument(true);
+        xw.writeStartDocument();
         xw.writeStartElement('html');
         form.controlTree.createTreeXML('control',xw);
         xw.writeEndElement();
@@ -483,19 +483,6 @@ formdesigner.controller = (function () {
     }
     that.Parser = Parser;
 
-    /**
-     * Generates and returns a valid XML XForm
-     * based on the data stored in the Form Object
-     */
-    that.buildXForm = function () {
-        if(!form) throw 'No Form object present, cannot create XForm!';
-        var xw = new XMLWriter( 'UTF-8', '1.0' ),
-                dataTree = getTree('data'),
-                controlTree = getTree('control'),
-                bindList = form.getBindList();
-
-        
-    };
     //make controller event capable
     formdesigner.util.eventuality(that);
 

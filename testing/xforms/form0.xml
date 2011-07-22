@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<html>
+	<input ref="/question1" />
+	<input ref="/question2" />
+	<input ref="/question3" />
+	<input ref="/question4" />
+	<input ref="/question5" />
+</html>

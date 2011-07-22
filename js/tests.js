@@ -1,5 +1,6 @@
 $(document).ready(function(){
 
+    var testXformBuffer;
     var make_control_bind_data_mug = function(){
         var myMug;
 
@@ -48,6 +49,19 @@ $(document).ready(function(){
             bind: myBind,
             mug: myMug
         };
+    }
+
+    var getTestXformOutput = function (formName) {
+        $.ajax({
+            url: 'testing/xforms/' + formName,
+            async: false,
+            cache: false,
+            dataType: 'text',
+            success: function(xform){
+                testXformBuffer = xform;
+                console.log("Successfully got test xform!");
+            }
+        });
     }
 
     var giveMugFakeValues = function (mug, mugType) {
@@ -661,27 +675,6 @@ $(document).ready(function(){
 
     });
 
-    test("TreeMap functionality (get Bind List)", function(){
-        var c = formdesigner.controller,
-                ui = formdesigner.ui,
-                jstree = $("#fd-question-tree"),
-                curMugType,
-                addQbut;
-        c.resetFormDesigner();
-        addQbut = ui.buttons.addquestionbutton;
-        addQbut.click();
-        addQbut.click();
-        addQbut.click();
-        addQbut.click();
-        addQbut.click();
-        console.log(c.form.controlTree.printTree());
-        var xw = new XMLWriter( 'UTF-8', '1.0' );
-        xw.writeStartDocument(true);
-        c.form.controlTree.createTreeXML('control',xw);
-        xw.writeEndDocument();
-        console.log(xw.flush());
-    })
-
     module("Itext functionality testing");
     test("Itext ops", function(){
         formdesigner.controller.resetFormDesigner();
@@ -728,6 +721,46 @@ $(document).ready(function(){
         IT.setValue(iID,otherLanguageName,form,val);
         equal(IT.getItextVals(iID,otherLanguageName)[form], val, "Itext set and retrieval work");
         
+    });
+
+    module("Create XForm XML");
+    test("Create simple flat Xform", function () {
+        var c = formdesigner.controller,
+                ui = formdesigner.ui,
+                jstree = $("#fd-question-tree"),
+                curMugType,
+                addQbut;
+        c.resetFormDesigner();
+        addQbut = ui.buttons.addquestionbutton;
+        addQbut.click();
+        addQbut.click();
+        addQbut.click();
+        addQbut.click();
+        addQbut.click();
+        var actual = beautifyXml(c.createXForm());
+        getTestXformOutput('form0.xml');
+        var expected = beautifyXml(testXformBuffer);
+        console.log(actual == expected);
+        equal(expected,actual);
+
+    });
+
+    test("Create simple nested Xform", function () {
+        var c = formdesigner.controller,
+            ui = formdesigner.ui,
+            jstree = $("#fd-question-tree"),
+            curMugType,
+            addQbut, lastCreatedNode;
+        c.resetFormDesigner();
+        addQbut = ui.buttons.addquestionbutton;
+
+        jstree.bind('create_node.jstree',function(e,data){
+            lastCreatedNode = data.rslt.obj;
+            console.log("Created Object is:",lastCreatedNode);
+        })
+        addQbut.click();
+        jstree.jstree('select_node',lastCreatedNode);
+
     });
 
 

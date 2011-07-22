@@ -704,10 +704,8 @@ formdesigner.model = function () {
                                     results.message = tResults[y].resultMessage;
                                     results.errorBlockName = tResults[y].blockName;
                                     results[i] = tResults;
-                                    return results;
-                                } else {
-                                    results.status = "pass";
                                 }
+
                             }
                         }
                         results[i] = tResults;

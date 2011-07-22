@@ -46,10 +46,14 @@ body{
 .fd-tree{
     float:left;
     width:280px;
-    height: 700px;
+    height: 500px;
     margin: 5px;
     border: 1px solid gray;
     overflow: auto;
+}
+
+#fd-props-advanced{
+    margin-right:5px;
 }
 
 #fd-question-tree{
@@ -61,7 +65,7 @@ body{
 #fd-data-tree-container{
     float: left;
     left: -260px;
-    top:700px;
+    top:500px;
     position: absolute;
     z-index: 0;
     overflow: auto;
@@ -75,7 +79,7 @@ body{
     float: left;
     margin-top: 5px;
     padding-left: 5px;
-    height:700px;
+    height:500px;
     width: 500px;
     display:none;
 
@@ -132,6 +136,8 @@ td {
     padding: 5px;
 }
 
+
+
 .fd-property-text {
     float: none;
 }
@@ -140,6 +146,23 @@ td {
     list-style-type: none;
 }
 
+#fd-question-properties ul li:nth-child(even) {
+    background: #FAFAFF
+}
+
+
+
+#fd-question-properties ul li:hover{
+    background: #f0f8ff;
+}
 #fd-question-properties ul li:nth-child(odd) {
-    background: #e5ecf9
+
+}
+
+.fd-props-heading {
+    font-weight: bold;
+}
+
+.fd-props-validate {
+    float: right;
 }

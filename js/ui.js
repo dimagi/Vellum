@@ -208,14 +208,44 @@ formdesigner.ui = (function () {
 
     }
 
+    var showVisualValidation = that.showVisualValidation = function showVisualValidation (mugType){
+        function setValidationFailedIcon(li,showIcon, message){
+            var exists = ($(li).find('.fd-props-validate').length > 0);
+            if(exists && showIcon){
+                return;
+            }else if (exists && !showIcon){
+                $(li).find('.fd-props-validate').removeClass('ui-icon');
+            }else if(!exists && showIcon){
+                var icon = $('<span class="fd-props-validate ui-icon ui-icon-alert" title="' + message + '"></span>');
+                li.append(icon);
+            }
+            return li;
+        }
+
+        var vObj = mugType.validateMug();
+        //TODO:
+        // LOOP THROUGH VALIDATION OBJECT AND SET ANY CORRESPONDING INPUT FIELDS TO SHOW THE ALERT IF IT HAS FAILED.
+        // SET THE TITLE MESSAGE (see setValidationFailedIcon() ) to that of the failure message in the validation object.
+
+    }
+
     that.displayMugProperties = that.displayQuestion = function(mugType){
 //        if (!mugType.properties.controlElement) {
 //            //fuggedaboudit
 //            throw "Attempted to display properties for a MugType that doesn't have a controlElement!";
 //        }
 
+        /**
+         * creates and returns a <ul> element with the heading set and the correct classes configured.
+         * @param heading
+         */
+        var makeUL = function (heading){
+            var str = '<ul class="fd-props-ul"><span class="fd-props-heading">' + heading + '</span></ul>';
+            return $(str);
+        }
 
         var displayFuncs = {};
+
 
         /**
          * Runs through a properties block and generates the
@@ -236,7 +266,9 @@ formdesigner.ui = (function () {
                     if(show){
                         var pBlock = propertiesBlock[i],
                                 labelStr = pBlock.lstring ? pBlock.lstring : i,
-                                liStr = '<li id="' + groupName + '-' + i + '" class="fd-property"><span class="fd-property-text">'+labelStr+': '+'</span><input id="' + groupName + '-' + i + '-' + 'input" class="fd-property-input">'+'</li>',
+                                liStr = '<li id="' + groupName + '-' + i + '" class="fd-property"><span class="fd-property-text">'+labelStr+': '+'</span>' +
+                                        '<input id="' + groupName + '-' + i + '-' + 'input" class="fd-property-input">'+
+                                        '</li>',
                                 input;
 
                         li = $(liStr);
@@ -273,7 +305,7 @@ formdesigner.ui = (function () {
                     ul;
 
             uiBlock.empty(); //clear it out first in case there's anything present.
-            ul = $('<ul>Control Props</ul>');
+            ul = makeUL('Control Properties');
 
 
             listDisplay(properties, ul, mugType.mug.properties.controlElement.properties, 'controlElement',true,false);
@@ -287,7 +319,7 @@ formdesigner.ui = (function () {
                     uiBlock = $('#fd-props-data'),
                     ul;
             uiBlock.empty(); //clear it out first in case there's anything present.
-            ul = $('<ul>Data Props</ul>');
+            ul = makeUL('Data Properties');
 
             listDisplay(properties,ul,mugType.mug.properties.dataElement.properties, 'dataElement', true, false);
             uiBlock.append(ul);
@@ -301,7 +333,7 @@ formdesigner.ui = (function () {
                     uiBlock = $('#fd-props-bind'),
                     ul;
             uiBlock.empty(); //clear it out first in case there's anything present.
-            ul = $('<ul>Bind Props</ul>');
+            ul = makeUL('Bind Properties');
 
 
             listDisplay(properties, ul, mugType.mug.properties.bindElement.properties, 'bindElement', true, false);
@@ -329,12 +361,25 @@ formdesigner.ui = (function () {
                 collapsible: true
             });
 
+            adv.find('h3').click(function () {
+                var props = $('#fd-question-properties');
+                if(props.css('height') === '500px'){
+                    $('#fd-question-properties').animate({
+                        height:'700px'
+                    },200);
+                }else{
+                    $('#fd-question-properties').animate({
+                        height:'500px'
+                    },200);
+                }
+            })
+
             adv.accordion("activate",false);
 
             contentEl = $('#fd-adv-props-content');
 
             contentEl.empty();
-            ul = $('<ul>Data Element Advanced Properties:</ul>');
+            ul = makeUL('Data Element Advanced Properties:');
             properties = mugType.properties.dataElement,
             listDisplay(properties, ul, mugType.mug.properties.dataElement.properties, 'dataElement', false, true);
             contentEl.append(ul);
@@ -342,7 +387,7 @@ formdesigner.ui = (function () {
                 $(ul).remove();
             }
 
-            ul = $('<ul>Bind Element Advanced Properties:</ul>');
+            ul = makeUL('Bind Element Advanced Properties:');
             properties = mugType.properties.bindElement,
             listDisplay(properties, ul, mugType.mug.properties.bindElement.properties, 'bindElement', false, true);
             contentEl.append(ul);
@@ -350,7 +395,7 @@ formdesigner.ui = (function () {
                 $(ul).remove();
             }
 
-            ul = $('<ul>Control Element Advanced Properties:</ul>');
+            ul = makeUL('Control Element Advanced Properties:');
             properties = mugType.properties.controlElement,
             listDisplay(properties, ul, mugType.mug.properties.controlElement.properties, 'controlElement', false, true);
             contentEl.append(ul);
@@ -416,7 +461,12 @@ formdesigner.ui = (function () {
         function updateDisplay(){
             var mugTProps = mugType.properties,
             i = 0;
+            $('#fd-question-properties').animate({
+                        height:'500px'
+                    },200);
+            
             $("#fd-question-properties").hide();
+
             $('#fd-props-bind').empty();
             $('#fd-props-data').empty();
             $('#fd-props-control').empty();
