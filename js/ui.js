@@ -222,10 +222,38 @@ formdesigner.ui = (function () {
             return li;
         }
 
-        var vObj = mugType.validateMug();
-        //TODO:
-        // LOOP THROUGH VALIDATION OBJECT AND SET ANY CORRESPONDING INPUT FIELDS TO SHOW THE ALERT IF IT HAS FAILED.
-        // SET THE TITLE MESSAGE (see setValidationFailedIcon() ) to that of the failure message in the validation object.
+        function loopValProps (block, name){
+            var i, res, msg, li;
+            if(block){
+                for(i in block){
+                    if(block.hasOwnProperty(i)){
+                        res = block[i].result;
+                        msg = block[i].resultMessage;
+                        li = findLIbyPropertyName(i, name);
+                        if(res === 'fail'){
+                            setValidationFailedIcon(li, true, msg);
+                        }else if(res === 'pass'){
+                            setValidationFailedIcon(li, false, msg);
+                        }
+                    }
+                }
+            }
+        }
+
+        function findLIbyPropertyName(i,blockName){
+            return $('#' + blockName + '-' + i);
+        }
+
+        var vObj = mugType.validateMug(),
+                bProps = vObj.bindElement,
+                cProps = vObj.controlElement,
+                dProps = vObj.dataElement,
+                i;
+
+
+        loopValProps(bProps, 'bindElement');
+        loopValProps(cProps, 'controlElement');
+        loopValProps(dProps, 'dataElement');
 
     }
 
