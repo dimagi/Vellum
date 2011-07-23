@@ -258,11 +258,6 @@ formdesigner.ui = (function () {
     }
 
     that.displayMugProperties = that.displayQuestion = function(mugType){
-//        if (!mugType.properties.controlElement) {
-//            //fuggedaboudit
-//            throw "Attempted to display properties for a MugType that doesn't have a controlElement!";
-//        }
-
         /**
          * creates and returns a <ul> element with the heading set and the correct classes configured.
          * @param heading
@@ -273,7 +268,6 @@ formdesigner.ui = (function () {
         }
 
         var displayFuncs = {};
-
 
         /**
          * Runs through a properties block and generates the
@@ -316,7 +310,7 @@ formdesigner.ui = (function () {
                                     groupName = input.data('groupName'),
                                     propName = input.data('propName'),
                                     curMug = formdesigner.controller.getCurrentlySelectedMug(),
-                                    curMT = formdesigner.controller.getCurrentlySelectedMugType;
+                                    curMT = formdesigner.controller.getCurrentlySelectedMugType();
                             formdesigner.controller.setMugPropertyValue(curMug,groupName,propName,input.val(),curMT);
                         });
 
@@ -354,7 +348,6 @@ formdesigner.ui = (function () {
             uiBlock.show();
         }
         displayFuncs.dataElement = showDataProps;
-
 
         function showBindProps(){
             var properties = mugType.properties.bindElement,
@@ -511,6 +504,7 @@ formdesigner.ui = (function () {
         };
 
         updateDisplay();
+        formdesigner.ui.showVisualValidation(mugType);
     }
 
 
