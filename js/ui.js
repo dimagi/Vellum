@@ -231,19 +231,42 @@ formdesigner.ui = (function () {
             return li;
         }
 
-        var vObj = mugType.validateMug();
-        //TODO:
-        // LOOP THROUGH VALIDATION OBJECT AND SET ANY CORRESPONDING INPUT FIELDS TO SHOW THE ALERT IF IT HAS FAILED.
-        // SET THE TITLE MESSAGE (see setValidationFailedIcon() ) to that of the failure message in the validation object.
+        function loopValProps (block, name){
+            var i, res, msg, li;
+            if(block){
+                for(i in block){
+                    if(block.hasOwnProperty(i)){
+                        res = block[i].result;
+                        msg = block[i].resultMessage;
+                        li = findLIbyPropertyName(i, name);
+                        if(res === 'fail'){
+                            setValidationFailedIcon(li, true, msg);
+                        }else if(res === 'pass'){
+                            setValidationFailedIcon(li, false, msg);
+                        }
+                    }
+                }
+            }
+        }
+
+        function findLIbyPropertyName(i,blockName){
+            return $('#' + blockName + '-' + i);
+        }
+
+        var vObj = mugType.validateMug(),
+                bProps = vObj.bindElement,
+                cProps = vObj.controlElement,
+                dProps = vObj.dataElement,
+                i;
+
+
+        loopValProps(bProps, 'bindElement');
+        loopValProps(cProps, 'controlElement');
+        loopValProps(dProps, 'dataElement');
 
     }
 
     that.displayMugProperties = that.displayQuestion = function(mugType){
-//        if (!mugType.properties.controlElement) {
-//            //fuggedaboudit
-//            throw "Attempted to display properties for a MugType that doesn't have a controlElement!";
-//        }
-
         /**
          * creates and returns a <ul> element with the heading set and the correct classes configured.
          * @param heading
@@ -254,7 +277,6 @@ formdesigner.ui = (function () {
         }
 
         var displayFuncs = {};
-
 
         /**
          * Runs through a properties block and generates the
@@ -297,7 +319,7 @@ formdesigner.ui = (function () {
                                     groupName = input.data('groupName'),
                                     propName = input.data('propName'),
                                     curMug = formdesigner.controller.getCurrentlySelectedMug(),
-                                    curMT = formdesigner.controller.getCurrentlySelectedMugType;
+                                    curMT = formdesigner.controller.getCurrentlySelectedMugType();
                             formdesigner.controller.setMugPropertyValue(curMug,groupName,propName,input.val(),curMT);
                         });
 
@@ -335,7 +357,6 @@ formdesigner.ui = (function () {
             uiBlock.show();
         }
         displayFuncs.dataElement = showDataProps;
-
 
         function showBindProps(){
             var properties = mugType.properties.bindElement,
@@ -492,6 +513,7 @@ formdesigner.ui = (function () {
         };
 
         updateDisplay();
+        formdesigner.ui.showVisualValidation(mugType);
     }
 
 
