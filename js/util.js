@@ -28,6 +28,21 @@ formdesigner.util = (function(){
 
     var GROUP_OR_REPEAT_VALID_CHILDREN = that.GROUP_OR_REPEAT_VALID_CHILDREN = ["group","repeat","question","selectQuestion","trigger"];
 
+    /**
+     * From http://stackoverflow.com/questions/4149276/javascript-camelcase-to-regular-form
+     * @param myString
+     */
+    function fromCamelToRegularCase(myString){
+        var ret;
+        // insert a space before all caps
+        ret = myString.replace(/([A-Z])/g, ' $1')
+        // uppercase the first character
+                .replace(/^./, function(str){ return str.toUpperCase(); })
+
+        return ret;
+    }
+    that.fromCamelToRegularCase = fromCamelToRegularCase;
+
 
     //taken from http://stackoverflow.com/questions/728360/copying-an-object-in-javascript
     //clones a 'simple' object (see link for full description)

@@ -50,6 +50,7 @@ body{
     margin: 5px;
     border: 1px solid gray;
     overflow: auto;
+    background:  white;
 }
 
 #fd-props-advanced{
@@ -59,7 +60,11 @@ body{
 #fd-question-tree{
     clear:right;
     float:left;
-    
+    background: none;
+}
+
+#fd-data-tree{
+    background: none;
 }
 
 #fd-data-tree-container{
@@ -136,6 +141,12 @@ td {
     padding: 5px;
 }
 
+#fd-props-head {
+    left: 237px;
+    position: relative;
+    width:498px;
+}
+
 
 
 .fd-property-text {
@@ -163,6 +174,42 @@ td {
     font-weight: bold;
 }
 
+
+
 .fd-props-validate {
     float: right;
+}
+
+.fd-head {
+    -webkit-transform: rotate(-90deg);
+    -moz-transform: rotate(-90deg);
+    /* for ie */
+    filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=3);
+
+
+    background: url("smoothness/images/ui-bg_glass_75_e6e6e6_1x400.png") repeat-x scroll 50% 50% #E6E6E6;
+    border: 1px solid #D3D3D3;
+    color: #555555;
+    display: block;
+    float: right;
+    font-size: 17px;
+    font-weight: bold;
+    height: 25px;
+    left: 16px;
+    padding: 0;
+    position: absolute;
+    text-align: center;
+    top: 236px;
+    width: 500px;
+    z-index: 3;
+}
+
+#fd-question-tree-head {
+    left: 23px;
+    top: 242px;
+    width: 498px;
+}
+
+#fd-props-content {
+    padding-right:25px;
 }

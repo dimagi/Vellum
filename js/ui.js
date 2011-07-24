@@ -148,11 +148,34 @@ formdesigner.ui = (function () {
                 output.val(d);
                 $('#inline').click();
             });
-            $("#fd-print-tree-but")
-                    .addClass("ui-corner-all ui-icon ui-icon-plusthick")
-                    .css("float", "left");
 
             buttons.fancyBut = fancyBut;
+        })();
+
+        (function c_CMDialog() {
+            var dialogBut = $(
+                    '<div id="fd-dialog-button">'+
+                '<span id="fd-dialog-but"></span>Show Modal Dialog ' +
+              '</div>');
+            toolbar.append(dialogBut);
+
+            dialogBut.button().click(function () {
+                setDialogInfo(
+                    "FooBar" + Math.random(),
+                    'lol',
+                    function(){
+                        $( this ).dialog( "close" );
+                    },
+                    "pants",
+                    function(){
+                        $( this ).dialog( "close" );
+                    }
+                );
+
+                showConfirmDialog();
+            });
+
+            buttons.dialogBut = dialogBut;
         })();
 
 
@@ -266,7 +289,7 @@ formdesigner.ui = (function () {
 
     }
 
-    that.displayMugProperties = that.displayQuestion = function(mugType){
+    var displayMugProperties = that.displayMugProperties = that.displayQuestion = function(mugType){
         /**
          * creates and returns a <ul> element with the heading set and the correct classes configured.
          * @param heading
@@ -383,6 +406,23 @@ formdesigner.ui = (function () {
                 contentEl,
                 ul,properties;
 
+            function displayBlock(blockName){
+                if (!mugType.properties[blockName]) {
+                    return;
+                }
+
+                var contentEl = $('#fd-adv-props-content'),
+                    regBlockName = formdesigner.util.fromCamelToRegularCase(blockName),
+                    ul = makeUL(regBlockName + ' Advanced Properties:'),
+                    mugTypeProperties = mugType.properties[blockName],
+                    mugProperties = mugType.mug.properties[blockName].properties;
+
+                listDisplay(mugTypeProperties, ul, mugProperties, blockName, false, true);
+                contentEl.append(ul);
+                if(ul.children().length === 0){
+                    $(ul).remove();
+                }
+            }
 
             $('#fd-props-advanced').append(adv);
             adv.accordion({
@@ -406,33 +446,12 @@ formdesigner.ui = (function () {
 
             adv.accordion("activate",false);
 
-            contentEl = $('#fd-adv-props-content');
+            var contentEl = $('#fd-adv-props-content');
 
             contentEl.empty();
-            ul = makeUL('Data Element Advanced Properties:');
-            properties = mugType.properties.dataElement,
-            listDisplay(properties, ul, mugType.mug.properties.dataElement.properties, 'dataElement', false, true);
-            contentEl.append(ul);
-            if(ul.children().length === 0){
-                $(ul).remove();
-            }
-
-            ul = makeUL('Bind Element Advanced Properties:');
-            properties = mugType.properties.bindElement,
-            listDisplay(properties, ul, mugType.mug.properties.bindElement.properties, 'bindElement', false, true);
-            contentEl.append(ul);
-            if(ul.children().length === 0){
-                $(ul).remove();
-            }
-
-            ul = makeUL('Control Element Advanced Properties:');
-            properties = mugType.properties.controlElement,
-            listDisplay(properties, ul, mugType.mug.properties.controlElement.properties, 'controlElement', false, true);
-            contentEl.append(ul);
-            if(ul.children().length === 0){
-                $(ul).remove();
-            }
-
+            displayBlock('dataElement');
+            displayBlock('bindElement');
+            displayBlock('controlElement');
 
         }
 
@@ -494,7 +513,7 @@ formdesigner.ui = (function () {
             $('#fd-question-properties').animate({
                         height:'500px'
                     },200);
-            
+
             $("#fd-question-properties").hide();
 
             $('#fd-props-bind').empty();
@@ -527,7 +546,7 @@ formdesigner.ui = (function () {
         formdesigner.controller.setCurrentlySelectedMugType(curSelUfid);
         that.displayMugProperties(formdesigner.controller.getCurrentlySelectedMugType());
     }
-    
+
     /**
      * Creates the UI tree
      */
@@ -610,7 +629,7 @@ formdesigner.ui = (function () {
                 },200);
             }
         });
-        
+
     };
 
     var create_data_tree = function(){
@@ -709,6 +728,48 @@ formdesigner.ui = (function () {
         clearUITree($('#fd-data-tree'));
     };
 
+    function init_modal_dialogs () {
+        $( "#fd-dialog-confirm" ).dialog({
+			resizable: false,
+			height:140,
+			modal: true,
+			buttons: {
+				"Confirm": function() {
+					$( this ).dialog( "close" );
+				},
+				Cancel: function() {
+					$( this ).dialog( "close" );
+				}
+			},
+            autoOpen: false
+		});
+    }
+
+    var showConfirmDialog = that.showConfirmDialog = function () {
+        $( "#fd-dialog-confirm" ).dialog("open");
+    }
+
+    var hideConfirmDialog = that.hideConfirmDialog = function () {
+        $( "#fd-dialog-confirm" ).dialog("close");
+    }
+
+    /**
+     * Set the values for the Confirm Modal Dialog
+     * (box that pops up that has a confirm and cancel button)
+     * @param confButName
+     * @param confFunction
+     * @param cancelButName
+     * @param cancelButFunction
+     */
+    var setDialogInfo = that.setDialogInfo = function (message, confButName, confFunction, cancelButName, cancelButFunction){
+        var buttons = {}, opt;
+            buttons[confButName] = confFunction;
+            buttons[cancelButName] = cancelButFunction;
+        $('#fd-dialog-confirm .fd-message').text(message);
+        
+        $( "#fd-dialog-confirm" ).dialog("option",{buttons: buttons});
+    }
+
     that.init = function(){
         generate_scaffolding($("#formdesigner"));
         do_loading_bar();
@@ -717,6 +778,7 @@ formdesigner.ui = (function () {
         create_question_tree();
         create_data_tree();
         init_form_paste();
+        init_modal_dialogs();
 
 
 

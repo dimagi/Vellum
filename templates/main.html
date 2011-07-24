@@ -43,19 +43,24 @@
 
     </div>
     <div id="fd-trees">
-        <div id="fd-question-tree" class="fd-tree"></div>
+        <div id="fd-question-tree-container" class="fd-tree">
+            <div id="fd-question-tree-head" class="fd-head">Question Tree</div>
+            <div id="fd-question-tree"></div>
+        </div>
         <div id="fd-data-tree-container" class="fd-tree">
-            <div id="fd-data-tree-head">Data Tree</div>
+            <div id="fd-data-tree-head" class="fd-head">Data Tree</div>
             <div id="fd-data-tree"></div>
         </div>
     </div>
     <div id="fd-question-properties" class="fd-question-properties">
-        <div id="fd-props-head" class="head">Question Properties</div>
-        <div id="fd-props-data" class="fd-prop-block"></div>
-        <div id="fd-props-control" class="fd-prop-block"></div>
-        <div id="fd-props-bind" class="fd-props-block"></div>
-        <div id="fd-props-itext" class="fd-props-itext-block fd-props-block"></div>
-        <div id="fd-props-advanced" class="fd-props-block"></div>
+        <div id="fd-props-head" class="fd-head">Question Properties</div>
+        <div id="fd-props-content">
+            <div id="fd-props-data" class="fd-prop-block"></div>
+            <div id="fd-props-control" class="fd-prop-block"></div>
+            <div id="fd-props-bind" class="fd-props-block"></div>
+            <div id="fd-props-itext" class="fd-props-itext-block fd-props-block"></div>
+            <div id="fd-props-advanced" class="fd-props-block"></div>
+        </div>
 
     </div>
     <div id="fd-extra-tools" class="span-24 last fd-min">
@@ -99,5 +104,12 @@
     <a id="inline" href="#data" style="display:none">This shows content of element who has id="data"</a>
     <!--<div id="fd-form-paste"><textarea rows="20" cols="20" id="fd-form-paste-textarea"></textarea> <textarea rows="10" cols="10" id="fd-form-paste-output">output</textarea></div>-->
     <div style="display:none"><div id="data"><textarea id="fd-source"></textarea></div></div>
+
+    <div id="fd-dialog-confirm" title="Dialog Box">
+	    <p>
+            <span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>
+            <span class="fd-message">These items will be permanently deleted and cannot be recovered. Are you sure?</span>
+        </p>
+    </div>
 
 </div>
