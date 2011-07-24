@@ -248,7 +248,10 @@ formdesigner.ui = (function () {
             }else if (exists && !showIcon){
                 $(li).find('.fd-props-validate').removeClass('ui-icon');
             }else if(!exists && showIcon){
-                var icon = $('<span class="fd-props-validate ui-icon ui-icon-alert" title="' + message + '"></span>');
+                var icon = $('<span class="fd-props-validate ui-icon ui-icon-alert"></span>');
+                console.log("MESSAGE HERE!",message)
+                icon.attr('title',message);
+                
                 li.append(icon);
             }
             return li;

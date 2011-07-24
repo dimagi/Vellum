@@ -636,14 +636,14 @@ formdesigner.model = function () {
                         retBlock.resultMessage = '"' + ruleKey + '" is Required and Present in block:' + blockName;
                     } else {
                         retBlock.result = 'fail';
-                        retBlock.resultMessage = '"' + ruleKey + '" VALUE IS REQUIRED in block:' + blockName + ', but is NOT present!';
+                        retBlock.resultMessage = '"' + ruleKey + '" value is required in:' + blockName + ', but is NOT present!';
                     }
                 } else if (presence === 'notallowed') {
                     if (!testingObj[ruleKey]) { //note the equivalency modification from the above
                         retBlock.result = 'pass';
                     } else {
                         retBlock.result = 'fail';
-                        retBlock.resultMessage = '"' + ruleKey + '" IS NOT ALLOWED IN THIS OBJECT in block:' + blockName;
+                        retBlock.resultMessage = '"' + ruleKey + '" IS NOT ALLOWED IN THIS OBJECT in:' + blockName;
                     }
                 } else {
                     retBlock.result = 'fail';
