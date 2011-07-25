@@ -644,6 +644,42 @@ formdesigner.ui = (function () {
     ////////////////TODO
     ///////////////INCANTATION : $($('#fed8b8a52d30801b3f0371107a86e2ff a')[0]).append('<span class="ui-icon ui-icon-alert tree-valid-alert-icon"></span>')
 
+    /**
+     * Goes through the internal data/controlTrees and determines which mugs are not valid.
+     *
+     * Then adds an icon in the UI tree next to each node that corresponds to an invalid Mug.
+     *
+     * Will clear icons for nodes that are valid (if they were invalid before)
+     */
+    var setTreeValidationIcons = function () {
+        var dTree, cTree, uiDTree, uiCTree, form,
+                invalidMTs, i;
+        uiCTree = $('#fd-question-tree');
+        uiDTree = $('#fd-data-tree');
+        form = controller.form;
+        cTree = form.controlTree;
+        dTree = form.dataTree;
+
+        function clearIcons() {
+            var nodes;
+            nodes = uiCTree.find('.jstree-leaf');
+            nodes.each(function (idx, el){
+                $(el).find('.fd-tree-valid-alert-icon').remove();
+            })
+        }
+
+
+
+        clearIcons() //clear existing warning icons to start fresh.
+        invalidMTs = form.getInvalidMugTypeUFIDs();
+        for (i in invalidMTs){
+            if(invalidMTs.hasOwnProperty(i)){
+                $($('#' + invalidMTs[i] + ' a')[0]).append('<span class="ui-icon ui-icon-alert fd-tree-valid-alert-icon"></span>')
+            }
+        }
+    };
+    that.setTreeValidationIcons = setTreeValidationIcons;
+
     var create_data_tree = function(){
         var tree = $("#fd-data-tree-container");
         $("#fd-data-tree-head").click(function () {
@@ -784,6 +820,12 @@ formdesigner.ui = (function () {
         $( "#fd-dialog-confirm" ).dialog("option",{buttons: buttons});
     }
 
+    var init_misc = function () {
+        controller.on('question-creation', function (e) {
+            setTreeValidationIcons();
+        });
+    };
+
     that.init = function(){
         generate_scaffolding($("#formdesigner"));
         do_loading_bar();
@@ -794,7 +836,7 @@ formdesigner.ui = (function () {
         init_form_paste();
         init_modal_dialogs();
 
-
+        init_misc();
 
         setup_fancybox();
     }
