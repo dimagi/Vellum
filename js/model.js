@@ -1351,7 +1351,35 @@ formdesigner.model = function () {
                 
             };
 
+            /**
+             * See docs @ Tree.validateTree()
+             */
+            var validateTree = function () {
+                var thisResult, thisMT, i, childResult;
+                if(!this.getValue()){
+                    throw 'Tree contains node with no values!'
+                }
+                thisMT = this.getValue();
+                thisResult = thisMT.validateMug();
+                if(thisResult.status === 'fail'){
+                    return false;
+                }
 
+                for (i in this.getChildren()) {
+                    if (this.getChildren().hasOwnProperty(i)) {
+                        childResult = this.getChildren()[i].validateTree();
+                        if(!childResult){
+                            return false;
+                        }
+                    }
+                }
+
+                //If we got this far, everything checks out.
+                return true;
+
+
+            }
+            that.validateTree = validateTree;
 
             return that;
         };
@@ -1620,6 +1648,27 @@ formdesigner.model = function () {
             }
         }
 
+        /**
+         * Looks through all the nodes in the tree
+         * and runs ValidateMugType on each.
+         * If any fail (i.e. result === 'fail')
+         * will return false, else return true.
+         */
+        var isTreeValid = function() {
+            var rChildren = rootNode.getChildren(),
+                i, retVal;
+            for (i in rChildren){
+                if(rChildren.hasOwnProperty(i)){
+                    retVal = rChildren[i].validateTree();
+                    if(!retVal){
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+        that.isTreeValid = isTreeValid;
+
         return that;
     };
     that.Tree = Tree;
@@ -1676,6 +1725,47 @@ formdesigner.model = function () {
             return bList;
             
         }
+
+        var getInvalidMugTypes = function () {
+            var MTListC, MTListD, result, controlTree, dataTree,
+                mapFunc = function (node) {
+                    if (node.isRootNode) {
+                        return;
+                    }
+                    var MT = node.getValue(),
+                        validationResult = MT.validateMug();
+
+                    if(validationResult.status !== 'pass'){
+                        return MT;
+                    }else{
+                        return null;
+                    }
+                }
+
+            dataTree = this.dataTree;
+            controlTree = this.controlTree;
+            MTListC = controlTree.treeMap(mapFunc);
+            MTListD = dataTree.treeMap(mapFunc);
+            result = formdesigner.util.mergeArray(MTListC, MTListD);
+
+            return result;
+        }
+        that.getInvalidMugTypes = getInvalidMugTypes;
+
+        /**
+         * Goes through both trees and picks out all the invalid
+         * MugTypes and returns their UFIDs in a flat list.
+         */
+        var getInvalidMugTypeUFIDs = function () {
+            var badMTs = this.getInvalidMugTypes(), result = [], i;
+            for (i in badMTs){
+                if(badMTs.hasOwnProperty(i)){
+                    result.push(badMTs[i].ufid);
+                }
+            }
+            return result;
+        }
+        that.getInvalidMugTypeUFIDs = getInvalidMugTypeUFIDs;
 
         //make the object event aware
         formdesigner.util.eventuality(that);

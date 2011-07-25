@@ -16,6 +16,7 @@
 body{
     font-family:Arial;
     height:2000px;
+    overflow-x:hidden;
 }
 
 #fd-question-table{
@@ -100,22 +101,35 @@ td {
 
 #fd-extra-tools{
     float:left;
-    /*border: 1px solid black;*/
-    height:85%;
+    border: 1px solid black;
+    height:745px;
+    padding-bottom:5px;
     /*margin: 5px;*/
     padding-top: 5px;
     position: absolute;
-    right: -255px;
+    right: -274px;
     width: 300px;
+    margin-top: 5px;
+    background: white;
+    z-index:4;
 }
 
 #fd-extra-tools-accordion{
-    float:left;
-    width:250px;
+    float: left;
+    padding-left: 30px;
+    width: 270px;
+    z-index:4;
 }
 
 #fd-acc-min-max{
-    float:left;
+    float: left;
+    left: -365px;
+    margin: 0;
+    padding: 0;
+    top: 364px;
+    width: 754px;
+    cursor: pointer;
+    z-index:5;
 }
 
 #textDrop{
@@ -161,6 +175,10 @@ td {
     background: #FAFAFF
 }
 
+.questionButton {
+    width: 200px;
+    margin: 1px;
+}
 
 
 #fd-question-properties ul li:hover{
@@ -199,7 +217,7 @@ td {
     padding: 0;
     position: absolute;
     text-align: center;
-    top: 236px;
+    top: 237px;
     width: 500px;
     z-index: 3;
 }
@@ -210,6 +228,19 @@ td {
     width: 498px;
 }
 
+#fd-data-tree-head {
+    top: 236px;
+    width: 500px;
+    cursor: pointer;
+}
+
 #fd-props-content {
     padding-right:25px;
+}
+
+.tree-valid-alert-icon {
+    float: right;
+    left: 0;
+    position: relative;
+    top: -16px;
 }

@@ -117,8 +117,8 @@ formdesigner.ui = (function () {
         //debug tools
         (function c_printDataTreeToConsole() {
             var printTreeBut = $(
-                    '<div id="fd-print-tree-button">'+
-                '<span id="fd-print-tree-but"></span>Print DATA tree to Console ' +
+                    '<div id="fd-print-tree-button" class="toolbarButton questionButton">'+
+                'Print tree to Console' +
               '</div>');
             toolbar.append(printTreeBut);
 
@@ -127,17 +127,17 @@ formdesigner.ui = (function () {
                 console.log("Control Tree:"+controller.form.controlTree.printTree())
                 console.log("Data Tree:   "+controller.form.dataTree.printTree());
                 console.groupEnd();
+                console.log("TREE VALIDATION RESULT",controller.form.controlTree.isTreeValid());
+                console.log("INVALID MTs", controller.form.getInvalidMugTypes());
+                console.log("TREE MAP INVALID UFIDS", controller.form.getInvalidMugTypeUFIDs())
             });
-            $("#fd-print-tree-but")
-                    .addClass("ui-corner-all ui-icon ui-icon-plusthick")
-                    .css("float", "left");
 
             buttons.printTree = printTreeBut;
         })();
 
        (function c_fancyBox() {
             var fancyBut = $(
-                    '<div id="fd-fancy-button">'+
+                    '<div id="fd-fancy-button" class="toolbarButton questionButton">'+
                 '<span id="fd-fancy-but"></span>View Source ' +
               '</div>');
             toolbar.append(fancyBut);
@@ -154,7 +154,7 @@ formdesigner.ui = (function () {
 
         (function c_CMDialog() {
             var dialogBut = $(
-                    '<div id="fd-dialog-button">'+
+                    '<div id="fd-dialog-button" class="toolbarButton questionButton">'+
                 '<span id="fd-dialog-but"></span>Show Modal Dialog ' +
               '</div>');
             toolbar.append(dialogBut);
@@ -177,6 +177,12 @@ formdesigner.ui = (function () {
 
             buttons.dialogBut = dialogBut;
         })();
+
+        $('.questionButton').button({
+            icons:{
+                primary: 'ui-icon-gear'
+            }
+        })
 
 
 
@@ -618,37 +624,42 @@ formdesigner.ui = (function () {
         });
         accordion.accordion("activate",false);
 
-        min_max.button();
+//        min_max.button();
         min_max.click(function(){
             var b = $("#fd-extra-tools"),
             curRight = b.css('right');
-            if(curRight === '-255px'){
+            if(curRight === '-274px'){
                 b.animate({
                     right:'0px'
                 },200);
             }else if(curRight === "0px"){
                 b.animate({
-                    right:'-255px'
+                    right:'-274px'
                 },200);
             }
         });
 
     };
 
+    ////////////////TODO
+    ///////////////INCANTATION : $($('#fed8b8a52d30801b3f0371107a86e2ff a')[0]).append('<span class="ui-icon ui-icon-alert tree-valid-alert-icon"></span>')
+
     var create_data_tree = function(){
         var tree = $("#fd-data-tree-container");
-        tree.hover(
-                function () {
-                    $(this).stop().animate({
-                        'left': '0px'
-                    }, 200);
-                },
-                function () {
-                    $(this).stop().animate({
-                        'left': '-260px'
-                    }, 200);
+        $("#fd-data-tree-head").click(function () {
+                var container = $("#fd-data-tree-container"),
+                    curLeft = container.css('left');
+                if(curLeft === '-260px'){
+                    container.stop().animate({
+                            'left': '0px'
+                        }, 200);
+                }else if(curLeft === '0px'){
+                    container.stop().animate({
+                            'left': '-260px'
+                        }, 200);
                 }
-            );
+            }
+        );
 
         //DATA TREE
         tree = $("#fd-data-tree");
