@@ -234,6 +234,14 @@ formdesigner.controller = (function () {
         xw.writeEndDocument();
         return xw.flush();
     }
+
+    that.XMLWriter = null;
+    var initXMLWriter = function () {
+        var xw = new XMLWriter( 'UTF-8', '1.0' );
+        xw.writeStartDocument();
+        formdesigner.controller.XMLWriter = xw;
+    }
+    that.initXMLWriter = initXMLWriter;
     /**
      * Checks that the specified move is legal. returns false if problem is found.
      *

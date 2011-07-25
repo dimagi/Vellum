@@ -551,6 +551,13 @@ formdesigner.model = function () {
                             return 'pass';
                         }
                     }
+                },
+                requiredAttr: {
+                    editable: 'w',
+                    visiblity: 'visible',
+                    presence: 'optional',
+                    lstring: "Is this Question Required?",
+                    uiType: "checkbox"
                 }
             },
             controlElement: {
@@ -1206,149 +1213,23 @@ formdesigner.model = function () {
              * @param nodeFunc
              * @param store
              */
-            that.treeMap = function (nodeFunc, store) {
+            that.treeMap = function (nodeFunc, store, afterChildFunc) {
                 var result, child;
                 result = nodeFunc(this); //call on self
+                console.log("IN TREEMAP", this, nodeFunc, afterChildFunc);
                 if(result){
                     store.push(result);
                 }
                 for(child in this.getChildren()){
                     if(this.getChildren().hasOwnProperty(child)){
-                        this.getChildren()[child].treeMap(nodeFunc,store); //have each children also perform the func
+                        this.getChildren()[child].treeMap(nodeFunc, store, afterChildFunc); //have each children also perform the func
                     }
+                }
+                if(afterChildFunc){
+                    console.log("AFTER CHILD FUNC HAS BEEN CALLED!",this, afterChildFunc);
+                    afterChildFunc(this, result);
                 }
                 return store; //return the results
-            };
-
-            /**
-             * Walks down the tree and generates XML elements
-             * using the XMLWriter (see http://flesler.blogspot.com/2008/03/xmlwriter-for-javascript.html )
-             * according to the specified treeType.
-             * @param treeType - String, either 'control' or 'data'
-             * @param the XmlWriter object
-             */
-            that.createControlTreeXML = function (xmlWriter) {
-                var mugType, mug, tagName, label, child;
-
-                if(!this.getValue() || this.isRootNode){
-                    for (child in this.getChildren()){
-                        if(this.getChildren().hasOwnProperty(child)){
-                            this.getChildren()[child].createControlTreeXML(xmlWriter); //do the recursion boogey.
-                        }
-                    }
-                    return;
-                }
-
-
-                /**
-                 * Includes the label arg because of the special case with repeats
-                 * (label falls under group, not group->repeat unfortunately)
-                 * @param tagName
-                 * @param elLabel - dictionary: {ref: 'itext ref string', defText: 'default label text'} both are optional
-                 */
-                function createOpenControlTag(tagName,elLabel){
-                    var isGroupOrRepeat = (tagName === 'group' || tagName === 'repeat')
-                    function createLabel(){
-                        if(elLabel){
-                            xmlWriter.writeStartElement('label');
-                            if(elLabel.ref){
-                                xmlWriter.writeAttributeString('ref',elLabel.ref);
-                            }
-                            if(elLabel.defText){
-                                xmlWriter.writeString(elLabel.defText);
-                            }
-                            xmlWriter.writeEndElement(); //close Label tag;
-                        }
-                    };
-
-                    tagName = tagName.toLowerCase();
-                    if(isGroupOrRepeat){
-                        xmlWriter.writeStartElement('group');
-                        createLabel();
-                        if(tagName === 'repeat'){
-                            xmlWriter.writeStartElement('repeat');
-                        }
-                    }else{
-                        xmlWriter.writeStartElement(tagName);
-
-                    }
-
-                    if(tagName !== 'group'){
-                        createLabel();
-                    }
-
-                    if(tagName !== 'item'){
-                        var attr, absPath;
-                        if(tagName === 'repeat'){
-                            attr = 'nodeset';
-                        }else{
-                            attr = 'ref';
-                        }
-                        absPath = formdesigner.controller.form.controlTree.getAbsolutePath(mugType);
-
-
-                        xmlWriter.writeAttributeString(attr, absPath);
-                    }
-                    
-                }
-
-
-
-                mugType = this.getValue();
-                mug = mugType.mug;
-
-
-                if(!mugType.properties.controlElement || !mug.properties.controlElement){
-                    return;
-                }
-
-                tagName = mug.properties.controlElement.properties.tagName;
-
-                var cProps = mug.properties.controlElement.properties;
-                label;
-                if(cProps.label){
-                    label = {};
-                    label.defText = cProps.label;
-                }
-                if(cProps.labelItextID){
-                    if(!label){ label = {}; }
-                    label.ref = "jr:itext('" + cProps.labelItextID + "')";
-                }
-                
-                createOpenControlTag(tagName, label);
-
-                //Do hint label
-                if(cProps.hintLabel || cProps.hintItextID){
-                    xmlWriter.writeStartElement('hint');
-                    if(cProps.hintLabel){
-                        xmlWriter.writeString(cProps.hintLabel);
-                    }
-                    if(cProps.hintItextID){
-                        var ref = "jr:itext('" + cProps.hintItextID + "')";
-                        xmlWriter.writeAttributeString('ref',ref);
-                    }
-                    xmlWriter.writeEndElement();
-                }
-
-                //Do value tag
-                if(cProps.defaultValue){
-                    xmlWriter.writeStartElement();
-                    xmlWriter.writeString(cProps.defaultValue());
-                    xmlWriter.writeEndElement();
-                }
-                console.log("Node:",this,", Children:",this.getChildren());
-                for (child in this.getChildren()){
-                    if(this.getChildren().hasOwnProperty[child]){
-                        this.getChildren()[child].createControlTreeXML(xmlWriter); //do the recursion boogey.
-                    }
-                }
-
-                //finish off
-                xmlWriter.writeEndElement(); //close control tag.
-                if(tagName === 'repeat'){
-                    xmlWriter.writeEndElement(); //special case where we have to close the repeat as well as the group tag.
-                }
-                
             };
 
             /**
@@ -1544,8 +1425,7 @@ formdesigner.model = function () {
         /**
          * returns the absolute path, in the form of a string separated by slashes ('/nodeID/otherNodeID/finalNodeID'),
          * the nodeID's are those given by the Mugs (i.e. the node value objects) according to whether this tree is a
-         * 'data' (DataElement) tree or a 'bind' (BindElement) tree.  Sorry about the confusing jargon.  It's a little late
-         * in the game to be changing things up, unfortunately.
+         * 'data' (DataElement) tree or a 'bind' (BindElement) tree.
          *
          * @param nodeOrMugType - can be a tree Node or a MugType that is a member of this tree (via a Node)
          */
@@ -1635,18 +1515,12 @@ formdesigner.model = function () {
          * Performs the given func on each
          * node of the tree (the Node is given as the only argument to the function)
          * and returns the result as a list.
+         * @param func - a function called on each node, the node is the only argument
+         * @param afterChildFunc - a function called after the above function is called on each child of the current node.
          */
-        that.treeMap = function (func) {
-            return rootNode.treeMap(func, []);
+        that.treeMap = function (func, afterChildFunc) {
+            return rootNode.treeMap(func, [], afterChildFunc);
         };
-
-        that.createTreeXML = function (treeType,xmlWriter) {
-            if(treeType === 'control'){
-                rootNode.createControlTreeXML(xmlWriter);
-            }else{
-                console.log('CREATE XML NOT IMPLEMENTED FOR DATA TREE YET');
-            }
-        }
 
         /**
          * Looks through all the nodes in the tree
@@ -1682,7 +1556,8 @@ formdesigner.model = function () {
         })();
 
         /**
-         * Loops through the data and the control trees and picks out all the unique bind elements.  Returns a list of BindElements
+         * Loops through the data and the control trees and picks out all the unique bind elements.
+         * Returns a list of MugTypes
          */
         that.getBindList = function(){
             var bList = [],
@@ -1697,7 +1572,7 @@ formdesigner.model = function () {
                     if(!MT.properties.bindElement){
                         return null;
                     }else{
-                        bind = M.properties.bindElement;
+                        bind = MT;
                         return bind;
                     }
                 };
@@ -1767,6 +1642,249 @@ formdesigner.model = function () {
         }
         that.getInvalidMugTypeUFIDs = getInvalidMugTypeUFIDs;
 
+        /**
+         * Generates an XML Xform and returns it as a string.
+         */
+        var createXForm = function () {
+            var create_dataBlock = function () {
+                //use dataTree.treeMap(func,listStore,afterChildfunc)
+                // create func that opens + creates the data tag, that can be recursively called on all children
+                // create afterChildfunc that closes the data tag
+                function mapFunc (node) {
+                    var xw = formdesigner.controller.XMLWriter,
+                        defaultVal,
+                        MT = node.getValue();
+                    xw.writeStartElement(node.getID());
+                    if(!node.isRootNode){
+                        xw.writeString(MT.mug.properties.dataElement.dataValue);
+                    }
+                }
+
+                function afterFunc (node) {
+                    var xw = formdesigner.controller.XMLWriter;
+                    xw.writeEndElement();
+                    //data elements only require one close element call with nothing else fancy.
+                }
+
+                dataTree.treeMap(mapFunc, afterFunc);
+            }
+
+            var create_bindList = function () {
+                var xw = formdesigner.controller.XMLWriter,
+                    bList = formdesigner.controller.form.getBindList(),
+                    MT,
+                        //vars populated by populateVariables()
+                        bEl,cons,consMsg,nodeset,type,relevant,required,calc,
+                    i, attrs, j;
+
+                function populateVariables (MT){
+                    bEl = MT.mug.properties.bindElement;
+                    cons = bEl.properties.constraintAttr;
+                    consMsg = bEl.properties.constraintMsgAttr;
+                    nodeset = dataTree.getAbsolutePath(MT);
+                    type = bEl.properties.dataType;
+                    relevant = bEl.properties.relevantAttr;
+                    required = bEl.properties.requiredAttr;
+                    calc = bEl.properties.calculateAttr;
+                    return {
+                        nodeset: nodeset,
+                        'type': type,
+                        constraint: cons,
+                        constraintMsg: consMsg,
+                        relevant: relevant,
+                        required: required,
+                        calculate: calc
+                    }
+                }
+
+                for (i in bList) {
+                    if(bList.hasOwnProperty(i)){
+                        MT = bList[i];
+                        attrs = populateVariables(MT);
+                        xw.writeStartElement('bind');
+                        for (j in attrs) { //for each populated property
+                            if(attrs.hasOwnProperty(j)){
+                                if(attrs[j]){ //if property has a useful bind attribute value
+                                    xw.writeAttributeString(j,attrs[j]); //write it
+                                }
+                            }
+                        }
+                        xw.writeEndElement();
+                    }
+                }
+            }
+
+            var create_controlBlock = function () {
+                var mapFunc, afterFunc
+
+                function mapFunc(node) {
+                    if(node.isRootNode) { //skip
+                        return;
+                    }
+
+                    var mugType = node.getValue(),
+                        cProps = mugType.mug.properties.controlElement.properties,
+                        label,
+                        xmlWriter = formdesigner.controller.XMLWriter;
+
+                    /**
+                     * @param tagName
+                     * @param elLabel - dictionary: {ref: 'itext ref string', defText: 'default label text'} both are optional
+                     */
+                    function createOpenControlTag(tagName,elLabel){
+                        tagName = tagName.toLowerCase();
+                        var isGroupOrRepeat = (tagName === 'group' || tagName === 'repeat');
+
+                        /**
+                         * Creates the label tag inside of a control Element in the xform
+                         */
+                        function createLabel() {
+                            if (elLabel) {
+                                xmlWriter.writeStartElement('label');
+                                if (elLabel.ref) {
+                                    xmlWriter.writeAttributeString('ref',elLabel.ref);
+                                }
+                                if (elLabel.defText) {
+                                    xmlWriter.writeString(elLabel.defText);
+                                }
+                                xmlWriter.writeEndElement(); //close Label tag;
+                            }
+                        }
+
+                        //////Special logic block to make sure the label ends up in the right place
+                        if (isGroupOrRepeat) {
+                            xmlWriter.writeStartElement('group');
+                            createLabel();
+                            if (tagName === 'repeat') {
+                                xmlWriter.writeStartElement('repeat');
+                            }
+                        } else {
+                            xmlWriter.writeStartElement(tagName);
+                        }
+                        if (tagName !== 'group') {
+                            createLabel();
+                        }
+                        //////////////////////////////////////////////////////////////////////////
+                        if (tagName === 'item') {
+                            //do a value tag for an item MugType
+                            xmlWriter.writeStartElement('value');
+                            xmlWriter.writeString(cProps.defaultValue);
+                            xmlWriter.writeEndElement();
+                        }
+                        ///////////////////////////////////////////////////////////////////////////
+                        ///Set the nodeset/ref attribute correctly
+                        if (tagName !== 'item') {
+                            var attr, absPath;
+                            if (tagName === 'repeat') {
+                                attr = 'nodeset';
+                            } else {
+                                attr = 'ref';
+                            }
+                            absPath = formdesigner.controller.form.dataTree.getAbsolutePath(mugType);
+                            xmlWriter.writeAttributeString(attr, absPath);
+                        }
+                        //////////////////////////////////////////////////////////////////////
+                        //Do hint label
+                        if( tagName !== 'item' && tagName !== 'repeat'){
+                            if(cProps.hintLabel || cProps.hintItextID){
+                                xmlWriter.writeStartElement('hint');
+                                if(cProps.hintLabel){
+                                    xmlWriter.writeString(cProps.hintLabel);
+                                }
+                                if(cProps.hintItextID){
+                                    var ref = "jr:itext('" + cProps.hintItextID + "')";
+                                    xmlWriter.writeAttributeString('ref',ref);
+                                }
+                                xmlWriter.writeEndElement();
+                            }
+                        }
+                        ///////////////////////////////////////
+                    }
+
+
+                    //create the label object (for createOpenControlTag())
+                    if (cProps.label) {
+                        label = {};
+                        label.defText = cProps.label;
+                    }
+                    if (cProps.labelItextID) {
+                        if (!label) {
+                            label = {};
+                        }
+                        label.ref = "jr:itext('" + cProps.labelItextID + "')";
+                    }
+                    ////////////
+
+                    createOpenControlTag(cProps.tagName, label);
+
+                }
+
+
+                function afterFunc(node) {
+                    if (node.isRootNode) {
+                        return;
+                    }
+
+                    var xmlWriter = formdesigner.controller.XMLWriter,
+                        mugType = node.getValue(),
+                        tagName = mugType.mug.properties.controlElement.properties;
+                    //finish off
+                    xmlWriter.writeEndElement(); //close control tag.
+                    if(tagName === 'repeat'){
+                        xmlWriter.writeEndElement(); //special case where we have to close the repeat as well as the group tag.
+                    }
+
+                }
+
+                controlTree.treeMap(mapFunc, afterFunc);
+            }
+
+            var create_itextBlock = function () {
+                return;
+            }
+
+            var generate_form = function (form_title) {
+                var docString;
+                formdesigner.controller.initXMLWriter();
+                var xw = formdesigner.controller.XMLWriter;
+
+                xw.writeStartDocument();
+                //Generate header boilerplate up to instance level
+                xw.writeStartElement('h:html');
+                    xw.writeStartElement('h:head');
+                        xw.writeStartElement('h:title');
+                            xw.writeString(form_title);
+                        xw.writeEndElement();       //CLOSE TITLE
+
+                ////////////MODEL///////////////////
+                        xw.writeStartElement('model');
+                            xw.writeStartElement('instance');
+                                create_dataBlock();
+                            xw.writeEndElement(); //CLOSE INSTANCE
+                            create_bindList();
+                            create_itextBlock();
+                        xw.writeEndElement(); //CLOSE MODEL
+                ///////////////////////////////////
+                    xw.writeEndElement(); //CLOSE HEAD
+
+                    xw.writeStartElement('h:body');
+                /////////////CONTROL BLOCK//////////////
+                        create_controlBlock();
+                ////////////////////////////////////////
+                    xw.writeEndElement(); //CLOSE BODY
+                xw.writeEndElement(); //CLOSE HTML
+
+                xw.writeEndDocument(); //CLOSE DOCUMENT
+                docString = xw.flush();
+
+                return docString;
+            };
+            var xformString = generate_form('TEST');
+            this.fire('xform-created');
+            return xformString;
+        }
+        that.createXForm = createXForm;
+        
         //make the object event aware
         formdesigner.util.eventuality(that);
         return that;

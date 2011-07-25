@@ -143,7 +143,7 @@ formdesigner.ui = (function () {
             toolbar.append(fancyBut);
 
             fancyBut.button().click(function () {
-                var d = controller.createXForm();
+                var d = controller.form.createXForm();
                 var output = $('#fd-source');
                 output.val(d);
                 $('#inline').click();
@@ -662,7 +662,7 @@ formdesigner.ui = (function () {
 
         function clearIcons() {
             var nodes;
-            nodes = uiCTree.find('.jstree-leaf');
+            nodes = uiCTree.find('.jstree-leaf, .jstree-open');
             nodes.each(function (idx, el){
                 $(el).find('.fd-tree-valid-alert-icon').remove();
             })
