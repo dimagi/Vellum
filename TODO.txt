@@ -1,2 +1,8 @@
 fd todo:
-- Write a method to check if a move is legal (maybe making use of the above method).  Before inserting a fresh node into the tree this checkMove() should be consulted first.
+in Form.getBindList() swap out redundant list merging code for function in util (test to see if everything works as expected)
+
+Make UI allow for 'uiType' property in MugType.properties blocks
+
+Tests for XML generation (all three above)
+
+
