@@ -1216,7 +1216,6 @@ formdesigner.model = function () {
             that.treeMap = function (nodeFunc, store, afterChildFunc) {
                 var result, child;
                 result = nodeFunc(this); //call on self
-                console.log("IN TREEMAP", this, nodeFunc, afterChildFunc);
                 if(result){
                     store.push(result);
                 }
@@ -1226,7 +1225,6 @@ formdesigner.model = function () {
                     }
                 }
                 if(afterChildFunc){
-                    console.log("AFTER CHILD FUNC HAS BEEN CALLED!",this, afterChildFunc);
                     afterChildFunc(this, result);
                 }
                 return store; //return the results
@@ -1442,10 +1440,10 @@ formdesigner.model = function () {
             nodeParent = this.getParentNode(node);
             output = '/' + node.getID();
 
-            while (nodeParent && !nodeParent.isRootNode) {
+            do {
                 output = '/' + nodeParent.getID() + output;
                 nodeParent = this.getParentNode(nodeParent);
-            }
+            } while (nodeParent && !nodeParent.isRootNode)
 
             return output;
 
