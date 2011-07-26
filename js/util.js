@@ -72,6 +72,42 @@ formdesigner.util = (function(){
     }
     that.mergeArray = mergeArray;
 
+    /**
+     * Given a (nodeset or ref) path, will figure out what the implied NodeID is.
+     * @param path
+     */
+    function getNodeIDFromPath (path) {
+        if (!path) {
+            return null;
+        }
+        var arr = path.split('/');
+        return arr[arr.length-1];
+    }
+    that.getNodeIDFromPath = getNodeIDFromPath;
+
+    /**
+     * Figures out what the xpath is of a controlElement
+     * by looking at the ref or nodeset attributes.
+     * @param el - a jquery selector or DOM node of an xforms controlElement.
+     * @return - a string of the ref/nodeset value
+     */
+    function getPathFromControlElement (el) {
+        if(!el){
+            return null;
+        }
+        el = $(el); //make sure it's jquerified
+        var path = el.attr('ref');
+        if(!path){
+            path = el.attr('nodeset');
+        }
+        if(!path) {
+            console.error('CANT PARSE CONTROL NODE, NO REF/NODESET ATTRIBUTE FOUND!');
+        }
+
+        return path;
+    }
+    that.getPathFromControlElement = getPathFromControlElement;
+
 
     //taken from http://stackoverflow.com/questions/728360/copying-an-object-in-javascript
     //clones a 'simple' object (see link for full description)

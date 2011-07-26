@@ -312,6 +312,7 @@ formdesigner.controller = (function () {
             xml = $(xmlDoc),
             binds = xml.find('bind'),
             data = xml.find('instance').children(),
+            controls = xml.find('h\\:body').children(),
             formID, formName;
 
         xml.find('instance').children().each(function () {
@@ -355,14 +356,7 @@ formdesigner.controller = (function () {
         }
 
         function parseBindList (bindList) {
-            /**
-             * Given a (nodeset or ref) path, will figure out what the implied NodeID is.
-             * @param path
-             */
-            function getNodeIDfromPath (path) {
-                var arr = path.split('/');
-                return arr[arr.length-1];
-            }
+
 
             function eachFunc () {
                 var el = $(this),
@@ -374,7 +368,7 @@ formdesigner.controller = (function () {
                 if (!path) {
                    path = el.attr('ref');
                 }
-                nodeID = getNodeIDfromPath(path);
+                nodeID = formdesigner.util.getNodeIDFromPath(path);
                 attrs.dataType = el.attr('type');
                 attrs.relevantAttr = el.attr('relevant');
                 attrs.calculateAttr = el.attr('calculate');
@@ -400,12 +394,165 @@ formdesigner.controller = (function () {
             bindList.each(eachFunc);
         }
 
-        function parseControlTree () {
+        function parseControlTree (controlsTree) {
+            function eachFunc(){
+                /**
+                 * Determines what MugType this element should be
+                 * and creates it.  Also modifies any existing mug that is associated
+                 * with this element to fit the new type.
+                 * @param nodeID
+                 * @param controlEl
+                 */
+                function classifyAndCreateMugType (nodeID, cEl) {
+                    var oldMT = formdesigner.controller.form.getMugTypeByIDFromTree(nodeID, 'data'), //check the date node to see if there's a related MT already present
+                        mugType, mug, tagName, bindEl, dataType, MTIdentifier;
+
+                    tagName = $(cEl)[0].nodeName;
+                    if (oldMT) {
+                        bindEl = oldMT.mug.properties.bindElement;
+                        if (bindEl) {
+                            dataType = bindEl.properties.dataType;
+                        }
+                    }
+
+                    //broadly categorize
+                    tagName = tagName.toLowerCase();
+                    if(tagName === 'select') {
+                        MTIdentifier = 'stdMSelect';
+                    }else if (tagName === 'select1') {
+                        MTIdentifier = 'stdSelect';
+                    }else if (tagName === 'trigger') {
+                        MTIdentifier = 'stdTrigger';
+                    }else if (tagName === 'input') {
+                        MTIdentifier = 'stdTextQuestion';
+                    }else if (tagName === 'item') {
+                        MTIdentifier = 'stdItem';
+                    }else if (tagName === 'group') {
+                        MTIdentifier = 'stdGroup';
+                    }
+
+                    dataType = dataType.replace('xsd:',''); //strip out extranous namespace
+                    dataType = dataType.toLowerCase();
+                    //fine tune for special cases (repeats, groups, inputs)
+                    if (MTIdentifier === 'input' && dataType){
+                        if(dataType === 'long') {
+                            MTIdentifier = 'stdLong';
+                        }else if(dataType === 'int') {
+                            MTIdentifier = 'stdInt';
+                        }else if(dataType === 'geopoint') {
+                            MTIdentifier = 'stdGeopoint';
+                        }else if(dataType === 'string') {
+                            //do nothing, the ident is already correct.
+                        }
+                    }else if (MTIdentifier === 'group') {
+                        if($(cEl).find('repeat').length > 0){
+                            tagName = 'repeat';
+                            MTIdentifier = 'stdRepeat';
+                        }
+                    }
+                    try{
+                        mugType = formdesigner.model.mugTypeMaker[MTIdentifier]();
+                    }catch (e) {
+                        throw 'New Control Element classified as non-existent MugType! Please create a rule for this case' +
+                            ' in formdesigner.model.mugTypeMaker! IdentString:' + MTIdentifier;
+                    }
+
+                    if(oldMT) {
+                        mugType.ufid = oldMT.ufid;
+                        mugType.mug.properties.dataElement = oldMT.mug.properties.dataElement;
+                        mugType.mug.properties.bindElement = oldMT.mug.properties.bindElement;
+
+                        //replace in dataTree
+                        formdesigner.controller.form.replaceMugType(oldMT,mugType,'data');
+                    }
+
+                    return mugType;
+                }
+
+                function populateMug (MugType, cEl) {
+                    var labelEl, hintEl;
+                    function parseLabel (lEl, MT) {
+                        var labelVal = $(lEl).html(),
+                            labelRef = $(lEl).attr('ref'),
+                            cProps = MT.mug.properties.controlElement.properties;
+
+                        labelRef = labelRef.replace("jr:itext('",'').replace("')",''); //strip itext incantation
+                        cProps.label = labelVal;
+                        cProps.labelItextID = labelRef;
+                    }
+
+                    function parseHint (hEl, MT) {
+                        var labelVal = $(hEl).html(),
+                            labelRef = $(hEl).attr('ref'),
+                            cProps = MT.mug.properties.controlElement.properties;
+
+                        labelRef = labelRef.replace("jr:itext('",'').replace("')",''); //strip itext incantation
+                        cProps.hintLabel = labelVal;
+                        cProps.hintItextID = labelRef;
+                    }
+
+
+
+                    var mType = MugType.mug.properties.controlElement.properties.tagName;
+                    labelEl = $(cEl).find('label');
+                    hintEl = $(cEl).find('hint')
+
+                    if (labelEl) {
+                        parseLabel(labelEl, MugType);
+                    }
+                    if (hintEl) {
+                        parseHint (hintEl, MugType);
+                    }
+
+                }
+
+                function insertMTInControlTree (MugType, parentMT) {
+                    formdesigner.controller.form.controlTree.insertMugType(MugType,'into',parentMT);
+                }
+
+
+
+                var el = $ ( this ),
+                    path,
+                    nodeID,
+                    mType,
+                    parentNode,
+                    parentPath,
+                    parentNodeID,
+                    parentMug,
+                    couldHaveChildren;
+
+                path = formdesigner.util.getPathFromControlElement(el);
+                nodeID = formdesigner.util.getNodeIDFromPath(path);
+
+                parentNode = el.parent();
+                if($(parentNode)[0].nodeName === 'repeat') {
+                    parentNode = parentNode.parent();
+                }
+
+                parentPath = formdesigner.util.getPathFromControlElement(parentNode);
+                parentNodeID = formdesigner.util.getNodeIDFromPath(parentPath);
+                if (parentNodeID) {
+                    parentMug = formdesigner.controller.form.getMugTypeByIDFromTree(parentNodeID,'control');
+                } else {
+                    parentMug = null;
+                }
+
+
+                mType = classifyAndCreateMugType(nodeID,el);
+                populateMug(mType,el);
+                insertMTInControlTree(mType, parentMug);
+
+
+                //TODO COULD HAVE CHILDREN RECURSE ON THIS FUNCTION!
+
+            }
 
         }
 
         parseDataTree (data[0]);
         parseBindList (binds);
+        parseControlTree (controls);
 
     }
     that.parseXML = parseXML;
