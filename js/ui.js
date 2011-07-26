@@ -120,7 +120,7 @@ formdesigner.ui = (function () {
                     '<div id="fd-print-tree-button" class="toolbarButton questionButton">'+
                 'Print tree to Console' +
               '</div>');
-            toolbar.append(printTreeBut);
+            $('#fd-dragons').append(printTreeBut);
 
             printTreeBut.button().click(function () {
                 console.group("Tree Pretty Print");
@@ -149,30 +149,18 @@ formdesigner.ui = (function () {
             buttons.fancyBut = fancyBut;
         })();
 
-        (function c_CMDialog() {
-            var dialogBut = $(
-                    '<div id="fd-dialog-button" class="toolbarButton questionButton">'+
-                '<span id="fd-dialog-but"></span>Show Modal Dialog ' +
+        (function c_openSource() {
+            var openSourcebut = $(
+                    '<div id="fd-opensource-button" class="toolbarButton questionButton">'+
+                '<span id="fd-opensource-but"></span>Open Source ' +
               '</div>');
-            toolbar.append(dialogBut);
+            toolbar.append(openSourcebut);
 
-            dialogBut.button().click(function () {
-                setDialogInfo(
-                    "FooBar" + Math.random(),
-                    'lol',
-                    function(){
-                        $( this ).dialog( "close" );
-                    },
-                    "pants",
-                    function(){
-                        $( this ).dialog( "close" );
-                    }
-                );
-
-                showConfirmDialog();
+            openSourcebut.button().click(function () {
+                formdesigner.controller.showLoadXformBox();
             });
 
-            buttons.dialogBut = dialogBut;
+            buttons.openSourcebut = openSourcebut;
         })();
 
         $('.questionButton').button({
@@ -641,6 +629,14 @@ formdesigner.ui = (function () {
                 primary : 'ui-icon-gear'
             }
         });
+
+        $('#fd-template-question-box div').each(function(){
+            $(this).button({
+                            icons : {
+                                primary : 'ui-icon-gear'
+                            }
+                        });
+        })
 
         function makeFormProp (propLabel, propName, keyUpFunc, initVal){
             var liStr = '<li id=fd-form-prop-"' + propName + '" class="fd-form-property"><span class="fd-form-property-text">'+propLabel+': '+'</span>' +

@@ -101,7 +101,7 @@ formdesigner.util = (function(){
             path = el.attr('nodeset');
         }
         if(!path) {
-            console.error('CANT PARSE CONTROL NODE, NO REF/NODESET ATTRIBUTE FOUND!');
+            console.error('CANT PARSE CONTROL NODE, NO REF/NODESET ATTRIBUTE FOUND! ELEMENT:',el);
         }
 
         return path;

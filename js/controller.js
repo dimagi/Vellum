@@ -286,6 +286,26 @@ formdesigner.controller = (function () {
     }
     that.generateXForm = generateXForm;
 
+    var showLoadXformBox = function () {
+        var input = $('#fd-source'),
+                button = $('#fd-parsexml-button');
+        button.button({
+            icons: {
+                primary : 'ui-icon-folder-open'
+            }
+        })
+        $('#inline').click();
+        button.show();
+
+        button.click(function () {
+            formdesigner.controller.parseXML(input.val());
+            $.fancybox.close();
+            $(this).hide();
+        });
+
+    };
+    that.showLoadXformBox = showLoadXformBox;
+
     var setFormName = function (name) {
         formdesigner.controller.form.formName = name;
     };
@@ -300,27 +320,12 @@ formdesigner.controller = (function () {
      */
     var parseXML = function (xmlString) {
         var ParseException = function (msg) {
-            that = {};
-            that.args = arguments;
-            that.message = msg;
-            that.toString = function () {
-                return msg + '' + arguments;
-            }
+            this.name = 'XMLParseException';
+            this.message = msg;
         }
 
-        var xmlDoc = $.parseXML(xmlString),
-            xml = $(xmlDoc),
-            binds = xml.find('bind'),
-            data = xml.find('instance').children(),
-            controls = xml.find('h\\:body').children(),
-            formID, formName;
-
-        xml.find('instance').children().each(function () {
-            formID = this.nodeName;
-        });
-
         function parseInstanceInfo () {
-            
+
         }
 
         function parseDataTree (dataEl) {
@@ -334,16 +339,17 @@ formdesigner.controller = (function () {
 
                 mType.typeName = "Data Only MugType";
                 mug = formdesigner.model.createMugFromMugType(mType);
-                mType.mug = mug;
-                mType.mug.properties.dataElement.nodeID = nodeID;
-                mType.mug.properties.dataElement.dataValue = nodeVal;
 
+                mug.properties.dataElement.properties.nodeID = nodeID;
+                mug.properties.dataElement.properties.dataValue = nodeVal;
+                mType.mug = mug;
                 if ( parentNodeName === rootNodeName ) {
                     parentMugType = null;
                 }else {
                     parentMugType = formdesigner.controller.form.getMugTypeByIDFromTree(parentNodeName,'data');
                 }
-                console.log(parentMugType);
+
+                console.log("DATA ELEMENT ID",mType.mug.getDataElementID(),mType.mug.properties.dataElement.properties.nodeID,nodeID);
                 dataTree.insertMugType(mType,'into',parentMugType);
             }
             var root = $(dataEl),
@@ -353,6 +359,7 @@ formdesigner.controller = (function () {
                 };
 
             root.children().each(recFunc);
+            console.log("DATA TREE",formdesigner.controller.form.dataTree.printTree());
         }
 
         function parseBindList (bindList) {
@@ -382,7 +389,8 @@ formdesigner.controller = (function () {
 
                 oldMT = formdesigner.controller.form.getMugTypeByIDFromTree(nodeID, 'data');
                 if(!oldMT){
-                    throw new ParseException('Parse error! Could not find Data MugType associated with this bind!', el);
+                    console.log("El,nodeID",el,nodeID);
+                    throw 'Parse error! Could not find Data MugType associated with this bind!';
                 }
                 mType.ufid = oldMT.ufid;
                 mType.properties.dataElement = oldMT.properties.dataElement;
@@ -412,6 +420,10 @@ formdesigner.controller = (function () {
                         bindEl = oldMT.mug.properties.bindElement;
                         if (bindEl) {
                             dataType = bindEl.properties.dataType;
+                            if (dataType) {
+                                dataType = dataType.replace('xsd:',''); //strip out extranous namespace
+                                dataType = dataType.toLowerCase();
+                            }
                         }
                     }
 
@@ -431,8 +443,7 @@ formdesigner.controller = (function () {
                         MTIdentifier = 'stdGroup';
                     }
 
-                    dataType = dataType.replace('xsd:',''); //strip out extranous namespace
-                    dataType = dataType.toLowerCase();
+
                     //fine tune for special cases (repeats, groups, inputs)
                     if (MTIdentifier === 'input' && dataType){
                         if(dataType === 'long') {
@@ -472,13 +483,15 @@ formdesigner.controller = (function () {
                 function populateMug (MugType, cEl) {
                     var labelEl, hintEl;
                     function parseLabel (lEl, MT) {
-                        var labelVal = $(lEl).html(),
+                        var labelVal = $(lEl).val(),
                             labelRef = $(lEl).attr('ref'),
                             cProps = MT.mug.properties.controlElement.properties;
-
-                        labelRef = labelRef.replace("jr:itext('",'').replace("')",''); //strip itext incantation
+                        if(labelRef){
+                            labelRef = labelRef.replace("jr:itext('",'').replace("')",''); //strip itext incantation
+                            cProps.labelItextID = labelRef;
+                        }
                         cProps.label = labelVal;
-                        cProps.labelItextID = labelRef;
+
                     }
 
                     function parseHint (hEl, MT) {
@@ -486,27 +499,46 @@ formdesigner.controller = (function () {
                             labelRef = $(hEl).attr('ref'),
                             cProps = MT.mug.properties.controlElement.properties;
 
-                        labelRef = labelRef.replace("jr:itext('",'').replace("')",''); //strip itext incantation
+                        if(labelRef){
+                            labelRef = labelRef.replace("jr:itext('",'').replace("')",''); //strip itext incantation
+                            cProps.hintItextID = labelRef;
+                        }
                         cProps.hintLabel = labelVal;
-                        cProps.hintItextID = labelRef;
+
+                    }
+
+                    function parseDefaultValue (dEl, MT) {
+                        var dVal = $(dEl).val(),
+                                tagName = MT.mug.properties.controlElement.properties.tagName.toLowerCase(),
+                                cProps = MT.mug.properties.controlElement.properties;
+                        if(dVal){
+                            cProps.defaultValue = dVal;
+                        }
                     }
 
 
 
                     var mType = MugType.mug.properties.controlElement.properties.tagName;
                     labelEl = $(cEl).find('label');
-                    hintEl = $(cEl).find('hint')
+                    hintEl = $(cEl).find('hint');
+                    var cantHaveDefaultValue = ['select', 'select1', 'repeat', 'group', 'trigger'];
 
-                    if (labelEl) {
+                    if (labelEl.length > 0) {
                         parseLabel(labelEl, MugType);
                     }
-                    if (hintEl) {
+                    if (hintEl.length > 0) {
                         parseHint (hintEl, MugType);
+                    }
+                    if (mType === 'item') {
+                        parseDefaultValue($(cEl).find('value'),MugType);
+                    }else if (cantHaveDefaultValue.indexOf(mType) === -1) {
+                        parseDefaultValue($(cEl),MugType);
                     }
 
                 }
 
                 function insertMTInControlTree (MugType, parentMT) {
+                    console.log("PERFORMING INSERT!",MugType,parentMT);
                     formdesigner.controller.form.controlTree.insertMugType(MugType,'into',parentMT);
                 }
 
@@ -520,7 +552,9 @@ formdesigner.controller = (function () {
                     parentPath,
                     parentNodeID,
                     parentMug,
-                    couldHaveChildren;
+                    tagName,
+                    couldHaveChildren = ['repeat', 'group', 'select', '1select'],
+                    children;
 
                 path = formdesigner.util.getPathFromControlElement(el);
                 nodeID = formdesigner.util.getNodeIDFromPath(path);
@@ -528,6 +562,8 @@ formdesigner.controller = (function () {
                 parentNode = el.parent();
                 if($(parentNode)[0].nodeName === 'repeat') {
                     parentNode = parentNode.parent();
+                }if($(parentNode)[0].nodeName === 'h:body') {
+                    parentNode = null;
                 }
 
                 parentPath = formdesigner.util.getPathFromControlElement(parentNode);
@@ -543,12 +579,32 @@ formdesigner.controller = (function () {
                 populateMug(mType,el);
                 insertMTInControlTree(mType, parentMug);
 
-
-                //TODO COULD HAVE CHILDREN RECURSE ON THIS FUNCTION!
-
+                tagName = mType.mug.properties.controlElement.properties.tagName.toLowerCase();
+                if(couldHaveChildren.indexOf(tagName) !== -1) {
+                    if(tagName === 'repeat'){
+                        children = $(el).find('repeat').children().not('label').not('value');
+                    }else{
+                        children = $(el).children().not('label').not('value');
+                    }
+                    children.each(eachFunc); //recurse down the tree
+                }
             }
-
+            console.log('controlsTree',controlsTree,"controlsTree.children()",controlsTree.children());
+            controlsTree.each(eachFunc);
         }
+
+
+        var xmlDoc = $.parseXML(xmlString),
+            xml = $(xmlDoc),
+            binds = xml.find('bind'),
+            data = xml.find('instance').children(),
+            controls = xml.find('h\\:body').children(),
+            formID, formName;
+
+        xml.find('instance').children().each(function () {
+            formID = this.nodeName;
+        });
+
 
         parseDataTree (data[0]);
         parseBindList (binds);

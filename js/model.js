@@ -70,6 +70,7 @@ formdesigner.model = function () {
         };
 
         that.getDataElementID = function () {
+            console.log(this);
             if (this.properties.dataElement) {
                 return this.properties.dataElement.properties.nodeID;
             } else {
@@ -585,6 +586,12 @@ formdesigner.model = function () {
                     visibility: 'hidden',
                     presence: 'optional',
                     lstring: "Question HINT Itext ID"
+                },
+                defaultValue: {
+                    lstring: 'Default Question Value',
+                    visibility: 'visible',
+                    editable: 'w',
+                    presence: 'optional'
                 }
             }
         },
@@ -1939,7 +1946,11 @@ formdesigner.model = function () {
                 }else {
                     thisNodeID = mt.mug.properties.controlElement.properties.nodeID;
                 }
+
+                console.log("IN getMugTypeByIDFromTree() THISNODEID:"+thisNodeID+"nodeID"+ nodeID);
+
                 if(thisNodeID === nodeID){
+                    console.log("MT FOUND",nodeID);
                     return mt;
                 }
             }
@@ -1952,6 +1963,8 @@ formdesigner.model = function () {
             }else{
                 throw 'Invalid TreeType specified! Use either "data" or "control"';
             }
+
+            console.log("retVal!",retVal);
             if(retVal.length > 0){
                 return retVal[0];
             }else {

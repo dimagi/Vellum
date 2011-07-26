@@ -268,3 +268,17 @@ td {
 #fd-adv-props-content {
     padding: 0;
 }
+
+#fd-opensource-button {
+    left:3px;
+
+}
+
+#fd-fancy-button {
+    
+}
+
+.fd-template-but {
+    width: 200px;
+    margin: 2px;
+}

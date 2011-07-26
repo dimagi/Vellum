@@ -38,6 +38,12 @@
         <div id="fd-add-datetime-button" class="questionButton toolbarButton">
             <span id="add-datetime-but"></span>Date and Time
         </div>
+        <!--<div id="fd-add-viewsource-button" class="questionButton toolbarButton">-->
+            <!--<span id="add-viewsource-but"></span>View Source-->
+        <!--</div>-->
+        <!--<div id="fd-add-opensource-button" class="questionButton toolbarButton">-->
+            <!--<span id="add-opensource-but"></span>Open Source-->
+        <!--</div>-->
 
 
 
@@ -75,7 +81,10 @@
                 </ul>
             </div>
             <h3><a href="#">Template Questions</a></h3>
-            <div>
+            <div id="fd-template-question-box">
+                <div id="fd-add-template-yesno" class="fd-template-but">Add Yes/No Template</div>
+                <div id="fd-add-template-yesnomaybe" class="fd-template-but">Add Yes/No/Maybe Template</div>
+                <div id="fd-add-template-pregnancy" class="fd-template-but">Add Pregnancy Template</div>
                 <p>
 
                 </p>
@@ -87,7 +96,7 @@
                 </p>
             </div>
             <h3><a href="#">Dragons</a></h3>
-            <div>
+            <div id="fd-dragons">
                 <p>
 
                 </p>
@@ -100,7 +109,12 @@
 
     <a id="inline" href="#data" style="display:none">This shows content of element who has id="data"</a>
     <!--<div id="fd-form-paste"><textarea rows="20" cols="20" id="fd-form-paste-textarea"></textarea> <textarea rows="10" cols="10" id="fd-form-paste-output">output</textarea></div>-->
-    <div style="display:none"><div id="data"><textarea id="fd-source"></textarea></div></div>
+    <div style="display:none">
+        <div id="data">
+            <textarea id="fd-source"></textarea>
+            <div id="fd-parsexml-button">Load Text</div>
+        </div>
+    </div>
 
     <div id="fd-dialog-confirm" title="Dialog Box">
 	    <p>
