@@ -299,11 +299,113 @@ formdesigner.controller = (function () {
      * @param xmlString
      */
     var parseXML = function (xmlString) {
+        var ParseException = function (msg) {
+            that = {};
+            that.args = arguments;
+            that.message = msg;
+            that.toString = function () {
+                return msg + '' + arguments;
+            }
+        }
+
         var xmlDoc = $.parseXML(xmlString),
             xml = $(xmlDoc),
             binds = xml.find('bind'),
-            data = xml.find('instance');
+            data = xml.find('instance').children(),
+            formID, formName;
 
+        xml.find('instance').children().each(function () {
+            formID = this.nodeName;
+        });
+
+        function parseInstanceInfo () {
+            
+        }
+
+        function parseDataTree (dataEl) {
+            function parseDataElement (el) {
+                var nodeID = el.nodeName, nodeVal = $(el).val(),
+                    mType = formdesigner.util.getNewMugType(formdesigner.model.mugTypes.dataOnly),
+                    parentNodeName = $(el).parent()[0].nodeName,
+                    rootNodeName = $(dataEl)[0].nodeName,
+                    dataTree = formdesigner.controller.form.dataTree,
+                    mug, parentMugType;
+
+                mType.typeName = "Data Only MugType";
+                mug = formdesigner.model.createMugFromMugType(mType);
+                mType.mug = mug;
+                mType.mug.properties.dataElement.nodeID = nodeID;
+                mType.mug.properties.dataElement.dataValue = nodeVal;
+
+                if ( parentNodeName === rootNodeName ) {
+                    parentMugType = null;
+                }else {
+                    parentMugType = formdesigner.controller.form.getMugTypeByIDFromTree(parentNodeName,'data');
+                }
+                console.log(parentMugType);
+                dataTree.insertMugType(mType,'into',parentMugType);
+            }
+            var root = $(dataEl),
+                recFunc = function () {
+                    parseDataElement(this);
+                    $(this).children().each(recFunc);
+                };
+
+            root.children().each(recFunc);
+        }
+
+        function parseBindList (bindList) {
+            /**
+             * Given a (nodeset or ref) path, will figure out what the implied NodeID is.
+             * @param path
+             */
+            function getNodeIDfromPath (path) {
+                var arr = path.split('/');
+                return arr[arr.length-1];
+            }
+
+            function eachFunc () {
+                var el = $(this),
+                    attrs = {},
+                    mType = formdesigner.util.getNewMugType(formdesigner.model.mugTypes.dataBind),
+                    mug = formdesigner.model.createMugFromMugType(mType),
+                    path, nodeID, bindElement, oldMT;
+                path = el.attr('nodeset');
+                if (!path) {
+                   path = el.attr('ref');
+                }
+                nodeID = getNodeIDfromPath(path);
+                attrs.dataType = el.attr('type');
+                attrs.relevantAttr = el.attr('relevant');
+                attrs.calculateAttr = el.attr('calculate');
+                attrs.constraintAttr = el.attr('constraint');
+                attrs.constraintMsgAttr = el.attr('constraintMsg');
+                attrs.requiredAttr = el.attr('required');
+                attrs.nodeID = nodeID;
+
+                bindElement = new formdesigner.model.BindElement(attrs);
+                mug.properties.bindElement = bindElement;
+
+                oldMT = formdesigner.controller.form.getMugTypeByIDFromTree(nodeID, 'data');
+                if(!oldMT){
+                    throw new ParseException('Parse error! Could not find Data MugType associated with this bind!', el);
+                }
+                mType.ufid = oldMT.ufid;
+                mType.properties.dataElement = oldMT.properties.dataElement;
+                mType.mug = mug;
+                mType.mug.properties.dataElement = oldMT.mug.properties.dataElement;
+
+                form.replaceMugType(oldMT, mType, 'data');
+            }
+            bindList.each(eachFunc);
+        }
+
+        function parseControlTree () {
+
+        }
+
+        parseDataTree (data[0]);
+        parseBindList (binds);
 
     }
     that.parseXML = parseXML;
@@ -317,7 +419,10 @@ formdesigner.controller = (function () {
      * @param rType - The type of the Reference controlElement being moved (use tagName!) e.g. "input" or "group"
      *                  if -1 is given, assumes rootNode.
      */
-    var checkMoveOp = that.checkMoveOp =function (mugType, position, refMugType) {
+    var checkMoveOp = that.checkMoveOp =function (mugType, position, refMugType, treeType) {
+        if(treeType === 'data'){
+            return true;
+        }
         var oType = mugType.mug.properties.controlElement.properties.tagName,
                 rType = (!refMugType || refMugType === -1) ? 'group' : refMugType.mug.properties.controlElement.properties.tagName,
                 oIsGroupOrRepeat = (oType === 'repeat' || oType === 'group'),
@@ -475,87 +580,6 @@ formdesigner.controller = (function () {
         formdesigner.model.reset();
         formdesigner.ui.resetUI();
     }
-
-    var Parser = function(spec){
-        var that = {},
-                unusedBits; //the unused elements of a regular XForm are stored here.
-
-        (function constructor(mySpec){
-
-        })(spec);
-
-
-        that.parse = function(XMLString){
-            var jform = xmlToJSON(XMLString),
-                    bindBlock, dataBlock, controlBlock;
-            
-            bindBlock = jform["h:html"]["h:head"].model.bind;
-            dataBlock = jform["h:html"]["h:head"].model.instance;
-            controlBlock = jform["h:html"]["h:body"];
-            console.log(bindBlock);
-            console.log(dataBlock);
-            console.log(controlBlock);
-            console.log('jform',jform)
-            parseDataBlock(jform);
-            parseBindBlock(jform);
-            parseControlBlock(jform);
-
-            storeUnusedBits(jform);
-            return json2xml(jform,"");
-        }
-
-        /**
-         * Converts an XML string to a JSON
-         * document.
-         * @param xml
-         */
-        var xmlToJSON = function(xml){
-            var data = xml,output,content;
-
-            content = formdesigner.util.parseXml(data);
-            output = xml2json(content,"\t");
-            output =  eval('(' + output + ')');
-            return output;
-        }
-
-        var parseDataBlock = function(form){
-
-        };
-
-        var parseBindBlock = function(form){
-
-        };
-
-        var parseControlBlock = function(form){
-
-        };
-
-        /**
-         * Store the 'rest' of the xform document (as a JSON object)
-         * to be retrieved later during form construction.
-         * @param form
-         */
-        var storeUnusedBits = function(form){
-            unusedBits = form;
-        };
-
-        /**
-         * Retrieve the unused parts (during parse time) of the XForm
-         * as a JSON object.
-         */
-        that.getUnusedDocParts = function(){
-            return unusedBits;
-        };
-
-
-
-
-        //make parser event aware
-        formdesigner.util.eventuality(that);
-
-        return that;
-    }
-    that.Parser = Parser;
 
     //make controller event capable
     formdesigner.util.eventuality(that);

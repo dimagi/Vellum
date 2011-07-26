@@ -755,7 +755,6 @@ $(document).ready(function(){
 
         jstree.bind('create_node.jstree',function(e,data){
             lastCreatedNode = data.rslt.obj;
-            console.log("Created Object is:",lastCreatedNode);
         })
         addQbut.click();
         jstree.jstree('select_node',lastCreatedNode);
@@ -791,7 +790,6 @@ $(document).ready(function(){
         addQbut = ui.buttons.addquestionbutton;
         jstree.bind('create_node.jstree',function(e,data){
             lastCreatedNode = data.rslt.obj;
-            console.log("Created Object is:",lastCreatedNode);
         })
         addQbut.click();
         addQbut.click();
@@ -804,6 +802,58 @@ $(document).ready(function(){
 
         //testing the opposite case is done in the test group above.
 
+    });
+
+    test ("Test getMTbyDataNodeID function", function ()  {
+        var c = formdesigner.controller,
+            ui = formdesigner.ui,
+            jstree = $("#fd-question-tree"),
+            mugType,
+            ufid1,ufid2,
+            addQbut, lastCreatedNode, addGroupBut;
+        c.resetFormDesigner();
+        addQbut = ui.buttons.addquestionbutton;
+        jstree.bind('create_node.jstree',function(e,data){
+            lastCreatedNode = data.rslt.obj;
+        })
+        addQbut.click();
+        ufid1 = $(lastCreatedNode).attr('id');
+        addQbut.click();
+        ufid2 = $(lastCreatedNode).attr('id');
+
+        mugType = c.getMTFromFormByUFID(ufid2);
+        deepEqual(mugType, c.form.getMugTypeByIDFromTree(mugType.mug.properties.dataElement.properties.nodeID, 'data'), 'MugTypes should be the same')
+        ok(null === c.form.getMugTypeByIDFromTree('foo', 'data'), 'Given a bogus ID should return null');
+    });
+
+    module("Parsing tests");
+    test ("Replacing MugTypes in a tree", function () {
+        getTestXformOutput('form1.xml');
+        var xmlDoc = $.parseXML(testXformBuffer),
+            xml = $(xmlDoc),
+            binds = xml.find('bind'),
+            data = xml.find('instance').children(),
+            formID, formName,
+            c = formdesigner.controller,
+            jstree = $("#fd-question-tree");
+        c.resetFormDesigner();
+
+        var mType = formdesigner.util.getNewMugType(formdesigner.model.mugTypes.dataBind),
+        mug = formdesigner.model.createMugFromMugType(mType),
+        oldMT;
+
+        jstree.bind('create_node.jstree',function(e,data){
+            lastCreatedNode = data.rslt.obj;
+        })
+
+        formdesigner.ui.buttons.addquestionbutton.click();
+        oldMT = formdesigner.controller.form.getMugTypeByIDFromTree('question2', 'data');
+        mType.mug = mug;
+        mType.mug.properties.dataElement.properties.nodeID = 'HYAAA';
+        mType.ufid = oldMT.ufid;
+
+        c.form.replaceMugType(oldMT,mType,'data');
+        console.log(oldMT);
     });
 
 

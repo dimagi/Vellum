@@ -481,20 +481,10 @@ formdesigner.model = function () {
          *          presence: 'required|optional|notallowed' //must this property be set, optional or should not be present?
          *          [values: [arr of allowable vals]] //list of allowed values for this property
          *          [validationFunc: function(mugType,mug)] //special validation function, optional
+         *          lstring: "Human Readable Property Description" //Optional
          *      }
          *
-         *
-         *
-         *
          */
-//        prop: {
-//            editable: '',
-//            visibility: '',
-//            presence: ''
-////            values: [], //Optional. List of allowed values this property can take
-////            validationFunc: function(mugType,mug){} //Optional
-////            lstring: "Human Readable Property Description" //Optional
-//        },
         properties : {
             dataElement: {
                 nodeID: {
@@ -1030,6 +1020,10 @@ formdesigner.model = function () {
                 return nodeValue;
             };
 
+            that.setValue = function (val) {
+                nodeValue = val;
+            }
+
             /**
              * DOES NOT CHECK TO SEE IF NODE IS IN TREE ALREADY!
              * Adds child to END of children!
@@ -1359,7 +1353,7 @@ formdesigner.model = function () {
         that.insertMugType = function (mugType, position, refMugType) {
             var refNode, refNodeSiblings, refNodeIndex, refNodeParent, node;
 
-            if (!formdesigner.controller.checkMoveOp(mugType, position, refMugType)) {
+            if (!formdesigner.controller.checkMoveOp(mugType, position, refMugType, treeType)) {
                 console.group("Illegal Tree Move Op");
                 console.log("position: " + position);
                 console.log("mugType below");
@@ -1927,6 +1921,80 @@ formdesigner.model = function () {
         };
         that.isFormValid = isFormValid;
 
+        /**
+         * Searches through the dataTree for a mugType
+         * that matches the given nodeID (e.g. mugType.mug.properties.dataElement.properties.nodeID)
+         * @param nodeID
+         * @param treeType - either 'data' or 'control
+         */
+        var getMugTypeByIDFromTree = function (nodeID, treeType) {
+            var mapFunc = function (node) {
+                if(node.isRootNode){
+                    return;
+                }
+                var mt = node.getValue(),
+                    thisNodeID;
+                if (treeType === 'data') {
+                    thisNodeID = mt.mug.properties.dataElement.properties.nodeID;
+                }else {
+                    thisNodeID = mt.mug.properties.controlElement.properties.nodeID;
+                }
+                if(thisNodeID === nodeID){
+                    return mt;
+                }
+            }
+
+            var retVal;
+            if (treeType === 'data') {
+                retVal = dataTree.treeMap(mapFunc);
+            }else if (treeType === 'control') {
+                retVal = controlTree.treeMap(mapFunc);
+            }else{
+                throw 'Invalid TreeType specified! Use either "data" or "control"';
+            }
+            if(retVal.length > 0){
+                return retVal[0];
+            }else {
+                return null;
+            }
+
+        };
+        that.getMugTypeByIDFromTree = getMugTypeByIDFromTree;
+
+        /**
+         * Replace a MugType that already exists in a tree with a new
+         * one.  It is up to the caller to ensure that the MT
+         * ufids and other properties match up as required.
+         * Use with caution.
+         * @param oldMT
+         * @param newMT
+         * @param treeType
+         *
+         * @return - true if a replacement occurred. False if no match was found for oldMT
+         */
+        var replaceMugType = function (oldMT, newMT, treeType){
+            function treeFunc (node) {
+                if(node.getValue() === oldMT){
+                    node.setValue(newMT);
+                    return true;
+                }
+            }
+
+            var result, tree;
+            if(treeType === 'data'){
+                tree = dataTree;
+            }else {
+                tree = controlTree;
+            }
+            result = tree.treeMap(treeFunc);
+            if(result.length > 0){
+                return result[0];
+            }else {
+                return false;
+            }
+        };
+        that.replaceMugType = replaceMugType;
+        
         //make the object event aware
         formdesigner.util.eventuality(that);
         return that;
