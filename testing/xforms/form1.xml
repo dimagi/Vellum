@@ -1,7 +1,30 @@
-<?xml version="1.0" encoding="UTF-8" standalone="true" ?>
-<html>
-	<input ref="/question1" />
-	<group ref="/question2" >
-		<input ref="/question3" />
-	</group>
-</html>
+<?xml version="1.0" encoding="UTF-8" ?>
+<h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:orx="http://openrosa.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa">
+	<h:head>
+		<h:title>TEST</h:title>
+		<model>
+			<instance>
+				<data>
+					<question1 />
+					<group1>
+						<question2 />
+					</group1>
+				</data>
+			</instance>
+			<bind nodeset="/data/question1" type="xsd:anyURI" />
+			<bind nodeset="/data/group1" />
+			<bind nodeset="/group1/question2" type="xsd:anyURI" />
+		</model>
+	</h:head>
+	<h:body>
+		<input ref="/data/question1">
+			<label>question1 label</label>
+		</input>
+		<group ref="/data/group1">
+			<label>group label</label>
+			<input ref="/group1/question2">
+				<label>question2 label</label>
+			</input>
+		</group>
+	</h:body>
+</h:html>

@@ -1157,8 +1157,14 @@ formdesigner.model = function () {
              * An ID used during prettyPrinting of the Node. (a human readable value for the node)
              */
             that.getID = function () {
-                if (this.isRootNode) {  
-                    return 'RootNode';
+                var id;
+                if (this.isRootNode) {
+                    id = formdesigner.controller.form.formID;
+                    if (id) {
+                        return id;
+                    } else {
+                        return 'RootNode';
+                    }
                 }
                 if (!this.getValue() || typeof this.getValue().validateMug !== 'function') {
                     return 'NodeWithNoValue!';
@@ -1549,6 +1555,8 @@ formdesigner.model = function () {
         var that = {}, dataTree, controlTree;
 
         var init = (function () {
+            that.formName = 'New Form';
+            that.formID = 'data';
             that.dataTree = dataTree = new Tree('data');
             that.controlTree = controlTree = new Tree('control');
         })();
@@ -1653,7 +1661,7 @@ formdesigner.model = function () {
                         defaultVal,
                         MT = node.getValue();
                     xw.writeStartElement(node.getID());
-                    if(!node.isRootNode){
+                    if(!node.isRootNode && MT.mug.properties.dataElement.dataValue){
                         xw.writeString(MT.mug.properties.dataElement.dataValue);
                     }
                 }
@@ -1763,8 +1771,9 @@ formdesigner.model = function () {
                             createLabel();
                         }
                         //////////////////////////////////////////////////////////////////////////
-                        if (tagName === 'item') {
+                        if (tagName === 'item' && cProps.defaultValue) {
                             //do a value tag for an item MugType
+                            console.log('creating item value tag!',cProps,mugType);
                             xmlWriter.writeStartElement('value');
                             xmlWriter.writeString(cProps.defaultValue);
                             xmlWriter.writeEndElement();
@@ -1841,6 +1850,15 @@ formdesigner.model = function () {
                 return;
             }
 
+            function html_tag_boilerplate () {
+                var xw = formdesigner.controller.XMLWriter;
+                xw.writeAttributeString( "xmlns:h", "http://www.w3.org/1999/xhtml" );
+                xw.writeAttributeString( "xmlns:orx", "http://openrosa.org/jr/xforms" );
+                xw.writeAttributeString( "xmlns", "http://www.w3.org/2002/xforms" );
+                xw.writeAttributeString( "xmlns:xsd", "http://www.w3.org/2001/XMLSchema" );
+                xw.writeAttributeString( "xmlns:jr", "http://openrosa.org/javarosa" );
+            }
+
             var generate_form = function (form_title) {
                 var docString;
                 formdesigner.controller.initXMLWriter();
@@ -1849,6 +1867,7 @@ formdesigner.model = function () {
                 xw.writeStartDocument();
                 //Generate header boilerplate up to instance level
                 xw.writeStartElement('h:html');
+                html_tag_boilerplate();
                     xw.writeStartElement('h:head');
                         xw.writeStartElement('h:title');
                             xw.writeString(form_title);
@@ -1882,7 +1901,32 @@ formdesigner.model = function () {
             return xformString;
         }
         that.createXForm = createXForm;
-        
+
+        /**
+         * Goes through all mugs (in data and control tree and bindList)
+         * to determine if all mugs are Valid and ok for form creation.
+         */
+        var isFormValid = function () {
+            var i, bList;
+            if (!this.dataTree.isTreeValid()) {
+                return false;
+            }
+            if (!this.controlTree.isTreeValid()) {
+                return false;
+            }
+            bList = this.getBindList();
+            for (i in bList) {
+                if(bList.hasOwnProperty(i)){
+                    if (bList[i].validateMug.status === 'fail') {
+                       return false;
+                    }
+                }
+            }
+
+            return true;
+        };
+        that.isFormValid = isFormValid;
+
         //make the object event aware
         formdesigner.util.eventuality(that);
         return that;

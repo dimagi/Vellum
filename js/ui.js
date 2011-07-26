@@ -143,10 +143,7 @@ formdesigner.ui = (function () {
             toolbar.append(fancyBut);
 
             fancyBut.button().click(function () {
-                var d = controller.form.createXForm();
-                var output = $('#fd-source');
-                output.val(d);
-                $('#inline').click();
+                controller.generateXForm();
             });
 
             buttons.fancyBut = fancyBut;
@@ -639,10 +636,48 @@ formdesigner.ui = (function () {
             }
         });
 
-    };
+        $('#fd-add-data-node-button').button({
+            icons : {
+                primary : 'ui-icon-gear'
+            }
+        });
 
-    ////////////////TODO
-    ///////////////INCANTATION : $($('#fed8b8a52d30801b3f0371107a86e2ff a')[0]).append('<span class="ui-icon ui-icon-alert tree-valid-alert-icon"></span>')
+        function makeFormProp (propLabel, propName, keyUpFunc, initVal){
+            var liStr = '<li id=fd-form-prop-"' + propName + '" class="fd-form-property"><span class="fd-form-property-text">'+propLabel+': '+'</span>' +
+                '<input id=fd-form-prop-"' + propName + '-' + 'input" class="fd-form-property-input">'+
+                '</li>',
+                li = $(liStr),
+                ul = $('#fd-form-opts-ul');
+
+            ul.append(li);
+            $(li).find('input').val(initVal)
+                               .keyup(keyUpFunc);
+
+
+        };
+
+        function fireFormPropChanged (propName, oldVal, newVal) {
+            formdesigner.controller.form.fire({
+                type: 'form-property-changed',
+                propName: propName,
+                oldVal: formdesigner.controller.form.formName,
+                newVal: $( this ).val()
+            })
+        }
+
+        var formNameFunc = function (e) {
+            fireFormPropChanged('formName',formdesigner.controller.form.formName, $( this ).val());
+            formdesigner.controller.form.formName = $(this).val();
+        }
+        makeFormProp("Form Name","formName", formNameFunc, formdesigner.controller.form.formName);
+
+        var formIDFunc = function (e) {
+            fireFormPropChanged('formID',formdesigner.controller.form.formName, $( this ).val());
+            formdesigner.controller.form.formID = $(this).val();
+        }
+        makeFormProp("Form ID", "formID", formIDFunc, formdesigner.controller.form.formID);
+
+    }
 
     /**
      * Goes through the internal data/controlTrees and determines which mugs are not valid.
@@ -781,7 +816,7 @@ formdesigner.ui = (function () {
     function init_modal_dialogs () {
         $( "#fd-dialog-confirm" ).dialog({
 			resizable: false,
-			height:140,
+//			height:140,
 			modal: true,
 			buttons: {
 				"Confirm": function() {
@@ -795,13 +830,15 @@ formdesigner.ui = (function () {
 		});
     }
 
-    var showConfirmDialog = that.showConfirmDialog = function () {
+    var showConfirmDialog = function () {
         $( "#fd-dialog-confirm" ).dialog("open");
-    }
+    };
+    that.showConfirmDialog = showConfirmDialog;
 
-    var hideConfirmDialog = that.hideConfirmDialog = function () {
+    var hideConfirmDialog = function () {
         $( "#fd-dialog-confirm" ).dialog("close");
-    }
+    };
+    that.hideConfirmDialog = hideConfirmDialog;
 
     /**
      * Set the values for the Confirm Modal Dialog
@@ -819,6 +856,7 @@ formdesigner.ui = (function () {
         
         $( "#fd-dialog-confirm" ).dialog("option",{buttons: buttons});
     }
+    that.setDialogInfo = setDialogInfo;
 
     var init_misc = function () {
         controller.on('question-creation', function (e) {

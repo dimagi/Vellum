@@ -517,7 +517,7 @@ $(document).ready(function(){
         var mugTD = GNMT(DBCQuestion);
         var mugD = createMugFromMugType(mugTD);
         tree.insertMugType(mugTD, 'before', mugTA);
-        equal('/'+mugTD.mug.properties.dataElement.properties.nodeID, tree.getAbsolutePath(mugTD),
+        equal('/' + formdesigner.controller.form.formID + '/' + mugTD.mug.properties.dataElement.properties.nodeID, tree.getAbsolutePath(mugTD),
              "Check that the newly inserted Mug's generated path is correct");
         console.log("MUGTD",mugTD);
         treePrettyPrintExpected = ''+tree._getRootNodeID()+'['+
@@ -650,8 +650,8 @@ $(document).ready(function(){
         ui = formdesigner.ui;
         jstree = $("#fd-question-tree");
 
-        equal(c.form.controlTree.printTree(false), "RootNode", "Ensure the controlTree is empty after a call to resetFormDesigner");
-        equal(c.form.dataTree.printTree(false), "RootNode", "Ensure the dataTree is empty after a call to resetFormDesigner");
+        equal(c.form.controlTree.printTree(false), formdesigner.controller.form.formID, "Ensure the controlTree is empty after a call to resetFormDesigner");
+        equal(c.form.dataTree.printTree(false), formdesigner.controller.form.formID, "Ensure the dataTree is empty after a call to resetFormDesigner");
 
         //add a listener for question creation events
         c.on("question-creation", function(e){
@@ -737,10 +737,9 @@ $(document).ready(function(){
         addQbut.click();
         addQbut.click();
         addQbut.click();
-        var actual = beautifyXml(c.createXForm());
+        var actual = beautifyXml(c.form.createXForm());
         getTestXformOutput('form0.xml');
         var expected = beautifyXml(testXformBuffer);
-        console.log(actual == expected);
         equal(expected,actual);
 
     });
@@ -750,7 +749,7 @@ $(document).ready(function(){
             ui = formdesigner.ui,
             jstree = $("#fd-question-tree"),
             curMugType,
-            addQbut, lastCreatedNode;
+            addQbut, lastCreatedNode, addGroupBut;
         c.resetFormDesigner();
         addQbut = ui.buttons.addquestionbutton;
 
@@ -760,8 +759,53 @@ $(document).ready(function(){
         })
         addQbut.click();
         jstree.jstree('select_node',lastCreatedNode);
+        $('#controlElement-label-input').val('question1 label').keyup();
+        addGroupBut = ui.buttons.addgroupbutton;
+        addGroupBut.click();
+        jstree.jstree('select_node',lastCreatedNode,true);
+        $('#controlElement-label-input').val('group label').keyup();
+        $('#dataElement-nodeID-input').val('group1').keyup();
+        addQbut.click();
+        jstree.jstree('select_node',lastCreatedNode,true);
+        $('#controlElement-label-input').val('question2 label').keyup();
+        $('#dataElement-nodeID-input').val('question2').keyup();
+        var actual = beautifyXml(c.form.createXForm());
+        getTestXformOutput('form1.xml');
+        var expected = beautifyXml(testXformBuffer);
+        equal(expected,actual);
+
+        //test if form is valid
+        ok(formdesigner.controller.form.isFormValid(), 'Form Should pass all Validation Tests');
+
+                
 
     });
+
+    test ("Test Form Validation function", function () {
+        var c = formdesigner.controller,
+            ui = formdesigner.ui,
+            jstree = $("#fd-question-tree"),
+            curMugType,
+            addQbut, lastCreatedNode, addGroupBut;
+        c.resetFormDesigner();
+        addQbut = ui.buttons.addquestionbutton;
+        jstree.bind('create_node.jstree',function(e,data){
+            lastCreatedNode = data.rslt.obj;
+            console.log("Created Object is:",lastCreatedNode);
+        })
+        addQbut.click();
+        addQbut.click();
+        addGroupBut = ui.buttons.addgroupbutton;
+        addGroupBut.click();
+        jstree.jstree('select_node',lastCreatedNode,true);
+        addQbut.click();
+
+        notEqual(formdesigner.controller.form.isFormValid(), true, 'Form should not be valid. Missing label fields.');
+
+        //testing the opposite case is done in the test group above.
+
+    });
+
 
 
 });

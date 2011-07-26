@@ -171,6 +171,10 @@ td {
     list-style-type: none;
 }
 
+#fd-form-opts-ul {
+    list-style-type: none;
+}
+
 #fd-question-properties ul li:nth-child(even) {
     background: #FAFAFF
 }
@@ -243,4 +247,20 @@ td {
     left: 0;
     position: relative;
     top: -16px;
+}
+
+.fd-form-props-heading {
+    font-weight:bold;
+}
+
+.fd-form-property {
+
+}
+
+.fd-form-property-text {
+    
+}
+
+.fd-form-property-input {
+    
 }

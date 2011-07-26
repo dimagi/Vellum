@@ -94,9 +94,12 @@ formdesigner.controller = (function () {
      */
     var insertMugTypeIntoForm = function (refMugType, newMugType) {
         var dataTree = form.dataTree, controlTree = form.controlTree;
-
-        dataTree.insertMugType(newMugType, formdesigner.util.getRelativeInsertPosition(refMugType, newMugType), refMugType);
-        controlTree.insertMugType(newMugType, formdesigner.util.getRelativeInsertPosition(refMugType, newMugType), refMugType);
+        if (newMugType.type.indexOf('d') !== -1) {
+            dataTree.insertMugType(newMugType, formdesigner.util.getRelativeInsertPosition(refMugType, newMugType), refMugType);
+        }
+        if (newMugType.type.indexOf('c') !== -1) {
+            controlTree.insertMugType(newMugType, formdesigner.util.getRelativeInsertPosition(refMugType, newMugType), refMugType);
+        }
     };
     that.insertMugTypeIntoForm = insertMugTypeIntoForm;
 
@@ -224,17 +227,6 @@ formdesigner.controller = (function () {
     };
     that.createQuestion = createQuestion;
 
-
-    that.createXForm = function () {
-        var xw = new XMLWriter( 'UTF-8', '1.0' );
-        xw.writeStartDocument();
-        xw.writeStartElement('html');
-        form.controlTree.createTreeXML('control',xw);
-        xw.writeEndElement();
-        xw.writeEndDocument();
-        return xw.flush();
-    }
-
     that.XMLWriter = null;
     var initXMLWriter = function () {
         var xw = new XMLWriter( 'UTF-8', '1.0' );
@@ -242,6 +234,80 @@ formdesigner.controller = (function () {
         formdesigner.controller.XMLWriter = xw;
     }
     that.initXMLWriter = initXMLWriter;
+
+    /**
+     * Checks that the form is valid (prompts the user if not).
+     *
+     * Returns a reference to the variable that will contain the xform
+     * string.  If there are no validation errors at call time,
+     * this variable will immediately be populated with the form.
+     * If there are problems, the var will not be populated until the user
+     * hits continue.  If they choose to abort the operation (to fix the
+     * form) the var will not be populated at all.
+     *
+     */
+    that.XFORM_STRING = null;
+    var generateXForm = function () {
+
+        function showFormInLightBox () {
+            var output = $('#fd-source');
+            if(formdesigner.controller.XFORM_STRING){
+                output.val(formdesigner.controller.XFORM_STRING);
+                $('#inline').click();
+            }
+        }
+
+        // There are validation errors but user continues anyway
+        function onContinue () {
+            formdesigner.controller.XFORM_STRING = form.createXForm();
+            formdesigner.ui.hideConfirmDialog();
+            showFormInLightBox();
+
+        }
+
+        function onAbort () {
+            formdesigner.controller.XFORM_STRING = null;
+            formdesigner.ui.hideConfirmDialog();
+        }
+
+        var msg = "There are validation errors in the form.  Do you want to continue anyway? WARNING:" +
+            "The form will not be valid and likely not perform correctly on your device!"
+
+        formdesigner.ui.setDialogInfo(msg,'Continue',onContinue,'Abort',onAbort);
+        console.log ("form.isValid:",form.isFormValid());
+        if (!form.isFormValid()) {
+            console.log("FORM NOT VALID: SHOWING CONFIRM BOX");
+            formdesigner.ui.showConfirmDialog();
+        } else {
+            formdesigner.controller.XFORM_STRING = form.createXForm();
+            showFormInLightBox();
+        }
+        return formdesigner.controller.XFORM_STRING;
+    }
+    that.generateXForm = generateXForm;
+
+    var setFormName = function (name) {
+        formdesigner.controller.form.formName = name;
+    };
+    that.setFormName = setFormName;
+
+    /**
+     * The big daddy function of parsing.
+     * Pass in the XML String and this function
+     * will create all the right stuff in the trees
+     * and set everything up for editing.
+     * @param xmlString
+     */
+    var parseXML = function (xmlString) {
+        var xmlDoc = $.parseXML(xmlString),
+            xml = $(xmlDoc),
+            binds = xml.find('bind'),
+            data = xml.find('instance');
+
+
+    }
+    that.parseXML = parseXML;
+
     /**
      * Checks that the specified move is legal. returns false if problem is found.
      *
