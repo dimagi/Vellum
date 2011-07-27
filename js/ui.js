@@ -891,7 +891,7 @@ formdesigner.ui = (function () {
 
     that.init = function(){
         controller = formdesigner.controller;
-        generate_scaffolding($("#formdesigner"));
+        generate_scaffolding($(formdesigner.rootElement));
         do_loading_bar();
         init_toolbar();
         init_extra_tools();
@@ -905,6 +905,8 @@ formdesigner.ui = (function () {
         setup_fancybox();
     }
 
+
+
     $(document).ready(function () {
 //
 
@@ -913,7 +915,14 @@ formdesigner.ui = (function () {
     return that;
 }());
 
-formdesigner.launch = function () {
+formdesigner.launch = function (rootElement) {
+    if(rootElement){
+        formdesigner.rootElement = rootElement;
+    }else{
+        formdesigner.rootElement = '#formdesigner';
+    }
     formdesigner.ui.controller = formdesigner.controller;
     formdesigner.controller.initFormDesigner();
 }
+
+formdesigner.rootElement = '';

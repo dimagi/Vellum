@@ -14,5 +14,12 @@ The super easy way
 
 That's it!
 
+Usage as a Jquery-UI like plugin
+--------------------------------
+1. Clone the repo
+2. Place all the subfolders in the same folder as the html file you're planning to run the plugin from.
+3. In your $(document).ready() call formdesigner.launch(arg), where arg is a jquery selector pointing to the div you would like to use as the container for the fd.
+
+
 
 Contact: adewinter [at] dimagi dot C O M
