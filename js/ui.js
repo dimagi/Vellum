@@ -529,7 +529,6 @@ formdesigner.ui = (function () {
         formdesigner.ui.showVisualValidation(mugType);
     }
 
-
     /**
      * Private function (to the UI anyway) for handling node_select events.
      * @param e
@@ -600,34 +599,64 @@ formdesigner.ui = (function () {
     };
 
     var init_extra_tools = function(){
-        var eContainer = $("fd-extra-tools"),
+        var accContainer = $("#fd-extra-tools"),
             accordion = $("#fd-extra-tools-accordion"),
-                min_max = $('#fd-acc-min-max');
+            min_max = $('#fd-acc-min-max'),
+            min_max_button = $('#fd-min-max-button'),
+            question_props = $('#fd-question-properties'),
+            fd_tree = $('.fd-tree');
+        accordion.hide();
         accordion.accordion({
             fillSpace: true,
-            collapsible: true
+            collapsible: false
         });
-        accordion.accordion("activate",false);
 
+        accordion.show();
+        accordion.accordion("resize");
+        min_max_button.button({
+            icons: {
+                primary: 'ui-icon-arrowthick-2-n-s'
+            }
+        })
 //        min_max.button();
         min_max.click(function(){
-            var b = $("#fd-extra-tools"),
-            curRight = b.css('right');
-            if(curRight === '-274px'){
-                b.animate({
-                    right:'0px'
+            var curWidth = accContainer.css('width');
+            if(curWidth === '300px'){
+                accordion.hide(200)
+                accContainer.css('border','');
+                min_max.css('border', '');
+                accContainer.animate({
+                    width:'20px'
                 },200);
-            }else if(curRight === "0px"){
-                b.animate({
-                    right:'-274px'
+                question_props.animate({
+                    width:'503px'
                 },200);
+                fd_tree.animate({
+                    width:'41%'
+                },200);
+            }else if(curWidth === '20px'){
+                accordion.show(200)
+                min_max.css('border','');
+                accContainer.css('border', '1px solid gray');
+                accContainer.animate({
+                    width:'300px'
+                },200);
+                question_props.animate({
+                    width:'374px'
+                },200);
+                fd_tree.each(function () {
+                    $(this).animate({
+                        width:'25%'
+                    },200)
+                });
             }
         });
 
         $('#fd-add-data-node-button').button({
             icons : {
                 primary : 'ui-icon-gear'
-            }
+            },
+            text : false
         });
 
         $('#fd-template-question-box div').each(function(){

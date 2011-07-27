@@ -45,13 +45,15 @@ body{
     position:relative;
 }
 .fd-tree{
-    float:left;
-    width:280px;
+    background: none repeat scroll 0 0 white;
+    border: 1px solid gray;
+    float: left;
     height: 500px;
     margin: 5px;
-    border: 1px solid gray;
-    overflow: auto;
-    background:  white;
+    overflow-x: hidden;
+    overflow-y: auto;
+    position: relative;
+    width: 25%;
 }
 
 #fd-props-advanced{
@@ -77,6 +79,7 @@ body{
     overflow: auto;
     margin-top: 10px;
     width:280px;
+    display:none;
 }
 
 
@@ -86,7 +89,7 @@ body{
     margin-top: 5px;
     padding-left: 5px;
     height:500px;
-    width: 500px;
+    width: 374px;
     display:none;
 
 }
@@ -98,20 +101,26 @@ td {
 .fd-properties-block-header {
     text-align:left;
 }
-
+.fd-props-ul  {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    position: relative;
+    top: -20px;
+}
 #fd-extra-tools{
-    float:left;
+    float:right;
+    position:relative;
     border: 1px solid black;
-    height:745px;
+    height:492px;
     padding-bottom:5px;
     /*margin: 5px;*/
-    padding-top: 5px;
-    position: absolute;
-    right: -274px;
     width: 300px;
     margin-top: 5px;
     background: white;
     z-index:4;
+    padding-right: 5px;
+    padding-top: 3px;
 }
 
 #fd-extra-tools-accordion{
@@ -119,17 +128,18 @@ td {
     padding-left: 30px;
     width: 270px;
     z-index:4;
+    padding-bottom:100px;
 }
 
 #fd-acc-min-max{
+    cursor: pointer;
     float: left;
-    left: -365px;
+    left: -237px;
     margin: 0;
     padding: 0;
-    top: 364px;
-    width: 754px;
-    cursor: pointer;
-    z-index:5;
+    top: 237px;
+    width: 498px;
+    z-index: 5;
 }
 
 #textDrop{
@@ -158,7 +168,8 @@ td {
 #fd-props-head {
     left: 237px;
     position: relative;
-    width:498px;
+    top: 237px;
+    width: 498px;
 }
 
 
@@ -208,7 +219,6 @@ td {
     /* for ie */
     filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=3);
 
-
     background: url("smoothness/images/ui-bg_glass_75_e6e6e6_1x400.png") repeat-x scroll 50% 50% #E6E6E6;
     border: 1px solid #D3D3D3;
     color: #555555;
@@ -216,26 +226,27 @@ td {
     float: right;
     font-size: 17px;
     font-weight: bold;
-    height: 25px;
-    left: 16px;
+    height: 24px;
     padding: 0;
     position: absolute;
     text-align: center;
-    top: 237px;
     width: 500px;
     z-index: 3;
 }
 
 #fd-question-tree-head {
-    left: 23px;
-    top: 242px;
+    position: absolute;
+    right: -237px;
+    top: 236px;
     width: 498px;
 }
 
 #fd-data-tree-head {
+    cursor: pointer;
+    position: relative;
+    right: -238px;
     top: 236px;
     width: 500px;
-    cursor: pointer;
 }
 
 #fd-props-content {
@@ -281,4 +292,16 @@ td {
 .fd-template-but {
     width: 200px;
     margin: 2px;
+}
+
+#fd-ui-container {
+
+    width: 940px;
+}
+
+#fd-min-max-button {
+    float: right;
+    height: 21px;
+    margin: 1px;
+    width: 37px;
 }

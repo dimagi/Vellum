@@ -14,17 +14,18 @@ formdesigner.controller = (function () {
         curSelMugType = null,
         curSelUfid = null,
 
-        initFormDesigner = function () {
-            formdesigner.util.question_counter = 1;
-            curSelMugType = null;
-            curSelUfid = null;
-            $('#fd-quesiton-tree').empty();
-            $('#fd-data-tree').empty();
+    initFormDesigner = function () {
+        formdesigner.util.question_counter = 1;
+        curSelMugType = null;
+        curSelUfid = null;
+        $('#fd-quesiton-tree').empty();
+        $('#fd-data-tree').empty();
 
-            formdesigner.model.init();
-            formdesigner.ui.init();
-        };
+        formdesigner.model.init();
+        formdesigner.ui.init();
+    };
     that.initFormDesigner = initFormDesigner;
+    
     that.form = form;
     var setForm = that.setForm = function (aForm) {
         form = that.form = aForm;
@@ -76,15 +77,6 @@ formdesigner.controller = (function () {
          myMug.fire(event);
     };
 
-
-
-
-
-
-
-
-
-
     /**
      * Inserts a new MugType into the relevant Trees (and their
      * relevant positions) according to the specified mugType and
@@ -102,6 +94,23 @@ formdesigner.controller = (function () {
         }
     };
     that.insertMugTypeIntoForm = insertMugTypeIntoForm;
+
+    var initController = function () {
+
+    }
+    that.initController = initController;
+
+    /**
+     * Controller internal function.  Goes through
+     * the internal data model and reloads the UI trees
+     * and whatever other widgets need refreshing in order
+     * for the user to start the editing process.
+     */
+    function reloadUI () {
+        formdesigner.ui.resetUI();
+
+
+    }
 
     var showErrorMessage = function (msg) {
         formdesigner.ui.appendErrorMessage(msg);
@@ -324,7 +333,7 @@ formdesigner.controller = (function () {
             this.message = msg;
         }
 
-        function parseInstanceInfo () {
+        function parseInstanceInfo (dataEl) {
 
         }
 
@@ -425,6 +434,8 @@ formdesigner.controller = (function () {
                                 dataType = dataType.toLowerCase();
                             }
                         }
+                    }else {
+                        throw 'Could not find Data MT associated with Control Element!'+cEl;
                     }
 
                     //broadly categorize
@@ -441,6 +452,8 @@ formdesigner.controller = (function () {
                         MTIdentifier = 'stdItem';
                     }else if (tagName === 'group') {
                         MTIdentifier = 'stdGroup';
+                    }else if (tagName === 'secret') {
+                        MTIdentifier = 'stdSecret';
                     }
 
 
@@ -468,7 +481,7 @@ formdesigner.controller = (function () {
                             ' in formdesigner.model.mugTypeMaker! IdentString:' + MTIdentifier;
                     }
 
-                    if(oldMT) {
+                    if(oldMT) { //copy oldMT data to newly generated MT
                         mugType.ufid = oldMT.ufid;
                         mugType.mug.properties.dataElement = oldMT.mug.properties.dataElement;
                         mugType.mug.properties.bindElement = oldMT.mug.properties.bindElement;
@@ -495,30 +508,27 @@ formdesigner.controller = (function () {
                     }
 
                     function parseHint (hEl, MT) {
-                        var labelVal = $(hEl).html(),
-                            labelRef = $(hEl).attr('ref'),
+                        var hintVal = $(hEl).html(),
+                            hintRef = $(hEl).attr('ref'),
                             cProps = MT.mug.properties.controlElement.properties;
 
-                        if(labelRef){
-                            labelRef = labelRef.replace("jr:itext('",'').replace("')",''); //strip itext incantation
-                            cProps.hintItextID = labelRef;
+                        if(hintRef){
+                            hintRef = hintRef.replace("jr:itext('",'').replace("')",''); //strip itext incantation
+                            cProps.hintItextID = hintRef;
                         }
-                        cProps.hintLabel = labelVal;
+                        cProps.hintLabel = hintVal;
 
                     }
 
                     function parseDefaultValue (dEl, MT) {
-                        var dVal = $(dEl).val(),
-                                tagName = MT.mug.properties.controlElement.properties.tagName.toLowerCase(),
+                        var dVal = $(dEl).html(),
                                 cProps = MT.mug.properties.controlElement.properties;
                         if(dVal){
                             cProps.defaultValue = dVal;
                         }
                     }
 
-
-
-                    var mType = MugType.mug.properties.controlElement.properties.tagName;
+                    var tag = MugType.mug.properties.controlElement.properties.tagName;
                     labelEl = $(cEl).find('label');
                     hintEl = $(cEl).find('hint');
                     var cantHaveDefaultValue = ['select', 'select1', 'repeat', 'group', 'trigger'];
@@ -529,9 +539,9 @@ formdesigner.controller = (function () {
                     if (hintEl.length > 0) {
                         parseHint (hintEl, MugType);
                     }
-                    if (mType === 'item') {
+                    if (tag === 'item') {
                         parseDefaultValue($(cEl).find('value'),MugType);
-                    }else if (cantHaveDefaultValue.indexOf(mType) === -1) {
+                    }else if (cantHaveDefaultValue.indexOf(tag) === -1) {
                         parseDefaultValue($(cEl),MugType);
                     }
 
@@ -541,8 +551,6 @@ formdesigner.controller = (function () {
                     console.log("PERFORMING INSERT!",MugType,parentMT);
                     formdesigner.controller.form.controlTree.insertMugType(MugType,'into',parentMT);
                 }
-
-
 
                 var el = $ ( this ),
                     path,
@@ -561,7 +569,7 @@ formdesigner.controller = (function () {
 
                 parentNode = el.parent();
                 if($(parentNode)[0].nodeName === 'repeat') {
-                    parentNode = parentNode.parent();
+                    parentNode = parentNode.parent(); //skip one up because of repeat's funny structure.
                 }if($(parentNode)[0].nodeName === 'h:body') {
                     parentNode = null;
                 }
@@ -593,22 +601,41 @@ formdesigner.controller = (function () {
             controlsTree.each(eachFunc);
         }
 
+        function parseItextBlock (itextBlock) {
 
-        var xmlDoc = $.parseXML(xmlString),
-            xml = $(xmlDoc),
-            binds = xml.find('bind'),
-            data = xml.find('instance').children(),
-            controls = xml.find('h\\:body').children(),
-            formID, formName;
+        }
 
-        xml.find('instance').children().each(function () {
-            formID = this.nodeName;
-        });
+        formdesigner.controller.fire('parse-start');
+        formdesigner.controller.resetFormDesigner();
+        try{
+            var xmlDoc = $.parseXML(xmlString),
+                xml = $(xmlDoc),
+                binds = xml.find('bind'),
+                data = xml.find('instance').children(),
+                controls = xml.find('h\\:body').children(),
+                itext = xml.find('itext'),
+                formID, formName;
 
+            xml.find('instance').children().each(function () {
+                formID = this.nodeName;
+            });
 
-        parseDataTree (data[0]);
-        parseBindList (binds);
-        parseControlTree (controls);
+            parseInstanceInfo(data[0]);
+            parseDataTree (data[0]);
+            parseBindList (binds);
+            parseControlTree (controls);
+            parseItextBlock(itext);
+
+            formdesigner.controller.fire({
+                type: 'parse-finish'
+            });
+        } catch (e) {
+            formdesigner.controller.fire({
+              type: 'parse-error',
+              exceptionData: e
+            });
+            throw e;
+        }
 
     }
     that.parseXML = parseXML;
