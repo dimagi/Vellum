@@ -1,5 +1,5 @@
 $(document).ready(function(){
-
+    formdesigner.launch();
     var testXformBuffer;
     var make_control_bind_data_mug = function(){
         var myMug;

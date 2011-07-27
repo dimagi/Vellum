@@ -890,6 +890,7 @@ formdesigner.ui = (function () {
     };
 
     that.init = function(){
+        controller = formdesigner.controller;
         generate_scaffolding($("#formdesigner"));
         do_loading_bar();
         init_toolbar();
@@ -905,11 +906,14 @@ formdesigner.ui = (function () {
     }
 
     $(document).ready(function () {
-        controller = formdesigner.controller;
-        controller.initFormDesigner();
+//
 
     });
 
     return that;
 }());
 
+formdesigner.launch = function () {
+    formdesigner.ui.controller = formdesigner.controller;
+    formdesigner.controller.initFormDesigner();
+}
