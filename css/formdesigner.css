@@ -192,8 +192,10 @@ td {
 }
 
 .questionButton {
-    width: 200px;
+    height: 60px;
     margin: 1px;
+    vertical-align: middle;
+    width: 200px;
 }
 
 
