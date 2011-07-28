@@ -722,7 +722,6 @@ formdesigner.model = function () {
                         for(y in block){
                             if(block.hasOwnProperty(y)){
                                 if(!testingObj[i]){
-                                    console.log("No Mug.properties." + i + "?? MugType:",mugT,testingObj,i,block);
                                     throw 'No Mug.properties??'
                                 }
                                 tResults[y] = validateRule(y,block[y],testingObj[i].properties,i,mugT,mugT.mug);
@@ -742,9 +741,6 @@ formdesigner.model = function () {
                 for(j in mugProperties){
                     if(mugProperties.hasOwnProperty(j)){
                         var pBlock = mugProperties[j];
-                        if(!pBlock){ //how does that even happen?
-                            console.log('NO PBLOCK',pBlock, mugProperties, mugT);
-                        }
                         for (z in pBlock.properties){
                             if(pBlock.properties.hasOwnProperty(z)){
                                 var p = pBlock.properties[z],
@@ -1377,13 +1373,13 @@ formdesigner.model = function () {
             var refNode, refNodeSiblings, refNodeIndex, refNodeParent, node;
 
             if (!formdesigner.controller.checkMoveOp(mugType, position, refMugType, treeType)) {
-                console.group("Illegal Tree Move Op");
-                console.log("position: " + position);
-                console.log("mugType below");
-                console.log(mugType);
-                console.log("RefMugType below");
-                console.log(refMugType);
-                console.groupEnd();
+//                console.group("Illegal Tree Move Op");
+//                console.log("position: " + position);
+//                console.log("mugType below");
+//                console.log(mugType);
+//                console.log("RefMugType below");
+//                console.log(refMugType);
+//                console.groupEnd();
                 throw 'Illegal Tree move requested! Doing nothing instead.';
 
             }
@@ -1474,9 +1470,7 @@ formdesigner.model = function () {
 
         that.printTree = function (toConsole) {
             var t = rootNode.prettyPrint();
-            if (toConsole) {
-                console.debug(t);
-            }
+
             return t;
         };
 

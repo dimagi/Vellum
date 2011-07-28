@@ -253,14 +253,14 @@ formdesigner.util = (function(){
     }
 
     that.throwAndLogValidationError = function(vResult,mType,mug){
-            console.group("Failed Validation Objectss");
-            console.log("Validation Object:");
-            console.log(vResult);
-            console.log("MugType");
-            console.log(mType);
-            console.log("Mug");
-            console.log(mug);
-            console.groupEnd();
+//            console.group("Failed Validation Objectss");
+//            console.log("Validation Object:");
+//            console.log(vResult);
+//            console.log("MugType");
+//            console.log(mType);
+//            console.log("Mug");
+//            console.log(mug);
+//            console.groupEnd();
             throw 'Newly created mug did not validate! MugType and Mug logged to console...'
     }
 
@@ -566,7 +566,7 @@ formdesigner.util = (function(){
 
         //DEBUG EVENT CONSOLE PRINTER
         mug.on('property-changed', function(e){
-           console.log("PROPERTY-CHANGED-EVENT (see utils)",e);
+//           console.log("PROPERTY-CHANGED-EVENT (see utils)",e);
         });
     }
 

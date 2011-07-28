@@ -12,7 +12,7 @@ if(!Object.keys) Object.keys = function(o){
 if (typeof formdesigner === 'undefined') {
     var formdesigner = {};
 }
-var log = console.log, exports = {};
+//var log = console.log, exports = {};
 
 formdesigner.ui = (function () {
     "use strict";
@@ -124,13 +124,13 @@ formdesigner.ui = (function () {
 
             printTreeBut.button().click(function () {
                 var vObj = [], vOut = [], i, invalidMT = [], mt;
-                console.group("Tree Pretty Print");
-                console.log("Control Tree:"+controller.form.controlTree.printTree())
-                console.log("Data Tree:   "+controller.form.dataTree.printTree());
-                console.log("TREE VALIDATION RESULT",controller.form.controlTree.isTreeValid());
+//                console.group("Tree Pretty Print");
+//                console.log("Control Tree:"+controller.form.controlTree.printTree())
+//                console.log("Data Tree:   "+controller.form.dataTree.printTree());
+//                console.log("TREE VALIDATION RESULT",controller.form.controlTree.isTreeValid());
                 invalidMT = controller.form.getInvalidMugTypes();
 
-                console.log("TREE MAP INVALID UFIDS", controller.form.getInvalidMugTypeUFIDs());
+//                console.log("TREE MAP INVALID UFIDS", controller.form.getInvalidMugTypeUFIDs());
                 for (i in invalidMT){
                     if(invalidMT.hasOwnProperty(i)){
                         mt = invalidMT[i];
@@ -138,8 +138,8 @@ formdesigner.ui = (function () {
                         vOut.push(mt.validateMug());
                     }
                 }
-                console.log("INVALID MTs,VALIDATION OBJ",vOut);
-                console.groupEnd();
+//                console.log("INVALID MTs,VALIDATION OBJ",vOut);
+//                console.groupEnd();
 
             });
 
@@ -584,7 +584,7 @@ formdesigner.ui = (function () {
                         mugType = controller.form.controlTree.getMugTypeFromUFID($(data.rslt.o).attr('id')),
                         refMugType = controller.form.controlTree.getMugTypeFromUFID($(data.rslt.r).attr('id')),
                         position = data.rslt.p;
-                    console.log('MOVE_NODE.JSTREE EVENT',mugType,position,refMugType);
+//                    console.log('MOVE_NODE.JSTREE EVENT',mugType,position,refMugType);
             controller.moveMugType(mugType, position, refMugType);
         });
         questionTree = $("#fd-question-tree");
