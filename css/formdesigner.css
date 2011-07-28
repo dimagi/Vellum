@@ -53,7 +53,7 @@ body{
     overflow-x: hidden;
     overflow-y: auto;
     position: relative;
-    width: 25%;
+    width: 24%;
 }
 
 #fd-props-advanced{
@@ -89,7 +89,7 @@ body{
     margin-top: 5px;
     padding-left: 5px;
     height:500px;
-    width: 374px;
+    width: 49%;
     display:none;
 
 }
@@ -105,6 +105,7 @@ td {
     list-style-type: none;
     margin: 0;
     padding: 0;
+    padding-top:20px;
     position: relative;
     top: -20px;
 }
@@ -115,7 +116,7 @@ td {
     height:492px;
     padding-bottom:5px;
     /*margin: 5px;*/
-    width: 300px;
+    width: 24%;
     margin-top: 5px;
     background: white;
     z-index:4;
@@ -126,7 +127,7 @@ td {
 #fd-extra-tools-accordion{
     float: left;
     padding-left: 30px;
-    width: 270px;
+    width: 94%;
     z-index:4;
     padding-bottom:100px;
 }
@@ -153,12 +154,11 @@ td {
 }
 
 .fd-property-input {
-    float: right;
     margin-top: 0;
     padding-bottom: 2px;
     padding-left: 5px;
     padding-top: 0;
-    width: 200px;
+    width: 80%;
 }
 
 .fd-property {
@@ -175,7 +175,8 @@ td {
 
 
 .fd-property-text {
-    float: none;
+    height: 50px;
+    position: relative;
 }
 
 #fd-question-properties ul {
@@ -251,6 +252,7 @@ td {
 
 #fd-props-content {
     padding-right:25px;
+    padding-top: 20px;
 }
 
 .fd-tree-valid-alert-icon {
@@ -296,7 +298,7 @@ td {
 
 #fd-ui-container {
 
-    width: 940px;
+    width: 100%;
 }
 
 #fd-min-max-button {
@@ -304,4 +306,9 @@ td {
     height: 21px;
     margin: 1px;
     width: 37px;
+}
+
+.fd-prop-input-div {
+    float: right;
+    width: 80%;
 }

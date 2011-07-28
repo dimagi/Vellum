@@ -240,7 +240,6 @@ formdesigner.ui = (function () {
                 $(li).find('.fd-props-validate').removeClass('ui-icon');
             }else if(!exists && showIcon){
                 var icon = $('<span class="fd-props-validate ui-icon ui-icon-alert"></span>');
-                console.log("MESSAGE HERE!",message)
                 icon.attr('title',message);
                 
                 li.append(icon);
@@ -315,7 +314,7 @@ formdesigner.ui = (function () {
                         var pBlock = propertiesBlock[i],
                                 labelStr = pBlock.lstring ? pBlock.lstring : i,
                                 liStr = '<li id="' + groupName + '-' + i + '" class="fd-property"><span class="fd-property-text">'+labelStr+': '+'</span>' +
-                                        '<input id="' + groupName + '-' + i + '-' + 'input" class="fd-property-input">'+
+                                        '<span class="fd-prop-input-div"><input id="' + groupName + '-' + i + '-' + 'input" class="fd-property-input"></span>'+
                                         '</li>',
                                 input;
 
@@ -592,7 +591,7 @@ formdesigner.ui = (function () {
             cache: false,
             success: function(html){
                 root.append(html);
-                console.log("Successfully loaded main template!");
+                formdesigner.fire('formdesigner.loading_complete');
             }
         });
 
@@ -601,10 +600,82 @@ formdesigner.ui = (function () {
     var init_extra_tools = function(){
         var accContainer = $("#fd-extra-tools"),
             accordion = $("#fd-extra-tools-accordion"),
-            min_max = $('#fd-acc-min-max'),
-            min_max_button = $('#fd-min-max-button'),
-            question_props = $('#fd-question-properties'),
-            fd_tree = $('.fd-tree');
+            minMax = $('#fd-acc-min-max'),
+            minMaxButton = $('#fd-min-max-button'),
+            questionProps = $('#fd-question-properties'),
+            fdTree = $('.fd-tree'),
+            fdContainer = $('#fd-ui-container'),
+
+
+            TREE_MIN_WIDTH = 250,
+            TREE_MAX_WIDTH = 380,
+            PROPS_MIN_WIDTH = 300,
+            PROPS_MAX_WIDTH = 750,
+            EXTRAS_MIN_WIDTH = 20,
+            EXTRAS_MAX_WIDTH = 300,
+            STATE_EXTRAS_MAXIMIZE = true; //should you be maximizing or minimizing windows right now?
+
+        function resizeTree () {
+            //Ideally we want the tree to take up about 25% of the global width
+
+            var cur, global, desired, limit, extras;
+
+            extras = STATE_EXTRAS_MAXIMIZE ? EXTRAS_MAX_WIDTH : EXTRAS_MIN_WIDTH;
+            cur = fdTree.width();
+            global = fdContainer.width() - extras;
+            desired = global * 0.25;
+
+            if (desired > TREE_MAX_WIDTH) {
+                desired = TREE_MAX_WIDTH;
+            }else if (desired < TREE_MIN_WIDTH){
+                desired = TREE_MIN_WIDTH;
+            }
+
+            fdTree.animate({
+                    width: desired + 'px'
+            },200);
+
+        }
+
+        function resizeProps () {
+            //Ideally we want the properties view to take up about 75% of the global width
+
+            var cur, global, desired, limit, extras;
+
+            extras = STATE_EXTRAS_MAXIMIZE ? EXTRAS_MAX_WIDTH : EXTRAS_MIN_WIDTH;
+            cur = questionProps.width();
+            global = fdContainer.width() - extras - fdTree.width() - 40;
+            desired = global;
+            if (desired > PROPS_MAX_WIDTH) {
+                desired = PROPS_MAX_WIDTH;
+            }else if (desired < PROPS_MIN_WIDTH){
+                desired = PROPS_MIN_WIDTH;
+            }
+
+            questionProps.animate({
+                    width: desired + 'px'
+            },200);
+
+        }
+
+        function resizeExtras () {
+            if (STATE_EXTRAS_MAXIMIZE) {
+
+                accContainer.animate({
+                    width: EXTRAS_MAX_WIDTH + 'px'
+                },200);
+                accordion.show(300);
+            } else {
+
+                accContainer.animate({
+                    width: EXTRAS_MIN_WIDTH + 'px'
+                },200);
+                accordion.hide(200);
+            }
+        }
+
+
+
         accordion.hide();
         accordion.accordion({
             fillSpace: true,
@@ -613,43 +684,29 @@ formdesigner.ui = (function () {
 
         accordion.show();
         accordion.accordion("resize");
-        min_max_button.button({
+        minMaxButton.button({
             icons: {
                 primary: 'ui-icon-arrowthick-2-n-s'
             }
         })
 //        min_max.button();
-        min_max.click(function(){
-            var curWidth = accContainer.css('width');
-            if(curWidth === '300px'){
-                accordion.hide(200)
-                accContainer.css('border','');
-                min_max.css('border', '');
-                accContainer.animate({
-                    width:'20px'
-                },200);
-                question_props.animate({
-                    width:'503px'
-                },200);
-                fd_tree.animate({
-                    width:'41%'
-                },200);
-            }else if(curWidth === '20px'){
-                accordion.show(200)
-                min_max.css('border','');
-                accContainer.css('border', '1px solid gray');
-                accContainer.animate({
-                    width:'300px'
-                },200);
-                question_props.animate({
-                    width:'374px'
-                },200);
-                fd_tree.each(function () {
-                    $(this).animate({
-                        width:'25%'
-                    },200)
-                });
+        minMax.click(function(){
+            if (STATE_EXTRAS_MAXIMIZE) {
+                STATE_EXTRAS_MAXIMIZE = false;
+            }else {
+                STATE_EXTRAS_MAXIMIZE = true;
             }
+
+
+            resizeTree();
+            resizeProps();
+            resizeExtras();
+        });
+
+        $(window).resize(function () {
+            resizeTree();
+            resizeProps();
+            resizeExtras();
         });
 
         $('#fd-add-data-node-button').button({
@@ -801,12 +858,11 @@ formdesigner.ui = (function () {
             enableEscapeButton: false,
             showCloseButton : true,
             onClosed: function(){
-    //                console.log("onClosed called");
             }
         });
 
         $('#fancybox-overlay').click(function () {
-//            console.log('overlay clicked!');
+
         })
     };
 
@@ -909,6 +965,7 @@ formdesigner.ui = (function () {
 
     $(document).ready(function () {
 //
+        formdesigner.launch($('#formdesigner'));
 
     });
 
@@ -921,6 +978,7 @@ formdesigner.launch = function (rootElement) {
     }else{
         formdesigner.rootElement = '#formdesigner';
     }
+    formdesigner.util.eventuality(formdesigner);
     formdesigner.ui.controller = formdesigner.controller;
     formdesigner.controller.initFormDesigner();
 }
