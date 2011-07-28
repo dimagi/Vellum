@@ -450,9 +450,27 @@ formdesigner.model = function () {
 //        }
     };
 
-    var TYPE_FLAG_OPTIONAL = that.TYPE_FLAG_OPTIONAL = '_optional';
-    var TYPE_FLAG_REQUIRED = that.TYPE_FLAG_REQUIRED = '_required';
-    var TYPE_FLAG_NOT_ALLOWED = that.TYPE_FLAG_NOT_ALLOWED = '_notallowed';
+    var validationFuncs = {
+        //should be used to figure out the logic for label, defaultLabel, labelItext, etc properties
+        label: function (mugType, mug) {
+            var controlBlock, hasLabel, hasLabelItextID, missing;
+            controlBlock = mug.properties.controlElement.properties;
+            hasLabel = !(!(controlBlock.label));
+            hasLabelItextID = !(!(controlBlock.labelItextID));
+            if (hasLabel || hasLabelItextID) {
+                return 'pass';
+            }else if (!hasLabel && !hasLabelItextID) {
+                missing = 'either a Label or LabelItext';
+            }else if (!hasLabel) {
+                missing = 'a Label'
+            }else if (!hasLabelItextID) {
+                missing = 'a Label Itext ID';
+            }
+            return 'Question is missing ' + missing + ' value!';
+        }
+    }
+
+    that.validationFuncs = validationFuncs;
 
 
     var RootMugType = {
@@ -480,7 +498,7 @@ formdesigner.model = function () {
          *          visibility: 'hidden|visible', //show as a user editable property?
          *          presence: 'required|optional|notallowed' //must this property be set, optional or should not be present?
          *          [values: [arr of allowable vals]] //list of allowed values for this property
-         *          [validationFunc: function(mugType,mug)] //special validation function, optional
+         *          [validationFunc: function(mugType,mug)] //special validation function, optional, return errorMessage string or 'pass'
          *          lstring: "Human Readable Property Description" //Optional
          *      }
          *
@@ -564,10 +582,11 @@ formdesigner.model = function () {
                     presence: 'required',
                     values: formdesigner.util.VALID_CONTROL_TAG_NAMES
                 },
-                label: { //TODO FIXME MAKE VALIDATION FUNC FOR CHECKING FOR EITHER OR LABEL OR LABELITEXTID
+                label: {
                     editable: 'w',
                     visibility: 'visible',
-                    presence: 'required'
+                    presence: 'required',
+                    validationFunc : validationFuncs.label
                 },
                 hintLabel: {
                     editable: 'w',
@@ -578,7 +597,8 @@ formdesigner.model = function () {
                     editable: 'w',
                     visibility: 'hidden',
                     presence: 'optional',
-                    lstring: "Question Itext ID"
+                    lstring: "Question Itext ID",
+                    validationFunc : validationFuncs.label
                 },
                 hintItextID: {
                     editable: 'w',
@@ -663,7 +683,7 @@ formdesigner.model = function () {
                         retBlock.resultMessage = '"' + ruleKey + '" is a string value (Required) and Present in block:' + blockName;
                     } else {
                         retBlock.result = 'fail';
-                        retBlock.resultMessage = '"' + ruleKey + '" ::: ' + funcRetVal + ' in block:' + blockName + ',Message:' + funcRetVal;
+                        retBlock.resultMessage = funcRetVal;
                     }
                 }
 

@@ -339,12 +339,18 @@ formdesigner.controller = (function () {
 
         function parseDataTree (dataEl) {
             function parseDataElement (el) {
-                var nodeID = el.nodeName, nodeVal = $(el).val(),
+                var nodeID = el.nodeName, nodeVal,
                     mType = formdesigner.util.getNewMugType(formdesigner.model.mugTypes.dataOnly),
                     parentNodeName = $(el).parent()[0].nodeName,
                     rootNodeName = $(dataEl)[0].nodeName,
                     dataTree = formdesigner.controller.form.dataTree,
                     mug, parentMugType;
+
+                if($(el).children().length === 0) {
+                    nodeVal = $(el).text();
+                }else {
+                    nodeVal = null;
+                }
 
                 mType.typeName = "Data Only MugType";
                 mug = formdesigner.model.createMugFromMugType(mType);
@@ -499,8 +505,8 @@ formdesigner.controller = (function () {
 
                     //check flags
                     if(!hasBind){
-                        mugType.type.replace ('b',''); //strip 'b' from type string
-                        console.log('IN CLASSIFY! MUG DOES NOT HAVE BIND!',mugType);
+                        mugType.type = mugType.type.replace ('b',''); //strip 'b' from type string
+                        console.log('IN CLASSIFY! MUG DOES NOT HAVE BIND!',mugType, cEl);
                         console.log(mugType.toString());
                         delete mugType.properties.bindElement;
                         delete mugType.mug.properties.bindElement;
@@ -512,7 +518,7 @@ formdesigner.controller = (function () {
                 function populateMug (MugType, cEl) {
                     var labelEl, hintEl;
                     function parseLabel (lEl, MT) {
-                        var labelVal = $(lEl).val(),
+                        var labelVal = formdesigner.util.getXLabelValue($(lEl)),
                             labelRef = $(lEl).attr('ref'),
                             cProps = MT.mug.properties.controlElement.properties;
                         if(labelRef){
@@ -521,10 +527,14 @@ formdesigner.controller = (function () {
                         }
                         cProps.label = labelVal;
 
+
+                            console.log ('STUFF LABEL VAL', labelVal);
+                       
+
                     }
 
                     function parseHint (hEl, MT) {
-                        var hintVal = $(hEl).html(),
+                        var hintVal = formdesigner.util.getXLabelValue($(hEl)),
                             hintRef = $(hEl).attr('ref'),
                             cProps = MT.mug.properties.controlElement.properties;
 
@@ -537,7 +547,7 @@ formdesigner.controller = (function () {
                     }
 
                     function parseDefaultValue (dEl, MT) {
-                        var dVal = $(dEl).val(),
+                        var dVal = formdesigner.util.getXLabelValue($(dEl)),
                                 cProps = MT.mug.properties.controlElement.properties;
                         if(dVal){
                             cProps.defaultValue = dVal;
@@ -548,7 +558,9 @@ formdesigner.controller = (function () {
                     labelEl = $(cEl).find('label');
                     hintEl = $(cEl).find('hint');
                     var cantHaveDefaultValue = ['select', 'select1', 'repeat', 'group', 'trigger'];
-
+                    if(tag === 'input'){
+                        console.log("IN POPULATE MUG, LABEL VALUE:",labelEl);
+                    }
                     if (labelEl.length > 0) {
                         parseLabel(labelEl, MugType);
                     }

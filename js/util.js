@@ -29,6 +29,54 @@ formdesigner.util = (function(){
     var GROUP_OR_REPEAT_VALID_CHILDREN = that.GROUP_OR_REPEAT_VALID_CHILDREN = ["group","repeat","question","selectQuestion","trigger"];
 
     /**
+     * Grabs the value between the tags of the element passed in
+     * and returns a string of everything inside.
+     *
+     * This method is kindy of hacky, so buyer beware.
+     *
+     * Motivation: Jquery's selector can't do this.  We need to be able to
+     * grab the value of label tags, even if it includes <output> tags inside
+     * of it (since the tag may need to be displayed to the user).
+     * @param el - jquery selector or string used in the selector pointing to a DOM element.
+     */
+    var xmls = new XMLSerializer();
+    function getXLabelValue (el){
+        var resStr;
+        function getEndTag (str) {
+            var res, reo, last;
+            reo = /<\/(?:"[^"]*"['"]*|'[^']*'['"]*|[^'">])+>/g;
+            res = reo.exec(str);
+            last = res;
+            while(res !== null) {
+                last = res;
+                res = reo.exec(str);
+            }
+            if(last){
+                return last[0];
+            }else{
+                return null;
+            }
+            
+        }
+
+        function getStartTag (str) {
+            var re, res
+            re = /<(?:"[^"]*"['"]*|'[^']*'['"]*|[^'">])+>/;
+            res = re.exec(str);
+            return res[0];
+        }
+
+        resStr = xmls.serializeToString($(el)[0]);
+        console.log("getXLabelValue SERIALIZED STRING!!: ", resStr);
+
+        resStr = resStr.replace(getStartTag(resStr),'').replace(getEndTag(resStr),'');
+        console.log('getXLabelValue FINAL:', resStr);
+        return resStr;
+    };
+    that.getXLabelValue = getXLabelValue;
+
+
+    /**
      * From http://stackoverflow.com/questions/4149276/javascript-camelcase-to-regular-form
      * @param myString
      */
