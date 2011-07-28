@@ -123,13 +123,24 @@ formdesigner.ui = (function () {
             $('#fd-dragons').append(printTreeBut);
 
             printTreeBut.button().click(function () {
+                var vObj = [], vOut = [], i, invalidMT = [], mt;
                 console.group("Tree Pretty Print");
                 console.log("Control Tree:"+controller.form.controlTree.printTree())
                 console.log("Data Tree:   "+controller.form.dataTree.printTree());
-                console.groupEnd();
                 console.log("TREE VALIDATION RESULT",controller.form.controlTree.isTreeValid());
-                console.log("INVALID MTs", controller.form.getInvalidMugTypes());
-                console.log("TREE MAP INVALID UFIDS", controller.form.getInvalidMugTypeUFIDs())
+                invalidMT = controller.form.getInvalidMugTypes();
+
+                console.log("TREE MAP INVALID UFIDS", controller.form.getInvalidMugTypeUFIDs());
+                for (i in invalidMT){
+                    if(invalidMT.hasOwnProperty(i)){
+                        mt = invalidMT[i];
+                        vOut.push(mt);
+                        vOut.push(mt.validateMug());
+                    }
+                }
+                console.log("INVALID MTs,VALIDATION OBJ",vOut);
+                console.groupEnd();
+
             });
 
             buttons.printTree = printTreeBut;

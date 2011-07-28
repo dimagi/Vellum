@@ -399,7 +399,7 @@ formdesigner.controller = (function () {
                 oldMT = formdesigner.controller.form.getMugTypeByIDFromTree(nodeID, 'data');
                 if(!oldMT){
                     console.log("El,nodeID",el,nodeID);
-                    throw 'Parse error! Could not find Data MugType associated with this bind!';
+                    throw 'Parse error! Could not find Data MugType associated with this bind!'; //can't have a bind without an associated dataElement.
                 }
                 mType.ufid = oldMT.ufid;
                 mType.properties.dataElement = oldMT.properties.dataElement;
@@ -422,7 +422,9 @@ formdesigner.controller = (function () {
                  */
                 function classifyAndCreateMugType (nodeID, cEl) {
                     var oldMT = formdesigner.controller.form.getMugTypeByIDFromTree(nodeID, 'data'), //check the date node to see if there's a related MT already present
-                        mugType, mug, tagName, bindEl, dataType, MTIdentifier;
+                        mugType, mug, tagName, bindEl, dataEl, dataType, MTIdentifier,
+                        //flags
+                        hasBind = true;
 
                     tagName = $(cEl)[0].nodeName;
                     if (oldMT) {
@@ -433,10 +435,14 @@ formdesigner.controller = (function () {
                                 dataType = dataType.replace('xsd:',''); //strip out extranous namespace
                                 dataType = dataType.toLowerCase();
                             }
+                        }else{
+                            hasBind = false;
                         }
                     }else {
                         throw 'Could not find Data MT associated with Control Element!'+cEl;
                     }
+
+                    console.log('IN CLASSIFY! DETECTED TAG NAME IS:',tagName);
 
                     //broadly categorize
                     tagName = tagName.toLowerCase();
@@ -468,13 +474,14 @@ formdesigner.controller = (function () {
                         }else if(dataType === 'string') {
                             //do nothing, the ident is already correct.
                         }
-                    }else if (MTIdentifier === 'group') {
+                    }else if (MTIdentifier === 'stdGroup') {
                         if($(cEl).find('repeat').length > 0){
                             tagName = 'repeat';
                             MTIdentifier = 'stdRepeat';
                         }
                     }
                     try{
+                        console.log("IN CLASSIFY final identifier is:",MTIdentifier);
                         mugType = formdesigner.model.mugTypeMaker[MTIdentifier]();
                     }catch (e) {
                         throw 'New Control Element classified as non-existent MugType! Please create a rule for this case' +
@@ -488,6 +495,15 @@ formdesigner.controller = (function () {
 
                         //replace in dataTree
                         formdesigner.controller.form.replaceMugType(oldMT,mugType,'data');
+                    }
+
+                    //check flags
+                    if(!hasBind){
+                        mugType.type.replace ('b',''); //strip 'b' from type string
+                        console.log('IN CLASSIFY! MUG DOES NOT HAVE BIND!',mugType);
+                        console.log(mugType.toString());
+                        delete mugType.properties.bindElement;
+                        delete mugType.mug.properties.bindElement;
                     }
 
                     return mugType;
@@ -521,7 +537,7 @@ formdesigner.controller = (function () {
                     }
 
                     function parseDefaultValue (dEl, MT) {
-                        var dVal = $(dEl).html(),
+                        var dVal = $(dEl).val(),
                                 cProps = MT.mug.properties.controlElement.properties;
                         if(dVal){
                             cProps.defaultValue = dVal;

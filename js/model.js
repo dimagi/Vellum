@@ -70,7 +70,6 @@ formdesigner.model = function () {
         };
 
         that.getDataElementID = function () {
-            console.log(this);
             if (this.properties.dataElement) {
                 return this.properties.dataElement.properties.nodeID;
             } else {
@@ -681,7 +680,7 @@ formdesigner.model = function () {
              * "status" will be set to fail if any one property is not in the required state
              * in the mug.
              * @param propertiesObj
-             * @param testingObj
+             * @param testingObj - the Mug properties block.
              * @param blockName
              */
             var checkProps = function (mugT,propertiesObj, testingObj, blockName) {
@@ -702,6 +701,10 @@ formdesigner.model = function () {
                                 tResults = {};
                         for(y in block){
                             if(block.hasOwnProperty(y)){
+                                if(!testingObj[i]){
+                                    console.log("No Mug.properties." + i + "?? MugType:",mugT,testingObj,i,block);
+                                    throw 'No Mug.properties??'
+                                }
                                 tResults[y] = validateRule(y,block[y],testingObj[i].properties,i,mugT,mugT.mug);
                                 if (tResults[y].result === "fail") {
                                     results.status = "fail";
@@ -719,6 +722,9 @@ formdesigner.model = function () {
                 for(j in mugProperties){
                     if(mugProperties.hasOwnProperty(j)){
                         var pBlock = mugProperties[j];
+                        if(!pBlock){ //how does that even happen?
+                            console.log('NO PBLOCK',pBlock, mugProperties, mugT);
+                        }
                         for (z in pBlock.properties){
                             if(pBlock.properties.hasOwnProperty(z)){
                                 var p = pBlock.properties[z],
@@ -808,8 +814,8 @@ formdesigner.model = function () {
 
         mug: null,
         toString: function () {
-            if (this.mug && this.properties.bindElement) {
-                return this.mug.properties.bindElement.properties.nodeID;
+            if (this.mug && this.mug.properties.dataElement) {
+                return this.mug.properties.dataElement.properties.nodeID;
             } else {
                 return this.typeName;
             }
@@ -879,18 +885,13 @@ formdesigner.model = function () {
     that.mugTypeMaker = {};
     that.mugTypeMaker.stdTextQuestion = function () {
         var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion),
-                mug,
-                vResult;
+                mug;
         mType.typeName = "Text Question MugType";
         mType.controlNodeAllowedChildren = false;
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
         mType.mug.properties.controlElement.properties.name = "Text";
         mType.mug.properties.controlElement.properties.tagName = "input";
-        vResult = mType.validateMug();
-//        if(vResult.status !== 'pass'){
-//            formdesigner.util.throwAndLogValidationError(vResult,mType,mType.mug);
-//        }
         return mType;
     };
 
@@ -917,13 +918,6 @@ formdesigner.model = function () {
         mType.mug = mug;
         mType.mug.properties.controlElement.properties.name = "Item";
         mType.mug.properties.controlElement.properties.tagName = "item";
-
-
-
-        vResult = mType.validateMug();
-//        if(vResult.status !== 'pass'){
-//            formdesigner.util.throwAndLogValidationError(vResult,mType,mType.mug);
-//        }
         return mType;
     };
 
@@ -940,12 +934,6 @@ formdesigner.model = function () {
         mType.mug = mug;
         mType.mug.properties.controlElement.properties.name = "Trigger";
         mType.mug.properties.controlElement.properties.tagName = "trigger";
-
-
-        vResult = mType.validateMug();
-//        if(vResult.status !== 'pass'){
-//            formdesigner.util.throwAndLogValidationError(vResult,mType,mType.mug);
-//        }
         return mType;
     };
 
@@ -955,6 +943,7 @@ formdesigner.model = function () {
                 mug,
                 vResult;
         mType.controlNodeCanHaveChildren = true;
+        mType.typeName = "Standard Multi Select Question";
         allowedChildren = ['item'];
         mType.controlNodeAllowedChildren = allowedChildren;
         mug = that.createMugFromMugType(mType);
@@ -962,12 +951,18 @@ formdesigner.model = function () {
         mType.mug.properties.controlElement.properties.name = "Multi-Select";
         mType.mug.properties.controlElement.properties.tagName = "select";
         mType.mug.properties.bindElement.properties.dataType = "xsd:select";
-        vResult = mType.validateMug();
-//        if(vResult.status !== 'pass'){
-//            formdesigner.util.throwAndLogValidationError(vResult,mType,mType.mug);
-//        }
         return mType;
     };
+
+    that.mugTypeMaker.stdSelect = function () {
+        var mType = formdesigner.model.mugTypeMaker.stdMSelect(), mug;
+        mug = mType.mug;
+        mType.typeName = "Standard Single Select Question";
+        mType.mug.properties.controlElement.properties.name = 'Single-Select';
+        mType.mug.properties.controlElement.properties.tagName = "select1";
+        mType.mug.properties.bindElement.properties.dataType = "select1";
+        return mType;
+    }
 
     that.mugTypeMaker.stdGroup = function () {
         var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion),
@@ -975,6 +970,7 @@ formdesigner.model = function () {
                 mug,
                 vResult;
         mType.controlNodeCanHaveChildren = true;
+        mType.typeName = "Standard Group";
         allowedChildren = ['repeat', 'input', 'select', 'select1', 'group'];
         mType.controlNodeAllowedChildren = allowedChildren;
         mType.properties.bindElement.dataType.presence = "notallowed";
@@ -1686,21 +1682,25 @@ formdesigner.model = function () {
 
                 function populateVariables (MT){
                     bEl = MT.mug.properties.bindElement;
-                    cons = bEl.properties.constraintAttr;
-                    consMsg = bEl.properties.constraintMsgAttr;
-                    nodeset = dataTree.getAbsolutePath(MT);
-                    type = bEl.properties.dataType;
-                    relevant = bEl.properties.relevantAttr;
-                    required = bEl.properties.requiredAttr;
-                    calc = bEl.properties.calculateAttr;
-                    return {
-                        nodeset: nodeset,
-                        'type': type,
-                        constraint: cons,
-                        constraintMsg: consMsg,
-                        relevant: relevant,
-                        required: required,
-                        calculate: calc
+                    if (bEl) {
+                        cons = bEl.properties.constraintAttr;
+                        consMsg = bEl.properties.constraintMsgAttr;
+                        nodeset = dataTree.getAbsolutePath(MT);
+                        type = bEl.properties.dataType;
+                        relevant = bEl.properties.relevantAttr;
+                        required = bEl.properties.requiredAttr;
+                        calc = bEl.properties.calculateAttr;
+                        return {
+                            nodeset: nodeset,
+                            'type': type,
+                            constraint: cons,
+                            constraintMsg: consMsg,
+                            relevant: relevant,
+                            required: required,
+                            calculate: calc
+                        }
+                    } else {
+                        return null;
                     }
                 }
 
@@ -1774,7 +1774,6 @@ formdesigner.model = function () {
                         //////////////////////////////////////////////////////////////////////////
                         if (tagName === 'item' && cProps.defaultValue) {
                             //do a value tag for an item MugType
-                            console.log('creating item value tag!',cProps,mugType);
                             xmlWriter.writeStartElement('value');
                             xmlWriter.writeString(cProps.defaultValue);
                             xmlWriter.writeEndElement();
@@ -1931,6 +1930,11 @@ formdesigner.model = function () {
         /**
          * Searches through the dataTree for a mugType
          * that matches the given nodeID (e.g. mugType.mug.properties.dataElement.properties.nodeID)
+         *
+         * WARNING:
+         * Some MugTypes (such as for example 'Items' or 'Triggers' or certain 'Group's may not have
+         * any nodeID at all (i.e. no bind element and no data element)
+         * in such cases... other methods need to be used as this method will not find a match.
          * @param nodeID
          * @param treeType - either 'data' or 'control
          */
@@ -1941,16 +1945,16 @@ formdesigner.model = function () {
                 }
                 var mt = node.getValue(),
                     thisNodeID;
-                if (treeType === 'data') {
+                if (mt.properties.dataElement && mt.mug.properties.dataElement) {
                     thisNodeID = mt.mug.properties.dataElement.properties.nodeID;
-                }else {
-                    thisNodeID = mt.mug.properties.controlElement.properties.nodeID;
+                } else if (mt.properties.bindElement && mt.mug.properties.bindElement){
+                    thisNodeID = mt.mug.properties.bindElement.properties.nodeID;
+                } else {
+                    return; //this MT just has no nodeID :/
                 }
 
-                console.log("IN getMugTypeByIDFromTree() THISNODEID:"+thisNodeID+"nodeID"+ nodeID);
 
                 if(thisNodeID === nodeID){
-                    console.log("MT FOUND",nodeID);
                     return mt;
                 }
             }
@@ -1964,7 +1968,6 @@ formdesigner.model = function () {
                 throw 'Invalid TreeType specified! Use either "data" or "control"';
             }
 
-            console.log("retVal!",retVal);
             if(retVal.length > 0){
                 return retVal[0];
             }else {
