@@ -67,10 +67,7 @@ formdesigner.util = (function(){
         }
 
         resStr = xmls.serializeToString($(el)[0]);
-        console.log("getXLabelValue SERIALIZED STRING!!: ", resStr);
-
         resStr = resStr.replace(getStartTag(resStr),'').replace(getEndTag(resStr),'');
-        console.log('getXLabelValue FINAL:', resStr);
         return resStr;
     };
     that.getXLabelValue = getXLabelValue;
@@ -149,7 +146,7 @@ formdesigner.util = (function(){
             path = el.attr('nodeset');
         }
         if(!path) {
-            console.error('CANT PARSE CONTROL NODE, NO REF/NODESET ATTRIBUTE FOUND! ELEMENT:',el);
+            return null;
         }
 
         return path;

@@ -554,7 +554,7 @@ formdesigner.ui = (function () {
      * Creates the UI tree
      */
     function create_question_tree() {
-        $.jstree._themes = "themes/";
+        $.jstree._themes = formdesigner.staticPrefix + "themes/";
         $("#fd-question-tree").jstree({
             "json_data" : {
                 "data" : []
@@ -576,16 +576,17 @@ formdesigner.ui = (function () {
                 "drag_target" : false
             },
             "types": getJSTreeTypes(),
-            "plugins" : [ "themes", "json_data", "ui", "types", "crrm", "dnd" ]
+            "plugins" : [ "themes", "json_data", "ui", "crrm", "types", "dnd" ]
 	    }).bind("select_node.jstree", function (e, data) {
-                    node_select(e, data);
+            node_select(e, data);
         }).bind("move_node.jstree", function (e, data) {
-                    var controller = formdesigner.controller,
-                                mugType = controller.form.controlTree.getMugTypeFromUFID($(data.rslt.o).attr('id')),
-                                refMugType = controller.form.controlTree.getMugTypeFromUFID($(data.rslt.r).attr('id')),
-                                position = data.rslt.p;
-                    controller.moveMugType(mugType, position, refMugType);
-                });
+            var controller = formdesigner.controller,
+                        mugType = controller.form.controlTree.getMugTypeFromUFID($(data.rslt.o).attr('id')),
+                        refMugType = controller.form.controlTree.getMugTypeFromUFID($(data.rslt.r).attr('id')),
+                        position = data.rslt.p;
+                    console.log('MOVE_NODE.JSTREE EVENT',mugType,position,refMugType);
+            controller.moveMugType(mugType, position, refMugType);
+        });
         questionTree = $("#fd-question-tree");
     }
 
@@ -597,7 +598,7 @@ formdesigner.ui = (function () {
         var root = $(rootElement);
         root.empty();
         $.ajax({
-            url: 'templates/main.html',
+            url: formdesigner.staticPrefix + 'templates/main.html',
             async: false,
             cache: false,
             success: function(html){
@@ -963,7 +964,7 @@ formdesigner.ui = (function () {
         init_toolbar();
         init_extra_tools();
         create_question_tree();
-        create_data_tree();
+//        create_data_tree();
         init_form_paste();
         init_modal_dialogs();
 
@@ -976,19 +977,43 @@ formdesigner.ui = (function () {
 
     $(document).ready(function () {
 //
-        formdesigner.launch($('#formdesigner'));
+//        formdesigner.launch($('#formdesigner'));
 
     });
 
     return that;
 }());
 
-formdesigner.launch = function (rootElement) {
-    if(rootElement){
-        formdesigner.rootElement = rootElement;
+/**
+ *
+ * @param opts - {
+ *  rootElement: "jQuery selector to FD Container",
+ *  staticPrefix : "url prefix for static resources like css and pngs",
+ *  save_url : "URL that the FD should post saved forms to",
+ *  [form] : "string of the xml form that you wish to load"
+ *  }
+ */
+formdesigner.launch = function (opts) {
+    if(!opts){
+        opts = {};
+    }
+    if(opts.rootElement){
+        formdesigner.rootElement = opts.rootElement;
     }else{
         formdesigner.rootElement = '#formdesigner';
     }
+
+    if(opts.staticPrefix){
+        formdesigner.staticPrefix = opts.staticPrefix
+    }else {
+        formdesigner.staticPrefix = "";
+    }
+
+    formdesigner.save_url = opts["save_url"];
+    formdesigner.loadMe = opts["form"];
+
+
+
     formdesigner.util.eventuality(formdesigner);
     formdesigner.ui.controller = formdesigner.controller;
     formdesigner.controller.initFormDesigner();

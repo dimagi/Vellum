@@ -136,7 +136,8 @@ formdesigner.controller = (function () {
                 case 'group':
                     setType("group");
                     break;
-                case 'multi select':
+                case 'multi-select':
+                case 'single-select':
                     setType("selectQuestion");
                     break;
                 case 'trigger':
@@ -364,7 +365,6 @@ formdesigner.controller = (function () {
                     parentMugType = formdesigner.controller.form.getMugTypeByIDFromTree(parentNodeName,'data');
                 }
 
-                console.log("DATA ELEMENT ID",mType.mug.getDataElementID(),mType.mug.properties.dataElement.properties.nodeID,nodeID);
                 dataTree.insertMugType(mType,'into',parentMugType);
             }
             var root = $(dataEl),
@@ -374,7 +374,6 @@ formdesigner.controller = (function () {
                 };
 
             root.children().each(recFunc);
-            console.log("DATA TREE",formdesigner.controller.form.dataTree.printTree());
         }
 
         function parseBindList (bindList) {
@@ -444,12 +443,8 @@ formdesigner.controller = (function () {
                         }else{
                             hasBind = false;
                         }
-                    }else {
-                        throw 'Could not find Data MT associated with Control Element!'+cEl;
                     }
-
-                    console.log('IN CLASSIFY! DETECTED TAG NAME IS:',tagName);
-
+                    
                     //broadly categorize
                     tagName = tagName.toLowerCase();
                     if(tagName === 'select') {
@@ -467,7 +462,6 @@ formdesigner.controller = (function () {
                     }else if (tagName === 'secret') {
                         MTIdentifier = 'stdSecret';
                     }
-
 
                     //fine tune for special cases (repeats, groups, inputs)
                     if (MTIdentifier === 'input' && dataType){
@@ -487,7 +481,6 @@ formdesigner.controller = (function () {
                         }
                     }
                     try{
-                        console.log("IN CLASSIFY final identifier is:",MTIdentifier);
                         mugType = formdesigner.model.mugTypeMaker[MTIdentifier]();
                     }catch (e) {
                         throw 'New Control Element classified as non-existent MugType! Please create a rule for this case' +
@@ -506,8 +499,6 @@ formdesigner.controller = (function () {
                     //check flags
                     if(!hasBind){
                         mugType.type = mugType.type.replace ('b',''); //strip 'b' from type string
-                        console.log('IN CLASSIFY! MUG DOES NOT HAVE BIND!',mugType, cEl);
-                        console.log(mugType.toString());
                         delete mugType.properties.bindElement;
                         delete mugType.mug.properties.bindElement;
                     }
@@ -526,11 +517,6 @@ formdesigner.controller = (function () {
                             cProps.labelItextID = labelRef;
                         }
                         cProps.label = labelVal;
-
-
-                            console.log ('STUFF LABEL VAL', labelVal);
-                       
-
                     }
 
                     function parseHint (hEl, MT) {
@@ -558,9 +544,6 @@ formdesigner.controller = (function () {
                     labelEl = $(cEl).find('label');
                     hintEl = $(cEl).find('hint');
                     var cantHaveDefaultValue = ['select', 'select1', 'repeat', 'group', 'trigger'];
-                    if(tag === 'input'){
-                        console.log("IN POPULATE MUG, LABEL VALUE:",labelEl);
-                    }
                     if (labelEl.length > 0) {
                         parseLabel(labelEl, MugType);
                     }
@@ -576,7 +559,6 @@ formdesigner.controller = (function () {
                 }
 
                 function insertMTInControlTree (MugType, parentMT) {
-                    console.log("PERFORMING INSERT!",MugType,parentMT);
                     formdesigner.controller.form.controlTree.insertMugType(MugType,'into',parentMT);
                 }
 
@@ -589,11 +571,12 @@ formdesigner.controller = (function () {
                     parentNodeID,
                     parentMug,
                     tagName,
-                    couldHaveChildren = ['repeat', 'group', 'select', '1select'],
+                    couldHaveChildren = ['repeat', 'group', 'select', 'select1'],
                     children;
 
-                path = formdesigner.util.getPathFromControlElement(el);
-                nodeID = formdesigner.util.getNodeIDFromPath(path);
+                console.log("ELEMENT IN PARSECONTROL",el);
+
+
 
                 parentNode = el.parent();
                 if($(parentNode)[0].nodeName === 'repeat') {
@@ -610,7 +593,9 @@ formdesigner.controller = (function () {
                     parentMug = null;
                 }
 
-
+                path = formdesigner.util.getPathFromControlElement(el);
+                nodeID = formdesigner.util.getNodeIDFromPath(path);
+                
                 mType = classifyAndCreateMugType(nodeID,el);
                 populateMug(mType,el);
                 insertMTInControlTree(mType, parentMug);
@@ -625,7 +610,6 @@ formdesigner.controller = (function () {
                     children.each(eachFunc); //recurse down the tree
                 }
             }
-            console.log('controlsTree',controlsTree,"controlsTree.children()",controlsTree.children());
             controlsTree.each(eachFunc);
         }
 
@@ -681,16 +665,22 @@ formdesigner.controller = (function () {
         if(treeType === 'data'){
             return true;
         }
+
+        if(position === 'inside'){
+            position = 'into';
+
+        }
         var oType = mugType.mug.properties.controlElement.properties.tagName,
                 rType = (!refMugType || refMugType === -1) ? 'group' : refMugType.mug.properties.controlElement.properties.tagName,
                 oIsGroupOrRepeat = (oType === 'repeat' || oType === 'group'),
                 oIsItemOrInputOrTrigger = (oType === 'item' || oType === 'input' || oType === 'trigger'),
-                oIsSelect = (oType === '1select' || oType === 'select'),
+                oIsSelect = (oType === 'select1' || oType === 'select'),
                 oIsItem = (oType === 'item'),
-                rIsSelect = (rType === '1select' || rType === 'select'),
+                rIsSelect = (rType === 'select1' || rType === 'select'),
                 rIsItemOrInputOrTrigger = (rType === 'item' || rType === 'input' || rType === 'trigger'),
                 rIsGroupOrRepeat = (rType === 'repeat' || rType === 'group');
 
+        console.log(oType,position,rType);
         if (position !== 'into') {
             if (!refMugType) {
                 throw "If refMugType is null in checkMoveOp() position MUST be 'into'! Position was: "+position;
@@ -713,6 +703,7 @@ formdesigner.controller = (function () {
         }
 
         //we should never get here.
+        console.error("checkMoveOp error..",mugType,position,refMugType,treeType);
         throw "Unknown controlElement type used, can't check if the MOVE_OP is valid or not!";
 
     };
