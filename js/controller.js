@@ -237,6 +237,19 @@ formdesigner.controller = (function () {
     };
     that.createQuestion = createQuestion;
 
+    var loadQuestionIntoUI = function (mugType) {
+        var mug;
+
+        mug = mugType.mug;
+
+        //this allows the mug to respond to certain events in a common way.
+        //see method docs for further info
+        formdesigner.util.setStandardMugEventResponses(mug);
+
+
+
+    }
+
     that.XMLWriter = null;
     var initXMLWriter = function () {
         var xw = new XMLWriter( 'UTF-8', '1.0' );

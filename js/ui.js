@@ -778,7 +778,7 @@ formdesigner.ui = (function () {
                 primary : 'ui-icon-gear'
             },
             text : false
-        });
+        }).button("disable");
 
         $('#fd-extra-template-questions div').each(function(){
             $(this).button({
@@ -786,7 +786,7 @@ formdesigner.ui = (function () {
                                 primary : 'ui-icon-gear'
                             }
                         });
-        })
+        }).button("disable");
 
         function makeFormProp (propLabel, propName, keyUpFunc, initVal){
             var liStr = '<li id=fd-form-prop-"' + propName + '" class="fd-form-property"><span class="fd-form-property-text">'+propLabel+': '+'</span>' +

@@ -537,13 +537,13 @@ formdesigner.model = function () {
                     editable: 'w',
                     visibility: 'visible',
                     presence: 'optional',
-                    lstring: 'Skip Condition:'
+                    lstring: 'Skip Condition'
                 },
                 calculateAttr: {
                     editable: 'w',
                     visibility: 'visible',
                     presence: 'optional',
-                    lstring: 'Calculate Condition:'
+                    lstring: 'Calculate Condition'
                 },
                 constraintAttr: {
                     editable: 'w',
@@ -590,14 +590,16 @@ formdesigner.model = function () {
                 },
                 label: {
                     editable: 'w',
-                    visibility: 'visible',
+                    visibility: 'hidden',
                     presence: 'required',
-                    validationFunc : validationFuncs.label
+                    validationFunc : validationFuncs.label,
+                    lstring: "Default Label"
                 },
                 hintLabel: {
                     editable: 'w',
                     visibility: 'advanced',
-                    presence: 'optional'
+                    presence: 'optional',
+                    lstring: "Hint Label"
                 },
                 labelItextID: {
                     editable: 'w',
@@ -947,12 +949,17 @@ formdesigner.model = function () {
     that.mugTypeMaker.stdTrigger = function () {
         var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion),
                 mug,
-                vResult;
+                vResult, controlProps, bindProps;
 
         mType.typeName = "Trigger/Message MugType";
         mType.controlNodeAllowedChildren = false;
         mType.properties.bindElement.dataType.presence = 'notallowed';
+        mType.properties.dataElement.dataValue.presence = 'notallowed';
 
+        controlProps = mType.properties.controlElement;
+        controlProps.hintLabel.presence = 'notallowed';
+        controlProps.hintItextID.presence = 'notallowed';
+        controlProps.defaultValue.presence = 'notallowed';
 
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;

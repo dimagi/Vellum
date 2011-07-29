@@ -11,9 +11,9 @@
 					</group1>
 				</data>
 			</instance>
-			<bind nodeset="/data/question1" type="xsd:anyURI" />
+			<bind nodeset="/data/question1" type="xsd:string" />
 			<bind nodeset="/data/group1" />
-			<bind nodeset="/group1/question2" type="xsd:anyURI" />
+			<bind nodeset="/group1/question2" type="xsd:string" />
 		</model>
 	</h:head>
 	<h:body>

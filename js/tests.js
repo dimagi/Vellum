@@ -418,7 +418,7 @@ $(document).ready(function(){
 
         notEqual(mugTB.ufid,mugTC.ufid);
         notEqual(mugTB.properties, mugTC.properties);
-        ok(mugTC.properties.bindElement.nodeID.visibility === 'hidden');
+        equal(mugTC.properties.bindElement.nodeID.visibility,'advanced');
 
     })
 
@@ -758,15 +758,18 @@ $(document).ready(function(){
         })
         addQbut.click();
         jstree.jstree('select_node',lastCreatedNode);
-        $('#controlElement-label-input').val('question1 label').keyup();
+        formdesigner.controller.form.controlTree.getMugTypeFromUFID(lastCreatedNode.attr('id')).mug.properties.controlElement.properties.label = 'question1 label';
+//        $('#controlElement-label-input').val('question1 label').keyup();
         addGroupBut = ui.buttons.addgroupbutton;
         addGroupBut.click();
         jstree.jstree('select_node',lastCreatedNode,true);
-        $('#controlElement-label-input').val('group label').keyup();
+        formdesigner.controller.form.controlTree.getMugTypeFromUFID(lastCreatedNode.attr('id')).mug.properties.controlElement.properties.label = 'group label';
+//        $('#controlElement-label-input').val('group label').keyup();
         $('#dataElement-nodeID-input').val('group1').keyup();
         addQbut.click();
         jstree.jstree('select_node',lastCreatedNode,true);
-        $('#controlElement-label-input').val('question2 label').keyup();
+        formdesigner.controller.form.controlTree.getMugTypeFromUFID(lastCreatedNode.attr('id')).mug.properties.controlElement.properties.label = 'question2 label';
+//        $('#controlElement-label-input').val('question2 label').keyup();
         $('#dataElement-nodeID-input').val('question2').keyup();
         var actual = beautifyXml(c.form.createXForm());
         getTestXformOutput('form1.xml');
