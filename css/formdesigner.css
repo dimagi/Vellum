@@ -106,10 +106,27 @@ td {
     list-style-type: none;
     margin: 0;
     padding: 0;
+    position: relative;
+    top: -20px;
+}
+
+#fd-adv-props-content .fd-props-ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
     padding-top:20px;
     position: relative;
     top: -20px;
 }
+
+#fd-extra-tools-accordion .fd-props-ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 30px 0 0 5px;
+    position: relative;
+    top: -20px;
+}
+
 #fd-extra-tools{
     float:right;
     position:relative;
@@ -164,6 +181,8 @@ td {
 
 .fd-property {
     padding: 5px;
+    display: table;
+    width:100%;
 }
 
 #fd-props-head {
@@ -282,6 +301,8 @@ td {
 
 #fd-adv-props-content {
     padding: 0;
+    overflow-x: hidden;
+    /*width: 100%;*/
 }
 
 #fd-opensource-button {
@@ -312,7 +333,7 @@ td {
 
 .fd-prop-input-div {
     float: right;
-    width: 80%;
+    width:320px;
 }
 
 #fd-parsexml-button {
@@ -331,4 +352,14 @@ td {
 .fd-extra-content {
 
 
+}
+
+.fd-prop-input-div-checkbox {
+    float: right;
+    width: 150px;
+    
+}
+
+.fd-property-checkbox {
+    
 }

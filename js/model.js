@@ -521,33 +521,39 @@ formdesigner.model = function () {
             bindElement: {
                 nodeID: {
                     editable: 'w',
-                    visibility: 'hidden',
-                    presence: 'optional'
+                    visibility: 'advanced',
+                    presence: 'optional',
+                    lstring: 'Bind Node ID'
                 },
                 dataType: {
                     editable: 'w',
-                    visibility: 'hidden',
+                    visibility: 'visible',
                     presence: 'optional',
-                    values: formdesigner.util.XSD_DATA_TYPES
+                    values: formdesigner.util.XSD_DATA_TYPES,
+                    uiType: 'select',
+                    lstring: 'Question Type'
                 },
                 relevantAttr: {
                     editable: 'w',
                     visibility: 'visible',
-                    presence: 'optional'
+                    presence: 'optional',
+                    lstring: 'Skip Condition:'
                 },
                 calculateAttr: {
                     editable: 'w',
                     visibility: 'visible',
-                    presence: 'optional'
+                    presence: 'optional',
+                    lstring: 'Calculate Condition:'
                 },
                 constraintAttr: {
                     editable: 'w',
                     visibility: 'visible',
-                    presence: 'optional'
+                    presence: 'optional',
+                    lstring: 'Constraint Condition'
                 },
                 constraintMsgAttr: {
                     editable: 'w',
-                    visibility: 'hidden',
+                    visibility: 'advanced',
                     presence: 'optional',
                     validationFunc : function (mugType, mug) {
                         var bindBlock = mug.properties.bindElement.properties;
@@ -558,25 +564,25 @@ formdesigner.model = function () {
                         } else {
                             return 'pass';
                         }
-                    }
+                    },
+                    lstring: 'Constraint Message'
                 },
                 requiredAttr: {
                     editable: 'w',
-                    visiblity: 'visible',
+                    visibility: 'visible',
                     presence: 'optional',
                     lstring: "Is this Question Required?",
                     uiType: "checkbox"
                 }
             },
             controlElement: {
-                name: {
+                name: { //internal use
                     editable: 'w',
                     visibility: 'hidden',
                     presence: 'required',
                     values: formdesigner.util.VALID_QUESTION_TYPE_NAMES,
-                    lstring: "Question Type"
                 },
-                tagName: {
+                tagName: { //internal use
                     editable: 'r',
                     visibility: 'hidden',
                     presence: 'required',
@@ -590,19 +596,19 @@ formdesigner.model = function () {
                 },
                 hintLabel: {
                     editable: 'w',
-                    visibility: 'hidden',
+                    visibility: 'advanced',
                     presence: 'optional'
                 },
                 labelItextID: {
                     editable: 'w',
-                    visibility: 'hidden',
+                    visibility: 'advanced',
                     presence: 'optional',
                     lstring: "Question Itext ID",
                     validationFunc : validationFuncs.label
                 },
                 hintItextID: {
                     editable: 'w',
-                    visibility: 'hidden',
+                    visibility: 'advanced',
                     presence: 'optional',
                     lstring: "Question HINT Itext ID"
                 },
@@ -908,6 +914,7 @@ formdesigner.model = function () {
         mType.mug = mug;
         mType.mug.properties.controlElement.properties.name = "Text";
         mType.mug.properties.controlElement.properties.tagName = "input";
+        mType.mug.properties.bindElement.properties.dataType = "xsd:string";
         return mType;
     };
 
@@ -945,6 +952,7 @@ formdesigner.model = function () {
         mType.typeName = "Trigger/Message MugType";
         mType.controlNodeAllowedChildren = false;
         mType.properties.bindElement.dataType.presence = 'notallowed';
+
 
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;

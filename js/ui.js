@@ -124,13 +124,13 @@ formdesigner.ui = (function () {
 
             printTreeBut.button().click(function () {
                 var vObj = [], vOut = [], i, invalidMT = [], mt;
-//                console.group("Tree Pretty Print");
-//                console.log("Control Tree:"+controller.form.controlTree.printTree())
-//                console.log("Data Tree:   "+controller.form.dataTree.printTree());
-//                console.log("TREE VALIDATION RESULT",controller.form.controlTree.isTreeValid());
+                console.group("Tree Pretty Print");
+                console.log("Control Tree:"+controller.form.controlTree.printTree())
+                console.log("Data Tree:   "+controller.form.dataTree.printTree());
+                console.log("TREE VALIDATION RESULT",controller.form.controlTree.isTreeValid());
                 invalidMT = controller.form.getInvalidMugTypes();
 
-//                console.log("TREE MAP INVALID UFIDS", controller.form.getInvalidMugTypeUFIDs());
+                console.log("TREE MAP INVALID UFIDS", controller.form.getInvalidMugTypeUFIDs());
                 for (i in invalidMT){
                     if(invalidMT.hasOwnProperty(i)){
                         mt = invalidMT[i];
@@ -138,8 +138,8 @@ formdesigner.ui = (function () {
                         vOut.push(mt.validateMug());
                     }
                 }
-//                console.log("INVALID MTs,VALIDATION OBJ",vOut);
-//                console.groupEnd();
+                console.log("INVALID MTs,VALIDATION OBJ",vOut);
+                console.groupEnd();
 
             });
 
@@ -187,48 +187,49 @@ formdesigner.ui = (function () {
 
     function getJSTreeTypes() {
         var groupRepeatValidChildren = formdesigner.util.GROUP_OR_REPEAT_VALID_CHILDREN,
+            jquery_icon_url = formdesigner.iconUrl,
         types =  {
             "max_children" : -1,
 			"valid_children" : groupRepeatValidChildren,
 			"types" : {
                 "group" : {
                     "icon": {
-                        "image" : "css/smoothness/images/ui-icons_888888_256x240.png",
+                        "image" : jquery_icon_url,
                         "position": "-16px -96px"
                     },
                     "valid_children" : groupRepeatValidChildren
                 },
                 "repeat" : {
                     "icon": {
-                        "image" : "css/smoothness/images/ui-icons_888888_256x240.png",
+                        "image" : jquery_icon_url,
                         "position": "-64px -80px"
                     },
                     "valid_children" : groupRepeatValidChildren
                 },
                 "question" : {
                     "icon": {
-                        "image" : "css/smoothness/images/ui-icons_888888_256x240.png",
+                        "image" : jquery_icon_url,
                         "position": "-128px -96px"
                     },
                     "valid_children" : "none"
                 },
                 "selectQuestion" : {
                     "icon": {
-                        "image" : "css/smoothness/images/ui-icons_888888_256x240.png",
+                        "image" : jquery_icon_url,
                         "position": "-96px -176px"
                     },
                     "valid_children": ["item"]
                 },
                 "item" : {
                     "icon": {
-                        "image" : "css/smoothness/images/ui-icons_888888_256x240.png",
+                        "image" : jquery_icon_url,
                         "position": "-48px -128px"
                     },
                     "valid_children" : "none"
                 },
                 "trigger" : {
                     "icon": {
-                        "image" : "css/smoothness/images/ui-icons_888888_256x240.png",
+                        "image" : jquery_icon_url,
                         "position": "-16px -144px"
                     },
                     "valid_children" : "none"
@@ -317,20 +318,59 @@ formdesigner.ui = (function () {
          * @param showHidden - Show properties with the visibility flag set to 'hidden'
          */
         function listDisplay(propertiesBlock,parentUL, mugProps, groupName, showVisible, showHidden){
+            function getWidget (propBlockIndex) {
+                var liStr,li,
+                p = propertiesBlock[propBlockIndex],
+                        itemID,html, labelStr, i;
+
+                labelStr = p.lstring ? p.lstring : propBlockIndex;
+                itemID = groupName + '-' + propBlockIndex + '-' + 'input';
+                html = '<span class="fd-property-text">'+labelStr+': '+'</span>'
+                if (!p.uiType || p.uiType === 'input') {
+                    html = html + '<div class="fd-prop-input-div chzn-container"><input id="' + itemID + '" class="fd-property-input"></div>'
+                } else if (p.uiType === 'select') {
+                    html = html +
+                            '<span class="fd-prop-input-div"><select data-placeholder="Choose a ' + labelStr + '" style="width:300px;" class="chzn-select"' +
+                            ' id="' + itemID + '">' +
+                                '<option value="blank"></option>';
+                    for (i in p.values) {
+                        if (p.values.hasOwnProperty(i)) {
+                            var strVal = formdesigner.util.fromCamelToRegularCase(p.values[i].replace('xsd:','')),
+                            isSelected = '';
+
+                            if (mugProps[propBlockIndex] === p.values[i]) {
+                                isSelected = 'selected';
+                            }
+
+
+                            html = html + '<option value="' + p.values[i] + '" '+ isSelected + '>' + strVal + '</option>';
+                        }
+                    }
+
+                    html = html + '</select></span>';
+                } else if (p.uiType === 'mselect') {
+                    html = html + '<span class="fd-prop-input-div">' + '</span>';
+                } else if (p.uiType === 'checkbox') {
+                    html = html + '<div class="fd-prop-input-div-checkbox"><input id="' + itemID + '" class="fd-property-checkbox" type="checkbox"></div>'
+                }
+
+                liStr = '<li id="' + groupName + '-' + propBlockIndex + '" class="fd-property">' +
+                            html +
+                            '</li>'
+                li = $(liStr);
+
+                return li;
+            }
             var i, li;
             for(i in propertiesBlock){
                 if(propertiesBlock.hasOwnProperty(i)){
-                    var show = (showVisible && propertiesBlock[i].visibility === 'visible') || (showHidden && propertiesBlock[i].visibility === 'hidden');
+                    var show = ((showVisible && propertiesBlock[i].visibility === 'visible') || (showHidden && propertiesBlock[i].visibility === 'advanced')) && propertiesBlock[i].presence !== 'notallowed';
                     if(show){
                         var pBlock = propertiesBlock[i],
-                                labelStr = pBlock.lstring ? pBlock.lstring : i,
-                                liStr = '<li id="' + groupName + '-' + i + '" class="fd-property"><span class="fd-property-text">'+labelStr+': '+'</span>' +
-                                        '<span class="fd-prop-input-div"><input id="' + groupName + '-' + i + '-' + 'input" class="fd-property-input"></span>'+
-                                        '</li>',
-                                input;
+                        input;
 
-                        li = $(liStr);
-                        input = $(li).find('input');
+                        li = getWidget(i);
+                        input = $(li).find(':input');
 
                         //set some useful data properties
                         input.data('propName',i);
@@ -435,18 +475,31 @@ formdesigner.ui = (function () {
                 collapsible: true
             });
 
-            adv.find('h3').click(function () {
-                var props = $('#fd-question-properties');
-                if(props.css('height') === '500px'){
-                    $('#fd-question-properties').animate({
-                        height:'700px'
-                    },200);
-                }else{
-                    $('#fd-question-properties').animate({
-                        height:'500px'
-                    },200);
+            $('#fd-props-advanced').bind( "accordionchangestart", function(event, ui) {
+                var newSize = '500px';
+                console.log("CLIKC!",event,ui);
+                if (ui.newContent.length === 0) {
+                    newSize = '500px';
+                }else {
+                    newSize = '900px';
                 }
-            })
+                $('#fd-question-properties').animate({
+                        height:newSize
+                },200);
+            });
+
+//            adv.find('h3').click(function () {
+//                var props = $('#fd-question-properties');
+//                if(props.css('height') === '500px'){
+//                    $('#fd-question-properties').animate({
+//                        height:'900px'
+//                    },200);
+//                }else{
+//                    $('#fd-question-properties').animate({
+//                        height:'500px'
+//                    },200);
+//                }
+//            })
 
             adv.accordion("activate",false);
 
@@ -456,6 +509,8 @@ formdesigner.ui = (function () {
             displayBlock('dataElement');
             displayBlock('bindElement');
             displayBlock('controlElement');
+
+            $('select').chosen();
 
         }
 
@@ -621,10 +676,10 @@ formdesigner.ui = (function () {
 
             TREE_MIN_WIDTH = 250,
             TREE_MAX_WIDTH = 380,
-            PROPS_MIN_WIDTH = 300,
-            PROPS_MAX_WIDTH = 750,
+            PROPS_MIN_WIDTH = 470,
+            PROPS_MAX_WIDTH = 720,
             EXTRAS_MIN_WIDTH = 20,
-            EXTRAS_MAX_WIDTH = 300,
+            EXTRAS_MAX_WIDTH = 235,
             STATE_EXTRAS_MAXIMIZE = true; //should you be maximizing or minimizing windows right now?
 
         function resizeTree () {
@@ -1009,6 +1064,8 @@ formdesigner.launch = function (opts) {
 
     formdesigner.save_url = opts["save_url"];
     formdesigner.loadMe = opts["form"];
+    
+    formdesigner.iconUrl = opts.iconUrl ? opts.iconUrl : "css/smoothness/images/ui-icons_888888_256x240.png";
 
 
 
