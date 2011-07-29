@@ -690,8 +690,7 @@ formdesigner.ui = (function () {
 
         accordion.hide();
         accordion.accordion({
-            fillSpace: true,
-            collapsible: false
+            autoHeight: false
         });
 
         accordion.show();
@@ -708,8 +707,6 @@ formdesigner.ui = (function () {
             }else {
                 STATE_EXTRAS_MAXIMIZE = true;
             }
-
-
             resizeTree();
             resizeProps();
             resizeExtras();
@@ -728,7 +725,7 @@ formdesigner.ui = (function () {
             text : false
         });
 
-        $('#fd-template-question-box div').each(function(){
+        $('#fd-extra-template-questions div').each(function(){
             $(this).button({
                             icons : {
                                 primary : 'ui-icon-gear'
@@ -978,6 +975,7 @@ formdesigner.ui = (function () {
     $(document).ready(function () {
 //
 //        formdesigner.launch($('#formdesigner'));
+        
 
     });
 
@@ -1017,6 +1015,7 @@ formdesigner.launch = function (opts) {
     formdesigner.util.eventuality(formdesigner);
     formdesigner.ui.controller = formdesigner.controller;
     formdesigner.controller.initFormDesigner();
+
 }
 
 formdesigner.rootElement = '';
