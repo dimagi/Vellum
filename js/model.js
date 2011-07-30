@@ -400,7 +400,7 @@ formdesigner.model = function () {
         //BE CAREFUL HERE.  This is where the automagic architecture detection ends, some things are hardcoded.
         var mugSpec, dataElSpec, bindElSpec, controlElSpec, i,
                 mug,dataElement,bindElement,controlElement,
-                specBlob = {}, validationResult;
+                specBlob = {}, validationResult, mugProps, nodeID, defaultItextValue;
 
         specBlob = getSpec(mugType.properties);
         mugSpec = specBlob || undefined;
@@ -430,6 +430,55 @@ formdesigner.model = function () {
                 }
                 mug.properties.bindElement = new BindElement(bindElSpec);
             }
+
+
+        }
+        mugProps = mug.properties;
+        if (mug.properties.controlElement) {
+            //Create some default Itext IDs
+            nodeID = null;
+
+
+            if (mugProps.bindElement) { //try for the bindElement nodeID
+                nodeID = mugProps.bindElement.properties.nodeID;
+            }
+            if (!nodeID) { //if nothing, try the dataElement nodeID
+                if (mugProps.dataElement) {
+                   nodeID = mugProps.dataElement.properties.nodeID;
+                }
+            }
+
+            if (!nodeID) { //Still nothing... so try some more exotic stuff
+                if (mugProps.controlElement) {
+                    //must be an Item or similar generate an itextID
+                    nodeID = formdesigner.util.generate_item_label();
+
+                }
+            }
+
+            //finally
+            mugProps.controlElement.properties.labelItextID = nodeID;
+
+
+        }
+
+        if (controlElSpec) { //this is some kind of select item or trigger...
+                //give it a useful initial label
+            if(dataElSpec) {
+                defaultItextValue = mugProps.dataElement.properties.nodeID;
+            }else if (bindElSpec) {
+                defaultItextValue = mugProps.bindElement.properties.nodeID;
+            }else if (controlElSpec) { //fall back to the Itext ID
+                defaultItextValue = mugProps.controlElement.properties.labelItextID;
+            }else { //what are we even doing here?
+                throw 'Mug does not contain any elements! Missing Data, Bind and Control elements!';
+            }
+            formdesigner.model.Itext.setValue(
+                    mug.properties.controlElement.properties.labelItextID,
+                    formdesigner.model.Itext.getDefaultLanguage(),
+                    'default',
+                    defaultItextValue
+            )
         }
 
         //Bind the mug to it's mugType
@@ -1883,7 +1932,49 @@ formdesigner.model = function () {
             }
 
             var create_itextBlock = function () {
-                return;
+                var xmlWriter = formdesigner.controller.XMLWriter, hasItext, lang, languages, Itext, id,
+                        langData, val, formData, form, i;
+                Itext = formdesigner.model.Itext;
+                languages = Itext.getLanguages();
+                hasItext = languages.length > 0;
+
+                if (hasItext) {
+                    xmlWriter.writeStartElement("itext");
+                    for (i in languages) {
+                        if (languages.hasOwnProperty(i)) {
+                            lang = languages[i];
+                            xmlWriter.writeStartElement("translation");
+                            xmlWriter.writeAttributeString("lang", lang);
+                            if (Itext.getDefaultLanguage() === lang) {
+                                xmlWriter.writeAttributeString("default", '');
+                            }
+                            langData = Itext.getLanguageData(lang);
+                            for (id in langData) {
+                                if(langData.hasOwnProperty(id)) {
+                                    xmlWriter.writeStartElement("text");
+                                    xmlWriter.writeAttributeString("id",id);
+                                    formData = langData[id];
+                                    for (form in formData) {
+                                        if (formData.hasOwnProperty(form)) {
+                                            val = formData[form];
+                                            xmlWriter.writeStartElement("value");
+                                            if(form !== "default") {
+                                                xmlWriter.writeAttributeString('form', form);
+                                            }
+                                            xmlWriter.writeString(val);
+                                            xmlWriter.writeEndElement();
+                                        }
+                                    }
+                                    xmlWriter.writeEndElement();
+                                }
+                            }
+                            xmlWriter.writeEndElement();
+                        }
+                    }
+                    xmlWriter.writeEndElement();
+                }
+
+                //done with Itext block generation.
             }
 
             function html_tag_boilerplate () {
@@ -2092,7 +2183,8 @@ formdesigner.model = function () {
                  *   }
                  *
                  */
-                data = {};
+
+        data = {};
 
         function exceptionString(iID, lang, form, val){
             var s;
@@ -2218,7 +2310,7 @@ formdesigner.model = function () {
             if(form === null){
                 form = 'default';
             }
-            if(!data.lang){
+            if(!data[lang]){
                 data[lang] = {};
             }
             if(!data[lang][iID]){
@@ -2265,6 +2357,31 @@ formdesigner.model = function () {
 
             return data[lang][iID][form];
         };
+
+        /**
+         * Gets all the data associated with a language in the form of a
+         * dictionary object.  Structure:
+         * {
+         *      itextID1 : {
+         *          long: longVal,
+         *          image: imageVal,
+         *          ...
+         *          },
+         *      itextID2 : {
+         *          long: ...
+         *          ...
+         *          }
+         *      }
+         * }
+         * @param lang - the string identifier of the language you want the data for.
+         */
+        that.getLanguageData = function (lang) {
+            return data[lang];
+        };
+
+        that.getAllData = function () {
+            return data;
+        }
 
         /**
          * Goes through the Itext data and verifies that
@@ -2355,6 +2472,18 @@ formdesigner.model = function () {
             }
         };
 
+        /**
+         * Blows away all data stored in the Itext object
+         * and resets it to pristine condition (i.e. as if the FD was freshly launched)
+         */
+        that.resetItext = function () {
+            data = {};
+
+            console.log ("ITEXT RESET CALLED!");
+            that.addLanguage("en");
+            that.setDefaultLanguage("en");
+        };
+
         (function init(initLang){
             that.addLanguage(initLang);
             that.setDefaultLanguage(initLang);
@@ -2372,6 +2501,7 @@ formdesigner.model = function () {
      */
     that.reset = function () {
         that.form = new Form();
+        formdesigner.model.Itext.resetItext();
         formdesigner.controller.setForm(that.form);
     };
 

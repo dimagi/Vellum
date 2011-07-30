@@ -193,14 +193,28 @@ formdesigner.util = (function(){
 
     that.question_counter = 1;
     /**
+     * Private method for constructing unique questionIDs, labels for items, etc
+     * @param prefixStr
+     */
+    var label_maker = function (prefixStr) {
+        var ret = prefixStr + that.question_counter;
+        that.question_counter += 1;
+        return ret;
+    }
+
+    /**
      * Generates a unique question ID (unique in this form) and
      * returns it as a string.
      */
     that.generate_question_id = function () {
-        var ret = 'question' + this.question_counter;
-        this.question_counter += 1;
-        return ret;
+        return label_maker('question');
     };
+
+
+    var generate_item_label = function () {
+        return label_maker('item');
+    };
+    that.generate_item_label = generate_item_label;
 
     that.allowUnusedXMLAttributes = function(that){
         var unusedXMLattrs = {},
