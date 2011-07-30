@@ -451,13 +451,22 @@ formdesigner.controller = (function () {
 
                 dataTree.insertMugType(mType,'into',parentMugType);
             }
-            var root = $(dataEl),
+            var root = $(dataEl), uuid, uiVersion, formName, formVersion, jrm,
                 recFunc = function () {
                     parseDataElement(this);
                     $(this).children().each(recFunc);
                 };
 
             root.children().each(recFunc);
+            //try to grab the JavaRosa XForm Attributes in the root data element...
+            formdesigner.formUuid = root.attr("xmlns");
+            formdesigner.formJRM = root.attr("xmlns:jrm");
+            formdesigner.formUIVersion = root.attr("uiVersion");
+            formdesigner.formVersion = root.attr("version");
+            formdesigner.formName = root.attr("name");
+
+            console.log("FORMDESIGNER OBJECT POST PARSE", formdesigner);
+
         }
 
         function parseBindList (bindList) {
@@ -467,6 +476,9 @@ formdesigner.controller = (function () {
              * @param attrString - string
              */
             function parseRequiredAttribute (attrString) {
+                if (!attrString) {
+                    return null;
+                }
                 var str = attrString.toLowerCase().replace(/\s/g, '');
                 if (str === 'true()') {
                     return true;
@@ -581,8 +593,10 @@ formdesigner.controller = (function () {
                     try{
                         mugType = formdesigner.model.mugTypeMaker[MTIdentifier]();
                     }catch (e) {
+                        console.log ("Exception Control Element", cEl);
                         throw 'New Control Element classified as non-existent MugType! Please create a rule for this case' +
-                            ' in formdesigner.model.mugTypeMaker! IdentString:' + MTIdentifier;
+                            ' in formdesigner.model.mugTypeMaker! IdentString:' + MTIdentifier + ",tagName:" + tagName +
+                                ",cEl:" + cEl + ",nodeID:" + nodeID;
                     }
 
                     if(oldMT) { //copy oldMT data to newly generated MT
@@ -639,8 +653,12 @@ formdesigner.controller = (function () {
                     }
 
                     var tag = MugType.mug.properties.controlElement.properties.tagName;
-                    labelEl = $(cEl).find('label');
-                    hintEl = $(cEl).find('hint');
+                    if(tag === 'repeat'){
+                        labelEl = $($(cEl).parent().children('label'));
+                    } else {
+                        labelEl = $(cEl).children('label');
+                    }
+                    hintEl = $(cEl).children('hint');
                     var cannottHaveDefaultValue = ['select', 'select1', 'repeat', 'group', 'trigger'];
                     if (labelEl.length > 0) {
                         parseLabel(labelEl, MugType);
@@ -649,7 +667,7 @@ formdesigner.controller = (function () {
                         parseHint (hintEl, MugType);
                     }
                     if (tag === 'item') {
-                        parseDefaultValue($(cEl).find('value'),MugType);
+                        parseDefaultValue($(cEl).children('value'),MugType);
                     }
 
                 }
@@ -658,7 +676,15 @@ formdesigner.controller = (function () {
                     formdesigner.controller.form.controlTree.insertMugType(MugType,'into',parentMT);
                 }
 
-                var el = $ ( this ),
+                //figures out if this control DOM element is a repeat
+                function isRepeat(groupEl) {
+                    if($(groupEl)[0].tagName !== 'group') {
+                        return false;
+                    }
+                    return $(groupEl).children('repeat').length === 1;
+                }
+
+                var el = $ ( this ), oldEl,
                     path,
                     nodeID,
                     mType,
@@ -670,14 +696,19 @@ formdesigner.controller = (function () {
                     couldHaveChildren = ['repeat', 'group', 'select', 'select1'],
                     children;
 
-                console.log("ELEMENT IN PARSECONTROL",el);
 
-
+                //do the repeat switch thing
+                if(isRepeat(el)) {
+                    console.log("REPEAT FOUND WHILE PARSING!");
+                    oldEl = el;
+                    el = $(el.children('repeat')[0]);
+                }
 
                 parentNode = el.parent();
-                if($(parentNode)[0].nodeName === 'repeat') {
-                    parentNode = parentNode.parent(); //skip one up because of repeat's funny structure.
-                }if($(parentNode)[0].nodeName === 'h:body') {
+//                if($(parentNode)[0].nodeName === 'repeat') {
+//                    parentNode = parentNode.parent(); //skip one up because of repeat's funny structure.
+//                }
+                if($(parentNode)[0].nodeName === 'h:body') {
                     parentNode = null;
                 }
 
@@ -689,19 +720,26 @@ formdesigner.controller = (function () {
                     parentMug = null;
                 }
 
+
+
                 path = formdesigner.util.getPathFromControlElement(el);
                 nodeID = formdesigner.util.getNodeIDFromPath(path);
-                
-                mType = classifyAndCreateMugType(nodeID,el);
-                populateMug(mType,el);
+                if(oldEl){
+                    mType = classifyAndCreateMugType(nodeID,oldEl);
+                    populateMug(mType,oldEl);
+                }else {
+                    mType = classifyAndCreateMugType(nodeID,el);
+                    populateMug(mType,el);
+                }
+
                 insertMTInControlTree(mType, parentMug);
 
                 tagName = mType.mug.properties.controlElement.properties.tagName.toLowerCase();
                 if(couldHaveChildren.indexOf(tagName) !== -1) {
                     if(tagName === 'repeat'){
-                        children = $(el).find('repeat').children().not('label').not('value');
+                        children = $(oldEl).children('repeat').children().not('label').not('value').not('hint');
                     }else{
-                        children = $(el).children().not('label').not('value');
+                        children = $(el).children().not('label').not('value').not('hint');
                     }
                     children.each(eachFunc); //recurse down the tree
                 }
@@ -778,7 +816,6 @@ formdesigner.controller = (function () {
                 rIsItemOrInputOrTrigger = (rType === 'item' || rType === 'input' || rType === 'trigger'),
                 rIsGroupOrRepeat = (rType === 'repeat' || rType === 'group');
 
-        console.log(oType,position,rType);
         if (position !== 'into') {
             if (!refMugType) {
                 throw "If refMugType is null in checkMoveOp() position MUST be 'into'! Position was: "+position;

@@ -1059,6 +1059,16 @@ formdesigner.model = function () {
         return mType;
     };
 
+    that.mugTypeMaker.stdRepeat = function () {
+        var mType;
+
+        mType = formdesigner.model.mugTypeMaker.stdGroup();
+        mType.typeName = "Standard Repeat";
+        mType.mug.properties.controlElement.properties.name = "Repeat";
+        mType.mug.properties.controlElement.properties.tagName = "repeat";
+        return mType;
+    }
+
 
 
     /**
@@ -1977,6 +1987,44 @@ formdesigner.model = function () {
                 //done with Itext block generation.
             }
 
+            var create_model_header = function () {
+                var xw = formdesigner.controller.XMLWriter,
+                        uuid, uiVersion, version, formName, jrm;
+                //assume we're currently pointed at the opening date block tag
+                //e.g. <model><instance><data> <--- we're at <data> now.
+
+                jrm = formdesigner.formJRM;
+                if(!jrm) {
+                    jrm = "http://dev.commcarehq.org/jr/xforms";
+                }
+
+                uuid = formdesigner.formUuid; //gets set at parse time/by UI
+                if(!uuid) {
+                    uuid = "http://openrosa.org/formdesigner/" + formdesigner.util.generate_xmlns_uuid();
+                }
+
+                uiVersion = formdesigner.formUIVersion; //gets set at parse time/by UI
+                if(!uiVersion) {
+                    uiVersion = 1;
+                }
+
+                version = formdesigner.formVersion; //gets set at parse time/by UI
+                if(!version) {
+                    version = 1;
+                }
+
+                formName = formdesigner.formName; //gets set at parse time/by UI
+                if(!formName) {
+                    formName = "New Form";
+                }
+
+                xw.writeAttributeString("xmlns:jrm",jrm);
+                xw.writeAttributeString("xmlns", uuid);
+                xw.writeAttributeString("uiVersion", uiVersion);
+                xw.writeAttributeString("version", version);
+                xw.writeAttributeString("name", formName);
+            }
+
             function html_tag_boilerplate () {
                 var xw = formdesigner.controller.XMLWriter;
                 xw.writeAttributeString( "xmlns:h", "http://www.w3.org/1999/xhtml" );
@@ -2004,6 +2052,7 @@ formdesigner.model = function () {
                         xw.writeStartElement('model');
                             xw.writeStartElement('instance');
                                 create_dataBlock();
+                                create_model_header();
                             xw.writeEndElement(); //CLOSE INSTANCE
                         /////////////////BINDS /////////////////
                             create_bindList();
@@ -2478,8 +2527,6 @@ formdesigner.model = function () {
          */
         that.resetItext = function () {
             data = {};
-
-            console.log ("ITEXT RESET CALLED!");
             that.addLanguage("en");
             that.setDefaultLanguage("en");
         };

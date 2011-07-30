@@ -381,10 +381,8 @@ formdesigner.ui = (function () {
                         input.val(mugProps[i]);  //<--- POTENTIAL PAIN POINT! Could be something that's not a string!
 
                         //set event handler
-                        console.log('PBLOCK IN DISPLAYMUG',pBlock);
 
                         if(!pBlock.uiType || pBlock.uiType === 'input'){
-                            console.log('loading "input" type handler for input box!');
                             input.keyup(function(e){
                                 var input = $(e.currentTarget),
                                         groupName = input.data('groupName'),
@@ -473,13 +471,10 @@ formdesigner.ui = (function () {
                     iID = mugType.mug.properties.controlElement.properties.labelItextID = formdesigner.util.getNewItextID(mugType);
                 }
 
-                console.log("ITEXT DEETZ",iID);
                 id = 'fd-itext-' + textForm.toLowerCase();
                 liStr = '<li id="' + id + '"></li>';
                 txtStr = '<span id="' + id +'-txt">' + formdesigner.util.fromCamelToRegularCase(textForm) + '</span>';
                 inputStr = '<div id="' + id + '-input-div"><input id="' + id + '-input" />';
-                console.log(Itext.getValue(iID, currentLang, textForm));
-                console.log(inputStr);
                 li = $(liStr);
                 text = $(txtStr);
                 input = $(inputStr);
@@ -491,7 +486,6 @@ formdesigner.ui = (function () {
                 input.data('textform', textForm);
 
                 input.find(':input').keyup ( function (e) {
-                    console.log("Huu!",e, $(this));
                     Itext.setValue(iID, currentLang, textForm, $(this).val());
                 });
 

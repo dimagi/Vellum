@@ -1,8 +1,17 @@
 fd todo:
+
+When loading tests/xforms/form3.xml model is built correctly but UI tree is incorrect.
+Write hardcore test for form3 (testing out most properties have been loaded correctly, trees look correct, etc))
+
+Write IText Parser
+
+Make 'save to server' button with ajax post method (post URL set by formdesigner init params)
+
+
+
+
+
 in Form.getBindList() swap out redundant list merging code for function in util (test to see if everything works as expected)
-
-Make UI allow for 'uiType' property in MugType.properties blocks
-
 Tests for XML generation (all three above)
 
 
