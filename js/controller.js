@@ -23,6 +23,7 @@ formdesigner.controller = (function () {
 
         formdesigner.model.init();
         formdesigner.ui.init();
+        formdesigner.currentItextDisplayLanguage = formdesigner.model.Itext.getDefaultLanguage();
     };
     that.initFormDesigner = initFormDesigner;
     
@@ -49,8 +50,8 @@ formdesigner.controller = (function () {
      * @param ufid - UFID of the selected MugType
      */
     var setCurrentlySelectedMugType = function (ufid) {
-        curSelUfid = ufid;
-        curSelMugType = getMTFromFormByUFID(ufid);
+        this.curSelUfid = ufid;
+        this.curSelMugType = getMTFromFormByUFID(ufid);
     };
     that.setCurrentlySelectedMugType = setCurrentlySelectedMugType;
 
@@ -107,10 +108,39 @@ formdesigner.controller = (function () {
      * for the user to start the editing process.
      */
     function reloadUI () {
-        formdesigner.ui.resetUI();
+        var controlTree, dataTree, treeFunc;
 
+        //first clear out the existing UI
+        formdesigner.ui.resetUI();
+        formdesigner.controller.setCurrentlySelectedMugType(null);
+
+        treeFunc = function (node) {
+            var mt;
+            if(node.isRootNode) {
+                return;
+            }
+
+            mt = node.getValue();
+            if(!mt) {
+                throw 'Node in tree without value?!?!'
+            }
+
+            formdesigner.controller.loadMugTypeIntoUI(mt);
+
+
+        }
+
+        controlTree = formdesigner.controller.form.controlTree;
+        controlTree.treeMap(treeFunc);
+
+        formdesigner.ui.setTreeValidationIcons();
+
+//        dataTree = formdesigner.controller.form.dataTree;
+//        dataTree.treeMap(treeFunc);
 
     }
+
+    that.reloadUI = reloadUI;
 
     var showErrorMessage = function (msg) {
         formdesigner.ui.appendErrorMessage(msg);
@@ -181,13 +211,13 @@ formdesigner.controller = (function () {
             true  //skip_rename
         );
 
-        $('#fd-data-tree').jstree("create",
-            null, //reference node, use null if using UI plugin for currently selected
-            insertPosition, //position relative to reference node
-            objectData,
-            null, //callback after creation, better to wait for event
-            true  //skip_rename
-        );
+//        $('#fd-data-tree').jstree("create",
+//            null, //reference node, use null if using UI plugin for currently selected
+//            insertPosition, //position relative to reference node
+//            objectData,
+//            null, //callback after creation, better to wait for event
+//            true  //skip_rename
+//        );
         treeSetItemType(mugType);
     }
 
@@ -237,8 +267,8 @@ formdesigner.controller = (function () {
     };
     that.createQuestion = createQuestion;
 
-    var loadQuestionIntoUI = function (mugType) {
-        var mug;
+    var loadMugTypeIntoUI = function (mugType) {
+        var mug, controlTree, parentMT, parentMTUfid, loadMTEvent = {};
 
         mug = mugType.mug;
 
@@ -246,9 +276,24 @@ formdesigner.controller = (function () {
         //see method docs for further info
         formdesigner.util.setStandardMugEventResponses(mug);
 
+        //set the 'currently selected mugType' to be that of this mugType's parent.
+        controlTree = formdesigner.controller.form.controlTree;
+        parentMT = controlTree.getParentMugType(mugType);
+        if(parentMT){
+            parentMTUfid = parentMT.ufid;
+            formdesigner.ui.getJSTree().jstree('select_node',$('#'+parentMTUfid), true);
+        }else{
+            parentMTUfid = null;
+        }
+//        formdesigner.controller.setCurrentlySelectedMugType(parentMTUfid);
+        createQuestionInUITree(mugType);
+        loadMTEvent.type= "mugtype-loaded";
+        loadMTEvent.mugType = mugType;
+        this.fire(loadMTEvent);
 
-
+        return mug;
     }
+    that.loadMugTypeIntoUI = loadMugTypeIntoUI;
 
     that.XMLWriter = null;
     var initXMLWriter = function () {
@@ -321,7 +366,7 @@ formdesigner.controller = (function () {
         button.show();
 
         button.click(function () {
-            formdesigner.controller.parseXML(input.val());
+            formdesigner.controller.loadXForm(input.val());
             $.fancybox.close();
             $(this).hide();
         });
@@ -333,6 +378,32 @@ formdesigner.controller = (function () {
         formdesigner.controller.form.formName = name;
     };
     that.setFormName = setFormName;
+
+    var loadXForm = function (formString) {
+        formdesigner.fire({
+                type: 'load-form-start',
+                form : formString
+            });
+        try {
+            formdesigner.controller.resetFormDesigner();
+            formdesigner.controller.parseXML(formString);
+            formdesigner.controller.reloadUI();
+        }catch (e) {
+            formdesigner.fire({
+                type: 'load-form-error',
+                errorObj : e,
+                form : formString
+            });
+            throw (e);
+        }
+
+
+        formdesigner.fire({
+                type: 'load-form-compelete',
+                form : formString
+            });
+    }
+    that.loadXForm = loadXForm;
 
     /**
      * The big daddy function of parsing.
@@ -390,7 +461,21 @@ formdesigner.controller = (function () {
         }
 
         function parseBindList (bindList) {
-
+            /**
+             * Parses the required attribute string (expecting either "true()" or "false()" or nothing
+             * and returns either true, false or null
+             * @param attrString - string
+             */
+            function parseRequiredAttribute (attrString) {
+                var str = attrString.toLowerCase().replace(/\s/g, '');
+                if (str === 'true()') {
+                    return true;
+                } else if (str === 'false()') {
+                    return false;
+                } else {
+                    return null;
+                }
+            }
 
             function eachFunc () {
                 var el = $(this),
@@ -408,7 +493,7 @@ formdesigner.controller = (function () {
                 attrs.calculateAttr = el.attr('calculate');
                 attrs.constraintAttr = el.attr('constraint');
                 attrs.constraintMsgAttr = el.attr('constraintMsg');
-                attrs.requiredAttr = el.attr('required');
+                attrs.requiredAttr = parseRequiredAttribute(el.attr('required'));
                 attrs.nodeID = nodeID;
 
                 bindElement = new formdesigner.model.BindElement(attrs);
@@ -556,7 +641,7 @@ formdesigner.controller = (function () {
                     var tag = MugType.mug.properties.controlElement.properties.tagName;
                     labelEl = $(cEl).find('label');
                     hintEl = $(cEl).find('hint');
-                    var cantHaveDefaultValue = ['select', 'select1', 'repeat', 'group', 'trigger'];
+                    var cannottHaveDefaultValue = ['select', 'select1', 'repeat', 'group', 'trigger'];
                     if (labelEl.length > 0) {
                         parseLabel(labelEl, MugType);
                     }
@@ -565,8 +650,6 @@ formdesigner.controller = (function () {
                     }
                     if (tag === 'item') {
                         parseDefaultValue($(cEl).find('value'),MugType);
-                    }else if (cantHaveDefaultValue.indexOf(tag) === -1) {
-                        parseDefaultValue($(cEl),MugType);
                     }
 
                 }
@@ -631,7 +714,6 @@ formdesigner.controller = (function () {
         }
 
         formdesigner.controller.fire('parse-start');
-        formdesigner.controller.resetFormDesigner();
         try{
             var xmlDoc = $.parseXML(xmlString),
                 xml = $(xmlDoc),
@@ -654,6 +736,9 @@ formdesigner.controller = (function () {
             formdesigner.controller.fire({
                 type: 'parse-finish'
             });
+
+
+
         } catch (e) {
             formdesigner.controller.fire({
               type: 'parse-error',

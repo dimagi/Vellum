@@ -420,6 +420,11 @@ formdesigner.util = (function(){
     };
     that.getRelativeInsertPosition = getRelativeInsertPosition;
 
+    var getNewItextID = function (mugType) {
+        return 'foo';
+    };
+    that.getNewItextID = getNewItextID;
+
     var generate_guid = function() {
         // http://stackoverflow.com/questions/105034/how-to-create-a-guid-uuid-in-javascript
         var S4 = function() {

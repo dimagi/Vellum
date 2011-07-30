@@ -580,7 +580,7 @@ formdesigner.model = function () {
                     editable: 'w',
                     visibility: 'hidden',
                     presence: 'required',
-                    values: formdesigner.util.VALID_QUESTION_TYPE_NAMES,
+                    values: formdesigner.util.VALID_QUESTION_TYPE_NAMES
                 },
                 tagName: { //internal use
                     editable: 'r',
@@ -613,12 +613,6 @@ formdesigner.model = function () {
                     visibility: 'advanced',
                     presence: 'optional',
                     lstring: "Question HINT Itext ID"
-                },
-                defaultValue: {
-                    lstring: 'Default Question Value',
-                    visibility: 'visible',
-                    editable: 'w',
-                    presence: 'optional'
                 }
             }
         },
@@ -959,7 +953,6 @@ formdesigner.model = function () {
         controlProps = mType.properties.controlElement;
         controlProps.hintLabel.presence = 'notallowed';
         controlProps.hintItextID.presence = 'notallowed';
-        controlProps.defaultValue.presence = 'notallowed';
 
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
@@ -1709,6 +1702,20 @@ formdesigner.model = function () {
                         bEl,cons,consMsg,nodeset,type,relevant,required,calc,
                     i, attrs, j;
 
+                /**
+                 * Converts true to 'true()' and false to 'false()'. Returns null for all else.
+                 * @param req
+                 */
+                function createBindRequiredAttribute(req) {
+                    if(req === true) {
+                        return 'true()';
+                    }else if (req === false) {
+                        return 'false()';
+                    } else {
+                        return null;
+                    }
+                }
+
                 function populateVariables (MT){
                     bEl = MT.mug.properties.bindElement;
                     if (bEl) {
@@ -1717,7 +1724,7 @@ formdesigner.model = function () {
                         nodeset = dataTree.getAbsolutePath(MT);
                         type = bEl.properties.dataType;
                         relevant = bEl.properties.relevantAttr;
-                        required = bEl.properties.requiredAttr;
+                        required = createBindRequiredAttribute(bEl.properties.requiredAttr);
                         calc = bEl.properties.calculateAttr;
                         return {
                             nodeset: nodeset,
@@ -1907,8 +1914,12 @@ formdesigner.model = function () {
                             xw.writeStartElement('instance');
                                 create_dataBlock();
                             xw.writeEndElement(); //CLOSE INSTANCE
+                        /////////////////BINDS /////////////////
                             create_bindList();
+                        ///////////////////////////////////////
+                        //////////ITEXT //////////////////////
                             create_itextBlock();
+                        ////////////////////////////////////
                         xw.writeEndElement(); //CLOSE MODEL
                 ///////////////////////////////////
                     xw.writeEndElement(); //CLOSE HEAD
@@ -2136,7 +2147,7 @@ formdesigner.model = function () {
             defaultLanguage = name;
         };
 
-        that.getDefaultLanguage = function (name) {
+        that.getDefaultLanguage = function () {
             return defaultLanguage;
         };
 
@@ -2217,6 +2228,13 @@ formdesigner.model = function () {
                 data[lang][iID][form] = "";
             }
             data[lang][iID][form] = val;
+            formdesigner.controller.fire({
+                type: 'question-itext-changed',
+                iTextID: iID,
+                language: lang,
+                textForm: form,
+                value: val
+            })
 
         };
 
@@ -2233,7 +2251,8 @@ formdesigner.model = function () {
                 throw 'Attempted to retrieve Itext value from language that does not exist!' + exceptionString(iID,lang,form)
             }
             if(!data[lang][iID]){
-                throw 'Attempted to retrieve Itext value that does not exist!' + exceptionString(iID,lang,form)
+//                throw 'Attempted to retrieve Itext value that does not exist!' + exceptionString(iID,lang,form)
+                return null;
             }
 
             if(!form){

@@ -163,7 +163,7 @@ formdesigner.ui = (function () {
         (function c_openSource() {
             var openSourcebut = $(
                     '<div id="fd-opensource-button" class="toolbarButton questionButton">'+
-                '<span id="fd-opensource-but"></span>Open Source ' +
+                '<span id="fd-opensource-but"></span>Load Source ' +
               '</div>');
             toolbar.append(openSourcebut);
 
@@ -327,7 +327,7 @@ formdesigner.ui = (function () {
                 itemID = groupName + '-' + propBlockIndex + '-' + 'input';
                 html = '<span class="fd-property-text">'+labelStr+': '+'</span>'
                 if (!p.uiType || p.uiType === 'input') {
-                    html = html + '<div class="fd-prop-input-div chzn-container"><input id="' + itemID + '" class="fd-property-input"></div>'
+                    html = html + '<div class="fd-prop-input-div chzn-container"><input id="' + itemID + '" class="fd-property-input" /></div>'
                 } else if (p.uiType === 'select') {
                     html = html +
                             '<span class="fd-prop-input-div"><select data-placeholder="Choose a ' + labelStr + '" style="width:300px;" class="chzn-select"' +
@@ -381,14 +381,37 @@ formdesigner.ui = (function () {
                         input.val(mugProps[i]);  //<--- POTENTIAL PAIN POINT! Could be something that's not a string!
 
                         //set event handler
-                        input.keyup(function(e){
-                            var input = $(e.currentTarget),
-                                    groupName = input.data('groupName'),
-                                    propName = input.data('propName'),
-                                    curMug = formdesigner.controller.getCurrentlySelectedMug(),
-                                    curMT = formdesigner.controller.getCurrentlySelectedMugType();
-                            formdesigner.controller.setMugPropertyValue(curMug,groupName,propName,input.val(),curMT);
-                        });
+                        console.log('PBLOCK IN DISPLAYMUG',pBlock);
+
+                        if(!pBlock.uiType || pBlock.uiType === 'input'){
+                            console.log('loading "input" type handler for input box!');
+                            input.keyup(function(e){
+                                var input = $(e.currentTarget),
+                                        groupName = input.data('groupName'),
+                                        propName = input.data('propName'),
+                                        curMug = formdesigner.controller.getCurrentlySelectedMug(),
+                                        curMT = formdesigner.controller.getCurrentlySelectedMugType();
+                                formdesigner.controller.setMugPropertyValue(curMug,groupName,propName,input.val(),curMT);
+                            });
+                        }else if(pBlock.uiType === 'select'){
+                            //TODO HOOK UP LISTENER!
+                        }else if(pBlock.uiType === 'checkbox'){
+                            input.prop("checked",mugProps[i]);
+
+                            input.change(function (e) {
+                                var input = $(e.currentTarget),
+                                        groupName = input.data('groupName'),
+                                        propName = input.data('propName'),
+                                        curMug = formdesigner.controller.getCurrentlySelectedMug(),
+                                        curMT = formdesigner.controller.getCurrentlySelectedMugType();
+                                formdesigner.controller.setMugPropertyValue(curMug,groupName,propName,input.prop("checked"),curMT);
+                            });
+
+                        }
+
+
+
+                        
 
 
                         parentUL.append(li);
@@ -440,10 +463,103 @@ formdesigner.ui = (function () {
         displayFuncs.bindElement = showBindProps;
 
         function showItextProps(){
+            function makeLI(textForm) {
+                var mugType, liStr, txtStr, inputStr, id, li, text, input, currentLang, Itext, iID;
+                Itext = formdesigner.model.Itext;
+                currentLang = formdesigner.currentItextDisplayLanguage;
+                mugType = formdesigner.controller.getCurrentlySelectedMugType();
+                iID = mugType.mug.properties.controlElement.properties.labelItextID;
+                if(!iID) {
+                    iID = mugType.mug.properties.controlElement.properties.labelItextID = formdesigner.util.getNewItextID(mugType);
+                }
+
+                console.log("ITEXT DEETZ",iID);
+                id = 'fd-itext-' + textForm.toLowerCase();
+                liStr = '<li id="' + id + '"></li>';
+                txtStr = '<span id="' + id +'-txt">' + formdesigner.util.fromCamelToRegularCase(textForm) + '</span>';
+                inputStr = '<div id="' + id + '-input-div"><input id="' + id + '-input" />';
+                console.log(Itext.getValue(iID, currentLang, textForm));
+                console.log(inputStr);
+                li = $(liStr);
+                text = $(txtStr);
+                input = $(inputStr);
+                input.find(':input').val(Itext.getValue(iID, currentLang, textForm));
+                li.append(text);
+                li.append(input);
+
+                input.data('ufid', mugType.ufid);
+                input.data('textform', textForm);
+
+                input.find(':input').keyup ( function (e) {
+                    console.log("Huu!",e, $(this));
+                    Itext.setValue(iID, currentLang, textForm, $(this).val());
+                });
+
+                return li;
+            }
+
+            function makeItextUL() {
+                var ulStr = '<ul id="fd-props-itext-ul"></ul>';
+                return $(ulStr);
+            }
+
+            function makeLangDropDown() {
+                var div = $('#fd-itext-langs'), addLangButton, langList, langs, i, str, selectedLang, Itext;
+                Itext = formdesigner.model.Itext;
+                langs = Itext.getLanguages();
+
+                str = '<select data-placeholder="Choose a Language" style="width:300px;" class="chzn-select" id=fd-itext-lang-select">'
+                for (i in langs) {
+                    if (langs.hasOwnProperty(i)) {
+                        if(Itext.getDefaultLanguage === langs[i]){
+                            selectedLang = 'selected';
+                        }
+
+                        str = str + '<option value="' + langs[i] + '"' + selectedLang + '>' + langs[i] + '</option>';
+                    }
+                }
+
+                langList = $(str);
+                div.append(langList);
+                langList.chosen();
+                langList.change (function (e) {
+                    formdesigner.currentItextDisplayLanguage = $(this).val();
+                })
+
+                str = '';
+                str = '<button id="fd-itext-add-lang-button">Add Language</button>';
+                addLangButton = $(str);
+                addLangButton.button();
+                addLangButton.click (function () {
+                    formdesigner.ui.showAddLanguageDialog();
+                })
+                div.append(addLangButton);
+
+            }
+            $('#fd-itext-inputs').empty();
+            $('#fd-itext-langs').empty();
+            var uiBlock = $('#fd-itext-inputs'),
+                ul, LIs, i;
+                ul = makeItextUL();
+                uiBlock.append(ul);
+                LIs = {
+                    liDef : makeLI('default'),
+                    liLong : makeLI('long'),
+                    liShort : makeLI('short'),
+                    liAudio : makeLI('audio'),
+                    liImage : makeLI('image')
+                }
+
+                for (i in LIs) {
+                    if(LIs.hasOwnProperty(i)) {
+                        ul.append(LIs[i]);
+                    }
+                }
 
         }
         displayFuncs.itext = showItextProps; //not sure if this will ever be used like this, but may as well stick with the pattern
 
+        var IS_ADVANCED_ACC_EXPANDED = false;
         function showAdvanced(){
             var str = '<div id="fd-props-adv-accordion"><h3><a href="#">Advanced Properties</a></h3><div id="fd-adv-props-content">Some Content<br />asdasddas</div></div>',
                 adv = $(str),
@@ -472,15 +588,17 @@ formdesigner.ui = (function () {
             adv.accordion({
 //                fillSpace: true,
                 autoHeight: false,
-                collapsible: true
+                collapsible: true,
+                active: IS_ADVANCED_ACC_EXPANDED
             });
 
             $('#fd-props-advanced').bind( "accordionchangestart", function(event, ui) {
                 var newSize = '500px';
-                console.log("CLIKC!",event,ui);
                 if (ui.newContent.length === 0) {
+                    IS_ADVANCED_ACC_EXPANDED = false;
                     newSize = '500px';
                 }else {
+                    IS_ADVANCED_ACC_EXPANDED = true;
                     newSize = '900px';
                 }
                 $('#fd-question-properties').animate({
@@ -605,6 +723,20 @@ formdesigner.ui = (function () {
         that.displayMugProperties(formdesigner.controller.getCurrentlySelectedMugType());
     }
 
+    function selectMugTypeInUI(mugType) {
+        var ufid = mugType.ufid;
+        return getJSTree().jstree('select_node', $('#'+ufid));
+    }
+    that.selectMugTypeInUI = selectMugTypeInUI;
+
+    /**
+     * Returns the current UI tree instance as a Jquery Selector object
+     */
+    function getJSTree () {
+        return $('#fd-question-tree');
+    }
+    that.getJSTree = getJSTree;
+
     /**
      * Creates the UI tree
      */
@@ -613,6 +745,9 @@ formdesigner.ui = (function () {
         $("#fd-question-tree").jstree({
             "json_data" : {
                 "data" : []
+            },
+            "ui" : {
+                select_limit: 1
             },
             "crrm" : {
                 "move": {
@@ -984,6 +1119,11 @@ formdesigner.ui = (function () {
         $( "#fd-dialog-confirm" ).dialog("close");
     };
     that.hideConfirmDialog = hideConfirmDialog;
+
+    var showAddLanguageDialog = function () {
+        //TODO MAKE THIS DIALOG!!!
+    };
+    that.showAddLanguageDialog = showAddLanguageDialog;
 
     /**
      * Set the values for the Confirm Modal Dialog
