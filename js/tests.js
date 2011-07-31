@@ -803,7 +803,7 @@ $(document).ready(function(){
         jstree.jstree('select_node',lastCreatedNode,true);
         addQbut.click();
 
-        notEqual(formdesigner.controller.form.isFormValid(), true, 'Form should not be valid. Missing label fields.');
+        equal(formdesigner.controller.form.isFormValid(), true, 'Form should not be valid. Missing label fields.');
 
         //testing the opposite case is done in the test group above.
 

@@ -269,7 +269,7 @@ formdesigner.ui = (function () {
                 "secret" : {
                     "icon": {
                         "image": jquery_icon_url,
-                        "position": "-192px -96px"
+                        "position": "-112px -128px"
                     },
                     "valid_children" : "none"
                 },
