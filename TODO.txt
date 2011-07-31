@@ -1,6 +1,6 @@
 fd todo:
 --- Critical
-Write IText Parser
+Wire up language selector for itext display in question props + make add language button work.
 Make 'save to server' button with ajax post method (post URL set by formdesigner init params)
 Fix overall FD height
 Decide on correct fields to display in normal props view

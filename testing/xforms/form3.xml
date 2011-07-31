@@ -26,22 +26,41 @@
       <bind nodeset="/data/repeat/question8" type="xsd:string"/>
 	  <bind nodeset="/data/long_question" type="xsd:long"/>
       <itext>
-        <translation lang="en" default="">
+        <translation lang="sw" default="">
           <text id="repeatItextID">
-            <value>the repeat's unique itext</value>
+            <value>SW the repeat's unique itext</value>
           </text>
           <text id="question1w2">
-            <value>asdasdasaaaaaa</value>
+            <value>SW asdasdasaaaaaa</value>
           </text>
           <text id="Group4ohdear">
-            <value>Group1's default Itext</value>
+            <value>SW Group1's default Itext</value>
           </text>
           <text id="question3ddd">
-            <value>asdasdasds</value>
+            <value>SW asdasdasds</value>
           </text>
 		  <text id="phone_number">
-			<value>Enter Your Phone Number Localized EN</value>
-			<value form="short">phone num</value>
+			<value>SW Enter Your Phone Number Localized EN</value>
+			<value form="short">SW phone num</value>
+		</text>
+        </translation>
+		
+		<translation lang="pt">
+          <text id="repeatItextID">
+            <value>PT the repeat's unique itext</value>
+          </text>
+          <text id="question1w2">
+            <value>PT asdasdasaaaaaa</value>
+          </text>
+          <text id="Group4ohdear">
+            <value>PT Group1's default Itext</value>
+          </text>
+          <text id="question3ddd">
+            <value>PT asdasdasds</value>
+          </text>
+		  <text id="phone_number">
+			<value>PT Enter Your Phone Number Localized EN</value>
+			<value form="short">PT phone num</value>
 		</text>
         </translation>
       </itext>

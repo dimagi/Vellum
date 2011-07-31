@@ -789,6 +789,7 @@ formdesigner.controller = (function () {
             }
 
             $(itextBlock).children().each(eachLang);
+            formdesigner.currentItextDisplayLanguage = formdesigner.model.Itext.getDefaultLanguage();
         }
 
         formdesigner.controller.fire('parse-start');
