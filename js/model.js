@@ -796,7 +796,7 @@ formdesigner.model = function () {
                             if(pBlock.properties.hasOwnProperty(z)){
                                 var p = pBlock.properties[z],
                                         rule = propertiesObj[j][z];
-                                if(!rule || rule.presence === 'notallowed'){
+                                if(p && (!rule || rule.presence === 'notallowed')){
                                     results.status = "fail";
                                     results.message = j + " has property '" + z + "' but no rule is present for that property in the MugType!";
                                     results.errorBlockName = j;
@@ -1713,13 +1713,14 @@ formdesigner.model = function () {
 
         /**
          * Goes through both trees and picks out all the invalid
-         * MugTypes and returns their UFIDs in a flat list.
+         * MugTypes and returns a dictionary with the MT.ufid as the key
+         * and the validation object as the value
          */
         var getInvalidMugTypeUFIDs = function () {
-            var badMTs = this.getInvalidMugTypes(), result = [], i;
+            var badMTs = this.getInvalidMugTypes(), result = {}, i;
             for (i in badMTs){
                 if(badMTs.hasOwnProperty(i)){
-                    result.push(badMTs[i].ufid);
+                    result[badMTs[i].ufid] = badMTs[i].validateMug();
                 }
             }
             return result;

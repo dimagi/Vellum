@@ -21,10 +21,42 @@ formdesigner.ui = (function () {
     controller = formdesigner.controller,
     questionTree;
 
-    var appendErrorMessage = that.appendErrorMessage = function (msg) {
-        $('#fd-notify').addClass("notice");
-        $('#fd-notify').text($('#fd-notify').text() + msg);
-    };
+    /**
+     * Displays an info box on the properties view.
+     * Use hideMessage() to hide.
+     * @param msg - the actual message contents
+     * @param header - message header (optional)
+     * @param msgType - can be either 'warning' or 'error' - defaults to 'warning'
+     */
+    var showMessage  = function (msg, header, msgType) {
+        var div, warningClass, iconClass, iconSpan, msgtxt, headertxt, icon;
+        div = $('#fd-props-message');
+        div.empty();
+        if(msgType === 'error') {
+            warningClass = 'ui-state-error';
+            iconClass = 'ui-icon-alert';
+        } else {
+            warningClass = 'ui-state-highlight';
+            iconClass = 'ui-icon-info';
+        }
+        iconSpan = '<span class="ui-icon ' + iconClass + '" style="float: left; margin-right: .3em;"></span>';
+        icon = $(iconSpan);
+        headertxt = '<strong>' + header + '</strong>';
+        msgtxt = ' ' + msg;
+        div.append(icon).append(headertxt).append(msgtxt);
+        div.addClass(warningClass).addClass('ui-corner-all');
+        div.show();
+
+
+    }
+    that.showMessage = showMessage;
+
+    /**
+     * Hides the question properties message box;
+     */
+    var hideMessage = function () {
+        $('#fd-props-message').hide();
+    }
 
     function do_loading_bar() {
         var pbar = $("#progressbar"),
@@ -234,6 +266,13 @@ formdesigner.ui = (function () {
                     },
                     "valid_children" : "none"
                 },
+                "secret" : {
+                    "icon": {
+                        "image": jquery_icon_url,
+                        "position": "-192px -96px"
+                    },
+                    "valid_children" : "none"
+                },
 				"default" : {
 					"valid_children" : groupRepeatValidChildren
 				}
@@ -243,7 +282,7 @@ formdesigner.ui = (function () {
 
     }
 
-    var showVisualValidation = that.showVisualValidation = function showVisualValidation (mugType){
+    var showVisualValidation = function showVisualValidation (mugType){
         function setValidationFailedIcon(li,showIcon, message){
             var exists = ($(li).find('.fd-props-validate').length > 0);
             if(exists && showIcon){
@@ -269,6 +308,7 @@ formdesigner.ui = (function () {
                         li = findLIbyPropertyName(i, name);
                         if(res === 'fail'){
                             setValidationFailedIcon(li, true, msg);
+                            propsMessage += '<br>' + msg + '</br>';
                         }else if(res === 'pass'){
                             setValidationFailedIcon(li, false, msg);
                         }
@@ -285,14 +325,20 @@ formdesigner.ui = (function () {
                 bProps = vObj.bindElement,
                 cProps = vObj.controlElement,
                 dProps = vObj.dataElement,
-                i;
+                i, propsMessage;
 
-
+        hideMessage();
+        propsMessage = '';
         loopValProps(bProps, 'bindElement');
         loopValProps(cProps, 'controlElement');
         loopValProps(dProps, 'dataElement');
+        console.log("PROPS MESSAGE", propsMessage);
+        if(propsMessage) {
+            showMessage(propsMessage, 'Question Problems', 'warning');
+        }
 
     }
+    that.showVisualValidation = showVisualValidation;
 
     var displayMugProperties = that.displayMugProperties = that.displayQuestion = function(mugType){
         /**
@@ -963,7 +1009,7 @@ formdesigner.ui = (function () {
      */
     var setTreeValidationIcons = function () {
         var dTree, cTree, uiDTree, uiCTree, form,
-                invalidMTs, i;
+                invalidMTs, i, invalidMsg;
         uiCTree = $('#fd-question-tree');
         uiDTree = $('#fd-data-tree');
         form = controller.form;
@@ -984,7 +1030,8 @@ formdesigner.ui = (function () {
         invalidMTs = form.getInvalidMugTypeUFIDs();
         for (i in invalidMTs){
             if(invalidMTs.hasOwnProperty(i)){
-                $($('#' + invalidMTs[i] + ' a')[0]).append('<span class="ui-icon ui-icon-alert fd-tree-valid-alert-icon"></span>')
+                invalidMsg = invalidMTs[i].message;
+                $($('#' + i + ' a')[0]).append('<span class="ui-icon ui-icon-alert fd-tree-valid-alert-icon" title="'+invalidMsg+'></span>')
             }
         }
     };

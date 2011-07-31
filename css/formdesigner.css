@@ -107,14 +107,14 @@ td {
     margin: 0;
     padding: 0;
     position: relative;
-    top: -20px;
+    /*top: -20px;*/
 }
 
 #fd-adv-props-content .fd-props-ul {
     list-style-type: none;
     margin: 0;
     padding: 0;
-    padding-top:20px;
+    /*padding-top:20px;*/
     position: relative;
     top: -20px;
 }
@@ -143,10 +143,8 @@ td {
 }
 
 #fd-extra-tools-accordion{
-    float: right;
-    /*padding-left: 30px;*/
-    width: 89%;
     z-index:4;
+    padding-left: 2px;
     padding-bottom:100px;
 }
 
@@ -362,4 +360,11 @@ td {
 
 .fd-property-checkbox {
     
+}
+
+#fd-props-message {
+    margin: 0;
+    padding: 0;
+    text-align: center;
+    vertical-align: middle;
 }

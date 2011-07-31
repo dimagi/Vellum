@@ -156,7 +156,6 @@ formdesigner.controller = (function () {
                         mugTUfid = mugType.ufid,
                         node = $('#'+mugTUfid);
                     controlTree.jstree("set_type",tType,node);
-                    dataTree.jstree("set_type",tType,node);
                 };
 
             switch(tString.toLowerCase()) {
@@ -165,6 +164,9 @@ formdesigner.controller = (function () {
                     break;
                 case 'group':
                     setType("group");
+                    break;
+                case 'repeat':
+                    setType("repeat");
                     break;
                 case 'multi-select':
                 case 'single-select':
@@ -175,6 +177,9 @@ formdesigner.controller = (function () {
                     break;
                 case 'item':
                     setType("item");
+                    break;
+                case 'secret':
+                    setType("secret");
                     break;
             }
         }
@@ -284,6 +289,7 @@ formdesigner.controller = (function () {
             formdesigner.ui.getJSTree().jstree('select_node',$('#'+parentMTUfid), true);
         }else{
             parentMTUfid = null;
+            formdesigner.ui.getJSTree().jstree('deselect_all');
         }
 //        formdesigner.controller.setCurrentlySelectedMugType(parentMTUfid);
         createQuestionInUITree(mugType);
