@@ -754,7 +754,41 @@ formdesigner.controller = (function () {
         }
 
         function parseItextBlock (itextBlock) {
+            var curLanguage, curIID, curForm, Itext;
+            Itext = formdesigner.model.Itext;
+            Itext.removeLanguage('en');
 
+            function eachLang() {
+                var el = $ (this);
+                curLanguage = el.attr('lang');
+                Itext.addLanguage(curLanguage);
+                if(el.attr('default')) {
+                    Itext.setDefaultLanguage(curLanguage);
+                }
+
+                //loop through children
+                el.children().each(eachText)
+            }
+
+            function eachText() {
+                var textEl = $ (this);
+                curIID = textEl.attr('id');
+                textEl.children().each(eachValue);
+
+
+            }
+
+            function eachValue() {
+                var valEl = $(this);
+                curForm = valEl.attr('form');
+                if(!curForm) {
+                    curForm = null;
+                }
+
+                Itext.setValue(curIID,curLanguage,curForm,formdesigner.util.getXLabelValue(valEl));
+            }
+
+            $(itextBlock).children().each(eachLang);
         }
 
         formdesigner.controller.fire('parse-start');
