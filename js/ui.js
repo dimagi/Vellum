@@ -474,7 +474,11 @@ formdesigner.ui = (function () {
 
 
             listDisplay(properties, ul, mugType.mug.properties.controlElement.properties, 'controlElement',true,false);
+
             uiBlock.append(ul);
+            if(uiBlock.find('li').length === 0){
+                uiBlock.empty();
+            }
             uiBlock.show();
         }
         displayFuncs.controlElement = showControlProps;
@@ -488,6 +492,9 @@ formdesigner.ui = (function () {
 
             listDisplay(properties,ul,mugType.mug.properties.dataElement.properties, 'dataElement', true, false);
             uiBlock.append(ul);
+            if(uiBlock.find('li').length === 0){
+                uiBlock.empty();
+            }
             uiBlock.show();
         }
         displayFuncs.dataElement = showDataProps;
@@ -502,6 +509,9 @@ formdesigner.ui = (function () {
 
             listDisplay(properties, ul, mugType.mug.properties.bindElement.properties, 'bindElement', true, false);
             uiBlock.append(ul);
+            if(uiBlock.find('li').length === 0){
+                uiBlock.empty();
+            }
             uiBlock.show();
         }
         displayFuncs.bindElement = showBindProps;
@@ -518,9 +528,9 @@ formdesigner.ui = (function () {
                 }
 
                 id = 'fd-itext-' + textForm.toLowerCase();
-                liStr = '<li id="' + id + '"></li>';
-                txtStr = '<span id="' + id +'-txt">' + formdesigner.util.fromCamelToRegularCase(textForm) + '</span>';
-                inputStr = '<div id="' + id + '-input-div"><input id="' + id + '-input" />';
+                liStr = '<li id="' + id + '" class="fd-property"></li>';
+                txtStr = '<span id="' + id +'-txt" class="fd-property-text">' + formdesigner.util.fromCamelToRegularCase(textForm) + '</span>';
+                inputStr = '<div id="' + id + '-input-div" class="fd-prop-input-div chzn-container"><input id="' + id + '-input" class="fd-property-input"/>';
                 li = $(liStr);
                 text = $(txtStr);
                 input = $(inputStr);
@@ -539,7 +549,9 @@ formdesigner.ui = (function () {
             }
 
             function makeItextUL() {
-                var ulStr = '<ul id="fd-props-itext-ul"></ul>';
+                var ulStr = '<ul id="fd-props-itext-ul" class="fd-props-ul">' +
+                        '<span class="fd-props-heading">Display Properties</span>' +
+                        '</ul>';
                 return $(ulStr);
             }
 
@@ -548,10 +560,11 @@ formdesigner.ui = (function () {
                 Itext = formdesigner.model.Itext;
                 langs = Itext.getLanguages();
 
-                str = '<select data-placeholder="Choose a Language" style="width:300px;" class="chzn-select" id=fd-itext-lang-select">'
+                str = '<select data-placeholder="Choose a Language" style="width:300px;" class="chzn-select" id="fd-itext-lang-select">' +
+                        '<option value="blank"></option>'
                 for (i in langs) {
                     if (langs.hasOwnProperty(i)) {
-                        if(Itext.getDefaultLanguage === langs[i]){
+                        if(Itext.getDefaultLanguage() === langs[i]){
                             selectedLang = 'selected';
                         }
 
@@ -559,9 +572,10 @@ formdesigner.ui = (function () {
                     }
                 }
 
+                str += '</select>';
+
                 langList = $(str);
                 div.append(langList);
-                langList.chosen();
                 langList.change (function (e) {
                     formdesigner.currentItextDisplayLanguage = $(this).val();
                 })
@@ -578,6 +592,10 @@ formdesigner.ui = (function () {
             }
             $('#fd-itext-inputs').empty();
             $('#fd-itext-langs').empty();
+
+            makeLangDropDown();
+            $('#fd-itext-lang-select').chosen();
+            
             var uiBlock = $('#fd-itext-inputs'),
                 ul, LIs, i;
                 ul = makeItextUL();
@@ -668,7 +686,7 @@ formdesigner.ui = (function () {
             displayBlock('bindElement');
             displayBlock('controlElement');
 
-            $('select').chosen();
+            contentEl.find('select').chosen();
 
         }
 

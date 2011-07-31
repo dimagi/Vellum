@@ -2354,9 +2354,14 @@ formdesigner.model = function () {
          * @param val
          */
         that.setValue = function (iID, lang, form, val){
-            if(!iID || !lang || !val){
+            if(!iID || !lang || typeof form === 'undefined'){
                 throw 'Must specify all arguments for Itext.setValue()!' + exceptionString(iID, lang, form, val);
             }
+
+            if(!val) {
+                val = '';
+            }
+
             if(form === null){
                 form = 'default';
             }
