@@ -352,6 +352,41 @@ formdesigner.ui = (function () {
 
         var displayFuncs = {};
 
+        function setSpecialDataValueWidgetTypes (selector) {
+            if(!selector) {
+                selector = $('#dataElement-dataValue :input')
+            } else {
+                selector = $(selector);
+            }
+            var dIn = selector,
+                curMug = formdesigner.controller.getCurrentlySelectedMugType().mug,
+                selectedDataType;
+            if(dIn.length === 1) { //Default Data Value element exists
+                //cleanup
+                if(dIn.datepicker) {
+                    dIn.datepicker('destroy');
+                }
+                if(dIn.datetimepicker) {
+                    dIn.datetimepicker('destroy');
+                }
+                if(dIn.timepicker) {
+                    dIn.timepicker('destroy');
+                }
+                if(curMug.properties.bindElement) {
+                    selectedDataType = curMug.properties.bindElement.properties.dataType.toLowerCase();
+                }
+
+            }
+
+            if(selectedDataType === 'xsd:date') {
+                dIn.datepicker({ dateFormat: 'yy-mm-dd' });
+            } else if (selectedDataType === 'xsd:datetime') {
+                dIn.datetimepicker();
+            } else if (selectedDataType === 'xsd:time') {
+                dIn.timepicker({});
+            }
+        }
+        
         /**
          * Runs through a properties block and generates the
          * correct li elements (and appends them to the given parentUL)
@@ -407,6 +442,9 @@ formdesigner.ui = (function () {
 
                 return li;
             }
+
+
+
             var i, li;
             for(i in propertiesBlock){
                 if(propertiesBlock.hasOwnProperty(i)){
@@ -438,7 +476,17 @@ formdesigner.ui = (function () {
                                 formdesigner.controller.setMugPropertyValue(curMug,groupName,propName,input.val(),curMT);
                             });
                         }else if(pBlock.uiType === 'select'){
-                            //TODO HOOK UP LISTENER!
+                            input.change(function (e) {
+                                var select = $(e.currentTarget),
+                                        groupName = select.data('groupName'),
+                                        propName = select.data('propName'),
+                                        curMug = formdesigner.controller.getCurrentlySelectedMug(),
+                                        curMT = formdesigner.controller.getCurrentlySelectedMugType(),
+                                        propVal = select.val();
+
+                                formdesigner.controller.setMugPropertyValue(curMug,groupName,propName,select.val(),curMT);
+                                setSpecialDataValueWidgetTypes();
+                            });
                         }else if(pBlock.uiType === 'checkbox'){
                             input.prop("checked",mugProps[i]);
 
@@ -450,7 +498,6 @@ formdesigner.ui = (function () {
                                         curMT = formdesigner.controller.getCurrentlySelectedMugType();
                                 formdesigner.controller.setMugPropertyValue(curMug,groupName,propName,input.prop("checked"),curMT);
                             });
-
                         }
 
 
@@ -480,10 +527,12 @@ formdesigner.ui = (function () {
                 uiBlock.empty();
             }
             uiBlock.show();
+            uiBlock.find('select').chosen();
         }
         displayFuncs.controlElement = showControlProps;
 
         function showDataProps(){
+
             var properties = mugType.properties.dataElement,
                     uiBlock = $('#fd-props-data'),
                     ul;
@@ -495,7 +544,9 @@ formdesigner.ui = (function () {
             if(uiBlock.find('li').length === 0){
                 uiBlock.empty();
             }
+            setSpecialDataValueWidgetTypes();
             uiBlock.show();
+            uiBlock.find('select').chosen();
         }
         displayFuncs.dataElement = showDataProps;
 
@@ -513,6 +564,7 @@ formdesigner.ui = (function () {
                 uiBlock.empty();
             }
             uiBlock.show();
+            uiBlock.find('select').chosen();
         }
         displayFuncs.bindElement = showBindProps;
 
