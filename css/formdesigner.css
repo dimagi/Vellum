@@ -370,3 +370,13 @@ td {
     float: right;
 }
 
+#fd-form-saving-anim {
+
+}
+
+#fd-form-saving-img {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+

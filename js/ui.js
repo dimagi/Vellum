@@ -1301,6 +1301,8 @@ formdesigner.ui = (function () {
     };
     that.showAddLanguageDialog = showAddLanguageDialog;
 
+
+
     /**
      * Set the values for the Confirm Modal Dialog
      * (box that pops up that has a confirm and cancel button)
@@ -1310,14 +1312,40 @@ formdesigner.ui = (function () {
      * @param cancelButFunction
      */
     var setDialogInfo = that.setDialogInfo = function (message, confButName, confFunction, cancelButName, cancelButFunction){
-        var buttons = {}, opt;
+        var buttons = {}, opt,
+                dial = $('#fd-dialog-confirm'), contentStr;
             buttons[confButName] = confFunction;
             buttons[cancelButName] = cancelButFunction;
+
+        dial.empty();
+        contentStr = '<p>' +
+                    '<span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>' +
+            '<span class="fd-message">These items will be permanently deleted and cannot be recovered. Are you sure?</span></p>';
+        dial.append(contentStr);
         $('#fd-dialog-confirm .fd-message').text(message);
         
         $( "#fd-dialog-confirm" ).dialog("option",{buttons: buttons});
     }
     that.setDialogInfo = setDialogInfo;
+
+    var showWaitingDialog = that.showWaitingDialog = function () {
+        var dial = $('#fd-dialog-confirm'), contentStr;
+        dial.empty();
+        dial.dialog("destroy");
+        dial.dialog({
+            modal: true,
+            autoOpen: false,
+            buttons : {},
+            closeOnEscape: false,
+            open: function(event, ui) { $(".ui-dialog-titlebar-close").hide(); }
+        });
+        contentStr = '<p>' +
+            '<span class="fd-message">Saving form to server... </span><div id="fd-form-saving-anim"></div></p>'
+        dial.append(contentStr);
+        $('#fd-form-saving-anim').append('<img src="'+formdesigner.staticPrefix+'images/ajax-loader.gif" id="fd-form-saving-img"/>')
+
+        showConfirmDialog();
+    }
 
     var init_misc = function () {
         controller.on('question-creation', function (e) {

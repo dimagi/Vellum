@@ -984,6 +984,26 @@ formdesigner.controller = (function () {
         return data;
     }
 
+
+    var sendXForm = function (url) {
+        if (!url) {
+            url = formdesigner.save_url;
+        }
+        if (!url) {
+            formdesigner.ui.setDialogInfo("Error: Cannot send form, no save url specified!",
+            'OK', function () {
+                        $ (this) .dialog("close");
+                    },
+            'Cancel', function () {
+                        $ (this) .dialog("close");
+            });
+
+            formdesigner.ui.showConfirmDialog();
+        }
+
+
+    }
+
     /**
      * Used to reset the state of the controller if a FD wide reset is called
      * (see resetFormDesigner)
