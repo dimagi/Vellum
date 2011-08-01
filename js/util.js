@@ -96,7 +96,7 @@ formdesigner.util = (function(){
      * @param arrB
      */
     var mergeArray = function (arrA, arrB) {
-        var result = [];
+        var result = [], i;
         for(i in arrA){
             if(arrA.hasOwnProperty(i)){
                 if(arrA.slice(0,arrA.indexOf(i)).indexOf(i) === -1){ //check to see if there aren't dupes in arrA
@@ -281,6 +281,8 @@ formdesigner.util = (function(){
 
     that.parseXml = function (xml) {
        var dom = null;
+        console.log("ATTEMPTING TO LOAD XML INTO XML PARSER");
+        console.log(xml);
        if (window.DOMParser) {
           try {
              dom = (new DOMParser()).parseFromString(xml, "text/xml");
@@ -609,6 +611,77 @@ formdesigner.util = (function(){
         });
     }
 
+    /**
+     * Renames a node in the JSTree display tree
+     * @param ufid - MugType ufid
+     * @param val - New value of the display label
+     */
+    that.changeUITreeNodeLabel = function (ufid, val) {
+        console.log("trying to change node label in jstree!");
+        var el = $('#' + ufid);
+        $('#fd-question-tree').jstree('rename_node',el,val);
+    }
+
+
+    that.getMugDisplayName = function (mugType) {
+        var iID, nodeID, cEl,dEl,bEl, mugProps, disp, lang, Itext;
+        if(!mugType || !mugType.mug) {
+            return 'No Name!'
+        }
+        mugProps = mugType.mug.properties;
+        if (mugProps.controlElement) {
+            cEl = mugProps.controlElement.properties;
+        }
+        if (mugProps.dataElement) {
+            dEl = mugProps.dataElement.properties;
+        }
+        if (mugProps.bindElement) {
+            bEl = mugProps.bindElement.properties;
+        }
+        Itext = formdesigner.model.Itext;
+
+        if(cEl) {
+            iID = cEl.labelItextID;
+        }
+
+        if(!iID) {
+            if(bEl) {
+                nodeID = bEl.nodeID;
+            }
+            if(!nodeID){
+                if(dEl) {
+                    nodeID = dEl.nodeID;
+                }
+            }
+
+            if(nodeID) {
+                disp = nodeID;
+            } else {
+                disp = 'No Display Name!';
+            }
+            return disp;
+        }
+
+        lang = formdesigner.controller.currentItextDisplayLanguage;
+        if(!lang) {
+            lang = Itext.getDefaultLanguage();
+        }
+
+        if(!lang) {
+            return 'No Translation Data';
+        }
+
+        disp = Itext.getValue(iID,lang,'default');
+        if(!disp) {
+            disp = Itext.getValue(iID, lang, 'long');
+        }
+
+        if (cEl.defaultValue && !disp) {
+            disp = cEl.defaultValue;
+        }
+
+        return disp;
+    }
 
     return that;
 

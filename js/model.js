@@ -1252,7 +1252,7 @@ formdesigner.model = function () {
                 if (treeType === 'data') {
                     return this.getValue().mug.getDataElementID();
                 } else if (treeType === 'control') {
-                    return this.getValue().mug.getDisplayName();
+                    return formdesigner.util.getMugDisplayName(this.getValue());
                 } else {
                     throw 'Tree does not have a specified treeType! Default is "data" so must have been forcibly removed!';
                 }

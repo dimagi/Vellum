@@ -196,7 +196,7 @@ formdesigner.controller = (function () {
             objectData.state = 'open'; //should new node be open or closed?, omit for leaf
         }
 
-        objectData.data = !(mug.properties.dataElement) ? mug.properties.controlElement.properties.nodeID : mug.properties.dataElement.properties.nodeID;
+        objectData.data = formdesigner.util.getMugDisplayName(mugType);
         objectData.metadata = {
                                 'mugTypeUfid': mugType.ufid,
                                 'mugUfid': mug.ufid,
@@ -807,6 +807,10 @@ formdesigner.controller = (function () {
             parseInstanceInfo(data[0]);
             parseDataTree (data[0]);
             parseBindList (binds);
+
+            if(controls.length === 0) {
+                controls = xml.find('body').children();
+            }
             parseControlTree (controls);
             parseItextBlock(itext);
 

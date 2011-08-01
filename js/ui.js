@@ -588,15 +588,18 @@ formdesigner.ui = (function () {
                 li = $(liStr);
                 text = $(txtStr);
                 input = $(inputStr);
+
                 input.find(':input').val(Itext.getValue(iID, currentLang, textForm));
                 li.append(text);
                 li.append(input);
 
                 input.data('ufid', mugType.ufid);
                 input.data('textform', textForm);
-
+                input.children(':input').data('ufid', mugType.ufid).data('textform', textForm);;
                 input.find(':input').keyup ( function (e) {
+                    var mugType = formdesigner.controller.form.controlTree.getMugTypeFromUFID($(this).data('ufid'));
                     Itext.setValue(iID, currentLang, textForm, $(this).val());
+                    formdesigner.util.changeUITreeNodeLabel($ (this).data('ufid'), formdesigner.util.getMugDisplayName(mugType))
                 });
 
                 return li;
@@ -1333,8 +1336,11 @@ formdesigner.ui = (function () {
     }
     that.setDialogInfo = setDialogInfo;
 
-    var showWaitingDialog = that.showWaitingDialog = function () {
+    var showWaitingDialog = that.showWaitingDialog = function (msg) {
         var dial = $('#fd-dialog-confirm'), contentStr;
+        if(!msg) {
+            msg = 'Saving form to server...';
+        }
         dial.empty();
         dial.dialog("destroy");
         dial.dialog({
@@ -1345,7 +1351,7 @@ formdesigner.ui = (function () {
             open: function(event, ui) { $(".ui-dialog-titlebar-close").hide(); }
         });
         contentStr = '<p>' +
-            '<span class="fd-message">Saving form to server... </span><div id="fd-form-saving-anim"></div></p>'
+            '<span class="fd-message">' + msg+ '</span><div id="fd-form-saving-anim"></div></p>'
         dial.append(contentStr);
         $('#fd-form-saving-anim').append('<img src="'+formdesigner.staticPrefix+'images/ajax-loader.gif" id="fd-form-saving-img"/>')
 
@@ -1442,8 +1448,10 @@ formdesigner.launch = function (opts) {
     }
 
     window.setTimeout(function () {
+        formdesigner.ui.showWaitingDialog("Loading form...");
         formdesigner.controller.reloadUI();
-    }, 800);
+        formdesigner.ui.hideConfirmDialog();
+    }, 400);
 
 
 
