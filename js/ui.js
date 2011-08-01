@@ -555,6 +555,11 @@ formdesigner.ui = (function () {
                 return $(ulStr);
             }
 
+            function langSelectorCallback (e) {
+                formdesigner.currentItextDisplayLanguage = $('#fd-itext-lang-select').val();
+                showItextProps(); //redraw the Itext section
+            }
+
             function makeLangDropDown() {
                 var div = $('#fd-itext-langs'), addLangButton, langList, langs, i, str, selectedLang, Itext;
                 Itext = formdesigner.model.Itext;
@@ -595,6 +600,7 @@ formdesigner.ui = (function () {
 
             makeLangDropDown();
             $('#fd-itext-lang-select').chosen();
+            $('#fd-itext-lang-select').change (langSelectorCallback);
             
             var uiBlock = $('#fd-itext-inputs'),
                 ul, LIs, i;
