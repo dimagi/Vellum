@@ -15,7 +15,7 @@
 
 body{
     font-family:Arial;
-    height:2000px;
+    /*height:2000px;*/
     overflow-x:hidden;
 }
 
@@ -48,7 +48,7 @@ body{
     background: none repeat scroll 0 0 white;
     border: 1px solid gray;
     float: left;
-    height: 500px;
+    height: 900px;
     margin-top: 5px;
     overflow-x: hidden;
     overflow-y: auto;
@@ -88,10 +88,10 @@ body{
     float: left;
     margin-top: 5px;
     margin-left: 5px;
-    padding-left: 5px;
-    height:500px;
+    height:900px;
     width: 49%;
     display:none;
+    overflow-x:hidden;  
 
 }
 
@@ -131,15 +131,14 @@ td {
     float:right;
     position:relative;
     border: 1px solid black;
-    height:492px;
+    height:892px;
     padding-bottom:5px;
     /*margin: 5px;*/
     width: 24%;
     margin-top: 5px;
     background: white;
     z-index:4;
-    padding-right: 5px;
-    padding-top: 3px;
+    padding-right: 5px; 
 }
 
 #fd-extra-tools-accordion{
@@ -178,16 +177,14 @@ td {
 }
 
 .fd-property {
-    padding: 5px;
     display: table;
-    width:100%;
+    padding: 5px 0 5px 5px;
+    width: 100%;
 }
 
-#fd-props-head {
-    left: 237px;
+#fd-props-head, #fd-extra-props-head {
     position: relative;
-    top: 237px;
-    width: 498px;
+    width: 100%;
 }
 
 
@@ -234,16 +231,14 @@ td {
 }
 
 .fd-head {
-    -webkit-transform: rotate(-90deg);
-    -moz-transform: rotate(-90deg);
+    /*-webkit-transform: rotate(-90deg);*/
+    /*-moz-transform: rotate(-90deg);*/
     /* for ie */
-    filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=3);
+    /*filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=3);*/
 
     /*background: url("smoothness/images/ui-bg_glass_75_e6e6e6_1x400.png") repeat-x scroll 50% 50% #E6E6E6;*/
     border: 1px solid #D3D3D3;
     /*color: #555555;*/
-    display: block;
-    float: right;
     font-size: 17px;
     font-weight: bold;
     height: 24px;
@@ -255,10 +250,8 @@ td {
 }
 
 #fd-question-tree-head {
-    position: absolute;
-    right: -237px;
-    top: 236px;
-    width: 498px;
+    position: relative;
+    width: 100%;
 }
 
 #fd-data-tree-head {
@@ -270,8 +263,8 @@ td {
 }
 
 #fd-props-content {
-    padding-right:25px;
-    padding-top: 20px;
+    padding: 5px;
+    position: relative;
 }
 
 .fd-tree-valid-alert-icon {
@@ -368,3 +361,12 @@ td {
     text-align: center;
     vertical-align: middle;
 }
+
+#fd-itext-lang-select_chzn {
+    float:left;
+}
+
+#fd-itext-add-lang-button {
+    float: right;
+}
+

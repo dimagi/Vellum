@@ -573,7 +573,7 @@ formdesigner.ui = (function () {
                             selectedLang = 'selected';
                         }
 
-                        str = str + '<option value="' + langs[i] + '"' + selectedLang + '>' + langs[i] + '</option>';
+                        str = str + '<option value="' + langs[i] + '" >' + langs[i] + '</option>';
                     }
                 }
 
@@ -585,6 +585,8 @@ formdesigner.ui = (function () {
                     formdesigner.currentItextDisplayLanguage = $(this).val();
                 })
 
+                langList.val(formdesigner.currentItextDisplayLanguage);
+
                 str = '';
                 str = '<button id="fd-itext-add-lang-button">Add Language</button>';
                 addLangButton = $(str);
@@ -595,15 +597,18 @@ formdesigner.ui = (function () {
                 div.append(addLangButton);
 
             }
+            var langDrop = $('#fd-itext-langs').detach();
+            $('#fd-props-itext').prepend(langDrop);
+            langDrop.empty();
             $('#fd-itext-inputs').empty();
-            $('#fd-itext-langs').empty();
+
 
             makeLangDropDown();
             $('#fd-itext-lang-select').chosen();
             $('#fd-itext-lang-select').change (langSelectorCallback);
             
             var uiBlock = $('#fd-itext-inputs'),
-                ul, LIs, i;
+                ul, LIs, i, langSettings, itextHeading;
                 ul = makeItextUL();
                 uiBlock.append(ul);
                 LIs = {
@@ -619,6 +624,12 @@ formdesigner.ui = (function () {
                         ul.append(LIs[i]);
                     }
                 }
+
+            //shuffle layout a bit.
+            langSettings = $('#fd-itext-langs');
+            itextHeading = $('#fd-props-itext-ul').children('span');
+            langSettings.detach();
+            itextHeading.after(langSettings);
 
         }
         displayFuncs.itext = showItextProps; //not sure if this will ever be used like this, but may as well stick with the pattern
@@ -657,10 +668,10 @@ formdesigner.ui = (function () {
             });
 
             $('#fd-props-advanced').bind( "accordionchangestart", function(event, ui) {
-                var newSize = '500px';
+                var newSize = '900px';
                 if (ui.newContent.length === 0) {
                     IS_ADVANCED_ACC_EXPANDED = false;
-                    newSize = '500px';
+                    newSize = '900px';
                 }else {
                     IS_ADVANCED_ACC_EXPANDED = true;
                     newSize = '900px';
@@ -752,7 +763,7 @@ formdesigner.ui = (function () {
             var mugTProps = mugType.properties,
             i = 0;
             $('#fd-question-properties').animate({
-                        height:'500px'
+                        height:'900px'
                     },200);
 
             $("#fd-question-properties").hide();
@@ -989,7 +1000,7 @@ formdesigner.ui = (function () {
 
         function makeFormProp (propLabel, propName, keyUpFunc, initVal){
             var liStr = '<li id=fd-form-prop-"' + propName + '" class="fd-form-property"><span class="fd-form-property-text">'+propLabel+': '+'</span>' +
-                '<input id=fd-form-prop-"' + propName + '-' + 'input" class="fd-form-property-input">'+
+                '<input id=fd-form-prop-' + propName + '-' + 'input" class="fd-form-property-input">'+
                 '</li>',
                 li = $(liStr),
                 ul = $('#fd-form-opts-ul');
@@ -1174,6 +1185,53 @@ formdesigner.ui = (function () {
             autoOpen: false
 		});
     }
+    var newLang = null;
+    var addLanguageDialog = function() {
+        function beforeClose (event,ui) {
+            //grab the input value and add the new language
+            console.log("New language beforeClose!");
+            if($('#fd-new-lang-input').val()) {
+                console.log('adding a new language to Itext!');
+                formdesigner.model.Itext.addLanguage($('#fd-new-lang-input').val())
+            } else {
+                console.log("no new language added!");
+            }
+            
+        }
+
+        var div = $( "#fd-dialog-confirm" ),input,
+                contStr;
+        div.dialog( "destroy" );
+        div.empty();
+
+
+        contStr = '<p> <span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>' +
+            '<span class="fd-message">Enter name of new Language</span> ' +
+                '<div id="fd-new-lang-div"><input id="fd-new-lang-input" /></div>' +
+                '</p>'
+        div.append(contStr);
+
+        div.dialog({
+            autoOpen: false,
+            modal: true,
+            buttons: {
+                "Create": function () {
+                    $(this).dialog("close");
+                },
+                "Cancel": function () {
+                    $('#fd-new-lang-input').val('');
+                    $(this).dialog("close");
+                }
+            },
+            beforeClose: beforeClose,
+            close: function (event, ui) {
+                displayMugProperties(
+                        formdesigner.controller.getCurrentlySelectedMugType()
+                );
+            }
+        })
+
+    }
 
     var showConfirmDialog = function () {
         $( "#fd-dialog-confirm" ).dialog("open");
@@ -1186,7 +1244,8 @@ formdesigner.ui = (function () {
     that.hideConfirmDialog = hideConfirmDialog;
 
     var showAddLanguageDialog = function () {
-        //TODO MAKE THIS DIALOG!!!
+        addLanguageDialog();
+        showConfirmDialog();
     };
     that.showAddLanguageDialog = showAddLanguageDialog;
 

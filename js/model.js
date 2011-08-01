@@ -2014,7 +2014,7 @@ formdesigner.model = function () {
                     version = 1;
                 }
 
-                formName = formdesigner.formName; //gets set at parse time/by UI
+                formName = formdesigner.controller.form.formName; //gets set at parse time/by UI
                 if(!formName) {
                     formName = "New Form";
                 }
@@ -2046,7 +2046,7 @@ formdesigner.model = function () {
                 html_tag_boilerplate();
                     xw.writeStartElement('h:head');
                         xw.writeStartElement('h:title');
-                            xw.writeString(form_title);
+                            xw.writeString(formdesigner.controller.form.formName);
                         xw.writeEndElement();       //CLOSE TITLE
 
                 ////////////MODEL///////////////////
