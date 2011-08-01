@@ -373,7 +373,9 @@ formdesigner.ui = (function () {
                     dIn.timepicker('destroy');
                 }
                 if(curMug.properties.bindElement) {
-                    selectedDataType = curMug.properties.bindElement.properties.dataType.toLowerCase();
+                    if(curMug.properties.bindElement.properties.dataType){
+                        selectedDataType = curMug.properties.bindElement.properties.dataType.toLowerCase();
+                    }
                 }
 
             }
@@ -1208,6 +1210,7 @@ formdesigner.ui = (function () {
      * faster/easier than rebuilding the entire interface from scratch.
      */
     that.resetUI = function(){
+        console.log("resetUI() called");
         /**
          * Clear out all nodes from the given UI jsTree.
          * @param tree - Jquery selector pointing to jstree instance
@@ -1218,7 +1221,9 @@ formdesigner.ui = (function () {
         };
 
         clearUITree($('#fd-question-tree'));
-        clearUITree($('#fd-data-tree'));
+
+        console.log("resetUI() finished");
+
     };
 
     function init_modal_dialogs () {
@@ -1372,9 +1377,6 @@ formdesigner.ui = (function () {
 
 
     $(document).ready(function () {
-//
-//        formdesigner.launch($('#formdesigner'));
-        
 
     });
 
@@ -1386,11 +1388,28 @@ formdesigner.ui = (function () {
  * @param opts - {
  *  rootElement: "jQuery selector to FD Container",
  *  staticPrefix : "url prefix for static resources like css and pngs",
- *  save_url : "URL that the FD should post saved forms to",
+ *  saveUrl : "URL that the FD should post saved forms to",
  *  [form] : "string of the xml form that you wish to load"
+ *  [formName] : "Default Form Name"
+ *  [langs] : ["en", "por", ... ]
  *  }
  */
 formdesigner.launch = function (opts) {
+    formdesigner.util.eventuality(formdesigner);
+    formdesigner.on('load-form-complete', function () {
+        console.log("LOAD FORM COMPLETE EVENT RECEIVED");
+    })
+
+    formdesigner.on('load-form-start', function (e) {
+       console.log("LOAD_FORM_START EVENT");
+    });
+
+    formdesigner.on('load-form-error', function (e) {
+           console.log("LOAD_FORM_ERROR EVENT");
+        });
+
+
+
     if(!opts){
         opts = {};
     }
@@ -1406,16 +1425,28 @@ formdesigner.launch = function (opts) {
         formdesigner.staticPrefix = "";
     }
 
-    formdesigner.save_url = opts["save_url"];
+    formdesigner.saveUrl = opts["saveUrl"];
     formdesigner.loadMe = opts["form"];
     
     formdesigner.iconUrl = opts.iconUrl ? opts.iconUrl : "css/smoothness/images/ui-icons_888888_256x240.png";
 
 
 
-    formdesigner.util.eventuality(formdesigner);
+
     formdesigner.ui.controller = formdesigner.controller;
     formdesigner.controller.initFormDesigner();
+
+    if(formdesigner.loadMe) {
+        formdesigner.controller.loadXForm(formdesigner.loadMe);
+
+    }
+
+    window.setTimeout(function () {
+        formdesigner.controller.reloadUI();
+    }, 800);
+
+
+
 
 }
 

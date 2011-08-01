@@ -108,6 +108,7 @@ formdesigner.controller = (function () {
      * for the user to start the editing process.
      */
     function reloadUI () {
+        console.log("reloadUI() called");
         var controlTree, dataTree, treeFunc;
 
         //first clear out the existing UI
@@ -137,7 +138,7 @@ formdesigner.controller = (function () {
 
 //        dataTree = formdesigner.controller.form.dataTree;
 //        dataTree.treeMap(treeFunc);
-
+        console.log("reloadUI() finished");
     }
 
     that.reloadUI = reloadUI;
@@ -403,9 +404,9 @@ formdesigner.controller = (function () {
             throw (e);
         }
 
-
+        console.log("FIRING LOAD FORM COMPLETE EVENT");
         formdesigner.fire({
-                type: 'load-form-compelete',
+                type: 'load-form-complete',
                 form : formString
             });
     }
@@ -470,9 +471,6 @@ formdesigner.controller = (function () {
             formdesigner.formUIVersion = root.attr("uiVersion");
             formdesigner.formVersion = root.attr("version");
             formdesigner.formName = root.attr("name");
-
-            console.log("FORMDESIGNER OBJECT POST PARSE", formdesigner);
-
         }
 
         function parseBindList (bindList) {
@@ -987,7 +985,7 @@ formdesigner.controller = (function () {
 
     var sendXForm = function (url) {
         if (!url) {
-            url = formdesigner.save_url;
+            url = formdesigner.saveUrl;
         }
         if (!url) {
             formdesigner.ui.setDialogInfo("Error: Cannot send form, no save url specified!",
@@ -997,12 +995,16 @@ formdesigner.controller = (function () {
             'Cancel', function () {
                         $ (this) .dialog("close");
             });
-
-            formdesigner.ui.showConfirmDialog();
         }
+        $('body').ajaxStart(formdesigner.ui.showWaitingDialog);
+        $('body').ajaxStop(formdesigner.ui.hideConfirmDialog);
+
+        formdesigner.XFORM_STRING = form.createXForm();
+        jQuery.post(url, {xform: formdesigner.XFORM_STRING}, formdesigner.ui.hideConfirmDialog);
 
 
     }
+    that.sendXForm = sendXForm;
 
     /**
      * Used to reset the state of the controller if a FD wide reset is called
@@ -1021,6 +1023,7 @@ formdesigner.controller = (function () {
      * to create a 'New Form'
      */
     that.resetFormDesigner = function () {
+        console.log("resetFormDesigner() called");
         resetControllerInternal();
         formdesigner.model.reset();
         formdesigner.ui.resetUI();

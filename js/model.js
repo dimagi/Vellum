@@ -1743,6 +1743,10 @@ formdesigner.model = function () {
                     if(!node.isRootNode && MT.mug.properties.dataElement.dataValue){
                         xw.writeString(MT.mug.properties.dataElement.dataValue);
                     }
+
+                    if (node.isRootNode) {
+                        create_model_header();
+                    }
                 }
 
                 function afterFunc (node) {
@@ -2053,7 +2057,6 @@ formdesigner.model = function () {
                         xw.writeStartElement('model');
                             xw.writeStartElement('instance');
                                 create_dataBlock();
-                                create_model_header();
                             xw.writeEndElement(); //CLOSE INSTANCE
                         /////////////////BINDS /////////////////
                             create_bindList();
