@@ -108,7 +108,6 @@ formdesigner.controller = (function () {
      * for the user to start the editing process.
      */
     function reloadUI () {
-        console.log("reloadUI() called");
         var controlTree, dataTree, treeFunc;
 
         //first clear out the existing UI
@@ -138,7 +137,6 @@ formdesigner.controller = (function () {
 
 //        dataTree = formdesigner.controller.form.dataTree;
 //        dataTree.treeMap(treeFunc);
-        console.log("reloadUI() finished");
     }
 
     that.reloadUI = reloadUI;
@@ -350,7 +348,6 @@ formdesigner.controller = (function () {
             "The form will not be valid and likely not perform correctly on your device!"
 
         formdesigner.ui.setDialogInfo(msg,'Continue',onContinue,'Abort',onAbort);
-        console.log ("form.isValid:",form.isFormValid());
         if (!form.isFormValid()) {
             console.log("FORM NOT VALID: SHOWING CONFIRM BOX");
             formdesigner.ui.showConfirmDialog();
@@ -500,7 +497,6 @@ formdesigner.controller = (function () {
             throw (e);
         }
 
-        console.log("FIRING LOAD FORM COMPLETE EVENT");
         formdesigner.fire({
                 type: 'load-form-complete',
                 form : formString
@@ -799,7 +795,6 @@ formdesigner.controller = (function () {
 
                 //do the repeat switch thing
                 if(isRepeat(el)) {
-                    console.log("REPEAT FOUND WHILE PARSING!");
                     oldEl = el;
                     el = $(el.children('repeat')[0]);
                 }
@@ -1078,7 +1073,6 @@ formdesigner.controller = (function () {
 
         data = JSON.stringify(recurse(trees[0].rootNode),null,'\t');
 
-        console.log(data);
         return data;
     }
 
@@ -1123,7 +1117,6 @@ formdesigner.controller = (function () {
      * to create a 'New Form'
      */
     that.resetFormDesigner = function () {
-        console.log("resetFormDesigner() called");
         resetControllerInternal();
         formdesigner.model.reset();
         formdesigner.ui.resetUI();

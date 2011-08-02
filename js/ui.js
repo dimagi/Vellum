@@ -12,7 +12,6 @@ if(!Object.keys) Object.keys = function(o){
 if (typeof formdesigner === 'undefined') {
     var formdesigner = {};
 }
-//var log = console.log, exports = {};
 
 formdesigner.ui = (function () {
     "use strict";
@@ -242,6 +241,22 @@ formdesigner.ui = (function () {
 //            buttons.openSourcebut = openSourcebut;
         })();
 
+        (function c_saveForm() {
+            var savebut = $(
+                    '<button id="fd-save-button" class="toolbarButton questionButton">'+
+                'Save Form to Server' +
+              '</button>');
+            toolbar.append(savebut);
+
+            savebut.button().click(function () {
+                formdesigner.controller.sendXForm();
+            });
+
+//            buttons.openSourcebut = openSourcebut;
+        })();
+
+
+
 //        $('.questionButton').button({
 //            icons:{
 //                primary: 'ui-icon-gear'
@@ -368,7 +383,6 @@ formdesigner.ui = (function () {
         loopValProps(bProps, 'bindElement');
         loopValProps(cProps, 'controlElement');
         loopValProps(dProps, 'dataElement');
-        console.log("PROPS MESSAGE", propsMessage);
         if(propsMessage) {
             showMessage(propsMessage, 'Question Problems', 'warning');
         }
@@ -942,7 +956,6 @@ formdesigner.ui = (function () {
                         mugType = controller.form.controlTree.getMugTypeFromUFID($(data.rslt.o).attr('id')),
                         refMugType = controller.form.controlTree.getMugTypeFromUFID($(data.rslt.r).attr('id')),
                         position = data.rslt.p;
-//                    console.log('MOVE_NODE.JSTREE EVENT',mugType,position,refMugType);
             controller.moveMugType(mugType, position, refMugType);
         });
         questionTree = $("#fd-question-tree");
@@ -1166,7 +1179,6 @@ formdesigner.ui = (function () {
      * faster/easier than rebuilding the entire interface from scratch.
      */
     that.resetUI = function(){
-        console.log("resetUI() called");
         /**
          * Clear out all nodes from the given UI jsTree.
          * @param tree - Jquery selector pointing to jstree instance
@@ -1178,7 +1190,6 @@ formdesigner.ui = (function () {
 
         clearUITree($('#fd-question-tree'));
 
-        console.log("resetUI() finished");
 
     };
 
@@ -1202,14 +1213,9 @@ formdesigner.ui = (function () {
     var addLanguageDialog = function() {
         function beforeClose (event,ui) {
             //grab the input value and add the new language
-            console.log("New language beforeClose!");
             if($('#fd-new-lang-input').val()) {
-                console.log('adding a new language to Itext!');
                 formdesigner.model.Itext.addLanguage($('#fd-new-lang-input').val())
-            } else {
-                console.log("no new language added!");
             }
-            
         }
 
         var div = $( "#fd-dialog-confirm" ),input,
@@ -1291,7 +1297,7 @@ formdesigner.ui = (function () {
 
     var showWaitingDialog = that.showWaitingDialog = function (msg) {
         var dial = $('#fd-dialog-confirm'), contentStr;
-        if(!msg) {
+        if(!msg || typeof msg !== 'string') {
             msg = 'Saving form to server...';
         }
         dial.empty();
@@ -1355,19 +1361,6 @@ formdesigner.ui = (function () {
  */
 formdesigner.launch = function (opts) {
     formdesigner.util.eventuality(formdesigner);
-    formdesigner.on('load-form-complete', function () {
-        console.log("LOAD FORM COMPLETE EVENT RECEIVED");
-    })
-
-    formdesigner.on('load-form-start', function (e) {
-       console.log("LOAD_FORM_START EVENT");
-    });
-
-    formdesigner.on('load-form-error', function (e) {
-           console.log("LOAD_FORM_ERROR EVENT");
-        });
-
-
 
     if(!opts){
         opts = {};
