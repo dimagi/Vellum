@@ -938,75 +938,9 @@ formdesigner.ui = (function () {
             minMaxButton = $('#fd-min-max-button'),
             questionProps = $('#fd-question-properties'),
             fdTree = $('.fd-tree'),
-            fdContainer = $('#fd-ui-container'),
+            fdContainer = $('#fd-ui-container');
 
 
-            TREE_MIN_WIDTH = 250,
-            TREE_MAX_WIDTH = 380,
-            PROPS_MIN_WIDTH = 470,
-            PROPS_MAX_WIDTH = 720,
-            EXTRAS_MIN_WIDTH = 20,
-            EXTRAS_MAX_WIDTH = 235,
-            STATE_EXTRAS_MAXIMIZE = true; //should you be maximizing or minimizing windows right now?
-
-        function resizeTree () {
-            //Ideally we want the tree to take up about 25% of the global width
-
-            var cur, global, desired, limit, extras;
-
-            extras = STATE_EXTRAS_MAXIMIZE ? EXTRAS_MAX_WIDTH : EXTRAS_MIN_WIDTH;
-            cur = fdTree.width();
-            global = fdContainer.width() - extras;
-            desired = global * 0.25;
-
-            if (desired > TREE_MAX_WIDTH) {
-                desired = TREE_MAX_WIDTH;
-            }else if (desired < TREE_MIN_WIDTH){
-                desired = TREE_MIN_WIDTH;
-            }
-
-            fdTree.animate({
-                    width: desired + 'px'
-            },200);
-
-        }
-
-        function resizeProps () {
-            //Ideally we want the properties view to take up about 75% of the global width
-
-            var cur, global, desired, limit, extras;
-
-            extras = STATE_EXTRAS_MAXIMIZE ? EXTRAS_MAX_WIDTH : EXTRAS_MIN_WIDTH;
-            cur = questionProps.width();
-            global = fdContainer.width() - extras - fdTree.width() - 40;
-            desired = global;
-            if (desired > PROPS_MAX_WIDTH) {
-                desired = PROPS_MAX_WIDTH;
-            }else if (desired < PROPS_MIN_WIDTH){
-                desired = PROPS_MIN_WIDTH;
-            }
-
-            questionProps.animate({
-                    width: desired + 'px'
-            },200);
-
-        }
-
-        function resizeExtras () {
-            if (STATE_EXTRAS_MAXIMIZE) {
-
-                accContainer.animate({
-                    width: EXTRAS_MAX_WIDTH + 'px'
-                },200);
-                accordion.show(300);
-            } else {
-
-                accContainer.animate({
-                    width: EXTRAS_MIN_WIDTH + 'px'
-                },200);
-                accordion.hide(200);
-            }
-        }
 
 
 
@@ -1022,23 +956,6 @@ formdesigner.ui = (function () {
                 primary: 'ui-icon-arrowthick-2-n-s'
             }
         })
-//        min_max.button();
-        minMax.click(function(){
-            if (STATE_EXTRAS_MAXIMIZE) {
-                STATE_EXTRAS_MAXIMIZE = false;
-            }else {
-                STATE_EXTRAS_MAXIMIZE = true;
-            }
-            resizeTree();
-            resizeProps();
-            resizeExtras();
-        });
-
-        $(window).resize(function () {
-            resizeTree();
-            resizeProps();
-            resizeExtras();
-        });
 
         $('#fd-add-data-node-button').button({
             icons : {

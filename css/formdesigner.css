@@ -53,7 +53,7 @@ body{
     overflow-x: hidden;
     overflow-y: auto;
     position: relative;
-    width: 24%;
+    width: 235px;
 }
 
 #fd-props-advanced{
@@ -89,7 +89,7 @@ body{
     margin-top: 5px;
     margin-left: 5px;
     height:900px;
-    width: 49%;
+    width: 490px;
     display:none;
     overflow-x:hidden;  
 
@@ -131,10 +131,10 @@ td {
     float:right;
     position:relative;
     border: 1px solid black;
-    height:892px;
+    height:895px;
     padding-bottom:5px;
     /*margin: 5px;*/
-    width: 24%;
+    width: 235px;
     margin-top: 5px;
     background: white;
     z-index:4;
@@ -252,6 +252,10 @@ td {
 #fd-question-tree-head {
     position: relative;
     width: 100%;
+}
+
+#fd-question-tree-container {
+    overflow-x:auto;
 }
 
 #fd-data-tree-head {
