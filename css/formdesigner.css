@@ -301,8 +301,6 @@ td {
 }
 
 #fd-opensource-button {
-    left:3px;
-
 }
 
 #fd-fancy-button {
@@ -382,5 +380,17 @@ td {
     display: block;
     margin-left: auto;
     margin-right: auto;
+}
+
+#fd-question-add {
+    float:left;
+}
+
+#fd-question-select {
+    position:relative;
+}
+
+#fd-add-but {
+    position:relative;
 }
 

@@ -129,29 +129,51 @@ formdesigner.ui = (function () {
 
     }
 
-    function init_toolbar() {
-        var toolbar = $(".fd-toolbar");
-        var buts =  $(".questionButton");
+    function init_toolbar() {4
+        var toolbar = $(".fd-toolbar"), select, addbutstr, addbut;
+
+        select = $('#fd-question-select');
+        addbutstr = '<button id="fd-add-but">Add</button>';
+        select.after(addbutstr);
+        addbut = $('#fd-add-but');
+        addbut.button({
+            icons:{
+                primary: 'ui-icon-gear'
+            }
+        });
+
+        function findq () {
+            var selVal, qID,qType;
+            selVal = $('#fd-question-select').val();
+            qID = $('#fd-question-select').find('[value*="'+selVal+'"]').attr('id');
+            qType = qID.split('-')[2];
+            formdesigner.controller.createQuestion(qType);
+        }
+        addbut.click(findq);
+
+
+
+//        var buts =  $(".questionButton");
 
         //make each element a button
-        buts.button();
+//        buts.button();
 
         //bind a function to the click event for each button
-        buts.each(function (index) {
-           var qType = $(this).attr("id").split('-')[2],
-                   name = $(this).attr("id").replace('fd-','').replace('-','').replace('-','');
-           $(this).click(function (){
-              formdesigner.controller.createQuestion(qType);
-           });
-           buttons[name] = $(this);
-        });
+//        buts.each(function (index) {
+//           var qType = $(this).attr("id").split('-')[2],
+//                   name = $(this).attr("id").replace('fd-','').replace('-','').replace('-','');
+//           $(this).click(function (){
+//              formdesigner.controller.createQuestion(qType);
+//           });
+//           buttons[name] = $(this);
+//        });
 
         //debug tools
         (function c_printDataTreeToConsole() {
             var printTreeBut = $(
-                    '<div id="fd-print-tree-button" class="toolbarButton questionButton">'+
+                    '<button id="fd-print-tree-button" class="toolbarButton questionButton">'+
                 'Print tree to Console' +
-              '</div>');
+              '</button>');
             $('#fd-dragons').append(printTreeBut);
 
             printTreeBut.button().click(function () {
@@ -175,42 +197,42 @@ formdesigner.ui = (function () {
 
             });
 
-            buttons.printTree = printTreeBut;
+//            buttons.printTree = printTreeBut;
         })();
 
        (function c_fancyBox() {
             var fancyBut = $(
-                    '<div id="fd-fancy-button" class="toolbarButton questionButton">'+
-                '<span id="fd-fancy-but"></span>View Source ' +
-              '</div>');
+                    '<button id="fd-fancy-button" class="toolbarButton questionButton">'+
+                'View Source ' +
+              '</button>');
             toolbar.append(fancyBut);
 
             fancyBut.button().click(function () {
                 controller.generateXForm();
             });
 
-            buttons.fancyBut = fancyBut;
+//            buttons.fancyBut = fancyBut;
         })();
 
         (function c_openSource() {
             var openSourcebut = $(
-                    '<div id="fd-opensource-button" class="toolbarButton questionButton">'+
-                '<span id="fd-opensource-but"></span>Load Source ' +
-              '</div>');
+                    '<button id="fd-opensource-button" class="toolbarButton questionButton">'+
+                'Load Source ' +
+              '</button>');
             toolbar.append(openSourcebut);
 
             openSourcebut.button().click(function () {
                 formdesigner.controller.showLoadXformBox();
             });
 
-            buttons.openSourcebut = openSourcebut;
+//            buttons.openSourcebut = openSourcebut;
         })();
 
-        $('.questionButton').button({
-            icons:{
-                primary: 'ui-icon-gear'
-            }
-        })
+//        $('.questionButton').button({
+//            icons:{
+//                primary: 'ui-icon-gear'
+//            }
+//        })
 
 
 
