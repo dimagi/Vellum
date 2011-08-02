@@ -662,7 +662,7 @@ formdesigner.util = (function(){
             return disp;
         }
 
-        lang = formdesigner.controller.currentItextDisplayLanguage;
+        lang = formdesigner.currentItextDisplayLanguage;
         if(!lang) {
             lang = Itext.getDefaultLanguage();
         }

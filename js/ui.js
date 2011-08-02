@@ -150,6 +150,8 @@ formdesigner.ui = (function () {
         }
         addbut.click(findq);
 
+        select.chosen();
+
         //debug tools
         (function c_printDataTreeToConsole() {
             var printTreeBut = $(
@@ -211,8 +213,6 @@ formdesigner.ui = (function () {
 //            buttons.printTree = printTreeBut;
         })();
 
-
-
        (function c_fancyBox() {
             var fancyBut = $(
                     '<button id="fd-fancy-button" class="toolbarButton questionButton">'+
@@ -254,16 +254,6 @@ formdesigner.ui = (function () {
 
 //            buttons.openSourcebut = openSourcebut;
         })();
-
-
-
-//        $('.questionButton').button({
-//            icons:{
-//                primary: 'ui-icon-gear'
-//            }
-//        })
-
-
 
     }
     that.buttons = buttons;
@@ -981,6 +971,53 @@ formdesigner.ui = (function () {
     };
 
     var init_extra_tools = function(){
+        function makeLangDrop() {
+            var div, addLangButton, langList, langs, i, str, selectedLang, Itext;
+            $('#fd-extra-settings').find('#fd-lang-disp-div').remove();
+            div = $('<div id="fd-lang-disp-div"></div>');
+            Itext = formdesigner.model.Itext;
+            langs = Itext.getLanguages();
+            div.append('<span class="fd-form-props-heading">Choose Display Language</span>');
+
+            str = '<select data-placeholder="Choose a Language" style="width:150px;" class="chzn-select" id="fd-land-disp-select">' +
+                    '<option value="blank"></option>'
+            for (i in langs) {
+                if (langs.hasOwnProperty(i)) {
+                    if(Itext.getDefaultLanguage() === langs[i]){
+                        selectedLang = 'selected';
+                    }
+
+                    str = str + '<option value="' + langs[i] + '" >' + langs[i] + '</option>';
+                }
+            }
+
+            str += '</select>';
+
+            langList = $(str);
+            div.append(langList);
+            langList.change (function (e) {
+                formdesigner.currentItextDisplayLanguage = $(this).val();
+                formdesigner.controller.reloadUI();
+            })
+
+            langList.val(formdesigner.currentItextDisplayLanguage);
+
+            str = '';
+            str = '<button id="fd-lang-disp-add-lang-button">Add Language</button>';
+            addLangButton = $(str);
+            addLangButton.button();
+            addLangButton.click (function () {
+                formdesigner.ui.showAddLanguageDialog();
+            })
+            div.append(addLangButton);
+            div.append('<br/><br/><br/><br/><br/>');
+            $('#fd-extra-settings').append(div);
+            $(div).find('#fd-land-disp-select').chosen();
+
+
+        }
+
+
         var accContainer = $("#fd-extra-tools"),
             accordion = $("#fd-extra-tools-accordion"),
             minMax = $('#fd-acc-min-max'),
@@ -989,8 +1026,10 @@ formdesigner.ui = (function () {
             fdTree = $('.fd-tree'),
             fdContainer = $('#fd-ui-container');
 
-
-
+        makeLangDrop();
+        formdesigner.controller.on('fd-reload-ui', function () {
+            makeLangDrop();
+        })
 
 
         accordion.hide();

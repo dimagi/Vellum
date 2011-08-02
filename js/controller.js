@@ -135,8 +135,8 @@ formdesigner.controller = (function () {
 
         formdesigner.ui.setTreeValidationIcons();
 
-//        dataTree = formdesigner.controller.form.dataTree;
-//        dataTree.treeMap(treeFunc);
+        formdesigner.controller.fire('fd-reload-ui');
+
     }
 
     that.reloadUI = reloadUI;

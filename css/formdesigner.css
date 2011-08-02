@@ -390,6 +390,13 @@ td {
     position:relative;
 }
 
+#fd-question-select_chzn {
+    clear: none;
+    float: left;
+    margin-right: 5px;
+
+}
+
 #fd-add-but {
     position:relative;
 }
