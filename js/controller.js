@@ -144,7 +144,8 @@ formdesigner.controller = (function () {
     that.reloadUI = reloadUI;
 
     var showErrorMessage = function (msg) {
-        formdesigner.ui.appendErrorMessage(msg);
+//        formdesigner.ui.appendErrorMessage(msg);
+        
     };
     that.showErrorMessage = showErrorMessage;
 
@@ -380,6 +381,101 @@ formdesigner.controller = (function () {
 
     };
     that.showLoadXformBox = showLoadXformBox;
+
+    var parseXLSItext = function (str) {
+        var rows = str.split('\n'),
+                nRows, nCols, i, j, cells, lang,iID, form, val, Itext;
+        nRows = rows.length;
+        nCols = rows[0].split('\t').length;
+        Itext = formdesigner.model.Itext;
+        for (i in rows) {
+            if (rows.hasOwnProperty(i)) {
+                cells = rows[i].split('\t');
+                lang = cells[0];
+                iID = cells[1];
+                for (j = 2; j<cells.length ; j++) {
+                    if(cells[j]) {
+                        if(j === 2) {
+                            form = 'default';
+                        } else if (j === 3) {
+                            form = 'audio';
+                        } else if (j === 4) {
+                            form = 'image';
+                        } else if (j === 5) {
+                            form = 'video';
+                        }
+                        val = cells[j];
+                        Itext.setValue(iID,lang,form,val);
+                    }
+                }
+            }
+        }
+    }
+    that.parseXLSItext = parseXLSItext;
+
+    var generateItextXLS = function () {
+        var idata, row, iID, lang, form, val, Itext,
+                out = '';
+        Itext = formdesigner.model.Itext;
+        idata = Itext.getAllData();
+
+        function makeRow (language, id, data) {
+            var row = '', i;
+            row = language + '\t' + id;
+            row += '\t' + (data["default"] ? data["default"] : '');
+            row += '\t' + (data["audio"] ? data["audio"] : '');
+            row += '\t' + (data["image"] ? data["image"] : '');
+            row += '\t' + (data["video"] ? data["video"] : '');
+            row += '\n';
+            return row;
+        }
+
+        for (lang in idata) {
+            if (idata.hasOwnProperty(lang)) {
+                for (iID in idata[lang] ) {
+                    if (idata[lang].hasOwnProperty(iID)) {
+                        out += makeRow(lang, iID, idata[lang][iID])
+                    }
+                }
+
+            }
+        }
+
+        return out;
+    }
+    that.generateItextXLS = generateItextXLS;
+
+    var showLoadItextFromClipboard = function () {
+        var input = $('#fd-source'),
+                button = $('<button id ="fd-parsexls-button">Load Itext</button>');
+        button.button({
+            icons: {
+                primary : 'ui-icon-folder-open'
+            }
+        })
+        $('#inline').click();
+        input.after(button);
+        button.show();
+
+        button.click(function () {
+            formdesigner.controller.parseXLSItext(input.val());
+            $.fancybox.close();
+            $(this).remove();
+        });
+
+    };
+    that.showLoadItextFromClipboard = showLoadItextFromClipboard;
+
+    var showGeneratedItextXLS = function () {
+        var source = $('#fd-source');
+
+        source.val(formdesigner.controller.generateItextXLS());
+
+        $('#inline').click();
+        
+
+    };
+    that.showGeneratedItextXLS = showGeneratedItextXLS;
 
     var setFormName = function (name) {
         formdesigner.controller.form.formName = name;

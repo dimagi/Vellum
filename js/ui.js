@@ -151,23 +151,6 @@ formdesigner.ui = (function () {
         }
         addbut.click(findq);
 
-
-
-//        var buts =  $(".questionButton");
-
-        //make each element a button
-//        buts.button();
-
-        //bind a function to the click event for each button
-//        buts.each(function (index) {
-//           var qType = $(this).attr("id").split('-')[2],
-//                   name = $(this).attr("id").replace('fd-','').replace('-','').replace('-','');
-//           $(this).click(function (){
-//              formdesigner.controller.createQuestion(qType);
-//           });
-//           buttons[name] = $(this);
-//        });
-
         //debug tools
         (function c_printDataTreeToConsole() {
             var printTreeBut = $(
@@ -199,6 +182,37 @@ formdesigner.ui = (function () {
 
 //            buttons.printTree = printTreeBut;
         })();
+
+        (function c_showLoadItextXLS() {
+            var loadXLSBut = $(
+                    '<button id="fd-load-xls-button" class="toolbarButton questionButton">'+
+                'Load Itext XLS From Clipboard' +
+              '</button>');
+            $('#fd-dragons').append(loadXLSBut);
+
+            loadXLSBut.button().click(function () {
+                formdesigner.controller.showLoadItextFromClipboard();
+
+            });
+
+//            buttons.printTree = printTreeBut;
+        })();
+
+        (function c_showGeneratedItextXLS() {
+            var genXLSgbut = $(
+                    '<button id="fd-gen-xls-button" class="toolbarButton questionButton">'+
+                'Save Itext XLS to Clipboard' +
+              '</button>');
+            $('#fd-dragons').append(genXLSgbut);
+
+            genXLSgbut.button().click(function () {
+                formdesigner.controller.showGeneratedItextXLS();
+            });
+
+//            buttons.printTree = printTreeBut;
+        })();
+
+
 
        (function c_fancyBox() {
             var fancyBut = $(
