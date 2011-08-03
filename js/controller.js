@@ -504,6 +504,21 @@ formdesigner.controller = (function () {
     }
     that.loadXForm = loadXForm;
 
+
+    var removeMugTypeByUFID = function (ufid) {
+        var MT = formdesigner.controller.form.getMugTypeByUFID(ufid);
+        formdesigner.controller.removeMugTypeFromForm(MT);
+    }
+    that.removeMugTypeByUFID = removeMugTypeByUFID;
+
+    var removeMugTypeFromForm = function (mugType) {
+        formdesigner.ui.removeMugTypeFromUITree(mugType);
+        formdesigner.controller.form.dataTree.removeMugType(mugType);
+        formdesigner.controller.form.controlTree.removeMugType(mugType);
+
+    }
+    that.removeMugTypeFromForm = removeMugTypeFromForm;
+
     /**
      * The big daddy function of parsing.
      * Pass in the XML String and this function

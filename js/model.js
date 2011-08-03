@@ -1685,6 +1685,20 @@ formdesigner.model = function () {
             
         }
 
+        /**
+         * Searches through BOTH trees and returns
+         * a MT if found (null if nothing found)
+         */
+        var getMugTypeByUFID = function (ufid) {
+            var MT = dataTree.getMugTypeFromUFID(ufid);
+            if(!MT) {
+                MT = controlTree.getMugTypeFromUFID(ufid);
+            }
+
+            return MT;
+        };
+        that.getMugTypeByUFID = getMugTypeByUFID;
+
         var getInvalidMugTypes = function () {
             var MTListC, MTListD, result, controlTree, dataTree,
                 mapFunc = function (node) {
@@ -2398,7 +2412,9 @@ formdesigner.model = function () {
          */
         that.getValue = function(iID, lang, form){
             if(!data[lang]){
-                throw 'Attempted to retrieve Itext value from language that does not exist!' + exceptionString(iID,lang,form)
+//                throw 'Attempted to retrieve Itext value from language that does not exist!' + exceptionString(iID,lang,form)
+                that.addLanguage(lang);
+                return null;
             }
             if(!data[lang][iID]){
 //                throw 'Attempted to retrieve Itext value that does not exist!' + exceptionString(iID,lang,form)

@@ -255,6 +255,21 @@ formdesigner.ui = (function () {
 //            buttons.openSourcebut = openSourcebut;
         })();
 
+        (function c_removeSelected() {
+            var removebut = $(
+                    '<button id="fd-remove-button" class="toolbarButton questionButton">'+
+                'Remove Selected' +
+              '</button>');
+            toolbar.append(removebut);
+
+            removebut.button().click(function () {
+                var selected = formdesigner.controller.getCurrentlySelectedMugType();
+                formdesigner.controller.removeMugTypeFromForm(selected);
+            });
+
+//            buttons.openSourcebut = openSourcebut;
+        })();
+
     }
     that.buttons = buttons;
 
@@ -1133,6 +1148,16 @@ formdesigner.ui = (function () {
         }
     };
     that.setTreeValidationIcons = setTreeValidationIcons;
+
+    var removeMugTypeFromUITree = function (mugType) {
+        var controlTree, el, ufid;
+        ufid = mugType.ufid;
+        el = $("#" + ufid);
+        controlTree = $("#fd-question-tree");
+        controlTree.jstree("remove",el);
+    };
+    that.removeMugTypeFromUITree = removeMugTypeFromUITree;
+
 
     var create_data_tree = function(){
         var tree = $("#fd-data-tree-container");
