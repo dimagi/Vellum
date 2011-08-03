@@ -72,6 +72,27 @@ formdesigner.util = (function(){
     };
     that.getXLabelValue = getXLabelValue;
 
+    var dumpFormTreesToConsole = function () {
+        var vObj = [], vOut = [], i, invalidMT = [], mt;
+                console.group("Tree Pretty Print");
+                console.log("Control Tree:"+formdesigner.controller.form.controlTree.printTree())
+                console.log("Data Tree:   "+formdesigner.controller.form.dataTree.printTree());
+                console.log("TREE VALIDATION RESULT",formdesigner.controller.form.controlTree.isTreeValid());
+                invalidMT = formdesigner.controller.form.getInvalidMugTypes();
+
+                console.log("TREE MAP INVALID UFIDS", formdesigner.controller.form.getInvalidMugTypeUFIDs());
+                for (i in invalidMT){
+                    if(invalidMT.hasOwnProperty(i)){
+                        mt = invalidMT[i];
+                        vOut.push(mt);
+                        vOut.push(mt.validateMug());
+                    }
+                }
+                console.log("INVALID MTs,VALIDATION OBJ",vOut);
+                console.groupEnd();
+    };
+    that.dumpFormTreesToConsole = dumpFormTreesToConsole;
+
 
     /**
      * From http://stackoverflow.com/questions/4149276/javascript-camelcase-to-regular-form
@@ -436,8 +457,65 @@ formdesigner.util = (function(){
     };
     that.getRelativeInsertPosition = getRelativeInsertPosition;
 
-    var getNewItextID = function (mugType) {
-        return 'foo';
+    /**
+     * Looks at the mugType and attempts to retrieve an ItextID associated with the control element.
+     * If none is found, generate one based on information in the mug.
+     * @param mugType
+     * @param isHint - do we want an itextID for a hint label?
+     */
+    var getNewItextID = function (mugType, isHint) {
+        if(!mugType || !mugType.mug) {
+            throw 'No mugType/mug specified for retreiving itextID!'
+        }
+
+        var mug, iID, cEl,bEl,dEl,MTProps, Itext, iidProp;
+        mug = mugType.mug;
+        MTProps = mugType.properties;
+        Itext = formdesigner.model.Itext;
+        if(MTProps.controlElement) {
+            cEl = mug.properties.controlElement.properties;
+        }
+        if(MTProps.bindElement) {
+            bEl = mug.properties.bindElement.properties;
+        }
+        if(MTProps.dataElement) {
+            dEl = mug.properties.dataElement.properties;
+        }
+        if (isHint) {
+            iidProp = 'hintItextID';
+        } else {
+            iidProp = 'labelItextID';
+        }
+
+        if(cEl) {
+            iID = cEl[iidProp];
+        }
+
+        if(!iID) {
+            if(dEl && dEl.nodeID) {
+                iID = dEl.nodeID;
+            }else if (bEl && bEl.nodeID){
+                iID = bEl.nodeID;
+            }
+
+            if(iID && isHint) {
+                iID += '_hint';
+            }
+        }
+
+        if(!iID && (cEl && cEl.defaultValue)) {//implies this is a 'stdItem' mugType
+            iID = cEl.defaultValue.replace(/ /g, ''); //strip whitespaces
+
+            if(iID && isHint) {
+                iID += '_hint';
+            }
+        }
+
+        if(!iID) {
+            throw 'Could not generate an Itext for given MugType:' + mugType + '.  Unknown MugType.';
+        }
+
+        return iID;
     };
     that.getNewItextID = getNewItextID;
 

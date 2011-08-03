@@ -730,16 +730,25 @@ formdesigner.controller = (function () {
                 }
 
                 function populateMug (MugType, cEl) {
-                    var labelEl, hintEl;
+                    var labelEl, hintEl, Itext;
+                    Itext = formdesigner.model.Itext;
                     function parseLabel (lEl, MT) {
                         var labelVal = formdesigner.util.getXLabelValue($(lEl)),
                             labelRef = $(lEl).attr('ref'),
-                            cProps = MT.mug.properties.controlElement.properties;
+                            cProps = MT.mug.properties.controlElement.properties,
+                            defLang;
                         if(labelRef){
                             labelRef = labelRef.replace("jr:itext('",'').replace("')",''); //strip itext incantation
                             cProps.labelItextID = labelRef;
+                        } else {
+                            labelRef = formdesigner.util.getNewItextID(MT, false); //assumes this is always successful
+                            cProps.labelItextID = labelRef;
                         }
-                        cProps.label = labelVal;
+
+                        if (labelVal) {  //DOES NOT STORE DEFAULT LABEL IN MUG, SETS IT AS DEFAULT ITEXT INSTEAD
+                            defLang = Itext.getDefaultLanguage();
+                            Itext.setValue(cProps.labelItextID, defLang, 'default', labelVal);
+                        }
                     }
 
                     function parseHint (hEl, MT) {
@@ -917,8 +926,9 @@ formdesigner.controller = (function () {
             if(controls.length === 0) {
                 controls = xml.find('body').children();
             }
-            parseControlTree (controls);
             parseItextBlock(itext);
+            parseControlTree (controls);
+
 
             formdesigner.controller.fire({
                 type: 'parse-finish'

@@ -502,18 +502,28 @@ formdesigner.model = function () {
     var validationFuncs = {
         //should be used to figure out the logic for label, defaultLabel, labelItext, etc properties
         label: function (mugType, mug) {
-            var controlBlock, hasLabel, hasLabelItextID, missing;
+            var controlBlock, hasLabel, hasLabelItextID, missing, hasItext, Itext;
+            Itext = formdesigner.model.Itext
             controlBlock = mug.properties.controlElement.properties;
             hasLabel = !(!(controlBlock.label));
             hasLabelItextID = !(!(controlBlock.labelItextID));
-            if (hasLabel || hasLabelItextID) {
+            if(hasLabelItextID){
+                hasItext = Itext.hasHumanReadableItext(mug,false);
+            } else {
+                hasItext = false;
+            }
+            if (hasLabel) {
                 return 'pass';
+            } else if (hasLabelItextID && hasItext) {
+                return 'pass';
+            } else if (hasLabelItextID && !hasItext) {
+                missing = 'a display label';
             }else if (!hasLabel && !hasLabelItextID) {
-                missing = 'either a Label or LabelItext';
+                missing = 'a display label ID';
             }else if (!hasLabel) {
-                missing = 'a Label'
+                missing = 'a display label'
             }else if (!hasLabelItextID) {
-                missing = 'a Label Itext ID';
+                missing = 'a display label ID';
             }
             return 'Question is missing ' + missing + ' value!';
         }
@@ -2539,12 +2549,51 @@ formdesigner.model = function () {
                 itextID = isHint ? p.hintItextID : p.labelItextID,
                 ivals = this.getItextVals(itextID,this.getDefaultLanguage());
 
+            if(!ivals) {
+                return false;
+            }
+
             if ( ivals['default'] || ivals.long || ivals.short ) {
                 return true;
             } else {
                 return false;
             }
         };
+
+        var getHumanReadableItext = function (mug, isHint) {
+            if(!mug.properties.controlElement){
+                return false;
+            }
+
+            if(!formdesigner.model.Itext.hasHumanReadableItext(mug,isHint)) {
+                return null;
+            }
+
+
+            var p = mug.properties.controlElement.properties,
+                itextID = isHint ? p.hintItextID : p.labelItextID,
+                ivals = this.getItextVals(itextID,this.getDefaultLanguage()),
+                retval;
+
+            if(!ivals) {
+                return null;
+            }
+
+            retval = ivals ['default'];
+            if(!retval) {
+                retval = ivals['long'];
+            }
+            if(!retval) {
+                retval = ivals['short'];
+            }
+
+            if(!retval) {
+                retval = null;
+            }
+
+            return retval;
+
+        }
 
         /**
          * Blows away all data stored in the Itext object

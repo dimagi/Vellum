@@ -96,6 +96,18 @@ $(document).ready(function(){
         }
     }
 
+    var addQuestionThroughUI = function (type) {
+        var addbut, sel;
+        addbut = $('#fd-add-but');
+        sel = $('#fd-question-select');
+
+        sel.val(type); //set the dropdown to the correct val
+        addbut.click(); //click the add question button.
+
+    }
+
+    
+
     module("LiveText Unit Tests");
     test("Create and Verify LiveText", function(){
         expect(4);
@@ -582,23 +594,37 @@ $(document).ready(function(){
             mugTC = formdesigner.model.mugTypeMaker.stdTextQuestion(),
             mugA = mugTA.mug,
             mugB = mugTB.mug,
-            mugC = mugTC.mug;
-
+            mugC = mugTC.mug,
+                Itext;
         formdesigner.controller.resetFormDesigner();
-        var c = formdesigner.controller;
+
+        Itext = formdesigner.model.Itext;
+        Itext.setValue(mugA.properties.controlElement.properties.labelItextID,Itext.getDefaultLanguage(),'default','group1 itext');
+        Itext.setValue(mugB.properties.controlElement.properties.labelItextID,Itext.getDefaultLanguage(),'default','question1 itext');
+        Itext.setValue(mugC.properties.controlElement.properties.labelItextID,Itext.getDefaultLanguage(),'default','question2 itext');
+
+        var c = formdesigner.controller, disp = formdesigner.util.getMugDisplayName;
         c.insertMugTypeIntoForm(null,mugTA);
         var tree = c.form.dataTree;
         var treePrettyPrintExpected = ''+tree._getRootNodeID()+'['+
                                         tree._getMugTypeNodeID(mugTA)+']';
 
-        equal(c.form.dataTree.printTree(),treePrettyPrintExpected, "Tree structure is correct after inserting a 'Group' MT under root");
-        equal(c.form.controlTree.printTree(),treePrettyPrintExpected, "Tree structure is correct after inserting a 'Group' MT under root");
+        equal(c.form.dataTree.printTree(),treePrettyPrintExpected, "Tree structure is correct after inserting a 'Group' MT under root DATA TREE");
+
+        treePrettyPrintExpected = ''+tree._getRootNodeID()+'['+
+                                        disp(mugTA)+']';
+        equal(c.form.controlTree.printTree(),treePrettyPrintExpected, "Tree structure is correct after inserting a 'Group' MT under root CONTROL TREE");
+
         c.insertMugTypeIntoForm(mugTA,mugTB);
         treePrettyPrintExpected = ''+tree._getRootNodeID()+'['+
                                         tree._getMugTypeNodeID(mugTA)+'['+
                                         tree._getMugTypeNodeID(mugTB)+']]';
-        equal(c.form.dataTree.printTree(),treePrettyPrintExpected, "Tree structure is correct after inserting a 'Text' MT under 'Group'");
-        equal(c.form.controlTree.printTree(),treePrettyPrintExpected, "Tree structure is correct after inserting a 'Text' MT under 'Group'");
+        equal(c.form.dataTree.printTree(),treePrettyPrintExpected, "Tree structure is correct after inserting a 'Text' MT under 'Group' DATA TREE");
+
+        treePrettyPrintExpected = ''+tree._getRootNodeID()+'['+
+                                        disp(mugTA)+'['+
+                                        disp(mugTB)+']]';
+        equal(c.form.controlTree.printTree(),treePrettyPrintExpected, "Tree structure is correct after inserting a 'Text' MT under 'Group' CONTROL TREE");
     });
 
     test("Does check_move() work correctly?", function(){
@@ -643,7 +669,7 @@ $(document).ready(function(){
 
         formdesigner.controller.resetFormDesigner();
 
-        var c,ui, jstree, curMugType;
+        var c,ui, jstree, curMugType, addqbut;
 
 
         c = formdesigner.controller
@@ -660,16 +686,16 @@ $(document).ready(function(){
         });
         console.log(ui.buttons);
 
-        ui.buttons.addquestionbutton.click();
-        ui.buttons.addquestionbutton.click();
-        ui.buttons.addquestionbutton.click();
+        addqbut = $('#fd-add-but');
+        addqbut.click();
+        addqbut.click();
+        addqbut.click();
         jstree.jstree("select_node",$('#'+curMugType.ufid));
-        console.log("curMugType.ufid=",curMugType.ufid);
-        console.log('Selected Node', jstree.jstree("get_selected"));
+
         var curSelNode = jstree.jstree("get_selected");
         var curSelMT = c.getMTFromFormByUFID(curSelNode.attr('id'));
         ok(typeof jstree.jstree("get_selected") !== 'undefined');
-        console.log(c.form.controlTree.printTree(false));
+
 
         equal(jstree.jstree("get_selected").attr('id'), curMugType.ufid, "Mug that was just created is the same as the one that is currently selected");
 
@@ -733,14 +759,16 @@ $(document).ready(function(){
                 curMugType,
                 addQbut;
         c.resetFormDesigner();
-        addQbut = ui.buttons.addquestionbutton;
+        addQbut = $('#fd-add-but');
         addQbut.click();
         addQbut.click();
         addQbut.click();
         addQbut.click();
         addQbut.click();
+        formdesigner.formUuid = 'http://openrosa.org/formdesigner/1B27BC6C-D6B2-43E2-A36A-050DBCAF4763';
         var actual = beautifyXml(c.form.createXForm());
         getTestXformOutput('form0.xml');
+
         var expected = beautifyXml(testXformBuffer);
         equal(expected,actual);
 
@@ -751,28 +779,26 @@ $(document).ready(function(){
             ui = formdesigner.ui,
             jstree = $("#fd-question-tree"),
             curMugType,
-            addQbut, lastCreatedNode, addGroupBut;
+            addQbut, lastCreatedNode, addGroupBut, qTypeSel;
         c.resetFormDesigner();
-        addQbut = ui.buttons.addquestionbutton;
+
 
         jstree.bind('create_node.jstree',function(e,data){
             lastCreatedNode = data.rslt.obj;
         })
-        addQbut.click();
+        addQuestionThroughUI("Text Question");
         jstree.jstree('select_node',lastCreatedNode);
         formdesigner.controller.form.controlTree.getMugTypeFromUFID(lastCreatedNode.attr('id')).mug.properties.controlElement.properties.label = 'question1 label';
-//        $('#controlElement-label-input').val('question1 label').keyup();
-        addGroupBut = ui.buttons.addgroupbutton;
-        addGroupBut.click();
+
+        addQuestionThroughUI("Group");
         jstree.jstree('select_node',lastCreatedNode,true);
         formdesigner.controller.form.controlTree.getMugTypeFromUFID(lastCreatedNode.attr('id')).mug.properties.controlElement.properties.label = 'group label';
-//        $('#controlElement-label-input').val('group label').keyup();
         $('#dataElement-nodeID-input').val('group1').keyup();
-        addQbut.click();
+        addQuestionThroughUI("Text Question");
         jstree.jstree('select_node',lastCreatedNode,true);
         formdesigner.controller.form.controlTree.getMugTypeFromUFID(lastCreatedNode.attr('id')).mug.properties.controlElement.properties.label = 'question2 label';
-//        $('#controlElement-label-input').val('question2 label').keyup();
         $('#dataElement-nodeID-input').val('question2').keyup();
+        formdesigner.formUuid = "http://openrosa.org/formdesigner/5EACC430-F892-4AA7-B4AA-999AD0805A97";    
         var actual = beautifyXml(c.form.createXForm());
         getTestXformOutput('form1.xml');
         var expected = beautifyXml(testXformBuffer);
@@ -790,22 +816,20 @@ $(document).ready(function(){
             ui = formdesigner.ui,
             jstree = $("#fd-question-tree"),
             curMugType,
-            addQbut, lastCreatedNode, addGroupBut;
+            lastCreatedNode;
         c.resetFormDesigner();
-        addQbut = ui.buttons.addquestionbutton;
+
         jstree.bind('create_node.jstree',function(e,data){
             lastCreatedNode = data.rslt.obj;
         })
-        addQbut.click();
-        addQbut.click();
-        addGroupBut = ui.buttons.addgroupbutton;
-        addGroupBut.click();
+        addQuestionThroughUI("Text Question");
+        addQuestionThroughUI("Text Question");
+        addQuestionThroughUI("Group");
         jstree.jstree('select_node',lastCreatedNode,true);
-        addQbut.click();
+        addQuestionThroughUI("Text Question");
 
-        equal(formdesigner.controller.form.isFormValid(), true, 'Form should not be valid. Missing label fields.');
+        equal(formdesigner.controller.form.isFormValid(), true, 'Form should be valid.');
 
-        //testing the opposite case is done in the test group above.
 
     });
 
@@ -815,15 +839,14 @@ $(document).ready(function(){
             jstree = $("#fd-question-tree"),
             mugType,
             ufid1,ufid2,
-            addQbut, lastCreatedNode, addGroupBut;
+            lastCreatedNode;
         c.resetFormDesigner();
-        addQbut = ui.buttons.addquestionbutton;
         jstree.bind('create_node.jstree',function(e,data){
             lastCreatedNode = data.rslt.obj;
         })
-        addQbut.click();
+        addQuestionThroughUI("Text Question");
         ufid1 = $(lastCreatedNode).attr('id');
-        addQbut.click();
+        addQuestionThroughUI("Text Question");
         ufid2 = $(lastCreatedNode).attr('id');
 
         mugType = c.getMTFromFormByUFID(ufid2);
@@ -838,7 +861,7 @@ $(document).ready(function(){
             xml = $(xmlDoc),
             binds = xml.find('bind'),
             data = xml.find('instance').children(),
-            formID, formName,
+            formID, formName, lastCreatedNode,
             c = formdesigner.controller,
             jstree = $("#fd-question-tree");
         c.resetFormDesigner();
@@ -851,7 +874,7 @@ $(document).ready(function(){
             lastCreatedNode = data.rslt.obj;
         })
 
-        formdesigner.ui.buttons.addquestionbutton.click();
+        addQuestionThroughUI("Text Question");
         oldMT = formdesigner.controller.form.getMugTypeByIDFromTree('question2', 'data');
         mType.mug = mug;
         mType.mug.properties.dataElement.properties.nodeID = 'HYAAA';
@@ -861,6 +884,46 @@ $(document).ready(function(){
         console.log(oldMT);
     });
 
+
+    module("UI Tests");
+    test ("'Remove Selected' button", function () {
+        var c = formdesigner.controller,
+            ui = formdesigner.ui,
+            jstree = $("#fd-question-tree"),
+            curMugType,
+            addQbut, lastCreatedNode, addGroupBut, qTypeSel, iiD, groupMT, Itext;
+        c.resetFormDesigner();
+
+
+        Itext = formdesigner.model.Itext;
+
+        jstree.bind('create_node.jstree',function(e,data){
+            lastCreatedNode = data.rslt.obj;
+        })
+
+        function getMTFromEl(el) {
+            return formdesigner.controller.form.controlTree.getMugTypeFromUFID(el.attr('id'));
+        }
+
+        //build form
+        addQuestionThroughUI("Text Question");
+        jstree.jstree('select_node',lastCreatedNode);
+        getMTFromEl(lastCreatedNode).mug.properties.controlElement.properties.label = 'question1 label';
+        addQuestionThroughUI("Group");
+        jstree.jstree('select_node',lastCreatedNode,true);
+        groupMT = getMTFromEl(lastCreatedNode);
+        .mug.properties.controlElement.properties.label = 'group label';
+        $('#dataElement-nodeID-input').val('group1').keyup();
+        addQuestionThroughUI("Text Question");
+        jstree.jstree('select_node',lastCreatedNode,true);
+        getMTFromEl(lastCreatedNode).mug.properties.controlElement.properties.label = 'question2 label';
+        $('#dataElement-nodeID-input').val('question2').keyup();
+
+        //test if form is valid
+        ok(formdesigner.controller.form.isFormValid(), 'Form Should pass all Validation Tests');
+
+        //remove group node
+    })
 
 
 });
