@@ -681,7 +681,6 @@ $(document).ready(function(){
 
         //add a listener for question creation events
         c.on("question-creation", function(e){
-            console.log("QUESTION CREATION EVENT FIRED:",e);
             curMugType = e.mugType;
         });
         console.log(ui.buttons);
@@ -891,7 +890,7 @@ $(document).ready(function(){
             ui = formdesigner.ui,
             jstree = $("#fd-question-tree"),
             curMugType,
-            addQbut, lastCreatedNode, addGroupBut, qTypeSel, iiD, groupMT, Itext;
+            addQbut, lastCreatedNode, addGroupBut, qTypeSel, iiD, groupMT, Itext,mugProps,cEl,iID;
         c.resetFormDesigner();
 
 
@@ -908,21 +907,55 @@ $(document).ready(function(){
         //build form
         addQuestionThroughUI("Text Question");
         jstree.jstree('select_node',lastCreatedNode);
-        getMTFromEl(lastCreatedNode).mug.properties.controlElement.properties.label = 'question1 label';
+        curMugType = getMTFromEl(lastCreatedNode);
+        mugProps = curMugType.mug.properties;
+        cEl = mugProps.controlElement.properties;
+        iID = cEl.labelItextID;
+        Itext.setValue(iID,Itext.getDefaultLanguage(),'default','question1 label');
         addQuestionThroughUI("Group");
         jstree.jstree('select_node',lastCreatedNode,true);
-        groupMT = getMTFromEl(lastCreatedNode);
-        .mug.properties.controlElement.properties.label = 'group label';
+        curMugType = getMTFromEl(lastCreatedNode);
+        groupMT = curMugType;
+        mugProps = curMugType.mug.properties;
+        cEl = mugProps.controlElement.properties;
+        iID = cEl.labelItextID;
+        Itext.setValue(iID,Itext.getDefaultLanguage(),'default','group1 label');
         $('#dataElement-nodeID-input').val('group1').keyup();
         addQuestionThroughUI("Text Question");
         jstree.jstree('select_node',lastCreatedNode,true);
-        getMTFromEl(lastCreatedNode).mug.properties.controlElement.properties.label = 'question2 label';
-        $('#dataElement-nodeID-input').val('question2').keyup();
+        curMugType = getMTFromEl(lastCreatedNode);
+        mugProps = curMugType.mug.properties;
+        cEl = mugProps.controlElement.properties;
+        iID = cEl.labelItextID;
+        Itext.setValue(iID,Itext.getDefaultLanguage(),'default','question2 label');
+
+        //select the group node
+        jstree.jstree('select_node',$('#'+ groupMT.ufid),true);
+
+        //remove it
+        $('#fd-remove-button').click();
 
         //test if form is valid
         ok(formdesigner.controller.form.isFormValid(), 'Form Should pass all Validation Tests');
 
-        //remove group node
+        //compare with form we have in the testing cache.
+        formdesigner.formUuid = "http://openrosa.org/formdesigner/E9BE7934-687F-4C19-BDB7-9509005460B6";
+        var actual = c.form.createXForm();
+        stop(500);
+        $.post('/formvalidate/validate/',{xform: actual},function (data) {
+            console.log(data);
+            var res = data;
+            if(!res.success){
+                console.log(res.outString, res.errString);
+            }
+            ok(res.success, 'Form validates with Javarosa form validator, see console for failure');
+            start();
+        });
+        actual = beautifyXml(actual);
+        getTestXformOutput('form8.xml');
+        var expected = beautifyXml(testXformBuffer);
+        equal(expected,actual);
+
     })
 
 
