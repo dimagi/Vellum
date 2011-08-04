@@ -608,8 +608,7 @@ formdesigner.ui = (function () {
         }
         displayFuncs.bindElement = showBindProps;
 
-        function showItextProps(){
-            function makeLI(textForm) {
+        function makeItextLI(textForm, iflabel) {
                 var mugType, liStr, txtStr, inputStr, id, li, text, input, currentLang, Itext, iID;
                 Itext = formdesigner.model.Itext;
                 currentLang = formdesigner.currentItextDisplayLanguage;
@@ -621,7 +620,7 @@ formdesigner.ui = (function () {
 
                 id = 'fd-itext-' + textForm.toLowerCase();
                 liStr = '<li id="' + id + '" class="fd-property"></li>';
-                txtStr = '<span id="' + id +'-txt" class="fd-property-text">' + formdesigner.util.fromCamelToRegularCase(textForm) + '</span>';
+                txtStr = '<span id="' + id +'-txt" class="fd-property-text">' + iflabel + '</span>';
                 inputStr = '<div id="' + id + '-input-div" class="fd-prop-input-div chzn-container"><input id="' + id + '-input" class="fd-property-input"/>';
                 li = $(liStr);
                 text = $(txtStr);
@@ -641,7 +640,10 @@ formdesigner.ui = (function () {
                 });
 
                 return li;
-            }
+        }
+
+        function showItextProps(){
+
 
             function makeItextUL() {
                 var ulStr = '<ul id="fd-props-itext-ul" class="fd-props-ul">' +
@@ -707,11 +709,9 @@ formdesigner.ui = (function () {
                 ul = makeItextUL();
                 uiBlock.append(ul);
                 LIs = {
-                    liDef : makeLI('default'),
-                    liLong : makeLI('long'),
-                    liShort : makeLI('short'),
-                    liAudio : makeLI('audio'),
-                    liImage : makeLI('image')
+                    liDef : makeItextLI('default', 'Display Label'),
+                    liAudio : makeItextLI('audio', 'Audio URI'),
+                    liImage : makeItextLI('image', 'Image URI')
                 }
 
                 for (i in LIs) {
@@ -748,52 +748,44 @@ formdesigner.ui = (function () {
                     mugProperties = mugType.mug.properties[blockName].properties;
 
                 listDisplay(mugTypeProperties, ul, mugProperties, blockName, false, true);
-                contentEl.append(ul);
-                if(ul.children().length === 0){
+
+                if(ul.children().length === 1){
                     $(ul).remove();
+                } else {
+                    contentEl.append(ul);
                 }
             }
 
             $('#fd-props-advanced').append(adv);
+
+            if(typeof formdesigner.IS_ADVANCED_ACC_EXPANDED === 'undefined') {
+                formdesigner.IS_ADVANCED_ACC_EXPANDED = false;
+            }
+
+            console.log('adv acc exp',formdesigner.IS_ADVANCED_ACC_EXPANDED);
             adv.accordion({
 //                fillSpace: true,
                 autoHeight: false,
                 collapsible: true,
-                active: IS_ADVANCED_ACC_EXPANDED
+                active: formdesigner.IS_ADVANCED_ACC_EXPANDED
             });
+            if(formdesigner.IS_ADVANCED_ACC_EXPANDED) {
+                console.log("FUUUU");
+                $('#fd-props-adv-accordion').accordion('activate',0);
+            }
 
-            $('#fd-props-advanced').bind( "accordionchangestart", function(event, ui) {
-                var newSize = '900px';
-                if (ui.newContent.length === 0) {
-                    IS_ADVANCED_ACC_EXPANDED = false;
-                    newSize = '900px';
-                }else {
-                    IS_ADVANCED_ACC_EXPANDED = true;
-                    newSize = '900px';
-                }
-                $('#fd-question-properties').animate({
-                        height:newSize
-                },200);
+            $('#fd-props-adv-accordion h3').click(function () {
+
+                formdesigner.IS_ADVANCED_ACC_EXPANDED = !formdesigner.IS_ADVANCED_ACC_EXPANDED;
+                console.log('CLICK!',formdesigner.IS_ADVANCED_ACC_EXPANDED);
             });
-
-//            adv.find('h3').click(function () {
-//                var props = $('#fd-question-properties');
-//                if(props.css('height') === '500px'){
-//                    $('#fd-question-properties').animate({
-//                        height:'900px'
-//                    },200);
-//                }else{
-//                    $('#fd-question-properties').animate({
-//                        height:'500px'
-//                    },200);
-//                }
-//            })
-
-            adv.accordion("activate",false);
 
             var contentEl = $('#fd-adv-props-content');
 
             contentEl.empty();
+            var itextul = makeUL('');
+            itextul.append(makeItextLI('short', 'Short Display Name')).append(makeItextLI('long','Long Display Name'));
+            contentEl.append('<br /><br />').append(itextul);
             displayBlock('dataElement');
             displayBlock('bindElement');
             displayBlock('controlElement');
