@@ -1051,8 +1051,8 @@ formdesigner.ui = (function () {
         }).button("disable");
 
         function makeFormProp (propLabel, propName, keyUpFunc, initVal){
-            var liStr = '<li id=fd-form-prop-"' + propName + '" class="fd-form-property"><span class="fd-form-property-text">'+propLabel+': '+'</span>' +
-                '<input id=fd-form-prop-' + propName + '-' + 'input" class="fd-form-property-input">'+
+            var liStr = '<li id="fd-form-prop-' + propName + '" class="fd-form-property"><span class="fd-form-property-text">'+propLabel+': '+'</span>' +
+                '<input id="fd-form-prop-' + propName + '-' + 'input" class="fd-form-property-input">'+
                 '</li>',
                 li = $(liStr),
                 ul = $('#fd-form-opts-ul');
@@ -1068,8 +1068,8 @@ formdesigner.ui = (function () {
             formdesigner.controller.form.fire({
                 type: 'form-property-changed',
                 propName: propName,
-                oldVal: formdesigner.controller.form.formName,
-                newVal: $( this ).val()
+                oldVal: oldVal,
+                newVal: newVal
             })
         }
 
@@ -1080,6 +1080,7 @@ formdesigner.ui = (function () {
         makeFormProp("Form Name","formName", formNameFunc, formdesigner.controller.form.formName);
 
         var formIDFunc = function (e) {
+            $(this).val($(this).val().replace(/ /g,'_'));
             fireFormPropChanged('formID',formdesigner.controller.form.formName, $( this ).val());
             formdesigner.controller.form.formID = $(this).val();
         }

@@ -883,6 +883,9 @@ $(document).ready(function(){
         console.log(oldMT);
     });
 
+    function getMTFromEl(el) {
+        return formdesigner.controller.form.controlTree.getMugTypeFromUFID(el.attr('id'));
+    }
 
     module("UI Tests");
     test ("'Remove Selected' button", function () {
@@ -900,9 +903,7 @@ $(document).ready(function(){
             lastCreatedNode = data.rslt.obj;
         })
 
-        function getMTFromEl(el) {
-            return formdesigner.controller.form.controlTree.getMugTypeFromUFID(el.attr('id'));
-        }
+
 
         //build form
         addQuestionThroughUI("Text Question");
@@ -958,10 +959,104 @@ $(document).ready(function(){
 
     })
 
+    test("Input fields", function() {
+        var c = formdesigner.controller,
+                    ui = formdesigner.ui,
+                    jstree = $("#fd-question-tree"),
+                    curMugType,
+                    addQbut, lastCreatedNode, addGroupBut, qTypeSel, iiD, groupMT, Itext,mugProps,cEl,iID,
+                    workingField;
+        c.resetFormDesigner();
+
+
+        Itext = formdesigner.model.Itext;
+
+        jstree.bind('create_node.jstree',function(e,data){
+            lastCreatedNode = data.rslt.obj;
+        })
+
+        var xmlString;
+        //build form
+        addQuestionThroughUI("Text Question");
+
+        //change form name and test results
+        workingField = $("#fd-form-prop-formName-input");
+        workingField.val("My Test Form").keyup();
+        xmlString = c.form.createXForm();
+        validateFormWithJR(xmlString);
+        var xml = parseXMLAndGetSelector(xmlString);
+        var title = xml.find("h\\:title");
+        if(title.length === 0) {
+            title = xml.find("title");
+        }
+        equal(title.length, 1, "Should have found the title node in generated source");
+        equal(title.text(), "My Test Form", "Form title has been set correctly");
+
+        //change form data node name and test results
+        workingField = $('#fd-form-prop-formID-input');
+        workingField.val('mydatanode').keyup();
+        xmlString = c.form.createXForm();
+        xml = parseXMLAndGetSelector(xmlString);
+        validateFormWithJR(xmlString);
+
+        var dataNode = $(xml.find('instance').children()[0]);
+        console.log(xmlString);
+        equal(dataNode.length, 1, 'found data node in xml source');
+        equal(dataNode[0].tagName, "mydatanode", "Data node is named correctly");
+        workingField.val("My Data Node").keyup(); //test auto replace of ' ' with '_'
+        xmlString = c.form.createXForm();
+        console.log("XML STRING HERE", xmlString);
+        xml = parseXMLAndGetSelector(xmlString);
+        validateFormWithJR(xmlString);
+        formdesigner.temp = xml;
+        equal(workingField.val(), "My_Data_Node", "field value correctly swapped ' ' for '_'");
+        var dataNode = $(xml.find('instance').children()[0]);
+        equal(dataNode.length, 1, 'found data node in xml source');
+        equal(dataNode[0].tagName, "My_Data_Node", "Data node with spaces is named correctly");
+        
+
+
+        curMugType = getMTFromEl($(lastCreatedNode));
+        ui.selectMugTypeInUI(curMugType);
+        equal(curMugType.typeName, "Text Question MugType", "Is Question created through UI a text type question?");
+        workingField = $('#dataElement-nodeID-input');
+        workingField.val("textQuestion1").keyup();
+        xmlString = c.form.createXForm();
+        validateFormWithJR(xmlString);
+        equal(curMugType.mug.properties.dataElement.properties.nodeID, "textQuestion1", "dataElement nodeID set correctly");
+        equal(curMugType.mug.properties.bindElement.properties.nodeID, "textQuestion1", "bindElement nodeID set correctly");
+        xml = parseXMLAndGetSelector(xmlString);
+
+
+    })
+
 
 });
 
+var asyncRes = []
+/**
+ * Actual is the xml form string
+ * @param actual
+ */
+function validateFormWithJR(actual) {
+        stop();
+        $.post('/formvalidate/validate/',{xform: actual},function (data) {
+            var len = asyncRes.length + 1
+            asyncRes[len] = data;
+            if(!asyncRes[len].success){
+                console.log(asyncRes[len].outString, asyncRes[len].errString);
+            }
+            ok(asyncRes[len].success, 'Form validates with Javarosa form validator, see console for failure');
+            start();
+        });
+}
 
+
+function parseXMLAndGetSelector(xmlString) {
+    var xmlDoc = $.parseXML(xmlString),
+                xml = $(xmlDoc);
+    return xml;
+}
 
 function divide(a,b){
     return a/b;
