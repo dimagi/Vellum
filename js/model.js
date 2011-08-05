@@ -526,6 +526,25 @@ formdesigner.model = function () {
                 missing = 'a display label ID';
             }
             return 'Question is missing ' + missing + ' value!';
+        },
+        hintItextID: function (mugType, mug) {
+            var controlBlock, hintIID, itextVal, Itext, controlElement;
+            controlBlock = mugType.properties.controlElement;
+            controlElement = mug.properties.controlElement.properties;
+            Itext = formdesigner.model.Itext;
+            hintIID = controlElement.hintItextID;
+            itextVal = Itext.getValue(hintIID,Itext.getDefaultLanguage(),'default');
+            if(hintIID && !itextVal) {
+                return 'Question has Hint Itext ID but no Hint Itext Label Data!';
+            }
+            if(itextVal && !hintIID) {
+                return 'Question has Hint Itext Display label but no Hint Itext ID!';
+            }
+            if(controlBlock.hintItextID === 'required' && !hintIID) {
+                return 'Hint Itext ID is required but not present in this question!';
+            }
+
+            return 'pass';
         }
     }
 
@@ -671,7 +690,8 @@ formdesigner.model = function () {
                     editable: 'w',
                     visibility: 'advanced',
                     presence: 'optional',
-                    lstring: "Question HINT Itext ID"
+                    lstring: "Question HINT Itext ID",
+                    validationFunc: validationFuncs.hintItextID
                 }
             }
         },
@@ -899,6 +919,7 @@ formdesigner.model = function () {
         }
 
     };
+    formdesigner.util.eventuality(RootMugType);
     that.RootMugType = RootMugType;
 
     /**
@@ -1057,6 +1078,8 @@ formdesigner.model = function () {
         allowedChildren = ['repeat', 'input', 'select', 'select1', 'group'];
         mType.controlNodeAllowedChildren = allowedChildren;
         mType.properties.bindElement.dataType.presence = "notallowed";
+        mType.properties.controlElement.hintItextID.presence = "notallowed";
+        mType.properties.controlElement.hintLabel.presence = "notallowed";
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
         mType.mug.properties.controlElement.properties.name = "Group";
@@ -1755,6 +1778,13 @@ formdesigner.model = function () {
          * Generates an XML Xform and returns it as a string.
          */
         var createXForm = function () {
+            var sanitizeXML = function(xmlString) {
+                if(!xmlString) {
+                    return;
+                }
+
+                return xmlString.replace(/\>/g, "&gt;").replace(/\</g, "&lt;");
+            }
             var create_dataBlock = function () {
                 //use dataTree.treeMap(func,listStore,afterChildfunc)
                 // create func that opens + creates the data tag, that can be recursively called on all children
@@ -1763,9 +1793,11 @@ formdesigner.model = function () {
                     var xw = formdesigner.controller.XMLWriter,
                         defaultVal,
                         MT = node.getValue();
+
                     xw.writeStartElement(node.getID());
-                    if(!node.isRootNode && MT.mug.properties.dataElement.dataValue){
-                        xw.writeString(MT.mug.properties.dataElement.dataValue);
+                    if(!node.isRootNode && MT.mug.properties.dataElement.properties.dataValue){
+                        defaultVal = MT.mug.properties.dataElement.properties.dataValue;
+                        xw.writeString(defaultVal);
                     }
 
                     if (node.isRootNode) {
@@ -1807,13 +1839,13 @@ formdesigner.model = function () {
                 function populateVariables (MT){
                     bEl = MT.mug.properties.bindElement;
                     if (bEl) {
-                        cons = bEl.properties.constraintAttr;
+                        cons = sanitizeXML(bEl.properties.constraintAttr);
                         consMsg = bEl.properties.constraintMsgAttr;
                         nodeset = dataTree.getAbsolutePath(MT);
                         type = bEl.properties.dataType;
-                        relevant = bEl.properties.relevantAttr;
-                        required = createBindRequiredAttribute(bEl.properties.requiredAttr);
-                        calc = bEl.properties.calculateAttr;
+                        relevant = sanitizeXML(bEl.properties.relevantAttr);
+                        required = sanitizeXML(createBindRequiredAttribute(bEl.properties.requiredAttr));
+                        calc = sanitizeXML(bEl.properties.calculateAttr);
                         return {
                             nodeset: nodeset,
                             'type': type,
@@ -1836,7 +1868,11 @@ formdesigner.model = function () {
                         for (j in attrs) { //for each populated property
                             if(attrs.hasOwnProperty(j)){
                                 if(attrs[j]){ //if property has a useful bind attribute value
-                                    xw.writeAttributeString(j,attrs[j]); //write it
+                                    if(j === "constraintMsg"){
+                                        xw.writeAttributeString("jr:constraintMsg",attrs[j]); //write it
+                                    } else {
+                                        xw.writeAttributeString(j,attrs[j]);
+                                    } //write it
                                 }
                             }
                         }
@@ -2368,6 +2404,32 @@ formdesigner.model = function () {
             }
 
         };
+
+        /**
+         * Create a new Itext ID in storage deliberately without a
+         * value (this is usually to trigger the validation mechanism to pick up on
+         * the fact that an Itext ID was specified but that there was no value).
+         * @param iID
+         * @param lang
+         */
+        that.createIIDWithoutVal = function (iID, lang) {
+            if(!lang) {
+                throw "Can't create a new Itext ID in Itext without specifying a language!"
+            }
+
+            if(!iID && lang) {
+                throw "Attempted to create a new Itext ID without specifying one! Language: " + lang;
+            }
+            if(!iID) {
+                throw "Attempted to create a new Itext ID without specifying one!";
+            }
+
+            if(!formdesigner.Itext.getLanguageData(lang)){
+                formdesigner.Itext.addLanguage(lang);
+            }
+            data[lang][iID] = {};
+
+        }
 
         /**
          * The 'meat' function.  Set a specific Itext element

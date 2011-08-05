@@ -10,6 +10,16 @@ if(typeof Object.create !== 'function') {
     };
 }
 
+
+//Trim dogpunch
+if(typeof(String.prototype.trim) === "undefined")
+{
+    String.prototype.trim = function()
+    {
+        return String(this).replace(/^\s+|\s+$/g, '');
+    };
+}
+
 if(typeof formdesigner === 'undefined'){
     var formdesigner = {};
 }

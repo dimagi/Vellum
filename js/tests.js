@@ -1000,12 +1000,10 @@ $(document).ready(function(){
         validateFormWithJR(xmlString);
 
         var dataNode = $(xml.find('instance').children()[0]);
-        console.log(xmlString);
         equal(dataNode.length, 1, 'found data node in xml source');
         equal(dataNode[0].tagName, "mydatanode", "Data node is named correctly");
         workingField.val("My Data Node").keyup(); //test auto replace of ' ' with '_'
         xmlString = c.form.createXForm();
-        console.log("XML STRING HERE", xmlString);
         xml = parseXMLAndGetSelector(xmlString);
         validateFormWithJR(xmlString);
         formdesigner.temp = xml;
@@ -1017,6 +1015,7 @@ $(document).ready(function(){
 
 
         curMugType = getMTFromEl($(lastCreatedNode));
+        console.log(curMugType);
         ui.selectMugTypeInUI(curMugType);
         equal(curMugType.typeName, "Text Question MugType", "Is Question created through UI a text type question?");
         workingField = $('#dataElement-nodeID-input');
@@ -1026,7 +1025,146 @@ $(document).ready(function(){
         equal(curMugType.mug.properties.dataElement.properties.nodeID, "textQuestion1", "dataElement nodeID set correctly");
         equal(curMugType.mug.properties.bindElement.properties.nodeID, "textQuestion1", "bindElement nodeID set correctly");
         xml = parseXMLAndGetSelector(xmlString);
+        validateFormWithJR(xmlString);
 
+        curMugType.mug.on('property-changed', function(e) {
+            console.log('Form Prop Changed!',e);
+        });
+        //set Default Value
+        workingField = $('#dataElement-dataValue-input');
+        workingField.val('Some Data Value String').keyup();
+        xmlString = c.form.createXForm();
+        validateFormWithJR(xmlString);
+        xml = parseXMLAndGetSelector(xmlString);
+        var defaultValueXML = xml.find('My_Data_Node').children('textQuestion1').text();
+        equal(defaultValueXML, "Some Data Value String", "default value set in UI corresponds to that generated in XML");
+
+        workingField = $('#bindElement-relevantAttr-input');
+        workingField.val("/data/bleeding_sign = 'N'").keyup();
+        xmlString = c.form.createXForm();
+        validateFormWithJR(xmlString);
+        xml = parseXMLAndGetSelector(xmlString);
+        var bindRelVal = $(xml.find('bind')[0]).attr('relevant');
+        equal(bindRelVal, "/data/bleeding_sign = 'N'", 'Was relevancy condition set correctly in the UI?');
+
+        workingField.val("/data/bleeding_sign >= 5 or /data/bleeding_sing < 21").keyup();
+        xmlString = c.form.createXForm();
+        validateFormWithJR(xmlString);
+        xml = parseXMLAndGetSelector(xmlString);
+        var bindVal = grep(xmlString,"<bind").trim();
+        var expected = '<bind nodeset="/My_Data_Node/textQuestion1" type="xsd:string" relevant="/data/bleeding_sign &gt;= 5 or /data/bleeding_sing &lt; 21" />'
+        equal(bindVal, expected, 'Was relevancy condition with < or > signs rendered correctly in the UI?');
+
+        workingField = $('#bindElement-calculateAttr-input');
+        workingField.val("/data/bleeding_sign >= 5 or /data/bleeding_sing < 21").keyup();
+        xmlString = c.form.createXForm();
+        validateFormWithJR(xmlString);
+        xml = parseXMLAndGetSelector(xmlString);
+        bindVal = grep(xmlString,"<bind").trim();
+        expected = '<bind nodeset="/My_Data_Node/textQuestion1" type="xsd:string" relevant="/data/bleeding_sign &gt;= 5 or /data/bleeding_sing &lt; 21" calculate="/data/bleeding_sign &gt;= 5 or /data/bleeding_sing &lt; 21" />'
+        equal(bindVal, expected, 'Was calculate condition with < or > signs rendered correctly in the UI?');
+
+        workingField = $('#bindElement-constraintAttr-input');
+        workingField.val("/data/bleeding_sign >= 5 or /data/bleeding_sing < 21").keyup();
+        xmlString = c.form.createXForm();
+        validateFormWithJR(xmlString);
+        xml = parseXMLAndGetSelector(xmlString);
+        bindVal = grep(xmlString,"<bind").trim();
+        expected = '<bind nodeset="/My_Data_Node/textQuestion1" type="xsd:string" constraint="/data/bleeding_sign &gt;= 5 or /data/bleeding_sing &lt; 21" relevant="/data/bleeding_sign &gt;= 5 or /data/bleeding_sing &lt; 21" calculate="/data/bleeding_sign &gt;= 5 or /data/bleeding_sing &lt; 21" />'
+        equal(bindVal, expected, 'Was constraint condition with < or > signs rendered correctly in the UI?');
+        workingField.val('').keyup();
+        $('#bindElement-calculateAttr-input').val('').keyup();
+        $('#bindElement-relevantAttr-input').val('').keyup();
+
+        workingField = $('#bindElement-requiredAttr-input');
+        workingField.click(); //check the 'required' checkbox;
+        xmlString = c.form.createXForm();
+        validateFormWithJR(xmlString);
+        xml = parseXMLAndGetSelector(xmlString);
+        var requireAttr = xml.find('bind').attr('required');
+        expected = "true()";
+        equal(requireAttr,expected,"Is the required attribute value === 'true()' in the bind?");
+
+        workingField = $('#fd-itext-default-input');
+        workingField.val("Question 1 Itext yay").keyup();
+        xmlString = c.form.createXForm();
+        validateFormWithJR(xmlString);
+        xml = parseXMLAndGetSelector(xmlString);
+        window.xmlString = xml;
+        var itextVal = xml.find('text,[id="question1"]').children('value').text()
+        expected = "Question 1 Itext yay";
+        equal(itextVal,expected,"Has default Itext been set correctly through UI?");
+
+        workingField = $('#fd-itext-audio-input');
+        workingField.val("jr://audio/sound/vol1/questionnaire/awesome.mp3").keyup();
+        xmlString = c.form.createXForm();
+        validateFormWithJR(xmlString);
+        xml = parseXMLAndGetSelector(xmlString);
+        window.xmlString = xml;
+        itextVal = xml.find('text,[id="question1"]').children('[form="audio"]').text()
+        expected = "jr://audio/sound/vol1/questionnaire/awesome.mp3";
+        equal(itextVal,expected,"Has audio Itext been set correctly through UI?");
+
+        workingField = $('#fd-itext-image-input');
+        workingField.val("jr://images/foo.png").keyup();
+        xmlString = c.form.createXForm();
+        validateFormWithJR(xmlString);
+        xml = parseXMLAndGetSelector(xmlString);
+        window.xmlString = xml;
+        itextVal = xml.find('text,[id="question1"]').children('[form="image"]').text()
+        expected = "jr://images/foo.png";
+        equal(itextVal,expected,"Has image Itext been set correctly through UI?");
+
+        workingField = $('#fd-itext-short-input');
+        workingField.val("Some short itext").keyup();
+        xmlString = c.form.createXForm();
+        validateFormWithJR(xmlString);
+        xml = parseXMLAndGetSelector(xmlString);
+        window.xmlString = xml;
+        itextVal = xml.find('text,[id="question1"]').children('[form="short"]').text()
+        expected = "Some short itext";
+        equal(itextVal,expected,"Has short Itext been set correctly through UI?");
+
+        workingField = $('#fd-itext-long-input');
+        workingField.val("some long Itext for question 1").keyup();
+        xmlString = c.form.createXForm();
+        validateFormWithJR(xmlString);
+        xml = parseXMLAndGetSelector(xmlString);
+        window.xmlString = xml;
+        itextVal = xml.find('text,[id="question1"]').children('[form="long"]').text()
+        expected = "some long Itext for question 1";
+        equal(itextVal,expected,"Has long Itext been set correctly through UI?");
+
+        workingField = $('#bindElement-constraintMsgAttr-input');
+        workingField.val("Some default jr:constraintMsg value").keyup();
+        xmlString = c.form.createXForm();
+        validateFormWithJR(xmlString);
+        xml = parseXMLAndGetSelector(xmlString);
+        bindVal = grep(xmlString,"<bind").trim();
+        expected = '<bind nodeset="/My_Data_Node/textQuestion1" type="xsd:string" jr:constraintMsg="Some default jr:constraintMsg value" required="true()" />';
+        equal(bindVal, expected, 'Was constraint Message correctly set?');
+
+
+        workingField = $('#controlElement-hintLabel-input');
+        workingField.val("Default Hint Label Value").keyup();
+        xmlString = c.form.createXForm();
+        validateFormWithJR(xmlString);
+        xml = parseXMLAndGetSelector(xmlString);
+        window.xmlString = xml;
+        var someval = xml.find('input').children('hint').text()
+        expected = "Default Hint Label Value";
+        equal(someval,expected,"Has default hint label been set correctly through UI?");
+
+        formdesigner.model.Itext.setValue('question1_hint','en','default','Some Hint Itext') //set the Itext value manually in the absence of a UI widget for it at the present time
+        workingField = $('#controlElement-hintItextID-input');
+        workingField.val("question1_hint").keyup();
+        xmlString = c.form.createXForm();
+        validateFormWithJR(xmlString);
+        xml = parseXMLAndGetSelector(xmlString);
+        window.xmlString = xml;
+        someval = xml.find('input').children('hint').attr('ref');
+        expected = "jr:itext('question1_hint')";
+        equal(someval,expected,"Has hint Itext ID been set correctly through UI?");
 
     })
 
@@ -1044,7 +1182,7 @@ function validateFormWithJR(actual) {
             var len = asyncRes.length + 1
             asyncRes[len] = data;
             if(!asyncRes[len].success){
-                console.log(asyncRes[len].outString, asyncRes[len].errString);
+                console.log("VALIDATIONG WITH JR VALIDATOR FAILED! OUTPUT:",asyncRes[len].outstring, asyncRes[len].errstring);
             }
             ok(asyncRes[len].success, 'Form validates with Javarosa form validator, see console for failure');
             start();
@@ -1053,6 +1191,7 @@ function validateFormWithJR(actual) {
 
 
 function parseXMLAndGetSelector(xmlString) {
+
     var xmlDoc = $.parseXML(xmlString),
                 xml = $(xmlDoc);
     return xml;
@@ -1060,4 +1199,15 @@ function parseXMLAndGetSelector(xmlString) {
 
 function divide(a,b){
     return a/b;
+}
+
+function grep(xmlString, matchStr) {
+    var lines,i;
+    lines = xmlString.split(/\n/g);
+    for (i in lines) {
+        if(lines[i].match(matchStr)) {
+            return lines[i];
+        }
+    }
+    return null;
 }

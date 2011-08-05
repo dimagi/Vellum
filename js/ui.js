@@ -364,16 +364,21 @@ formdesigner.ui = (function () {
                 bProps = vObj.bindElement,
                 cProps = vObj.controlElement,
                 dProps = vObj.dataElement,
-                i, propsMessage;
+                i, propsMessage, itextValidation;
 
         hideMessage();
         propsMessage = '';
         loopValProps(bProps, 'bindElement');
         loopValProps(cProps, 'controlElement');
         loopValProps(dProps, 'dataElement');
+        itextValidation = formdesigner.model.Itext.validateItext();
+        if(itextValidation !== true) {
+            propsMessage += '<br>' + JSON.stringify(itextValidation) + '</br>';
+        }
         if(propsMessage) {
             showMessage(propsMessage, 'Question Problems', 'warning');
         }
+
 
     }
     that.showVisualValidation = showVisualValidation;
@@ -608,38 +613,63 @@ formdesigner.ui = (function () {
         }
         displayFuncs.bindElement = showBindProps;
 
-        function makeItextLI(textForm, iflabel) {
-                var mugType, liStr, txtStr, inputStr, id, li, text, input, currentLang, Itext, iID;
-                Itext = formdesigner.model.Itext;
-                currentLang = formdesigner.currentItextDisplayLanguage;
-                mugType = formdesigner.controller.getCurrentlySelectedMugType();
+        /**
+         * Makes an Itext LI for UI user input of Itext values. Assumes the Itext ID is already present,
+         * if not will generate one and add it to the Itext object.
+         * @param textForm
+         * @param iflabel
+         * @param ishint - flag for if this is a 'hint' type itext (hint itext ID is located in a different place to regular itext ID)
+         */
+        function makeItextLI(textForm, iflabel, ishint) {
+            var mugType, liStr, txtStr, inputStr, id, li, text, input, currentLang, Itext, iID, iIDInput,
+                    isRequired;
+            Itext = formdesigner.model.Itext;
+            currentLang = formdesigner.currentItextDisplayLanguage;
+            mugType = formdesigner.controller.getCurrentlySelectedMugType();
+            if(!ishint){
+                isRequired = true; //at present we can give everything an Itext ID so...
                 iID = mugType.mug.properties.controlElement.properties.labelItextID;
-                if(!iID) {
-                    iID = mugType.mug.properties.controlElement.properties.labelItextID = formdesigner.util.getNewItextID(mugType);
+            } else {
+                isRequired = (mugType.properties.controlElement.hintItextID.presence === 'required') ||
+                             (mugType.properties.controlElement.hintLabel === 'required');
+                iID = mugType.mug.properties.controlElement.properties.hintItextID;
+            }
+            if(!iID && isRequired) {
+                //make a new iID;
+                iID = formdesigner.util.getNewItextID(mugType,ishint);
+                //set the new Itext ID in it's respective UI element
+                if(ishint) {
+                    mugType.mug.properties.controlElement.properties.hintItextID = iID;
+                    iIDInput = $('#controlElement-hintItextID-input');
+                }else {
+                    mugType.mug.properties.controlElement.properties.labelItextID = iID;
+                    iIDInput = $('#controlElement-labelItextID-input');
                 }
+                iIDInput.val(iID).keyup(); //.keyup() to trigger existing behaviour, if any.
+            }
 
-                id = 'fd-itext-' + textForm.toLowerCase();
-                liStr = '<li id="' + id + '" class="fd-property"></li>';
-                txtStr = '<span id="' + id +'-txt" class="fd-property-text">' + iflabel + '</span>';
-                inputStr = '<div id="' + id + '-input-div" class="fd-prop-input-div chzn-container"><input id="' + id + '-input" class="fd-property-input"/>';
-                li = $(liStr);
-                text = $(txtStr);
-                input = $(inputStr);
+            id = 'fd-itext-' + textForm.toLowerCase();
+            liStr = '<li id="' + id + '" class="fd-property"></li>';
+            txtStr = '<span id="' + id +'-txt" class="fd-property-text">' + iflabel + '</span>';
+            inputStr = '<div id="' + id + '-input-div" class="fd-prop-input-div chzn-container"><input id="' + id + '-input" class="fd-property-input"/>';
+            li = $(liStr);
+            text = $(txtStr);
+            input = $(inputStr);
 
-                input.find(':input').val(Itext.getValue(iID, currentLang, textForm));
-                li.append(text);
-                li.append(input);
+            input.find(':input').val(Itext.getValue(iID, currentLang, textForm));
+            li.append(text);
+            li.append(input);
 
-                input.data('ufid', mugType.ufid);
-                input.data('textform', textForm);
-                input.children(':input').data('ufid', mugType.ufid).data('textform', textForm);;
-                input.find(':input').keyup ( function (e) {
-                    var mugType = formdesigner.controller.form.controlTree.getMugTypeFromUFID($(this).data('ufid'));
-                    Itext.setValue(iID, currentLang, textForm, $(this).val());
-                    formdesigner.util.changeUITreeNodeLabel($ (this).data('ufid'), formdesigner.util.getMugDisplayName(mugType))
-                });
+            input.data('ufid', mugType.ufid);
+            input.data('textform', textForm);
+            input.children(':input').data('ufid', mugType.ufid).data('textform', textForm);;
+            input.find(':input').keyup ( function (e) {
+                var mugType = formdesigner.controller.form.controlTree.getMugTypeFromUFID($(this).data('ufid'));
+                Itext.setValue(iID, currentLang, textForm, $(this).val());
+                formdesigner.util.changeUITreeNodeLabel($ (this).data('ufid'), formdesigner.util.getMugDisplayName(mugType))
+            });
 
-                return li;
+            return li;
         }
 
         function showItextProps(){
@@ -784,7 +814,12 @@ formdesigner.ui = (function () {
 
             contentEl.empty();
             var itextul = makeUL('');
-            itextul.append(makeItextLI('short', 'Short Display Name')).append(makeItextLI('long','Long Display Name'));
+            itextul.append(makeItextLI('short', 'Short Display Label'))
+                    .append(makeItextLI('long', 'Long Display Label'));
+            if(mugType.properties.controlElement.hintItextID && mugType.properties.controlElement.hintItextID.presence !== "notallowed") {
+                itextul.append(makeItextLI('default', 'Hint Display Label', true));
+            }
+
             contentEl.append('<br /><br />').append(itextul);
             displayBlock('dataElement');
             displayBlock('bindElement');
