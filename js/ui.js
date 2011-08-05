@@ -164,7 +164,6 @@ formdesigner.ui = (function () {
                 formdesigner.util.dumpFormTreesToConsole();
             });
 
-//            buttons.printTree = printTreeBut;
         })();
 
         (function c_showLoadItextXLS() {
@@ -178,8 +177,6 @@ formdesigner.ui = (function () {
                 formdesigner.controller.showLoadItextFromClipboard();
 
             });
-
-//            buttons.printTree = printTreeBut;
         })();
 
         (function c_showGeneratedItextXLS() {
@@ -192,8 +189,6 @@ formdesigner.ui = (function () {
             genXLSgbut.button().click(function () {
                 formdesigner.controller.showGeneratedItextXLS();
             });
-
-//            buttons.printTree = printTreeBut;
         })();
 
        (function c_fancyBox() {
@@ -207,7 +202,6 @@ formdesigner.ui = (function () {
                 controller.generateXForm();
             });
 
-//            buttons.fancyBut = fancyBut;
         })();
 
         (function c_openSource() {
@@ -221,7 +215,6 @@ formdesigner.ui = (function () {
                 formdesigner.controller.showLoadXformBox();
             });
 
-//            buttons.openSourcebut = openSourcebut;
         })();
 
         (function c_saveForm() {
@@ -235,7 +228,6 @@ formdesigner.ui = (function () {
                 formdesigner.controller.sendXForm();
             });
 
-//            buttons.openSourcebut = openSourcebut;
         })();
 
         (function c_removeSelected() {
@@ -250,7 +242,6 @@ formdesigner.ui = (function () {
                 formdesigner.controller.removeMugTypeFromForm(selected);
             });
 
-//            buttons.openSourcebut = openSourcebut;
         })();
 
     }
