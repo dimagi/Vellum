@@ -272,10 +272,8 @@ td {
 }
 
 .fd-tree-valid-alert-icon {
+    display:inline;
     float: right;
-    left: 0;
-    position: relative;
-    top: -16px;
 }
 
 .fd-form-props-heading {

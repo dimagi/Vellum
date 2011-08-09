@@ -1774,6 +1774,60 @@ formdesigner.model = function () {
         }
         that.getInvalidMugTypeUFIDs = getInvalidMugTypeUFIDs;
 
+        var getInvalidItextMugTypes = function () {
+            var Itext, invalidItexts, MTListC, MTListD, result, controlTree, dataTree, mapFunc;
+
+            mapFunc = function (node) {
+                var MT, ufid, iID, hIID;
+                if (node.isRootNode) {
+                    return;
+                }
+                MT = node.getValue();
+                ufid = MT.ufid;
+                if(MT.properties.controlElement) {
+                    iID = MT.mug.properties.controlElement.properties.labelItextID;
+                    hIID = MT.mug.properties.controlElement.properties.hintItextID;
+                }
+                if(invalidItexts.indexOf(iID) !== -1) {
+                    return MT;
+                } else if (invalidItexts.indexOf(hIID) !== -1) {
+                    return MT;
+                } else {
+                    return null;
+                }
+            };
+
+
+            Itext = formdesigner.model.Itext;
+            invalidItexts = Itext.getInvalidItextIDs();
+
+            if(invalidItexts === 'true') {
+                return [];
+            }
+
+            dataTree = this.dataTree;
+            controlTree = this.controlTree;
+            MTListC = controlTree.treeMap(mapFunc);
+            MTListD = dataTree.treeMap(mapFunc);
+            result = formdesigner.util.mergeArray(MTListC, MTListD);
+
+            return result;
+        }
+        that.getInvalidItextMugTypes = getInvalidItextMugTypes;
+
+        var getInvalidItextMTUfids = function () {
+            var MTs, ufids = [], i;
+            MTs = getInvalidItextMugTypes();
+
+            for (i in MTs) {
+                if(MTs.hasOwnProperty(i)) {
+                    ufids.push(MTs[i].ufid);
+                }
+            }
+            return ufids;
+        }
+        that.getInvalidItextMTUfids = getInvalidItextMTUfids;
+
         /**
          * Generates an XML Xform and returns it as a string.
          */
@@ -2424,8 +2478,8 @@ formdesigner.model = function () {
                 throw "Attempted to create a new Itext ID without specifying one!";
             }
 
-            if(!formdesigner.Itext.getLanguageData(lang)){
-                formdesigner.Itext.addLanguage(lang);
+            if(!formdesigner.model.Itext.getLanguageData(lang)){
+                formdesigner.model.Itext.addLanguage(lang);
             }
             data[lang][iID] = {};
 
@@ -2558,6 +2612,10 @@ formdesigner.model = function () {
             function iIDFormMissing(iID, form){
                 return 'Missing Special Form:' + form + ' for Itext ID:' + iID;
             }
+            function iIDTextEmpty(iID) {
+                return 'No Itext Display Data for ID:' + iID;
+            }
+
             if(!dLang){
                 throw 'No Default Language set! Aborting validation. You should set one!';
             }
@@ -2566,12 +2624,22 @@ formdesigner.model = function () {
                 throw 'Default language is set to a language that does not exist in the Itext DB!';
             }
 
+            function isEmpty(ob){
+                var i;
+                for (var i in ob) {
+                    if(ob.hasOwnProperty(i)){
+                        return false;
+                    }
+                }
+                return true;
+            }
+
             for (lang in data) {
                 if (data.hasOwnProperty(lang)) {
                     for (iID in data[lang]) {
                         if (data[lang].hasOwnProperty(iID)) {
-                            if (!data[dLang][iID]) {
-                                errorIIDs[iID] = iIDMissing(iID, dLang);
+                            if (isEmpty(data[dLang][iID])) {
+                                errorIIDs[iID] = iIDTextEmpty(iID);
                             } else {
                                 for (form in data[lang][iID]) {
                                     if (data[lang][iID].hasOwnProperty(form)) {
@@ -2592,6 +2660,19 @@ formdesigner.model = function () {
                 return errorIIDs;
             }
 
+        };
+
+        that.getInvalidItextIDs = function () {
+            var valRes, IDs = [], i;
+            valRes = formdesigner.model.Itext.validateItext();
+            console.log("VALRES!",valRes);
+            for (i in valRes) {
+                if(valRes.hasOwnProperty(i)) {
+                    IDs.push(i);
+                }
+            }
+
+            return IDs;
         };
 
         /**

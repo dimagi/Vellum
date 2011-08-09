@@ -94,6 +94,15 @@ $(document).ready(function(){
                 }
             }
         }
+        if(mugType.properties.controlElement){
+            console.log(mug);
+            if(mug.properties.controlElement.properties.hintItextID) {
+                formdesigner.model.Itext.setValue(mug.properties.controlElement.properties.hintItextID,'en','default','foo hint');
+            }
+            if (mug.properties.controlElement.properties.labelItextID) {
+                formdesigner.model.Itext.setValue(mug.properties.controlElement.properties.labelItextID,'en','default','foo default');
+            }
+        }
     }
 
     var addQuestionThroughUI = function (type) {
@@ -295,10 +304,11 @@ $(document).ready(function(){
         var MugType = formdesigner.model.mugTypeMaker.stdTextQuestion(); //simulates a 'standard' text question
         myMug = MugType.mug;
         giveMugFakeValues(myMug,MugType);
-        console.log("MUG WITH FAKE VALUES",myMug);  
+        formdesigner.model.Itext.setValue(myMug.properties.controlElement.properties.hintItextID,'en','default','foo hint');
+        formdesigner.model.Itext.setValue(myMug.properties.controlElement.properties.labelItextID,'en','default','foo default');
+        console.log("MUG WITH FAKE VALUES",myMug);
         var validationObject = MugType.validateMug(myMug);
         equal(MugType.typeName, "Text Question MugType");
-        console.log("FAILED VALIDATION HERE",validationObject);
         equal(validationObject.status, "pass", 'Does the mug validate against the MugType?');
 
         var otherType = formdesigner.model.mugTypeMaker["stdTextQuestion"]();
@@ -463,6 +473,7 @@ $(document).ready(function(){
             console.log("validation obj B",vTB);
             console.log("validation obj C",vTC);
             console.groupEnd()
+            ok(false);
             throw 'AUTO MUG CREATION FROM MUG DID NOT PASS VALIDATION SEE CONSOLE'
         }
 

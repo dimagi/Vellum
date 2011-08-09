@@ -508,7 +508,12 @@ formdesigner.ui = (function () {
                                         groupName = input.data('groupName'),
                                         propName = input.data('propName'),
                                         curMug = formdesigner.controller.getCurrentlySelectedMug(),
-                                        curMT = formdesigner.controller.getCurrentlySelectedMugType();
+                                        curMT = formdesigner.controller.getCurrentlySelectedMugType(),
+                                        allowedIDChars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ:_';
+
+                                if(propName === 'nodeID'){ //sanitize nodeID;
+                                    input.val(input.val().replace(/\s/g,'_'));
+                                }
                                 formdesigner.controller.setMugPropertyValue(curMug,groupName,propName,input.val(),curMT);
                             });
                         }else if(pBlock.uiType === 'select'){
@@ -1145,7 +1150,7 @@ formdesigner.ui = (function () {
         for (i in invalidMTs){
             if(invalidMTs.hasOwnProperty(i)){
                 invalidMsg = invalidMTs[i].message;
-                $($('#' + i + ' a')[0]).append('<span class="ui-icon ui-icon-alert fd-tree-valid-alert-icon" title="'+invalidMsg+'></span>')
+                $($('#' + i + ' a')[0]).append('<div class="ui-icon ui-icon-alert fd-tree-valid-alert-icon" title="'+invalidMsg.replace(/"/g,"'")+'"></div>')
             }
         }
     };
