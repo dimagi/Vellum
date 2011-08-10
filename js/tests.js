@@ -1262,6 +1262,23 @@ $(document).ready(function(){
         el = xml.find('[nodeset*='+curMugType.mug.properties.bindElement.properties.nodeID+']')
         equal($(el).attr('type'), 'xsd:long');
 
+        addQuestionThroughUI("Secret Question");
+        curMugType = getMTFromEl($(lastCreatedNode));
+        ui.selectMugTypeInUI(curMugType);
+        equal($('#bindElement-dataType-input').val(), 'xsd:string');
+        equal(curMugType.mug.properties.bindElement.properties.dataType, 'xsd:string');
+        equal(curMugType.typeName, "Secret Question MugType");
+        equal(curMugType.mug.properties.controlElement.properties.name, "Secret");
+        xmlString = c.form.createXForm();
+        validateFormWithJR(xmlString);
+        xml = parseXMLAndGetSelector(xmlString);
+        window.xmlSring = xml;
+        el = xml.find('secret')
+        equal($(el).length,1);
+        equal($(el).tagName)
+        el = xml.find('[nodeset*='+curMugType.mug.properties.bindElement.properties.nodeID+']')
+        equal($(el).attr('type'), 'xsd:string');
+
 
 
     });

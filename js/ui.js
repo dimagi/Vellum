@@ -275,6 +275,27 @@ formdesigner.ui = (function () {
                     },
                     "valid_children" : "none"
                 },
+                "int" : {
+                    "icon": {
+                        "image" : jquery_icon_url,
+                        "position": "-128px -96px"
+                    },
+                    "valid_children" : "none"
+                },
+                "long" : {
+                    "icon": {
+                        "image" : jquery_icon_url,
+                        "position": "-128px -96px"
+                    },
+                    "valid_children" : "none"
+                },
+                "double" : {
+                    "icon": {
+                        "image" : jquery_icon_url,
+                        "position": "-128px -96px"
+                    },
+                    "valid_children" : "none"
+                },
                 "selectQuestion" : {
                     "icon": {
                         "image" : jquery_icon_url,

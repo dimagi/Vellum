@@ -1006,7 +1006,7 @@ formdesigner.model = function () {
 
         mType.properties.bindElement.dataType.validationFunc = function (mt,m) {
             var dtype = m.properties.bindElement.properties.dataType;
-            if (formdesigner.utils.XSD_DATA_TYPES.indexOf(dtype) !== -1) {
+            if (formdesigner.util.XSD_DATA_TYPES.indexOf(dtype) !== -1) {
                 return 'pass';
             } else {
                 return 'Secret question data type must be a valid XSD Datatype!';

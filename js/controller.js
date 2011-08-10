@@ -162,6 +162,15 @@ formdesigner.controller = (function () {
                 case 'text':
                     setType("question");
                     break;
+                case 'integer':
+                    setType("int");
+                    break;
+                case 'double':
+                    setType("double");
+                    break;
+                case 'long':
+                    setType("long");
+                    break;
                 case 'group':
                     setType("group");
                     break;
@@ -989,7 +998,7 @@ formdesigner.controller = (function () {
                 oIsSelect = (oType === 'select1' || oType === 'select'),
                 oIsItem = (oType === 'item'),
                 rIsSelect = (rType === 'select1' || rType === 'select'),
-                rIsItemOrInputOrTrigger = (rType === 'item' || rType === 'input' || rType === 'trigger' || oType === 'secret'),
+                rIsItemOrInputOrTrigger = (rType === 'item' || rType === 'input' || rType === 'trigger' || rType === 'secret'),
                 rIsGroupOrRepeat = (rType === 'repeat' || rType === 'group');
 
         if (position !== 'into') {
