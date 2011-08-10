@@ -604,7 +604,8 @@ formdesigner.util = (function(){
             'repeat',
             'trigger',
             'item',
-            'output'
+            'output',
+            'secret'
     ]
 
     that.VALID_QUESTION_TYPE_NAMES = [
@@ -624,7 +625,8 @@ formdesigner.util = (function(){
             'Picture',
             'Audio',
             'GPS',
-            'Barcode'
+            'Barcode',
+            'Secret'
     ]
 
     /**

@@ -245,13 +245,32 @@ formdesigner.controller = (function () {
             case 'select':
                 mugType = formdesigner.model.mugTypeMaker.stdMSelect();
                 break;
+            case '1select':
+                mugType = formdesigner.model.mugTypeMaker.stdSelect();
+                break;
+            case 'secret':
+                mugType = formdesigner.model.mugTypeMaker.stdSecret();
+                break;
              case 'item':
                 mugType = formdesigner.model.mugTypeMaker.stdItem();
                 break;
             case 'trigger':
                 mugType = formdesigner.model.mugTypeMaker.stdTrigger();
                 break;
+            case 'repeat':
+                mugType = formdesigner.model.mugTypeMaker.stdRepeat();
+                break;
+            case 'int':
+                mugType = formdesigner.model.mugTypeMaker.stdInt();
+                break;
+            case 'long':
+                mugType = formdesigner.model.mugTypeMaker.stdLong();
+                break;
+            case 'double':
+                mugType = formdesigner.model.mugTypeMaker.stdDouble();
+                break;
             default:
+                console.log("No standard mugType for selected question type:" + qType + " switching to 'Text Question' type!");
                 mugType = formdesigner.model.mugTypeMaker.stdTextQuestion();
         }
 
@@ -966,11 +985,11 @@ formdesigner.controller = (function () {
         var oType = mugType.mug.properties.controlElement.properties.tagName,
                 rType = (!refMugType || refMugType === -1) ? 'group' : refMugType.mug.properties.controlElement.properties.tagName,
                 oIsGroupOrRepeat = (oType === 'repeat' || oType === 'group'),
-                oIsItemOrInputOrTrigger = (oType === 'item' || oType === 'input' || oType === 'trigger'),
+                oIsItemOrInputOrTrigger = (oType === 'item' || oType === 'input' || oType === 'trigger' || oType === 'secret'),
                 oIsSelect = (oType === 'select1' || oType === 'select'),
                 oIsItem = (oType === 'item'),
                 rIsSelect = (rType === 'select1' || rType === 'select'),
-                rIsItemOrInputOrTrigger = (rType === 'item' || rType === 'input' || rType === 'trigger'),
+                rIsItemOrInputOrTrigger = (rType === 'item' || rType === 'input' || rType === 'trigger' || oType === 'secret'),
                 rIsGroupOrRepeat = (rType === 'repeat' || rType === 'group');
 
         if (position !== 'into') {

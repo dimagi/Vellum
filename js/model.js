@@ -994,6 +994,63 @@ formdesigner.model = function () {
         return mType;
     };
 
+    that.mugTypeMaker.stdSecret = function () {
+        var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion),
+                mug;
+        mType.typeName = "Secret Question MugType";
+        mType.controlNodeAllowedChildren = false;
+        mug = that.createMugFromMugType(mType);
+        mType.mug = mug;
+        mType.mug.properties.controlElement.properties.name = "Secret";
+        mType.mug.properties.controlElement.properties.tagName = "secret";
+
+        mType.properties.bindElement.dataType.validationFunc = function (mt,m) {
+            var dtype = m.properties.bindElement.properties.dataType;
+            if (formdesigner.utils.XSD_DATA_TYPES.indexOf(dtype) !== -1) {
+                return 'pass';
+            } else {
+                return 'Secret question data type must be a valid XSD Datatype!';
+            }
+        };
+        mType.properties.bindElement.dataType.lstring = 'Data Type';
+        mType.mug.properties.bindElement.properties.dataType = "xsd:string";
+        return mType;
+    };
+
+    that.mugTypeMaker.stdInt = function () {
+        var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion),
+                mug;
+        mType.typeName = "Integer Question MugType";
+        mType.controlNodeAllowedChildren = false;
+        mug = that.createMugFromMugType(mType);
+        mType.mug = mug;
+        mType.mug.properties.controlElement.properties.name = "Integer";
+        mType.mug.properties.controlElement.properties.tagName = "input";
+        mType.mug.properties.bindElement.properties.dataType = "xsd:int";
+        return mType;
+    };
+
+    that.mugTypeMaker.stdLong = function () {
+        var mType, mug;
+        mType = formdesigner.model.mugTypeMaker.stdInt();
+        mug = mType.mug;
+        mType.typeName = "Long Question MugType";
+        mType.mug.properties.controlElement.properties.name = "Long";
+        mType.mug.properties.bindElement.properties.dataType = "xsd:long";
+        return mType;
+    };
+
+    that.mugTypeMaker.stdDouble = function () {
+        var mType, mug;
+        mType = formdesigner.model.mugTypeMaker.stdInt();
+        mug = mType.mug;
+        mType.typeName = "Double Question MugType";
+        mType.mug.properties.controlElement.properties.name = "Double";
+        mType.mug.properties.bindElement.properties.dataType = "xsd:double";
+        return mType;
+    }
+
+
     that.mugTypeMaker.stdItem = function () {
         var mType = formdesigner.util.getNewMugType(mugTypes.controlOnly),
                 mug,

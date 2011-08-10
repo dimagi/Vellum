@@ -943,7 +943,7 @@ formdesigner.ui = (function () {
 
     function selectMugTypeInUI(mugType) {
         var ufid = mugType.ufid;
-        return getJSTree().jstree('select_node', $('#'+ufid));
+        return getJSTree().jstree('select_node', $('#'+ufid), true);
     }
     that.selectMugTypeInUI = selectMugTypeInUI;
 

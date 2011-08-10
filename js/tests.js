@@ -1197,7 +1197,74 @@ $(document).ready(function(){
         expected = "Question 1 Itext hint";
         equal(itextVal,expected,"Has hint Itext been set correctly through UI?");
 
-    })
+    });
+
+    test("DataType selector functionality", function() {
+        var c = formdesigner.controller,
+                    ui = formdesigner.ui,
+                    jstree = $("#fd-question-tree"),
+                    curMugType,
+                    addQbut, lastCreatedNode, addGroupBut, qTypeSel, iiD, groupMT, Itext,mugProps,cEl,iID,
+                    workingField;
+        c.resetFormDesigner();
+
+
+        Itext = formdesigner.model.Itext;
+
+        jstree.bind('create_node.jstree',function(e,data){
+            lastCreatedNode = data.rslt.obj;
+        })
+
+        var xmlString, xml;
+        //build form
+        addQuestionThroughUI("Text Question");
+        addQuestionThroughUI("Group");
+        curMugType = getMTFromEl($(lastCreatedNode));
+        ui.selectMugTypeInUI(curMugType);
+        addQuestionThroughUI("Integer Number");
+        curMugType = getMTFromEl($(lastCreatedNode));
+        ui.selectMugTypeInUI(curMugType);
+        equal($('#bindElement-dataType-input').val(), 'xsd:int');
+        equal(curMugType.mug.properties.bindElement.properties.dataType, 'xsd:int');
+
+        xmlString = c.form.createXForm();
+        validateFormWithJR(xmlString);
+        xml = parseXMLAndGetSelector(xmlString);
+        window.xmlSring = xml;
+        var el = xml.find('[nodeset*='+curMugType.mug.properties.bindElement.properties.nodeID+']')
+        equal($(el).attr('type'), 'xsd:int');
+
+
+        addQuestionThroughUI("Double Number");
+        curMugType = getMTFromEl($(lastCreatedNode));
+        ui.selectMugTypeInUI(curMugType);
+        equal($('#bindElement-dataType-input').val(), 'xsd:double');
+        equal(curMugType.mug.properties.bindElement.properties.dataType, 'xsd:double');
+        xmlString = c.form.createXForm();
+        validateFormWithJR(xmlString);
+        xml = parseXMLAndGetSelector(xmlString);
+        window.xmlSring = xml;
+        el = xml.find('[nodeset*='+curMugType.mug.properties.bindElement.properties.nodeID+']')
+        equal($(el).attr('type'), 'xsd:double');
+        equal(curMugType.mug.properties.bindElement.properties.dataType, 'xsd:double');
+
+        addQuestionThroughUI("Long Number");
+        curMugType = getMTFromEl($(lastCreatedNode));
+        ui.selectMugTypeInUI(curMugType);
+        equal($('#bindElement-dataType-input').val(), 'xsd:long');
+        console.log($(lastCreatedNode), curMugType);
+        equal(curMugType.mug.properties.bindElement.properties.dataType, 'xsd:long');
+
+        xmlString = c.form.createXForm();
+        validateFormWithJR(xmlString);
+        xml = parseXMLAndGetSelector(xmlString);
+        window.xmlSring = xml;
+        el = xml.find('[nodeset*='+curMugType.mug.properties.bindElement.properties.nodeID+']')
+        equal($(el).attr('type'), 'xsd:long');
+
+
+
+    });
 
 
 });
