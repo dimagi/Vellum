@@ -526,6 +526,25 @@ formdesigner.model = function () {
                 missing = 'a display label ID';
             }
             return 'Question is missing ' + missing + ' value!';
+        },
+        hintItextID: function (mugType, mug) {
+            var controlBlock, hintIID, itextVal, Itext, controlElement;
+            controlBlock = mugType.properties.controlElement;
+            controlElement = mug.properties.controlElement.properties;
+            Itext = formdesigner.model.Itext;
+            hintIID = controlElement.hintItextID;
+            itextVal = Itext.getValue(hintIID,Itext.getDefaultLanguage(),'default');
+            if(hintIID && !itextVal) {
+                return 'Question has Hint Itext ID but no Hint Itext Label Data!';
+            }
+            if(itextVal && !hintIID) {
+                return 'Question has Hint Itext Display label but no Hint Itext ID!';
+            }
+            if(controlBlock.hintItextID === 'required' && !hintIID) {
+                return 'Hint Itext ID is required but not present in this question!';
+            }
+
+            return 'pass';
         }
     }
 
@@ -575,6 +594,18 @@ formdesigner.model = function () {
                     visibility: 'visible',
                     presence: 'optional',
                     lstring: 'Default Data Value'
+                },
+                keyAttr: {
+                    editable: 'w',
+                    visibility: 'advanced',
+                    presence: 'optional',
+                    lstring: 'JR:Preload key value'
+                },
+                xmlnsAttr: {
+                    editable: 'w',
+                    visibility: 'advanced',
+                    presence: 'optional',
+                    lstring: "Special Data Node XMLNS attribute"
                 }
             },
             bindElement: {
@@ -632,6 +663,23 @@ formdesigner.model = function () {
                     presence: 'optional',
                     lstring: "Is this Question Required?",
                     uiType: "checkbox"
+                },
+                preload: {
+                    editable: 'w',
+                    visibility: 'advanced',
+                    presence: 'optional',
+                    lstring: "JR Preload"
+                },
+                preloadParams: {
+                    editable: 'w',
+                    visibility: 'advanced',
+                    presence: 'optional',
+                    lstring: "JR Preload Param"
+                },
+                nodeset: {
+                    editable: 'r',
+                    visibility: 'hidden',
+                    presence: 'optional' //if not present one will be generated... hopefully.
                 }
             },
             controlElement: {
@@ -671,7 +719,8 @@ formdesigner.model = function () {
                     editable: 'w',
                     visibility: 'advanced',
                     presence: 'optional',
-                    lstring: "Question HINT Itext ID"
+                    lstring: "Question HINT Itext ID",
+                    validationFunc: validationFuncs.hintItextID
                 }
             }
         },
@@ -899,6 +948,7 @@ formdesigner.model = function () {
         }
 
     };
+    formdesigner.util.eventuality(RootMugType);
     that.RootMugType = RootMugType;
 
     /**
@@ -972,6 +1022,63 @@ formdesigner.model = function () {
         mType.mug.properties.bindElement.properties.dataType = "xsd:string";
         return mType;
     };
+
+    that.mugTypeMaker.stdSecret = function () {
+        var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion),
+                mug;
+        mType.typeName = "Secret Question MugType";
+        mType.controlNodeAllowedChildren = false;
+        mug = that.createMugFromMugType(mType);
+        mType.mug = mug;
+        mType.mug.properties.controlElement.properties.name = "Secret";
+        mType.mug.properties.controlElement.properties.tagName = "secret";
+
+        mType.properties.bindElement.dataType.validationFunc = function (mt,m) {
+            var dtype = m.properties.bindElement.properties.dataType;
+            if (formdesigner.util.XSD_DATA_TYPES.indexOf(dtype) !== -1) {
+                return 'pass';
+            } else {
+                return 'Secret question data type must be a valid XSD Datatype!';
+            }
+        };
+        mType.properties.bindElement.dataType.lstring = 'Data Type';
+        mType.mug.properties.bindElement.properties.dataType = "xsd:string";
+        return mType;
+    };
+
+    that.mugTypeMaker.stdInt = function () {
+        var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion),
+                mug;
+        mType.typeName = "Integer Question MugType";
+        mType.controlNodeAllowedChildren = false;
+        mug = that.createMugFromMugType(mType);
+        mType.mug = mug;
+        mType.mug.properties.controlElement.properties.name = "Integer";
+        mType.mug.properties.controlElement.properties.tagName = "input";
+        mType.mug.properties.bindElement.properties.dataType = "xsd:int";
+        return mType;
+    };
+
+    that.mugTypeMaker.stdLong = function () {
+        var mType, mug;
+        mType = formdesigner.model.mugTypeMaker.stdInt();
+        mug = mType.mug;
+        mType.typeName = "Long Question MugType";
+        mType.mug.properties.controlElement.properties.name = "Long";
+        mType.mug.properties.bindElement.properties.dataType = "xsd:long";
+        return mType;
+    };
+
+    that.mugTypeMaker.stdDouble = function () {
+        var mType, mug;
+        mType = formdesigner.model.mugTypeMaker.stdInt();
+        mug = mType.mug;
+        mType.typeName = "Double Question MugType";
+        mType.mug.properties.controlElement.properties.name = "Double";
+        mType.mug.properties.bindElement.properties.dataType = "xsd:double";
+        return mType;
+    }
+
 
     that.mugTypeMaker.stdItem = function () {
         var mType = formdesigner.util.getNewMugType(mugTypes.controlOnly),
@@ -1057,6 +1164,8 @@ formdesigner.model = function () {
         allowedChildren = ['repeat', 'input', 'select', 'select1', 'group'];
         mType.controlNodeAllowedChildren = allowedChildren;
         mType.properties.bindElement.dataType.presence = "notallowed";
+        mType.properties.controlElement.hintItextID.presence = "notallowed";
+        mType.properties.controlElement.hintLabel.presence = "notallowed";
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
         mType.mug.properties.controlElement.properties.name = "Group";
@@ -1431,7 +1540,6 @@ formdesigner.model = function () {
             }
         };
 
-
         /**
          * Insert a MugType as a child to the node containing parentMugType.
          *
@@ -1507,8 +1615,6 @@ formdesigner.model = function () {
             }
         };
 
-
-
         /**
          * Returns a list of nodes that are in the top level of this tree (i.e. not the abstract rootNode but it's children)
          */
@@ -1531,16 +1637,21 @@ formdesigner.model = function () {
                 throw 'getAbsolutePath argument must be a MugType!';
             }
             if (!node) {
-                throw 'Cant find path of MugType that is not present in the Tree!';
+//                console.log('Cant find path of MugType that is not present in the Tree!');
+                return null;
             }
             nodeParent = this.getParentNode(node);
             output = '/' + node.getID();
 
-            do {
+            while (nodeParent) {
                 output = '/' + nodeParent.getID() + output;
+                if(nodeParent.isRootNode){
+                    break;
+                }
                 nodeParent = this.getParentNode(nodeParent);
-            } while (nodeParent && !nodeParent.isRootNode)
 
+            }
+                        
             return output;
 
         };
@@ -1751,22 +1862,94 @@ formdesigner.model = function () {
         }
         that.getInvalidMugTypeUFIDs = getInvalidMugTypeUFIDs;
 
+        var getInvalidItextMugTypes = function () {
+            var Itext, invalidItexts, MTListC, MTListD, result, controlTree, dataTree, mapFunc;
+
+            mapFunc = function (node) {
+                var MT, ufid, iID, hIID;
+                if (node.isRootNode) {
+                    return;
+                }
+                MT = node.getValue();
+                ufid = MT.ufid;
+                if(MT.properties.controlElement) {
+                    iID = MT.mug.properties.controlElement.properties.labelItextID;
+                    hIID = MT.mug.properties.controlElement.properties.hintItextID;
+                }
+                if(invalidItexts.indexOf(iID) !== -1) {
+                    return MT;
+                } else if (invalidItexts.indexOf(hIID) !== -1) {
+                    return MT;
+                } else {
+                    return null;
+                }
+            };
+
+
+            Itext = formdesigner.model.Itext;
+            invalidItexts = Itext.getInvalidItextIDs();
+
+            if(invalidItexts === 'true') {
+                return [];
+            }
+
+            dataTree = this.dataTree;
+            controlTree = this.controlTree;
+            MTListC = controlTree.treeMap(mapFunc);
+            MTListD = dataTree.treeMap(mapFunc);
+            result = formdesigner.util.mergeArray(MTListC, MTListD);
+
+            return result;
+        }
+        that.getInvalidItextMugTypes = getInvalidItextMugTypes;
+
+        var getInvalidItextMTUfids = function () {
+            var MTs, ufids = [], i;
+            MTs = getInvalidItextMugTypes();
+
+            for (i in MTs) {
+                if(MTs.hasOwnProperty(i)) {
+                    ufids.push(MTs[i].ufid);
+                }
+            }
+            return ufids;
+        }
+        that.getInvalidItextMTUfids = getInvalidItextMTUfids;
+
         /**
          * Generates an XML Xform and returns it as a string.
          */
         var createXForm = function () {
+            var sanitizeXML = function(xmlString) {
+                if(!xmlString) {
+                    return;
+                }
+
+                return xmlString.replace(/\>/g, "&gt;").replace(/\</g, "&lt;");
+            }
             var create_dataBlock = function () {
                 //use dataTree.treeMap(func,listStore,afterChildfunc)
                 // create func that opens + creates the data tag, that can be recursively called on all children
                 // create afterChildfunc that closes the data tag
                 function mapFunc (node) {
                     var xw = formdesigner.controller.XMLWriter,
-                        defaultVal,
+                        defaultVal, extraXMLNS, keyAttr,
                         MT = node.getValue();
+
                     xw.writeStartElement(node.getID());
-                    if(!node.isRootNode && MT.mug.properties.dataElement.dataValue){
-                        xw.writeString(MT.mug.properties.dataElement.dataValue);
+                    if(!node.isRootNode && MT.mug.properties.dataElement.properties.dataValue){
+                        defaultVal = MT.mug.properties.dataElement.properties.dataValue;
+                        xw.writeString(defaultVal);
                     }
+                    if(!node.isRootNode && MT.mug.properties.dataElement.properties.keyAttr){
+                        keyAttr = MT.mug.properties.dataElement.properties.keyAttr;
+                        xw.writeAttributeString("key", keyAttr);
+                    }
+                    if(!node.isRootNode && MT.mug.properties.dataElement.properties.xmlnsAttr){
+                        extraXMLNS = MT.mug.properties.dataElement.properties.xmlnsAttr;
+                        xw.writeAttributeString("xmlns", extraXMLNS);
+                    }
+
 
                     if (node.isRootNode) {
                         create_model_header();
@@ -1807,13 +1990,15 @@ formdesigner.model = function () {
                 function populateVariables (MT){
                     bEl = MT.mug.properties.bindElement;
                     if (bEl) {
-                        cons = bEl.properties.constraintAttr;
+                        cons = sanitizeXML(bEl.properties.constraintAttr);
                         consMsg = bEl.properties.constraintMsgAttr;
                         nodeset = dataTree.getAbsolutePath(MT);
                         type = bEl.properties.dataType;
-                        relevant = bEl.properties.relevantAttr;
-                        required = createBindRequiredAttribute(bEl.properties.requiredAttr);
-                        calc = bEl.properties.calculateAttr;
+                        relevant = sanitizeXML(bEl.properties.relevantAttr);
+                        required = sanitizeXML(createBindRequiredAttribute(bEl.properties.requiredAttr));
+                        calc = sanitizeXML(bEl.properties.calculateAttr);
+                        preld = bEl.properties.preload;
+                        preldParams = bEl.properties.preloadParams;
                         return {
                             nodeset: nodeset,
                             'type': type,
@@ -1821,7 +2006,9 @@ formdesigner.model = function () {
                             constraintMsg: consMsg,
                             relevant: relevant,
                             required: required,
-                            calculate: calc
+                            calculate: calc,
+                            preload: preld,
+                            preloadParams: preldParams
                         }
                     } else {
                         return null;
@@ -1836,7 +2023,15 @@ formdesigner.model = function () {
                         for (j in attrs) { //for each populated property
                             if(attrs.hasOwnProperty(j)){
                                 if(attrs[j]){ //if property has a useful bind attribute value
-                                    xw.writeAttributeString(j,attrs[j]); //write it
+                                    if(j === "constraintMsg"){
+                                        xw.writeAttributeString("jr:constraintMsg",attrs[j]); //write it
+                                    } else if (j === "preload") {
+                                        xw.writeAttributeString("jr:preload", attrs[j]);
+                                    } else if (j === "preloadParams") {
+                                        xw.writeAttributeString("jr:preloadParams", attrs[j]);
+                                    } else {
+                                        xw.writeAttributeString(j,attrs[j]);
+                                    } //write it
                                 }
                             }
                         }
@@ -2152,17 +2347,19 @@ formdesigner.model = function () {
                     return;
                 }
                 var mt = node.getValue(),
-                    thisNodeID;
+                    thisDataNodeID, thisBindNodeID;
                 if (mt.properties.dataElement && mt.mug.properties.dataElement) {
-                    thisNodeID = mt.mug.properties.dataElement.properties.nodeID;
-                } else if (mt.properties.bindElement && mt.mug.properties.bindElement){
-                    thisNodeID = mt.mug.properties.bindElement.properties.nodeID;
-                } else {
+                    thisDataNodeID = mt.mug.properties.dataElement.properties.nodeID;
+                }
+                if (mt.properties.bindElement && mt.mug.properties.bindElement){
+                    thisBindNodeID = mt.mug.properties.bindElement.properties.nodeID;
+                }
+                if (!thisDataNodeID && !thisBindNodeID){
                     return; //this MT just has no nodeID :/
                 }
 
 
-                if(thisNodeID === nodeID){
+                if(thisDataNodeID === nodeID || thisBindNodeID === nodeID){
                     return mt;
                 }
             }
@@ -2370,6 +2567,32 @@ formdesigner.model = function () {
         };
 
         /**
+         * Create a new Itext ID in storage deliberately without a
+         * value (this is usually to trigger the validation mechanism to pick up on
+         * the fact that an Itext ID was specified but that there was no value).
+         * @param iID
+         * @param lang
+         */
+        that.createIIDWithoutVal = function (iID, lang) {
+            if(!lang) {
+                throw "Can't create a new Itext ID in Itext without specifying a language!"
+            }
+
+            if(!iID && lang) {
+                throw "Attempted to create a new Itext ID without specifying one! Language: " + lang;
+            }
+            if(!iID) {
+                throw "Attempted to create a new Itext ID without specifying one!";
+            }
+
+            if(!formdesigner.model.Itext.getLanguageData(lang)){
+                formdesigner.model.Itext.addLanguage(lang);
+            }
+            data[lang][iID] = {};
+
+        }
+
+        /**
          * The 'meat' function.  Set a specific Itext element
          * by specifying the itext ID, language, form and value.
          * use form = 'default' or null for the default form.
@@ -2496,6 +2719,10 @@ formdesigner.model = function () {
             function iIDFormMissing(iID, form){
                 return 'Missing Special Form:' + form + ' for Itext ID:' + iID;
             }
+            function iIDTextEmpty(iID) {
+                return 'No Itext Display Data for ID:' + iID;
+            }
+
             if(!dLang){
                 throw 'No Default Language set! Aborting validation. You should set one!';
             }
@@ -2504,12 +2731,22 @@ formdesigner.model = function () {
                 throw 'Default language is set to a language that does not exist in the Itext DB!';
             }
 
+            function isEmpty(ob){
+                var i;
+                for (var i in ob) {
+                    if(ob.hasOwnProperty(i)){
+                        return false;
+                    }
+                }
+                return true;
+            }
+
             for (lang in data) {
                 if (data.hasOwnProperty(lang)) {
                     for (iID in data[lang]) {
                         if (data[lang].hasOwnProperty(iID)) {
-                            if (!data[dLang][iID]) {
-                                errorIIDs[iID] = iIDMissing(iID, dLang);
+                            if (isEmpty(data[dLang][iID])) {
+                                errorIIDs[iID] = iIDTextEmpty(iID);
                             } else {
                                 for (form in data[lang][iID]) {
                                     if (data[lang][iID].hasOwnProperty(form)) {
@@ -2530,6 +2767,18 @@ formdesigner.model = function () {
                 return errorIIDs;
             }
 
+        };
+
+        that.getInvalidItextIDs = function () {
+            var valRes, IDs = [], i;
+            valRes = formdesigner.model.Itext.validateItext();
+            for (i in valRes) {
+                if(valRes.hasOwnProperty(i)) {
+                    IDs.push(i);
+                }
+            }
+
+            return IDs;
         };
 
         /**
@@ -2592,6 +2841,26 @@ formdesigner.model = function () {
             }
 
             return retval;
+
+        }
+
+        /**
+         * Renames the itext ID to something new.
+         * @param oldID
+         * @param newID
+         */
+        that.renameItextID = function (oldID, newID) {
+            if ( (!oldID || !newID) || (oldID === newID) ){
+                return;
+            }
+            var langs, i, b;
+            langs = formdesigner.model.Itext.getLanguages();
+            for (i in langs) {
+                if (data[langs[i]][oldID]) {
+                    data[langs[i]][newID] = data[langs[i]][oldID];
+                    delete data[langs[i]][oldID];
+                }
+            }
 
         }
 

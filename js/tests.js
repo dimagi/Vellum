@@ -1,4 +1,9 @@
+
+var JRVALIDATE_MODE = true;
+
+
 $(document).ready(function(){
+
     formdesigner.launch();
     var testXformBuffer;
     var make_control_bind_data_mug = function(){
@@ -59,7 +64,6 @@ $(document).ready(function(){
             dataType: 'text',
             success: function(xform){
                 testXformBuffer = xform;
-                console.log("Successfully got test xform!");
             }
         });
     }
@@ -92,6 +96,14 @@ $(document).ready(function(){
 
                     }
                 }
+            }
+        }
+        if(mugType.properties.controlElement){
+            if(mug.properties.controlElement.properties.hintItextID) {
+                formdesigner.model.Itext.setValue(mug.properties.controlElement.properties.hintItextID,'en','default','foo hint');
+            }
+            if (mug.properties.controlElement.properties.labelItextID) {
+                formdesigner.model.Itext.setValue(mug.properties.controlElement.properties.labelItextID,'en','default','foo default');
             }
         }
     }
@@ -295,10 +307,10 @@ $(document).ready(function(){
         var MugType = formdesigner.model.mugTypeMaker.stdTextQuestion(); //simulates a 'standard' text question
         myMug = MugType.mug;
         giveMugFakeValues(myMug,MugType);
-        console.log("MUG WITH FAKE VALUES",myMug);  
+        formdesigner.model.Itext.setValue(myMug.properties.controlElement.properties.hintItextID,'en','default','foo hint');
+        formdesigner.model.Itext.setValue(myMug.properties.controlElement.properties.labelItextID,'en','default','foo default');
         var validationObject = MugType.validateMug(myMug);
         equal(MugType.typeName, "Text Question MugType");
-        console.log("FAILED VALIDATION HERE",validationObject);
         equal(validationObject.status, "pass", 'Does the mug validate against the MugType?');
 
         var otherType = formdesigner.model.mugTypeMaker["stdTextQuestion"]();
@@ -463,6 +475,7 @@ $(document).ready(function(){
             console.log("validation obj B",vTB);
             console.log("validation obj C",vTC);
             console.groupEnd()
+            ok(false);
             throw 'AUTO MUG CREATION FROM MUG DID NOT PASS VALIDATION SEE CONSOLE'
         }
 
@@ -472,7 +485,8 @@ $(document).ready(function(){
         //////////END SETUP//////////
 
         var actualPath = tree.getAbsolutePath(mugTC);
-        var expectedPath =  '/'+mugTA.mug.properties.dataElement.properties.nodeID+
+        var expectedPath =  '/'+formdesigner.controller.form.formID+
+                            '/'+mugTA.mug.properties.dataElement.properties.nodeID+
                             '/'+mugTB.mug.properties.dataElement.properties.nodeID+
                             '/'+mugTC.mug.properties.dataElement.properties.nodeID;
         equal(actualPath, expectedPath, 'Is the generated DataElement path for the mug correct?');
@@ -496,7 +510,8 @@ $(document).ready(function(){
         
         tree.insertMugType(mugTC, 'into', mugTA);
         actualPath = tree.getAbsolutePath(mugTC);
-        expectedPath =  '/'+mugTA.mug.properties.dataElement.properties.nodeID+
+        expectedPath =  '/'+formdesigner.controller.form.formID+
+                        '/'+mugTA.mug.properties.dataElement.properties.nodeID+
                         '/'+mugTC.mug.properties.dataElement.properties.nodeID;
         equal(actualPath, expectedPath, 'After move is the calculated path still correct?');
 
@@ -507,7 +522,7 @@ $(document).ready(function(){
         equal(treePrettyPrintExpected,tree.printTree(), 'Check the tree structure is correct3');
 
         tree.removeMugType(mugTB);
-        raises(function(){tree.getAbsolutePath(mugTB)}, "Cant find path of MugType that is not present in the Tree!");
+        ok(tree.getAbsolutePath(mugTB) === null, "Cant find path of MugType that is not present in the Tree!");
 
         tree.insertMugType(mugTB,'before',mugTC);
         treePrettyPrintExpected = ''+tree._getRootNodeID()+'['+
@@ -517,7 +532,7 @@ $(document).ready(function(){
         equal(treePrettyPrintExpected,tree.printTree(), 'Check the tree structure is correct4');
 
         tree.removeMugType(mugTB);
-        raises(function(){tree.getAbsolutePath(mugTB)}, "Cant find path of MugType that is not present in the Tree!");
+        ok(tree.getAbsolutePath(mugTB) === null, "Cant find path of MugType that is not present in the Tree!");
 
         tree.insertMugType(mugTB,'before',mugTC);
         treePrettyPrintExpected = ''+tree._getRootNodeID()+'['+
@@ -531,7 +546,6 @@ $(document).ready(function(){
         tree.insertMugType(mugTD, 'before', mugTA);
         equal('/' + formdesigner.controller.form.formID + '/' + mugTD.mug.properties.dataElement.properties.nodeID, tree.getAbsolutePath(mugTD),
              "Check that the newly inserted Mug's generated path is correct");
-        console.log("MUGTD",mugTD);
         treePrettyPrintExpected = ''+tree._getRootNodeID()+'['+
             tree._getMugTypeNodeID(mugTD)+','+
             tree._getMugTypeNodeID(mugTA)+'['+
@@ -681,10 +695,8 @@ $(document).ready(function(){
 
         //add a listener for question creation events
         c.on("question-creation", function(e){
-            console.log("QUESTION CREATION EVENT FIRED:",e);
             curMugType = e.mugType;
         });
-        console.log(ui.buttons);
 
         addqbut = $('#fd-add-but');
         addqbut.click();
@@ -748,7 +760,17 @@ $(document).ready(function(){
         equal(IT.getItextVals(iID,otherLanguageName)[form], val, "Itext set and retrieval work");
 
         equal(IT.getValue(iID2,'en','short'), valObject.en.short, "Other Itext retreival method test");
-        
+
+        //rename an ID
+        IT.setValue(iID,'en',form,val);
+        var newID = iID + 'foo';
+        IT.renameItextID(iID,newID);
+        ok(!IT.getAllData().en[iID], 'old ID does not exist anymore in EN');
+        ok(!IT.getAllData().sw[iID], 'old ID does not exist anymore in SW');
+        ok(IT.getAllData().en[newID], 'new ID exists in EN');
+        ok(IT.getAllData().sw[newID], 'new ID exists in SW');
+
+
     });
 
     module("Create XForm XML");
@@ -778,30 +800,42 @@ $(document).ready(function(){
         var c = formdesigner.controller,
             ui = formdesigner.ui,
             jstree = $("#fd-question-tree"),
-            curMugType,
+            curMugType, Itext,
             addQbut, lastCreatedNode, addGroupBut, qTypeSel;
         c.resetFormDesigner();
 
+        Itext = formdesigner.model.Itext;
 
         jstree.bind('create_node.jstree',function(e,data){
             lastCreatedNode = data.rslt.obj;
         })
         addQuestionThroughUI("Text Question");
         jstree.jstree('select_node',lastCreatedNode);
-        formdesigner.controller.form.controlTree.getMugTypeFromUFID(lastCreatedNode.attr('id')).mug.properties.controlElement.properties.label = 'question1 label';
+        curMugType = formdesigner.controller.form.controlTree.getMugTypeFromUFID(lastCreatedNode.attr('id'));
+        Itext.setValue(curMugType.mug.properties.controlElement.properties.labelItextID,'en','default','question1 label');
 
         addQuestionThroughUI("Group");
         jstree.jstree('select_node',lastCreatedNode,true);
-        formdesigner.controller.form.controlTree.getMugTypeFromUFID(lastCreatedNode.attr('id')).mug.properties.controlElement.properties.label = 'group label';
+
         $('#dataElement-nodeID-input').val('group1').keyup();
+        curMugType = formdesigner.controller.form.controlTree.getMugTypeFromUFID(lastCreatedNode.attr('id'));
+        Itext.setValue(curMugType.mug.properties.controlElement.properties.labelItextID,'en','default','group label');
         addQuestionThroughUI("Text Question");
         jstree.jstree('select_node',lastCreatedNode,true);
-        formdesigner.controller.form.controlTree.getMugTypeFromUFID(lastCreatedNode.attr('id')).mug.properties.controlElement.properties.label = 'question2 label';
         $('#dataElement-nodeID-input').val('question2').keyup();
+        curMugType = formdesigner.controller.form.controlTree.getMugTypeFromUFID(lastCreatedNode.attr('id'));
+        Itext.setValue(curMugType.mug.properties.controlElement.properties.labelItextID,'en','default', 'question2 label');
         formdesigner.formUuid = "http://openrosa.org/formdesigner/5EACC430-F892-4AA7-B4AA-999AD0805A97";    
         var actual = beautifyXml(c.form.createXForm());
+        validateFormWithJR(actual);
+
         getTestXformOutput('form1.xml');
         var expected = beautifyXml(testXformBuffer);
+        validateFormWithJR(expected);
+        validateFormWithJR(actual);
+        validateFormWithJR(expected);
+        validateFormWithJR(actual);
+        
         equal(expected,actual);
 
         //test if form is valid
@@ -881,9 +915,11 @@ $(document).ready(function(){
         mType.ufid = oldMT.ufid;
 
         c.form.replaceMugType(oldMT,mType,'data');
-        console.log(oldMT);
     });
 
+    function getMTFromEl(el) {
+        return formdesigner.controller.form.controlTree.getMugTypeFromUFID(el.attr('id'));
+    }
 
     module("UI Tests");
     test ("'Remove Selected' button", function () {
@@ -891,7 +927,68 @@ $(document).ready(function(){
             ui = formdesigner.ui,
             jstree = $("#fd-question-tree"),
             curMugType,
-            addQbut, lastCreatedNode, addGroupBut, qTypeSel, iiD, groupMT, Itext;
+            addQbut, lastCreatedNode, addGroupBut, qTypeSel, iiD, groupMT, Itext,mugProps,cEl,iID;
+        c.resetFormDesigner();
+        Itext = formdesigner.model.Itext;
+        jstree.bind('create_node.jstree',function(e,data){
+            lastCreatedNode = data.rslt.obj;
+        })
+
+        //build form
+        addQuestionThroughUI("Text Question");
+        jstree.jstree('select_node',lastCreatedNode);
+        curMugType = getMTFromEl(lastCreatedNode);
+        mugProps = curMugType.mug.properties;
+        cEl = mugProps.controlElement.properties;
+        iID = cEl.labelItextID;
+        Itext.setValue(iID,Itext.getDefaultLanguage(),'default','question1 label');
+        //add group
+        addQuestionThroughUI("Group");
+        jstree.jstree('select_node',lastCreatedNode,true);
+        curMugType = getMTFromEl(lastCreatedNode);
+        groupMT = curMugType;
+        mugProps = curMugType.mug.properties;
+        cEl = mugProps.controlElement.properties;
+        iID = cEl.labelItextID;
+        Itext.setValue(iID,Itext.getDefaultLanguage(),'default','group1 label'); //set itext value for group
+        $('#dataElement-nodeID-input').val('group1').keyup(); //change the groups nodeIDs to something more reasonable
+
+        //add another text question
+        addQuestionThroughUI("Text Question");
+        jstree.jstree('select_node',lastCreatedNode,true);
+        curMugType = getMTFromEl(lastCreatedNode);
+        mugProps = curMugType.mug.properties;
+        cEl = mugProps.controlElement.properties;
+        iID = cEl.labelItextID;
+        Itext.setValue(iID,Itext.getDefaultLanguage(),'default','question2 label');
+
+        //select the group node
+        jstree.jstree('select_node',$('#'+ groupMT.ufid),true);
+
+        //remove it
+        $('#fd-remove-button').click();
+
+        //test if form is valid
+        ok(formdesigner.controller.form.isFormValid(), 'Form Should pass all Validation Tests');
+
+        //compare with form we have in the testing cache.
+        formdesigner.formUuid = "http://openrosa.org/formdesigner/E9BE7934-687F-4C19-BDB7-9509005460B6";
+        var actual = c.form.createXForm();
+        validateFormWithJR(actual);
+        actual = beautifyXml(actual);
+        getTestXformOutput('form8.xml');
+        var expected = beautifyXml(testXformBuffer);
+        equal(expected,actual);
+
+    })
+
+    test("Input fields", function() {
+        var c = formdesigner.controller,
+                    ui = formdesigner.ui,
+                    jstree = $("#fd-question-tree"),
+                    curMugType,
+                    addQbut, lastCreatedNode, addGroupBut, qTypeSel, iiD, groupMT, Itext,mugProps,cEl,iID,
+                    workingField;
         c.resetFormDesigner();
 
 
@@ -901,35 +998,368 @@ $(document).ready(function(){
             lastCreatedNode = data.rslt.obj;
         })
 
-        function getMTFromEl(el) {
-            return formdesigner.controller.form.controlTree.getMugTypeFromUFID(el.attr('id'));
-        }
-
+        var xmlString;
         //build form
         addQuestionThroughUI("Text Question");
-        jstree.jstree('select_node',lastCreatedNode);
-        getMTFromEl(lastCreatedNode).mug.properties.controlElement.properties.label = 'question1 label';
-        addQuestionThroughUI("Group");
-        jstree.jstree('select_node',lastCreatedNode,true);
-        groupMT = getMTFromEl(lastCreatedNode);
-        .mug.properties.controlElement.properties.label = 'group label';
-        $('#dataElement-nodeID-input').val('group1').keyup();
+
+        //change form name and test results
+        workingField = $("#fd-form-prop-formName-input");
+        workingField.val("My Test Form").keyup();
+        xmlString = c.form.createXForm();
+        validateFormWithJR(xmlString);
+        var xml = parseXMLAndGetSelector(xmlString);
+        var title = xml.find("h\\:title");
+        if(title.length === 0) {
+            title = xml.find("title");
+        }
+        equal(title.length, 1, "Should have found the title node in generated source");
+        equal(title.text(), "My Test Form", "Form title has been set correctly");
+
+        //change form data node name and test results
+        workingField = $('#fd-form-prop-formID-input');
+        workingField.val('mydatanode').keyup();
+        xmlString = c.form.createXForm();
+        xml = parseXMLAndGetSelector(xmlString);
+        validateFormWithJR(xmlString);
+
+        var dataNode = $(xml.find('instance').children()[0]);
+        equal(dataNode.length, 1, 'found data node in xml source');
+        equal(dataNode[0].tagName, "mydatanode", "Data node is named correctly");
+        workingField.val("My Data Node").keyup(); //test auto replace of ' ' with '_'
+        xmlString = c.form.createXForm();
+        xml = parseXMLAndGetSelector(xmlString);
+        validateFormWithJR(xmlString);
+        formdesigner.temp = xml;
+        equal(workingField.val(), "My_Data_Node", "field value correctly swapped ' ' for '_'");
+        var dataNode = $(xml.find('instance').children()[0]);
+        equal(dataNode.length, 1, 'found data node in xml source');
+        equal(dataNode[0].tagName, "My_Data_Node", "Data node with spaces is named correctly");
+        
+
+
+        curMugType = getMTFromEl($(lastCreatedNode));
+        ui.selectMugTypeInUI(curMugType);
+        equal(curMugType.typeName, "Text Question MugType", "Is Question created through UI a text type question?");
+        workingField = $('#dataElement-nodeID-input');
+        workingField.val("textQuestion1").keyup().keyup().keyup();
+        xmlString = c.form.createXForm();
+        validateFormWithJR(xmlString);
+        equal(curMugType.mug.properties.dataElement.properties.nodeID, "textQuestion1", "dataElement nodeID set correctly");
+        equal(curMugType.mug.properties.bindElement.properties.nodeID, "textQuestion1", "bindElement nodeID set correctly");
+        xml = parseXMLAndGetSelector(xmlString);
+        validateFormWithJR(xmlString);
+
+        //set Default Value
+        workingField = $('#dataElement-dataValue-input');
+        workingField.val('Some Data Value String').keyup();
+        xmlString = c.form.createXForm();
+        validateFormWithJR(xmlString);
+        xml = parseXMLAndGetSelector(xmlString);
+        var defaultValueXML = xml.find('My_Data_Node').children('textQuestion1').text();
+        equal(defaultValueXML, "Some Data Value String", "default value set in UI corresponds to that generated in XML");
+
+        workingField = $('#bindElement-relevantAttr-input');
+        workingField.val("/data/bleeding_sign = 'N'").keyup();
+        xmlString = c.form.createXForm();
+        validateFormWithJR(xmlString);
+        xml = parseXMLAndGetSelector(xmlString);
+        var bindRelVal = $(xml.find('bind')[0]).attr('relevant');
+        equal(bindRelVal, "/data/bleeding_sign = 'N'", 'Was relevancy condition set correctly in the UI?');
+
+        workingField.val("/data/bleeding_sign >= 5 or /data/bleeding_sing < 21").keyup();
+        xmlString = c.form.createXForm();
+        validateFormWithJR(xmlString);
+        xml = parseXMLAndGetSelector(xmlString);
+        var bindVal = grep(xmlString,"<bind").trim();
+        var expected = '<bind nodeset="/My_Data_Node/textQuestion1" type="xsd:string" relevant="/data/bleeding_sign &gt;= 5 or /data/bleeding_sing &lt; 21" />'
+        equal(bindVal, expected, 'Was relevancy condition with < or > signs rendered correctly in the UI?');
+
+        workingField = $('#bindElement-calculateAttr-input');
+        workingField.val("/data/bleeding_sign >= 5 or /data/bleeding_sing < 21").keyup();
+        xmlString = c.form.createXForm();
+        validateFormWithJR(xmlString);
+        xml = parseXMLAndGetSelector(xmlString);
+        bindVal = grep(xmlString,"<bind").trim();
+        expected = '<bind nodeset="/My_Data_Node/textQuestion1" type="xsd:string" relevant="/data/bleeding_sign &gt;= 5 or /data/bleeding_sing &lt; 21" calculate="/data/bleeding_sign &gt;= 5 or /data/bleeding_sing &lt; 21" />'
+        equal(bindVal, expected, 'Was calculate condition with < or > signs rendered correctly in the UI?');
+
+        workingField = $('#bindElement-constraintAttr-input');
+        workingField.val("/data/bleeding_sign >= 5 or /data/bleeding_sing < 21").keyup();
+        xmlString = c.form.createXForm();
+        validateFormWithJR(xmlString);
+        xml = parseXMLAndGetSelector(xmlString);
+        bindVal = grep(xmlString,"<bind").trim();
+        expected = '<bind nodeset="/My_Data_Node/textQuestion1" type="xsd:string" constraint="/data/bleeding_sign &gt;= 5 or /data/bleeding_sing &lt; 21" relevant="/data/bleeding_sign &gt;= 5 or /data/bleeding_sing &lt; 21" calculate="/data/bleeding_sign &gt;= 5 or /data/bleeding_sing &lt; 21" />'
+        equal(bindVal, expected, 'Was constraint condition with < or > signs rendered correctly in the UI?');
+        workingField.val('').keyup();
+        $('#bindElement-calculateAttr-input').val('').keyup();
+        $('#bindElement-relevantAttr-input').val('').keyup();
+
+        workingField = $('#bindElement-requiredAttr-input');
+        workingField.click(); //check the 'required' checkbox;
+        xmlString = c.form.createXForm();
+        validateFormWithJR(xmlString);
+        xml = parseXMLAndGetSelector(xmlString);
+        var requireAttr = xml.find('bind').attr('required');
+        expected = "true()";
+        equal(requireAttr,expected,"Is the required attribute value === 'true()' in the bind?");
+
+        workingField = $('#fd-itext-default-input');
+        workingField.val("Question 1 Itext yay").keyup().keyup();
+        xmlString = c.form.createXForm();
+        validateFormWithJR(xmlString);
+        xml = parseXMLAndGetSelector(xmlString);
+        var itextVal = xml.find('translation #'+ $('#controlElement-labelItextID-input').val()).children('value').text()
+        expected = "Question 1 Itext yay";
+        equal(itextVal,expected,"Has default Itext been set correctly through UI?");
+
+        workingField = $('#fd-itext-audio-input');
+        workingField.val("jr://audio/sound/vol1/questionnaire/awesome.mp3").keyup();
+        xmlString = c.form.createXForm();
+        validateFormWithJR(xmlString);
+        xml = parseXMLAndGetSelector(xmlString);
+        window.xmlString = xml;
+        itextVal = xml.find('translation #'+ $('#controlElement-labelItextID-input').val()).children('[form="audio"]').text()
+        expected = "jr://audio/sound/vol1/questionnaire/awesome.mp3";
+        equal(itextVal,expected,"Has audio Itext been set correctly through UI?");
+
+        workingField = $('#fd-itext-image-input');
+        workingField.val("jr://images/foo.png").keyup();
+        xmlString = c.form.createXForm();
+        validateFormWithJR(xmlString);
+        xml = parseXMLAndGetSelector(xmlString);
+        window.xmlString = xml;
+        itextVal = xml.find('text,[id="'+ $('#controlElement-labelItextID-input').val()+'"]').children('[form="image"]').text()
+        expected = "jr://images/foo.png";
+        equal(itextVal,expected,"Has image Itext been set correctly through UI?");
+
+        workingField = $('#fd-itext-short-input');
+        workingField.val("Some short itext").keyup();
+        xmlString = c.form.createXForm();
+        validateFormWithJR(xmlString);
+        xml = parseXMLAndGetSelector(xmlString);
+        window.xmlString = xml;
+        itextVal = xml.find('text,[id="'+ $('#controlElement-labelItextID-input').val()+'"]').children('[form="short"]').text()
+        expected = "Some short itext";
+        equal(itextVal,expected,"Has short Itext been set correctly through UI?");
+
+        workingField = $('#fd-itext-long-input');
+        workingField.val("some long Itext for question 1").keyup();
+        xmlString = c.form.createXForm();
+        validateFormWithJR(xmlString);
+        xml = parseXMLAndGetSelector(xmlString);
+        window.xmlString = xml;
+        itextVal = xml.find('text,[id="'+ $('#controlElement-labelItextID-input').val()+'"]').children('[form="long"]').text()
+        expected = "some long Itext for question 1";
+        equal(itextVal,expected,"Has long Itext been set correctly through UI?");
+
+
+
+        workingField = $('#bindElement-constraintMsgAttr-input');
+        workingField.val("Some default jr:constraintMsg value").keyup();
+        xmlString = c.form.createXForm();
+        validateFormWithJR(xmlString);
+        xml = parseXMLAndGetSelector(xmlString);
+        bindVal = grep(xmlString,"<bind").trim();
+        expected = '<bind nodeset="/My_Data_Node/textQuestion1" type="xsd:string" jr:constraintMsg="Some default jr:constraintMsg value" required="true()" />';
+        equal(bindVal, expected, 'Was constraint Message correctly set?');
+
+
+        workingField = $('#controlElement-hintLabel-input');
+        workingField.val("Default Hint Label Value").keyup();
+        xmlString = c.form.createXForm();
+        validateFormWithJR(xmlString);
+        xml = parseXMLAndGetSelector(xmlString);
+        window.xmlString = xml;
+        var someval = xml.find('input').children('hint').text()
+        expected = "Default Hint Label Value";
+        equal(someval,expected,"Has default hint label been set correctly through UI?");
+
+        workingField = $('#controlElement-hintItextID-input');
+        workingField.val("question1_hint").keyup();
+        xmlString = c.form.createXForm();
+        xml = parseXMLAndGetSelector(xmlString);
+        window.xmlString = xml;
+        someval = xml.find('input').children('hint').attr('ref');
+        expected = "jr:itext('question1_hint')";
+        equal(someval,expected,"Has hint Itext ID been set correctly through UI?");
+
+        workingField = $('#fd-itext-hint-input');
+        workingField.val("Question 1 Itext hint").keyup().keyup();
+        xmlString = c.form.createXForm();
+        validateFormWithJR(xmlString);
+        xml = parseXMLAndGetSelector(xmlString);
+        var findstring = '';
+        if($('#controlElement-hintItextID-input').val()) {
+            findstring = '[id='+$('#controlElement-hintItextID-input').val()+']';
+        }
+        itextVal = xml.find('translation').find(findstring).children('value').text()
+        expected = "Question 1 Itext hint";
+        equal(itextVal,expected,"Has hint Itext been set correctly through UI?");
+
+    });
+
+    test("DataType selector functionality", function() {
+        var c = formdesigner.controller,
+                    ui = formdesigner.ui,
+                    jstree = $("#fd-question-tree"),
+                    curMugType,
+                    addQbut, lastCreatedNode, addGroupBut, qTypeSel, iiD, groupMT, Itext,mugProps,cEl,iID,
+                    workingField;
+        c.resetFormDesigner();
+
+
+        Itext = formdesigner.model.Itext;
+
+        jstree.bind('create_node.jstree',function(e,data){
+            lastCreatedNode = data.rslt.obj;
+        })
+
+        var xmlString, xml;
+        //build form
         addQuestionThroughUI("Text Question");
-        jstree.jstree('select_node',lastCreatedNode,true);
-        getMTFromEl(lastCreatedNode).mug.properties.controlElement.properties.label = 'question2 label';
-        $('#dataElement-nodeID-input').val('question2').keyup();
+        addQuestionThroughUI("Group");
+        curMugType = getMTFromEl($(lastCreatedNode));
+        ui.selectMugTypeInUI(curMugType);
+        addQuestionThroughUI("Integer Number");
+        curMugType = getMTFromEl($(lastCreatedNode));
+        ui.selectMugTypeInUI(curMugType);
+        equal($('#bindElement-dataType-input').val(), 'xsd:int');
+        equal(curMugType.mug.properties.bindElement.properties.dataType, 'xsd:int');
 
-        //test if form is valid
-        ok(formdesigner.controller.form.isFormValid(), 'Form Should pass all Validation Tests');
+        xmlString = c.form.createXForm();
+        validateFormWithJR(xmlString);
+        xml = parseXMLAndGetSelector(xmlString);
+        window.xmlSring = xml;
+        var el = xml.find('[nodeset*='+curMugType.mug.properties.bindElement.properties.nodeID+']')
+        equal($(el).attr('type'), 'xsd:int');
 
-        //remove group node
-    })
+
+        addQuestionThroughUI("Double Number");
+        curMugType = getMTFromEl($(lastCreatedNode));
+        ui.selectMugTypeInUI(curMugType);
+        equal($('#bindElement-dataType-input').val(), 'xsd:double');
+        equal(curMugType.mug.properties.bindElement.properties.dataType, 'xsd:double');
+        xmlString = c.form.createXForm();
+        validateFormWithJR(xmlString);
+        xml = parseXMLAndGetSelector(xmlString);
+        window.xmlSring = xml;
+        el = xml.find('[nodeset*='+curMugType.mug.properties.bindElement.properties.nodeID+']')
+        equal($(el).attr('type'), 'xsd:double');
+        equal(curMugType.mug.properties.bindElement.properties.dataType, 'xsd:double');
+
+        addQuestionThroughUI("Long Number");
+        curMugType = getMTFromEl($(lastCreatedNode));
+        ui.selectMugTypeInUI(curMugType);
+        equal($('#bindElement-dataType-input').val(), 'xsd:long');
+        equal(curMugType.mug.properties.bindElement.properties.dataType, 'xsd:long');
+
+        xmlString = c.form.createXForm();
+        validateFormWithJR(xmlString);
+        xml = parseXMLAndGetSelector(xmlString);
+        window.xmlSring = xml;
+        el = xml.find('[nodeset*='+curMugType.mug.properties.bindElement.properties.nodeID+']')
+        equal($(el).attr('type'), 'xsd:long');
+
+        addQuestionThroughUI("Secret Question");
+        curMugType = getMTFromEl($(lastCreatedNode));
+        ui.selectMugTypeInUI(curMugType);
+        equal($('#bindElement-dataType-input').val(), 'xsd:string');
+        equal(curMugType.mug.properties.bindElement.properties.dataType, 'xsd:string');
+        equal(curMugType.typeName, "Secret Question MugType");
+        equal(curMugType.mug.properties.controlElement.properties.name, "Secret");
+        xmlString = c.form.createXForm();
+        validateFormWithJR(xmlString);
+        xml = parseXMLAndGetSelector(xmlString);
+        window.xmlSring = xml;
+        el = xml.find('secret')
+        equal($(el).length,1);
+        equal($(el).tagName)
+        el = xml.find('[nodeset*='+curMugType.mug.properties.bindElement.properties.nodeID+']')
+        equal($(el).attr('type'), 'xsd:string');
+
+
+
+    });
+
+    module("Parsing Tests Part II");
+    test("Parse Error Messages Functionality", function () {
+        var c = formdesigner.controller,
+            ui = formdesigner.ui,
+            jstree = $("#fd-question-tree"),
+            curMugType,
+            addQbut, lastCreatedNode, addGroupBut, qTypeSel, iiD, groupMT, Itext,mugProps,cEl,iID,
+                sourceDrop, parseButton, pErrors, expectedErrors, myxml;
+        c.resetFormDesigner();
+
+
+        getTestXformOutput('form_with_no_data_attrs.xml');
+        myxml = testXformBuffer;
+        c.loadXForm(myxml); //load the xform using the standard pathway in the FD for parsing forms
+
+        expectedErrors = [
+            "warning::Form does not have a unique xform XMLNS (in data block). Will be added automatically",
+            "warning::Form JRM namespace attribute was not found in data block. One will be added automatically",
+            "warning::Form does not have a UIVersion attribute, one will be generated automatically",
+            "warning::Form does not have a Version attribute (in the data block), one will be added automatically",
+            "warning::Form does not have a Name! The default form name will be used"
+        ];
+        pErrors = c.getParseErrorMsgs();
+        deepEqual(pErrors, expectedErrors, "Do the correct errors get generated for a form with no data block attributes?");
+
+
+    });
 
 
 });
 
+var asyncRes = [], testData = [], len = -1;
+formdesigner.asyncRes = asyncRes;
+formdesigner.testData = testData;
+/**
+ * Actual is the xml form string
+ * @param actual
+ */
+function validateFormWithJR(actual) {
+    if(!JRVALIDATE_MODE){
+        return true;
+    }
+        stop();
+        var mylen;
+        len = len + 1;
+        mylen = len;
+        testData[mylen] = formdesigner.util.clone(actual);
+        $.post('/formvalidate/validate/',{xform: testData[mylen]},function (data) {
+                    asyncRes[mylen] = data;
+                    if(!asyncRes[mylen].success){
+                        ok(false, "Form Failed to validate with JR Validator!"+mylen);
+                        start();
+                        throw 'Form Failed to validate with JR Validator! See Console. Failure number:'+mylen;
+                    }
+                    ok(asyncRes[mylen].success, 'Form validates with Javarosa form validator, see console for failure '+mylen);
+                    start();
 
+        });
+}
+
+function parseXMLAndGetSelector(xmlString) {
+
+    var xmlDoc = $.parseXML(xmlString),
+                xml = $(xmlDoc);
+    return xml;
+}
 
 function divide(a,b){
     return a/b;
+}
+
+function grep(xmlString, matchStr) {
+    var lines,i;
+    lines = xmlString.split(/\n/g);
+    for (i in lines) {
+        if(lines[i].match(matchStr)) {
+            return lines[i];
+        }
+    }
+    return null;
 }

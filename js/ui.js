@@ -164,7 +164,6 @@ formdesigner.ui = (function () {
                 formdesigner.util.dumpFormTreesToConsole();
             });
 
-//            buttons.printTree = printTreeBut;
         })();
 
         (function c_showLoadItextXLS() {
@@ -178,8 +177,6 @@ formdesigner.ui = (function () {
                 formdesigner.controller.showLoadItextFromClipboard();
 
             });
-
-//            buttons.printTree = printTreeBut;
         })();
 
         (function c_showGeneratedItextXLS() {
@@ -192,8 +189,6 @@ formdesigner.ui = (function () {
             genXLSgbut.button().click(function () {
                 formdesigner.controller.showGeneratedItextXLS();
             });
-
-//            buttons.printTree = printTreeBut;
         })();
 
        (function c_fancyBox() {
@@ -207,7 +202,6 @@ formdesigner.ui = (function () {
                 controller.generateXForm();
             });
 
-//            buttons.fancyBut = fancyBut;
         })();
 
         (function c_openSource() {
@@ -221,7 +215,6 @@ formdesigner.ui = (function () {
                 formdesigner.controller.showLoadXformBox();
             });
 
-//            buttons.openSourcebut = openSourcebut;
         })();
 
         (function c_saveForm() {
@@ -235,7 +228,6 @@ formdesigner.ui = (function () {
                 formdesigner.controller.sendXForm();
             });
 
-//            buttons.openSourcebut = openSourcebut;
         })();
 
         (function c_removeSelected() {
@@ -250,7 +242,6 @@ formdesigner.ui = (function () {
                 formdesigner.controller.removeMugTypeFromForm(selected);
             });
 
-//            buttons.openSourcebut = openSourcebut;
         })();
 
     }
@@ -278,6 +269,27 @@ formdesigner.ui = (function () {
                     "valid_children" : groupRepeatValidChildren
                 },
                 "question" : {
+                    "icon": {
+                        "image" : jquery_icon_url,
+                        "position": "-128px -96px"
+                    },
+                    "valid_children" : "none"
+                },
+                "int" : {
+                    "icon": {
+                        "image" : jquery_icon_url,
+                        "position": "-128px -96px"
+                    },
+                    "valid_children" : "none"
+                },
+                "long" : {
+                    "icon": {
+                        "image" : jquery_icon_url,
+                        "position": "-128px -96px"
+                    },
+                    "valid_children" : "none"
+                },
+                "double" : {
                     "icon": {
                         "image" : jquery_icon_url,
                         "position": "-128px -96px"
@@ -364,16 +376,21 @@ formdesigner.ui = (function () {
                 bProps = vObj.bindElement,
                 cProps = vObj.controlElement,
                 dProps = vObj.dataElement,
-                i, propsMessage;
+                i, propsMessage, itextValidation;
 
         hideMessage();
         propsMessage = '';
         loopValProps(bProps, 'bindElement');
         loopValProps(cProps, 'controlElement');
         loopValProps(dProps, 'dataElement');
+        itextValidation = formdesigner.model.Itext.validateItext();
+        if(itextValidation !== true) {
+            propsMessage += '<br>' + JSON.stringify(itextValidation) + '</br>';
+        }
         if(propsMessage) {
             showMessage(propsMessage, 'Question Problems', 'warning');
         }
+
 
     }
     that.showVisualValidation = showVisualValidation;
@@ -512,7 +529,16 @@ formdesigner.ui = (function () {
                                         groupName = input.data('groupName'),
                                         propName = input.data('propName'),
                                         curMug = formdesigner.controller.getCurrentlySelectedMug(),
-                                        curMT = formdesigner.controller.getCurrentlySelectedMugType();
+                                        curMT = formdesigner.controller.getCurrentlySelectedMugType(),
+                                        oldItextID;
+
+                                if (propName === 'nodeID'){ //sanitize nodeID;
+                                    input.val(input.val().replace(/\s/g,'_'));
+                                }
+                                if (propName === 'labelItextID' || propName === 'hintItextID') {
+                                    oldItextID = curMug.properties.controlElement.properties[propName];
+                                    formdesigner.model.Itext.renameItextID(oldItextID,input.val());
+                                }
                                 formdesigner.controller.setMugPropertyValue(curMug,groupName,propName,input.val(),curMT);
                             });
                         }else if(pBlock.uiType === 'select'){
@@ -608,40 +634,88 @@ formdesigner.ui = (function () {
         }
         displayFuncs.bindElement = showBindProps;
 
-        function showItextProps(){
-            function makeLI(textForm) {
-                var mugType, liStr, txtStr, inputStr, id, li, text, input, currentLang, Itext, iID;
-                Itext = formdesigner.model.Itext;
-                currentLang = formdesigner.currentItextDisplayLanguage;
-                mugType = formdesigner.controller.getCurrentlySelectedMugType();
+        /**
+         * Makes an Itext LI for UI user input of Itext values. Assumes the Itext ID is already present,
+         * if not will generate one and add it to the Itext object.
+         * @param textForm
+         * @param iflabel
+         * @param ishint - flag for if this is a 'hint' type itext (hint itext ID is located in a different place to regular itext ID)
+         */
+        function makeItextLI(textForm, iflabel, ishint) {
+            var mugType, liStr, txtStr, inputStr, id, li, text, input, currentLang, Itext, iID, iIDInput,
+                    isRequired;
+            Itext = formdesigner.model.Itext;
+            currentLang = formdesigner.currentItextDisplayLanguage;
+            mugType = formdesigner.controller.getCurrentlySelectedMugType();
+            if(!ishint){
+                isRequired = true; //at present we can give everything an Itext ID so...
                 iID = mugType.mug.properties.controlElement.properties.labelItextID;
-                if(!iID) {
-                    iID = mugType.mug.properties.controlElement.properties.labelItextID = formdesigner.util.getNewItextID(mugType);
-                }
-
-                id = 'fd-itext-' + textForm.toLowerCase();
-                liStr = '<li id="' + id + '" class="fd-property"></li>';
-                txtStr = '<span id="' + id +'-txt" class="fd-property-text">' + formdesigner.util.fromCamelToRegularCase(textForm) + '</span>';
-                inputStr = '<div id="' + id + '-input-div" class="fd-prop-input-div chzn-container"><input id="' + id + '-input" class="fd-property-input"/>';
-                li = $(liStr);
-                text = $(txtStr);
-                input = $(inputStr);
-
-                input.find(':input').val(Itext.getValue(iID, currentLang, textForm));
-                li.append(text);
-                li.append(input);
-
-                input.data('ufid', mugType.ufid);
-                input.data('textform', textForm);
-                input.children(':input').data('ufid', mugType.ufid).data('textform', textForm);;
-                input.find(':input').keyup ( function (e) {
-                    var mugType = formdesigner.controller.form.controlTree.getMugTypeFromUFID($(this).data('ufid'));
-                    Itext.setValue(iID, currentLang, textForm, $(this).val());
-                    formdesigner.util.changeUITreeNodeLabel($ (this).data('ufid'), formdesigner.util.getMugDisplayName(mugType))
-                });
-
-                return li;
+            } else {
+                isRequired = (mugType.properties.controlElement.hintItextID.presence === 'required') ||
+                             (mugType.properties.controlElement.hintLabel === 'required');
+                iID = mugType.mug.properties.controlElement.properties.hintItextID;
             }
+            if(!iID && isRequired) {
+                //make a new iID;
+                iID = formdesigner.util.getNewItextID(mugType,ishint);
+                //set the new Itext ID in it's respective UI element
+                if(ishint) {
+                    mugType.mug.properties.controlElement.properties.hintItextID = iID;
+                    iIDInput = $('#controlElement-hintItextID-input');
+                }else {
+                    mugType.mug.properties.controlElement.properties.labelItextID = iID;
+                    iIDInput = $('#controlElement-labelItextID-input');
+                }
+                iIDInput.val(iID).keyup(); //.keyup() to trigger existing behaviour, if any.
+            }
+            if (ishint){
+                id = 'fd-itext-hint';
+            } else {
+                id = 'fd-itext-' + textForm.toLowerCase();
+            }
+            liStr = '<li id="' + id + '" class="fd-property"></li>';
+            txtStr = '<span id="' + id +'-txt" class="fd-property-text">' + iflabel + '</span>';
+            inputStr = '<div id="' + id + '-input-div" class="fd-prop-input-div chzn-container"><input id="' + id + '-input" class="fd-property-input"/>';
+            li = $(liStr);
+            text = $(txtStr);
+            input = $(inputStr);
+
+            input.find(':input').val(Itext.getValue(iID, currentLang, textForm));
+            li.append(text);
+            li.append(input);
+
+            input.data('ufid', mugType.ufid);
+            input.data('textform', textForm);
+            input.children(':input').data('ufid', mugType.ufid).data('textform', textForm);;
+            input.find(':input').keyup ( function (e) {
+                var oldVal, newVal, mugType, curIID;
+                oldVal = Itext.getValue(iID,currentLang, textForm);
+                newVal = $ (this).val();
+                mugType = formdesigner.controller.form.controlTree.getMugTypeFromUFID($(this).data('ufid'));
+                if(ishint){
+                    curIID = mugType.mug.properties.controlElement.properties.hintItextID;
+                } else {
+                    curIID = mugType.mug.properties.controlElement.properties.labelItextID;
+                }
+                Itext.setValue(curIID, currentLang, textForm, newVal);
+                formdesigner.util.changeUITreeNodeLabel($ (this).data('ufid'), formdesigner.util.getMugDisplayName(mugType))
+
+                formdesigner.controller.form.fire({
+                    type: 'form-property-changed',
+                    propName: 'itext;'+textForm,
+                    iID: curIID,
+                    mugType: mugType,
+                    oldVal: oldVal,
+                    newVal: newVal
+                })
+
+            });
+
+            return li;
+        }
+
+        function showItextProps(){
+
 
             function makeItextUL() {
                 var ulStr = '<ul id="fd-props-itext-ul" class="fd-props-ul">' +
@@ -707,11 +781,9 @@ formdesigner.ui = (function () {
                 ul = makeItextUL();
                 uiBlock.append(ul);
                 LIs = {
-                    liDef : makeLI('default'),
-                    liLong : makeLI('long'),
-                    liShort : makeLI('short'),
-                    liAudio : makeLI('audio'),
-                    liImage : makeLI('image')
+                    liDef : makeItextLI('default', 'Display Label'),
+                    liAudio : makeItextLI('audio', 'Audio URI'),
+                    liImage : makeItextLI('image', 'Image URI')
                 }
 
                 for (i in LIs) {
@@ -748,52 +820,45 @@ formdesigner.ui = (function () {
                     mugProperties = mugType.mug.properties[blockName].properties;
 
                 listDisplay(mugTypeProperties, ul, mugProperties, blockName, false, true);
-                contentEl.append(ul);
-                if(ul.children().length === 0){
+
+                if(ul.children().length === 1){
                     $(ul).remove();
+                } else {
+                    contentEl.append(ul);
                 }
             }
 
             $('#fd-props-advanced').append(adv);
+
+            if(typeof formdesigner.IS_ADVANCED_ACC_EXPANDED === 'undefined') {
+                formdesigner.IS_ADVANCED_ACC_EXPANDED = false;
+            }
+
             adv.accordion({
 //                fillSpace: true,
                 autoHeight: false,
                 collapsible: true,
-                active: IS_ADVANCED_ACC_EXPANDED
+                active: formdesigner.IS_ADVANCED_ACC_EXPANDED
             });
+            if(formdesigner.IS_ADVANCED_ACC_EXPANDED) {
+                $('#fd-props-adv-accordion').accordion('activate',0);
+            }
 
-            $('#fd-props-advanced').bind( "accordionchangestart", function(event, ui) {
-                var newSize = '900px';
-                if (ui.newContent.length === 0) {
-                    IS_ADVANCED_ACC_EXPANDED = false;
-                    newSize = '900px';
-                }else {
-                    IS_ADVANCED_ACC_EXPANDED = true;
-                    newSize = '900px';
-                }
-                $('#fd-question-properties').animate({
-                        height:newSize
-                },200);
+            $('#fd-props-adv-accordion h3').click(function () {
+                formdesigner.IS_ADVANCED_ACC_EXPANDED = !formdesigner.IS_ADVANCED_ACC_EXPANDED;
             });
-
-//            adv.find('h3').click(function () {
-//                var props = $('#fd-question-properties');
-//                if(props.css('height') === '500px'){
-//                    $('#fd-question-properties').animate({
-//                        height:'900px'
-//                    },200);
-//                }else{
-//                    $('#fd-question-properties').animate({
-//                        height:'500px'
-//                    },200);
-//                }
-//            })
-
-            adv.accordion("activate",false);
 
             var contentEl = $('#fd-adv-props-content');
 
             contentEl.empty();
+            var itextul = makeUL('');
+            itextul.append(makeItextLI('short', 'Short Display Label'))
+                    .append(makeItextLI('long', 'Long Display Label'));
+            if(mugType.properties.controlElement.hintItextID && mugType.properties.controlElement.hintItextID.presence !== "notallowed") {
+                itextul.append(makeItextLI('default', 'Hint Display Label', true));
+            }
+
+            contentEl.append('<br /><br />').append(itextul);
             displayBlock('dataElement');
             displayBlock('bindElement');
             displayBlock('controlElement');
@@ -816,7 +881,11 @@ formdesigner.ui = (function () {
                                 propName = otherInput.data('propName'),
                                 curMug = formdesigner.controller.getCurrentlySelectedMug(),
                                 curMugType = formdesigner.controller.getCurrentlySelectedMugType();
-                            formdesigner.controller.setMugPropertyValue(curMug,groupName,propName,otherInput.val(), curMugType);
+                    formdesigner.controller.setMugPropertyValue(curMug,groupName,propName,otherInput.val(), curMugType);
+                    //update ItextID stuff
+                    if($('#controlElement-labelItextID-input').length > 0) { //does it have itextID?
+                        $('#controlElement-labelItextID-input').val(otherInput.val()).keyup(); //trigger keyup to have this change be taken care of in the regular way.
+                    }
                 }
 
                 var nodeIDBoxes = $('input[id*="nodeID"]'); //gets all input boxes with ID attribute containing 'nodeID'
@@ -895,7 +964,7 @@ formdesigner.ui = (function () {
 
     function selectMugTypeInUI(mugType) {
         var ufid = mugType.ufid;
-        return getJSTree().jstree('select_node', $('#'+ufid));
+        return getJSTree().jstree('select_node', $('#'+ufid), true);
     }
     that.selectMugTypeInUI = selectMugTypeInUI;
 
@@ -1059,8 +1128,8 @@ formdesigner.ui = (function () {
         }).button("disable");
 
         function makeFormProp (propLabel, propName, keyUpFunc, initVal){
-            var liStr = '<li id=fd-form-prop-"' + propName + '" class="fd-form-property"><span class="fd-form-property-text">'+propLabel+': '+'</span>' +
-                '<input id=fd-form-prop-' + propName + '-' + 'input" class="fd-form-property-input">'+
+            var liStr = '<li id="fd-form-prop-' + propName + '" class="fd-form-property"><span class="fd-form-property-text">'+propLabel+': '+'</span>' +
+                '<input id="fd-form-prop-' + propName + '-' + 'input" class="fd-form-property-input">'+
                 '</li>',
                 li = $(liStr),
                 ul = $('#fd-form-opts-ul');
@@ -1076,8 +1145,8 @@ formdesigner.ui = (function () {
             formdesigner.controller.form.fire({
                 type: 'form-property-changed',
                 propName: propName,
-                oldVal: formdesigner.controller.form.formName,
-                newVal: $( this ).val()
+                oldVal: oldVal,
+                newVal: newVal
             })
         }
 
@@ -1088,7 +1157,8 @@ formdesigner.ui = (function () {
         makeFormProp("Form Name","formName", formNameFunc, formdesigner.controller.form.formName);
 
         var formIDFunc = function (e) {
-            fireFormPropChanged('formID',formdesigner.controller.form.formName, $( this ).val());
+            $(this).val($(this).val().replace(/ /g,'_'));
+            fireFormPropChanged('formID',formdesigner.controller.form.formID, $( this ).val());
             formdesigner.controller.form.formID = $(this).val();
         }
         makeFormProp("Form ID", "formID", formIDFunc, formdesigner.controller.form.formID);
@@ -1112,11 +1182,7 @@ formdesigner.ui = (function () {
         dTree = form.dataTree;
 
         function clearIcons() {
-            var nodes;
-            nodes = uiCTree.find('.jstree-leaf, .jstree-open');
-            nodes.each(function (idx, el){
-                $(el).find('.fd-tree-valid-alert-icon').remove();
-            })
+            uiCTree.find('.fd-tree-valid-alert-icon').remove();
         }
 
 
@@ -1126,7 +1192,7 @@ formdesigner.ui = (function () {
         for (i in invalidMTs){
             if(invalidMTs.hasOwnProperty(i)){
                 invalidMsg = invalidMTs[i].message;
-                $($('#' + i + ' a')[0]).append('<span class="ui-icon ui-icon-alert fd-tree-valid-alert-icon" title="'+invalidMsg+'></span>')
+                $($('#' + i)[0]).append('<div class="ui-icon ui-icon-alert fd-tree-valid-alert-icon" title="'+invalidMsg.replace(/"/g,"'")+'"></div>')
             }
         }
     };
@@ -1236,6 +1302,9 @@ formdesigner.ui = (function () {
         };
 
         clearUITree($('#fd-question-tree'));
+
+        $('#fd-form-prop-formName-input').val(formdesigner.controller.form.formName);
+        $('#fd-form-prop-formID-input').val(formdesigner.controller.form.formID);
 
 
     };

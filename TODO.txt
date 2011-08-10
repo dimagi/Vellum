@@ -1,16 +1,14 @@
 fd todo:
+
+
 --- Critical
-Make 'save to server' button with ajax post method (post URL set by formdesigner init params)
-Decide on correct fields to display in normal props view
+Pick icons for new question type
+Finishing integrating question type (tree move view logic should be same as 'text' type)
 fix parse for secret question type (should be easy)
-Hide button in advanced
+
 
 --- Somewhat critical
 Data tree view/node edit abilities.
+Hide button in advanced
 
 --- Less critical
- - Write hardcore test for form3 (testing out most properties have been loaded correctly, trees look correct, etc))
- - In Form.getBindList() swap out redundant list merging code for function in util (test to see if everything works as expected)
- - Tests for XML generation (all three above)
- - Do something with the top toolbar.
- - Advanced props accordion should stay state when selecting new question

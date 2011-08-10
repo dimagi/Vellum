@@ -162,6 +162,15 @@ formdesigner.controller = (function () {
                 case 'text':
                     setType("question");
                     break;
+                case 'integer':
+                    setType("int");
+                    break;
+                case 'double':
+                    setType("double");
+                    break;
+                case 'long':
+                    setType("long");
+                    break;
                 case 'group':
                     setType("group");
                     break;
@@ -245,13 +254,32 @@ formdesigner.controller = (function () {
             case 'select':
                 mugType = formdesigner.model.mugTypeMaker.stdMSelect();
                 break;
+            case '1select':
+                mugType = formdesigner.model.mugTypeMaker.stdSelect();
+                break;
+            case 'secret':
+                mugType = formdesigner.model.mugTypeMaker.stdSecret();
+                break;
              case 'item':
                 mugType = formdesigner.model.mugTypeMaker.stdItem();
                 break;
             case 'trigger':
                 mugType = formdesigner.model.mugTypeMaker.stdTrigger();
                 break;
+            case 'repeat':
+                mugType = formdesigner.model.mugTypeMaker.stdRepeat();
+                break;
+            case 'int':
+                mugType = formdesigner.model.mugTypeMaker.stdInt();
+                break;
+            case 'long':
+                mugType = formdesigner.model.mugTypeMaker.stdLong();
+                break;
+            case 'double':
+                mugType = formdesigner.model.mugTypeMaker.stdDouble();
+                break;
             default:
+                console.log("No standard mugType for selected question type:" + qType + " switching to 'Text Question' type!");
                 mugType = formdesigner.model.mugTypeMaker.stdTextQuestion();
         }
 
@@ -349,7 +377,6 @@ formdesigner.controller = (function () {
 
         formdesigner.ui.setDialogInfo(msg,'Continue',onContinue,'Abort',onAbort);
         if (!form.isFormValid()) {
-            console.log("FORM NOT VALID: SHOWING CONFIRM BOX");
             formdesigner.ui.showConfirmDialog();
         } else {
             formdesigner.controller.XFORM_STRING = form.createXForm();
@@ -520,6 +547,26 @@ formdesigner.controller = (function () {
     that.removeMugTypeFromForm = removeMugTypeFromForm;
 
     /**
+    * use getErrorMsg() and addErrorMsg() to deal with error msgs!
+    */
+    var parseErrorMsgs = [];
+
+    var addParseErrorMsg = function (level, msg) {
+        parseErrorMsgs.push(level + "::" + msg);
+    }
+    that.addParseErrorMsg = addParseErrorMsg;
+
+    var getParseErrorMsgs = function () {
+        return parseErrorMsgs;
+    }
+    that.getParseErrorMsgs = getParseErrorMsgs;
+
+    var resetParseErrorMsgs = function () {
+        parseErrorMsgs = [];
+    }
+    that.resetParseErrorMsgs = resetParseErrorMsgs;
+
+    /**
      * The big daddy function of parsing.
      * Pass in the XML String and this function
      * will create all the right stuff in the trees
@@ -527,6 +574,9 @@ formdesigner.controller = (function () {
      * @param xmlString
      */
     var parseXML = function (xmlString) {
+        var pError, getPErros;
+        pError = formdesigner.controller.addParseErrorMsg;
+        getPErros = formdesigner.controller.getParseErrorMsgs;
         var ParseException = function (msg) {
             this.name = 'XMLParseException';
             this.message = msg;
@@ -543,7 +593,8 @@ formdesigner.controller = (function () {
                     parentNodeName = $(el).parent()[0].nodeName,
                     rootNodeName = $(dataEl)[0].nodeName,
                     dataTree = formdesigner.controller.form.dataTree,
-                    mug, parentMugType;
+                    mug, parentMugType,
+                        extraXMLNS, keyAttr;
 
                 if($(el).children().length === 0) {
                     nodeVal = $(el).text();
@@ -551,11 +602,21 @@ formdesigner.controller = (function () {
                     nodeVal = null;
                 }
 
+                extraXMLNS = $(el).attr('xmlns');
+                keyAttr = $(el).attr('key');
+
                 mType.typeName = "Data Only MugType";
                 mug = formdesigner.model.createMugFromMugType(mType);
 
                 mug.properties.dataElement.properties.nodeID = nodeID;
                 mug.properties.dataElement.properties.dataValue = nodeVal;
+                if(extraXMLNS && (extraXMLNS !== formdesigner.formUuid)) {
+                    mug.properties.dataElement.properties.xmlnsAttr = extraXMLNS;
+                }
+                if(keyAttr) {
+                    mug.properties.dataElement.properties.keyAttr = keyAttr;
+                }
+                
                 mType.mug = mug;
                 if ( parentNodeName === rootNodeName ) {
                     parentMugType = null;
@@ -569,8 +630,12 @@ formdesigner.controller = (function () {
                 recFunc = function () {
                     parseDataElement(this);
                     $(this).children().each(recFunc);
+
                 };
 
+            if(root.children().length === 0) {
+                pError('error', 'Data block has no children elements! Please make sure your form is a valid JavaRosa XForm and try again!');
+            }
             root.children().each(recFunc);
             //try to grab the JavaRosa XForm Attributes in the root data element...
             formdesigner.formUuid = root.attr("xmlns");
@@ -578,6 +643,24 @@ formdesigner.controller = (function () {
             formdesigner.formUIVersion = root.attr("uiVersion");
             formdesigner.formVersion = root.attr("version");
             formdesigner.formName = root.attr("name");
+            formdesigner.controller.form.formID = $(root)[0].tagName;
+            
+            if (!formdesigner.formUuid) {
+                pError('warning', 'Form does not have a unique xform XMLNS (in data block). Will be added automatically');
+            }
+            if (!formdesigner.formJRM) {
+                pError('warning', 'Form JRM namespace attribute was not found in data block. One will be added automatically');
+            }
+            if (!formdesigner.formUIVersion) {
+                pError('warning', 'Form does not have a UIVersion attribute, one will be generated automatically');
+            }
+            if (!formdesigner.formVersion) {
+                pError('warning', 'Form does not have a Version attribute (in the data block), one will be added automatically');
+            }
+            if (!formdesigner.formName) {
+                pError('warning', 'Form does not have a Name! The default form name will be used');
+            }
+
         }
 
         function parseBindList (bindList) {
@@ -611,21 +694,42 @@ formdesigner.controller = (function () {
                    path = el.attr('ref');
                 }
                 nodeID = formdesigner.util.getNodeIDFromPath(path);
+                if(el.attr('id')) {
+                    attrs.nodeID = el.attr('id');
+                    attrs.nodeset = path;
+                } else {
+                    attrs.nodeID = nodeID;
+                }
+
                 attrs.dataType = el.attr('type');
                 attrs.relevantAttr = el.attr('relevant');
                 attrs.calculateAttr = el.attr('calculate');
                 attrs.constraintAttr = el.attr('constraint');
                 attrs.constraintMsgAttr = el.attr('constraintMsg');
                 attrs.requiredAttr = parseRequiredAttribute(el.attr('required'));
-                attrs.nodeID = nodeID;
+                attrs.preload = el.attr("jr:preload");
+                if(!attrs.preload) {
+                    attrs.preload = el.attr("jr\\:preload");
+                }
+                attrs.preloadParams = el.attr("jr:preloadParams");
+                if(!attrs.preloadParams) {
+                    attrs.preloadParams = el.attr("jr\\:preloadParams");
+                }
 
                 bindElement = new formdesigner.model.BindElement(attrs);
                 mug.properties.bindElement = bindElement;
 
                 oldMT = formdesigner.controller.form.getMugTypeByIDFromTree(nodeID, 'data');
+                if(!oldMT && attrs.nodeset) {
+                    oldMT = formdesigner.controller.form.getMugTypeByIDFromTree(
+                                                formdesigner.util.getNodeIDFromPath(attrs.nodeset),
+                                                'data'
+                    );
+                }
                 if(!oldMT){
-                    console.log("El,nodeID",el,nodeID);
-                    throw 'Parse error! Could not find Data MugType associated with this bind!'; //can't have a bind without an associated dataElement.
+                    pError ('warning', "Bind Node [" + nodeID + "] found but has no associated Data node. This bind node will be discarded!");
+//                    throw 'Parse error! Could not find Data MugType associated with this bind!'; //can't have a bind without an associated dataElement.
+                    return;
                 }
                 mType.ufid = oldMT.ufid;
                 mType.properties.dataElement = oldMT.properties.dataElement;
@@ -814,7 +918,8 @@ formdesigner.controller = (function () {
                     parentMug,
                     tagName,
                     couldHaveChildren = ['repeat', 'group', 'select', 'select1'],
-                    children;
+                    children,
+                    bind;
 
 
                 //do the repeat switch thing
@@ -824,15 +929,19 @@ formdesigner.controller = (function () {
                 }
 
                 parentNode = el.parent();
-//                if($(parentNode)[0].nodeName === 'repeat') {
-//                    parentNode = parentNode.parent(); //skip one up because of repeat's funny structure.
-//                }
                 if($(parentNode)[0].nodeName === 'h:body') {
                     parentNode = null;
                 }
 
                 parentPath = formdesigner.util.getPathFromControlElement(parentNode);
                 parentNodeID = formdesigner.util.getNodeIDFromPath(parentPath);
+                if(!parentNodeID) {
+                    //try looking for a control with a bind attribute
+                    bind = $(parentNode).attr('bind');
+                    if (bind) {
+                         parentNodeID = bind;
+                    }
+                }
                 if (parentNodeID) {
                     parentMug = formdesigner.controller.form.getMugTypeByIDFromTree(parentNodeID,'control');
                 } else {
@@ -843,6 +952,13 @@ formdesigner.controller = (function () {
 
                 path = formdesigner.util.getPathFromControlElement(el);
                 nodeID = formdesigner.util.getNodeIDFromPath(path);
+                if(!nodeID) {
+                    //try looking for a control with a bind attribute
+                    bind = $(el).attr('bind');
+                    if (bind) {
+                         nodeID = bind;
+                    }
+                }
                 if(oldEl){
                     mType = classifyAndCreateMugType(nodeID,oldEl);
                     populateMug(mType,oldEl);
@@ -905,6 +1021,8 @@ formdesigner.controller = (function () {
             formdesigner.currentItextDisplayLanguage = formdesigner.model.Itext.getDefaultLanguage();
         }
 
+        formdesigner.controller.resetParseErrorMsgs();
+
         formdesigner.controller.fire('parse-start');
         try{
             var xmlDoc = $.parseXML(xmlString),
@@ -913,12 +1031,27 @@ formdesigner.controller = (function () {
                 data = xml.find('instance').children(),
                 controls = xml.find('h\\:body').children(),
                 itext = xml.find('itext'),
-                formID, formName;
+                formID, formName,
+                    title;
 
             xml.find('instance').children().each(function () {
                 formID = this.nodeName;
             });
 
+            title = xml.find('title');
+            if(title.length === 0) {
+                title = xml.find('h\\:title');
+            }
+
+            if(title.length > 0) {
+                title = $(title).text();
+                formdesigner.controller.form.formName = title;
+            }
+
+
+            if(data.length === 0) {
+                pError('error', 'No Data block was found in the form.  Please check that your form is valid!');
+            }
             parseInstanceInfo(data[0]);
             parseDataTree (data[0]);
             parseBindList (binds);
@@ -968,11 +1101,11 @@ formdesigner.controller = (function () {
         var oType = mugType.mug.properties.controlElement.properties.tagName,
                 rType = (!refMugType || refMugType === -1) ? 'group' : refMugType.mug.properties.controlElement.properties.tagName,
                 oIsGroupOrRepeat = (oType === 'repeat' || oType === 'group'),
-                oIsItemOrInputOrTrigger = (oType === 'item' || oType === 'input' || oType === 'trigger'),
+                oIsItemOrInputOrTrigger = (oType === 'item' || oType === 'input' || oType === 'trigger' || oType === 'secret'),
                 oIsSelect = (oType === 'select1' || oType === 'select'),
                 oIsItem = (oType === 'item'),
                 rIsSelect = (rType === 'select1' || rType === 'select'),
-                rIsItemOrInputOrTrigger = (rType === 'item' || rType === 'input' || rType === 'trigger'),
+                rIsItemOrInputOrTrigger = (rType === 'item' || rType === 'input' || rType === 'trigger' || rType === 'secret'),
                 rIsGroupOrRepeat = (rType === 'repeat' || rType === 'group');
 
         if (position !== 'into') {
