@@ -1,4 +1,9 @@
+
+var JRVALIDATE_MODE = true;
+
+
 $(document).ready(function(){
+
     formdesigner.launch();
     var testXformBuffer;
     var make_control_bind_data_mug = function(){
@@ -59,7 +64,6 @@ $(document).ready(function(){
             dataType: 'text',
             success: function(xform){
                 testXformBuffer = xform;
-                console.log("Successfully got test xform!");
             }
         });
     }
@@ -95,7 +99,6 @@ $(document).ready(function(){
             }
         }
         if(mugType.properties.controlElement){
-            console.log(mug);
             if(mug.properties.controlElement.properties.hintItextID) {
                 formdesigner.model.Itext.setValue(mug.properties.controlElement.properties.hintItextID,'en','default','foo hint');
             }
@@ -306,7 +309,6 @@ $(document).ready(function(){
         giveMugFakeValues(myMug,MugType);
         formdesigner.model.Itext.setValue(myMug.properties.controlElement.properties.hintItextID,'en','default','foo hint');
         formdesigner.model.Itext.setValue(myMug.properties.controlElement.properties.labelItextID,'en','default','foo default');
-        console.log("MUG WITH FAKE VALUES",myMug);
         var validationObject = MugType.validateMug(myMug);
         equal(MugType.typeName, "Text Question MugType");
         equal(validationObject.status, "pass", 'Does the mug validate against the MugType?');
@@ -483,7 +485,8 @@ $(document).ready(function(){
         //////////END SETUP//////////
 
         var actualPath = tree.getAbsolutePath(mugTC);
-        var expectedPath =  '/'+mugTA.mug.properties.dataElement.properties.nodeID+
+        var expectedPath =  '/'+formdesigner.controller.form.formID+
+                            '/'+mugTA.mug.properties.dataElement.properties.nodeID+
                             '/'+mugTB.mug.properties.dataElement.properties.nodeID+
                             '/'+mugTC.mug.properties.dataElement.properties.nodeID;
         equal(actualPath, expectedPath, 'Is the generated DataElement path for the mug correct?');
@@ -507,7 +510,8 @@ $(document).ready(function(){
         
         tree.insertMugType(mugTC, 'into', mugTA);
         actualPath = tree.getAbsolutePath(mugTC);
-        expectedPath =  '/'+mugTA.mug.properties.dataElement.properties.nodeID+
+        expectedPath =  '/'+formdesigner.controller.form.formID+
+                        '/'+mugTA.mug.properties.dataElement.properties.nodeID+
                         '/'+mugTC.mug.properties.dataElement.properties.nodeID;
         equal(actualPath, expectedPath, 'After move is the calculated path still correct?');
 
@@ -542,7 +546,6 @@ $(document).ready(function(){
         tree.insertMugType(mugTD, 'before', mugTA);
         equal('/' + formdesigner.controller.form.formID + '/' + mugTD.mug.properties.dataElement.properties.nodeID, tree.getAbsolutePath(mugTD),
              "Check that the newly inserted Mug's generated path is correct");
-        console.log("MUGTD",mugTD);
         treePrettyPrintExpected = ''+tree._getRootNodeID()+'['+
             tree._getMugTypeNodeID(mugTD)+','+
             tree._getMugTypeNodeID(mugTA)+'['+
@@ -694,7 +697,6 @@ $(document).ready(function(){
         c.on("question-creation", function(e){
             curMugType = e.mugType;
         });
-        console.log(ui.buttons);
 
         addqbut = $('#fd-add-but');
         addqbut.click();
@@ -758,7 +760,17 @@ $(document).ready(function(){
         equal(IT.getItextVals(iID,otherLanguageName)[form], val, "Itext set and retrieval work");
 
         equal(IT.getValue(iID2,'en','short'), valObject.en.short, "Other Itext retreival method test");
-        
+
+        //rename an ID
+        IT.setValue(iID,'en',form,val);
+        var newID = iID + 'foo';
+        IT.renameItextID(iID,newID);
+        ok(!IT.getAllData().en[iID], 'old ID does not exist anymore in EN');
+        ok(!IT.getAllData().sw[iID], 'old ID does not exist anymore in SW');
+        ok(IT.getAllData().en[newID], 'new ID exists in EN');
+        ok(IT.getAllData().sw[newID], 'new ID exists in SW');
+
+
     });
 
     module("Create XForm XML");
@@ -788,30 +800,42 @@ $(document).ready(function(){
         var c = formdesigner.controller,
             ui = formdesigner.ui,
             jstree = $("#fd-question-tree"),
-            curMugType,
+            curMugType, Itext,
             addQbut, lastCreatedNode, addGroupBut, qTypeSel;
         c.resetFormDesigner();
 
+        Itext = formdesigner.model.Itext;
 
         jstree.bind('create_node.jstree',function(e,data){
             lastCreatedNode = data.rslt.obj;
         })
         addQuestionThroughUI("Text Question");
         jstree.jstree('select_node',lastCreatedNode);
-        formdesigner.controller.form.controlTree.getMugTypeFromUFID(lastCreatedNode.attr('id')).mug.properties.controlElement.properties.label = 'question1 label';
+        curMugType = formdesigner.controller.form.controlTree.getMugTypeFromUFID(lastCreatedNode.attr('id'));
+        Itext.setValue(curMugType.mug.properties.controlElement.properties.labelItextID,'en','default','question1 label');
 
         addQuestionThroughUI("Group");
         jstree.jstree('select_node',lastCreatedNode,true);
-        formdesigner.controller.form.controlTree.getMugTypeFromUFID(lastCreatedNode.attr('id')).mug.properties.controlElement.properties.label = 'group label';
+
         $('#dataElement-nodeID-input').val('group1').keyup();
+        curMugType = formdesigner.controller.form.controlTree.getMugTypeFromUFID(lastCreatedNode.attr('id'));
+        Itext.setValue(curMugType.mug.properties.controlElement.properties.labelItextID,'en','default','group label');
         addQuestionThroughUI("Text Question");
         jstree.jstree('select_node',lastCreatedNode,true);
-        formdesigner.controller.form.controlTree.getMugTypeFromUFID(lastCreatedNode.attr('id')).mug.properties.controlElement.properties.label = 'question2 label';
         $('#dataElement-nodeID-input').val('question2').keyup();
+        curMugType = formdesigner.controller.form.controlTree.getMugTypeFromUFID(lastCreatedNode.attr('id'));
+        Itext.setValue(curMugType.mug.properties.controlElement.properties.labelItextID,'en','default', 'question2 label');
         formdesigner.formUuid = "http://openrosa.org/formdesigner/5EACC430-F892-4AA7-B4AA-999AD0805A97";    
         var actual = beautifyXml(c.form.createXForm());
+        validateFormWithJR(actual);
+
         getTestXformOutput('form1.xml');
         var expected = beautifyXml(testXformBuffer);
+        validateFormWithJR(expected);
+        validateFormWithJR(actual);
+        validateFormWithJR(expected);
+        validateFormWithJR(actual);
+        
         equal(expected,actual);
 
         //test if form is valid
@@ -891,7 +915,6 @@ $(document).ready(function(){
         mType.ufid = oldMT.ufid;
 
         c.form.replaceMugType(oldMT,mType,'data');
-        console.log(oldMT);
     });
 
     function getMTFromEl(el) {
@@ -906,15 +929,10 @@ $(document).ready(function(){
             curMugType,
             addQbut, lastCreatedNode, addGroupBut, qTypeSel, iiD, groupMT, Itext,mugProps,cEl,iID;
         c.resetFormDesigner();
-
-
         Itext = formdesigner.model.Itext;
-
         jstree.bind('create_node.jstree',function(e,data){
             lastCreatedNode = data.rslt.obj;
         })
-
-
 
         //build form
         addQuestionThroughUI("Text Question");
@@ -924,6 +942,7 @@ $(document).ready(function(){
         cEl = mugProps.controlElement.properties;
         iID = cEl.labelItextID;
         Itext.setValue(iID,Itext.getDefaultLanguage(),'default','question1 label');
+        //add group
         addQuestionThroughUI("Group");
         jstree.jstree('select_node',lastCreatedNode,true);
         curMugType = getMTFromEl(lastCreatedNode);
@@ -931,8 +950,10 @@ $(document).ready(function(){
         mugProps = curMugType.mug.properties;
         cEl = mugProps.controlElement.properties;
         iID = cEl.labelItextID;
-        Itext.setValue(iID,Itext.getDefaultLanguage(),'default','group1 label');
-        $('#dataElement-nodeID-input').val('group1').keyup();
+        Itext.setValue(iID,Itext.getDefaultLanguage(),'default','group1 label'); //set itext value for group
+        $('#dataElement-nodeID-input').val('group1').keyup(); //change the groups nodeIDs to something more reasonable
+
+        //add another text question
         addQuestionThroughUI("Text Question");
         jstree.jstree('select_node',lastCreatedNode,true);
         curMugType = getMTFromEl(lastCreatedNode);
@@ -953,16 +974,7 @@ $(document).ready(function(){
         //compare with form we have in the testing cache.
         formdesigner.formUuid = "http://openrosa.org/formdesigner/E9BE7934-687F-4C19-BDB7-9509005460B6";
         var actual = c.form.createXForm();
-        stop(500);
-        $.post('/formvalidate/validate/',{xform: actual},function (data) {
-            console.log(data);
-            var res = data;
-            if(!res.success){
-                console.log(res.outString, res.errString);
-            }
-            ok(res.success, 'Form validates with Javarosa form validator, see console for failure');
-            start();
-        });
+        validateFormWithJR(actual);
         actual = beautifyXml(actual);
         getTestXformOutput('form8.xml');
         var expected = beautifyXml(testXformBuffer);
@@ -1026,11 +1038,10 @@ $(document).ready(function(){
 
 
         curMugType = getMTFromEl($(lastCreatedNode));
-        console.log(curMugType);
         ui.selectMugTypeInUI(curMugType);
         equal(curMugType.typeName, "Text Question MugType", "Is Question created through UI a text type question?");
         workingField = $('#dataElement-nodeID-input');
-        workingField.val("textQuestion1").keyup();
+        workingField.val("textQuestion1").keyup().keyup().keyup();
         xmlString = c.form.createXForm();
         validateFormWithJR(xmlString);
         equal(curMugType.mug.properties.dataElement.properties.nodeID, "textQuestion1", "dataElement nodeID set correctly");
@@ -1038,9 +1049,6 @@ $(document).ready(function(){
         xml = parseXMLAndGetSelector(xmlString);
         validateFormWithJR(xmlString);
 
-        curMugType.mug.on('property-changed', function(e) {
-            console.log('Form Prop Changed!',e);
-        });
         //set Default Value
         workingField = $('#dataElement-dataValue-input');
         workingField.val('Some Data Value String').keyup();
@@ -1097,12 +1105,11 @@ $(document).ready(function(){
         equal(requireAttr,expected,"Is the required attribute value === 'true()' in the bind?");
 
         workingField = $('#fd-itext-default-input');
-        workingField.val("Question 1 Itext yay").keyup();
+        workingField.val("Question 1 Itext yay").keyup().keyup();
         xmlString = c.form.createXForm();
         validateFormWithJR(xmlString);
         xml = parseXMLAndGetSelector(xmlString);
-        window.xmlString = xml;
-        var itextVal = xml.find('text,[id="question1"]').children('value').text()
+        var itextVal = xml.find('translation #'+ $('#controlElement-labelItextID-input').val()).children('value').text()
         expected = "Question 1 Itext yay";
         equal(itextVal,expected,"Has default Itext been set correctly through UI?");
 
@@ -1112,7 +1119,7 @@ $(document).ready(function(){
         validateFormWithJR(xmlString);
         xml = parseXMLAndGetSelector(xmlString);
         window.xmlString = xml;
-        itextVal = xml.find('text,[id="question1"]').children('[form="audio"]').text()
+        itextVal = xml.find('translation #'+ $('#controlElement-labelItextID-input').val()).children('[form="audio"]').text()
         expected = "jr://audio/sound/vol1/questionnaire/awesome.mp3";
         equal(itextVal,expected,"Has audio Itext been set correctly through UI?");
 
@@ -1122,7 +1129,7 @@ $(document).ready(function(){
         validateFormWithJR(xmlString);
         xml = parseXMLAndGetSelector(xmlString);
         window.xmlString = xml;
-        itextVal = xml.find('text,[id="question1"]').children('[form="image"]').text()
+        itextVal = xml.find('text,[id="'+ $('#controlElement-labelItextID-input').val()+'"]').children('[form="image"]').text()
         expected = "jr://images/foo.png";
         equal(itextVal,expected,"Has image Itext been set correctly through UI?");
 
@@ -1132,7 +1139,7 @@ $(document).ready(function(){
         validateFormWithJR(xmlString);
         xml = parseXMLAndGetSelector(xmlString);
         window.xmlString = xml;
-        itextVal = xml.find('text,[id="question1"]').children('[form="short"]').text()
+        itextVal = xml.find('text,[id="'+ $('#controlElement-labelItextID-input').val()+'"]').children('[form="short"]').text()
         expected = "Some short itext";
         equal(itextVal,expected,"Has short Itext been set correctly through UI?");
 
@@ -1142,9 +1149,11 @@ $(document).ready(function(){
         validateFormWithJR(xmlString);
         xml = parseXMLAndGetSelector(xmlString);
         window.xmlString = xml;
-        itextVal = xml.find('text,[id="question1"]').children('[form="long"]').text()
+        itextVal = xml.find('text,[id="'+ $('#controlElement-labelItextID-input').val()+'"]').children('[form="long"]').text()
         expected = "some long Itext for question 1";
         equal(itextVal,expected,"Has long Itext been set correctly through UI?");
+
+
 
         workingField = $('#bindElement-constraintMsgAttr-input');
         workingField.val("Some default jr:constraintMsg value").keyup();
@@ -1166,40 +1175,61 @@ $(document).ready(function(){
         expected = "Default Hint Label Value";
         equal(someval,expected,"Has default hint label been set correctly through UI?");
 
-        formdesigner.model.Itext.setValue('question1_hint','en','default','Some Hint Itext') //set the Itext value manually in the absence of a UI widget for it at the present time
         workingField = $('#controlElement-hintItextID-input');
         workingField.val("question1_hint").keyup();
         xmlString = c.form.createXForm();
-        validateFormWithJR(xmlString);
         xml = parseXMLAndGetSelector(xmlString);
         window.xmlString = xml;
         someval = xml.find('input').children('hint').attr('ref');
         expected = "jr:itext('question1_hint')";
         equal(someval,expected,"Has hint Itext ID been set correctly through UI?");
 
+        workingField = $('#fd-itext-hint-input');
+        workingField.val("Question 1 Itext hint").keyup().keyup();
+        xmlString = c.form.createXForm();
+        validateFormWithJR(xmlString);
+        xml = parseXMLAndGetSelector(xmlString);
+        var findstring = '';
+        if($('#controlElement-hintItextID-input').val()) {
+            findstring = '[id='+$('#controlElement-hintItextID-input').val()+']';
+        }
+        itextVal = xml.find('translation').find(findstring).children('value').text()
+        expected = "Question 1 Itext hint";
+        equal(itextVal,expected,"Has hint Itext been set correctly through UI?");
+
     })
 
 
 });
 
-var asyncRes = []
+var asyncRes = [], testData = [], len = -1;
+formdesigner.asyncRes = asyncRes;
+formdesigner.testData = testData;
 /**
  * Actual is the xml form string
  * @param actual
  */
 function validateFormWithJR(actual) {
+    if(!JRVALIDATE_MODE){
+        return true;
+    }
         stop();
-        $.post('/formvalidate/validate/',{xform: actual},function (data) {
-            var len = asyncRes.length + 1
-            asyncRes[len] = data;
-            if(!asyncRes[len].success){
-                console.log("VALIDATIONG WITH JR VALIDATOR FAILED! OUTPUT:",asyncRes[len].outstring, asyncRes[len].errstring);
-            }
-            ok(asyncRes[len].success, 'Form validates with Javarosa form validator, see console for failure');
-            start();
+        var mylen;
+        len = len + 1;
+        mylen = len;
+        testData[mylen] = formdesigner.util.clone(actual);
+        $.post('/formvalidate/validate/',{xform: testData[mylen]},function (data) {
+                    asyncRes[mylen] = data;
+                    if(!asyncRes[mylen].success){
+                        ok(false, "Form Failed to validate with JR Validator!"+mylen);
+                        start();
+                        throw 'Form Failed to validate with JR Validator! See Console. Failure number:'+mylen;
+                    }
+                    ok(asyncRes[mylen].success, 'Form validates with Javarosa form validator, see console for failure '+mylen);
+                    start();
+
         });
 }
-
 
 function parseXMLAndGetSelector(xmlString) {
 

@@ -273,7 +273,8 @@ td {
 
 .fd-tree-valid-alert-icon {
     display:inline;
-    float: right;
+    position:absolute;
+    
 }
 
 .fd-form-props-heading {

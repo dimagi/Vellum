@@ -312,8 +312,6 @@ formdesigner.util = (function(){
 
     that.parseXml = function (xml) {
        var dom = null;
-        console.log("ATTEMPTING TO LOAD XML INTO XML PARSER");
-        console.log(xml);
        if (window.DOMParser) {
           try {
              dom = (new DOMParser()).parseFromString(xml, "text/xml");
@@ -690,13 +688,6 @@ formdesigner.util = (function(){
             var MT = formdesigner.controller.form.controlTree.getMugTypeFromUFID(e.mugTypeUfid);
             formdesigner.ui.showVisualValidation(MT);
         });
-
-
-
-        //DEBUG EVENT CONSOLE PRINTER
-        mug.on('property-changed', function(e){
-//           console.log("PROPERTY-CHANGED-EVENT (see utils)",e);
-        });
     }
 
     /**
@@ -705,7 +696,6 @@ formdesigner.util = (function(){
      * @param val - New value of the display label
      */
     that.changeUITreeNodeLabel = function (ufid, val) {
-        console.log("trying to change node label in jstree!");
         var el = $('#' + ufid);
         $('#fd-question-tree').jstree('rename_node',el,val);
     }

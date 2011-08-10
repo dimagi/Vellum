@@ -13,17 +13,17 @@
 			</instance>
 			<bind nodeset="/data/question1" type="xsd:string" />
 			<bind nodeset="/data/group1" />
-			<bind nodeset="/group1/question2" type="xsd:string" />
+			<bind nodeset="/data/group1/question2" type="xsd:string" />
 			<itext>
 				<translation lang="en" default="">
 					<text id="question1">
-						<value>question1</value>
+						<value>question1 label</value>
+					</text>
+					<text id="group1">
+						<value>group label</value>
 					</text>
 					<text id="question2">
-						<value>question2</value>
-					</text>
-					<text id="question3">
-						<value>question3</value>
+						<value>question2 label</value>
 					</text>
 				</translation>
 			</itext>
@@ -31,12 +31,12 @@
 	</h:head>
 	<h:body>
 		<input ref="/data/question1">
-			<label ref="jr:itext('question1')">question1 label</label>
+			<label ref="jr:itext('question1')" />
 		</input>
 		<group ref="/data/group1">
-			<label ref="jr:itext('question2')">group label</label>
-			<input ref="/group1/question2">
-				<label ref="jr:itext('question3')">question2 label</label>
+			<label ref="jr:itext('group1')" />
+			<input ref="/data/group1/question2">
+				<label ref="jr:itext('question2')" />
 			</input>
 		</group>
 	</h:body>

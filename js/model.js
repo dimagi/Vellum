@@ -1559,11 +1559,15 @@ formdesigner.model = function () {
             nodeParent = this.getParentNode(node);
             output = '/' + node.getID();
 
-            do {
+            while (nodeParent) {
                 output = '/' + nodeParent.getID() + output;
+                if(nodeParent.isRootNode){
+                    break;
+                }
                 nodeParent = this.getParentNode(nodeParent);
-            } while (nodeParent && !nodeParent.isRootNode)
 
+            }
+                        
             return output;
 
         };
@@ -2665,7 +2669,6 @@ formdesigner.model = function () {
         that.getInvalidItextIDs = function () {
             var valRes, IDs = [], i;
             valRes = formdesigner.model.Itext.validateItext();
-            console.log("VALRES!",valRes);
             for (i in valRes) {
                 if(valRes.hasOwnProperty(i)) {
                     IDs.push(i);
@@ -2735,6 +2738,26 @@ formdesigner.model = function () {
             }
 
             return retval;
+
+        }
+
+        /**
+         * Renames the itext ID to something new.
+         * @param oldID
+         * @param newID
+         */
+        that.renameItextID = function (oldID, newID) {
+            if ( (!oldID || !newID) || (oldID === newID) ){
+                return;
+            }
+            var langs, i, b;
+            langs = formdesigner.model.Itext.getLanguages();
+            for (i in langs) {
+                if (data[langs[i]][oldID]) {
+                    data[langs[i]][newID] = data[langs[i]][oldID];
+                    delete data[langs[i]][oldID];
+                }
+            }
 
         }
 

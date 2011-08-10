@@ -509,10 +509,14 @@ formdesigner.ui = (function () {
                                         propName = input.data('propName'),
                                         curMug = formdesigner.controller.getCurrentlySelectedMug(),
                                         curMT = formdesigner.controller.getCurrentlySelectedMugType(),
-                                        allowedIDChars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ:_';
+                                        oldItextID;
 
-                                if(propName === 'nodeID'){ //sanitize nodeID;
+                                if (propName === 'nodeID'){ //sanitize nodeID;
                                     input.val(input.val().replace(/\s/g,'_'));
+                                }
+                                if (propName === 'labelItextID' || propName === 'hintItextID') {
+                                    oldItextID = curMug.properties.controlElement.properties[propName];
+                                    formdesigner.model.Itext.renameItextID(oldItextID,input.val());
                                 }
                                 formdesigner.controller.setMugPropertyValue(curMug,groupName,propName,input.val(),curMT);
                             });
@@ -643,8 +647,11 @@ formdesigner.ui = (function () {
                 }
                 iIDInput.val(iID).keyup(); //.keyup() to trigger existing behaviour, if any.
             }
-
-            id = 'fd-itext-' + textForm.toLowerCase();
+            if (ishint){
+                id = 'fd-itext-hint';
+            } else {
+                id = 'fd-itext-' + textForm.toLowerCase();
+            }
             liStr = '<li id="' + id + '" class="fd-property"></li>';
             txtStr = '<span id="' + id +'-txt" class="fd-property-text">' + iflabel + '</span>';
             inputStr = '<div id="' + id + '-input-div" class="fd-prop-input-div chzn-container"><input id="' + id + '-input" class="fd-property-input"/>';
@@ -660,9 +667,27 @@ formdesigner.ui = (function () {
             input.data('textform', textForm);
             input.children(':input').data('ufid', mugType.ufid).data('textform', textForm);;
             input.find(':input').keyup ( function (e) {
-                var mugType = formdesigner.controller.form.controlTree.getMugTypeFromUFID($(this).data('ufid'));
-                Itext.setValue(iID, currentLang, textForm, $(this).val());
+                var oldVal, newVal, mugType, curIID;
+                oldVal = Itext.getValue(iID,currentLang, textForm);
+                newVal = $ (this).val();
+                mugType = formdesigner.controller.form.controlTree.getMugTypeFromUFID($(this).data('ufid'));
+                if(ishint){
+                    curIID = mugType.mug.properties.controlElement.properties.hintItextID;
+                } else {
+                    curIID = mugType.mug.properties.controlElement.properties.labelItextID;
+                }
+                Itext.setValue(curIID, currentLang, textForm, newVal);
                 formdesigner.util.changeUITreeNodeLabel($ (this).data('ufid'), formdesigner.util.getMugDisplayName(mugType))
+
+                formdesigner.controller.form.fire({
+                    type: 'form-property-changed',
+                    propName: 'itext;'+textForm,
+                    iID: curIID,
+                    mugType: mugType,
+                    oldVal: oldVal,
+                    newVal: newVal
+                })
+
             });
 
             return li;
@@ -788,7 +813,6 @@ formdesigner.ui = (function () {
                 formdesigner.IS_ADVANCED_ACC_EXPANDED = false;
             }
 
-            console.log('adv acc exp',formdesigner.IS_ADVANCED_ACC_EXPANDED);
             adv.accordion({
 //                fillSpace: true,
                 autoHeight: false,
@@ -796,14 +820,11 @@ formdesigner.ui = (function () {
                 active: formdesigner.IS_ADVANCED_ACC_EXPANDED
             });
             if(formdesigner.IS_ADVANCED_ACC_EXPANDED) {
-                console.log("FUUUU");
                 $('#fd-props-adv-accordion').accordion('activate',0);
             }
 
             $('#fd-props-adv-accordion h3').click(function () {
-
                 formdesigner.IS_ADVANCED_ACC_EXPANDED = !formdesigner.IS_ADVANCED_ACC_EXPANDED;
-                console.log('CLICK!',formdesigner.IS_ADVANCED_ACC_EXPANDED);
             });
 
             var contentEl = $('#fd-adv-props-content');
@@ -839,7 +860,11 @@ formdesigner.ui = (function () {
                                 propName = otherInput.data('propName'),
                                 curMug = formdesigner.controller.getCurrentlySelectedMug(),
                                 curMugType = formdesigner.controller.getCurrentlySelectedMugType();
-                            formdesigner.controller.setMugPropertyValue(curMug,groupName,propName,otherInput.val(), curMugType);
+                    formdesigner.controller.setMugPropertyValue(curMug,groupName,propName,otherInput.val(), curMugType);
+                    //update ItextID stuff
+                    if($('#controlElement-labelItextID-input').length > 0) { //does it have itextID?
+                        $('#controlElement-labelItextID-input').val(otherInput.val()).keyup(); //trigger keyup to have this change be taken care of in the regular way.
+                    }
                 }
 
                 var nodeIDBoxes = $('input[id*="nodeID"]'); //gets all input boxes with ID attribute containing 'nodeID'
@@ -1136,11 +1161,7 @@ formdesigner.ui = (function () {
         dTree = form.dataTree;
 
         function clearIcons() {
-            var nodes;
-            nodes = uiCTree.find('.jstree-leaf, .jstree-open');
-            nodes.each(function (idx, el){
-                $(el).find('.fd-tree-valid-alert-icon').remove();
-            })
+            uiCTree.find('.fd-tree-valid-alert-icon').remove();
         }
 
 
@@ -1150,7 +1171,7 @@ formdesigner.ui = (function () {
         for (i in invalidMTs){
             if(invalidMTs.hasOwnProperty(i)){
                 invalidMsg = invalidMTs[i].message;
-                $($('#' + i + ' a')[0]).append('<div class="ui-icon ui-icon-alert fd-tree-valid-alert-icon" title="'+invalidMsg.replace(/"/g,"'")+'"></div>')
+                $($('#' + i)[0]).append('<div class="ui-icon ui-icon-alert fd-tree-valid-alert-icon" title="'+invalidMsg.replace(/"/g,"'")+'"></div>')
             }
         }
     };

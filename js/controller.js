@@ -349,7 +349,6 @@ formdesigner.controller = (function () {
 
         formdesigner.ui.setDialogInfo(msg,'Continue',onContinue,'Abort',onAbort);
         if (!form.isFormValid()) {
-            console.log("FORM NOT VALID: SHOWING CONFIRM BOX");
             formdesigner.ui.showConfirmDialog();
         } else {
             formdesigner.controller.XFORM_STRING = form.createXForm();
@@ -624,7 +623,6 @@ formdesigner.controller = (function () {
 
                 oldMT = formdesigner.controller.form.getMugTypeByIDFromTree(nodeID, 'data');
                 if(!oldMT){
-                    console.log("El,nodeID",el,nodeID);
                     throw 'Parse error! Could not find Data MugType associated with this bind!'; //can't have a bind without an associated dataElement.
                 }
                 mType.ufid = oldMT.ufid;
