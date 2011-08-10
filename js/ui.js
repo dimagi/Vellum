@@ -1158,7 +1158,7 @@ formdesigner.ui = (function () {
 
         var formIDFunc = function (e) {
             $(this).val($(this).val().replace(/ /g,'_'));
-            fireFormPropChanged('formID',formdesigner.controller.form.formName, $( this ).val());
+            fireFormPropChanged('formID',formdesigner.controller.form.formID, $( this ).val());
             formdesigner.controller.form.formID = $(this).val();
         }
         makeFormProp("Form ID", "formID", formIDFunc, formdesigner.controller.form.formID);
@@ -1302,6 +1302,9 @@ formdesigner.ui = (function () {
         };
 
         clearUITree($('#fd-question-tree'));
+
+        $('#fd-form-prop-formName-input').val(formdesigner.controller.form.formName);
+        $('#fd-form-prop-formID-input').val(formdesigner.controller.form.formID);
 
 
     };

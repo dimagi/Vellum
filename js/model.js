@@ -594,6 +594,18 @@ formdesigner.model = function () {
                     visibility: 'visible',
                     presence: 'optional',
                     lstring: 'Default Data Value'
+                },
+                keyAttr: {
+                    editable: 'w',
+                    visibility: 'advanced',
+                    presence: 'optional',
+                    lstring: 'JR:Preload key value'
+                },
+                xmlnsAttr: {
+                    editable: 'w',
+                    visibility: 'advanced',
+                    presence: 'optional',
+                    lstring: "Special Data Node XMLNS attribute"
                 }
             },
             bindElement: {
@@ -651,6 +663,23 @@ formdesigner.model = function () {
                     presence: 'optional',
                     lstring: "Is this Question Required?",
                     uiType: "checkbox"
+                },
+                preload: {
+                    editable: 'w',
+                    visibility: 'advanced',
+                    presence: 'optional',
+                    lstring: "JR Preload"
+                },
+                preloadParams: {
+                    editable: 'w',
+                    visibility: 'advanced',
+                    presence: 'optional',
+                    lstring: "JR Preload Param"
+                },
+                nodeset: {
+                    editable: 'r',
+                    visibility: 'hidden',
+                    presence: 'optional' //if not present one will be generated... hopefully.
                 }
             },
             controlElement: {
@@ -1511,7 +1540,6 @@ formdesigner.model = function () {
             }
         };
 
-
         /**
          * Insert a MugType as a child to the node containing parentMugType.
          *
@@ -1587,8 +1615,6 @@ formdesigner.model = function () {
             }
         };
 
-
-
         /**
          * Returns a list of nodes that are in the top level of this tree (i.e. not the abstract rootNode but it's children)
          */
@@ -1611,7 +1637,8 @@ formdesigner.model = function () {
                 throw 'getAbsolutePath argument must be a MugType!';
             }
             if (!node) {
-                throw 'Cant find path of MugType that is not present in the Tree!';
+//                console.log('Cant find path of MugType that is not present in the Tree!');
+                return null;
             }
             nodeParent = this.getParentNode(node);
             output = '/' + node.getID();
@@ -1906,7 +1933,7 @@ formdesigner.model = function () {
                 // create afterChildfunc that closes the data tag
                 function mapFunc (node) {
                     var xw = formdesigner.controller.XMLWriter,
-                        defaultVal,
+                        defaultVal, extraXMLNS, keyAttr,
                         MT = node.getValue();
 
                     xw.writeStartElement(node.getID());
@@ -1914,6 +1941,15 @@ formdesigner.model = function () {
                         defaultVal = MT.mug.properties.dataElement.properties.dataValue;
                         xw.writeString(defaultVal);
                     }
+                    if(!node.isRootNode && MT.mug.properties.dataElement.properties.keyAttr){
+                        keyAttr = MT.mug.properties.dataElement.properties.keyAttr;
+                        xw.writeAttributeString("key", keyAttr);
+                    }
+                    if(!node.isRootNode && MT.mug.properties.dataElement.properties.xmlnsAttr){
+                        extraXMLNS = MT.mug.properties.dataElement.properties.xmlnsAttr;
+                        xw.writeAttributeString("xmlns", extraXMLNS);
+                    }
+
 
                     if (node.isRootNode) {
                         create_model_header();
@@ -1961,6 +1997,8 @@ formdesigner.model = function () {
                         relevant = sanitizeXML(bEl.properties.relevantAttr);
                         required = sanitizeXML(createBindRequiredAttribute(bEl.properties.requiredAttr));
                         calc = sanitizeXML(bEl.properties.calculateAttr);
+                        preld = bEl.properties.preload;
+                        preldParams = bEl.properties.preloadParams;
                         return {
                             nodeset: nodeset,
                             'type': type,
@@ -1968,7 +2006,9 @@ formdesigner.model = function () {
                             constraintMsg: consMsg,
                             relevant: relevant,
                             required: required,
-                            calculate: calc
+                            calculate: calc,
+                            preload: preld,
+                            preloadParams: preldParams
                         }
                     } else {
                         return null;
@@ -1985,6 +2025,10 @@ formdesigner.model = function () {
                                 if(attrs[j]){ //if property has a useful bind attribute value
                                     if(j === "constraintMsg"){
                                         xw.writeAttributeString("jr:constraintMsg",attrs[j]); //write it
+                                    } else if (j === "preload") {
+                                        xw.writeAttributeString("jr:preload", attrs[j]);
+                                    } else if (j === "preloadParams") {
+                                        xw.writeAttributeString("jr:preloadParams", attrs[j]);
                                     } else {
                                         xw.writeAttributeString(j,attrs[j]);
                                     } //write it
@@ -2303,17 +2347,19 @@ formdesigner.model = function () {
                     return;
                 }
                 var mt = node.getValue(),
-                    thisNodeID;
+                    thisDataNodeID, thisBindNodeID;
                 if (mt.properties.dataElement && mt.mug.properties.dataElement) {
-                    thisNodeID = mt.mug.properties.dataElement.properties.nodeID;
-                } else if (mt.properties.bindElement && mt.mug.properties.bindElement){
-                    thisNodeID = mt.mug.properties.bindElement.properties.nodeID;
-                } else {
+                    thisDataNodeID = mt.mug.properties.dataElement.properties.nodeID;
+                }
+                if (mt.properties.bindElement && mt.mug.properties.bindElement){
+                    thisBindNodeID = mt.mug.properties.bindElement.properties.nodeID;
+                }
+                if (!thisDataNodeID && !thisBindNodeID){
                     return; //this MT just has no nodeID :/
                 }
 
 
-                if(thisNodeID === nodeID){
+                if(thisDataNodeID === nodeID || thisBindNodeID === nodeID){
                     return mt;
                 }
             }

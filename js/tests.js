@@ -522,7 +522,7 @@ $(document).ready(function(){
         equal(treePrettyPrintExpected,tree.printTree(), 'Check the tree structure is correct3');
 
         tree.removeMugType(mugTB);
-        raises(function(){tree.getAbsolutePath(mugTB)}, "Cant find path of MugType that is not present in the Tree!");
+        ok(tree.getAbsolutePath(mugTB) === null, "Cant find path of MugType that is not present in the Tree!");
 
         tree.insertMugType(mugTB,'before',mugTC);
         treePrettyPrintExpected = ''+tree._getRootNodeID()+'['+
@@ -532,7 +532,7 @@ $(document).ready(function(){
         equal(treePrettyPrintExpected,tree.printTree(), 'Check the tree structure is correct4');
 
         tree.removeMugType(mugTB);
-        raises(function(){tree.getAbsolutePath(mugTB)}, "Cant find path of MugType that is not present in the Tree!");
+        ok(tree.getAbsolutePath(mugTB) === null, "Cant find path of MugType that is not present in the Tree!");
 
         tree.insertMugType(mugTB,'before',mugTC);
         treePrettyPrintExpected = ''+tree._getRootNodeID()+'['+
@@ -1252,7 +1252,6 @@ $(document).ready(function(){
         curMugType = getMTFromEl($(lastCreatedNode));
         ui.selectMugTypeInUI(curMugType);
         equal($('#bindElement-dataType-input').val(), 'xsd:long');
-        console.log($(lastCreatedNode), curMugType);
         equal(curMugType.mug.properties.bindElement.properties.dataType, 'xsd:long');
 
         xmlString = c.form.createXForm();
@@ -1279,6 +1278,34 @@ $(document).ready(function(){
         el = xml.find('[nodeset*='+curMugType.mug.properties.bindElement.properties.nodeID+']')
         equal($(el).attr('type'), 'xsd:string');
 
+
+
+    });
+
+    module("Parsing Tests Part II");
+    test("Parse Error Messages Functionality", function () {
+        var c = formdesigner.controller,
+            ui = formdesigner.ui,
+            jstree = $("#fd-question-tree"),
+            curMugType,
+            addQbut, lastCreatedNode, addGroupBut, qTypeSel, iiD, groupMT, Itext,mugProps,cEl,iID,
+                sourceDrop, parseButton, pErrors, expectedErrors, myxml;
+        c.resetFormDesigner();
+
+
+        getTestXformOutput('form_with_no_data_attrs.xml');
+        myxml = testXformBuffer;
+        c.loadXForm(myxml); //load the xform using the standard pathway in the FD for parsing forms
+
+        expectedErrors = [
+            "warning::Form does not have a unique xform XMLNS (in data block). Will be added automatically",
+            "warning::Form JRM namespace attribute was not found in data block. One will be added automatically",
+            "warning::Form does not have a UIVersion attribute, one will be generated automatically",
+            "warning::Form does not have a Version attribute (in the data block), one will be added automatically",
+            "warning::Form does not have a Name! The default form name will be used"
+        ];
+        pErrors = c.getParseErrorMsgs();
+        deepEqual(pErrors, expectedErrors, "Do the correct errors get generated for a form with no data block attributes?");
 
 
     });
