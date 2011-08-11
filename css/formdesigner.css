@@ -202,7 +202,7 @@ td {
     list-style-type: none;
 }
 
-#fd-question-properties ul li:nth-child(even) {
+#fd-question-properties ul li.fd-property:nth-child(even) {
     background: #FAFAFF
 }
 
