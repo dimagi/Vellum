@@ -191,32 +191,6 @@ formdesigner.ui = (function () {
             });
         })();
 
-       (function c_fancyBox() {
-            var fancyBut = $(
-                    '<button id="fd-fancy-button" class="toolbarButton questionButton">'+
-                'View Source ' +
-              '</button>');
-            toolbar.append(fancyBut);
-
-            fancyBut.button().click(function () {
-                controller.generateXForm();
-            });
-
-        })();
-
-        (function c_openSource() {
-            var openSourcebut = $(
-                    '<button id="fd-opensource-button" class="toolbarButton questionButton">'+
-                'Load Source ' +
-              '</button>');
-            toolbar.append(openSourcebut);
-
-            openSourcebut.button().click(function () {
-                formdesigner.controller.showLoadXformBox();
-            });
-
-        })();
-
         (function c_saveForm() {
             var savebut = $(
                     '<button id="fd-save-button" class="toolbarButton questionButton">'+
@@ -1110,14 +1084,35 @@ formdesigner.ui = (function () {
             icons: {
                 primary: 'ui-icon-arrowthick-2-n-s'
             }
-        })
+        });
 
-        $('#fd-add-data-node-button').button({
-            icons : {
-                primary : 'ui-icon-gear'
-            },
-            text : false
-        }).button("disable");
+
+        (function c_loadSource() {
+             var fancyBut = $(
+                     '<button id="fd-fancy-button" class="toolbarButton questionButton">'+
+                 'View Source ' +
+               '</button>');
+             $('#fd-extra-advanced').append(fancyBut);
+
+             fancyBut.button().click(function () {
+                 controller.generateXForm();
+             });
+
+         })();
+
+         (function c_openSource() {
+             var openSourcebut = $(
+                     '<button id="fd-opensource-button" class="toolbarButton questionButton">'+
+                 'Load Source ' +
+               '</button>');
+             $('#fd-extra-advanced').append(openSourcebut);
+
+             openSourcebut.button().click(function () {
+                 formdesigner.controller.showLoadXformBox();
+             });
+
+         })();
+
 
         $('#fd-extra-template-questions div').each(function(){
             $(this).button({

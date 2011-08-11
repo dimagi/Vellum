@@ -247,6 +247,7 @@ td {
     text-align: center;
     width: 500px;
     z-index: 3;
+    line-height:25px;
 }
 
 #fd-question-tree-head {
