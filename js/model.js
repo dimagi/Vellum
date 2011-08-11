@@ -621,7 +621,7 @@ formdesigner.model = function () {
                     presence: 'optional',
                     values: formdesigner.util.XSD_DATA_TYPES,
                     uiType: 'select',
-                    lstring: 'Question Type'
+                    lstring: 'Data Type'
                 },
                 relevantAttr: {
                     editable: 'w',

@@ -567,7 +567,7 @@ formdesigner.util = (function(){
     that.give_ufid = give_ufid;
 
     that.XSD_DATA_TYPES = [
-            'xsd:anyURI',
+//            'xsd:anyURI',
             'xsd:base64Binary',
             'xsd:boolean',
             'xsd:byte',
@@ -575,7 +575,7 @@ formdesigner.util = (function(){
             'xsd:dateTime',
             'xsd:decimal',
             'xsd:double',
-            'xsd:duration',
+//            'xsd:duration',
             'xsd:float',
 //            'xsd:gDay',
 //            'xsd:gMonth',
@@ -585,15 +585,15 @@ formdesigner.util = (function(){
 //            'xsd:hexBinary',
             'xsd:int',
             'xsd:integer',
-            'xsd:language',
+//            'xsd:language',
             'xsd:long',
             'xsd:short',
             'xsd:string',
-            'xsd:time',
-            'xsd:unsignedByte',
-            'xsd:unsignedInt',
-            'xsd:unsignedLong',
-            'xsd:unsignedShort'
+            'xsd:time'
+//            'xsd:unsignedByte',
+//            'xsd:unsignedInt',
+//            'xsd:unsignedLong',
+//            'xsd:unsignedShort'
     ];
 
     that.VALID_CONTROL_TAG_NAMES = [
