@@ -266,7 +266,7 @@ div.chzn-container ul.chzn-results li em {
 }
 div.chzn-container ul.chzn-results li.highlighted {
   background: #3875d7;
-  color: #fff;
+  color: #000000;
 }
 div.chzn-container ul.chzn-results li.highlighted em {
   background: transparent;
@@ -285,6 +285,7 @@ div.chzn-container ul.chzn-results li.group-option {
 
 div.chzn-container-multi div.chzn-drop li.result-selected {
   display: none;
+  background: #3333ff;
 }
 
 
