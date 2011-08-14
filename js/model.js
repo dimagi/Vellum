@@ -1265,8 +1265,9 @@ formdesigner.model = function () {
                 if (MugType === null) {
                     return null;
                 }
-                var retVal;
-                if (this.getValue() === MugType) {
+                var retVal, thisVal;
+                thisVal = this.getValue();
+                if (thisVal === MugType) {
                     return this;
                 } else {
                     for (var i in children) {
@@ -2019,7 +2020,9 @@ formdesigner.model = function () {
                     if(bList.hasOwnProperty(i)){
                         MT = bList[i];
                         attrs = populateVariables(MT);
-                        xw.writeStartElement('bind');
+                        if(attrs.nodeset){
+                            xw.writeStartElement('bind');
+                        }
                         for (j in attrs) { //for each populated property
                             if(attrs.hasOwnProperty(j)){
                                 if(attrs[j]){ //if property has a useful bind attribute value
@@ -2035,7 +2038,10 @@ formdesigner.model = function () {
                                 }
                             }
                         }
-                        xw.writeEndElement();
+                        if(attrs.nodeset) {
+                            xw.writeEndElement();
+                        }
+
                     }
                 }
             }
@@ -2374,7 +2380,7 @@ formdesigner.model = function () {
             }
 
             if(retVal.length > 0){
-                return retVal[0];
+                return retVal;
             }else {
                 return null;
             }
