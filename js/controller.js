@@ -621,7 +621,7 @@ formdesigner.controller = (function () {
                 if ( parentNodeName === rootNodeName ) {
                     parentMugType = null;
                 }else {
-                    parentMugType = formdesigner.controller.form.getMugTypeByIDFromTree(parentNodeName,'data');
+                    parentMugType = formdesigner.controller.form.getMugTypeByIDFromTree(parentNodeName,'data')[0];
                 }
 
                 dataTree.insertMugType(mType,'into',parentMugType);
@@ -719,12 +719,12 @@ formdesigner.controller = (function () {
                 bindElement = new formdesigner.model.BindElement(attrs);
                 mug.properties.bindElement = bindElement;
 
-                oldMT = formdesigner.controller.form.getMugTypeByIDFromTree(nodeID, 'data');
+                oldMT = formdesigner.controller.form.getMugTypeByIDFromTree(nodeID, 'data')[0];
                 if(!oldMT && attrs.nodeset) {
                     oldMT = formdesigner.controller.form.getMugTypeByIDFromTree(
                                                 formdesigner.util.getNodeIDFromPath(attrs.nodeset),
                                                 'data'
-                    );
+                    )[0];
                 }
                 if(!oldMT){
                     pError ('warning', "Bind Node [" + nodeID + "] found but has no associated Data node. This bind node will be discarded!");
@@ -751,7 +751,7 @@ formdesigner.controller = (function () {
                  * @param controlEl
                  */
                 function classifyAndCreateMugType (nodeID, cEl) {
-                    var oldMT = formdesigner.controller.form.getMugTypeByIDFromTree(nodeID, 'data'), //check the date node to see if there's a related MT already present
+                    var oldMT = formdesigner.controller.form.getMugTypeByIDFromTree(nodeID, 'data')[0], //check the date node to see if there's a related MT already present
                         mugType, mug, tagName, bindEl, dataEl, dataType, MTIdentifier,
                         //flags
                         hasBind = true;
@@ -943,7 +943,7 @@ formdesigner.controller = (function () {
                     }
                 }
                 if (parentNodeID) {
-                    parentMug = formdesigner.controller.form.getMugTypeByIDFromTree(parentNodeID,'control');
+                    parentMug = formdesigner.controller.form.getMugTypeByIDFromTree(parentNodeID,'control')[0];
                 } else {
                     parentMug = null;
                 }

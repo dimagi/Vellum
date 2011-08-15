@@ -6,6 +6,24 @@ $(document).ready(function(){
 
     formdesigner.launch();
     var testXformBuffer;
+    var testFormNames = [
+        "Follow-up a Household Referral.xml",
+        "Follow-up at household.xml",
+        "Pos Parto.xml",
+        "Registo.xml",
+        "Follow-up a pregnancy referral.xml",
+        "Gravidez.xml",
+        "Register a household.xml",
+        "Close a pregnancy.xml",
+        "Follow-up a pregnancy.xml",
+        "NutritionAndHealth.xml",
+        "Register a pregnancy.xml",
+    ];
+
+    var get_cchq_forms = function (name) {
+        getTestXformOutput('fromcchq/' + name);
+    }
+
     var make_control_bind_data_mug = function(){
         var myMug;
 
@@ -884,7 +902,7 @@ $(document).ready(function(){
         ufid2 = $(lastCreatedNode).attr('id');
 
         mugType = c.getMTFromFormByUFID(ufid2);
-        deepEqual(mugType, c.form.getMugTypeByIDFromTree(mugType.mug.properties.dataElement.properties.nodeID, 'data'), 'MugTypes should be the same')
+        deepEqual([mugType], c.form.getMugTypeByIDFromTree(mugType.mug.properties.dataElement.properties.nodeID, 'data'), 'MugTypes should be the same')
         ok(null === c.form.getMugTypeByIDFromTree('foo', 'data'), 'Given a bogus ID should return null');
     });
 
@@ -1310,6 +1328,28 @@ $(document).ready(function(){
 
     });
 
+    module("In Out In XForm Tests");
+    test("Grab all the forms in the cache and test them individually", function () {
+         var c = formdesigner.controller,
+            ui = formdesigner.ui,
+            jstree = $("#fd-question-tree"),
+            output, myxml, i=0;
+
+        for (i in testFormNames) {
+            get_cchq_forms(testFormNames[i]);
+            myxml = testXformBuffer;
+            validateFormWithJR(myxml);
+            c.loadXForm(myxml);             //parse
+            output = c.form.createXForm();  //generate form with FD
+            validateFormWithJR(output);     //validate
+
+            c.loadXForm(output);            //parse the newly generated form
+            output = c.form.createXForm();  //generate resulting XForm again
+            validateFormWithJR(output);     //Validate again
+        }
+
+    });
+
 
 });
 
@@ -1329,6 +1369,7 @@ function validateFormWithJR(actual) {
         len = len + 1;
         mylen = len;
         testData[mylen] = formdesigner.util.clone(actual);
+//        $.ajaxSetup({"async": false});
         $.post('/formvalidate/validate/',{xform: testData[mylen]},function (data) {
                     asyncRes[mylen] = data;
                     if(!asyncRes[mylen].success){
