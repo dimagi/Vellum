@@ -17,7 +17,7 @@ $(document).ready(function(){
         "Close a pregnancy.xml",
         "Follow-up a pregnancy.xml",
         "NutritionAndHealth.xml",
-        "Register a pregnancy.xml"
+        "Register a pregnancy.xml",
     ];
 
     var get_cchq_forms = function (name) {
@@ -1328,6 +1328,28 @@ $(document).ready(function(){
 
     });
 
+    module("In Out In XForm Tests");
+    test("Grab all the forms in the cache and test them individually", function () {
+         var c = formdesigner.controller,
+            ui = formdesigner.ui,
+            jstree = $("#fd-question-tree"),
+            output, myxml, i=0;
+
+        for (i in testFormNames) {
+            get_cchq_forms(testFormNames[i]);
+            myxml = testXformBuffer;
+            validateFormWithJR(myxml);
+            c.loadXForm(myxml);             //parse
+            output = c.form.createXForm();  //generate form with FD
+            validateFormWithJR(output);     //validate
+
+            c.loadXForm(output);            //parse the newly generated form
+            output = c.form.createXForm();  //generate resulting XForm again
+            validateFormWithJR(output);     //Validate again
+        }
+
+    });
+
 
 });
 
@@ -1347,6 +1369,7 @@ function validateFormWithJR(actual) {
         len = len + 1;
         mylen = len;
         testData[mylen] = formdesigner.util.clone(actual);
+//        $.ajaxSetup({"async": false});
         $.post('/formvalidate/validate/',{xform: testData[mylen]},function (data) {
                     asyncRes[mylen] = data;
                     if(!asyncRes[mylen].success){

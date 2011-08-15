@@ -43,40 +43,40 @@
           <sick_action/>
         </data>
       </instance>
-      <bind nodeset="/data/sick_fever" type="select1" relevant="/data/client_available = 'Yes'" action="enable"/>
-      <bind nodeset="/data/sick_referral" type="select1" relevant="/data/sick_general = 'Yes'" action="enable"/>
-      <bind nodeset="/data/client_pregnant" type="select1" relevant="/data/client_available = 'Yes'" action="enable"/>
-      <bind nodeset="/data/newborm_present" type="select1" relevant="/data/client_available = 'Yes'" action="enable"/>
-      <bind nodeset="/data/newborn_amt" type="xsd:int" relevant="/data/newborm_present = 'Yes'" action="enable" constraint=". &gt; 0" jr:constraintMsg=""/>
-      <bind nodeset="/data/newborn/newborn_location" type="select1" relevant="/data/newborm_present = 'Yes'" action="enable"/>
-      <bind nodeset="/data/newborn/newborn_chv" type="select1" relevant="/data/newborm_present = 'Yes'" action="enable"/>
-      <bind nodeset="/data/newborn/newborn_registration" type="select1" relevant="/data/newborm_present = 'Yes'" action="enable"/>
-      <bind nodeset="/data/newborn/newborn_reminder" relevant="/data/newborn/newborn_registration = 'No'" action="enable" type=""/>
-      <bind nodeset="/data/child_present" type="select1" relevant="/data/client_available = 'Yes'" action="enable"/>
-      <bind nodeset="/data/child_immunization" relevant="/data/child_present = 'Yes'" action="enable" type=""/>
-      <bind nodeset="/data/child_vac_schedule" type="select1" relevant="/data/child_present = 'Yes'" action="enable"/>
-      <bind nodeset="/data/child_reminder" relevant="/data/child_vac_schedule = 'No'" action="enable" type=""/>
-      <bind nodeset="/data/client_family_planning" type="select1" relevant="/data/client_available = 'Yes'" action="enable"/>
-      <bind nodeset="/data/family_planning_which" type="select1" relevant="/data/client_family_planning = 'Yes'" action="enable"/>
-      <bind nodeset="/data/family_reminder" relevant="/data/client_family_planning = 'Yes'" action="enable" type=""/>
-      <bind nodeset="/data/client_referral" type="select1" relevant="/data/client_available = 'Yes'" action="enable"/>
-      <bind nodeset="/data/mark_referral" type="select" relevant="/data/client_referral = 'Yes'" action="enable"/>
+      <bind nodeset="/data/sick_fever" type="select1" relevant="/data/client_available = 'Yes'" />
+      <bind nodeset="/data/sick_referral" type="select1" relevant="/data/sick_general = 'Yes'" />
+      <bind nodeset="/data/client_pregnant" type="select1" relevant="/data/client_available = 'Yes'" />
+      <bind nodeset="/data/newborm_present" type="select1" relevant="/data/client_available = 'Yes'" />
+      <bind nodeset="/data/newborn_amt" type="xsd:int" relevant="/data/newborm_present = 'Yes'"  constraint=". &gt; 0" jr:constraintMsg=""/>
+      <bind nodeset="/data/newborn/newborn_location" type="select1" relevant="/data/newborm_present = 'Yes'" />
+      <bind nodeset="/data/newborn/newborn_chv" type="select1" relevant="/data/newborm_present = 'Yes'" />
+      <bind nodeset="/data/newborn/newborn_registration" type="select1" relevant="/data/newborm_present = 'Yes'" />
+      <bind nodeset="/data/newborn/newborn_reminder" relevant="/data/newborn/newborn_registration = 'No'"  />
+      <bind nodeset="/data/child_present" type="select1" relevant="/data/client_available = 'Yes'" />
+      <bind nodeset="/data/child_immunization" relevant="/data/child_present = 'Yes'"  />
+      <bind nodeset="/data/child_vac_schedule" type="select1" relevant="/data/child_present = 'Yes'" />
+      <bind nodeset="/data/child_reminder" relevant="/data/child_vac_schedule = 'No'"  />
+      <bind nodeset="/data/client_family_planning" type="select1" relevant="/data/client_available = 'Yes'" />
+      <bind nodeset="/data/family_planning_which" type="select1" relevant="/data/client_family_planning = 'Yes'" />
+      <bind nodeset="/data/family_reminder" relevant="/data/client_family_planning = 'Yes'"  />
+      <bind nodeset="/data/client_referral" type="select1" relevant="/data/client_available = 'Yes'" />
+      <bind nodeset="/data/mark_referral" type="select" relevant="/data/client_referral = 'Yes'" />
       <bind nodeset="/data/client_available" type="select1" required="true()"/>
-      <bind nodeset="/data/client_missing" type="select1" relevant="/data/client_available = 'No'" action="enable"/>
-      <bind nodeset="/data/client_stopped" type="select1" relevant="/data/client_available = 'No' and not(/data/client_missing = 'not_home')" action="enable"/>
-      <bind nodeset="/data/household_verification" type="xsd:int" relevant="/data/client_available = 'Yes'" constraint=". &gt; 99 and . &lt; 1000" action="enable" jr:constraintMsg="Namba ya kaya lazima iwe kati ya 100 na 999."/>
-      <bind nodeset="/data/followup_id" action="enable" calculate="int(random() * 899) + 100" type="xsd:string"/>
-      <bind nodeset="/data/sick_cough" type="select1" relevant="/data/client_available = 'Yes'" action="enable"/>
-      <bind nodeset="/data/sick_diarrhea" type="select1" relevant="/data/client_available = 'Yes'" action="enable"/>
-      <bind nodeset="/data/sick_general" type="select1" relevant="/data/client_available = 'Yes'" action="enable"/>
-      <bind nodeset="/data/sick_amt" relevant="/data/sick_general = 'Yes'" type="xsd:int" constraint=". &gt; 0" action="enable" jr:constraintMsg="Angalia idadi ya wagonjwa uliyoweka?"/>
-      <bind nodeset="/data/sick_person/sick_suffering" type="select1" relevant="/data/sick_general = 'Yes'" action="enable"/>
-      <bind nodeset="/data/sick_person/sick_action" type="select1" relevant="/data/sick_general = 'Yes'" action="enable"/>
-      <bind nodeset="/data/sick_reminder" relevant="/data/sick_referral = 'Yes'" action="enable" type=""/>
-      <bind nodeset="/data/household_follow_id" relevant="/data/client_available = 'Yes'" action="enable" type=""/>
+      <bind nodeset="/data/client_missing" type="select1" relevant="/data/client_available = 'No'" />
+      <bind nodeset="/data/client_stopped" type="select1" relevant="/data/client_available = 'No' and not(/data/client_missing = 'not_home')" />
+      <bind nodeset="/data/household_verification" type="xsd:int" relevant="/data/client_available = 'Yes'" constraint=". &gt; 99 and . &lt; 1000"  jr:constraintMsg="Namba ya kaya lazima iwe kati ya 100 na 999."/>
+      <bind nodeset="/data/followup_id"  calculate="int(random() * 899) + 100" type="xsd:string"/>
+      <bind nodeset="/data/sick_cough" type="select1" relevant="/data/client_available = 'Yes'" />
+      <bind nodeset="/data/sick_diarrhea" type="select1" relevant="/data/client_available = 'Yes'" />
+      <bind nodeset="/data/sick_general" type="select1" relevant="/data/client_available = 'Yes'" />
+      <bind nodeset="/data/sick_amt" relevant="/data/sick_general = 'Yes'" type="xsd:int" constraint=". &gt; 0"  jr:constraintMsg="Angalia idadi ya wagonjwa uliyoweka?"/>
+      <bind nodeset="/data/sick_person/sick_suffering" type="select1" relevant="/data/sick_general = 'Yes'" />
+      <bind nodeset="/data/sick_person/sick_action" type="select1" relevant="/data/sick_general = 'Yes'" />
+      <bind nodeset="/data/sick_reminder" relevant="/data/sick_referral = 'Yes'"  />
+      <bind nodeset="/data/household_follow_id" relevant="/data/client_available = 'Yes'"  />
       <bind nodeset="/data/sick_person"/>
       <bind nodeset="/data/newborn"/>
-      <bind id="pregnancy_reminder" nodeset="/data/pregnancy_reminder" type="" relevant="/data/client_pregnant = 'Yes'" action="enable"/>
+      <bind id="pregnancy_reminder" nodeset="/data/pregnancy_reminder"  relevant="/data/client_pregnant = 'Yes'" />
       <itext>
         <translation lang="en">
           <text id="question 10">
@@ -1160,7 +1160,7 @@
     </input>
     <group>
       <repeat nodeset="/data/sick_person" jr:count="/data/sick_amt" jr:noAddRemove="true()">
-        <select1 ref="/data/sick_person/sick_suffering" type="select1">
+        <select1 ref="/data/sick_person/sick_suffering" >
           <label ref="jr:itext('sick_suffering')">What is sick person suffering from?</label>
           <item>
             <label ref="jr:itext('option17')">Diarrhea</label>
@@ -1199,7 +1199,7 @@
             <value>Other</value>
           </item>
         </select1>
-        <select1 ref="/data/sick_person/sick_action" type="select1">
+        <select1 ref="/data/sick_person/sick_action" >
           <label ref="jr:itext('sick_action')">Has the sick person:</label>
           <item>
             <label ref="jr:itext('gone_and_treated')">Gone to health facility and received treatment.</label>
@@ -1261,7 +1261,7 @@
     </input>
     <group>
       <repeat nodeset="/data/newborn" jr:count="/data/newborn_amt" jr:noAddRemove="true()">
-        <select1 ref="/data/newborn/newborn_location" type="select1">
+        <select1 ref="/data/newborn/newborn_location" >
           <label ref="jr:itext('newborn_location')">Where was the birth of child?</label>
           <item>
             <label ref="jr:itext('health_facility')">Health Facility</label>
@@ -1276,7 +1276,7 @@
             <value>Other</value>
           </item>
         </select1>
-        <select1 ref="/data/newborn/newborn_chv" type="select1">
+        <select1 ref="/data/newborn/newborn_chv" >
           <label ref="jr:itext('newborn_chv')">Were you visited by a newborn education CHV?</label>
           <item>
             <label ref="jr:itext('option1')">Yes</label>
@@ -1287,7 +1287,7 @@
             <value>No</value>
           </item>
         </select1>
-        <select1 ref="/data/newborn/newborn_registration" type="select1">
+        <select1 ref="/data/newborn/newborn_registration" >
           <label ref="jr:itext('newborn_registration')">Was your child's birth registered?</label>
           <item>
             <label ref="jr:itext('option1')">Yes</label>
@@ -1298,7 +1298,7 @@
             <value>No</value>
           </item>
         </select1>
-        <trigger ref="/data/newborn/newborn_reminder" type="">
+        <trigger ref="/data/newborn/newborn_reminder" >
           <label ref="jr:itext('newborn_reminder')">It's important to make sure you register your newborn after birth.	You can't enrol your child into school without a birth registration card.</label>
         </trigger>
       </repeat>

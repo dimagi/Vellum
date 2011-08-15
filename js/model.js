@@ -2379,11 +2379,7 @@ formdesigner.model = function () {
                 throw 'Invalid TreeType specified! Use either "data" or "control"';
             }
 
-            if(retVal.length > 0){
-                return retVal;
-            }else {
-                return null;
-            }
+            return retVal;
 
         };
         that.getMugTypeByIDFromTree = getMugTypeByIDFromTree;
