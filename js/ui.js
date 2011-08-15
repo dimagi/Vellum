@@ -1418,7 +1418,8 @@ formdesigner.ui = (function () {
             autoOpen: false,
             buttons : {},
             closeOnEscape: false,
-            open: function(event, ui) { $(".ui-dialog-titlebar-close").hide(); }
+            open: function(event, ui) { $(".ui-dialog-titlebar-close").hide(); },
+            close: function(event, ui) { $(".ui-dialog-titlebar-close").show(); }
         });
         contentStr = '<p>' +
             '<span class="fd-message">' + msg+ '</span><div id="fd-form-saving-anim"></div></p>'
