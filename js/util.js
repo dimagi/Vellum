@@ -702,15 +702,18 @@ formdesigner.util = (function(){
             }
         });
 
-        mug.on('property-changed', function (e) {
-            formdesigner.ui.setTreeValidationIcons();
-        })
-
         //Update the status of the indicator icons indicating where validation has failed
         mug.on('property-changed', function (e) {
             var MT = formdesigner.controller.form.controlTree.getMugTypeFromUFID(e.mugTypeUfid);
             formdesigner.ui.showVisualValidation(MT);
+            formdesigner.ui.setTreeValidationIcons();
         });
+
+        formdesigner.controller.form.on('form-property-changed', function (e) {
+            var MT = formdesigner.controller.curSelMugType;
+            formdesigner.ui.showVisualValidation(MT);
+            formdesigner.ui.setTreeValidationIcons();
+        })
     }
 
     /**
