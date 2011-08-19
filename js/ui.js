@@ -249,24 +249,38 @@ formdesigner.ui = (function () {
                     },
                     "valid_children" : "none"
                 },
+                "date" : {
+                    "icon": {
+                        "image" : jquery_icon_url,
+                        "position": "-32px -112px"
+                    },
+                    "valid_children" : "none"
+                },
+                "datetime" : {
+                    "icon": {
+                        "image" : jquery_icon_url,
+                        "position": "-80px -112px"
+                    },
+                    "valid_children" : "none"
+                },
                 "int" : {
                     "icon": {
                         "image" : jquery_icon_url,
-                        "position": "-128px -96px"
+                        "position": "-112px -112px"
                     },
                     "valid_children" : "none"
                 },
                 "long" : {
                     "icon": {
                         "image" : jquery_icon_url,
-                        "position": "-128px -96px"
+                        "position": "-112px -112px"
                     },
                     "valid_children" : "none"
                 },
                 "double" : {
                     "icon": {
                         "image" : jquery_icon_url,
-                        "position": "-128px -96px"
+                        "position": "-112px -112px"
                     },
                     "valid_children" : "none"
                 },
@@ -881,9 +895,11 @@ formdesigner.ui = (function () {
              * the node label in the jstree (UITree) should be updated to reflect that change
              */
             function updateUITreeNodeLabel(){
-                var mug = mugType.mug;
+                var mug = mugType.mug,
+                        util = formdesigner.util;
+
                 mug.on('property-changed',function(e){
-                    if(e.property === 'nodeID'){
+                    if(e.property === 'nodeID' && !util.getDefaultDisplayItext(mug)){
                         var node = $('#' + e.mugTypeUfid);
                         $('#fd-question-tree').jstree('rename_node',node,this.properties[e.element].properties[e.property]);
                     }
@@ -891,9 +907,16 @@ formdesigner.ui = (function () {
 
             }
 
+            function updateSaveState () {
+                var mug = mugType.mug;
+                mug.on('property-changed', function (e) {
+                    formdesigner.ui.FormSaved = false;
+                });
+            }
+
             syncNodeIDInputs();
             updateUITreeNodeLabel();
-
+            updateSaveState();
 
         }
 
@@ -1432,7 +1455,22 @@ formdesigner.ui = (function () {
         controller.on('question-creation', function (e) {
             setTreeValidationIcons();
         });
+
+        //set prompt when navigating away from the FD
+        $(window).bind('beforeunload', function () {
+            if(!formdesigner.ui.FormSaved){
+                return 'Are you sure you want to exit? All unsaved changes will be lost!';
+            }
+        })
     };
+
+    var set_event_listeners = function () {
+        formdesigner.controller.form.on('form-property-changed', function() {
+            formdesigner.ui.FormSaved = false;
+        })
+
+        
+    }
 
     that.init = function(){
         controller = formdesigner.controller;

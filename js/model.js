@@ -1059,6 +1059,32 @@ formdesigner.model = function () {
         return mType;
     };
 
+    that.mugTypeMaker.stdDate = function () {
+        var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion),
+                mug;
+        mType.typeName = "Date Question MugType";
+        mType.controlNodeAllowedChildren = false;
+        mug = that.createMugFromMugType(mType);
+        mType.mug = mug;
+        mType.mug.properties.controlElement.properties.name = "Date";
+        mType.mug.properties.controlElement.properties.tagName = "input";
+        mType.mug.properties.bindElement.properties.dataType = "xsd:date";
+        return mType;
+    };
+
+    that.mugTypeMaker.stdDateTime = function () {
+        var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion),
+                mug;
+        mType.typeName = "Date Time Question MugType";
+        mType.controlNodeAllowedChildren = false;
+        mug = that.createMugFromMugType(mType);
+        mType.mug = mug;
+        mType.mug.properties.controlElement.properties.name = "DateTime";
+        mType.mug.properties.controlElement.properties.tagName = "input";
+        mType.mug.properties.bindElement.properties.dataType = "xsd:dateTime";
+        return mType;
+    };
+
     that.mugTypeMaker.stdLong = function () {
         var mType, mug;
         mType = formdesigner.model.mugTypeMaker.stdInt();
