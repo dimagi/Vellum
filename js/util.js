@@ -36,7 +36,7 @@ formdesigner.util = (function(){
     };
     that.VERIFY_CODES = VERIFY_CODES;
 
-    var GROUP_OR_REPEAT_VALID_CHILDREN = that.GROUP_OR_REPEAT_VALID_CHILDREN = ["group","repeat","question","selectQuestion","trigger"];
+    var GROUP_OR_REPEAT_VALID_CHILDREN = that.GROUP_OR_REPEAT_VALID_CHILDREN = ["group","repeat","question","date","datetime","int","long","double","selectQuestion","trigger","secret","default"];
 
     /**
      * Grabs the value between the tags of the element passed in

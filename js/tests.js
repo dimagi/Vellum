@@ -903,7 +903,8 @@ $(document).ready(function(){
 
         mugType = c.getMTFromFormByUFID(ufid2);
         deepEqual([mugType], c.form.getMugTypeByIDFromTree(mugType.mug.properties.dataElement.properties.nodeID, 'data'), 'MugTypes should be the same')
-        ok(null === c.form.getMugTypeByIDFromTree('foo', 'data'), 'Given a bogus ID should return null');
+        console.log(c.form.getMugTypeByIDFromTree('foo', 'data'))
+        equal(0, c.form.getMugTypeByIDFromTree('foo', 'data').length, 'Given a bogus ID should return an empty list');
     });
 
     module("Parsing tests");
