@@ -36,7 +36,7 @@ formdesigner.util = (function(){
     };
     that.VERIFY_CODES = VERIFY_CODES;
 
-    var GROUP_OR_REPEAT_VALID_CHILDREN = that.GROUP_OR_REPEAT_VALID_CHILDREN = ["group","repeat","question","selectQuestion","trigger"];
+    var GROUP_OR_REPEAT_VALID_CHILDREN = that.GROUP_OR_REPEAT_VALID_CHILDREN = ["group","repeat","question","date","datetime","int","long","double","selectQuestion","trigger","secret","default"];
 
     /**
      * Grabs the value between the tags of the element passed in
@@ -702,15 +702,18 @@ formdesigner.util = (function(){
             }
         });
 
-        mug.on('property-changed', function (e) {
-            formdesigner.ui.setTreeValidationIcons();
-        })
-
         //Update the status of the indicator icons indicating where validation has failed
         mug.on('property-changed', function (e) {
             var MT = formdesigner.controller.form.controlTree.getMugTypeFromUFID(e.mugTypeUfid);
             formdesigner.ui.showVisualValidation(MT);
+            formdesigner.ui.setTreeValidationIcons();
         });
+
+        formdesigner.controller.form.on('form-property-changed', function (e) {
+            var MT = formdesigner.controller.curSelMugType;
+            formdesigner.ui.showVisualValidation(MT);
+            formdesigner.ui.setTreeValidationIcons();
+        })
     }
 
     /**

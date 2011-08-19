@@ -1192,10 +1192,12 @@ formdesigner.model = function () {
         mType.properties.bindElement.dataType.presence = "notallowed";
         mType.properties.controlElement.hintItextID.presence = "notallowed";
         mType.properties.controlElement.hintLabel.presence = "notallowed";
+        mType.properties.dataElement.dataValue.presence = "notallowed";
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
         mType.mug.properties.controlElement.properties.name = "Group";
         mType.mug.properties.controlElement.properties.tagName = "group";
+
 
         vResult = mType.validateMug();
 //        if(vResult.status !== 'pass'){

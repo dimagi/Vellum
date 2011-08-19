@@ -828,7 +828,7 @@ formdesigner.controller = (function () {
                         }
 
                     }else if (MTIdentifier === 'stdGroup') {
-                        if($(cEl).find('repeat').length > 0){
+                        if($(cEl).children('repeat').length > 0){
                             tagName = 'repeat';
                             MTIdentifier = 'stdRepeat';
                         }
@@ -911,10 +911,12 @@ formdesigner.controller = (function () {
                     var tag = MugType.mug.properties.controlElement.properties.tagName;
                     if(tag === 'repeat'){
                         labelEl = $($(cEl).parent().children('label'));
+                        hintEl = $(cEl).parent().children('hint');
                     } else {
                         labelEl = $(cEl).children('label');
+                        hintEl = $(cEl).children('hint');
                     }
-                    hintEl = $(cEl).children('hint');
+
                     var cannottHaveDefaultValue = ['select', 'select1', 'repeat', 'group', 'trigger'];
                     if (labelEl.length > 0) {
                         parseLabel(labelEl, MugType);
@@ -960,7 +962,7 @@ formdesigner.controller = (function () {
                     el = $(el.children('repeat')[0]);
                 }
 
-                parentNode = el.parent();
+                parentNode = oldEl ? oldEl.parent() : el.parent();
                 if($(parentNode)[0].nodeName === 'h:body') {
                     parentNode = null;
                 }
@@ -993,21 +995,15 @@ formdesigner.controller = (function () {
                 }
                 if(oldEl){
                     mType = classifyAndCreateMugType(nodeID,oldEl);
-                    populateMug(mType,oldEl);
                 }else {
                     mType = classifyAndCreateMugType(nodeID,el);
-                    populateMug(mType,el);
                 }
-
+                populateMug(mType,el);
                 insertMTInControlTree(mType, parentMug);
 
                 tagName = mType.mug.properties.controlElement.properties.tagName.toLowerCase();
                 if(couldHaveChildren.indexOf(tagName) !== -1) {
-                    if(tagName === 'repeat'){
-                        children = $(oldEl).children('repeat').children().not('label').not('value').not('hint');
-                    }else{
-                        children = $(el).children().not('label').not('value').not('hint');
-                    }
+                    children = $(el).children().not('label').not('value').not('hint');
                     children.each(eachFunc); //recurse down the tree
                 }
             }

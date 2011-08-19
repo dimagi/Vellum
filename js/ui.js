@@ -360,6 +360,9 @@ formdesigner.ui = (function () {
             return $('#' + blockName + '-' + i);
         }
 
+        if (!mugType) {
+            return;
+        }
         var vObj = mugType.validateMug(),
                 bProps = vObj.bindElement,
                 cProps = vObj.controlElement,
