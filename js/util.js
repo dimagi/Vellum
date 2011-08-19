@@ -638,6 +638,27 @@ formdesigner.util = (function(){
     };
     that.exists = exists;
 
+    var getLabelItextID = function (mug) {
+        if(mug.properties.controlElement) {
+            return mug.properties.controlElement.properties.labelItextID;
+        }
+    }
+    that.getLabelItextID = getLabelItextID;
+
+    var getDefaultDisplayItext = function (mug) {
+        var iID, Itext;
+        Itext = formdesigner.model.Itext;
+        iID = that.getLabelItextID(mug);
+        if(iID) {
+            return Itext.getValue(iID,Itext.getDefaultLanguage(), 'default');
+        }
+        else {
+            return null;
+        }
+    }
+    that.getDefaultDisplayItext = getDefaultDisplayItext;
+
+
     (function($) {
               // duck-punching to make attr() return a map
               var _old = $.fn.attr;

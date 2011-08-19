@@ -190,6 +190,12 @@ formdesigner.controller = (function () {
                 case 'secret':
                     setType("secret");
                     break;
+                case 'date':
+                    setType("date");
+                    break;
+                case 'datetime':
+                    setType("datetime");
+                    break;
             }
         }
 
@@ -277,6 +283,12 @@ formdesigner.controller = (function () {
                 break;
             case 'double':
                 mugType = formdesigner.model.mugTypeMaker.stdDouble();
+                break;
+            case 'date':
+                mugType = formdesigner.model.mugTypeMaker.stdDate();
+                break;
+            case 'datetime':
+                mugType = formdesigner.model.mugTypeMaker.stdDateTime();
                 break;
             default:
                 console.log("No standard mugType for selected question type:" + qType + " switching to 'Text Question' type!");
@@ -443,13 +455,22 @@ formdesigner.controller = (function () {
         Itext = formdesigner.model.Itext;
         idata = Itext.getAllData();
 
+        /**
+         * Cleanes Itext so that it fits the csv spec. For now just replaces newlines with ''
+         * @param val
+         */
+        function cleanItextVal(val) {
+            var newVal;
+            newVal = val.replace(/\n/g, '')
+            return newVal
+        }
         function makeRow (language, id, data) {
             var row = '', i;
             row = language + '\t' + id;
-            row += '\t' + (data["default"] ? data["default"] : '');
-            row += '\t' + (data["audio"] ? data["audio"] : '');
-            row += '\t' + (data["image"] ? data["image"] : '');
-            row += '\t' + (data["video"] ? data["video"] : '');
+            row += '\t' + (data["default"] ? cleanItextVal(data["default"]) : '');
+            row += '\t' + (data["audio"] ? cleanItextVal(data["audio"]) : '');
+            row += '\t' + (data["image"] ? cleanItextVal(data["image"]) : '');
+            row += '\t' + (data["video"] ? cleanItextVal(data["video"]) : '');
             row += '\n';
             return row;
         }
@@ -621,7 +642,7 @@ formdesigner.controller = (function () {
                 if ( parentNodeName === rootNodeName ) {
                     parentMugType = null;
                 }else {
-                    parentMugType = formdesigner.controller.form.getMugTypeByIDFromTree(parentNodeName,'data');
+                    parentMugType = formdesigner.controller.form.getMugTypeByIDFromTree(parentNodeName,'data')[0];
                 }
 
                 dataTree.insertMugType(mType,'into',parentMugType);
@@ -719,12 +740,12 @@ formdesigner.controller = (function () {
                 bindElement = new formdesigner.model.BindElement(attrs);
                 mug.properties.bindElement = bindElement;
 
-                oldMT = formdesigner.controller.form.getMugTypeByIDFromTree(nodeID, 'data');
+                oldMT = formdesigner.controller.form.getMugTypeByIDFromTree(nodeID, 'data')[0];
                 if(!oldMT && attrs.nodeset) {
                     oldMT = formdesigner.controller.form.getMugTypeByIDFromTree(
                                                 formdesigner.util.getNodeIDFromPath(attrs.nodeset),
                                                 'data'
-                    );
+                    )[0];
                 }
                 if(!oldMT){
                     pError ('warning', "Bind Node [" + nodeID + "] found but has no associated Data node. This bind node will be discarded!");
@@ -751,7 +772,7 @@ formdesigner.controller = (function () {
                  * @param controlEl
                  */
                 function classifyAndCreateMugType (nodeID, cEl) {
-                    var oldMT = formdesigner.controller.form.getMugTypeByIDFromTree(nodeID, 'data'), //check the date node to see if there's a related MT already present
+                    var oldMT = formdesigner.controller.form.getMugTypeByIDFromTree(nodeID, 'data')[0], //check the date node to see if there's a related MT already present
                         mugType, mug, tagName, bindEl, dataEl, dataType, MTIdentifier,
                         //flags
                         hasBind = true;
@@ -789,16 +810,23 @@ formdesigner.controller = (function () {
                     }
 
                     //fine tune for special cases (repeats, groups, inputs)
-                    if (MTIdentifier === 'input' && dataType){
+                    if (MTIdentifier === 'stdTextQuestion' && dataType){
                         if(dataType === 'long') {
                             MTIdentifier = 'stdLong';
                         }else if(dataType === 'int') {
                             MTIdentifier = 'stdInt';
+                        }else if(dataType === 'double') {
+                            MTIdentifier = 'stdDouble';
                         }else if(dataType === 'geopoint') {
                             MTIdentifier = 'stdGeopoint';
                         }else if(dataType === 'string') {
                             //do nothing, the ident is already correct.
+                        }else if(dataType === 'date') {
+                             MTIdentifier = 'stdDate';
+                        }else if(dataType === 'datetime') {
+                             MTIdentifier = 'stdDateTime';
                         }
+
                     }else if (MTIdentifier === 'stdGroup') {
                         if($(cEl).find('repeat').length > 0){
                             tagName = 'repeat';
@@ -840,7 +868,7 @@ formdesigner.controller = (function () {
                         var labelVal = formdesigner.util.getXLabelValue($(lEl)),
                             labelRef = $(lEl).attr('ref'),
                             cProps = MT.mug.properties.controlElement.properties,
-                            defLang;
+                            defLang, itextVal;
                         if(labelRef){
                             labelRef = labelRef.replace("jr:itext('",'').replace("')",''); //strip itext incantation
                             cProps.labelItextID = labelRef;
@@ -849,9 +877,13 @@ formdesigner.controller = (function () {
                             cProps.labelItextID = labelRef;
                         }
 
-                        if (labelVal) {  //DOES NOT STORE DEFAULT LABEL IN MUG, SETS IT AS DEFAULT ITEXT INSTEAD
+                        if (labelVal) {
+                            cProps.label = labelVal;
                             defLang = Itext.getDefaultLanguage();
-                            Itext.setValue(cProps.labelItextID, defLang, 'default', labelVal);
+                            itextVal = Itext.getValue(cProps.labelItextID, defLang, 'default');
+                            if(!itextVal || itextVal === labelRef) { //if no default Itext has been set, set it with the default label
+                                Itext.setValue(cProps.labelItextID, defLang, 'default', labelVal);
+                            }
                         }
                     }
 
@@ -943,7 +975,7 @@ formdesigner.controller = (function () {
                     }
                 }
                 if (parentNodeID) {
-                    parentMug = formdesigner.controller.form.getMugTypeByIDFromTree(parentNodeID,'control');
+                    parentMug = formdesigner.controller.form.getMugTypeByIDFromTree(parentNodeID,'control')[0];
                 } else {
                     parentMug = null;
                 }
@@ -1236,6 +1268,10 @@ formdesigner.controller = (function () {
 
 
     var sendXForm = function (url) {
+        function successFunc () {
+            formdesigner.ui.FormSaved = true;
+            formdesigner.ui.hideConfirmDialog;
+        }
         if (!url) {
             url = formdesigner.saveUrl;
         }
@@ -1252,7 +1288,7 @@ formdesigner.controller = (function () {
         $('body').ajaxStop(formdesigner.ui.hideConfirmDialog);
 
         formdesigner.XFORM_STRING = form.createXForm();
-        jQuery.post(url, {xform: formdesigner.XFORM_STRING}, formdesigner.ui.hideConfirmDialog);
+        jQuery.post(url, {xform: formdesigner.XFORM_STRING}, successFunc);
 
 
     }

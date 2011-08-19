@@ -1059,6 +1059,32 @@ formdesigner.model = function () {
         return mType;
     };
 
+    that.mugTypeMaker.stdDate = function () {
+        var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion),
+                mug;
+        mType.typeName = "Date Question MugType";
+        mType.controlNodeAllowedChildren = false;
+        mug = that.createMugFromMugType(mType);
+        mType.mug = mug;
+        mType.mug.properties.controlElement.properties.name = "Date";
+        mType.mug.properties.controlElement.properties.tagName = "input";
+        mType.mug.properties.bindElement.properties.dataType = "xsd:date";
+        return mType;
+    };
+
+    that.mugTypeMaker.stdDateTime = function () {
+        var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion),
+                mug;
+        mType.typeName = "Date Time Question MugType";
+        mType.controlNodeAllowedChildren = false;
+        mug = that.createMugFromMugType(mType);
+        mType.mug = mug;
+        mType.mug.properties.controlElement.properties.name = "DateTime";
+        mType.mug.properties.controlElement.properties.tagName = "input";
+        mType.mug.properties.bindElement.properties.dataType = "xsd:dateTime";
+        return mType;
+    };
+
     that.mugTypeMaker.stdLong = function () {
         var mType, mug;
         mType = formdesigner.model.mugTypeMaker.stdInt();
@@ -1265,8 +1291,9 @@ formdesigner.model = function () {
                 if (MugType === null) {
                     return null;
                 }
-                var retVal;
-                if (this.getValue() === MugType) {
+                var retVal, thisVal;
+                thisVal = this.getValue();
+                if (thisVal === MugType) {
                     return this;
                 } else {
                     for (var i in children) {
@@ -2019,7 +2046,9 @@ formdesigner.model = function () {
                     if(bList.hasOwnProperty(i)){
                         MT = bList[i];
                         attrs = populateVariables(MT);
-                        xw.writeStartElement('bind');
+                        if(attrs.nodeset){
+                            xw.writeStartElement('bind');
+                        }
                         for (j in attrs) { //for each populated property
                             if(attrs.hasOwnProperty(j)){
                                 if(attrs[j]){ //if property has a useful bind attribute value
@@ -2035,7 +2064,10 @@ formdesigner.model = function () {
                                 }
                             }
                         }
-                        xw.writeEndElement();
+                        if(attrs.nodeset) {
+                            xw.writeEndElement();
+                        }
+
                     }
                 }
             }
@@ -2373,11 +2405,7 @@ formdesigner.model = function () {
                 throw 'Invalid TreeType specified! Use either "data" or "control"';
             }
 
-            if(retVal.length > 0){
-                return retVal[0];
-            }else {
-                return null;
-            }
+            return retVal;
 
         };
         that.getMugTypeByIDFromTree = getMugTypeByIDFromTree;
