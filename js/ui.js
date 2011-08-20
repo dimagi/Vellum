@@ -902,7 +902,7 @@ formdesigner.ui = (function () {
                         util = formdesigner.util;
 
                 mug.on('property-changed',function(e){
-                    if(e.property === 'nodeID' && !util.getDefaultDisplayItext(mug)){
+                    if(e.property === 'nodeID' && !formdesigner.util.getDefaultDisplayItext(mug)){
                         var node = $('#' + e.mugTypeUfid);
                         $('#fd-question-tree').jstree('rename_node',node,this.properties[e.element].properties[e.property]);
                     }
