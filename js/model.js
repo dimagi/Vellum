@@ -2886,9 +2886,11 @@ formdesigner.model = function () {
             var langs, i, b;
             langs = formdesigner.model.Itext.getLanguages();
             for (i in langs) {
-                if (data[langs[i]][oldID]) {
-                    data[langs[i]][newID] = data[langs[i]][oldID];
-                    delete data[langs[i]][oldID];
+                if(langs.hasOwnProperty(i)){
+                    if (data[langs[i]][oldID]) {
+                        data[langs[i]][newID] = data[langs[i]][oldID];
+                        delete data[langs[i]][oldID];
+                    }
                 }
             }
 

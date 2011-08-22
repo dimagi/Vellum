@@ -401,3 +401,7 @@ body{
     position:relative;
 }
 
+#formdesigner {
+    width: 980px;
+    margin: auto;
+}
