@@ -386,7 +386,28 @@ formdesigner.ui = (function () {
     }
     that.showVisualValidation = showVisualValidation;
 
-    var displayMugProperties = that.displayMugProperties = that.displayQuestion = function(mugType){
+    var displayMugDataProperties = that.displayMugDataProperties  = function(mugType){
+
+    }
+
+    /**
+     * Draws the properties to be edited to the screen.
+     * @param mugType - the MugType that has been selected for editing
+     * @param showControl - Show control type properties? Optional, defaults to true
+     * @param showBind - Show bind type properties? Optional, defaults to true
+     * @param showData - Show data type properties? Optional, defaults to true
+     */
+    var displayMugProperties = that.displayMugProperties = that.displayQuestion = function(mugType, showControl, showBind, showData){
+        if (typeof showControl === 'undefined') {
+            showControl = true;
+        }
+        if (typeof showBind === 'undefined') {
+            showBind = true;
+        }
+        if (typeof showData === 'undefined') {
+            showData = true;
+        }
+
         /**
          * creates and returns a <ul> element with the heading set and the correct classes configured.
          * @param heading
@@ -569,6 +590,9 @@ formdesigner.ui = (function () {
         }
 
         function showControlProps(){
+            if (!showControl) {
+                return;
+            }
             var properties = mugType.properties.controlElement,
                     uiBlock = $('#fd-props-control'),
                     ul;
@@ -589,7 +613,9 @@ formdesigner.ui = (function () {
         displayFuncs.controlElement = showControlProps;
 
         function showDataProps(){
-
+            if (!showData) {
+                return;
+            }
             var properties = mugType.properties.dataElement,
                     uiBlock = $('#fd-props-data'),
                     ul;
@@ -608,6 +634,9 @@ formdesigner.ui = (function () {
         displayFuncs.dataElement = showDataProps;
 
         function showBindProps(){
+            if (!showBind) {
+                return;
+            }
             var properties = mugType.properties.bindElement,
                     uiBlock = $('#fd-props-bind'),
                     ul;
@@ -850,9 +879,15 @@ formdesigner.ui = (function () {
             }
 
             contentEl.append('<br /><br />').append(itextul);
-            displayBlock('dataElement');
-            displayBlock('bindElement');
-            displayBlock('controlElement');
+            if (showData) {
+                displayBlock('dataElement');
+            }
+            if (showBind) {
+                displayBlock('bindElement');
+            }
+            if (showControl) {
+                displayBlock('controlElement');
+            }
 
             contentEl.find('select').chosen();
 
@@ -959,7 +994,11 @@ formdesigner.ui = (function () {
     function node_select(e, data) {
         var curSelUfid = jQuery.data(data.rslt.obj[0], 'mugTypeUfid');
         formdesigner.controller.setCurrentlySelectedMugType(curSelUfid);
-        that.displayMugProperties(formdesigner.controller.getCurrentlySelectedMugType());
+        if($(e.currentTarget).attr('id') === 'fd-question-tree') {
+            that.displayMugProperties(formdesigner.controller.getCurrentlySelectedMugType());
+        } else if ($(e.currentTarget).attr('id') === 'fd-data-tree') {
+            that.displayMugDataProperties(formdesigner.controller.getCurrentlySelectedMugType());
+        }
     }
 
     function selectMugTypeInUI(mugType) {
@@ -1007,6 +1046,47 @@ formdesigner.ui = (function () {
             "types": getJSTreeTypes(),
             "plugins" : [ "themes", "json_data", "ui", "crrm", "types", "dnd" ]
 	    }).bind("select_node.jstree", function (e, data) {
+            console.log("NODE SELECTED EVENT!",e,data);
+            node_select(e, data);
+        }).bind("move_node.jstree", function (e, data) {
+            var controller = formdesigner.controller,
+                        mugType = controller.form.controlTree.getMugTypeFromUFID($(data.rslt.o).attr('id')),
+                        refMugType = controller.form.controlTree.getMugTypeFromUFID($(data.rslt.r).attr('id')),
+                        position = data.rslt.p;
+            controller.moveMugType(mugType, position, refMugType);
+        });
+        questionTree = $("#fd-question-tree");
+    }
+
+    function create_data_tree() {
+        $.jstree._themes = formdesigner.staticPrefix + "themes/";
+        $("#fd-data-tree").jstree({
+            "json_data" : {
+                "data" : []
+            },
+            "ui" : {
+                select_limit: 1
+            },
+            "crrm" : {
+                "move": {
+                    "always_copy": false,
+                    "check_move" : function (m) {
+                        var controller = formdesigner.controller,
+                                mugType = controller.form.controlTree.getMugTypeFromUFID($(m.o).attr('id')),
+                                refMugType = controller.form.controlTree.getMugTypeFromUFID($(m.r).attr('id')),
+                                position = m.p;
+                        return controller.checkMoveOp(mugType, position, refMugType);
+				    }
+                }
+            },
+            "dnd" : {
+                "drop_target" : false,
+                "drag_target" : false
+            },
+            "types": getJSTreeTypes(),
+            "plugins" : [ "themes", "json_data", "ui", "crrm", "types", "dnd" ]
+	    }).bind("select_node.jstree", function (e, data) {
+            console.log("NODE SELECTED EVENT!",e,data);
             node_select(e, data);
         }).bind("move_node.jstree", function (e, data) {
             var controller = formdesigner.controller,

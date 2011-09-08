@@ -1172,14 +1172,27 @@ formdesigner.controller = (function () {
      * @param mugType - The MT to be moved
      * @param position - The position relative to the refMugType (can be 'before','after' or 'into')
      * @param refMugType
+     * @param treeType - Optional - either 'data' or 'control' or 'both'. Indicates which tree to do the move op in.  defaults to 'both'
      */
-    var moveMugType = function (mugType, position, refMugType) {
+    var moveMugType = function (mugType, position, refMugType, treeType) {
         var dataTree = form.dataTree, controlTree = form.controlTree;
+        if (!treeType) {
+             treeType = 'both';
+        }
         if (!checkMoveOp(mugType, position, refMugType)) {
             throw 'MOVE NOT ALLOWED!  MugType Move for MT:' + mugType + ', refMT:' + refMugType + ", position:" + position + " ABORTED";
         }
-        dataTree.insertMugType(mugType, position, refMugType);
-        controlTree.insertMugType(mugType, position, refMugType);
+
+        if (treeType === 'both') {
+            dataTree.insertMugType(mugType, position, refMugType);
+            controlTree.insertMugType(mugType, position, refMugType);
+        } else if (treeType === 'control') {
+            controlTree.insertMugType(mugType, position, refMugType);
+        } else if (treeType === 'data') {
+            dataTree.insertMugType(mugType, position, refMugType);
+        } else {
+           throw 'Invalid/Unrecognized TreeType specified in moveMugType: ' + treeType;
+        }
     };
     that.moveMugType = moveMugType;
     /**
