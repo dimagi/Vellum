@@ -72,14 +72,13 @@ body{
 
 #fd-data-tree-container{
     float: left;
-    left: -260px;
-    top:500px;
+    left: -360px;
+    /*top:500px;*/
     position: absolute;
     z-index: 0;
     overflow: auto;
     margin-top: 10px;
     width:280px;
-    display:none;
 }
 
 

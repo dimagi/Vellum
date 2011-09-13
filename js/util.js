@@ -726,6 +726,27 @@ formdesigner.util = (function(){
         $('#fd-question-tree').jstree('rename_node',el,val);
     }
 
+    that.getDataMugDisplayName = function (mugType) {
+        var mugProps, dEl, goodLabel;
+
+        if(!mugType || !mugType.mug) {
+            return 'No Name!'
+        }
+
+        goodLabel = formdesigner.util.getMugDisplayName(mugType);
+        if (!goodLabel || goodLabel === 'No Name!' || goodLabel === 'No Display Name!') {
+            mugProps = mugType.mug.properties;
+            if (mugProps.dataElement) {
+                dEl = mugProps.dataElement.properties;
+            } else {
+                return 'Has no Data Element!';
+            }
+
+            goodLabel = dEl.nodeID;
+        }
+
+        return goodLabel;
+    }
 
     that.getMugDisplayName = function (mugType) {
         var iID, nodeID, cEl,dEl,bEl, mugProps, disp, lang, Itext;

@@ -18,7 +18,7 @@ formdesigner.ui = (function () {
     var that = {}, question_list = [],
     buttons = {},
     controller = formdesigner.controller,
-    questionTree;
+    questionTree, dataTree;
 
     /**
      * Displays an info box on the properties view.
@@ -221,6 +221,25 @@ formdesigner.ui = (function () {
     }
     that.buttons = buttons;
 
+    function getDataJSTreeTypes() {
+        var jquery_icon_url = formdesigner.iconUrl,
+            types =  {
+            "max_children" : -1,
+			"valid_children" : "all",
+			"types" : {
+                    "default" : {
+                        "icon": {
+                            "image": jquery_icon_url,
+                            "position": "-112px -144px"
+                        },
+                    "valid_children" : "all"
+                }
+			}
+        }
+
+        return types;
+    }
+
     function getJSTreeTypes() {
         var groupRepeatValidChildren = formdesigner.util.GROUP_OR_REPEAT_VALID_CHILDREN,
             jquery_icon_url = formdesigner.iconUrl,
@@ -387,7 +406,7 @@ formdesigner.ui = (function () {
     that.showVisualValidation = showVisualValidation;
 
     var displayMugDataProperties = that.displayMugDataProperties  = function(mugType){
-
+        return displayMugProperties(mugType, false, true, true);
     }
 
     /**
@@ -1016,6 +1035,14 @@ formdesigner.ui = (function () {
     that.getJSTree = getJSTree;
 
     /**
+     * Returns the current UI tree instance as a Jquery Selector object
+     */
+    function getDataJSTree () {
+        return $('#fd-data-tree');
+    }
+    that.getDataJSTree = getDataJSTree;
+
+    /**
      * Creates the UI tree
      */
     function create_question_tree() {
@@ -1083,7 +1110,7 @@ formdesigner.ui = (function () {
                 "drop_target" : false,
                 "drag_target" : false
             },
-            "types": getJSTreeTypes(),
+            "types": getDataJSTreeTypes(),
             "plugins" : [ "themes", "json_data", "ui", "crrm", "types", "dnd" ]
 	    }).bind("select_node.jstree", function (e, data) {
             console.log("NODE SELECTED EVENT!",e,data);
@@ -1095,7 +1122,7 @@ formdesigner.ui = (function () {
                         position = data.rslt.p;
             controller.moveMugType(mugType, position, refMugType);
         });
-        questionTree = $("#fd-question-tree");
+        dataTree = $("#fd-data-tree");
     }
 
     /**
@@ -1219,6 +1246,19 @@ formdesigner.ui = (function () {
 
          })();
 
+        (function c_openSource() {
+             var showDataViewBut = $(
+                     '<button id="fd-dataview-button" class="toolbarButton questionButton">'+
+                 'Show Data View ' +
+               '</button>');
+             $('#fd-extra-advanced').append(showDataViewBut);
+
+             showDataViewBut.button().click(function () {
+                 formdesigner.ui.showDataView();
+             });
+
+         })();
+
 
         $('#fd-extra-template-questions div').each(function(){
             $(this).button({
@@ -1308,61 +1348,6 @@ formdesigner.ui = (function () {
     };
     that.removeMugTypeFromUITree = removeMugTypeFromUITree;
 
-
-    var create_data_tree = function(){
-        var tree = $("#fd-data-tree-container");
-        $("#fd-data-tree-head").click(function () {
-                var container = $("#fd-data-tree-container"),
-                    curLeft = container.css('left');
-                if(curLeft === '-260px'){
-                    container.stop().animate({
-                            'left': '0px'
-                        }, 200);
-                }else if(curLeft === '0px'){
-                    container.stop().animate({
-                            'left': '-260px'
-                        }, 200);
-                }
-            }
-        );
-
-        //DATA TREE
-        tree = $("#fd-data-tree");
-        tree.jstree({
-            "json_data" : {
-                "data" : []
-            },
-            "crrm" : {
-                "move": {
-                    "always_copy": false,
-                    "check_move" : function (m) {
-                        var controller = formdesigner.controller,
-                                mugType = controller.form.controlTree.getMugTypeFromUFID($(m.o).attr('id')),
-                                refMugType = controller.form.controlTree.getMugTypeFromUFID($(m.r).attr('id')),
-                                position = m.p;
-                        return controller.checkMoveOp(mugType, position, refMugType);
-				    }
-                }
-            },
-//            "dnd" : {
-//                "drop_target" : false,
-//                "drag_target" : false
-//            },
-            "types": getJSTreeTypes(),
-            "plugins" : [ "themes", "json_data", "ui", "types", "crrm" ]
-	    }).bind("select_node.jstree", function (e, data) {
-//                    node_select(e, data);
-        }).bind("move_node.jstree", function (e, data) {
-//                    var controller = formdesigner.controller,
-//                                mugType = controller.form.controlTree.getMugTypeFromUFID($(data.rslt.o).attr('id')),
-//                                refMugType = controller.form.controlTree.getMugTypeFromUFID($(data.rslt.r).attr('id')),
-//                                position = data.rslt.p;
-//                    controller.moveMugType(mugType, position, refMugType);
-        });
-
-
-    };
-
     function setup_fancybox(){
         $("a#inline").fancybox({
             hideOnOverlayClick: false,
@@ -1403,6 +1388,7 @@ formdesigner.ui = (function () {
         };
 
         clearUITree($('#fd-question-tree'));
+        clearUITree($('#fd-data-tree'));
 
         $('#fd-form-prop-formName-input').val(formdesigner.controller.form.formName);
         $('#fd-form-prop-formID-input').val(formdesigner.controller.form.formID);
@@ -1468,6 +1454,12 @@ formdesigner.ui = (function () {
         })
 
     }
+
+    var showDataView = function () {
+        //grab the data tree
+        //populate the data jstree
+    }
+    that.showDataView = showDataView;
 
     var showConfirmDialog = function () {
         $( "#fd-dialog-confirm" ).dialog("open");

@@ -231,13 +231,47 @@ formdesigner.controller = (function () {
             true  //skip_rename
         );
 
-//        $('#fd-data-tree').jstree("create",
-//            null, //reference node, use null if using UI plugin for currently selected
-//            insertPosition, //position relative to reference node
-//            objectData,
-//            null, //callback after creation, better to wait for event
-//            true  //skip_rename
-//        );
+        treeSetItemType(mugType);
+    }
+
+    function createQuestionInDataTree(mugType) {
+        function treeSetItemType(mugType) {
+            var mugTUfid = mugType.ufid,
+                node = $('#'+mugTUfid);
+            $('#fd-data-tree').jstree("set_type","default",node);
+        }
+
+        var mug = mugType.mug,
+            controlTagName = mug.properties.controlElement.properties.tagName,
+            itemID,
+            objectData = {},
+            insertPosition;
+
+
+//            objectData.state = 'open'; //should new node be open or closed?, omit for leaf
+
+
+        objectData.data = formdesigner.util.getDataMugDisplayName(mugType);
+        objectData.metadata = {
+                                'mugTypeUfid': mugType.ufid,
+                                'mugUfid': mug.ufid,
+                                'dataID':mug.getDataElementID(),
+                                'bindID':mug.getBindElementID()
+                                };
+        objectData.attr = {
+            "id" : mugType.ufid
+        };
+
+        insertPosition = formdesigner.util.getRelativeInsertPosition(curSelMugType,mugType);
+
+        $('#fd-data-tree').jstree("create",
+            null, //reference node, use null if using UI plugin for currently selected
+            insertPosition, //position relative to reference node
+            objectData,
+            null, //callback after creation, better to wait for event
+            true  //skip_rename
+        );
+
         treeSetItemType(mugType);
     }
 
@@ -340,6 +374,36 @@ formdesigner.controller = (function () {
         return mug;
     }
     that.loadMugTypeIntoUI = loadMugTypeIntoUI;
+
+
+    var loadMugTypeIntoDataTree = function (mugType) {
+        var mug, dataTree, parentMT, parentMTUfid, loadMTEvent = {};
+
+        mug = mugType.mug;
+
+        //this allows the mug to respond to certain events in a common way.
+        //see method docs for further info
+        formdesigner.util.setStandardMugEventResponses(mug);
+
+        //set the 'currently selected mugType' to be that of this mugType's parent.
+        dataTree = formdesigner.controller.form.dataTree;
+        parentMT = dataTree.getParentMugType(mugType);
+        if(parentMT){
+            parentMTUfid = parentMT.ufid;
+            formdesigner.ui.getDataJSTree().jstree('select_node',$('#'+parentMTUfid), true);
+        }else{
+            parentMTUfid = null;
+            formdesigner.ui.getDataJSTree().jstree('deselect_all');
+        }
+
+        createQuestionInDataTree(mugType);
+        loadMTEvent.type= "mugtype-loaded";
+        loadMTEvent.mugType = mugType;
+        this.fire(loadMTEvent);
+
+        return mug;
+    }
+    that.loadMugTypeIntoDataTree = loadMugTypeIntoDataTree;
 
     that.XMLWriter = null;
     var initXMLWriter = function () {
