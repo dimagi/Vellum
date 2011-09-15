@@ -1014,33 +1014,19 @@ formdesigner.ui = (function () {
         var curSelUfid = jQuery.data(data.rslt.obj[0], 'mugTypeUfid');
         formdesigner.controller.setCurrentlySelectedMugType(curSelUfid);
         if($(e.currentTarget).attr('id') === 'fd-question-tree') {
+            $('#fd-data-tree').jstree('deselect_all');
             that.displayMugProperties(formdesigner.controller.getCurrentlySelectedMugType());
         } else if ($(e.currentTarget).attr('id') === 'fd-data-tree') {
+            $('#fd-question-tree').jstree('deselect_all');
             that.displayMugDataProperties(formdesigner.controller.getCurrentlySelectedMugType());
         }
     }
 
     function selectMugTypeInUI(mugType) {
         var ufid = mugType.ufid;
-        return getJSTree().jstree('select_node', $('#'+ufid), true);
+        return $('#fd-question-tree').jstree('select_node', $('#'+ufid), true);
     }
     that.selectMugTypeInUI = selectMugTypeInUI;
-
-    /**
-     * Returns the current UI tree instance as a Jquery Selector object
-     */
-    function getJSTree () {
-        return $('#fd-question-tree');
-    }
-    that.getJSTree = getJSTree;
-
-    /**
-     * Returns the current UI tree instance as a Jquery Selector object
-     */
-    function getDataJSTree () {
-        return $('#fd-data-tree');
-    }
-    that.getDataJSTree = getDataJSTree;
 
     /**
      * Creates the UI tree
@@ -1073,7 +1059,6 @@ formdesigner.ui = (function () {
             "types": getJSTreeTypes(),
             "plugins" : [ "themes", "json_data", "ui", "crrm", "types", "dnd" ]
 	    }).bind("select_node.jstree", function (e, data) {
-            console.log("NODE SELECTED EVENT!",e,data);
             node_select(e, data);
         }).bind("move_node.jstree", function (e, data) {
             var controller = formdesigner.controller,
@@ -1102,7 +1087,8 @@ formdesigner.ui = (function () {
                                 mugType = controller.form.controlTree.getMugTypeFromUFID($(m.o).attr('id')),
                                 refMugType = controller.form.controlTree.getMugTypeFromUFID($(m.r).attr('id')),
                                 position = m.p;
-                        return controller.checkMoveOp(mugType, position, refMugType);
+                        return controller.checkMoveOp(mugType, position, refMugType,'data');
+//                        return true;  //Data nodes have no bad moves (all data nodes can have data nodes as children)
 				    }
                 }
             },
@@ -1113,14 +1099,13 @@ formdesigner.ui = (function () {
             "types": getDataJSTreeTypes(),
             "plugins" : [ "themes", "json_data", "ui", "crrm", "types", "dnd" ]
 	    }).bind("select_node.jstree", function (e, data) {
-            console.log("NODE SELECTED EVENT!",e,data);
             node_select(e, data);
         }).bind("move_node.jstree", function (e, data) {
             var controller = formdesigner.controller,
                         mugType = controller.form.controlTree.getMugTypeFromUFID($(data.rslt.o).attr('id')),
                         refMugType = controller.form.controlTree.getMugTypeFromUFID($(data.rslt.r).attr('id')),
                         position = data.rslt.p;
-            controller.moveMugType(mugType, position, refMugType);
+            controller.moveMugType(mugType, position, refMugType, 'data');
         });
         dataTree = $("#fd-data-tree");
     }
@@ -1315,38 +1300,65 @@ formdesigner.ui = (function () {
      */
     var setTreeValidationIcons = function () {
         var dTree, cTree, uiDTree, uiCTree, form,
-                invalidMTs, i, invalidMsg;
+                invalidMTs, i, invalidMsg, liID;
+
+        //init things
         uiCTree = $('#fd-question-tree');
         uiDTree = $('#fd-data-tree');
         form = controller.form;
         cTree = form.controlTree;
         dTree = form.dataTree;
 
-        function clearIcons() {
-            uiCTree.find('.fd-tree-valid-alert-icon').remove();
+
+        function clearIcons (tree) {
+            tree.find('.fd-tree-valid-alert-icon').remove();
+        }
+
+        function appendIcon (id, msg) {
+            $($('#' + i)[0]).append('<div class="ui-icon ui-icon-alert fd-tree-valid-alert-icon" title="'+msg+'"></div>')
         }
 
 
 
-        clearIcons() //clear existing warning icons to start fresh.
+        clearIcons(uiCTree); //clear existing warning icons to start fresh.
+        clearIcons(uiDTree); //same for data tree
         invalidMTs = form.getInvalidMugTypeUFIDs();
         for (i in invalidMTs){
             if(invalidMTs.hasOwnProperty(i)){
-                invalidMsg = invalidMTs[i].message;
-                $($('#' + i)[0]).append('<div class="ui-icon ui-icon-alert fd-tree-valid-alert-icon" title="'+invalidMsg.replace(/"/g,"'")+'"></div>')
+                invalidMsg = invalidMTs[i].message.replace(/"/g,"'");
+                //ui tree
+                liID = i;
+                appendIcon (liID, invalidMsg);
+
+                //data tree
+                liID = i + "_data";
+                appendIcon (liID, invalidMsg);
             }
         }
+
     };
     that.setTreeValidationIcons = setTreeValidationIcons;
 
     var removeMugTypeFromUITree = function (mugType) {
-        var controlTree, el, ufid;
-        ufid = mugType.ufid;
-        el = $("#" + ufid);
-        controlTree = $("#fd-question-tree");
-        controlTree.jstree("remove",el);
+        removeMugTypeFromTree (mugType, $('#fd-question-tree'));
     };
     that.removeMugTypeFromUITree = removeMugTypeFromUITree;
+
+    var removeMugTypeFromDataTree = function (mugType) {
+        removeMugTypeFromTree (mugType, $('#fd-data-tree'));
+    };
+    that.removeMugTypeFromDataTree = removeMugTypeFromDataTree;
+
+    var removeMugTypeFromTree = function (mugType, tree) {
+        var el, ufid;
+        tree = $(tree); //ensure it's a jquery element
+        ufid = mugType.ufid;
+        el = $("#" + ufid);
+        if (tree.attr('id') === 'fd-data-tree') {
+            el = $('#' + ufid + '_data');
+        }
+        tree.jstree("remove",el);
+    }
 
     function setup_fancybox(){
         $("a#inline").fancybox({
@@ -1555,7 +1567,7 @@ formdesigner.ui = (function () {
         init_toolbar();
         init_extra_tools();
         create_question_tree();
-//        create_data_tree();
+        create_data_tree();
         init_form_paste();
         init_modal_dialogs();
 

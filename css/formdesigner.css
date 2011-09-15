@@ -259,11 +259,8 @@ body{
 }
 
 #fd-data-tree-head {
-    cursor: pointer;
     position: relative;
-    right: -238px;
-    top: 236px;
-    width: 500px;
+    width: 100%;
 }
 
 #fd-props-content {

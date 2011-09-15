@@ -1,5 +1,5 @@
 
-var JRVALIDATE_MODE = true;
+var JRVALIDATE_MODE = false;
 
 
 $(document).ready(function(){
@@ -17,7 +17,7 @@ $(document).ready(function(){
         "Close a pregnancy.xml",
         "Follow-up a pregnancy.xml",
         "NutritionAndHealth.xml",
-        "Register a pregnancy.xml",
+        "Register a pregnancy.xml"
     ];
 
     var get_cchq_forms = function (name) {

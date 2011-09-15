@@ -1023,6 +1023,16 @@ formdesigner.model = function () {
         return mType;
     };
 
+    that.mugTypeMaker.stdDataBindOnly = function () {
+        var mType = formdesigner.util.getNewMugType(mugTypes.dataBind),
+        mug;
+        mType.typeName = "Data Node Mug";
+        mType.controlNodeAllowedChildren = false;
+        mug = that.createMugFromMugType(mType);
+        mType.mug = mug;
+        return mType;
+    }
+
     that.mugTypeMaker.stdSecret = function () {
         var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion),
                 mug;
