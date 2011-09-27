@@ -1135,7 +1135,7 @@ formdesigner.model = function () {
                 vResult,
                 controlProps;
 
-        mType.typeName = "Item MugType";
+        mType.typeName = "Select Item";
         mType.controlNodeAllowedChildren = false;
 
 

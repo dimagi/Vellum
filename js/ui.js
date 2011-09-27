@@ -978,9 +978,27 @@ formdesigner.ui = (function () {
                 });
             }
 
+            function updateDataViewLabels () {
+                var mug, util, dataJSTree;
+                if (!mugType.properties.dataElement) {
+                    return ; //this shouldn't do anything for MT's that don't have a Data Node
+                }
+                mug = mugType.mug,
+                util = formdesigner.util;
+                dataJSTree = $('#fd-data-tree');
+
+                mug.on('property-changed',function(e){
+                    if(e.property === 'nodeID' && e.element === 'dataElement'){
+                        var node = $('#' + e.mugTypeUfid + '_data');
+                        dataJSTree.jstree('rename_node',node,this.properties.dataElement.properties.nodeID);
+                    }
+                });
+            }
+
             syncNodeIDInputs();
             updateUITreeNodeLabel();
             updateSaveState();
+            updateDataViewLabels();
 
         }
 

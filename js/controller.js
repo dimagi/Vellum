@@ -253,6 +253,11 @@ formdesigner.controller = (function () {
         var mug = mugType.mug,
             objectData = {},
             insertPosition, curSelMugEl;
+
+        if (!mugType.properties.dataElement) { //this mug doesn't have a data node so shouldn't be included.
+            return;
+        }
+
         objectData.state = 'open'; //should new node be open or closed?, omit for leaf
         objectData.data = formdesigner.util.getDataMugDisplayName(mugType);
         objectData.metadata = {
