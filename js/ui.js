@@ -1476,19 +1476,19 @@ formdesigner.ui = (function () {
     }
 
 
-    formdesigner.controller.isDataViewVisible = false;
+    var isDataViewVisible = false;
     /**
      * A simple toggle for flipping the type of UI tree visible to the user.
      */
     var showDataView = function () {
-        if (formdesigner.controller.isDataViewVisible) {
+        if (isDataViewVisible) {
             $('#fd-data-tree-container').hide();
             $('#fd-question-tree-container').show();
-            formdesigner.controller.isDataViewVisible = false;
+            isDataViewVisible = false;
         } else {
             $('#fd-question-tree-container').hide();
             $('#fd-data-tree-container').show();
-            formdesigner.controller.isDataViewVisible = true;
+            isDataViewVisible = true;
         }
     }
     that.showDataView = showDataView;
