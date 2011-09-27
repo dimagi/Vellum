@@ -1371,7 +1371,7 @@ function validateFormWithJR(actual) {
         mylen = len;
         testData[mylen] = formdesigner.util.clone(actual);
 //        $.ajaxSetup({"async": false});
-        $.post('/formvalidate/validate/',{xform: testData[mylen]},function (data) {
+        $.post('/formtranslate/validate/',{xform: testData[mylen]},function (data) {
                     asyncRes[mylen] = data;
                     if(!asyncRes[mylen].success){
                         ok(false, "Form Failed to validate with JR Validator!"+mylen);

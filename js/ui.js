@@ -1125,8 +1125,8 @@ formdesigner.ui = (function () {
                     "always_copy": false,
                     "check_move" : function (m) {
                         var controller = formdesigner.controller,
-                                mugType = controller.form.controlTree.getMugTypeFromUFID($(m.o).attr('id')),
-                                refMugType = controller.form.controlTree.getMugTypeFromUFID($(m.r).attr('id')),
+                                mugType = controller.form.dataTree.getMugTypeFromUFID($(m.o).attr('id')),
+                                refMugType = controller.form.dataTree.getMugTypeFromUFID($(m.r).attr('id')),
                                 position = m.p;
                         return controller.checkMoveOp(mugType, position, refMugType,'data');
 //                        return true;  //Data nodes have no bad moves (all data nodes can have data nodes as children)
@@ -1143,8 +1143,8 @@ formdesigner.ui = (function () {
             node_select(e, data);
         }).bind("move_node.jstree", function (e, data) {
             var controller = formdesigner.controller,
-                        mugType = controller.form.controlTree.getMugTypeFromUFID($(data.rslt.o).attr('id')),
-                        refMugType = controller.form.controlTree.getMugTypeFromUFID($(data.rslt.r).attr('id')),
+                        mugType = controller.form.dataTree.getMugTypeFromUFID($(data.rslt.o).attr('id')),
+                        refMugType = controller.form.dataTree.getMugTypeFromUFID($(data.rslt.r).attr('id')),
                         position = data.rslt.p;
             controller.moveMugType(mugType, position, refMugType, 'data');
         });
@@ -1514,6 +1514,7 @@ formdesigner.ui = (function () {
      * A simple toggle for flipping the type of UI tree visible to the user.
      */
     var showDataView = function () {
+        $('#fd-question-properties').hide();
         if (isDataViewVisible) {
             $('#fd-data-tree-container').hide();
             $('#fd-question-tree-container').show();
