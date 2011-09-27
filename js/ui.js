@@ -988,7 +988,7 @@ formdesigner.ui = (function () {
         //vellum thinks this is
         function showQuestionType () {
             var uiBlock = $('#fd-props-mugtype-info'),
-                ul, typeString = mugType.typeName.replace('MugType','').replace('Mug','');
+                ul, typeString = mugType.typeName;
 
             uiBlock.empty();
             ul = makeUL(typeString);

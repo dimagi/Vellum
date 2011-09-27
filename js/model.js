@@ -1013,7 +1013,7 @@ formdesigner.model = function () {
     that.mugTypeMaker.stdTextQuestion = function () {
         var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion),
                 mug;
-        mType.typeName = "Text Question MugType";
+        mType.typeName = "Text Question";
         mType.controlNodeAllowedChildren = false;
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
@@ -1036,7 +1036,7 @@ formdesigner.model = function () {
     that.mugTypeMaker.stdSecret = function () {
         var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion),
                 mug;
-        mType.typeName = "Secret Question MugType";
+        mType.typeName = "Secret Question";
         mType.controlNodeAllowedChildren = false;
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
@@ -1059,7 +1059,7 @@ formdesigner.model = function () {
     that.mugTypeMaker.stdInt = function () {
         var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion),
                 mug;
-        mType.typeName = "Integer Question MugType";
+        mType.typeName = "Integer Question";
         mType.controlNodeAllowedChildren = false;
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
@@ -1072,7 +1072,7 @@ formdesigner.model = function () {
     that.mugTypeMaker.stdGeopoint = function () {
         var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion),
                 mug;
-        mType.typeName = "Geopoint Question MugType";
+        mType.typeName = "Geopoint Question";
         mType.controlNodeAllowedChildren = false;
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
@@ -1085,7 +1085,7 @@ formdesigner.model = function () {
     that.mugTypeMaker.stdDate = function () {
         var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion),
                 mug;
-        mType.typeName = "Date Question MugType";
+        mType.typeName = "Date Question";
         mType.controlNodeAllowedChildren = false;
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
@@ -1098,7 +1098,7 @@ formdesigner.model = function () {
     that.mugTypeMaker.stdDateTime = function () {
         var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion),
                 mug;
-        mType.typeName = "Date Time Question MugType";
+        mType.typeName = "Date Time Question";
         mType.controlNodeAllowedChildren = false;
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
@@ -1112,7 +1112,7 @@ formdesigner.model = function () {
         var mType, mug;
         mType = formdesigner.model.mugTypeMaker.stdInt();
         mug = mType.mug;
-        mType.typeName = "Long Question MugType";
+        mType.typeName = "Long Question";
         mType.mug.properties.controlElement.properties.name = "Long";
         mType.mug.properties.bindElement.properties.dataType = "xsd:long";
         return mType;
@@ -1122,7 +1122,7 @@ formdesigner.model = function () {
         var mType, mug;
         mType = formdesigner.model.mugTypeMaker.stdInt();
         mug = mType.mug;
-        mType.typeName = "Double Question MugType";
+        mType.typeName = "Double Question";
         mType.mug.properties.controlElement.properties.name = "Double";
         mType.mug.properties.bindElement.properties.dataType = "xsd:double";
         return mType;
@@ -1182,7 +1182,7 @@ formdesigner.model = function () {
                 mug,
                 vResult;
         mType.controlNodeCanHaveChildren = true;
-        mType.typeName = "Standard Multi Select Question";
+        mType.typeName = "Multi Select Question";
         allowedChildren = ['item'];
         mType.controlNodeAllowedChildren = allowedChildren;
         mug = that.createMugFromMugType(mType);
@@ -1196,7 +1196,7 @@ formdesigner.model = function () {
     that.mugTypeMaker.stdSelect = function () {
         var mType = formdesigner.model.mugTypeMaker.stdMSelect(), mug;
         mug = mType.mug;
-        mType.typeName = "Standard Single Select Question";
+        mType.typeName = "Single Select Question";
         mType.mug.properties.controlElement.properties.name = 'Single-Select';
         mType.mug.properties.controlElement.properties.tagName = "select1";
         mType.mug.properties.bindElement.properties.dataType = "select1";
@@ -1209,7 +1209,7 @@ formdesigner.model = function () {
                 mug,
                 vResult;
         mType.controlNodeCanHaveChildren = true;
-        mType.typeName = "Standard Group";
+        mType.typeName = "Group";
         allowedChildren = ['repeat', 'input', 'select', 'select1', 'group'];
         mType.controlNodeAllowedChildren = allowedChildren;
         mType.properties.bindElement.dataType.presence = "notallowed";
@@ -1233,7 +1233,7 @@ formdesigner.model = function () {
         var mType;
 
         mType = formdesigner.model.mugTypeMaker.stdGroup();
-        mType.typeName = "Standard Repeat";
+        mType.typeName = "Repeat";
         mType.mug.properties.controlElement.properties.name = "Repeat";
         mType.mug.properties.controlElement.properties.tagName = "repeat";
         return mType;
