@@ -572,7 +572,7 @@ formdesigner.model = function () {
          *     the string 'pass' or an error string.
          *
          *     PropertyValue = {
-         *          editable: 'r|w|rw', //(read) or (write) or (read and write)
+         *          editable: 'r|w|rw', //(read) or (write) or (read and write) (by the user)
          *          visibility: 'hidden|visible', //show as a user editable property?
          *          presence: 'required|optional|notallowed' //must this property be set, optional or should not be present?
          *          [values: [arr of allowable vals]] //list of allowed values for this property

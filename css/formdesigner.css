@@ -401,3 +401,8 @@ body{
     width: 980px;
     margin: auto;
 }
+
+#fd-props-mugtype-info {
+    border: 1px solid black;
+    text-align: center;
+}

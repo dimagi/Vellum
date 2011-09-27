@@ -984,6 +984,19 @@ formdesigner.ui = (function () {
 
         }
 
+        //Throws a little label at the top of the question properties block to indicate what kind of question
+        //vellum thinks this is
+        function showQuestionType () {
+            var uiBlock = $('#fd-props-mugtype-info'),
+                ul, typeString = mugType.typeName.replace('MugType','').replace('Mug','');
+
+            uiBlock.empty();
+            ul = makeUL(typeString);
+
+            uiBlock.append(ul);
+            uiBlock.show();
+        }
+
         function updateDisplay(){
             var mugTProps = mugType.properties,
             i = 0;
@@ -998,6 +1011,8 @@ formdesigner.ui = (function () {
             $('#fd-props-control').empty();
             $('#fd-props-advanced').empty();
             $('#fd-itext-inputs').empty();
+
+            showQuestionType();
             for(i in mugTProps){
                 if(mugTProps.hasOwnProperty(i)){
                     displayFuncs[i]();
