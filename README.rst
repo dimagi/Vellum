@@ -18,7 +18,30 @@ Usage as a Jquery-UI like plugin
 --------------------------------
 1. Clone the repo
 2. Place all the subfolders in the same folder as the html file you're planning to run the plugin from.
-3. In your $(document).ready() call formdesigner.launch(arg), where arg is a jquery selector pointing to the div you would like to use as the container for the fd.
+e.g. if you host your webserver at c:\www with your index.html being at c:\www\index.html place the contents of the repo in that www folder.
+
+Example Usage (assumes you already have jquery set up for the page):
+    $(document).ready(function () {
+           formdesigner.launch({
+            rootElement: "#formdesigner",
+            staticPrefix: "",
+            langs: ""
+        });
+       });
+
+formdesigner.launch causes the formdesigner to initialize itself fully in the element specified by rootElement.
+
+Form Options:
+ *  rootElement: "jQuery selector to FD Container",
+ *  staticPrefix : "url prefix for static resources like css and pngs",
+ *  saveUrl : "URL that the FD should post saved forms to",
+ *  [form] : "string of the xml form that you wish to load"
+ *  [formName] : "Default Form Name"
+ *  iconUrl: URL pointing to jquery-ui icons.png
+
+See index.html in this repo for a working example.
+
+IMPORTANT!!: in css/jquery.fancybox-1.3.4.css change line 39 to the URL that points to fancybox.png
 
 
 
