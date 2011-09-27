@@ -425,15 +425,20 @@ formdesigner.util = (function(){
                     return s.toLowerCase();
                 };
 
-        if(!refMugType || !ofTypeMug || !ofTypeMug.properties.controlElement || !refMugType.properties.controlElement){ throw 'Cannot pass null argument or MugType without a controlElement!'; }
+        if (!refMugType || !ofTypeMug || !refMugType.properties.controlElement) {
+            throw 'Cannot pass null argument or MugType without a controlElement!';
+        }
         if(!refMugType.controlNodeCanHaveChildren){ return false; }
         allowedChildren = refMugType.controlNodeAllowedChildren;
         allowedChildren = allowedChildren.map(makeLower);
-
-        targetMugTagName = ofTypeMug.mug.properties.controlElement.properties.tagName.toLowerCase();
+        if (ofTypeMug.mug.properties.controlElement) {
+            targetMugTagName = ofTypeMug.mug.properties.controlElement.properties.tagName.toLowerCase();
+        } else if (ofTypeMug.typeName === "Data Only MugType") {
+            targetMugTagName = 'data';
+        }
         refMugTagName = refMugType.mug.properties.controlElement.properties.tagName.toLowerCase();
 
-        if(allowedChildren.indexOf(targetMugTagName) === -1){
+        if(allowedChildren.indexOf(targetMugTagName) === -1 && targetMugTagName != 'data'){
             return false;
         }else{
             return true;

@@ -754,8 +754,9 @@ formdesigner.ui = (function () {
         }
 
         function showItextProps(){
-
-
+            if (!showControl) {
+                return;
+            }
             function makeItextUL() {
                 var ulStr = '<ul id="fd-props-itext-ul" class="fd-props-ul">' +
                         '<span class="fd-props-heading">Display Properties</span>' +
@@ -806,6 +807,9 @@ formdesigner.ui = (function () {
 
             }
             var langDrop = $('#fd-itext-langs').detach();
+            if(langDrop.length === 0) {
+                langDrop = $('<div id="fd-itext-langs"></div>');
+            }
             $('#fd-props-itext').prepend(langDrop);
             langDrop.empty();
             $('#fd-itext-inputs').empty();
@@ -817,19 +821,19 @@ formdesigner.ui = (function () {
             
             var uiBlock = $('#fd-itext-inputs'),
                 ul, LIs, i, langSettings, itextHeading;
-                ul = makeItextUL();
-                uiBlock.append(ul);
-                LIs = {
-                    liDef : makeItextLI('default', 'Display Label'),
-                    liAudio : makeItextLI('audio', 'Audio URI'),
-                    liImage : makeItextLI('image', 'Image URI')
-                }
+            ul = makeItextUL();
+            uiBlock.append(ul);
+            LIs = {
+                liDef : makeItextLI('default', 'Display Label'),
+                liAudio : makeItextLI('audio', 'Audio URI'),
+                liImage : makeItextLI('image', 'Image URI')
+            }
 
-                for (i in LIs) {
-                    if(LIs.hasOwnProperty(i)) {
-                        ul.append(LIs[i]);
-                    }
+            for (i in LIs) {
+                if(LIs.hasOwnProperty(i)) {
+                    ul.append(LIs[i]);
                 }
+            }
 
             //shuffle layout a bit.
             langSettings = $('#fd-itext-langs');
@@ -890,14 +894,17 @@ formdesigner.ui = (function () {
             var contentEl = $('#fd-adv-props-content');
 
             contentEl.empty();
-            var itextul = makeUL('');
-            itextul.append(makeItextLI('short', 'Short Display Label'))
-                    .append(makeItextLI('long', 'Long Display Label'));
-            if(mugType.properties.controlElement.hintItextID && mugType.properties.controlElement.hintItextID.presence !== "notallowed") {
-                itextul.append(makeItextLI('default', 'Hint Display Label', true));
+            if (showControl) {
+                //Itext input widgets
+                var itextul = makeUL('');
+                itextul.append(makeItextLI('short', 'Short Display Label'))
+                        .append(makeItextLI('long', 'Long Display Label'));
+                if(mugType.properties.controlElement.hintItextID && mugType.properties.controlElement.hintItextID.presence !== "notallowed") {
+                    itextul.append(makeItextLI('default', 'Hint Display Label', true));
+                }
+                contentEl.append('<br /><br />').append(itextul);
             }
-
-            contentEl.append('<br /><br />').append(itextul);
+            
             if (showData) {
                 displayBlock('dataElement');
             }
@@ -990,6 +997,7 @@ formdesigner.ui = (function () {
             $('#fd-props-data').empty();
             $('#fd-props-control').empty();
             $('#fd-props-advanced').empty();
+            $('#fd-itext-inputs').empty();
             for(i in mugTProps){
                 if(mugTProps.hasOwnProperty(i)){
                     displayFuncs[i]();
@@ -1014,10 +1022,10 @@ formdesigner.ui = (function () {
         var curSelUfid = jQuery.data(data.rslt.obj[0], 'mugTypeUfid');
         formdesigner.controller.setCurrentlySelectedMugType(curSelUfid);
         if($(e.currentTarget).attr('id') === 'fd-question-tree') {
-            $('#fd-data-tree').jstree('deselect_all');
+//            $('#fd-data-tree').jstree('select_node');
             that.displayMugProperties(formdesigner.controller.getCurrentlySelectedMugType());
         } else if ($(e.currentTarget).attr('id') === 'fd-data-tree') {
-            $('#fd-question-tree').jstree('deselect_all');
+//            $('#fd-question-tree').jstree('deselect_all');
             that.displayMugDataProperties(formdesigner.controller.getCurrentlySelectedMugType());
         }
     }
@@ -1205,7 +1213,7 @@ formdesigner.ui = (function () {
         });
 
 
-        (function c_loadSource() {
+        (function c_generateSource() {
              var fancyBut = $(
                      '<button id="fd-fancy-button" class="toolbarButton questionButton">'+
                  'View Source ' +
@@ -1231,7 +1239,7 @@ formdesigner.ui = (function () {
 
          })();
 
-        (function c_openSource() {
+        (function c_showDataView() {
              var showDataViewBut = $(
                      '<button id="fd-dataview-button" class="toolbarButton questionButton">'+
                  'Show Data View ' +

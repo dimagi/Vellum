@@ -251,13 +251,11 @@ formdesigner.controller = (function () {
         }
 
         var mug = mugType.mug,
-            controlTagName = mug.properties.controlElement.properties.tagName,
-            itemID,
             objectData = {},
-            insertPosition;
+            insertPosition, curSelMugEl;
 
 
-//            objectData.state = 'open'; //should new node be open or closed?, omit for leaf
+            objectData.state = 'open'; //should new node be open or closed?, omit for leaf
 
 
         objectData.data = formdesigner.util.getDataMugDisplayName(mugType);
@@ -273,9 +271,20 @@ formdesigner.controller = (function () {
 
         insertPosition = formdesigner.util.getRelativeInsertPosition(curSelMugType,mugType);
 //        insertPosition = "into"; //data nodes can always have children.
-        
+
+        if (curSelMugType) {
+            curSelMugEl = $('#' + curSelMugType.ufid + '_data')
+            if (curSelMugEl.length === 0) {
+                curSelMugEl = null;
+            }
+        }else {
+            curSelMugEl = null;
+        }
+
+
+
         $('#fd-data-tree').jstree("create",
-            null, //reference node, use null if using UI plugin for currently selected
+            curSelMugEl, //reference node, use null if using UI plugin for currently selected
             insertPosition, //position relative to reference node
             objectData,
             null, //callback after creation, better to wait for event
@@ -404,7 +413,7 @@ formdesigner.controller = (function () {
         parentMT = dataTree.getParentMugType(mugType);
         if(parentMT){
             parentMTUfid = parentMT.ufid;
-            $('#fd-data-tree').jstree('select_node',$('#'+parentMTUfid), true);
+            $('#fd-data-tree').jstree('select_node',$('#'+parentMTUfid + '_data'), true);
         }else{
             parentMTUfid = null;
             $('#fd-data-tree').jstree('deselect_all');
