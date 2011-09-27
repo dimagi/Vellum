@@ -732,25 +732,20 @@ formdesigner.util = (function(){
     }
 
     that.getDataMugDisplayName = function (mugType) {
-        var mugProps, dEl, goodLabel;
+        var mugProps, dEl;
 
         if(!mugType || !mugType.mug) {
             return 'No Name!'
         }
 
-        goodLabel = formdesigner.util.getMugDisplayName(mugType);
-        if (!goodLabel || goodLabel === 'No Name!' || goodLabel === 'No Display Name!') {
-            mugProps = mugType.mug.properties;
-            if (mugProps.dataElement) {
-                dEl = mugProps.dataElement.properties;
-            } else {
-                return 'Has no Data Element!';
-            }
-
-            goodLabel = dEl.nodeID;
+        mugProps = mugType.mug.properties;
+        if (mugProps.dataElement) {
+            dEl = mugProps.dataElement.properties;
+        } else {
+            return 'Has no Data Element!';
         }
 
-        return goodLabel;
+        return dEl.nodeID;
     }
 
     that.getMugDisplayName = function (mugType) {

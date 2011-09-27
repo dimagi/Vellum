@@ -253,11 +253,7 @@ formdesigner.controller = (function () {
         var mug = mugType.mug,
             objectData = {},
             insertPosition, curSelMugEl;
-
-
-            objectData.state = 'open'; //should new node be open or closed?, omit for leaf
-
-
+        objectData.state = 'open'; //should new node be open or closed?, omit for leaf
         objectData.data = formdesigner.util.getDataMugDisplayName(mugType);
         objectData.metadata = {
                                 'mugTypeUfid': mugType.ufid,
