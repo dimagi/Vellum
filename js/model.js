@@ -2783,7 +2783,6 @@ formdesigner.model = function () {
                 }
                 return true;
             }
-
             for (lang in data) {
                 if (data.hasOwnProperty(lang)) {
                     for (iID in data[lang]) {
@@ -2792,10 +2791,12 @@ formdesigner.model = function () {
                                 errorIIDs[iID] = iIDTextEmpty(iID);
                             } else {
                                 for (form in data[lang][iID]) {
-                                    if (data[lang][iID].hasOwnProperty(form)) {
-                                       if (!data[dLang][iID][form]) {
-                                           errorIIDs[iID] = iIDFormMissing(iID,form);
-                                       } 
+                                    // The condition here is that there is a property 
+                                    // in a language that is not in the default language
+                                    if (data[lang][iID].hasOwnProperty(form) && 
+                                        data[lang][iID][form] && 
+                                        !data[dLang][iID][form]) {
+                                       errorIIDs[iID] = iIDFormMissing(iID,form);
                                     }
                                 }
                             }
