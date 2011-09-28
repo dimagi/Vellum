@@ -1598,17 +1598,9 @@ formdesigner.model = function () {
          */
         that.insertMugType = function (mugType, position, refMugType) {
             var refNode, refNodeSiblings, refNodeIndex, refNodeParent, node;
-
+            
             if (!formdesigner.controller.checkMoveOp(mugType, position, refMugType, treeType)) {
-//                console.group("Illegal Tree Move Op");
-//                console.log("position: " + position);
-//                console.log("mugType below");
-//                console.log(mugType);
-//                console.log("RefMugType below");
-//                console.log(refMugType);
-//                console.groupEnd();
                 throw 'Illegal Tree move requested! Doing nothing instead.';
-
             }
 
             if (position !== null && typeof position !== 'string') {
@@ -1625,11 +1617,12 @@ formdesigner.model = function () {
                 refNode = this.getNodeFromMugType(refMugType);
             }
 
-            node = removeNodeFromTree(this.getNodeFromMugType(mugType)); //remove it from tree if it already exists
+            //remove it from tree if it already exists
+            node = removeNodeFromTree(this.getNodeFromMugType(mugType)); 
             if (!node) {
                 node = new Node(null, mugType);
             }
-
+            
             if (position !== 'into') {
                 refNodeParent = that.getParentNode(refNode);
                 refNodeSiblings = refNodeParent.getChildren();

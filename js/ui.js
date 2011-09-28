@@ -958,16 +958,43 @@ formdesigner.ui = (function () {
      */
     function node_select(e, data) {
         var curSelUfid = jQuery.data(data.rslt.obj[0], 'mugTypeUfid');
+        
         formdesigner.controller.setCurrentlySelectedMugType(curSelUfid);
         that.displayMugProperties(formdesigner.controller.getCurrentlySelectedMugType());
     }
-
+    
     function selectMugTypeInUI(mugType) {
         var ufid = mugType.ufid;
         return getJSTree().jstree('select_node', $('#'+ufid), true);
     }
     that.selectMugTypeInUI = selectMugTypeInUI;
-
+    
+    function forceUpdateUI() {
+        // after deleting a question the tree can in a state where nothing is 
+        // selected which makes the form designer sad.
+        // If there is nothing selected and there are other questions, just select
+        // the first thing. Otherwise, clear out the question editing pane.
+        var tree = getJSTree();
+        var selected = tree.jstree('get_selected');
+        if (selected.length == 0) {
+            // if there's any nodes in the tree, just select the first
+            var all_nodes = $(tree).find("li");
+            if (all_nodes.length > 0) {
+                tree.jstree('select_node', all_nodes[0]);
+            }
+            else {
+                // otherwise clear the Question Edit UI pane
+                $("#fd-question-properties").hide();
+                // and the selected mug + other stuff in the UI  
+                formdesigner.controller.reloadUI();
+                
+            }            
+        } else {
+            // already selected, nothing to do 
+        }
+    }
+    that.forceUpdateUI = forceUpdateUI;
+    
     /**
      * Returns the current UI tree instance as a Jquery Selector object
      */
@@ -1223,8 +1250,13 @@ formdesigner.ui = (function () {
         var controlTree, el, ufid;
         ufid = mugType.ufid;
         el = $("#" + ufid);
-        controlTree = $("#fd-question-tree");
+        // this event _usually_ will select another mug from the tree
+        // but NOT if the first element is removed. 
+        // Rather than putz around with that, we'll just force 
+        // selection of the topmost mug, or nothing. 
+        // See also: forceUpdateUI
         controlTree.jstree("remove",el);
+        
     };
     that.removeMugTypeFromUITree = removeMugTypeFromUITree;
 

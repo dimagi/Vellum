@@ -222,7 +222,7 @@ formdesigner.controller = (function () {
         };
 
         insertPosition = formdesigner.util.getRelativeInsertPosition(curSelMugType,mugType);
-
+        
         $('#fd-question-tree').jstree("create",
             null, //reference node, use null if using UI plugin for currently selected
             insertPosition, //position relative to reference node
@@ -331,7 +331,6 @@ formdesigner.controller = (function () {
             parentMTUfid = null;
             formdesigner.ui.getJSTree().jstree('deselect_all');
         }
-//        formdesigner.controller.setCurrentlySelectedMugType(parentMTUfid);
         createQuestionInUITree(mugType);
         loadMTEvent.type= "mugtype-loaded";
         loadMTEvent.mugType = mugType;
@@ -563,7 +562,7 @@ formdesigner.controller = (function () {
         formdesigner.ui.removeMugTypeFromUITree(mugType);
         formdesigner.controller.form.dataTree.removeMugType(mugType);
         formdesigner.controller.form.controlTree.removeMugType(mugType);
-
+        formdesigner.ui.forceUpdateUI();
     }
     that.removeMugTypeFromForm = removeMugTypeFromForm;
 
