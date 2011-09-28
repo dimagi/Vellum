@@ -976,7 +976,7 @@ formdesigner.ui = (function () {
         // the first thing. Otherwise, clear out the question editing pane.
         var tree = getJSTree();
         var selected = tree.jstree('get_selected');
-        if (selected.length == 0) {
+        if (selected.length === 0) {
             // if there's any nodes in the tree, just select the first
             var all_nodes = $(tree).find("li");
             if (all_nodes.length > 0) {
@@ -1251,9 +1251,8 @@ formdesigner.ui = (function () {
         ufid = mugType.ufid;
         el = $("#" + ufid);
         // this event _usually_ will select another mug from the tree
-        // but NOT if the first element is removed. 
-        // Rather than putz around with that, we'll just force 
-        // selection of the topmost mug, or nothing. 
+        // but NOT if the first element is removed.
+        // In this case we select the topmost node (if available) 
         // See also: forceUpdateUI
         controlTree.jstree("remove",el);
         
