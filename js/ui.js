@@ -391,6 +391,8 @@ formdesigner.ui = (function () {
          * creates and returns a <ul> element with the heading set and the correct classes configured.
          * @param heading
          */
+         
+        
         var makeUL = function (heading){
             var str = '<ul class="fd-props-ul"><span class="fd-props-heading">' + heading + '</span></ul>';
             return $(str);
@@ -523,7 +525,8 @@ formdesigner.ui = (function () {
                                         curMT = formdesigner.controller.getCurrentlySelectedMugType(),
                                         oldItextID;
 
-                                if (propName === 'nodeID'){ //sanitize nodeID;
+                                if (propName === 'nodeID' && input.val().indexOf(" ") != -1){ 
+                                    // sanitize nodeID;
                                     input.val(input.val().replace(/\s/g,'_'));
                                 }
                                 if (propName === 'labelItextID' || propName === 'hintItextID') {
