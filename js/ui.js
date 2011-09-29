@@ -1413,14 +1413,19 @@ formdesigner.ui = (function () {
             },
             beforeClose: beforeClose,
             close: function (event, ui) {
-                // rerender the mug page to update the inner UI
                 var currentMug = formdesigner.controller.getCurrentlySelectedMugType();
-                if (currentMug) {
-                    displayMugProperties(currentMug);
-                }
-                // and also the side nav so the language list refreshes
+                // rerender the side nav so the language list refreshes
                 // this is one way to do this although it might be overkill
                 formdesigner.controller.reloadUI();
+                if (currentMug) {
+                    // also rerender the mug page to update the inner UI.
+                    // this is a fickle beast. something in the underlying
+                    // spaghetti requires the first call before the second
+                    // and requires both of these calls after the reloadUI call
+                    formdesigner.controller.setCurrentlySelectedMugType(currentMug.ufid);
+                    displayMugProperties(currentMug);
+                }
+                
             }
             
         })
