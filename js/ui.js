@@ -1387,14 +1387,14 @@ formdesigner.ui = (function () {
             }
         }
 
-        var div = $( "#fd-dialog-confirm" ),input,
-                contStr;
+        var div = $( "#fd-dialog-confirm" ),input,contStr;
+                
         div.dialog( "destroy" );
         div.empty();
 
 
         contStr = '<p> <span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>' +
-            '<span class="fd-message">Enter name of new Language</span> ' +
+                '<span class="fd-message">Enter name of new Language</span> ' +
                 '<div id="fd-new-lang-div"><input id="fd-new-lang-input" /></div>' +
                 '</p>'
         div.append(contStr);
@@ -1413,10 +1413,16 @@ formdesigner.ui = (function () {
             },
             beforeClose: beforeClose,
             close: function (event, ui) {
-                displayMugProperties(
-                        formdesigner.controller.getCurrentlySelectedMugType()
-                );
+                // rerender the mug page to update the inner UI
+                var currentMug = formdesigner.controller.getCurrentlySelectedMugType();
+                if (currentMug) {
+                    displayMugProperties(currentMug);
+                }
+                // and also the side nav so the language list refreshes
+                // this is one way to do this although it might be overkill
+                formdesigner.controller.reloadUI();
             }
+            
         })
 
     }
