@@ -321,7 +321,7 @@ formdesigner.ui = (function () {
 
     }
 
-    var showVisualValidation = function showVisualValidation (mugType){
+    var showVisualValidation = function (mugType){
         function setValidationFailedIcon(li,showIcon, message){
             var exists = ($(li).find('.fd-props-validate').length > 0);
             if(exists && showIcon){
@@ -347,7 +347,7 @@ formdesigner.ui = (function () {
                         li = findLIbyPropertyName(i, name);
                         if(res === 'fail'){
                             setValidationFailedIcon(li, true, msg);
-                            propsMessage += '<br>' + msg + '</br>';
+                            propsMessage += '<p>' + msg + '</p>';
                         }else if(res === 'pass'){
                             setValidationFailedIcon(li, false, msg);
                         }
@@ -376,14 +376,14 @@ formdesigner.ui = (function () {
         loopValProps(dProps, 'dataElement');
         itextValidation = formdesigner.model.Itext.validateItext();
         if(itextValidation !== true) {
-            propsMessage += '<br>' + JSON.stringify(itextValidation) + '</br>';
+            propsMessage += '<p>' + JSON.stringify(itextValidation) + '</p>';
         }
         if(propsMessage) {
             showMessage(propsMessage, 'Question Problems', 'warning');
         }
 
 
-    }
+    };
     that.showVisualValidation = showVisualValidation;
 
     var displayMugProperties = that.displayMugProperties = that.displayQuestion = function(mugType){

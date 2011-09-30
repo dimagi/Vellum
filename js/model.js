@@ -500,10 +500,10 @@ formdesigner.model = function () {
         //should be used to figure out the logic for label, defaultLabel, labelItext, etc properties
         label: function (mugType, mug) {
             var controlBlock, hasLabel, hasLabelItextID, missing, hasItext, Itext;
-            Itext = formdesigner.model.Itext
+            Itext = formdesigner.model.Itext;
             controlBlock = mug.properties.controlElement.properties;
-            hasLabel = !(!(controlBlock.label));
-            hasLabelItextID = !(!(controlBlock.labelItextID));
+            hasLabel = Boolean(controlBlock.label);
+            hasLabelItextID = Boolean(controlBlock.labelItextID);
             if(hasLabelItextID){
                 hasItext = Itext.hasHumanReadableItext(mug,false);
             } else {
@@ -515,11 +515,11 @@ formdesigner.model = function () {
                 return 'pass';
             } else if (hasLabelItextID && !hasItext) {
                 missing = 'a display label';
-            }else if (!hasLabel && !hasLabelItextID) {
+            } else if (!hasLabel && !hasLabelItextID) {
                 missing = 'a display label ID';
-            }else if (!hasLabel) {
+            } else if (!hasLabel) {
                 missing = 'a display label'
-            }else if (!hasLabelItextID) {
+            } else if (!hasLabelItextID) {
                 missing = 'a display label ID';
             }
             return 'Question is missing ' + missing + ' value!';
@@ -543,7 +543,7 @@ formdesigner.model = function () {
 
             return 'pass';
         }
-    }
+    };
 
     that.validationFuncs = validationFuncs;
 
@@ -725,15 +725,15 @@ formdesigner.model = function () {
         //for validating a mug against this internal definition we have.
         validateMug : function () {
             /**
-             * Takes in a key-val pair like {"controlNode": TYPE_FLAG_REQUIRED}
+             * Takes in a key-val pair like {"controlNode": 'required'}
              * and an object to check against, and tell you if the object lives up to the rule
              * returns true if the object abides by the rule.
              *
              * For example, if the rule above is used, we pass in a mug to check if it has a controlNode.
              * If a property with the name of "controlNode" exists, true will be returned since it is required and present.
              *
-             * if the TYPE_FLAG is TYPE_FLAG_OPTIONAL, true will always be returned.
-             * if TYPE_FLAG_NOT_ALLOWED and a property with it's corresponding key IS present in the testing object,
+             * if the TYPE_FLAG is 'optional', true will always be returned.
+             * if 'notallowed' and a property with it's corresponding key IS present in the testing object,
              * false will be returned.
              *
              * if a TYPE_FLAG is not used, check the value. (implies that this property is required)
@@ -741,7 +741,7 @@ formdesigner.model = function () {
              * @param ruleValue
              * @param testingObj
              */
-            var validateRule = function (ruleKey, ruleValue, testingObj, blockName,curMugType,curMug) {
+            var validateRule = function (ruleKey, ruleValue, testingObj, blockName, curMugType, curMug) {
                 var retBlock = {},
                         visible = ruleValue.visibility,
                         editable = ruleValue.editable,
@@ -2339,7 +2339,7 @@ formdesigner.model = function () {
             var xformString = generate_form('TEST');
             this.fire('xform-created');
             return xformString;
-        }
+        };
         that.createXForm = createXForm;
 
         /**
@@ -2399,7 +2399,7 @@ formdesigner.model = function () {
                 if(thisDataNodeID === nodeID || thisBindNodeID === nodeID){
                     return mt;
                 }
-            }
+            };
 
             var retVal;
             if (treeType === 'data') {
@@ -2524,7 +2524,7 @@ formdesigner.model = function () {
                 }
             }
             return langs;
-        }
+        };
 
         /**
          * Not an undoable operation!
@@ -2766,7 +2766,7 @@ formdesigner.model = function () {
 
             function isEmpty(ob){
                 var i;
-                for (var i in ob) {
+                for (i in ob) {
                     if(ob.hasOwnProperty(i)){
                         return false;
                     }
@@ -2836,11 +2836,7 @@ formdesigner.model = function () {
                 return false;
             }
 
-            if ( ivals['default'] || ivals.long || ivals.short ) {
-                return true;
-            } else {
-                return false;
-            }
+            return Boolean(ivals['default'] || ivals['long'] || ivals['short']);
         };
 
         var getHumanReadableItext = function (mug, isHint) {
@@ -2946,5 +2942,3 @@ formdesigner.model = function () {
 
     return that;
 }();
-
-
