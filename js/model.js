@@ -2656,7 +2656,7 @@ formdesigner.model = function () {
                     return val;
                 }
             }
-            for (i = 0; i < langs; i++) {
+            for (i = 0; i < langs.length; i++) {
                 if (langs[i] !== lang && langs[i] !== that.getDefaultLanguage()) {
                     val = that.getValue(question, langs[i], form);
                     if (val && val.trim()) {
