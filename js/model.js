@@ -56,9 +56,6 @@ formdesigner.model = function () {
                     that.properties[i] = spec[i];
                 }
             }
-//            that.properties.bindElement = spec.bindElement || undefined;
-//            that.properties.dataElement = spec.dataElement || undefined;
-//            that.properties.controlElement = spec.controlElement || undefined;
         }(mySpec));
 
         that.getBindElementID = function () {
