@@ -2204,11 +2204,22 @@ formdesigner.model = function () {
 
             var createITextBlock = function () {
                 var xmlWriter = formdesigner.controller.XMLWriter, hasItext, lang, languages, Itext, id,
-                        langData, val, formData, form, i;
+                        langData, val, formData, form, i, allLangKeys, question, form;
+                
+                // here are the rules that govern itext
+                // 1. iText nodes for which values in _all_ languages are empty/blank 
+                // will be removed entirely from the form.
+                // 2. iText nodes that have a single value in _one_ language 
+                // but not others, will automatically have that value copied 
+                // into the remaining languages. TBD: there should be a UI to 
+                // disable this feature
+                // 3. iText nodes that have multiple values in multiple languages 
+                // will be properly set as such.
+                
                 Itext = formdesigner.model.Itext;
                 languages = Itext.getLanguages();
                 hasItext = languages.length > 0;
-
+                allLangKeys = Itext.buildItextValueSet();
                 if (hasItext) {
                     xmlWriter.writeStartElement("itext");
                     for (i in languages) {
@@ -2219,25 +2230,24 @@ formdesigner.model = function () {
                             if (Itext.getDefaultLanguage() === lang) {
                                 xmlWriter.writeAttributeString("default", '');
                             }
-                            langData = Itext.getLanguageData(lang);
-                            for (id in langData) {
-                                if(langData.hasOwnProperty(id)) {
+                            for (question in allLangKeys) {
+                                if (allLangKeys.hasOwnProperty(question)) {
                                     xmlWriter.writeStartElement("text");
-                                    xmlWriter.writeAttributeString("id",id);
-                                    formData = langData[id];
-                                    for (form in formData) {
-                                        if (formData.hasOwnProperty(form)) {
-                                            val = formData[form];
+                                    xmlWriter.writeAttributeString("id",question);
+                                    for (form in allLangKeys[question]) {
+                                        if (allLangKeys[question].hasOwnProperty(form)) {
+                                            val = Itext.getValueOrDefault(lang, question, form);
                                             xmlWriter.writeStartElement("value");
                                             if(form !== "default") {
                                                 xmlWriter.writeAttributeString('form', form);
                                             }
                                             xmlWriter.writeString(val);
-                                            xmlWriter.writeEndElement();
+                                            xmlWriter.writeEndElement();    
                                         }
                                     }
                                     xmlWriter.writeEndElement();
                                 }
+                            
                             }
                             xmlWriter.writeEndElement();
                         }
@@ -2598,7 +2608,65 @@ formdesigner.model = function () {
             }
 
         };
-
+        
+        /**
+         * Build the list of all itext values based in the form
+         * defined by merging across languages
+         */
+        that.buildItextValueSet = function() {
+            var ret = {}, i, 
+                langs = that.getLanguages(),
+                langdata, question, langNode, form;
+            for (i = 0; i < langs.length; i++) {
+                langdata = that.getLanguageData(langs[i]);
+                for (question in langdata) {
+                    if (langdata.hasOwnProperty(question)) {
+                        for (form in langdata[question]) {
+                            if (langdata[question].hasOwnProperty(form) &&
+                                langdata[question][form].trim()) {
+                                // it exists and is not empty, therefore add it
+                                // to the tree
+                                if (!ret.hasOwnProperty(question)) {
+                                    ret[question] = {};
+                                }
+                                ret[question][form] = null;
+                            }                
+                        }
+                    }
+                }
+            }
+            return ret;
+        };
+        
+        /**
+         * If the itext value exists, return it, otherwise return a
+         * default value found elsewhere in the form.
+         */
+        that.getValueOrDefault = function(lang, question, form) {
+            // if it exists, great
+            var val = that.getValue(question, lang, form), 
+                langs = that.getLanguages(), i;
+            if (val && val.trim()){
+                return val;
+            }
+            // if it's not the default, check there
+            if (lang !== that.getDefaultLanguage()) {
+                val = that.getValue(question, that.getDefaultLanguage(), form);
+                if (val && val.trim()) {
+                    return val;
+                }
+            }
+            for (i = 0; i < langs; i++) {
+                if (langs[i] !== lang && langs[i] !== that.getDefaultLanguage()) {
+                    val = that.getValue(question, langs[i], form);
+                    if (val && val.trim()) {
+                        return val;
+                    }
+                }
+            }
+        }
+        
+        
         /**
          * Create a new Itext ID in storage deliberately without a
          * value (this is usually to trigger the validation mechanism to pick up on
