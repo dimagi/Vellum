@@ -1959,7 +1959,7 @@ formdesigner.model = function () {
 
                 return xmlString.replace(/\>/g, "&gt;").replace(/\</g, "&lt;");
             }
-            var create_dataBlock = function () {
+            var createDataBlock = function () {
                 //use dataTree.treeMap(func,listStore,afterChildfunc)
                 // create func that opens + creates the data tag, that can be recursively called on all children
                 // create afterChildfunc that closes the data tag
@@ -1984,7 +1984,7 @@ formdesigner.model = function () {
 
 
                     if (node.isRootNode) {
-                        create_model_header();
+                        createModelHeader();
                     }
                 }
 
@@ -1997,7 +1997,7 @@ formdesigner.model = function () {
                 dataTree.treeMap(mapFunc, afterFunc);
             }
 
-            var create_bindList = function () {
+            var createBindList = function () {
                 var xw = formdesigner.controller.XMLWriter,
                     bList = formdesigner.controller.form.getBindList(),
                     MT,
@@ -2077,7 +2077,7 @@ formdesigner.model = function () {
                 }
             }
 
-            var create_controlBlock = function () {
+            var createControlBlock = function () {
                 var mapFunc, afterFunc
 
                 function mapFunc(node) {
@@ -2202,7 +2202,7 @@ formdesigner.model = function () {
                 controlTree.treeMap(mapFunc, afterFunc);
             }
 
-            var create_itextBlock = function () {
+            var createITextBlock = function () {
                 var xmlWriter = formdesigner.controller.XMLWriter, hasItext, lang, languages, Itext, id,
                         langData, val, formData, form, i;
                 Itext = formdesigner.model.Itext;
@@ -2248,7 +2248,7 @@ formdesigner.model = function () {
                 //done with Itext block generation.
             }
 
-            var create_model_header = function () {
+            var createModelHeader = function () {
                 var xw = formdesigner.controller.XMLWriter,
                         uuid, uiVersion, version, formName, jrm;
                 //assume we're currently pointed at the opening date block tag
@@ -2295,7 +2295,7 @@ formdesigner.model = function () {
                 xw.writeAttributeString( "xmlns:jr", "http://openrosa.org/javarosa" );
             }
 
-            var generate_form = function (form_title) {
+            var generateForm = function () {
                 var docString;
                 formdesigner.controller.initXMLWriter();
                 var xw = formdesigner.controller.XMLWriter;
@@ -2312,13 +2312,13 @@ formdesigner.model = function () {
                 ////////////MODEL///////////////////
                         xw.writeStartElement('model');
                             xw.writeStartElement('instance');
-                                create_dataBlock();
+                                createDataBlock();
                             xw.writeEndElement(); //CLOSE INSTANCE
                         /////////////////BINDS /////////////////
-                            create_bindList();
+                            createBindList();
                         ///////////////////////////////////////
                         //////////ITEXT //////////////////////
-                            create_itextBlock();
+                            createITextBlock();
                         ////////////////////////////////////
                         xw.writeEndElement(); //CLOSE MODEL
                 ///////////////////////////////////
@@ -2326,7 +2326,7 @@ formdesigner.model = function () {
 
                     xw.writeStartElement('h:body');
                 /////////////CONTROL BLOCK//////////////
-                        create_controlBlock();
+                        createControlBlock();
                 ////////////////////////////////////////
                     xw.writeEndElement(); //CLOSE BODY
                 xw.writeEndElement(); //CLOSE HTML
@@ -2336,7 +2336,7 @@ formdesigner.model = function () {
 
                 return docString;
             };
-            var xformString = generate_form('TEST');
+            var xformString = generateForm();
             this.fire('xform-created');
             return xformString;
         };
