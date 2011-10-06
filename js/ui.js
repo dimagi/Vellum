@@ -271,7 +271,7 @@ formdesigner.ui = (function () {
 
     }
 
-    var showVisualValidation = function showVisualValidation (mugType){
+    var showVisualValidation = function (mugType){
         function setValidationFailedIcon(li,showIcon, message){
             var exists = ($(li).find('.fd-props-validate').length > 0);
             if(exists && showIcon){
@@ -297,7 +297,7 @@ formdesigner.ui = (function () {
                         li = findLIbyPropertyName(i, name);
                         if(res === 'fail'){
                             setValidationFailedIcon(li, true, msg);
-                            propsMessage += '<br>' + msg + '</br>';
+                            propsMessage += '<p>' + msg + '</p>';
                         }else if(res === 'pass'){
                             setValidationFailedIcon(li, false, msg);
                         }
@@ -326,14 +326,14 @@ formdesigner.ui = (function () {
         loopValProps(dProps, 'dataElement');
         itextValidation = formdesigner.model.Itext.validateItext();
         if(itextValidation !== true) {
-            propsMessage += '<br>' + JSON.stringify(itextValidation) + '</br>';
+            propsMessage += '<p>' + JSON.stringify(itextValidation) + '</p>';
         }
         if(propsMessage) {
             showMessage(propsMessage, 'Question Problems', 'warning');
         }
 
 
-    }
+    };
     that.showVisualValidation = showVisualValidation;
 
     var displayMugDataProperties = that.displayMugDataProperties  = function(mugType){
@@ -362,6 +362,8 @@ formdesigner.ui = (function () {
          * creates and returns a <ul> element with the heading set and the correct classes configured.
          * @param heading
          */
+         
+        
         var makeUL = function (heading){
             var str = '<ul class="fd-props-ul"><span class="fd-props-heading">' + heading + '</span></ul>';
             return $(str);
@@ -494,7 +496,8 @@ formdesigner.ui = (function () {
                                         curMT = formdesigner.controller.getCurrentlySelectedMugType(),
                                         oldItextID;
 
-                                if (propName === 'nodeID'){ //sanitize nodeID;
+                                if (propName === 'nodeID' && input.val().indexOf(" ") != -1){ 
+                                    // sanitize nodeID;
                                     input.val(input.val().replace(/\s/g,'_'));
                                 }
                                 if (propName === 'labelItextID' || propName === 'hintItextID') {
@@ -894,7 +897,7 @@ formdesigner.ui = (function () {
                         util = formdesigner.util;
 
                 mug.on('property-changed',function(e){
-                    if(e.property === 'nodeID' && ! formdesigner.util.getDefaultDisplayItext(mug)){
+                    if(e.property === 'nodeID' && !formdesigner.util.getDefaultDisplayItext(mug)){
                         var node = $('#' + e.mugTypeUfid);
                         $('#fd-question-tree').jstree('rename_node',node,this.properties[e.element].properties[e.property]);
                     }
@@ -984,6 +987,7 @@ formdesigner.ui = (function () {
      */
     function node_select(e, data) {
         var curSelUfid = jQuery.data(data.rslt.obj[0], 'mugTypeUfid');
+        
         formdesigner.controller.setCurrentlySelectedMugType(curSelUfid);
         if($(e.currentTarget).attr('id') === 'fd-question-tree') {
 //            $('#fd-data-tree').jstree('select_node');
@@ -993,13 +997,39 @@ formdesigner.ui = (function () {
             that.displayMugDataProperties(formdesigner.controller.getCurrentlySelectedMugType());
         }
     }
-
+    
     function selectMugTypeInUI(mugType) {
         var ufid = mugType.ufid;
         return $('#fd-question-tree').jstree('select_node', $('#'+ufid), true);
     }
     that.selectMugTypeInUI = selectMugTypeInUI;
-
+    
+    function forceUpdateUI() {
+        // after deleting a question the tree can in a state where nothing is 
+        // selected which makes the form designer sad.
+        // If there is nothing selected and there are other questions, just select
+        // the first thing. Otherwise, clear out the question editing pane.
+        var tree = getJSTree();
+        var selected = tree.jstree('get_selected');
+        if (selected.length === 0) {
+            // if there's any nodes in the tree, just select the first
+            var all_nodes = $(tree).find("li");
+            if (all_nodes.length > 0) {
+                tree.jstree('select_node', all_nodes[0]);
+            }
+            else {
+                // otherwise clear the Question Edit UI pane
+                $("#fd-question-properties").hide();
+                // and the selected mug + other stuff in the UI  
+                formdesigner.controller.reloadUI();
+                
+            }            
+        } else {
+            // already selected, nothing to do 
+        }
+    }
+    that.forceUpdateUI = forceUpdateUI;
+    
     /**
      * Creates the UI tree
      */
@@ -1331,7 +1361,16 @@ formdesigner.ui = (function () {
     that.setTreeValidationIcons = setTreeValidationIcons;
 
     var removeMugTypeFromUITree = function (mugType) {
-        removeMugTypeFromTree (mugType, $('#fd-question-tree'));
+        var controlTree, el, ufid;
+        ufid = mugType.ufid;
+        el = $("#" + ufid);
+        controlTree = $("#fd-question-tree");
+        // this event _usually_ will select another mug from the tree
+        // but NOT if the first element is removed.
+        // In this case we select the topmost node (if available) 
+        // See also: forceUpdateUI
+        controlTree.jstree("remove",el);
+        
     };
     that.removeMugTypeFromUITree = removeMugTypeFromUITree;
 
@@ -1424,14 +1463,14 @@ formdesigner.ui = (function () {
             }
         }
 
-        var div = $( "#fd-dialog-confirm" ),input,
-                contStr;
+        var div = $( "#fd-dialog-confirm" ),input,contStr;
+                
         div.dialog( "destroy" );
         div.empty();
 
 
         contStr = '<p> <span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>' +
-            '<span class="fd-message">Enter name of new Language</span> ' +
+                '<span class="fd-message">Enter name of new Language</span> ' +
                 '<div id="fd-new-lang-div"><input id="fd-new-lang-input" /></div>' +
                 '</p>'
         div.append(contStr);
@@ -1450,10 +1489,21 @@ formdesigner.ui = (function () {
             },
             beforeClose: beforeClose,
             close: function (event, ui) {
-                displayMugProperties(
-                        formdesigner.controller.getCurrentlySelectedMugType()
-                );
+                var currentMug = formdesigner.controller.getCurrentlySelectedMugType();
+                // rerender the side nav so the language list refreshes
+                // this is one way to do this although it might be overkill
+                formdesigner.controller.reloadUI();
+                if (currentMug) {
+                    // also rerender the mug page to update the inner UI.
+                    // this is a fickle beast. something in the underlying
+                    // spaghetti requires the first call before the second
+                    // and requires both of these calls after the reloadUI call
+                    formdesigner.controller.setCurrentlySelectedMugType(currentMug.ufid);
+                    displayMugProperties(currentMug);
+                }
+                
             }
+            
         })
 
     }
