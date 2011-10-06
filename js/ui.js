@@ -1361,15 +1361,16 @@ formdesigner.ui = (function () {
     that.setTreeValidationIcons = setTreeValidationIcons;
 
     var removeMugTypeFromUITree = function (mugType) {
-        var controlTree, el, ufid;
-        ufid = mugType.ufid;
-        el = $("#" + ufid);
-        controlTree = $("#fd-question-tree");
-        // this event _usually_ will select another mug from the tree
-        // but NOT if the first element is removed.
-        // In this case we select the topmost node (if available) 
-        // See also: forceUpdateUI
-        controlTree.jstree("remove",el);
+//        var controlTree, el, ufid;
+//        ufid = mugType.ufid;
+//        el = $("#" + ufid);
+//        controlTree = $("#fd-question-tree");
+//        // this event _usually_ will select another mug from the tree
+//        // but NOT if the first element is removed.
+//        // In this case we select the topmost node (if available)
+//        // See also: forceUpdateUI
+//        controlTree.jstree("remove",el);
+        removeMugTypeFromTree (mugType, $('#fd-question-tree'));
         
     };
     that.removeMugTypeFromUITree = removeMugTypeFromUITree;
