@@ -15,10 +15,13 @@ if (typeof formdesigner === 'undefined') {
 
 formdesigner.ui = (function () {
     "use strict";
-    var that = {}, question_list = [],
-    buttons = {},
-    controller = formdesigner.controller,
-    questionTree, dataTree;
+    var that = {},
+        question_list = [],
+        buttons = {},
+        controller = formdesigner.controller,
+        questionTree,
+        dataTree,
+        LINK_CONTROL_MOVES_TO_DATA_TREE = true;
 
     /**
      * Displays an info box on the properties view.
@@ -45,8 +48,6 @@ formdesigner.ui = (function () {
         div.append(icon).append(headertxt).append(msgtxt);
         div.addClass(warningClass).addClass('ui-corner-all');
         div.show();
-
-
     }
     that.showMessage = showMessage;
 
@@ -57,76 +58,6 @@ formdesigner.ui = (function () {
         $('#fd-props-message').hide();
     }
 
-    function do_loading_bar() {
-        var pbar = $("#progressbar"),
-        content = $("#content"),
-        loadingBar = $("#loadingBar"),
-                doneController = false,
-                doneUtil = false,
-                doneModel = false,
-                doneTree = true,
-                allDone = false,
-                tryComplete = function () {
-                    allDone = doneUtil && doneController && doneModel;
-                    if (allDone) {
-                        loadingBar.delay(500).fadeOut(500);
-                    }
-                };
-
-        content.show();
-        loadingBar.css("background-color", "white");
-        loadingBar.fadeIn(100);
-
-        pbar.progressbar({ value: 0 });
-
-//        $("#loadingInfo").html("downloading jstree.js");
-//        $.getScript("js/jquery.jstree.js", function () {
-//            pbar.progressbar({ value: (pbar.progressbar( "option", "value" )+25)});
-//            doneTree = true;
-//            tryComplete();
-//        });
-//
-//        $("#loadingInfo").html("downloading util.js");
-//        $.getScript("js/util.js", function () {
-//            pbar.progressbar({ value: (pbar.progressbar( "option", "value" )+25)});
-//            doneUtil = true;
-//            tryComplete();
-//        });
-//
-//        $("#loadingInfo").html("downloading model.js");
-//        $.getScript("js/model.js", function () {
-//            pbar.progressbar({ value: (pbar.progressbar( "option", "value" )+25)});
-//            doneModel = true;
-//            tryComplete();
-//        });
-//
-//        $("#loadingInfo").html("downloading controller.js");
-//        $.getScript("js/controller.js", function () {
-//            pbar.progressbar({ value: (pbar.progressbar( "option", "value" )+25)});
-//            doneController = true;
-//            tryComplete();
-//        });
-//
-//        window.setTimeout(function () {
-//            if (!allDone) {
-//                    allDone = doneUtil && doneController && doneModel && doneTree;
-//                    if (allDone) {
-//                        loadingBar.delay(500).fadeOut(500);
-//                    }else{
-//                        var alertString = '';
-//                        if (!doneUtil) { alertString += '[Util.js]'; }
-//                        if (!doneController) { alertString += '[Controller.js]';}
-//                        if (!doneModel) { alertString += '[Model.js]';}
-//                        if (!doneTree) { alertString += '[jsTree]'; }
-//
-//                        alert("Problem loading FormDesigner Libraries! Libraries not loaded: "+alertString);
-//                    }
-//            }
-//                }, 5000);
-
-        loadingBar.fadeOut(200);
-
-    }
 
     function init_toolbar() {4
         var toolbar = $(".fd-toolbar"), select, addbutstr, addbut;
@@ -1106,7 +1037,22 @@ formdesigner.ui = (function () {
                         mugType = controller.form.controlTree.getMugTypeFromUFID($(data.rslt.o).attr('id')),
                         refMugType = controller.form.controlTree.getMugTypeFromUFID($(data.rslt.r).attr('id')),
                         position = data.rslt.p;
-            controller.moveMugType(mugType, position, refMugType);
+            controller.moveMugType(mugType, position, refMugType, 'both');
+
+            if (LINK_CONTROL_MOVES_TO_DATA_TREE) {   //for matching the move in the GUI question tree with the GUI Data Tree
+                var elMT, elMTRef, pos;
+                elMT = $('#' + mugType.ufid + '_data');
+                elMTRef = $('#' + refMugType.ufid + '_data');
+                if (elMTRef.length === 0) {
+                    elMTRef = -1;
+                }
+                pos = position;
+                $('#fd-data-tree').jstree("move_node",elMT, elMTRef, pos, false);
+            }
+
+        }).bind("deselect_all.jstree", function (e, data) {
+            formdesigner.controller.curSelMugType = null;
+            formdesigner.controller.curSelUfid = null;
         });
         questionTree = $("#fd-question-tree");
     }
@@ -1142,11 +1088,15 @@ formdesigner.ui = (function () {
 	    }).bind("select_node.jstree", function (e, data) {
             node_select(e, data);
         }).bind("move_node.jstree", function (e, data) {
-            var controller = formdesigner.controller,
-                        mugType = controller.form.dataTree.getMugTypeFromUFID($(data.rslt.o).attr('id')),
-                        refMugType = controller.form.dataTree.getMugTypeFromUFID($(data.rslt.r).attr('id')),
-                        position = data.rslt.p;
+            var controller, mugType, refMugType, position;
+            controller = formdesigner.controller;
+            mugType = controller.form.dataTree.getMugTypeFromUFID($(data.rslt.o).attr('id').replace('_data',''));
+            refMugType = controller.form.dataTree.getMugTypeFromUFID($(data.rslt.r).attr('id').replace('_data',''));
+            position = data.rslt.p;
             controller.moveMugType(mugType, position, refMugType, 'data');
+        }).bind("deselect_all.jstree", function (e, data) {
+            formdesigner.controller.curSelMugType = null;
+            formdesigner.controller.curSelUfid = null;
         });
         dataTree = $("#fd-data-tree");
     }
@@ -1617,7 +1567,6 @@ formdesigner.ui = (function () {
     that.init = function(){
         controller = formdesigner.controller;
         generate_scaffolding($(formdesigner.rootElement));
-        do_loading_bar();
         init_toolbar();
         init_extra_tools();
         create_question_tree();

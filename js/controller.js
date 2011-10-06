@@ -270,8 +270,8 @@ formdesigner.controller = (function () {
             "id" : mugType.ufid + "_data"
         };
 
-        insertPosition = formdesigner.util.getRelativeInsertPosition(curSelMugType,mugType);
-//        insertPosition = "into"; //data nodes can always have children.
+//        insertPosition = formdesigner.util.getRelativeInsertPosition(curSelMugType,mugType);
+        insertPosition = "into"; //data nodes can always have children.
 
         if (curSelMugType) {
             curSelMugEl = $('#' + curSelMugType.ufid + '_data')
@@ -285,7 +285,7 @@ formdesigner.controller = (function () {
 
 
         $('#fd-data-tree').jstree("create",
-            curSelMugEl, //reference node, use null if using UI plugin for currently selected
+            null, //reference node, use null if using UI plugin for currently selected
             insertPosition, //position relative to reference node
             objectData,
             null, //callback after creation, better to wait for event
