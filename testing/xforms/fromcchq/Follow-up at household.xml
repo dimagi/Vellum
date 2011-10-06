@@ -7,6 +7,7 @@
           <client_available/>
           <client_missing/>
           <client_stopped/>
+		  <foo/>
           <household_verification/>
           <household_follow_id/>
           <followup_id/>

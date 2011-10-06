@@ -22,6 +22,7 @@ formdesigner.ui = (function () {
         questionTree,
         dataTree,
         LINK_CONTROL_MOVES_TO_DATA_TREE = true;
+        
 
     /**
      * Displays an info box on the properties view.
@@ -270,6 +271,43 @@ formdesigner.ui = (function () {
         return types;
 
     }
+
+    /**
+     * Determine if we're in DataView mode based on whether
+     * the data JS Tree (container) is visible or not.
+     */
+    var isInDataViewMode = function () {
+        var controlTreeContainer = $('#fd-question-tree-container');
+        if (controlTreeContainer.is(":visible")) {
+            return false;
+        } else { //we're in data view mode.
+            return true;
+        }
+    }
+
+    /**
+     * returns either the Data UI tree or the Question JS Tree,
+     * depending on what's visible
+     */
+    var getJSTree = function () {
+        if (isInDataViewMode) {
+            return getDataJSTree();
+        } else {
+            return getQuestionJSTree();
+        }
+    }
+    that.getJSTree = getJSTree;
+
+
+    var getQuestionJSTree = function () {
+        return $('#fd-question-tree');
+    }
+    that.getQuestionJSTree = getQuestionJSTree;
+
+    var getDataJSTree = function () {
+        return $('#fd-data-tree');
+    }
+    that.getDataJSTree = getDataJSTree;
 
     var showVisualValidation = function (mugType){
         function setValidationFailedIcon(li,showIcon, message){
@@ -1510,21 +1548,13 @@ formdesigner.ui = (function () {
     }
 
 
-    var isDataViewVisible = false;
     /**
      * A simple toggle for flipping the type of UI tree visible to the user.
      */
     var showDataView = function () {
         $('#fd-question-properties').hide();
-        if (isDataViewVisible) {
-            $('#fd-data-tree-container').hide();
-            $('#fd-question-tree-container').show();
-            isDataViewVisible = false;
-        } else {
-            $('#fd-question-tree-container').hide();
-            $('#fd-data-tree-container').show();
-            isDataViewVisible = true;
-        }
+        $('#fd-data-tree-container').toggle();
+        $('#fd-question-tree-container').toggle();
     }
     that.showDataView = showDataView;
 
@@ -1622,6 +1652,8 @@ formdesigner.ui = (function () {
         init_extra_tools();
         create_question_tree();
         create_data_tree();
+        //hide the data JSTree initially.
+        $('#fd-data-tree-container').hide();
         init_form_paste();
         init_modal_dialogs();
 
