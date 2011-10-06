@@ -402,11 +402,8 @@ formdesigner.controller = (function () {
                 that.curSelUfid = null;
             }
         }
-        console.log("Currently selected before before:", that.curSelMugType);
         insertMugTypeIntoForm(that.curSelMugType,mugType);
-        console.log("Currently selected before:", that.curSelMugType);
         createQuestionInUITree(mugType);
-        console.log("CurSel after", that.curSelMugType)
         createQuestionInDataTree(mugType);
         createQuestionEvent.type = "question-creation";
         createQuestionEvent.mugType = mugType;
