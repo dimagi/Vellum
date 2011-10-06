@@ -81,6 +81,7 @@ formdesigner.controller = (function () {
      */
     var insertMugTypeIntoForm = function (refMugType, newMugType) {
         var dataTree = that.form.dataTree, controlTree = that.form.controlTree;
+
         if (newMugType.properties.dataElement) {
             if (newMugType.properties.controlElement) {
                 dataTree.insertMugType(newMugType, formdesigner.util.getRelativeInsertPosition(refMugType, newMugType), refMugType);
@@ -88,6 +89,7 @@ formdesigner.controller = (function () {
                 dataTree.insertMugType(newMugType, 'after', refMugType);
             }
         }
+
         if (newMugType.properties.controlElement) {
             controlTree.insertMugType(newMugType, formdesigner.util.getRelativeInsertPosition(refMugType, newMugType), refMugType);
         }
@@ -152,10 +154,9 @@ formdesigner.controller = (function () {
 
     function createQuestionInUITree(mugType) {
         function treeSetItemType(mugType) {
-            var tString = mugType.mug.properties.controlElement.properties.name.toLowerCase(),
+            var tString = mugType.mug.properties.controlElement ? mugType.mug.properties.controlElement.properties.name.toLowerCase() : 'data',
                 setType = function (tType) {
                     var controlTree = $('#fd-question-tree'),
-                        dataTree = $('#fd-data-tree'),
                         mugTUfid = mugType.ufid,
                         node = $('#'+mugTUfid);
                     controlTree.jstree("set_type",tType,node);
@@ -199,16 +200,22 @@ formdesigner.controller = (function () {
                 case 'datetime':
                     setType("datetime");
                     break;
+                case 'data':
+                    setType('dataNode');
+                    break;
+
+
             }
         }
 
         var mug = mugType.mug,
-            controlTagName = mug.properties.controlElement.properties.tagName,
+            controlTagName = mug.properties.controlElement ? mug.properties.controlElement.properties.tagName : null,
             isGroupOrRepeat = (controlTagName === 'group' || controlTagName === 'repeat'),
-            itemID,
             objectData = {},
-            insertPosition;
+            insertPosition,
+            oldSelected;
 
+        oldSelected = that.curSelMugType;
         if (isGroupOrRepeat) {
             objectData.state = 'open'; //should new node be open or closed?, omit for leaf
         }
@@ -223,8 +230,12 @@ formdesigner.controller = (function () {
         objectData.attr = {
             "id" : mugType.ufid
         };
-
-        insertPosition = formdesigner.util.getRelativeInsertPosition(curSelMugType,mugType);
+        if (mug.properties.controlElement) {
+            insertPosition = formdesigner.util.getRelativeInsertPosition(that.curSelMugType,mugType);
+        } else {
+            formdesigner.ui.getQuestionJSTree().jstree("deselect_all");
+            insertPosition = "last";
+        }
         
         $('#fd-question-tree').jstree("create",
             null, //reference node, use null if using UI plugin for currently selected
@@ -235,6 +246,8 @@ formdesigner.controller = (function () {
         );
 
         treeSetItemType(mugType);
+
+        formdesigner.ui.getQuestionJSTree().jstree("select_node", $('#' + oldSelected));
     }
 
     function createQuestionInDataTree(mugType) {
@@ -246,7 +259,7 @@ formdesigner.controller = (function () {
 
         var mug = mugType.mug,
             objectData = {},
-            insertPosition, curSelMugEl;
+            insertPosition, curSelMugElData, curSelMugElQuestion, oldSelectedMugEl;
 
         if (!mugType.properties.dataElement) { //this mug doesn't have a data node so shouldn't be included.
             return;
@@ -268,15 +281,28 @@ formdesigner.controller = (function () {
         insertPosition = "into"; //data nodes can always have children.
 
         if (curSelMugType) {
-            curSelMugEl = $('#' + curSelMugType.ufid + '_data')
-            if (curSelMugEl.length === 0) {
-                curSelMugEl = null;
+            curSelMugElData = $('#' + curSelMugType.ufid + '_data') //get corresponding Data Element
+            oldSelectedMugEl = curSelMugElData;
+            curSelMugElQuestion = ('#' + curSelMugType.ufid); //remember what is selected in the question tree.
+            if (curSelMugElData.length === 0) {
+                var curParent = that.form.controlTree.getParentMugType()
+                if(curParent) {
+                    curSelMugElData = $('#' + curParent.ufid + '_data');
+                } else { //parent is root of tree
+                    curSelMugElData = null;
+                }
+            }
+
+            if (curSelMugElData) {
+                formdesigner.ui.getDataJSTree().jstree('select_node', curSelMugElData);
+            } else {
+                formdesigner.ui.getDataJSTree().jstree('deselect_all');
             }
         }else {
-            curSelMugEl = null;
+            //nothing selected
+            curSelMugElData = null;
+            formdesigner.ui.getDataJSTree().jstree('deselect_all');
         }
-
-
 
         $('#fd-data-tree').jstree("create",
             null, //reference node, use null if using UI plugin for currently selected
@@ -287,6 +313,15 @@ formdesigner.controller = (function () {
         );
 
         treeSetItemType(mugType);
+
+        //if we're in question view mode, select the node that was previously selected in the question tree.
+        if(!formdesigner.ui.isInDataViewMode()) {
+            formdesigner.ui.getDataJSTree().jstree('deselect_all');
+            formdesigner.ui.getQuestionJSTree().jstree('select_node', curSelMugElQuestion);
+        } else { //if not, select what was originally selected in the data tree
+           formdesigner.ui.getQuestionJSTree().jstree('deselect_all');
+            formdesigner.ui.getDataJSTree().jstree('select_node', oldSelectedMugEl);
+        }
     }
 
     /**
@@ -338,7 +373,7 @@ formdesigner.controller = (function () {
             case 'datetime':
                 mugType = formdesigner.model.mugTypeMaker.stdDateTime();
                 break;
-            case 'data':
+            case 'datanode':
                 mugType = formdesigner.model.mugTypeMaker.stdDataBindOnly();
                 break;
             default:
@@ -352,12 +387,37 @@ formdesigner.controller = (function () {
         //see method docs for further info
         formdesigner.util.setStandardMugEventResponses(mug);
 
-        insertMugTypeIntoForm(curSelMugType,mugType);
+
+        var oldSelected = that.curSelMugType;
+        var isDataNodeSelected = that.curSelMugType && !that.curSelMugType.properties.controlElement;
+        if (isDataNodeSelected) {
+            //select the lowest not-data-node and continue
+            var tmpSelector = formdesigner.ui.getQuestionJSTree().find('li[rel!="dataNode"]');
+            if (tmpSelector.length > 0) {
+                var newSelectEl = $(tmpSelector[tmpSelector.length - 1]);
+                formdesigner.ui.getQuestionJSTree().jstree("select_node", newSelectEl, false);
+            } else {
+                formdesigner.ui.getQuestionJSTree().jstree("deselect_all");
+                that.curSelMugType = null;
+                that.curSelUfid = null;
+            }
+        }
+        console.log("Currently selected before before:", that.curSelMugType);
+        insertMugTypeIntoForm(that.curSelMugType,mugType);
+        console.log("Currently selected before:", that.curSelMugType);
         createQuestionInUITree(mugType);
+        console.log("CurSel after", that.curSelMugType)
         createQuestionInDataTree(mugType);
         createQuestionEvent.type = "question-creation";
         createQuestionEvent.mugType = mugType;
         this.fire(createQuestionEvent);
+
+
+        //re-select what was originally selected at the start of this method (which gets changed when dealing with Data Nodes)
+        if (isDataNodeSelected) {
+            formdesigner.ui.getQuestionJSTree().jstree("deselect_all");
+            formdesigner.ui.getQuestionJSTree().jstree("select_node", $('#' + oldSelected.ufid));
+        }
 
         return mug;
 
@@ -1219,8 +1279,10 @@ formdesigner.controller = (function () {
 
         if (position !== 'into') {
             if (!refMugType) {
-                throw "If refMugType is null in checkMoveOp() position MUST be 'into'! Position was: "+position;
+//                throw "If refMugType is null in checkMoveOp() position MUST be 'into'! Position was: "+position;
+                return true;
             }
+
             var pRefMugType = that.form.controlTree.getParentMugType(refMugType);
             return checkMoveOp(mugType,'into',pRefMugType);
         }

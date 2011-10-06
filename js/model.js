@@ -1023,10 +1023,11 @@ formdesigner.model = function () {
     that.mugTypeMaker.stdDataBindOnly = function () {
         var mType = formdesigner.util.getNewMugType(mugTypes.dataBind),
         mug;
-        mType.typeName = "Data Node Mug";
+        mType.typeName = "Data Node";
         mType.controlNodeAllowedChildren = false;
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
+        delete mType.mug.properties.bindElement.properties.dataType;
         return mType;
     }
 

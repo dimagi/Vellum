@@ -263,6 +263,13 @@ formdesigner.ui = (function () {
                     },
                     "valid_children" : "none"
                 },
+                "datanode" : {
+                    "icon": {
+                        "image": jquery_icon_url,
+                        "position": "-112px -144px"
+                    },
+                    "valid_children" : "none"
+                },
 				"default" : {
 					"valid_children" : groupRepeatValidChildren
 				}
@@ -284,13 +291,14 @@ formdesigner.ui = (function () {
             return true;
         }
     }
+    that.isInDataViewMode = isInDataViewMode;
 
     /**
      * returns either the Data UI tree or the Question JS Tree,
      * depending on what's visible
      */
     var getJSTree = function () {
-        if (isInDataViewMode) {
+        if (isInDataViewMode()) {
             return getDataJSTree();
         } else {
             return getQuestionJSTree();
@@ -395,6 +403,11 @@ formdesigner.ui = (function () {
         if (typeof showData === 'undefined') {
             showData = true;
         }
+
+        //Override these flags if the mugType doesn't actually contain these blocks;
+        showControl = showControl && mugType.properties.controlElement;
+        showBind = showBind && mugType.properties.bindElement;
+        showData = showData && mugType.properties.dataElement;
 
         /**
          * creates and returns a <ul> element with the heading set and the correct classes configured.
