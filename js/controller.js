@@ -108,11 +108,11 @@ formdesigner.controller = (function () {
      * for the user to start the editing process.
      */
     function reloadUI () {
-        var tree, treeFunc, loaderFunc;
+        var tree, treeFunc, loaderFunc, dataNodeList, i;
 
         //first clear out the existing UI
         formdesigner.ui.resetUI();
-        formdesigner.controller.setCurrentlySelectedMugType(null);
+        that.setCurrentlySelectedMugType(null);
 
 
         treeFunc = function (node) {
@@ -138,6 +138,15 @@ formdesigner.controller = (function () {
         tree = that.form.dataTree;
         tree.treeMap(treeFunc);
 
+        //get list of pure data nodes and throw them in the Question UI tree (at the bottom)
+        dataNodeList = that.getDataNodeList();
+        for (i in dataNodeList) {
+            if (dataNodeList.hasOwnProperty(i)) {
+                that.loadMugTypeIntoUI(dataNodeList[i]);
+            }
+        }
+
+
         formdesigner.ui.setTreeValidationIcons();
 
         that.fire('fd-reload-ui');
@@ -145,6 +154,29 @@ formdesigner.controller = (function () {
     }
 
     that.reloadUI = reloadUI;
+
+
+
+    /**
+     * Goes through and grabs all of the data nodes (i.e. nodes that are only data nodes (possibly with a bind) without any
+     * kind of control.  Returns a flat list of these nodes (list items are mugTypes).
+     */
+    that.getDataNodeList = function(){
+        var treeFunc = function(node){ //the function we will pass to treeMap
+            if(!node.getValue() || node.isRootNode){
+                return null;
+            }
+            var MT = node.getValue();
+
+            if(MT.properties.controlElement){
+                return null;
+            }else{
+                return MT;
+            }
+        };
+
+        return  that.form.dataTree.treeMap(treeFunc);
+    }
 
     var showErrorMessage = function (msg) {
 //        formdesigner.ui.appendErrorMessage(msg);
@@ -433,7 +465,7 @@ formdesigner.controller = (function () {
         //set the 'currently selected mugType' to be that of this mugType's parent.
         controlTree = that.form.controlTree;
         parentMT = controlTree.getParentMugType(mugType);
-        if(parentMT){
+        if(parentMT && mugType.properties.controlElement){ //check for control element because we want data nodes to be a flat list at bottom.
             parentMTUfid = parentMT.ufid;
             $('#fd-question-tree').jstree('select_node',$('#'+parentMTUfid), true);
         }else{
