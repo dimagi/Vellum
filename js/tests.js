@@ -1,5 +1,5 @@
 
-var JRVALIDATE_MODE = false;
+var JRVALIDATE_MODE = true;
 
 
 $(document).ready(function(){
