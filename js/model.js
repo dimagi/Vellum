@@ -1160,8 +1160,8 @@ formdesigner.model = function () {
 
         mType.typeName = "Trigger/Message MugType";
         mType.controlNodeAllowedChildren = false;
-        mType.properties.bindElement.dataType.presence = 'notallowed';
-        mType.properties.dataElement.dataValue.presence = 'notallowed';
+        mType.properties.bindElement.dataType.presence = 'optional';
+        mType.properties.dataElement.dataValue.presence = 'optional';
 
         controlProps = mType.properties.controlElement;
         controlProps.hintLabel.presence = 'notallowed';

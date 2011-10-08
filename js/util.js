@@ -457,7 +457,7 @@ formdesigner.util = (function(){
     var getRelativeInsertPosition = function(refMugType, newMugType){
             var canHaveChildren;
             if(!refMugType){
-                return "first";
+                return "into";
             }
 
             canHaveChildren = formdesigner.util.canMugTypeHaveChildren(refMugType,newMugType);
