@@ -1314,6 +1314,8 @@ formdesigner.ui = (function () {
                  formdesigner.ui.showDataView();
              });
 
+            showDataViewBut.button('disable');
+
          })();
 
 
