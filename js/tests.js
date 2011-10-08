@@ -17,7 +17,7 @@ $(document).ready(function(){
         "Close a pregnancy.xml",
         "Follow-up a pregnancy.xml",
         "NutritionAndHealth.xml",
-        "Register a pregnancy.xml",
+        "Register a pregnancy.xml"
     ];
 
     var get_cchq_forms = function (name) {
@@ -328,7 +328,7 @@ $(document).ready(function(){
         formdesigner.model.Itext.setValue(myMug.properties.controlElement.properties.hintItextID,'en','default','foo hint');
         formdesigner.model.Itext.setValue(myMug.properties.controlElement.properties.labelItextID,'en','default','foo default');
         var validationObject = MugType.validateMug(myMug);
-        equal(MugType.typeName, "Text Question MugType");
+        equal(MugType.typeName, "Text Question");
         equal(validationObject.status, "pass", 'Does the mug validate against the MugType?');
 
         var otherType = formdesigner.model.mugTypeMaker["stdTextQuestion"]();
@@ -1058,7 +1058,7 @@ $(document).ready(function(){
 
         curMugType = getMTFromEl($(lastCreatedNode));
         ui.selectMugTypeInUI(curMugType);
-        equal(curMugType.typeName, "Text Question MugType", "Is Question created through UI a text type question?");
+        equal(curMugType.typeName, "Text Question", "Is Question created through UI a text type question?");
         workingField = $('#dataElement-nodeID-input');
         workingField.val("textQuestion1").keyup().keyup().keyup();
         xmlString = c.form.createXForm();
@@ -1285,7 +1285,7 @@ $(document).ready(function(){
         ui.selectMugTypeInUI(curMugType);
         equal($('#bindElement-dataType-input').val(), 'xsd:string');
         equal(curMugType.mug.properties.bindElement.properties.dataType, 'xsd:string');
-        equal(curMugType.typeName, "Secret Question MugType");
+        equal(curMugType.typeName, "Secret Question");
         equal(curMugType.mug.properties.controlElement.properties.name, "Secret");
         xmlString = c.form.createXForm();
         validateFormWithJR(xmlString);

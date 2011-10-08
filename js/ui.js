@@ -15,10 +15,14 @@ if (typeof formdesigner === 'undefined') {
 
 formdesigner.ui = (function () {
     "use strict";
-    var that = {}, question_list = [],
-    buttons = {},
-    controller = formdesigner.controller,
-    questionTree;
+    var that = {},
+        question_list = [],
+        buttons = {},
+        controller = formdesigner.controller,
+        questionTree,
+        dataTree,
+        LINK_CONTROL_MOVES_TO_DATA_TREE = true;
+        
 
     /**
      * Displays an info box on the properties view.
@@ -45,8 +49,6 @@ formdesigner.ui = (function () {
         div.append(icon).append(headertxt).append(msgtxt);
         div.addClass(warningClass).addClass('ui-corner-all');
         div.show();
-
-
     }
     that.showMessage = showMessage;
 
@@ -57,76 +59,6 @@ formdesigner.ui = (function () {
         $('#fd-props-message').hide();
     }
 
-    function do_loading_bar() {
-        var pbar = $("#progressbar"),
-        content = $("#content"),
-        loadingBar = $("#loadingBar"),
-                doneController = false,
-                doneUtil = false,
-                doneModel = false,
-                doneTree = true,
-                allDone = false,
-                tryComplete = function () {
-                    allDone = doneUtil && doneController && doneModel;
-                    if (allDone) {
-                        loadingBar.delay(500).fadeOut(500);
-                    }
-                };
-
-        content.show();
-        loadingBar.css("background-color", "white");
-        loadingBar.fadeIn(100);
-
-        pbar.progressbar({ value: 0 });
-
-//        $("#loadingInfo").html("downloading jstree.js");
-//        $.getScript("js/jquery.jstree.js", function () {
-//            pbar.progressbar({ value: (pbar.progressbar( "option", "value" )+25)});
-//            doneTree = true;
-//            tryComplete();
-//        });
-//
-//        $("#loadingInfo").html("downloading util.js");
-//        $.getScript("js/util.js", function () {
-//            pbar.progressbar({ value: (pbar.progressbar( "option", "value" )+25)});
-//            doneUtil = true;
-//            tryComplete();
-//        });
-//
-//        $("#loadingInfo").html("downloading model.js");
-//        $.getScript("js/model.js", function () {
-//            pbar.progressbar({ value: (pbar.progressbar( "option", "value" )+25)});
-//            doneModel = true;
-//            tryComplete();
-//        });
-//
-//        $("#loadingInfo").html("downloading controller.js");
-//        $.getScript("js/controller.js", function () {
-//            pbar.progressbar({ value: (pbar.progressbar( "option", "value" )+25)});
-//            doneController = true;
-//            tryComplete();
-//        });
-//
-//        window.setTimeout(function () {
-//            if (!allDone) {
-//                    allDone = doneUtil && doneController && doneModel && doneTree;
-//                    if (allDone) {
-//                        loadingBar.delay(500).fadeOut(500);
-//                    }else{
-//                        var alertString = '';
-//                        if (!doneUtil) { alertString += '[Util.js]'; }
-//                        if (!doneController) { alertString += '[Controller.js]';}
-//                        if (!doneModel) { alertString += '[Model.js]';}
-//                        if (!doneTree) { alertString += '[jsTree]'; }
-//
-//                        alert("Problem loading FormDesigner Libraries! Libraries not loaded: "+alertString);
-//                    }
-//            }
-//                }, 5000);
-
-        loadingBar.fadeOut(200);
-
-    }
 
     function init_toolbar() {4
         var toolbar = $(".fd-toolbar"), select, addbutstr, addbut;
@@ -221,6 +153,25 @@ formdesigner.ui = (function () {
     }
     that.buttons = buttons;
 
+    function getDataJSTreeTypes() {
+        var jquery_icon_url = formdesigner.iconUrl,
+            types =  {
+            "max_children" : -1,
+			"valid_children" : "all",
+			"types" : {
+                    "default" : {
+                        "icon": {
+                            "image": jquery_icon_url,
+                            "position": "-112px -144px"
+                        },
+                    "valid_children" : "all"
+                }
+			}
+        }
+
+        return types;
+    }
+
     function getJSTreeTypes() {
         var groupRepeatValidChildren = formdesigner.util.GROUP_OR_REPEAT_VALID_CHILDREN,
             jquery_icon_url = formdesigner.iconUrl,
@@ -312,6 +263,13 @@ formdesigner.ui = (function () {
                     },
                     "valid_children" : "none"
                 },
+                "datanode" : {
+                    "icon": {
+                        "image": jquery_icon_url,
+                        "position": "-112px -144px"
+                    },
+                    "valid_children" : "none"
+                },
 				"default" : {
 					"valid_children" : groupRepeatValidChildren
 				}
@@ -320,6 +278,44 @@ formdesigner.ui = (function () {
         return types;
 
     }
+
+    /**
+     * Determine if we're in DataView mode based on whether
+     * the data JS Tree (container) is visible or not.
+     */
+    var isInDataViewMode = function () {
+        var controlTreeContainer = $('#fd-question-tree-container');
+        if (controlTreeContainer.is(":visible")) {
+            return false;
+        } else { //we're in data view mode.
+            return true;
+        }
+    }
+    that.isInDataViewMode = isInDataViewMode;
+
+    /**
+     * returns either the Data UI tree or the Question JS Tree,
+     * depending on what's visible
+     */
+    var getJSTree = function () {
+        if (isInDataViewMode()) {
+            return getDataJSTree();
+        } else {
+            return getQuestionJSTree();
+        }
+    }
+    that.getJSTree = getJSTree;
+
+
+    var getQuestionJSTree = function () {
+        return $('#fd-question-tree');
+    }
+    that.getQuestionJSTree = getQuestionJSTree;
+
+    var getDataJSTree = function () {
+        return $('#fd-data-tree');
+    }
+    that.getDataJSTree = getDataJSTree;
 
     var showVisualValidation = function (mugType){
         function setValidationFailedIcon(li,showIcon, message){
@@ -386,7 +382,33 @@ formdesigner.ui = (function () {
     };
     that.showVisualValidation = showVisualValidation;
 
-    var displayMugProperties = that.displayMugProperties = that.displayQuestion = function(mugType){
+    var displayMugDataProperties = that.displayMugDataProperties  = function(mugType){
+        return displayMugProperties(mugType, false, true, true);
+    }
+
+    /**
+     * Draws the properties to be edited to the screen.
+     * @param mugType - the MugType that has been selected for editing
+     * @param showControl - Show control type properties? Optional, defaults to true
+     * @param showBind - Show bind type properties? Optional, defaults to true
+     * @param showData - Show data type properties? Optional, defaults to true
+     */
+    var displayMugProperties = that.displayMugProperties = that.displayQuestion = function(mugType, showControl, showBind, showData){
+        if (typeof showControl === 'undefined') {
+            showControl = true;
+        }
+        if (typeof showBind === 'undefined') {
+            showBind = true;
+        }
+        if (typeof showData === 'undefined') {
+            showData = true;
+        }
+
+        //Override these flags if the mugType doesn't actually contain these blocks;
+        showControl = showControl && mugType.properties.controlElement;
+        showBind = showBind && mugType.properties.bindElement;
+        showData = showData && mugType.properties.dataElement;
+
         /**
          * creates and returns a <ul> element with the heading set and the correct classes configured.
          * @param heading
@@ -572,6 +594,9 @@ formdesigner.ui = (function () {
         }
 
         function showControlProps(){
+            if (!showControl) {
+                return;
+            }
             var properties = mugType.properties.controlElement,
                     uiBlock = $('#fd-props-control'),
                     ul;
@@ -592,7 +617,9 @@ formdesigner.ui = (function () {
         displayFuncs.controlElement = showControlProps;
 
         function showDataProps(){
-
+            if (!showData) {
+                return;
+            }
             var properties = mugType.properties.dataElement,
                     uiBlock = $('#fd-props-data'),
                     ul;
@@ -611,6 +638,9 @@ formdesigner.ui = (function () {
         displayFuncs.dataElement = showDataProps;
 
         function showBindProps(){
+            if (!showBind) {
+                return;
+            }
             var properties = mugType.properties.bindElement,
                     uiBlock = $('#fd-props-bind'),
                     ul;
@@ -709,8 +739,9 @@ formdesigner.ui = (function () {
         }
 
         function showItextProps(){
-
-
+            if (!showControl) {
+                return;
+            }
             function makeItextUL() {
                 var ulStr = '<ul id="fd-props-itext-ul" class="fd-props-ul">' +
                         '<span class="fd-props-heading">Display Properties</span>' +
@@ -761,6 +792,9 @@ formdesigner.ui = (function () {
 
             }
             var langDrop = $('#fd-itext-langs').detach();
+            if(langDrop.length === 0) {
+                langDrop = $('<div id="fd-itext-langs"></div>');
+            }
             $('#fd-props-itext').prepend(langDrop);
             langDrop.empty();
             $('#fd-itext-inputs').empty();
@@ -772,19 +806,19 @@ formdesigner.ui = (function () {
             
             var uiBlock = $('#fd-itext-inputs'),
                 ul, LIs, i, langSettings, itextHeading;
-                ul = makeItextUL();
-                uiBlock.append(ul);
-                LIs = {
-                    liDef : makeItextLI('default', 'Display Label'),
-                    liAudio : makeItextLI('audio', 'Audio URI'),
-                    liImage : makeItextLI('image', 'Image URI')
-                }
+            ul = makeItextUL();
+            uiBlock.append(ul);
+            LIs = {
+                liDef : makeItextLI('default', 'Display Label'),
+                liAudio : makeItextLI('audio', 'Audio URI'),
+                liImage : makeItextLI('image', 'Image URI')
+            }
 
-                for (i in LIs) {
-                    if(LIs.hasOwnProperty(i)) {
-                        ul.append(LIs[i]);
-                    }
+            for (i in LIs) {
+                if(LIs.hasOwnProperty(i)) {
+                    ul.append(LIs[i]);
                 }
+            }
 
             //shuffle layout a bit.
             langSettings = $('#fd-itext-langs');
@@ -845,17 +879,26 @@ formdesigner.ui = (function () {
             var contentEl = $('#fd-adv-props-content');
 
             contentEl.empty();
-            var itextul = makeUL('');
-            itextul.append(makeItextLI('short', 'Short Display Label'))
-                    .append(makeItextLI('long', 'Long Display Label'));
-            if(mugType.properties.controlElement.hintItextID && mugType.properties.controlElement.hintItextID.presence !== "notallowed") {
-                itextul.append(makeItextLI('default', 'Hint Display Label', true));
+            if (showControl) {
+                //Itext input widgets
+                var itextul = makeUL('');
+                itextul.append(makeItextLI('short', 'Short Display Label'))
+                        .append(makeItextLI('long', 'Long Display Label'));
+                if(mugType.properties.controlElement.hintItextID && mugType.properties.controlElement.hintItextID.presence !== "notallowed") {
+                    itextul.append(makeItextLI('default', 'Hint Display Label', true));
+                }
+                contentEl.append('<br /><br />').append(itextul);
             }
-
-            contentEl.append('<br /><br />').append(itextul);
-            displayBlock('dataElement');
-            displayBlock('bindElement');
-            displayBlock('controlElement');
+            
+            if (showData) {
+                displayBlock('dataElement');
+            }
+            if (showBind) {
+                displayBlock('bindElement');
+            }
+            if (showControl) {
+                displayBlock('controlElement');
+            }
 
             contentEl.find('select').chosen();
 
@@ -920,10 +963,41 @@ formdesigner.ui = (function () {
                 });
             }
 
+            function updateDataViewLabels () {
+                var mug, util, dataJSTree;
+                if (!mugType.properties.dataElement) {
+                    return ; //this shouldn't do anything for MT's that don't have a Data Node
+                }
+                mug = mugType.mug,
+                util = formdesigner.util;
+                dataJSTree = $('#fd-data-tree');
+
+                mug.on('property-changed',function(e){
+                    if(e.property === 'nodeID' && e.element === 'dataElement'){
+                        var node = $('#' + e.mugTypeUfid + '_data');
+                        dataJSTree.jstree('rename_node',node,this.properties.dataElement.properties.nodeID);
+                    }
+                });
+            }
+
             syncNodeIDInputs();
             updateUITreeNodeLabel();
             updateSaveState();
+            updateDataViewLabels();
 
+        }
+
+        //Throws a little label at the top of the question properties block to indicate what kind of question
+        //vellum thinks this is
+        function showQuestionType () {
+            var uiBlock = $('#fd-props-mugtype-info'),
+                ul, typeString = mugType.typeName;
+
+            uiBlock.empty();
+            ul = makeUL(typeString);
+
+            uiBlock.append(ul);
+            uiBlock.show();
         }
 
         function updateDisplay(){
@@ -939,6 +1013,9 @@ formdesigner.ui = (function () {
             $('#fd-props-data').empty();
             $('#fd-props-control').empty();
             $('#fd-props-advanced').empty();
+            $('#fd-itext-inputs').empty();
+
+            showQuestionType();
             for(i in mugTProps){
                 if(mugTProps.hasOwnProperty(i)){
                     displayFuncs[i]();
@@ -963,12 +1040,18 @@ formdesigner.ui = (function () {
         var curSelUfid = jQuery.data(data.rslt.obj[0], 'mugTypeUfid');
         
         formdesigner.controller.setCurrentlySelectedMugType(curSelUfid);
-        that.displayMugProperties(formdesigner.controller.getCurrentlySelectedMugType());
+        if($(e.currentTarget).attr('id') === 'fd-question-tree') {
+//            $('#fd-data-tree').jstree('select_node');
+            that.displayMugProperties(formdesigner.controller.getCurrentlySelectedMugType());
+        } else if ($(e.currentTarget).attr('id') === 'fd-data-tree') {
+//            $('#fd-question-tree').jstree('deselect_all');
+            that.displayMugDataProperties(formdesigner.controller.getCurrentlySelectedMugType());
+        }
     }
     
     function selectMugTypeInUI(mugType) {
         var ufid = mugType.ufid;
-        return getJSTree().jstree('select_node', $('#'+ufid), true);
+        return $('#fd-question-tree').jstree('select_node', $('#'+ufid), true);
     }
     that.selectMugTypeInUI = selectMugTypeInUI;
     
@@ -998,14 +1081,6 @@ formdesigner.ui = (function () {
     }
     that.forceUpdateUI = forceUpdateUI;
     
-    /**
-     * Returns the current UI tree instance as a Jquery Selector object
-     */
-    function getJSTree () {
-        return $('#fd-question-tree');
-    }
-    that.getJSTree = getJSTree;
-
     /**
      * Creates the UI tree
      */
@@ -1043,9 +1118,68 @@ formdesigner.ui = (function () {
                         mugType = controller.form.controlTree.getMugTypeFromUFID($(data.rslt.o).attr('id')),
                         refMugType = controller.form.controlTree.getMugTypeFromUFID($(data.rslt.r).attr('id')),
                         position = data.rslt.p;
-            controller.moveMugType(mugType, position, refMugType);
+            controller.moveMugType(mugType, position, refMugType, 'both');
+
+            if (LINK_CONTROL_MOVES_TO_DATA_TREE) {   //for matching the move in the GUI question tree with the GUI Data Tree
+                var elMT, elMTRef, pos;
+                elMT = $('#' + mugType.ufid + '_data');
+                elMTRef = $('#' + refMugType.ufid + '_data');
+                if (elMTRef.length === 0) {
+                    elMTRef = -1;
+                }
+                pos = position;
+                $('#fd-data-tree').jstree("move_node",elMT, elMTRef, pos, false);
+            }
+
+        }).bind("deselect_all.jstree", function (e, data) {
+            formdesigner.controller.curSelMugType = null;
+            formdesigner.controller.curSelUfid = null;
         });
         questionTree = $("#fd-question-tree");
+    }
+
+    function create_data_tree() {
+        $.jstree._themes = formdesigner.staticPrefix + "themes/";
+        $("#fd-data-tree").jstree({
+            "json_data" : {
+                "data" : []
+            },
+            "ui" : {
+                select_limit: 1
+            },
+            "crrm" : {
+                "move": {
+                    "always_copy": false,
+                    "check_move" : function (m) {
+                        var controller = formdesigner.controller,
+                                mugType = controller.form.dataTree.getMugTypeFromUFID($(m.o).attr('id')),
+                                refMugType = controller.form.dataTree.getMugTypeFromUFID($(m.r).attr('id')),
+                                position = m.p;
+                        return controller.checkMoveOp(mugType, position, refMugType,'data');
+//                        return true;  //Data nodes have no bad moves (all data nodes can have data nodes as children)
+				    }
+                }
+            },
+            "dnd" : {
+                "drop_target" : false,
+                "drag_target" : false
+            },
+            "types": getDataJSTreeTypes(),
+            "plugins" : [ "themes", "json_data", "ui", "crrm", "types", "dnd" ]
+	    }).bind("select_node.jstree", function (e, data) {
+            node_select(e, data);
+        }).bind("move_node.jstree", function (e, data) {
+            var controller, mugType, refMugType, position;
+            controller = formdesigner.controller;
+            mugType = controller.form.dataTree.getMugTypeFromUFID($(data.rslt.o).attr('id').replace('_data',''));
+            refMugType = controller.form.dataTree.getMugTypeFromUFID($(data.rslt.r).attr('id').replace('_data',''));
+            position = data.rslt.p;
+            controller.moveMugType(mugType, position, refMugType, 'data');
+        }).bind("deselect_all.jstree", function (e, data) {
+            formdesigner.controller.curSelMugType = null;
+            formdesigner.controller.curSelUfid = null;
+        });
+        dataTree = $("#fd-data-tree");
     }
 
     /**
@@ -1143,7 +1277,7 @@ formdesigner.ui = (function () {
         });
 
 
-        (function c_loadSource() {
+        (function c_generateSource() {
              var fancyBut = $(
                      '<button id="fd-fancy-button" class="toolbarButton questionButton">'+
                  'View Source ' +
@@ -1165,6 +1299,19 @@ formdesigner.ui = (function () {
 
              openSourcebut.button().click(function () {
                  formdesigner.controller.showLoadXformBox();
+             });
+
+         })();
+
+        (function c_showDataView() {
+             var showDataViewBut = $(
+                     '<button id="fd-dataview-button" class="toolbarButton questionButton">'+
+                 'Show Data View ' +
+               '</button>');
+             $('#fd-extra-advanced').append(showDataViewBut);
+
+             showDataViewBut.button().click(function () {
+                 formdesigner.ui.showDataView();
              });
 
          })();
@@ -1225,98 +1372,75 @@ formdesigner.ui = (function () {
      */
     var setTreeValidationIcons = function () {
         var dTree, cTree, uiDTree, uiCTree, form,
-                invalidMTs, i, invalidMsg;
+                invalidMTs, i, invalidMsg, liID;
+
+        //init things
         uiCTree = $('#fd-question-tree');
         uiDTree = $('#fd-data-tree');
         form = controller.form;
         cTree = form.controlTree;
         dTree = form.dataTree;
 
-        function clearIcons() {
-            uiCTree.find('.fd-tree-valid-alert-icon').remove();
+
+        function clearIcons (tree) {
+            tree.find('.fd-tree-valid-alert-icon').remove();
+        }
+
+        function appendIcon (id, msg) {
+            $($('#' + i)[0]).append('<div class="ui-icon ui-icon-alert fd-tree-valid-alert-icon" title="'+msg+'"></div>')
         }
 
 
 
-        clearIcons() //clear existing warning icons to start fresh.
+        clearIcons(uiCTree); //clear existing warning icons to start fresh.
+        clearIcons(uiDTree); //same for data tree
         invalidMTs = form.getInvalidMugTypeUFIDs();
         for (i in invalidMTs){
             if(invalidMTs.hasOwnProperty(i)){
-                invalidMsg = invalidMTs[i].message;
-                $($('#' + i)[0]).append('<div class="ui-icon ui-icon-alert fd-tree-valid-alert-icon" title="'+invalidMsg.replace(/"/g,"'")+'"></div>')
+                invalidMsg = invalidMTs[i].message.replace(/"/g,"'");
+                //ui tree
+                liID = i;
+                appendIcon (liID, invalidMsg);
+
+                //data tree
+                liID = i + "_data";
+                appendIcon (liID, invalidMsg);
             }
         }
+
     };
     that.setTreeValidationIcons = setTreeValidationIcons;
 
     var removeMugTypeFromUITree = function (mugType) {
-        var controlTree, el, ufid;
-        ufid = mugType.ufid;
-        el = $("#" + ufid);
-        controlTree = $("#fd-question-tree");
-        // this event _usually_ will select another mug from the tree
-        // but NOT if the first element is removed.
-        // In this case we select the topmost node (if available) 
-        // See also: forceUpdateUI
-        controlTree.jstree("remove",el);
+//        var controlTree, el, ufid;
+//        ufid = mugType.ufid;
+//        el = $("#" + ufid);
+//        controlTree = $("#fd-question-tree");
+//        // this event _usually_ will select another mug from the tree
+//        // but NOT if the first element is removed.
+//        // In this case we select the topmost node (if available)
+//        // See also: forceUpdateUI
+//        controlTree.jstree("remove",el);
+        removeMugTypeFromTree (mugType, $('#fd-question-tree'));
         
     };
     that.removeMugTypeFromUITree = removeMugTypeFromUITree;
 
-
-    var create_data_tree = function(){
-        var tree = $("#fd-data-tree-container");
-        $("#fd-data-tree-head").click(function () {
-                var container = $("#fd-data-tree-container"),
-                    curLeft = container.css('left');
-                if(curLeft === '-260px'){
-                    container.stop().animate({
-                            'left': '0px'
-                        }, 200);
-                }else if(curLeft === '0px'){
-                    container.stop().animate({
-                            'left': '-260px'
-                        }, 200);
-                }
-            }
-        );
-
-        //DATA TREE
-        tree = $("#fd-data-tree");
-        tree.jstree({
-            "json_data" : {
-                "data" : []
-            },
-            "crrm" : {
-                "move": {
-                    "always_copy": false,
-                    "check_move" : function (m) {
-                        var controller = formdesigner.controller,
-                                mugType = controller.form.controlTree.getMugTypeFromUFID($(m.o).attr('id')),
-                                refMugType = controller.form.controlTree.getMugTypeFromUFID($(m.r).attr('id')),
-                                position = m.p;
-                        return controller.checkMoveOp(mugType, position, refMugType);
-				    }
-                }
-            },
-//            "dnd" : {
-//                "drop_target" : false,
-//                "drag_target" : false
-//            },
-            "types": getJSTreeTypes(),
-            "plugins" : [ "themes", "json_data", "ui", "types", "crrm" ]
-	    }).bind("select_node.jstree", function (e, data) {
-//                    node_select(e, data);
-        }).bind("move_node.jstree", function (e, data) {
-//                    var controller = formdesigner.controller,
-//                                mugType = controller.form.controlTree.getMugTypeFromUFID($(data.rslt.o).attr('id')),
-//                                refMugType = controller.form.controlTree.getMugTypeFromUFID($(data.rslt.r).attr('id')),
-//                                position = data.rslt.p;
-//                    controller.moveMugType(mugType, position, refMugType);
-        });
-
-
+    var removeMugTypeFromDataTree = function (mugType) {
+        removeMugTypeFromTree (mugType, $('#fd-data-tree'));
     };
+    that.removeMugTypeFromDataTree = removeMugTypeFromDataTree;
+
+    var removeMugTypeFromTree = function (mugType, tree) {
+        var el, ufid;
+        tree = $(tree); //ensure it's a jquery element
+        ufid = mugType.ufid;
+        el = $("#" + ufid);
+        if (tree.attr('id') === 'fd-data-tree') {
+            el = $('#' + ufid + '_data');
+        }
+        tree.jstree("remove",el);
+    }
 
     function setup_fancybox(){
         $("a#inline").fancybox({
@@ -1358,6 +1482,7 @@ formdesigner.ui = (function () {
         };
 
         clearUITree($('#fd-question-tree'));
+        clearUITree($('#fd-data-tree'));
 
         $('#fd-form-prop-formName-input').val(formdesigner.controller.form.formName);
         $('#fd-form-prop-formID-input').val(formdesigner.controller.form.formID);
@@ -1434,6 +1559,17 @@ formdesigner.ui = (function () {
         })
 
     }
+
+
+    /**
+     * A simple toggle for flipping the type of UI tree visible to the user.
+     */
+    var showDataView = function () {
+        $('#fd-question-properties').hide();
+        $('#fd-data-tree-container').toggle();
+        $('#fd-question-tree-container').toggle();
+    }
+    that.showDataView = showDataView;
 
     var showConfirmDialog = function () {
         $( "#fd-dialog-confirm" ).dialog("open");
@@ -1525,11 +1661,12 @@ formdesigner.ui = (function () {
     that.init = function(){
         controller = formdesigner.controller;
         generate_scaffolding($(formdesigner.rootElement));
-        do_loading_bar();
         init_toolbar();
         init_extra_tools();
         create_question_tree();
-//        create_data_tree();
+        create_data_tree();
+        //hide the data JSTree initially.
+        $('#fd-data-tree-container').hide();
         init_form_paste();
         init_modal_dialogs();
 

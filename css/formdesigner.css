@@ -72,14 +72,13 @@ body{
 
 #fd-data-tree-container{
     float: left;
-    left: -260px;
-    top:500px;
+    left: -360px;
+    /*top:500px;*/
     position: absolute;
     z-index: 0;
     overflow: auto;
     margin-top: 10px;
     width:280px;
-    display:none;
 }
 
 
@@ -260,11 +259,8 @@ body{
 }
 
 #fd-data-tree-head {
-    cursor: pointer;
     position: relative;
-    right: -238px;
-    top: 236px;
-    width: 500px;
+    width: 100%;
 }
 
 #fd-props-content {
@@ -404,4 +400,9 @@ body{
 #formdesigner {
     width: 980px;
     margin: auto;
+}
+
+#fd-props-mugtype-info {
+    border: 1px solid black;
+    text-align: center;
 }
