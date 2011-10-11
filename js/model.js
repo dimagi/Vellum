@@ -2201,7 +2201,7 @@ formdesigner.model = function () {
 
                     var xmlWriter = formdesigner.controller.XMLWriter,
                         mugType = node.getValue(),
-                        tagName = mugType.mug.properties.controlElement.properties;
+                        tagName = mugType.mug.properties.controlElement.properties.tagName;
                     //finish off
                     xmlWriter.writeEndElement(); //close control tag.
                     if(tagName === 'repeat'){
