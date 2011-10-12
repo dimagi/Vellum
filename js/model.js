@@ -2602,9 +2602,7 @@ formdesigner.model = function () {
 
         /**
          * Get the Itext values for a specific Itext item
-         * for a specified language.  If no language is specified,
-         * will return valObject (see addItem())
-         *
+         * for a specified language.
          * if iID does not exist, null is returned.
          * If lang does not exist, exception is thrown.
          */
@@ -2973,6 +2971,19 @@ formdesigner.model = function () {
                 }
             }
 
+        }
+
+        that.removeItext = function (itextID) {
+            if (!itextID) {
+                throw "Can't delete null in Itext. Must specify an ItextID.  In model.Itext.removeItext()";
+            }
+            var langs, i, b;
+            langs = formdesigner.model.Itext.getLanguages();
+            for (i in langs) {
+                if(langs.hasOwnProperty(i)){
+                    delete data[langs[i]][itextID];
+                }
+            }
         }
 
         /**

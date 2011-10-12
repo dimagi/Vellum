@@ -799,6 +799,150 @@ $(document).ready(function(){
 
     });
 
+    test("High level util.js Itext rename cond 1", function(){
+        //test that renaming the itextid of an existing mug does not cause an overwrite
+        //of values already existing at the target itextID
+
+        formdesigner.controller.resetFormDesigner();
+        var IT = formdesigner.model.Itext,
+                util = formdesigner.util;
+        var otherLanguageName = "sw";
+        IT.addLanguage(otherLanguageName);
+        var iID = 'itext_ID1', form = 'long', val = "The Foo went to the BAR", oldIID;
+
+
+        IT.setValue(iID,"en",form,val);
+        ok(IT.validateItext(),"Itext data should be valid at this point");
+
+        var ui, jstree, curMugType, addqbut;
+        var c = formdesigner.controller;
+        //add a listener for question creation events
+        c.on("question-creation", function(e){
+            curMugType = e.mugType;
+        });
+
+        //add a question
+        addqbut = $('#fd-add-but');
+        addqbut.click();
+
+        oldIID = curMugType.mug.properties.controlElement.properties.labelItextID;
+
+        //actually test the util.renameItextID thing
+        util.setOrRenameItextID(iID,curMugType,'labelItextID',false);
+        equal(IT.getItextVals(oldIID,'en'), null, 'Old Itext ID should not exist in the Itext Object anymore');
+        notEqual(IT.getItextVals(iID,'en'), null, "New Itext ID SHOULD exist in the Itext Object");
+
+        equal(IT.getItextVals(iID, 'en')["long"], val, "Existing Itext values were not renamed");
+
+
+
+    });
+
+    test("High level util.js Itext rename cond 2", function(){
+        //test that renaming the itext id of an existing mug
+        //DOES cause an overwrite of the values at the target itextID
+        formdesigner.controller.resetFormDesigner();
+        var IT = formdesigner.model.Itext,
+                util = formdesigner.util;
+        var otherLanguageName = "sw";
+        IT.addLanguage(otherLanguageName);
+        var iID = 'itext_ID1', form = 'long', val = "The Foo went to the BAR", mtIID, mtIVal;
+
+        IT.setValue(iID,"en",form,val);
+        ok(IT.validateItext(),"Itext data should be valid at this point");
+
+        var ui, jstree, curMugType, addqbut;
+        var c = formdesigner.controller;
+        //add a listener for question creation events
+        c.on("question-creation", function(e){
+            curMugType = e.mugType;
+        });
+
+        //add a question
+        addqbut = $('#fd-add-but');
+        addqbut.click();
+
+        mtIID = curMugType.mug.properties.controlElement.properties.labelItextID;
+        mtIVal = IT.getItextVals(mtIID, 'en')["default"];
+
+        //actually test the util.renameItextID thing
+        util.setOrRenameItextID('itext_ID1',curMugType,'labelItextID',true);
+        equal(IT.getItextVals(mtIID, 'en'), null, 'Old Itext ID should not exist in the Itext Object anymore');
+        notEqual(IT.getItextVals("itext_ID1", 'en'), null, "New Itext ID SHOULD exist in the Itext Object");
+
+        equal(IT.getItextVals("itext_ID1", 'en')["default"], mtIVal, "Itext values were renamed");
+
+
+    });
+
+        test("High level util.js Itext rename cond 3", function(){
+            //test that renaming the itext ID of an existing mug
+            //works in the absence of itext values at the target itextID
+            formdesigner.controller.resetFormDesigner();
+            var IT = formdesigner.model.Itext,
+                    util = formdesigner.util;
+            var otherLanguageName = "sw";
+            IT.addLanguage(otherLanguageName);
+            var iID = 'itext_ID1', mt1, mtIID, mtVal;
+
+            var ui, jstree, curMugType, addqbut;
+            var c = formdesigner.controller;
+            //add a listener for question creation events
+            c.on("question-creation", function(e){
+                curMugType = e.mugType;
+            });
+
+            //add a question
+            addqbut = $('#fd-add-but');
+            addqbut.click();
+
+            mt1 = curMugType;
+            mtIID = curMugType.mug.properties.controlElement.properties.labelItextID;
+            mtVal = IT.getItextVals(mtIID, 'en')["default"];
+
+            util.setOrRenameItextID(iID,curMugType,'labelItextID',false);
+            equal(IT.getItextVals(mtIID, 'en'), null, 'Old Itext ID should not exist in the Itext Object anymore');
+            notEqual(IT.getItextVals(iID, 'en'), null, "New Itext ID SHOULD exist in the Itext Object");
+
+            equal(IT.getItextVals(iID, 'en')["default"], mtVal, "Itext value is there");
+
+
+        });
+
+
+        test("High level util.js Itext rename cond 4", function(){
+            //test that renaming the itext id of a mug that already exists
+            //works in the absence of all itext.
+            formdesigner.controller.resetFormDesigner();
+            var IT = formdesigner.model.Itext,
+                    util = formdesigner.util;
+            var otherLanguageName = "sw";
+            IT.addLanguage(otherLanguageName);
+            var iID = 'itext_ID1', mt1, mtIID, mtVal;
+
+            var ui, jstree, curMugType, addqbut;
+            var c = formdesigner.controller;
+            //add a listener for question creation events
+            c.on("question-creation", function(e){
+                curMugType = e.mugType;
+            });
+
+            //add a question
+            addqbut = $('#fd-add-but');
+            addqbut.click();
+
+            mt1 = curMugType;
+            mtIID = curMugType.mug.properties.controlElement.properties.labelItextID;
+            mtVal = IT.getItextVals(mtIID, 'en')["default"];
+
+            IT.removeItext(mtIID); //remove Itext of MT
+
+            util.setOrRenameItextID(iID,curMugType,'labelItextID',false);
+            equal(IT.getItextVals(mtIID, 'en'), null, 'Old Itext ID should not exist in the Itext Object anymore');
+            equal(IT.getItextVals(iID, 'en'), null, "New Itext ID should not exist in the Itext Object (no prior itext vals avail)");
+
+        });
+
     module("Create XForm XML");
     test("Create simple flat Xform", function () {
         var c = formdesigner.controller,

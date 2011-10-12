@@ -1048,11 +1048,10 @@ formdesigner.controller = (function () {
                             defLang, itextVal;
                         if(labelRef){
                             labelRef = labelRef.replace("jr:itext('",'').replace("')",''); //strip itext incantation
-                            cProps.labelItextID = labelRef;
                         } else {
                             labelRef = formdesigner.util.getNewItextID(MT, false); //assumes this is always successful
-                            cProps.labelItextID = labelRef;
                         }
+                        formdesigner.util.setOrRenameItextID(labelRef,MugType,'labelItextID');
 
                         if (labelVal) {
                             cProps.label = labelVal;

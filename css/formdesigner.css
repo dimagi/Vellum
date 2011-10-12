@@ -20,7 +20,7 @@ body{
 }
 
 #fd-question-table{
-    border: 1px solid black;
+    border: 1px solid gray;
     width: 50em;
 }
 
@@ -129,7 +129,7 @@ body{
 #fd-extra-tools{
     float:right;
     position:relative;
-    border: 1px solid black;
+    border: 1px solid gray;
     height:895px;
     padding-bottom:5px;
     /*margin: 5px;*/
@@ -403,6 +403,6 @@ body{
 }
 
 #fd-props-mugtype-info {
-    border: 1px solid black;
+    border: 1px solid gray;
     text-align: center;
 }

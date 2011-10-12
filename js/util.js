@@ -103,7 +103,68 @@ formdesigner.util = (function(){
     };
     that.dumpFormTreesToConsole = dumpFormTreesToConsole;
 
+    /**
+     * Takes in an itextID and a mugType.  If no ItextID is
+     * assigned to this mug, it simple sets it.
+     *
+     * If an itextID is already associated with this mug/mugtype,
+     * this method will rename the ID in the Itext object as well
+     * as changing the value in the mug.
+     *
+     * If this MugType is not supposed to have Itext data associated with
+     * it this method will just return (no errors or exceptions thrown)
+     * @param itextID
+     * @param mugType
+     * @param itextMugRef - optional.  This indicates the itext value to be changed (default ItextID, hintItextID, etc).
+     * For example: 'labelItextID' or 'hintItextID'
+     * @param overwrite - optional (default: false). Set this to true, if there is an existing ItextID (with associated
+     * value) in the Itext obj equal to the oldItextID as well as the possibility of an ItextID in the Itext object
+     * equal to the new value (specified in the args here).  If overwrite is true, values associated with the
+     * oldItextID will overwrite the values associated with the 'new' ItextID (specified in the args here).
+     *
+     * if itextMugRef is not specified, defaults to labelItextID
+     *
+     */
+     var setOrRenameItextID = function (newItextID, mugType, itextMugRef, overwrite) {
+        var Itext = formdesigner.model.Itext, oldItextID, hasOldItext, hasNewItext;
+        if (!itextMugRef) {
+            itextMugRef = 'labelItextID';
+        }
 
+        if (typeof overwrite === 'undefined') {
+            overwrite = false;
+        }
+
+        if (!mugType.properties.controlElement) { //no Itext business to do here
+            return;
+        }
+
+        oldItextID = mugType.mug.properties.controlElement.properties[itextMugRef];
+        hasOldItext = Itext.getItextVals(oldItextID, Itext.getDefaultLanguage()) !== null;
+        hasNewItext = Itext.getItextVals(newItextID, Itext.getDefaultLanguage()) !== null;
+
+
+        if (!oldItextID) { //assumes there's no ID by this name in the Itext object if this is null
+            mugType.mug.properties.controlElement.properties[itextMugRef] = newItextID;
+            //no changes to make to Itext obj
+            return;
+        } else {
+            if (overwrite) { //rename in Itext obj potentially destroying existing values for newItextID
+                Itext.renameItextID(oldItextID, newItextID);
+            } else { //lose the values associated with 'oldItextID' (if any)
+                if (hasNewItext) { //overwrite == false so delete vals associated with oldItextID to keep things clean
+                    Itext.removeItext(oldItextID);
+                } else if (hasOldItext) {
+                    Itext.renameItextID(oldItextID, newItextID);
+                } else {
+                    //nothing to do, nothing of importance in the Itext object
+                }
+            }
+            mugType.mug.properties.controlElement.properties[itextMugRef] = newItextID; //set the new val in the mug
+        }
+    };
+     that.setOrRenameItextID = setOrRenameItextID;
+    
     /**
      * From http://stackoverflow.com/questions/4149276/javascript-camelcase-to-regular-form
      * @param myString
