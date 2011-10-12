@@ -1639,6 +1639,10 @@ formdesigner.ui = (function () {
         showConfirmDialog();
     }
 
+    that.hideWaitingDialog = function () {
+        hideConfirmDialog();
+    }
+
     var init_misc = function () {
         controller.on('question-creation', function (e) {
             setTreeValidationIcons();

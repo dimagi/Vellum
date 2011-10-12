@@ -1,9 +1,17 @@
 
 var JRVALIDATE_MODE = true;
 
+var validateCallbackFunc = function (data, textStatus, jqXHR) {
+    if(!data.success) {
+        console.group('JR Validation Error');
+        console.log(data);
+        console.groupEnd();
+    }
+    ok(data.success, 'Form Validates with JR validator');
+    start();
+}
 
 $(document).ready(function(){
-
     formdesigner.launch();
     var testXformBuffer;
     var testFormNames = [
@@ -1330,29 +1338,45 @@ $(document).ready(function(){
     });
 
     module("In Out In XForm Tests");
-    test("Grab all the forms in the cache and test them individually", function () {
+
          var c = formdesigner.controller,
             ui = formdesigner.ui,
             jstree = $("#fd-question-tree"),
-            output, myxml, i=0;
+            output, myxml = {}, i=0, k=0, prettyTreeBefore = [], prettyTreeAfter = [];
 
-        for (i in testFormNames) {
-            get_cchq_forms(testFormNames[i]);
-            myxml = testXformBuffer;
-            validateFormWithJR(myxml);
-            c.loadXForm(myxml);             //parse
-            output = c.form.createXForm();  //generate form with FD
-            validateFormWithJR(output);     //validate
 
-            c.loadXForm(output);            //parse the newly generated form
-            output = c.form.createXForm();  //generate resulting XForm again
-            validateFormWithJR(output);     //Validate again
+
+        for (k in testFormNames) {
+            test("Test form: " + testFormNames[k], (function(i) {
+                return function () {
+                    var myform;
+                    get_cchq_forms(testFormNames[i]);
+                    myform = testXformBuffer;
+                    c.loadXForm(myform);             //parse
+                    prettyTreeBefore[0] = formdesigner.controller.form.controlTree.printTree();
+                    prettyTreeBefore[1] = formdesigner.controller.form.dataTree.printTree()
+                    output = c.form.createXForm();  //generate form with FD
+                    validateFormWithJR(output, validateCallbackFunc);     //validate
+
+                    c.loadXForm(output);            //parse the newly generated form
+                    prettyTreeAfter[0] = formdesigner.controller.form.controlTree.printTree();
+                    prettyTreeAfter[1] = formdesigner.controller.form.dataTree.printTree();
+                    output = c.form.createXForm();  //generate resulting XForm again
+                    validateFormWithJR(output, validateCallbackFunc);     //Validate again
+
+                    equal(prettyTreeBefore[0], prettyTreeAfter[0], "Internal controlTree should be the same at all times");
+                    equal(prettyTreeBefore[1], prettyTreeAfter[1], "Internal dataTree should be the same at all times");
+                }
+            }(k)));
+
         }
 
-    });
+
 
 
 });
+
+
 
 var asyncRes = [], testData = [], len = -1;
 formdesigner.asyncRes = asyncRes;
@@ -1361,27 +1385,18 @@ formdesigner.testData = testData;
  * Actual is the xml form string
  * @param actual
  */
-function validateFormWithJR(actual) {
+function validateFormWithJR(actual, successFunc) {
     if(!JRVALIDATE_MODE){
         return true;
     }
-        stop();
-        var mylen;
-        len = len + 1;
-        mylen = len;
-        testData[mylen] = formdesigner.util.clone(actual);
-//        $.ajaxSetup({"async": false});
-        $.post('/formtranslate/validate/',{xform: testData[mylen]},function (data) {
-                    asyncRes[mylen] = data;
-                    if(!asyncRes[mylen].success){
-                        ok(false, "Form Failed to validate with JR Validator!"+mylen);
-                        start();
-                        throw 'Form Failed to validate with JR Validator! See Console. Failure number:'+mylen;
-                    }
-                    ok(asyncRes[mylen].success, 'Form validates with Javarosa form validator, see console for failure '+mylen);
-                    start();
 
-        });
+    if (!successFunc) {
+        successFunc = validateCallbackFunc;
+    }
+    stop();
+
+//        $.ajaxSetup({"async": false});
+    $.post('/formtranslate/validate/',{xform: actual},successFunc);
 }
 
 function parseXMLAndGetSelector(xmlString) {

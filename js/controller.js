@@ -580,8 +580,8 @@ formdesigner.controller = (function () {
         button.show();
 
         button.click(function () {
-            that.loadXForm(input.val());
             $.fancybox.close();
+            that.loadXForm(input.val());
             $(this).hide();
         });
 
@@ -698,27 +698,34 @@ formdesigner.controller = (function () {
     that.setFormName = setFormName;
 
     var loadXForm = function (formString) {
-        formdesigner.fire({
-                type: 'load-form-start',
-                form : formString
-            });
-        try {
-            that.resetFormDesigner();
-            that.parseXML(formString);
-            that.reloadUI();
-        }catch (e) {
+        $.fancybox.showActivity();
+        window.setTimeout(function () { //wait for the spinner to come up.
             formdesigner.fire({
-                type: 'load-form-error',
-                errorObj : e,
-                form : formString
+                    type: 'load-form-start',
+                    form : formString
             });
-            throw (e);
-        }
 
-        formdesigner.fire({
-                type: 'load-form-complete',
-                form : formString
-            });
+            try {
+                that.resetFormDesigner();
+                that.parseXML(formString);
+                that.reloadUI();
+            }catch (e) {
+                formdesigner.fire({
+                    type: 'load-form-error',
+                    errorObj : e,
+                    form : formString
+                });
+                throw (e);
+            }
+
+            formdesigner.fire({
+                    type: 'load-form-complete',
+                    form : formString
+                });
+            $.fancybox.hideActivity();
+        },
+        500);
+
     }
     that.loadXForm = loadXForm;
 
