@@ -1322,18 +1322,20 @@ $(document).ready(function(){
 
         getTestXformOutput('form_with_no_data_attrs.xml');
         myxml = testXformBuffer;
+        stop();
         c.loadXForm(myxml); //load the xform using the standard pathway in the FD for parsing forms
-
-        expectedErrors = [
-            "warning::Form does not have a unique xform XMLNS (in data block). Will be added automatically",
-            "warning::Form JRM namespace attribute was not found in data block. One will be added automatically",
-            "warning::Form does not have a UIVersion attribute, one will be generated automatically",
-            "warning::Form does not have a Version attribute (in the data block), one will be added automatically",
-            "warning::Form does not have a Name! The default form name will be used"
-        ];
-        pErrors = c.getParseErrorMsgs();
-        deepEqual(pErrors, expectedErrors, "Do the correct errors get generated for a form with no data block attributes?");
-
+        window.setTimeout(function () {
+            expectedErrors = [
+                "warning::Form does not have a unique xform XMLNS (in data block). Will be added automatically",
+                "warning::Form JRM namespace attribute was not found in data block. One will be added automatically",
+                "warning::Form does not have a UIVersion attribute, one will be generated automatically",
+                "warning::Form does not have a Version attribute (in the data block), one will be added automatically",
+                "warning::Form does not have a Name! The default form name will be used"
+            ];
+            start();
+            pErrors = c.getParseErrorMsgs();
+            deepEqual(pErrors, expectedErrors, "Do the correct errors get generated for a form with no data block attributes?");
+        }, 1000);
 
     });
 
