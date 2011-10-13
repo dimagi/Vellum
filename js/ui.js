@@ -1716,7 +1716,14 @@ formdesigner.ui = (function () {
     
     that.showXPathEditor = function(options) {
         var editorPane = $('#fd-xpath-editor');
+        var getCurrentExpression = function() {
+            return $("#fd-xpath-editor-text").val();
+        };
+        var getValidationSummary = function() {
+            return $("#fd-xpath-validation-summary");
+        }
         var initXPathEditor = function() {
+            // build the inputs here
             $("<label />").attr("for", "fd-xpath-editor-text").text("Enter XPath String:").appendTo(editorPane);
             $("<input />").attr("id", "fd-xpath-editor-text").attr("type", "text").appendTo(editorPane);
             var doneButton = $('<button />').text("Done").button().appendTo(editorPane);
@@ -1724,8 +1731,18 @@ formdesigner.ui = (function () {
 	           formdesigner.controller.doneXPathEditor({
 	               group:    $('#fd-xpath-editor').data("group"),
 	               property: $('#fd-xpath-editor').data("property"),
-	               value:    $("#fd-xpath-editor-text").val()
+	               value:    getCurrentExpression()
 	           });
+	        });
+	        var validationSummary = $("<div />").attr("id", "fd-xpath-validation-summary").appendTo(editorPane);
+	        var validateButton = $('<button />').text("Validate").button().appendTo(editorPane);
+	        validateButton.click(function() {
+                try {
+                    var parsed = xpath.parse(getCurrentExpression());
+                    validationSummary.text("Validation Succeeded! " + parsed.toString()).removeClass("error").addClass("success");
+                } catch (err) {
+                    validationSummary.text("Validation Failed! " + err).removeClass("success").addClass("error");
+                }
 	        });
         }
         
@@ -1733,6 +1750,8 @@ formdesigner.ui = (function () {
             initXPathEditor();
         } 
         editorPane.data("group", options.group).data("property", options.property);
+        // clear validation text
+        getValidationSummary().text("").removeClass("error").removeClass("success");
         $("#fd-xpath-editor-text").val(options.value);
         $('#fd-xpath-editor').show();
     };
