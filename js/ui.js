@@ -463,18 +463,18 @@ formdesigner.ui = (function () {
          * Runs through a properties block and generates the
          * correct li elements (and appends them to the given parentUL)
          *
-         * @param propertiesBlock - The properties block from the MugType (e.g. mugType.properties.controlElement
+         * @param propertiesBlock - The propertiesinput block from the MugType (e.g. mugType.properties.controlElement
          * @param parentUL - The UL DOM node that an LI should be appended to.
          * @param mugProps - actual mug properties corresponding to the propertiesBlock above
          * @param groupName - Name of the current properties block (e.g. 'controlElement'
          * @param showVisible - Show properties with the visibility flag set to 'visible'
          * @param showHidden - Show properties with the visibility flag set to 'hidden'
          */
-        function listDisplay(propertiesBlock,parentUL, mugProps, groupName, showVisible, showHidden){
+        function listDisplay(propertiesBlock, parentUL, mugProps, groupName, showVisible, showHidden){
             function getWidget (propBlockIndex) {
                 var liStr,li,
                 p = propertiesBlock[propBlockIndex],
-                        itemID,html, labelStr, i;
+                        itemID,html, labelStr, i, xPathButton;
 
                 labelStr = p.lstring ? p.lstring : propBlockIndex;
                 itemID = groupName + '-' + propBlockIndex + '-' + 'input';
@@ -505,13 +505,32 @@ formdesigner.ui = (function () {
                     html = html + '<span class="fd-prop-input-div">' + '</span>';
                 } else if (p.uiType === 'checkbox') {
                     html = html + '<div class="fd-prop-input-div-checkbox"><input id="' + itemID + '" class="fd-property-checkbox" type="checkbox"></div>'
+                } else if (p.uiType === "xpath") {
+                    html = html + '<div class="fd-prop-input-div chzn-container">';
+                    html = html + '<input id="' + itemID + '" class="fd-property-input" style="width:200px;"/>';
+                    // the button gets added later
+                    html = html + '</div>';
                 }
 
                 liStr = '<li id="' + groupName + '-' + propBlockIndex + '" class="fd-property">' +
                             html +
                             '</li>'
                 li = $(liStr);
-
+                if (p.uiType === "xpath") {
+                    // make and add the xpath button down here, since we want to work with 
+                    // the jquery objects
+                    xPathButton = $('<button />').addClass("xpath-edit-button").text("Edit").button();
+                    xPathButton.data("group", groupName).data("prop", propBlockIndex).data("inputControlID", itemID);
+                    xPathButton.click(function () {
+                        formdesigner.controller.displayXPathEditor({
+                            group:    $(this).data("group"),
+                            property: $(this).data("prop"),
+                            value:    $("#" + $(this).data("inputControlID")).val()
+                        });
+                    });
+                    
+                    li.append(xPathButton);
+                }
                 return li;
             }
 
@@ -999,7 +1018,7 @@ formdesigner.ui = (function () {
             uiBlock.append(ul);
             uiBlock.show();
         }
-
+        
         function updateDisplay(){
             var mugTProps = mugType.properties,
             i = 0;
@@ -1007,8 +1026,8 @@ formdesigner.ui = (function () {
                         height:'900px'
                     },200);
 
-            $("#fd-question-properties").hide();
-
+            that.hideQuestionProperties();
+            
             $('#fd-props-bind').empty();
             $('#fd-props-data').empty();
             $('#fd-props-control').empty();
@@ -1070,7 +1089,7 @@ formdesigner.ui = (function () {
             }
             else {
                 // otherwise clear the Question Edit UI pane
-                $("#fd-question-properties").hide();
+                that.hideQuestionProperties();
                 // and the selected mug + other stuff in the UI  
                 formdesigner.controller.reloadUI();
                 
@@ -1593,7 +1612,7 @@ formdesigner.ui = (function () {
      * A simple toggle for flipping the type of UI tree visible to the user.
      */
     var showDataView = function () {
-        $('#fd-question-properties').hide();
+        that.hideQuestionProperties();
         $('#fd-data-tree-container').toggle();
         $('#fd-question-tree-container').toggle();
     }
@@ -1688,6 +1707,38 @@ formdesigner.ui = (function () {
         })
 
         
+    };
+    
+    that.hideQuestionProperties = function() {
+        $("#fd-question-properties").hide();
+    };
+    
+    
+    that.showXPathEditor = function(options) {
+        var editorPane = $('#fd-xpath-editor');
+        var initXPathEditor = function() {
+            $("<label />").attr("for", "fd-xpath-editor-text").text("Enter XPath String:").appendTo(editorPane);
+            $("<input />").attr("id", "fd-xpath-editor-text").attr("type", "text").appendTo(editorPane);
+            var doneButton = $('<button />').text("Done").button().appendTo(editorPane);
+	        doneButton.click(function() {
+	           formdesigner.controller.doneXPathEditor({
+	               group:    $('#fd-xpath-editor').data("group"),
+	               property: $('#fd-xpath-editor').data("property"),
+	               value:    $("#fd-xpath-editor-text").val()
+	           });
+	        });
+        }
+        
+        if (editorPane.children().length === 0) {
+            initXPathEditor();
+        } 
+        editorPane.data("group", options.group).data("property", options.property);
+        $("#fd-xpath-editor-text").val(options.value);
+        $('#fd-xpath-editor').show();
+    };
+    
+    that.hideXPathEditor = function() {
+        $('#fd-xpath-editor').hide();
     }
 
     that.init = function(){

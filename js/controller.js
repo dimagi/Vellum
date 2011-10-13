@@ -1572,7 +1572,24 @@ formdesigner.controller = (function () {
         formdesigner.model.reset();
         formdesigner.ui.resetUI();
     }
-
+    
+    
+    // here is the xpath stuff
+    var displayXPathEditor = function(options) {
+        formdesigner.ui.hideQuestionProperties();
+        formdesigner.ui.showXPathEditor(options);
+    };
+    that.displayXPathEditor = displayXPathEditor;
+    
+    var doneXPathEditor = function(options) {
+        var mug = that.getCurrentlySelectedMugType();
+        mug.mug.properties[options.group].properties[options.property] = options.value;
+        formdesigner.ui.hideXPathEditor();
+        formdesigner.ui.displayMugProperties(mug);
+    };
+    that.doneXPathEditor = doneXPathEditor;
+    
+    
     //make controller event capable
     formdesigner.util.eventuality(that);
 
