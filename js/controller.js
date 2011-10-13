@@ -36,6 +36,57 @@ formdesigner.controller = (function () {
     that.getMTFromFormByUFID = getMTFromFormByUFID;
 
     /**
+     * Walks through both internal trees (data and control) and grabs
+     * the Itext id's from any Mugs that are found.  Returns
+     * a flat list of iIDs.  This list is primarily used
+     * for trimming out crufty itext.  See also
+     * formdesigner.model.Itext.removeCruftyItext()
+     */
+    var getListOfItextIDsFromMugs = function () {
+        var cTree, dTree, treeFunc, thingToGet, cLists=[], dLists=[], mergeLists = [], finalList;
+        //use formdesigner.util.mergeArray
+
+        treeFunc = function (node) {
+            var mt;
+            if(node.isRootNode) {
+                return;
+            }
+
+            mt = node.getValue();
+            if(!mt) {
+                throw 'Node in tree without value?!?!'
+            }
+
+            if (mt.mug.properties.controlElement) {
+                return mt.mug.properties.controlElement.properties[thingToGet];
+            }
+
+
+        }
+
+        cTree = that.form.controlTree;
+        dTree = that.form.dataTree;
+
+        thingToGet = 'labelItextID'; //get all the labelItextIDs
+        cLists[0] = cTree.treeMap(treeFunc);
+        dLists[0] = dTree.treeMap(treeFunc);
+
+        thingToGet = 'hintItextID'; //get all the hintItextIDs
+        cLists[1] = cTree.treeMap(treeFunc);
+        dLists[1] = dTree.treeMap(treeFunc);
+
+        mergeLists[0] = formdesigner.util.mergeArray(cLists[0],dLists[0]); //strip dupes and merge
+        mergeLists[1] = formdesigner.util.mergeArray(cLists[1],dLists[1]); //strip dupes and merge
+
+        finalList = formdesigner.util.mergeArray(mergeLists[0], mergeLists[1]); //merge mergers (and strip dupes ;) )
+
+        return finalList; //give it all back
+
+    }
+    that.getListOfItextIDsFromMugs = getListOfItextIDsFromMugs;
+
+
+    /**
      * Sets the currently selected (in the UI tree) MugType
      * so that the controller is aware of the currently
      * being worked on MT without having to do the call
@@ -71,6 +122,25 @@ formdesigner.controller = (function () {
 
          myMug.fire(event);
     };
+
+    /**
+     * Function for triggering a clean out of the itext
+     * where all ids + itext data are removed that are
+     * found to not be linked to any element in the form.
+     *
+     * Toggles the ui spinner (this operation could take a few seconds).
+     */
+    var removeCruftyItext = function () {
+        //show spinner
+        $.fancybox.showActivity();
+
+        var validIds = that.getListOfItextIDsFromMugs();
+        formdesigner.model.Itext.removeCruftyItext(validIds);
+
+        //hide spinner
+        $.fancybox.hideActivity();
+    }
+    that.removeCruftyItext = removeCruftyItext;
 
     /**
      * Inserts a new MugType into the relevant Trees (and their

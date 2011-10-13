@@ -943,6 +943,81 @@ $(document).ready(function(){
 
         });
 
+
+        test("Crufty Itext Removal Funcs", function () {
+            stop();
+            formdesigner.controller.resetFormDesigner();
+            var cleanForm = 'form0.xml';
+            var cruftyForm = 'form_with_crufty_itext1.xml';
+
+            var Itext = formdesigner.model.Itext;
+            var c = formdesigner.controller;
+            getTestXformOutput(cleanForm);
+            cleanForm = testXformBuffer;
+            getTestXformOutput(cruftyForm);
+            cruftyForm = testXformBuffer;
+
+            var cleanIDs = ["question1", "question2", "question3", "question4", "question5"];
+            var crufyIDs = ["question1", "question2", "question3", "question4", "question5", "cough", "TB_positive", "fever", "skin_infection", "wound_infection", "hiv_positive", "BP", "diabetes", "danger_sign_preg_mother", "preg_mother-TT", "preg_mother-ante_natal", "birth_registration"];
+
+            //Test the clean form
+
+            c.loadXForm(cleanForm);
+
+            window.setTimeout(function () {
+//                start();
+                same(Itext.getAllItextIDs(), cleanIDs, 'List of all Itext IDs is correct');
+                same(Itext.getAllItextIDs(), c.getListOfItextIDsFromMugs(), '"All" itext IDs and "clean/valid" ids are the same');
+                c.removeCruftyItext();
+                same(Itext.getAllItextIDs(), cleanIDs, 'List of "clean" Itext IDs is still correct after calling removeCrufyItext()');
+                same(Itext.getAllItextIDs(), c.getListOfItextIDsFromMugs(), '"All" itext IDs and "clean/valid" ids are the same');
+
+                //test the crufty form
+                c.loadXForm(cruftyForm);
+//                stop()
+                window.setTimeout(function () {
+                    start();
+                    same(Itext.getAllItextIDs(), crufyIDs, 'List of all Itext IDs is correct');
+                    c.removeCruftyItext();
+                    same(Itext.getAllItextIDs(), cleanIDs, 'List of Itext IDs is correct after calling removeCrufyItext() (now the same as the "clean" forms');
+                    same(Itext.getAllItextIDs(), c.getListOfItextIDsFromMugs(), '"All" itext IDs and "clean/valid" ids are the same');
+                }, 700)
+            }, 700);
+
+        });
+
+        test("Crufty Itext Removal Controller Wrapper Func", function () {
+            stop();
+            formdesigner.controller.resetFormDesigner();
+            var cleanForm = 'form0.xml';
+            var cruftyForm = 'form_with_crufty_itext1.xml';
+
+            var Itext = formdesigner.model.Itext;
+            var c = formdesigner.controller;
+            getTestXformOutput(cleanForm);
+            cleanForm = testXformBuffer;
+            getTestXformOutput(cruftyForm);
+            cruftyForm = testXformBuffer;
+
+            var cleanIDs = ["question1", "question2", "question3", "question4", "question5"];
+            var crufyIDs = ["question1", "question2", "question3", "question4", "question5", "cough", "TB_positive", "fever", "skin_infection", "wound_infection", "hiv_positive", "BP", "diabetes", "danger_sign_preg_mother", "preg_mother-TT", "preg_mother-ante_natal", "birth_registration"];
+
+            //Test the clean form
+
+            c.loadXForm(cruftyForm);
+            window.setTimeout(function () {
+                start();
+                c.removeCruftyItext();
+                same(Itext.getAllItextIDs(), cleanIDs, "Controller function for UI for cleaning out Crufty Itext produces correct results");
+
+            },700);
+
+        });
+
+
+
+
+
     module("Create XForm XML");
     test("Create simple flat Xform", function () {
         var c = formdesigner.controller,

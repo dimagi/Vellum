@@ -2675,7 +2675,6 @@ formdesigner.model = function () {
             }
         }
         
-        
         /**
          * Create a new Itext ID in storage deliberately without a
          * value (this is usually to trigger the validation mechanism to pick up on
@@ -2995,6 +2994,60 @@ formdesigner.model = function () {
             that.addLanguage("en");
             that.setDefaultLanguage("en");
         };
+
+        /**
+         * Generates a flat list of all unique Itext IDs currently in the
+         * Itext object.
+         */
+        var getAllItextIDs = function () {
+            var idList = [], langs, iData, lang, id, ids, i;
+            langs = that.getLanguages();
+            iData = that.getAllData()
+
+            //generate list of unique Itext IDs
+            for (i in langs) {
+                if (langs.hasOwnProperty(i)) {
+                    lang = langs[i];
+                    ids = iData[lang];
+                    for (id in ids) {
+                        if (ids.hasOwnProperty(id)) {
+                            if(idList.indexOf(id) === -1) { //only add it if it's not already there.
+                                idList.push(id);
+                            }
+                        }
+                    }
+                }
+            }
+
+            return idList;
+        }
+        that.getAllItextIDs = getAllItextIDs;
+
+        /**
+         * Takes in a list of Itext IDs that are
+         * actually being used in the form
+         * and deletes all other Itext IDs that are
+         * presently being stored in the Itext Object.
+         *
+         * For generating a list of useful IDs see:
+         * formdesigner.controller.getListOfItextIDsFromMugs()
+         *
+         * @param validIDList
+         */
+        var removeCruftyItext = function (validIDList) {
+            var idList, i, id;
+
+            idList = that.getAllItextIDs();
+            for (i in idList) {
+                if (idList.hasOwnProperty(i)) {
+                    id = idList[i];
+                    if(validIDList.indexOf(id) === -1) {
+                        that.removeItext(id); //remove it from the Itext object
+                    }
+                }
+            }
+        }
+        that.removeCruftyItext = removeCruftyItext;
 
         (function init(initLang){
             that.addLanguage(initLang);

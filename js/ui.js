@@ -1318,6 +1318,32 @@ formdesigner.ui = (function () {
 
          })();
 
+        (function c_clearCruftyItext() {
+            var clearCruftBut = $(
+                     '<button id="fd-dataview-button" class="toolbarButton questionButton">'+
+                 'Remove Unused Itext ' +
+               '</button>');
+             $('#fd-extra-advanced').append(clearCruftBut);
+
+            clearCruftBut.button().click(function () {
+                var msg = "Are you sure you want to remove all unused Itext?";
+                var onContinue = function () {
+                    formdesigner.ui.hideConfirmDialog();
+                    window.setTimeout(function () {
+                        formdesigner.controller.removeCruftyItext();
+                    }, 200);
+                };
+
+                var onAbort = function () {
+                    formdesigner.ui.hideConfirmDialog();
+                }
+
+                formdesigner.ui.setDialogInfo(msg,'Continue',onContinue,'Abort',onAbort);
+                formdesigner.ui.showConfirmDialog();
+            });
+
+        }());
+
 
         $('#fd-extra-template-questions div').each(function(){
             $(this).button({
