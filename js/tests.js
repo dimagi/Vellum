@@ -1016,6 +1016,66 @@ $(document).ready(function(){
 
 
 
+        test("Test default language setting", function () {
+            stop();
+            formdesigner.controller.resetFormDesigner();
+            var form = 'form_with_3_languages.xml';
+
+            var Itext = formdesigner.model.Itext;
+            var c = formdesigner.controller;
+            getTestXformOutput(form);
+            form = testXformBuffer;
+
+
+            formdesigner.myform = form;
+            //Test the clean form
+            c.loadXForm(form);
+
+            window.setTimeout(function () {
+                start();
+                equal(Itext.getDefaultLanguage(), 'th', "Language was correctly set to 'th'");
+
+                Itext.setDefaultLanguage('sw');
+                equal(Itext.getDefaultLanguage(), 'sw', "Language was correctly set to 'sw'");
+
+
+
+            },777);
+        });
+
+        test("Test default language by using external language list init option", function () {
+            stop();
+            formdesigner.controller.resetFormDesigner();
+            var form = 'form_with_3_languages.xml';
+            var Itext = formdesigner.model.Itext;
+            var c = formdesigner.controller;
+            var xmlString;
+            getTestXformOutput(form);
+            form = testXformBuffer;
+
+            var langs = ["sw", "th", "en"];
+            formdesigner.opts = {"langs" : langs}; //fake the mechanism by which options are usually passed in by the launcher
+                                        // see formdesigner.launch() in ui.js
+            c.loadXForm(form);
+
+            window.setTimeout(function () {
+
+                equal(Itext.getDefaultLanguage(), 'sw', "Language was correctly set to 'sw' at parse time");
+
+                xmlString = c.form.createXForm();
+                validateFormWithJR(xmlString);
+                
+                var grepVal = grep(xmlString,"default=").trim();
+                equal(grepVal, '<translation lang="sw" default="">', "default attr was correctly set");
+                start();
+
+
+            },777);
+        });
+
+
+
+
 
 
     module("Create XForm XML");

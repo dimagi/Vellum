@@ -1262,11 +1262,20 @@ formdesigner.controller = (function () {
             Itext.removeLanguage('en');
 
             function eachLang() {
-                var el = $ (this);
+                var el = $ (this) ,defaultExternalLang;
                 curLanguage = el.attr('lang');
                 Itext.addLanguage(curLanguage);
-                if(el.attr('default')) {
+                if(el.attr('default') !== undefined) {
                     Itext.setDefaultLanguage(curLanguage);
+                }
+
+                //if we were passed a list of languages (in order of preference from outside)...
+                if(formdesigner.opts["langs"]) {
+                    //grab the default language.
+                    if(formdesigner.opts["langs"].length > 0) { //make sure there are actually entries in the list
+                        defaultExternalLang = formdesigner.opts["langs"][0];
+                        Itext.setDefaultLanguage(defaultExternalLang); //set the form default to the one specified in initialization options.
+                    }
                 }
 
                 //loop through children
@@ -1299,14 +1308,14 @@ formdesigner.controller = (function () {
 
         that.fire('parse-start');
         try{
-            var xmlDoc = $.parseXML(xmlString),
-                xml = $(xmlDoc),
-                binds = xml.find('bind'),
-                data = xml.find('instance').children(),
-                controls = xml.find('h\\:body').children(),
-                itext = xml.find('itext'),
-                formID, formName,
-                    title;
+                var xmlDoc = $.parseXML(xmlString),
+                    xml = $(xmlDoc),
+                    binds = xml.find('bind'),
+                    data = xml.find('instance').children(),
+                    controls = xml.find('h\\:body').children(),
+                    itext = xml.find('itext'),
+                    formID, formName,
+                        title;
 
             xml.find('instance').children().each(function () {
                 formID = this.nodeName;
@@ -1557,6 +1566,7 @@ formdesigner.controller = (function () {
      */
     function resetControllerInternal () {
             formdesigner.util.question_counter = 1;
+            //reset Options passed in to the initializer
             curSelMugType = null;
             curSelUfid = null;
     }

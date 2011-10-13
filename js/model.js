@@ -2553,13 +2553,13 @@ formdesigner.model = function () {
          * @param name
          */
         that.removeLanguage = function (name) {
-            if(this.getDefaultLanguage() === name){
-                this.setDefaultLanguage(Object.keys(data)[0]); //attempt to set default to first available lang.
-            }
             if(!data[name]) {
                 return;
             }else{
                 delete data[name];
+                if(this.getDefaultLanguage() === name){
+                    this.setDefaultLanguage(Object.keys(data)[0]); //attempt to set default to first available lang.
+                }
             }
         };
 
