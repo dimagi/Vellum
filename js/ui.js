@@ -1722,26 +1722,48 @@ formdesigner.ui = (function () {
         var getValidationSummary = function() {
             return $("#fd-xpath-validation-summary");
         }
+        var validateCurrent = function () {
+            var expr = getCurrentExpression();
+            if (expr) {
+	            try {
+	                var parsed = xpath.parse(expr);
+	                return [true, parsed];
+	            } catch (err) {
+	                return [false, err];
+	            }
+            }
+            return [true, null];
+        }
         var initXPathEditor = function() {
             // build the inputs here
             $("<label />").attr("for", "fd-xpath-editor-text").text("Enter XPath String:").appendTo(editorPane);
             $("<input />").attr("id", "fd-xpath-editor-text").attr("type", "text").appendTo(editorPane);
             var doneButton = $('<button />').text("Done").button().appendTo(editorPane);
 	        doneButton.click(function() {
-	           formdesigner.controller.doneXPathEditor({
-	               group:    $('#fd-xpath-editor').data("group"),
-	               property: $('#fd-xpath-editor').data("property"),
-	               value:    getCurrentExpression()
-	           });
+	           var results = validateCurrent();
+	           if (results[0]) {
+		           formdesigner.controller.doneXPathEditor({
+		               group:    $('#fd-xpath-editor').data("group"),
+		               property: $('#fd-xpath-editor').data("property"),
+		               value:    getCurrentExpression()
+		           });
+	           } else {
+	               getValidationSummary().text("Validation Failed! Please fix all errors before leaving this page. " + results[1]).removeClass("success").addClass("error");
+	           }
 	        });
 	        var validationSummary = $("<div />").attr("id", "fd-xpath-validation-summary").appendTo(editorPane);
 	        var validateButton = $('<button />').text("Validate").button().appendTo(editorPane);
 	        validateButton.click(function() {
-                try {
-                    var parsed = xpath.parse(getCurrentExpression());
-                    validationSummary.text("Validation Succeeded! " + parsed.toString()).removeClass("error").addClass("success");
-                } catch (err) {
-                    validationSummary.text("Validation Failed! " + err).removeClass("success").addClass("error");
+                var results = validateCurrent();
+                if (results[0]) {
+                    if (results[1]) {
+                        validationSummary.text("Validation Succeeded! " + results[1].toString());
+                    } else {
+                        validationSummary.text("Nothing to validate.");
+                    }
+                    validationSummary.removeClass("error").addClass("success");
+                } else {
+                    validationSummary.text("Validation Failed! " + results[1]).removeClass("success").addClass("error");
                 }
 	        });
         }
