@@ -1846,9 +1846,7 @@ formdesigner.model = function () {
                     }
                 }
             }
-
             return bList;
-            
         }
 
         /**

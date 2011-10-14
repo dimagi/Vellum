@@ -1573,6 +1573,16 @@ formdesigner.controller = (function () {
         formdesigner.ui.resetUI();
     }
     
+    // tree drag and drop stuff, used by xpath
+    var handleTreeDrop = function(source, target) {
+        var target = $(target), sourceUid = $(source).attr("id");
+        if (target.hasClass("xpath-edit-node")) {
+            var mug = that.form.getMugTypeByUFID(sourceUid);
+            var path = formdesigner.controller.form.dataTree.getAbsolutePath(mug);
+            target.val(path);                
+        }
+    };
+    that.handleTreeDrop = handleTreeDrop;
     
     // here is the xpath stuff
     var displayXPathEditor = function(options) {

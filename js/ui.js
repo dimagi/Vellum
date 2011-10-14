@@ -1125,8 +1125,9 @@ formdesigner.ui = (function () {
                 }
             },
             "dnd" : {
-                "drop_target" : false,
-                "drag_target" : false
+                "drop_finish" : function(data) {
+                    formdesigner.controller.handleTreeDrop(data.o, data.r);
+                }
             },
             "types": getJSTreeTypes(),
             "plugins" : [ "themes", "json_data", "ui", "crrm", "types", "dnd" ]
@@ -1716,12 +1717,18 @@ formdesigner.ui = (function () {
     
     that.showXPathEditor = function(options) {
         var editorPane = $('#fd-xpath-editor');
+        var getExpressionInput = function() {
+            return $("#fd-xpath-editor-text");
+        }
         var getCurrentExpression = function() {
-            return $("#fd-xpath-editor-text").val();
+            return getExpressionInput().val();
         };
         var getValidationSummary = function() {
             return $("#fd-xpath-validation-summary");
         }
+        var getexpressionPane = function() {
+            return $("#fd-xpath-editor-expressions");
+        };
         var validateCurrent = function () {
             var expr = getCurrentExpression();
             if (expr) {
@@ -1734,10 +1741,56 @@ formdesigner.ui = (function () {
             }
             return [true, null];
         }
+        
+        var addExpression = function() {
+            var createQuestionAcceptor = function() {
+                var questionAcceptor = $("<input />").attr("placeholder", "Hint: drag a question here.");
+                questionAcceptor.css("min-width", "200px")
+                questionAcceptor.addClass("jstree-drop xpath-edit-node");
+                return questionAcceptor;
+            }
+            var createOperationSelector = function() {
+                var sel = $("<select />");
+                for (var i in XPathExpressionTypeEnum) {
+                    if (XPathExpressionTypeEnum.hasOwnProperty(i)) {
+                        $("<option />").val(XPathExpressionTypeEnum[i]).text(XPathExpressionTypeEnum[i]).appendTo(sel);
+                    }
+                }
+                return sel;
+            }
+            var expressionPane = getexpressionPane();
+            var expression = $("<div />").appendTo(expressionPane);
+            var left = createQuestionAcceptor().appendTo(expression);
+            var op = createOperationSelector().appendTo(expression);
+            var right = createQuestionAcceptor().appendTo(expression);
+            $("<div />").text("Update").button().appendTo(expression).click(function() {
+                var exprPath = left.val() + " " + expressionTypeEnumToXPathLiteral(op.val()) + " " + right.val();
+                getExpressionInput().val(exprPath);
+            });
+            $("<div />").text("Delete").button().appendTo(expression).click(function() {
+                expression.remove();
+            });
+            
+            /*
+            questionAcceptor.droppable({
+                drop: function(event, ui) {
+                    console.log("this", this);
+                    console.log("event", event);
+                    console.log("ui", ui);
+                }
+            });
+            */
+            
+        };
         var initXPathEditor = function() {
             // build the inputs here
             $("<label />").attr("for", "fd-xpath-editor-text").text("Enter XPath String:").appendTo(editorPane);
             $("<input />").attr("id", "fd-xpath-editor-text").attr("type", "text").appendTo(editorPane);
+            $("<div />").attr("id", "fd-xpath-editor-expressions").appendTo(editorPane);
+            var addExpressionButton = $("<button />").text("Add expression").button().appendTo(editorPane);
+            addExpressionButton.click(function() {
+                addExpression();
+            });
             var doneButton = $('<button />').text("Done").button().appendTo(editorPane);
 	        doneButton.click(function() {
 	           var results = validateCurrent();
@@ -1774,6 +1827,7 @@ formdesigner.ui = (function () {
         editorPane.data("group", options.group).data("property", options.property);
         // clear validation text
         getValidationSummary().text("").removeClass("error").removeClass("success");
+        
         $("#fd-xpath-editor-text").val(options.value);
         $('#fd-xpath-editor').show();
     };
