@@ -1715,22 +1715,44 @@ formdesigner.ui = (function () {
     };
     
     
-    that.showXPathEditor = function(options) {
+    that.showXPathEditor = function (options) {
         var editorPane = $('#fd-xpath-editor');
-        var getExpressionInput = function() {
+        
+        var getExpressionInput = function () {
             return $("#fd-xpath-editor-text");
         }
-        var getCurrentExpression = function() {
+        var getCurrentExpression = function () {
             return getExpressionInput().val();
         };
-        var getValidationSummary = function() {
+        var getValidationSummary = function () {
             return $("#fd-xpath-validation-summary");
         }
-        var getexpressionPane = function() {
+        var getExpressionPane = function () {
             return $("#fd-xpath-editor-expressions");
         };
-        var validateCurrent = function () {
-            var expr = getCurrentExpression();
+        var getExpressionList = function () {
+            return getExpressionPane().children();
+        }
+        
+        var getExpressionFromUI = function () {
+            var pane = getExpressionPane();
+            var expressionParts = [];
+            pane.children().each(function() {
+                var join = $($(this).find(".join-select"));
+                var left = $($(this).find("input")[0]);
+                var right = $($(this).find("input")[1]);
+                var op = $($(this).find(".op-select")[0]);
+                // todo, construct manually, and validate individual parts.
+                if (join.length > 0) {
+                    expressionParts.push(xpathmodels.expressionTypeEnumToXPathLiteral($(join[0]).val()));   
+                }
+                var exprPath = left.val() + " " + xpathmodels.expressionTypeEnumToXPathLiteral(op.val()) + " " + right.val();
+                expressionParts.push(exprPath);                
+            });
+            return expressionParts.join(" ");
+        };
+        
+        var validate = function (expr) {
             if (expr) {
 	            try {
 	                var parsed = xpath.parse(expr);
@@ -1740,59 +1762,116 @@ formdesigner.ui = (function () {
 	            }
             }
             return [true, null];
-        }
+        };
         
-        var addExpression = function() {
+        var validateCurrent = function () {
+            return validate(getCurrentExpression());
+        };
+        
+        
+        var addExpression = function(values) {
+            // adds an expression to the UI. optionally populating it with 
+            // values
             var createQuestionAcceptor = function() {
                 var questionAcceptor = $("<input />").attr("placeholder", "Hint: drag a question here.");
                 questionAcceptor.css("min-width", "200px")
                 questionAcceptor.addClass("jstree-drop xpath-edit-node");
                 return questionAcceptor;
             }
-            var createOperationSelector = function() {
+            var expTypes = xpathmodels.XPathExpressionTypeEnum;
+            var constructSelect = function (ops) {
                 var sel = $("<select />");
-                for (var i in XPathExpressionTypeEnum) {
-                    if (XPathExpressionTypeEnum.hasOwnProperty(i)) {
-                        $("<option />").val(XPathExpressionTypeEnum[i]).text(XPathExpressionTypeEnum[i]).appendTo(sel);
-                    }
+                for (var i = 0; i < ops.length; i++) {
+                    $("<option />").text(ops[i][0]).val(ops[i][1]).appendTo(sel);
                 }
                 return sel;
             }
-            var expressionPane = getexpressionPane();
+            var createOperationSelector = function() {
+                var ops = [["is equal to", expTypes.EQ],
+                           ["is not equal to", expTypes.NEQ],
+                           ["id less than", expTypes.LT],
+                           ["is less than or equal to", expTypes.LTE],
+                           ["is greater than", expTypes.GT],
+                           ["is greater than or equal to", expTypes.GTE]];
+                     
+                return constructSelect(ops).addClass("op-select");;
+            }
+            var createJoinSelector = function() {
+                var ops = [["and", expTypes.AND],
+                           ["or", expTypes.OR]];
+                return constructSelect(ops).addClass("join-select");
+            }
+            var expressionPane = getExpressionPane();
+            var expressionCount = getExpressionPane().children().length;
             var expression = $("<div />").appendTo(expressionPane);
-            var left = createQuestionAcceptor().appendTo(expression);
+            var join = null;
+            if (expressionCount !== 0) {
+                join = createJoinSelector().appendTo(expression);
+            }
+            var left = createQuestionAcceptor().addClass("left-question").appendTo(expression);
             var op = createOperationSelector().appendTo(expression);
-            var right = createQuestionAcceptor().appendTo(expression);
-            $("<div />").text("Update").button().appendTo(expression).click(function() {
-                var exprPath = left.val() + " " + expressionTypeEnumToXPathLiteral(op.val()) + " " + right.val();
-                getExpressionInput().val(exprPath);
-            });
+            var right = createQuestionAcceptor().addClass("right-question").appendTo(expression);
+            if (values) {
+                left.val(values.left);
+                op.val(values.operation);
+                right.val(values.right);
+            }
             $("<div />").text("Delete").button().appendTo(expression).click(function() {
                 expression.remove();
-            });
-            
-            /*
-            questionAcceptor.droppable({
-                drop: function(event, ui) {
-                    console.log("this", this);
-                    console.log("event", event);
-                    console.log("ui", ui);
+                console.log("join", join);
+                if (join === null && getExpressionList().length > 0) {
+                    // when removing the first expression, make sure to update the 
+                    // next one in the UI to not have a join, if necessary.
+                    $($(getExpressionList()[0]).children(".join-select")).remove();   
                 }
             });
-            */
             
+            
+        };
+        
+        var updateXPathEditor = function(options) {
+            // set data properties for callbacks and such
+            editorPane.data("group", options.group).data("property", options.property);
+	        // clear validation text
+	        getValidationSummary().text("").removeClass("error").removeClass("success");
+	        
+	        // clear expression builder
+	        var expressionPane = getExpressionPane();
+	        expressionPane.empty();
+	        
+	        // update expression builder
+	        if (options.value) {
+	           var results = validate(options.value);
+	           if (results[0]) {
+	               // it parsed correctly, try to load it.
+	               var parsed = results[1];
+	               if (xpathmodels.isSimpleOp(parsed)) {
+	                   // for now we only support these
+	                   addExpression({left: parsed.left.toXPath(), 
+	                                  operation: xpathmodels.expressionTypeEnumToXPathLiteral(parsed.type),
+	                                  right: parsed.right.toXPath()});
+	               } 
+	           }
+	        }
+	        $("#fd-xpath-editor-text").val(options.value);
+	        
         };
         var initXPathEditor = function() {
             // build the inputs here
-            $("<label />").attr("for", "fd-xpath-editor-text").text("Enter XPath String:").appendTo(editorPane);
-            $("<input />").attr("id", "fd-xpath-editor-text").attr("type", "text").appendTo(editorPane);
+            $("<label />").attr("for", "fd-xpath-editor-text").text("XPath String: ").appendTo(editorPane);
+            $("<input />").attr("id", "fd-xpath-editor-text").attr("type", "text").appendTo(editorPane).css("min-width", "400px");
             $("<div />").attr("id", "fd-xpath-editor-expressions").appendTo(editorPane);
             var addExpressionButton = $("<button />").text("Add expression").button().appendTo(editorPane);
             addExpressionButton.click(function() {
                 addExpression();
             });
+            var updateButton = $("<div />").text("Update").button().appendTo(editorPane);
+            updateButton.click(function () {
+                getExpressionInput().val(getExpressionFromUI());
+            });
             var doneButton = $('<button />').text("Done").button().appendTo(editorPane);
 	        doneButton.click(function() {
+	           getExpressionInput().val(getExpressionFromUI());
 	           var results = validateCurrent();
 	           if (results[0]) {
 		           formdesigner.controller.doneXPathEditor({
@@ -1824,11 +1903,8 @@ formdesigner.ui = (function () {
         if (editorPane.children().length === 0) {
             initXPathEditor();
         } 
-        editorPane.data("group", options.group).data("property", options.property);
-        // clear validation text
-        getValidationSummary().text("").removeClass("error").removeClass("success");
         
-        $("#fd-xpath-editor-text").val(options.value);
+        updateXPathEditor(options);
         $('#fd-xpath-editor').show();
     };
     
