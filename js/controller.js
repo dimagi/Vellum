@@ -530,7 +530,7 @@ formdesigner.controller = (function () {
 
         //this allows the mug to respond to certain events in a common way.
         //see method docs for further info
-        formdesigner.util.setStandardMugEventResponses(mug);
+//        formdesigner.util.setStandardMugEventResponses(mug);
 
         //set the 'currently selected mugType' to be that of this mugType's parent.
         controlTree = that.form.controlTree;
@@ -559,7 +559,7 @@ formdesigner.controller = (function () {
 
         //this allows the mug to respond to certain events in a common way.
         //see method docs for further info
-        formdesigner.util.setStandardMugEventResponses(mug);
+//        formdesigner.util.setStandardMugEventResponses(mug);
 
         //set the 'currently selected mugType' to be that of this mugType's parent.
         dataTree = formdesigner.controller.form.dataTree;
@@ -1317,6 +1317,10 @@ formdesigner.controller = (function () {
                     formID, formName,
                         title;
 
+
+            if($(xml).find('parsererror').length > 0) {
+                throw 'PARSE ERROR! Message follows:' + $(xml).find('parsererror').find('div').html();
+            }
             xml.find('instance').children().each(function () {
                 formID = this.nodeName;
             });

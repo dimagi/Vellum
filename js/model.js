@@ -2490,7 +2490,7 @@ formdesigner.model = function () {
      * @param langName
      */
     that.Itext = (function(langName){
-        var that = {}, defaultLanguage = "en",
+        var that = {}, defaultLanguage = "en";
 
                 /**
                  * Data where it's all stored.
@@ -2512,7 +2512,7 @@ formdesigner.model = function () {
                  *
                  */
 
-        data = {};
+        that.data = {};
 
         function exceptionString(iID, lang, form, val){
             var s;
@@ -2524,11 +2524,11 @@ formdesigner.model = function () {
         }
 
         that.addLanguage = function (name) {
-            if(Object.keys(data).length === 0){
+            if(Object.keys(that.data).length === 0){
                 this.setDefaultLanguage(name);
             }
-            if(!data[name]){
-                data[name] = {};
+            if(!that.data[name]){
+                that.data[name] = {};
             }else{
                 return; //do nothing, it already exists.
             }
@@ -2539,8 +2539,8 @@ formdesigner.model = function () {
          */
         that.getLanguages = function () {
             var langs = [], i;
-            for(i in data){
-                if(data.hasOwnProperty(i)){
+            for(i in that.data){
+                if(that.data.hasOwnProperty(i)){
                     langs.push(i);
                 }
             }
@@ -2553,12 +2553,12 @@ formdesigner.model = function () {
          * @param name
          */
         that.removeLanguage = function (name) {
-            if(!data[name]) {
+            if(!that.data[name]) {
                 return;
             }else{
-                delete data[name];
+                delete that.data[name];
                 if(this.getDefaultLanguage() === name){
-                    this.setDefaultLanguage(Object.keys(data)[0]); //attempt to set default to first available lang.
+                    this.setDefaultLanguage(Object.keys(that.data)[0]); //attempt to set default to first available lang.
                 }
             }
         };
@@ -2591,10 +2591,10 @@ formdesigner.model = function () {
             var lang;
             for(lang in valObject){
                 if(valObject.hasOwnProperty(lang)){
-                    if(!data[lang]){
-                        data[lang] = {};
+                    if(!that.data[lang]){
+                        that.data[lang] = {};
                     }
-                    data[lang][iID] = valObject[lang];
+                    that.data[lang][iID] = valObject[lang];
 
                 }
             }
@@ -2607,13 +2607,13 @@ formdesigner.model = function () {
          * If lang does not exist, exception is thrown.
          */
         that.getItextVals = function (iID, lang) {
-            if(!data[lang]){
+            if(!that.data[lang]){
                 throw 'Language:' + lang + ' does not exist in Itext! Attempted to retrieve Itext data for iID:' + iID;
             }
-            if(!data[lang][iID]){
+            if(!that.data[lang][iID]){
                 return null;
             }else{
-                return data[lang][iID];
+                return that.data[lang][iID];
             }
 
         };
@@ -2697,7 +2697,7 @@ formdesigner.model = function () {
             if(!formdesigner.model.Itext.getLanguageData(lang)){
                 formdesigner.model.Itext.addLanguage(lang);
             }
-            data[lang][iID] = {};
+            that.data[lang][iID] = {};
 
         }
 
@@ -2724,16 +2724,16 @@ formdesigner.model = function () {
             if(form === null){
                 form = 'default';
             }
-            if(!data[lang]){
-                data[lang] = {};
+            if(!that.data[lang]){
+                that.data[lang] = {};
             }
-            if(!data[lang][iID]){
-                data[lang][iID] = {};
+            if(!that.data[lang][iID]){
+                that.data[lang][iID] = {};
             }
-            if(!data[lang][iID][form]){
-                data[lang][iID][form] = "";
+            if(!that.data[lang][iID][form]){
+                that.data[lang][iID][form] = "";
             }
-            data[lang][iID][form] = val;
+            that.data[lang][iID][form] = val;
             formdesigner.controller.fire({
                 type: 'question-itext-changed',
                 iTextID: iID,
@@ -2753,12 +2753,12 @@ formdesigner.model = function () {
          * @param form
          */
         that.getValue = function(iID, lang, form){
-            if(!data[lang]){
+            if(!that.data[lang]){
 //                throw 'Attempted to retrieve Itext value from language that does not exist!' + exceptionString(iID,lang,form)
                 that.addLanguage(lang);
                 return null;
             }
-            if(!data[lang][iID]){
+            if(!that.data[lang][iID]){
 //                throw 'Attempted to retrieve Itext value that does not exist!' + exceptionString(iID,lang,form)
                 return null;
             }
@@ -2767,11 +2767,11 @@ formdesigner.model = function () {
                 form = 'default';
             }
 
-            if(!data[lang][iID][form]){
+            if(!that.data[lang][iID][form]){
                 return null;
             }
 
-            return data[lang][iID][form];
+            return that.data[lang][iID][form];
         };
 
         /**
@@ -2792,11 +2792,11 @@ formdesigner.model = function () {
          * @param lang - the string identifier of the language you want the data for.
          */
         that.getLanguageData = function (lang) {
-            return data[lang];
+            return that.data[lang];
         };
 
         that.getAllData = function () {
-            return data;
+            return that.data;
         }
 
         /**
@@ -2836,7 +2836,7 @@ formdesigner.model = function () {
                 throw 'No Default Language set! Aborting validation. You should set one!';
             }
 
-            if(!data[dLang]){
+            if(!that.data[dLang]){
                 throw 'Default language is set to a language that does not exist in the Itext DB!';
             }
 
@@ -2849,19 +2849,19 @@ formdesigner.model = function () {
                 }
                 return true;
             }
-            for (lang in data) {
-                if (data.hasOwnProperty(lang)) {
-                    for (iID in data[lang]) {
-                        if (data[lang].hasOwnProperty(iID)) {
-                            if (isEmpty(data[dLang][iID])) {
+            for (lang in that.data) {
+                if (that.data.hasOwnProperty(lang)) {
+                    for (iID in that.data[lang]) {
+                        if (that.data[lang].hasOwnProperty(iID)) {
+                            if (isEmpty(that.data[dLang][iID])) {
                                 errorIIDs[iID] = iIDTextEmpty(iID);
                             } else {
-                                for (form in data[lang][iID]) {
+                                for (form in that.data[lang][iID]) {
                                     // The condition here is that there is a property 
                                     // in a language that is not in the default language
-                                    if (data[lang][iID].hasOwnProperty(form) && 
-                                        data[lang][iID][form] && 
-                                        !data[dLang][iID][form]) {
+                                    if (that.data[lang][iID].hasOwnProperty(form) &&
+                                        that.data[lang][iID][form] &&
+                                        !that.data[dLang][iID][form]) {
                                        errorIIDs[iID] = iIDFormMissing(iID,form);
                                     }
                                 }
@@ -2963,9 +2963,9 @@ formdesigner.model = function () {
             langs = formdesigner.model.Itext.getLanguages();
             for (i in langs) {
                 if(langs.hasOwnProperty(i)){
-                    if (data[langs[i]][oldID]) {
-                        data[langs[i]][newID] = data[langs[i]][oldID];
-                        delete data[langs[i]][oldID];
+                    if (that.data[langs[i]][oldID]) {
+                        that.data[langs[i]][newID] = that.data[langs[i]][oldID];
+                        delete that.data[langs[i]][oldID];
                     }
                 }
             }
@@ -2980,7 +2980,7 @@ formdesigner.model = function () {
             langs = formdesigner.model.Itext.getLanguages();
             for (i in langs) {
                 if(langs.hasOwnProperty(i)){
-                    delete data[langs[i]][itextID];
+                    delete that.data[langs[i]][itextID];
                 }
             }
         }
@@ -2990,7 +2990,8 @@ formdesigner.model = function () {
          * and resets it to pristine condition (i.e. as if the FD was freshly launched)
          */
         that.resetItext = function () {
-            data = {};
+            delete that.data;
+            that.data = {};
             that.addLanguage("en");
             that.setDefaultLanguage("en");
         };
