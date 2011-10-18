@@ -1769,64 +1769,131 @@ formdesigner.ui = (function () {
         };
         
         
-        var addExpression = function(values) {
-            // adds an expression to the UI. optionally populating it with 
-            // values
-            var createQuestionAcceptor = function() {
-                var questionAcceptor = $("<input />").attr("placeholder", "Hint: drag a question here.");
-                questionAcceptor.css("min-width", "200px")
-                questionAcceptor.addClass("jstree-drop xpath-edit-node");
-                return questionAcceptor;
-            }
+        var tryAddExpression = function(parsedExpression) {
+            // trys to add an expression to the UI.
+            // if the expression is empty just appends a new div for the expression.
+            // if the expression exists, it will try to parse it into sub 
+            // expressions.
+            // returns the expression if it succeeds, otherwise false. 
+            console.log("updating", parsedExpression);
             var expTypes = xpathmodels.XPathExpressionTypeEnum;
+            
+            var isJoiningOp = function (subElement) {
+                // something that joins expressions
+                return (subElement instanceof xpathmodels.XPathBoolExpr); 
+            };
+            
+            var isExpressionOp = function (subElement) {
+                // something that can be put into an expression
+                return (subElement instanceof xpathmodels.XPathCmpExpr ||
+                        subElement instanceof xpathmodels.XPathEqExpr); 
+            }
+            
+            var isSupportedBaseType = function (subelement) {
+                // something that can be stuck in a base string
+                // currently everything is supported.
+                return true;
+            };
+            
             var constructSelect = function (ops) {
                 var sel = $("<select />");
                 for (var i = 0; i < ops.length; i++) {
                     $("<option />").text(ops[i][0]).val(ops[i][1]).appendTo(sel);
                 }
                 return sel;
-            }
-            var createOperationSelector = function() {
-                var ops = [["is equal to", expTypes.EQ],
-                           ["is not equal to", expTypes.NEQ],
-                           ["id less than", expTypes.LT],
-                           ["is less than or equal to", expTypes.LTE],
-                           ["is greater than", expTypes.GT],
-                           ["is greater than or equal to", expTypes.GTE]];
-                     
-                return constructSelect(ops).addClass("op-select");;
-            }
+            };
+                
             var createJoinSelector = function() {
                 var ops = [["and", expTypes.AND],
                            ["or", expTypes.OR]];
                 return constructSelect(ops).addClass("join-select");
-            }
-            var expressionPane = getExpressionPane();
-            var expressionCount = getExpressionPane().children().length;
-            var expression = $("<div />").appendTo(expressionPane);
-            var join = null;
-            if (expressionCount !== 0) {
-                join = createJoinSelector().appendTo(expression);
-            }
-            var left = createQuestionAcceptor().addClass("left-question").appendTo(expression);
-            var op = createOperationSelector().appendTo(expression);
-            var right = createQuestionAcceptor().addClass("right-question").appendTo(expression);
-            if (values) {
-                left.val(values.left);
-                op.val(values.operation);
-                right.val(values.right);
-            }
-            $("<div />").text("Delete").button().appendTo(expression).click(function() {
-                expression.remove();
-                console.log("join", join);
-                if (join === null && getExpressionList().length > 0) {
-                    // when removing the first expression, make sure to update the 
-                    // next one in the UI to not have a join, if necessary.
-                    $($(getExpressionList()[0]).children(".join-select")).remove();   
-                }
-            });
+            };
             
+            var newExpressionUIElement = function (expOp) {
+                var createQuestionAcceptor = function() {
+	                var questionAcceptor = $("<input />").attr("placeholder", "Hint: drag a question here.");
+	                questionAcceptor.css("min-width", "200px")
+	                questionAcceptor.addClass("jstree-drop xpath-edit-node");
+	                return questionAcceptor;
+	            };
+	            var createOperationSelector = function() {
+	                var ops = [["is equal to", expTypes.EQ],
+	                           ["is not equal to", expTypes.NEQ],
+	                           ["id less than", expTypes.LT],
+	                           ["is less than or equal to", expTypes.LTE],
+	                           ["is greater than", expTypes.GT],
+	                           ["is greater than or equal to", expTypes.GTE]];
+	                     
+	                return constructSelect(ops).addClass("op-select");;
+	            };
+	            
+                var expression = $("<div />");
             
+                var left = createQuestionAcceptor().addClass("left-question").appendTo(expression);
+	            var op = createOperationSelector().appendTo(expression);
+	            var right = createQuestionAcceptor().addClass("right-question").appendTo(expression);
+	            if (expOp) {
+	                // populate
+	                console.log("populating", expOp);
+	                left.val(expOp.left.toXPath());
+	                op.val(xpathmodels.expressionTypeEnumToXPathLiteral(expOp.type));
+	                right.val(expOp.right.toXPath());
+	            }
+	            $("<div />").text("Delete").button().appendTo(expression).click(function() {
+	                var isFirst = expression.children(".join-select").length == 0;
+	                expression.remove();
+	                if (isFirst && getExpressionList().length > 0) {
+	                    // when removing the first expression, make sure to update the 
+	                    // next one in the UI to not have a join, if necessary.
+	                    $($(getExpressionList()[0]).children(".join-select")).remove();   
+	                }
+	            });
+	            return expression;
+	        };
+	        
+	        var failAndClear = function () {
+	           getExpressionPane().empty();
+	           console.log("fail", parsedExpression);
+	           return false;
+	        }
+	        
+	        var expressionPane = getExpressionPane();
+	        var expressionUIElem, nextUIElem;
+            if (!parsedExpression) {
+                // just create a new expression
+	            expressionUIElem = newExpressionUIElement();
+	            // and if it's not the first additionally add the join selector
+	            if (getExpressionPane().children().length !== 0) {
+	                createJoinSelector().prependTo(expressionUIElem);
+	            }
+	            return expressionUIElem.appendTo(expressionPane);
+	        } else {
+	            // we're creating for an existing expression, this is more complicated
+	            
+	            if (isExpressionOp(parsedExpression)) {
+                    // if it's an expression op stick it in.
+                    // no need to join, so this is good.
+                    return newExpressionUIElement(parsedExpression).appendTo(expressionPane);
+	            } else if (isJoiningOp(parsedExpression) && isExpressionOp(parsedExpression.right)) {
+	                // if it's a joining op the first element has to be 
+	                // an expression and the second must be a valid op
+	                nextUIElem = tryAddExpression(parsedExpression.left);
+                    if (nextUIElem) {
+                        expressionUIElem = newExpressionUIElement(parsedExpression.right).appendTo(expressionPane);
+                        console.log("added", nextUIElem, parsedExpression.right);
+	                    createJoinSelector().prependTo(nextUIElem).val(parsedExpression.type);
+	                } else {
+	                   // something recursively failed. Raise failure up.
+	                   return failAndClear();
+	                }
+	                return expressionUIElem;
+	            } else {
+	               // fail and return nothing.
+	               return failAndClear();
+	            }
+	        }
+	        
+	                    
         };
         
         var updateXPathEditor = function(options) {
@@ -1845,17 +1912,19 @@ formdesigner.ui = (function () {
 	           if (results[0]) {
 	               // it parsed correctly, try to load it.
 	               var parsed = results[1];
-	               if (xpathmodels.isSimpleOp(parsed)) {
-	                   // for now we only support these
-	                   addExpression({left: parsed.left.toXPath(), 
-	                                  operation: xpathmodels.expressionTypeEnumToXPathLiteral(parsed.type),
-	                                  right: parsed.right.toXPath()});
-	               } 
+	               // try to load the operation into the UI.
+	               if (tryAddExpression(parsed)) {
+	                   // it succeeded, nothing to do 
+	               } else {
+	                   // show advanced mode.
+	                   console.log("go to advanced!");
+	               }
 	           }
 	        }
 	        $("#fd-xpath-editor-text").val(options.value);
 	        
         };
+        
         var initXPathEditor = function() {
             // build the inputs here
             $("<label />").attr("for", "fd-xpath-editor-text").text("XPath String: ").appendTo(editorPane);
@@ -1863,7 +1932,7 @@ formdesigner.ui = (function () {
             $("<div />").attr("id", "fd-xpath-editor-expressions").appendTo(editorPane);
             var addExpressionButton = $("<button />").text("Add expression").button().appendTo(editorPane);
             addExpressionButton.click(function() {
-                addExpression();
+                tryAddExpression();
             });
             var updateButton = $("<div />").text("Update").button().appendTo(editorPane);
             updateButton.click(function () {
