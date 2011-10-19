@@ -85,6 +85,43 @@ formdesigner.controller = (function () {
     }
     that.getListOfItextIDsFromMugs = getListOfItextIDsFromMugs;
 
+    /**
+     * Walks through both internal trees (data and control) and grabs
+     * all mugTypes that are not (1)Select Items.  Returns
+     * a flat list of unique mugTypes.  This list is primarily fo the
+     * autocomplete skip logic wizard.
+     */
+    var getListMugTypesNotItems = function () {
+        var cTree, dTree, treeFunc, cList, dList, mergeList;
+        //use formdesigner.util.mergeArray
+
+        treeFunc = function (node) {
+            var mt;
+            if(node.isRootNode) {
+                return;
+            }
+
+            mt = node.getValue();
+            if(!mt) {
+                throw 'Node in tree without value?!?!'
+            }
+
+            return mt;
+        }
+
+        cTree = that.form.controlTree;
+        dTree = that.form.dataTree;
+
+        cList = cTree.treeMap(treeFunc);
+        dList = dTree.treeMap(treeFunc);
+
+        mergeList = formdesigner.util.mergeArray(cList, dList); //strip dupes and merge
+
+        return mergeList; //give it all back
+
+    }
+    that.getListMugTypesNotItems = getListMugTypesNotItems;
+
 
     /**
      * Sets the currently selected (in the UI tree) MugType
