@@ -7,6 +7,7 @@ formdesigner.controller = (function () {
     var that = {},
         curSelMugType = null,
         curSelUfid = null,
+        DEBUG_MODE = false,
 
     initFormDesigner = function () {
         formdesigner.util.question_counter = 1;

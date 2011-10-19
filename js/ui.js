@@ -21,7 +21,8 @@ formdesigner.ui = (function () {
         controller = formdesigner.controller,
         questionTree,
         dataTree,
-        LINK_CONTROL_MOVES_TO_DATA_TREE = true;
+        LINK_CONTROL_MOVES_TO_DATA_TREE = true,
+        DEBUG_MODE = false;
         
 
     /**
@@ -1813,7 +1814,7 @@ formdesigner.ui = (function () {
             // if the expression exists, it will try to parse it into sub 
             // expressions.
             // returns the expression if it succeeds, otherwise false. 
-            if (parsedExpression) {
+            if (parsedExpression && DEBUG_MODE) {
                 console.log("trying to add", parsedExpression.toString());
             }
             
@@ -1866,7 +1867,9 @@ formdesigner.ui = (function () {
 	            var right = createQuestionAcceptor().addClass("right-question").appendTo(expression);
 	            if (expOp) {
 	                // populate
-	                console.log("populating", expOp.toString());
+                    if (DEBUG_MODE) {
+                        console.log("populating", expOp.toString());
+                    }
 	                left.val(expOp.left.toXPath());
 	                op.val(xpathmodels.expressionTypeEnumToXPathLiteral(expOp.type));
 	                right.val(expOp.right.toXPath());
@@ -1938,7 +1941,9 @@ formdesigner.ui = (function () {
         };
         
         var setUIForExpression = function (xpathstring) {
-	        console.log("setting ui for", xpathstring);
+            if (DEBUG_MODE) {
+                console.log("setting ui for", xpathstring);
+            }
 	        var results = validate(xpathstring);
             var advancedFailover = function (text) {
                alert("We couldn't interpret your expression to our format, so defaulting to advanced mode. " +
