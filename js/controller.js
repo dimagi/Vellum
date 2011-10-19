@@ -106,6 +106,10 @@ formdesigner.controller = (function () {
                 throw 'Node in tree without value?!?!'
             }
 
+            if(mt.typeName === "Select Item") { //skip Select Items
+                return;
+            }
+
             return mt;
         }
 
