@@ -1733,7 +1733,22 @@ formdesigner.ui = (function () {
          * 
          */
         var expTypes = xpathmodels.XPathExpressionTypeEnum;
-            
+        var questionList = formdesigner.controller.getListMugTypesNotItems();
+        var questionChoiceAutoComplete = [];
+        var mug;
+        
+        var mugToAutoCompleteUIElement = function (mug) {
+            return {id: formdesigner.controller.form.dataTree.getAbsolutePath(mug),
+                    uid: mug.ufid,
+                    name: formdesigner.util.getDefaultDisplayItext(mug.mug) };
+        }
+        
+        for (var i = 0; i < questionList.length; i++) {
+            questionChoiceAutoComplete.push(mugToAutoCompleteUIElement(questionList[i]));
+        }
+        console.log("question list", questionChoiceAutoComplete );
+
+        
         var editorPane = $('#fd-xpath-editor');
         
         var getExpressionInput = function () {
@@ -1758,13 +1773,13 @@ formdesigner.ui = (function () {
             var expressionParts = [];
             var joinType = getTopLevelJoinSelect().val();
             pane.children().each(function() {
-                var left = $($(this).find("input")[0]);
-                var right = $($(this).find("input")[1]);
+                var left = $($(this).find(".left-question")[0]);
+                var right = $($(this).find(".right-question")[0]);
                 var op = $($(this).find(".op-select")[0]);
                 // make sure we wrap the vals in parens in case they were necessary
                 // todo, construct manually, and validate individual parts.
                 var exprPath = "(" + left.val() + ") " + xpathmodels.expressionTypeEnumToXPathLiteral(op.val()) + " (" + right.val() + ")";
-                expressionParts.push(exprPath);                
+                expressionParts.push(exprPath);
             });
             var preparsed = expressionParts.join(" " + joinType + " ");
             // try to parse and unparse to clean up the formatting
@@ -1818,6 +1833,9 @@ formdesigner.ui = (function () {
                 console.log("trying to add", parsedExpression.toString());
             }
             
+            var isPath  = function (subElement) {
+                return (subElement instanceof xpathmodels.XPathPathExpr); 
+            }
             var isJoiningOp = function (subElement) {
                 // something that joins expressions
                 return (subElement instanceof xpathmodels.XPathBoolExpr); 
@@ -1860,19 +1878,43 @@ formdesigner.ui = (function () {
 	                return constructSelect(ops).addClass("op-select");;
 	            };
 	            
-                var expression = $("<div />");
+	            var populateTokenInputBox = function (input, expr) {
+	                if (isPath(expr)) {
+	                   var mug = formdesigner.controller.getMugByPath(expr.toXPath());
+	                   if (mug) {
+	                       input.tokenInput("add", mugToAutoCompleteUIElement(mug));
+	                       return;       
+	                   }
+	                }
+	                input.tokenInput("add", {id: expr.toXPath(), name: expr.toXPath()});
+	            }
+	            
+                var expression = $("<div />").addClass("bin-expression");
             
                 var left = createQuestionAcceptor().addClass("left-question").appendTo(expression);
 	            var op = createOperationSelector().appendTo(expression);
 	            var right = createQuestionAcceptor().addClass("right-question").appendTo(expression);
-	            if (expOp) {
+	            
+	            // set fancy input mode on the boxes
+	            var options = {theme: "facebook", 
+	                           tokenLimit: 1, 
+	                           searchDelay: 0, 
+	                           allowFreetext: true,
+	                           hintText: "Type in a question name or drag a question here.",
+	                           noResultsText: "No questions found. Press 'ENTER' to use a freetext value."};
+	            left.tokenInput(questionChoiceAutoComplete, options);
+	            right.tokenInput(questionChoiceAutoComplete, options); 
+	            
+	            // also make them drop targets for the tree
+	            expression.children(".token-input-list-facebook").addClass("jstree-drop xpath-edit-node");
+                if (expOp) {
 	                // populate
                     if (DEBUG_MODE) {
                         console.log("populating", expOp.toString());
                     }
-	                left.val(expOp.left.toXPath());
-	                op.val(xpathmodels.expressionTypeEnumToXPathLiteral(expOp.type));
-	                right.val(expOp.right.toXPath());
+                    populateTokenInputBox(left, expOp.left);
+                    op.val(xpathmodels.expressionTypeEnumToXPathLiteral(expOp.type));
+	                populateTokenInputBox(right, expOp.right);
 	            }
 	            $("<div />").text("Delete").button().appendTo(expression).click(function() {
 	                var isFirst = expression.children(".join-select").length == 0;

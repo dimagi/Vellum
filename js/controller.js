@@ -83,9 +83,21 @@ formdesigner.controller = (function () {
 
         return finalList; //give it all back
 
-    }
+    };
     that.getListOfItextIDsFromMugs = getListOfItextIDsFromMugs;
 
+    var getMugByPath = function (path) {
+        // TODO: this is likely crazy slow if the form is big.
+        var candidates = that.getListMugTypesNotItems();
+        for (var i = 0; i < candidates.length; i++) {
+            console.log("checking", candidates[i])
+            if (that.form.dataTree.getAbsolutePath(candidates[i]) == path) {
+                return candidates[i];
+            }
+        }
+    };
+    that.getMugByPath = getMugByPath;
+    
     /**
      * Walks through both internal trees (data and control) and grabs
      * all mugTypes that are not (1)Select Items.  Returns
@@ -1632,6 +1644,7 @@ formdesigner.controller = (function () {
     // tree drag and drop stuff, used by xpath
     var handleTreeDrop = function(source, target) {
         var target = $(target), sourceUid = $(source).attr("id");
+        console.log("drop target", target);
         if (target.hasClass("xpath-edit-node")) {
             var mug = that.form.getMugTypeByUFID(sourceUid);
             var path = formdesigner.controller.form.dataTree.getAbsolutePath(mug);
