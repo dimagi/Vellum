@@ -530,7 +530,7 @@ formdesigner.controller = (function () {
 
         //this allows the mug to respond to certain events in a common way.
         //see method docs for further info
-        formdesigner.util.setStandardMugEventResponses(mug);
+//        formdesigner.util.setStandardMugEventResponses(mug);
 
         //set the 'currently selected mugType' to be that of this mugType's parent.
         controlTree = that.form.controlTree;
@@ -559,7 +559,7 @@ formdesigner.controller = (function () {
 
         //this allows the mug to respond to certain events in a common way.
         //see method docs for further info
-        formdesigner.util.setStandardMugEventResponses(mug);
+//        formdesigner.util.setStandardMugEventResponses(mug);
 
         //set the 'currently selected mugType' to be that of this mugType's parent.
         dataTree = formdesigner.controller.form.dataTree;
@@ -1262,11 +1262,20 @@ formdesigner.controller = (function () {
             Itext.removeLanguage('en');
 
             function eachLang() {
-                var el = $ (this);
+                var el = $ (this) ,defaultExternalLang;
                 curLanguage = el.attr('lang');
                 Itext.addLanguage(curLanguage);
-                if(el.attr('default')) {
+                if(el.attr('default') !== undefined) {
                     Itext.setDefaultLanguage(curLanguage);
+                }
+
+                //if we were passed a list of languages (in order of preference from outside)...
+                if(formdesigner.opts["langs"]) {
+                    //grab the default language.
+                    if(formdesigner.opts["langs"].length > 0) { //make sure there are actually entries in the list
+                        defaultExternalLang = formdesigner.opts["langs"][0];
+                        Itext.setDefaultLanguage(defaultExternalLang); //set the form default to the one specified in initialization options.
+                    }
                 }
 
                 //loop through children
@@ -1299,15 +1308,19 @@ formdesigner.controller = (function () {
 
         that.fire('parse-start');
         try{
-            var xmlDoc = $.parseXML(xmlString),
-                xml = $(xmlDoc),
-                binds = xml.find('bind'),
-                data = xml.find('instance').children(),
-                controls = xml.find('h\\:body').children(),
-                itext = xml.find('itext'),
-                formID, formName,
-                    title;
+                var xmlDoc = $.parseXML(xmlString),
+                    xml = $(xmlDoc),
+                    binds = xml.find('bind'),
+                    data = xml.find('instance').children(),
+                    controls = xml.find('h\\:body').children(),
+                    itext = xml.find('itext'),
+                    formID, formName,
+                        title;
 
+
+            if($(xml).find('parsererror').length > 0) {
+                throw 'PARSE ERROR! Message follows:' + $(xml).find('parsererror').find('div').html();
+            }
             xml.find('instance').children().each(function () {
                 formID = this.nodeName;
             });
@@ -1557,6 +1570,7 @@ formdesigner.controller = (function () {
      */
     function resetControllerInternal () {
             formdesigner.util.question_counter = 1;
+            //reset Options passed in to the initializer
             curSelMugType = null;
             curSelUfid = null;
     }

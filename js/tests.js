@@ -1,35 +1,39 @@
 
 var JRVALIDATE_MODE = true;
 
-var validateCallbackFunc = function (data, textStatus, jqXHR) {
-    if(!data.success) {
-        console.group('JR Validation Error');
-        console.log(data);
-        console.groupEnd();
+var validateCallbackFunc = function (testDescription) {
+    var thisDesc = testDescription;
+    var func = function(data, textStatus, jqXHR) {
+        if(!data.success) {
+            console.group('JR Validation Error');
+            console.log(data);
+            console.groupEnd();
+        }
+        ok(data.success, 'Form Validates with JR validator:'+thisDesc);
+        start();
     }
-    ok(data.success, 'Form Validates with JR validator');
-    start();
+    return func;
 }
 
 $(document).ready(function(){
     formdesigner.launch();
-    var testXformBuffer;
+    var testXformBuffer = {};
     var testFormNames = [
         "Follow-up a Household Referral.xml",
-        "Follow-up at household.xml",
-        "Pos Parto.xml",
-        "Registo.xml",
-        "Follow-up a pregnancy referral.xml",
-        "Gravidez.xml",
-        "Register a household.xml",
-        "Close a pregnancy.xml",
-        "Follow-up a pregnancy.xml",
-        "NutritionAndHealth.xml",
-        "Register a pregnancy.xml"
+//        "Follow-up at household.xml",
+//        "Pos Parto.xml",
+//        "Registo.xml",
+//        "Follow-up a pregnancy referral.xml",
+//        "Gravidez.xml",
+//        "Register a household.xml",
+//        "Close a pregnancy.xml",
+//        "Follow-up a pregnancy.xml",
+//        "NutritionAndHealth.xml",
+//        "Register a pregnancy.xml"
     ];
 
     var get_cchq_forms = function (name) {
-        getTestXformOutput('fromcchq/' + name);
+        getFormFromServerAndPlaceInBuffer('fromcchq/' + name);
     }
 
     var make_control_bind_data_mug = function(){
@@ -82,14 +86,14 @@ $(document).ready(function(){
         };
     }
 
-    var getTestXformOutput = function (formName) {
+    var getFormFromServerAndPlaceInBuffer = function (formName) {
         $.ajax({
             url: 'testing/xforms/' + formName,
             async: false,
             cache: false,
             dataType: 'text',
             success: function(xform){
-                testXformBuffer = xform;
+                testXformBuffer[formName] = xform;
             }
         });
     }
@@ -952,10 +956,10 @@ $(document).ready(function(){
 
             var Itext = formdesigner.model.Itext;
             var c = formdesigner.controller;
-            getTestXformOutput(cleanForm);
-            cleanForm = testXformBuffer;
-            getTestXformOutput(cruftyForm);
-            cruftyForm = testXformBuffer;
+            getFormFromServerAndPlaceInBuffer(cleanForm);
+            cleanForm = testXformBuffer[cleanForm];
+            getFormFromServerAndPlaceInBuffer(cruftyForm);
+            cruftyForm = testXformBuffer[cruftyForm];
 
             var cleanIDs = ["question1", "question2", "question3", "question4", "question5"];
             var crufyIDs = ["question1", "question2", "question3", "question4", "question5", "cough", "TB_positive", "fever", "skin_infection", "wound_infection", "hiv_positive", "BP", "diabetes", "danger_sign_preg_mother", "preg_mother-TT", "preg_mother-ante_natal", "birth_registration"];
@@ -994,10 +998,10 @@ $(document).ready(function(){
 
             var Itext = formdesigner.model.Itext;
             var c = formdesigner.controller;
-            getTestXformOutput(cleanForm);
-            cleanForm = testXformBuffer;
-            getTestXformOutput(cruftyForm);
-            cruftyForm = testXformBuffer;
+            getFormFromServerAndPlaceInBuffer(cleanForm);
+            cleanForm = testXformBuffer[cleanForm];
+            getFormFromServerAndPlaceInBuffer(cruftyForm);
+            cruftyForm = testXformBuffer[cruftyForm];
 
             var cleanIDs = ["question1", "question2", "question3", "question4", "question5"];
             var crufyIDs = ["question1", "question2", "question3", "question4", "question5", "cough", "TB_positive", "fever", "skin_infection", "wound_infection", "hiv_positive", "BP", "diabetes", "danger_sign_preg_mother", "preg_mother-TT", "preg_mother-ante_natal", "birth_registration"];
@@ -1016,16 +1020,80 @@ $(document).ready(function(){
 
 
 
+        test("Test default language setting", function () {
+            stop();
+            formdesigner.controller.resetFormDesigner();
+            var form = 'form_with_3_languages.xml';
+
+            var Itext = formdesigner.model.Itext;
+            var c = formdesigner.controller;
+            getFormFromServerAndPlaceInBuffer(form);
+            form = testXformBuffer[form];
+
+
+            formdesigner.myform = form;
+            //Test the clean form
+            c.loadXForm(form);
+
+            window.setTimeout(function () {
+                start();
+                equal(Itext.getDefaultLanguage(), 'th', "Language was correctly set to 'th'");
+
+                Itext.setDefaultLanguage('sw');
+                equal(Itext.getDefaultLanguage(), 'sw', "Language was correctly set to 'sw'");
+
+
+
+            },777);
+        });
+
+        test("Test default language by using external language list init option", function () {
+            stop();
+            formdesigner.controller.resetFormDesigner();
+            var form = 'form_with_3_languages.xml';
+            var Itext = formdesigner.model.Itext;
+            var c = formdesigner.controller;
+            var xmlString;
+            getFormFromServerAndPlaceInBuffer(form);
+            form = testXformBuffer[form];
+
+            var langs = ["sw", "th", "en"];
+            formdesigner.opts = {"langs" : langs}; //fake the mechanism by which options are usually passed in by the launcher
+                                        // see formdesigner.launch() in ui.js
+            c.loadXForm(form);
+
+            window.setTimeout(function () {
+
+                equal(Itext.getDefaultLanguage(), 'sw', "Language was correctly set to 'sw' at parse time");
+
+                xmlString = c.form.createXForm();
+                validateFormWithJR(xmlString, validateCallbackFunc('Default Language Init w sw'));
+                
+                var grepVal = grep(xmlString,"default=").trim();
+                equal(grepVal, '<translation lang="sw" default="">', "default attr was correctly set");
+                start();
+                delete formdesigner.opts.langs;
+                formdesigner.opts["langs"] = [];
+
+
+            },777);
+        });
+
+
+
+
 
 
     module("Create XForm XML");
     test("Create simple flat Xform", function () {
+        stop()
         var c = formdesigner.controller,
                 ui = formdesigner.ui,
                 jstree = $("#fd-question-tree"),
                 curMugType,
                 addQbut;
         c.resetFormDesigner();
+        start()
         addQbut = $('#fd-add-but');
         addQbut.click();
         addQbut.click();
@@ -1034,9 +1102,9 @@ $(document).ready(function(){
         addQbut.click();
         formdesigner.formUuid = 'http://openrosa.org/formdesigner/1B27BC6C-D6B2-43E2-A36A-050DBCAF4763';
         var actual = beautifyXml(c.form.createXForm());
-        getTestXformOutput('form0.xml');
+        getFormFromServerAndPlaceInBuffer('form0.xml');
 
-        var expected = beautifyXml(testXformBuffer);
+        var expected = beautifyXml(testXformBuffer['form0.xml']);
         equal(expected,actual);
 
     });
@@ -1072,14 +1140,12 @@ $(document).ready(function(){
         Itext.setValue(curMugType.mug.properties.controlElement.properties.labelItextID,'en','default', 'question2 label');
         formdesigner.formUuid = "http://openrosa.org/formdesigner/5EACC430-F892-4AA7-B4AA-999AD0805A97";    
         var actual = beautifyXml(c.form.createXForm());
-        validateFormWithJR(actual);
+        validateFormWithJR(actual, validateCallbackFunc('Simple Nested Form Actual 1'));
 
-        getTestXformOutput('form1.xml');
-        var expected = beautifyXml(testXformBuffer);
-        validateFormWithJR(expected);
-        validateFormWithJR(actual);
-        validateFormWithJR(expected);
-        validateFormWithJR(actual);
+        getFormFromServerAndPlaceInBuffer('form1.xml');
+        var expected = beautifyXml(testXformBuffer['form1.xml']);
+        validateFormWithJR(expected, validateCallbackFunc('form1.xml'));
+        validateFormWithJR(actual, validateCallbackFunc('Simple Nested Form Actual 2'));
         
         equal(expected,actual);
 
@@ -1136,8 +1202,8 @@ $(document).ready(function(){
 
     module("Parsing tests");
     test ("Replacing MugTypes in a tree", function () {
-        getTestXformOutput('form1.xml');
-        var xmlDoc = $.parseXML(testXformBuffer),
+        getFormFromServerAndPlaceInBuffer('form1.xml');
+        var xmlDoc = $.parseXML(testXformBuffer['form1.xml']),
             xml = $(xmlDoc),
             binds = xml.find('bind'),
             data = xml.find('instance').children(),
@@ -1220,15 +1286,16 @@ $(document).ready(function(){
         //compare with form we have in the testing cache.
         formdesigner.formUuid = "http://openrosa.org/formdesigner/E9BE7934-687F-4C19-BDB7-9509005460B6";
         var actual = c.form.createXForm();
-        validateFormWithJR(actual);
+        validateFormWithJR(actual, validateCallbackFunc('Remove Selected 1'));
         actual = beautifyXml(actual);
-        getTestXformOutput('form8.xml');
-        var expected = beautifyXml(testXformBuffer);
+        getFormFromServerAndPlaceInBuffer('form8.xml');
+        var expected = beautifyXml(testXformBuffer['form8.xml']);
         equal(expected,actual);
 
     })
 
     test("Input fields", function() {
+        stop();
         var c = formdesigner.controller,
                     ui = formdesigner.ui,
                     jstree = $("#fd-question-tree"),
@@ -1237,7 +1304,7 @@ $(document).ready(function(){
                     workingField;
         c.resetFormDesigner();
 
-
+//        start();
         Itext = formdesigner.model.Itext;
 
         jstree.bind('create_node.jstree',function(e,data){
@@ -1252,7 +1319,7 @@ $(document).ready(function(){
         workingField = $("#fd-form-prop-formName-input");
         workingField.val("My Test Form").keyup();
         xmlString = c.form.createXForm();
-        validateFormWithJR(xmlString);
+        validateFormWithJR(xmlString, validateCallbackFunc('Input Selector 1'));
         var xml = parseXMLAndGetSelector(xmlString);
         var title = xml.find("h\\:title");
         if(title.length === 0) {
@@ -1266,7 +1333,7 @@ $(document).ready(function(){
         workingField.val('mydatanode').keyup();
         xmlString = c.form.createXForm();
         xml = parseXMLAndGetSelector(xmlString);
-        validateFormWithJR(xmlString);
+        validateFormWithJR(xmlString, validateCallbackFunc('Input Selector 2'));
 
         var dataNode = $(xml.find('instance').children()[0]);
         equal(dataNode.length, 1, 'found data node in xml source');
@@ -1274,7 +1341,7 @@ $(document).ready(function(){
         workingField.val("My Data Node").keyup(); //test auto replace of ' ' with '_'
         xmlString = c.form.createXForm();
         xml = parseXMLAndGetSelector(xmlString);
-        validateFormWithJR(xmlString);
+        validateFormWithJR(xmlString, validateCallbackFunc('Input Selector 3'));
         formdesigner.temp = xml;
         equal(workingField.val(), "My_Data_Node", "field value correctly swapped ' ' for '_'");
         var dataNode = $(xml.find('instance').children()[0]);
@@ -1289,17 +1356,17 @@ $(document).ready(function(){
         workingField = $('#dataElement-nodeID-input');
         workingField.val("textQuestion1").keyup().keyup().keyup();
         xmlString = c.form.createXForm();
-        validateFormWithJR(xmlString);
+        validateFormWithJR(xmlString, validateCallbackFunc('Input Selector 4'));
         equal(curMugType.mug.properties.dataElement.properties.nodeID, "textQuestion1", "dataElement nodeID set correctly");
         equal(curMugType.mug.properties.bindElement.properties.nodeID, "textQuestion1", "bindElement nodeID set correctly");
         xml = parseXMLAndGetSelector(xmlString);
-        validateFormWithJR(xmlString);
+        validateFormWithJR(xmlString, validateCallbackFunc('Input Selector 5'));
 
         //set Default Value
         workingField = $('#dataElement-dataValue-input');
         workingField.val('Some Data Value String').keyup();
         xmlString = c.form.createXForm();
-        validateFormWithJR(xmlString);
+        validateFormWithJR(xmlString, validateCallbackFunc('Input Selector 5'));
         xml = parseXMLAndGetSelector(xmlString);
         var defaultValueXML = xml.find('My_Data_Node').children('textQuestion1').text();
         equal(defaultValueXML, "Some Data Value String", "default value set in UI corresponds to that generated in XML");
@@ -1307,14 +1374,14 @@ $(document).ready(function(){
         workingField = $('#bindElement-relevantAttr-input');
         workingField.val("/data/bleeding_sign = 'N'").keyup();
         xmlString = c.form.createXForm();
-        validateFormWithJR(xmlString);
+        validateFormWithJR(xmlString, validateCallbackFunc('Input Selector 6'));
         xml = parseXMLAndGetSelector(xmlString);
         var bindRelVal = $(xml.find('bind')[0]).attr('relevant');
         equal(bindRelVal, "/data/bleeding_sign = 'N'", 'Was relevancy condition set correctly in the UI?');
 
         workingField.val("/data/bleeding_sign >= 5 or /data/bleeding_sing < 21").keyup();
         xmlString = c.form.createXForm();
-        validateFormWithJR(xmlString);
+        validateFormWithJR(xmlString, validateCallbackFunc('Input Selector 7'));
         xml = parseXMLAndGetSelector(xmlString);
         var bindVal = grep(xmlString,"<bind").trim();
         var expected = '<bind nodeset="/My_Data_Node/textQuestion1" type="xsd:string" relevant="/data/bleeding_sign &gt;= 5 or /data/bleeding_sing &lt; 21" />'
@@ -1323,7 +1390,7 @@ $(document).ready(function(){
         workingField = $('#bindElement-calculateAttr-input');
         workingField.val("/data/bleeding_sign >= 5 or /data/bleeding_sing < 21").keyup();
         xmlString = c.form.createXForm();
-        validateFormWithJR(xmlString);
+        validateFormWithJR(xmlString, validateCallbackFunc('Input Selector 8'));
         xml = parseXMLAndGetSelector(xmlString);
         bindVal = grep(xmlString,"<bind").trim();
         expected = '<bind nodeset="/My_Data_Node/textQuestion1" type="xsd:string" relevant="/data/bleeding_sign &gt;= 5 or /data/bleeding_sing &lt; 21" calculate="/data/bleeding_sign &gt;= 5 or /data/bleeding_sing &lt; 21" />'
@@ -1332,7 +1399,7 @@ $(document).ready(function(){
         workingField = $('#bindElement-constraintAttr-input');
         workingField.val("/data/bleeding_sign >= 5 or /data/bleeding_sing < 21").keyup();
         xmlString = c.form.createXForm();
-        validateFormWithJR(xmlString);
+        validateFormWithJR(xmlString, validateCallbackFunc('Input Selector 9'));
         xml = parseXMLAndGetSelector(xmlString);
         bindVal = grep(xmlString,"<bind").trim();
         expected = '<bind nodeset="/My_Data_Node/textQuestion1" type="xsd:string" constraint="/data/bleeding_sign &gt;= 5 or /data/bleeding_sing &lt; 21" relevant="/data/bleeding_sign &gt;= 5 or /data/bleeding_sing &lt; 21" calculate="/data/bleeding_sign &gt;= 5 or /data/bleeding_sing &lt; 21" />'
@@ -1344,7 +1411,7 @@ $(document).ready(function(){
         workingField = $('#bindElement-requiredAttr-input');
         workingField.click(); //check the 'required' checkbox;
         xmlString = c.form.createXForm();
-        validateFormWithJR(xmlString);
+        validateFormWithJR(xmlString, validateCallbackFunc('Input Selector 10'));
         xml = parseXMLAndGetSelector(xmlString);
         var requireAttr = xml.find('bind').attr('required');
         expected = "true()";
@@ -1353,7 +1420,7 @@ $(document).ready(function(){
         workingField = $('#fd-itext-default-input');
         workingField.val("Question 1 Itext yay").keyup().keyup();
         xmlString = c.form.createXForm();
-        validateFormWithJR(xmlString);
+        validateFormWithJR(xmlString, validateCallbackFunc('Input Selector 11'));
         xml = parseXMLAndGetSelector(xmlString);
         var itextVal = xml.find('translation #'+ $('#controlElement-labelItextID-input').val()).children('value').text()
         expected = "Question 1 Itext yay";
@@ -1362,7 +1429,7 @@ $(document).ready(function(){
         workingField = $('#fd-itext-audio-input');
         workingField.val("jr://audio/sound/vol1/questionnaire/awesome.mp3").keyup();
         xmlString = c.form.createXForm();
-        validateFormWithJR(xmlString);
+        validateFormWithJR(xmlString, validateCallbackFunc('Input Selector 12'));
         xml = parseXMLAndGetSelector(xmlString);
         window.xmlString = xml;
         itextVal = xml.find('translation #'+ $('#controlElement-labelItextID-input').val()).children('[form="audio"]').text()
@@ -1372,7 +1439,7 @@ $(document).ready(function(){
         workingField = $('#fd-itext-image-input');
         workingField.val("jr://images/foo.png").keyup();
         xmlString = c.form.createXForm();
-        validateFormWithJR(xmlString);
+        validateFormWithJR(xmlString, validateCallbackFunc('Input Selector 13'));
         xml = parseXMLAndGetSelector(xmlString);
         window.xmlString = xml;
         itextVal = xml.find('text,[id="'+ $('#controlElement-labelItextID-input').val()+'"]').children('[form="image"]').text()
@@ -1382,7 +1449,7 @@ $(document).ready(function(){
         workingField = $('#fd-itext-short-input');
         workingField.val("Some short itext").keyup();
         xmlString = c.form.createXForm();
-        validateFormWithJR(xmlString);
+        validateFormWithJR(xmlString, validateCallbackFunc('Input Selector 14'));
         xml = parseXMLAndGetSelector(xmlString);
         window.xmlString = xml;
         itextVal = xml.find('text,[id="'+ $('#controlElement-labelItextID-input').val()+'"]').children('[form="short"]').text()
@@ -1392,7 +1459,7 @@ $(document).ready(function(){
         workingField = $('#fd-itext-long-input');
         workingField.val("some long Itext for question 1").keyup();
         xmlString = c.form.createXForm();
-        validateFormWithJR(xmlString);
+        validateFormWithJR(xmlString, validateCallbackFunc('Input Selector 15'));
         xml = parseXMLAndGetSelector(xmlString);
         window.xmlString = xml;
         itextVal = xml.find('text,[id="'+ $('#controlElement-labelItextID-input').val()+'"]').children('[form="long"]').text()
@@ -1404,7 +1471,7 @@ $(document).ready(function(){
         workingField = $('#bindElement-constraintMsgAttr-input');
         workingField.val("Some default jr:constraintMsg value").keyup();
         xmlString = c.form.createXForm();
-        validateFormWithJR(xmlString);
+        validateFormWithJR(xmlString, validateCallbackFunc('Input Selector 16'));
         xml = parseXMLAndGetSelector(xmlString);
         bindVal = grep(xmlString,"<bind").trim();
         expected = '<bind nodeset="/My_Data_Node/textQuestion1" type="xsd:string" jr:constraintMsg="Some default jr:constraintMsg value" required="true()" />';
@@ -1414,7 +1481,7 @@ $(document).ready(function(){
         workingField = $('#controlElement-hintLabel-input');
         workingField.val("Default Hint Label Value").keyup();
         xmlString = c.form.createXForm();
-        validateFormWithJR(xmlString);
+        validateFormWithJR(xmlString, validateCallbackFunc('Input Selector 17'));
         xml = parseXMLAndGetSelector(xmlString);
         window.xmlString = xml;
         var someval = xml.find('input').children('hint').text()
@@ -1433,7 +1500,7 @@ $(document).ready(function(){
         workingField = $('#fd-itext-hint-input');
         workingField.val("Question 1 Itext hint").keyup().keyup();
         xmlString = c.form.createXForm();
-        validateFormWithJR(xmlString);
+        validateFormWithJR(xmlString, validateCallbackFunc('Input Selector 18'));
         xml = parseXMLAndGetSelector(xmlString);
         var findstring = '';
         if($('#controlElement-hintItextID-input').val()) {
@@ -1442,6 +1509,7 @@ $(document).ready(function(){
         itextVal = xml.find('translation').find(findstring).children('value').text()
         expected = "Question 1 Itext hint";
         equal(itextVal,expected,"Has hint Itext been set correctly through UI?");
+        start();
 
     });
 
@@ -1474,7 +1542,7 @@ $(document).ready(function(){
         equal(curMugType.mug.properties.bindElement.properties.dataType, 'xsd:int');
 
         xmlString = c.form.createXForm();
-        validateFormWithJR(xmlString);
+        validateFormWithJR(xmlString, validateCallbackFunc('DataType Selector 1'));
         xml = parseXMLAndGetSelector(xmlString);
         window.xmlSring = xml;
         var el = xml.find('[nodeset*='+curMugType.mug.properties.bindElement.properties.nodeID+']')
@@ -1487,7 +1555,7 @@ $(document).ready(function(){
         equal($('#bindElement-dataType-input').val(), 'xsd:double');
         equal(curMugType.mug.properties.bindElement.properties.dataType, 'xsd:double');
         xmlString = c.form.createXForm();
-        validateFormWithJR(xmlString);
+        validateFormWithJR(xmlString, validateCallbackFunc('DataType Selector 2'));
         xml = parseXMLAndGetSelector(xmlString);
         window.xmlSring = xml;
         el = xml.find('[nodeset*='+curMugType.mug.properties.bindElement.properties.nodeID+']')
@@ -1501,7 +1569,7 @@ $(document).ready(function(){
         equal(curMugType.mug.properties.bindElement.properties.dataType, 'xsd:long');
 
         xmlString = c.form.createXForm();
-        validateFormWithJR(xmlString);
+        validateFormWithJR(xmlString, validateCallbackFunc('DataType Selector 3'));
         xml = parseXMLAndGetSelector(xmlString);
         window.xmlSring = xml;
         el = xml.find('[nodeset*='+curMugType.mug.properties.bindElement.properties.nodeID+']')
@@ -1515,7 +1583,7 @@ $(document).ready(function(){
         equal(curMugType.typeName, "Secret Question");
         equal(curMugType.mug.properties.controlElement.properties.name, "Secret");
         xmlString = c.form.createXForm();
-        validateFormWithJR(xmlString);
+        validateFormWithJR(xmlString, validateCallbackFunc('DataType Selector 4'));
         xml = parseXMLAndGetSelector(xmlString);
         window.xmlSring = xml;
         el = xml.find('secret')
@@ -1539,8 +1607,8 @@ $(document).ready(function(){
         c.resetFormDesigner();
 
 
-        getTestXformOutput('form_with_no_data_attrs.xml');
-        myxml = testXformBuffer;
+        getFormFromServerAndPlaceInBuffer('form_with_no_data_attrs.xml');
+        myxml = testXformBuffer["form_with_no_data_attrs.xml"];
         stop();
         c.loadXForm(myxml); //load the xform using the standard pathway in the FD for parsing forms
         window.setTimeout(function () {
@@ -1572,18 +1640,19 @@ $(document).ready(function(){
                 return function () {
                     var myform;
                     get_cchq_forms(testFormNames[i]);
-                    myform = testXformBuffer;
+                    myform = testXformBuffer[testFormNames[i]];
+                    console.log("MYFORM!", myform);
                     c.loadXForm(myform);             //parse
                     prettyTreeBefore[0] = formdesigner.controller.form.controlTree.printTree();
                     prettyTreeBefore[1] = formdesigner.controller.form.dataTree.printTree()
                     output = c.form.createXForm();  //generate form with FD
-                    validateFormWithJR(output, validateCallbackFunc);     //validate
+                    validateFormWithJR(output, validateCallbackFunc('Iteration:' + i));     //validate
 
                     c.loadXForm(output);            //parse the newly generated form
                     prettyTreeAfter[0] = formdesigner.controller.form.controlTree.printTree();
                     prettyTreeAfter[1] = formdesigner.controller.form.dataTree.printTree();
                     output = c.form.createXForm();  //generate resulting XForm again
-                    validateFormWithJR(output, validateCallbackFunc);     //Validate again
+                    validateFormWithJR(output, validateCallbackFunc('Iteration 2nd:' + i));     //Validate again
 
                     equal(prettyTreeBefore[0], prettyTreeAfter[0], "Internal controlTree should be the same at all times");
                     equal(prettyTreeBefore[1], prettyTreeAfter[1], "Internal dataTree should be the same at all times");
@@ -1606,13 +1675,16 @@ formdesigner.testData = testData;
  * Actual is the xml form string
  * @param actual
  */
-function validateFormWithJR(actual, successFunc) {
+function validateFormWithJR(actual, successFunc, name) {
+    if(typeof name === undefined){
+        name = '';
+    }
     if(!JRVALIDATE_MODE){
         return true;
     }
 
     if (!successFunc) {
-        successFunc = validateCallbackFunc;
+        successFunc = validateCallbackFunc(name);
     }
     stop();
 

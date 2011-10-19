@@ -2110,7 +2110,7 @@ formdesigner.ui = (function () {
  *  saveUrl : "URL that the FD should post saved forms to",
  *  [form] : "string of the xml form that you wish to load"
  *  [formName] : "Default Form Name"
- *  [langs] : ["en", "por", ... ]
+ *  [langs] : ["en", "por", ... ] in order of preference.  First language in list will be set to the default language for this form.
  *  }
  */
 formdesigner.launch = function (opts) {
@@ -2136,8 +2136,13 @@ formdesigner.launch = function (opts) {
     
     formdesigner.iconUrl = opts.iconUrl ? opts.iconUrl : "css/smoothness/images/ui-icons_888888_256x240.png";
 
+    formdesigner.opts = opts;  //for additional options used elsewhere.
 
-
+    ///////////WARNING!/////////////////////////////////////////////////////////////////////////////////////////
+    // formdesigner.opts should be used exclusively! Do NOT add vars directly to formdesigner (as is done above)
+    // for anything related to the actual form being loaded.  Not following this advice will result in subtle
+    // consequences
+    ////////////HAVE A NICE DAY//////////////////////////////////////////////////////////////////////////////////
 
     formdesigner.ui.controller = formdesigner.controller;
     formdesigner.controller.initFormDesigner();
