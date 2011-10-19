@@ -1734,14 +1734,9 @@ formdesigner.ui = (function () {
          */
         var expTypes = xpathmodels.XPathExpressionTypeEnum;
         var questionList = formdesigner.controller.getListMugTypesNotItems();
-        var questionChoiceAutoComplete = [];
-        var mug;
-        
-        for (var i = 0; i < questionList.length; i++) {
-            questionChoiceAutoComplete.push(formdesigner.util.mugToAutoCompleteUIElement(questionList[i]));
-        }
-        console.log("question list", questionChoiceAutoComplete );
-
+        var questionChoiceAutoComplete = questionList.map(function (item) { 
+            return formdesigner.util.mugToAutoCompleteUIElement(item);
+        });
         
         var editorPane = $('#fd-xpath-editor');
         
@@ -1868,7 +1863,7 @@ formdesigner.ui = (function () {
 	                           ["is greater than", expTypes.GT],
 	                           ["is greater than or equal to", expTypes.GTE]];
 	                     
-	                return constructSelect(ops).addClass("op-select");;
+	                return constructSelect(ops).addClass("op-select").css("vertical-align", "text-bottom");
 	            };
 	            
 	            var populateTokenInputBox = function (input, expr) {
@@ -1880,26 +1875,60 @@ formdesigner.ui = (function () {
 	                   }
 	                }
 	                input.tokenInput("add", {id: expr.toXPath(), name: expr.toXPath()});
-	            }
+	            };
 	            
+                var createQuestionInGroup = function (type) {
+                     var group = $("<div />").addClass("expression-part").appendTo(expression).css("display", "inline");
+                     return createQuestionAcceptor().addClass(type + "-question xpath-edit-node").appendTo(group);
+                };
                 var expression = $("<div />").addClass("bin-expression");
                 
-                var leftGroup = $("<div />").addClass("expression-part").appendTo(expression).css("display", "inline");
-                var left = createQuestionAcceptor().addClass("left-question xpath-edit-node").appendTo(leftGroup);
+                
+                var left = createQuestionInGroup("left")
 	            var op = createOperationSelector().appendTo(expression);
-	            var rightGroup = $("<div />").addClass("expression-part").appendTo(expression).css("display", "inline");
-                var right = createQuestionAcceptor().addClass("right-question xpath-edit-node").appendTo(rightGroup);
 	            
+	            var right = createQuestionInGroup("right")
+                
 	            // set fancy input mode on the boxes
-	            var options = {theme: "facebook", 
-	                           tokenLimit: 1, 
-	                           searchDelay: 0, 
-	                           allowFreetext: true,
-	                           hintText: "Type in a question name or drag a question here.",
-	                           noResultsText: "No questions found. Press 'ENTER' to use a freetext value."};
-	            left.tokenInput(questionChoiceAutoComplete, options);
-	            right.tokenInput(questionChoiceAutoComplete, options); 
+	            var baseOptions = {theme: "facebook", 
+	                               tokenLimit: 1, 
+	                               searchDelay: 0, 
+	                               allowFreetext: true,
+	                               hintText: "Type in a question name or drag a question here.",
+	                               noResultsText: "No questions found. Press 'ENTER' to use a freetext value."};
 	            
+	            right.tokenInput(questionChoiceAutoComplete, baseOptions);
+	            var leftOptions = formdesigner.util.clone(baseOptions); 
+	            leftOptions.onAdd = function (item) {
+                    // for the left input only, if we add a select question, 
+                    // rebuild the autocomplete on the right side to support options
+                    if (item.uid) {
+                        // only questions have a uid
+                        var mug = formdesigner.controller.form.controlTree.getMugTypeFromUFID(item.uid);
+                        if (mug.typeName === "Multi Select Question" ||
+                            mug.typeName === "Single Select Question") {
+                            // this is pretty ridiculous but it seems to work.
+                            // remove and re add the entire right expression part
+                            right.parents(".expression-part").remove();
+                            right = createQuestionInGroup("right");
+                            var children = formdesigner.controller.getChildren(mug);
+                            var autoCompleteChildren = children.map(function (item) { 
+                                return formdesigner.util.selectItemToAutoCompleteUIElement(item);
+                            }); 
+                            var selectItemOptions = {
+                                   theme: "facebook", 
+                                   tokenLimit: 1, 
+                                   searchDelay: 0, 
+                                   allowFreetext: false,
+                                   hintText: "Type in a select option name.",
+                                   noResultsText: "No matching options found."
+                            };
+                            right.tokenInput(autoCompleteChildren, selectItemOptions);
+                        }
+                    }    
+                }
+                left.tokenInput(questionChoiceAutoComplete, leftOptions);
+	            	            
 	            // also make them drop targets for the tree
 	            expression.find(".token-input-list-facebook").addClass("jstree-drop");
                 if (expOp) {
@@ -1911,7 +1940,7 @@ formdesigner.ui = (function () {
                     op.val(xpathmodels.expressionTypeEnumToXPathLiteral(expOp.type));
 	                populateTokenInputBox(right, expOp.right);
 	            }
-	            $("<div />").text("Delete").button().appendTo(expression).click(function() {
+	            $("<div />").text("Delete").button().css("float", "left").appendTo(expression).click(function() {
 	                var isFirst = expression.children(".join-select").length == 0;
 	                expression.remove();
 	                if (isFirst && getExpressionList().length > 0) {

@@ -875,6 +875,12 @@ formdesigner.util = (function(){
                 uid: mug.ufid,
                 name: formdesigner.util.getDefaultDisplayItext(mug.mug) };
     }
+    
+    that.selectItemToAutoCompleteUIElement = function (mug) {
+        return {id: '"' + mug.mug.properties.controlElement.properties.defaultValue + '"',
+                uid: mug.ufid,
+                name: formdesigner.util.getDefaultDisplayItext(mug.mug) };
+    }
         
         
     return that;

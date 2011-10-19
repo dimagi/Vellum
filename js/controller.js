@@ -97,6 +97,12 @@ formdesigner.controller = (function () {
     };
     that.getMugByPath = getMugByPath;
     
+    var getChildren = function (mug) {
+        var children = that.form.controlTree.getNodeFromMugType(mug).getChildren();
+        return children.map(function (item) { return item.getValue();});
+    }
+    that.getChildren = getChildren;
+    
     /**
      * Walks through both internal trees (data and control) and grabs
      * all mugTypes that are not (1)Select Items.  Returns
