@@ -90,7 +90,6 @@ formdesigner.controller = (function () {
         // TODO: this is likely crazy slow if the form is big.
         var candidates = that.getListMugTypesNotItems();
         for (var i = 0; i < candidates.length; i++) {
-            console.log("checking", candidates[i])
             if (that.form.dataTree.getAbsolutePath(candidates[i]) == path) {
                 return candidates[i];
             }
