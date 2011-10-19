@@ -1587,6 +1587,7 @@ formdesigner.controller = (function () {
     // here is the xpath stuff
     var displayXPathEditor = function(options) {
         formdesigner.ui.hideQuestionProperties();
+        formdesigner.ui.hideTools();
         formdesigner.ui.showXPathEditor(options);
     };
     that.displayXPathEditor = displayXPathEditor;
@@ -1595,6 +1596,7 @@ formdesigner.controller = (function () {
         var mug = that.getCurrentlySelectedMugType();
         mug.mug.properties[options.group].properties[options.property] = options.value;
         formdesigner.ui.hideXPathEditor();
+        formdesigner.ui.showTools();
         formdesigner.ui.displayMugProperties(mug);
     };
     that.doneXPathEditor = doneXPathEditor;
