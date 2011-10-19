@@ -151,7 +151,7 @@ $(document).ready(function(){
     
 
     module("LiveText Unit Tests");
-    test("Create and Verify LiveText", function(){
+    asyncTest("Create and Verify LiveText", function(){
         expect(4);
 
         ////////
@@ -183,8 +183,9 @@ $(document).ready(function(){
         };
         liveText.addToken(otherObj,otherObj.cbFunc,[5]);
         equal(liveText.renderString(),"Test StringSome Text Meow Mix times: 5", "rendering with callback + params");
+        start();
     });
-    test("Test additional LiveText object", function(){
+    asyncTest("Test additional LiveText object", function(){
         expect(2);
 
         ///////
@@ -195,11 +196,11 @@ $(document).ready(function(){
         otherLiveText.addToken("foo ");
         otherLiveText.addToken("bar");
         equal(otherLiveText.renderString(),"foo bar", "check creation of additional LiveText and that it produces correct results");
-
+start();
     });
 
     module("Bind Element");
-    test("Create a bind with and without arguments", function(){
+    asyncTest("Create a bind with and without arguments", function(){
        expect(8);
        var myBind = new formdesigner.model.BindElement();
        ok(typeof myBind === 'object', "Is it an object?");
@@ -228,10 +229,11 @@ $(document).ready(function(){
 
         notEqual(myBind.ufid,myOtherBind.ufid, "Make sure that the ufids are unique");
 //        ok(typeof myOtherBind.ufid === 'string', "Is the ufid a string?");
+        start();
     });
 
     module("Data Element");
-    test("Create a data Element with and without", function(){
+    asyncTest("Create a data Element with and without", function(){
         expect(6);
         var myData = new formdesigner.model.DataElement();
         ok(typeof myData === 'object', "Is it an object?");
@@ -249,10 +251,11 @@ $(document).ready(function(){
         equal(otherData.properties.defaultData,initialData,"Is initialData correct?");
         equal(typeof otherData.ufid, 'string', "Is ufid a string and exists?");
         notEqual(otherData,myData,"Test that data elements are unique");
+        start();
     });
 
     module("Control Element");
-    test("Control Element Default", function(){
+    asyncTest("Control Element Default", function(){
         expect(2);
         var emptyControl = new formdesigner.model.ControlElement();
         ok(typeof emptyControl === 'object', "Is emptyControl an object?");
@@ -265,9 +268,9 @@ $(document).ready(function(){
         );
 
         notEqual(emptyControl.ufid,fullControl.ufid,"Check that ufids are not equal for ControlElements");
-
+start();
     });
-    test("Control Element with additional init value", function(){
+    asyncTest("Control Element with additional init value", function(){
         expect(2);
                //Control Element
         var typeName = "input";
@@ -282,11 +285,12 @@ $(document).ready(function(){
         );
 
         equal(myControl.properties.typeName,typeName, "Was type name set?");
-        equal(typeof myControl.ufid,'string', "Does ufid exist?")
+        equal(typeof myControl.ufid,'string', "Does ufid exist?");
+        start();
     });
 
     module("Mug Unit Tests");
-    test("Create and Verify Mug with null constructor", function(){
+    asyncTest("Create and Verify Mug with null constructor", function(){
         expect(4);
         var myMug = new formdesigner.model.Mug();
         ok(typeof myMug === 'object',"Test that the object is an object");
@@ -294,9 +298,10 @@ $(document).ready(function(){
         ok(typeof myMug.properties.bindElement === 'undefined', "BindElement should not exist in object constructed with no params");
         ok(typeof myMug.properties.controlElement === 'undefined', "ControlElement should not exist in object constructed with no params");
         ok(typeof myMug.properties.dataElement === 'undefined', "DataElement should not exist in object constructed with no params");
+        start();
 
     });
-    test("Create and Verify Mug with fake Bind,Control and Data element specified in Constructor", function(){
+    asyncTest("Create and Verify Mug with fake Bind,Control and Data element specified in Constructor", function(){
         expect(4);
         var specObj = {
            bindElement: {},
@@ -309,8 +314,9 @@ $(document).ready(function(){
         ok(typeof myMug.properties.bindElement === 'object', "BindElement should exist in object constructed with params");
         ok(typeof myMug.properties.controlElement === 'object', "ControlElement should exist in object constructed with params");
         ok(typeof myMug.properties.dataElement === 'object', "DataElement should exist in object constructed with params");
+        start();
     });
-    test("Create populated Mug", function(){
+    asyncTest("Create populated Mug", function(){
        expect(5);
         var testData = make_control_bind_data_mug();
         var myMug = testData.mug;
@@ -323,14 +329,14 @@ $(document).ready(function(){
         deepEqual(myMug.properties.bindElement,myBind, "Bind Element check");
         deepEqual(myMug.properties.dataElement,myData, "Data Element check");
 
-
+start();
 
 
 
 
     });
     module("MugType tests");
-    test("Validate example mug against definition", function(){
+    asyncTest("Validate example mug against definition", function(){
         expect(3);
         var testData = make_control_bind_data_mug();
         var myMug;
@@ -347,10 +353,10 @@ $(document).ready(function(){
         otherType.properties.bindElement['someProperty'] = 'foo';
         var vObj = otherType.validateMug(myMug);
         equal(vObj.status,'fail', "This should fail because the mug does not contain the required property");
-
+start();
     });
 
-    test("Test custom validation function in bind block definition", function(){
+    asyncTest("Test custom validation function in bind block definition", function(){
         expect(2);
         var myMug;
         var MugType = formdesigner.model.mugTypeMaker.stdTextQuestion(); //simulates a 'standard' text question
@@ -366,9 +372,10 @@ $(document).ready(function(){
         myMug.properties.bindElement.properties.constraintMsgAttr = "foo";
         validationObject = MugType.validateMug(myMug);
         equal(validationObject.status,'fail', "Special validation function has detected a constraintMsg but no constraint attribute in the bindElement");
+        start();
     });
 
-    test("MugType creation tools", function(){
+    asyncTest("MugType creation tools", function(){
         expect(2);
         var testData = make_control_bind_data_mug();
         var myMug = testData.mug;
@@ -381,19 +388,20 @@ $(document).ready(function(){
 
         OtherMugType.typeName = "This is a different Mug";
         notEqual(MugType.typeName,OtherMugType.typeName);
-
+start();
     });
 
     module("Automatic Mug Creation from MugType");
-    test("Create mug from MugType", function(){
+    asyncTest("Create mug from MugType", function(){
         expect(2);
         var mugType = formdesigner.model.mugTypeMaker.stdTextQuestion();
         var mug = mugType.mug;
         giveMugFakeValues(mug,mugType);
         ok(typeof mug === 'object', "Mug is an Object");
         equal(mugType.validateMug(mug).status,'pass', "Mug passes validation");
+        start();
     });
-    test("Test sub MugType and Mug creation",function(){
+    asyncTest("Test sub MugType and Mug creation",function(){
         expect(23);
         //capital A for 'Abstract'
         var AdbType  = formdesigner.model.mugTypes.dataBind,
@@ -440,10 +448,10 @@ $(document).ready(function(){
         ok(typeof Mug.properties.bindElement === 'undefined', "Mug's bindElement is undefined");
         ok(typeof Mug.properties.dataElement === 'object', "Mug's dataElement exists");
         ok(Mug.properties.dataElement.properties.nodeID.toLocaleLowerCase().indexOf('question') != -1);
-        
+        start();
     });
 
-    test("More MugType validation testing", function(){
+    asyncTest("More MugType validation testing", function(){
         var AdbType  = formdesigner.model.mugTypes.dataBind,
             AdbcType = formdesigner.model.mugTypes.dataBindControlQuestion,
             AdcType  = formdesigner.model.mugTypes.dataControlQuestion,
@@ -460,9 +468,10 @@ $(document).ready(function(){
         tMug.type = "";
         validationResult = tMug.validateMug(Mug);
         notEqual(validationResult.status,'pass',"MugType is wrong Type ('' instead of 'db')");
+        start();
     });
 
-    test("Check MugType properties alterations",function(){
+    asyncTest("Check MugType properties alterations",function(){
         var mugTA = formdesigner.model.mugTypeMaker.stdTextQuestion(),
             mugTB = formdesigner.model.mugTypeMaker.stdTrigger(),
             mugTC = formdesigner.model.mugTypeMaker.stdMSelect(),
@@ -473,11 +482,11 @@ $(document).ready(function(){
         notEqual(mugTB.ufid,mugTC.ufid);
         notEqual(mugTB.properties, mugTC.properties);
         equal(mugTC.properties.bindElement.nodeID.visibility,'advanced');
-
+start();
     })
 
     module("Tree Data Structure Tests");
-    test("Trees", function(){
+    asyncTest("Trees", function(){
 //        expect(16);
 
         ///////////BEGIN SETUP///////
@@ -607,11 +616,11 @@ $(document).ready(function(){
 
         tempMT = tree.getMugTypeFromUFID(mugTD.ufid);
         deepEqual(mugTD,tempMT);
-
+start();
 
     });
     module("UITree");
-    test("Children moving/relative location tests", function(){
+    asyncTest("Children moving/relative location tests", function(){
             var mugTA = formdesigner.model.mugTypeMaker.stdGroup(),
             mugTB = formdesigner.model.mugTypeMaker.stdTextQuestion(),
             mugTC = formdesigner.model.mugTypeMaker.stdTextQuestion(),
@@ -627,11 +636,11 @@ $(document).ready(function(){
         equal(pos,'into', "Insert a 'Text' MT into a 'Group' MT");
         pos = relPos(mugTB,mugTC);
         equal(pos,'after', "Insert 'Text' after other 'Text'");
-
+start();
 
     });
 
-    test("Tree insertion tests", function(){
+    asyncTest("Tree insertion tests", function(){
         expect(4);
         var mugTA = formdesigner.model.mugTypeMaker.stdGroup(),
             mugTB = formdesigner.model.mugTypeMaker.stdTextQuestion(),
@@ -669,9 +678,10 @@ $(document).ready(function(){
                                         disp(mugTA)+'['+
                                         disp(mugTB)+']]';
         equal(c.form.controlTree.printTree(),treePrettyPrintExpected, "Tree structure is correct after inserting a 'Text' MT under 'Group' CONTROL TREE");
+        start();
     });
 
-    test("Does check_move() work correctly?", function(){
+    asyncTest("Does check_move() work correctly?", function(){
         var mugTA = formdesigner.model.mugTypeMaker.stdTextQuestion(),
             mugTB = formdesigner.model.mugTypeMaker.stdTrigger(),
             mugTC = formdesigner.model.mugTypeMaker.stdItem(),
@@ -704,12 +714,12 @@ $(document).ready(function(){
         ok(!c.checkMoveOp(mugTA,'into',mugTD));
         ok(!c.checkMoveOp(mugTGroupA,'into',mugTD));
 
-
+start();
 
     });
 
     module("UI Create Questions Tests");
-    test("Add A text question", function(){
+    asyncTest("Add A text question", function(){
 
         formdesigner.controller.resetFormDesigner();
 
@@ -740,11 +750,11 @@ $(document).ready(function(){
 
 
         equal(jstree.jstree("get_selected").attr('id'), curMugType.ufid, "Mug that was just created is the same as the one that is currently selected");
-
+start();
     });
 
     module("Itext functionality testing");
-    test("Itext ops", function(){
+    asyncTest("Itext ops", function(){
         formdesigner.controller.resetFormDesigner();
         var IT = formdesigner.model.Itext;
         var otherLanguageName = "sw";
@@ -800,10 +810,10 @@ $(document).ready(function(){
         ok(IT.getAllData().en[newID], 'new ID exists in EN');
         ok(IT.getAllData().sw[newID], 'new ID exists in SW');
 
-
+start();
     });
 
-    test("High level util.js Itext rename cond 1", function(){
+    asyncTest("High level util.js Itext rename cond 1", function(){
         //test that renaming the itextid of an existing mug does not cause an overwrite
         //of values already existing at the target itextID
 
@@ -837,12 +847,12 @@ $(document).ready(function(){
         notEqual(IT.getItextVals(iID,'en'), null, "New Itext ID SHOULD exist in the Itext Object");
 
         equal(IT.getItextVals(iID, 'en')["long"], val, "Existing Itext values were not renamed");
-
+start();
 
 
     });
 
-    test("High level util.js Itext rename cond 2", function(){
+    asyncTest("High level util.js Itext rename cond 2", function(){
         //test that renaming the itext id of an existing mug
         //DOES cause an overwrite of the values at the target itextID
         formdesigner.controller.resetFormDesigner();
@@ -876,10 +886,10 @@ $(document).ready(function(){
 
         equal(IT.getItextVals("itext_ID1", 'en')["default"], mtIVal, "Itext values were renamed");
 
-
+start();
     });
 
-        test("High level util.js Itext rename cond 3", function(){
+        asyncTest("High level util.js Itext rename cond 3", function(){
             //test that renaming the itext ID of an existing mug
             //works in the absence of itext values at the target itextID
             formdesigner.controller.resetFormDesigner();
@@ -909,12 +919,12 @@ $(document).ready(function(){
             notEqual(IT.getItextVals(iID, 'en'), null, "New Itext ID SHOULD exist in the Itext Object");
 
             equal(IT.getItextVals(iID, 'en')["default"], mtVal, "Itext value is there");
-
+start();
 
         });
 
 
-        test("High level util.js Itext rename cond 4", function(){
+        asyncTest("High level util.js Itext rename cond 4", function(){
             //test that renaming the itext id of a mug that already exists
             //works in the absence of all itext.
             formdesigner.controller.resetFormDesigner();
@@ -944,12 +954,12 @@ $(document).ready(function(){
             util.setOrRenameItextID(iID,curMugType,'labelItextID',false);
             equal(IT.getItextVals(mtIID, 'en'), null, 'Old Itext ID should not exist in the Itext Object anymore');
             equal(IT.getItextVals(iID, 'en'), null, "New Itext ID should not exist in the Itext Object (no prior itext vals avail)");
-
+start();
         });
 
 
-        test("Crufty Itext Removal Funcs", function () {
-            stop();
+        asyncTest("Crufty Itext Removal Funcs", function () {
+            ;
             formdesigner.controller.resetFormDesigner();
             var cleanForm = 'form0.xml';
             var cruftyForm = 'form_with_crufty_itext1.xml';
@@ -990,9 +1000,8 @@ $(document).ready(function(){
 
         });
 
-        test("Crufty Itext Removal Controller Wrapper Func", function () {
-            stop();
-            formdesigner.controller.resetFormDesigner();
+        asyncTest("Crufty Itext Removal Controller Wrapper Func", function () {
+                        formdesigner.controller.resetFormDesigner();
             var cleanForm = 'form0.xml';
             var cruftyForm = 'form_with_crufty_itext1.xml';
 
@@ -1020,9 +1029,8 @@ $(document).ready(function(){
 
 
 
-        test("Test default language setting", function () {
-            stop();
-            formdesigner.controller.resetFormDesigner();
+        asyncTest("Test default language setting", function () {
+                        formdesigner.controller.resetFormDesigner();
             var form = 'form_with_3_languages.xml';
 
             var Itext = formdesigner.model.Itext;
@@ -1047,9 +1055,8 @@ $(document).ready(function(){
             },777);
         });
 
-        test("Test default language by using external language list init option", function () {
-            stop();
-            formdesigner.controller.resetFormDesigner();
+        asyncTest("Test default language by using external language list init option", function () {
+                        formdesigner.controller.resetFormDesigner();
             var form = 'form_with_3_languages.xml';
             var Itext = formdesigner.model.Itext;
             var c = formdesigner.controller;
@@ -1071,10 +1078,10 @@ $(document).ready(function(){
                 
                 var grepVal = grep(xmlString,"default=").trim();
                 equal(grepVal, '<translation lang="sw" default="">', "default attr was correctly set");
-                start();
+
                 delete formdesigner.opts.langs;
                 formdesigner.opts["langs"] = [];
-
+start();
 
             },777);
         });
@@ -1085,14 +1092,18 @@ $(document).ready(function(){
 
 
     module("Create XForm XML");
-    test("Create simple flat Xform", function () {
+    asyncTest("Create simple flat Xform", function () {
         stop()
         var c = formdesigner.controller,
                 ui = formdesigner.ui,
                 jstree = $("#fd-question-tree"),
                 curMugType,
                 addQbut;
+        var data = formdesigner.model.Itext.getAllData();
+        delete formdesigner.opts.langs;
+        data = formdesigner.model.Itext.getAllData();
         c.resetFormDesigner();
+        data = formdesigner.model.Itext.getAllData();
         start()
         addQbut = $('#fd-add-but');
         addQbut.click();
@@ -1100,16 +1111,17 @@ $(document).ready(function(){
         addQbut.click();
         addQbut.click();
         addQbut.click();
+        data = formdesigner.model.Itext.getAllData();
         formdesigner.formUuid = 'http://openrosa.org/formdesigner/1B27BC6C-D6B2-43E2-A36A-050DBCAF4763';
         var actual = beautifyXml(c.form.createXForm());
         getFormFromServerAndPlaceInBuffer('form0.xml');
 
         var expected = beautifyXml(testXformBuffer['form0.xml']);
         equal(expected,actual);
-
+start();
     });
 
-    test("Create simple nested Xform", function () {
+    asyncTest("Create simple nested Xform", function () {
         var c = formdesigner.controller,
             ui = formdesigner.ui,
             jstree = $("#fd-question-tree"),
@@ -1151,12 +1163,12 @@ $(document).ready(function(){
 
         //test if form is valid
         ok(formdesigner.controller.form.isFormValid(), 'Form Should pass all Validation Tests');
-
+        start();
                 
 
     });
 
-    test ("Test Form Validation function", function () {
+    asyncTest("Test Form Validation function", function () {
         var c = formdesigner.controller,
             ui = formdesigner.ui,
             jstree = $("#fd-question-tree"),
@@ -1174,11 +1186,11 @@ $(document).ready(function(){
         addQuestionThroughUI("Text Question");
 
         equal(formdesigner.controller.form.isFormValid(), true, 'Form should be valid.');
-
+        start();
 
     });
 
-    test ("Test getMTbyDataNodeID function", function ()  {
+    asyncTest("Test getMTbyDataNodeID function", function ()  {
         var c = formdesigner.controller,
             ui = formdesigner.ui,
             jstree = $("#fd-question-tree"),
@@ -1198,10 +1210,11 @@ $(document).ready(function(){
         deepEqual([mugType], c.form.getMugTypeByIDFromTree(mugType.mug.properties.dataElement.properties.nodeID, 'data'), 'MugTypes should be the same')
         console.log(c.form.getMugTypeByIDFromTree('foo', 'data'))
         equal(0, c.form.getMugTypeByIDFromTree('foo', 'data').length, 'Given a bogus ID should return an empty list');
+        start();
     });
 
     module("Parsing tests");
-    test ("Replacing MugTypes in a tree", function () {
+    asyncTest("Replacing MugTypes in a tree", function () {
         getFormFromServerAndPlaceInBuffer('form1.xml');
         var xmlDoc = $.parseXML(testXformBuffer['form1.xml']),
             xml = $(xmlDoc),
@@ -1227,6 +1240,7 @@ $(document).ready(function(){
         mType.ufid = oldMT.ufid;
 
         c.form.replaceMugType(oldMT,mType,'data');
+        start();
     });
 
     function getMTFromEl(el) {
@@ -1291,11 +1305,11 @@ $(document).ready(function(){
         getFormFromServerAndPlaceInBuffer('form8.xml');
         var expected = beautifyXml(testXformBuffer['form8.xml']);
         equal(expected,actual);
+        start();
 
     })
 
-    test("Input fields", function() {
-        stop();
+    asyncTest("Input fields", function() {
         var c = formdesigner.controller,
                     ui = formdesigner.ui,
                     jstree = $("#fd-question-tree"),
@@ -1311,13 +1325,16 @@ $(document).ready(function(){
             lastCreatedNode = data.rslt.obj;
         })
 
+
         var xmlString;
         //build form
         addQuestionThroughUI("Text Question");
 
         //change form name and test results
         workingField = $("#fd-form-prop-formName-input");
-        workingField.val("My Test Form").keyup();
+        workingField.val("My Test Form");
+        triggerKeyEvents(workingField,32,false,false);
+        triggerKeyEvents(workingField,8,false,false);
         xmlString = c.form.createXForm();
         validateFormWithJR(xmlString, validateCallbackFunc('Input Selector 1'));
         var xml = parseXMLAndGetSelector(xmlString);
@@ -1330,7 +1347,9 @@ $(document).ready(function(){
 
         //change form data node name and test results
         workingField = $('#fd-form-prop-formID-input');
-        workingField.val('mydatanode').keyup();
+        workingField.val('mydatanode');
+        triggerKeyEvents(workingField,32,false,false);
+        triggerKeyEvents(workingField,8,false,false);
         xmlString = c.form.createXForm();
         xml = parseXMLAndGetSelector(xmlString);
         validateFormWithJR(xmlString, validateCallbackFunc('Input Selector 2'));
@@ -1338,7 +1357,9 @@ $(document).ready(function(){
         var dataNode = $(xml.find('instance').children()[0]);
         equal(dataNode.length, 1, 'found data node in xml source');
         equal(dataNode[0].tagName, "mydatanode", "Data node is named correctly");
-        workingField.val("My Data Node").keyup(); //test auto replace of ' ' with '_'
+        workingField.val("My Data Node");
+        triggerKeyEvents(workingField,32,false,false);
+        triggerKeyEvents(workingField,8,false,false); //test auto replace of ' ' with '_'
         xmlString = c.form.createXForm();
         xml = parseXMLAndGetSelector(xmlString);
         validateFormWithJR(xmlString, validateCallbackFunc('Input Selector 3'));
@@ -1354,7 +1375,9 @@ $(document).ready(function(){
         ui.selectMugTypeInUI(curMugType);
         equal(curMugType.typeName, "Text Question", "Is Question created through UI a text type question?");
         workingField = $('#dataElement-nodeID-input');
-        workingField.val("textQuestion1").keyup().keyup().keyup();
+        workingField.val("textQuestion1").keyup().keyup();
+        triggerKeyEvents(workingField,32,false,false);
+        triggerKeyEvents(workingField,8,false,false);
         xmlString = c.form.createXForm();
         validateFormWithJR(xmlString, validateCallbackFunc('Input Selector 4'));
         equal(curMugType.mug.properties.dataElement.properties.nodeID, "textQuestion1", "dataElement nodeID set correctly");
@@ -1364,7 +1387,9 @@ $(document).ready(function(){
 
         //set Default Value
         workingField = $('#dataElement-dataValue-input');
-        workingField.val('Some Data Value String').keyup();
+        workingField.val('Some Data Value String');
+        triggerKeyEvents(workingField,32,false,false);
+        triggerKeyEvents(workingField,8,false,false);
         xmlString = c.form.createXForm();
         validateFormWithJR(xmlString, validateCallbackFunc('Input Selector 5'));
         xml = parseXMLAndGetSelector(xmlString);
@@ -1372,14 +1397,18 @@ $(document).ready(function(){
         equal(defaultValueXML, "Some Data Value String", "default value set in UI corresponds to that generated in XML");
 
         workingField = $('#bindElement-relevantAttr-input');
-        workingField.val("/data/bleeding_sign = 'N'").keyup();
+        workingField.val("/data/bleeding_sign = 'N'");
+        triggerKeyEvents(workingField,32,false,false);
+        triggerKeyEvents(workingField,8,false,false);
         xmlString = c.form.createXForm();
         validateFormWithJR(xmlString, validateCallbackFunc('Input Selector 6'));
         xml = parseXMLAndGetSelector(xmlString);
         var bindRelVal = $(xml.find('bind')[0]).attr('relevant');
         equal(bindRelVal, "/data/bleeding_sign = 'N'", 'Was relevancy condition set correctly in the UI?');
 
-        workingField.val("/data/bleeding_sign >= 5 or /data/bleeding_sing < 21").keyup();
+        workingField.val("/data/bleeding_sign >= 5 or /data/bleeding_sing < 21");
+        triggerKeyEvents(workingField,32,false,false);
+        triggerKeyEvents(workingField,8,false,false);
         xmlString = c.form.createXForm();
         validateFormWithJR(xmlString, validateCallbackFunc('Input Selector 7'));
         xml = parseXMLAndGetSelector(xmlString);
@@ -1388,7 +1417,9 @@ $(document).ready(function(){
         equal(bindVal, expected, 'Was relevancy condition with < or > signs rendered correctly in the UI?');
 
         workingField = $('#bindElement-calculateAttr-input');
-        workingField.val("/data/bleeding_sign >= 5 or /data/bleeding_sing < 21").keyup();
+        workingField.val("/data/bleeding_sign >= 5 or /data/bleeding_sing < 21");
+        triggerKeyEvents(workingField,32,false,false);
+        triggerKeyEvents(workingField,8,false,false);
         xmlString = c.form.createXForm();
         validateFormWithJR(xmlString, validateCallbackFunc('Input Selector 8'));
         xml = parseXMLAndGetSelector(xmlString);
@@ -1397,16 +1428,26 @@ $(document).ready(function(){
         equal(bindVal, expected, 'Was calculate condition with < or > signs rendered correctly in the UI?');
 
         workingField = $('#bindElement-constraintAttr-input');
-        workingField.val("/data/bleeding_sign >= 5 or /data/bleeding_sing < 21").keyup();
+        workingField.val("/data/bleeding_sign >= 5 or /data/bleeding_sing < 21");
+        triggerKeyEvents(workingField,32,false,false);
+		triggerKeyEvents(workingField,8,false,false);
         xmlString = c.form.createXForm();
         validateFormWithJR(xmlString, validateCallbackFunc('Input Selector 9'));
         xml = parseXMLAndGetSelector(xmlString);
         bindVal = grep(xmlString,"<bind").trim();
         expected = '<bind nodeset="/My_Data_Node/textQuestion1" type="xsd:string" constraint="/data/bleeding_sign &gt;= 5 or /data/bleeding_sing &lt; 21" relevant="/data/bleeding_sign &gt;= 5 or /data/bleeding_sing &lt; 21" calculate="/data/bleeding_sign &gt;= 5 or /data/bleeding_sing &lt; 21" />'
         equal(bindVal, expected, 'Was constraint condition with < or > signs rendered correctly in the UI?');
-        workingField.val('').keyup();
-        $('#bindElement-calculateAttr-input').val('').keyup();
-        $('#bindElement-relevantAttr-input').val('').keyup();
+        workingField.val('');
+		triggerKeyEvents(workingField,32,false,false);
+		triggerKeyEvents(workingField,8,false,false);
+        workingField = $('#bindElement-calculateAttr-input');
+        workingField.val('');
+		triggerKeyEvents(workingField,32,false,false);
+		triggerKeyEvents(workingField,8,false,false);
+        workingField = $('#bindElement-relevantAttr-input');
+        workingField.val('');
+		triggerKeyEvents(workingField,32,false,false);
+		triggerKeyEvents(workingField,8,false,false);
 
         workingField = $('#bindElement-requiredAttr-input');
         workingField.click(); //check the 'required' checkbox;
@@ -1418,7 +1459,9 @@ $(document).ready(function(){
         equal(requireAttr,expected,"Is the required attribute value === 'true()' in the bind?");
 
         workingField = $('#fd-itext-default-input');
-        workingField.val("Question 1 Itext yay").keyup().keyup();
+        workingField.val("Question 1 Itext yay");
+		triggerKeyEvents(workingField,32,false,false);
+		triggerKeyEvents(workingField,8,false,false);
         xmlString = c.form.createXForm();
         validateFormWithJR(xmlString, validateCallbackFunc('Input Selector 11'));
         xml = parseXMLAndGetSelector(xmlString);
@@ -1427,7 +1470,9 @@ $(document).ready(function(){
         equal(itextVal,expected,"Has default Itext been set correctly through UI?");
 
         workingField = $('#fd-itext-audio-input');
-        workingField.val("jr://audio/sound/vol1/questionnaire/awesome.mp3").keyup();
+        workingField.val("jr://audio/sound/vol1/questionnaire/awesome.mp3");
+		triggerKeyEvents(workingField,32,false,false);
+		triggerKeyEvents(workingField,8,false,false);
         xmlString = c.form.createXForm();
         validateFormWithJR(xmlString, validateCallbackFunc('Input Selector 12'));
         xml = parseXMLAndGetSelector(xmlString);
@@ -1437,7 +1482,9 @@ $(document).ready(function(){
         equal(itextVal,expected,"Has audio Itext been set correctly through UI?");
 
         workingField = $('#fd-itext-image-input');
-        workingField.val("jr://images/foo.png").keyup();
+        workingField.val("jr://images/foo.png");
+		triggerKeyEvents(workingField,32,false,false);
+		triggerKeyEvents(workingField,8,false,false);
         xmlString = c.form.createXForm();
         validateFormWithJR(xmlString, validateCallbackFunc('Input Selector 13'));
         xml = parseXMLAndGetSelector(xmlString);
@@ -1447,7 +1494,9 @@ $(document).ready(function(){
         equal(itextVal,expected,"Has image Itext been set correctly through UI?");
 
         workingField = $('#fd-itext-short-input');
-        workingField.val("Some short itext").keyup();
+        workingField.val("Some short itext");
+		triggerKeyEvents(workingField,32,false,false);
+		triggerKeyEvents(workingField,8,false,false);
         xmlString = c.form.createXForm();
         validateFormWithJR(xmlString, validateCallbackFunc('Input Selector 14'));
         xml = parseXMLAndGetSelector(xmlString);
@@ -1457,7 +1506,9 @@ $(document).ready(function(){
         equal(itextVal,expected,"Has short Itext been set correctly through UI?");
 
         workingField = $('#fd-itext-long-input');
-        workingField.val("some long Itext for question 1").keyup();
+        workingField.val("some long Itext for question 1");
+		triggerKeyEvents(workingField,32,false,false);
+		triggerKeyEvents(workingField,8,false,false);
         xmlString = c.form.createXForm();
         validateFormWithJR(xmlString, validateCallbackFunc('Input Selector 15'));
         xml = parseXMLAndGetSelector(xmlString);
@@ -1469,7 +1520,9 @@ $(document).ready(function(){
 
 
         workingField = $('#bindElement-constraintMsgAttr-input');
-        workingField.val("Some default jr:constraintMsg value").keyup();
+        workingField.val("Some default jr:constraintMsg value");
+		triggerKeyEvents(workingField,32,false,false);
+		triggerKeyEvents(workingField,8,false,false);
         xmlString = c.form.createXForm();
         validateFormWithJR(xmlString, validateCallbackFunc('Input Selector 16'));
         xml = parseXMLAndGetSelector(xmlString);
@@ -1479,7 +1532,9 @@ $(document).ready(function(){
 
 
         workingField = $('#controlElement-hintLabel-input');
-        workingField.val("Default Hint Label Value").keyup();
+        workingField.val("Default Hint Label Value");
+		triggerKeyEvents(workingField,32,false,false);
+		triggerKeyEvents(workingField,8,false,false);
         xmlString = c.form.createXForm();
         validateFormWithJR(xmlString, validateCallbackFunc('Input Selector 17'));
         xml = parseXMLAndGetSelector(xmlString);
@@ -1489,7 +1544,9 @@ $(document).ready(function(){
         equal(someval,expected,"Has default hint label been set correctly through UI?");
 
         workingField = $('#controlElement-hintItextID-input');
-        workingField.val("question1_hint").keyup();
+        workingField.val("question1_hint");
+		triggerKeyEvents(workingField,32,false,false);
+		triggerKeyEvents(workingField,8,false,false);
         xmlString = c.form.createXForm();
         xml = parseXMLAndGetSelector(xmlString);
         window.xmlString = xml;
@@ -1498,7 +1555,9 @@ $(document).ready(function(){
         equal(someval,expected,"Has hint Itext ID been set correctly through UI?");
 
         workingField = $('#fd-itext-hint-input');
-        workingField.val("Question 1 Itext hint").keyup().keyup();
+        workingField.val("Question 1 Itext hint");
+		triggerKeyEvents(workingField,32,false,false);
+		triggerKeyEvents(workingField,8,false,false);
         xmlString = c.form.createXForm();
         validateFormWithJR(xmlString, validateCallbackFunc('Input Selector 18'));
         xml = parseXMLAndGetSelector(xmlString);
@@ -1513,7 +1572,7 @@ $(document).ready(function(){
 
     });
 
-    test("DataType selector functionality", function() {
+    asyncTest("DataType selector functionality", function() {
         var c = formdesigner.controller,
                     ui = formdesigner.ui,
                     jstree = $("#fd-question-tree"),
@@ -1591,13 +1650,13 @@ $(document).ready(function(){
         equal($(el).tagName)
         el = xml.find('[nodeset*='+curMugType.mug.properties.bindElement.properties.nodeID+']')
         equal($(el).attr('type'), 'xsd:string');
-
+        start();
 
 
     });
 
     module("Parsing Tests Part II");
-    test("Parse Error Messages Functionality", function () {
+    asyncTest("Parse Error Messages Functionality", function () {
         var c = formdesigner.controller,
             ui = formdesigner.ui,
             jstree = $("#fd-question-tree"),
@@ -1609,7 +1668,6 @@ $(document).ready(function(){
 
         getFormFromServerAndPlaceInBuffer('form_with_no_data_attrs.xml');
         myxml = testXformBuffer["form_with_no_data_attrs.xml"];
-        stop();
         c.loadXForm(myxml); //load the xform using the standard pathway in the FD for parsing forms
         window.setTimeout(function () {
             expectedErrors = [
@@ -1636,7 +1694,7 @@ $(document).ready(function(){
 
 
         for (k in testFormNames) {
-            test("Test form: " + testFormNames[k], (function(i) {
+            asyncTest("Test form: " + testFormNames[k], (function(i) {
                 return function () {
                     var myform;
                     get_cchq_forms(testFormNames[i]);
@@ -1656,6 +1714,7 @@ $(document).ready(function(){
 
                     equal(prettyTreeBefore[0], prettyTreeAfter[0], "Internal controlTree should be the same at all times");
                     equal(prettyTreeBefore[1], prettyTreeAfter[1], "Internal dataTree should be the same at all times");
+                    start();
                 }
             }(k)));
 
