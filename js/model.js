@@ -624,18 +624,21 @@ formdesigner.model = function () {
                     editable: 'w',
                     visibility: 'visible',
                     presence: 'optional',
+                    uiType: "xpath",
                     lstring: 'Skip Condition'
                 },
                 calculateAttr: {
                     editable: 'w',
                     visibility: 'visible',
                     presence: 'optional',
+                    uiType: "xpath",
                     lstring: 'Calculate Condition'
                 },
                 constraintAttr: {
                     editable: 'w',
                     visibility: 'visible',
                     presence: 'optional',
+                    uiType: "xpath",
                     lstring: 'Constraint Condition'
                 },
                 constraintMsgAttr: {
@@ -1844,9 +1847,7 @@ formdesigner.model = function () {
                     }
                 }
             }
-
             return bList;
-            
         }
 
         /**
