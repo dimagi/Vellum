@@ -1644,11 +1644,13 @@ formdesigner.controller = (function () {
     // tree drag and drop stuff, used by xpath
     var handleTreeDrop = function(source, target) {
         var target = $(target), sourceUid = $(source).attr("id");
-        console.log("drop target", target);
-        if (target.hasClass("xpath-edit-node")) {
+        // from the target, find the actual input
+        var actualTarget = $($(target.parents(".expression-part")[0]).find(".xpath-edit-node")[0]);
+        if (actualTarget) {
             var mug = that.form.getMugTypeByUFID(sourceUid);
-            var path = formdesigner.controller.form.dataTree.getAbsolutePath(mug);
-            target.val(path);                
+            // clear and add it
+            actualTarget.tokenInput("clear");
+            actualTarget.tokenInput("add", formdesigner.util.mugToAutoCompleteUIElement(mug));
         }
     };
     that.handleTreeDrop = handleTreeDrop;

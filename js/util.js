@@ -868,7 +868,15 @@ formdesigner.util = (function(){
 
         return disp;
     }
-
+    
+    
+    that.mugToAutoCompleteUIElement = function (mug) {
+        return {id: formdesigner.controller.form.dataTree.getAbsolutePath(mug),
+                uid: mug.ufid,
+                name: formdesigner.util.getDefaultDisplayItext(mug.mug) };
+    }
+        
+        
     return that;
 
 }());

@@ -1737,14 +1737,8 @@ formdesigner.ui = (function () {
         var questionChoiceAutoComplete = [];
         var mug;
         
-        var mugToAutoCompleteUIElement = function (mug) {
-            return {id: formdesigner.controller.form.dataTree.getAbsolutePath(mug),
-                    uid: mug.ufid,
-                    name: formdesigner.util.getDefaultDisplayItext(mug.mug) };
-        }
-        
         for (var i = 0; i < questionList.length; i++) {
-            questionChoiceAutoComplete.push(mugToAutoCompleteUIElement(questionList[i]));
+            questionChoiceAutoComplete.push(formdesigner.util.mugToAutoCompleteUIElement(questionList[i]));
         }
         console.log("question list", questionChoiceAutoComplete );
 
@@ -1864,7 +1858,6 @@ formdesigner.ui = (function () {
                 var createQuestionAcceptor = function() {
 	                var questionAcceptor = $("<input />").attr("placeholder", "Hint: drag a question here.");
 	                questionAcceptor.css("min-width", "200px")
-	                questionAcceptor.addClass("jstree-drop xpath-edit-node");
 	                return questionAcceptor;
 	            };
 	            var createOperationSelector = function() {
@@ -1882,7 +1875,7 @@ formdesigner.ui = (function () {
 	                if (isPath(expr)) {
 	                   var mug = formdesigner.controller.getMugByPath(expr.toXPath());
 	                   if (mug) {
-	                       input.tokenInput("add", mugToAutoCompleteUIElement(mug));
+	                       input.tokenInput("add", formdesigner.util.mugToAutoCompleteUIElement(mug));
 	                       return;       
 	                   }
 	                }
@@ -1890,10 +1883,12 @@ formdesigner.ui = (function () {
 	            }
 	            
                 var expression = $("<div />").addClass("bin-expression");
-            
-                var left = createQuestionAcceptor().addClass("left-question").appendTo(expression);
+                
+                var leftGroup = $("<div />").addClass("expression-part").appendTo(expression).css("display", "inline");
+                var left = createQuestionAcceptor().addClass("left-question xpath-edit-node").appendTo(leftGroup);
 	            var op = createOperationSelector().appendTo(expression);
-	            var right = createQuestionAcceptor().addClass("right-question").appendTo(expression);
+	            var rightGroup = $("<div />").addClass("expression-part").appendTo(expression).css("display", "inline");
+                var right = createQuestionAcceptor().addClass("right-question xpath-edit-node").appendTo(rightGroup);
 	            
 	            // set fancy input mode on the boxes
 	            var options = {theme: "facebook", 
@@ -1906,7 +1901,7 @@ formdesigner.ui = (function () {
 	            right.tokenInput(questionChoiceAutoComplete, options); 
 	            
 	            // also make them drop targets for the tree
-	            expression.children(".token-input-list-facebook").addClass("jstree-drop xpath-edit-node");
+	            expression.find(".token-input-list-facebook").addClass("jstree-drop");
                 if (expOp) {
 	                // populate
                     if (DEBUG_MODE) {
