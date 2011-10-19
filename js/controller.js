@@ -1586,7 +1586,36 @@ formdesigner.controller = (function () {
         formdesigner.model.reset();
         formdesigner.ui.resetUI();
     }
-
+    
+    // tree drag and drop stuff, used by xpath
+    var handleTreeDrop = function(source, target) {
+        var target = $(target), sourceUid = $(source).attr("id");
+        if (target.hasClass("xpath-edit-node")) {
+            var mug = that.form.getMugTypeByUFID(sourceUid);
+            var path = formdesigner.controller.form.dataTree.getAbsolutePath(mug);
+            target.val(path);                
+        }
+    };
+    that.handleTreeDrop = handleTreeDrop;
+    
+    // here is the xpath stuff
+    var displayXPathEditor = function(options) {
+        formdesigner.ui.hideQuestionProperties();
+        formdesigner.ui.hideTools();
+        formdesigner.ui.showXPathEditor(options);
+    };
+    that.displayXPathEditor = displayXPathEditor;
+    
+    var doneXPathEditor = function(options) {
+        var mug = that.getCurrentlySelectedMugType();
+        mug.mug.properties[options.group].properties[options.property] = options.value;
+        formdesigner.ui.hideXPathEditor();
+        formdesigner.ui.showTools();
+        formdesigner.ui.displayMugProperties(mug);
+    };
+    that.doneXPathEditor = doneXPathEditor;
+    
+    
     //make controller event capable
     formdesigner.util.eventuality(that);
 

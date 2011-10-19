@@ -394,6 +394,10 @@ formdesigner.ui = (function () {
      * @param showData - Show data type properties? Optional, defaults to true
      */
     var displayMugProperties = that.displayMugProperties = that.displayQuestion = function(mugType, showControl, showBind, showData){
+        // always hide the xpath editor if necessary 
+        that.hideXPathEditor();
+        that.showTools();
+        
         if (typeof showControl === 'undefined') {
             showControl = true;
         }
@@ -463,18 +467,18 @@ formdesigner.ui = (function () {
          * Runs through a properties block and generates the
          * correct li elements (and appends them to the given parentUL)
          *
-         * @param propertiesBlock - The properties block from the MugType (e.g. mugType.properties.controlElement
+         * @param propertiesBlock - The propertiesinput block from the MugType (e.g. mugType.properties.controlElement
          * @param parentUL - The UL DOM node that an LI should be appended to.
          * @param mugProps - actual mug properties corresponding to the propertiesBlock above
          * @param groupName - Name of the current properties block (e.g. 'controlElement'
          * @param showVisible - Show properties with the visibility flag set to 'visible'
          * @param showHidden - Show properties with the visibility flag set to 'hidden'
          */
-        function listDisplay(propertiesBlock,parentUL, mugProps, groupName, showVisible, showHidden){
+        function listDisplay(propertiesBlock, parentUL, mugProps, groupName, showVisible, showHidden){
             function getWidget (propBlockIndex) {
                 var liStr,li,
                 p = propertiesBlock[propBlockIndex],
-                        itemID,html, labelStr, i;
+                        itemID,html, labelStr, i, xPathButton;
 
                 labelStr = p.lstring ? p.lstring : propBlockIndex;
                 itemID = groupName + '-' + propBlockIndex + '-' + 'input';
@@ -505,13 +509,32 @@ formdesigner.ui = (function () {
                     html = html + '<span class="fd-prop-input-div">' + '</span>';
                 } else if (p.uiType === 'checkbox') {
                     html = html + '<div class="fd-prop-input-div-checkbox"><input id="' + itemID + '" class="fd-property-checkbox" type="checkbox"></div>'
+                } else if (p.uiType === "xpath") {
+                    html = html + '<div class="fd-prop-input-div chzn-container">';
+                    html = html + '<input id="' + itemID + '" style="width:220px;"/>';
+                    // the button gets added later
+                    html = html + '</div>';
                 }
 
                 liStr = '<li id="' + groupName + '-' + propBlockIndex + '" class="fd-property">' +
                             html +
                             '</li>'
                 li = $(liStr);
-
+                if (p.uiType === "xpath") {
+                    // make and add the xpath button down here, since we want to work with 
+                    // the jquery objects
+                    xPathButton = $('<button />').addClass("xpath-edit-button").text("Edit").button();
+                    xPathButton.data("group", groupName).data("prop", propBlockIndex).data("inputControlID", itemID);
+                    xPathButton.click(function () {
+                        formdesigner.controller.displayXPathEditor({
+                            group:    $(this).data("group"),
+                            property: $(this).data("prop"),
+                            value:    $("#" + $(this).data("inputControlID")).val()
+                        });
+                    });
+                    
+                    $(li.children("div")[0]).append(xPathButton);
+                }
                 return li;
             }
 
@@ -538,7 +561,7 @@ formdesigner.ui = (function () {
 
                         //set event handler
 
-                        if(!pBlock.uiType || pBlock.uiType === 'input'){
+                        if(!pBlock.uiType || pBlock.uiType === 'input' || pBlock.uiType === 'xpath'){
                             input.keyup(function(e){
                                 var input = $(e.currentTarget),
                                         groupName = input.data('groupName'),
@@ -999,7 +1022,7 @@ formdesigner.ui = (function () {
             uiBlock.append(ul);
             uiBlock.show();
         }
-
+        
         function updateDisplay(){
             var mugTProps = mugType.properties,
             i = 0;
@@ -1007,8 +1030,8 @@ formdesigner.ui = (function () {
                         height:'900px'
                     },200);
 
-            $("#fd-question-properties").hide();
-
+            that.hideQuestionProperties();
+            
             $('#fd-props-bind').empty();
             $('#fd-props-data').empty();
             $('#fd-props-control').empty();
@@ -1070,7 +1093,7 @@ formdesigner.ui = (function () {
             }
             else {
                 // otherwise clear the Question Edit UI pane
-                $("#fd-question-properties").hide();
+                that.hideQuestionProperties();
                 // and the selected mug + other stuff in the UI  
                 formdesigner.controller.reloadUI();
                 
@@ -1106,8 +1129,9 @@ formdesigner.ui = (function () {
                 }
             },
             "dnd" : {
-                "drop_target" : false,
-                "drag_target" : false
+                "drop_finish" : function(data) {
+                    formdesigner.controller.handleTreeDrop(data.o, data.r);
+                }
             },
             "types": getJSTreeTypes(),
             "plugins" : [ "themes", "json_data", "ui", "crrm", "types", "dnd" ]
@@ -1593,7 +1617,7 @@ formdesigner.ui = (function () {
      * A simple toggle for flipping the type of UI tree visible to the user.
      */
     var showDataView = function () {
-        $('#fd-question-properties').hide();
+        that.hideQuestionProperties();
         $('#fd-data-tree-container').toggle();
         $('#fd-question-tree-container').toggle();
     }
@@ -1688,6 +1712,368 @@ formdesigner.ui = (function () {
         })
 
         
+    };
+    
+    that.hideQuestionProperties = function() {
+        $("#fd-question-properties").hide();
+    };
+    
+    that.hideTools = function() {
+        $("#fd-extra-tools").hide();
+    };
+    that.showTools = function() {
+        $("#fd-extra-tools").show();
+    };
+    
+    
+    that.showXPathEditor = function (options) {
+        /*
+         * All the logic to display the XPath Editor widget.
+         * 
+         */
+        var expTypes = xpathmodels.XPathExpressionTypeEnum;
+            
+        var editorPane = $('#fd-xpath-editor');
+        
+        var getExpressionInput = function () {
+            return $("#fd-xpath-editor-text");
+        }
+        var getValidationSummary = function () {
+            return $("#fd-xpath-validation-summary");
+        }
+        var getExpressionPane = function () {
+            return $("#fd-xpath-editor-expressions");
+        };
+        var getExpressionList = function () {
+            return getExpressionPane().children();
+        };
+        var getTopLevelJoinSelect = function () {
+            return $(editorPane.find("#top-level-join-select")[0]);
+        }
+        
+        var getExpressionFromSimpleMode = function () {
+            // basic
+            var pane = getExpressionPane();
+            var expressionParts = [];
+            var joinType = getTopLevelJoinSelect().val();
+            pane.children().each(function() {
+                var left = $($(this).find("input")[0]);
+                var right = $($(this).find("input")[1]);
+                var op = $($(this).find(".op-select")[0]);
+                // make sure we wrap the vals in parens in case they were necessary
+                // todo, construct manually, and validate individual parts.
+                var exprPath = "(" + left.val() + ") " + xpathmodels.expressionTypeEnumToXPathLiteral(op.val()) + " (" + right.val() + ")";
+                expressionParts.push(exprPath);                
+            });
+            var preparsed = expressionParts.join(" " + joinType + " ");
+            // try to parse and unparse to clean up the formatting
+            var results = validate(preparsed);
+            if (results[0] && results[1]) {
+                return results[1].toXPath();
+            }
+            return preparsed;
+        }
+        var getExpressionFromUI = function () {
+            if ($("#xpath-advanced-check").is(':checked')) {
+                // advanced
+                return getExpressionInput().val();
+            } else {
+                return getExpressionFromSimpleMode();
+	        }
+        };
+        
+        var validate = function (expr) {
+            if (expr) {
+	            try {
+	                var parsed = xpath.parse(expr);
+	                return [true, parsed];
+	            } catch (err) {
+	                return [false, err];
+	            }
+            }
+            return [true, null];
+        };
+        
+        var validateCurrent = function () {
+            return validate(getExpressionFromUI());
+        };
+        
+        var constructSelect = function (ops) {
+            var sel = $("<select />");
+            for (var i = 0; i < ops.length; i++) {
+                $("<option />").text(ops[i][0]).val(ops[i][1]).appendTo(sel);
+            }
+            return sel;
+        };
+            
+        
+        var tryAddExpression = function(parsedExpression, joiningOp) {
+            // trys to add an expression to the UI.
+            // if the expression is empty just appends a new div for the expression.
+            // if the expression exists, it will try to parse it into sub 
+            // expressions.
+            // returns the expression if it succeeds, otherwise false. 
+            if (parsedExpression) {
+                console.log("trying to add", parsedExpression.toString());
+            }
+            
+            var isJoiningOp = function (subElement) {
+                // something that joins expressions
+                return (subElement instanceof xpathmodels.XPathBoolExpr); 
+            };
+            
+            var isExpressionOp = function (subElement) {
+                // something that can be put into an expression
+                return (subElement instanceof xpathmodels.XPathCmpExpr ||
+                        subElement instanceof xpathmodels.XPathEqExpr); 
+            }
+            
+            var isSupportedBaseType = function (subelement) {
+                // something that can be stuck in a base string
+                // currently everything is supported.
+                return true;
+            };
+            
+            var createJoinSelector = function() {
+                var ops = [["and", expTypes.AND],
+                           ["or", expTypes.OR]];
+                return constructSelect(ops).addClass("join-select");
+            };
+            
+            var newExpressionUIElement = function (expOp) {
+                // create the UI for an individual expression
+                var createQuestionAcceptor = function() {
+	                var questionAcceptor = $("<input />").attr("placeholder", "Hint: drag a question here.");
+	                questionAcceptor.css("min-width", "200px")
+	                questionAcceptor.addClass("jstree-drop xpath-edit-node");
+	                return questionAcceptor;
+	            };
+	            var createOperationSelector = function() {
+	                var ops = [["is equal to", expTypes.EQ],
+	                           ["is not equal to", expTypes.NEQ],
+	                           ["is less than", expTypes.LT],
+	                           ["is less than or equal to", expTypes.LTE],
+	                           ["is greater than", expTypes.GT],
+	                           ["is greater than or equal to", expTypes.GTE]];
+	                     
+	                return constructSelect(ops).addClass("op-select");;
+	            };
+	            
+                var expression = $("<div />");
+            
+                var left = createQuestionAcceptor().addClass("left-question").appendTo(expression);
+	            var op = createOperationSelector().appendTo(expression);
+	            var right = createQuestionAcceptor().addClass("right-question").appendTo(expression);
+	            if (expOp) {
+	                // populate
+	                console.log("populating", expOp.toString());
+	                left.val(expOp.left.toXPath());
+	                op.val(xpathmodels.expressionTypeEnumToXPathLiteral(expOp.type));
+	                right.val(expOp.right.toXPath());
+	            }
+	            $("<div />").text("Delete").button().appendTo(expression).click(function() {
+	                var isFirst = expression.children(".join-select").length == 0;
+	                expression.remove();
+	                if (isFirst && getExpressionList().length > 0) {
+	                    // when removing the first expression, make sure to update the 
+	                    // next one in the UI to not have a join, if necessary.
+	                    $($(getExpressionList()[0]).children(".join-select")).remove();   
+	                }
+	            });
+	            return expression;
+	        };
+	        
+	        var failAndClear = function () {
+	           getExpressionPane().empty();
+	           console.log("fail", parsedExpression);
+	           return false;
+	        }
+	        
+	        var expressionPane = getExpressionPane();
+	        var expressionUIElem, leftUIElem, rightUIElem;
+            if (!parsedExpression) {
+                // just create a new expression
+	            expressionUIElem = newExpressionUIElement();
+	            // and if it's not the first additionally add the join selector
+	            if (getExpressionPane().children().length !== 0) {
+	                // No longer handled internally
+	                // TODO: clean up
+	                // createJoinSelector().prependTo(expressionUIElem);
+	            }
+	            return expressionUIElem.appendTo(expressionPane);
+	        } else {
+	            // we're creating for an existing expression, this is more complicated
+	            
+	            if (isExpressionOp(parsedExpression)) {
+                    // if it's an expression op stick it in.
+                    // no need to join, so this is good.
+                    return newExpressionUIElement(parsedExpression).appendTo(expressionPane);
+	            } else if (isJoiningOp(parsedExpression)) {
+	                // if it's a joining op the first element has to be 
+	                // an expression and the second must be a valid op
+	                // isExpressionOp(parsedExpression.right))
+	                if (joiningOp && parsedExpression.type != joiningOp) {
+	                   // we tried to add a joining op that was different from 
+	                   // what we were already working on. Fail.
+	                   return failAndClear();
+	                } 
+	                leftUIElem = tryAddExpression(parsedExpression.left, parsedExpression.type);
+	                rightUIElem = tryAddExpression(parsedExpression.right, parsedExpression.type);
+	                if (leftUIElem && rightUIElem) {
+                        leftUIElem.appendTo(expressionPane);
+                        rightUIElem.appendTo(expressionPane);
+                        getTopLevelJoinSelect().val(parsedExpression.type);
+	                } else {
+	                   // something recursively failed. Raise failure up.
+	                   return failAndClear();
+	                }
+	                return rightUIElem; // this is arbitrary / maybe wrong
+	            } else {
+	               // fail and return nothing.
+	               return failAndClear();
+	            }
+	        }
+	        
+	                    
+        };
+        
+        var setUIForExpression = function (xpathstring) {
+	        console.log("setting ui for", xpathstring);
+	        var results = validate(xpathstring);
+            var advancedFailover = function (text) {
+               alert("We couldn't interpret your expression to our format, so defaulting to advanced mode. " +
+                     "Please fix your expression before using the expression builder. To start over " + 
+                     "delete the contents of the advanced editor box and uncheck 'Advanced Mode'.");
+               showAdvancedMode(text);
+            }
+            if (results[0]) {
+               // it parsed correctly, try to load it.
+               var parsed = results[1];
+               // try to load the operation into the UI.
+               if (tryAddExpression(parsed)) {
+                   // it succeeded. nothing more to do
+               } else {
+                   // show advanced mode.
+                   advancedFailover(parsed.toXPath());
+               }
+	        } else {
+               advancedFailover(xpathstring);
+	        }
+        }
+        var updateXPathEditor = function(options) {
+            // set data properties for callbacks and such
+            editorPane.data("group", options.group).data("property", options.property);
+	        // clear validation text
+	        getValidationSummary().text("").removeClass("error").removeClass("success");
+	        
+	        // clear expression builder
+	        var expressionPane = getExpressionPane();
+	        expressionPane.empty();
+	        
+	        // update expression builder
+	        if (options.value) {
+	           showSimpleMode(options.value);
+	        } else {
+	           // nothing to do     
+	           showSimpleMode();
+	        }
+	        
+	        $("#fd-xpath-editor-text").val(options.value);
+	        
+        };
+        
+        // toggle simple/advanced mode
+        var showAdvancedMode = function (text) {
+            getExpressionInput().val(text);
+            getExpressionPane().empty();
+            $("#xpath-advanced-check").attr("checked", true);
+            $("#xpath-advanced").show();
+            $("#xpath-simple").hide();
+        };
+        var showSimpleMode = function (text) {
+            $("#xpath-simple").show();
+            $("#xpath-advanced").hide();
+            $("#xpath-advanced-check").attr("checked", false);
+            getExpressionPane().empty();
+            // this sometimes sends us back to advanced mode (if we couldn't parse)
+            // for now consider that fine.
+            if (text) {
+                setUIForExpression(text);
+            }
+        };
+        var initXPathEditor = function() {
+            
+            $("<label />").attr("for", "xpath-advanced-check").text("Advanced Mode?").appendTo(editorPane);
+            var advancedModeSelector = $("<input />").attr("type", "checkbox").attr("id", "xpath-advanced-check").appendTo(editorPane);
+            
+            advancedModeSelector.click( function(){
+                if ($(this).is(':checked')) {
+                    showAdvancedMode(getExpressionFromSimpleMode());
+                } else {
+                    showSimpleMode(getExpressionInput().val());
+                }
+            });
+            
+            // advanced UI
+            var advancedUI = $("<div />").attr("id", "xpath-advanced").appendTo(editorPane);
+            $("<label />").attr("for", "fd-xpath-editor-text").text("XPath String: ").appendTo(advancedUI);
+            $("<input />").attr("id", "fd-xpath-editor-text").attr("type", "text").appendTo(advancedUI).css("min-width", "400px");
+            
+            // simple UI
+            var simpleUI = $("<div />").attr("id", "xpath-simple").appendTo(editorPane);
+            
+            var topLevelJoinOps = [["True when ALL of the expressions are true.", expTypes.AND],
+                                ["True when ANY of the expressions are true.", expTypes.OR]]
+                    
+            constructSelect(topLevelJoinOps).appendTo(simpleUI).attr("id", "top-level-join-select");
+            $("<div />").attr("id", "fd-xpath-editor-expressions").appendTo(simpleUI);
+            var addExpressionButton = $("<button />").text("Add expression").button().appendTo(simpleUI);
+            addExpressionButton.click(function() {
+                tryAddExpression();
+            });
+            
+            // shared UI
+            var doneButton = $('<button />').text("Done").button().appendTo(editorPane);
+	        doneButton.click(function() {
+	           getExpressionInput().val(getExpressionFromUI());
+	           var results = validateCurrent();
+	           if (results[0]) {
+		           formdesigner.controller.doneXPathEditor({
+		               group:    $('#fd-xpath-editor').data("group"),
+		               property: $('#fd-xpath-editor').data("property"),
+		               value:    getExpressionFromUI()
+		           });
+	           } else {
+	               getValidationSummary().text("Validation Failed! Please fix all errors before leaving this page. " + results[1]).removeClass("success").addClass("error");
+	           }
+	        });
+	        var validateButton = $('<button />').text("Validate").button().appendTo(editorPane);
+            var validationSummary = $("<div />").attr("id", "fd-xpath-validation-summary").appendTo(editorPane);
+	        validateButton.click(function() {
+                var results = validateCurrent();
+                if (results[0]) {
+                    if (results[1]) {
+                        validationSummary.text("Validation Succeeded! " + results[1].toString());
+                    } else {
+                        validationSummary.text("Nothing to validate.");
+                    }
+                    validationSummary.removeClass("error").addClass("success");
+                } else {
+                    validationSummary.text("Validation Failed! " + results[1]).removeClass("success").addClass("error");
+                }
+	        });
+        }
+        
+        if (editorPane.children().length === 0) {
+            initXPathEditor();
+        } 
+        
+        updateXPathEditor(options);
+        editorPane.show();
+    };
+    
+    that.hideXPathEditor = function() {
+        $('#fd-xpath-editor').hide();
     }
 
     that.init = function(){
@@ -1771,7 +2157,6 @@ formdesigner.launch = function (opts) {
         formdesigner.controller.reloadUI();
         formdesigner.ui.hideConfirmDialog();
     }, 400);
-
 
 
 
