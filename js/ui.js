@@ -511,7 +511,7 @@ formdesigner.ui = (function () {
                     html = html + '<div class="fd-prop-input-div-checkbox"><input id="' + itemID + '" class="fd-property-checkbox" type="checkbox"></div>'
                 } else if (p.uiType === "xpath") {
                     html = html + '<div class="fd-prop-input-div chzn-container">';
-                    html = html + '<input id="' + itemID + '" style="width:200px;"/>';
+                    html = html + '<input id="' + itemID + '" style="width:220px;"/>';
                     // the button gets added later
                     html = html + '</div>';
                 }
@@ -533,7 +533,7 @@ formdesigner.ui = (function () {
                         });
                     });
                     
-                    li.append(xPathButton);
+                    $(li.children("div")[0]).append(xPathButton);
                 }
                 return li;
             }
@@ -561,7 +561,7 @@ formdesigner.ui = (function () {
 
                         //set event handler
 
-                        if(!pBlock.uiType || pBlock.uiType === 'input'){
+                        if(!pBlock.uiType || pBlock.uiType === 'input' || pBlock.uiType === 'xpath'){
                             input.keyup(function(e){
                                 var input = $(e.currentTarget),
                                         groupName = input.data('groupName'),
