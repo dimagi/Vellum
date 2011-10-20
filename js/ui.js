@@ -761,7 +761,6 @@ formdesigner.ui = (function () {
                 }
                 Itext.setValue(curIID, currentLang, textForm, newVal);
                 formdesigner.util.changeUITreeNodeLabel($ (this).data('ufid'), formdesigner.util.getMugDisplayName(mugType))
-
                 formdesigner.controller.form.fire({
                     type: 'form-property-changed',
                     propName: 'itext;'+textForm,
@@ -1553,7 +1552,8 @@ formdesigner.ui = (function () {
 
         $('#fd-form-prop-formName-input').val(formdesigner.controller.form.formName);
         $('#fd-form-prop-formID-input').val(formdesigner.controller.form.formID);
-
+        
+        set_event_listeners();
 
     };
 
@@ -1724,9 +1724,7 @@ formdesigner.ui = (function () {
     var set_event_listeners = function () {
         formdesigner.controller.form.on('form-property-changed', function() {
             formdesigner.controller.setFormChanged();
-        })
-
-        
+        });
     };
     
     that.hideQuestionProperties = function() {
@@ -2177,7 +2175,8 @@ formdesigner.ui = (function () {
         init_modal_dialogs();
 
         init_misc();
-
+        set_event_listeners(); 
+        
         setup_fancybox();
     }
 
