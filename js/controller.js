@@ -26,6 +26,10 @@ formdesigner.controller = (function () {
            that.setFormChanged(); //mark the form as 'changed'
         });
 
+        that.on('question-removed', function () {
+            that.setFormChanged();
+        });
+
     };
     that.initFormDesigner = initFormDesigner;
 
@@ -891,9 +895,14 @@ formdesigner.controller = (function () {
     that.removeMugTypeByUFID = removeMugTypeByUFID;
 
     var removeMugTypeFromForm = function (mugType) {
+        var removeEvent = {};
         formdesigner.ui.removeMugTypeFromUITree(mugType);
         that.form.dataTree.removeMugType(mugType);
         that.form.controlTree.removeMugType(mugType);
+
+        removeEvent.type = "question-removed";
+        removeEvent.mugType = mugType;
+        that.fire(removeEvent);
         formdesigner.ui.forceUpdateUI();
     }
     that.removeMugTypeFromForm = removeMugTypeFromForm;

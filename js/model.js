@@ -1186,11 +1186,11 @@ formdesigner.model = function () {
         mType.typeName = "Multi Select Question";
         allowedChildren = ['item'];
         mType.controlNodeAllowedChildren = allowedChildren;
+        delete mType.properties.bindElement.dataType;
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
         mType.mug.properties.controlElement.properties.name = "Multi-Select";
         mType.mug.properties.controlElement.properties.tagName = "select";
-        mType.mug.properties.bindElement.properties.dataType = "xsd:select";
         return mType;
     };
 
@@ -1200,7 +1200,6 @@ formdesigner.model = function () {
         mType.typeName = "Single Select Question";
         mType.mug.properties.controlElement.properties.name = 'Single-Select';
         mType.mug.properties.controlElement.properties.tagName = "select1";
-        mType.mug.properties.bindElement.properties.dataType = "select1";
         return mType;
     }
 
