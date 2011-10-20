@@ -868,7 +868,21 @@ formdesigner.util = (function(){
 
         return disp;
     }
-
+    
+    
+    that.mugToAutoCompleteUIElement = function (mug) {
+        return {id: formdesigner.controller.form.dataTree.getAbsolutePath(mug),
+                uid: mug.ufid,
+                name: formdesigner.util.getDefaultDisplayItext(mug.mug) };
+    }
+    
+    that.selectItemToAutoCompleteUIElement = function (mug) {
+        return {id: '"' + mug.mug.properties.controlElement.properties.defaultValue + '"',
+                uid: mug.ufid,
+                name: formdesigner.util.getDefaultDisplayItext(mug.mug) };
+    }
+        
+        
     return that;
 
 }());

@@ -107,9 +107,26 @@ formdesigner.controller = (function () {
 
         return finalList; //give it all back
 
-    }
+    };
     that.getListOfItextIDsFromMugs = getListOfItextIDsFromMugs;
 
+    var getMugByPath = function (path) {
+        // TODO: this is likely crazy slow if the form is big.
+        var candidates = that.getListMugTypesNotItems();
+        for (var i = 0; i < candidates.length; i++) {
+            if (that.form.dataTree.getAbsolutePath(candidates[i]) == path) {
+                return candidates[i];
+            }
+        }
+    };
+    that.getMugByPath = getMugByPath;
+    
+    var getChildren = function (mug) {
+        var children = that.form.controlTree.getNodeFromMugType(mug).getChildren();
+        return children.map(function (item) { return item.getValue();});
+    }
+    that.getChildren = getChildren;
+    
     /**
      * Walks through both internal trees (data and control) and grabs
      * all mugTypes that are not (1)Select Items.  Returns
@@ -1657,10 +1674,13 @@ formdesigner.controller = (function () {
     // tree drag and drop stuff, used by xpath
     var handleTreeDrop = function(source, target) {
         var target = $(target), sourceUid = $(source).attr("id");
-        if (target.hasClass("xpath-edit-node")) {
+        // from the target, find the actual input
+        var actualTarget = $($(target.parents(".expression-part")[0]).find(".xpath-edit-node")[0]);
+        if (actualTarget) {
             var mug = that.form.getMugTypeByUFID(sourceUid);
-            var path = formdesigner.controller.form.dataTree.getAbsolutePath(mug);
-            target.val(path);                
+            // clear and add it
+            actualTarget.tokenInput("clear");
+            actualTarget.tokenInput("add", formdesigner.util.mugToAutoCompleteUIElement(mug));
         }
     };
     that.handleTreeDrop = handleTreeDrop;
