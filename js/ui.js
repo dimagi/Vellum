@@ -1927,8 +1927,8 @@ formdesigner.ui = (function () {
                             right = createQuestionInGroup("right");
                             var children = formdesigner.controller.getChildren(mug);
                             var autoCompleteChildren = children.map(function (item) { 
-                                return formdesigner.util.selectItemToAutoCompleteUIElement(item);
-                            }); 
+                                return formdesigner.util.mugToAutoCompleteUIElement(item);
+                            });
                             var selectItemOptions = {
                                    theme: "facebook", 
                                    tokenLimit: 1, 
@@ -1938,6 +1938,7 @@ formdesigner.ui = (function () {
                                    noResultsText: "No matching options found."
                             };
                             right.tokenInput(autoCompleteChildren, selectItemOptions);
+                            expression.find(".token-input-list-facebook").addClass("jstree-drop");
                         }
                     }    
                 }
