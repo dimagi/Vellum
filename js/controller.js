@@ -8,6 +8,7 @@ formdesigner.controller = (function () {
         curSelMugType = null,
         curSelUfid = null,
         DEBUG_MODE = false,
+        FORM_SAVED = true,
 
     initFormDesigner = function () {
         formdesigner.util.question_counter = 1;
@@ -20,8 +21,31 @@ formdesigner.controller = (function () {
         formdesigner.model.init();
         formdesigner.ui.init();
         formdesigner.currentItextDisplayLanguage = formdesigner.model.Itext.getDefaultLanguage();
+
+        that.on('question-creation', function () {
+           that.setFormChanged(); //mark the form as 'changed'
+        });
+
     };
     that.initFormDesigner = initFormDesigner;
+
+
+    that.setFormSaved = function () {
+        FORM_SAVED = true;
+        formdesigner.ui.setSaveButtonFormSaved();
+    }
+
+    that.setFormChanged = function () {
+        FORM_SAVED = false;
+
+        //update button disabled state.
+        formdesigner.ui.setSaveButtonFormUnsaved();
+        
+    }
+
+    that.isFormSaved = function () {
+        return FORM_SAVED;
+    }
     
     var setForm = that.setForm = function (aForm) {
         that.form = aForm;
@@ -811,6 +835,7 @@ formdesigner.controller = (function () {
 
     var loadXForm = function (formString) {
         $.fancybox.showActivity();
+        that.setFormSaved(); //form is being loaded for the first time so by default it is 'saved'
         window.setTimeout(function () { //wait for the spinner to come up.
             formdesigner.fire({
                     type: 'load-form-start',
@@ -1581,8 +1606,8 @@ formdesigner.controller = (function () {
 
     var sendXForm = function (url) {
         function successFunc () {
-            formdesigner.ui.FormSaved = true;
-            formdesigner.ui.hideConfirmDialog;
+            that.setFormSaved();
+            formdesigner.ui.hideConfirmDialog();
         }
         if (!url) {
             url = formdesigner.saveUrl;

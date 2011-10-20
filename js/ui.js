@@ -154,6 +154,20 @@ formdesigner.ui = (function () {
     }
     that.buttons = buttons;
 
+    //Sets a visual indicator that the form needs saving on the 'Save Form To Server' Button
+    that.setSaveButtonFormUnsaved = function () {
+        var saveBut = $('#fd-save-button');
+        saveBut.button('enable');
+        saveBut.button('option', 'icons', {primary:'ui-icon-alert'});
+    }
+
+    //Sets a visual indicator that the form IS saved (on 'Save Form To Server' Button)
+    that.setSaveButtonFormSaved = function () {
+        var saveBut = $('#fd-save-button');
+        saveBut.button('disable');
+        saveBut.button('option', 'icons', {primary:'ui-icon-check'});
+    }
+
     function getDataJSTreeTypes() {
         var jquery_icon_url = formdesigner.iconUrl,
             types =  {
@@ -983,7 +997,7 @@ formdesigner.ui = (function () {
             function updateSaveState () {
                 var mug = mugType.mug;
                 mug.on('property-changed', function (e) {
-                    formdesigner.ui.FormSaved = false;
+                    formdesigner.controller.setFormChanged();
                 });
             }
 
@@ -1701,7 +1715,7 @@ formdesigner.ui = (function () {
 
         //set prompt when navigating away from the FD
         $(window).bind('beforeunload', function () {
-            if(!formdesigner.ui.FormSaved){
+            if(!formdesigner.controller.isFormSaved()){
                 return 'Are you sure you want to exit? All unsaved changes will be lost!';
             }
         })
@@ -1709,7 +1723,7 @@ formdesigner.ui = (function () {
 
     var set_event_listeners = function () {
         formdesigner.controller.form.on('form-property-changed', function() {
-            formdesigner.ui.FormSaved = false;
+            formdesigner.controller.setFormChanged();
         })
 
         
