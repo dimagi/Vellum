@@ -776,7 +776,7 @@ formdesigner.util = (function(){
         });
 
         formdesigner.controller.form.on('form-property-changed', function (e) {
-            var MT = formdesigner.controller.curSelMugType;
+            var MT = formdesigner.controller.getCurrentlySelectedMugType();
             formdesigner.ui.showVisualValidation(MT);
             formdesigner.ui.setTreeValidationIcons();
         })

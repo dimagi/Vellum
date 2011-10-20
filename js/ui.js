@@ -1171,7 +1171,7 @@ formdesigner.ui = (function () {
             }
 
         }).bind("deselect_all.jstree", function (e, data) {
-            formdesigner.controller.curSelMugType = null;
+            formdesigner.controller.setCurrentlySelectedMugType(null);
             formdesigner.controller.curSelUfid = null;
         });
         questionTree = $("#fd-question-tree");
@@ -1215,8 +1215,8 @@ formdesigner.ui = (function () {
             position = data.rslt.p;
             controller.moveMugType(mugType, position, refMugType, 'data');
         }).bind("deselect_all.jstree", function (e, data) {
-            formdesigner.controller.curSelMugType = null;
-            formdesigner.controller.curSelUfid = null;
+//            formdesigner.controller.setCurrentlySelectedMugType(null);
+//            formdesigner.controller.curSelUfid = null;
         });
         dataTree = $("#fd-data-tree");
     }

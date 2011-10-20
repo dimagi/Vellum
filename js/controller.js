@@ -6,21 +6,22 @@ formdesigner.controller = (function () {
     "use strict";
     var that = {},
         curSelMugType = null,
-        curSelUfid = null,
         DEBUG_MODE = false,
         FORM_SAVED = true,
 
     initFormDesigner = function () {
         formdesigner.util.question_counter = 1;
-        curSelMugType = null;
-        curSelUfid = null;
+
+        that.curSelUfid = null;
         // ui.questionTree.empty();
         // ui.dataTree.empty();
         $('#fd-data-tree').empty();
 
         formdesigner.model.init();
         formdesigner.ui.init();
-        formdesigner.currentItextDisplayLanguage = formdesigner.model.Itext.getDefaultLanguage();
+        that.setCurrentlySelectedMugType(null);
+        
+        formdesigner.currentItextDisplayLanguage = formdesigner.opts.langs ? formdesigner.opts.langs[0] : formdesigner.model.Itext.getDefaultLanguage();
 
         that.on('question-creation', function () {
            that.setFormChanged(); //mark the form as 'changed'
@@ -30,8 +31,42 @@ formdesigner.controller = (function () {
             that.setFormChanged();
         });
 
+        /**
+         * Remove itext of question that was just removed.
+         */
+        that.on('question-removed', function (e) {
+            var mt;
+            mt = e.mugType;
+            that.removeMugTypeItext(mt);
+        })
+
     };
     that.initFormDesigner = initFormDesigner;
+
+    /**
+     * Removes all Itext associated with the specified
+     * MugType from the Form (the Itext object).s
+     * @param mt
+     */
+    that.removeMugTypeItext = function (mt) {
+        var iID, hID, Itext;
+            Itext = formdesigner.model.Itext;
+
+            if (!mt.properties.controlElement) {
+                return;
+            }
+
+            iID = mt.mug.properties.controlElement.properties.labelItextID;
+            hID = mt.mug.properties.controlElement.properties.hintItextID;
+
+            if (iID) {
+               Itext.removeItext(iID);
+            }
+
+            if(hID) {
+                Itext.removeItext(hID);
+            }
+    }
 
 
     that.setFormSaved = function () {
@@ -56,11 +91,11 @@ formdesigner.controller = (function () {
     };
 
     var getMTFromFormByUFID = function (ufid) {
-        curSelMugType = that.form.dataTree.getMugTypeFromUFID(ufid);
-        if (!curSelMugType) { //check controlTree in case it's there.
-            curSelMugType = that.form.controlTree.getMugTypeFromUFID(ufid);
+        var curMT = that.form.dataTree.getMugTypeFromUFID(ufid);
+        if (!curMT) { //check controlTree in case it's there.
+            curMT = that.form.controlTree.getMugTypeFromUFID(ufid);
         }
-        return curSelMugType;
+        return curMT;
     };
     that.getMTFromFormByUFID = getMTFromFormByUFID;
 
@@ -182,8 +217,8 @@ formdesigner.controller = (function () {
      * @param ufid - UFID of the selected MugType
      */
     var setCurrentlySelectedMugType = function (ufid) {
-        this.curSelUfid = ufid;
-        this.curSelMugType = getMTFromFormByUFID(ufid);
+        that.curSelUfid = ufid;
+        curSelMugType = getMTFromFormByUFID(ufid);
     };
     that.setCurrentlySelectedMugType = setCurrentlySelectedMugType;
 
@@ -404,7 +439,7 @@ formdesigner.controller = (function () {
             insertPosition,
             oldSelected;
 
-        oldSelected = that.curSelMugType;
+        oldSelected = that.getCurrentlySelectedMugType();
         if (isGroupOrRepeat) {
             objectData.state = 'open'; //should new node be open or closed?, omit for leaf
         }
@@ -420,7 +455,7 @@ formdesigner.controller = (function () {
             "id" : mugType.ufid
         };
         if (mug.properties.controlElement) {
-            insertPosition = formdesigner.util.getRelativeInsertPosition(that.curSelMugType,mugType);
+            insertPosition = formdesigner.util.getRelativeInsertPosition(that.getCurrentlySelectedMugType(),mugType);
         } else {
             formdesigner.ui.getQuestionJSTree().jstree("deselect_all");
             insertPosition = "last";
@@ -469,10 +504,10 @@ formdesigner.controller = (function () {
 //        insertPosition = formdesigner.util.getRelativeInsertPosition(curSelMugType,mugType);
         insertPosition = "into"; //data nodes can always have children.
 
-        if (curSelMugType) {
-            curSelMugElData = $('#' + curSelMugType.ufid + '_data') //get corresponding Data Element
+        if (that.getCurrentlySelectedMugType()) {
+            curSelMugElData = $('#' + that.getCurrentlySelectedMugType().ufid + '_data') //get corresponding Data Element
             oldSelectedMugEl = curSelMugElData;
-            curSelMugElQuestion = ('#' + curSelMugType.ufid); //remember what is selected in the question tree.
+            curSelMugElQuestion = ('#' + that.getCurrentlySelectedMugType().ufid); //remember what is selected in the question tree.
             if (curSelMugElData.length === 0) {
                 var curParent = that.form.controlTree.getParentMugType()
                 if(curParent) {
@@ -577,8 +612,8 @@ formdesigner.controller = (function () {
         formdesigner.util.setStandardMugEventResponses(mug);
 
 
-        var oldSelected = that.curSelMugType;
-        var isDataNodeSelected = that.curSelMugType && !that.curSelMugType.properties.controlElement;
+        var oldSelected = that.getCurrentlySelectedMugType();
+        var isDataNodeSelected = that.getCurrentlySelectedMugType() && !that.getCurrentlySelectedMugType().properties.controlElement;
         if (isDataNodeSelected) {
             //select the lowest not-data-node and continue
             var tmpSelector = formdesigner.ui.getQuestionJSTree().find('li[rel!="dataNode"]');
@@ -587,11 +622,11 @@ formdesigner.controller = (function () {
                 formdesigner.ui.getQuestionJSTree().jstree("select_node", newSelectEl, false);
             } else {
                 formdesigner.ui.getQuestionJSTree().jstree("deselect_all");
-                that.curSelMugType = null;
+                that.setCurrentlySelectedMugType(null);
                 that.curSelUfid = null;
             }
         }
-        insertMugTypeIntoForm(that.curSelMugType,mugType);
+        insertMugTypeIntoForm(that.getCurrentlySelectedMugType(),mugType);
         createQuestionInUITree(mugType);
         createQuestionInDataTree(mugType);
         createQuestionEvent.type = "question-creation";
@@ -1587,7 +1622,7 @@ formdesigner.controller = (function () {
     };
 
     var getCurrentlySelectedMug = function () {
-        return curSelMugType.mug;
+        return that.getCurrentlySelectedMugType().mug;
     };
     that.getCurrentlySelectedMug = getCurrentlySelectedMug;
 
@@ -1664,8 +1699,8 @@ formdesigner.controller = (function () {
     function resetControllerInternal () {
             formdesigner.util.question_counter = 1;
             //reset Options passed in to the initializer
-            curSelMugType = null;
-            curSelUfid = null;
+            that.setCurrentlySelectedMugType(null);
+            that.curSelUfid = null;
     }
 
     /**
