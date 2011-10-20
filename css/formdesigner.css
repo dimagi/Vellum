@@ -407,6 +407,31 @@ body{
     text-align: center;
 }
 
+#xpath-edit-head {
+    border: 1px solid #D3D3D3;
+    font-size: 17px;
+    font-weight: bold;
+    height: 24px;
+    padding: 0;
+    position: absolute;
+    text-align: center;
+    width: 710px;
+    z-index: 3;
+    line-height:25px;
+}
+
 #fd-xpath-editor {
+    border: 1px solid gray;
+    float: left;
+    margin-top: 5px;
+    margin-left: 5px;
+    height:900px;
+    width: 713px;
+    overflow-x:hidden;
     display: none;
+}
+
+#xpath-edit-inner {
+    padding-top: 25px;
+    margin: 5px;
 }

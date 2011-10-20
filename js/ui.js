@@ -2087,9 +2087,11 @@ formdesigner.ui = (function () {
             }
         };
         var initXPathEditor = function() {
-            
-            $("<label />").attr("for", "xpath-advanced-check").text("Advanced Mode?").appendTo(editorPane);
-            var advancedModeSelector = $("<input />").attr("type", "checkbox").attr("id", "xpath-advanced-check").appendTo(editorPane);
+            $("<div />").attr("id", "xpath-edit-head").addClass("ui-widget-header").text("Expression Editor").appendTo(editorPane);
+            var mainPane = $("<div />").attr("id", "xpath-edit-inner").appendTo(editorPane);
+            $("<label />").attr("for", "xpath-advanced-check").text("Advanced Mode?").appendTo(mainPane);
+            var advancedModeSelector = $("<input />").attr("type", "checkbox").attr("id", "xpath-advanced-check").appendTo(mainPane);
+            advancedModeSelector.css("clear", "both");
             
             advancedModeSelector.click( function(){
                 if ($(this).is(':checked')) {
@@ -2100,12 +2102,12 @@ formdesigner.ui = (function () {
             });
             
             // advanced UI
-            var advancedUI = $("<div />").attr("id", "xpath-advanced").appendTo(editorPane);
+            var advancedUI = $("<div />").attr("id", "xpath-advanced").appendTo(mainPane);
             $("<label />").attr("for", "fd-xpath-editor-text").text("XPath String: ").appendTo(advancedUI);
             $("<input />").attr("id", "fd-xpath-editor-text").attr("type", "text").appendTo(advancedUI).css("min-width", "400px");
             
             // simple UI
-            var simpleUI = $("<div />").attr("id", "xpath-simple").appendTo(editorPane);
+            var simpleUI = $("<div />").attr("id", "xpath-simple").appendTo(mainPane);
             
             var topLevelJoinOps = [["True when ALL of the expressions are true.", expTypes.AND],
                                 ["True when ANY of the expressions are true.", expTypes.OR]]
@@ -2118,7 +2120,7 @@ formdesigner.ui = (function () {
             });
             
             // shared UI
-            var doneButton = $('<button />').text("Done").button().appendTo(editorPane);
+            var doneButton = $('<button />').text("Done").button().appendTo(mainPane);
 	        doneButton.click(function() {
 	           getExpressionInput().val(getExpressionFromUI());
 	           var results = validateCurrent();
@@ -2132,8 +2134,8 @@ formdesigner.ui = (function () {
 	               getValidationSummary().text("Validation Failed! Please fix all errors before leaving this page. " + results[1]).removeClass("success").addClass("error");
 	           }
 	        });
-	        var validateButton = $('<button />').text("Validate").button().appendTo(editorPane);
-            var validationSummary = $("<div />").attr("id", "fd-xpath-validation-summary").appendTo(editorPane);
+	        var validateButton = $('<button />').text("Validate").button().appendTo(mainPane);
+            var validationSummary = $("<div />").attr("id", "fd-xpath-validation-summary").appendTo(mainPane);
 	        validateButton.click(function() {
                 var results = validateCurrent();
                 if (results[0]) {
