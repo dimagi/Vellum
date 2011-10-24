@@ -1791,6 +1791,11 @@ formdesigner.model = function () {
         }
         that.isTreeValid = isTreeValid;
 
+
+        that.getRootNode = function () {
+            return rootNode;
+        }
+
         return that;
     };
     that.Tree = Tree;

@@ -149,16 +149,64 @@ formdesigner.controller = (function () {
     };
     that.getListOfItextIDsFromMugs = getListOfItextIDsFromMugs;
 
-    var getMugByPath = function (path) {
-        // TODO: this is likely crazy slow if the form is big.
-        var candidates = that.getListMugTypesNotItems();
-        for (var i = 0; i < candidates.length; i++) {
-            if (that.form.dataTree.getAbsolutePath(candidates[i]) == path) {
-                return candidates[i];
-            }
+    /**
+     * Returns a MugType NOT a Mug!
+     * @param path - String of path you want
+     * @param tree - [OPTIONAL] Type of tree, 'control' or 'data'.  Defaults to 'data'
+     */
+    var getMugTypeByPath = function (path, tree) {
+        var recFunc, tokens, targetMT, rootNode;
+        if (!tree) {
+            tree = 'data';
         }
+
+        if(!path) { //no path specified
+            return null;
+        }
+
+
+        recFunc = function (node, recTokens) {
+            var currentToken, rest, children, i;
+            if (recTokens.length === 0) {
+                return node.getValue(); //found the target. It is this node.
+            }
+            currentToken = recTokens[0];
+            rest = recTokens.slice(1);
+            children = node.getChildren();
+
+            for (i in children) {
+                if(children.hasOwnProperty(i)) {
+                    if (children[i].getID() === currentToken) {
+                        return recFunc(children[i], rest);
+                    }
+                }
+            }
+
+            //if we got here that means 'path not found'
+            return null;
+
+        };
+
+        tokens = path.split('/').slice(1);
+        if (tokens.length === 0) {
+            return null; //empty path string === 'path not found'
+        }
+
+        if (tree === 'data') {
+            rootNode = that.form.dataTree.getRootNode();
+
+        } else if (tree === 'control') {
+            rootNode = that.form.controlTree.getRootNode();
+        }
+
+        if(rootNode.getID() !== tokens[0]) {
+            return null; //path not found
+        }
+
+        targetMT = recFunc(rootNode,tokens.slice(1));
+        return targetMT;
     };
-    that.getMugByPath = getMugByPath;
+    that.getMugByPath = getMugTypeByPath;
     
     var getChildren = function (mug) {
         var children = that.form.controlTree.getNodeFromMugType(mug).getChildren();
@@ -984,13 +1032,13 @@ formdesigner.controller = (function () {
 
         function parseDataTree (dataEl) {
             function parseDataElement (el) {
-                var nodeID = el.nodeName, nodeVal,
-                    mType = formdesigner.util.getNewMugType(formdesigner.model.mugTypes.dataOnly),
-                    parentNodeName = $(el).parent()[0].nodeName,
-                    rootNodeName = $(dataEl)[0].nodeName,
-                    dataTree = that.form.dataTree,
-                    mug, parentMugType,
-                        extraXMLNS, keyAttr;
+                var nodeID, nodeVal, mug, parentMugType, extraXMLNS, keyAttr,mType,parentNodeName,rootNodeName,dataTree;
+                
+                nodeID = el.nodeName;
+                mType = formdesigner.util.getNewMugType(formdesigner.model.mugTypes.dataOnly);
+                parentNodeName = $(el).parent()[0].nodeName;
+                rootNodeName = $(dataEl)[0].nodeName;
+                dataTree = that.form.dataTree;
 
                 if($(el).children().length === 0) {
                     nodeVal = $(el).text();
@@ -1022,12 +1070,13 @@ formdesigner.controller = (function () {
 
                 dataTree.insertMugType(mType,'into',parentMugType);
             }
-            var root = $(dataEl), uuid, uiVersion, formName, formVersion, jrm,
-                recFunc = function () {
+            var root = $(dataEl), recFunc;
+
+            recFunc = function () {
                     parseDataElement(this);
                     $(this).children().each(recFunc);
 
-                };
+            };
 
             if(root.children().length === 0) {
                 pError('error', 'Data block has no children elements! Please make sure your form is a valid JavaRosa XForm and try again!');
