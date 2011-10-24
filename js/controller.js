@@ -1164,7 +1164,7 @@ formdesigner.controller = (function () {
                 bindElement = new formdesigner.model.BindElement(attrs);
                 mug.properties.bindElement = bindElement;
 
-                oldMT = that.form.getMugTypeByIDFromTree(nodeID, 'data')[0];
+                oldMT = that.getMugByPath(path,'data');
                 if(!oldMT && attrs.nodeset) {
                     oldMT = that.form.getMugTypeByIDFromTree(
                                                 formdesigner.util.getNodeIDFromPath(attrs.nodeset),
