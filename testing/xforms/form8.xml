@@ -14,12 +14,6 @@
 					<text id="question1">
 						<value>question1 label</value>
 					</text>
-					<text id="group1">
-						<value>group1 label</value>
-					</text>
-					<text id="question3">
-						<value>question2 label</value>
-					</text>
 				</translation>
 			</itext>
 		</model>

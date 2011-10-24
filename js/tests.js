@@ -1277,7 +1277,7 @@ start();
         cEl = mugProps.controlElement.properties;
         iID = cEl.labelItextID;
         Itext.setValue(iID,Itext.getDefaultLanguage(),'default','group1 label'); //set itext value for group
-        $('#dataElement-nodeID-input').val('group1').keyup(); //change the groups nodeIDs to something more reasonable
+        $('#dataElement-nodeID-input').val('group1').keyup(); //change the group's nodeIDs to something more reasonable
 
         //add another text question
         addQuestionThroughUI("Text Question");
@@ -1304,7 +1304,7 @@ start();
         actual = beautifyXml(actual);
         getFormFromServerAndPlaceInBuffer('form8.xml');
         var expected = beautifyXml(testXformBuffer['form8.xml']);
-        equal(expected,actual);
+        equal(actual,expected);
         start();
 
     })

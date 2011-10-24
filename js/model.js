@@ -3055,6 +3055,27 @@ formdesigner.model = function () {
         }
         that.removeCruftyItext = removeCruftyItext;
 
+
+        /**
+         * Remove all Itext associated with the given mug
+         * @param mug
+         */
+        that.removeMugItext = function (mug) {
+            var labelItext, hintItext;
+            if (mug.properties.controlElement) {
+                //attempt to remove Itext
+                labelItext = mug.properties.controlElement.properties.labelItextID;
+                hintItext = mug.properties.controlElement.properties.hintItextID;
+                if (labelItext) {
+                    that.removeItext(labelItext);
+                }
+                if (hintItext) {
+                    that.removeItext(hintItext);
+                }
+            }
+        };
+
+
         (function init(initLang){
             that.addLanguage(initLang);
             that.setDefaultLanguage(initLang);

@@ -978,8 +978,19 @@ formdesigner.controller = (function () {
     that.removeMugTypeByUFID = removeMugTypeByUFID;
 
     var removeMugTypeFromForm = function (mugType) {
-        var removeEvent = {};
+        var removeEvent = {}, Itext, children, i;
+        Itext = formdesigner.model.Itext;
         formdesigner.ui.removeMugTypeFromUITree(mugType);
+
+        children = formdesigner.controller.form.controlTree.getNodeFromMugType(mugType).getChildrenMugTypes();
+        for (i in children) {
+            if(children.hasOwnProperty(i)) {
+                removeMugTypeFromForm(children[i]); //recursively remove MugTypes.
+            }
+        }
+
+        Itext.removeMugItext(mugType.mug);
+
         that.form.dataTree.removeMugType(mugType);
         that.form.controlTree.removeMugType(mugType);
 
