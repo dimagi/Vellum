@@ -886,11 +886,11 @@ formdesigner.util = (function(){
         if (mug.typeName === "Select Item") {
             return {id: '"' + mug.mug.properties.controlElement.properties.defaultValue + '"',
                     uid: mug.ufid,
-                    name: formdesigner.util.getDefaultDisplayItext(mug.mug) };
+                    name: that.getMugDisplayName(mug) };
         } else {
 	        return {id: formdesigner.controller.form.dataTree.getAbsolutePath(mug),
 	                uid: mug.ufid,
-	                name: formdesigner.util.getDefaultDisplayItext(mug.mug) };
+	                name: that.getMugDisplayName(mug) };
        }
     }
         
