@@ -2124,7 +2124,7 @@ formdesigner.ui = (function () {
             // advanced UI
             var advancedUI = $("<div />").attr("id", "xpath-advanced").appendTo(mainPane);
             $("<label />").attr("for", "fd-xpath-editor-text").text("XPath String: ").appendTo(advancedUI);
-            $("<input />").attr("id", "fd-xpath-editor-text").attr("type", "text").appendTo(advancedUI).css("min-width", "400px");
+            $("<textarea />").attr("id", "fd-xpath-editor-text").attr("rows", "2").attr("cols", "50").appendTo(advancedUI);
             
             // simple UI
             var simpleUI = $("<div />").attr("id", "xpath-simple").appendTo(mainPane);
