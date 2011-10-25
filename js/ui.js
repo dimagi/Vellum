@@ -589,10 +589,22 @@ formdesigner.ui = (function () {
                                     // sanitize nodeID;
                                     input.val(input.val().replace(/\s/g,'_'));
                                 }
+
+                                //short circuit the mug property changing process for when the
+                                //nodeID is changed to empty-string (i.e. when the user backspaces
+                                //the whole value).  This allows us to keep a reference to everything
+                                //and rename smoothly to the new value the user will ultimately enter.
+                                if (input.val() === "" && (propName === 'nodeID' || propName === 'labelItextID' || propName === 'hintItextID')) {
+                                    return;
+                                }
+
                                 if (propName === 'labelItextID' || propName === 'hintItextID') {
                                     oldItextID = curMug.properties.controlElement.properties[propName];
                                     formdesigner.model.Itext.renameItextID(oldItextID,input.val());
                                 }
+
+
+
                                 formdesigner.controller.setMugPropertyValue(curMug,groupName,propName,input.val(),curMT);
                             });
                         }else if(pBlock.uiType === 'select'){
@@ -748,7 +760,7 @@ formdesigner.ui = (function () {
 
             input.data('ufid', mugType.ufid);
             input.data('textform', textForm);
-            input.children(':input').data('ufid', mugType.ufid).data('textform', textForm);;
+            input.children(':input').data('ufid', mugType.ufid).data('textform', textForm);
             input.find(':input').keyup ( function (e) {
                 var oldVal, newVal, mugType, curIID;
                 oldVal = Itext.getValue(iID,currentLang, textForm);
@@ -955,6 +967,16 @@ formdesigner.ui = (function () {
                                 propName = otherInput.data('propName'),
                                 curMug = formdesigner.controller.getCurrentlySelectedMug(),
                                 curMugType = formdesigner.controller.getCurrentlySelectedMugType();
+
+                    //Short circuit the process of syncing the two IDs
+                    //when the text box is blank (i.e. a user backspaced away all chars).
+                    //This prevents us from getting into a hairy situation
+                    //with ItextIDs being blank/getting unsynchronized with
+                    //the data stored in Itext.
+                    if (otherInput.val() === "") {
+                        return;
+                    }
+
                     formdesigner.controller.setMugPropertyValue(curMug,groupName,propName,otherInput.val(), curMugType);
                     //update ItextID stuff
                     if($('#controlElement-labelItextID-input').length > 0) { //does it have itextID?
