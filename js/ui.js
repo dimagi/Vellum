@@ -1235,6 +1235,9 @@ formdesigner.ui = (function () {
             refMugType = controller.form.dataTree.getMugTypeFromUFID($(data.rslt.r).attr('id').replace('_data',''));
             position = data.rslt.p;
             controller.moveMugType(mugType, position, refMugType, 'data');
+
+
+
         }).bind("deselect_all.jstree", function (e, data) {
 //            formdesigner.controller.setCurrentlySelectedMugType(null);
 //            formdesigner.controller.curSelUfid = null;
@@ -1574,8 +1577,6 @@ formdesigner.ui = (function () {
 
         $('#fd-form-prop-formName-input').val(formdesigner.controller.form.formName);
         $('#fd-form-prop-formID-input').val(formdesigner.controller.form.formID);
-        
-        set_event_listeners();
 
     };
 
@@ -1744,9 +1745,7 @@ formdesigner.ui = (function () {
     };
 
     var set_event_listeners = function () {
-        formdesigner.controller.form.on('form-property-changed', function() {
-            formdesigner.controller.setFormChanged();
-        });
+
     };
     
     that.hideQuestionProperties = function() {

@@ -88,6 +88,7 @@ formdesigner.controller = (function () {
     
     var setForm = that.setForm = function (aForm) {
         that.form = aForm;
+        formdesigner.util.setStandardFormEventResponses(that.form);
     };
 
     var getMTFromFormByUFID = function (ufid) {
@@ -1642,6 +1643,13 @@ formdesigner.controller = (function () {
         } else {
            throw 'Invalid/Unrecognized TreeType specified in moveMugType: ' + treeType;
         }
+
+        //fire an form-property-changed event to sync up with the 'save to server' button disabled state
+        formdesigner.controller.form.fire({
+            type: 'form-property-changed'
+        });
+
+
     };
     that.moveMugType = moveMugType;
     /**

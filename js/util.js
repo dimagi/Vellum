@@ -775,11 +775,23 @@ formdesigner.util = (function(){
             formdesigner.ui.setTreeValidationIcons();
         });
 
-        formdesigner.controller.form.on('form-property-changed', function (e) {
+
+    }
+
+    /**
+     * Bind some standard responses to the 'form-property-changed' event.
+     * @param form - formdesigner.model.Form object.
+     */
+    that.setStandardFormEventResponses = function (form) {
+        form.on('form-property-changed', function (e) {
             var MT = formdesigner.controller.getCurrentlySelectedMugType();
             formdesigner.ui.showVisualValidation(MT);
             formdesigner.ui.setTreeValidationIcons();
         })
+
+        form.on('form-property-changed', function() {
+            formdesigner.controller.setFormChanged();
+        });
     }
 
     /**

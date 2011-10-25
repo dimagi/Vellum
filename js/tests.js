@@ -20,16 +20,16 @@ $(document).ready(function(){
     var testXformBuffer = {};
     var testFormNames = [
         "Follow-up a Household Referral.xml",
-//        "Follow-up at household.xml",
-//        "Pos Parto.xml",
-//        "Registo.xml",
-//        "Follow-up a pregnancy referral.xml",
-//        "Gravidez.xml",
-//        "Register a household.xml",
-//        "Close a pregnancy.xml",
-//        "Follow-up a pregnancy.xml",
-//        "NutritionAndHealth.xml",
-//        "Register a pregnancy.xml"
+        "Follow-up at household.xml",
+        "Pos Parto.xml",
+        "Registo.xml",
+        "Follow-up a pregnancy referral.xml",
+        "Gravidez.xml",
+        "Register a household.xml",
+        "Close a pregnancy.xml",
+        "Follow-up a pregnancy.xml",
+        "NutritionAndHealth.xml",
+        "Register a pregnancy.xml"
     ];
 
     var get_cchq_forms = function (name) {
