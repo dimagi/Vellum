@@ -894,7 +894,11 @@ formdesigner.util = (function(){
        }
     }
         
-        
+    that.isSelect = function (mug) {
+        return (mug.typeName === "Multi Select Question" ||
+                mug.typeName === "Single Select Question")
+    }
+    
     return that;
 
 }());
