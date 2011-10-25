@@ -2529,11 +2529,17 @@ formdesigner.model = function () {
         }
 
         that.addLanguage = function (name) {
-            if(Object.keys(that.data).length === 0){
+            var hasExistingLanguage = Object.keys(that.data).length !== 0
+            if(!hasExistingLanguage){
                 this.setDefaultLanguage(name);
             }
             if(!that.data[name]){
-                that.data[name] = {};
+                if (hasExistingLanguage) {  //clone the default language data.
+                    //assumes a default language is set if hasExistingLanguage
+                    that.data[name] = formdesigner.util.clone(that.data[that.getDefaultLanguage()]);
+                } else {
+                    that.data[name] = {}; //this is the first language so nothing to copy
+                }
             }else{
                 return; //do nothing, it already exists.
             }
