@@ -771,10 +771,14 @@ formdesigner.controller = (function () {
             // callback to actually render the form
             
             var output = $('#fd-source'),
-                controls = $("#fd-source-controls");
+                controls = $("#fd-source-controls"),
+                help = $("#fd-source-help");
             
             // clear controls
             controls.empty();
+            help.text("This is the raw XML. You can edit or paste into this box to make changes " +
+                      "to your form. Press 'Update Source' to save changes, or 'Close' to cancel.");
+            
             
             // populate text
             output.val(that.form.createXForm());
@@ -894,11 +898,16 @@ formdesigner.controller = (function () {
 
     var showItextDialog = function () {
     
-        var input = $('#fd-source');
-        var controls = $("#fd-source-controls");
-        
+        var input = $('#fd-source'),
+            controls = $("#fd-source-controls"),
+            help = $("#fd-source-help");
+            
         // clear controls
         controls.empty();
+        help.text("Copy these translations into a spreadsheet program like Excel. " + 
+                  "You can edit them there and then paste them back here when you're " +
+                  "done. These will update the translations used in your form. Press " + 
+                  "'Update Translations' to save changes, or 'Close' to cancel.");
         
         // display current values
         input.val(that.generateItextXLS());

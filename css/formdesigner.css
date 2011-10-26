@@ -162,9 +162,14 @@ body{
     height: 640px;
 }
 
-#fd-source{
+#fd-source {
     width: 800px;
     height: 800px;
+}
+
+#fd-source-help, #fd-source-controls {
+    width: 800px;
+    padding: 1em;
 }
 
 .fd-property-input {
