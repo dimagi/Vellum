@@ -436,13 +436,27 @@ body{
     margin: 5px;
 }
 
-.validation-results {
-    display:  inline;
-    position: relative;
-}
+/* xpath editor styling */
 
 /* stolen from blueprint */
-.error, .notice, .success {padding:.4em;margin-bottom:1em;border:2px solid #ddd;}
+.error, .notice, .success {padding:.4em; border:2px solid #ddd;}
 .error {background:#FBE3E4;color:#8a1f11;border-color:#FBC2C4;}
 .notice {background:#FFF6BF;color:#514721;border-color:#FFD324;}
 .success {background:#E6EFC2;color:#264409;border-color:#C6D880;}
+
+
+.xpath-edit-node, .expression-part, .op-select, .validation-results {
+    vertical-align: text-bottom;
+    display: inline-block;
+    margin-left: .4em;	
+}
+
+.xpath-edit-node {
+    width: 180px;
+}
+
+.validation-results
+{
+    position: relative;
+    margin-bottom: 0px;
+}
