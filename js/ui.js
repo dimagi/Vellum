@@ -129,7 +129,7 @@ formdesigner.ui = (function () {
         (function c_saveForm() {
             var savebut = $(
                     '<button id="fd-save-button" class="toolbarButton questionButton">'+
-                'Save Form to Server' +
+                'Save Form' +
               '</button>');
             toolbar.append(savebut);
 
@@ -156,14 +156,14 @@ formdesigner.ui = (function () {
     }
     that.buttons = buttons;
 
-    //Sets a visual indicator that the form needs saving on the 'Save Form To Server' Button
+    //Sets a visual indicator that the form needs saving on the 'Save Form' Button
     that.setSaveButtonFormUnsaved = function () {
         var saveBut = $('#fd-save-button');
         saveBut.button('enable');
         saveBut.button('option', 'icons', {primary:'ui-icon-alert'});
     }
 
-    //Sets a visual indicator that the form IS saved (on 'Save Form To Server' Button)
+    //Sets a visual indicator that the form IS saved (on 'Save Form' Button)
     that.setSaveButtonFormSaved = function () {
         var saveBut = $('#fd-save-button');
         saveBut.button('disable');
