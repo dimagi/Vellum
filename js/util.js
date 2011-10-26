@@ -889,7 +889,8 @@ formdesigner.util = (function(){
         if (mug.typeName === "Select Item") {
             return '"' + mug.mug.properties.controlElement.properties.defaultValue + '"';
         } else {
-            return formdesigner.controller.form.dataTree.getAbsolutePath(mug);
+            // for the currently selected mug, return a "."
+            return (mug.ufid === formdesigner.controller.getCurrentlySelectedMugType().ufid) ? "." : formdesigner.controller.form.dataTree.getAbsolutePath(mug);
         }
     }
     that.mugToAutoCompleteUIElement = function (mug) {

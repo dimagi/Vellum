@@ -1795,6 +1795,7 @@ formdesigner.controller = (function () {
                 // actualTarget.tokenInput("clear");
                 actualTarget.tokenInput("add", formdesigner.util.mugToAutoCompleteUIElement(mug));
             } else {
+                // the .change fires the validation controls
                 actualTarget.val(actualTarget.val() + formdesigner.util.mugToXPathReference(mug)).change();
             }
         }
