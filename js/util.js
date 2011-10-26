@@ -51,7 +51,7 @@ formdesigner.util = (function(){
      */
     var xmls = new XMLSerializer();
     function getXLabelValue (el){
-        var resStr;
+        var resStr, resEl;
         function getEndTag (str) {
             var res, reo, last;
             reo = /<\/(?:"[^"]*"['"]*|'[^']*'['"]*|[^'">])+>/g;
@@ -76,7 +76,9 @@ formdesigner.util = (function(){
             return res[0];
         }
 
-        resStr = xmls.serializeToString($(el)[0]);
+        resEl = $(el)[0];
+        if(!resEl) { return; }
+        resStr = xmls.serializeToString(resEl);
         resStr = resStr.replace(getStartTag(resStr),'').replace(getEndTag(resStr),'');
         return resStr;
     };
