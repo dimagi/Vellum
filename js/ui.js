@@ -1785,9 +1785,10 @@ formdesigner.ui = (function () {
         var getExpressionList = function () {
             return getExpressionPane().children();
         };
+        
         var getTopLevelJoinSelect = function () {
             return $(editorPane.find("#top-level-join-select")[0]);
-        }
+        };
         
         var getExpressionFromSimpleMode = function () {
             // basic
@@ -1810,7 +1811,8 @@ formdesigner.ui = (function () {
                 return results[1].toXPath();
             }
             return preparsed;
-        }
+        };
+        
         var getExpressionFromUI = function () {
             if ($("#xpath-advanced-check").is(':checked')) {
                 // advanced
@@ -1882,6 +1884,7 @@ formdesigner.ui = (function () {
             };
             
             var newExpressionUIElement = function (expOp) {
+            
                 // create the UI for an individual expression
                 var createQuestionAcceptor = function() {
 	                var questionAcceptor = $("<input />").attr("placeholder", "Hint: drag a question here.");
@@ -1899,96 +1902,165 @@ formdesigner.ui = (function () {
 	                return constructSelect(ops).addClass("op-select").css("vertical-align", "text-bottom");
 	            };
 	            
-	            var populateTokenInputBox = function (input, expr) {
-	                if (isPath(expr)) {
-	                   var mug = formdesigner.controller.getMugByPath(expr.toXPath());
-	                   if (mug) {
-	                       input.tokenInput("add", formdesigner.util.mugToAutoCompleteUIElement(mug));
-	                       return;       
-	                   }
-	                }
-	                input.tokenInput("add", {id: expr.toXPath(), name: expr.toXPath()});
-	            };
-	            
+	            var expression = $("<div />").addClass("bin-expression");
+                
                 var createQuestionInGroup = function (type) {
                      var group = $("<div />").addClass("expression-part").appendTo(expression).css("display", "inline");
                      return createQuestionAcceptor().addClass(type + "-question xpath-edit-node").appendTo(group);
                 };
-                var expression = $("<div />").addClass("bin-expression");
+                
+                var getLeftQuestionInput = function () {
+                    return $(expression.find(".left-question")[0]);
+                } 
+                
+                var getRightQuestionInput = function () {
+                    return $(expression.find(".right-question")[0]);
+                } 
+                
+                var getValidationResults = function () {
+                    return $(expression.find(".validation-results")[0]);
+                }
+                
+                var validateExpression = function(item) {
+                    var le = getLeftQuestionInput().val(),
+                        re = getRightQuestionInput().val();
+                    if (le && validate(le)[0] && re && validate(re)[0]) {
+                        getValidationResults().text("ok").addClass("success ui-icon-circle-check").removeClass("error");
+                    } else {
+                        getValidationResults().text("fix").addClass("error").removeClass("success");
+                    }
+                }
                 
                 
-                var left = createQuestionInGroup("left")
-	            var op = createOperationSelector().appendTo(expression);
+	            var updateSelectOptions = function (inputControl, selectQuestion, value) {
+	                // this only works on the right box
+	                
+	                // this is pretty ridiculous but it seems to work.
+                    // remove and re add the entire right expression part
+                    inputControl.parents(".expression-part").remove();
+	                inputControl = createQuestionInGroup("right");
+	                var children = formdesigner.controller.getChildren(selectQuestion);
+	                var autoCompleteChildren = children.map(function (item) { 
+	                    return formdesigner.util.mugToAutoCompleteUIElement(item);
+	                });
+	                var selectItemOptions = {
+	                       theme: "facebook", 
+	                       //tokenLimit: 1,
+	                       tokenDelimiter: " ", 
+	                       searchDelay: 0, 
+	                       allowFreetext: true,
+	                       hintText: "Type in a select option name.",
+	                       noResultsText: "No matching options found.",
+	                       onAdd: validateExpression,
+	                       onDelete: validateExpression
+	                };
+	                inputControl.tokenInput(autoCompleteChildren, selectItemOptions);
+	                var found = false;
+                    if (value && value instanceof xpathmodels.XPathStringLiteral) {
+	                    for (var i = 0; i < children.length; i++) {
+	                       if (children[i].mug.properties.controlElement.properties.defaultValue == value.value) {
+	                           inputControl.tokenInput("add", formdesigner.util.mugToAutoCompleteUIElement(children[i]));
+	                           found = true;
+	                           break;
+                           }
+	                    }
+	                }
+	                if (value && !found) {
+	                   // put in something, even though it wasn't properly handled
+	                   inputControl.tokenInput("add", {id: value.toXPath(), name: value.toXPath()});
+	                }
+	                // reenable drop target
+	                expression.find(".token-input-list-facebook").addClass("jstree-drop");
+	            }
 	            
-	            var right = createQuestionInGroup("right")
+	            var populateTokenInputBox = function (input, expr, pairedExpr) {
+	                var mug;
+	                if (isPath(expr)) {
+	                   mug = formdesigner.controller.getMugByPath(expr.toXPath());
+	                   if (mug) {
+	                       input.tokenInput("add", formdesigner.util.mugToAutoCompleteUIElement(mug));
+	                       return;       
+	                   }
+	                } else if (isPath(pairedExpr)) {
+	                   // potentially load the UI element for the select value
+	                   // currently only if the left hand side is a select
+	                   mug = formdesigner.controller.getMugByPath(pairedExpr.toXPath());
+	                   if (mug && formdesigner.util.isSelect(mug)) {
+	                       updateSelectOptions(input, mug, expr);
+	                       return;
+	                   }
+	                }
+	                // default case
+	                input.tokenInput("add", {id: expr.toXPath(), name: expr.toXPath()});
+	            };
+	            
                 
-	            // set fancy input mode on the boxes
+                // set fancy input mode on the boxes
 	            var baseOptions = {theme: "facebook", 
-	                               tokenLimit: 1, 
+	                               //tokenLimit: 1,
+	                               tokenDelimiter: " ", 
 	                               searchDelay: 0, 
 	                               allowFreetext: true,
 	                               hintText: "Type in a question name or drag a question here.",
-	                               noResultsText: "No questions found. Press 'ENTER' to use a freetext value."};
+	                               noResultsText: "No questions found. Press 'ENTER' to use a freetext value.",
+	                               onDelete: validateExpression
+	                               };
 	            
-	            right.tokenInput(questionChoiceAutoComplete, baseOptions);
 	            var leftOptions = formdesigner.util.clone(baseOptions); 
+	            var rightOptions = formdesigner.util.clone(baseOptions); 
+                
+	            rightOptions.onAdd = validateExpression;
 	            leftOptions.onAdd = function (item) {
-                    // for the left input only, if we add a select question, 
+	                validateExpression();
+	                // for the left input only, if we add a select question, 
                     // rebuild the autocomplete on the right side to support options
                     if (item.uid) {
                         // only questions have a uid
                         var mug = formdesigner.controller.form.controlTree.getMugTypeFromUFID(item.uid);
-                        if (mug.typeName === "Multi Select Question" ||
-                            mug.typeName === "Single Select Question") {
-                            // this is pretty ridiculous but it seems to work.
-                            // remove and re add the entire right expression part
-                            right.parents(".expression-part").remove();
-                            right = createQuestionInGroup("right");
-                            var children = formdesigner.controller.getChildren(mug);
-                            var autoCompleteChildren = children.map(function (item) { 
-                                return formdesigner.util.mugToAutoCompleteUIElement(item);
-                            });
-                            var selectItemOptions = {
-                                   theme: "facebook", 
-                                   tokenLimit: 1, 
-                                   searchDelay: 0, 
-                                   allowFreetext: false,
-                                   hintText: "Type in a select option name.",
-                                   noResultsText: "No matching options found."
-                            };
-                            right.tokenInput(autoCompleteChildren, selectItemOptions);
-                            expression.find(".token-input-list-facebook").addClass("jstree-drop");
+                        if (formdesigner.util.isSelect(mug)) {
+                            updateSelectOptions(right, mug);
                         }
                     }    
                 }
+                
+                var left = createQuestionInGroup("left")
                 left.tokenInput(questionChoiceAutoComplete, leftOptions);
-	            	            
-	            // also make them drop targets for the tree
+	            
+	            var op = createOperationSelector().appendTo(expression);
+                var right = createQuestionInGroup("right")
+                $("<div />").text("Delete").button().css("float", "left").appendTo(expression).click(function() {
+                    var isFirst = expression.children(".join-select").length == 0;
+                    expression.remove();
+                    if (isFirst && getExpressionList().length > 0) {
+                        // when removing the first expression, make sure to update the 
+                        // next one in the UI to not have a join, if necessary.
+                        $($(getExpressionList()[0]).children(".join-select")).remove();   
+                    }
+                });
+                $("<div />").addClass("validation-results").appendTo(expression);
+                
+                right.tokenInput(questionChoiceAutoComplete, rightOptions);
+                // also make them drop targets for the tree
 	            expression.find(".token-input-list-facebook").addClass("jstree-drop");
                 if (expOp) {
 	                // populate
                     if (DEBUG_MODE) {
                         console.log("populating", expOp.toString());
                     }
-                    populateTokenInputBox(left, expOp.left);
+                    populateTokenInputBox(getLeftQuestionInput(), expOp.left);
                     op.val(xpathmodels.expressionTypeEnumToXPathLiteral(expOp.type));
-	                populateTokenInputBox(right, expOp.right);
+	                // the population of the left can affect the right, 
+	                // so we need to update the reference 
+	                populateTokenInputBox(getRightQuestionInput(), expOp.right, expOp.left);
 	            }
-	            $("<div />").text("Delete").button().css("float", "left").appendTo(expression).click(function() {
-	                var isFirst = expression.children(".join-select").length == 0;
-	                expression.remove();
-	                if (isFirst && getExpressionList().length > 0) {
-	                    // when removing the first expression, make sure to update the 
-	                    // next one in the UI to not have a join, if necessary.
-	                    $($(getExpressionList()[0]).children(".join-select")).remove();   
-	                }
-	            });
 	            return expression;
 	        };
 	        
 	        var failAndClear = function () {
 	           getExpressionPane().empty();
-	           console.log("fail", parsedExpression);
+	           if (DEBUG_MODE) {
+                   console.log("fail", parsedExpression);
+	           }
 	           return false;
 	        }
 	        
@@ -2124,7 +2196,7 @@ formdesigner.ui = (function () {
             // advanced UI
             var advancedUI = $("<div />").attr("id", "xpath-advanced").appendTo(mainPane);
             $("<label />").attr("for", "fd-xpath-editor-text").text("XPath String: ").appendTo(advancedUI);
-            $("<input />").attr("id", "fd-xpath-editor-text").attr("type", "text").appendTo(advancedUI).css("min-width", "400px");
+            $("<textarea />").attr("id", "fd-xpath-editor-text").attr("rows", "2").attr("cols", "50").appendTo(advancedUI);
             
             // simple UI
             var simpleUI = $("<div />").attr("id", "xpath-simple").appendTo(mainPane);

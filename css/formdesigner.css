@@ -435,3 +435,10 @@ body{
     padding-top: 25px;
     margin: 5px;
 }
+
+.validation-results {
+    display: inline;
+    position: fixed;
+    padding: .4em;
+    
+}
