@@ -588,7 +588,7 @@ formdesigner.model = function () {
                         },
                 dataValue: {
                     editable: 'w',
-                    visibility: 'visible',
+                    visibility: 'advanced',
                     presence: 'optional',
                     lstring: 'Default Data Value'
                 },
