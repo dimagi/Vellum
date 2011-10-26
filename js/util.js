@@ -883,17 +883,19 @@ formdesigner.util = (function(){
         return disp;
     }
     
-    
-    that.mugToAutoCompleteUIElement = function (mug) {
+    that.mugToXPathReference = function (mug) {
+        // for select items, return the quoted value.
+        // for everything else return the path
         if (mug.typeName === "Select Item") {
-            return {id: '"' + mug.mug.properties.controlElement.properties.defaultValue + '"',
-                    uid: mug.ufid,
-                    name: that.getMugDisplayName(mug) };
+            return '"' + mug.mug.properties.controlElement.properties.defaultValue + '"';
         } else {
-	        return {id: formdesigner.controller.form.dataTree.getAbsolutePath(mug),
-	                uid: mug.ufid,
-	                name: that.getMugDisplayName(mug) };
-       }
+            return formdesigner.controller.form.dataTree.getAbsolutePath(mug);
+        }
+    }
+    that.mugToAutoCompleteUIElement = function (mug) {
+        return {id:   that.mugToXPathReference(mug),
+                uid:  mug.ufid,
+                name: that.getMugDisplayName(mug) };
     }
         
     that.isSelect = function (mug) {

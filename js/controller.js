@@ -1791,8 +1791,12 @@ formdesigner.controller = (function () {
         if (actualTarget) {
             var mug = that.form.getMugTypeByUFID(sourceUid);
             // with multi-question support, don't bother clearing it
-            // actualTarget.tokenInput("clear");
-            actualTarget.tokenInput("add", formdesigner.util.mugToAutoCompleteUIElement(mug));
+            if (formdesigner.ui.TOKEN_INPUT) {
+                // actualTarget.tokenInput("clear");
+                actualTarget.tokenInput("add", formdesigner.util.mugToAutoCompleteUIElement(mug));
+            } else {
+                actualTarget.val(actualTarget.val() + formdesigner.util.mugToXPathReference(mug)).change();
+            }
         }
     };
     that.handleTreeDrop = handleTreeDrop;

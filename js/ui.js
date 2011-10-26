@@ -22,9 +22,11 @@ formdesigner.ui = (function () {
         questionTree,
         dataTree,
         LINK_CONTROL_MOVES_TO_DATA_TREE = true,
-        DEBUG_MODE = false;
+        DEBUG_MODE = false,
+        TOKEN_INPUT = false; // change this if you want tokenized xpath mode
         
-
+    that.TOKEN_INPUT = TOKEN_INPUT;
+    
     /**
      * Displays an info box on the properties view.
      * Use hideMessage() to hide.
@@ -1873,10 +1875,10 @@ formdesigner.ui = (function () {
             
                 // create the UI for an individual expression
                 var createQuestionAcceptor = function() {
-	                var questionAcceptor = $("<input />").attr("placeholder", "Hint: drag a question here.");
-	                questionAcceptor.css("min-width", "200px")
+	                var questionAcceptor = $("<input />").attr("type", "text").attr("placeholder", "Hint: drag a question here.");
 	                return questionAcceptor;
 	            };
+	            
 	            var createOperationSelector = function() {
 	                var ops = [["is equal to", expTypes.EQ],
 	                           ["is not equal to", expTypes.NEQ],
@@ -1885,13 +1887,13 @@ formdesigner.ui = (function () {
 	                           ["is greater than", expTypes.GT],
 	                           ["is greater than or equal to", expTypes.GTE]];
 	                     
-	                return constructSelect(ops).addClass("op-select").css("vertical-align", "text-bottom");
+	                return constructSelect(ops).addClass("op-select");
 	            };
 	            
 	            var expression = $("<div />").addClass("bin-expression");
                 
                 var createQuestionInGroup = function (type) {
-                     var group = $("<div />").addClass("expression-part").appendTo(expression).css("display", "inline");
+                     var group = $("<div />").addClass("expression-part").appendTo(expression);
                      return createQuestionAcceptor().addClass(type + "-question xpath-edit-node").appendTo(group);
                 };
                 
@@ -1917,104 +1919,138 @@ formdesigner.ui = (function () {
                     }
                 }
                 
+                var left = createQuestionInGroup("left")
+                var op = createOperationSelector().appendTo(expression);
+                var right = createQuestionInGroup("right")
+                var deleteButton = $("<div />").text("Delete").button().css("float", "left").appendTo(expression);
+                var validationResults = $("<div />").addClass("validation-results").appendTo(expression);
                 
-	            var updateSelectOptions = function (inputControl, selectQuestion, value) {
-	                // this only works on the right box
+                // BEGIN token input code (not used, but configurably reenabled)
+	            var updateTokenInputSelectOptions = function (inputControl, selectQuestion, value) {
+	                // this does nothing.
 	                
-	                // this is pretty ridiculous but it seems to work.
-                    // remove and re add the entire right expression part
-                    inputControl.parents(".expression-part").remove();
-	                inputControl = createQuestionInGroup("right");
-	                var children = formdesigner.controller.getChildren(selectQuestion);
-	                var autoCompleteChildren = children.map(function (item) { 
-	                    return formdesigner.util.mugToAutoCompleteUIElement(item);
-	                });
-	                var selectItemOptions = {
-	                       theme: "facebook", 
-	                       //tokenLimit: 1,
-	                       tokenDelimiter: " ", 
-	                       searchDelay: 0, 
-	                       allowFreetext: true,
-	                       hintText: "Type in a select option name.",
-	                       noResultsText: "No matching options found.",
-	                       onAdd: validateExpression,
-	                       onDelete: validateExpression
-	                };
-	                inputControl.tokenInput(autoCompleteChildren, selectItemOptions);
-	                var found = false;
-                    if (value && value instanceof xpathmodels.XPathStringLiteral) {
-	                    for (var i = 0; i < children.length; i++) {
-	                       if (children[i].mug.properties.controlElement.properties.defaultValue == value.value) {
-	                           inputControl.tokenInput("add", formdesigner.util.mugToAutoCompleteUIElement(children[i]));
-	                           found = true;
-	                           break;
-                           }
-	                    }
+	                // with token input enabled it correctly populates the autocomplete,
+	                // which only works on the right box
+	                if (TOKEN_INPUT) {
+		                // this is pretty ridiculous but it seems to work.
+	                    // remove and re add the entire right expression part
+	                    inputControl.parents(".expression-part").remove();
+		                inputControl = createQuestionInGroup("right");
+		                var children = formdesigner.controller.getChildren(selectQuestion);
+		                var autoCompleteChildren = children.map(function (item) { 
+		                    return formdesigner.util.mugToAutoCompleteUIElement(item);
+		                });
+		                var selectItemOptions = {
+		                       theme: "facebook", 
+		                       //tokenLimit: 1,
+		                       tokenDelimiter: " ", 
+		                       searchDelay: 0, 
+		                       allowFreetext: true,
+		                       hintText: "Type in a select option name.",
+		                       noResultsText: "No matching options found.",
+		                       onAdd: validateExpression,
+		                       onDelete: validateExpression
+		                };
+		                inputControl.tokenInput(autoCompleteChildren, selectItemOptions);
+		                var found = false;
+	                    if (value && value instanceof xpathmodels.XPathStringLiteral) {
+		                    for (var i = 0; i < children.length; i++) {
+		                       if (children[i].mug.properties.controlElement.properties.defaultValue == value.value) {
+		                           inputControl.tokenInput("add", formdesigner.util.mugToAutoCompleteUIElement(children[i]));
+		                           found = true;
+		                           break;
+	                           }
+		                    }
+		                }
+		                if (value && !found) {
+		                   // put in something, even though it wasn't properly handled
+		                   inputControl.tokenInput("add", {id: value.toXPath(), name: value.toXPath()});
+		                }
+	                    // reenable drop target
+	                    expression.find(".token-input-list-facebook").addClass("jstree-drop");
 	                }
-	                if (value && !found) {
-	                   // put in something, even though it wasn't properly handled
-	                   inputControl.tokenInput("add", {id: value.toXPath(), name: value.toXPath()});
-	                }
-	                // reenable drop target
-	                expression.find(".token-input-list-facebook").addClass("jstree-drop");
 	            }
 	            
-	            var populateTokenInputBox = function (input, expr, pairedExpr) {
-	                var mug;
-	                if (isPath(expr)) {
-	                   mug = formdesigner.controller.getMugByPath(expr.toXPath());
-	                   if (mug) {
-	                       input.tokenInput("add", formdesigner.util.mugToAutoCompleteUIElement(mug));
-	                       return;       
-	                   }
-	                } else if (isPath(pairedExpr)) {
-	                   // potentially load the UI element for the select value
-	                   // currently only if the left hand side is a select
-	                   mug = formdesigner.controller.getMugByPath(pairedExpr.toXPath());
-	                   if (mug && formdesigner.util.isSelect(mug)) {
-	                       updateSelectOptions(input, mug, expr);
-	                       return;
-	                   }
-	                }
-	                // default case
-	                input.tokenInput("add", {id: expr.toXPath(), name: expr.toXPath()});
-	            };
-	            
+	            var setTokenInputOptions = function() {
+	                // set fancy input mode on the boxes
+	                var baseOptions = {theme: "facebook", 
+	                                   //tokenLimit: 1,
+	                                   tokenDelimiter: " ", 
+	                                   searchDelay: 0, 
+	                                   allowFreetext: true,
+	                                   hintText: "Type in a question name or drag a question here.",
+	                                   noResultsText: "No questions found. Press 'ENTER' to use a freetext value.",
+	                                   onDelete: validateExpression
+	                                   };
+	                
+	                var leftOptions = formdesigner.util.clone(baseOptions); 
+	                var rightOptions = formdesigner.util.clone(baseOptions); 
+	                
+	                rightOptions.onAdd = validateExpression;
+	                leftOptions.onAdd = function (item) {
+	                    validateExpression();
+	                    // for the left input only, if we add a select question, 
+	                    // rebuild the autocomplete on the right side to support options
+	                    if (item.uid) {
+	                        // only questions have a uid
+	                        var mug = formdesigner.controller.form.controlTree.getMugTypeFromUFID(item.uid);
+	                        if (formdesigner.util.isSelect(mug)) {
+	                            updateTokenInputSelectOptions(right, mug);
+	                        }
+	                    }    
+	                };
+	                
+	                left.tokenInput(questionChoiceAutoComplete, leftOptions);
+                    right.tokenInput(questionChoiceAutoComplete, rightOptions);
+                    // also make them drop targets for the tree
+                    expression.find(".token-input-list-facebook").addClass("jstree-drop");
+                };
                 
-                // set fancy input mode on the boxes
-	            var baseOptions = {theme: "facebook", 
-	                               //tokenLimit: 1,
-	                               tokenDelimiter: " ", 
-	                               searchDelay: 0, 
-	                               allowFreetext: true,
-	                               hintText: "Type in a question name or drag a question here.",
-	                               noResultsText: "No questions found. Press 'ENTER' to use a freetext value.",
-	                               onDelete: validateExpression
-	                               };
-	            
-	            var leftOptions = formdesigner.util.clone(baseOptions); 
-	            var rightOptions = formdesigner.util.clone(baseOptions); 
+                var updateTokenInputQuestionBox = function(input, expr, pairedExpr) {
+                    var mug;
+                    if (isPath(expr)) {
+                       mug = formdesigner.controller.getMugByPath(expr.toXPath());
+                       if (mug) {
+                           input.tokenInput("add", formdesigner.util.mugToAutoCompleteUIElement(mug));
+                           return;       
+                       }
+                    } else if (isPath(pairedExpr)) {
+                       // potentially load the UI element for the select value
+                       // currently only if the left hand side is a select
+                       mug = formdesigner.controller.getMugByPath(pairedExpr.toXPath());
+                       if (mug && formdesigner.util.isSelect(mug)) {
+                           updateTokenInputSelectOptions(input, mug, expr);
+                           return;
+                       }
+                    }
+                    // default case
+                    input.tokenInput("add", {id: expr.toXPath(), name: expr.toXPath()});
+                };
                 
-	            rightOptions.onAdd = validateExpression;
-	            leftOptions.onAdd = function (item) {
-	                validateExpression();
-	                // for the left input only, if we add a select question, 
-                    // rebuild the autocomplete on the right side to support options
-                    if (item.uid) {
-                        // only questions have a uid
-                        var mug = formdesigner.controller.form.controlTree.getMugTypeFromUFID(item.uid);
-                        if (formdesigner.util.isSelect(mug)) {
-                            updateSelectOptions(right, mug);
-                        }
-                    }    
+                // END token input code (not used, but configurably reenabled)
+                
+                var populateQuestionInputBox = function (input, expr, pairedExpr) {
+                    if (TOKEN_INPUT) {
+                        updateTokenInputQuestionBox(input, expr, pairedExpr);
+                    } else {
+                        input.val(expr.toXPath());
+                    }
+                };
+                
+                var setBasicOptions = function () {
+                    // just make the inputs droppable and add event handlers to validate
+                    // the inputs
+                    expression.find(".xpath-edit-node").addClass("jstree-drop");
+                    expression.find(".xpath-edit-node").change(validateExpression);
                 }
                 
-                var left = createQuestionInGroup("left")
-                left.tokenInput(questionChoiceAutoComplete, leftOptions);
-	            
-	            var op = createOperationSelector().appendTo(expression);
-                var right = createQuestionInGroup("right")
-                $("<div />").text("Delete").button().css("float", "left").appendTo(expression).click(function() {
+                if (TOKEN_INPUT) {
+                    setTokenInputOptions();
+                } else {
+                    setBasicOptions();
+                }
+                
+                deleteButton.click(function() {
                     var isFirst = expression.children(".join-select").length == 0;
                     expression.remove();
                     if (isFirst && getExpressionList().length > 0) {
@@ -2023,21 +2059,17 @@ formdesigner.ui = (function () {
                         $($(getExpressionList()[0]).children(".join-select")).remove();   
                     }
                 });
-                $("<div />").addClass("validation-results").appendTo(expression);
                 
-                right.tokenInput(questionChoiceAutoComplete, rightOptions);
-                // also make them drop targets for the tree
-	            expression.find(".token-input-list-facebook").addClass("jstree-drop");
                 if (expOp) {
 	                // populate
                     if (DEBUG_MODE) {
                         console.log("populating", expOp.toString());
                     }
-                    populateTokenInputBox(getLeftQuestionInput(), expOp.left);
+                    populateQuestionInputBox(getLeftQuestionInput(), expOp.left);
                     op.val(xpathmodels.expressionTypeEnumToXPathLiteral(expOp.type));
 	                // the population of the left can affect the right, 
 	                // so we need to update the reference 
-	                populateTokenInputBox(getRightQuestionInput(), expOp.right, expOp.left);
+	                populateQuestionInputBox(getRightQuestionInput(), expOp.right, expOp.left);
 	            }
 	            return expression;
 	        };
