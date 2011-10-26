@@ -966,7 +966,7 @@ formdesigner.model = function () {
         dataBind: function () {
             var mType = formdesigner.util.clone(RootMugType);
 
-            mType.typeName = "Data + Bind Only Mug";
+            mType.typeName = "Data Node";
             mType.type = "db";
             delete mType.properties.controlElement;
             return mType;
@@ -1030,7 +1030,6 @@ formdesigner.model = function () {
         mType.controlNodeAllowedChildren = false;
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
-        delete mType.mug.properties.bindElement.properties.dataType;
         return mType;
     }
 
