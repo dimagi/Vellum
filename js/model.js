@@ -643,7 +643,7 @@ formdesigner.model = function () {
                 },
                 constraintMsgAttr: {
                     editable: 'w',
-                    visibility: 'advanced',
+                    visibility: 'visible',
                     presence: 'optional',
                     validationFunc : function (mugType, mug) {
                         var bindBlock = mug.properties.bindElement.properties;

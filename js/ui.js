@@ -432,8 +432,6 @@ formdesigner.ui = (function () {
          * creates and returns a <ul> element with the heading set and the correct classes configured.
          * @param heading
          */
-         
-        
         var makeUL = function (heading){
             var str = '<ul class="fd-props-ul"><span class="fd-props-heading">' + heading + '</span></ul>';
             return $(str);
@@ -695,7 +693,7 @@ formdesigner.ui = (function () {
                     uiBlock = $('#fd-props-bind'),
                     ul;
             uiBlock.empty(); //clear it out first in case there's anything present.
-            ul = makeUL('Bind Properties');
+            ul = makeUL('Logic Properties');
 
 
             listDisplay(properties, ul, mugType.mug.properties.bindElement.properties, 'bindElement', true, false);
@@ -712,7 +710,7 @@ formdesigner.ui = (function () {
          * Makes an Itext LI for UI user input of Itext values. Assumes the Itext ID is already present,
          * if not will generate one and add it to the Itext object.
          * @param textForm
-         * @param iflabel
+         * @param iflabel - Display Label for UI
          * @param ishint - flag for if this is a 'hint' type itext (hint itext ID is located in a different place to regular itext ID)
          */
         function makeItextLI(textForm, iflabel, ishint) {
@@ -860,7 +858,8 @@ formdesigner.ui = (function () {
             LIs = {
                 liDef : makeItextLI('default', 'Display Label'),
                 liAudio : makeItextLI('audio', 'Audio URI'),
-                liImage : makeItextLI('image', 'Image URI')
+                liImage : makeItextLI('image', 'Image URI'),
+                liVideo : makeItextLI('video', 'Video URI')
             }
 
             for (i in LIs) {
