@@ -773,7 +773,6 @@ formdesigner.controller = (function () {
      */
     that.XFORM_STRING = null;
     var generateXForm = function () {
-
         function showFormInLightBox () {
             var output = $('#fd-source');
             if(that.XFORM_STRING){
@@ -795,6 +794,22 @@ formdesigner.controller = (function () {
             formdesigner.ui.hideConfirmDialog();
         }
 
+        //create the 'load xform' button
+        var input = $('#fd-source'),
+            button = $('#fd-parsexml-button');
+        
+        button.button({
+            icons: {
+                primary : 'ui-icon-folder-open'
+            }
+        })
+        button.show();
+
+        button.click(function () {
+            $.fancybox.close();
+            that.loadXForm(input.val());
+        });
+
         var msg = "There are validation errors in the form.  Do you want to continue anyway? WARNING:" +
             "The form will not be valid and likely not perform correctly on your device!";
 
@@ -809,25 +824,6 @@ formdesigner.controller = (function () {
     }
     that.generateXForm = generateXForm;
 
-    var showLoadXformBox = function () {
-        var input = $('#fd-source'),
-                button = $('#fd-parsexml-button');
-        button.button({
-            icons: {
-                primary : 'ui-icon-folder-open'
-            }
-        })
-        $('#inline').click();
-        button.show();
-
-        button.click(function () {
-            $.fancybox.close();
-            that.loadXForm(input.val());
-            $(this).hide();
-        });
-
-    };
-    that.showLoadXformBox = showLoadXformBox;
 
     var parseXLSItext = function (str) {
         var rows = str.split('\n'),
@@ -1009,6 +1005,10 @@ formdesigner.controller = (function () {
 
     var addParseErrorMsg = function (level, msg) {
         parseErrorMsgs.push(level + "::" + msg);
+        that.fire({
+              type: 'parse-error',
+              exceptionData: level + "::" + msg
+        });
     }
     that.addParseErrorMsg = addParseErrorMsg;
 

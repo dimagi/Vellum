@@ -1342,25 +1342,12 @@ formdesigner.ui = (function () {
         (function c_generateSource() {
              var fancyBut = $(
                      '<button id="fd-fancy-button" class="toolbarButton questionButton">'+
-                 'View Source ' +
+                 'View/Load Source ' +
                '</button>');
              $('#fd-extra-advanced').append(fancyBut);
 
              fancyBut.button().click(function () {
                  controller.generateXForm();
-             });
-
-         })();
-
-         (function c_openSource() {
-             var openSourcebut = $(
-                     '<button id="fd-opensource-button" class="toolbarButton questionButton">'+
-                 'Load Source ' +
-               '</button>');
-             $('#fd-extra-advanced').append(openSourcebut);
-
-             openSourcebut.button().click(function () {
-                 formdesigner.controller.showLoadXformBox();
              });
 
          })();
