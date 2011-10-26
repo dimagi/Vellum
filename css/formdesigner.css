@@ -452,7 +452,7 @@ body{
 }
 
 .xpath-edit-node {
-    width: 180px;
+    width: 180px !important; 
 }
 
 .validation-results
