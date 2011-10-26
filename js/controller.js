@@ -1790,8 +1790,8 @@ formdesigner.controller = (function () {
         var actualTarget = $($(target.parents(".expression-part")[0]).find(".xpath-edit-node")[0]);
         if (actualTarget) {
             var mug = that.form.getMugTypeByUFID(sourceUid);
-            // clear and add it
-            actualTarget.tokenInput("clear");
+            // with multi-question support, don't bother clearing it
+            // actualTarget.tokenInput("clear");
             actualTarget.tokenInput("add", formdesigner.util.mugToAutoCompleteUIElement(mug));
         }
     };

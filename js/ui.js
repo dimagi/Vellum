@@ -1945,9 +1945,10 @@ formdesigner.ui = (function () {
 	                });
 	                var selectItemOptions = {
 	                       theme: "facebook", 
-	                       tokenLimit: 1, 
+	                       //tokenLimit: 1,
+	                       tokenDelimiter: " ", 
 	                       searchDelay: 0, 
-	                       allowFreetext: false,
+	                       allowFreetext: true,
 	                       hintText: "Type in a select option name.",
 	                       noResultsText: "No matching options found.",
 	                       onAdd: validateExpression,
@@ -1996,7 +1997,8 @@ formdesigner.ui = (function () {
                 
                 // set fancy input mode on the boxes
 	            var baseOptions = {theme: "facebook", 
-	                               tokenLimit: 1, 
+	                               //tokenLimit: 1,
+	                               tokenDelimiter: " ", 
 	                               searchDelay: 0, 
 	                               allowFreetext: true,
 	                               hintText: "Type in a question name or drag a question here.",
