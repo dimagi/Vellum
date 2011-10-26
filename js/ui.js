@@ -102,27 +102,15 @@ formdesigner.ui = (function () {
         })();
 
         (function c_showLoadItextXLS() {
-            var loadXLSBut = $(
+            var editXLSBut = $(
                     '<button id="fd-load-xls-button" class="toolbarButton questionButton">'+
-                'Load Itext XLS From Clipboard' +
+                'Edit Bulk Translations' +
               '</button>');
-            $('#fd-dragons').append(loadXLSBut);
+            $('#fd-extra-advanced').append(editXLSBut);
 
-            loadXLSBut.button().click(function () {
-                formdesigner.controller.showLoadItextFromClipboard();
+            editXLSBut.button().click(function () {
+                formdesigner.controller.showItextDialog();
 
-            });
-        })();
-
-        (function c_showGeneratedItextXLS() {
-            var genXLSgbut = $(
-                    '<button id="fd-gen-xls-button" class="toolbarButton questionButton">'+
-                'Save Itext XLS to Clipboard' +
-              '</button>');
-            $('#fd-dragons').append(genXLSgbut);
-
-            genXLSgbut.button().click(function () {
-                formdesigner.controller.showGeneratedItextXLS();
             });
         })();
 

@@ -897,37 +897,36 @@ formdesigner.controller = (function () {
     }
     that.generateItextXLS = generateItextXLS;
 
-    var showLoadItextFromClipboard = function (){
-        var input = $('#fd-source'),
-                button = $('<button id ="fd-parsexls-button">Load Itext</button>');
-        button.button({
-            icons: {
-                primary : 'ui-icon-folder-open'
-            }
-        })
-        $('#inline').click();
-        input.after(button);
-        button.show();
-
-        button.click(function () {
+    var showItextDialog = function () {
+    
+        var input = $('#fd-source');
+        var controls = $("#fd-source-controls");
+        
+        // clear controls
+        controls.empty();
+        
+        // display current values
+        input.val(that.generateItextXLS());
+        
+        // add controls
+        var updateButton = $('<button id ="fd-parsexls-button">Update Translations</button>').appendTo(controls).button();
+        updateButton.click(function () {
             that.parseXLSItext(input.val());
             $.fancybox.close();
             $(this).remove();
         });
-
-    };
-    that.showLoadItextFromClipboard = showLoadItextFromClipboard;
-
-    var showGeneratedItextXLS = function () {
-        var source = $('#fd-source');
-
-        source.val(that.generateItextXLS());
-
-        $('#inline').click();
         
-
+        var closeButton = $('<button id ="fd-close-popup-button">Close</button>').appendTo(controls).button();
+        closeButton.click(function () {
+            $.fancybox.close();
+            $(this).remove();
+        });
+        
+        // this shows the popup
+        $('#inline').click();
     };
-    that.showGeneratedItextXLS = showGeneratedItextXLS;
+    that.showItextDialog = showItextDialog;
+
 
     var setFormName = function (name) {
         that.form.formName = name;
