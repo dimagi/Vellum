@@ -1785,9 +1785,10 @@ formdesigner.ui = (function () {
         var getExpressionList = function () {
             return getExpressionPane().children();
         };
+        
         var getTopLevelJoinSelect = function () {
             return $(editorPane.find("#top-level-join-select")[0]);
-        }
+        };
         
         var getExpressionFromSimpleMode = function () {
             // basic
@@ -1810,7 +1811,8 @@ formdesigner.ui = (function () {
                 return results[1].toXPath();
             }
             return preparsed;
-        }
+        };
+        
         var getExpressionFromUI = function () {
             if ($("#xpath-advanced-check").is(':checked')) {
                 // advanced
@@ -1915,6 +1917,20 @@ formdesigner.ui = (function () {
                     return $(expression.find(".right-question")[0]);
                 } 
                 
+                var getValidationResults = function () {
+                    return $(expression.find(".validation-results")[0]);
+                }
+                
+                var validateExpression = function(item) {
+                    var le = getLeftQuestionInput().val(),
+                        re = getRightQuestionInput().val();
+                    if (le && validate(le)[0] && re && validate(re)[0]) {
+                        getValidationResults().text("ok").addClass("success ui-icon-circle-check").removeClass("error");
+                    } else {
+                        getValidationResults().text("fix").addClass("error").removeClass("success");
+                    }
+                }
+                
                 
 	            var updateSelectOptions = function (inputControl, selectQuestion, value) {
 	                // this only works on the right box
@@ -1933,7 +1949,9 @@ formdesigner.ui = (function () {
 	                       searchDelay: 0, 
 	                       allowFreetext: false,
 	                       hintText: "Type in a select option name.",
-	                       noResultsText: "No matching options found."
+	                       noResultsText: "No matching options found.",
+	                       onAdd: validateExpression,
+	                       onDelete: validateExpression
 	                };
 	                inputControl.tokenInput(autoCompleteChildren, selectItemOptions);
 	                var found = false;
@@ -1975,16 +1993,23 @@ formdesigner.ui = (function () {
 	                input.tokenInput("add", {id: expr.toXPath(), name: expr.toXPath()});
 	            };
 	            
+                
                 // set fancy input mode on the boxes
 	            var baseOptions = {theme: "facebook", 
 	                               tokenLimit: 1, 
 	                               searchDelay: 0, 
 	                               allowFreetext: true,
 	                               hintText: "Type in a question name or drag a question here.",
-	                               noResultsText: "No questions found. Press 'ENTER' to use a freetext value."};
+	                               noResultsText: "No questions found. Press 'ENTER' to use a freetext value.",
+	                               onDelete: validateExpression
+	                               };
 	            
 	            var leftOptions = formdesigner.util.clone(baseOptions); 
+	            var rightOptions = formdesigner.util.clone(baseOptions); 
+                
+	            rightOptions.onAdd = validateExpression;
 	            leftOptions.onAdd = function (item) {
+	                validateExpression();
 	                // for the left input only, if we add a select question, 
                     // rebuild the autocomplete on the right side to support options
                     if (item.uid) {
@@ -2001,8 +2026,18 @@ formdesigner.ui = (function () {
 	            
 	            var op = createOperationSelector().appendTo(expression);
                 var right = createQuestionInGroup("right")
-                right.tokenInput(questionChoiceAutoComplete, baseOptions);
+                $("<div />").text("Delete").button().css("float", "left").appendTo(expression).click(function() {
+                    var isFirst = expression.children(".join-select").length == 0;
+                    expression.remove();
+                    if (isFirst && getExpressionList().length > 0) {
+                        // when removing the first expression, make sure to update the 
+                        // next one in the UI to not have a join, if necessary.
+                        $($(getExpressionList()[0]).children(".join-select")).remove();   
+                    }
+                });
+                $("<div />").addClass("validation-results").appendTo(expression);
                 
+                right.tokenInput(questionChoiceAutoComplete, rightOptions);
                 // also make them drop targets for the tree
 	            expression.find(".token-input-list-facebook").addClass("jstree-drop");
                 if (expOp) {
@@ -2016,15 +2051,6 @@ formdesigner.ui = (function () {
 	                // so we need to update the reference 
 	                populateTokenInputBox(getRightQuestionInput(), expOp.right, expOp.left);
 	            }
-	            $("<div />").text("Delete").button().css("float", "left").appendTo(expression).click(function() {
-	                var isFirst = expression.children(".join-select").length == 0;
-	                expression.remove();
-	                if (isFirst && getExpressionList().length > 0) {
-	                    // when removing the first expression, make sure to update the 
-	                    // next one in the UI to not have a join, if necessary.
-	                    $($(getExpressionList()[0]).children(".join-select")).remove();   
-	                }
-	            });
 	            return expression;
 	        };
 	        
