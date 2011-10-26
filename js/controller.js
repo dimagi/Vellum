@@ -761,55 +761,52 @@ formdesigner.controller = (function () {
     that.initXMLWriter = initXMLWriter;
 
     /**
-     * Checks that the form is valid (prompts the user if not).
-     *
-     * Returns a reference to the variable that will contain the xform
-     * string.  If there are no validation errors at call time,
-     * this variable will immediately be populated with the form.
-     * If there are problems, the var will not be populated until the user
-     * hits continue.  If they choose to abort the operation (to fix the
-     * form) the var will not be populated at all.
-     *
-     */
-    that.XFORM_STRING = null;
-    var generateXForm = function () {
+     * Shows the source XML in a dialog window for editing, optionally
+     * not displaying if there are validation errors and the user chooses
+     * not to continue.
+     */ 
+     
+    var showSourceXMLDialog = function () {
         function showFormInLightBox () {
-            var output = $('#fd-source');
-            if(that.XFORM_STRING){
-                output.val(that.XFORM_STRING);
-                $('#inline').click();
-            }
+            // callback to actually render the form
+            
+            var output = $('#fd-source'),
+                controls = $("#fd-source-controls");
+            
+            // clear controls
+            controls.empty();
+            
+            // populate text
+            output.val(that.form.createXForm());
+            
+            // add controls
+            var loadButton = $('<button id ="fd-loadsource-button">Update Source</button>').appendTo(controls).button();
+	        loadButton.click(function () {
+	            that.loadXForm(output.val());
+	            $.fancybox.close();
+	        });
+	
+	        var closeButton = $('<button id ="fd-close-popup-button">Close</button>').appendTo(controls).button();
+	        closeButton.click(function () {
+	            $.fancybox.close();
+	        });
+	        
+	        
+            $('#inline').click();
         }
 
         // There are validation errors but user continues anyway
         function onContinue () {
-            that.XFORM_STRING = that.form.createXForm();
             formdesigner.ui.hideConfirmDialog();
             showFormInLightBox();
 
         }
 
         function onAbort () {
-            that.XFORM_STRING = null;
             formdesigner.ui.hideConfirmDialog();
         }
 
-        //create the 'load xform' button
-        var input = $('#fd-source'),
-            button = $('#fd-parsexml-button');
         
-        button.button({
-            icons: {
-                primary : 'ui-icon-folder-open'
-            }
-        })
-        button.show();
-
-        button.click(function () {
-            $.fancybox.close();
-            that.loadXForm(input.val());
-        });
-
         var msg = "There are validation errors in the form.  Do you want to continue anyway? WARNING:" +
             "The form will not be valid and likely not perform correctly on your device!";
 
@@ -817,12 +814,10 @@ formdesigner.controller = (function () {
         if (!that.form.isFormValid()) {
             formdesigner.ui.showConfirmDialog();
         } else {
-            that.XFORM_STRING = that.form.createXForm();
             showFormInLightBox();
         }
-        return that.XFORM_STRING;
     }
-    that.generateXForm = generateXForm;
+    that.showSourceXMLDialog = showSourceXMLDialog;
 
 
     var parseXLSItext = function (str) {
@@ -913,13 +908,11 @@ formdesigner.controller = (function () {
         updateButton.click(function () {
             that.parseXLSItext(input.val());
             $.fancybox.close();
-            $(this).remove();
         });
         
         var closeButton = $('<button id ="fd-close-popup-button">Close</button>').appendTo(controls).button();
         closeButton.click(function () {
             $.fancybox.close();
-            $(this).remove();
         });
         
         // this shows the popup

@@ -1332,12 +1332,12 @@ formdesigner.ui = (function () {
         (function c_generateSource() {
              var fancyBut = $(
                      '<button id="fd-fancy-button" class="toolbarButton questionButton">'+
-                 'View/Load Source ' +
+                 'Edit Source XML' +
                '</button>');
              $('#fd-extra-advanced').append(fancyBut);
 
              fancyBut.button().click(function () {
-                 controller.generateXForm();
+                 formdesigner.controller.showSourceXMLDialog();
              });
 
          })();
