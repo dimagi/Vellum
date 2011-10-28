@@ -1162,7 +1162,7 @@ formdesigner.model = function () {
 
         mType.typeName = "Trigger/Message MugType";
         mType.controlNodeAllowedChildren = false;
-        mType.properties.bindElement.dataType.presence = 'optional';
+        mType.properties.bindElement.dataType.presence = 'notallowed';
         mType.properties.dataElement.dataValue.presence = 'optional';
 
         controlProps = mType.properties.controlElement;
@@ -1185,7 +1185,7 @@ formdesigner.model = function () {
         mType.typeName = "Multi Select Question";
         allowedChildren = ['item'];
         mType.controlNodeAllowedChildren = allowedChildren;
-        delete mType.properties.bindElement.dataType;
+        mType.properties.bindElement.dataType.visibility = "hidden";
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
         mType.mug.properties.controlElement.properties.name = "Multi-Select";
