@@ -30,7 +30,42 @@ formdesigner.controller = (function () {
         that.on('question-removed', function () {
             that.setFormChanged();
         });
+        
+        that.on('widget-value-changed', function (e) {
+            // When a widget's value changes, do whatever work you need to in 
+            // the model/UI to make sure we are in a consistent state.
+            
+            var widget = e.widget;
+            var val = widget.getValue();
+            console.log("value changed", widget);
+            if (widget.propName === 'nodeID' && val.indexOf(" ") != -1){ 
+                // attempt to sanitize nodeID
+                // TODO, still may allow some bad values
+                widget.setValue(val.replace(/\s/g,'_'));
+            }
+            
+            //short circuit the mug property changing process for when the
+            //nodeID is changed to empty-string (i.e. when the user backspaces
+            //the whole value).  This allows us to keep a reference to everything
+            //and rename smoothly to the new value the user will ultimately enter.
+            if (val === "" && (propName === 'nodeID' || propName === 'labelItextID' || propName === 'hintItextID')) {
+                return;
+            }
+            
+            // cz, not sure what this is, copied from old event handler
+            if (widget.propName === 'labelItextID' || widget.propName === 'hintItextID') {
+                var oldItextID = widget.mug.properties.controlElement.properties[propName];
+                formdesigner.model.Itext.renameItextID(oldItextID, widget.getValue());
+            }
+            
+            that.setMugPropertyValue(widget.mug.mug,
+                                     widget.groupName,
+                                     widget.propName,
+                                     widget.getValue(),
+                                     widget.mug);
 
+        });
+        
         /**
          * Remove itext of question that was just removed.
          */
@@ -277,21 +312,17 @@ formdesigner.controller = (function () {
      * @param property (string) property name
      * @param val new value the property should be set to.
      */
-     that.setMugPropertyValue = function (myMug, element, property, val, mugType) {
-         var rootProps = myMug['properties'];
-         var elProps = rootProps[element].properties,
-            propertyToChange = elProps[property], event = {};
-
-         myMug.properties[element].properties[property] = val;
-         event.type = 'property-changed';
-         event.property = property;
-         event.element = element;
-         event.val = val;
-         event.mugUfid = myMug.ufid;
-         event.mugTypeUfid = mugType.ufid;
-
-
-         myMug.fire(event);
+    that.setMugPropertyValue = function (myMug, element, property, val, mugType) {
+        console.log("update property value", myMug);
+        myMug.properties[element].properties[property] = val;
+        myMug.fire({
+			type: 'property-changed',
+			property: property,
+			element: element,
+			val: val,
+			mugUfid: myMug.ufid,
+			mugTypeUfid: mugType.ufid,
+        });
     };
 
     /**

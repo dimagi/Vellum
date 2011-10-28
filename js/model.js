@@ -724,7 +724,34 @@ formdesigner.model = function () {
                 }
             }
         },
-
+        
+        getPropertyDefinition: function (index) {
+            // get a propery definition by a string or list index
+            // assumes strings are split by the "/" character
+            if (!(index instanceof Array)) {
+                index = index.split("/");
+            } 
+            // this will raise a reference error if you give it a bad value
+            var ret = this.properties;
+            for (var i = 0; i < index.length; i++) {
+                ret = ret[index[i]];
+            }
+            return ret;
+        },
+        getPropertyValue: function (index) {
+            // get a propery value by a string or list index
+            // assumes strings are split by the "/" character
+            if (!(index instanceof Array)) {
+                index = index.split("/");
+            } 
+            // this will raise a reference error if you give it a bad value
+            var ret = this.mug;
+            for (var i = 0; i < index.length; i++) {
+                ret = ret["properties"];
+                ret = ret[index[i]];
+            }
+            return ret;
+        },
         //for validating a mug against this internal definition we have.
         validateMug : function () {
             /**
