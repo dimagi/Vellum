@@ -775,7 +775,7 @@ formdesigner.ui = (function () {
             var subconfig, sec;
             for (var i = 0; i < config.length; i++) {
                 subconfig = config[i];
-                var sec = formdesigner.widgets.getDisplaySection(config[i], mugType);
+                sec = formdesigner.widgets.getDisplaySection(config[i], mugType);
                 sec.getSectionDisplay().appendTo(content);
             }
 	        
