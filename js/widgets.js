@@ -196,19 +196,20 @@ formdesigner.widgets = (function () {
         return new cls(mugType, path);
     }
     
-    var setBaseSectionProperties = function (section, options, mugType) {
+    var setBaseSectionProperties = function (section, mugType, options) {
         // this shared method provides fake inheritance, assuming
         // it is called in a constructor on the object being constructed
         section.mugType = mugType;
         section.slug = options.slug || "anon";
         section.displayName = options.displayName;
+        console.log("elements", options.elements);
         section.elements = options.elements;
         
     }
     
-    that.GenericSection = function (options, mugType) {
+    that.GenericSection = function (mugType, options) {
         
-        setBaseSectionProperties(this, options, mugType);
+        setBaseSectionProperties(this, mugType, options);
         
                 
         this.getHeader = function () {
@@ -239,9 +240,9 @@ formdesigner.widgets = (function () {
         return this;
     };
     
-    that.AccordionSection = function (options, mugType) {
+    that.AccordionSection = function (mugType, options) {
         
-        setBaseSectionProperties(this, options, mugType);
+        setBaseSectionProperties(this, mugType, options);
         
         this.getHeader = function () {
             return $('<h3><a href="#">' + this.displayName + '</a></h3>');
@@ -253,6 +254,7 @@ formdesigner.widgets = (function () {
             var toWidget = function (elementpath) {
                 return that.widgetFromMugAndPath(inner.mugType, elementpath);
             }
+            console.log("elements", this.elements);
             return this.elements.map(toWidget);
         }
         
@@ -275,6 +277,8 @@ formdesigner.widgets = (function () {
         };
         return this;
     };
+    
+    that.ITextSection = that.AccordionSection;
     
     that.sectionTypeFromPropertyDefinition = function (propertyDef) {
         switch (propertyDef.type) {

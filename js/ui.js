@@ -752,30 +752,35 @@ formdesigner.ui = (function () {
             $("<div />").addClass("fd-props-heading").text(mugType.typeName).attr("id", "fd-props-mugtype-info").appendTo(content);
             
             // TODO: where does this belong? eventually we want this to be per-question-type
-            var config = [{ slug: "main",
-                            type: "generic",
+            var w = formdesigner.widgets;
+            var config = [new w.GenericSection(mugType, { 
+                            slug: "main",
                             displayName: "Main Properties",
-                            elements: ["dataElement/nodeID", "bindElement/dataType",
-                                       "bindElement/requiredAttr"]},
-                          { slug: "logic",
-                            type: "generic",
+                            elements: ["dataElement/nodeID", "controlElement/label",
+                                       "bindElement/dataType",
+                                       "bindElement/requiredAttr"]}),
+                          new w.ITextSection(mugType, {
+                            slug: "itext",
+                            displayName: "Translations / Multimedia",
+                            elements: []}),
+                          new w.AccordionSection(mugType, {
+                            slug: "logic",
                             displayName: "Logic Properties",
                             elements: ["bindElement/relevantAttr", "bindElement/calculateAttr", 
-                                       "bindElement/constraintAttr"]},
-                          { slug: "advanced",
+                                       "bindElement/constraintAttr"]}),
+                          new w.AccordionSection(mugType, { 
+                            slug: "advanced",
                             type: "accordion",
                             displayName: "Advanced Properties",
                             elements: ["dataElement/dataValue", "dataElement/keyAttr", "dataElement/xmlnsAttr", 
                                        "bindElement/nodeID", "bindElement/preload", "bindElement/preloadParams",
                                        "controlElement/hintLabel", "controlElement/labelItextID", "controlElement/hintItextID"
-                                       ]}
+                                       ]})
                           ];
-                          
         
-            var subconfig, sec;
+            var sec;
             for (var i = 0; i < config.length; i++) {
-                subconfig = config[i];
-                sec = formdesigner.widgets.getDisplaySection(config[i], mugType);
+                sec = config[i];
                 sec.getSectionDisplay().appendTo(content);
             }
 	        
