@@ -504,8 +504,13 @@ formdesigner.model = function () {
             return null;
         };
         mugType.getItextBlock = function (lang) {
-            return that.Itext.getBlock(this.getItextID(), lang);
+            return that.Itext.getItextVals(this.getItextID(), lang);
         };
+        
+        mugType.getAllItextForms = function () {
+            return that.Itext.getExhaustiveFormSet(this.getItextID()); 
+        };
+        
         
         //Bind the mug to it's mugType
         mugType.mug = mug || undefined;
@@ -2677,7 +2682,7 @@ formdesigner.model = function () {
                 throw 'Language:' + lang + ' does not exist in Itext! Attempted to retrieve Itext data for iID:' + iID;
             }
             if(!that.data[lang][iID]){
-                return null;
+                return {};
             }else{
                 return that.data[lang][iID];
             }
@@ -2713,6 +2718,24 @@ formdesigner.model = function () {
             return ret;
         };
         
+        /**
+         * For a given id, get the full formset looking across all languages
+         * 
+         */
+        that.getExhaustiveFormSet = function (id) {
+            var langs = that.getLanguages();
+            var ret = ["default"];
+            var vals, val;
+            for (var i = 0; i < langs.length; i++) {
+                vals = that.getItextVals(id, langs[i]);
+                for (val in vals) {
+                    if (vals.hasOwnProperty(val) && ret.indexOf(val) === -1) {
+                        ret.push(val);
+                    }
+                }
+            }
+            return ret;
+        };
         /**
          * If the itext value exists, return it, otherwise return a
          * default value found elsewhere in the form.
@@ -2810,21 +2833,7 @@ formdesigner.model = function () {
 
         };
 
-        /**
-         * Get an itext dictionary for an id and language
-         */
-        that.getBlock = function (iID, lang) {
-            if(!that.data[lang]){
-                // throw 'Attempted to retrieve Itext value from language that does not exist!' + exceptionString(iID, lang, form);
-                that.addLanguage(lang);
-            }
-            if(!that.data[lang][iID]){
-                // throw 'Attempted to retrieve Itext value that does not exist!' + exceptionString(iID,lang,form)
-                return {};
-            }
-            return that.data[lang][iID];
-        }
-
+        
         /**
          * Must specify all params, use form='default' or null for the default (no special form) form.
          * Throws exception if iID or lang does not exist. If no data is available for that form,
@@ -2834,7 +2843,7 @@ formdesigner.model = function () {
          * @param form
          */
         that.getValue = function(iID, lang, form){
-            var block = that.getBlock(iID, lang);
+            var block = that.getItextVals(iID, lang);
             
             if(!form){
                 form = 'default';

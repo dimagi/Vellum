@@ -396,7 +396,7 @@ formdesigner.widgets = (function () {
             
             // TODO: get existing itext from mug
             var itextWidget, subBlock, subSec;
-            
+            var fullFormList = mugType.getAllItextForms();
             for (var i = 0; i < this.langs.length; i++) {
                 subSec = $("<div />").addClass("itext-language-section").data("language", this.langs[i]);
                 subSec.appendTo(sec);
@@ -405,26 +405,12 @@ formdesigner.widgets = (function () {
                 
                 subBlock = mugType.getItextBlock(this.langs[i]);
                 
-                // make sure we include a default
-                if (!subBlock["default"]) {
-                    subBlock["default"] = "";
-                }
-                
-                // add default display first
-                itextWidget = new that.ITextWidget(mugType, this.langs[i], "default");
-                itextWidget.setValue(subBlock["default"]);
-                itextWidget.getUIElement().appendTo(subSec);
-                
-                // loop through remaining items, add to UI
-                for (var prop in subBlock) {
-                    if (prop !== "default") {
-	                    if (subBlock.hasOwnProperty(prop)) {
-	                        // add widget
-	                        itextWidget = new that.ITextWidget(mugType, this.langs[i], prop);
-	                        itextWidget.setValue(subBlock[prop]);
-                            itextWidget.getUIElement().appendTo(subSec);
-	                    }
-	                }
+                // loop through items, add to UI
+                for (var j = 0; j < fullFormList.length; j++) {
+                    // add widget
+	                itextWidget = new that.ITextWidget(mugType, this.langs[i], fullFormList[j]);
+	                itextWidget.setValue(subBlock[fullFormList[j]]);
+                    itextWidget.getUIElement().appendTo(subSec);
                 }
             }
             
