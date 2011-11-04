@@ -351,10 +351,10 @@ formdesigner.model = function () {
 
 
     ///////////////////////////////////////////////////////////////////////////////////////
-//////    DEFINITION (MUG TYPE) CODE /////////////////////////////////////////////////////////////////
+    //////    DEFINITION (MUG TYPE) CODE //////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////////////////////
 
-        /**
+    /**
      * Creates a new mug (with default init values)
      * based on the template (MugType) given by the argument.
      *
@@ -478,6 +478,35 @@ formdesigner.model = function () {
             )
         }
 
+        
+        // utility functions
+        mugType.hasControlElement = function () {
+            return Boolean(this.mug.properties.controlElement);
+        }
+        
+        // Add some useful functions for dealing with itext.
+        mugType.setItextID = function (val) {
+            if (this.hasControlElement()) {
+                this.mug.properties.controlElement.properties.labelItextID = val;
+            }
+        };
+        mugType.getItextID = function () {
+            var itext;
+            if (this.hasControlElement()) {
+                if (this.mug.properties.controlElement.properties.labelItextID) {
+                    return this.mug.properties.controlElement.properties.labelItextID;
+                } else {
+                    itext = formdesigner.util.getNewItextID(this);
+                    this.setItextId(itext);
+                    return itext;
+                }
+            }    
+            return null;
+        };
+        mugType.getItextBlock = function (lang) {
+            return that.Itext.getBlock(this.getItextID(), lang);
+        };
+        
         //Bind the mug to it's mugType
         mugType.mug = mug || undefined;
 
@@ -2782,6 +2811,21 @@ formdesigner.model = function () {
         };
 
         /**
+         * Get an itext dictionary for an id and language
+         */
+        that.getBlock = function (iID, lang) {
+            if(!that.data[lang]){
+                // throw 'Attempted to retrieve Itext value from language that does not exist!' + exceptionString(iID, lang, form);
+                that.addLanguage(lang);
+            }
+            if(!that.data[lang][iID]){
+                // throw 'Attempted to retrieve Itext value that does not exist!' + exceptionString(iID,lang,form)
+                return {};
+            }
+            return that.data[lang][iID];
+        }
+
+        /**
          * Must specify all params, use form='default' or null for the default (no special form) form.
          * Throws exception if iID or lang does not exist. If no data is available for that form,
          * returns null.
@@ -2790,27 +2834,18 @@ formdesigner.model = function () {
          * @param form
          */
         that.getValue = function(iID, lang, form){
-            if(!that.data[lang]){
-//                throw 'Attempted to retrieve Itext value from language that does not exist!' + exceptionString(iID,lang,form)
-                that.addLanguage(lang);
-                return null;
-            }
-            if(!that.data[lang][iID]){
-//                throw 'Attempted to retrieve Itext value that does not exist!' + exceptionString(iID,lang,form)
-                return null;
-            }
-
+            var block = that.getBlock(iID, lang);
+            
             if(!form){
                 form = 'default';
             }
 
-            if(!that.data[lang][iID][form]){
+            if(!block[form]){
                 return null;
             }
-
-            return that.data[lang][iID][form];
+            return block[form];
         };
-
+        
         /**
          * Gets all the data associated with a language in the form of a
          * dictionary object.  Structure:

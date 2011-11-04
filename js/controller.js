@@ -48,7 +48,7 @@ formdesigner.controller = (function () {
             //nodeID is changed to empty-string (i.e. when the user backspaces
             //the whole value).  This allows us to keep a reference to everything
             //and rename smoothly to the new value the user will ultimately enter.
-            if (val === "" && (propName === 'nodeID' || propName === 'labelItextID' || propName === 'hintItextID')) {
+            if (val === "" && (widget.propName === 'nodeID' || widget.propName === 'labelItextID' || widget.propName === 'hintItextID')) {
                 return;
             }
             
@@ -58,12 +58,7 @@ formdesigner.controller = (function () {
                 formdesigner.model.Itext.renameItextID(oldItextID, widget.getValue());
             }
             
-            that.setMugPropertyValue(widget.mug.mug,
-                                     widget.groupName,
-                                     widget.propName,
-                                     widget.getValue(),
-                                     widget.mug);
-
+            widget.save();
         });
         
         /**

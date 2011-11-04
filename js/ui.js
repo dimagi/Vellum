@@ -488,7 +488,8 @@ formdesigner.ui = (function () {
             currentLang = formdesigner.currentItextDisplayLanguage;
             mugType = formdesigner.controller.getCurrentlySelectedMugType();
             if(!ishint){
-                isRequired = true; //at present we can give everything an Itext ID so...
+                // at present we give everything an Itext ID so make it required
+                isRequired = true; 
                 iID = mugType.mug.properties.controlElement.properties.labelItextID;
             } else {
                 isRequired = (mugType.properties.controlElement.hintItextID.presence === 'required') ||
@@ -756,17 +757,18 @@ formdesigner.ui = (function () {
             var config = [new w.GenericSection(mugType, { 
                             slug: "main",
                             displayName: "Main Properties",
-                            elements: ["dataElement/nodeID", "controlElement/label",
-                                       "bindElement/dataType",
-                                       "bindElement/requiredAttr"]}),
+                            elements: ["dataElement/nodeID", 
+                                       "bindElement/dataType"
+                                       ]}),
                           new w.ITextSection(mugType, {
                             slug: "itext",
-                            displayName: "Translations / Multimedia",
+                            displayName: "Content",
                             elements: []}),
                           new w.AccordionSection(mugType, {
                             slug: "logic",
                             displayName: "Logic Properties",
-                            elements: ["bindElement/relevantAttr", "bindElement/calculateAttr", 
+                            elements: ["bindElement/requiredAttr",
+                                       "bindElement/relevantAttr", "bindElement/calculateAttr", 
                                        "bindElement/constraintAttr"]}),
                           new w.AccordionSection(mugType, { 
                             slug: "advanced",
@@ -774,7 +776,8 @@ formdesigner.ui = (function () {
                             displayName: "Advanced Properties",
                             elements: ["dataElement/dataValue", "dataElement/keyAttr", "dataElement/xmlnsAttr", 
                                        "bindElement/nodeID", "bindElement/preload", "bindElement/preloadParams",
-                                       "controlElement/hintLabel", "controlElement/labelItextID", "controlElement/hintItextID"
+                                       "controlElement/label", "controlElement/hintLabel", "controlElement/labelItextID", 
+                                       "controlElement/hintItextID"
                                        ]})
                           ];
         

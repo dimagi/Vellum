@@ -441,6 +441,12 @@ body{
     margin: 5px;
 }
 
+/* new question UI styling */
+
+.question-section {
+    margin-bottom: 1em;	
+}
+
 /* xpath editor styling */
 
 /* stolen from blueprint */

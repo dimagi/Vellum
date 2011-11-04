@@ -13,16 +13,12 @@ formdesigner.widgets = (function () {
         return path.split("/")[1];
     };
     
-    var setBaseWidgetProperties = function(widget, mugType, path) {
+    var setBaseWidgetProperties = function(widget, mugType) {
+        // set properties shared by all widgets
+        
         // this shared method provides fake inheritance, assuming
         // it is called in a constructor on the object being constructed
         widget.mug = mugType;
-        widget.path = path;
-        widget.definition = mugType.getPropertyDefinition(path);
-        widget.currentValue = mugType.getPropertyValue(path);
-        widget.groupName = that.getGroupName(widget.path);
-        widget.propName = that.getPropertyName(widget.path);
-        widget.itemID = path.split("/").join("-") + '-' + 'input';
                 
         widget.getDisplayName = function () {
             // use the display text, or the property name if none found
@@ -38,6 +34,10 @@ formdesigner.widgets = (function () {
             throw ("must be overridden");
         };
         
+        widget.getID = function () {
+            throw ("must be overridden");
+        };
+        
         widget.setValue = function (val) {
             // noop
         };
@@ -45,6 +45,7 @@ formdesigner.widgets = (function () {
         widget.getValue = function () {
             // noop
         };
+        
         
         widget.fireValueChanged = function () {
             var ref = this;
@@ -58,18 +59,45 @@ formdesigner.widgets = (function () {
         
         widget.getUIElement = function () {
             // gets the whole widget (label + control)
-	        var uiElem = $("<li />").attr("id", this.path.split("/").join("-")).addClass("fd-property");
+	        var uiElem = $("<li />").attr("id", this.getID()).addClass("fd-property");
 	        uiElem.append(this.getLabel());
 	        uiElem.append(this.getControl());
 	        return uiElem;
-        }
+        };
         
     };
     
+    var setNormalWidgetProperties = function(widget, mugType, path) {
+        // for "normal" = non-itext widgets.
+        
+        setBaseWidgetProperties(widget, mugType, path);
+        widget.path = path;
+        widget.definition = mugType.getPropertyDefinition(path);
+        widget.currentValue = mugType.getPropertyValue(path);
+        widget.groupName = that.getGroupName(widget.path);
+        widget.propName = that.getPropertyName(widget.path);
+        
+        widget.getID = function () {
+            return this.path.split("/").join("-");
+        };
+        
+        
+        // TODO, is this really necessary
+        widget.itemID = widget.getID() + '-' + 'input';
+        
+        widget.save = function () {
+            formdesigner.controller.setMugPropertyValue(this.mug.mug,
+                                                        this.groupName,
+                                                        this.propName,
+                                                        this.getValue(),
+                                                        this.mug);
+        };
+        
+    };
     that.TextWidget = function (mugType, path) {
         // a text widget 
         
-        setBaseWidgetProperties(this, mugType, path);
+        setNormalWidgetProperties(this, mugType, path);
 	    
 	    var control = $('<div />').addClass("fd-prop-input-div chzn-container");
         var input = $("<input />").addClass("fd-property-input").appendTo(control);
@@ -92,10 +120,10 @@ formdesigner.widgets = (function () {
     
     that.CheckboxWidget = function (mugType, path) {
                 
-        setBaseWidgetProperties(this, mugType, path);
+        setNormalWidgetProperties(this, mugType, path);
         
         var control = $('<div />').addClass("fd-prop-input-div-checkbox");
-        var input = $("<input />").addClass("fd-property-checkbox")
+        var input = $("<input />").addClass("fd-property-checkbox");
         input.attr("type", "checkbox").attr("id", this.itemID);
         control.append(input);
         
@@ -117,7 +145,7 @@ formdesigner.widgets = (function () {
     
     that.XPathWidget = function (mugType, path) {
                 
-        setBaseWidgetProperties(this, mugType, path);
+        setNormalWidgetProperties(this, mugType, path);
         
         this.getControl = function () {
             var control = $('<div />').addClass("fd-prop-input-div chzn-container");
@@ -138,10 +166,63 @@ formdesigner.widgets = (function () {
         return this;    
     };
     
+    that.ITextWidget = function(mugType, language, form) {
+        
+        setBaseWidgetProperties(this, mugType);
+        
+        this.language = language;
+        this.form = form;
+        
+        this.getID = function () {
+            return "itext-" + this.language + "-" + this.form;
+        };
+        
+        this.getType = function () {
+            if (this.form === "default") {
+                return "Display Text";
+            }
+            return this.form;
+        };
+        
+        this.getDisplayName = function () {
+            return this.getType();
+        };
+        
+        this.setValue = function (value) {
+            input.val(value);
+        };
+        
+        this.getValue = function() {
+            return input.val();
+        };
+        
+        
+        this.save = function () {
+            // override save to reference the itext, rather than
+            // a property of the mug
+            formdesigner.model.Itext.setValue(this.mug.getItextID(),
+                                              this.language,
+                                              this.form,
+                                              this.getValue());
+        };
+        
+        
+        var control = $('<div />').addClass("fd-prop-input-div chzn-container");
+        var input = $("<input />").addClass("fd-property-input").appendTo(control);
+        
+        this.getControl = function () {
+            return control;
+        };
+        
+        
+        input.keyup(this.fireValueChanged());
+        
+    };
+    
     that.SelectWidget = function (mugType, path) {
         // a select widget 
         
-        setBaseWidgetProperties(this, mugType, path);
+        setNormalWidgetProperties(this, mugType, path);
         
         var control = $("<span />").addClass("fd-prop-input-div");
         var input = $("<select />").css("width", "300px").addClass("chzn-select");
@@ -169,7 +250,6 @@ formdesigner.widgets = (function () {
         };
         
         this.getValue = function() {
-            console.log("selecty value is ", input.val());
             return input.val();
         };
         
@@ -202,9 +282,7 @@ formdesigner.widgets = (function () {
         section.mugType = mugType;
         section.slug = options.slug || "anon";
         section.displayName = options.displayName;
-        console.log("elements", options.elements);
         section.elements = options.elements;
-        
     }
     
     that.GenericSection = function (mugType, options) {
@@ -229,7 +307,7 @@ formdesigner.widgets = (function () {
         }
         this.getSectionDisplay = function () {
             // returns the actual display for the section
-            var sec = $("<div />").attr("id", this.slug);
+            var sec = $("<div />").attr("id", this.slug).addClass("question-section");
             sec.append(this.getHeader());
             this.getWidgets().map(function (elemWidget) {
                 elemWidget.setValue(elemWidget.currentValue);
@@ -254,13 +332,12 @@ formdesigner.widgets = (function () {
             var toWidget = function (elementpath) {
                 return that.widgetFromMugAndPath(inner.mugType, elementpath);
             }
-            console.log("elements", this.elements);
             return this.elements.map(toWidget);
         }
         
         this.getSectionDisplay = function () {
             // returns the actual display for the section
-            var sec = $("<div />").attr("id", this.slug);
+            var sec = $("<div />").attr("id", this.slug).addClass("question-section");
             sec.append(this.getHeader());
             var inner = $('<div />').appendTo(sec);
             this.getWidgets().map(function (elemWidget) {
@@ -278,7 +355,92 @@ formdesigner.widgets = (function () {
         return this;
     };
     
-    that.ITextSection = that.AccordionSection;
+    that.ITextSection = function (mugType, options) {
+        
+        // TODO: reconcile with copy/pasted code
+        setBaseSectionProperties(this, mugType, options);
+        
+        this.getHeader = function () {
+            // TODO: could swap this out for something else
+            // this is copy/pasted from makeUL in ui.js
+            return $('<ul class="fd-props-ul"><span class="fd-props-heading">' + this.displayName + '</span></ul>');
+        };
+        
+        var sec = $("<div />").attr("id", this.slug).addClass("question-section");
+        
+        var addItextType = this.addItextType = function (form) {
+            sec.find(".itext-language-section").each(function () {
+                var lang = $(this).data("language");
+                itextWidget = new that.ITextWidget(mugType, lang, form);
+                itextWidget.getUIElement().appendTo($(this));
+            });            
+        };
+        
+        this.getSectionDisplay = function () {
+            // returns the actual display for the section
+            sec.append(this.getHeader());
+            var inner = $('<div />').appendTo(sec);
+            
+            // get languages
+            this.langs = formdesigner.model.Itext.getLanguages();
+            this.controls = [];
+            
+            // TODO: get existing itext from mug
+            var itextWidget, subBlock, subSec;
+            
+            for (var i = 0; i < this.langs.length; i++) {
+                subSec = $("<div />").addClass("itext-language-section").data("language", this.langs[i]);
+                subSec.appendTo(inner);
+                $('<ul class="fd-props-ul"><span class="fd-props-heading">' + this.langs[i] + '</span></ul>').appendTo(subSec);
+                subBlock = mugType.getItextBlock(this.langs[i]);
+                
+                // make sure we list the default first
+                if (!subBlock["default"]) {
+                    subBlock["default"] = "";
+                }
+                
+                // add default display first
+                itextWidget = new that.ITextWidget(mugType, this.langs[i], "default");
+                itextWidget.setValue(subBlock["default"]);
+                itextWidget.getUIElement().appendTo(subSec);
+                
+                // loop through remaining items
+                for (var prop in subBlock) {
+                    if (prop !== "default") {
+	                    if (subBlock.hasOwnProperty(prop)) {
+	                        // add widget
+	                        itextWidget = new that.ITextWidget(mugType, this.langs[i], prop);
+	                        itextWidget.setValue(subBlock[prop]);
+                            itextWidget.getUIElement().appendTo(subSec);
+	                    }
+	                }
+                }
+            }
+            
+            var addButton = $("<div />").text("Add Content Item").button().appendTo(inner);
+            addButton.click(function () {
+                var dialog = $("#fd-dialog-confirm");
+                dialog.dialog( "destroy" );
+                dialog.empty();
+                $("<label />").attr("for", "new-itext-id").text("Content type: ").appendTo(dialog);
+                var input = $("<input />").addClass("fd-property-input").attr("id", "new-itext-id").appendTo(dialog);
+                dialog.dialog({
+                    title: "New Content Item Type",
+                    buttons: {
+                        "Add": function () {
+                            addItextType(input.val());
+                            $(this).dialog("close");
+                        },
+                        "Cancel": function () {
+                            $(this).dialog("close");
+                        }
+                    }
+               });
+            });
+            return sec;
+        };
+        
+    };
     
     that.sectionTypeFromPropertyDefinition = function (propertyDef) {
         switch (propertyDef.type) {
