@@ -37,7 +37,6 @@ formdesigner.controller = (function () {
             
             var widget = e.widget;
             var val = widget.getValue();
-            console.log("value changed", widget);
             if (widget.propName === 'nodeID' && val.indexOf(" ") != -1){ 
                 // attempt to sanitize nodeID
                 // TODO, still may allow some bad values
@@ -308,7 +307,6 @@ formdesigner.controller = (function () {
      * @param val new value the property should be set to.
      */
     that.setMugPropertyValue = function (myMug, element, property, val, mugType) {
-        console.log("update property value", myMug);
         myMug.properties[element].properties[property] = val;
         myMug.fire({
 			type: 'property-changed',
