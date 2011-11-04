@@ -750,7 +750,7 @@ formdesigner.ui = (function () {
             var content = $("#fd-props-content").empty();
             
             // Add heading to indicate what kind of question vellum thinks this is
-            $("<div />").addClass("fd-props-heading").text(mugType.typeName).attr("id", "fd-props-mugtype-info").appendTo(content);
+            $("<h1 />").text(mugType.typeName).attr("id", "fd-props-mugtype-info").appendTo(content);
             
             // TODO: where does this belong? eventually we want this to be per-question-type
             var w = formdesigner.widgets;

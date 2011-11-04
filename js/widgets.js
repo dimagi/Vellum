@@ -26,7 +26,7 @@ formdesigner.widgets = (function () {
         }
         
         widget.getLabel = function () {
-            var label = $("<span />").addClass("fd-property-text").text(this.getDisplayName()); 
+            var label = $("<label />").text(this.getDisplayName()).attr("for", this.getID()); 
             return label;
         };
         
@@ -59,7 +59,7 @@ formdesigner.widgets = (function () {
         
         widget.getUIElement = function () {
             // gets the whole widget (label + control)
-	        var uiElem = $("<li />").attr("id", this.getID()).addClass("fd-property");
+	        var uiElem = $("<div />");
 	        uiElem.append(this.getLabel());
 	        uiElem.append(this.getControl());
 	        return uiElem;
@@ -99,11 +99,10 @@ formdesigner.widgets = (function () {
         
         setNormalWidgetProperties(this, mugType, path);
 	    
-	    var control = $('<div />').addClass("fd-prop-input-div chzn-container");
-        var input = $("<input />").addClass("fd-property-input").appendTo(control);
+	    var input = $("<input />").attr("id", this.getID()).attr("type", "text");
             
 	    this.getControl = function () {
-            return control;
+            return input;
         };
         
         this.setValue = function (value) {
@@ -122,13 +121,19 @@ formdesigner.widgets = (function () {
                 
         setNormalWidgetProperties(this, mugType, path);
         
-        var control = $('<div />').addClass("fd-prop-input-div-checkbox");
-        var input = $("<input />").addClass("fd-property-checkbox");
-        input.attr("type", "checkbox").attr("id", this.itemID);
-        control.append(input);
+        var input = $("<input />").attr("id", this.getID());
+        input.attr("type", "checkbox");
         
         this.getControl = function () {
-	        return control;
+	        return input;
+        };
+        
+        this.getUIElement = function () {
+            // override this because the label comes after the control
+            var uiElem = $("<div />");
+            uiElem.append(this.getControl());
+            uiElem.append(this.getLabel());
+            return uiElem;
         };
         
         this.setValue = function (value) {
@@ -147,23 +152,41 @@ formdesigner.widgets = (function () {
                 
         setNormalWidgetProperties(this, mugType, path);
         
+        
+        this.setValue = function (value) {
+            input.val(value);
+        };
+        
+        this.getValue = function() {
+            return input.val();
+        };
+        
+        
+        var input = $("<input />").attr("id", this.getID()).attr("type", "text");
+        var xPathButton = $('<button />').addClass("xpath-edit-button").text("Edit").button();
+        xPathButton.data("group", this.groupName).data("prop", this.propName).data("inputControlID", this.itemID);
+        xPathButton.click(function () {
+            formdesigner.controller.displayXPathEditor({
+                group:    $(this).data("group"),
+                property: $(this).data("prop"),
+                value:    $("#" + $(this).data("inputControlID")).val()
+            });
+        });
+        
         this.getControl = function () {
-            var control = $('<div />').addClass("fd-prop-input-div chzn-container");
-		    var input = $("<input />").attr("id", this.itemID).css("width", "220px").appendTo(control);
-		    var xPathButton = $('<button />').addClass("xpath-edit-button").text("Edit").button();
-		    xPathButton.data("group", this.groupName).data("prop", this.propName).data("inputControlID", this.itemID);
-		    xPathButton.click(function () {
-		        formdesigner.controller.displayXPathEditor({
-		            group:    $(this).data("group"),
-		            property: $(this).data("prop"),
-		            value:    $("#" + $(this).data("inputControlID")).val()
-		        });
-		    });
-		    control.append(xPathButton);
-		    return control;
+            return input;
 		};
         
-        return this;    
+        this.getUIElement = function () {
+            // gets the whole widget (label + control)
+            var uiElem = $("<div />");
+            uiElem.append(this.getLabel());
+            uiElem.append(this.getControl());
+            uiElem.append(xPathButton);
+            return uiElem;
+        };
+        
+        return this;
     };
     
     that.ITextWidget = function(mugType, language, form) {
@@ -207,16 +230,13 @@ formdesigner.widgets = (function () {
         };
         
         
-        var control = $('<div />').addClass("fd-prop-input-div chzn-container");
-        var input = $("<input />").addClass("fd-property-input").appendTo(control);
+        var input = $("<input />").attr("id", this.getID()).attr("type", "text");
         
         this.getControl = function () {
-            return control;
+            return input;
         };
         
-        
         input.keyup(this.fireValueChanged());
-        
     };
     
     that.SelectWidget = function (mugType, path) {
@@ -224,9 +244,7 @@ formdesigner.widgets = (function () {
         
         setNormalWidgetProperties(this, mugType, path);
         
-        var control = $("<span />").addClass("fd-prop-input-div");
-        var input = $("<select />").css("width", "300px").addClass("chzn-select");
-        input.appendTo(control);
+        var input = $("<select />").attr("id", this.getID()).addClass("chzn-select");
         input.append($('<option value="blank" />'));
         for (i in this.definition.values) {
             if (this.definition.values.hasOwnProperty(i)) {
@@ -242,7 +260,7 @@ formdesigner.widgets = (function () {
         }
     
         this.getControl = function () {
-        	return control;
+        	return input;
         };
         
         this.setValue = function (value) {
@@ -283,19 +301,17 @@ formdesigner.widgets = (function () {
         section.slug = options.slug || "anon";
         section.displayName = options.displayName;
         section.elements = options.elements;
+        
+        section.getHeader = function () {
+            return $('<h2 />').text(this.displayName);
+        };
+        
     }
     
     that.GenericSection = function (mugType, options) {
         
         setBaseSectionProperties(this, mugType, options);
-        
                 
-        this.getHeader = function () {
-            // TODO: could swap this out for something else
-            // this is copy/pasted from makeUL in ui.js
-            return $('<ul class="fd-props-ul"><span class="fd-props-heading">' + this.displayName + '</span></ul>');
-        };
-        
         this.getWidgets = function () {
                     
             var inner = this;
@@ -307,13 +323,14 @@ formdesigner.widgets = (function () {
         }
         this.getSectionDisplay = function () {
             // returns the actual display for the section
-            var sec = $("<div />").attr("id", this.slug).addClass("question-section");
-            sec.append(this.getHeader());
+            
+            var header = this.getHeader();
+            var sec = $("<fieldset />").attr("id", this.slug).addClass("question-section");
             this.getWidgets().map(function (elemWidget) {
                 elemWidget.setValue(elemWidget.currentValue);
                 elemWidget.getUIElement().appendTo(sec);
             });
-            return sec;
+            return header.add(sec);
         };
         return this;
     };
@@ -337,8 +354,8 @@ formdesigner.widgets = (function () {
         
         this.getSectionDisplay = function () {
             // returns the actual display for the section
-            var sec = $("<div />").attr("id", this.slug).addClass("question-section");
-            sec.append(this.getHeader());
+            var sec = $("<fieldset />").attr("id", this.slug).addClass("question-section");
+            this.getHeader().appendTo(sec);
             var inner = $('<div />').appendTo(sec);
             this.getWidgets().map(function (elemWidget) {
                 elemWidget.setValue(elemWidget.currentValue);
@@ -360,13 +377,7 @@ formdesigner.widgets = (function () {
         // TODO: reconcile with copy/pasted code
         setBaseSectionProperties(this, mugType, options);
         
-        this.getHeader = function () {
-            // TODO: could swap this out for something else
-            // this is copy/pasted from makeUL in ui.js
-            return $('<ul class="fd-props-ul"><span class="fd-props-heading">' + this.displayName + '</span></ul>');
-        };
-        
-        var sec = $("<div />").attr("id", this.slug).addClass("question-section");
+        var sec = $("<fieldset />").attr("id", this.slug).addClass("question-section");
         
         var addItextType = this.addItextType = function (form) {
             sec.find(".itext-language-section").each(function () {
@@ -378,9 +389,7 @@ formdesigner.widgets = (function () {
         
         this.getSectionDisplay = function () {
             // returns the actual display for the section
-            sec.append(this.getHeader());
-            var inner = $('<div />').appendTo(sec);
-            
+            var header = this.getHeader()
             // get languages
             this.langs = formdesigner.model.Itext.getLanguages();
             this.controls = [];
@@ -390,11 +399,13 @@ formdesigner.widgets = (function () {
             
             for (var i = 0; i < this.langs.length; i++) {
                 subSec = $("<div />").addClass("itext-language-section").data("language", this.langs[i]);
-                subSec.appendTo(inner);
-                $('<ul class="fd-props-ul"><span class="fd-props-heading">' + this.langs[i] + '</span></ul>').appendTo(subSec);
+                subSec.appendTo(sec);
+                // sub heading for language
+                $("<h3 />").text(this.langs[i]).appendTo(subSec);
+                
                 subBlock = mugType.getItextBlock(this.langs[i]);
                 
-                // make sure we list the default first
+                // make sure we include a default
                 if (!subBlock["default"]) {
                     subBlock["default"] = "";
                 }
@@ -404,7 +415,7 @@ formdesigner.widgets = (function () {
                 itextWidget.setValue(subBlock["default"]);
                 itextWidget.getUIElement().appendTo(subSec);
                 
-                // loop through remaining items
+                // loop through remaining items, add to UI
                 for (var prop in subBlock) {
                     if (prop !== "default") {
 	                    if (subBlock.hasOwnProperty(prop)) {
@@ -417,7 +428,7 @@ formdesigner.widgets = (function () {
                 }
             }
             
-            var addButton = $("<div />").text("Add Content Item").button().appendTo(inner);
+            var addButton = $("<div />").text("Add Content Item").button().appendTo(sec);
             addButton.click(function () {
                 var dialog = $("#fd-dialog-confirm");
                 dialog.dialog( "destroy" );
@@ -437,7 +448,8 @@ formdesigner.widgets = (function () {
                     }
                });
             });
-            return sec;
+            
+            return header.add(sec);
         };
         
     };
