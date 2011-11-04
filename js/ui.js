@@ -497,37 +497,12 @@ formdesigner.ui = (function () {
             $("<h1 />").text(mugType.typeName).attr("id", "fd-props-mugtype-info").appendTo(content);
             
             // TODO: where does this belong? eventually we want this to be per-question-type
-            var w = formdesigner.widgets;
-            var config = [new w.GenericSection(mugType, { 
-                            slug: "main",
-                            displayName: "Main Properties",
-                            elements: ["dataElement/nodeID", 
-                                       "bindElement/dataType"
-                                       ]}),
-                          new w.ITextSection(mugType, {
-                            slug: "itext",
-                            displayName: "Content",
-                            elements: []}),
-                          new w.AccordionSection(mugType, {
-                            slug: "logic",
-                            displayName: "Logic Properties",
-                            elements: ["bindElement/requiredAttr",
-                                       "bindElement/relevantAttr", "bindElement/calculateAttr", 
-                                       "bindElement/constraintAttr"]}),
-                          new w.AccordionSection(mugType, { 
-                            slug: "advanced",
-                            type: "accordion",
-                            displayName: "Advanced Properties",
-                            elements: ["dataElement/dataValue", "dataElement/keyAttr", "dataElement/xmlnsAttr", 
-                                       "bindElement/nodeID", "bindElement/preload", "bindElement/preloadParams",
-                                       "controlElement/label", "controlElement/hintLabel", "controlElement/labelItextID", 
-                                       "controlElement/hintItextID"
-                                       ]})
-                          ];
+            
+            var sections = formdesigner.widgets.getSectionListForMug(mugType);
         
             var sec;
-            for (var i = 0; i < config.length; i++) {
-                sec = config[i];
+            for (var i = 0; i < sections.length; i++) {
+                sec = sections[i];
                 sec.getSectionDisplay().appendTo(content);
             }
 	        
@@ -546,21 +521,25 @@ formdesigner.ui = (function () {
      */
     function node_select(e, data) {
         var curSelUfid = jQuery.data(data.rslt.obj[0], 'mugTypeUfid');
+        // don't do anything if we're already on the selected node
+        var curMug = formdesigner.controller.getCurrentlySelectedMugType();
         
-        formdesigner.controller.setCurrentlySelectedMugType(curSelUfid);
-        if($(e.currentTarget).attr('id') === 'fd-question-tree') {
-//            $('#fd-data-tree').jstree('select_node');
-            that.displayMugProperties(formdesigner.controller.getCurrentlySelectedMugType());
-        } else if ($(e.currentTarget).attr('id') === 'fd-data-tree') {
-//            $('#fd-question-tree').jstree('deselect_all');
-            that.displayMugDataProperties(formdesigner.controller.getCurrentlySelectedMugType());
-        }
-    }
+        // don't bother resetting everything if they just clicked
+        // on the mug that was already selected
+        if (!curMug || curMug.ufid !== curSelUfid) {
+	        formdesigner.controller.setCurrentlySelectedMugType(curSelUfid);
+	        if($(e.currentTarget).attr('id') === 'fd-question-tree') {
+	            that.displayMugProperties(formdesigner.controller.getCurrentlySelectedMugType());
+	        } else if ($(e.currentTarget).attr('id') === 'fd-data-tree') {
+	            that.displayMugDataProperties(formdesigner.controller.getCurrentlySelectedMugType());
+	        }
+	    }
+    };
     
     function selectMugTypeInUI(mugType) {
         var ufid = mugType.ufid;
         return $('#fd-question-tree').jstree('select_node', $('#'+ufid), true);
-    }
+    };
     that.selectMugTypeInUI = selectMugTypeInUI;
     
     function forceUpdateUI() {
@@ -586,7 +565,7 @@ formdesigner.ui = (function () {
         } else {
             // already selected, nothing to do 
         }
-    }
+    };
     that.forceUpdateUI = forceUpdateUI;
     
     /**
@@ -640,9 +619,6 @@ formdesigner.ui = (function () {
                 $('#fd-data-tree').jstree("move_node",elMT, elMTRef, pos, false);
             }
 
-        }).bind("deselect_all.jstree", function (e, data) {
-            formdesigner.controller.setCurrentlySelectedMugType(null);
-            formdesigner.controller.curSelUfid = null;
         });
         questionTree = $("#fd-question-tree");
     }

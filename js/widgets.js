@@ -388,7 +388,7 @@ formdesigner.widgets = (function () {
                 var lang = $(this).data("language");
                 itextWidget = new that.ITextWidget(mugType, lang, form);
                 itextWidget.getUIElement().appendTo($(this));
-            });            
+            });
         };
         
         this.getSectionDisplay = function () {
@@ -444,40 +444,63 @@ formdesigner.widgets = (function () {
         
     };
     
-    that.sectionTypeFromPropertyDefinition = function (propertyDef) {
-        switch (propertyDef.type) {
-            case "accordion":
-                return that.AccordionSection;
-            case "generic":
-            default:
-                return that.GenericSection;
+    /**
+     * Hard coded function to map mugs to the types of things
+     * that they display
+     * 
+     */
+    that.getSectionListForMug = function (mugType) {
+        
+        sections = [];
+        sections.push(that.getMainSection(mugType));
+        if (mugType.hasControlElement()) {
+            sections.push(that.getITextSection(mugType));
         }
-    };
-    that.getDisplaySection = function (config, mugType) {
-        var cls = that.sectionTypeFromPropertyDefinition(config); 
-        return new cls(config, mugType);
+        sections.push(that.getLogicSection(mugType));
+        sections.push(that.getAdvancedSection(mugType));
+        return sections;    
     };
     
+    that.getMainSection = function (mugType) {
+        return new that.GenericSection(mugType, { 
+                            slug: "main",
+                            displayName: "Main Properties",
+                            elements: ["dataElement/nodeID", 
+                                       "bindElement/dataType"]});
+                                       
+    }
+    
+    that.getITextSection = function (mugType) {
+        return new that.ITextSection(mugType, {
+                            slug: "itext",
+                            displayName: "Content",
+                            elements: []});
+    }
+    that.getLogicSection = function (mugType) {
+        return new that.AccordionSection(mugType, {
+                            slug: "logic",
+                            displayName: "Logic Properties",
+                            elements: ["bindElement/requiredAttr",
+                                       "bindElement/relevantAttr", "bindElement/calculateAttr", 
+                                       "bindElement/constraintAttr"]});
+    }
+    
+    that.getAdvancedSection = function (mugType) {
+        var elements = ["dataElement/dataValue", "dataElement/keyAttr", "dataElement/xmlnsAttr", 
+                        "bindElement/preload", "bindElement/preloadParams"];
+        var controlElements = ["controlElement/label", "controlElement/hintLabel", "controlElement/labelItextID", 
+                               "controlElement/hintItextID"];
+        if (mugType.hasControlElement()) {
+            for (var i = 0; i < controlElements.length; i++) {
+                elements.push(controlElements[i]);
+            }
+        }
+        return new that.AccordionSection(mugType, { 
+                            slug: "advanced",
+                            type: "accordion",
+                            displayName: "Advanced Properties",
+                            elements: elements});
+    }
     return that;
 }());
 
-/*
-        // this is what's left of the non-ported stuff
-        var itemID = pathParts.join("-") + '-' + 'input';
-    
-        //set some useful data properties
-        if (input) {
-            input.attr("id", itemID);
-            input.data('propName', propName);
-            input.data('groupName', groupName);
-            
-            // set initial value for each input box (if any)
-            // POTENTIAL PAIN POINT! Could be something that's not a string!
-            input.val(currVal);
-        }
-        return control;
-        
-    };
-    
-}
-*/
