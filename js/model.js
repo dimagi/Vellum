@@ -506,7 +506,9 @@ formdesigner.model = function () {
         mugType.getItextBlock = function (lang) {
             return that.Itext.getItextVals(this.getItextID(), lang);
         };
-        
+        mugType.getDisplayText = function (lang) {
+            return that.Itext.getValue(this.getItextID(),lang, 'default');
+        };
         mugType.getAllItextForms = function () {
             return that.Itext.getExhaustiveFormSet(this.getItextID()); 
         };

@@ -432,60 +432,24 @@ formdesigner.ui = (function () {
              * the other NodeID (e.g. data) gets changed and the model gets updated too.
              */
             
-            function syncNodeIDInputs(){
-                // this spaghetti is terrible :(
-                
-                // cz: what does this do?
-                function otherInputUpdate (otherIn) {
-                    var otherInput = $(otherIn),
-                                groupName = otherInput.data('groupName'),
-                                propName = otherInput.data('propName'),
-                                curMug = formdesigner.controller.getCurrentlySelectedMug(),
-                                curMugType = formdesigner.controller.getCurrentlySelectedMugType();
-
-                    //Short circuit the process of syncing the two IDs
-                    //when the text box is blank (i.e. a user backspaced away all chars).
-                    //This prevents us from getting into a hairy situation
-                    //with ItextIDs being blank/getting unsynchronized with
-                    //the data stored in Itext.
-                    if (otherInput.val() === "") {
-                        return;
-                    }
-
-                    formdesigner.controller.setMugPropertyValue(curMug,groupName,propName,otherInput.val(), curMugType);
-                    //update ItextID stuff
-                    if($('#controlElement-labelItextID-input').length > 0) { //does it have itextID?
-                        $('#controlElement-labelItextID-input').val(otherInput.val()).keyup(); //trigger keyup to have this change be taken care of in the regular way.
-                    }
-                }
-
-                // gets all input boxes with ID attribute containing 'nodeID'
-                var nodeIDBoxes = $('input[id*="nodeID"]'); 
-                if(nodeIDBoxes.length === 2){
-                    $(nodeIDBoxes[0]).keyup(function(e) {
-                        $(nodeIDBoxes[1]).val($(e.currentTarget).val());
-                        otherInputUpdate(nodeIDBoxes[1]);
-
-                    });
-                    $(nodeIDBoxes[1]).keyup(function (e) {
-                        $(nodeIDBoxes[0]).val($(e.currentTarget).val());
-                        otherInputUpdate(nodeIDBoxes[0]);
-                    });
-                }
-            }
-
             /**
              * When either bindElement.nodeID or dataElement.nodeID changes value,
              * the node label in the jstree (UITree) should be updated to reflect that change
              */
+            
             function updateUITreeNodeLabel(){
                 var mug = mugType.mug,
                         util = formdesigner.util;
 
                 mug.on('property-changed',function(e){
-                    if(e.property === 'nodeID' && !formdesigner.util.getDefaultDisplayItext(mug)){
-                        var node = $('#' + e.mugTypeUfid);
+                    var node = $('#' + e.mugTypeUfid);
+                    var displayText = mugType.getDisplayText(formdesigner.currentItextDisplayLanguage);
+                    if(e.property === 'nodeID' && !displayText){
                         $('#fd-question-tree').jstree('rename_node',node,mug.properties[e.element].properties[e.property]);
+                    } else {
+                        if (displayText && displayText !== $('#fd-question-tree').jstree("get_text", node)) {
+                            $('#fd-question-tree').jstree('rename_node', node, displayText);
+                        }
                     } 
                 });
             }
@@ -513,7 +477,7 @@ formdesigner.ui = (function () {
                     }
                 });
             }
-            syncNodeIDInputs();
+            
             updateUITreeNodeLabel();
             updateSaveState();
             updateDataViewLabels();

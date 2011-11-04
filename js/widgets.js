@@ -227,6 +227,10 @@ formdesigner.widgets = (function () {
                                               this.language,
                                               this.form,
                                               this.getValue());
+            // fire the property changed event
+            mugType.mug.fire({ type: "property-changed",
+                               mugUfid: mugType.mug.ufid,
+                               mugTypeUfid: mugType.ufid});
         };
         
         
