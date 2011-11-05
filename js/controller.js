@@ -51,9 +51,9 @@ formdesigner.controller = (function () {
                 return;
             }
             
-            // cz, not sure what this is, copied from old event handler
+            // When the itext value changes, go change the reference in our itext model
             if (widget.propName === 'labelItextID' || widget.propName === 'hintItextID') {
-                var oldItextID = widget.mug.properties.controlElement.properties[propName];
+                var oldItextID = widget.mug.mug.properties.controlElement.properties[widget.propName];
                 formdesigner.model.Itext.renameItextID(oldItextID, widget.getValue());
             }
             

@@ -186,6 +186,7 @@ formdesigner.widgets = (function () {
             return uiElem;
         };
         
+        input.keyup(this.fireValueChanged());
         return this;
     };
     
@@ -482,7 +483,7 @@ formdesigner.widgets = (function () {
                             displayName: "Logic Properties",
                             elements: ["bindElement/requiredAttr",
                                        "bindElement/relevantAttr", "bindElement/calculateAttr", 
-                                       "bindElement/constraintAttr"]});
+                                       "bindElement/constraintAttr", "bindElement/constraintMsgAttr"]});
     }
     
     that.getAdvancedSection = function (mugType) {
