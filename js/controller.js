@@ -52,11 +52,10 @@ formdesigner.controller = (function () {
             }
             
             // When the itext value changes, go change the reference in our itext model
-            if (widget.propName === 'labelItextID' || widget.propName === 'hintItextID') {
+            if (widget.propName && widget.propName.indexOf("ItextID") !== -1) {
                 var oldItextID = widget.mug.mug.properties.controlElement.properties[widget.propName];
                 formdesigner.model.Itext.renameItextID(oldItextID, widget.getValue());
-            }
-            
+            } 
             widget.save();
         });
         
@@ -1188,6 +1187,7 @@ formdesigner.controller = (function () {
                 attrs.calculateAttr = el.attr('calculate');
                 attrs.constraintAttr = el.attr('constraint');
                 attrs.constraintMsgAttr = el.attr('constraintMsg');
+                // TODO: parse constraint itext
                 attrs.requiredAttr = parseRequiredAttribute(el.attr('required'));
                 attrs.preload = el.attr("jr:preload");
                 if(!attrs.preload) {

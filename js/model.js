@@ -503,16 +503,22 @@ formdesigner.model = function () {
             }    
             return null;
         };
+        mugType.getHintItextID = function () {
+            if (this.hasControlElement()) {
+                return this.mug.properties.controlElement.properties.hintItextID;
+            }
+        };
+        mugType.getConstraintMsgItextID = function () {
+            if (this.hasControlElement()) {
+                return this.mug.properties.bindElement.properties.constraintMsgItextID;
+            }
+        };
         mugType.getItextBlock = function (lang) {
             return that.Itext.getItextVals(this.getItextID(), lang);
         };
         mugType.getDisplayText = function (lang) {
             return that.Itext.getValue(this.getItextID(),lang, 'default');
         };
-        mugType.getAllItextForms = function () {
-            return that.Itext.getExhaustiveFormSet(this.getItextID()); 
-        };
-        
         
         //Bind the mug to it's mugType
         mugType.mug = mug || undefined;
@@ -578,7 +584,20 @@ formdesigner.model = function () {
             }
 
             return 'pass';
+        },
+        constraintItextId: function (mugType, mug) {
+            var bindBlock = mugType.properties.bindElement.properties;
+            var IT = formdesigner.model.Itext;
+            if (bindBlock.constraintMsgItextID && bindBlock.constraintMsgAttr) {
+                return 'Question specifies a both a constraint message and itext. Please delete one.';
+            }
+            if (bindBlock.constraintMsgItextID && !IT.hasItextBlock(bindBlock.constraintMsgItextID, 
+                                                                    IT.getDefaultLanguage())) {
+                return 'Question has a constraint message ID but no value.';
+            }
+            return 'pass';
         }
+        
     };
 
     that.validationFuncs = validationFuncs;
@@ -677,9 +696,16 @@ formdesigner.model = function () {
                     uiType: "xpath",
                     lstring: 'Constraint Condition'
                 },
+                constraintMsgItextID: {
+                    editable: 'w',
+                    visibility: 'advanced',
+                    presence: 'optional',
+                    lstring: "Constraint Itext ID",
+                    validationFunc: validationFuncs.constraintItextId
+                },
                 constraintMsgAttr: {
                     editable: 'w',
-                    visibility: 'visible',
+                    visibility: 'hidden',
                     presence: 'optional',
                     validationFunc : function (mugType, mug) {
                         var bindBlock = mug.properties.bindElement.properties;
@@ -2135,8 +2161,10 @@ formdesigner.model = function () {
                         for (j in attrs) { //for each populated property
                             if(attrs.hasOwnProperty(j)){
                                 if(attrs[j]){ //if property has a useful bind attribute value
-                                    if(j === "constraintMsg"){
+                                    if (j === "constraintMsg"){
                                         xw.writeAttributeString("jr:constraintMsg",attrs[j]); //write it
+                                    } else if (j === "constraintItextId") {
+                                        xw.writeAttributeString("jf:constraintMsg",  "jr:itext('" + attrs[j] + "')")
                                     } else if (j === "preload") {
                                         xw.writeAttributeString("jr:preload", attrs[j]);
                                     } else if (j === "preloadParams") {
