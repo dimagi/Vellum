@@ -954,7 +954,9 @@ formdesigner.controller = (function () {
                     errorObj : e,
                     form : formString
                 });
-                throw (e);
+                console.log('E OBJ', e);
+                formdesigner.ui.setDialogInfo(e, 'ok', function(){formdesigner.ui.hideConfirmDialog();}, 'cancel', function(){formdesigner.ui.hideConfirmDialog();});
+                formdesigner.ui.showConfirmDialog();
             }
 
             formdesigner.fire({
