@@ -929,8 +929,6 @@ start();
             // TODO: fix broken test after UI refactor
             ok(isEmptyItext(IT.getItextVals(mtIID, 'en')), 'Old Itext ID should not exist in the Itext Object anymore');
             ok(!isEmptyItext(IT.getItextVals(iID, 'en')), "New Itext ID SHOULD exist in the Itext Object");
-
-            
             equal(IT.getItextVals(iID, 'en')["default"], mtVal, "Itext value is there");
 start();
 
