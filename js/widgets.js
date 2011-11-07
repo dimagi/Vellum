@@ -589,8 +589,9 @@ formdesigner.widgets = (function () {
     
     that.getAdvancedSection = function (mugType) {
         var elements = ["dataElement/dataValue", "dataElement/keyAttr", "dataElement/xmlnsAttr", 
-                        "bindElement/preload", "bindElement/preloadParams"];
-        var controlElements = ["controlElement/label", "controlElement/hintLabel", "controlElement/labelItextID", 
+                        "bindElement/preload", "bindElement/preloadParams", ];
+        var controlElements = ["controlElement/label", "controlElement/hintLabel", 
+                               "bindElement/constraintMsgAttr", "controlElement/labelItextID", 
                                "controlElement/hintItextID"];
         if (mugType.hasControlElement()) {
             for (var i = 0; i < controlElements.length; i++) {

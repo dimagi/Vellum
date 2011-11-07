@@ -1060,12 +1060,33 @@ formdesigner.controller = (function () {
         var ParseException = function (msg) {
             this.name = 'XMLParseException';
             this.message = msg;
+        };
+
+        // some helper functions used by the parser
+        var lookForNamespaced = function (element, reference) {
+            // due to the fact that FF and Webkit store namespaced
+            // values slightly differently, we have to look in 
+            // a couple different places.
+            return element.attr("jr:" + reference) || element.attr("jr\\:" + reference);
+        };
+        
+        /**
+         * Get and itext reference from a value. Returns nothing if it can't
+         * parse it as a valid itext reference.
+         */
+        var getITextReference = function (value) {
+            try {
+                var parsed = xpath.parse(value);
+                if (parsed instanceof xpathmodels.XPathFuncExpr && parsed.id === "jr:itext") {
+                    return parsed.args[0].value;
+                } 
+            } catch (err) {
+                // this seems like a real error since the reference should presumably
+                // have been valid xpath, but don't deal with it here
+            }
+            return false;
         }
-
-        function parseInstanceInfo (dataEl) {
-
-        }
-
+        
         function parseDataTree (dataEl) {
             function parseDataElement (el) {
                 var nodeID, nodeVal, mug, parentMugType, extraXMLNS, keyAttr,mType,parentNodeName,rootNodeName,dataTree;
@@ -1186,18 +1207,25 @@ formdesigner.controller = (function () {
                 attrs.relevantAttr = el.attr('relevant');
                 attrs.calculateAttr = el.attr('calculate');
                 attrs.constraintAttr = el.attr('constraint');
-                attrs.constraintMsgAttr = el.attr('constraintMsg');
+                
+                var constraintMsg = lookForNamespaced(el, "constraintMsg");
+                
+                var constraintItext;
+                if (constraintMsg) {
+                    constraintItext = getITextReference(constraintMsg);
+                    if (constraintItext) {
+                        attrs.constraintMsgItextID = constraintItext;
+                    } else {
+                        attrs.constraintMsgAttr = constraintMsg;    
+                    }
+                } 
+                
                 // TODO: parse constraint itext
                 attrs.requiredAttr = parseRequiredAttribute(el.attr('required'));
-                attrs.preload = el.attr("jr:preload");
-                if(!attrs.preload) {
-                    attrs.preload = el.attr("jr\\:preload");
-                }
-                attrs.preloadParams = el.attr("jr:preloadParams");
-                if(!attrs.preloadParams) {
-                    attrs.preloadParams = el.attr("jr\\:preloadParams");
-                }
-
+                
+                attrs.preload = lookForNamespaced(el, "preload");
+                attrs.preloadParams = lookForNamespaced(el, "preload");
+                
                 bindElement = new formdesigner.model.BindElement(attrs);
                 mug.properties.bindElement = bindElement;
 
@@ -1553,7 +1581,6 @@ formdesigner.controller = (function () {
             if(data.length === 0) {
                 pError('error', 'No Data block was found in the form.  Please check that your form is valid!');
             }
-            parseInstanceInfo(data[0]);
             parseDataTree (data[0]);
             parseBindList (binds);
 

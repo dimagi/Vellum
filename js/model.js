@@ -586,12 +586,12 @@ formdesigner.model = function () {
             return 'pass';
         },
         constraintItextId: function (mugType, mug) {
-            var bindBlock = mugType.properties.bindElement.properties;
+            var bindElement = mug.properties.bindElement.properties;
             var IT = formdesigner.model.Itext;
-            if (bindBlock.constraintMsgItextID && bindBlock.constraintMsgAttr) {
+            if (bindElement.constraintMsgItextID && bindElement.constraintMsgAttr) {
                 return 'Question specifies a both a constraint message and itext. Please delete one.';
             }
-            if (bindBlock.constraintMsgItextID && !IT.hasItextBlock(bindBlock.constraintMsgItextID, 
+            if (bindElement.constraintMsgItextID && !IT.hasItextBlock(bindElement.constraintMsgItextID, 
                                                                     IT.getDefaultLanguage())) {
                 return 'Question has a constraint message ID but no value.';
             }
@@ -710,7 +710,8 @@ formdesigner.model = function () {
                     validationFunc : function (mugType, mug) {
                         var bindBlock = mug.properties.bindElement.properties;
                         var hasConstraint = (typeof bindBlock.constraintAttr !== 'undefined');
-                        var hasConstraintMsg = (typeof bindBlock.constraintMsgAttr !== 'undefined');
+                        var hasConstraintMsg = (typeof bindBlock.constraintMsgAttr !== 'undefined' && 
+                                                typeof bindBlock.constraintMsgItextID !== 'undefined');
                         if (hasConstraintMsg && !hasConstraint) {
                             return 'ERROR: Bind cannot have a Constraint Message with no Constraint!';
                         } else {
@@ -2140,6 +2141,7 @@ formdesigner.model = function () {
                             'type': type,
                             constraint: cons,
                             constraintMsg: consMsg,
+                            constraintMsgItextID: bEl.properties.constraintMsgItextID,
                             relevant: relevant,
                             required: required,
                             calculate: calc,
@@ -2163,8 +2165,8 @@ formdesigner.model = function () {
                                 if(attrs[j]){ //if property has a useful bind attribute value
                                     if (j === "constraintMsg"){
                                         xw.writeAttributeString("jr:constraintMsg",attrs[j]); //write it
-                                    } else if (j === "constraintItextId") {
-                                        xw.writeAttributeString("jf:constraintMsg",  "jr:itext('" + attrs[j] + "')")
+                                    } else if (j === "constraintMsgItextID") {
+                                        xw.writeAttributeString("jr:constraintMsg",  "jr:itext('" + attrs[j] + "')")
                                     } else if (j === "preload") {
                                         xw.writeAttributeString("jr:preload", attrs[j]);
                                     } else if (j === "preloadParams") {
