@@ -710,7 +710,7 @@ formdesigner.model = function () {
                     validationFunc : function (mugType, mug) {
                         var bindBlock = mug.properties.bindElement.properties;
                         var hasConstraint = (typeof bindBlock.constraintAttr !== 'undefined');
-                        var hasConstraintMsg = (typeof bindBlock.constraintMsgAttr !== 'undefined' && 
+                        var hasConstraintMsg = (typeof bindBlock.constraintMsgAttr !== 'undefined' || 
                                                 typeof bindBlock.constraintMsgItextID !== 'undefined');
                         if (hasConstraintMsg && !hasConstraint) {
                             return 'ERROR: Bind cannot have a Constraint Message with no Constraint!';

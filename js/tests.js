@@ -128,13 +128,20 @@ $(document).ready(function(){
                 }
             }
         }
-        if(mugType.properties.controlElement){
+        if (mugType.properties.controlElement){
             if(mug.properties.controlElement.properties.hintItextID) {
                 formdesigner.model.Itext.setValue(mug.properties.controlElement.properties.hintItextID,'en','default','foo hint');
             }
             if (mug.properties.controlElement.properties.labelItextID) {
                 formdesigner.model.Itext.setValue(mug.properties.controlElement.properties.labelItextID,'en','default','foo default');
             }
+        }
+        if (mugType.properties.bindElement) {
+            if (mug.properties.bindElement.properties.constraintMsgAttr && mug.properties.bindElement.properties.constraintMsgItextID) {
+                // hack, these are mutually exclusive so remove one to make the validator happy
+                // remove the itext so we don't have to deal with that too
+                delete mug.properties.bindElement.properties["constraintMsgItextID"];
+            }         
         }
     }
 
@@ -1457,7 +1464,7 @@ start();
         expected = "true()";
         equal(requireAttr,expected,"Is the required attribute value === 'true()' in the bind?");
 
-        workingField = $('#itext-en-default');
+        workingField = $('#itext-en-text-default');
         workingField.val("Question 1 Itext yay").keyup();
 		xmlString = c.form.createXForm();
         validateFormWithJR(xmlString, validateCallbackFunc('Input Selector 11'));
@@ -1491,10 +1498,8 @@ start();
         equal(someval,expected,"Has default hint label been set correctly through UI?");
 
         workingField = $('#controlElement-hintItextID');
-        workingField.val("question1_hint");
-		triggerKeyEvents(workingField,32,false,false);
-		triggerKeyEvents(workingField,8,false,false);
-        xmlString = c.form.createXForm();
+        workingField.val("question1_hint").keyup();
+		xmlString = c.form.createXForm();
         xml = parseXMLAndGetSelector(xmlString);
         window.xmlString = xml;
         someval = xml.find('input').children('hint').attr('ref');
@@ -1502,11 +1507,9 @@ start();
         equal(someval,expected,"Has hint Itext ID been set correctly through UI?");
 
         // TODO: still broken, determine expected behavior
-        workingField = $('#fd-itext-hint-input');
-        workingField.val("Question 1 Itext hint");
-		triggerKeyEvents(workingField,32,false,false);
-		triggerKeyEvents(workingField,8,false,false);
-        xmlString = c.form.createXForm();
+        workingField = $('#itext-en-hint-default');
+        workingField.val("Question 1 Itext hint").keyup();
+		xmlString = c.form.createXForm();
         validateFormWithJR(xmlString, validateCallbackFunc('Input Selector 18'));
         xml = parseXMLAndGetSelector(xmlString);
         var findstring = '';

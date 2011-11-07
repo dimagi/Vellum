@@ -191,16 +191,17 @@ formdesigner.widgets = (function () {
         return this;
     };
     
-    var setBaseItextWidgetProperties = function (widget, mugType, language, idFunc, form) {
+    var setBaseItextWidgetProperties = function (widget, mugType, language, idFunc, slug, form) {
         widget.language = language;
         widget.form = form;
+        widget.slug = slug;
         
         widget.getTextId = function () {
             return idFunc(this.mug);
         };
         
         widget.getID = function () {
-            return "itext-" + this.language + "-" + this.textId + "-" + this.form;
+            return "itext-" + this.language + "-" + this.slug + "-" + this.form;
         };
         
         widget.getType = function () {
@@ -243,10 +244,10 @@ formdesigner.widgets = (function () {
         input.keyup(widget.fireValueChanged());    
     }; 
     
-    that.ITextWidget = function(mugType, language, idFunc, form) {
+    that.ITextWidget = function(mugType, language, idFunc, slug, form) {
         
         setBaseWidgetProperties(this, mugType);
-        setBaseItextWidgetProperties(this, mugType, language, idFunc, form);
+        setBaseItextWidgetProperties(this, mugType, language, idFunc, slug, form);
         
         this.getDisplayName = function () {
             return this.getType();
@@ -254,10 +255,10 @@ formdesigner.widgets = (function () {
 
     };
     
-    that.ITextInlineWidget = function (mugType, language, idFunc, form, displayName) {
+    that.ITextInlineWidget = function (mugType, language, idFunc, slug, form, displayName) {
         
         setBaseWidgetProperties(this, mugType);
-        setBaseItextWidgetProperties(this, mugType, language, idFunc, form);
+        setBaseItextWidgetProperties(this, mugType, language, idFunc, slug, form);
         
         this.getDisplayName = function () {
             return displayName + " " + this.getType() + " (" + language + ")";
@@ -414,6 +415,7 @@ formdesigner.widgets = (function () {
     var setITextFieldBlockCommonProps = function (block, mugType, options) {
         block.mugType = mugType;
         block.textIdFunc = options.textIdFunc;
+        block.slug = options.slug;
         
         block.getTextId = function () {
             return this.textIdFunc(this.mugType);                           
@@ -440,11 +442,13 @@ formdesigner.widgets = (function () {
         setITextFieldBlockCommonProps(this, mugType, options);
         var main = $("");
         
-        var textIdFunc = this.textIdFunc; // needed for closure
+        // needed for closure
+        var textIdFunc = this.textIdFunc; 
+        var slug = this.slug;
         var addItextType = this.addItextType = function (form) {
             main.parent().find(".itext-language-section").each(function () {
                 var lang = $(this).data("language");
-                itextWidget = new that.ITextWidget(mugType, lang, textIdFunc, form);
+                itextWidget = new that.ITextWidget(mugType, lang, textIdFunc, slug, form);
                 itextWidget.getUIElement().appendTo($(this));
             });
         };
@@ -463,7 +467,8 @@ formdesigner.widgets = (function () {
                 // loop through items, add to UI
                 for (var j = 0; j < this.formList.length; j++) {
                     // add widget
-                    itextWidget = new that.ITextWidget(mugType, this.langs[i], this.textIdFunc, this.formList[j]);
+                    itextWidget = new that.ITextWidget(mugType, this.langs[i], this.textIdFunc, 
+                                                       this.slug, this.formList[j]);
                     itextWidget.setValue(subBlock[this.formList[j]]);
                     itextWidget.getUIElement().appendTo(subSec);
                 }
@@ -517,7 +522,7 @@ formdesigner.widgets = (function () {
                 for (var j = 0; j < this.formList.length; j++) {
                     // add widget
                     itextWidget = new that.ITextInlineWidget(mugType, this.langs[i], this.textIdFunc, 
-                                                             this.formList[j], this.displayName);
+                                                             this.slug, this.formList[j], this.displayName);
                     itextWidget.setValue(subBlock[this.formList[j]]);
                     main = main.add(itextWidget.getUIElement());
                 }
@@ -561,6 +566,7 @@ formdesigner.widgets = (function () {
     
     that.getContentSection = function (mugType) {
         elements = [{ widgetType: "itext",
+                      slug: "text",
                       displayMode: "full",
                       textIdFunc: function (mt) { return mt.getItextID() },
                       showAddFormButton: true}];
@@ -578,6 +584,7 @@ formdesigner.widgets = (function () {
                         "bindElement/constraintMsgItextID"].map(wrapAsGeneric);
         elements.push({ widgetType: "itext",
                         displayMode: "inline",
+                        slug: "constraint",
                         displayName: "Constraint Message",
                         textIdFunc: function (mt) { return mt.getConstraintMsgItextID() }, 
                         showAddFormButton: false});
@@ -601,6 +608,7 @@ formdesigner.widgets = (function () {
         elements = elements.map(wrapAsGeneric);
         elements.push({ widgetType: "itext",
                         displayMode: "inline",
+                        slug: "hint",
                         displayName: "Hint",
                         textIdFunc: function (mt) { return mt.getHintItextID() }, 
                         showAddFormButton: false});
