@@ -261,7 +261,8 @@ formdesigner.widgets = (function () {
         setBaseItextWidgetProperties(this, mugType, language, idFunc, slug, form);
         
         this.getDisplayName = function () {
-            return displayName + " " + this.getType() + " (" + language + ")";
+            var formSpecifier = (this.form === "default") ? "" : " - " + this.form;
+            return displayName + formSpecifier + " (" + language + ")";
         };
 
     };
@@ -345,6 +346,10 @@ formdesigner.widgets = (function () {
             return $('<h2 />').text(this.displayName);
         };
         
+        section.getId = function () {
+            return "fd-question-edit-" + this.slug;
+        }
+        
     };
     
     that.GenericSection = function (mugType, options) {
@@ -364,7 +369,7 @@ formdesigner.widgets = (function () {
             // returns the actual display for the section
             
             var header = this.getHeader();
-            var sec = $("<fieldset />").attr("id", this.slug).addClass("question-section");
+            var sec = $("<fieldset />").attr("id", this.getId()).addClass("question-section");
             this.getWidgets().map(function (elemWidget) {
                 elemWidget.setValue(elemWidget.currentValue);
                 elemWidget.getUIElement().appendTo(sec);
@@ -394,7 +399,7 @@ formdesigner.widgets = (function () {
         
         this.getSectionDisplay = function () {
             // returns the actual display for the section
-            var sec = $("<fieldset />").attr("id", this.slug).addClass("question-section");
+            var sec = $("<fieldset />").attr("id", this.getId()).addClass("question-section");
             this.getHeader().appendTo(sec);
             var inner = $('<div />').appendTo(sec);
             this.getWidgets().map(function (elemWidget) {

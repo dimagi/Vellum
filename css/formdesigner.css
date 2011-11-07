@@ -18,6 +18,23 @@ body{
     overflow-x:hidden;
 }
 
+/* overrides for stuff in jquery UI */
+
+.ui-widget { font-family: inherit; }
+
+.ui-accordion .ui-accordion-content { 
+	padding: 1em .5em; 
+	border-top: 0; 
+	margin-top: -2px; 
+	position: relative; 
+	top: 1px; 
+	margin-bottom: 2px; 
+	overflow: auto; 
+	display: none; 
+	zoom: 1; 
+}
+
+
 #fd-question-table{
     border: 1px solid gray;
     width: 50em;
@@ -445,6 +462,7 @@ body{
 #fd-props-content h1 {
     font-weight: bold;  
     font-size: 1.4em;
+    margin-bottom: .5em;
 }
 
 #fd-props-content h2 {
@@ -458,7 +476,14 @@ body{
     margin-bottom: 0;
 }
 
+#fd-props-content fieldset:not(.ui-widget) {
+	padding:0 .4em .4em .4em;
+	margin:0 0 1.5em 0;
+	border:1px solid #ccc;
+}
+
 #fd-props-content fieldset h3 {
+    text-align: left;
     font-size: 1.1em;
     font-weight: bold;
 }
@@ -477,7 +502,8 @@ body{
 #fd-props-content fieldset input[type="text"], #fd-props-content fieldset select {
     width: 220px;
     float: right;
-    margin-right: 1em;
+    margin: .5em 1em .5em 0;
+    
 }
 
 #fd-props-content fieldset .xpath-edit-button {
