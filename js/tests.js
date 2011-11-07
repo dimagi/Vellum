@@ -13,7 +13,7 @@ var validateCallbackFunc = function (testDescription) {
         start();
     }
     return func;
-}
+};
 
 $(document).ready(function(){
     formdesigner.launch();
@@ -128,13 +128,20 @@ $(document).ready(function(){
                 }
             }
         }
-        if(mugType.properties.controlElement){
+        if (mugType.properties.controlElement){
             if(mug.properties.controlElement.properties.hintItextID) {
                 formdesigner.model.Itext.setValue(mug.properties.controlElement.properties.hintItextID,'en','default','foo hint');
             }
             if (mug.properties.controlElement.properties.labelItextID) {
                 formdesigner.model.Itext.setValue(mug.properties.controlElement.properties.labelItextID,'en','default','foo default');
             }
+        }
+        if (mugType.properties.bindElement) {
+            if (mug.properties.bindElement.properties.constraintMsgAttr && mug.properties.bindElement.properties.constraintMsgItextID) {
+                // hack, these are mutually exclusive so remove one to make the validator happy
+                // remove the itext so we don't have to deal with that too
+                delete mug.properties.bindElement.properties["constraintMsgItextID"];
+            }         
         }
     }
 
@@ -843,8 +850,8 @@ start();
 
         //actually test the util.renameItextID thing
         util.setOrRenameItextID(iID,curMugType,'labelItextID',false);
-        equal(IT.getItextVals(oldIID,'en'), null, 'Old Itext ID should not exist in the Itext Object anymore');
-        notEqual(IT.getItextVals(iID,'en'), null, "New Itext ID SHOULD exist in the Itext Object");
+        ok(!IT.hasItextBlock(oldIID,'en'), 'Old Itext ID should not exist in the Itext Object anymore');
+        ok(IT.hasItextBlock(iID,'en'), "New Itext ID SHOULD exist in the Itext Object");
 
         equal(IT.getItextVals(iID, 'en')["long"], val, "Existing Itext values were not renamed");
 start();
@@ -881,8 +888,8 @@ start();
 
         //actually test the util.renameItextID thing
         util.setOrRenameItextID('itext_ID1',curMugType,'labelItextID',true);
-        equal(IT.getItextVals(mtIID, 'en'), null, 'Old Itext ID should not exist in the Itext Object anymore');
-        notEqual(IT.getItextVals("itext_ID1", 'en'), null, "New Itext ID SHOULD exist in the Itext Object");
+        ok(!IT.hasItextBlock(mtIID, 'en'), 'Old Itext ID should not exist in the Itext Object anymore');
+        notEqual(IT.hasItextBlock("itext_ID1", 'en'), null, "New Itext ID SHOULD exist in the Itext Object");
 
         equal(IT.getItextVals("itext_ID1", 'en')["default"], mtIVal, "Itext values were renamed");
 
@@ -897,7 +904,7 @@ start();
                     util = formdesigner.util;
             var otherLanguageName = "sw";
             IT.addLanguage(otherLanguageName);
-            var iID = 'itext_ID1', mt1, mtIID, mtVal;
+            var newID = 'renamed_id', mt1, mtIID, mtVal;
 
             var ui, jstree, curMugType, addqbut;
             var c = formdesigner.controller;
@@ -913,12 +920,12 @@ start();
             mt1 = curMugType;
             mtIID = curMugType.mug.properties.controlElement.properties.labelItextID;
             mtVal = IT.getItextVals(mtIID, 'en')["default"];
-
-            util.setOrRenameItextID(iID,curMugType,'labelItextID',false);
-            equal(IT.getItextVals(mtIID, 'en'), null, 'Old Itext ID should not exist in the Itext Object anymore');
-            notEqual(IT.getItextVals(iID, 'en'), null, "New Itext ID SHOULD exist in the Itext Object");
-
-            equal(IT.getItextVals(iID, 'en')["default"], mtVal, "Itext value is there");
+            ok(IT.hasItextBlock(mtIID, "en"));
+            ok(!IT.hasItextBlock(newID, "en"));
+            util.setOrRenameItextID(newID,curMugType,'labelItextID',false);
+            ok(!IT.hasItextBlock(mtIID, "en"), 'Old Itext ID should not exist in the Itext Object anymore');
+            ok(IT.hasItextBlock(newID, "en"), "New Itext ID SHOULD exist in the Itext Object");
+            equal(IT.getItextVals(newID, 'en')["default"], mtVal, "Itext value is there");
 start();
 
         });
@@ -952,8 +959,8 @@ start();
             IT.removeItext(mtIID); //remove Itext of MT
 
             util.setOrRenameItextID(iID,curMugType,'labelItextID',false);
-            equal(IT.getItextVals(mtIID, 'en'), null, 'Old Itext ID should not exist in the Itext Object anymore');
-            equal(IT.getItextVals(iID, 'en'), null, "New Itext ID should not exist in the Itext Object (no prior itext vals avail)");
+            ok(!IT.hasItextBlock(mtIID, 'en'), 'Old Itext ID should not exist in the Itext Object anymore');
+            ok(!IT.hasItextBlock(iID, 'en'), "New Itext ID should not exist in the Itext Object (no prior itext vals avail)");
 start();
         });
 
@@ -1142,12 +1149,17 @@ start();
         addQuestionThroughUI("Group");
         jstree.jstree('select_node',lastCreatedNode,true);
 
-        $('#dataElement-nodeID-input').val('group1').keyup();
+        // change node id and itext id
+        $('#dataElement-nodeID').val('group1').keyup();
+        $('#controlElement-labelItextID').val('group1').keyup();
+        
         curMugType = formdesigner.controller.form.controlTree.getMugTypeFromUFID(lastCreatedNode.attr('id'));
         Itext.setValue(curMugType.mug.properties.controlElement.properties.labelItextID,'en','default','group label');
         addQuestionThroughUI("Text Question");
         jstree.jstree('select_node',lastCreatedNode,true);
-        $('#dataElement-nodeID-input').val('question2').keyup();
+        // change node id and itext id
+        $('#dataElement-nodeID').val('question2').keyup();
+        $('#controlElement-labelItextID').val('question2').keyup();
         curMugType = formdesigner.controller.form.controlTree.getMugTypeFromUFID(lastCreatedNode.attr('id'));
         Itext.setValue(curMugType.mug.properties.controlElement.properties.labelItextID,'en','default', 'question2 label');
         formdesigner.formUuid = "http://openrosa.org/formdesigner/5EACC430-F892-4AA7-B4AA-999AD0805A97";    
@@ -1158,7 +1170,6 @@ start();
         var expected = beautifyXml(testXformBuffer['form1.xml']);
         validateFormWithJR(expected, validateCallbackFunc('form1.xml'));
         validateFormWithJR(actual, validateCallbackFunc('Simple Nested Form Actual 2'));
-        
         equal(expected,actual);
 
         //test if form is valid
@@ -1208,7 +1219,6 @@ start();
 
         mugType = c.getMTFromFormByUFID(ufid2);
         deepEqual([mugType], c.form.getMugTypeByIDFromTree(mugType.mug.properties.dataElement.properties.nodeID, 'data'), 'MugTypes should be the same')
-        console.log(c.form.getMugTypeByIDFromTree('foo', 'data'))
         equal(0, c.form.getMugTypeByIDFromTree('foo', 'data').length, 'Given a bogus ID should return an empty list');
         start();
     });
@@ -1277,7 +1287,7 @@ start();
         cEl = mugProps.controlElement.properties;
         iID = cEl.labelItextID;
         Itext.setValue(iID,Itext.getDefaultLanguage(),'default','group1 label'); //set itext value for group
-        $('#dataElement-nodeID-input').val('group1').keyup(); //change the group's nodeIDs to something more reasonable
+        $('#dataElement-nodeID').val('group1').keyup(); //change the group's nodeIDs to something more reasonable
 
         //add another text question
         addQuestionThroughUI("Text Question");
@@ -1374,8 +1384,8 @@ start();
         curMugType = getMTFromEl($(lastCreatedNode));
         ui.selectMugTypeInUI(curMugType);
         equal(curMugType.typeName, "Text Question", "Is Question created through UI a text type question?");
-        workingField = $('#dataElement-nodeID-input');
-        workingField.val("textQuestion1").keyup().keyup();
+        workingField = $('#dataElement-nodeID');
+        workingField.val("textQuestion1").keyup();
         triggerKeyEvents(workingField,32,false,false);
         triggerKeyEvents(workingField,8,false,false);
         xmlString = c.form.createXForm();
@@ -1386,7 +1396,7 @@ start();
         validateFormWithJR(xmlString, validateCallbackFunc('Input Selector 5'));
 
         //set Default Value
-        workingField = $('#dataElement-dataValue-input');
+        workingField = $('#dataElement-dataValue');
         workingField.val('Some Data Value String');
         triggerKeyEvents(workingField,32,false,false);
         triggerKeyEvents(workingField,8,false,false);
@@ -1396,19 +1406,15 @@ start();
         var defaultValueXML = xml.find('My_Data_Node').children('textQuestion1').text();
         equal(defaultValueXML, "Some Data Value String", "default value set in UI corresponds to that generated in XML");
 
-        workingField = $('#bindElement-relevantAttr-input');
-        workingField.val("/data/bleeding_sign = 'N'");
-        triggerKeyEvents(workingField,32,false,false);
-        triggerKeyEvents(workingField,8,false,false);
+        workingField = $('#bindElement-relevantAttr');
+        workingField.val("/data/bleeding_sign = 'N'").keyup();
         xmlString = c.form.createXForm();
         validateFormWithJR(xmlString, validateCallbackFunc('Input Selector 6'));
         xml = parseXMLAndGetSelector(xmlString);
         var bindRelVal = $(xml.find('bind')[0]).attr('relevant');
         equal(bindRelVal, "/data/bleeding_sign = 'N'", 'Was relevancy condition set correctly in the UI?');
 
-        workingField.val("/data/bleeding_sign >= 5 or /data/bleeding_sing < 21");
-        triggerKeyEvents(workingField,32,false,false);
-        triggerKeyEvents(workingField,8,false,false);
+        workingField.val("/data/bleeding_sign >= 5 or /data/bleeding_sing < 21").keyup();
         xmlString = c.form.createXForm();
         validateFormWithJR(xmlString, validateCallbackFunc('Input Selector 7'));
         xml = parseXMLAndGetSelector(xmlString);
@@ -1416,7 +1422,7 @@ start();
         var expected = '<bind nodeset="/My_Data_Node/textQuestion1" type="xsd:string" relevant="/data/bleeding_sign &gt;= 5 or /data/bleeding_sing &lt; 21" />'
         equal(bindVal, expected, 'Was relevancy condition with < or > signs rendered correctly in the UI?');
 
-        workingField = $('#bindElement-calculateAttr-input');
+        workingField = $('#bindElement-calculateAttr');
         workingField.val("/data/bleeding_sign >= 5 or /data/bleeding_sing < 21");
         triggerKeyEvents(workingField,32,false,false);
         triggerKeyEvents(workingField,8,false,false);
@@ -1427,7 +1433,7 @@ start();
         expected = '<bind nodeset="/My_Data_Node/textQuestion1" type="xsd:string" relevant="/data/bleeding_sign &gt;= 5 or /data/bleeding_sing &lt; 21" calculate="/data/bleeding_sign &gt;= 5 or /data/bleeding_sing &lt; 21" />'
         equal(bindVal, expected, 'Was calculate condition with < or > signs rendered correctly in the UI?');
 
-        workingField = $('#bindElement-constraintAttr-input');
+        workingField = $('#bindElement-constraintAttr');
         workingField.val("/data/bleeding_sign >= 5 or /data/bleeding_sing < 21");
         triggerKeyEvents(workingField,32,false,false);
 		triggerKeyEvents(workingField,8,false,false);
@@ -1440,16 +1446,16 @@ start();
         workingField.val('');
 		triggerKeyEvents(workingField,32,false,false);
 		triggerKeyEvents(workingField,8,false,false);
-        workingField = $('#bindElement-calculateAttr-input');
+        workingField = $('#bindElement-calculateAttr');
         workingField.val('');
 		triggerKeyEvents(workingField,32,false,false);
 		triggerKeyEvents(workingField,8,false,false);
-        workingField = $('#bindElement-relevantAttr-input');
+        workingField = $('#bindElement-relevantAttr');
         workingField.val('');
 		triggerKeyEvents(workingField,32,false,false);
 		triggerKeyEvents(workingField,8,false,false);
 
-        workingField = $('#bindElement-requiredAttr-input');
+        workingField = $('#bindElement-requiredAttr');
         workingField.click(); //check the 'required' checkbox;
         xmlString = c.form.createXForm();
         validateFormWithJR(xmlString, validateCallbackFunc('Input Selector 10'));
@@ -1458,68 +1464,16 @@ start();
         expected = "true()";
         equal(requireAttr,expected,"Is the required attribute value === 'true()' in the bind?");
 
-        workingField = $('#fd-itext-default-input');
-        workingField.val("Question 1 Itext yay");
-		triggerKeyEvents(workingField,32,false,false);
-		triggerKeyEvents(workingField,8,false,false);
-        xmlString = c.form.createXForm();
+        workingField = $('#itext-en-text-default');
+        workingField.val("Question 1 Itext yay").keyup();
+		xmlString = c.form.createXForm();
         validateFormWithJR(xmlString, validateCallbackFunc('Input Selector 11'));
         xml = parseXMLAndGetSelector(xmlString);
-        var itextVal = xml.find('translation #'+ $('#controlElement-labelItextID-input').val()).children('value').text()
+        var itextVal = xml.find('translation #'+ $('#controlElement-labelItextID').val()).children('value').text();
         expected = "Question 1 Itext yay";
         equal(itextVal,expected,"Has default Itext been set correctly through UI?");
 
-        workingField = $('#fd-itext-audio-input');
-        workingField.val("jr://audio/sound/vol1/questionnaire/awesome.mp3");
-		triggerKeyEvents(workingField,32,false,false);
-		triggerKeyEvents(workingField,8,false,false);
-        xmlString = c.form.createXForm();
-        validateFormWithJR(xmlString, validateCallbackFunc('Input Selector 12'));
-        xml = parseXMLAndGetSelector(xmlString);
-        window.xmlString = xml;
-        itextVal = xml.find('translation #'+ $('#controlElement-labelItextID-input').val()).children('[form="audio"]').text()
-        expected = "jr://audio/sound/vol1/questionnaire/awesome.mp3";
-        equal(itextVal,expected,"Has audio Itext been set correctly through UI?");
-
-        workingField = $('#fd-itext-image-input');
-        workingField.val("jr://images/foo.png");
-		triggerKeyEvents(workingField,32,false,false);
-		triggerKeyEvents(workingField,8,false,false);
-        xmlString = c.form.createXForm();
-        validateFormWithJR(xmlString, validateCallbackFunc('Input Selector 13'));
-        xml = parseXMLAndGetSelector(xmlString);
-        window.xmlString = xml;
-        itextVal = xml.find('text,[id="'+ $('#controlElement-labelItextID-input').val()+'"]').children('[form="image"]').text()
-        expected = "jr://images/foo.png";
-        equal(itextVal,expected,"Has image Itext been set correctly through UI?");
-
-        workingField = $('#fd-itext-short-input');
-        workingField.val("Some short itext");
-		triggerKeyEvents(workingField,32,false,false);
-		triggerKeyEvents(workingField,8,false,false);
-        xmlString = c.form.createXForm();
-        validateFormWithJR(xmlString, validateCallbackFunc('Input Selector 14'));
-        xml = parseXMLAndGetSelector(xmlString);
-        window.xmlString = xml;
-        itextVal = xml.find('text,[id="'+ $('#controlElement-labelItextID-input').val()+'"]').children('[form="short"]').text()
-        expected = "Some short itext";
-        equal(itextVal,expected,"Has short Itext been set correctly through UI?");
-
-        workingField = $('#fd-itext-long-input');
-        workingField.val("some long Itext for question 1");
-		triggerKeyEvents(workingField,32,false,false);
-		triggerKeyEvents(workingField,8,false,false);
-        xmlString = c.form.createXForm();
-        validateFormWithJR(xmlString, validateCallbackFunc('Input Selector 15'));
-        xml = parseXMLAndGetSelector(xmlString);
-        window.xmlString = xml;
-        itextVal = xml.find('text,[id="'+ $('#controlElement-labelItextID-input').val()+'"]').children('[form="long"]').text()
-        expected = "some long Itext for question 1";
-        equal(itextVal,expected,"Has long Itext been set correctly through UI?");
-
-
-
-        workingField = $('#bindElement-constraintMsgAttr-input');
+        workingField = $('#bindElement-constraintMsgAttr');
         workingField.val("Some default jr:constraintMsg value");
 		triggerKeyEvents(workingField,32,false,false);
 		triggerKeyEvents(workingField,8,false,false);
@@ -1531,7 +1485,7 @@ start();
         equal(bindVal, expected, 'Was constraint Message correctly set?');
 
 
-        workingField = $('#controlElement-hintLabel-input');
+        workingField = $('#controlElement-hintLabel');
         workingField.val("Default Hint Label Value");
 		triggerKeyEvents(workingField,32,false,false);
 		triggerKeyEvents(workingField,8,false,false);
@@ -1543,27 +1497,24 @@ start();
         expected = "Default Hint Label Value";
         equal(someval,expected,"Has default hint label been set correctly through UI?");
 
-        workingField = $('#controlElement-hintItextID-input');
-        workingField.val("question1_hint");
-		triggerKeyEvents(workingField,32,false,false);
-		triggerKeyEvents(workingField,8,false,false);
-        xmlString = c.form.createXForm();
+        workingField = $('#controlElement-hintItextID');
+        workingField.val("question1_hint").keyup();
+		xmlString = c.form.createXForm();
         xml = parseXMLAndGetSelector(xmlString);
         window.xmlString = xml;
         someval = xml.find('input').children('hint').attr('ref');
         expected = "jr:itext('question1_hint')";
         equal(someval,expected,"Has hint Itext ID been set correctly through UI?");
 
-        workingField = $('#fd-itext-hint-input');
-        workingField.val("Question 1 Itext hint");
-		triggerKeyEvents(workingField,32,false,false);
-		triggerKeyEvents(workingField,8,false,false);
-        xmlString = c.form.createXForm();
+        // TODO: still broken, determine expected behavior
+        workingField = $('#itext-en-hint-default');
+        workingField.val("Question 1 Itext hint").keyup();
+		xmlString = c.form.createXForm();
         validateFormWithJR(xmlString, validateCallbackFunc('Input Selector 18'));
         xml = parseXMLAndGetSelector(xmlString);
         var findstring = '';
-        if($('#controlElement-hintItextID-input').val()) {
-            findstring = '[id='+$('#controlElement-hintItextID-input').val()+']';
+        if($('#controlElement-hintItextID').val()) {
+            findstring = '[id='+$('#controlElement-hintItextID').val()+']';
         }
         itextVal = xml.find('translation').find(findstring).children('value').text()
         expected = "Question 1 Itext hint";
@@ -1597,7 +1548,7 @@ start();
         addQuestionThroughUI("Integer Number");
         curMugType = getMTFromEl($(lastCreatedNode));
         ui.selectMugTypeInUI(curMugType);
-        equal($('#bindElement-dataType-input').val(), 'xsd:int');
+        equal($('#bindElement-dataType').val(), 'xsd:int');
         equal(curMugType.mug.properties.bindElement.properties.dataType, 'xsd:int');
 
         xmlString = c.form.createXForm();
@@ -1611,7 +1562,7 @@ start();
         addQuestionThroughUI("Double Number");
         curMugType = getMTFromEl($(lastCreatedNode));
         ui.selectMugTypeInUI(curMugType);
-        equal($('#bindElement-dataType-input').val(), 'xsd:double');
+        equal($('#bindElement-dataType').val(), 'xsd:double');
         equal(curMugType.mug.properties.bindElement.properties.dataType, 'xsd:double');
         xmlString = c.form.createXForm();
         validateFormWithJR(xmlString, validateCallbackFunc('DataType Selector 2'));
@@ -1624,7 +1575,7 @@ start();
         addQuestionThroughUI("Long Number");
         curMugType = getMTFromEl($(lastCreatedNode));
         ui.selectMugTypeInUI(curMugType);
-        equal($('#bindElement-dataType-input').val(), 'xsd:long');
+        equal($('#bindElement-dataType').val(), 'xsd:long');
         equal(curMugType.mug.properties.bindElement.properties.dataType, 'xsd:long');
 
         xmlString = c.form.createXForm();
@@ -1637,7 +1588,7 @@ start();
         addQuestionThroughUI("Secret Question");
         curMugType = getMTFromEl($(lastCreatedNode));
         ui.selectMugTypeInUI(curMugType);
-        equal($('#bindElement-dataType-input').val(), 'xsd:string');
+        equal($('#bindElement-dataType').val(), 'xsd:string');
         equal(curMugType.mug.properties.bindElement.properties.dataType, 'xsd:string');
         equal(curMugType.typeName, "Secret Question");
         equal(curMugType.mug.properties.controlElement.properties.name, "Secret");

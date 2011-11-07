@@ -30,7 +30,35 @@ formdesigner.controller = (function () {
         that.on('question-removed', function () {
             that.setFormChanged();
         });
-
+        
+        that.on('widget-value-changed', function (e) {
+            // When a widget's value changes, do whatever work you need to in 
+            // the model/UI to make sure we are in a consistent state.
+            
+            var widget = e.widget;
+            var val = widget.getValue();
+            if (widget.propName === 'nodeID' && val.indexOf(" ") != -1){ 
+                // attempt to sanitize nodeID
+                // TODO, still may allow some bad values
+                widget.setValue(val.replace(/\s/g,'_'));
+            }
+            
+            //short circuit the mug property changing process for when the
+            //nodeID is changed to empty-string (i.e. when the user backspaces
+            //the whole value).  This allows us to keep a reference to everything
+            //and rename smoothly to the new value the user will ultimately enter.
+            if (val === "" && (widget.propName === 'nodeID' || widget.propName === 'labelItextID' || widget.propName === 'hintItextID')) {
+                return;
+            }
+            
+            // When the itext value changes, go change the reference in our itext model
+            if (widget.propName && widget.propName.indexOf("ItextID") !== -1) {
+                var oldItextID = widget.mug.mug.properties.controlElement.properties[widget.propName];
+                formdesigner.model.Itext.renameItextID(oldItextID, widget.getValue());
+            } 
+            widget.save();
+        });
+        
         /**
          * Remove itext of question that was just removed.
          */
@@ -277,21 +305,16 @@ formdesigner.controller = (function () {
      * @param property (string) property name
      * @param val new value the property should be set to.
      */
-     that.setMugPropertyValue = function (myMug, element, property, val, mugType) {
-         var rootProps = myMug['properties'];
-         var elProps = rootProps[element].properties,
-            propertyToChange = elProps[property], event = {};
-
-         myMug.properties[element].properties[property] = val;
-         event.type = 'property-changed';
-         event.property = property;
-         event.element = element;
-         event.val = val;
-         event.mugUfid = myMug.ufid;
-         event.mugTypeUfid = mugType.ufid;
-
-
-         myMug.fire(event);
+    that.setMugPropertyValue = function (myMug, element, property, val, mugType) {
+        myMug.properties[element].properties[property] = val;
+        myMug.fire({
+			type: 'property-changed',
+			property: property,
+			element: element,
+			val: val,
+			mugUfid: myMug.ufid,
+			mugTypeUfid: mugType.ufid,
+        });
     };
 
     /**
@@ -1037,12 +1060,33 @@ formdesigner.controller = (function () {
         var ParseException = function (msg) {
             this.name = 'XMLParseException';
             this.message = msg;
+        };
+
+        // some helper functions used by the parser
+        var lookForNamespaced = function (element, reference) {
+            // due to the fact that FF and Webkit store namespaced
+            // values slightly differently, we have to look in 
+            // a couple different places.
+            return element.attr("jr:" + reference) || element.attr("jr\\:" + reference);
+        };
+        
+        /**
+         * Get and itext reference from a value. Returns nothing if it can't
+         * parse it as a valid itext reference.
+         */
+        var getITextReference = function (value) {
+            try {
+                var parsed = xpath.parse(value);
+                if (parsed instanceof xpathmodels.XPathFuncExpr && parsed.id === "jr:itext") {
+                    return parsed.args[0].value;
+                } 
+            } catch (err) {
+                // this seems like a real error since the reference should presumably
+                // have been valid xpath, but don't deal with it here
+            }
+            return false;
         }
-
-        function parseInstanceInfo (dataEl) {
-
-        }
-
+        
         function parseDataTree (dataEl) {
             function parseDataElement (el) {
                 var nodeID, nodeVal, mug, parentMugType, extraXMLNS, keyAttr,mType,parentNodeName,rootNodeName,dataTree;
@@ -1163,17 +1207,25 @@ formdesigner.controller = (function () {
                 attrs.relevantAttr = el.attr('relevant');
                 attrs.calculateAttr = el.attr('calculate');
                 attrs.constraintAttr = el.attr('constraint');
-                attrs.constraintMsgAttr = el.attr('constraintMsg');
+                
+                var constraintMsg = lookForNamespaced(el, "constraintMsg");
+                
+                var constraintItext;
+                if (constraintMsg) {
+                    constraintItext = getITextReference(constraintMsg);
+                    if (constraintItext) {
+                        attrs.constraintMsgItextID = constraintItext;
+                    } else {
+                        attrs.constraintMsgAttr = constraintMsg;    
+                    }
+                } 
+                
+                // TODO: parse constraint itext
                 attrs.requiredAttr = parseRequiredAttribute(el.attr('required'));
-                attrs.preload = el.attr("jr:preload");
-                if(!attrs.preload) {
-                    attrs.preload = el.attr("jr\\:preload");
-                }
-                attrs.preloadParams = el.attr("jr:preloadParams");
-                if(!attrs.preloadParams) {
-                    attrs.preloadParams = el.attr("jr\\:preloadParams");
-                }
-
+                
+                attrs.preload = lookForNamespaced(el, "preload");
+                attrs.preloadParams = lookForNamespaced(el, "preload");
+                
                 bindElement = new formdesigner.model.BindElement(attrs);
                 mug.properties.bindElement = bindElement;
 
@@ -1529,7 +1581,6 @@ formdesigner.controller = (function () {
             if(data.length === 0) {
                 pError('error', 'No Data block was found in the form.  Please check that your form is valid!');
             }
-            parseInstanceInfo(data[0]);
             parseDataTree (data[0]);
             parseBindList (binds);
 

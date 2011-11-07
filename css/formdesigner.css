@@ -14,8 +14,7 @@
 }
 
 body{
-    font-family:Arial;
-    /*height:2000px;*/
+    font-family: "Helvetica Neue", "Helvetica", "Verdana", "Arial", sans-serif;
     overflow-x:hidden;
 }
 
@@ -439,6 +438,55 @@ body{
 #xpath-edit-inner {
     padding-top: 25px;
     margin: 5px;
+}
+
+/* new question UI styling */
+
+#fd-props-content h1 {
+    font-weight: bold;  
+    font-size: 1.4em;
+}
+
+#fd-props-content h2 {
+    font-size: 1.1em;
+    border: 1px solid lightgray;
+    border-bottom: 0;
+    text-align: center;
+    background-color: whitesmoke;
+    padding: .2em;
+    font-weight: bold;
+    margin-bottom: 0;
+}
+
+#fd-props-content fieldset h3 {
+    font-size: 1.1em;
+    font-weight: bold;
+}
+
+#fd-props-content fieldset div {
+    clear: both;
+    margin-bottom: .3em;
+}
+
+#fd-props-content fieldset label {
+    font-weight: normal;
+    display: inline-block;
+    padding-top: .4em;
+}
+
+#fd-props-content fieldset input[type="text"], #fd-props-content fieldset select {
+    width: 220px;
+    float: right;
+    margin-right: 1em;
+}
+
+#fd-props-content fieldset .xpath-edit-button {
+    float: right;
+    margin-right: 2em;
+}
+
+.question-section {
+    margin-bottom: 1em;	
 }
 
 /* xpath editor styling */
