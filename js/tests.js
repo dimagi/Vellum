@@ -15,17 +15,6 @@ var validateCallbackFunc = function (testDescription) {
     return func;
 };
 
-var isEmptyItext = function (itext) {
-    if (itext) {
-        for (var i in itext) {
-            if (itext.hasOwnProperty(i)) {
-                return false;
-            }   
-        }
-    }
-    return true;
-};
-
 $(document).ready(function(){
     formdesigner.launch();
     var testXformBuffer = {};
@@ -854,8 +843,8 @@ start();
 
         //actually test the util.renameItextID thing
         util.setOrRenameItextID(iID,curMugType,'labelItextID',false);
-        ok(isEmptyItext(IT.getItextVals(oldIID,'en')), 'Old Itext ID should not exist in the Itext Object anymore');
-        notEqual(IT.getItextVals(iID,'en'), null, "New Itext ID SHOULD exist in the Itext Object");
+        ok(!IT.hasItextBlock(oldIID,'en'), 'Old Itext ID should not exist in the Itext Object anymore');
+        ok(IT.hasItextBlock(iID,'en'), "New Itext ID SHOULD exist in the Itext Object");
 
         equal(IT.getItextVals(iID, 'en')["long"], val, "Existing Itext values were not renamed");
 start();
@@ -892,8 +881,8 @@ start();
 
         //actually test the util.renameItextID thing
         util.setOrRenameItextID('itext_ID1',curMugType,'labelItextID',true);
-        ok(isEmptyItext(IT.getItextVals(mtIID, 'en')), 'Old Itext ID should not exist in the Itext Object anymore');
-        notEqual(IT.getItextVals("itext_ID1", 'en'), null, "New Itext ID SHOULD exist in the Itext Object");
+        ok(!IT.hasItextBlock(mtIID, 'en'), 'Old Itext ID should not exist in the Itext Object anymore');
+        notEqual(IT.hasItextBlock("itext_ID1", 'en'), null, "New Itext ID SHOULD exist in the Itext Object");
 
         equal(IT.getItextVals("itext_ID1", 'en')["default"], mtIVal, "Itext values were renamed");
 
@@ -908,7 +897,7 @@ start();
                     util = formdesigner.util;
             var otherLanguageName = "sw";
             IT.addLanguage(otherLanguageName);
-            var iID = 'itext_ID1', mt1, mtIID, mtVal;
+            var newID = 'renamed_id', mt1, mtIID, mtVal;
 
             var ui, jstree, curMugType, addqbut;
             var c = formdesigner.controller;
@@ -924,12 +913,12 @@ start();
             mt1 = curMugType;
             mtIID = curMugType.mug.properties.controlElement.properties.labelItextID;
             mtVal = IT.getItextVals(mtIID, 'en')["default"];
-
-            util.setOrRenameItextID(iID,curMugType,'labelItextID',false);
-            // TODO: fix broken test after UI refactor
-            ok(isEmptyItext(IT.getItextVals(mtIID, 'en')), 'Old Itext ID should not exist in the Itext Object anymore');
-            ok(!isEmptyItext(IT.getItextVals(iID, 'en')), "New Itext ID SHOULD exist in the Itext Object");
-            equal(IT.getItextVals(iID, 'en')["default"], mtVal, "Itext value is there");
+            ok(IT.hasItextBlock(mtIID, "en"));
+            ok(!IT.hasItextBlock(newID, "en"));
+            util.setOrRenameItextID(newID,curMugType,'labelItextID',false);
+            ok(!IT.hasItextBlock(mtIID, "en"), 'Old Itext ID should not exist in the Itext Object anymore');
+            ok(IT.hasItextBlock(newID, "en"), "New Itext ID SHOULD exist in the Itext Object");
+            equal(IT.getItextVals(newID, 'en')["default"], mtVal, "Itext value is there");
 start();
 
         });
@@ -963,8 +952,8 @@ start();
             IT.removeItext(mtIID); //remove Itext of MT
 
             util.setOrRenameItextID(iID,curMugType,'labelItextID',false);
-            ok(isEmptyItext(IT.getItextVals(mtIID, 'en')), 'Old Itext ID should not exist in the Itext Object anymore');
-            ok(isEmptyItext(IT.getItextVals(iID, 'en')), "New Itext ID should not exist in the Itext Object (no prior itext vals avail)");
+            ok(!IT.hasItextBlock(mtIID, 'en'), 'Old Itext ID should not exist in the Itext Object anymore');
+            ok(!IT.hasItextBlock(iID, 'en'), "New Itext ID should not exist in the Itext Object (no prior itext vals avail)");
 start();
         });
 

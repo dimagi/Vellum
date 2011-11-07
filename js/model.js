@@ -2635,7 +2635,11 @@ formdesigner.model = function () {
                 }
             }
         };
-
+        
+        that.hasLanguage = function (lang) {
+            return that.data.hasOwnProperty(lang);
+        };
+        
         that.setDefaultLanguage = function (name) {
             defaultLanguage = name;
         };
@@ -2689,6 +2693,16 @@ formdesigner.model = function () {
                 return that.data[lang][iID];
             }
 
+        };
+        
+        /**
+         * True if there's a defined block for this
+         */
+        that.hasItextBlock = function (iID, lang) {
+            if (that.hasLanguage(lang)) {
+                return that.data[lang].hasOwnProperty(iID);
+            }
+            return false;
         };
         
         /**
