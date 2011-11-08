@@ -1788,9 +1788,13 @@ formdesigner.controller = (function () {
 
 
     var sendXForm = function (url) {
-        function successFunc () {
+        function successFunc (data, textStatus, jqXHR) {
             that.setFormSaved();
             formdesigner.ui.hideConfirmDialog();
+            formdesigner.fire({
+                type: 'form-saved',
+                response: data
+            });
         }
         if (!url) {
             url = formdesigner.saveUrl;
