@@ -589,12 +589,17 @@ formdesigner.widgets = (function () {
         return ret;
     };
     that.getMainSection = function (mugType) {
-        var elements = ["dataElement/nodeID", 
-                        "bindElement/dataType"];
+        var elements = ["dataElement/nodeID"];
                                              
+        if (!formdesigner.util.isSelect(mugType)) {
+            // don't allow switching types for selects
+            elements.push("bindElement/dataType");
+        }
+        
         if (formdesigner.util.isSelectItem(mugType)) {
             elements.push("controlElement/defaultValue");
         }
+        
         elements = filterByMugProperties(elements, mugType).map(wrapAsGeneric);
         
         return new that.GenericSection(mugType, { 
