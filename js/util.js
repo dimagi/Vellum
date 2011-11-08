@@ -903,6 +903,9 @@ formdesigner.util = (function(){
         return (mug.typeName === "Multi Select Question" ||
                 mug.typeName === "Single Select Question")
     }
+    that.isSelectItem = function (mug) {
+        return (mug.typeName === "Select Item")
+    }
     
     return that;
 

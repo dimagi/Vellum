@@ -483,6 +483,12 @@ formdesigner.model = function () {
         mugType.hasControlElement = function () {
             return Boolean(this.mug.properties.controlElement);
         }
+        mugType.hasDataElement = function () {
+            return Boolean(this.mug.properties.dataElement);
+        }
+        mugType.hasBindElement = function () {
+            return Boolean(this.mug.properties.bindElement);
+        }
         
         // Add some useful functions for dealing with itext.
         mugType.setItextID = function (val) {
@@ -752,6 +758,13 @@ formdesigner.model = function () {
                     presence: 'required',
                     values: formdesigner.util.VALID_QUESTION_TYPE_NAMES
                 },
+                defaultValue: {
+		            lstring: 'Item Value',
+		            visibility: 'hidden',
+		            editable: 'w',
+		            presence: 'optional'
+                },
+        
                 tagName: { //internal use
                     editable: 'r',
                     visibility: 'hidden',
@@ -1096,7 +1109,7 @@ formdesigner.model = function () {
     /**
      * This is the output for MugTypes.  If you need a new Mug or MugType (with a mug)
      * use these functions.  Each of the below functions will create a new MugType and a
-     * new associated mug with some default values initialized according to what kind of
+     * new associated mug with some  values initialized according to what kind of
      * MugType is requested.
      */
     that.mugTypeMaker = {};

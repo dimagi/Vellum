@@ -549,7 +549,9 @@ formdesigner.widgets = (function () {
         if (mugType.hasControlElement()) {
             sections.push(that.getContentSection(mugType));
         }
-        sections.push(that.getLogicSection(mugType));
+        if (mugType.hasBindElement()) {
+            sections.push(that.getLogicSection(mugType));
+        }
         sections.push(that.getAdvancedSection(mugType));
         return sections;    
     };
@@ -559,9 +561,42 @@ formdesigner.widgets = (function () {
         return {widgetType: "generic", path: elemPath };
     };
     
+    var filterByMugProperties = function (list, mugType) {
+        var ret = [];
+        var hasControl = mugType.hasControlElement();
+        var hasData = mugType.hasDataElement();
+        var hasBind = mugType.hasBindElement();
+        var path;
+        
+        for (var i = 0; i < list.length; i++) {
+            path = list[i];
+            if (path.indexOf("controlElement") !== -1) {
+                if (hasControl) {
+                    ret.push(path);
+                }
+            } else if (path.indexOf("dataElement") !== -1) {
+                if (hasData) {
+                    ret.push(path);
+                }
+            } else if (path.indexOf("bindElement") !== -1) {
+                if (hasBind) {
+                    ret.push(path);
+                }
+            } else {
+                ret.push(path);
+            } 
+        }
+        return ret;
+    };
     that.getMainSection = function (mugType) {
         var elements = ["dataElement/nodeID", 
-                        "bindElement/dataType"].map(wrapAsGeneric);
+                        "bindElement/dataType"];
+                                             
+        if (formdesigner.util.isSelectItem(mugType)) {
+            elements.push("controlElement/defaultValue");
+        }
+        elements = filterByMugProperties(elements, mugType).map(wrapAsGeneric);
+        
         return new that.GenericSection(mugType, { 
                             slug: "main",
                             displayName: "Main Properties",
@@ -600,17 +635,13 @@ formdesigner.widgets = (function () {
     };
     
     that.getAdvancedSection = function (mugType) {
-        var elements = ["dataElement/dataValue", "dataElement/keyAttr", "dataElement/xmlnsAttr", 
-                        "bindElement/preload", "bindElement/preloadParams", ];
-        var controlElements = ["controlElement/label", "controlElement/hintLabel", 
-                               "bindElement/constraintMsgAttr", "controlElement/labelItextID", 
-                               "controlElement/hintItextID"];
-        if (mugType.hasControlElement()) {
-            for (var i = 0; i < controlElements.length; i++) {
-                elements.push(controlElements[i]);
-            }
-        }
-        elements = elements.map(wrapAsGeneric);
+        var elements = filterByMugProperties(
+            ["dataElement/dataValue", "dataElement/keyAttr", "dataElement/xmlnsAttr", 
+             "bindElement/preload", "bindElement/preloadParams", 
+             "controlElement/label", "controlElement/hintLabel", 
+             "bindElement/constraintMsgAttr", "controlElement/labelItextID", 
+             "controlElement/hintItextID"], mugType).map(wrapAsGeneric);
+        
         elements.push({ widgetType: "itext",
                         displayMode: "inline",
                         slug: "hint",
