@@ -62,6 +62,7 @@ formdesigner.ui = (function () {
         $('#fd-props-message').hide();
     }
 
+    
 
     function init_toolbar() {4
         var toolbar = $(".fd-toolbar"), select, addbutstr, addbut;
@@ -398,11 +399,12 @@ formdesigner.ui = (function () {
      * @param showBind - Show bind type properties? Optional, defaults to true
      * @param showData - Show data type properties? Optional, defaults to true
      */
-    var displayMugProperties = that.displayMugProperties = that.displayQuestion = function(mugType, showControl, showBind, showData){
+    var displayMugProperties = that.displayMugProperties = function (mugType, showControl, showBind, showData) {
         // always hide the xpath editor if necessary 
         that.hideXPathEditor();
         that.showTools();
         
+        // set default values for properties
         if (typeof showControl === 'undefined') {
             showControl = true;
         }
@@ -422,586 +424,34 @@ formdesigner.ui = (function () {
          * creates and returns a <ul> element with the heading set and the correct classes configured.
          * @param heading
          */
-        var makeUL = function (heading){
-            var str = '<ul class="fd-props-ul"><span class="fd-props-heading">' + heading + '</span></ul>';
-            return $(str);
-        }
-
-        var displayFuncs = {};
-
-        function setSpecialDataValueWidgetTypes (selector) {
-            if(!selector) {
-                selector = $('#dataElement-dataValue :input')
-            } else {
-                selector = $(selector);
-            }
-            var dIn = selector,
-                curMug = formdesigner.controller.getCurrentlySelectedMugType().mug,
-                selectedDataType;
-            if(dIn.length === 1) { //Default Data Value element exists
-                //cleanup
-                if(dIn.datepicker) {
-                    dIn.datepicker('destroy');
-                }
-                if(dIn.datetimepicker) {
-                    dIn.datetimepicker('destroy');
-                }
-                if(dIn.timepicker) {
-                    dIn.timepicker('destroy');
-                }
-                if(curMug.properties.bindElement) {
-                    if(curMug.properties.bindElement.properties.dataType){
-                        selectedDataType = curMug.properties.bindElement.properties.dataType.toLowerCase();
-                    }
-                }
-
-            }
-
-            if(selectedDataType === 'xsd:date') {
-                dIn.datepicker({ dateFormat: 'yy-mm-dd' });
-            } else if (selectedDataType === 'xsd:datetime') {
-                dIn.datetimepicker();
-            } else if (selectedDataType === 'xsd:time') {
-                dIn.timepicker({});
-            }
-        }
         
-        /**
-         * Runs through a properties block and generates the
-         * correct li elements (and appends them to the given parentUL)
-         *
-         * @param propertiesBlock - The propertiesinput block from the MugType (e.g. mugType.properties.controlElement
-         * @param parentUL - The UL DOM node that an LI should be appended to.
-         * @param mugProps - actual mug properties corresponding to the propertiesBlock above
-         * @param groupName - Name of the current properties block (e.g. 'controlElement'
-         * @param showVisible - Show properties with the visibility flag set to 'visible'
-         * @param showHidden - Show properties with the visibility flag set to 'hidden'
-         */
-        function listDisplay(propertiesBlock, parentUL, mugProps, groupName, showVisible, showHidden){
-            function getWidget (propBlockIndex) {
-                var liStr,li,
-                p = propertiesBlock[propBlockIndex],
-                        itemID,html, labelStr, i, xPathButton;
-
-                labelStr = p.lstring ? p.lstring : propBlockIndex;
-                itemID = groupName + '-' + propBlockIndex + '-' + 'input';
-                html = '<span class="fd-property-text">'+labelStr+': '+'</span>'
-                if (!p.uiType || p.uiType === 'input') {
-                    html = html + '<div class="fd-prop-input-div chzn-container"><input id="' + itemID + '" class="fd-property-input" /></div>'
-                } else if (p.uiType === 'select') {
-                    html = html +
-                            '<span class="fd-prop-input-div"><select data-placeholder="Choose a ' + labelStr + '" style="width:300px;" class="chzn-select"' +
-                            ' id="' + itemID + '">' +
-                                '<option value="blank"></option>';
-                    for (i in p.values) {
-                        if (p.values.hasOwnProperty(i)) {
-                            var strVal = formdesigner.util.fromCamelToRegularCase(p.values[i].replace('xsd:','')),
-                            isSelected = '';
-
-                            if (mugProps[propBlockIndex] === p.values[i]) {
-                                isSelected = 'selected';
-                            }
-
-
-                            html = html + '<option value="' + p.values[i] + '" '+ isSelected + '>' + strVal + '</option>';
-                        }
-                    }
-
-                    html = html + '</select></span>';
-                } else if (p.uiType === 'mselect') {
-                    html = html + '<span class="fd-prop-input-div">' + '</span>';
-                } else if (p.uiType === 'checkbox') {
-                    html = html + '<div class="fd-prop-input-div-checkbox"><input id="' + itemID + '" class="fd-property-checkbox" type="checkbox"></div>'
-                } else if (p.uiType === "xpath") {
-                    html = html + '<div class="fd-prop-input-div chzn-container">';
-                    html = html + '<input id="' + itemID + '" style="width:220px;"/>';
-                    // the button gets added later
-                    html = html + '</div>';
-                }
-
-                liStr = '<li id="' + groupName + '-' + propBlockIndex + '" class="fd-property">' +
-                            html +
-                            '</li>'
-                li = $(liStr);
-                if (p.uiType === "xpath") {
-                    // make and add the xpath button down here, since we want to work with 
-                    // the jquery objects
-                    xPathButton = $('<button />').addClass("xpath-edit-button").text("Edit").button();
-                    xPathButton.data("group", groupName).data("prop", propBlockIndex).data("inputControlID", itemID);
-                    xPathButton.click(function () {
-                        formdesigner.controller.displayXPathEditor({
-                            group:    $(this).data("group"),
-                            property: $(this).data("prop"),
-                            value:    $("#" + $(this).data("inputControlID")).val()
-                        });
-                    });
-                    
-                    $(li.children("div")[0]).append(xPathButton);
-                }
-                return li;
-            }
-
-
-
-            var i, li;
-            for(i in propertiesBlock){
-                if(propertiesBlock.hasOwnProperty(i)){
-                    var show = ((showVisible && propertiesBlock[i].visibility === 'visible') || (showHidden && propertiesBlock[i].visibility === 'advanced')) && propertiesBlock[i].presence !== 'notallowed';
-                    if(show){
-                        var pBlock = propertiesBlock[i],
-                        input;
-
-                        li = getWidget(i);
-                        input = $(li).find(':input');
-
-                        //set some useful data properties
-                        input.data('propName',i);
-                        input.data('groupName', groupName);
-
-
-                        //set initial value for each input box (if any)
-                        input.val(mugProps[i]);  //<--- POTENTIAL PAIN POINT! Could be something that's not a string!
-
-                        //set event handler
-
-                        if(!pBlock.uiType || pBlock.uiType === 'input' || pBlock.uiType === 'xpath'){
-                            input.keyup(function(e){
-                                var input = $(e.currentTarget),
-                                        groupName = input.data('groupName'),
-                                        propName = input.data('propName'),
-                                        curMug = formdesigner.controller.getCurrentlySelectedMug(),
-                                        curMT = formdesigner.controller.getCurrentlySelectedMugType(),
-                                        oldItextID;
-
-                                if (propName === 'nodeID' && input.val().indexOf(" ") != -1){ 
-                                    // sanitize nodeID;
-                                    input.val(input.val().replace(/\s/g,'_'));
-                                }
-
-                                //short circuit the mug property changing process for when the
-                                //nodeID is changed to empty-string (i.e. when the user backspaces
-                                //the whole value).  This allows us to keep a reference to everything
-                                //and rename smoothly to the new value the user will ultimately enter.
-                                if (input.val() === "" && (propName === 'nodeID' || propName === 'labelItextID' || propName === 'hintItextID')) {
-                                    return;
-                                }
-
-                                if (propName === 'labelItextID' || propName === 'hintItextID') {
-                                    oldItextID = curMug.properties.controlElement.properties[propName];
-                                    formdesigner.model.Itext.renameItextID(oldItextID,input.val());
-                                }
-
-
-
-                                formdesigner.controller.setMugPropertyValue(curMug,groupName,propName,input.val(),curMT);
-                            });
-                        }else if(pBlock.uiType === 'select'){
-                            input.change(function (e) {
-                                var select = $(e.currentTarget),
-                                        groupName = select.data('groupName'),
-                                        propName = select.data('propName'),
-                                        curMug = formdesigner.controller.getCurrentlySelectedMug(),
-                                        curMT = formdesigner.controller.getCurrentlySelectedMugType(),
-                                        propVal = select.val();
-
-                                formdesigner.controller.setMugPropertyValue(curMug,groupName,propName,select.val(),curMT);
-                                setSpecialDataValueWidgetTypes();
-                            });
-                        }else if(pBlock.uiType === 'checkbox'){
-                            input.prop("checked",mugProps[i]);
-
-                            input.change(function (e) {
-                                var input = $(e.currentTarget),
-                                        groupName = input.data('groupName'),
-                                        propName = input.data('propName'),
-                                        curMug = formdesigner.controller.getCurrentlySelectedMug(),
-                                        curMT = formdesigner.controller.getCurrentlySelectedMugType();
-                                formdesigner.controller.setMugPropertyValue(curMug,groupName,propName,input.prop("checked"),curMT);
-                            });
-                        }
-
-
-
-                        
-
-
-                        parentUL.append(li);
-                    }
-                }
-            }
-        }
-
-        function showControlProps(){
-            if (!showControl) {
-                return;
-            }
-            var properties = mugType.properties.controlElement,
-                    uiBlock = $('#fd-props-control'),
-                    ul;
-
-            uiBlock.empty(); //clear it out first in case there's anything present.
-            ul = makeUL('Control Properties');
-
-
-            listDisplay(properties, ul, mugType.mug.properties.controlElement.properties, 'controlElement',true,false);
-
-            uiBlock.append(ul);
-            if(uiBlock.find('li').length === 0){
-                uiBlock.empty();
-            }
-            uiBlock.show();
-            uiBlock.find('select').chosen();
-        }
-        displayFuncs.controlElement = showControlProps;
-
-        function showDataProps(){
-            if (!showData) {
-                return;
-            }
-            var properties = mugType.properties.dataElement,
-                    uiBlock = $('#fd-props-data'),
-                    ul;
-            uiBlock.empty(); //clear it out first in case there's anything present.
-            ul = makeUL('Data Properties');
-
-            listDisplay(properties,ul,mugType.mug.properties.dataElement.properties, 'dataElement', true, false);
-            uiBlock.append(ul);
-            if(uiBlock.find('li').length === 0){
-                uiBlock.empty();
-            }
-            setSpecialDataValueWidgetTypes();
-            uiBlock.show();
-            uiBlock.find('select').chosen();
-        }
-        displayFuncs.dataElement = showDataProps;
-
-        function showBindProps(){
-            if (!showBind) {
-                return;
-            }
-            var properties = mugType.properties.bindElement,
-                    uiBlock = $('#fd-props-bind'),
-                    ul;
-            uiBlock.empty(); //clear it out first in case there's anything present.
-            ul = makeUL('Logic Properties');
-
-
-            listDisplay(properties, ul, mugType.mug.properties.bindElement.properties, 'bindElement', true, false);
-            uiBlock.append(ul);
-            if(uiBlock.find('li').length === 0){
-                uiBlock.empty();
-            }
-            uiBlock.show();
-            uiBlock.find('select').chosen();
-        }
-        displayFuncs.bindElement = showBindProps;
-
-        /**
-         * Makes an Itext LI for UI user input of Itext values. Assumes the Itext ID is already present,
-         * if not will generate one and add it to the Itext object.
-         * @param textForm
-         * @param iflabel - Display Label for UI
-         * @param ishint - flag for if this is a 'hint' type itext (hint itext ID is located in a different place to regular itext ID)
-         */
-        function makeItextLI(textForm, iflabel, ishint) {
-            var mugType, liStr, txtStr, inputStr, id, li, text, input, currentLang, Itext, iID, iIDInput,
-                    isRequired;
-            Itext = formdesigner.model.Itext;
-            currentLang = formdesigner.currentItextDisplayLanguage;
-            mugType = formdesigner.controller.getCurrentlySelectedMugType();
-            if(!ishint){
-                isRequired = true; //at present we can give everything an Itext ID so...
-                iID = mugType.mug.properties.controlElement.properties.labelItextID;
-            } else {
-                isRequired = (mugType.properties.controlElement.hintItextID.presence === 'required') ||
-                             (mugType.properties.controlElement.hintLabel === 'required');
-                iID = mugType.mug.properties.controlElement.properties.hintItextID;
-            }
-            if(!iID && isRequired) {
-                //make a new iID;
-                iID = formdesigner.util.getNewItextID(mugType,ishint);
-                //set the new Itext ID in it's respective UI element
-                if(ishint) {
-                    mugType.mug.properties.controlElement.properties.hintItextID = iID;
-                    iIDInput = $('#controlElement-hintItextID-input');
-                }else {
-                    mugType.mug.properties.controlElement.properties.labelItextID = iID;
-                    iIDInput = $('#controlElement-labelItextID-input');
-                }
-                iIDInput.val(iID).keyup(); //.keyup() to trigger existing behaviour, if any.
-            }
-            if (ishint){
-                id = 'fd-itext-hint';
-            } else {
-                id = 'fd-itext-' + textForm.toLowerCase();
-            }
-            liStr = '<li id="' + id + '" class="fd-property"></li>';
-            txtStr = '<span id="' + id +'-txt" class="fd-property-text">' + iflabel + '</span>';
-            inputStr = '<div id="' + id + '-input-div" class="fd-prop-input-div chzn-container"><input id="' + id + '-input" class="fd-property-input"/>';
-            li = $(liStr);
-            text = $(txtStr);
-            input = $(inputStr);
-
-            input.find(':input').val(Itext.getValue(iID, currentLang, textForm));
-            li.append(text);
-            li.append(input);
-
-            input.data('ufid', mugType.ufid);
-            input.data('textform', textForm);
-            input.children(':input').data('ufid', mugType.ufid).data('textform', textForm);
-            input.find(':input').keyup ( function (e) {
-                var oldVal, newVal, mugType, curIID;
-                oldVal = Itext.getValue(iID,currentLang, textForm);
-                newVal = $ (this).val();
-                mugType = formdesigner.controller.form.controlTree.getMugTypeFromUFID($(this).data('ufid'));
-                if(ishint){
-                    curIID = mugType.mug.properties.controlElement.properties.hintItextID;
-                } else {
-                    curIID = mugType.mug.properties.controlElement.properties.labelItextID;
-                }
-                Itext.setValue(curIID, currentLang, textForm, newVal);
-                formdesigner.util.changeUITreeNodeLabel($ (this).data('ufid'), formdesigner.util.getMugDisplayName(mugType))
-                formdesigner.controller.form.fire({
-                    type: 'form-property-changed',
-                    propName: 'itext;'+textForm,
-                    iID: curIID,
-                    mugType: mugType,
-                    oldVal: oldVal,
-                    newVal: newVal
-                })
-
-            });
-
-            return li;
-        }
-
-        function showItextProps(){
-            if (!showControl) {
-                return;
-            }
-            function makeItextUL() {
-                var ulStr = '<ul id="fd-props-itext-ul" class="fd-props-ul">' +
-                        '<span class="fd-props-heading">Display Properties</span>' +
-                        '</ul>';
-                return $(ulStr);
-            }
-
-            function langSelectorCallback (e) {
-                formdesigner.currentItextDisplayLanguage = $('#fd-itext-lang-select').val();
-                showItextProps(); //redraw the Itext section
-            }
-
-            function makeLangDropDown() {
-                var div = $('#fd-itext-langs'), addLangButton, langList, langs, i, str, selectedLang, Itext;
-                Itext = formdesigner.model.Itext;
-                langs = Itext.getLanguages();
-
-                str = '<select data-placeholder="Choose a Language" style="width:300px;" class="chzn-select" id="fd-itext-lang-select">' +
-                        '<option value="blank"></option>'
-                for (i in langs) {
-                    if (langs.hasOwnProperty(i)) {
-                        if(Itext.getDefaultLanguage() === langs[i]){
-                            selectedLang = 'selected';
-                        }
-
-                        str = str + '<option value="' + langs[i] + '" >' + langs[i] + '</option>';
-                    }
-                }
-
-                str += '</select>';
-
-                langList = $(str);
-                div.append(langList);
-                langList.change (function (e) {
-                    formdesigner.currentItextDisplayLanguage = $(this).val();
-                })
-
-                langList.val(formdesigner.currentItextDisplayLanguage);
-
-                str = '';
-                str = '<button id="fd-itext-add-lang-button">Add Language</button>';
-                addLangButton = $(str);
-                addLangButton.button();
-                addLangButton.click (function () {
-                    formdesigner.ui.showAddLanguageDialog();
-                })
-                div.append(addLangButton);
-
-            }
-            var langDrop = $('#fd-itext-langs').detach();
-            if(langDrop.length === 0) {
-                langDrop = $('<div id="fd-itext-langs"></div>');
-            }
-            $('#fd-props-itext').prepend(langDrop);
-            langDrop.empty();
-            $('#fd-itext-inputs').empty();
-
-
-            makeLangDropDown();
-            $('#fd-itext-lang-select').chosen();
-            $('#fd-itext-lang-select').change (langSelectorCallback);
-            
-            var uiBlock = $('#fd-itext-inputs'),
-                ul, LIs, i, langSettings, itextHeading;
-            ul = makeItextUL();
-            uiBlock.append(ul);
-            LIs = {
-                liDef : makeItextLI('default', 'Display Label'),
-                liAudio : makeItextLI('audio', 'Audio URI'),
-                liImage : makeItextLI('image', 'Image URI'),
-                liVideo : makeItextLI('video', 'Video URI')
-            }
-
-            for (i in LIs) {
-                if(LIs.hasOwnProperty(i)) {
-                    ul.append(LIs[i]);
-                }
-            }
-
-            //shuffle layout a bit.
-            langSettings = $('#fd-itext-langs');
-            itextHeading = $('#fd-props-itext-ul').children('span');
-            langSettings.detach();
-            itextHeading.after(langSettings);
-
-        }
-        displayFuncs.itext = showItextProps; //not sure if this will ever be used like this, but may as well stick with the pattern
-
-        var IS_ADVANCED_ACC_EXPANDED = false;
-        function showAdvanced(){
-            var str = '<div id="fd-props-adv-accordion"><h3><a href="#">Advanced Properties</a></h3><div id="fd-adv-props-content">Some Content<br />asdasddas</div></div>',
-                adv = $(str),
-                contentEl,
-                ul,properties;
-
-            function displayBlock(blockName){
-                if (!mugType.properties[blockName]) {
-                    return;
-                }
-
-                var contentEl = $('#fd-adv-props-content'),
-                    regBlockName = formdesigner.util.fromCamelToRegularCase(blockName),
-                    ul = makeUL(regBlockName + ' Advanced Properties:'),
-                    mugTypeProperties = mugType.properties[blockName],
-                    mugProperties = mugType.mug.properties[blockName].properties;
-
-                listDisplay(mugTypeProperties, ul, mugProperties, blockName, false, true);
-
-                if(ul.children().length === 1){
-                    $(ul).remove();
-                } else {
-                    contentEl.append(ul);
-                }
-            }
-
-            $('#fd-props-advanced').append(adv);
-
-            if(typeof formdesigner.IS_ADVANCED_ACC_EXPANDED === 'undefined') {
-                formdesigner.IS_ADVANCED_ACC_EXPANDED = false;
-            }
-
-            adv.accordion({
-//                fillSpace: true,
-                autoHeight: false,
-                collapsible: true,
-                active: formdesigner.IS_ADVANCED_ACC_EXPANDED
-            });
-            if(formdesigner.IS_ADVANCED_ACC_EXPANDED) {
-                $('#fd-props-adv-accordion').accordion('activate',0);
-            }
-
-            $('#fd-props-adv-accordion h3').click(function () {
-                formdesigner.IS_ADVANCED_ACC_EXPANDED = !formdesigner.IS_ADVANCED_ACC_EXPANDED;
-            });
-
-            var contentEl = $('#fd-adv-props-content');
-
-            contentEl.empty();
-            if (showControl) {
-                //Itext input widgets
-                var itextul = makeUL('');
-                itextul.append(makeItextLI('short', 'Short Display Label'))
-                        .append(makeItextLI('long', 'Long Display Label'));
-                if(mugType.properties.controlElement.hintItextID && mugType.properties.controlElement.hintItextID.presence !== "notallowed") {
-                    itextul.append(makeItextLI('default', 'Hint Display Label', true));
-                }
-                contentEl.append('<br /><br />').append(itextul);
-            }
-            
-            if (showData) {
-                displayBlock('dataElement');
-            }
-            if (showBind) {
-                displayBlock('bindElement');
-            }
-            if (showControl) {
-                displayBlock('controlElement');
-            }
-
-            contentEl.find('select').chosen();
-
-        }
-
+        
         function attachCommonEventListeners () {
             /**
              * Sets things up such that if you alter one NodeID box (e.g. bind)
              * the other NodeID (e.g. data) gets changed and the model gets updated too.
              */
-            function syncNodeIDInputs(){
-                //this spaghetti is terrible :(
-
-                function otherInputUpdate (otherIn) {
-                    var otherInput = $(otherIn),
-                                groupName = otherInput.data('groupName'),
-                                propName = otherInput.data('propName'),
-                                curMug = formdesigner.controller.getCurrentlySelectedMug(),
-                                curMugType = formdesigner.controller.getCurrentlySelectedMugType();
-
-                    //Short circuit the process of syncing the two IDs
-                    //when the text box is blank (i.e. a user backspaced away all chars).
-                    //This prevents us from getting into a hairy situation
-                    //with ItextIDs being blank/getting unsynchronized with
-                    //the data stored in Itext.
-                    if (otherInput.val() === "") {
-                        return;
-                    }
-
-                    formdesigner.controller.setMugPropertyValue(curMug,groupName,propName,otherInput.val(), curMugType);
-                    //update ItextID stuff
-                    if($('#controlElement-labelItextID-input').length > 0) { //does it have itextID?
-                        $('#controlElement-labelItextID-input').val(otherInput.val()).keyup(); //trigger keyup to have this change be taken care of in the regular way.
-                    }
-                }
-
-                var nodeIDBoxes = $('input[id*="nodeID"]'); //gets all input boxes with ID attribute containing 'nodeID'
-                if(nodeIDBoxes.length === 2){
-                    $(nodeIDBoxes[0]).keyup(function(e) {
-                        $(nodeIDBoxes[1]).val($(e.currentTarget).val());
-                        otherInputUpdate(nodeIDBoxes[1]);
-
-                    });
-                    $(nodeIDBoxes[1]).keyup(function (e) {
-                        $(nodeIDBoxes[0]).val($(e.currentTarget).val());
-                        otherInputUpdate(nodeIDBoxes[0]);
-                    });
-                }
-            }
-
+            
             /**
              * When either bindElement.nodeID or dataElement.nodeID changes value,
              * the node label in the jstree (UITree) should be updated to reflect that change
              */
+            
             function updateUITreeNodeLabel(){
                 var mug = mugType.mug,
                         util = formdesigner.util;
 
                 mug.on('property-changed',function(e){
-                    if(e.property === 'nodeID' && !formdesigner.util.getDefaultDisplayItext(mug)){
-                        var node = $('#' + e.mugTypeUfid);
-                        $('#fd-question-tree').jstree('rename_node',node,this.properties[e.element].properties[e.property]);
-                    }
+                    var node = $('#' + e.mugTypeUfid);
+                    var displayText = mugType.getDisplayText(formdesigner.currentItextDisplayLanguage);
+                    if(e.property === 'nodeID' && !displayText){
+                        $('#fd-question-tree').jstree('rename_node',node,mug.properties[e.element].properties[e.property]);
+                    } else {
+                        if (displayText && displayText !== $('#fd-question-tree').jstree("get_text", node)) {
+                            $('#fd-question-tree').jstree('rename_node', node, displayText);
+                        }
+                    } 
                 });
-
             }
 
             function updateSaveState () {
@@ -1027,51 +477,36 @@ formdesigner.ui = (function () {
                     }
                 });
             }
-
-            syncNodeIDInputs();
+            
             updateUITreeNodeLabel();
             updateSaveState();
             updateDataViewLabels();
 
         }
 
-        //Throws a little label at the top of the question properties block to indicate what kind of question
-        //vellum thinks this is
-        function showQuestionType () {
-            var uiBlock = $('#fd-props-mugtype-info'),
-                ul, typeString = mugType.typeName;
-
-            uiBlock.empty();
-            ul = makeUL(typeString);
-
-            uiBlock.append(ul);
-            uiBlock.show();
-        }
-        
         function updateDisplay(){
-            var mugTProps = mugType.properties,
-            i = 0;
             $('#fd-question-properties').animate({
                         height:'900px'
                     },200);
 
             that.hideQuestionProperties();
             
-            $('#fd-props-bind').empty();
-            $('#fd-props-data').empty();
-            $('#fd-props-control').empty();
-            $('#fd-props-advanced').empty();
-            $('#fd-itext-inputs').empty();
-
-            showQuestionType();
-            for(i in mugTProps){
-                if(mugTProps.hasOwnProperty(i)){
-                    displayFuncs[i]();
-                }
-            };
-            displayFuncs.itext();
-            showAdvanced();
-            attachCommonEventListeners();
+            var content = $("#fd-props-content").empty();
+            
+            // Add heading to indicate what kind of question vellum thinks this is
+            $("<h1 />").text(mugType.typeName).attr("id", "fd-props-mugtype-info").appendTo(content);
+            
+            // TODO: where does this belong? eventually we want this to be per-question-type
+            
+            var sections = formdesigner.widgets.getSectionListForMug(mugType);
+        
+            var sec;
+            for (var i = 0; i < sections.length; i++) {
+                sec = sections[i];
+                sec.getSectionDisplay().appendTo(content);
+            }
+	        
+	        attachCommonEventListeners();
             $("#fd-question-properties").show();
         };
 
@@ -1086,21 +521,25 @@ formdesigner.ui = (function () {
      */
     function node_select(e, data) {
         var curSelUfid = jQuery.data(data.rslt.obj[0], 'mugTypeUfid');
+        // don't do anything if we're already on the selected node
+        var curMug = formdesigner.controller.getCurrentlySelectedMugType();
         
-        formdesigner.controller.setCurrentlySelectedMugType(curSelUfid);
-        if($(e.currentTarget).attr('id') === 'fd-question-tree') {
-//            $('#fd-data-tree').jstree('select_node');
-            that.displayMugProperties(formdesigner.controller.getCurrentlySelectedMugType());
-        } else if ($(e.currentTarget).attr('id') === 'fd-data-tree') {
-//            $('#fd-question-tree').jstree('deselect_all');
-            that.displayMugDataProperties(formdesigner.controller.getCurrentlySelectedMugType());
-        }
-    }
+        // don't bother resetting everything if they just clicked
+        // on the mug that was already selected
+        if (!curMug || curMug.ufid !== curSelUfid) {
+	        formdesigner.controller.setCurrentlySelectedMugType(curSelUfid);
+	        if($(e.currentTarget).attr('id') === 'fd-question-tree') {
+	            that.displayMugProperties(formdesigner.controller.getCurrentlySelectedMugType());
+	        } else if ($(e.currentTarget).attr('id') === 'fd-data-tree') {
+	            that.displayMugDataProperties(formdesigner.controller.getCurrentlySelectedMugType());
+	        }
+	    }
+    };
     
     function selectMugTypeInUI(mugType) {
         var ufid = mugType.ufid;
         return $('#fd-question-tree').jstree('select_node', $('#'+ufid), true);
-    }
+    };
     that.selectMugTypeInUI = selectMugTypeInUI;
     
     function forceUpdateUI() {
@@ -1126,7 +565,7 @@ formdesigner.ui = (function () {
         } else {
             // already selected, nothing to do 
         }
-    }
+    };
     that.forceUpdateUI = forceUpdateUI;
     
     /**
@@ -1180,9 +619,6 @@ formdesigner.ui = (function () {
                 $('#fd-data-tree').jstree("move_node",elMT, elMTRef, pos, false);
             }
 
-        }).bind("deselect_all.jstree", function (e, data) {
-            formdesigner.controller.setCurrentlySelectedMugType(null);
-            formdesigner.controller.curSelUfid = null;
         });
         questionTree = $("#fd-question-tree");
     }

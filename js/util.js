@@ -142,11 +142,11 @@ formdesigner.util = (function(){
         }
 
         oldItextID = mugType.mug.properties.controlElement.properties[itextMugRef];
-        hasOldItext = Itext.getItextVals(oldItextID, Itext.getDefaultLanguage()) !== null;
-        hasNewItext = Itext.getItextVals(newItextID, Itext.getDefaultLanguage()) !== null;
+        hasOldItext = Itext.hasItextBlock(oldItextID, Itext.getDefaultLanguage());
+        hasNewItext = Itext.hasItextBlock(newItextID, Itext.getDefaultLanguage());
 
-
-        if (!oldItextID) { //assumes there's no ID by this name in the Itext object if this is null
+        //assumes there's no ID by this name in the Itext object if this is null
+        if (!oldItextID) { 
             mugType.mug.properties.controlElement.properties[itextMugRef] = newItextID;
             //no changes to make to Itext obj
             return;
@@ -902,6 +902,9 @@ formdesigner.util = (function(){
     that.isSelect = function (mug) {
         return (mug.typeName === "Multi Select Question" ||
                 mug.typeName === "Single Select Question")
+    }
+    that.isSelectItem = function (mug) {
+        return (mug.typeName === "Select Item")
     }
     
     return that;
