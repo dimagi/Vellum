@@ -337,30 +337,30 @@ formdesigner.ui = (function () {
                 li.append(icon);
             }
             return li;
-        }
+        };
 
         function loopValProps (block, name){
-            var i, res, msg, li;
+            var i, res, msg, input;
             if(block){
                 for(i in block){
                     if(block.hasOwnProperty(i)){
                         res = block[i].result;
                         msg = block[i].resultMessage;
-                        li = findLIbyPropertyName(i, name);
+                        input = findInputByReference(name, i);
                         if(res === 'fail'){
-                            setValidationFailedIcon(li, true, msg);
+                            setValidationFailedIcon(input.parent(), true, msg);
                             propsMessage += '<p>' + msg + '</p>';
                         }else if(res === 'pass'){
-                            setValidationFailedIcon(li, false, msg);
+                            setValidationFailedIcon(input.parent(), false, msg);
                         }
                     }
                 }
             }
-        }
+        };
 
-        function findLIbyPropertyName(i,blockName){
-            return $('#' + blockName + '-' + i);
-        }
+        function findInputByReference(blockName, elementName){
+            return $('#' + blockName + '-' + elementName);
+        };
 
         if (!mugType) {
             return;
@@ -849,7 +849,7 @@ formdesigner.ui = (function () {
                 oldVal: oldVal,
                 newVal: newVal
             })
-        }
+        };
 
         var formNameFunc = function (e) {
             fireFormPropChanged('formName',formdesigner.controller.form.formName, $( this ).val());
@@ -887,11 +887,11 @@ formdesigner.ui = (function () {
 
         function clearIcons (tree) {
             tree.find('.fd-tree-valid-alert-icon').remove();
-        }
+        };
 
         function appendIcon (id, msg) {
             $($('#' + i)[0]).append('<div class="ui-icon ui-icon-alert fd-tree-valid-alert-icon" title="'+msg+'"></div>')
-        }
+        };
 
 
 
