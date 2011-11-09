@@ -452,14 +452,14 @@ formdesigner.ui = (function () {
                         }
                     } 
                 });
-            }
+            };
 
             function updateSaveState () {
                 var mug = mugType.mug;
                 mug.on('property-changed', function (e) {
                     formdesigner.controller.setFormChanged();
                 });
-            }
+            };
 
             function updateDataViewLabels () {
                 var mug, util, dataJSTree;
@@ -476,7 +476,7 @@ formdesigner.ui = (function () {
                         dataJSTree.jstree('rename_node',node,this.properties.dataElement.properties.nodeID);
                     }
                 });
-            }
+            };
             
             updateUITreeNodeLabel();
             updateSaveState();
