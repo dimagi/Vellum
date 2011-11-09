@@ -544,12 +544,20 @@ formdesigner.model = function () {
 //        }
     };
 
+    var validateElementName = function (value, displayName) {
+        if (!formdesigner.util.isValidElementName(value)) {
+            return value + " is not a legal " + displayName + ". Must start with a letter and contain only letters, numbers, and '-' or '_' characters.";
+        }
+        return "pass";            
+    };
+    
     var validationFuncs = {
         //should be used to figure out the logic for label, defaultLabel, labelItext, etc properties
         nodeID: function (mugType, mug) {
             var qId = mug.properties.dataElement.properties.nodeID;
-            if (!formdesigner.util.isValidElementName(qId)) {
-                return qId + " is not a legal question id. Must start with a letter and contain only letters, numbers, and '-' or '_' characters.";
+            var res = validateElementName(qId, "Question ID");
+            if (res !== "pass") {
+                return res;
             }
             // check for dupes
             var hasDuplicateId = function (qId) {
@@ -573,6 +581,10 @@ formdesigner.model = function () {
             hasLabel = Boolean(controlBlock.label);
             hasLabelItextID = Boolean(controlBlock.labelItextID);
             if(hasLabelItextID){
+                var res = validateElementName(controlBlock.labelItextID, "Label IText ID");
+	            if (res !== "pass") {
+	                return res;
+	            }
                 hasItext = Itext.hasHumanReadableItext(mug,false);
             } else {
                 hasItext = false;
@@ -598,6 +610,12 @@ formdesigner.model = function () {
             controlElement = mug.properties.controlElement.properties;
             Itext = formdesigner.model.Itext;
             hintIID = controlElement.hintItextID;
+            if (hintIID) {
+                var res = validateElementName(hintIID, "Hint IText ID");
+                if (res !== "pass") {
+                    return res;
+                }
+            }
             itextVal = Itext.getValue(hintIID,Itext.getDefaultLanguage(),'default');
             if(hintIID && !itextVal) {
                 return 'Question has Hint Itext ID but no Hint Itext Label Data!';
@@ -614,6 +632,14 @@ formdesigner.model = function () {
         constraintItextId: function (mugType, mug) {
             var bindElement = mug.properties.bindElement.properties;
             var IT = formdesigner.model.Itext;
+            
+            if (bindElement.constraintMsgItextID) {
+                var res = validateElementName(bindElement.constraintMsgItextID, "Constraint IText ID");
+                if (res !== "pass") {
+                    return res;
+                }
+            }
+            
             if (bindElement.constraintMsgItextID && bindElement.constraintMsgAttr) {
                 return 'Question specifies a both a constraint message and itext. Please delete one.';
             }
