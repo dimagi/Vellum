@@ -1141,7 +1141,7 @@ formdesigner.ui = (function () {
     var set_event_listeners = function () {
         formdesigner.controller.on("question-itext-changed", function (e) {
             // update any display values that are affected
-            var allMugs = formdesigner.controller.getListMugTypesNotItems();
+            var allMugs = formdesigner.controller.getMugTypeList();
             if (formdesigner.currentItextDisplayLanguage === e.language) {
 		        allMugs.map(function (mug) {
 		            var node = $('#' + mug.ufid);
@@ -1174,7 +1174,7 @@ formdesigner.ui = (function () {
          * 
          */
         var expTypes = xpathmodels.XPathExpressionTypeEnum;
-        var questionList = formdesigner.controller.getListMugTypesNotItems();
+        var questionList = formdesigner.controller.getMugTypeList();
         var questionChoiceAutoComplete = questionList.map(function (item) { 
             return formdesigner.util.mugToAutoCompleteUIElement(item);
         });

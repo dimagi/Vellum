@@ -561,7 +561,7 @@ formdesigner.model = function () {
             }
             // check for dupes
             var hasDuplicateId = function (qId) {
-                var allMugs = formdesigner.controller.getListMugTypesNotItems();
+                var allMugs = formdesigner.controller.getMugTypeList();
                 var hasDupeArray = allMugs.map(function (node) {
                     // skip ourselves, checking for dupes
                     return node.hasDataElement() && node.ufid != mugType.ufid && 
