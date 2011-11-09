@@ -35,6 +35,17 @@ formdesigner.controller = (function () {
             that.setFormChanged();
         });
         
+        that.on('parse-finish', function () {
+            // wire the event handlers for all the mugs in the tree
+            var allMugs = that.getMugTypeList(true);
+            allMugs.map(function (mt) {
+                formdesigner.util.setStandardMugEventResponses(mt.mug);
+            });
+            
+            
+            
+            
+        });
         that.on('widget-value-changed', function (e) {
             // When a widget's value changes, do whatever work you need to in 
             // the model/UI to make sure we are in a consistent state.
@@ -253,7 +264,7 @@ formdesigner.controller = (function () {
      * a flat list of unique mugTypes.  This list is primarily fo the
      * autocomplete skip logic wizard.
      */
-    var getListMugTypesNotItems = function () {
+    var getMugTypeList = function (includeSelectItems) {
         var cTree, dTree, treeFunc, cList, dList, mergeList;
         //use formdesigner.util.mergeArray
 
@@ -268,7 +279,7 @@ formdesigner.controller = (function () {
                 throw 'Node in tree without value?!?!'
             }
 
-            if(mt.typeName === "Select Item") { //skip Select Items
+            if(mt.typeName === "Select Item" && !includeSelectItems) { //skip Select Items
                 return;
             }
 
@@ -287,7 +298,7 @@ formdesigner.controller = (function () {
 
     };
     
-    that.getListMugTypesNotItems = getListMugTypesNotItems;
+    that.getMugTypeList = getMugTypeList;
 
 
     /**
@@ -1631,8 +1642,6 @@ formdesigner.controller = (function () {
             that.fire({
                 type: 'parse-finish'
             });
-
-
 
         } catch (e) {
             that.fire({
