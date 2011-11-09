@@ -591,6 +591,9 @@ formdesigner.model = function () {
             }
             if (hasLabel) {
                 return 'pass';
+            } else if (!hasLabel && !hasItext && (mugType.properties.controlElement.label.presence == 'optional' || mugType.properties.controlElement.labelItextID.presence == 'optional')) {
+                //make allowance for questions that have label/labelItextID set to 'optional'
+                return 'pass';
             } else if (hasLabelItextID && hasItext) {
                 return 'pass';
             } else if (hasLabelItextID && !hasItext) {
@@ -1364,6 +1367,8 @@ formdesigner.model = function () {
         mType.properties.bindElement.dataType.presence = "notallowed";
         mType.properties.controlElement.hintItextID.presence = "notallowed";
         mType.properties.controlElement.hintLabel.presence = "notallowed";
+        mType.properties.controlElement.label.presence = "optional";
+        mType.properties.controlElement.labelItextID.presence = "optional";
         mType.properties.dataElement.dataValue.presence = "notallowed";
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
@@ -2251,7 +2256,9 @@ formdesigner.model = function () {
                     var mugType = node.getValue(),
                         cProps = mugType.mug.properties.controlElement.properties,
                         label,
-                        xmlWriter = formdesigner.controller.XMLWriter;
+                        xmlWriter = formdesigner.controller.XMLWriter,
+                        hasItext,
+                        isItextOptional;
 
                     /**
                      * @param tagName
@@ -2265,7 +2272,7 @@ formdesigner.model = function () {
                          * Creates the label tag inside of a control Element in the xform
                          */
                         function createLabel() {
-                            if (elLabel) {
+                            if (elLabel.ref || elLabel.defText) {
                                 xmlWriter.writeStartElement('label');
                                 if (elLabel.ref) {
                                     xmlWriter.writeAttributeStringSafe('ref',elLabel.ref);
@@ -2338,6 +2345,11 @@ formdesigner.model = function () {
                             label = {};
                         }
                         label.ref = "jr:itext('" + cProps.labelItextID + "')";
+                        hasItext = formdesigner.model.Itext.buildItextValueSet().hasOwnProperty(cProps.labelItextID);
+                        isItextOptional = mugType.properties.controlElement.labelItextID.presence == 'optional'; //iID is optional so by extension Itext is optional.
+                        if (!hasItext && isItextOptional) {
+                            label.ref = '';
+                        }
                     }
                     ////////////
 
@@ -2810,7 +2822,7 @@ formdesigner.model = function () {
                                 if (!ret.hasOwnProperty(question)) {
                                     ret[question] = {};
                                 }
-                                ret[question][form] = null;
+                                ret[question][form] = null;  //TODO: should this be null?
                             }                
                         }
                     }
