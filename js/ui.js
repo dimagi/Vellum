@@ -437,23 +437,6 @@ formdesigner.ui = (function () {
              * the node label in the jstree (UITree) should be updated to reflect that change
              */
             
-            function updateUITreeNodeLabel(){
-                var mug = mugType.mug,
-                        util = formdesigner.util;
-
-                mug.on('property-changed',function(e){
-                    var node = $('#' + e.mugTypeUfid);
-                    var displayText = mugType.getDisplayText(formdesigner.currentItextDisplayLanguage);
-                    if(e.property === 'nodeID' && !displayText){
-                        $('#fd-question-tree').jstree('rename_node',node,mug.properties[e.element].properties[e.property]);
-                    } else {
-                        if (displayText && displayText !== $('#fd-question-tree').jstree("get_text", node)) {
-                            $('#fd-question-tree').jstree('rename_node', node, displayText);
-                        }
-                    } 
-                });
-            };
-
             function updateSaveState () {
                 var mug = mugType.mug;
                 mug.on('property-changed', function (e) {
@@ -478,7 +461,6 @@ formdesigner.ui = (function () {
                 });
             };
             
-            updateUITreeNodeLabel();
             updateSaveState();
             updateDataViewLabels();
 
@@ -1157,7 +1139,21 @@ formdesigner.ui = (function () {
     };
 
     var set_event_listeners = function () {
-
+        formdesigner.controller.on("question-itext-changed", function (e) {
+            // update any display values that are affected
+            var allMugs = formdesigner.controller.getListMugTypesNotItems();
+            if (formdesigner.currentItextDisplayLanguage === e.language) {
+		        allMugs.map(function (mug) {
+		            var node = $('#' + mug.ufid);
+                    if (mug.getItextID() === e.iTextID) {
+		                if (e.value && e.value !== $('#fd-question-tree').jstree("get_text", node)) {
+                            $('#fd-question-tree').jstree('rename_node', node, e.value);
+                        }    
+		            }
+		        });
+            }
+            
+        });
     };
     
     that.hideQuestionProperties = function() {
