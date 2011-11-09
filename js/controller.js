@@ -809,7 +809,11 @@ formdesigner.controller = (function () {
             
             
             // populate text
-            output.val(that.form.createXForm());
+            if(!formdesigner.controller.formLoadingFailed){
+                output.val(that.form.createXForm());
+            } else {
+                output.val(formdesigner.loadMe);
+            }
             
             // add controls
             var loadButton = $('<button id ="fd-loadsource-button">Update Source</button>').appendTo(controls).button();
@@ -967,6 +971,31 @@ formdesigner.controller = (function () {
     var loadXForm = function (formString) {
         $.fancybox.showActivity();
         that.setFormSaved(); //form is being loaded for the first time so by default it is 'saved'
+
+        //universal flag for indicating that there's something wrong enough with the form that vellum can't deal.
+        formdesigner.controller.formLoadingFailed = false;
+        //re-enable all buttons and inputs in case they were disabled before.
+        $('input').prop('enabled', false);
+        $('button').button('enable');
+
+        //Things to do to gracefully deal with a form loading failure
+        function formLoadFailed(e) {
+            var showSourceButton = $('#fd-fancy-button');
+            formdesigner.controller.formLoadingFailed = true;
+
+            //populate formdesigner.loadMe (var used when loading a form given during initialization)
+            //with the broken form, so that it can be viewed/edited by the showSource view
+            formdesigner.loadMe = formString;
+
+            //disable all buttons and inputs
+            $('input').prop('disabled', false);
+            $('button').button('disable');
+            showSourceButton.button('enable'); //enable the view source button so the form can be tweaked by hand.
+
+        }
+
+        formdesigner.on('load-form-error', formLoadFailed); 
+
         window.setTimeout(function () { //wait for the spinner to come up.
             formdesigner.fire({
                     type: 'load-form-start',

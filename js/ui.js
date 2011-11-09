@@ -768,24 +768,24 @@ formdesigner.ui = (function () {
 
          })();
 
-        (function c_showDataView() {
-             var showDataViewBut = $(
-                     '<button id="fd-dataview-button" class="toolbarButton questionButton">'+
-                 'Show Data View ' +
-               '</button>');
-             $('#fd-extra-advanced').append(showDataViewBut);
-
-             showDataViewBut.button().click(function () {
-                 formdesigner.ui.showDataView();
-             });
-
-            showDataViewBut.button('disable');
-
-         })();
+//        (function c_showDataView() {
+//             var showDataViewBut = $(
+//                     '<button id="fd-dataview-button" class="toolbarButton questionButton">'+
+//                 'Show Data View ' +
+//               '</button>');
+//             $('#fd-extra-advanced').append(showDataViewBut);
+//
+//             showDataViewBut.button().click(function () {
+//                 formdesigner.ui.showDataView();
+//             });
+//
+//            showDataViewBut.button('disable');
+//
+//         })();
 
         (function c_clearCruftyItext() {
             var clearCruftBut = $(
-                     '<button id="fd-dataview-button" class="toolbarButton questionButton">'+
+                     '<button id="fd-cruftyItextRemove-button" class="toolbarButton questionButton">'+
                  'Remove Unused Itext ' +
                '</button>');
              $('#fd-extra-advanced').append(clearCruftBut);
