@@ -876,6 +876,11 @@ formdesigner.controller = (function () {
                 }
             }
         }
+        
+        formdesigner.controller.form.fire({
+            type: 'form-property-changed'
+        });
+        
     }
     that.parseXLSItext = parseXLSItext;
 
@@ -1607,7 +1612,7 @@ formdesigner.controller = (function () {
             });
             throw e;
         }
-
+        
     }
     that.parseXML = parseXML;
 
