@@ -673,7 +673,7 @@ formdesigner.ui = (function () {
 
     var init_extra_tools = function(){
         function makeLangDrop() {
-            var div, addLangButton, langList, langs, i, str, selectedLang, Itext;
+            var div, addLangButton, removeLangButton, langList, langs, i, str, selectedLang, Itext;
             $('#fd-extra-settings').find('#fd-lang-disp-div').remove();
             div = $('<div id="fd-lang-disp-div"></div>');
             Itext = formdesigner.model.Itext;
@@ -711,6 +711,14 @@ formdesigner.ui = (function () {
                 formdesigner.ui.showAddLanguageDialog();
             })
             div.append(addLangButton);
+            str = '';
+            str = '<button id="fd-lang-disp-add-lang-button">Remove Langauge</button>';
+            removeLangButton = $(str);
+            removeLangButton.button();
+            removeLangButton.click(function () {
+                formdesigner.ui.showRemoveLanguageDialog();
+            })
+            div.append(removeLangButton);
             div.append('<br/><br/><br/><br/><br/>');
             $('#fd-extra-settings').append(div);
             $(div).find('#fd-land-disp-select').chosen();
@@ -1044,6 +1052,74 @@ formdesigner.ui = (function () {
 
     }
 
+    var removeLanguageDialog = function () {
+        function beforeClose (event,ui) {
+            //grab the input value and add the new language
+            if($('#fd-remove-lang-input').val() != '') {
+                formdesigner.model.Itext.removeLanguage($('#fd-remove-lang-input').val())
+                formdesigner.currentItextDisplayLanguage = formdesigner.model.Itext.getDefaultLanguage();
+            }
+        }
+
+        var div = $( "#fd-dialog-confirm" ),input,contStr, langToBeRemoved, buttons, msg;
+
+        div.dialog( "destroy" );
+        div.empty();
+
+
+        if(formdesigner.model.Itext.getLanguages().length == 1) {
+            //When there is only one language in the 
+            langToBeRemoved = '';
+            msg = 'You need to have at least one language in the form.  Please add a new language before removing this one.';
+        } else {
+            langToBeRemoved = formdesigner.currentItextDisplayLanguage
+            msg = 'Are you sure you want to permanently remove this language?';
+        }
+
+        contStr = '<p> <span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>' +
+                '<span class="fd-message">' + msg + '</span> ' +
+                '<div id="fd-new-lang-div"><input id="fd-remove-lang-input" type="hidden"/></div>' +
+                '</p>'
+
+        div.append(contStr);
+
+        //We use the following hidden input box as a flag to determine what to do in the beforeClose() func above.
+        $('#fd-remove-lang-input').val(langToBeRemoved);
+
+        buttons = {}
+        buttons["Cancel"] = function () {
+            $('#fd-remove-lang-input').val('')
+            $(this).dialog("close");
+        }
+
+        if (langToBeRemoved != '') {
+            buttons["Yes"] = function () {
+                $(this).dialog("close");
+            }
+        }
+
+        div.dialog({
+            autoOpen: false,
+            modal: true,
+            buttons: buttons,
+            beforeClose: beforeClose,
+            close: function (event, ui) {
+                var currentMug = formdesigner.controller.getCurrentlySelectedMugType();
+                // rerender the side nav so the language list refreshes
+                // this is one way to do this although it might be overkill
+                formdesigner.controller.reloadUI();
+                if (currentMug) {
+                    // also rerender the mug page to update the inner UI.
+                    // this is a fickle beast. something in the underlying
+                    // spaghetti requires the first call before the second
+                    // and requires both of these calls after the reloadUI call
+                    formdesigner.controller.setCurrentlySelectedMugType(currentMug.ufid);
+                    displayMugProperties(currentMug);
+                }
+            }
+        })
+    }
+
 
     /**
      * A simple toggle for flipping the type of UI tree visible to the user.
@@ -1071,7 +1147,11 @@ formdesigner.ui = (function () {
     };
     that.showAddLanguageDialog = showAddLanguageDialog;
 
-
+    var showRemoveLanguageDialog = function () {
+        removeLanguageDialog();
+        showConfirmDialog();
+    }
+    that.showRemoveLanguageDialog = showRemoveLanguageDialog;
 
     /**
      * Set the values for the Confirm Modal Dialog
