@@ -1310,7 +1310,7 @@ formdesigner.model = function () {
                 mug,
                 vResult, controlProps, bindProps;
 
-        mType.typeName = "Trigger/Message MugType";
+        mType.typeName = "Label/Prompt";
         mType.controlNodeAllowedChildren = false;
         mType.properties.bindElement.dataType.presence = 'notallowed';
         mType.properties.dataElement.dataValue.presence = 'optional';
