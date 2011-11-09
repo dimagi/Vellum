@@ -1657,6 +1657,24 @@ start();
         
     });
 
+    test("Check XML String Quoting Function", function () {
+        var fdutil = formdesigner.util;
+        equal(fdutil.escapeQuotedXML("foo < bar"), "foo &lt; bar", "Less than signs escape.");
+        equal(fdutil.escapeQuotedXML("foo > bar"), "foo &gt; bar", "Greater than signs escape.");
+        equal(fdutil.escapeQuotedXML('foo " bar'), "foo &quot; bar", "Quotes escape.");
+        equal(fdutil.escapeQuotedXML('foo " bar', {escapeQuotes: false}), 'foo " bar', 
+              "Options can override escape quote behavior.");
+        equal(fdutil.escapeQuotedXML('foo & bar'), "foo & bar", "Ampersands don't escape.");
+        equal(fdutil.escapeQuotedXML('foo & bar', {escapeAmpersands: true}), "foo &amp; bar", 
+              "Options can override escape ampersand behavior.");
+        equal(fdutil.escapeQuotedXML("foo ' bar"), "foo ' bar", "Apostrophes don't escape.");
+        equal(fdutil.escapeQuotedXML("foo ' bar", {escapeApostrophes: true}), "foo &apos; bar", 
+              "Options can override escape apostrophe behavior.");
+        equal(fdutil.escapeQuotedXML("foo & bar < baz", {escapeAmpersands: true}), "foo &amp; bar &lt; baz", 
+              "Order of operations doesn't break apostrophes.");
+        
+    });
+
     //Disabling these tests until I can figure out what the hell is wrong with them.
 //    module("In Out In XForm Tests");
 //

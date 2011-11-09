@@ -892,6 +892,46 @@ formdesigner.util = (function(){
         return elementNameRegex.test(name);
     };
     
+    /*
+     * Assumes we're in a quoted string, and replaces special characters
+     * so that they don't break xml
+     * 
+     */
+    that.escapeQuotedXML = function (text, options) {
+        // force to string
+        text = "" + text; 
+        
+        if (!text) {
+            return "";
+        }
+        
+        // special case this because we want the default to be true
+        var escapeQuotes = (options && options.hasOwnProperty("escapeQuotes")) ? options.escapeQuotes : true;
+        
+        // have to do these first
+        if (options && options.escapeAmpersands) {
+            text = text.replace(/&/,'&amp;');
+        }
+        // these are required
+        text = text.replace(/</g,'&lt;');
+        text = text.replace(/>/g,'&gt;');
+        // these are optional
+        if (options && options.escapeApostrophes) {
+            text = text.replace(/'/g, "&apos;");
+        }
+        if (escapeQuotes) {
+            text = text.replace(/"/g,'&quot;');
+        }
+        return text;
+        
+        text = text
+    };
+    
+    // monkey patch the xmlwriter for convenience
+    XMLWriter.prototype.writeAttributeStringSafe = function (name, value, options) {
+        return this.writeAttributeString(name, that.escapeQuotedXML(value, options));
+    }; 
+    
     that.mugToXPathReference = function (mug) {
         // for select items, return the quoted value.
         // for everything else return the path

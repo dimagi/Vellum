@@ -2119,13 +2119,6 @@ formdesigner.model = function () {
          * Generates an XML Xform and returns it as a string.
          */
         var createXForm = function () {
-            var sanitizeXML = function(xmlString) {
-                if(!xmlString) {
-                    return;
-                }
-
-                return xmlString.replace(/\>/g, "&gt;").replace(/\</g, "&lt;");
-            }
             var createDataBlock = function () {
                 //use dataTree.treeMap(func,listStore,afterChildfunc)
                 // create func that opens + creates the data tag, that can be recursively called on all children
@@ -2142,11 +2135,11 @@ formdesigner.model = function () {
                     }
                     if(!node.isRootNode && MT.mug.properties.dataElement.properties.keyAttr){
                         keyAttr = MT.mug.properties.dataElement.properties.keyAttr;
-                        xw.writeAttributeString("key", keyAttr);
+                        xw.writeAttributeStringSafe("key", keyAttr);
                     }
                     if(!node.isRootNode && MT.mug.properties.dataElement.properties.xmlnsAttr){
                         extraXMLNS = MT.mug.properties.dataElement.properties.xmlnsAttr;
-                        xw.writeAttributeString("xmlns", extraXMLNS);
+                        xw.writeAttributeStringSafe("xmlns", extraXMLNS);
                     }
 
 
@@ -2189,13 +2182,13 @@ formdesigner.model = function () {
                 function populateVariables (MT){
                     bEl = MT.mug.properties.bindElement;
                     if (bEl) {
-                        cons = sanitizeXML(bEl.properties.constraintAttr);
+                        cons = bEl.properties.constraintAttr;
                         consMsg = bEl.properties.constraintMsgAttr;
                         nodeset = dataTree.getAbsolutePath(MT);
                         type = bEl.properties.dataType;
-                        relevant = sanitizeXML(bEl.properties.relevantAttr);
-                        required = sanitizeXML(createBindRequiredAttribute(bEl.properties.requiredAttr));
-                        calc = sanitizeXML(bEl.properties.calculateAttr);
+                        relevant = bEl.properties.relevantAttr;
+                        required = createBindRequiredAttribute(bEl.properties.requiredAttr);
+                        calc = bEl.properties.calculateAttr;
                         preld = bEl.properties.preload;
                         preldParams = bEl.properties.preloadParams;
                         return {
@@ -2226,15 +2219,15 @@ formdesigner.model = function () {
                             if(attrs.hasOwnProperty(j)){
                                 if(attrs[j]){ //if property has a useful bind attribute value
                                     if (j === "constraintMsg"){
-                                        xw.writeAttributeString("jr:constraintMsg",attrs[j]); //write it
+                                        xw.writeAttributeStringSafe("jr:constraintMsg",attrs[j]); //write it
                                     } else if (j === "constraintMsgItextID") {
-                                        xw.writeAttributeString("jr:constraintMsg",  "jr:itext('" + attrs[j] + "')")
+                                        xw.writeAttributeStringSafe("jr:constraintMsg",  "jr:itext('" + attrs[j] + "')")
                                     } else if (j === "preload") {
-                                        xw.writeAttributeString("jr:preload", attrs[j]);
+                                        xw.writeAttributeStringSafe("jr:preload", attrs[j]);
                                     } else if (j === "preloadParams") {
-                                        xw.writeAttributeString("jr:preloadParams", attrs[j]);
+                                        xw.writeAttributeStringSafe("jr:preloadParams", attrs[j]);
                                     } else {
-                                        xw.writeAttributeString(j,attrs[j]);
+                                        xw.writeAttributeStringSafe(j,attrs[j]);
                                     } //write it
                                 }
                             }
@@ -2275,7 +2268,7 @@ formdesigner.model = function () {
                             if (elLabel) {
                                 xmlWriter.writeStartElement('label');
                                 if (elLabel.ref) {
-                                    xmlWriter.writeAttributeString('ref',elLabel.ref);
+                                    xmlWriter.writeAttributeStringSafe('ref',elLabel.ref);
                                 }
                                 if (elLabel.defText) {
                                     xmlWriter.writeString(elLabel.defText);
@@ -2314,7 +2307,7 @@ formdesigner.model = function () {
                                 attr = 'ref';
                             }
                             absPath = formdesigner.controller.form.dataTree.getAbsolutePath(mugType);
-                            xmlWriter.writeAttributeString(attr, absPath);
+                            xmlWriter.writeAttributeStringSafe(attr, absPath);
                         }
                         //////////////////////////////////////////////////////////////////////
                         //Do hint label
@@ -2326,7 +2319,7 @@ formdesigner.model = function () {
                                 }
                                 if(cProps.hintItextID){
                                     var ref = "jr:itext('" + cProps.hintItextID + "')";
-                                    xmlWriter.writeAttributeString('ref',ref);
+                                    xmlWriter.writeAttributeStringSafe('ref',ref);
                                 }
                                 xmlWriter.writeEndElement();
                             }
@@ -2396,20 +2389,20 @@ formdesigner.model = function () {
                         if (languages.hasOwnProperty(i)) {
                             lang = languages[i];
                             xmlWriter.writeStartElement("translation");
-                            xmlWriter.writeAttributeString("lang", lang);
+                            xmlWriter.writeAttributeStringSafe("lang", lang);
                             if (Itext.getDefaultLanguage() === lang) {
-                                xmlWriter.writeAttributeString("default", '');
+                                xmlWriter.writeAttributeStringSafe("default", '');
                             }
                             for (question in allLangKeys) {
                                 if (allLangKeys.hasOwnProperty(question)) {
                                     xmlWriter.writeStartElement("text");
-                                    xmlWriter.writeAttributeString("id",question);
+                                    xmlWriter.writeAttributeStringSafe("id",question);
                                     for (form in allLangKeys[question]) {
                                         if (allLangKeys[question].hasOwnProperty(form)) {
                                             val = Itext.getValueOrDefault(lang, question, form);
                                             xmlWriter.writeStartElement("value");
                                             if(form !== "default") {
-                                                xmlWriter.writeAttributeString('form', form);
+                                                xmlWriter.writeAttributeStringSafe('form', form);
                                             }
                                             xmlWriter.writeString(val);
                                             xmlWriter.writeEndElement();    
@@ -2459,20 +2452,20 @@ formdesigner.model = function () {
                     formName = "New Form";
                 }
 
-                xw.writeAttributeString("xmlns:jrm",jrm);
-                xw.writeAttributeString("xmlns", uuid);
-                xw.writeAttributeString("uiVersion", uiVersion);
-                xw.writeAttributeString("version", version);
-                xw.writeAttributeString("name", formName);
+                xw.writeAttributeStringSafe("xmlns:jrm",jrm);
+                xw.writeAttributeStringSafe("xmlns", uuid);
+                xw.writeAttributeStringSafe("uiVersion", uiVersion);
+                xw.writeAttributeStringSafe("version", version);
+                xw.writeAttributeStringSafe("name", formName);
             }
 
             function html_tag_boilerplate () {
                 var xw = formdesigner.controller.XMLWriter;
-                xw.writeAttributeString( "xmlns:h", "http://www.w3.org/1999/xhtml" );
-                xw.writeAttributeString( "xmlns:orx", "http://openrosa.org/jr/xforms" );
-                xw.writeAttributeString( "xmlns", "http://www.w3.org/2002/xforms" );
-                xw.writeAttributeString( "xmlns:xsd", "http://www.w3.org/2001/XMLSchema" );
-                xw.writeAttributeString( "xmlns:jr", "http://openrosa.org/javarosa" );
+                xw.writeAttributeStringSafe( "xmlns:h", "http://www.w3.org/1999/xhtml" );
+                xw.writeAttributeStringSafe( "xmlns:orx", "http://openrosa.org/jr/xforms" );
+                xw.writeAttributeStringSafe( "xmlns", "http://www.w3.org/2002/xforms" );
+                xw.writeAttributeStringSafe( "xmlns:xsd", "http://www.w3.org/2001/XMLSchema" );
+                xw.writeAttributeStringSafe( "xmlns:jr", "http://openrosa.org/javarosa" );
             }
 
             var generateForm = function () {
