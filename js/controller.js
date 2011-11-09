@@ -31,6 +31,10 @@ formdesigner.controller = (function () {
             that.setFormChanged();
         });
         
+        that.on('question-itext-changed', function () {
+            that.setFormChanged();
+        });
+        
         that.on('widget-value-changed', function (e) {
             // When a widget's value changes, do whatever work you need to in 
             // the model/UI to make sure we are in a consistent state.
@@ -876,12 +880,8 @@ formdesigner.controller = (function () {
                 }
             }
         }
-        
-        formdesigner.controller.form.fire({
-            type: 'form-property-changed'
-        });
-        
-    }
+    };
+    
     that.parseXLSItext = parseXLSItext;
 
     var generateItextXLS = function () {
