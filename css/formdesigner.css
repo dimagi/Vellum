@@ -20,19 +20,7 @@ body{
 
 /* overrides for stuff in jquery UI */
 
-.ui-widget { font-family: inherit; }
-
-.ui-accordion .ui-accordion-content { 
-	padding: 1em .5em; 
-	border-top: 0; 
-	margin-top: -2px; 
-	position: relative; 
-	top: 1px; 
-	margin-bottom: 2px; 
-	overflow: auto; 
-	display: none; 
-	zoom: 1; 
-}
+#fd-props-content .ui-widget { font-family: inherit; }
 
 
 #fd-question-table{
@@ -299,17 +287,6 @@ body{
     font-weight:bold;
 }
 
-.fd-form-property {
-
-}
-
-.fd-form-property-text {
-    
-}
-
-.fd-form-property-input {
-    
-}
 
 #fd-adv-props-content {
     padding: 0;
@@ -317,12 +294,6 @@ body{
     /*width: 100%;*/
 }
 
-#fd-opensource-button {
-}
-
-#fd-fancy-button {
-    
-}
 
 .fd-template-but {
     width: 200px;
@@ -359,18 +330,9 @@ body{
     padding-left: 2px;
 }
 
-.fd-extra-content {
-
-
-}
-
 .fd-prop-input-div-checkbox {
     float: right;
     width: 150px;
-    
-}
-
-.fd-property-checkbox {
     
 }
 
@@ -387,10 +349,6 @@ body{
 
 #fd-itext-add-lang-button {
     float: right;
-}
-
-#fd-form-saving-anim {
-
 }
 
 #fd-form-saving-img {
@@ -475,6 +433,12 @@ body{
     font-weight: bold;
     margin-bottom: 0;
 }
+
+#fd-props-content .ui-accordion-content { 
+    padding: 1em .5em; 
+}
+
+
 
 #fd-props-content fieldset:not(.ui-widget) {
 	padding:0 .4em .4em .4em;
