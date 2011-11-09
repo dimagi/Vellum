@@ -546,6 +546,26 @@ formdesigner.model = function () {
 
     var validationFuncs = {
         //should be used to figure out the logic for label, defaultLabel, labelItext, etc properties
+        nodeID: function (mugType, mug) {
+            var qId = mug.properties.dataElement.properties.nodeID;
+            if (!formdesigner.util.isValidElementName(qId)) {
+                return qId + " is not a legal question id. Must start with a letter and contain only letters, numbers, and '-' or '_' characters.";
+            }
+            // check for dupes
+            var hasDuplicateId = function (qId) {
+                var allMugs = formdesigner.controller.getListMugTypesNotItems();
+                var hasDupeArray = allMugs.map(function (node) {
+                    // skip ourselves, checking for dupes
+                    return node.hasDataElement() && node.ufid != mugType.ufid && 
+                           node.mug.properties.dataElement.properties.nodeID === qId;
+                });
+                return hasDupeArray.indexOf(true) !== -1;
+            }
+            if (hasDuplicateId(qId)) {
+                return qId + " is a duplicate ID in the form. Question IDs must be unique.";
+            }
+            return "pass";
+        }, 
         label: function (mugType, mug) {
             var controlBlock, hasLabel, hasLabelItextID, missing, hasItext, Itext;
             Itext = formdesigner.model.Itext;
@@ -645,8 +665,9 @@ formdesigner.model = function () {
                     editable: 'w',
                     visibility: 'visible',
                     presence: 'required',
-                    lstring: 'Question ID'
-                        },
+                    lstring: 'Question ID',
+                    validationFunc : validationFuncs.nodeID
+                },
                 dataValue: {
                     editable: 'w',
                     visibility: 'advanced',
@@ -2065,6 +2086,8 @@ formdesigner.model = function () {
             return ufids;
         }
         that.getInvalidItextMTUfids = getInvalidItextMTUfids;
+
+        
 
         /**
          * Generates an XML Xform and returns it as a string.

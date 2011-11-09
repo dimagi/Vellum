@@ -881,7 +881,16 @@ formdesigner.util = (function(){
         }
 
         return disp;
-    }
+    };
+    
+    /*
+     * Utility to check if something is a valid element name
+     */
+    that.isValidElementName = function (name) {
+        // HT: http://stackoverflow.com/questions/2519845/how-to-check-if-string-is-a-valid-xml-element-name
+        var elementNameRegex = /^(?!XML)[a-zA-Z][\w0-9-]*$/;
+        return elementNameRegex.test(name);
+    };
     
     that.mugToXPathReference = function (mug) {
         // for select items, return the quoted value.
@@ -892,20 +901,22 @@ formdesigner.util = (function(){
             // for the currently selected mug, return a "."
             return (mug.ufid === formdesigner.controller.getCurrentlySelectedMugType().ufid) ? "." : formdesigner.controller.form.dataTree.getAbsolutePath(mug);
         }
-    }
+    };
+    
     that.mugToAutoCompleteUIElement = function (mug) {
         return {id:   that.mugToXPathReference(mug),
                 uid:  mug.ufid,
                 name: that.getMugDisplayName(mug) };
-    }
+    };
         
     that.isSelect = function (mug) {
         return (mug.typeName === "Multi Select Question" ||
                 mug.typeName === "Single Select Question")
-    }
+    };
+    
     that.isSelectItem = function (mug) {
         return (mug.typeName === "Select Item")
-    }
+    };
     
     return that;
 

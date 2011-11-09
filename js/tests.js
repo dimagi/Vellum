@@ -1635,6 +1635,27 @@ start();
 
     });
 
+    module("Utilities tests");
+    test("Check XML Element Validation Function", function () {
+        var fdutil = formdesigner.util;
+        
+        var goodNames = ["textOnly", "textWithSomeNumbers123", "hyphenated-string",
+                         "underscored_string", "CapsFirst", "XMok", "xmok", 
+                         "a_bit-ofEv3ryth1ng"];
+        var badNames = ["1startswithnumber", "has spaces", "illegalChar$",
+                        "illegalChar.", "illegalChar!", "illegalChar'",
+                        'illegalChar"', "illegalChar?", "illegalChar*",
+                        "XMLisAnIllegalStartString", "-startsWithHyphen",
+                        "_startsWithUnderscore"];
+        var i;
+        for (i = 0; i < goodNames.length; i++) {
+            ok(fdutil.isValidElementName(goodNames[i]), goodNames[i] + " is considered a valid xml element");
+        }
+        for (i = 0; i < badNames.length; i++) {
+            ok(!fdutil.isValidElementName(badNames[i]), badNames[i] + " is considered an invalid xml element");
+        }
+        
+    });
 
     //Disabling these tests until I can figure out what the hell is wrong with them.
 //    module("In Out In XForm Tests");
