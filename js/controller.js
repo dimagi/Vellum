@@ -281,7 +281,8 @@ formdesigner.controller = (function () {
 
         return mergeList; //give it all back
 
-    }
+    };
+    
     that.getListMugTypesNotItems = getListMugTypesNotItems;
 
 
