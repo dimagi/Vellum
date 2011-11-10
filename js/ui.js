@@ -1286,6 +1286,10 @@ formdesigner.ui = (function () {
             pane.children().each(function() {
                 var left = $($(this).find(".left-question")[0]);
                 var right = $($(this).find(".right-question")[0]);
+                // ignore empty expressions 
+                if (left.val() === "" && right.val() === "") {
+                    return;
+                } 
                 var op = $($(this).find(".op-select")[0]);
                 // make sure we wrap the vals in parens in case they were necessary
                 // todo, construct manually, and validate individual parts.
@@ -1541,7 +1545,8 @@ formdesigner.ui = (function () {
                     // just make the inputs droppable and add event handlers to validate
                     // the inputs
                     expression.find(".xpath-edit-node").addClass("jstree-drop");
-                    expression.find(".xpath-edit-node").change(validateExpression);
+                    expression.find(".xpath-edit-node").keyup(validateExpression);
+                    expression.find(".xpath-edit-node").change(validateExpression);                    
                 }
                 
                 if (TOKEN_INPUT) {
