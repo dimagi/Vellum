@@ -712,7 +712,7 @@ formdesigner.ui = (function () {
             })
             div.append(addLangButton);
             str = '';
-            str = '<button id="fd-lang-disp-add-lang-button">Remove Langauge</button>';
+            str = '<button id="fd-lang-disp-remove-lang-button">Remove Langauge</button>';
             removeLangButton = $(str);
             removeLangButton.button();
             removeLangButton.click(function () {
@@ -981,6 +981,58 @@ formdesigner.ui = (function () {
         $('#fd-form-prop-formID-input').val(formdesigner.controller.form.formID);
 
     };
+
+    /**
+     * Turns the UI on/off. Primarily used by disableUI() and enableUI()
+     * @param state - if false: turn UI off.  if true turn UI on.
+     */
+    function flipUI(state) {
+        var butState;
+        //we need a button State variable since it uses different syntax for disabling
+        //(compared to input widgets)
+        if (state) {
+            butState = 'enable';
+        } else {
+            butState = 'disable';
+        }
+
+
+        //buttons
+        $('#fd-add-but').button(butState);
+        $('#fd-save-button').button(butState);
+        $('#fd-remove-button').button(butState); //remove question button
+        $('#fd-lang-disp-add-lang-button').button(butState);
+        $('#fd-lang-disp-remove-lang-button').button(butState);
+        $('#fd-load-xls-button').button(butState);
+        $('#fd-editsource-button').button(butState);
+        $('#fd-cruftyItextRemove-button').button(butState);
+        //Print tree to console button is not disabled since it's almost always useful.
+
+        //inputs
+        $('#fd-form-prop-formName-input').prop('enabled', state);
+        $('#fd-form-prop-formID-input').prop('enabled', state);
+
+        //other stuff
+        if (state) {
+            $('#fd-question-properties').hide();
+        } else {
+            $('#fd-question-properties').show();
+        }
+
+    }
+
+    var disableUI = function () {
+        flipUI(false);
+    }
+    that.disableUI = disableUI;
+
+    var enableUI = function () {
+        flipUI(true);
+    }
+    that.enableUI = enableUI;
+
+
+
 
     function init_modal_dialogs () {
         $( "#fd-dialog-confirm" ).dialog({

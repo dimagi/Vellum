@@ -983,15 +983,18 @@ formdesigner.controller = (function () {
         $.fancybox.showActivity();
         that.setFormSaved(); //form is being loaded for the first time so by default it is 'saved'
 
+        if(!formdesigner.controller.formLoadingFailed) {
+            //re-enable all buttons and inputs in case they were disabled before.
+            formdesigner.ui.enableUI();
+        }
+
         //universal flag for indicating that there's something wrong enough with the form that vellum can't deal.
         formdesigner.controller.formLoadingFailed = false;
-        //re-enable all buttons and inputs in case they were disabled before.
-        $('input').prop('enabled', false);
-        $('button').button('enable');
 
         //Things to do to gracefully deal with a form loading failure
         function formLoadFailed(e) {
-            var showSourceButton = $('#fd-fancy-button');
+            var showSourceButton = $('#fd-editsource-button');
+            $('#fd-question-properties').hide(); //hide the question properties pane in the event that it's showing.
             formdesigner.controller.formLoadingFailed = true;
 
             //populate formdesigner.loadMe (var used when loading a form given during initialization)
@@ -999,8 +1002,7 @@ formdesigner.controller = (function () {
             formdesigner.loadMe = formString;
 
             //disable all buttons and inputs
-            $('input').prop('disabled', false);
-            $('button').button('disable');
+            formdesigner.ui.disableUI();
             showSourceButton.button('enable'); //enable the view source button so the form can be tweaked by hand.
 
         }
