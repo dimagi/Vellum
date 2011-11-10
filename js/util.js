@@ -635,33 +635,19 @@ formdesigner.util = (function(){
     that.give_ufid = give_ufid;
 
     that.XSD_DATA_TYPES = [
-//            'xsd:anyURI',
-            'xsd:base64Binary',
             'xsd:boolean',
             'xsd:byte',
             'xsd:date',
             'xsd:dateTime',
             'xsd:decimal',
             'xsd:double',
-//            'xsd:duration',
             'xsd:float',
-//            'xsd:gDay',
-//            'xsd:gMonth',
-//            'xsd:gMonthDay',
-//            'xsd:gYear',
-//            'xsd:gYearMonth',
-//            'xsd:hexBinary',
             'xsd:int',
             'xsd:integer',
-//            'xsd:language',
             'xsd:long',
             'xsd:short',
             'xsd:string',
             'xsd:time'
-//            'xsd:unsignedByte',
-//            'xsd:unsignedInt',
-//            'xsd:unsignedLong',
-//            'xsd:unsignedShort'
     ];
 
     that.VALID_CONTROL_TAG_NAMES = [

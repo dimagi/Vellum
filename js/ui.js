@@ -1221,7 +1221,7 @@ formdesigner.ui = (function () {
     var set_event_listeners = function () {
         formdesigner.controller.on("question-itext-changed", function (e) {
             // update any display values that are affected
-            var allMugs = formdesigner.controller.getMugTypeList();
+            var allMugs = formdesigner.controller.getMugTypeList(true);
             if (formdesigner.currentItextDisplayLanguage === e.language) {
 		        allMugs.map(function (mug) {
 		            var node = $('#' + mug.ufid);
