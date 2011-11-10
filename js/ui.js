@@ -756,13 +756,13 @@ formdesigner.ui = (function () {
 
 
         (function c_generateSource() {
-             var fancyBut = $(
-                     '<button id="fd-fancy-button" class="toolbarButton questionButton">'+
+             var editSource = $(
+                     '<button id="fd-editsource-button" class="toolbarButton questionButton">'+
                  'Edit Source XML' +
                '</button>');
-             $('#fd-extra-advanced').append(fancyBut);
+             $('#fd-extra-advanced').append(editSource);
 
-             fancyBut.button().click(function () {
+             editSource.button().click(function () {
                  formdesigner.controller.showSourceXMLDialog();
              });
 
