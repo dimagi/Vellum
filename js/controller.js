@@ -640,7 +640,7 @@ formdesigner.controller = (function () {
      * Convenience method for generating mug and mugType, calling UI and throwing
      * it the 'question' object
      *
-     * @param qType = type of question to be created. ||| Currently does nothing |||
+     * @param qType = type of question to be created.
      */
     var createQuestion = function (qType) {
         var mugType, mug, createQuestionEvent = {};

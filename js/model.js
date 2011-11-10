@@ -383,9 +383,6 @@ formdesigner.model = function () {
                             if(p.presence === 'required' || p.presence === 'optional'){
                                 spec[i][j] = null;
                             }
-                            if(p.values && p.presence !== 'notallowed'){
-                                spec[i][j] = p.values[0];
-                            }
                         }
                     }
                 }
