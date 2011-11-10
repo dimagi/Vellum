@@ -983,11 +983,6 @@ formdesigner.controller = (function () {
         $.fancybox.showActivity();
         that.setFormSaved(); //form is being loaded for the first time so by default it is 'saved'
 
-        if(!formdesigner.controller.formLoadingFailed) {
-            //re-enable all buttons and inputs in case they were disabled before.
-            formdesigner.ui.enableUI();
-        }
-
         //universal flag for indicating that there's something wrong enough with the form that vellum can't deal.
         formdesigner.controller.formLoadingFailed = false;
 
@@ -1034,7 +1029,13 @@ formdesigner.controller = (function () {
                     type: 'load-form-complete',
                     form : formString
                 });
+            if(!formdesigner.controller.formLoadingFailed) {
+                //re-enable all buttons and inputs in case they were disabled before.
+                formdesigner.ui.enableUI();
+            }
             $.fancybox.hideActivity();
+
+
         },
         500);
 

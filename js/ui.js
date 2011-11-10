@@ -1014,9 +1014,9 @@ formdesigner.ui = (function () {
 
         //other stuff
         if (state) {
-            $('#fd-question-properties').hide();
-        } else {
             $('#fd-question-properties').show();
+        } else {
+            $('#fd-question-properties').hide();
         }
 
     }
