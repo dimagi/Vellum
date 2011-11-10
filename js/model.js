@@ -2146,6 +2146,9 @@ formdesigner.model = function () {
                         extraXMLNS = MT.mug.properties.dataElement.properties.xmlnsAttr;
                         xw.writeAttributeStringSafe("xmlns", extraXMLNS);
                     }
+                    if(!node.isRootNode && MT.typeName == "Repeat"){
+                        xw.writeAttributeStringSafe("jr:template","");
+                    }
 
 
                     if (node.isRootNode) {
