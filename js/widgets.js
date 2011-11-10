@@ -83,8 +83,6 @@ formdesigner.widgets = (function () {
         };
         
         
-        // TODO, is this really necessary
-        widget.itemID = widget.getID() + '-' + 'input';
         
         widget.save = function () {
             formdesigner.controller.setMugPropertyValue(this.mug.mug,
@@ -165,7 +163,7 @@ formdesigner.widgets = (function () {
         
         var input = $("<input />").attr("id", this.getID()).attr("type", "text");
         var xPathButton = $('<button />').addClass("xpath-edit-button").text("Edit").button();
-        xPathButton.data("group", this.groupName).data("prop", this.propName).data("inputControlID", this.itemID);
+        xPathButton.data("group", this.groupName).data("prop", this.propName).data("inputControlID", this.getID());
         xPathButton.click(function () {
             formdesigner.controller.displayXPathEditor({
                 group:    $(this).data("group"),
