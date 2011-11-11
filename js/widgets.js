@@ -13,9 +13,9 @@ formdesigner.widgets = (function () {
         return path.split("/")[1];
     };
     
-    var setBaseWidgetProperties = function(widget, mugType) {
+    that.baseWidget = function(mugType) {
         // set properties shared by all widgets
-        
+        var widget = {};
         // this shared method provides fake inheritance, assuming
         // it is called in a constructor on the object being constructed
         widget.mug = mugType;
@@ -66,12 +66,12 @@ formdesigner.widgets = (function () {
 	        return uiElem;
         };
         
+        return widget;
     };
     
-    var setNormalWidgetProperties = function(widget, mugType, path) {
+    that.normalWidget = function(mugType, path) {
         // for "normal" = non-itext widgets.
-        
-        setBaseWidgetProperties(widget, mugType, path);
+        var widget = that.baseWidget(mugType);
         widget.path = path;
         widget.definition = mugType.getPropertyDefinition(path);
         widget.currentValue = mugType.getPropertyValue(path);
@@ -85,49 +85,70 @@ formdesigner.widgets = (function () {
         
         
         widget.save = function () {
-            formdesigner.controller.setMugPropertyValue(this.mug.mug,
-                                                        this.groupName,
-                                                        this.propName,
-                                                        this.getValue(),
-                                                        this.mug);
+            if (this.mug.getPropertyValue(this.path) !== this.getValue()) {
+	            formdesigner.controller.setMugPropertyValue(this.mug.mug,
+	                                                        this.groupName,
+	                                                        this.propName,
+	                                                        this.getValue(),
+	                                                        this.mug);
+            }
         };
+        return widget;
         
     };
-    that.TextWidget = function (mugType, path) {
+    
+    that.textWidget = function (mugType, path) {
         // a text widget 
+        var widget = that.normalWidget(mugType, path);
         
-        setNormalWidgetProperties(this, mugType, path);
-	    
-	    var input = $("<input />").attr("id", this.getID()).attr("type", "text");
+	    var input = $("<input />").attr("id", widget.getID()).attr("type", "text");
             
-	    this.getControl = function () {
+	    widget.getControl = function () {
             return input;
         };
         
-        this.setValue = function (value) {
+        widget.setValue = function (value) {
             input.val(value);
         };
         
-        this.getValue = function() {
+        widget.getValue = function() {
             return input.val();
         };
         
-        input.keyup(this.fireValueChanged());
-        return this;    
+        input.keyup(widget.fireValueChanged());
+        return widget;    
     };
     
-    that.CheckboxWidget = function (mugType, path) {
-                
-        setNormalWidgetProperties(this, mugType, path);
+    that.iTextIDWidget = function (mugType, path) {
+        // a special text widget that holds itext ids
+        var widget = that.textWidget(mugType, path); 
+        widget.save = function () {
+            var oldItextID = this.mug.getPropertyValue(this.path);
+            if (oldItextID !== this.getValue()) {
+	            formdesigner.model.Itext.renameItextID(oldItextID, this.getValue());
+	            formdesigner.controller.setMugPropertyValue(this.mug.mug,
+	                                                        this.groupName,
+	                                                        this.propName,
+	                                                        this.getValue(),
+	                                                        this.mug);
+            }
+        };
         
-        var input = $("<input />").attr("id", this.getID());
+        return widget;
+    }
+    
+    that.checkboxWidget = function (mugType, path) {
+                
+        var widget = that.normalWidget(mugType, path);
+        
+        var input = $("<input />").attr("id", widget.getID());
         input.attr("type", "checkbox");
         
-        this.getControl = function () {
+        widget.getControl = function () {
 	        return input;
         };
         
-        this.getUIElement = function () {
+        widget.getUIElement = function () {
             // override this because the label comes after the control
             var uiElem = $("<div />");
             uiElem.append(this.getControl());
@@ -135,35 +156,25 @@ formdesigner.widgets = (function () {
             return uiElem;
         };
         
-        this.setValue = function (value) {
+        widget.setValue = function (value) {
             input.prop("checked", value);
         };
         
-        this.getValue = function() {
+        widget.getValue = function() {
             return input.prop("checked");
         };
         
-        input.change(this.fireValueChanged());
-        return this;    
+        input.change(widget.fireValueChanged());
+        return widget;    
     };
     
-    that.XPathWidget = function (mugType, path) {
+    that.xPathWidget = function (mugType, path) {
                 
-        setNormalWidgetProperties(this, mugType, path);
+        var widget = that.textWidget(mugType, path);
         
         
-        this.setValue = function (value) {
-            input.val(value);
-        };
-        
-        this.getValue = function() {
-            return input.val();
-        };
-        
-        
-        var input = $("<input />").attr("id", this.getID()).attr("type", "text");
         var xPathButton = $('<button />').addClass("xpath-edit-button").text("Edit").button();
-        xPathButton.data("group", this.groupName).data("prop", this.propName).data("inputControlID", this.getID());
+        xPathButton.data("group", widget.groupName).data("prop", widget.propName).data("inputControlID", widget.getID());
         xPathButton.click(function () {
             formdesigner.controller.displayXPathEditor({
                 group:    $(this).data("group"),
@@ -172,11 +183,7 @@ formdesigner.widgets = (function () {
             });
         });
         
-        this.getControl = function () {
-            return input;
-		};
-        
-        this.getUIElement = function () {
+        widget.getUIElement = function () {
             // gets the whole widget (label + control)
             var uiElem = $("<div />");
             uiElem.append(this.getLabel());
@@ -185,11 +192,11 @@ formdesigner.widgets = (function () {
             return uiElem;
         };
         
-        input.keyup(this.fireValueChanged());
-        return this;
+        return widget;
     };
     
-    var setBaseItextWidgetProperties = function (widget, mugType, language, idFunc, slug, form) {
+    that.baseItextWidget = function (mugType, language, idFunc, slug, form) {
+        var widget = that.baseWidget(mugType);
         widget.language = language;
         widget.form = form;
         widget.slug = slug;
@@ -239,79 +246,77 @@ formdesigner.widgets = (function () {
             return input;
         };
         
-        input.keyup(widget.fireValueChanged());    
-    }; 
-    
-    that.ITextWidget = function(mugType, language, idFunc, slug, form) {
-        
-        setBaseWidgetProperties(this, mugType);
-        setBaseItextWidgetProperties(this, mugType, language, idFunc, slug, form);
-        
-        this.getDisplayName = function () {
-            return this.getType();
-        };
-
+        input.keyup(widget.fireValueChanged());
+        return widget;
     };
     
-    that.ITextInlineWidget = function (mugType, language, idFunc, slug, form, displayName) {
+    that.iTextWidget = function(mugType, language, idFunc, slug, form) {
         
-        setBaseWidgetProperties(this, mugType);
-        setBaseItextWidgetProperties(this, mugType, language, idFunc, slug, form);
+        var widget = that.baseItextWidget(mugType, language, idFunc, slug, form);
         
-        this.getDisplayName = function () {
+        widget.getDisplayName = function () {
+            return this.getType();
+        };
+        return widget;
+    };
+    
+    that.iTextInlineWidget = function (mugType, language, idFunc, slug, form, displayName) {
+        
+        var widget = that.baseItextWidget(mugType, language, idFunc, slug, form);
+        
+        widget.getDisplayName = function () {
             var formSpecifier = (this.form === "default") ? "" : " - " + this.form;
             return displayName + formSpecifier + " (" + language + ")";
         };
-
+        return widget;
     };
     
-    that.SelectWidget = function (mugType, path) {
+    that.selectWidget = function (mugType, path) {
         // a select widget 
+        var widget = that.normalWidget(mugType, path);
         
-        setNormalWidgetProperties(this, mugType, path);
-        
-        var input = $("<select />").attr("id", this.getID()).addClass("chzn-select");
+        var input = $("<select />").attr("id", widget.getID()).addClass("chzn-select");
         input.append($('<option value="blank" />'));
-        for (i in this.definition.values) {
-            if (this.definition.values.hasOwnProperty(i)) {
-                var strVal = formdesigner.util.fromCamelToRegularCase(this.definition.values[i].replace('xsd:','')),
+        for (i in widget.definition.values) {
+            if (widget.definition.values.hasOwnProperty(i)) {
+                var strVal = formdesigner.util.fromCamelToRegularCase(widget.definition.values[i].replace('xsd:','')),
                     isSelected = '';
         
-                option = $("<option />").val(this.definition.values[i]).text(strVal).appendTo(input);
-                if (this.currentValue === this.definition.values[i]) {
+                option = $("<option />").val(widget.definition.values[i]).text(strVal).appendTo(input);
+                if (widget.currentValue === widget.definition.values[i]) {
                     // TODO: is this necessary?
                     option.attr("selected", "selected");
                 }
             }
         }
     
-        this.getControl = function () {
+        widget.getControl = function () {
         	return input;
         };
         
-        this.setValue = function (value) {
+        widget.setValue = function (value) {
             input.val(value);
         };
         
-        this.getValue = function() {
+        widget.getValue = function() {
             return input.val();
         };
         
-        input.change(this.fireValueChanged());
+        input.change(widget.fireValueChanged());
         
-        return this;    
+        return widget;    
     };
     
     that.widgetTypeFromPropertyDefinition = function (propertyDef) {
         switch (propertyDef.uiType) {
             case "select":
-                return that.SelectWidget;
+                return that.selectWidget;
             case "checkbox":
-                return that.CheckboxWidget;
+                return that.checkboxWidget;
             case "xpath":
-                return that.XPathWidget;
+                return that.xPathWidget;
             default:
-                return that.TextWidget;
+                return that.textWidget;
         }                        
     };
 
@@ -328,7 +333,7 @@ formdesigner.widgets = (function () {
             case "generic":
             default: 
                 var cls = that.widgetTypeFromPropertyDefinition(mugType.getPropertyDefinition(definition.path));
-                return new cls(mugType, definition.path);
+                return cls(mugType, definition.path);
         }
     };
     
@@ -358,7 +363,8 @@ formdesigner.widgets = (function () {
                     
             var inner = this;
             var toWidget = function (elementdefinition) {
-                return that.widgetFromMugAndDefinition(inner.mugType, elementdefinition);
+                var w = that.widgetFromMugAndDefinition(inner.mugType, elementdefinition);
+                return w;
             }
             return this.elements.map(toWidget);
             
@@ -451,7 +457,7 @@ formdesigner.widgets = (function () {
         var addItextType = this.addItextType = function (form) {
             main.parent().find(".itext-language-section").each(function () {
                 var lang = $(this).data("language");
-                itextWidget = new that.ITextWidget(mugType, lang, textIdFunc, slug, form);
+                itextWidget = that.iTextWidget(mugType, lang, textIdFunc, slug, form);
                 itextWidget.getUIElement().appendTo($(this));
             });
         };
@@ -470,7 +476,7 @@ formdesigner.widgets = (function () {
                 // loop through items, add to UI
                 for (var j = 0; j < this.formList.length; j++) {
                     // add widget
-                    itextWidget = new that.ITextWidget(mugType, this.langs[i], this.textIdFunc, 
+                    itextWidget = that.iTextWidget(mugType, this.langs[i], this.textIdFunc, 
                                                        this.slug, this.formList[j]);
                     itextWidget.setValue(subBlock[this.formList[j]]);
                     itextWidget.getUIElement().appendTo(subSec);
@@ -524,7 +530,7 @@ formdesigner.widgets = (function () {
                 // loop through items, add to UI
                 for (var j = 0; j < this.formList.length; j++) {
                     // add widget
-                    itextWidget = new that.ITextInlineWidget(mugType, this.langs[i], this.textIdFunc, 
+                    itextWidget = that.iTextInlineWidget(mugType, this.langs[i], this.textIdFunc, 
                                                              this.slug, this.formList[j], this.displayName);
                     itextWidget.setValue(subBlock[this.formList[j]]);
                     main = main.add(itextWidget.getUIElement());
