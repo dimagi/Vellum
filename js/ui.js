@@ -1241,6 +1241,9 @@ formdesigner.ui = (function () {
                     '<span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>' +
             '<span class="fd-message">These items will be permanently deleted and cannot be recovered. Are you sure?</span></p>';
         dial.append(contentStr);
+        if(!message || typeof(message) !== "string"){
+            message = "";
+        }
         $('#fd-dialog-confirm .fd-message').text(message);
         
         $( "#fd-dialog-confirm" ).dialog("option",{buttons: buttons});

@@ -1025,7 +1025,7 @@ formdesigner.controller = (function () {
                     form : formString
                 });
                 console.log('E OBJ', e);
-                formdesigner.ui.setDialogInfo(e, 'ok', function(){formdesigner.ui.hideConfirmDialog();}, 'cancel', function(){formdesigner.ui.hideConfirmDialog();});
+                formdesigner.ui.setDialogInfo(e.toString(), 'ok', function(){formdesigner.ui.hideConfirmDialog();}, 'cancel', function(){formdesigner.ui.hideConfirmDialog();});
                 formdesigner.ui.showConfirmDialog();
             }
 
@@ -1259,7 +1259,7 @@ formdesigner.controller = (function () {
                 }
 
                 attrs.dataType = el.attr('type');
-                if(attrs.dataType.toLowerCase() === 'xsd:integer') {  //normalize this dataType ('int' and 'integer' are both valid).
+                if(attrs.dataType && attrs.dataType.toLowerCase() === 'xsd:integer') {  //normalize this dataType ('int' and 'integer' are both valid).
                     attrs.dataType = 'xsd:int';
                 }
                 attrs.relevantAttr = el.attr('relevant');
