@@ -62,7 +62,7 @@ formdesigner.controller = (function () {
             //nodeID is changed to empty-string (i.e. when the user backspaces
             //the whole value).  This allows us to keep a reference to everything
             //and rename smoothly to the new value the user will ultimately enter.
-            if (val === "" && (widget.propName === 'nodeID' || widget.propName === 'labelItextID' || widget.propName === 'hintItextID')) {
+            if (val === "" && (widget.propName && (widget.propName === 'nodeID' || widget.propName.indexOf("ItextID") !== -1))) {
                 return;
             }
             
