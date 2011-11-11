@@ -451,7 +451,7 @@ formdesigner.model = function () {
             }
 
             //finally
-            mugProps.controlElement.properties.labelItextID = nodeID;
+            mugProps.controlElement.properties.labelItextID = nodeID + "-label";
 
 
         }

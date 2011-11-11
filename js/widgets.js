@@ -60,7 +60,7 @@ formdesigner.widgets = (function () {
         
         widget.getUIElement = function () {
             // gets the whole widget (label + control)
-	        var uiElem = $("<div />");
+	        var uiElem = $("<div />").addClass("widget");
 	        uiElem.append(this.getLabel());
 	        uiElem.append(this.getControl());
 	        return uiElem;
@@ -85,13 +85,11 @@ formdesigner.widgets = (function () {
         
         
         widget.save = function () {
-            if (this.mug.getPropertyValue(this.path) !== this.getValue()) {
-	            formdesigner.controller.setMugPropertyValue(this.mug.mug,
-	                                                        this.groupName,
-	                                                        this.propName,
-	                                                        this.getValue(),
-	                                                        this.mug);
-            }
+            formdesigner.controller.setMugPropertyValue(this.mug.mug,
+	                                                    this.groupName,
+                                                        this.propName,
+                                                        this.getValue(),
+                                                        this.mug);
         };
         return widget;
         
@@ -121,19 +119,98 @@ formdesigner.widgets = (function () {
     
     that.iTextIDWidget = function (mugType, path) {
         // a special text widget that holds itext ids
-        var widget = that.textWidget(mugType, path); 
-        widget.save = function () {
-            var oldItextID = this.mug.getPropertyValue(this.path);
-            if (oldItextID !== this.getValue()) {
-	            formdesigner.model.Itext.renameItextID(oldItextID, this.getValue());
-	            formdesigner.controller.setMugPropertyValue(this.mug.mug,
-	                                                        this.groupName,
-	                                                        this.propName,
-	                                                        this.getValue(),
-	                                                        this.mug);
+        var widget = that.textWidget(mugType, path);
+        
+        widget.getNodeId = function () {
+            return this.mug.mug.properties.dataElement.properties.nodeID;
+        }
+        
+        widget.autoGenerateId = function (nodeId) {
+            return nodeId + "-" + widget.propName.replace("ItextID", "");
+        }
+        widget.updateAutoId = function () {
+            widget.setValue(widget.autoGenerateId(widget.getNodeId()));
+        }
+        
+        // auto checkbox
+        var autoBoxId = widget.getID() + "-auto-itext";
+        var autoBox = $("<input />").attr("type", "checkbox").attr("id", autoBoxId);
+        var autoBoxLabel = $("<label />").text("auto?").attr("for", autoBoxId); 
+        
+        autoBox.change(function () {
+            var auto = $(this).prop("checked");
+            widget.setAutoMode(auto);
+            if (auto) {
+                widget.updateAutoId();
+                widget.fireValueChanged()();
             }
+        });
+        
+        widget.setAutoMode = function (autoMode) {
+            this.autoMode = autoMode;
+            if (autoMode) {
+                //this.getControl().addClass("auto-itext");
+            } else {
+                //this.getControl().removeClass("auto-itext");
+            }
+                
+        }
+        
+        // support auto mode to keep ids in sync
+        if (widget.currentValue === widget.autoGenerateId(widget.getNodeId())) {
+            widget.setAutoMode(true);
+            autoBox.prop("checked", true);
+        }
+        
+        widget.getUIElement = function () {
+            // gets the whole widget (label + control)
+            var uiElem = $("<div />").addClass("widget");
+            uiElem.append(this.getLabel());
+            uiElem.append(this.getControl());
+            var autoDiv = $("<div />").addClass("auto-itext");
+            autoDiv.append(autoBoxLabel);
+            autoDiv.append(autoBox);
+            uiElem.append(autoDiv);
+            return uiElem;
         };
         
+        
+        widget.save = function () {
+            // override save to call out to rename itext
+            var oldItextID = this.mug.getPropertyValue(this.path);
+            var val = this.getValue();
+            if (oldItextID !== val) {
+                if (val) {
+                    // this isn't quite right, as we'll create cruft potentially
+                    // what we really need is to do something a lot smarter here
+                    // (keep refs to itext by object or guid)
+                    // This is left as a todo
+                    formdesigner.model.Itext.renameItextID(oldItextID, val);
+                }
+                formdesigner.controller.setMugPropertyValue(this.mug.mug,
+	                                                        this.groupName,
+	                                                        this.propName,
+	                                                        val,
+	                                                        this.mug);
+            } 
+        };
+        
+        formdesigner.controller.on('widget-value-changed', function (e) {
+            // keep the ids in sync if we're in auto mode
+            var changedWidget = e.widget;
+            if (widget.autoMode && changedWidget.propName === "nodeID") {
+                widget.setValue(widget.autoGenerateId(changedWidget.getValue()));
+                widget.fireValueChanged()();
+            } 
+        });
+        
+        widget.getControl().keyup(function () {
+            // turn off auto-mode if the id is ever manually overridden
+            var newVal = $(this).val();
+            if (newVal !== widget.autoGenerateId(widget.getNodeId())) {
+                widget.setAutoMode(false);
+            }
+        }); 
         return widget;
     }
     
@@ -150,7 +227,7 @@ formdesigner.widgets = (function () {
         
         widget.getUIElement = function () {
             // override this because the label comes after the control
-            var uiElem = $("<div />");
+            var uiElem = $("<div />").addClass("widget");
             uiElem.append(this.getControl());
             uiElem.append(this.getLabel());
             return uiElem;
@@ -185,7 +262,7 @@ formdesigner.widgets = (function () {
         
         widget.getUIElement = function () {
             // gets the whole widget (label + control)
-            var uiElem = $("<div />");
+            var uiElem = $("<div />").addClass("widget");
             uiElem.append(this.getLabel());
             uiElem.append(this.getControl());
             uiElem.append(xPathButton);
@@ -315,7 +392,7 @@ formdesigner.widgets = (function () {
                 return that.checkboxWidget;
             case "xpath":
                 return that.xPathWidget;
-            case "text-id":
+            case "itext-id":
                 return that.iTextIDWidget;
             default:
                 return that.textWidget;

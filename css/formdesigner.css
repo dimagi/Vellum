@@ -458,7 +458,7 @@ body{
     font-weight: bold;
 }
 
-#fd-props-content fieldset div {
+#fd-props-content fieldset div .widget {
     clear: both;
     margin-bottom: .3em;
 }
@@ -476,9 +476,15 @@ body{
     
 }
 
-#fd-props-content fieldset .xpath-edit-button {
+#fd-props-content fieldset .xpath-edit-button { 
     float: right;
     margin-right: 2em;
+}
+
+#fd-props-content fieldset .auto-itext {
+    float: right;
+    margin-right: 2em;
+    display: inline-block;
 }
 
 .question-section {
