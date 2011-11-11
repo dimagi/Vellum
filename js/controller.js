@@ -1259,6 +1259,9 @@ formdesigner.controller = (function () {
                 }
 
                 attrs.dataType = el.attr('type');
+                if(attrs.dataType.toLowerCase() === 'xsd:integer') {  //normalize this dataType ('int' and 'integer' are both valid).
+                    attrs.dataType = 'xsd:int';
+                }
                 attrs.relevantAttr = el.attr('relevant');
                 attrs.calculateAttr = el.attr('calculate');
                 attrs.constraintAttr = el.attr('constraint');

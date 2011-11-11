@@ -643,7 +643,6 @@ formdesigner.util = (function(){
             'xsd:double',
             'xsd:float',
             'xsd:int',
-            'xsd:integer',
             'xsd:long',
             'xsd:short',
             'xsd:string',
