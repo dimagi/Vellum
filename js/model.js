@@ -754,6 +754,7 @@ formdesigner.model = function () {
                     visibility: 'advanced',
                     presence: 'optional',
                     lstring: "Constraint Itext ID",
+                    uiType: "itext-id",
                     validationFunc: validationFuncs.constraintItextId
                 },
                 constraintMsgAttr: {
@@ -836,6 +837,7 @@ formdesigner.model = function () {
                     visibility: 'advanced',
                     presence: 'optional',
                     lstring: "Question Itext ID",
+                    uiType: "itext-id",
                     validationFunc : validationFuncs.label
                 },
                 hintItextID: {
@@ -843,6 +845,7 @@ formdesigner.model = function () {
                     visibility: 'advanced',
                     presence: 'optional',
                     lstring: "Question HINT Itext ID",
+                    uiType: "itext-id",
                     validationFunc: validationFuncs.hintItextID
                 }
             }

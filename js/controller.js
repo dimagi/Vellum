@@ -66,11 +66,6 @@ formdesigner.controller = (function () {
                 return;
             }
             
-            // When the itext value changes, go change the reference in our itext model
-            if (widget.propName && widget.propName.indexOf("ItextID") !== -1) {
-                var oldItextID = widget.mug.mug.properties.controlElement.properties[widget.propName];
-                formdesigner.model.Itext.renameItextID(oldItextID, widget.getValue());
-            } 
             widget.save();
         });
         

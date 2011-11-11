@@ -315,6 +315,8 @@ formdesigner.widgets = (function () {
                 return that.checkboxWidget;
             case "xpath":
                 return that.xPathWidget;
+            case "text-id":
+                return that.iTextIDWidget;
             default:
                 return that.textWidget;
         }                        
