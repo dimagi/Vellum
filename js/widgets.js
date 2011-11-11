@@ -325,10 +325,10 @@ formdesigner.widgets = (function () {
         switch (definition.widgetType) {
             case "itext":
                 if (definition.displayMode === "inline") {
-                    return new that.ITextFieldBlockInline(mugType, definition);
+                    return that.iTextFieldBlockInline(mugType, definition);
                 } else {
                     // default to "full"   
-                    return new that.ITextFieldBlock(mugType, definition);
+                    return that.iTextFieldBlock(mugType, definition);
                 }
             case "generic":
             default: 
@@ -337,9 +337,9 @@ formdesigner.widgets = (function () {
         }
     };
     
-    var setBaseSectionProperties = function (section, mugType, options) {
-        // this shared method provides fake inheritance, assuming
-        // it is called in a constructor on the object being constructed
+    that.baseSection = function (mugType, options) {
+        // functional inheritance
+        var section = {};
         section.mugType = mugType;
         section.slug = options.slug || "anon";
         section.displayName = options.displayName;
@@ -352,14 +352,13 @@ formdesigner.widgets = (function () {
         section.getId = function () {
             return "fd-question-edit-" + this.slug;
         }
-        
+        return section;
     };
     
-    that.GenericSection = function (mugType, options) {
-        
-        setBaseSectionProperties(this, mugType, options);
+    that.genericSection = function (mugType, options) {
+        var section = that.baseSection(mugType, options);   
                 
-        this.getWidgets = function () {
+        section.getWidgets = function () {
                     
             var inner = this;
             var toWidget = function (elementdefinition) {
@@ -369,7 +368,7 @@ formdesigner.widgets = (function () {
             return this.elements.map(toWidget);
             
         }
-        this.getSectionDisplay = function () {
+        section.getSectionDisplay = function () {
             // returns the actual display for the section
             
             var header = this.getHeader();
@@ -380,19 +379,18 @@ formdesigner.widgets = (function () {
             });
             return header.add(sec);
         };
-        return this;
+        return section;
     };
     
     
-    that.AccordionSection = function (mugType, options) {
+    that.accordionSection = function (mugType, options) {
+        var section = that.baseSection(mugType, options);   
         
-        setBaseSectionProperties(this, mugType, options);
-        
-        this.getHeader = function () {
+        section.getHeader = function () {
             return $('<h3><a href="#">' + this.displayName + '</a></h3>');
         };
         
-        this.getWidgets = function () {
+        section.getWidgets = function () {
             // TODO: don't copy paste this -- break into subsections?
             var inner = this;
             var toWidget = function (elementdef) {
@@ -401,7 +399,7 @@ formdesigner.widgets = (function () {
             return this.elements.map(toWidget);
         }
         
-        this.getSectionDisplay = function () {
+        section.getSectionDisplay = function () {
             // returns the actual display for the section
             var sec = $("<fieldset />").attr("id", this.getId()).addClass("question-section");
             this.getHeader().appendTo(sec);
@@ -418,10 +416,11 @@ formdesigner.widgets = (function () {
             
             return sec;
         };
-        return this;
+        return section;
     };
     
-    var setITextFieldBlockCommonProps = function (block, mugType, options) {
+    that.baseITextFieldBlock = function (mugType, options) {
+        var block = {};
         block.mugType = mugType;
         block.textIdFunc = options.textIdFunc;
         block.slug = options.slug;
@@ -445,16 +444,17 @@ formdesigner.widgets = (function () {
             // noop
         };
         
+        return block;
     };
     
-    that.ITextFieldBlock = function (mugType, options) {
-        setITextFieldBlockCommonProps(this, mugType, options);
+    that.iTextFieldBlock = function (mugType, options) {
+        var block = that.baseITextFieldBlock(mugType, options);
         var main = $("");
         
         // needed for closure
-        var textIdFunc = this.textIdFunc; 
-        var slug = this.slug;
-        var addItextType = this.addItextType = function (form) {
+        var textIdFunc = block.textIdFunc; 
+        var slug = block.slug;
+        var addItextType = block.addItextType = function (form) {
             main.parent().find(".itext-language-section").each(function () {
                 var lang = $(this).data("language");
                 itextWidget = that.iTextWidget(mugType, lang, textIdFunc, slug, form);
@@ -462,7 +462,7 @@ formdesigner.widgets = (function () {
             });
         };
         
-        this.getUIElement = function () {
+        block.getUIElement = function () {
             
             var itextWidget, subBlock, subSec;
             
@@ -509,18 +509,18 @@ formdesigner.widgets = (function () {
 	        return main;
         };
         
-        return this;
+        return block;
     };
     
-    that.ITextFieldBlockInline = function (mugType, options) {
+    that.iTextFieldBlockInline = function (mugType, options) {
         // an inline way of displaying itext blocks.
         // doesn't support adding fields
         // show's each langauge in the label
         
-        setITextFieldBlockCommonProps(this, mugType, options);
+        var block = that.baseITextFieldBlock(mugType, options);
         var main = $("");
         
-        this.getUIElement = function () {
+        block.getUIElement = function () {
             var itextWidget, subBlock, subSec;
             
             for (var i = 0; i < this.langs.length; i++) {
@@ -539,6 +539,8 @@ formdesigner.widgets = (function () {
             
             return main;
         };
+        
+        return block;
     };
     
     /**
@@ -606,7 +608,7 @@ formdesigner.widgets = (function () {
         
         elements = filterByMugProperties(elements, mugType).map(wrapAsGeneric);
         
-        return new that.GenericSection(mugType, { 
+        return that.genericSection(mugType, { 
                             slug: "main",
                             displayName: "Main Properties",
                             elements: elements});
@@ -619,7 +621,7 @@ formdesigner.widgets = (function () {
                       displayMode: "full",
                       textIdFunc: function (mt) { return mt.getItextID() },
                       showAddFormButton: true}];
-        return new that.GenericSection(mugType, { 
+        return that.genericSection(mugType, { 
             displayName: "Content",
             slug: "content",
             elements: elements
@@ -637,7 +639,7 @@ formdesigner.widgets = (function () {
                         displayName: "Constraint Message",
                         textIdFunc: function (mt) { return mt.getConstraintMsgItextID() }, 
                         showAddFormButton: false});
-        return new that.AccordionSection(mugType, {
+        return that.accordionSection(mugType, {
                             slug: "logic",
                             displayName: "Logic Properties",
                             elements: elements});
@@ -658,7 +660,7 @@ formdesigner.widgets = (function () {
                         textIdFunc: function (mt) { return mt.getHintItextID() }, 
                         showAddFormButton: false});
         
-        return new that.AccordionSection(mugType, { 
+        return that.accordionSection(mugType, { 
                             slug: "advanced",
                             type: "accordion",
                             displayName: "Advanced Properties",
