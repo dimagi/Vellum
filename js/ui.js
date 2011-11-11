@@ -62,7 +62,24 @@ formdesigner.ui = (function () {
         $('#fd-props-message').hide();
     }
 
-    
+    var showParseErrorMessage = function (msg) {
+        var div, container;
+        container = $('#fd-ui-container');
+        $('#fd-parse-error').remove(); //if there is already a message
+        div = '<div id="fd-parse-error"></div>';
+        div = $(div);
+        div.append(msg);
+        div.addClass('fd-error');
+        div.addClass('ui-state-error');
+        container.append(div);
+
+    }
+    that.showParseErrorMessage = showParseErrorMessage;
+
+    var hideParseErrorMessage = function () {
+        $('#fd-parse-error').hide();
+    }
+    that.hideParseErrorMessage = hideParseErrorMessage;
 
     function init_toolbar() {4
         var toolbar = $(".fd-toolbar"), select, addbutstr, addbut;

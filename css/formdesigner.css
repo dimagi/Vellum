@@ -85,6 +85,12 @@ body{
     width:280px;
 }
 
+.fd-error {
+    width: 480px;
+    float: left;
+    margin-left:10px;
+    margin-top:5px;
+}
 
 #fd-question-properties {
     border: 1px solid gray;

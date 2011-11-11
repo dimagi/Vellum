@@ -986,10 +986,11 @@ formdesigner.controller = (function () {
         //universal flag for indicating that there's something wrong enough with the form that vellum can't deal.
         formdesigner.controller.formLoadingFailed = false;
 
+        formdesigner.ui.hideParseErrorMessage(); //if there is an error message from a previous parse, hide it now.
+
         //Things to do to gracefully deal with a form loading failure
         function formLoadFailed(e) {
             var showSourceButton = $('#fd-editsource-button');
-            $('#fd-question-properties').hide(); //hide the question properties pane in the event that it's showing.
             formdesigner.controller.formLoadingFailed = true;
 
             //populate formdesigner.loadMe (var used when loading a form given during initialization)
@@ -999,6 +1000,9 @@ formdesigner.controller = (function () {
             //disable all buttons and inputs
             formdesigner.ui.disableUI();
             showSourceButton.button('enable'); //enable the view source button so the form can be tweaked by hand.
+
+            formdesigner.ui.showParseErrorMessage('Form loading has failed! You can edit the form manually by clicking on the "Edit Source XML" button or go back to load a new form');
+
 
         }
 
