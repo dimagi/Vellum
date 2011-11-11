@@ -1297,7 +1297,7 @@ formdesigner.ui = (function () {
             if (formdesigner.currentItextDisplayLanguage === e.language) {
 		        allMugs.map(function (mug) {
 		            var node = $('#' + mug.ufid);
-                    if (mug.getItextID() === e.iTextID) {
+                    if (mug.getItextID() === e.iTextID && e.textForm === "default") {
 		                if (e.value && e.value !== $('#fd-question-tree').jstree("get_text", node)) {
                             $('#fd-question-tree').jstree('rename_node', node, e.value);
                         }    
