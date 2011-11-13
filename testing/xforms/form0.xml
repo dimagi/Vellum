@@ -19,19 +19,19 @@
 			<bind nodeset="/data/question5" type="xsd:string" />
 			<itext>
 				<translation lang="en" default="">
-					<text id="question1">
+					<text id="question1-label">
 						<value>question1</value>
 					</text>
-					<text id="question2">
+					<text id="question2-label">
 						<value>question2</value>
 					</text>
-					<text id="question3">
+					<text id="question3-label">
 						<value>question3</value>
 					</text>
-					<text id="question4">
+					<text id="question4-label">
 						<value>question4</value>
 					</text>
-					<text id="question5">
+					<text id="question5-label">
 						<value>question5</value>
 					</text>
 				</translation>
@@ -40,19 +40,19 @@
 	</h:head>
 	<h:body>
 		<input ref="/data/question1">
-			<label ref="jr:itext('question1')" />
+			<label ref="jr:itext('question1-label')" />
 		</input>
 		<input ref="/data/question2">
-			<label ref="jr:itext('question2')" />
+			<label ref="jr:itext('question2-label')" />
 		</input>
 		<input ref="/data/question3">
-			<label ref="jr:itext('question3')" />
+			<label ref="jr:itext('question3-label')" />
 		</input>
 		<input ref="/data/question4">
-			<label ref="jr:itext('question4')" />
+			<label ref="jr:itext('question4-label')" />
 		</input>
 		<input ref="/data/question5">
-			<label ref="jr:itext('question5')" />
+			<label ref="jr:itext('question5-label')" />
 		</input>
 	</h:body>
 </h:html>
