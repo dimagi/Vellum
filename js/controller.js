@@ -62,7 +62,7 @@ formdesigner.controller = (function () {
             //nodeID is changed to empty-string (i.e. when the user backspaces
             //the whole value).  This allows us to keep a reference to everything
             //and rename smoothly to the new value the user will ultimately enter.
-            if (val === "" && (widget.propName && (widget.propName === 'nodeID' || widget.propName.indexOf("ItextID") !== -1))) {
+            if (val === "" && (widget.propName === 'nodeID')) {
                 return;
             }
             
@@ -1013,7 +1013,7 @@ formdesigner.controller = (function () {
                 that.resetFormDesigner();
                 that.parseXML(formString);
                 that.reloadUI();
-            }catch (e) {
+            } catch (e) {
                 formdesigner.fire({
                     type: 'load-form-error',
                     errorObj : e,
@@ -1221,6 +1221,8 @@ formdesigner.controller = (function () {
              * and returns either true, false or null
              * @param attrString - string
              */
+            
+            var Itext = formdesigner.model.Itext;
             function parseRequiredAttribute (attrString) {
                 if (!attrString) {
                     return null;
@@ -1263,16 +1265,14 @@ formdesigner.controller = (function () {
                 
                 var constraintMsg = lookForNamespaced(el, "constraintMsg");
                 
-                var constraintItext;
-                if (constraintMsg) {
-                    constraintItext = getITextReference(constraintMsg);
-                    if (constraintItext) {
-                        attrs.constraintMsgItextID = constraintItext;
-                    } else {
-                        attrs.constraintMsgAttr = constraintMsg;    
-                    }
-                } 
-                
+                var constraintItext = getITextReference(constraintMsg);
+                if (constraintItext) {
+                    attrs.constraintMsgItextID = Itext.getOrCreateItem(constraintItext);
+                } else {
+                    attrs.constraintMsgItextID = Itext.createItem("");
+                    attrs.constraintMsgAttr = constraintMsg;    
+                }
+                                
                 // TODO: parse constraint itext
                 attrs.requiredAttr = parseRequiredAttribute(el.attr('required'));
                 
@@ -1298,7 +1298,14 @@ formdesigner.controller = (function () {
                 mType.properties.dataElement = oldMT.properties.dataElement;
                 mType.mug = mug;
                 mType.mug.properties.dataElement = oldMT.mug.properties.dataElement;
-
+                // clear relevant itext for bind
+                // this is ugly, and should be moved somewhere else
+                if (oldMT.hasBindElement()) {
+                    console.log("clearing itext, before", Itext.getNonEmptyItems());
+                    Itext.removeItem(oldMT.mug.properties.bindElement.properties.constraintMsgItextID);
+                    console.log("clearing itext, after", Itext.getNonEmptyItems());
+                }
+                
                 that.form.replaceMugType(oldMT, mType, 'data');
             }
             bindList.each(eachFunc);
@@ -1391,8 +1398,16 @@ formdesigner.controller = (function () {
 
                         //replace in dataTree
                         that.form.replaceMugType(oldMT,mugType,'data');
+                        
+                        if (oldMT.hasControlElement()) {
+		                    console.log("clearing itext, before", Itext.getNonEmptyItems());
+		                    Itext.removeItem(oldMT.mug.properties.controlElement.properties.labelItextID);
+		                    Itext.removeItem(oldMT.mug.properties.controlElement.properties.hintItextID);
+		                    console.log("clearing itext, after", Itext.getNonEmptyItems());
+		                }
+		                
                     }
-
+                    
                     //check flags
                     if(!hasBind){
                         mugType.type = mugType.type.replace ('b',''); //strip 'b' from type string
@@ -1410,20 +1425,24 @@ formdesigner.controller = (function () {
                         var labelVal = formdesigner.util.getXLabelValue($(lEl)),
                             labelRef = $(lEl).attr('ref'),
                             cProps = MT.mug.properties.controlElement.properties,
-                            defLang, itextVal;
-                        if(labelRef){
-                            labelRef = labelRef.replace("jr:itext('",'').replace("')",''); //strip itext incantation
+                            defLang, asItext;
+                        if (labelRef){
+                            //strip itext incantation
+                            asItext = getITextReference(labelRef);
+                            if (asItext) {
+                                labelRef = asItext;
+                            }
                         } else {
                             labelRef = formdesigner.util.getNewItextID(MT, false); //assumes this is always successful
                         }
-                        formdesigner.util.setOrRenameItextID(labelRef,MugType,'labelItextID');
-
+                        
+                        Itext.removeItem(cProps.labelItextID);
+                        cProps.labelItextID = Itext.getOrCreateItem(labelRef);
                         if (labelVal) {
                             cProps.label = labelVal;
-                            defLang = Itext.getDefaultLanguage();
-                            itextVal = Itext.getValue(cProps.labelItextID, defLang, 'default');
-                            if(!itextVal || itextVal === labelRef) { //if no default Itext has been set, set it with the default label
-                                Itext.setValue(cProps.labelItextID, defLang, 'default', labelVal);
+                            if(!cProps.labelItextID.isEmpty()) { 
+                                //if no default Itext has been set, set it with the default label
+                                cProps.labelItextID.getOrCreateForm("default").setValue(defLang, labelVal);
                             }
                         }
                     }
@@ -1433,9 +1452,18 @@ formdesigner.controller = (function () {
                             hintRef = $(hEl).attr('ref'),
                             cProps = MT.mug.properties.controlElement.properties;
 
-                        if(hintRef){
-                            hintRef = hintRef.replace("jr:itext('",'').replace("')",''); //strip itext incantation
-                            cProps.hintItextID = hintRef;
+                        //strip itext incantation
+                        var asItext = getITextReference(hintRef);
+                        if (asItext) {
+                            if (cProps.hintItextID) {
+                                // clear the old, presumably auto-generated itext
+                                Itext.removeItem(cProps.hintItextID);
+                            }
+                            cProps.hintItextID = Itext.getOrCreateItem(asItext);
+                        } else {
+                            // couldn't parse the hint as itext.
+                            // just create an empty placeholder for it
+                            cProps.hintItextID = Itext.createItem(""); 
                         }
                         cProps.hintLabel = hintVal;
 
@@ -1552,20 +1580,37 @@ formdesigner.controller = (function () {
         }
 
         function parseItextBlock (itextBlock) {
-            var curLanguage, curIID, curForm, Itext;
-            Itext = formdesigner.model.Itext;
+            var Itext = formdesigner.model.Itext;
             Itext.removeLanguage('en');
 
             function eachLang() {
-                var el = $ (this) ,defaultExternalLang;
-                curLanguage = el.attr('lang');
-                Itext.addLanguage(curLanguage);
-                if(el.attr('default') !== undefined) {
-                    Itext.setDefaultLanguage(curLanguage);
+                
+                var el = $(this), defaultExternalLang;
+                var lang = el.attr('lang');
+                
+                function eachText() {
+                    var textEl = $ (this);
+	                var id = textEl.attr('id');
+	                var item = Itext.getOrCreateItem(id);
+	                
+	                function eachValue() {
+                        var valEl = $(this);
+                        var curForm = valEl.attr('form');
+                        if(!curForm) {
+                            curForm = "default";
+                        }
+                        item.getOrCreateForm(curForm).setValue(lang, formdesigner.util.getXLabelValue(valEl));
+                    };
+	                textEl.children().each(eachValue);
+	            };
+	                
+                Itext.addLanguage(lang);
+                if (el.attr('default') !== undefined) {
+                    Itext.setDefaultLanguage(lang);
                 }
 
                 //if we were passed a list of languages (in order of preference from outside)...
-                if(formdesigner.opts["langs"]) {
+                if (formdesigner.opts["langs"]) {
                     //grab the default language.
                     if(formdesigner.opts["langs"].length > 0) { //make sure there are actually entries in the list
                         defaultExternalLang = formdesigner.opts["langs"][0];
@@ -1577,24 +1622,7 @@ formdesigner.controller = (function () {
                 el.children().each(eachText)
             }
 
-            function eachText() {
-                var textEl = $ (this);
-                curIID = textEl.attr('id');
-                textEl.children().each(eachValue);
-
-
-            }
-
-            function eachValue() {
-                var valEl = $(this);
-                curForm = valEl.attr('form');
-                if(!curForm) {
-                    curForm = null;
-                }
-
-                Itext.setValue(curIID,curLanguage,curForm,formdesigner.util.getXLabelValue(valEl));
-            }
-
+            
             $(itextBlock).children().each(eachLang);
             formdesigner.currentItextDisplayLanguage = formdesigner.model.Itext.getDefaultLanguage();
         }
@@ -1602,7 +1630,7 @@ formdesigner.controller = (function () {
         that.resetParseErrorMsgs();
 
         that.fire('parse-start');
-        try{
+        try {
                 var xmlDoc = $.parseXML(xmlString),
                     xml = $(xmlDoc),
                     binds = xml.find('bind'),
@@ -1642,7 +1670,7 @@ formdesigner.controller = (function () {
             }
             parseItextBlock(itext);
             parseControlTree (controls);
-
+            
 
             that.fire({
                 type: 'parse-finish'
