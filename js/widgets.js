@@ -328,13 +328,16 @@ formdesigner.widgets = (function () {
             item = this.getTextItem();
             if (item) {
 	            item.getForm(this.form).setValue(this.language, this.getValue());
-	            // fire the property changed event
+	            // fire the property changed event(s)
 	            formdesigner.controller.fire({ 
 	               type: "question-itext-changed",
 	               language: this.language,
 	               id: item.id,
 	               form: this.form,
 	               value: this.getValue()
+                });
+                formdesigner.controller.form.fire({ 
+                   type: "form-property-changed",
                 });
 	        }
         };

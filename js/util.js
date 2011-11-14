@@ -713,7 +713,7 @@ formdesigner.util = (function(){
             var MT = formdesigner.controller.getCurrentlySelectedMugType();
             formdesigner.ui.showVisualValidation(MT);
             formdesigner.ui.setTreeValidationIcons();
-        })
+        });
 
         form.on('form-property-changed', function() {
             formdesigner.controller.setFormChanged();

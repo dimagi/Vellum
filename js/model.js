@@ -628,6 +628,9 @@ formdesigner.model = function () {
                     return res;
                 }
             }
+            if (constraintItext && constraintItext.id && !bindElement.constraintAttr) {
+                return "Can't have a constraint Itext ID without a constarint";
+            }
             return validateItextItem(constraintItext, "Constraint Itext");
         }
         

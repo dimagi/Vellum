@@ -341,16 +341,16 @@ formdesigner.ui = (function () {
     that.getDataJSTree = getDataJSTree;
 
     var showVisualValidation = function (mugType){
-        function setValidationFailedIcon(li,showIcon, message){
+        function setValidationFailedIcon(li, showIcon, message) {
+            console.log("validation update", li, showIcon, message);
             var exists = ($(li).find('.fd-props-validate').length > 0);
             if(exists && showIcon){
-                return;
-            }else if (exists && !showIcon){
-                $(li).find('.fd-props-validate').removeClass('ui-icon');
-            }else if(!exists && showIcon){
+                icon.attr("title", message).addClass("ui-icon");
+            } else if (exists && !showIcon){
+                $(li).find('.fd-props-validate').removeClass('ui-icon').attr("title", "");
+            } else if(!exists && showIcon){
                 var icon = $('<span class="fd-props-validate ui-icon ui-icon-alert"></span>');
                 icon.attr('title',message);
-                
                 li.append(icon);
             }
             return li;
@@ -398,6 +398,7 @@ formdesigner.ui = (function () {
             propsMessage += '<p>' + JSON.stringify(itextValidation) + '</p>';
         }
         if(propsMessage) {
+            
             showMessage(propsMessage, 'Question Problems', 'warning');
         }
 
