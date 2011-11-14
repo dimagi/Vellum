@@ -1156,7 +1156,7 @@ formdesigner.controller = (function () {
                 extraXMLNS = $(el).attr('xmlns');
                 keyAttr = $(el).attr('key');
 
-                mType.typeName = "Data Only MugType";
+                mType.typeName = "Data Node";
                 mug = formdesigner.model.createMugFromMugType(mType);
 
                 mug.properties.dataElement.properties.nodeID = nodeID;
