@@ -2784,12 +2784,16 @@ formdesigner.model = function () {
         itext.addLanguage = function (lang) {
             if (!this.hasLanguage(lang)) {
                 this.languages.push(lang);
-            }
+            } 
         };
         
         itext.removeLanguage = function (lang) {
             if(this.hasLanguage(lang)) {
                 this.languages.splice(this.languages.indexOf(lang), 1);
+            }
+            // if we removed the default, reset it
+            if (this.getDefaultLanguage() === lang) {
+                this.setDefaultLanguage(this.languages.length > 0 ? this.languages[0] : "");
             }
         };
         
@@ -2798,7 +2802,14 @@ formdesigner.model = function () {
         };
 
         itext.getDefaultLanguage = function () {
-            return this.defaultLanguage;
+            if (this.defaultLanguage) {
+                return this.defaultLanguage;
+            } else {
+                // dynamically generate default arbitrarily
+                return this.languages.length > 0 ? this.languages[0] : "";
+            }
+            
+            
         };
         
         itext.items = [];

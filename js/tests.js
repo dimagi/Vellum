@@ -761,62 +761,31 @@ start();
     });
 
     module("Itext functionality testing");
-    asyncTest("Itext ops", function(){
+    asyncTest("Itext Language Operations", function(){
         formdesigner.controller.resetFormDesigner();
         var IT = formdesigner.model.Itext;
         var otherLanguageName = "sw";
         ok(IT.getLanguages().length === 1, "Test that there is only one language at start");
-
+        ok(IT.getLanguages()[0] === "en", "Test that english loads as the only language.");
+        ok(IT.getDefaultLanguage() === "en", "Test that english loads as the default.");
         IT.addLanguage(otherLanguageName);
-        ok(IT.getLanguages().length === 2);
-
-        equal(IT.getDefaultLanguage(), IT.getLanguages()[0], "Is default language set correctly");
-
-        IT.setDefaultLanguage(otherLanguageName);
-        equal(IT.getDefaultLanguage(), otherLanguageName, "Is default language set to "+otherLanguageName);
-
-        var iID = 'itextID1', form = 'long', val = "The Foo went to the BAR";
-
-        IT.setValue(iID,otherLanguageName,form,val);
-        equal(IT.getValue(iID,otherLanguageName,form),val, "Itext item storage and retrieval");
-
-        ok(IT.validateItext(),"Itext data should be valid at this point");
-
-        var iID2 = 'itextID2',
-        valObject = {
-            en: {
-                short : "Some short text for itextID2",
-                image : "jr://some/image/uri.png"
-            }
-
-        }
-        IT.addItem(iID2,valObject);
-        ok(Object.keys(IT.validateItext()).length > 0, "Errors in Itext validation after adding new Itext to non-default language");
         
-        var otherValObject = {}
-        otherValObject.sw = valObject.en;
-        IT.addItem(iID2,otherValObject);
-        equal(IT.validateItext(), true, "Itext should now validate, after adding Itext to def language");
+        var updatedLangs = IT.getLanguages();
+        ok(updatedLangs.length === 2, "Test adding language updates model");
+        ok(updatedLangs.indexOf("en") !== -1, "Test that default language still present.");
+        ok(IT.getDefaultLanguage() === "en", "Test that default language still the default.");
+        ok(updatedLangs.indexOf("sw") !== -1, "Test that new language properly added.");
+        
+        IT.setDefaultLanguage(otherLanguageName);
+        equal(IT.getDefaultLanguage(), otherLanguageName, "Test that default language updates default");
 
         IT.removeLanguage("sw");
-        equal(IT.getDefaultLanguage(), 'en', "Default language should be 'en' after removal of 'sw' language");
-
-        equal(IT.validateItext(), true, 'Itext should still validate after language removal');
-
-        IT.setValue(iID,otherLanguageName,form,val);
-        equal(IT.getItextVals(iID,otherLanguageName)[form], val, "Itext set and retrieval work");
-
-        equal(IT.getValue(iID2,'en','short'), valObject.en.short, "Other Itext retreival method test");
-
-        //rename an ID
-        IT.setValue(iID,'en',form,val);
-        var newID = iID + 'foo';
-        IT.renameItextID(iID,newID);
-        ok(!IT.getAllData().en[iID], 'old ID does not exist anymore in EN');
-        ok(!IT.getAllData().sw[iID], 'old ID does not exist anymore in SW');
-        ok(IT.getAllData().en[newID], 'new ID exists in EN');
-        ok(IT.getAllData().sw[newID], 'new ID exists in SW');
-
+        updatedLangs = IT.getLanguages();
+        ok(updatedLangs.length === 1, "Test removing language updates model");
+        ok(updatedLangs.indexOf("sw") === -1, "Test that new language properly removed.");
+        ok(updatedLangs.indexOf("en") !== -1, "Test that other language still present after removal.");
+        ok(IT.getDefaultLanguage() === "en", "Test that default language switches after deleting the default.");
+        
 start();
     });
 
