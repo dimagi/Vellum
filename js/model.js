@@ -3045,25 +3045,29 @@ formdesigner.model = function () {
          * Remove all Itext associated with the given mug
          * @param mug
          */
-        itext.removeMugItext = function (mug) {
+        itext.removeMugItext = function (mugType) {
             var labelItext, hintItext, constraintItext;
-            if (mug.properties.controlElement) {
-                //attempt to remove Itext
-                labelItext = mug.properties.controlElement.properties.labelItextID;
-                hintItext = mug.properties.controlElement.properties.hintItextID;
-                if (labelItext) {
-                    this.removeItem(labelItext);
-                }
-                if (hintItext) {
-                    this.removeItem(hintItext);
-                }
-            } 
-            if (mug.properties.bindElement) {
-                constraintItext = mugType.mug.properties.bindElement.properties.constraintMsgItextID;
-                if (constraintItext) {
-                    this.removeItem(constraintItext);
-                }
-            }
+            var mug = mugType.mug;
+            if (mug){
+	            if (mug.properties.controlElement) {
+	                //attempt to remove Itext
+	                console.log(mug.properties.controlElement);
+	                labelItext = mug.properties.controlElement.properties.labelItextID;
+	                hintItext = mug.properties.controlElement.properties.hintItextID;
+	                if (labelItext) {
+	                    this.removeItem(labelItext);
+	                }
+	                if (hintItext) {
+	                    this.removeItem(hintItext);
+	                }
+	            } 
+	            if (mug.properties.bindElement) {
+	                constraintItext = mug.properties.bindElement.properties.constraintMsgItextID;
+	                if (constraintItext) {
+	                    this.removeItem(constraintItext);
+	                }
+	            }
+	        }
         };
 
 

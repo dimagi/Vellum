@@ -75,42 +75,17 @@ formdesigner.controller = (function () {
         that.on('question-removed', function (e) {
             var mt;
             mt = e.mugType;
-            that.removeMugTypeItext(mt);
-        })
+            formdesigner.model.Itext.removeMugItext(mt);
+        });
 
     };
     that.initFormDesigner = initFormDesigner;
 
-    /**
-     * Removes all Itext associated with the specified
-     * MugType from the Form (the Itext object).s
-     * @param mt
-     */
-    that.removeMugTypeItext = function (mt) {
-        var iID, hID, Itext;
-            Itext = formdesigner.model.Itext;
-
-            if (!mt.properties.controlElement) {
-                return;
-            }
-
-            iID = mt.mug.properties.controlElement.properties.labelItextID;
-            hID = mt.mug.properties.controlElement.properties.hintItextID;
-
-            if (iID) {
-               Itext.removeItext(iID);
-            }
-
-            if(hID) {
-                Itext.removeItext(hID);
-            }
-    }
-
-
+    
     that.setFormSaved = function () {
         FORM_SAVED = true;
         formdesigner.ui.setSaveButtonFormSaved();
-    }
+    };
 
     that.setFormChanged = function () {
         FORM_SAVED = false;
@@ -118,11 +93,11 @@ formdesigner.controller = (function () {
         //update button disabled state.
         formdesigner.ui.setSaveButtonFormUnsaved();
         
-    }
+    };
 
     that.isFormSaved = function () {
         return FORM_SAVED;
-    }
+    };
     
     var setForm = that.setForm = function (aForm) {
         that.form = aForm;
