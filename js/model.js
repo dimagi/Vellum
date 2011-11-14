@@ -512,7 +512,7 @@ formdesigner.model = function () {
             }
         }
         mugType.getConstraintMsgItext = function () {
-            if (this.hasControlElement()) {
+            if (this.hasBindElement()) {
                 return this.mug.properties.bindElement.properties.constraintMsgItextID;
             }
         };
