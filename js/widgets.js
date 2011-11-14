@@ -122,7 +122,13 @@ formdesigner.widgets = (function () {
         var widget = that.textWidget(mugType, path);
         
         widget.getNodeId = function () {
-            return this.mug.mug.properties.dataElement.properties.nodeID;
+            if (this.mug.hasDataElement()) {
+                return this.mug.mug.properties.dataElement.properties.nodeID;
+            } else if (formdesigner.util.isSelectItem(this.mug)) {
+                return this.mug.mug.properties.controlElement.properties.defaultValue;
+            } else {
+                throw "can't get nodeId for " + this.mug;
+            }
         }
         
         widget.autoGenerateId = function (nodeId) {
