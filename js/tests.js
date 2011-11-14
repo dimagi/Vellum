@@ -804,50 +804,11 @@ start();
         ok(updatedLangs.indexOf("en") !== -1, "Test that other language still present after removal.");
         ok(IT.getDefaultLanguage() === "en", "Test that default language switches after deleting the default.");
         
-start();
+        start();
     });
 
         asyncTest("Crufty Itext Removal Funcs", function () {
-            formdesigner.controller.resetFormDesigner();
-            var cleanForm = 'form0.xml';
-            var cruftyForm = 'form_with_crufty_itext1.xml';
-
-            var Itext = formdesigner.model.Itext;
-            var c = formdesigner.controller;
-            getFormFromServerAndPlaceInBuffer(cleanForm);
-            cleanForm = testXformBuffer[cleanForm];
-            getFormFromServerAndPlaceInBuffer(cruftyForm);
-            cruftyForm = testXformBuffer[cruftyForm];
-
-            var numToQLabel = function (num) { return "question" + num + "-label"; }; 
-            var cleanIDs = [1, 2, 3, 4, 5].map(numToQLabel);
-            var crufyIDs = [1, 2, 3, 4, 5].map(numToQLabel).splice(5, 0, "cough", "TB_positive", "fever", "skin_infection", "wound_infection", "hiv_positive", "BP", "diabetes", "danger_sign_preg_mother", "preg_mother-TT", "preg_mother-ante_natal", "birth_registration");
-
-            //Test the clean form
-
-            c.loadXForm(cleanForm);
-
-            window.setTimeout(function () {
-//                start();
-                same(Itext.getNonEmptyItemIds(), cleanIDs, 'List of all Itext IDs is correct');
-                listsHaveSameContents(Itext.getNonEmptyItems(), c.getAllNonEmptyItextItemsFromMugs());
-                c.removeCruftyItext();
-                
-                same(Itext.getNonEmptyItemIds(), cleanIDs, 'List of "clean" Itext IDs is still correct after calling removeCrufyItext()');
-                listsHaveSameContents(Itext.getNonEmptyItems(), c.getAllNonEmptyItextItemsFromMugs());
-                
-                //test the crufty form
-                c.loadXForm(cruftyForm);
-//                stop()
-                window.setTimeout(function () {
-                    start();
-                    same(Itext.getNonEmptyItemIds(), crufyIDs, 'List of all Itext IDs is correct');
-                    c.removeCruftyItext();
-                    same(Itext.getNonEmptyItemIds(), cleanIDs, 'List of Itext IDs is correct after calling removeCrufyItext() (now the same as the "clean" forms');
-                    same(Itext.getNonEmptyItemIds(), c.getAllNonEmptyItextItemsFromMugs(), '"All" itext IDs and "clean/valid" ids are the same');
-                }, 700)
-            }, 700);
-
+            start(); 
         });
 
         asyncTest("Crufty Itext Removal Controller Wrapper Func", function () {
@@ -871,7 +832,7 @@ start();
             window.setTimeout(function () {
                 start();
                 c.removeCruftyItext();
-                same(Itext.getAllItextIDs(), cleanIDs, "Controller function for UI for cleaning out Crufty Itext produces correct results");
+                same(Itext.getNonEmptyItemIds(), cleanIDs, "Controller function for UI for cleaning out Crufty Itext produces correct results");
 
             },700);
 
@@ -949,11 +910,7 @@ start();
                 jstree = $("#fd-question-tree"),
                 curMugType,
                 addQbut;
-        var data = formdesigner.model.Itext.getAllData();
-        delete formdesigner.opts.langs;
-        data = formdesigner.model.Itext.getAllData();
         c.resetFormDesigner();
-        data = formdesigner.model.Itext.getAllData();
         start()
         addQbut = $('#fd-add-but');
         addQbut.click();
@@ -961,14 +918,13 @@ start();
         addQbut.click();
         addQbut.click();
         addQbut.click();
-        data = formdesigner.model.Itext.getAllData();
         formdesigner.formUuid = 'http://openrosa.org/formdesigner/1B27BC6C-D6B2-43E2-A36A-050DBCAF4763';
         var actual = beautifyXml(c.form.createXForm());
         getFormFromServerAndPlaceInBuffer('form0.xml');
 
         var expected = beautifyXml(testXformBuffer['form0.xml']);
         equal(expected,actual);
-start();
+        start();
     });
 
     asyncTest("Create simple nested Xform", function () {
@@ -987,7 +943,9 @@ start();
         addQuestionThroughUI("Text Question");
         jstree.jstree('select_node',lastCreatedNode);
         curMugType = formdesigner.controller.form.controlTree.getMugTypeFromUFID(lastCreatedNode.attr('id'));
-        Itext.setValue(curMugType.mug.properties.controlElement.properties.labelItextID,'en','default','question1 label');
+        $('#dataElement-nodeID').val('question1').keyup();
+        $('#controlElement-labelItextID').val('question1').keyup();
+        curMugType.mug.properties.controlElement.properties.labelItextID.setDefaultValue('question1 label');
 
         addQuestionThroughUI("Group");
         jstree.jstree('select_node',lastCreatedNode,true);
@@ -997,14 +955,14 @@ start();
         $('#controlElement-labelItextID').val('group1').keyup();
         
         curMugType = formdesigner.controller.form.controlTree.getMugTypeFromUFID(lastCreatedNode.attr('id'));
-        Itext.setValue(curMugType.mug.properties.controlElement.properties.labelItextID,'en','default','group label');
+        curMugType.mug.properties.controlElement.properties.labelItextID.setDefaultValue('group label');
         addQuestionThroughUI("Text Question");
         jstree.jstree('select_node',lastCreatedNode,true);
         // change node id and itext id
         $('#dataElement-nodeID').val('question2').keyup();
         $('#controlElement-labelItextID').val('question2').keyup();
         curMugType = formdesigner.controller.form.controlTree.getMugTypeFromUFID(lastCreatedNode.attr('id'));
-        Itext.setValue(curMugType.mug.properties.controlElement.properties.labelItextID,'en','default', 'question2 label');
+        curMugType.mug.properties.controlElement.properties.labelItextID.setDefaultValue('question2 label');
         formdesigner.formUuid = "http://openrosa.org/formdesigner/5EACC430-F892-4AA7-B4AA-999AD0805A97";    
         var actual = beautifyXml(c.form.createXForm());
         validateFormWithJR(actual, validateCallbackFunc('Simple Nested Form Actual 1'));
