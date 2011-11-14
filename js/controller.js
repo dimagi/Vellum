@@ -777,7 +777,7 @@ formdesigner.controller = (function () {
         createQuestionInDataTree(mugType);
         loadMTEvent.type= "mugtype-loaded";
         loadMTEvent.mugType = mugType;
-        formdesigner.controller.fire(loadMTEvent);
+        that.fire(loadMTEvent);
 
         return mug;
     }
@@ -861,13 +861,11 @@ formdesigner.controller = (function () {
 
     var parseXLSItext = function (str) {
         var rows = str.split('\n'),
-                nRows, nCols, i, j, cells, lang,iID, form, val, Itext;
-        nRows = rows.length;
-        nCols = rows[0].split('\t').length;
+                i, j, cells, lang,iID, form, val, Itext;
         
         // TODO: should this be configurable? 
         var exportCols = ["default", "audio", "image" , "video"];
-        
+                
         Itext = formdesigner.model.Itext;
         for (i = 0; i < rows.length; i++) {
             cells = rows[i].split('\t');
@@ -881,6 +879,7 @@ formdesigner.controller = (function () {
                 }
             }
         }
+        that.fire({type: "global-itext-changed"});
     };
     
     that.parseXLSItext = parseXLSItext;

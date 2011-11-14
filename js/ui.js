@@ -1306,6 +1306,18 @@ formdesigner.ui = (function () {
             }
             
         });
+        formdesigner.controller.on("global-itext-changed", function (e) {
+            // update any display values that are affected
+            var allMugs = formdesigner.controller.getMugTypeList(true);
+            var currLang = formdesigner.currentItextDisplayLanguage;
+            allMugs.map(function (mug) {
+                var node = $('#' + mug.ufid);
+                var it = mug.getItext();
+                if (it && it.getValue("default", currLang) !== $('#fd-question-tree').jstree("get_text", node)) {
+                    $('#fd-question-tree').jstree('rename_node', node, it.getValue("default", currLang));
+                }
+            });
+        });
     };
     
     that.hideQuestionProperties = function() {
