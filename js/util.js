@@ -435,7 +435,7 @@ formdesigner.util = (function(){
         allowedChildren = allowedChildren.map(makeLower);
         if (ofTypeMug.mug.properties.controlElement) {
             targetMugTagName = ofTypeMug.mug.properties.controlElement.properties.tagName.toLowerCase();
-        } else if (ofTypeMug.typeName === "Data Only MugType") {
+        } else if (ofTypeMug.typeName === "Data Node") {
             targetMugTagName = 'data';
         }
         refMugTagName = refMugType.mug.properties.controlElement.properties.tagName.toLowerCase();
