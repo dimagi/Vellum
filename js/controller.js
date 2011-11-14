@@ -169,9 +169,7 @@ formdesigner.controller = (function () {
 	                if (val && !val.isEmpty() && ret.indexOf(val) === -1) {
 	                   // it was there and not present so add it to the list
 	                   ret.push(val);
-	                } else {
-	                   console.log("not a match", thingsToGet[i], val, ret);
-	                }
+	                } 
 	            } catch (err) {
 	                // probably just wasn't in the mug
 	            }
@@ -1294,9 +1292,7 @@ formdesigner.controller = (function () {
                 // clear relevant itext for bind
                 // this is ugly, and should be moved somewhere else
                 if (oldMT.hasBindElement()) {
-                    console.log("clearing itext, before", Itext.getNonEmptyItems());
                     Itext.removeItem(oldMT.mug.properties.bindElement.properties.constraintMsgItextID);
-                    console.log("clearing itext, after", Itext.getNonEmptyItems());
                 }
                 
                 that.form.replaceMugType(oldMT, mType, 'data');
@@ -1393,10 +1389,8 @@ formdesigner.controller = (function () {
                         that.form.replaceMugType(oldMT,mugType,'data');
                         
                         if (oldMT.hasControlElement()) {
-		                    console.log("clearing itext, before", Itext.getNonEmptyItems());
 		                    Itext.removeItem(oldMT.mug.properties.controlElement.properties.labelItextID);
 		                    Itext.removeItem(oldMT.mug.properties.controlElement.properties.hintItextID);
-		                    console.log("clearing itext, after", Itext.getNonEmptyItems());
 		                }
 		                
                     }
