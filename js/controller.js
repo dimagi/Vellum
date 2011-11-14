@@ -145,48 +145,45 @@ formdesigner.controller = (function () {
      * for trimming out crufty itext.  See also
      * formdesigner.model.Itext.removeCruftyItext()
      */
-    var getListOfItextIDsFromMugs = function () {
-        var cTree, dTree, treeFunc, thingToGet, cLists=[], dLists=[], mergeLists = [], finalList;
-        //use formdesigner.util.mergeArray
-
-        treeFunc = function (node) {
-            var mt;
-            if(node.isRootNode) {
+    var getAllNonEmptyItextItemsFromMugs = function () {
+        
+        // get all the itext references in the forms
+        var ret = [];
+        var appendItemsIfPresent = function (node) {
+            if (node.isRootNode) {
                 return;
             }
 
-            mt = node.getValue();
+            var mt = node.getValue();
             if(!mt) {
                 throw 'Node in tree without value?!?!'
             }
-
-            if (mt.mug.properties.controlElement) {
-                return mt.mug.properties.controlElement.properties[thingToGet];
-            }
-
-
+            
+            var thingsToGet = ['controlElement/labelItextID', 'controlElement/hintItextID', 
+                               'bindElement/constraintMsgItextID'] ; 
+        
+            var val;            
+            for (var i = 0; i < thingsToGet.length; i++) {
+	            try {
+	                val = mt.getPropertyValue(thingsToGet[i]);
+	                if (val && !val.isEmpty() && ret.indexOf(val) === -1) {
+	                   // it was there and not present so add it to the list
+	                   ret.push(val);
+	                } else {
+	                   console.log("not a match", thingsToGet[i], val, ret);
+	                }
+	            } catch (err) {
+	                // probably just wasn't in the mug
+	            }
+            }    
         }
-
-        cTree = that.form.controlTree;
-        dTree = that.form.dataTree;
-
-        thingToGet = 'labelItextID'; //get all the labelItextIDs
-        cLists[0] = cTree.treeMap(treeFunc);
-        dLists[0] = dTree.treeMap(treeFunc);
-
-        thingToGet = 'hintItextID'; //get all the hintItextIDs
-        cLists[1] = cTree.treeMap(treeFunc);
-        dLists[1] = dTree.treeMap(treeFunc);
-
-        mergeLists[0] = formdesigner.util.mergeArray(cLists[0],dLists[0]); //strip dupes and merge
-        mergeLists[1] = formdesigner.util.mergeArray(cLists[1],dLists[1]); //strip dupes and merge
-
-        finalList = formdesigner.util.mergeArray(mergeLists[0], mergeLists[1]); //merge mergers (and strip dupes ;) )
-
-        return finalList; //give it all back
+        
+        that.form.controlTree.treeMap(appendItemsIfPresent);
+        that.form.dataTree.treeMap(appendItemsIfPresent);
+        return ret; 
 
     };
-    that.getListOfItextIDsFromMugs = getListOfItextIDsFromMugs;
+    that.getAllNonEmptyItextItemsFromMugs = getAllNonEmptyItextItemsFromMugs;
 
     /**
      * Returns a MugType NOT a Mug!
@@ -339,7 +336,7 @@ formdesigner.controller = (function () {
         //show spinner
         $.fancybox.showActivity();
 
-        var validIds = that.getListOfItextIDsFromMugs();
+        var validIds = that.getAllNonEmptyItextItemsFromMugs();
         formdesigner.model.Itext.removeCruftyItext(validIds);
 
         //hide spinner

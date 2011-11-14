@@ -483,14 +483,14 @@ formdesigner.model = function () {
 	        that.Itext.addItem(mugType.mug.properties.controlElement.properties.labelItextID);
 	        
 	        // hint itext
-	        if (!mugType.mug.properties.controlElement.properties.hintItextID) {
+	        if (mugType.properties.controlElement.hintItextID.presence !== "notallowed") {
 	            mugType.mug.properties.controlElement.properties.hintItextID = that.Itext.createItem("");
 	        }
         }
         
         if (mugType.hasBindElement()) {
             // constraint msg itext
-            if (!mugType.mug.properties.bindElement.properties.constraintMsgItextID) {
+            if (mugType.properties.bindElement.constraintMsgItextID.presence !== "notallowed") {
                 mugType.mug.properties.bindElement.properties.constraintMsgItextID = that.Itext.createItem("");
             }
         }
@@ -528,12 +528,14 @@ formdesigner.model = function () {
     };
     
     var validateItextItem = function (itextItem, name) {
-        var val = itextItem.defaultValue();
-        if (itextItem.id && !val) {
-            return "Question has " + name + " ID but no " + name + " label!";
-        }
-        if (val && !itextItem.id) {
-            return "Question has " + name + " label but no " + name + " ID!";
+        if (formdesigner.util.exists(itextItem)) {
+	        var val = itextItem.defaultValue();
+	        if (itextItem.id && !val) {
+	            return "Question has " + name + " ID but no " + name + " label!";
+	        }
+	        if (val && !itextItem.id) {
+	            return "Question has " + name + " label but no " + name + " ID!";
+	        }
         }
         return "pass";
     };
@@ -1274,6 +1276,8 @@ formdesigner.model = function () {
         controlProps = mType.properties.controlElement;
         controlProps.hintLabel.presence = 'notallowed';
         controlProps.hintItextID.presence = 'notallowed';
+        
+        
         controlProps.defaultValue = {
             lstring: 'Item Value',
             visibility: 'visible',
@@ -2731,6 +2735,10 @@ formdesigner.model = function () {
             return this.getValue("default", that.Itext.getDefaultLanguage())
         };
         
+        item.setDefaultValue = function(val) {
+            this.getOrCreateForm("default").setValue(that.Itext.getDefaultLanguage(), val)
+        };
+        
         item.isEmpty = function () {
             if (this.forms) {
                 var nonEmptyItems = formdesigner.util.filterList(this.forms, function (form) {
@@ -2821,6 +2829,12 @@ formdesigner.model = function () {
         itext.getNonEmptyItems = function () {
             return formdesigner.util.filterList(this.items, function (item) {
                 return !item.isEmpty();
+            });
+        };
+        
+        itext.getNonEmptyItemIds = function () {
+            return this.getNonEmptyItems().map(function (item) {
+                return item.id;
             });
         };
         
@@ -3005,11 +3019,12 @@ formdesigner.model = function () {
          * presently being stored in the Itext Object.
          *
          * For generating a list of useful IDs see:
-         * formdesigner.controller.getListOfItextIDsFromMugs()
+         * formdesigner.controller.getAllNonEmptyItextItemsFromMugs()
          *
          * @param validIDList
          */
         var removeCruftyItext = function (validIDList) {
+            return;
             throw ("Not implemented!");
             
             var idList, i, id;

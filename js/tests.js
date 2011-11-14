@@ -128,19 +128,10 @@ $(document).ready(function(){
                 }
             }
         }
-        if (mugType.properties.controlElement){
-            if(mug.properties.controlElement.properties.hintItextID) {
-                formdesigner.model.Itext.setValue(mug.properties.controlElement.properties.hintItextID,'en','default','foo hint');
-            }
-            if (mug.properties.controlElement.properties.labelItextID) {
-                formdesigner.model.Itext.setValue(mug.properties.controlElement.properties.labelItextID,'en','default','foo default');
-            }
-        }
         if (mugType.properties.bindElement) {
             if (mug.properties.bindElement.properties.constraintMsgAttr && mug.properties.bindElement.properties.constraintMsgItextID) {
                 // hack, these are mutually exclusive so remove one to make the validator happy
-                // remove the itext so we don't have to deal with that too
-                delete mug.properties.bindElement.properties["constraintMsgItextID"];
+                delete mug.properties.bindElement.properties["constraintMsgAttr"];
             }         
         }
     }
@@ -155,7 +146,13 @@ $(document).ready(function(){
 
     }
 
-    
+    var listsHaveSameContents = function (expect, actual) {
+        equal(expect.length, actual.length, "Lists are the same length");
+        for (var i = 0; i < expect.length; i++) {
+            ok(actual.indexOf(expect[i]) !== -1, "Item " + expect[i] + " found in actual.");
+            ok(expect.indexOf(actual[i]) !== -1, "Item " + actual[i] + " found in expected.");
+        }
+    };
 
     module("LiveText Unit Tests");
     asyncTest("Create and Verify LiveText", function(){
@@ -345,13 +342,10 @@ start();
     module("MugType tests");
     asyncTest("Validate example mug against definition", function(){
         expect(3);
-        var testData = make_control_bind_data_mug();
         var myMug;
         var MugType = formdesigner.model.mugTypeMaker.stdTextQuestion(); //simulates a 'standard' text question
         myMug = MugType.mug;
         giveMugFakeValues(myMug,MugType);
-        formdesigner.model.Itext.setValue(myMug.properties.controlElement.properties.hintItextID,'en','default','foo hint');
-        formdesigner.model.Itext.setValue(myMug.properties.controlElement.properties.labelItextID,'en','default','foo default');
         var validationObject = MugType.validateMug(myMug);
         equal(MugType.typeName, "Text Question");
         equal(validationObject.status, "pass", 'Does the mug validate against the MugType?');
@@ -360,7 +354,33 @@ start();
         otherType.properties.bindElement['someProperty'] = 'foo';
         var vObj = otherType.validateMug(myMug);
         equal(vObj.status,'fail', "This should fail because the mug does not contain the required property");
-start();
+    
+        start();
+    });
+
+    asyncTest("Validate mug itext properties", function(){
+        expect(7);
+        var MugType = formdesigner.model.mugTypeMaker.stdTextQuestion(); //simulates a 'standard' text question
+        var myMug = MugType.mug;
+        giveMugFakeValues(myMug,MugType);
+        
+        equal(MugType.validateMug(myMug).status, "pass", 'Initial mug validates fine.');
+        
+        var validateItext = function (node, slug) {
+            node.id = "some-" + slug + "-id";
+	        equal(MugType.validateMug(myMug).status, "fail", "Mug with a " + slug + " id but no text fails.");
+	        node.getForm("default").setValue("en", slug + " value");
+	        equal(MugType.validateMug(myMug).status, "pass", "Mug with a " + slug + " id and text passes.");
+            node.id = "";
+	        equal(MugType.validateMug(myMug).status, "fail", "Mug with a " + slug + " text but no id fails.");
+            // clear to leave things as they are
+            node.getForm("default").setValue("en", "");
+        };
+        validateItext(myMug.properties.controlElement.properties.hintItextID, "hint");
+        validateItext(myMug.properties.bindElement.properties.constraintMsgItextID, "constraintMsg");
+        
+        
+        start();
     });
 
     asyncTest("Test custom validation function in bind block definition", function(){
@@ -654,14 +674,12 @@ start();
             mugTC = formdesigner.model.mugTypeMaker.stdTextQuestion(),
             mugA = mugTA.mug,
             mugB = mugTB.mug,
-            mugC = mugTC.mug,
-                Itext;
+            mugC = mugTC.mug;
         formdesigner.controller.resetFormDesigner();
 
-        Itext = formdesigner.model.Itext;
-        Itext.setValue(mugA.properties.controlElement.properties.labelItextID,Itext.getDefaultLanguage(),'default','group1 itext');
-        Itext.setValue(mugB.properties.controlElement.properties.labelItextID,Itext.getDefaultLanguage(),'default','question1 itext');
-        Itext.setValue(mugC.properties.controlElement.properties.labelItextID,Itext.getDefaultLanguage(),'default','question2 itext');
+        mugA.properties.controlElement.properties.labelItextID.setDefaultValue('group1 itext');
+        mugB.properties.controlElement.properties.labelItextID.setDefaultValue('question1 itext');
+        mugC.properties.controlElement.properties.labelItextID.setDefaultValue('question2 itext');
 
         var c = formdesigner.controller, disp = formdesigner.util.getMugDisplayName;
         c.insertMugTypeIntoForm(null,mugTA);
@@ -789,153 +807,7 @@ start();
 start();
     });
 
-    asyncTest("High level util.js Itext rename cond 1", function(){
-        //test that renaming the itextid of an existing mug does not cause an overwrite
-        //of values already existing at the target itextID
-
-        formdesigner.controller.resetFormDesigner();
-        var IT = formdesigner.model.Itext,
-                util = formdesigner.util;
-        var otherLanguageName = "sw";
-        IT.addLanguage(otherLanguageName);
-        var iID = 'itext_ID1', form = 'long', val = "The Foo went to the BAR", oldIID;
-
-
-        IT.setValue(iID,"en",form,val);
-        ok(IT.validateItext(),"Itext data should be valid at this point");
-
-        var ui, jstree, curMugType, addqbut;
-        var c = formdesigner.controller;
-        //add a listener for question creation events
-        c.on("question-creation", function(e){
-            curMugType = e.mugType;
-        });
-
-        //add a question
-        addqbut = $('#fd-add-but');
-        addqbut.click();
-
-        oldIID = curMugType.mug.properties.controlElement.properties.labelItextID;
-
-        //actually test the util.renameItextID thing
-        util.setOrRenameItextID(iID,curMugType,'labelItextID',false);
-        ok(!IT.hasItextBlock(oldIID,'en'), 'Old Itext ID should not exist in the Itext Object anymore');
-        ok(IT.hasItextBlock(iID,'en'), "New Itext ID SHOULD exist in the Itext Object");
-
-        equal(IT.getItextVals(iID, 'en')["long"], val, "Existing Itext values were not renamed");
-start();
-
-
-    });
-
-    asyncTest("High level util.js Itext rename cond 2", function(){
-        //test that renaming the itext id of an existing mug
-        //DOES cause an overwrite of the values at the target itextID
-        formdesigner.controller.resetFormDesigner();
-        var IT = formdesigner.model.Itext,
-                util = formdesigner.util;
-        var otherLanguageName = "sw";
-        IT.addLanguage(otherLanguageName);
-        var iID = 'itext_ID1', form = 'long', val = "The Foo went to the BAR", mtIID, mtIVal;
-
-        IT.setValue(iID,"en",form,val);
-        ok(IT.validateItext(),"Itext data should be valid at this point");
-
-        var ui, jstree, curMugType, addqbut;
-        var c = formdesigner.controller;
-        //add a listener for question creation events
-        c.on("question-creation", function(e){
-            curMugType = e.mugType;
-        });
-
-        //add a question
-        addqbut = $('#fd-add-but');
-        addqbut.click();
-
-        mtIID = curMugType.mug.properties.controlElement.properties.labelItextID;
-        mtIVal = IT.getItextVals(mtIID, 'en')["default"];
-
-        //actually test the util.renameItextID thing
-        util.setOrRenameItextID('itext_ID1',curMugType,'labelItextID',true);
-        ok(!IT.hasItextBlock(mtIID, 'en'), 'Old Itext ID should not exist in the Itext Object anymore');
-        notEqual(IT.hasItextBlock("itext_ID1", 'en'), null, "New Itext ID SHOULD exist in the Itext Object");
-
-        equal(IT.getItextVals("itext_ID1", 'en')["default"], mtIVal, "Itext values were renamed");
-
-start();
-    });
-
-        asyncTest("High level util.js Itext rename cond 3", function(){
-            //test that renaming the itext ID of an existing mug
-            //works in the absence of itext values at the target itextID
-            formdesigner.controller.resetFormDesigner();
-            var IT = formdesigner.model.Itext,
-                    util = formdesigner.util;
-            var otherLanguageName = "sw";
-            IT.addLanguage(otherLanguageName);
-            var newID = 'renamed_id', mt1, mtIID, mtVal;
-
-            var ui, jstree, curMugType, addqbut;
-            var c = formdesigner.controller;
-            //add a listener for question creation events
-            c.on("question-creation", function(e){
-                curMugType = e.mugType;
-            });
-
-            //add a question
-            addqbut = $('#fd-add-but');
-            addqbut.click();
-
-            mt1 = curMugType;
-            mtIID = curMugType.mug.properties.controlElement.properties.labelItextID;
-            mtVal = IT.getItextVals(mtIID, 'en')["default"];
-            ok(IT.hasItextBlock(mtIID, "en"));
-            ok(!IT.hasItextBlock(newID, "en"));
-            util.setOrRenameItextID(newID,curMugType,'labelItextID',false);
-            ok(!IT.hasItextBlock(mtIID, "en"), 'Old Itext ID should not exist in the Itext Object anymore');
-            ok(IT.hasItextBlock(newID, "en"), "New Itext ID SHOULD exist in the Itext Object");
-            equal(IT.getItextVals(newID, 'en')["default"], mtVal, "Itext value is there");
-start();
-
-        });
-
-
-        asyncTest("High level util.js Itext rename cond 4", function(){
-            //test that renaming the itext id of a mug that already exists
-            //works in the absence of all itext.
-            formdesigner.controller.resetFormDesigner();
-            var IT = formdesigner.model.Itext,
-                    util = formdesigner.util;
-            var otherLanguageName = "sw";
-            IT.addLanguage(otherLanguageName);
-            var iID = 'itext_ID1', mt1, mtIID, mtVal;
-
-            var ui, jstree, curMugType, addqbut;
-            var c = formdesigner.controller;
-            //add a listener for question creation events
-            c.on("question-creation", function(e){
-                curMugType = e.mugType;
-            });
-
-            //add a question
-            addqbut = $('#fd-add-but');
-            addqbut.click();
-
-            mt1 = curMugType;
-            mtIID = curMugType.mug.properties.controlElement.properties.labelItextID;
-            mtVal = IT.getItextVals(mtIID, 'en')["default"];
-
-            IT.removeItext(mtIID); //remove Itext of MT
-
-            util.setOrRenameItextID(iID,curMugType,'labelItextID',false);
-            ok(!IT.hasItextBlock(mtIID, 'en'), 'Old Itext ID should not exist in the Itext Object anymore');
-            ok(!IT.hasItextBlock(iID, 'en'), "New Itext ID should not exist in the Itext Object (no prior itext vals avail)");
-start();
-        });
-
-
         asyncTest("Crufty Itext Removal Funcs", function () {
-            ;
             formdesigner.controller.resetFormDesigner();
             var cleanForm = 'form0.xml';
             var cruftyForm = 'form_with_crufty_itext1.xml';
@@ -947,8 +819,9 @@ start();
             getFormFromServerAndPlaceInBuffer(cruftyForm);
             cruftyForm = testXformBuffer[cruftyForm];
 
-            var cleanIDs = ["question1", "question2", "question3", "question4", "question5"];
-            var crufyIDs = ["question1", "question2", "question3", "question4", "question5", "cough", "TB_positive", "fever", "skin_infection", "wound_infection", "hiv_positive", "BP", "diabetes", "danger_sign_preg_mother", "preg_mother-TT", "preg_mother-ante_natal", "birth_registration"];
+            var numToQLabel = function (num) { return "question" + num + "-label"; }; 
+            var cleanIDs = [1, 2, 3, 4, 5].map(numToQLabel);
+            var crufyIDs = [1, 2, 3, 4, 5].map(numToQLabel).splice(5, 0, "cough", "TB_positive", "fever", "skin_infection", "wound_infection", "hiv_positive", "BP", "diabetes", "danger_sign_preg_mother", "preg_mother-TT", "preg_mother-ante_natal", "birth_registration");
 
             //Test the clean form
 
@@ -956,21 +829,22 @@ start();
 
             window.setTimeout(function () {
 //                start();
-                same(Itext.getAllItextIDs(), cleanIDs, 'List of all Itext IDs is correct');
-                same(Itext.getAllItextIDs(), c.getListOfItextIDsFromMugs(), '"All" itext IDs and "clean/valid" ids are the same');
+                same(Itext.getNonEmptyItemIds(), cleanIDs, 'List of all Itext IDs is correct');
+                listsHaveSameContents(Itext.getNonEmptyItems(), c.getAllNonEmptyItextItemsFromMugs());
                 c.removeCruftyItext();
-                same(Itext.getAllItextIDs(), cleanIDs, 'List of "clean" Itext IDs is still correct after calling removeCrufyItext()');
-                same(Itext.getAllItextIDs(), c.getListOfItextIDsFromMugs(), '"All" itext IDs and "clean/valid" ids are the same');
-
+                
+                same(Itext.getNonEmptyItemIds(), cleanIDs, 'List of "clean" Itext IDs is still correct after calling removeCrufyItext()');
+                listsHaveSameContents(Itext.getNonEmptyItems(), c.getAllNonEmptyItextItemsFromMugs());
+                
                 //test the crufty form
                 c.loadXForm(cruftyForm);
 //                stop()
                 window.setTimeout(function () {
                     start();
-                    same(Itext.getAllItextIDs(), crufyIDs, 'List of all Itext IDs is correct');
+                    same(Itext.getNonEmptyItemIds(), crufyIDs, 'List of all Itext IDs is correct');
                     c.removeCruftyItext();
-                    same(Itext.getAllItextIDs(), cleanIDs, 'List of Itext IDs is correct after calling removeCrufyItext() (now the same as the "clean" forms');
-                    same(Itext.getAllItextIDs(), c.getListOfItextIDsFromMugs(), '"All" itext IDs and "clean/valid" ids are the same');
+                    same(Itext.getNonEmptyItemIds(), cleanIDs, 'List of Itext IDs is correct after calling removeCrufyItext() (now the same as the "clean" forms');
+                    same(Itext.getNonEmptyItemIds(), c.getAllNonEmptyItextItemsFromMugs(), '"All" itext IDs and "clean/valid" ids are the same');
                 }, 700)
             }, 700);
 

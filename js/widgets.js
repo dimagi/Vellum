@@ -177,7 +177,6 @@ formdesigner.widgets = (function () {
             } else {
                 //this.getControl().removeClass("auto-itext");
             }
-                
         }
         
         // support auto mode to keep ids in sync
@@ -670,28 +669,19 @@ formdesigner.widgets = (function () {
     
     var filterByMugProperties = function (list, mugType) {
         var ret = [];
-        var hasControl = mugType.hasControlElement();
-        var hasData = mugType.hasDataElement();
-        var hasBind = mugType.hasBindElement();
-        var path;
+        var path, propertyDef;
         
         for (var i = 0; i < list.length; i++) {
             path = list[i];
-            if (path.indexOf("controlElement") !== -1) {
-                if (hasControl) {
+            try {
+                propertyDef = mugType.getPropertyDefinition(path);
+                if (propertyDef.presence !== "notallowed") {
                     ret.push(path);
                 }
-            } else if (path.indexOf("dataElement") !== -1) {
-                if (hasData) {
-                    ret.push(path);
-                }
-            } else if (path.indexOf("bindElement") !== -1) {
-                if (hasBind) {
-                    ret.push(path);
-                }
-            } else {
-                ret.push(path);
-            } 
+            } catch (err) {
+                // assume we couldn't get the property definition
+                // therefore we should ignore it.
+            }
         }
         return ret;
     };
@@ -730,16 +720,21 @@ formdesigner.widgets = (function () {
     };
     
     that.getLogicSection = function (mugType) {
-        var elements = ["bindElement/requiredAttr",
-                        "bindElement/relevantAttr", "bindElement/calculateAttr", 
-                        "bindElement/constraintAttr",
-                        "bindElement/constraintMsgItextID"].map(wrapAsGeneric);
-        elements.push({ widgetType: "itext",
-                        displayMode: "inline",
-                        slug: "constraint",
-                        displayName: "Constraint Message",
-                        textIdFunc: function (mt) { return mt.getConstraintMsgItext() }, 
-                        showAddFormButton: false});
+        var elementPaths = filterByMugProperties(
+            ["bindElement/requiredAttr",
+             "bindElement/relevantAttr", "bindElement/calculateAttr", 
+             "bindElement/constraintAttr",
+             "bindElement/constraintMsgItextID"], mugType)
+        var elements = elementPaths.map(wrapAsGeneric);
+        if (elementPaths.indexOf("bindElement/constraintMsgItextID") !== -1) {
+            // only add the itext if the constraint was relevant
+	        elements.push({ widgetType: "itext",
+	                        displayMode: "inline",
+	                        slug: "constraint",
+	                        displayName: "Constraint Message",
+	                        textIdFunc: function (mt) { return mt.getConstraintMsgItext() }, 
+	                        showAddFormButton: false});
+        }
         return that.accordionSection(mugType, {
                             slug: "logic",
                             displayName: "Logic Properties",
@@ -747,20 +742,23 @@ formdesigner.widgets = (function () {
     };
     
     that.getAdvancedSection = function (mugType) {
-        var elements = filterByMugProperties(
+        var elementPaths = filterByMugProperties(
             ["dataElement/dataValue", "dataElement/keyAttr", "dataElement/xmlnsAttr", 
              "bindElement/preload", "bindElement/preloadParams", 
              "controlElement/label", "controlElement/hintLabel", 
              "bindElement/constraintMsgAttr", "controlElement/labelItextID", 
-             "controlElement/hintItextID"], mugType).map(wrapAsGeneric);
+             "controlElement/hintItextID"], mugType);
+        var elements = elementPaths.map(wrapAsGeneric);
         
-        elements.push({ widgetType: "itext",
-                        displayMode: "inline",
-                        slug: "hint",
-                        displayName: "Hint",
-                        textIdFunc: function (mt) { return mt.getHintItext() }, 
-                        showAddFormButton: false});
-        
+        if (elementPaths.indexOf("controlElement/hintItextID") !== -1) {
+	        // only add the itext if the hint was relevant
+	        elements.push({ widgetType: "itext",
+	                        displayMode: "inline",
+	                        slug: "hint",
+	                        displayName: "Hint",
+	                        textIdFunc: function (mt) { return mt.getHintItext() }, 
+	                        showAddFormButton: false});
+        }
         return that.accordionSection(mugType, { 
                             slug: "advanced",
                             type: "accordion",
