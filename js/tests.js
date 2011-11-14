@@ -1066,7 +1066,6 @@ start();
             curMugType,
             addQbut, lastCreatedNode, addGroupBut, qTypeSel, iiD, groupMT, Itext,mugProps,cEl,iID;
         c.resetFormDesigner();
-        Itext = formdesigner.model.Itext;
         jstree.bind('create_node.jstree',function(e,data){
             lastCreatedNode = data.rslt.obj;
         })
@@ -1078,7 +1077,8 @@ start();
         mugProps = curMugType.mug.properties;
         cEl = mugProps.controlElement.properties;
         iID = cEl.labelItextID;
-        Itext.setValue(iID,Itext.getDefaultLanguage(),'default','question1 label');
+        iID.id = "question1";
+        iID.setDefaultValue('question1 label');
         //add group
         addQuestionThroughUI("Group");
         jstree.jstree('select_node',lastCreatedNode,true);
@@ -1087,9 +1087,12 @@ start();
         mugProps = curMugType.mug.properties;
         cEl = mugProps.controlElement.properties;
         iID = cEl.labelItextID;
-        Itext.setValue(iID,Itext.getDefaultLanguage(),'default','group1 label'); //set itext value for group
-        $('#dataElement-nodeID').val('group1').keyup(); //change the group's nodeIDs to something more reasonable
-
+        //set itext value for group
+        iID.setDefaultValue('group1 label'); 
+        //change the group's nodeIDs to something more reasonable
+        $('#dataElement-nodeID').val('group1').keyup(); 
+        
+        
         //add another text question
         addQuestionThroughUI("Text Question");
         jstree.jstree('select_node',lastCreatedNode,true);
@@ -1097,7 +1100,7 @@ start();
         mugProps = curMugType.mug.properties;
         cEl = mugProps.controlElement.properties;
         iID = cEl.labelItextID;
-        Itext.setValue(iID,Itext.getDefaultLanguage(),'default','question2 label');
+        iID.setDefaultValue('question2 label');
 
         //select the group node
         jstree.jstree('select_node',$('#'+ groupMT.ufid),true);

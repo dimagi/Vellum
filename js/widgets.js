@@ -212,12 +212,14 @@ formdesigner.widgets = (function () {
             } 
         };
         
-        formdesigner.controller.on('widget-value-changed', function (e) {
+        widget.mug.mug.on('property-changed', function (e) {
             // keep the ids in sync if we're in auto mode
-            var changedWidget = e.widget;
-            if (widget.autoMode && changedWidget.propName === "nodeID") {
-                widget.setUIValue(widget.autoGenerateId(changedWidget.getValue()));
-                widget.fireValueChanged()();
+            if (widget.autoMode && e.property === "nodeID") {
+                var newVal = widget.autoGenerateId(e.val);
+                if (newVal !== widget.getValue()) {
+                    widget.setUIValue(newVal);
+                    widget.fireValueChanged()();
+                }
             } 
         });
         

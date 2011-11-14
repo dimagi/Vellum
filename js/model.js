@@ -3051,7 +3051,6 @@ formdesigner.model = function () {
             if (mug){
 	            if (mug.properties.controlElement) {
 	                //attempt to remove Itext
-	                console.log(mug.properties.controlElement);
 	                labelItext = mug.properties.controlElement.properties.labelItextID;
 	                hintItext = mug.properties.controlElement.properties.hintItextID;
 	                if (labelItext) {
