@@ -895,40 +895,43 @@ formdesigner.controller = (function () {
         var idata, row, iID, lang, form, val, Itext,
                 out = '';
         Itext = formdesigner.model.Itext;
-        idata = Itext.getAllData();
-
+        
         /**
          * Cleanes Itext so that it fits the csv spec. For now just replaces newlines with ''
          * @param val
          */
-        function cleanItextVal(val) {
-            var newVal;
-            newVal = val.replace(/\n/g, '')
-            return newVal
+        
+        var tabSeparate = function (list) {
+            var cleanVal = function (val) {
+	            return val.replace(/\n/g, '');
+	        };
+	        return list.map(cleanVal).join("\t");
+        };
+        
+        function makeRow (language, item, forms) {
+            var values = forms.map(function (form) {
+                return item.hasForm(form) ? item.getForm(form).getValueOrDefault(language) : "";
+            });
+            var row = [language, item.id].concat(values);
+            return tabSeparate(row);
         }
-        function makeRow (language, id, data) {
-            var row = '', i;
-            row = language + '\t' + id;
-            row += '\t' + (data["default"] ? cleanItextVal(data["default"]) : '');
-            row += '\t' + (data["audio"] ? cleanItextVal(data["audio"]) : '');
-            row += '\t' + (data["image"] ? cleanItextVal(data["image"]) : '');
-            row += '\t' + (data["video"] ? cleanItextVal(data["video"]) : '');
-            row += '\n';
-            return row;
-        }
-
-        for (lang in idata) {
-            if (idata.hasOwnProperty(lang)) {
-                for (iID in idata[lang] ) {
-                    if (idata[lang].hasOwnProperty(iID)) {
-                        out += makeRow(lang, iID, idata[lang][iID])
-                    }
-                }
-
+        
+        var ret = [];
+        // TODO: should this be configurable? 
+        var exportCols = ["default", "audio", "image" , "video"];
+        var languages = Itext.getLanguages();
+        var allItems = Itext.getNonEmptyItems();
+        var language, item, i, j;
+        if (languages.length > 0) {
+            for (i = 0; i < languages.length; i++) {
+                language = languages[i];
+                for (j = 0; j < allItems.length; j++) {
+                    item = allItems[j];
+                    ret.push(makeRow(language, item, exportCols));
+                }       
             }
         }
-
-        return out;
+        return ret.join("\n");
     }
     that.generateItextXLS = generateItextXLS;
 
