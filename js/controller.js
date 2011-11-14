@@ -864,26 +864,20 @@ formdesigner.controller = (function () {
                 nRows, nCols, i, j, cells, lang,iID, form, val, Itext;
         nRows = rows.length;
         nCols = rows[0].split('\t').length;
+        
+        // TODO: should this be configurable? 
+        var exportCols = ["default", "audio", "image" , "video"];
+        
         Itext = formdesigner.model.Itext;
-        for (i in rows) {
-            if (rows.hasOwnProperty(i)) {
-                cells = rows[i].split('\t');
-                lang = cells[0];
-                iID = cells[1];
-                for (j = 2; j<cells.length ; j++) {
-                    if(cells[j]) {
-                        if(j === 2) {
-                            form = 'default';
-                        } else if (j === 3) {
-                            form = 'audio';
-                        } else if (j === 4) {
-                            form = 'image';
-                        } else if (j === 5) {
-                            form = 'video';
-                        }
-                        val = cells[j];
-                        Itext.setValue(iID,lang,form,val);
-                    }
+        for (i = 0; i < rows.length; i++) {
+            cells = rows[i].split('\t');
+            lang = cells[0];
+            iID = cells[1];
+            for (j = 2; j < cells.length || j < exportCols.length + 2; j++) {
+                if (cells[j]) {
+                    form = exportCols[j - 2];
+                    val = cells[j];
+                    Itext.getOrCreateItem(iID).getOrCreateForm(form).setValue(lang, val);
                 }
             }
         }
