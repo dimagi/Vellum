@@ -2305,7 +2305,7 @@ formdesigner.model = function () {
                         //////////////////////////////////////////////////////////////////////
                         //Do hint label
                         if( tagName !== 'item' && tagName !== 'repeat'){
-                            if(cProps.hintLabel || cProps.hintItextID){
+                            if(cProps.hintLabel || (cProps.hintItextID && cProps.hintItextID.id)) {
                                 xmlWriter.writeStartElement('hint');
                                 if(cProps.hintLabel){
                                     xmlWriter.writeString(cProps.hintLabel);
