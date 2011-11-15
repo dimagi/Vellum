@@ -2050,60 +2050,6 @@ formdesigner.model = function () {
         }
         that.getInvalidMugTypeUFIDs = getInvalidMugTypeUFIDs;
 
-        var getInvalidItextMugTypes = function () {
-            var Itext, invalidItexts, MTListC, MTListD, result, controlTree, dataTree, mapFunc;
-
-            mapFunc = function (node) {
-                var MT, ufid, iID, hIID;
-                if (node.isRootNode) {
-                    return;
-                }
-                MT = node.getValue();
-                ufid = MT.ufid;
-                if(MT.properties.controlElement) {
-                    iID = MT.mug.properties.controlElement.properties.labelItextID;
-                    hIID = MT.mug.properties.controlElement.properties.hintItextID;
-                }
-                if(invalidItexts.indexOf(iID) !== -1) {
-                    return MT;
-                } else if (invalidItexts.indexOf(hIID) !== -1) {
-                    return MT;
-                } else {
-                    return null;
-                }
-            };
-
-
-            Itext = formdesigner.model.Itext;
-            invalidItexts = Itext.getInvalidItextIDs();
-
-            if(invalidItexts === 'true') {
-                return [];
-            }
-
-            dataTree = this.dataTree;
-            controlTree = this.controlTree;
-            MTListC = controlTree.treeMap(mapFunc);
-            MTListD = dataTree.treeMap(mapFunc);
-            result = formdesigner.util.mergeArray(MTListC, MTListD);
-
-            return result;
-        }
-        that.getInvalidItextMugTypes = getInvalidItextMugTypes;
-
-        var getInvalidItextMTUfids = function () {
-            var MTs, ufids = [], i;
-            MTs = getInvalidItextMugTypes();
-
-            for (i in MTs) {
-                if(MTs.hasOwnProperty(i)) {
-                    ufids.push(MTs[i].ufid);
-                }
-            }
-            return ufids;
-        }
-        that.getInvalidItextMTUfids = getInvalidItextMTUfids;
-
         
 
         /**
@@ -2910,28 +2856,6 @@ formdesigner.model = function () {
         };
                 
         
-        /**
-         * Must specify all params, use form='default' or null for the default (no special form) form.
-         * Throws exception if iID or lang does not exist. If no data is available for that form,
-         * returns null.
-         * @param iID
-         * @param lang
-         * @param form
-         */
-        itext.getValue = function(iID, lang, form){
-            throw ("Not implemented");
-            var block = this.getItextVals(iID, lang);
-            
-            if(!form){
-                form = 'default';
-            }
-
-            if(!block[form]){
-                return null;
-            }
-            return block[form];
-        };
-        
         
         /**
          * Goes through the Itext data and verifies that
@@ -2958,48 +2882,6 @@ formdesigner.model = function () {
             }
         };
 
-        itext.getInvalidItextIDs = function () {
-            throw ("Not implemented!");
-            
-            var valRes, IDs = [], i;
-            valRes = formdesigner.model.Itext.validateItext();
-            for (i in valRes) {
-                if(valRes.hasOwnProperty(i)) {
-                    IDs.push(i);
-                }
-            }
-
-            return IDs;
-        };
-
-        
-        /**
-         * Renames the itext ID to something new.
-         * @param oldID
-         * @param newID
-         */
-        itext.renameItextID = function (oldID, newID) {
-            throw ("Not implemented");
-            if ( (!oldID || !newID) || (oldID === newID) ){
-                return;
-            }
-            this.getItem(oldID).id = newID;
-        };
-
-        itext.removeItext = function (itextID) {
-            throw ("Not implemented");
-            if (!itextID) {
-                throw "Can't delete null in Itext. Must specify an ItextID.  In model.Itext.removeItext()";
-            }
-            var langs, i, b;
-            langs = formdesigner.model.Itext.getLanguages();
-            for (i in langs) {
-                if(langs.hasOwnProperty(i)){
-                    delete this.data[langs[i]][itextID];
-                }
-            }
-        }
-
         /**
          * Blows away all data stored in the Itext object
          * and resets it to pristine condition (i.e. as if the FD was freshly launched)
@@ -3012,8 +2894,6 @@ formdesigner.model = function () {
             this.addLanguage("en");
             this.setDefaultLanguage("en");
         };
-
-        
 
         /**
          * Takes in a list of Itext IDs that are
@@ -3028,19 +2908,7 @@ formdesigner.model = function () {
          */
         var removeCruftyItext = function (validIDList) {
             return;
-            throw ("Not implemented!");
-            
-            var idList, i, id;
-
-            idList = this.getAllItextIDs();
-            for (i in idList) {
-                if (idList.hasOwnProperty(i)) {
-                    id = idList[i];
-                    if(validIDList.indexOf(id) === -1) {
-                        this.removeItext(id); //remove it from the Itext object
-                    }
-                }
-            }
+            // TODO
         }
         itext.removeCruftyItext = removeCruftyItext;
 
