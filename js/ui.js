@@ -341,16 +341,15 @@ formdesigner.ui = (function () {
     that.getDataJSTree = getDataJSTree;
 
     var showVisualValidation = function (mugType){
-        function setValidationFailedIcon(li,showIcon, message){
+        function setValidationFailedIcon(li, showIcon, message) {
             var exists = ($(li).find('.fd-props-validate').length > 0);
             if(exists && showIcon){
-                return;
-            }else if (exists && !showIcon){
-                $(li).find('.fd-props-validate').removeClass('ui-icon');
-            }else if(!exists && showIcon){
+                icon.attr("title", message).addClass("ui-icon");
+            } else if (exists && !showIcon){
+                $(li).find('.fd-props-validate').removeClass('ui-icon').attr("title", "");
+            } else if(!exists && showIcon){
                 var icon = $('<span class="fd-props-validate ui-icon ui-icon-alert"></span>');
                 icon.attr('title',message);
-                
                 li.append(icon);
             }
             return li;
@@ -398,6 +397,7 @@ formdesigner.ui = (function () {
             propsMessage += '<p>' + JSON.stringify(itextValidation) + '</p>';
         }
         if(propsMessage) {
+            
             showMessage(propsMessage, 'Question Problems', 'warning');
         }
 
@@ -1152,7 +1152,7 @@ formdesigner.ui = (function () {
 
         div.append(contStr);
 
-        //We use the following hidden input box as a flag to determine what to do in the beforeClose() func above.
+        // We use the following hidden input box as a flag to determine what to do in the beforeClose() func above.
         $('#fd-remove-lang-input').val(langToBeRemoved);
 
         buttons = {}
@@ -1297,7 +1297,7 @@ formdesigner.ui = (function () {
             if (formdesigner.currentItextDisplayLanguage === e.language) {
 		        allMugs.map(function (mug) {
 		            var node = $('#' + mug.ufid);
-                    if (mug.getItextID() === e.iTextID && e.textForm === "default") {
+                    if (mug.getItext().id === e.id && e.form === "default") {
 		                if (e.value && e.value !== $('#fd-question-tree').jstree("get_text", node)) {
                             $('#fd-question-tree').jstree('rename_node', node, e.value);
                         }    
@@ -1305,6 +1305,18 @@ formdesigner.ui = (function () {
 		        });
             }
             
+        });
+        formdesigner.controller.on("global-itext-changed", function (e) {
+            // update any display values that are affected
+            var allMugs = formdesigner.controller.getMugTypeList(true);
+            var currLang = formdesigner.currentItextDisplayLanguage;
+            allMugs.map(function (mug) {
+                var node = $('#' + mug.ufid);
+                var it = mug.getItext();
+                if (it && it.getValue("default", currLang) !== $('#fd-question-tree').jstree("get_text", node)) {
+                    $('#fd-question-tree').jstree('rename_node', node, it.getValue("default", currLang));
+                }
+            });
         });
     };
     

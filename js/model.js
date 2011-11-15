@@ -394,7 +394,7 @@ formdesigner.model = function () {
         //BE CAREFUL HERE.  This is where the automagic architecture detection ends, some things are hardcoded.
         var mugSpec, dataElSpec, bindElSpec, controlElSpec, i,
                 mug,dataElement,bindElement,controlElement,
-                specBlob = {}, validationResult, mugProps, nodeID, defaultItextValue;
+                specBlob = {}, validationResult, mugProps, defaultItextValue;
 
         specBlob = getSpec(mugType.properties);
         mugSpec = specBlob || undefined;
@@ -427,54 +427,8 @@ formdesigner.model = function () {
 
 
         }
-        mugProps = mug.properties;
-        if (mug.properties.controlElement) {
-            //Create some default Itext IDs
-            nodeID = null;
-
-
-            if (mugProps.bindElement) { //try for the bindElement nodeID
-                nodeID = mugProps.bindElement.properties.nodeID;
-            }
-            if (!nodeID) { //if nothing, try the dataElement nodeID
-                if (mugProps.dataElement) {
-                   nodeID = mugProps.dataElement.properties.nodeID;
-                }
-            }
-
-            if (!nodeID) { //Still nothing... so try some more exotic stuff
-                if (mugProps.controlElement) {
-                    //must be an Item or similar generate an itextID
-                    nodeID = formdesigner.util.generate_item_label();
-
-                }
-            }
-
-            //finally
-            mugProps.controlElement.properties.labelItextID = nodeID + "-label";
-
-
-        }
-
-        if (controlElSpec) { //this is some kind of select item or trigger...
-                //give it a useful initial label
-            if(dataElSpec) {
-                defaultItextValue = mugProps.dataElement.properties.nodeID;
-            }else if (bindElSpec) {
-                defaultItextValue = mugProps.bindElement.properties.nodeID;
-            }else if (controlElSpec) { //fall back to the Itext ID
-                defaultItextValue = mugProps.controlElement.properties.labelItextID;
-            }else { //what are we even doing here?
-                throw 'Mug does not contain any elements! Missing Data, Bind and Control elements!';
-            }
-            formdesigner.model.Itext.setValue(
-                    mug.properties.controlElement.properties.labelItextID,
-                    formdesigner.model.Itext.getDefaultLanguage(),
-                    'default',
-                    defaultItextValue
-            )
-        }
-
+        //Bind the mug to it's mugType
+        mugType.mug = mug || undefined;
         
         // utility functions
         mugType.hasControlElement = function () {
@@ -487,58 +441,83 @@ formdesigner.model = function () {
             return Boolean(this.mug.properties.bindElement);
         }
         
+        
+        if (mugType.hasControlElement() && !mugType.mug.properties.controlElement.properties.labelItextID) {
+            // set default itext id/value
+            var getDefaultLabelItextId = function () {
+	            // Default Itext ID
+	            var nodeID = null;
+	            if (mugType.hasBindElement()) { //try for the bindElement nodeID
+	                nodeID = mugType.mug.properties.bindElement.properties.nodeID;
+	            } else if (mugType.hasDataElement()) {
+	                //if nothing, try the dataElement nodeID
+	                nodeID = mugType.mug.properties.dataElement.properties.nodeID;
+	            } else {
+	                nodeID = formdesigner.util.generate_item_label();
+	            }
+	            // finally
+	            return nodeID + "-label";
+	        };
+	        var getDefaultLabelValue = function () {
+		        if (mugType.hasDataElement()) {
+	                return mugType.mug.properties.dataElement.properties.nodeID;
+	            } else if (mugType.hasBindElement()) {
+	                return mugType.mug.properties.bindElement.properties.nodeID;
+	            } else { 
+	                // fall back to the Itext ID
+	                return mugType.mug.properties.controlElement.properties.labelItextID;
+	            } 
+	        };
+            // create a default itext object 
+            // give it a useful initial label
+            var formData = {};
+	        formData[that.Itext.getDefaultLanguage()] = getDefaultLabelValue();
+	        
+	        mugType.mug.properties.controlElement.properties.labelItextID = new that.ItextItem({
+	            id: getDefaultLabelItextId(),
+	            forms: [new that.ItextForm({
+	                        name: "default",
+	                        data: formData
+	                    })]
+	        });
+	        that.Itext.addItem(mugType.mug.properties.controlElement.properties.labelItextID);
+	        
+	        // hint itext
+	        if (mugType.properties.controlElement.hintItextID.presence !== "notallowed") {
+	            mugType.mug.properties.controlElement.properties.hintItextID = that.Itext.createItem("");
+	        }
+        }
+        
+        if (mugType.hasBindElement()) {
+            // constraint msg itext
+            if (mugType.properties.bindElement.constraintMsgItextID.presence !== "notallowed") {
+                mugType.mug.properties.bindElement.properties.constraintMsgItextID = that.Itext.createItem("");
+            }
+        }
         // Add some useful functions for dealing with itext.
         mugType.setItextID = function (val) {
             if (this.hasControlElement()) {
-                this.mug.properties.controlElement.properties.labelItextID = val;
+                this.mug.properties.controlElement.properties.labelItextID.id = val;
             }
         };
-        mugType.getItextID = function () {
-            var itext;
+        
+        mugType.getItext = function () {
             if (this.hasControlElement()) {
-                if (this.mug.properties.controlElement.properties.labelItextID) {
-                    return this.mug.properties.controlElement.properties.labelItextID;
-                } else {
-                    itext = formdesigner.util.getNewItextID(this);
-                    this.setItextId(itext);
-                    return itext;
-                }
-            }    
-            return null;
+                return this.mug.properties.controlElement.properties.labelItextID;
+            }        
         };
-        mugType.getHintItextID = function () {
+        mugType.getHintItext = function () {
             if (this.hasControlElement()) {
                 return this.mug.properties.controlElement.properties.hintItextID;
             }
-        };
-        mugType.getConstraintMsgItextID = function () {
-            if (this.hasControlElement()) {
+        }
+        mugType.getConstraintMsgItext = function () {
+            if (this.hasBindElement()) {
                 return this.mug.properties.bindElement.properties.constraintMsgItextID;
             }
         };
-        mugType.getItextBlock = function (lang) {
-            return that.Itext.getItextVals(this.getItextID(), lang);
-        };
-        mugType.getDisplayText = function (lang) {
-            return that.Itext.getValue(this.getItextID(),lang, 'default');
-        };
         
-        //Bind the mug to it's mugType
-        mugType.mug = mug || undefined;
-
-//        //ok,now: validate the mug to make sure everything is peachy.
-//        validationResult = mugType.validateMug(mug);
-//        if (validationResult.status !== 'pass') {
-//            console.group("Failed Validation on Mug Auto-creation");
-//            console.log('Failed validation object');
-//            console.log(validationResult);
-//            console.log("MugType:");
-//            console.log(mugType);
-//            console.groupEnd();
-//            throw 'Newly constructed mug did not pass validation!';
-//        }else{
-            return mug;
-//        }
+        return mug;
     };
 
     var validateElementName = function (value, displayName) {
@@ -548,6 +527,19 @@ formdesigner.model = function () {
         return "pass";            
     };
     
+    var validateItextItem = function (itextItem, name) {
+        if (formdesigner.util.exists(itextItem)) {
+	        var val = itextItem.defaultValue();
+	        if (itextItem.id && !val) {
+	            return "Question has " + name + " ID but no " + name + " label!";
+	        }
+	        if (val && !itextItem.id) {
+	            return "Question has " + name + " label but no " + name + " ID!";
+	        }
+        }
+        return "pass";
+    };
+        
     var validationFuncs = {
         //should be used to figure out the logic for label, defaultLabel, labelItext, etc properties
         nodeID: function (mugType, mug) {
@@ -576,13 +568,15 @@ formdesigner.model = function () {
             Itext = formdesigner.model.Itext;
             controlBlock = mug.properties.controlElement.properties;
             hasLabel = Boolean(controlBlock.label);
-            hasLabelItextID = Boolean(controlBlock.labelItextID);
-            if(hasLabelItextID){
-                var res = validateElementName(controlBlock.labelItextID, "Label IText ID");
+            var itextBlock = mugType.getItext();
+            hasLabelItextID = Boolean(itextBlock && itextBlock.id);
+            
+            if (hasLabelItextID){
+                var res = validateElementName(itextBlock.id, "Label IText ID");
 	            if (res !== "pass") {
 	                return res;
 	            }
-                hasItext = Itext.hasHumanReadableItext(mug,false);
+                hasItext = itextBlock.hasHumanReadableItext();
             } else {
                 hasItext = false;
             }
@@ -605,49 +599,39 @@ formdesigner.model = function () {
             return 'Question is missing ' + missing + ' value!';
         },
         hintItextID: function (mugType, mug) {
-            var controlBlock, hintIID, itextVal, Itext, controlElement;
+            var controlBlock, hintItext, itextVal, Itext, controlElement;
             controlBlock = mugType.properties.controlElement;
             controlElement = mug.properties.controlElement.properties;
             Itext = formdesigner.model.Itext;
-            hintIID = controlElement.hintItextID;
-            if (hintIID) {
-                var res = validateElementName(hintIID, "Hint IText ID");
+            hintItext = controlElement.hintItextID;
+            if (hintItext && hintItext.id) {
+                var res = validateElementName(hintItext.id, "Hint IText ID");
                 if (res !== "pass") {
                     return res;
                 }
-            }
-            itextVal = Itext.getValue(hintIID,Itext.getDefaultLanguage(),'default');
-            if(hintIID && !itextVal) {
-                return 'Question has Hint Itext ID but no Hint Itext Label Data!';
-            }
-            if(itextVal && !hintIID) {
-                return 'Question has Hint Itext Display label but no Hint Itext ID!';
+                
             }
             if(controlBlock.hintItextID === 'required' && !hintIID) {
                 return 'Hint Itext ID is required but not present in this question!';
             }
-
-            return 'pass';
+            
+            return validateItextItem(hintItext, "Hint Itext");
         },
         constraintItextId: function (mugType, mug) {
             var bindElement = mug.properties.bindElement.properties;
             var IT = formdesigner.model.Itext;
             
-            if (bindElement.constraintMsgItextID) {
-                var res = validateElementName(bindElement.constraintMsgItextID, "Constraint IText ID");
+            var constraintItext = bindElement.constraintMsgItextID;
+            if (constraintItext && constraintItext.id) {
+                var res = validateElementName(constraintItext.id, "Constraint IText ID");
                 if (res !== "pass") {
                     return res;
                 }
             }
-            
-            if (bindElement.constraintMsgItextID && bindElement.constraintMsgAttr) {
-                return 'Question specifies a both a constraint message and itext. Please delete one.';
+            if (constraintItext && constraintItext.id && !bindElement.constraintAttr) {
+                return "Can't have a constraint Itext ID without a constarint";
             }
-            if (bindElement.constraintMsgItextID && !IT.hasItextBlock(bindElement.constraintMsgItextID, 
-                                                                    IT.getDefaultLanguage())) {
-                return 'Question has a constraint message ID but no value.';
-            }
-            return 'pass';
+            return validateItextItem(constraintItext, "Constraint Itext");
         }
         
     };
@@ -764,8 +748,8 @@ formdesigner.model = function () {
                     validationFunc : function (mugType, mug) {
                         var bindBlock = mug.properties.bindElement.properties;
                         var hasConstraint = (typeof bindBlock.constraintAttr !== 'undefined');
-                        var hasConstraintMsg = (typeof bindBlock.constraintMsgAttr !== 'undefined' || 
-                                                typeof bindBlock.constraintMsgItextID !== 'undefined');
+                        var hasConstraintMsg = (bindBlock.constraintMsgAttr || 
+                                                bindBlock.constraintMsgItextID.id);
                         if (hasConstraintMsg && !hasConstraint) {
                             return 'ERROR: Bind cannot have a Constraint Message with no Constraint!';
                         } else {
@@ -1295,6 +1279,8 @@ formdesigner.model = function () {
         controlProps = mType.properties.controlElement;
         controlProps.hintLabel.presence = 'notallowed';
         controlProps.hintItextID.presence = 'notallowed';
+        
+        
         controlProps.defaultValue = {
             lstring: 'Item Value',
             visibility: 'visible',
@@ -2064,60 +2050,6 @@ formdesigner.model = function () {
         }
         that.getInvalidMugTypeUFIDs = getInvalidMugTypeUFIDs;
 
-        var getInvalidItextMugTypes = function () {
-            var Itext, invalidItexts, MTListC, MTListD, result, controlTree, dataTree, mapFunc;
-
-            mapFunc = function (node) {
-                var MT, ufid, iID, hIID;
-                if (node.isRootNode) {
-                    return;
-                }
-                MT = node.getValue();
-                ufid = MT.ufid;
-                if(MT.properties.controlElement) {
-                    iID = MT.mug.properties.controlElement.properties.labelItextID;
-                    hIID = MT.mug.properties.controlElement.properties.hintItextID;
-                }
-                if(invalidItexts.indexOf(iID) !== -1) {
-                    return MT;
-                } else if (invalidItexts.indexOf(hIID) !== -1) {
-                    return MT;
-                } else {
-                    return null;
-                }
-            };
-
-
-            Itext = formdesigner.model.Itext;
-            invalidItexts = Itext.getInvalidItextIDs();
-
-            if(invalidItexts === 'true') {
-                return [];
-            }
-
-            dataTree = this.dataTree;
-            controlTree = this.controlTree;
-            MTListC = controlTree.treeMap(mapFunc);
-            MTListD = dataTree.treeMap(mapFunc);
-            result = formdesigner.util.mergeArray(MTListC, MTListD);
-
-            return result;
-        }
-        that.getInvalidItextMugTypes = getInvalidItextMugTypes;
-
-        var getInvalidItextMTUfids = function () {
-            var MTs, ufids = [], i;
-            MTs = getInvalidItextMugTypes();
-
-            for (i in MTs) {
-                if(MTs.hasOwnProperty(i)) {
-                    ufids.push(MTs[i].ufid);
-                }
-            }
-            return ufids;
-        }
-        that.getInvalidItextMTUfids = getInvalidItextMTUfids;
-
         
 
         /**
@@ -2204,7 +2136,7 @@ formdesigner.model = function () {
                             'type': type,
                             constraint: cons,
                             constraintMsg: consMsg,
-                            constraintMsgItextID: bEl.properties.constraintMsgItextID,
+                            constraintMsgItextID: bEl.properties.constraintMsgItextID.id,
                             relevant: relevant,
                             required: required,
                             calculate: calc,
@@ -2322,13 +2254,13 @@ formdesigner.model = function () {
                         //////////////////////////////////////////////////////////////////////
                         //Do hint label
                         if( tagName !== 'item' && tagName !== 'repeat'){
-                            if(cProps.hintLabel || cProps.hintItextID){
+                            if(cProps.hintLabel || (cProps.hintItextID && cProps.hintItextID.id)) {
                                 xmlWriter.writeStartElement('hint');
                                 if(cProps.hintLabel){
                                     xmlWriter.writeString(cProps.hintLabel);
                                 }
-                                if(cProps.hintItextID){
-                                    var ref = "jr:itext('" + cProps.hintItextID + "')";
+                                if(cProps.hintItextID.id){
+                                    var ref = "jr:itext('" + cProps.hintItextID.id + "')";
                                     xmlWriter.writeAttributeStringSafe('ref',ref);
                                 }
                                 xmlWriter.writeEndElement();
@@ -2347,10 +2279,11 @@ formdesigner.model = function () {
                         if (!label) {
                             label = {};
                         }
-                        label.ref = "jr:itext('" + cProps.labelItextID + "')";
-                        hasItext = formdesigner.model.Itext.buildItextValueSet().hasOwnProperty(cProps.labelItextID);
+                        
+                        
+                        label.ref = "jr:itext('" + cProps.labelItextID.id + "')";
                         isItextOptional = mugType.properties.controlElement.labelItextID.presence == 'optional'; //iID is optional so by extension Itext is optional.
-                        if (!hasItext && isItextOptional) {
+                        if (cProps.labelItextID.isEmpty() && isItextOptional) {
                             label.ref = '';
                         }
                     }
@@ -2375,13 +2308,13 @@ formdesigner.model = function () {
                         xmlWriter.writeEndElement(); //special case where we have to close the repeat as well as the group tag.
                     }
 
-                }
+                };
 
                 controlTree.treeMap(mapFunc, afterFunc);
-            }
+            };
 
             var createITextBlock = function () {
-                var xmlWriter = formdesigner.controller.XMLWriter, hasItext, lang, languages, Itext, id,
+                var xmlWriter = formdesigner.controller.XMLWriter, lang, id,
                         langData, val, formData, form, i, allLangKeys, question, form;
                 
                 // here are the rules that govern itext
@@ -2394,47 +2327,43 @@ formdesigner.model = function () {
                 // 3. iText nodes that have multiple values in multiple languages 
                 // will be properly set as such.
                 
-                Itext = formdesigner.model.Itext;
-                languages = Itext.getLanguages();
-                hasItext = languages.length > 0;
-                allLangKeys = Itext.buildItextValueSet();
-                if (hasItext) {
+                var Itext = formdesigner.model.Itext;
+                var languages = Itext.getLanguages();
+                var allItems = Itext.getNonEmptyItems();
+                var item, forms, form;
+                if (languages.length > 0) {
                     xmlWriter.writeStartElement("itext");
-                    for (i in languages) {
-                        if (languages.hasOwnProperty(i)) {
-                            lang = languages[i];
-                            xmlWriter.writeStartElement("translation");
-                            xmlWriter.writeAttributeStringSafe("lang", lang);
-                            if (Itext.getDefaultLanguage() === lang) {
-                                xmlWriter.writeAttributeStringSafe("default", '');
-                            }
-                            for (question in allLangKeys) {
-                                if (allLangKeys.hasOwnProperty(question)) {
-                                    xmlWriter.writeStartElement("text");
-                                    xmlWriter.writeAttributeStringSafe("id",question);
-                                    for (form in allLangKeys[question]) {
-                                        if (allLangKeys[question].hasOwnProperty(form)) {
-                                            val = Itext.getValueOrDefault(lang, question, form);
-                                            xmlWriter.writeStartElement("value");
-                                            if(form !== "default") {
-                                                xmlWriter.writeAttributeStringSafe('form', form);
-                                            }
-                                            xmlWriter.writeString(val);
-                                            xmlWriter.writeEndElement();    
-                                        }
-                                    }
-                                    xmlWriter.writeEndElement();
+                    for (var i = 0; i < languages.length; i++) {
+                        lang = languages[i];
+                        xmlWriter.writeStartElement("translation");
+                        xmlWriter.writeAttributeStringSafe("lang", lang);
+                        if (Itext.getDefaultLanguage() === lang) {
+                            xmlWriter.writeAttributeStringSafe("default", '');
+                        }
+                        for (var j = 0; j < allItems.length; j++) {
+                            item = allItems[j];
+                            xmlWriter.writeStartElement("text");
+                            xmlWriter.writeAttributeStringSafe("id", item.id);
+                            forms = item.getForms();
+                            for (var k = 0; k < forms.length; k++) {
+                                form = forms[k];
+                                val = form.getValueOrDefault(lang);
+                                xmlWriter.writeStartElement("value");
+                                if(form.name !== "default") {
+                                    xmlWriter.writeAttributeStringSafe('form', form.name);
                                 }
-                            
+                                xmlWriter.writeString(val);
+                                xmlWriter.writeEndElement();    
                             }
                             xmlWriter.writeEndElement();
                         }
+                        xmlWriter.writeEndElement();
                     }
                     xmlWriter.writeEndElement();
                 }
 
                 //done with Itext block generation.
-            }
+            };
 
             var createModelHeader = function () {
                 var xw = formdesigner.controller.XMLWriter,
@@ -2642,6 +2571,144 @@ formdesigner.model = function () {
         return that;
     };
     that.Form = Form;
+    
+    
+    that.ItextForm = function (options) {
+        var form = {};
+        
+        form.data = options.data || {};
+        form.name = options.name || "default";
+        
+        form.getValue = function (lang) {
+            return this.data[lang];
+        };
+        
+        form.setValue = function (lang, value) {
+            this.data[lang] = value;
+        };
+        
+        form.getValueOrDefault = function (lang) {
+            // check the actual language first
+            if (this.data[lang]) {
+                return this.data[lang];
+            }
+            var defLang = that.Itext.getDefaultLanguage();
+            // check the default, if necesssary
+            if (lang !== defLang && this.data[defLang]) {
+                return this.data[defLang];
+            }
+            // check arbitrarily for something
+            for (var i in this.data) {
+                if (this.data.hasOwnProperty(i)) {
+                    return this.data[i];
+                }
+            }
+            // there wasn't anything
+            return "";
+        };
+        
+        form.isEmpty = function () {
+            for (var lang in this.data) {
+                if (this.data.hasOwnProperty(lang) && this.data[lang]) {
+                    return false;
+                }
+            }
+            return true;
+        };
+        
+        return form; 
+    };
+
+    /*
+     * An "item" of itext.
+     */
+    
+    that.ItextItem = function (options) {
+        
+        var item = {}; 
+        
+        item.forms = options.forms || [];
+        item.id = options.id || "";
+        
+        item.getForms = function () {
+            return this.forms;
+        };
+        
+        item.getFormNames = function () {
+            return this.forms.map(function (form) {
+                return form.name;
+            });
+        };
+        
+        item.hasForm = function (name) {
+            return this.getFormNames().indexOf(name) !== -1;
+        };
+        
+        item.getForm = function (name) {
+            return formdesigner.util.reduceToOne(this.forms, function (form) {
+                return form.name === name;
+            }, "form name = " + name);
+        };
+        
+        item.getOrCreateForm = function (name) {
+            try {
+                return this.getForm(name);
+            } catch (err) {
+                return this.addForm(name);
+            }
+        };
+        
+        item.addForm = function (name) {
+            if (!this.hasForm(name)) {
+                var newForm = new that.ItextForm({name: name});
+                this.forms.push(newForm);
+                return newForm;
+            }
+        };
+        
+        item.removeForm = function (name) {
+            var names = this.getFormNames();
+            var index = names.indexOf(name);
+            if (index !== -1) {
+                this.forms.splice(index, 1);
+            }
+        };
+        
+        item.getValue = function(form, language) {
+            if (this.hasForm(form)) {
+                return this.getForm(form).getValue(language);
+            }
+        };
+        
+        item.defaultValue = function() {
+            return this.getValue("default", that.Itext.getDefaultLanguage())
+        };
+        
+        item.setDefaultValue = function(val) {
+            this.getOrCreateForm("default").setValue(that.Itext.getDefaultLanguage(), val)
+        };
+        
+        item.isEmpty = function () {
+            if (this.forms) {
+                var nonEmptyItems = formdesigner.util.filterList(this.forms, function (form) {
+                    return !form.isEmpty();
+                });
+                return nonEmptyItems.length === 0;
+            }
+            return true;
+        };
+        
+        
+        item.hasHumanReadableItext = function() {
+            return Boolean(this.hasForm('default') || 
+                           this.hasForm('long')    || 
+                           this.hasForm('short'));
+        };
+        
+        
+        return item; 
+        
+    };
 
     /**
      * The itext holder object. Access all Itext through this gate.
@@ -2657,345 +2724,139 @@ formdesigner.model = function () {
      * @param langName
      */
     that.Itext = (function(langName){
-        var that = {}, defaultLanguage = "en";
-
-                /**
-                 * Data where it's all stored.
-                 * Takes the shape of:
-                 * { someLang: {
-                 *      itextID1 : {
-                 *          long: longVal,
-                 *          image: imageVal,
-                 *          ...
-                 *          },
-                 *      itextID2 : {
-                 *          long: ...
-                 *          ...
-                 *          }
-                 *      },
-                 *   otherLang: {
-                 *    ....
-                 *   }
-                 *
-                 */
-
-        that.data = {};
-
-        function exceptionString(iID, lang, form, val){
-            var s;
-            s = 'iID:' + iID + ', language:' + lang + ', form:' + form;
-            if(val){
-                s += ', value:' + val;
-            }
-            return s;
-        }
-
-        that.addLanguage = function (name) {
-            var hasExistingLanguage = Object.keys(that.data).length !== 0
-            if(!hasExistingLanguage){
-                this.setDefaultLanguage(name);
-            }
-            if(!that.data[name]){
-                if (hasExistingLanguage) {  //clone the default language data.
-                    //assumes a default language is set if hasExistingLanguage
-                    that.data[name] = formdesigner.util.clone(that.data[that.getDefaultLanguage()]);
-                } else {
-                    that.data[name] = {}; //this is the first language so nothing to copy
-                }
-            }else{
-                return; //do nothing, it already exists.
-            }
+        var itext = {}; 
+        
+        var langName = langName || "en";
+        itext.languages = [];
+        
+        
+        itext.getLanguages = function () {
+            return this.languages;
         };
-
-        /**
-         * Returns a list of languages currently being stored in the itext global object.
-         */
-        that.getLanguages = function () {
-            var langs = [], i;
-            for(i in that.data){
-                if(that.data.hasOwnProperty(i)){
-                    langs.push(i);
-                }
-            }
-            return langs;
+        
+        itext.hasLanguage = function (lang) {
+            return this.languages.indexOf(lang) !== -1;
         };
-
-        /**
-         * Not an undoable operation!
-         * Does what it says on the tin.
-         * @param name
-         */
-        that.removeLanguage = function (name) {
-            if(!that.data[name]) {
-                return;
-            }else{
-                delete that.data[name];
-                if(this.getDefaultLanguage() === name){
-                    this.setDefaultLanguage(Object.keys(that.data)[0]); //attempt to set default to first available lang.
-                }
+        
+        itext.addLanguage = function (lang) {
+            if (!this.hasLanguage(lang)) {
+                this.languages.push(lang);
+            } 
+        };
+        
+        itext.removeLanguage = function (lang) {
+            if(this.hasLanguage(lang)) {
+                this.languages.splice(this.languages.indexOf(lang), 1);
+            }
+            // if we removed the default, reset it
+            if (this.getDefaultLanguage() === lang) {
+                this.setDefaultLanguage(this.languages.length > 0 ? this.languages[0] : "");
             }
         };
         
-        that.hasLanguage = function (lang) {
-            return that.data.hasOwnProperty(lang);
+        itext.setDefaultLanguage = function (lang) {
+            this.defaultLanguage = lang;
+        };
+
+        itext.getDefaultLanguage = function () {
+            if (this.defaultLanguage) {
+                return this.defaultLanguage;
+            } else {
+                // dynamically generate default arbitrarily
+                return this.languages.length > 0 ? this.languages[0] : "";
+            }
+            
+            
         };
         
-        that.setDefaultLanguage = function (name) {
-            defaultLanguage = name;
+        itext.items = [];
+        
+        itext.getItems = function () {
+            return this.items;
         };
-
-        that.getDefaultLanguage = function () {
-            return defaultLanguage;
+        
+        itext.getNonEmptyItems = function () {
+            return formdesigner.util.filterList(this.items, function (item) {
+                return !item.isEmpty();
+            });
         };
-
+        
+        itext.getNonEmptyItemIds = function () {
+            return this.getNonEmptyItems().map(function (item) {
+                return item.id;
+            });
+        };
+        
+        itext.hasItem = function (item) {
+            return this.items.indexOf(item) !== -1;
+        };
+        
         /**
          * Add an itext item to the global Itext object.
-         * valObject is a dictionary containing values for the various forms.
-         * Can be any combination of forms. E.g.
-         * valObject = {
-         *  en : {
-         *      short : "some short text",
-         *      image : "jr://file/img.png"
-         *      }
-         *  }
-         *
-         *  If the languages in valObject do not exist, they will
-         *  automatically be added.
-         *
-         *  @param iID is the itext ID of this item.
+         * Item is an ItextItem object.
+         * Does nothing if the item was already in the itext object.
          */
-        that.addItem = function (iID, valObject) {
-            var lang;
-            for(lang in valObject){
-                if(valObject.hasOwnProperty(lang)){
-                    if(!that.data[lang]){
-                        that.data[lang] = {};
-                    }
-                    that.data[lang][iID] = valObject[lang];
-
-                }
-            }
+        itext.addItem = function (item) {
+            if (!this.hasItem(item)) {
+                this.items.push(item);
+            } 
         };
-
-        /**
-         * Get the Itext values for a specific Itext item
-         * for a specified language.
-         * if iID does not exist, null is returned.
-         * If lang does not exist, exception is thrown.
+        
+        /*
+         * Create a new blacnk item and add it to the list.
          */
-        that.getItextVals = function (iID, lang) {
-            if(!that.data[lang]){
-                throw 'Language:' + lang + ' does not exist in Itext! Attempted to retrieve Itext data for iID:' + iID;
-            }
-            if(!that.data[lang][iID]){
-                return {};
-            }else{
-                return that.data[lang][iID];
-            }
-
+        itext.createItem = function (id) {
+            var item = new that.ItextItem({
+                id: id,
+                forms: [new that.ItextForm({
+                            name: "default",
+                        })]
+            });
+            this.addItem(item);
+            return item;
         };
         
         /**
-         * True if there's a defined block for this
+         * Get the Itext Item by ID.
          */
-        that.hasItextBlock = function (iID, lang) {
-            if (that.hasLanguage(lang)) {
-                return that.data[lang].hasOwnProperty(iID);
+        itext.getItem = function (iID) {
+            // this is O[n] when it could be O[1] with some other
+            // data structure. That would require keeping the ids
+            // in sync in multiple places though.
+            // This could be worked around via careful event handling,
+            // but is not implemented until we see slowness.
+            return formdesigner.util.reduceToOne(this.items, function (item) {
+                return item.id === iID;
+            }, "itext id = " + iID);
+        };
+        
+        itext.getOrCreateItem = function (id) {
+            try {
+                return this.getItem(id);
+            } catch (err) {
+                return this.createItem(id); 
             }
-            return false;
+        };
+        
+        itext.removeItem = function (item) {
+            var index = this.items.indexOf(item);
+            if (index !== -1) {
+                this.items.splice(index, 1);
+            } 
         };
         
         /**
-         * Build the list of all itext values based in the form
-         * defined by merging across languages
+         * Generates a flat list of all unique Itext IDs currently in the
+         * Itext object.
          */
-        that.buildItextValueSet = function() {
-            var ret = {}, i, 
-                langs = that.getLanguages(),
-                langdata, question, langNode, form;
-            for (i = 0; i < langs.length; i++) {
-                langdata = that.getLanguageData(langs[i]);
-                for (question in langdata) {
-                    if (langdata.hasOwnProperty(question)) {
-                        for (form in langdata[question]) {
-                            if (langdata[question].hasOwnProperty(form) &&
-                                langdata[question][form].trim()) {
-                                // it exists and is not empty, therefore add it
-                                // to the tree
-                                if (!ret.hasOwnProperty(question)) {
-                                    ret[question] = {};
-                                }
-                                ret[question][form] = null;  //TODO: should this be null?
-                            }                
-                        }
-                    }
-                }
-            }
-            return ret;
+        itext.getAllItemIDs = function () {
+            return this.items.map(function (item) {
+                return item.id;
+            });
         };
+                
         
-        /**
-         * For a given id, get the full formset looking across all languages
-         * 
-         */
-        that.getExhaustiveFormSet = function (id) {
-            var langs = that.getLanguages();
-            var ret = ["default"];
-            var vals, val;
-            for (var i = 0; i < langs.length; i++) {
-                vals = that.getItextVals(id, langs[i]);
-                for (val in vals) {
-                    if (vals.hasOwnProperty(val) && ret.indexOf(val) === -1) {
-                        ret.push(val);
-                    }
-                }
-            }
-            return ret;
-        };
-        /**
-         * If the itext value exists, return it, otherwise return a
-         * default value found elsewhere in the form.
-         */
-        that.getValueOrDefault = function(lang, question, form) {
-            // if it exists, great
-            var val = that.getValue(question, lang, form), 
-                langs = that.getLanguages(), i;
-            if (val && val.trim()){
-                return val;
-            }
-            // if it's not the default, check there
-            if (lang !== that.getDefaultLanguage()) {
-                val = that.getValue(question, that.getDefaultLanguage(), form);
-                if (val && val.trim()) {
-                    return val;
-                }
-            }
-            for (i = 0; i < langs.length; i++) {
-                if (langs[i] !== lang && langs[i] !== that.getDefaultLanguage()) {
-                    val = that.getValue(question, langs[i], form);
-                    if (val && val.trim()) {
-                        return val;
-                    }
-                }
-            }
-        }
         
-        /**
-         * Create a new Itext ID in storage deliberately without a
-         * value (this is usually to trigger the validation mechanism to pick up on
-         * the fact that an Itext ID was specified but that there was no value).
-         * @param iID
-         * @param lang
-         */
-        that.createIIDWithoutVal = function (iID, lang) {
-            if(!lang) {
-                throw "Can't create a new Itext ID in Itext without specifying a language!"
-            }
-
-            if(!iID && lang) {
-                throw "Attempted to create a new Itext ID without specifying one! Language: " + lang;
-            }
-            if(!iID) {
-                throw "Attempted to create a new Itext ID without specifying one!";
-            }
-
-            if(!formdesigner.model.Itext.getLanguageData(lang)){
-                formdesigner.model.Itext.addLanguage(lang);
-            }
-            that.data[lang][iID] = {};
-
-        }
-
-        /**
-         * The 'meat' function.  Set a specific Itext element
-         * by specifying the itext ID, language, form and value.
-         * use form = 'default' or null for the default form.
-         *
-         * Will create the Itext item if none exists.
-         * @param iID
-         * @param lang
-         * @param form
-         * @param val
-         */
-        that.setValue = function (iID, lang, form, val){
-            if(!iID || !lang || typeof form === 'undefined'){
-                throw 'Must specify all arguments for Itext.setValue()!' + exceptionString(iID, lang, form, val);
-            }
-
-            if(!val) {
-                val = '';
-            }
-
-            if(form === null){
-                form = 'default';
-            }
-            if(!that.data[lang]){
-                that.data[lang] = {};
-            }
-            if(!that.data[lang][iID]){
-                that.data[lang][iID] = {};
-            }
-            if(!that.data[lang][iID][form]){
-                that.data[lang][iID][form] = "";
-            }
-            that.data[lang][iID][form] = val;
-            formdesigner.controller.fire({
-                type: 'question-itext-changed',
-                iTextID: iID,
-                language: lang,
-                textForm: form,
-                value: val
-            })
-
-        };
-
-        
-        /**
-         * Must specify all params, use form='default' or null for the default (no special form) form.
-         * Throws exception if iID or lang does not exist. If no data is available for that form,
-         * returns null.
-         * @param iID
-         * @param lang
-         * @param form
-         */
-        that.getValue = function(iID, lang, form){
-            var block = that.getItextVals(iID, lang);
-            
-            if(!form){
-                form = 'default';
-            }
-
-            if(!block[form]){
-                return null;
-            }
-            return block[form];
-        };
-        
-        /**
-         * Gets all the data associated with a language in the form of a
-         * dictionary object.  Structure:
-         * {
-         *      itextID1 : {
-         *          long: longVal,
-         *          image: imageVal,
-         *          ...
-         *          },
-         *      itextID2 : {
-         *          long: ...
-         *          ...
-         *          }
-         *      }
-         * }
-         * @param lang - the string identifier of the language you want the data for.
-         */
-        that.getLanguageData = function (lang) {
-            return that.data[lang];
-        };
-
-        that.getAllData = function () {
-            return that.data;
-        }
-
         /**
          * Goes through the Itext data and verifies that
          * a) a default language is set to something that exists
@@ -3007,219 +2868,32 @@ formdesigner.model = function () {
          *
          * if everything passes will return true
          */
-        that.validateItext = function () {
-            var dLang = this.getDefaultLanguage(),
-                    lang,iID,form,
-                    /**
-                     * Follows form:
-                     * { iID: errorMessage,
-                     *   iID2 : otherErrorMessage,
-                     *   ...
-                     *  }
-                     */
-                    errorIIDs = {};
-
-            function iIDMissing(iID, defLang){
-                return 'Missing Itext ID:' + iID + ' in Default Language:' + defLang;
-            }
-            function iIDFormMissing(iID, form){
-                return 'Missing Special Form:' + form + ' for Itext ID:' + iID;
-            }
-            function iIDTextEmpty(iID) {
-                return 'No Itext Display Data for ID:' + iID;
-            }
+        itext.validateItext = function () {
+            // TODO: fill this back in
+            
+            var dLang = this.getDefaultLanguage();
 
             if(!dLang){
                 throw 'No Default Language set! Aborting validation. You should set one!';
             }
 
-            if(!that.data[dLang]){
+            if(!this.hasLanguage(dLang)){
                 throw 'Default language is set to a language that does not exist in the Itext DB!';
             }
-
-            function isEmpty(ob){
-                var i;
-                for (i in ob) {
-                    if(ob.hasOwnProperty(i)){
-                        return false;
-                    }
-                }
-                return true;
-            }
-            for (lang in that.data) {
-                if (that.data.hasOwnProperty(lang)) {
-                    for (iID in that.data[lang]) {
-                        if (that.data[lang].hasOwnProperty(iID)) {
-                            if (isEmpty(that.data[dLang][iID])) {
-                                errorIIDs[iID] = iIDTextEmpty(iID);
-                            } else {
-                                for (form in that.data[lang][iID]) {
-                                    // The condition here is that there is a property 
-                                    // in a language that is not in the default language
-                                    if (that.data[lang][iID].hasOwnProperty(form) &&
-                                        that.data[lang][iID][form] &&
-                                        !that.data[dLang][iID][form]) {
-                                       errorIIDs[iID] = iIDFormMissing(iID,form);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            if (Object.keys(errorIIDs).length === 0) {
-                return true;
-            } else {
-                return errorIIDs;
-            }
-
         };
-
-        that.getInvalidItextIDs = function () {
-            var valRes, IDs = [], i;
-            valRes = formdesigner.model.Itext.validateItext();
-            for (i in valRes) {
-                if(valRes.hasOwnProperty(i)) {
-                    IDs.push(i);
-                }
-            }
-
-            return IDs;
-        };
-
-        /**
-         * Convenience function takes in a Mug and determines
-         * if there is any kind of itext stored for this mug
-         * that is meant to be viewed by a person (i.e. default, long, short)
-         * If so, return true, if not return false.
-         *
-         * set isHint to true if this query is in reference to hint/help text
-         */
-        that.hasHumanReadableItext = function(mug, isHint){
-            if(!mug.properties.controlElement){
-                return false;
-            }
-
-            var p = mug.properties.controlElement.properties,
-                itextID = isHint ? p.hintItextID : p.labelItextID,
-                ivals = this.getItextVals(itextID,this.getDefaultLanguage());
-
-            if(!ivals) {
-                return false;
-            }
-
-            return Boolean(ivals['default'] || ivals['long'] || ivals['short']);
-        };
-
-        var getHumanReadableItext = function (mug, isHint) {
-            if(!mug.properties.controlElement){
-                return false;
-            }
-
-            if(!formdesigner.model.Itext.hasHumanReadableItext(mug,isHint)) {
-                return null;
-            }
-
-
-            var p = mug.properties.controlElement.properties,
-                itextID = isHint ? p.hintItextID : p.labelItextID,
-                ivals = this.getItextVals(itextID,this.getDefaultLanguage()),
-                retval;
-
-            if(!ivals) {
-                return null;
-            }
-
-            retval = ivals ['default'];
-            if(!retval) {
-                retval = ivals['long'];
-            }
-            if(!retval) {
-                retval = ivals['short'];
-            }
-
-            if(!retval) {
-                retval = null;
-            }
-
-            return retval;
-
-        }
-
-        /**
-         * Renames the itext ID to something new.
-         * @param oldID
-         * @param newID
-         */
-        that.renameItextID = function (oldID, newID) {
-            if ( (!oldID || !newID) || (oldID === newID) ){
-                return;
-            }
-            var langs, i, b;
-            langs = formdesigner.model.Itext.getLanguages();
-            for (i in langs) {
-                if(langs.hasOwnProperty(i)){
-                    if (that.data[langs[i]][oldID]) {
-                        that.data[langs[i]][newID] = that.data[langs[i]][oldID];
-                        delete that.data[langs[i]][oldID];
-                    }
-                }
-            }
-
-        }
-
-        that.removeItext = function (itextID) {
-            if (!itextID) {
-                throw "Can't delete null in Itext. Must specify an ItextID.  In model.Itext.removeItext()";
-            }
-            var langs, i, b;
-            langs = formdesigner.model.Itext.getLanguages();
-            for (i in langs) {
-                if(langs.hasOwnProperty(i)){
-                    delete that.data[langs[i]][itextID];
-                }
-            }
-        }
 
         /**
          * Blows away all data stored in the Itext object
          * and resets it to pristine condition (i.e. as if the FD was freshly launched)
          */
-        that.resetItext = function () {
-            delete that.data;
-            that.data = {};
-            that.addLanguage("en");
-            that.setDefaultLanguage("en");
+        itext.resetItext = function () {
+            delete this.languages;
+            delete this.items;
+            this.languages = [];
+            this.items = [];
+            this.addLanguage("en");
+            this.setDefaultLanguage("en");
         };
-
-        /**
-         * Generates a flat list of all unique Itext IDs currently in the
-         * Itext object.
-         */
-        var getAllItextIDs = function () {
-            var idList = [], langs, iData, lang, id, ids, i;
-            langs = that.getLanguages();
-            iData = that.getAllData()
-
-            //generate list of unique Itext IDs
-            for (i in langs) {
-                if (langs.hasOwnProperty(i)) {
-                    lang = langs[i];
-                    ids = iData[lang];
-                    for (id in ids) {
-                        if (ids.hasOwnProperty(id)) {
-                            if(idList.indexOf(id) === -1) { //only add it if it's not already there.
-                                idList.push(id);
-                            }
-                        }
-                    }
-                }
-            }
-
-            return idList;
-        }
-        that.getAllItextIDs = getAllItextIDs;
 
         /**
          * Takes in a list of Itext IDs that are
@@ -3228,55 +2902,52 @@ formdesigner.model = function () {
          * presently being stored in the Itext Object.
          *
          * For generating a list of useful IDs see:
-         * formdesigner.controller.getListOfItextIDsFromMugs()
+         * formdesigner.controller.getAllNonEmptyItextItemsFromMugs()
          *
          * @param validIDList
          */
         var removeCruftyItext = function (validIDList) {
-            var idList, i, id;
-
-            idList = that.getAllItextIDs();
-            for (i in idList) {
-                if (idList.hasOwnProperty(i)) {
-                    id = idList[i];
-                    if(validIDList.indexOf(id) === -1) {
-                        that.removeItext(id); //remove it from the Itext object
-                    }
-                }
-            }
+            return;
+            // TODO
         }
-        that.removeCruftyItext = removeCruftyItext;
-
+        itext.removeCruftyItext = removeCruftyItext;
 
         /**
          * Remove all Itext associated with the given mug
          * @param mug
          */
-        that.removeMugItext = function (mug) {
-            var labelItext, hintItext;
-            if (mug.properties.controlElement) {
-                //attempt to remove Itext
-                labelItext = mug.properties.controlElement.properties.labelItextID;
-                hintItext = mug.properties.controlElement.properties.hintItextID;
-                if (labelItext) {
-                    that.removeItext(labelItext);
-                }
-                if (hintItext) {
-                    that.removeItext(hintItext);
-                }
-            }
+        itext.removeMugItext = function (mugType) {
+            var labelItext, hintItext, constraintItext;
+            var mug = mugType.mug;
+            if (mug){
+	            if (mug.properties.controlElement) {
+	                //attempt to remove Itext
+	                labelItext = mug.properties.controlElement.properties.labelItextID;
+	                hintItext = mug.properties.controlElement.properties.hintItextID;
+	                if (labelItext) {
+	                    this.removeItem(labelItext);
+	                }
+	                if (hintItext) {
+	                    this.removeItem(hintItext);
+	                }
+	            } 
+	            if (mug.properties.bindElement) {
+	                constraintItext = mug.properties.bindElement.properties.constraintMsgItextID;
+	                if (constraintItext) {
+	                    this.removeItem(constraintItext);
+	                }
+	            }
+	        }
         };
 
 
-        (function init(initLang){
-            that.addLanguage(initLang);
-            that.setDefaultLanguage(initLang);
-        })(langName);
-
+        itext.addLanguage(langName);
+        itext.setDefaultLanguage(langName);
+        
         //make event aware
-        formdesigner.util.eventuality(that);
+        formdesigner.util.eventuality(itext);
 
-        return that;
+        return itext;
     })("en");
 
     /**

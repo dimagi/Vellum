@@ -62,7 +62,7 @@ formdesigner.controller = (function () {
             //nodeID is changed to empty-string (i.e. when the user backspaces
             //the whole value).  This allows us to keep a reference to everything
             //and rename smoothly to the new value the user will ultimately enter.
-            if (val === "" && (widget.propName && (widget.propName === 'nodeID' || widget.propName.indexOf("ItextID") !== -1))) {
+            if (val === "" && (widget.propName === 'nodeID')) {
                 return;
             }
             
@@ -75,42 +75,17 @@ formdesigner.controller = (function () {
         that.on('question-removed', function (e) {
             var mt;
             mt = e.mugType;
-            that.removeMugTypeItext(mt);
-        })
+            formdesigner.model.Itext.removeMugItext(mt);
+        });
 
     };
     that.initFormDesigner = initFormDesigner;
 
-    /**
-     * Removes all Itext associated with the specified
-     * MugType from the Form (the Itext object).s
-     * @param mt
-     */
-    that.removeMugTypeItext = function (mt) {
-        var iID, hID, Itext;
-            Itext = formdesigner.model.Itext;
-
-            if (!mt.properties.controlElement) {
-                return;
-            }
-
-            iID = mt.mug.properties.controlElement.properties.labelItextID;
-            hID = mt.mug.properties.controlElement.properties.hintItextID;
-
-            if (iID) {
-               Itext.removeItext(iID);
-            }
-
-            if(hID) {
-                Itext.removeItext(hID);
-            }
-    }
-
-
+    
     that.setFormSaved = function () {
         FORM_SAVED = true;
         formdesigner.ui.setSaveButtonFormSaved();
-    }
+    };
 
     that.setFormChanged = function () {
         FORM_SAVED = false;
@@ -118,11 +93,11 @@ formdesigner.controller = (function () {
         //update button disabled state.
         formdesigner.ui.setSaveButtonFormUnsaved();
         
-    }
+    };
 
     that.isFormSaved = function () {
         return FORM_SAVED;
-    }
+    };
     
     var setForm = that.setForm = function (aForm) {
         that.form = aForm;
@@ -145,48 +120,43 @@ formdesigner.controller = (function () {
      * for trimming out crufty itext.  See also
      * formdesigner.model.Itext.removeCruftyItext()
      */
-    var getListOfItextIDsFromMugs = function () {
-        var cTree, dTree, treeFunc, thingToGet, cLists=[], dLists=[], mergeLists = [], finalList;
-        //use formdesigner.util.mergeArray
-
-        treeFunc = function (node) {
-            var mt;
-            if(node.isRootNode) {
+    var getAllNonEmptyItextItemsFromMugs = function () {
+        
+        // get all the itext references in the forms
+        var ret = [];
+        var appendItemsIfPresent = function (node) {
+            if (node.isRootNode) {
                 return;
             }
 
-            mt = node.getValue();
+            var mt = node.getValue();
             if(!mt) {
                 throw 'Node in tree without value?!?!'
             }
-
-            if (mt.mug.properties.controlElement) {
-                return mt.mug.properties.controlElement.properties[thingToGet];
-            }
-
-
+            
+            var thingsToGet = ['controlElement/labelItextID', 'controlElement/hintItextID', 
+                               'bindElement/constraintMsgItextID'] ; 
+        
+            var val;            
+            for (var i = 0; i < thingsToGet.length; i++) {
+	            try {
+	                val = mt.getPropertyValue(thingsToGet[i]);
+	                if (val && !val.isEmpty() && ret.indexOf(val) === -1) {
+	                   // it was there and not present so add it to the list
+	                   ret.push(val);
+	                } 
+	            } catch (err) {
+	                // probably just wasn't in the mug
+	            }
+            }    
         }
-
-        cTree = that.form.controlTree;
-        dTree = that.form.dataTree;
-
-        thingToGet = 'labelItextID'; //get all the labelItextIDs
-        cLists[0] = cTree.treeMap(treeFunc);
-        dLists[0] = dTree.treeMap(treeFunc);
-
-        thingToGet = 'hintItextID'; //get all the hintItextIDs
-        cLists[1] = cTree.treeMap(treeFunc);
-        dLists[1] = dTree.treeMap(treeFunc);
-
-        mergeLists[0] = formdesigner.util.mergeArray(cLists[0],dLists[0]); //strip dupes and merge
-        mergeLists[1] = formdesigner.util.mergeArray(cLists[1],dLists[1]); //strip dupes and merge
-
-        finalList = formdesigner.util.mergeArray(mergeLists[0], mergeLists[1]); //merge mergers (and strip dupes ;) )
-
-        return finalList; //give it all back
+        
+        that.form.controlTree.treeMap(appendItemsIfPresent);
+        that.form.dataTree.treeMap(appendItemsIfPresent);
+        return ret; 
 
     };
-    that.getListOfItextIDsFromMugs = getListOfItextIDsFromMugs;
+    that.getAllNonEmptyItextItemsFromMugs = getAllNonEmptyItextItemsFromMugs;
 
     /**
      * Returns a MugType NOT a Mug!
@@ -339,7 +309,7 @@ formdesigner.controller = (function () {
         //show spinner
         $.fancybox.showActivity();
 
-        var validIds = that.getListOfItextIDsFromMugs();
+        var validIds = that.getAllNonEmptyItextItemsFromMugs();
         formdesigner.model.Itext.removeCruftyItext(validIds);
 
         //hide spinner
@@ -780,7 +750,7 @@ formdesigner.controller = (function () {
         createQuestionInDataTree(mugType);
         loadMTEvent.type= "mugtype-loaded";
         loadMTEvent.mugType = mugType;
-        formdesigner.controller.fire(loadMTEvent);
+        that.fire(loadMTEvent);
 
         return mug;
     }
@@ -864,32 +834,25 @@ formdesigner.controller = (function () {
 
     var parseXLSItext = function (str) {
         var rows = str.split('\n'),
-                nRows, nCols, i, j, cells, lang,iID, form, val, Itext;
-        nRows = rows.length;
-        nCols = rows[0].split('\t').length;
+                i, j, cells, lang,iID, form, val, Itext;
+        
+        // TODO: should this be configurable? 
+        var exportCols = ["default", "audio", "image" , "video"];
+                
         Itext = formdesigner.model.Itext;
-        for (i in rows) {
-            if (rows.hasOwnProperty(i)) {
-                cells = rows[i].split('\t');
-                lang = cells[0];
-                iID = cells[1];
-                for (j = 2; j<cells.length ; j++) {
-                    if(cells[j]) {
-                        if(j === 2) {
-                            form = 'default';
-                        } else if (j === 3) {
-                            form = 'audio';
-                        } else if (j === 4) {
-                            form = 'image';
-                        } else if (j === 5) {
-                            form = 'video';
-                        }
-                        val = cells[j];
-                        Itext.setValue(iID,lang,form,val);
-                    }
+        for (i = 0; i < rows.length; i++) {
+            cells = rows[i].split('\t');
+            lang = cells[0];
+            iID = cells[1];
+            for (j = 2; j < cells.length || j < exportCols.length + 2; j++) {
+                if (cells[j]) {
+                    form = exportCols[j - 2];
+                    val = cells[j];
+                    Itext.getOrCreateItem(iID).getOrCreateForm(form).setValue(lang, val);
                 }
             }
         }
+        that.fire({type: "global-itext-changed"});
     };
     
     that.parseXLSItext = parseXLSItext;
@@ -898,40 +861,43 @@ formdesigner.controller = (function () {
         var idata, row, iID, lang, form, val, Itext,
                 out = '';
         Itext = formdesigner.model.Itext;
-        idata = Itext.getAllData();
-
+        
         /**
          * Cleanes Itext so that it fits the csv spec. For now just replaces newlines with ''
          * @param val
          */
-        function cleanItextVal(val) {
-            var newVal;
-            newVal = val.replace(/\n/g, '')
-            return newVal
+        
+        var tabSeparate = function (list) {
+            var cleanVal = function (val) {
+	            return val.replace(/\n/g, '');
+	        };
+	        return list.map(cleanVal).join("\t");
+        };
+        
+        function makeRow (language, item, forms) {
+            var values = forms.map(function (form) {
+                return item.hasForm(form) ? item.getForm(form).getValueOrDefault(language) : "";
+            });
+            var row = [language, item.id].concat(values);
+            return tabSeparate(row);
         }
-        function makeRow (language, id, data) {
-            var row = '', i;
-            row = language + '\t' + id;
-            row += '\t' + (data["default"] ? cleanItextVal(data["default"]) : '');
-            row += '\t' + (data["audio"] ? cleanItextVal(data["audio"]) : '');
-            row += '\t' + (data["image"] ? cleanItextVal(data["image"]) : '');
-            row += '\t' + (data["video"] ? cleanItextVal(data["video"]) : '');
-            row += '\n';
-            return row;
-        }
-
-        for (lang in idata) {
-            if (idata.hasOwnProperty(lang)) {
-                for (iID in idata[lang] ) {
-                    if (idata[lang].hasOwnProperty(iID)) {
-                        out += makeRow(lang, iID, idata[lang][iID])
-                    }
-                }
-
+        
+        var ret = [];
+        // TODO: should this be configurable? 
+        var exportCols = ["default", "audio", "image" , "video"];
+        var languages = Itext.getLanguages();
+        var allItems = Itext.getNonEmptyItems();
+        var language, item, i, j;
+        if (languages.length > 0) {
+            for (i = 0; i < languages.length; i++) {
+                language = languages[i];
+                for (j = 0; j < allItems.length; j++) {
+                    item = allItems[j];
+                    ret.push(makeRow(language, item, exportCols));
+                }       
             }
         }
-
-        return out;
+        return ret.join("\n");
     }
     that.generateItextXLS = generateItextXLS;
 
@@ -1013,7 +979,7 @@ formdesigner.controller = (function () {
                 that.resetFormDesigner();
                 that.parseXML(formString);
                 that.reloadUI();
-            }catch (e) {
+            } catch (e) {
                 formdesigner.fire({
                     type: 'load-form-error',
                     errorObj : e,
@@ -1221,6 +1187,8 @@ formdesigner.controller = (function () {
              * and returns either true, false or null
              * @param attrString - string
              */
+            
+            var Itext = formdesigner.model.Itext;
             function parseRequiredAttribute (attrString) {
                 if (!attrString) {
                     return null;
@@ -1263,16 +1231,14 @@ formdesigner.controller = (function () {
                 
                 var constraintMsg = lookForNamespaced(el, "constraintMsg");
                 
-                var constraintItext;
-                if (constraintMsg) {
-                    constraintItext = getITextReference(constraintMsg);
-                    if (constraintItext) {
-                        attrs.constraintMsgItextID = constraintItext;
-                    } else {
-                        attrs.constraintMsgAttr = constraintMsg;    
-                    }
-                } 
-                
+                var constraintItext = getITextReference(constraintMsg);
+                if (constraintItext) {
+                    attrs.constraintMsgItextID = Itext.getOrCreateItem(constraintItext);
+                } else {
+                    attrs.constraintMsgItextID = Itext.createItem("");
+                    attrs.constraintMsgAttr = constraintMsg;    
+                }
+                                
                 // TODO: parse constraint itext
                 attrs.requiredAttr = parseRequiredAttribute(el.attr('required'));
                 
@@ -1298,7 +1264,12 @@ formdesigner.controller = (function () {
                 mType.properties.dataElement = oldMT.properties.dataElement;
                 mType.mug = mug;
                 mType.mug.properties.dataElement = oldMT.mug.properties.dataElement;
-
+                // clear relevant itext for bind
+                // this is ugly, and should be moved somewhere else
+                if (oldMT.hasBindElement()) {
+                    Itext.removeItem(oldMT.mug.properties.bindElement.properties.constraintMsgItextID);
+                }
+                
                 that.form.replaceMugType(oldMT, mType, 'data');
             }
             bindList.each(eachFunc);
@@ -1391,8 +1362,14 @@ formdesigner.controller = (function () {
 
                         //replace in dataTree
                         that.form.replaceMugType(oldMT,mugType,'data');
+                        
+                        if (oldMT.hasControlElement()) {
+		                    Itext.removeItem(oldMT.mug.properties.controlElement.properties.labelItextID);
+		                    Itext.removeItem(oldMT.mug.properties.controlElement.properties.hintItextID);
+		                }
+		                
                     }
-
+                    
                     //check flags
                     if(!hasBind){
                         mugType.type = mugType.type.replace ('b',''); //strip 'b' from type string
@@ -1410,20 +1387,24 @@ formdesigner.controller = (function () {
                         var labelVal = formdesigner.util.getXLabelValue($(lEl)),
                             labelRef = $(lEl).attr('ref'),
                             cProps = MT.mug.properties.controlElement.properties,
-                            defLang, itextVal;
-                        if(labelRef){
-                            labelRef = labelRef.replace("jr:itext('",'').replace("')",''); //strip itext incantation
+                            defLang, asItext;
+                        if (labelRef){
+                            //strip itext incantation
+                            asItext = getITextReference(labelRef);
+                            if (asItext) {
+                                labelRef = asItext;
+                            }
                         } else {
                             labelRef = formdesigner.util.getNewItextID(MT, false); //assumes this is always successful
                         }
-                        formdesigner.util.setOrRenameItextID(labelRef,MugType,'labelItextID');
-
+                        
+                        Itext.removeItem(cProps.labelItextID);
+                        cProps.labelItextID = Itext.getOrCreateItem(labelRef);
                         if (labelVal) {
                             cProps.label = labelVal;
-                            defLang = Itext.getDefaultLanguage();
-                            itextVal = Itext.getValue(cProps.labelItextID, defLang, 'default');
-                            if(!itextVal || itextVal === labelRef) { //if no default Itext has been set, set it with the default label
-                                Itext.setValue(cProps.labelItextID, defLang, 'default', labelVal);
+                            if(!cProps.labelItextID.isEmpty()) { 
+                                //if no default Itext has been set, set it with the default label
+                                cProps.labelItextID.getOrCreateForm("default").setValue(defLang, labelVal);
                             }
                         }
                     }
@@ -1433,9 +1414,18 @@ formdesigner.controller = (function () {
                             hintRef = $(hEl).attr('ref'),
                             cProps = MT.mug.properties.controlElement.properties;
 
-                        if(hintRef){
-                            hintRef = hintRef.replace("jr:itext('",'').replace("')",''); //strip itext incantation
-                            cProps.hintItextID = hintRef;
+                        //strip itext incantation
+                        var asItext = getITextReference(hintRef);
+                        if (asItext) {
+                            if (cProps.hintItextID) {
+                                // clear the old, presumably auto-generated itext
+                                Itext.removeItem(cProps.hintItextID);
+                            }
+                            cProps.hintItextID = Itext.getOrCreateItem(asItext);
+                        } else {
+                            // couldn't parse the hint as itext.
+                            // just create an empty placeholder for it
+                            cProps.hintItextID = Itext.createItem(""); 
                         }
                         cProps.hintLabel = hintVal;
 
@@ -1552,20 +1542,37 @@ formdesigner.controller = (function () {
         }
 
         function parseItextBlock (itextBlock) {
-            var curLanguage, curIID, curForm, Itext;
-            Itext = formdesigner.model.Itext;
+            var Itext = formdesigner.model.Itext;
             Itext.removeLanguage('en');
 
             function eachLang() {
-                var el = $ (this) ,defaultExternalLang;
-                curLanguage = el.attr('lang');
-                Itext.addLanguage(curLanguage);
-                if(el.attr('default') !== undefined) {
-                    Itext.setDefaultLanguage(curLanguage);
+                
+                var el = $(this), defaultExternalLang;
+                var lang = el.attr('lang');
+                
+                function eachText() {
+                    var textEl = $ (this);
+	                var id = textEl.attr('id');
+	                var item = Itext.getOrCreateItem(id);
+	                
+	                function eachValue() {
+                        var valEl = $(this);
+                        var curForm = valEl.attr('form');
+                        if(!curForm) {
+                            curForm = "default";
+                        }
+                        item.getOrCreateForm(curForm).setValue(lang, formdesigner.util.getXLabelValue(valEl));
+                    };
+	                textEl.children().each(eachValue);
+	            };
+	                
+                Itext.addLanguage(lang);
+                if (el.attr('default') !== undefined) {
+                    Itext.setDefaultLanguage(lang);
                 }
 
                 //if we were passed a list of languages (in order of preference from outside)...
-                if(formdesigner.opts["langs"]) {
+                if (formdesigner.opts["langs"]) {
                     //grab the default language.
                     if(formdesigner.opts["langs"].length > 0) { //make sure there are actually entries in the list
                         defaultExternalLang = formdesigner.opts["langs"][0];
@@ -1577,24 +1584,7 @@ formdesigner.controller = (function () {
                 el.children().each(eachText)
             }
 
-            function eachText() {
-                var textEl = $ (this);
-                curIID = textEl.attr('id');
-                textEl.children().each(eachValue);
-
-
-            }
-
-            function eachValue() {
-                var valEl = $(this);
-                curForm = valEl.attr('form');
-                if(!curForm) {
-                    curForm = null;
-                }
-
-                Itext.setValue(curIID,curLanguage,curForm,formdesigner.util.getXLabelValue(valEl));
-            }
-
+            
             $(itextBlock).children().each(eachLang);
             formdesigner.currentItextDisplayLanguage = formdesigner.model.Itext.getDefaultLanguage();
         }
@@ -1602,7 +1592,7 @@ formdesigner.controller = (function () {
         that.resetParseErrorMsgs();
 
         that.fire('parse-start');
-        try{
+        try {
                 var xmlDoc = $.parseXML(xmlString),
                     xml = $(xmlDoc),
                     binds = xml.find('bind'),
@@ -1642,7 +1632,7 @@ formdesigner.controller = (function () {
             }
             parseItextBlock(itext);
             parseControlTree (controls);
-
+            
 
             that.fire({
                 type: 'parse-finish'
