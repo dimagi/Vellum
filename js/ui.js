@@ -342,7 +342,6 @@ formdesigner.ui = (function () {
 
     var showVisualValidation = function (mugType){
         function setValidationFailedIcon(li, showIcon, message) {
-            console.log("validation update", li, showIcon, message);
             var exists = ($(li).find('.fd-props-validate').length > 0);
             if(exists && showIcon){
                 icon.attr("title", message).addClass("ui-icon");
