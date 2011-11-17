@@ -44,7 +44,17 @@ body{
     padding: 5px;
     /*border: 1px solid black;*/
     margin-top: 0px;
+    vertical-align: middle;
 }
+
+.fd-toolbar > * {
+    display: inline-block;
+}
+
+.ui-state-error a {
+    font-weight: bold;
+}
+
 #fd-trees{
     position:relative;
 }
@@ -85,11 +95,8 @@ body{
     width:280px;
 }
 
-.fd-error {
-    width: 480px;
-    float: left;
-    margin-left:10px;
-    margin-top:5px;
+#fd-notify {
+    padding: .8em;	
 }
 
 #fd-question-properties {
@@ -364,11 +371,12 @@ body{
 }
 
 #fd-question-add {
-    float:left;
+    display: inline-block;
 }
 
 #fd-question-select {
     position:relative;
+    width:280px;
 }
 
 #fd-question-select_chzn {

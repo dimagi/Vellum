@@ -961,9 +961,15 @@ formdesigner.controller = (function () {
             //disable all buttons and inputs
             formdesigner.ui.disableUI();
             showSourceButton.button('enable'); //enable the view source button so the form can be tweaked by hand.
-
-            formdesigner.ui.showParseErrorMessage('Form loading has failed! You can edit the form manually by clicking on the "Edit Source XML" button or go back to load a new form');
-
+            
+            var validator_url = "https://www.commcarehq.org/formtranslate/";
+            var msg = "We're sorry, Vellum cannot load your form.  You can edit your form directly by clicking the " +
+                      '"Edit Source XML" button or go back to download your form. <br>' +
+                      "It is likely that your form contains errors.  You can check to see if " +
+                      "your form is valid by pasting your entire form into the " +
+                      '<a href "' + validator_url + '">Form Validator (link)</a>';
+                       
+            formdesigner.ui.showParseErrorMessage(msg);
 
         }
 
@@ -986,7 +992,20 @@ formdesigner.controller = (function () {
                     form : formString
                 });
                 console.log('E OBJ', e);
-                formdesigner.ui.setDialogInfo(e.toString(), 'ok', function(){formdesigner.ui.hideConfirmDialog();}, 'cancel', function(){formdesigner.ui.hideConfirmDialog();});
+                // hack: don't display the whole invalid XML block if it
+                // was a parse error
+                var msg = e.toString();
+                if (msg.indexOf("Invalid XML") === 0) {
+                    msg = "Parsing Error. Please check that your form is valid XML.";
+                }
+                
+                formdesigner.ui.setDialogInfo(msg, 
+                    'ok', function() {
+                        formdesigner.ui.hideConfirmDialog();
+                    }, 
+                    'cancel', function(){
+                        formdesigner.ui.hideConfirmDialog();
+                    });
                 formdesigner.ui.showConfirmDialog();
             }
 
@@ -1071,6 +1090,9 @@ formdesigner.controller = (function () {
      */
     var parseXML = function (xmlString) {
         var pError, getPErros;
+        // for convenience
+        var Itext = formdesigner.model.Itext;
+        
         pError = that.addParseErrorMsg;
         getPErros = that.getParseErrorMsgs;
         var ParseException = function (msg) {
@@ -1188,7 +1210,6 @@ formdesigner.controller = (function () {
              * @param attrString - string
              */
             
-            var Itext = formdesigner.model.Itext;
             function parseRequiredAttribute (attrString) {
                 if (!attrString) {
                     return null;
@@ -1542,7 +1563,6 @@ formdesigner.controller = (function () {
         }
 
         function parseItextBlock (itextBlock) {
-            var Itext = formdesigner.model.Itext;
             Itext.removeLanguage('en');
 
             function eachLang() {

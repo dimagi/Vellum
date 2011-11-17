@@ -63,25 +63,22 @@ formdesigner.ui = (function () {
     }
 
     var showParseErrorMessage = function (msg) {
-        var div, container;
-        container = $('#fd-ui-container');
-        $('#fd-parse-error').remove(); //if there is already a message
-        div = '<div id="fd-parse-error"></div>';
-        div = $(div);
-        div.append(msg);
-        div.addClass('fd-error');
-        div.addClass('ui-state-error');
-        container.append(div);
-
-    }
+        var container = $('#fd-notify');
+        container.html(msg);
+        container.addClass('ui-state-error');
+        container.show();
+    };
     that.showParseErrorMessage = showParseErrorMessage;
 
     var hideParseErrorMessage = function () {
-        $('#fd-parse-error').hide();
-    }
+        var container = $('#fd-notify');
+        container.html("");
+        container.removeClass("ui-state-error");
+        container.hide();
+    };
     that.hideParseErrorMessage = hideParseErrorMessage;
 
-    function init_toolbar() {4
+    function init_toolbar() {
         var toolbar = $(".fd-toolbar"), select, addbutstr, addbut;
 
         select = $('#fd-question-select');
@@ -1012,9 +1009,8 @@ formdesigner.ui = (function () {
         } else {
             butState = 'disable';
         }
-
-
-        //buttons
+        
+        // buttons
         $('#fd-add-but').button(butState);
         $('#fd-save-button').button(butState);
         $('#fd-remove-button').button(butState); //remove question button
@@ -1024,7 +1020,7 @@ formdesigner.ui = (function () {
         $('#fd-editsource-button').button(butState);
         $('#fd-cruftyItextRemove-button').button(butState);
         //Print tree to console button is not disabled since it's almost always useful.
-
+        
         //inputs
         $('#fd-form-prop-formName-input').prop('enabled', state);
         $('#fd-form-prop-formID-input').prop('enabled', state);
@@ -1035,7 +1031,7 @@ formdesigner.ui = (function () {
         } else {
             $('#fd-question-properties').hide();
         }
-
+        
     }
 
     var disableUI = function () {
@@ -1054,7 +1050,6 @@ formdesigner.ui = (function () {
     function init_modal_dialogs () {
         $( "#fd-dialog-confirm" ).dialog({
 			resizable: false,
-//			height:140,
 			modal: true,
 			buttons: {
 				"Confirm": function() {
