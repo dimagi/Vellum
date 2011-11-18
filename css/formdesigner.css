@@ -49,6 +49,8 @@ body{
 
 .fd-toolbar > * {
     display: inline-block;
+    vertical-align: middle;
+    margin: 1px;
 }
 
 .ui-state-error a {
