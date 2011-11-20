@@ -2881,16 +2881,22 @@ formdesigner.model = function () {
                 throw 'Default language is set to a language that does not exist in the Itext DB!';
             }
         };
+        
+        itext.clear = function () {
+            delete this.languages;
+            delete this.items;
+            this.languages = [];
+            this.items = [];
+            
+        };
+        
 
         /**
          * Blows away all data stored in the Itext object
          * and resets it to pristine condition (i.e. as if the FD was freshly launched)
          */
         itext.resetItext = function () {
-            delete this.languages;
-            delete this.items;
-            this.languages = [];
-            this.items = [];
+            this.clear();
             this.addLanguage("en");
             this.setDefaultLanguage("en");
         };

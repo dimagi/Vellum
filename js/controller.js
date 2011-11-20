@@ -1560,11 +1560,9 @@ formdesigner.controller = (function () {
                 }
             }
             controlsTree.each(eachFunc);
-        }
+        };
 
         function parseItextBlock (itextBlock) {
-            Itext.removeLanguage('en');
-
             function eachLang() {
                 
                 var el = $(this), defaultExternalLang;
@@ -1602,10 +1600,16 @@ formdesigner.controller = (function () {
 
                 //loop through children
                 el.children().each(eachText)
-            }
-
+            };
             
+            Itext.clear();
             $(itextBlock).children().each(eachLang);
+            if (Itext.getLanguages().length === 0) {
+                // there likely wasn't itext in the form. At least
+                // set a default language
+                Itext.addLanguage("en");
+                Itext.setDefaultLanguage("en");
+            } 
             formdesigner.currentItextDisplayLanguage = formdesigner.model.Itext.getDefaultLanguage();
         }
 
