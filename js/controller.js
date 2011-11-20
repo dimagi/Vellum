@@ -1409,24 +1409,23 @@ formdesigner.controller = (function () {
                             labelRef = $(lEl).attr('ref'),
                             cProps = MT.mug.properties.controlElement.properties,
                             defLang, asItext;
+                        var labelItext;
+                        cProps.label = labelVal;
                         if (labelRef){
                             //strip itext incantation
                             asItext = getITextReference(labelRef);
                             if (asItext) {
-                                labelRef = asItext;
+                                labelItext = Itext.getOrCreateItem(asItext);
                             }
                         } else {
-                            labelRef = formdesigner.util.getNewItextID(MT, false); //assumes this is always successful
+                            labelItext = MT.getDefaultLabelItext();
                         }
                         
                         Itext.removeItem(cProps.labelItextID);
-                        cProps.labelItextID = Itext.getOrCreateItem(labelRef);
-                        if (labelVal) {
-                            cProps.label = labelVal;
-                            if(!cProps.labelItextID.isEmpty()) { 
-                                //if no default Itext has been set, set it with the default label
-                                cProps.labelItextID.getOrCreateForm("default").setValue(defLang, labelVal);
-                            }
+                        cProps.labelItextID = labelItext;
+                        if (labelVal && !cProps.labelItextID.isEmpty()) {
+                            //if no default Itext has been set, set it with the default label
+                            cProps.labelItextID.getOrCreateForm("default").setValue(defLang, labelVal);
                         }
                     }
 

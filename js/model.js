@@ -441,45 +441,49 @@ formdesigner.model = function () {
             return Boolean(this.mug.properties.bindElement);
         }
         
-        
-        if (mugType.hasControlElement() && !mugType.mug.properties.controlElement.properties.labelItextID) {
-            // set default itext id/value
-            var getDefaultLabelItextId = function () {
-	            // Default Itext ID
-	            var nodeID = null;
-	            if (mugType.hasBindElement()) { //try for the bindElement nodeID
-	                nodeID = mugType.mug.properties.bindElement.properties.nodeID;
-	            } else if (mugType.hasDataElement()) {
-	                //if nothing, try the dataElement nodeID
-	                nodeID = mugType.mug.properties.dataElement.properties.nodeID;
-	            } else {
-	                nodeID = formdesigner.util.generate_item_label();
-	            }
-	            // finally
-	            return nodeID + "-label";
-	        };
-	        var getDefaultLabelValue = function () {
-		        if (mugType.hasDataElement()) {
-	                return mugType.mug.properties.dataElement.properties.nodeID;
-	            } else if (mugType.hasBindElement()) {
-	                return mugType.mug.properties.bindElement.properties.nodeID;
-	            } else { 
-	                // fall back to the Itext ID
-	                return mugType.mug.properties.controlElement.properties.labelItextID;
-	            } 
-	        };
-            // create a default itext object 
-            // give it a useful initial label
+        mugType.getDefaultLabelItextId = function () {
+            // Default Itext ID
+            var nodeID = null;
+            if (this.hasBindElement()) { //try for the bindElement nodeID
+                nodeID = this.mug.properties.bindElement.properties.nodeID;
+            } else if (this.hasDataElement()) {
+                //if nothing, try the dataElement nodeID
+                nodeID = this.mug.properties.dataElement.properties.nodeID;
+            } else {
+                nodeID = formdesigner.util.generate_item_label();
+            }
+            // finally
+            return nodeID + "-label";
+        };
+        mugType.getDefaultLabelValue = function () {
+            if (this.mug.properties.controlElement.properties.label) {
+                return this.mug.properties.controlElement.properties.label;
+            } 
+            else if (this.hasDataElement()) {
+                return this.mug.properties.dataElement.properties.nodeID;
+            } else if (this.hasBindElement()) {
+                return this.mug.properties.bindElement.properties.nodeID;
+            } else { 
+                // fall back to the Itext ID
+                return this.getDefaultLabelItextId();
+            } 
+        };
+        mugType.getDefaultLabelItext = function () {
             var formData = {};
-	        formData[that.Itext.getDefaultLanguage()] = getDefaultLabelValue();
-	        
-	        mugType.mug.properties.controlElement.properties.labelItextID = new that.ItextItem({
-	            id: getDefaultLabelItextId(),
-	            forms: [new that.ItextForm({
-	                        name: "default",
-	                        data: formData
-	                    })]
-	        });
+            formData[that.Itext.getDefaultLanguage()] = this.getDefaultLabelValue();
+            return new that.ItextItem({
+                id: this.getDefaultLabelItextId(),
+                forms: [new that.ItextForm({
+                            name: "default",
+                            data: formData
+                        })]
+            });
+        };
+        if (mugType.hasControlElement() && !mugType.mug.properties.controlElement.properties.labelItextID) {
+            // set default itext id/values
+            
+            // create a default itext object 
+            mugType.mug.properties.controlElement.properties.labelItextID = mugType.getDefaultLabelItext();
 	        that.Itext.addItem(mugType.mug.properties.controlElement.properties.labelItextID);
 	        
 	        // hint itext
@@ -504,7 +508,7 @@ formdesigner.model = function () {
         mugType.getItext = function () {
             if (this.hasControlElement()) {
                 return this.mug.properties.controlElement.properties.labelItextID;
-            }        
+            } 
         };
         mugType.getHintItext = function () {
             if (this.hasControlElement()) {
