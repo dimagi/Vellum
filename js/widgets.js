@@ -322,12 +322,9 @@ formdesigner.widgets = (function () {
             return input.val();
         };
         
-        widget.save = function () {
-            // override save to reference the itext, rather than
-            // a property of the mug
+        widget.fireChangeEvents = function () {
             item = this.getTextItem();
             if (item) {
-	            item.getForm(this.form).setValue(this.language, this.getValue());
 	            // fire the property changed event(s)
 	            formdesigner.controller.fire({ 
 	               type: "question-itext-changed",
@@ -335,11 +332,28 @@ formdesigner.widgets = (function () {
 	               id: item.id,
 	               form: this.form,
 	               value: this.getValue()
-                });
-                formdesigner.controller.form.fire({ 
-                   type: "form-property-changed",
-                });
+	            });
+	            formdesigner.controller.form.fire({ 
+	               type: "form-property-changed",
+	            });
 	        }
+        };
+        widget.save = function () {
+            // override save to reference the itext, rather than
+            // a property of the mug
+            item = this.getTextItem();
+            if (item) {
+	            item.getForm(this.form).setValue(this.language, this.getValue());
+	            this.fireChangeEvents();
+	        }
+        };
+        
+        // this is special
+        widget.deleteValue = function () {
+            item = this.getTextItem();
+            if (item) {
+                item.removeForm(this.form);
+            }
         };
         
         var input = $("<input />").attr("id", widget.getID()).attr("type", "text");
@@ -356,6 +370,26 @@ formdesigner.widgets = (function () {
         
         var widget = that.baseItextWidget(mugType, language, itemFunc, slug, form);
         
+        // a bit of a hack, only allow deletion for non-default forms
+        if (form !== "default") {
+            // override getUIElement to include the delete button
+            widget.getUIElement = function () {
+	            // gets the whole widget (label + control)
+	            var uiElem = $("<div />").addClass("widget");
+	            uiElem.append(this.getLabel());
+	            uiElem.append(this.getControl());
+	            var deleteButton = $('<button />').addClass("xpath-edit-button").text("Delete").button();
+	            deleteButton.click(function () {
+	                widget.deleteValue();
+	                uiElem.remove();
+	                widget.fireChangeEvents();
+	            });
+	            uiElem.append(deleteButton);
+                return uiElem;
+	        };
+            
+        }
+        
         widget.getDisplayName = function () {
             return this.getType();
         };
@@ -370,6 +404,7 @@ formdesigner.widgets = (function () {
             var formSpecifier = (this.form === "default") ? "" : " - " + this.form;
             return displayName + formSpecifier + " (" + language + ")";
         };
+        
         return widget;
     };
     

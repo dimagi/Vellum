@@ -1299,12 +1299,18 @@ formdesigner.ui = (function () {
 
     var set_event_listeners = function () {
         formdesigner.controller.on("question-itext-changed", function (e) {
-            // update any display values that are affected
+            // Update any display values that are affected
+            // NOTE: This currently walks the whole tree since you may 
+            // be sharing itext IDs. Generally it would be far more
+            // efficient to just do it based off the currently changing
+            // node. Left as a TODO if we have performance problems with
+            // this operation, but the current behavior is more correct.  
             var allMugs = formdesigner.controller.getMugTypeList(true);
             if (formdesigner.currentItextDisplayLanguage === e.language) {
 		        allMugs.map(function (mug) {
 		            var node = $('#' + mug.ufid);
-                    if (mug.getItext().id === e.id && e.form === "default") {
+		            var it = mug.getItext();
+		            if (it && it.id === e.id && e.form === "default") {
 		                if (e.value && e.value !== $('#fd-question-tree').jstree("get_text", node)) {
                             $('#fd-question-tree').jstree('rename_node', node, e.value);
                         }    
