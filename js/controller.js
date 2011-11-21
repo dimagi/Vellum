@@ -962,13 +962,15 @@ formdesigner.controller = (function () {
             formdesigner.ui.disableUI();
             showSourceButton.button('enable'); //enable the view source button so the form can be tweaked by hand.
             
+            // ok to hard code this because it's public
             var validator_url = "https://www.commcarehq.org/formtranslate/";
+            
             var msg = "We're sorry, Vellum cannot load your form.  You can edit your form directly by clicking the " +
                       '"Edit Source XML" button or go back to download your form. <br>' +
                       "It is likely that your form contains errors.  You can check to see if " +
                       "your form is valid by pasting your entire form into the " +
-                      '<a href "' + validator_url + '">Form Validator (link)</a>';
-                       
+                      '<a href="' + validator_url + '">Form Validator (link)</a>';
+            
             formdesigner.ui.showParseErrorMessage(msg);
 
         }
