@@ -392,7 +392,7 @@ formdesigner.controller = (function () {
         }
 
 
-        formdesigner.ui.setTreeValidationIcons();
+        formdesigner.ui.setAllTreeValidationIcons();
 
         that.fire('fd-reload-ui');
 

@@ -624,7 +624,7 @@ formdesigner.util = (function(){
         mug.on('property-changed', function (e) {
             var MT = formdesigner.controller.form.controlTree.getMugTypeFromUFID(e.mugTypeUfid);
             formdesigner.ui.showVisualValidation(MT);
-            formdesigner.ui.setTreeValidationIcons();
+            formdesigner.ui.setTreeValidationIcon(MT);
         });
 
 
@@ -638,7 +638,7 @@ formdesigner.util = (function(){
         form.on('form-property-changed', function (e) {
             var MT = formdesigner.controller.getCurrentlySelectedMugType();
             formdesigner.ui.showVisualValidation(MT);
-            formdesigner.ui.setTreeValidationIcons();
+            formdesigner.ui.setAllTreeValidationIcons();
         });
 
         form.on('form-property-changed', function() {

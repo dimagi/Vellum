@@ -341,7 +341,7 @@ formdesigner.ui = (function () {
         function setValidationFailedIcon(li, showIcon, message) {
             var exists = ($(li).find('.fd-props-validate').length > 0);
             if(exists && showIcon){
-                icon.attr("title", message).addClass("ui-icon");
+                $(li).find('.fd-props-validate').attr("title", message).addClass("ui-icon");
             } else if (exists && !showIcon){
                 $(li).find('.fd-props-validate').removeClass('ui-icon').attr("title", "");
             } else if(!exists && showIcon){
@@ -868,8 +868,26 @@ formdesigner.ui = (function () {
         }
         makeFormProp("Form ID", "formID", formIDFunc, formdesigner.controller.form.formID);
 
-    }
-
+    };
+    
+    
+    var setTreeNodeInvalid = function (uid, msg) {
+        $($('#' + uid)[0]).append('<div class="ui-icon ui-icon-alert fd-tree-valid-alert-icon" title="'+msg+'"></div>')
+    };
+    
+    var setTreeNodeValid = function (uid) {
+        $($('#' + uid)[0]).find(".fd-tree-valid-alert-icon").remove();
+    };
+    
+    that.setTreeValidationIcon = function (mugType) {
+        var validationResult = mugType.validateMug();
+        if (validationResult.status !== 'pass') {
+            setTreeNodeInvalid(mugType.ufid, validationResult.message.replace(/"/g, "'"));
+        } else {
+            setTreeNodeValid(mugType.ufid);
+        }
+    };
+    
     /**
      * Goes through the internal data/controlTrees and determines which mugs are not valid.
      *
@@ -877,7 +895,7 @@ formdesigner.ui = (function () {
      *
      * Will clear icons for nodes that are valid (if they were invalid before)
      */
-    var setTreeValidationIcons = function () {
+    var setAllTreeValidationIcons = function () {
         var dTree, cTree, uiDTree, uiCTree, form,
                 invalidMTs, i, invalidMsg, liID;
 
@@ -893,12 +911,6 @@ formdesigner.ui = (function () {
             tree.find('.fd-tree-valid-alert-icon').remove();
         };
 
-        function appendIcon (id, msg) {
-            $($('#' + i)[0]).append('<div class="ui-icon ui-icon-alert fd-tree-valid-alert-icon" title="'+msg+'"></div>')
-        };
-
-
-
         clearIcons(uiCTree); //clear existing warning icons to start fresh.
         clearIcons(uiDTree); //same for data tree
         invalidMTs = form.getInvalidMugTypeUFIDs();
@@ -907,16 +919,16 @@ formdesigner.ui = (function () {
                 invalidMsg = invalidMTs[i].message.replace(/"/g,"'");
                 //ui tree
                 liID = i;
-                appendIcon (liID, invalidMsg);
+                setTreeNodeInvalid(liID, invalidMsg);
 
                 //data tree
                 liID = i + "_data";
-                appendIcon (liID, invalidMsg);
+                setTreeNodeInvalid(liID, invalidMsg);
             }
         }
 
     };
-    that.setTreeValidationIcons = setTreeValidationIcons;
+    that.setAllTreeValidationIcons = setAllTreeValidationIcons;
 
     var removeMugTypeFromUITree = function (mugType) {
 //        var controlTree, el, ufid;
@@ -1274,7 +1286,7 @@ formdesigner.ui = (function () {
 
     var init_misc = function () {
         controller.on('question-creation', function (e) {
-            setTreeValidationIcons();
+            setAllTreeValidationIcons();
         });
 
         //set prompt when navigating away from the FD
@@ -1538,7 +1550,7 @@ formdesigner.ui = (function () {
 		                var found = false;
 	                    if (value && value instanceof xpathmodels.XPathStringLiteral) {
 		                    for (var i = 0; i < children.length; i++) {
-		                       if (children[i].mug.properties.controlElement.properties.defaultValue == value.value) {
+		                       if (children[i].mug.properties.controlElement.properties.defaultValue === value.value) {
 		                           inputControl.tokenInput("add", formdesigner.util.mugToAutoCompleteUIElement(children[i]));
 		                           found = true;
 		                           break;

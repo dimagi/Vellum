@@ -636,6 +636,12 @@ formdesigner.model = function () {
                 return "Can't have a constraint Itext ID without a constarint";
             }
             return validateItextItem(constraintItext, "Constraint Itext");
+        },
+        defaultValue: function (mugType, mug) {
+            if (/\s/.test(mug.properties.controlElement.properties.defaultValue)) {
+                return "Whitespace in values is not allowed.";
+            } 
+            return "pass";
         }
         
     };
@@ -798,7 +804,8 @@ formdesigner.model = function () {
 		            lstring: 'Item Value',
 		            visibility: 'hidden',
 		            editable: 'w',
-		            presence: 'optional'
+		            presence: 'optional',
+		            validationFunc: validationFuncs.defaultValue
                 },
         
                 tagName: { //internal use
@@ -1284,13 +1291,9 @@ formdesigner.model = function () {
         controlProps.hintLabel.presence = 'notallowed';
         controlProps.hintItextID.presence = 'notallowed';
         
-        
-        controlProps.defaultValue = {
-            lstring: 'Item Value',
-            visibility: 'visible',
-            editable: 'w',
-            presence: 'required'
-        }
+        controlProps.defaultValue.visibility = 'visible';
+        controlProps.defaultValue.presence = 'required';
+         
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
         mType.mug.properties.controlElement.properties.name = "Item";
