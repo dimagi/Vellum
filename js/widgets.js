@@ -375,13 +375,17 @@ formdesigner.widgets = (function () {
             // override getUIElement to include the delete button
             widget.getUIElement = function () {
 	            // gets the whole widget (label + control)
-	            var uiElem = $("<div />").addClass("widget");
+	            var uiElem = $("<div />").addClass("widget").attr("data-form", form);
 	            uiElem.append(this.getLabel());
 	            uiElem.append(this.getControl());
 	            var deleteButton = $('<button />').addClass("xpath-edit-button").text("Delete").button();
 	            deleteButton.click(function () {
 	                widget.deleteValue();
-	                uiElem.remove();
+	                // this is a bit ridiculous but finds the right things to remove
+	                uiElem.parent().parent().children(".itext-language-section")
+                        .children('div[data-form="' + form + '"]').each(function () {
+                        $(this).remove();    
+	                });
 	                widget.fireChangeEvents();
 	            });
 	            uiElem.append(deleteButton);
