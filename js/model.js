@@ -441,20 +441,30 @@ formdesigner.model = function () {
             return Boolean(this.mug.properties.bindElement);
         }
         
-        mugType.getDefaultLabelItextId = function () {
-            // Default Itext ID
-            var nodeID = null;
+        mugType.getDefaultItextRoot = function () {
+            var nodeID, parent;
             if (this.hasBindElement()) { //try for the bindElement nodeID
                 nodeID = this.mug.properties.bindElement.properties.nodeID;
             } else if (this.hasDataElement()) {
-                //if nothing, try the dataElement nodeID
+                // if nothing, try the dataElement nodeID
                 nodeID = this.mug.properties.dataElement.properties.nodeID;
-            } else {
+            } else if (formdesigner.util.isSelectItem(this)) {
+                // if it's a select item, generate based on the parent and value
+                parent = formdesigner.controller.form.controlTree.getParentMugType(this);
+                nodeID = parent.getDefaultItextRoot() + "-" + this.mug.properties.controlElement.properties.defaultValue;
+            } 
+            if (!nodeID) {
+                // all else failing, make a new one
                 nodeID = formdesigner.util.generate_item_label();
             }
-            // finally
-            return nodeID + "-label";
+            return nodeID;
         };
+        
+        mugType.getDefaultLabelItextId = function () {
+            // Default Itext ID
+            return this.getDefaultItextRoot() + "-label";
+        };
+        
         mugType.getDefaultLabelValue = function () {
             if (this.mug.properties.controlElement.properties.label) {
                 return this.mug.properties.controlElement.properties.label;
@@ -465,9 +475,10 @@ formdesigner.model = function () {
                 return this.mug.properties.bindElement.properties.nodeID;
             } else { 
                 // fall back to the Itext ID
-                return this.getDefaultLabelItextId();
+                return formdesigner.util.generate_item_label();
             } 
         };
+        
         mugType.getDefaultLabelItext = function () {
             var formData = {};
             formData[that.Itext.getDefaultLanguage()] = this.getDefaultLabelValue();
@@ -479,25 +490,7 @@ formdesigner.model = function () {
                         })]
             });
         };
-        if (mugType.hasControlElement() && !mugType.mug.properties.controlElement.properties.labelItextID) {
-            // set default itext id/values
-            
-            // create a default itext object 
-            mugType.mug.properties.controlElement.properties.labelItextID = mugType.getDefaultLabelItext();
-	        that.Itext.addItem(mugType.mug.properties.controlElement.properties.labelItextID);
-	        
-	        // hint itext
-	        if (mugType.properties.controlElement.hintItextID.presence !== "notallowed") {
-	            mugType.mug.properties.controlElement.properties.hintItextID = that.Itext.createItem("");
-	        }
-        }
         
-        if (mugType.hasBindElement()) {
-            // constraint msg itext
-            if (mugType.properties.bindElement.constraintMsgItextID.presence !== "notallowed") {
-                mugType.mug.properties.bindElement.properties.constraintMsgItextID = that.Itext.createItem("");
-            }
-        }
         // Add some useful functions for dealing with itext.
         mugType.setItextID = function (val) {
             if (this.hasControlElement()) {
@@ -1457,7 +1450,8 @@ formdesigner.model = function () {
 
             /**
              * Given a mugType, finds the node that the mugType belongs to.
-             * if it is not the current node, will recursively look through children node (depth first search)
+             * if it is not the current node, will recursively look through 
+             * children node (depth first search)
              */
             that.getNodeFromMugType = function (MugType) {
                 if (MugType === null) {
@@ -2064,7 +2058,7 @@ formdesigner.model = function () {
          */
         var createXForm = function () {
             var createDataBlock = function () {
-                //use dataTree.treeMap(func,listStore,afterChildfunc)
+                // use dataTree.treeMap(func,listStore,afterChildfunc)
                 // create func that opens + creates the data tag, that can be recursively called on all children
                 // create afterChildfunc that closes the data tag
                 function mapFunc (node) {
@@ -2960,6 +2954,29 @@ formdesigner.model = function () {
         //make event aware
         formdesigner.util.eventuality(itext);
 
+        itext.updateForMug = function (mugType) {
+            // set default itext id/values
+            if (mugType.hasControlElement()) {
+                // set label if not there
+                if (!mugType.mug.properties.controlElement.properties.labelItextID) {
+		            mugType.mug.properties.controlElement.properties.labelItextID = mugType.getDefaultLabelItext();
+		            that.Itext.addItem(mugType.mug.properties.controlElement.properties.labelItextID);
+	            }
+	            // set hint if legal and not there
+	            if (mugType.properties.controlElement.hintItextID.presence !== "notallowed" &&
+	                !mugType.mug.properties.controlElement.properties.hintItextID) {
+	                mugType.mug.properties.controlElement.properties.hintItextID = that.Itext.createItem("");
+	            }
+	        }
+	        if (mugType.hasBindElement()) {
+	            // set constraint msg if legal and not there
+	            if (mugType.properties.bindElement.constraintMsgItextID.presence !== "notallowed" &&
+	                !mugType.mug.properties.bindElement.properties.constraintMsgItextID) {
+	                mugType.mug.properties.bindElement.properties.constraintMsgItextID = that.Itext.createItem("");
+	            }
+	        }
+	    };
+        
         return itext;
     })("en");
 

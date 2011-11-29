@@ -83,7 +83,6 @@ formdesigner.widgets = (function () {
         };
         
         
-        
         widget.save = function () {
             formdesigner.controller.setMugPropertyValue(this.mug.mug,
 	                                                    this.groupName,
@@ -121,26 +120,37 @@ formdesigner.widgets = (function () {
         // a special text widget that holds itext ids
         var widget = that.textWidget(mugType, path);
         
-        widget.getNodeId = function () {
-            if (this.mug.hasDataElement()) {
-                return this.mug.mug.properties.dataElement.properties.nodeID;
-            } else if (formdesigner.util.isSelectItem(this.mug)) {
-                return this.mug.mug.properties.controlElement.properties.defaultValue;
-            } else {
-                throw "can't get nodeId for " + this.mug;
+        widget.isSelectItem = formdesigner.util.isSelectItem(widget.mug);
+        widget.parentMug = widget.isSelectItem ? formdesigner.controller.form.controlTree.getParentMugType(widget.mug) : null;
+        
+        // a few little hacks to support auto-update of select items
+        widget.getRootId = function () {
+            if (this.isSelectItem) {
+                return this.parentMug.getDefaultItextRoot() + "-";
             }
-        }
+            return "";
+        };
+        
+        widget.getNodeId = function () {
+            if (!this.isSelectItem) {
+                return this.mug.getDefaultItextRoot();
+            } else {
+                var val = this.mug.mug.properties.controlElement.properties.defaultValue; 
+                return val ? val : "null";
+            }
+        };
         
         widget.autoGenerateId = function (nodeId) {
-            return nodeId + "-" + widget.propName.replace("ItextID", "");
-        }
+            return this.getRootId() + nodeId + "-" + widget.propName.replace("ItextID", "");
+        };
         
         widget.setUIValue = function (val) {
             this.getControl().val(val);
         };
+        
         widget.updateAutoId = function () {
             widget.setUIValue(widget.autoGenerateId(widget.getNodeId()));
-        }
+        };
         
         widget.getItextItem = function () {
             return this.itextItem;
@@ -214,7 +224,9 @@ formdesigner.widgets = (function () {
         
         widget.mug.mug.on('property-changed', function (e) {
             // keep the ids in sync if we're in auto mode
-            if (widget.autoMode && e.property === "nodeID") {
+            if (widget.autoMode && 
+                (e.property === "nodeID" || 
+                 (widget.isSelectItem && e.property === "defaultValue"))) {
                 var newVal = widget.autoGenerateId(e.val);
                 if (newVal !== widget.getValue()) {
                     widget.setUIValue(newVal);

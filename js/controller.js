@@ -680,8 +680,14 @@ formdesigner.controller = (function () {
             }
         }
         insertMugTypeIntoForm(that.getCurrentlySelectedMugType(),mugType);
+        // update the itext values
+        formdesigner.model.Itext.updateForMug(mugType);
+        
         createQuestionInUITree(mugType);
         createQuestionInDataTree(mugType);
+        
+        
+        // events
         createQuestionEvent.type = "question-creation";
         createQuestionEvent.mugType = mugType;
         this.fire(createQuestionEvent);
@@ -1385,12 +1391,6 @@ formdesigner.controller = (function () {
 
                         //replace in dataTree
                         that.form.replaceMugType(oldMT,mugType,'data');
-                        
-                        if (oldMT.hasControlElement()) {
-		                    Itext.removeItem(oldMT.mug.properties.controlElement.properties.labelItextID);
-		                    Itext.removeItem(oldMT.mug.properties.controlElement.properties.hintItextID);
-		                }
-		                
                     }
                     
                     //check flags
@@ -1418,12 +1418,15 @@ formdesigner.controller = (function () {
                             asItext = getITextReference(labelRef);
                             if (asItext) {
                                 labelItext = Itext.getOrCreateItem(asItext);
+                            } else {
+                                // this is likely an error, though not sure what we should do here
+                                // for now just populate with the default 
+                                labelItext = MT.getDefaultLabelItext();
                             }
                         } else {
                             labelItext = MT.getDefaultLabelItext();
                         }
                         
-                        Itext.removeItem(cProps.labelItextID);
                         cProps.labelItextID = labelItext;
                         if (labelVal && !cProps.labelItextID.isEmpty()) {
                             //if no default Itext has been set, set it with the default label
@@ -1439,10 +1442,6 @@ formdesigner.controller = (function () {
                         //strip itext incantation
                         var asItext = getITextReference(hintRef);
                         if (asItext) {
-                            if (cProps.hintItextID) {
-                                // clear the old, presumably auto-generated itext
-                                Itext.removeItem(cProps.hintItextID);
-                            }
                             cProps.hintItextID = Itext.getOrCreateItem(asItext);
                         } else {
                             // couldn't parse the hint as itext.
@@ -1450,7 +1449,6 @@ formdesigner.controller = (function () {
                             cProps.hintItextID = Itext.createItem(""); 
                         }
                         cProps.hintLabel = hintVal;
-
                     }
 
                     function parseDefaultValue (dEl, MT) {
@@ -1559,6 +1557,9 @@ formdesigner.controller = (function () {
                     children = $(el).children().not('label').not('value').not('hint');
                     children.each(eachFunc); //recurse down the tree
                 }
+                
+                // update any remaining itext
+                Itext.updateForMug(mType);
             }
             controlsTree.each(eachFunc);
         };
@@ -1656,7 +1657,7 @@ formdesigner.controller = (function () {
                 controls = xml.find('body').children();
             }
             parseItextBlock(itext);
-            parseControlTree (controls);
+            parseControlTree(controls);
             
 
             that.fire({
