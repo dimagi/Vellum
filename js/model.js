@@ -525,7 +525,7 @@ formdesigner.model = function () {
     };
     
     var validateItextItem = function (itextItem, name) {
-        if (formdesigner.util.exists(itextItem)) {
+        if (itextItem) {
 	        var val = itextItem.defaultValue();
 	        if (itextItem.id && !val) {
 	            return "Question has " + name + " ID but no " + name + " label!";
@@ -752,7 +752,7 @@ formdesigner.model = function () {
                         var bindBlock = mug.properties.bindElement.properties;
                         var hasConstraint = (typeof bindBlock.constraintAttr !== 'undefined');
                         var hasConstraintMsg = (bindBlock.constraintMsgAttr || 
-                                                bindBlock.constraintMsgItextID.id);
+                                                (bindBlock.constraintMsgItextID && bindBlock.constraintMsgItextID.id));
                         if (hasConstraintMsg && !hasConstraint) {
                             return 'ERROR: Bind cannot have a Constraint Message with no Constraint!';
                         } else {
