@@ -41,11 +41,8 @@ formdesigner.controller = (function () {
             allMugs.map(function (mt) {
                 formdesigner.util.setStandardMugEventResponses(mt.mug);
             });
-            
-            
-            
-            
         });
+        
         that.on('widget-value-changed', function (e) {
             // When a widget's value changes, do whatever work you need to in 
             // the model/UI to make sure we are in a consistent state.
@@ -1483,7 +1480,7 @@ formdesigner.controller = (function () {
 
                 function insertMTInControlTree (MugType, parentMT) {
                     that.form.controlTree.insertMugType(MugType,'into',parentMT);
-                }
+                };
 
                 //figures out if this control DOM element is a repeat
                 function isRepeat(groupEl) {
@@ -1491,7 +1488,7 @@ formdesigner.controller = (function () {
                         return false;
                     }
                     return $(groupEl).children('repeat').length === 1;
-                }
+                };
 
                 var el = $ ( this ), oldEl,
                     path,
@@ -1544,9 +1541,9 @@ formdesigner.controller = (function () {
                          nodeID = bind;
                     }
                 }
-                if(oldEl){
+                if (oldEl) {
                     mType = classifyAndCreateMugType(nodeID,oldEl);
-                }else {
+                } else {
                     mType = classifyAndCreateMugType(nodeID,el);
                 }
                 populateMug(mType,el);
@@ -1560,7 +1557,7 @@ formdesigner.controller = (function () {
                 
                 // update any remaining itext
                 Itext.updateForMug(mType);
-            }
+            };
             controlsTree.each(eachFunc);
         };
 
