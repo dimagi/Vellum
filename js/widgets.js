@@ -341,7 +341,7 @@ formdesigner.widgets = (function () {
 	            formdesigner.controller.fire({ 
 	               type: "question-itext-changed",
 	               language: this.language,
-	               id: item.id,
+	               item: item,
 	               form: this.form,
 	               value: this.getValue()
 	            });

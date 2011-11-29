@@ -1310,7 +1310,7 @@ formdesigner.ui = (function () {
 		        allMugs.map(function (mug) {
 		            var node = $('#' + mug.ufid);
 		            var it = mug.getItext();
-		            if (it && it.id === e.id && e.form === "default") {
+		            if (it === e.item && e.form === "default") {
 		                if (e.value && e.value !== $('#fd-question-tree').jstree("get_text", node)) {
                             $('#fd-question-tree').jstree('rename_node', node, e.value);
                         }    
