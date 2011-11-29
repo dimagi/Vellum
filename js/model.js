@@ -810,7 +810,7 @@ formdesigner.model = function () {
                 label: {
                     editable: 'w',
                     visibility: 'hidden',
-                    presence: 'required',
+                    presence: 'optional',
                     validationFunc : validationFuncs.label,
                     lstring: "Default Label"
                 },
@@ -895,7 +895,7 @@ formdesigner.model = function () {
                 retBlock.ruleValue = ruleValue;
                 retBlock.objectValue = testingObj;
                 retBlock.blockName = blockName;
-                retBlock.result = 'fail';
+                retBlock.result = 'unchecked';
 
                 if (!testingObj) {
                     return retBlock;
@@ -927,7 +927,7 @@ formdesigner.model = function () {
                     retBlock.testingObj = testingObj;
                 }
 
-                if (ruleValue.validationFunc) {
+                if (retBlock.result !== "fail" && ruleValue.validationFunc) {
                     var funcRetVal = ruleValue.validationFunc(curMugType,curMug);
                     if (funcRetVal === 'pass') {
                         retBlock.result = 'pass';
