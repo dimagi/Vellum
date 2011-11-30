@@ -1649,13 +1649,16 @@ formdesigner.controller = (function () {
             if(data.length === 0) {
                 pError('error', 'No Data block was found in the form.  Please check that your form is valid!');
             }
+            
+            // parse itext first so all the other functions can access it
+            parseItextBlock(itext);
+            
             parseDataTree (data[0]);
             parseBindList (binds);
 
             if(controls.length === 0) {
                 controls = xml.find('body').children();
             }
-            parseItextBlock(itext);
             parseControlTree(controls);
             
 
