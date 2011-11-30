@@ -2333,6 +2333,8 @@ formdesigner.model = function () {
                 // disable this feature
                 // 3. iText nodes that have multiple values in multiple languages 
                 // will be properly set as such.
+                // 4. duplicate itext ids will be automatically updated to create
+                // non-duplicates
                 
                 var Itext = formdesigner.model.Itext;
                 var languages = Itext.getLanguages();
@@ -2421,6 +2423,10 @@ formdesigner.model = function () {
 
             var generateForm = function () {
                 var docString;
+                // first normalize the itext ids so we don't have any
+                // duplicates
+                formdesigner.model.Itext.deduplicateIds();
+                
                 formdesigner.controller.initXMLWriter();
                 var xw = formdesigner.controller.XMLWriter;
 
@@ -2792,6 +2798,22 @@ formdesigner.model = function () {
             return this.getNonEmptyItems().map(function (item) {
                 return item.id;
             });
+        };
+        
+        itext.deduplicateIds = function () {
+            var nonEmpty = this.getNonEmptyItems();
+            var found = [];
+            var counter, item, origId;
+            for (var i = 0; i < nonEmpty.length; i++) {
+                item = nonEmpty[i];
+                origId = item.id;
+                counter = 2;
+                while (found.indexOf(item.id) !== -1) {
+                    item.id = origId + counter;
+                    counter = counter + 1;
+                }
+                found.push(item.id);
+            }
         };
         
         itext.hasItem = function (item) {

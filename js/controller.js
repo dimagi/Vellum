@@ -866,7 +866,7 @@ formdesigner.controller = (function () {
         Itext = formdesigner.model.Itext;
         
         /**
-         * Cleanes Itext so that it fits the csv spec. For now just replaces newlines with ''
+         * Cleans Itext so that it fits the csv spec. For now just replaces newlines with ''
          * @param val
          */
         
@@ -889,6 +889,8 @@ formdesigner.controller = (function () {
         // TODO: should this be configurable? 
         var exportCols = ["default", "audio", "image" , "video"];
         var languages = Itext.getLanguages();
+        // deduplicate
+        Itext.deduplicateIds();
         var allItems = Itext.getNonEmptyItems();
         var language, item, i, j;
         if (languages.length > 0) {
