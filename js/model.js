@@ -455,7 +455,9 @@ formdesigner.model = function () {
             } else if (formdesigner.util.isSelectItem(this)) {
                 // if it's a select item, generate based on the parent and value
                 parent = formdesigner.controller.form.controlTree.getParentMugType(this);
-                nodeID = parent.getDefaultItextRoot() + "-" + this.mug.properties.controlElement.properties.defaultValue;
+                if (parent) {
+                    nodeID = parent.getDefaultItextRoot() + "-" + this.mug.properties.controlElement.properties.defaultValue;
+                }
             } 
             if (!nodeID) {
                 // all else failing, make a new one
