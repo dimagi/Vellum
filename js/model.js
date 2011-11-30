@@ -406,6 +406,10 @@ formdesigner.model = function () {
         if (mugSpec) {
             mug = new Mug(mugSpec);
             if (controlElSpec) {
+                if (formdesigner.util.isSelectItem(mugType) &&
+                    typeof controlElSpec.defaultValue !== 'undefined') {
+                    controlElSpec.defaultValue = formdesigner.util.generate_item_label();
+                }
                 mug.properties.controlElement = new ControlElement(controlElSpec);
             }
             if (dataElSpec) {
@@ -473,8 +477,10 @@ formdesigner.model = function () {
                 return this.mug.properties.dataElement.properties.nodeID;
             } else if (this.hasBindElement()) {
                 return this.mug.properties.bindElement.properties.nodeID;
-            } else { 
-                // fall back to the Itext ID
+            } else if (formdesigner.util.isSelectItem(this)) {
+                return this.mug.properties.controlElement.properties.defaultValue;
+            } else {
+                // fall back to generating an ID
                 return formdesigner.util.generate_item_label();
             } 
         };
