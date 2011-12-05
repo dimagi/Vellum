@@ -2933,21 +2933,24 @@ formdesigner.model = function () {
         };
 
         /**
-         * Takes in a list of Itext IDs that are
-         * actually being used in the form
-         * and deletes all other Itext IDs that are
-         * presently being stored in the Itext Object.
+         * Takes in a list of Itext Items and resets this object to only
+         * include those items. 
+         *
+         * PERMANENTLY DELETES ALL OTHER ITEXT ITEMS FROM THE MODEL
          *
          * For generating a list of useful IDs see:
          * formdesigner.controller.getAllNonEmptyItextItemsFromMugs()
          *
          * @param validIDList
          */
-        var removeCruftyItext = function (validIDList) {
-            return;
-            // TODO
+        
+        var resetItextList = function (validIDList) {
+            this.items = [];
+            for (var i = 0; i < validIDList.length; i++) {
+                this.items.push(validIDList[i]);
+            }
         }
-        itext.removeCruftyItext = removeCruftyItext;
+        itext.resetItextList = resetItextList;
 
         /**
          * Remove all Itext associated with the given mug

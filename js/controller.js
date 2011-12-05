@@ -307,7 +307,7 @@ formdesigner.controller = (function () {
         $.fancybox.showActivity();
 
         var validIds = that.getAllNonEmptyItextItemsFromMugs();
-        formdesigner.model.Itext.removeCruftyItext(validIds);
+        formdesigner.model.Itext.resetItextList(validIds);
 
         //hide spinner
         $.fancybox.hideActivity();
