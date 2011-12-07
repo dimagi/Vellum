@@ -87,7 +87,7 @@ formdesigner.ui = (function () {
         addbut = $('#fd-add-but');
         addbut.button({
             icons:{
-                primary: 'ui-icon-gear'
+                primary: 'ui-icon-plusthick'
             }
         });
 
@@ -148,48 +148,30 @@ formdesigner.ui = (function () {
         })();
 
         (function c_saveForm() {
-            var savebut = $(
-                    '<button id="fd-save-button" class="toolbarButton questionButton">'+
-                'Save Form' +
-              '</button>');
+            var savebut = $('<div id="fd-save-button" class="toolbarButton"/>');
             toolbar.append(savebut);
-
-            savebut.button().click(function () {
-                formdesigner.controller.sendXForm();
-            });
-
+            formdesigner.controller.saveButton.ui.appendTo(savebut);
         })();
 
         (function c_removeSelected() {
             var removebut = $(
-                    '<button id="fd-remove-button" class="toolbarButton questionButton">'+
+                    '<button id="fd-remove-button" class="toolbarButton">'+
                 'Remove Selected' +
               '</button>');
             toolbar.append(removebut);
 
-            removebut.button().click(function () {
+            removebut.button({
+                icons: {
+                    primary: 'ui-icon-minusthick'
+                }
+            }).click(function () {
                 var selected = formdesigner.controller.getCurrentlySelectedMugType();
                 formdesigner.controller.removeMugTypeFromForm(selected);
             });
-
         })();
 
     }
     that.buttons = buttons;
-
-    //Sets a visual indicator that the form needs saving on the 'Save Form' Button
-    that.setSaveButtonFormUnsaved = function () {
-        var saveBut = $('#fd-save-button');
-        saveBut.button('enable');
-        saveBut.button('option', 'icons', {primary:'ui-icon-alert'});
-    }
-
-    //Sets a visual indicator that the form IS saved (on 'Save Form' Button)
-    that.setSaveButtonFormSaved = function () {
-        var saveBut = $('#fd-save-button');
-        saveBut.button('disable');
-        saveBut.button('option', 'icons', {primary:'ui-icon-check'});
-    }
 
     function getDataJSTreeTypes() {
         var jquery_icon_url = formdesigner.iconUrl,
@@ -1042,7 +1024,9 @@ formdesigner.ui = (function () {
         
         // buttons
         $('#fd-add-but').button(butState);
-        $('#fd-save-button').button(butState);
+        // TODO: in making fd-save-button controlled by saveButton, do we need to do anything explicit here?
+//        $('#fd-save-button').button(butState);
+
         $('#fd-remove-button').button(butState); //remove question button
         $('#fd-lang-disp-add-lang-button').button(butState);
         $('#fd-lang-disp-remove-lang-button').button(butState);
@@ -1306,13 +1290,6 @@ formdesigner.ui = (function () {
         controller.on('question-creation', function (e) {
             setAllTreeValidationIcons();
         });
-
-        //set prompt when navigating away from the FD
-        $(window).bind('beforeunload', function () {
-            if(!formdesigner.controller.isFormSaved()){
-                return 'Are you sure you want to exit? All unsaved changes will be lost!';
-            }
-        })
     };
 
     var set_event_listeners = function () {

@@ -8,8 +8,15 @@ formdesigner.controller = (function () {
         curSelMugType = null,
         DEBUG_MODE = false,
         FORM_SAVED = true,
-
-    initFormDesigner = function () {
+        saveButton = SaveButton.init({
+            save: function() {
+                that.sendXForm();
+            },
+            unsavedMessage: 'Are you sure you want to exit? All unsaved changes will be lost!'
+        });
+    that.saveButton = saveButton;
+    
+    var initFormDesigner = function () {
         formdesigner.util.question_counter = 1;
 
         that.curSelUfid = null;
@@ -89,22 +96,12 @@ formdesigner.controller = (function () {
     };
     that.initFormDesigner = initFormDesigner;
 
-    
-    that.setFormSaved = function () {
-        FORM_SAVED = true;
-        formdesigner.ui.setSaveButtonFormSaved();
-    };
-
     that.setFormChanged = function () {
-        FORM_SAVED = false;
-
-        //update button disabled state.
-        formdesigner.ui.setSaveButtonFormUnsaved();
-        
+        saveButton.fire('change');
     };
 
     that.isFormSaved = function () {
-        return FORM_SAVED;
+        return saveButton.state === "saved";
     };
     
     var setForm = that.setForm = function (aForm) {
@@ -157,7 +154,7 @@ formdesigner.controller = (function () {
 	                // probably just wasn't in the mug
 	            }
             }    
-        }
+        };
         
         that.form.controlTree.treeMap(appendItemsIfPresent);
         that.form.dataTree.treeMap(appendItemsIfPresent);
@@ -228,7 +225,7 @@ formdesigner.controller = (function () {
     var getChildren = function (mug) {
         var children = that.form.controlTree.getNodeFromMugType(mug).getChildren();
         return children.map(function (item) { return item.getValue();});
-    }
+    };
     that.getChildren = getChildren;
     
     /**
@@ -257,7 +254,7 @@ formdesigner.controller = (function () {
             }
 
             return mt;
-        }
+        };
 
         cTree = that.form.controlTree;
         dTree = that.form.dataTree;
@@ -351,7 +348,7 @@ formdesigner.controller = (function () {
 
     var initController = function () {
 
-    }
+    };
     that.initController = initController;
 
     /**
@@ -382,7 +379,7 @@ formdesigner.controller = (function () {
             loaderFunc(mt);
 
 
-        }
+        };
         loaderFunc = that.loadMugTypeIntoUI
         tree = that.form.controlTree;
         tree.treeMap(treeFunc);
@@ -414,7 +411,7 @@ formdesigner.controller = (function () {
      * Goes through and grabs all of the data nodes (i.e. nodes that are only data nodes (possibly with a bind) without any
      * kind of control.  Returns a flat list of these nodes (list items are mugTypes).
      */
-    that.getDataNodeList = function(){
+    that.getDataNodeList = function () {
         var treeFunc = function(node){ //the function we will pass to treeMap
             if(!node.getValue() || node.isRootNode){
                 return null;
@@ -429,7 +426,7 @@ formdesigner.controller = (function () {
         };
 
         return  that.form.dataTree.treeMap(treeFunc);
-    }
+    };
 
     var showErrorMessage = function (msg) {
 //        formdesigner.ui.appendErrorMessage(msg);
@@ -737,7 +734,7 @@ formdesigner.controller = (function () {
         formdesigner.controller.fire(loadMTEvent);
 
         return mug;
-    }
+    };
     that.loadMugTypeIntoUI = loadMugTypeIntoUI;
 
 
@@ -767,7 +764,7 @@ formdesigner.controller = (function () {
         that.fire(loadMTEvent);
 
         return mug;
-    }
+    };
     that.loadMugTypeIntoDataUITree = loadMugTypeIntoDataUITree;
 
     that.XMLWriter = null;
@@ -775,7 +772,7 @@ formdesigner.controller = (function () {
         var xw = new XMLWriter( 'UTF-8', '1.0' );
         xw.writeStartDocument();
         that.XMLWriter = xw;
-    }
+    };
     that.initXMLWriter = initXMLWriter;
 
     /**
@@ -842,7 +839,7 @@ formdesigner.controller = (function () {
         } else {
             showFormInLightBox();
         }
-    }
+    };
     that.showSourceXMLDialog = showSourceXMLDialog;
 
 
@@ -914,7 +911,7 @@ formdesigner.controller = (function () {
             }
         }
         return ret.join("\n");
-    }
+    };
     that.generateItextXLS = generateItextXLS;
 
     var showItextDialog = function () {
@@ -958,7 +955,6 @@ formdesigner.controller = (function () {
 
     var loadXForm = function (formString) {
         $.fancybox.showActivity();
-        that.setFormSaved(); //form is being loaded for the first time so by default it is 'saved'
 
         //universal flag for indicating that there's something wrong enough with the form that vellum can't deal.
         formdesigner.controller.formLoadingFailed = false;
@@ -1041,14 +1037,14 @@ formdesigner.controller = (function () {
         },
         500);
 
-    }
+    };
     that.loadXForm = loadXForm;
 
 
     var removeMugTypeByUFID = function (ufid) {
         var MT = that.form.getMugTypeByUFID(ufid);
         that.removeMugTypeFromForm(MT);
-    }
+    };
     that.removeMugTypeByUFID = removeMugTypeByUFID;
 
     var removeMugTypeFromForm = function (mugType) {
@@ -1072,7 +1068,7 @@ formdesigner.controller = (function () {
         removeEvent.mugType = mugType;
         that.fire(removeEvent);
         formdesigner.ui.forceUpdateUI();
-    }
+    };
     that.removeMugTypeFromForm = removeMugTypeFromForm;
 
     /**
@@ -1086,17 +1082,17 @@ formdesigner.controller = (function () {
               type: 'parse-error',
               exceptionData: level + "::" + msg
         });
-    }
+    };
     that.addParseErrorMsg = addParseErrorMsg;
 
     var getParseErrorMsgs = function () {
         return parseErrorMsgs;
-    }
+    };
     that.getParseErrorMsgs = getParseErrorMsgs;
 
     var resetParseErrorMsgs = function () {
         parseErrorMsgs = [];
-    }
+    };
     that.resetParseErrorMsgs = resetParseErrorMsgs;
 
     /**
@@ -1141,7 +1137,7 @@ formdesigner.controller = (function () {
                 // have been valid xpath, but don't deal with it here
             }
             return false;
-        }
+        };
         
         function parseDataTree (dataEl) {
             function parseDataElement (el) {
@@ -1493,7 +1489,7 @@ formdesigner.controller = (function () {
 
                 function insertMTInControlTree (MugType, parentMT) {
                     that.form.controlTree.insertMugType(MugType,'into',parentMT);
-                };
+                }
 
                 //figures out if this control DOM element is a repeat
                 function isRepeat(groupEl) {
@@ -1501,7 +1497,7 @@ formdesigner.controller = (function () {
                         return false;
                     }
                     return $(groupEl).children('repeat').length === 1;
-                };
+                }
 
                 var el = $ ( this ), oldEl,
                     path,
@@ -1570,9 +1566,9 @@ formdesigner.controller = (function () {
                 
                 // update any remaining itext
                 Itext.updateForMug(mType);
-            };
+            }
             controlsTree.each(eachFunc);
-        };
+        }
 
         function parseItextBlock (itextBlock) {
             function eachLang() {
@@ -1592,9 +1588,9 @@ formdesigner.controller = (function () {
                             curForm = "default";
                         }
                         item.getOrCreateForm(curForm).setValue(lang, formdesigner.util.getXLabelValue(valEl));
-                    };
+                    }
 	                textEl.children().each(eachValue);
-	            };
+	            }
 	                
                 Itext.addLanguage(lang);
                 if (el.attr('default') !== undefined) {
@@ -1612,7 +1608,7 @@ formdesigner.controller = (function () {
 
                 //loop through children
                 el.children().each(eachText)
-            };
+            }
             
             Itext.clear();
             $(itextBlock).children().each(eachLang);
@@ -1685,7 +1681,7 @@ formdesigner.controller = (function () {
             throw e;
         }
         
-    }
+    };
     that.parseXML = parseXML;
 
     /**
@@ -1862,18 +1858,10 @@ formdesigner.controller = (function () {
         data = JSON.stringify(recurse(trees[0].rootNode),null,'\t');
 
         return data;
-    }
+    };
 
 
     var sendXForm = function (url) {
-        function successFunc (data, textStatus, jqXHR) {
-            that.setFormSaved();
-            formdesigner.ui.hideConfirmDialog();
-            formdesigner.fire({
-                type: 'form-saved',
-                response: data
-            });
-        }
         if (!url) {
             url = formdesigner.saveUrl;
         }
@@ -1890,10 +1878,19 @@ formdesigner.controller = (function () {
         $('body').ajaxStop(formdesigner.ui.hideConfirmDialog);
 
         formdesigner.XFORM_STRING = that.form.createXForm();
-        jQuery.post(url, {xform: formdesigner.XFORM_STRING}, successFunc);
-
-
-    }
+        saveButton.ajax({
+            type: "POST",
+            url: url,
+            data: {xform: formdesigner.XFORM_STRING},
+            success: function (data) {
+                formdesigner.ui.hideConfirmDialog();
+                formdesigner.fire({
+                    type: 'form-saved',
+                    response: data
+                });
+            }
+        });
+    };
     that.sendXForm = sendXForm;
 
     /**
@@ -1917,7 +1914,7 @@ formdesigner.controller = (function () {
         resetControllerInternal();
         formdesigner.model.reset();
         formdesigner.ui.resetUI();
-    }
+    };
     
     // tree drag and drop stuff, used by xpath
     var handleTreeDrop = function(source, target) {
