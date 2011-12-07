@@ -16,7 +16,7 @@ var validateCallbackFunc = function (testDescription) {
 };
 
 $(document).ready(function(){
-    formdesigner.launch();
+    formdesigner.launch({langs: ["en"]});
     var testXformBuffer = {};
     var testFormNames = [
         "Follow-up a Household Referral.xml",
@@ -119,8 +119,17 @@ $(document).ready(function(){
                                 if(mug.properties.bindElement){ //set bindElement.nodeID to same as dataElement.nodeID
                                     mug.properties.bindElement.properties.nodeID = mug.properties[i].properties[j];
                                 }
-                            }else{
-                                mug.properties[i].properties[j] = randomString();
+                            } else {
+                                // hack for itext to properly be set
+                                if (j.indexOf("ItextID") !== -1) {
+                                    mug.properties[i].properties[j] = formdesigner.model.ItextItem({
+                                        id: randomString(),
+                                    })
+                                    mug.properties[i].properties[j].setDefaultValue(randomString());
+                                } else {
+                                    console.log(typeof mug.properties[i].properties[j]);
+                                    mug.properties[i].properties[j] = randomString();
+                                }
                             }
                         }
 
@@ -368,8 +377,9 @@ start();
         
         var validateItext = function (node, slug) {
             node.id = "some-" + slug + "-id";
+            node.setDefaultValue("");
 	        equal(MugType.validateMug(myMug).status, "fail", "Mug with a " + slug + " id but no text fails.");
-	        node.getForm("default").setValue("en", slug + " value");
+	        node.setDefaultValue("en", slug + " value");
 	        equal(MugType.validateMug(myMug).status, "pass", "Mug with a " + slug + " id and text passes.");
             node.id = "";
 	        equal(MugType.validateMug(myMug).status, "fail", "Mug with a " + slug + " text but no id fails.");
@@ -823,8 +833,11 @@ start();
             getFormFromServerAndPlaceInBuffer(cruftyForm);
             cruftyForm = testXformBuffer[cruftyForm];
 
-            var cleanIDs = ["question1", "question2", "question3", "question4", "question5"];
-            var crufyIDs = ["question1", "question2", "question3", "question4", "question5", "cough", "TB_positive", "fever", "skin_infection", "wound_infection", "hiv_positive", "BP", "diabetes", "danger_sign_preg_mother", "preg_mother-TT", "preg_mother-ante_natal", "birth_registration"];
+            var cleanIDs = ["question1-label", "question2-label", "question3-label", "question4-label", "question5-label"];
+            
+            var crufyIDs = ["question1-label", "question2-label", "question3-label", "question4-label", "question5-label",
+                            "cough", "TB_positive", "fever", "skin_infection", "wound_infection", "hiv_positive", "BP", 
+                            "diabetes", "danger_sign_preg_mother", "preg_mother-TT", "preg_mother-ante_natal", "birth_registration"];
 
             //Test the clean form
 
