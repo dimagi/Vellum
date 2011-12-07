@@ -2738,14 +2738,11 @@ formdesigner.model = function () {
      * - audio
      * - hint
      *
-     * @param langName
      */
-    that.Itext = (function(langName){
+    that.Itext = (function() {
         var itext = {}; 
         
-        var langName = langName || "en";
         itext.languages = [];
-        
         
         itext.getLanguages = function () {
             return this.languages;
@@ -2928,10 +2925,13 @@ formdesigner.model = function () {
          * Blows away all data stored in the Itext object
          * and resets it to pristine condition (i.e. as if the FD was freshly launched)
          */
-        itext.resetItext = function () {
+        itext.resetItext = function (langs) {
             this.clear();
-            this.addLanguage("en");
-            this.setDefaultLanguage("en");
+            if (langs && langs.length > 0) {
+                for (var i = 0; i < langs.length; i++) {
+                    this.addLanguage(langs[i]);
+                }
+            }
         };
 
         /**
@@ -2983,9 +2983,6 @@ formdesigner.model = function () {
         };
 
 
-        itext.addLanguage(langName);
-        itext.setDefaultLanguage(langName);
-        
         //make event aware
         formdesigner.util.eventuality(itext);
 
@@ -3013,7 +3010,7 @@ formdesigner.model = function () {
 	    };
         
         return itext;
-    })("en");
+    })();
 
     /**
      * Called during a reset.  Resets the state of all
@@ -3021,7 +3018,7 @@ formdesigner.model = function () {
      */
     that.reset = function () {
         that.form = new Form();
-        formdesigner.model.Itext.resetItext();
+        formdesigner.model.Itext.resetItext(formdesigner.opts.langs);
         formdesigner.controller.setForm(that.form);
     };
 

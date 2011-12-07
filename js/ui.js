@@ -1949,8 +1949,8 @@ formdesigner.launch = function (opts) {
         formdesigner.staticPrefix = "";
     }
 
-    formdesigner.saveUrl = opts["saveUrl"];
-    formdesigner.loadMe = opts["form"];
+    formdesigner.saveUrl = opts.saveUrl;
+    formdesigner.loadMe = opts.form;
     
     formdesigner.iconUrl = opts.iconUrl ? opts.iconUrl : "css/smoothness/images/ui-icons_888888_256x240.png";
 

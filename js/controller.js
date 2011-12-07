@@ -21,8 +21,19 @@ formdesigner.controller = (function () {
         formdesigner.ui.init();
         that.setCurrentlySelectedMugType(null);
         
-        formdesigner.currentItextDisplayLanguage = formdesigner.opts.langs ? formdesigner.opts.langs[0] : formdesigner.model.Itext.getDefaultLanguage();
-
+        if (formdesigner.opts.langs && formdesigner.opts.langs.length > 0) {
+            // override the languages with whatever is passed in
+            for (var i = 0; i < formdesigner.opts.langs.length; i++) {
+                formdesigner.model.Itext.addLanguage(formdesigner.opts.langs[i]);
+            }
+            formdesigner.model.Itext.setDefaultLanguage(formdesigner.opts.langs[0]);
+        } else if (formdesigner.model.Itext.languages.length === 0) {
+            formdesigner.model.Itext.addLanguage("en");
+        }
+        
+        formdesigner.currentItextDisplayLanguage = formdesigner.opts.displayLanguage || 
+                                                   formdesigner.model.Itext.getDefaultLanguage();
+        
         that.on('question-creation', function () {
            that.setFormChanged(); //mark the form as 'changed'
         });
