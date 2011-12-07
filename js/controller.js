@@ -1416,7 +1416,7 @@ formdesigner.controller = (function () {
                         var labelVal = formdesigner.util.getXLabelValue($(lEl)),
                             labelRef = $(lEl).attr('ref'),
                             cProps = MT.mug.properties.controlElement.properties,
-                            defLang, asItext;
+                            asItext;
                         var labelItext;
                         cProps.label = labelVal;
                         if (labelRef){
@@ -1428,15 +1428,17 @@ formdesigner.controller = (function () {
                                 // this is likely an error, though not sure what we should do here
                                 // for now just populate with the default 
                                 labelItext = MT.getDefaultLabelItext();
+                                Itext.addItem(labelItext);
                             }
                         } else {
                             labelItext = MT.getDefaultLabelItext();
+                            Itext.addItem(labelItext);
                         }
                         
                         cProps.labelItextID = labelItext;
                         if (labelVal && !cProps.labelItextID.isEmpty()) {
                             //if no default Itext has been set, set it with the default label
-                            cProps.labelItextID.getOrCreateForm("default").setValue(defLang, labelVal);
+                            cProps.labelItextID.setDefaultValue(labelVal);
                         }
                     }
 
@@ -1596,7 +1598,7 @@ formdesigner.controller = (function () {
                 if (el.attr('default') !== undefined) {
                     Itext.setDefaultLanguage(lang);
                 }
-
+                
                 //if we were passed a list of languages (in order of preference from outside)...
                 if (formdesigner.opts["langs"]) {
                     //grab the default language.
@@ -1611,13 +1613,20 @@ formdesigner.controller = (function () {
             }
             
             Itext.clear();
+            if (formdesigner.opts.langs && formdesigner.opts.langs.length > 0) {
+	            // override the languages with whatever is passed in
+	            for (var i = 0; i < formdesigner.opts.langs.length; i++) {
+	                formdesigner.model.Itext.addLanguage(formdesigner.opts.langs[i]);
+	            }
+	            formdesigner.model.Itext.setDefaultLanguage(formdesigner.opts.langs[0]);
+            }
             $(itextBlock).children().each(eachLang);
             if (Itext.getLanguages().length === 0) {
-                // there likely wasn't itext in the form. At least
+                // there likely wasn't itext in the form or config. At least
                 // set a default language
                 Itext.addLanguage("en");
                 Itext.setDefaultLanguage("en");
-            } 
+            }
             formdesigner.currentItextDisplayLanguage = formdesigner.model.Itext.getDefaultLanguage();
         }
 
