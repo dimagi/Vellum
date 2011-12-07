@@ -1,4 +1,4 @@
-SaveButton = {
+var SaveButton = {
     /*
         options: {
             save: "Function to call when the user clicks Save",
@@ -7,14 +7,14 @@ SaveButton = {
     */
     init: function (options) {
         var button = {
-            $save: $('<span/>').text(COMMCAREHQ.SaveButton.message.SAVE).click(function () {
+            $save: $('<span/>').text(SaveButton.message.SAVE).click(function () {
                 button.fire('save');
             }).button(),
-            $retry: $('<span/>').text(COMMCAREHQ.SaveButton.message.RETRY).click(function () {
+            $retry: $('<span/>').text(SaveButton.message.RETRY).click(function () {
                 button.fire('save');
             }).button(),
-            $saving: $('<span/>').text(COMMCAREHQ.SaveButton.message.SAVING).button().button('disable'),
-            $saved: $('<span/>').text(COMMCAREHQ.SaveButton.message.SAVED).button().button('disable'),
+            $saving: $('<span/>').text(SaveButton.message.SAVING).button().button('disable'),
+            $saved: $('<span/>').text(SaveButton.message.SAVED).button().button('disable'),
             ui: $('<div/>').css({textAlign: 'right'}),
             setStateWhenReady: function (state) {
                 if (this.state === 'saving') {
@@ -59,7 +59,7 @@ SaveButton = {
                 options.error = function (data) {
                     that.nextState = null;
                     that.setState('retry');
-                    alert(COMMCAREHQ.SaveButton.message.ERROR_SAVING);
+                    alert(SaveButton.message.ERROR_SAVING);
                     error.apply(this, arguments);
                 };
                 $.ajax(options);
@@ -82,7 +82,7 @@ SaveButton = {
     },
     initForm: function ($form, options) {
         var url = $form.attr('action'),
-            button = COMMCAREHQ.SaveButton.init({
+            button = SaveButton.init({
                 unsavedMessage: options.unsavedMessage,
                 save: function () {
                     this.ajax({
@@ -109,3 +109,27 @@ SaveButton = {
         ERROR_SAVING: 'There was an error saving'
     }
 };
+
+var eventize = function (that) {
+    'use strict';
+    var events = {};
+    that.on = function (tag, callback) {
+        if (events[tag] === undefined) {
+            events[tag] = [];
+        }
+        events[tag].push(callback);
+        return that;
+    };
+    that.fire = function (tag, e) {
+        var i;
+        if (events[tag] !== undefined) {
+            for (i = 0; i < events[tag].length; i += 1) {
+                console.log(events[tag][i]);
+                events[tag][i].apply(that, [e]);
+            }
+        }
+        return that;
+    };
+    return that;
+};
+
