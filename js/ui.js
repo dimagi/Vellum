@@ -91,14 +91,32 @@ formdesigner.ui = (function () {
             }
         });
 
-        function findq () {
+        function addQuestion () {
             var selVal, qID,qType;
             selVal = $('#fd-question-select').val();
             qID = $('#fd-question-select').find('[value*="'+selVal+'"]').attr('id');
             qType = qID.split('-')[2];
-            formdesigner.controller.createQuestion(qType);
+            try {
+                formdesigner.controller.createQuestion(qType);
+            } catch (e) {
+                if (e.name === "IllegalMove") {
+                    if (qType == "item") {
+                        alert("You can't do that. Select items can only be added to Single Select or Multi-Select Questions.");
+                    } else {
+                        alert("Sorry that question type can't be added to the currently selected question.");
+                    }
+                } else if (e.name === "NoNodeFound") {
+                    // this is the error that gets raised when you add to a select item.
+                    // kinda sketch but more user friendly
+                    alert("You can't add questions to Select Items. Select something else before adding your question.");
+                } else {
+                    // we don't know what went wrong here.
+                    throw e;
+                }
+                
+            }
         }
-        addbut.click(findq);
+        addbut.click(addQuestion);
 
         select.chosen();
 

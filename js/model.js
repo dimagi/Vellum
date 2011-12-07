@@ -1532,7 +1532,8 @@ formdesigner.model = function () {
              */
             that.findParentNode = function (node) {
                 if (!node) {
-                    throw "No node specified, can't find 'null' in tree!";
+                    throw {name: "NoNodeFound",
+                           message: "No node specified, can't find 'null' in tree!"};
                 }
                 var i, parent = null;
                 if (!children || children.length === 0) {
@@ -1759,7 +1760,8 @@ formdesigner.model = function () {
             var refNode, refNodeSiblings, refNodeIndex, refNodeParent, node;
             
             if (!formdesigner.controller.checkMoveOp(mugType, position, refMugType, treeType)) {
-                throw 'Illegal Tree move requested! Doing nothing instead.';
+                throw {name: "IllegalMove",
+                       message: 'Illegal Tree move requested! Doing nothing instead.'};
             }
 
             if (position !== null && typeof position !== 'string') {
