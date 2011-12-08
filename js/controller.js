@@ -1053,13 +1053,16 @@ formdesigner.controller = (function () {
         Itext = formdesigner.model.Itext;
         formdesigner.ui.removeMugTypeFromUITree(mugType);
 
-        children = formdesigner.controller.form.controlTree.getNodeFromMugType(mugType).getChildrenMugTypes();
-        for (i in children) {
-            if(children.hasOwnProperty(i)) {
-                removeMugTypeFromForm(children[i]); //recursively remove MugTypes.
-            }
+        var fromTree = formdesigner.controller.form.controlTree.getNodeFromMugType(mugType);
+        if (fromTree) {
+	        children = formdesigner.controller.form.controlTree.getNodeFromMugType(mugType).getChildrenMugTypes();
+	        for (i in children) {
+	            if(children.hasOwnProperty(i)) {
+	                removeMugTypeFromForm(children[i]); //recursively remove MugTypes.
+	            }
+	        }
         }
-
+        
         Itext.removeMugItext(mugType.mug);
 
         that.form.dataTree.removeMugType(mugType);
