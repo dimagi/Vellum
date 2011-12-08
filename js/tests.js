@@ -123,11 +123,10 @@ $(document).ready(function(){
                                 // hack for itext to properly be set
                                 if (j.indexOf("ItextID") !== -1) {
                                     mug.properties[i].properties[j] = formdesigner.model.ItextItem({
-                                        id: randomString(),
+                                        id: formdesigner.util.generate_item_label(),
                                     })
                                     mug.properties[i].properties[j].setDefaultValue(randomString());
                                 } else {
-                                    console.log(typeof mug.properties[i].properties[j]);
                                     mug.properties[i].properties[j] = randomString();
                                 }
                             }
@@ -687,6 +686,11 @@ start();
             mugC = mugTC.mug;
         formdesigner.controller.resetFormDesigner();
 
+        var mugs = [mugTA, mugTB, mugTC];
+        for (var i = 0; i < mugs.length; i++) {
+            giveMugFakeValues(mugs[i].mug, mugs[i]);
+            
+        }
         mugA.properties.controlElement.properties.labelItextID.setDefaultValue('group1 itext');
         mugB.properties.controlElement.properties.labelItextID.setDefaultValue('question1 itext');
         mugC.properties.controlElement.properties.labelItextID.setDefaultValue('question2 itext');
@@ -855,6 +859,8 @@ start();
 
         asyncTest("Test default language setting", function () {
                         formdesigner.controller.resetFormDesigner();
+            var preLangs = formdesigner.opts.langs; 
+            formdesigner.opts.langs = [];
             var form = 'form_with_3_languages.xml';
 
             var Itext = formdesigner.model.Itext;
@@ -869,14 +875,16 @@ start();
 
             window.setTimeout(function () {
                 start();
+                console.log("def", Itext.getDefaultLanguage());
                 equal(Itext.getDefaultLanguage(), 'th', "Language was correctly set to 'th'");
 
                 Itext.setDefaultLanguage('sw');
                 equal(Itext.getDefaultLanguage(), 'sw', "Language was correctly set to 'sw'");
-
-
-
+                // reset langs back
+                formdesigner.opts.langs = preLangs;                
             },777);
+            
+            
         });
 
         asyncTest("Test default language by using external language list init option", function () {
@@ -888,9 +896,9 @@ start();
             getFormFromServerAndPlaceInBuffer(form);
             form = testXformBuffer[form];
 
-            var langs = ["sw", "th", "en"];
-            formdesigner.opts = {"langs" : langs}; //fake the mechanism by which options are usually passed in by the launcher
-                                        // see formdesigner.launch() in ui.js
+            var preLangs = formdesigner.opts.langs;
+            formdesigner.opts.langs = ["sw", "th", "en"]; //fake the mechanism by which options are usually passed in by the launcher
+                                                   // see formdesigner.launch() in ui.js
             c.loadXForm(form);
 
             window.setTimeout(function () {
@@ -903,8 +911,7 @@ start();
                 var grepVal = grep(xmlString,"default=").trim();
                 equal(grepVal, '<translation lang="sw" default="">', "default attr was correctly set");
 
-                delete formdesigner.opts.langs;
-                formdesigner.opts["langs"] = [];
+                formdesigner.opts.langs = preLangs;
 start();
 
             },777);
