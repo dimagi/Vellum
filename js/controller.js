@@ -1422,7 +1422,7 @@ formdesigner.controller = (function () {
                         
                         var newLabelItext = function (mugType) {
                             var item = formdesigner.model.ItextItem({
-				                id: mugType.getDefaultLabelItextId(),
+				                id: mugType.getDefaultLabelItextId()
 				            });
 				            Itext.addItem(item);
 				            return item;
