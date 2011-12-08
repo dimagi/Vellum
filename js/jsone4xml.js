@@ -50,9 +50,6 @@ var e4xmlJsonClass = {
     // Returns:     JavaScript object
     xml2obj: function(xml) {
         var obj = this.toObj(xml);
-        if (xml.name().uri && obj) {
-            obj["@xmlns"] = xml.name().uri;
-        } 
         obj[ROOT_TAG] = xml.name().localName;
         return obj
     },
@@ -60,9 +57,10 @@ var e4xmlJsonClass = {
     // Param "xml": E4X XML object
     // Param "tab": Tab or indent string for pretty output formatting omit or use empty string "" to supress.
     // Returns:     JSON string
-    xml2json: function(xml) {
+    xml2json: function(xml, tab) {
         var obj = this.xml2obj(xml);
         var json = this.toJson(obj, xml.name().localName, "\t");
+        if (!tab) tab = "";
         return "{\n" + tab + (tab ? json.replace(/\t/g, tab) : json.replace(/\t|\n/g, "")) + "\n}";
     },
 
@@ -141,16 +139,22 @@ var e4xmlJsonClass = {
         }
     }, 
     // Internal methods
-    toObj: function(xml) {
-
+    toObj: function(xml, expectedNamespace) {
         var attributes = xml.@*;
-
+            
+        var actualNamespace = xml.name().uri;
+        var addNamespace = (actualNamespace && actualNamespace !== expectedNamespace);
+        
         // base case, a simple node
-        if (attributes.length() == 0 && !this.hasChildren(xml)) {
+        if (attributes.length() == 0 && !this.hasChildren(xml) && !addNamespace) {
             return (xml || "").toString();
         }
         
         var o = {};
+        
+        if (addNamespace) {
+            o["@" + "xmlns"] = actualNamespace;
+        }
         
         // process attributes
         if (attributes.length() > 0) {
@@ -169,9 +173,9 @@ var e4xmlJsonClass = {
                     if (!o[children[i].name().localName]) {
                         o[children[i].name().localName] = []; 
                     }
-                    o[children[i].name().localName][o[children[i].name().localName].length] = this.toObj(children[i]);
+                    o[children[i].name().localName][o[children[i].name().localName].length] = this.toObj(children[i], actualNamespace);
                 } else {
-                    o[children[i].name().localName] = this.toObj(children[i]);
+                    o[children[i].name().localName] = this.toObj(children[i], actualNamespace);
                 }
             }
         } 

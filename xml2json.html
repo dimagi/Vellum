@@ -7,7 +7,7 @@
             var updateUI = function() {
                 try {
                     var toParse =  new XML(document.getElementById('form').value);
-                    var res = e4xmlJsonClass.xml2obj(toParse);
+                    var res = e4xmlJsonClass.xml2json(toParse);
                     console.log(res);
                     document.getElementById("json-output").innerHTML = res.toString();
                 } catch (err) {
