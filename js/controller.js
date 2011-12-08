@@ -1419,6 +1419,15 @@ formdesigner.controller = (function () {
                             asItext;
                         var labelItext;
                         cProps.label = labelVal;
+                        
+                        var newLabelItext = function (mugType) {
+                            var item = formdesigner.model.ItextItem({
+				                id: mugType.getDefaultLabelItextId(),
+				            });
+				            Itext.addItem(item);
+				            return item;
+                        };
+                        
                         if (labelRef){
                             //strip itext incantation
                             asItext = getITextReference(labelRef);
@@ -1427,18 +1436,21 @@ formdesigner.controller = (function () {
                             } else {
                                 // this is likely an error, though not sure what we should do here
                                 // for now just populate with the default 
-                                labelItext = MT.getDefaultLabelItext();
-                                Itext.addItem(labelItext);
+                                labelItext = newLabelItext(MT);
                             }
                         } else {
-                            labelItext = MT.getDefaultLabelItext();
-                            Itext.addItem(labelItext);
+                            labelItext = newLabelItext(MT);
                         }
                         
                         cProps.labelItextID = labelItext;
-                        if (labelVal && !cProps.labelItextID.isEmpty()) {
+                        if (cProps.labelItextID.isEmpty()) {
                             //if no default Itext has been set, set it with the default label
-                            cProps.labelItextID.setDefaultValue(labelVal);
+                            if (labelVal) {
+                                cProps.labelItextID.setDefaultValue(labelVal);
+                            } else {
+                                // or some sensible deafult
+                                cProps.labelItextID.setDefaultValue(MT.getDefaultLabelValue());
+                            }
                         }
                     }
 
