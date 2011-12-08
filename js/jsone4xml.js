@@ -34,7 +34,13 @@ var e4xmlJsonClass = {
     // abstract out the logging functionality.  it's not beautiful, but 
     // this at leasts provides a single point to change it (you still
     // have to edit the code, unfortunately)
-    log_func: log,
+    log_func: function (x) {
+        try {
+            console.log(x);
+        } catch (err) {
+            console.log("" + x);
+        }
+    },
     
     hello: function() {
         this.log_func("hello world!");
@@ -293,4 +299,4 @@ var e4xmlJsonClass = {
     }
 };
 
-exports.e4xmlJsonClass = e4xmlJsonClass;
+// exports.e4xmlJsonClass = e4xmlJsonClass;
