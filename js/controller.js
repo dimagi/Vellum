@@ -17,8 +17,9 @@ formdesigner.controller = (function () {
     that.saveButton = saveButton;
     
     var initFormDesigner = function () {
+        xpathmodels.DEBUG_MODE = DEBUG_MODE;
         formdesigner.util.question_counter = 1;
-
+        
         that.curSelUfid = null;
         // ui.questionTree.empty();
         // ui.dataTree.empty();
