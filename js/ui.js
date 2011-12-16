@@ -1852,21 +1852,7 @@ formdesigner.ui = (function () {
 	               getValidationSummary().text("Validation Failed! Please fix all errors before leaving this page. " + results[1]).removeClass("success").addClass("error");
 	           }
 	        });
-	        var validateButton = $('<button />').text("Validate").button().appendTo(mainPane);
-            var validationSummary = $("<div />").attr("id", "fd-xpath-validation-summary").appendTo(mainPane);
-	        validateButton.click(function() {
-                var results = validateCurrent();
-                if (results[0]) {
-                    if (results[1]) {
-                        validationSummary.text("Validation Succeeded! " + results[1].toString());
-                    } else {
-                        validationSummary.text("Nothing to validate.");
-                    }
-                    validationSummary.removeClass("error").addClass("success");
-                } else {
-                    validationSummary.text("Validation Failed! " + results[1]).removeClass("success").addClass("error");
-                }
-	        });
+	        var validationSummary = $("<div />").attr("id", "fd-xpath-validation-summary").appendTo(mainPane);
         }
         
         if (editorPane.children().length === 0) {
