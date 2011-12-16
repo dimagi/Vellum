@@ -452,12 +452,22 @@ formdesigner.ui = (function () {
              * the node label in the jstree (UITree) should be updated to reflect that change
              */
             
-            function updateSaveState () {
-                var mug = mugType.mug;
-                mug.on('property-changed', function (e) {
-                    formdesigner.controller.setFormChanged();
-                });
-            };
+            // this mainly updates the save button
+            mugType.mug.on('property-changed', function (e) {
+                formdesigner.controller.setFormChanged();
+            });
+            
+            // update the question tree (only if it's a data node, and only if
+            // it has changed)
+            mugType.mug.on('property-changed', function (e) {
+                if (e.property === 'nodeID' && e.element === 'dataElement') {
+                    var node = $('#' + e.mugTypeUfid);
+                    if (mugType.typeName === "Data Node" && e.val &&
+                        e.val !== $('#fd-question-tree').jstree("get_text", node)) {
+	                    $('#fd-question-tree').jstree('rename_node', node, e.val);
+	                }
+	            }
+            });
 
             function updateDataViewLabels () {
                 var mug, util, dataJSTree;
@@ -476,7 +486,6 @@ formdesigner.ui = (function () {
                 });
             };
             
-            updateSaveState();
             updateDataViewLabels();
 
         }
@@ -1315,6 +1324,7 @@ formdesigner.ui = (function () {
             }
             
         });
+           
         formdesigner.controller.on("global-itext-changed", function (e) {
             // update any display values that are affected
             var allMugs = formdesigner.controller.getMugTypeList(true);
