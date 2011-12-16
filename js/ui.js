@@ -97,7 +97,8 @@ formdesigner.ui = (function () {
             qID = $('#fd-question-select').find('[value*="'+selVal+'"]').attr('id');
             qType = qID.split('-')[2];
             try {
-                formdesigner.controller.createQuestion(qType);
+                var newMug = formdesigner.controller.createQuestion(qType);
+                that.selectMugTypeInUI(newMug);
             } catch (e) {
                 if (e.name === "IllegalMove") {
                     if (qType == "item") {

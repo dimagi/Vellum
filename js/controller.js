@@ -705,7 +705,7 @@ formdesigner.controller = (function () {
             formdesigner.ui.getQuestionJSTree().jstree("select_node", $('#' + oldSelected.ufid));
         }
 
-        return mug;
+        return mugType;
 
     };
     that.createQuestion = createQuestion;
