@@ -622,7 +622,7 @@ formdesigner.util = (function(){
 
         //Update the status of the indicator icons indicating where validation has failed
         mug.on('property-changed', function (e) {
-            var MT = formdesigner.controller.form.controlTree.getMugTypeFromUFID(e.mugTypeUfid);
+            var MT = formdesigner.controller.getMTFromFormByUFID(e.mugTypeUfid);
             formdesigner.ui.showVisualValidation(MT);
             formdesigner.ui.setTreeValidationIcon(MT);
         });
