@@ -8,6 +8,10 @@ Using/Testing the FormDesigner is easy.  Clone the repo and serve it through a w
 The super easy way
 ~~~~~~~~~~~~~~~~~~
 1. Clone the repo
+2. Initialize submodule (http://github.com/dimagi/js-xpath.git):
+        $ git submodule init
+3. Update submodule:
+        $ git submodule update
 2. Download Mongoose: http://code.google.com/p/mongoose/
 3. Place the mongoose exe file in the root of the repo and execute
 4. Open browser and go to http://localhost:8080 (for tests go to http://localhost:8080/test.html)
