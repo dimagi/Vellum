@@ -1838,7 +1838,7 @@ formdesigner.ui = (function () {
             });
             
             // shared UI
-            var doneButton = $('<button />').text("Done").button().appendTo(mainPane);
+            var doneButton = $('<button />').text("Save").button().appendTo(mainPane);
 	        doneButton.click(function() {
 	           getExpressionInput().val(getExpressionFromUI());
 	           var results = validateCurrent();
