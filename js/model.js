@@ -471,14 +471,13 @@ formdesigner.model = function () {
             return this.getDefaultItextRoot() + "-label";
         };
         
+        /*
+         * Gets a default label, auto-generating if necessary
+         */
         mugType.getDefaultLabelValue = function () {
             if (this.mug.properties.controlElement.properties.label) {
                 return this.mug.properties.controlElement.properties.label;
             } 
-            else if (this.properties.controlElement.label.presence == "optional") {
-                // if the label is optional just return an empty string for the default
-                return "";
-            }
             else if (this.hasDataElement()) {
                 return this.mug.properties.dataElement.properties.nodeID;
             } else if (this.hasBindElement()) {
@@ -491,9 +490,22 @@ formdesigner.model = function () {
             } 
         };
         
-        mugType.getDefaultLabelItext = function () {
+        /*
+         * Gets the actual label, either from the control element or an empty
+         * string if not found.
+         */
+        mugType.getLabelValue = function () {
+            if (this.mug.properties.controlElement.properties.label) {
+                return this.mug.properties.controlElement.properties.label;
+            } else {
+                return "";
+            } 
+            
+        };
+        
+        mugType.getDefaultLabelItext = function (defaultValue) {
             var formData = {};
-            formData[that.Itext.getDefaultLanguage()] = this.getDefaultLabelValue();
+            formData[that.Itext.getDefaultLanguage()] = defaultValue;
             return new that.ItextItem({
                 id: this.getDefaultLabelItextId(),
                 forms: [new that.ItextForm({
@@ -591,8 +603,8 @@ formdesigner.model = function () {
             }
             if (hasLabel) {
                 return 'pass';
-            } else if (!hasLabel && !hasItext && (mugType.properties.controlElement.label.presence == 'optional' || 
-                       mugType.properties.controlElement.labelItextID.presence == 'optional')) {
+            } else if (!hasLabel && !hasItext && (mugType.properties.controlElement.label.presence === 'optional' || 
+                       mugType.properties.controlElement.labelItextID.presence === 'optional')) {
                 //make allowance for questions that have label/labelItextID set to 'optional'
                 return 'pass';
             } else if (hasLabelItextID && hasItext) {
@@ -2987,32 +2999,42 @@ formdesigner.model = function () {
         };
 
 
-        //make event aware
-        formdesigner.util.eventuality(itext);
-
-        itext.updateForMug = function (mugType) {
+        itext.updateForNewMug = function(mugType) {
+            // for new mugs, generate a label
+            return this.updateForMug(mugType, mugType.getDefaultLabelValue());
+        };
+        
+        itext.updateForExistingMug = function(mugType) {
+            // for existing, just use what's there
+            return this.updateForMug(mugType, mugType.getLabelValue());
+        };
+        
+        itext.updateForMug = function (mugType, defaultLabelValue) {
             // set default itext id/values
             if (mugType.hasControlElement()) {
                 // set label if not there
                 if (!mugType.mug.properties.controlElement.properties.labelItextID) {
-		            mugType.mug.properties.controlElement.properties.labelItextID = mugType.getDefaultLabelItext();
-		            that.Itext.addItem(mugType.mug.properties.controlElement.properties.labelItextID);
+		            mugType.mug.properties.controlElement.properties.labelItextID = mugType.getDefaultLabelItext(defaultLabelValue);
+		            this.addItem(mugType.mug.properties.controlElement.properties.labelItextID);
 	            }
 	            // set hint if legal and not there
 	            if (mugType.properties.controlElement.hintItextID.presence !== "notallowed" &&
 	                !mugType.mug.properties.controlElement.properties.hintItextID) {
-	                mugType.mug.properties.controlElement.properties.hintItextID = that.Itext.createItem("");
+	                mugType.mug.properties.controlElement.properties.hintItextID = this.createItem("");
 	            }
 	        }
 	        if (mugType.hasBindElement()) {
 	            // set constraint msg if legal and not there
 	            if (mugType.properties.bindElement.constraintMsgItextID.presence !== "notallowed" &&
 	                !mugType.mug.properties.bindElement.properties.constraintMsgItextID) {
-	                mugType.mug.properties.bindElement.properties.constraintMsgItextID = that.Itext.createItem("");
+	                mugType.mug.properties.bindElement.properties.constraintMsgItextID = this.createItem("");
 	            }
 	        }
 	    };
         
+        //make event aware
+        formdesigner.util.eventuality(itext);
+
         return itext;
     })();
 

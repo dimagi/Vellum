@@ -687,7 +687,7 @@ formdesigner.controller = (function () {
         }
         insertMugTypeIntoForm(that.getCurrentlySelectedMugType(),mugType);
         // update the itext values
-        formdesigner.model.Itext.updateForMug(mugType);
+        formdesigner.model.Itext.updateForNewMug(mugType);
         
         createQuestionInUITree(mugType);
         createQuestionInDataTree(mugType);
@@ -1584,7 +1584,7 @@ formdesigner.controller = (function () {
                 }
                 
                 // update any remaining itext
-                Itext.updateForMug(mType);
+                Itext.updateForExistingMug(mType);
             }
             controlsTree.each(eachFunc);
         }
