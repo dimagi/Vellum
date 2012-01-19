@@ -475,6 +475,10 @@ formdesigner.model = function () {
             if (this.mug.properties.controlElement.properties.label) {
                 return this.mug.properties.controlElement.properties.label;
             } 
+            else if (this.properties.controlElement.label.presence == "optional") {
+                // if the label is optional just return an empty string for the default
+                return "";
+            }
             else if (this.hasDataElement()) {
                 return this.mug.properties.dataElement.properties.nodeID;
             } else if (this.hasBindElement()) {
@@ -587,7 +591,8 @@ formdesigner.model = function () {
             }
             if (hasLabel) {
                 return 'pass';
-            } else if (!hasLabel && !hasItext && (mugType.properties.controlElement.label.presence == 'optional' || mugType.properties.controlElement.labelItextID.presence == 'optional')) {
+            } else if (!hasLabel && !hasItext && (mugType.properties.controlElement.label.presence == 'optional' || 
+                       mugType.properties.controlElement.labelItextID.presence == 'optional')) {
                 //make allowance for questions that have label/labelItextID set to 'optional'
                 return 'pass';
             } else if (hasLabelItextID && hasItext) {
@@ -1368,8 +1373,7 @@ formdesigner.model = function () {
         mType.mug = mug;
         mType.mug.properties.controlElement.properties.name = "Group";
         mType.mug.properties.controlElement.properties.tagName = "group";
-
-
+        
         vResult = mType.validateMug();
 //        if(vResult.status !== 'pass'){
 //            formdesigner.util.throwAndLogValidationError(vResult,mType,mType.mug);
