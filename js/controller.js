@@ -300,7 +300,7 @@ formdesigner.controller = (function () {
 			element: element,
 			val: val,
 			mugUfid: myMug.ufid,
-			mugTypeUfid: mugType.ufid,
+			mugTypeUfid: mugType.ufid
         });
     };
 
@@ -320,7 +320,7 @@ formdesigner.controller = (function () {
 
         //hide spinner
         $.fancybox.hideActivity();
-    }
+    };
     that.removeCruftyItext = removeCruftyItext;
 
     /**
@@ -381,11 +381,11 @@ formdesigner.controller = (function () {
 
 
         };
-        loaderFunc = that.loadMugTypeIntoUI
+        loaderFunc = that.loadMugTypeIntoUI;
         tree = that.form.controlTree;
         tree.treeMap(treeFunc);
 
-        loaderFunc = that.loadMugTypeIntoDataUITree
+        loaderFunc = that.loadMugTypeIntoDataUITree;
         tree = that.form.dataTree;
         tree.treeMap(treeFunc);
 
@@ -564,11 +564,11 @@ formdesigner.controller = (function () {
         insertPosition = "into"; //data nodes can always have children.
 
         if (that.getCurrentlySelectedMugType()) {
-            curSelMugElData = $('#' + that.getCurrentlySelectedMugType().ufid + '_data') //get corresponding Data Element
+            curSelMugElData = $('#' + that.getCurrentlySelectedMugType().ufid + '_data'); //get corresponding Data Element
             oldSelectedMugEl = curSelMugElData;
             curSelMugElQuestion = ('#' + that.getCurrentlySelectedMugType().ufid); //remember what is selected in the question tree.
             if (curSelMugElData.length === 0) {
-                var curParent = that.form.controlTree.getParentMugType()
+                var curParent = that.form.controlTree.getParentMugType();
                 if(curParent) {
                     curSelMugElData = $('#' + curParent.ufid + '_data');
                 } else { //parent is root of tree
@@ -1222,12 +1222,12 @@ formdesigner.controller = (function () {
         }
 
         function parseBindList (bindList) {
+
             /**
              * Parses the required attribute string (expecting either "true()" or "false()" or nothing
              * and returns either true, false or null
              * @param attrString - string
              */
-            
             function parseRequiredAttribute (attrString) {
                 if (!attrString) {
                     return null;
@@ -1241,6 +1241,29 @@ formdesigner.controller = (function () {
                     return null;
                 }
             }
+
+            /**
+             * Takes in a path and converts it to an absolute path (if it isn't one already)
+             * @param path - a relative or absolute nodeset path
+             * @param rootNodeName - the name of the model root (used to create the absolute path)
+             * @return absolute nodeset path.
+             */
+            function processPath (path, rootNodeName) {
+                var newPath;
+                var parsed = xpath.parse(path);
+                if (!(parsed instanceof xpathmodels.XPathPathExpr)) {
+                    return null;
+                }
+
+                if (parsed.initial_context == xpathmodels.XPathInitialContextEnum.RELATIVE) {
+                    parsed.steps.splice(0, 0, xpathmodels.XPathStep({axis: "child", test: rootNodeName}));
+                    parsed.initial_context = xpathmodels.XPathInitialContextEnum.ROOT;
+                }
+                newPath = parsed.toXPath();
+                return newPath
+            }
+
+            formdesigner.processPath = processPath;
 
             function eachFunc () {
                 var el = $(this),
@@ -1282,11 +1305,12 @@ formdesigner.controller = (function () {
                 attrs.requiredAttr = parseRequiredAttribute(el.attr('required'));
                 
                 attrs.preload = lookForNamespaced(el, "preload");
-                attrs.preloadParams = lookForNamespaced(el, "preload");
+                attrs.preloadParams = lookForNamespaced(el, "preloadParams");
                 
                 bindElement = new formdesigner.model.BindElement(attrs);
                 mug.properties.bindElement = bindElement;
 
+                path = processPath(path,that.form.dataTree.getRootNode().getID());
                 oldMT = that.getMugByPath(path,'data');
                 if(!oldMT && attrs.nodeset) {
                     oldMT = that.form.getMugTypeByIDFromTree(
