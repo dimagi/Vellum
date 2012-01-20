@@ -687,7 +687,7 @@ formdesigner.controller = (function () {
         }
         insertMugTypeIntoForm(that.getCurrentlySelectedMugType(),mugType);
         // update the itext values
-        formdesigner.model.Itext.updateForMug(mugType);
+        formdesigner.model.Itext.updateForNewMug(mugType);
         
         createQuestionInUITree(mugType);
         createQuestionInDataTree(mugType);
@@ -1107,12 +1107,13 @@ formdesigner.controller = (function () {
      * @param xmlString
      */
     var parseXML = function (xmlString) {
-        var pError, getPErros;
+        var pError;
+        
         // for convenience
         var Itext = formdesigner.model.Itext;
         
-        pError = that.addParseErrorMsg;
-        getPErros = that.getParseErrorMsgs;
+        var pError = that.addParseErrorMsg;
+        
         var ParseException = function (msg) {
             this.name = 'XMLParseException';
             this.message = msg;
@@ -1463,7 +1464,7 @@ formdesigner.controller = (function () {
                                 labelItext = Itext.getOrCreateItem(asItext);
                             } else {
                                 // this is likely an error, though not sure what we should do here
-                                // for now just populate with the default 
+                                // for now just populate with the default
                                 labelItext = newLabelItext(MT);
                             }
                         } else {
@@ -1607,7 +1608,7 @@ formdesigner.controller = (function () {
                 }
                 
                 // update any remaining itext
-                Itext.updateForMug(mType);
+                Itext.updateForExistingMug(mType);
             }
             controlsTree.each(eachFunc);
         }
