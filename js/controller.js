@@ -94,6 +94,11 @@ formdesigner.controller = (function () {
             formdesigner.model.Itext.removeMugItext(mt);
         });
 
+
+        that.on('parse-error', function (e) {
+            formdesigner.ui.showParseErrorMessage(e.exceptionData);
+        });
+
     };
     that.initFormDesigner = initFormDesigner;
 
@@ -1320,7 +1325,7 @@ formdesigner.controller = (function () {
                     )[0];
                 }
                 if(!oldMT){
-                    pError ('warning', "Bind Node [" + nodeID + "] found but has no associated Data node. This bind node will be discarded!");
+                    pError ('warning', "Bind Node [" + path + "] found but has no associated Data node. This bind node will be discarded!");
 //                    throw 'Parse error! Could not find Data MugType associated with this bind!'; //can't have a bind without an associated dataElement.
                     return;
                 }
@@ -2005,6 +2010,8 @@ formdesigner.controller = (function () {
     
     //make controller event capable
     formdesigner.util.eventuality(that);
+
+
 
     return that;
 })();

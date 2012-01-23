@@ -60,7 +60,7 @@ formdesigner.ui = (function () {
      */
     var hideMessage = function () {
         $('#fd-props-message').hide();
-    }
+    };
 
     var showParseErrorMessage = function (msg) {
         var container = $('#fd-notify');
