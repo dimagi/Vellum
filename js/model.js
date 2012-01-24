@@ -475,7 +475,7 @@ formdesigner.model = function () {
          * Gets a default label, auto-generating if necessary
          */
         mugType.getDefaultLabelValue = function () {
-            if (this.mug.properties.controlElement.properties.label) {
+            if (this.hasControlElement() && this.mug.properties.controlElement.properties.label) {
                 return this.mug.properties.controlElement.properties.label;
             } 
             else if (this.hasDataElement()) {

@@ -1074,8 +1074,12 @@ start();
         start();
     });
 
-    function getMTFromEl(el) {
+    function getMTFromControlTree(el) {
         return formdesigner.controller.form.controlTree.getMugTypeFromUFID(el.attr('id'));
+    }
+
+    function getMTFromDataTree(el) {
+        return formdesigner.controller.form.dataTree.getMugTypeFromUFID(el.attr('id'));
     }
 
     module("UI Tests");
@@ -1093,7 +1097,7 @@ start();
         //build form
         addQuestionThroughUI("Text Question");
         jstree.jstree('select_node',lastCreatedNode);
-        curMugType = getMTFromEl(lastCreatedNode);
+        curMugType = getMTFromControlTree(lastCreatedNode);
         mugProps = curMugType.mug.properties;
         cEl = mugProps.controlElement.properties;
         iID = cEl.labelItextID;
@@ -1102,7 +1106,7 @@ start();
         //add group
         addQuestionThroughUI("Group");
         jstree.jstree('select_node',lastCreatedNode,true);
-        curMugType = getMTFromEl(lastCreatedNode);
+        curMugType = getMTFromControlTree(lastCreatedNode);
         groupMT = curMugType;
         mugProps = curMugType.mug.properties;
         cEl = mugProps.controlElement.properties;
@@ -1116,7 +1120,7 @@ start();
         //add another text question
         addQuestionThroughUI("Text Question");
         jstree.jstree('select_node',lastCreatedNode,true);
-        curMugType = getMTFromEl(lastCreatedNode);
+        curMugType = getMTFromControlTree(lastCreatedNode);
         mugProps = curMugType.mug.properties;
         cEl = mugProps.controlElement.properties;
         iID = cEl.labelItextID;
@@ -1205,7 +1209,7 @@ start();
         
 
 
-        curMugType = getMTFromEl($(lastCreatedNode));
+        curMugType = getMTFromControlTree($(lastCreatedNode));
         ui.selectMugTypeInUI(curMugType);
         equal(curMugType.typeName, "Text Question", "Is Question created through UI a text type question?");
         workingField = $('#dataElement-nodeID');
@@ -1361,16 +1365,16 @@ start();
 
         jstree.bind('create_node.jstree',function(e,data){
             lastCreatedNode = data.rslt.obj;
-        })
+        });
 
         var xmlString, xml;
         //build form
         addQuestionThroughUI("Text Question");
         addQuestionThroughUI("Group");
-        curMugType = getMTFromEl($(lastCreatedNode));
+        curMugType = getMTFromControlTree($(lastCreatedNode));
         ui.selectMugTypeInUI(curMugType);
         addQuestionThroughUI("Integer Number");
-        curMugType = getMTFromEl($(lastCreatedNode));
+        curMugType = getMTFromControlTree($(lastCreatedNode));
         ui.selectMugTypeInUI(curMugType);
         equal($('#bindElement-dataType').val(), 'xsd:int');
         equal(curMugType.mug.properties.bindElement.properties.dataType, 'xsd:int');
@@ -1384,7 +1388,7 @@ start();
 
 
         addQuestionThroughUI("Double Number");
-        curMugType = getMTFromEl($(lastCreatedNode));
+        curMugType = getMTFromControlTree($(lastCreatedNode));
         ui.selectMugTypeInUI(curMugType);
         equal($('#bindElement-dataType').val(), 'xsd:double');
         equal(curMugType.mug.properties.bindElement.properties.dataType, 'xsd:double');
@@ -1397,7 +1401,7 @@ start();
         equal(curMugType.mug.properties.bindElement.properties.dataType, 'xsd:double');
 
         addQuestionThroughUI("Long Number");
-        curMugType = getMTFromEl($(lastCreatedNode));
+        curMugType = getMTFromControlTree($(lastCreatedNode));
         ui.selectMugTypeInUI(curMugType);
         equal($('#bindElement-dataType').val(), 'xsd:long');
         equal(curMugType.mug.properties.bindElement.properties.dataType, 'xsd:long');
@@ -1410,7 +1414,7 @@ start();
         equal($(el).attr('type'), 'xsd:long');
 
         addQuestionThroughUI("Secret Question");
-        curMugType = getMTFromEl($(lastCreatedNode));
+        curMugType = getMTFromControlTree($(lastCreatedNode));
         ui.selectMugTypeInUI(curMugType);
         equal($('#bindElement-dataType').val(), 'xsd:string');
         equal(curMugType.mug.properties.bindElement.properties.dataType, 'xsd:string');
@@ -1498,6 +1502,37 @@ start();
               "Order of operations doesn't break apostrophes.");
         
     });
+
+
+    module("Tests created upon bug submission");
+    test("Create a data node", function () {
+        var c = formdesigner.controller,
+        ui = formdesigner.ui,curMugType,
+                addQbut, lastCreatedNode, addGroupBut, qTypeSel, iiD, groupMT, Itext,mugProps,cEl,iID,
+                workingField, jstree;
+
+        c.resetFormDesigner();
+
+
+        Itext = formdesigner.model.Itext;
+
+        jstree = $("#fd-question-tree");
+
+        jstree.bind('create_node.jstree',function(e,data){
+            lastCreatedNode = data.rslt.obj;
+        });
+
+        addQuestionThroughUI("Data Node");
+        curMugType = getMTFromDataTree($(lastCreatedNode));
+        ui.selectMugTypeInUI(curMugType);
+        ok(curMugType,'Data Node Exists');
+    });
+
+
+
+
+
+    
 
     //Disabling these tests until I can figure out what the hell is wrong with them.
 //    module("In Out In XForm Tests");
