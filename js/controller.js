@@ -491,6 +491,12 @@ formdesigner.controller = (function () {
                 case 'data':
                     setType('dataNode');
                     break;
+                case 'barcode':
+                    setType('barcode');
+                    break;
+                case 'geopoint':
+                    setType('geopoint');
+                    break;
 
 
             }
@@ -663,6 +669,12 @@ formdesigner.controller = (function () {
                 break;
             case 'datanode':
                 mugType = formdesigner.model.mugTypeMaker.stdDataBindOnly();
+                break;
+            case 'geopoint':
+                mugType = formdesigner.model.mugTypeMaker.stdGeopoint();
+                break;
+            case 'barcode':
+                mugType = formdesigner.model.mugTypeMaker.stdBarcode();
                 break;
             default:
                 console.log("No standard mugType for selected question type:" + qType + " switching to 'Text Question' type!");
@@ -1401,6 +1413,8 @@ formdesigner.controller = (function () {
                             MTIdentifier = 'stdDouble';
                         }else if(dataType === 'geopoint') {
                             MTIdentifier = 'stdGeopoint';
+                        }else if(dataType === 'barcode') {
+                            MTIdentifier = 'stdBarcode';
                         }else if(dataType === 'string') {
                             //do nothing, the ident is already correct.
                         }else if(dataType === 'date') {

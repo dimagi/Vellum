@@ -284,6 +284,20 @@ formdesigner.ui = (function () {
                     },
                     "valid_children" : "none"
                 },
+                "barcode" : {
+                    "icon": {
+                        "image": jquery_icon_url,
+                        "position": "-48px -224px"
+                    },
+                    "valid_children" : "none"
+                },
+                "geopoint" : {
+                    "icon": {
+                        "image": jquery_icon_url,
+                        "position": "-16px -176px"
+                    },
+                    "valid_children" : "none"
+                },
                 "datanode" : {
                     "icon": {
                         "image": jquery_icon_url,

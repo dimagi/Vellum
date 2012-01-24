@@ -1248,6 +1248,19 @@ formdesigner.model = function () {
         return mType;
     };
 
+    that.mugTypeMaker.stdBarcode = function () {
+        var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion),
+                mug;
+        mType.typeName = "Barcode Question";
+        mType.controlNodeAllowedChildren = false;
+        mug = that.createMugFromMugType(mType);
+        mType.mug = mug;
+        mType.mug.properties.controlElement.properties.name = "Barcode";
+        mType.mug.properties.controlElement.properties.tagName = "input";
+        mType.mug.properties.bindElement.properties.dataType = "barcode";
+        return mType;
+    };
+
     that.mugTypeMaker.stdDate = function () {
         var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion),
                 mug;

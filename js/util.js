@@ -524,7 +524,9 @@ formdesigner.util = (function(){
             'xsd:long',
             'xsd:short',
             'xsd:string',
-            'xsd:time'
+            'xsd:time',
+            'geopoint',
+            'barcode'
     ];
 
     that.VALID_CONTROL_TAG_NAMES = [
