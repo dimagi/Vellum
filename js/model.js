@@ -1386,7 +1386,7 @@ formdesigner.model = function () {
                 vResult;
         mType.controlNodeCanHaveChildren = true;
         mType.typeName = "Group";
-        allowedChildren = ['repeat', 'input', 'select', 'select1', 'group'];
+        allowedChildren = ['repeat', 'input', 'select', 'select1', 'group', 'trigger'];
         mType.controlNodeAllowedChildren = allowedChildren;
         mType.properties.bindElement.dataType.presence = "notallowed";
         mType.properties.controlElement.hintItextID.presence = "notallowed";

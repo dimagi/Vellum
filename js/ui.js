@@ -554,12 +554,12 @@ formdesigner.ui = (function () {
 	            that.displayMugDataProperties(formdesigner.controller.getCurrentlySelectedMugType());
 	        }
 	    }
-    };
+    }
     
     function selectMugTypeInUI(mugType) {
         var ufid = mugType.ufid;
         return $('#fd-question-tree').jstree('select_node', $('#'+ufid), true);
-    };
+    }
     that.selectMugTypeInUI = selectMugTypeInUI;
     
     function forceUpdateUI() {
