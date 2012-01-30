@@ -464,6 +464,11 @@ formdesigner.util = (function(){
     };
     that.canMugTypeHaveChildren = canMugTypeHaveChildren;
 
+    var capitaliseFirstLetter = function (string) {
+        return string.charAt(0).toUpperCase() + string.slice(1);
+    };
+    that.capitaliseFirstLetter = capitaliseFirstLetter;
+
     /**
      * Determines where the newMugType should be inserted relative
      * to the refMugType.

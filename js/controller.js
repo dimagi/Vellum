@@ -53,6 +53,11 @@ formdesigner.controller = (function () {
         that.on('question-itext-changed', function () {
             that.setFormChanged();
         });
+
+        that.on('parse-start', function () {
+            that.resetParseErrorMsgs();
+            that.resetParseWarningMsgs();
+        });
         
         that.on('parse-finish', function () {
             // wire the event handlers for all the mugs in the tree
@@ -60,6 +65,29 @@ formdesigner.controller = (function () {
             allMugs.map(function (mt) {
                 formdesigner.util.setStandardMugEventResponses(mt.mug);
             });
+
+            //loop through and collect all parse error msgs to display them to the user
+            var pErrorMsgs = "";
+            for (var i=0; i<that.parseErrorMsgs.length; i++) {
+                if(that.parseErrorMsgs.hasOwnProperty(i)) {
+                    pErrorMsgs += "<li>" + that.parseErrorMsgs[i] + "</li>";  //Using HTML line breaks since these will get directly inserted into the DOM
+                }
+            }
+            if (pErrorMsgs) {
+                formdesigner.ui.showParseErrorMessage(pErrorMsgs);
+            }
+
+            //loop through and collect all parse warning msgs to display them to the user
+            var pWarnMsgs = "";
+            for (var i=0; i<that.parseWarningMsgs.length; i++) {
+                if(that.parseWarningMsgs.hasOwnProperty(i)) {
+                    pWarnMsgs += "<li>" + that.parseWarningMsgs[i] + "</li>";  //Using HTML line breaks since these will get directly inserted into the DOM
+                }
+            }
+            if (pWarnMsgs) {
+                formdesigner.ui.showParseWarnMessage(pWarnMsgs);
+            }
+            
         });
         
         that.on('widget-value-changed', function (e) {
@@ -96,7 +124,9 @@ formdesigner.controller = (function () {
 
 
         that.on('parse-error', function (e) {
-            formdesigner.ui.showParseErrorMessage(e.exceptionData);
+            if(DEBUG_MODE) {
+                console.log('There was a parse error:', e);
+            }
         });
 
     };
@@ -978,6 +1008,7 @@ formdesigner.controller = (function () {
         formdesigner.controller.formLoadingFailed = false;
 
         formdesigner.ui.hideParseErrorMessage(); //if there is an error message from a previous parse, hide it now.
+        formdesigner.ui.hideParseWarnMessage();
 
         //Things to do to gracefully deal with a form loading failure
         function formLoadFailed(e) {
@@ -1015,6 +1046,7 @@ formdesigner.controller = (function () {
 
             try {
                 that.resetFormDesigner();
+                formdesigner.model.Itext.resetItext(); //Clear out any ideas about itext since we'll be loading in that information now.
                 that.parseXML(formString);
                 that.reloadUI();
             } catch (e) {
@@ -1095,26 +1127,41 @@ formdesigner.controller = (function () {
     /**
     * use getErrorMsg() and addErrorMsg() to deal with error msgs!
     */
-    var parseErrorMsgs = [];
+    that.parseErrorMsgs = [];
+    that.parseWarningMsgs = [];
 
-    var addParseErrorMsg = function (level, msg) {
-        parseErrorMsgs.push(level + "::" + msg);
+    var addParseErrorMsg = function (msg) {
+        that.parseErrorMsgs.push(msg);
         that.fire({
               type: 'parse-error',
-              exceptionData: level + "::" + msg
+              exceptionData: msg
         });
     };
     that.addParseErrorMsg = addParseErrorMsg;
 
+    var addParseWarningMsg = function (msg) {
+        that.parseWarningMsgs.push(msg);
+        that.fire({
+              type: 'parse-warning',
+              exceptionData: msg
+        });
+    };
+    that.addParseWarningMsg = addParseWarningMsg;
+
     var getParseErrorMsgs = function () {
-        return parseErrorMsgs;
+        return that.parseErrorMsgs;
     };
     that.getParseErrorMsgs = getParseErrorMsgs;
 
     var resetParseErrorMsgs = function () {
-        parseErrorMsgs = [];
+        that.parseErrorMsgs = [];
     };
     that.resetParseErrorMsgs = resetParseErrorMsgs;
+
+    var resetParseWarningMsgs = function () {
+        that.parseWarningMsgs = [];
+    };
+    that.resetParseWarningMsgs = resetParseWarningMsgs;
 
     /**
      * The big daddy function of parsing.
@@ -1124,13 +1171,9 @@ formdesigner.controller = (function () {
      * @param xmlString
      */
     var parseXML = function (xmlString) {
-        var pError;
-        
         // for convenience
         var Itext = formdesigner.model.Itext;
-        
         var pError = that.addParseErrorMsg;
-        
         var ParseException = function (msg) {
             this.name = 'XMLParseException';
             this.message = msg;
@@ -1210,7 +1253,7 @@ formdesigner.controller = (function () {
             };
 
             if(root.children().length === 0) {
-                pError('error', 'Data block has no children elements! Please make sure your form is a valid JavaRosa XForm and try again!');
+                pError('Data block has no children elements! Please make sure your form is a valid JavaRosa XForm and try again!');
             }
             root.children().each(recFunc);
             //try to grab the JavaRosa XForm Attributes in the root data element...
@@ -1222,19 +1265,19 @@ formdesigner.controller = (function () {
             that.form.formID = $(root)[0].tagName;
             
             if (!formdesigner.formUuid) {
-                pError('warning', 'Form does not have a unique xform XMLNS (in data block). Will be added automatically');
+                that.addParseWarningMsg('Form does not have a unique xform XMLNS (in data block). Will be added automatically');
             }
             if (!formdesigner.formJRM) {
-                pError('warning', 'Form JRM namespace attribute was not found in data block. One will be added automatically');
+                that.addParseWarningMsg('Form JRM namespace attribute was not found in data block. One will be added automatically');
             }
             if (!formdesigner.formUIVersion) {
-                pError('warning', 'Form does not have a UIVersion attribute, one will be generated automatically');
+                that.addParseWarningMsg('Form does not have a UIVersion attribute, one will be generated automatically');
             }
             if (!formdesigner.formVersion) {
-                pError('warning', 'Form does not have a Version attribute (in the data block), one will be added automatically');
+                that.addParseWarningMsg('Form does not have a Version attribute (in the data block), one will be added automatically');
             }
             if (!formdesigner.formName) {
-                pError('warning', 'Form does not have a Name! The default form name will be used');
+                that.addParseWarningMsg('Form does not have a Name! The default form name will be used');
             }
 
         }
@@ -1337,7 +1380,7 @@ formdesigner.controller = (function () {
                     )[0];
                 }
                 if(!oldMT){
-                    pError ('warning', "Bind Node [" + path + "] found but has no associated Data node. This bind node will be discarded!");
+                    that.addParseWarningMsg("Bind Node [" + path + "] found but has no associated Data node. This bind node will be discarded!");
 //                    throw 'Parse error! Could not find Data MugType associated with this bind!'; //can't have a bind without an associated dataElement.
                     return;
                 }
@@ -1637,6 +1680,7 @@ formdesigner.controller = (function () {
                 
                 var el = $(this), defaultExternalLang;
                 var lang = el.attr('lang');
+                var argument_langs = formdesigner.opts["langs"];
                 
                 function eachText() {
                     var textEl = $ (this);
@@ -1653,20 +1697,32 @@ formdesigner.controller = (function () {
                     }
 	                textEl.children().each(eachValue);
 	            }
-	                
+
+
+                if (argument_langs) {  //we make sure this is a valid list with things in it or null at init time.
+                    for (var i = 0; i < argument_langs; i++) {
+                        //Add each language that's listed in the launch args.
+                        if (argument_langs.hasOwnProperty(i)) {
+                            Itext.addLanguage(argument_langs[i]);
+                        }
+                    }
+                    //grab the default language.
+                    defaultExternalLang = argument_langs[0];
+                    Itext.setDefaultLanguage(defaultExternalLang); //set the form default to the one specified in initialization options.
+                }
+
+
+                if (argument_langs && argument_langs.indexOf(lang) === -1) { //this language does not exist in the list of langs provided in launch args
+                    that.addParseWarningMsg("The Following Language will be deleted from the form as it is not listed as a language in CommCareHQ: <b>" + lang + "</b>");
+                    return; //the data for this language will be dropped.
+                }
                 Itext.addLanguage(lang);
                 if (el.attr('default') !== undefined) {
                     Itext.setDefaultLanguage(lang);
                 }
                 
                 //if we were passed a list of languages (in order of preference from outside)...
-                if (formdesigner.opts["langs"]) {
-                    //grab the default language.
-                    if(formdesigner.opts["langs"].length > 0) { //make sure there are actually entries in the list
-                        defaultExternalLang = formdesigner.opts["langs"][0];
-                        Itext.setDefaultLanguage(defaultExternalLang); //set the form default to the one specified in initialization options.
-                    }
-                }
+
 
                 //loop through children
                 el.children().each(eachText)

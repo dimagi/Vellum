@@ -2443,7 +2443,7 @@ formdesigner.model = function () {
                 xw.writeAttributeStringSafe("uiVersion", uiVersion);
                 xw.writeAttributeStringSafe("version", version);
                 xw.writeAttributeStringSafe("name", formName);
-            }
+            };
 
             function html_tag_boilerplate () {
                 var xw = formdesigner.controller.XMLWriter;
@@ -2939,6 +2939,8 @@ formdesigner.model = function () {
             if(!this.hasLanguage(dLang)){
                 throw 'Default language is set to a language that does not exist in the Itext DB!';
             }
+
+            return true
         };
         
         itext.clear = function () {

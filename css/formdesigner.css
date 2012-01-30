@@ -97,9 +97,15 @@ body{
     width:280px;
 }
 
-#fd-notify {
-    padding: .8em;	
+#fd-error {
+
 }
+
+.fd-message {
+    padding: .8em;
+    margin: .8em;
+}
+
 
 #fd-question-properties {
     border: 1px solid gray;
@@ -357,7 +363,6 @@ body{
 
 #fd-props-message {
     margin: 0;
-    padding: 0;
     text-align: center;
     vertical-align: middle;
 }
@@ -528,4 +533,9 @@ body{
 {
     position: relative;
     margin-bottom: 0px;
+}
+
+
+.dismiss-message-button {
+    float: right;
 }
