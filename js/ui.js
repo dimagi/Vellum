@@ -38,26 +38,26 @@ formdesigner.ui = function () {
      * Displays an info box on the properties view.
      * Use hideMessage() to hide.
      * @param msg - the actual message contents
-     * @param header - message header (optional)
      * @param msgType - can be either 'warning' or 'error' - defaults to 'warning'
      */
-    var showMessage = function (msg, header, msgType) {
-        var div, warningClass, iconClass, iconSpan, msgtxt, headertxt, icon;
+    var showMessage = function (msg, msgType) {
+        var div, messageLevel, iconClass, iconSpan, msgtxt, levelText, icon;
+        that.hideMessage();
         div = $('#fd-props-message');
-        div.empty();
+
         if (msgType === 'error') {
-            warningClass = 'ui-state-error';
+            messageLevel = 'ui-state-error';
             iconClass = 'ui-icon-alert';
         } else {
-            warningClass = 'ui-state-highlight';
+            messageLevel = 'ui-state-highlight';
             iconClass = 'ui-icon-info';
         }
         iconSpan = '<span class="ui-icon ' + iconClass + '" style="float: left; margin-right: .3em;"></span>';
         icon = $(iconSpan);
-        headertxt = '<strong>' + header + '</strong>';
-        msgtxt = ' ' + msg;
-        div.append(icon).append(headertxt).append(msgtxt);
-        div.addClass(warningClass).addClass('ui-corner-all');
+        levelText = '<strong>' + formdesigner.util.capitaliseFirstLetter(msgType) + '<br /></strong>';
+        msgtxt = '' + msg;
+        div.append(icon).append(levelText).append(msgtxt);
+        div.addClass(messageLevel).addClass('ui-corner-all');
         div.show();
     };
     that.showMessage = showMessage;
@@ -66,22 +66,38 @@ formdesigner.ui = function () {
      * Hides the question properties message box;
      */
     var hideMessage = function () {
-        $('#fd-props-message').hide();
+        var div = $('#fd-props-message');
+        div.hide();
+        div.removeClass('ui-corner-all').removeClass('ui-state-error').removeClass('ui-state-highlight');
+        div.empty();
     };
 
+    that.hideMessage = hideMessage;
+
+    /**
+     * Convenience Method. See ui.showMessage();
+     * @param msg
+     */
     var showParseErrorMessage = function (msg) {
-        var container = $('#fd-notify');
-        container.html(msg);
-        container.addClass('ui-state-error');
-        container.show();
+//        var container = $('#fd-error');
+//        container.html(msg);
+//        container.addClass('ui-state-error');
+//        container.show();
+        showMessage(msg,'error');
     };
     that.showParseErrorMessage = showParseErrorMessage;
 
+
+    /**
+     * Convenience method.  See ui.showMessage();
+     * @param msg
+     */
+    var showParseWarnMessage = function (msg) {
+        showMessage(msg,'warn');
+    };
+
     var hideParseErrorMessage = function () {
-        var container = $('#fd-notify');
-        container.html("");
-        container.removeClass("ui-state-error");
-        container.hide();
+        hideMessage();
     };
     that.hideParseErrorMessage = hideParseErrorMessage;
 
@@ -417,9 +433,9 @@ formdesigner.ui = function () {
         if (itextValidation !== true) {
             propsMessage += '<p>' + JSON.stringify(itextValidation) + '</p>';
         }
-        if (propsMessage) {
-
-            showMessage(propsMessage, 'Question Problems', 'warning');
+        if (propsMessage && propsMessage !== '') {
+            console.log('Here!', propsMessage);
+            that.showMessage(propsMessage, 'warning');
         }
 
 
@@ -1961,6 +1977,10 @@ formdesigner.launch = function (opts) {
     formdesigner.loadMe = opts.form;
     
     formdesigner.iconUrl = opts.iconUrl ? opts.iconUrl : "css/smoothness/images/ui-icons_888888_256x240.png";
+
+    //if Languages are provided as launch arguments, do not allow adding/removing additional languages.
+    opts.allowLanguageEdits = !(opts["langs"] && opts["langs"].length > 0 && opts["langs"][0] !== "");
+
 
     formdesigner.opts = opts;  //for additional options used elsewhere.
 

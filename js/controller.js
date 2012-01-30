@@ -96,6 +96,9 @@ formdesigner.controller = (function () {
 
 
         that.on('parse-error', function (e) {
+            if(DEBUG_MODE) {
+                console.log('There was a parse error:', e);
+            }
             formdesigner.ui.showParseErrorMessage(e.exceptionData);
         });
 
@@ -1637,6 +1640,7 @@ formdesigner.controller = (function () {
                 
                 var el = $(this), defaultExternalLang;
                 var lang = el.attr('lang');
+                var argument_langs = formdesigner.opts["langs"];
                 
                 function eachText() {
                     var textEl = $ (this);
@@ -1653,20 +1657,33 @@ formdesigner.controller = (function () {
                     }
 	                textEl.children().each(eachValue);
 	            }
-	                
+
+
+                if (argument_langs) {
+                    //grab the default language.
+                    if(argument_langs.length > 0) { //make sure there are actually entries in the list
+                        for (var i = 0; i < argument_langs; i++) {
+                            //Add each language that's listed in the launch args.
+                            if (argument_langs.hasOwnProperty(i)) {
+                                Itext.addLanguage(argument_langs[i]);
+                            }
+                        }
+                        defaultExternalLang = argument_langs[0];
+                        Itext.setDefaultLanguage(defaultExternalLang); //set the form default to the one specified in initialization options.
+                    }
+                }
+
+
+                if (argument_langs && argument_langs.indexOf(lang) === -1) { //this language does not exist in the list of langs provided in launch args
+                    return; //do nothing, the data for this language will be dropped.
+                }
                 Itext.addLanguage(lang);
                 if (el.attr('default') !== undefined) {
                     Itext.setDefaultLanguage(lang);
                 }
                 
                 //if we were passed a list of languages (in order of preference from outside)...
-                if (formdesigner.opts["langs"]) {
-                    //grab the default language.
-                    if(formdesigner.opts["langs"].length > 0) { //make sure there are actually entries in the list
-                        defaultExternalLang = formdesigner.opts["langs"][0];
-                        Itext.setDefaultLanguage(defaultExternalLang); //set the form default to the one specified in initialization options.
-                    }
-                }
+
 
                 //loop through children
                 el.children().each(eachText)
