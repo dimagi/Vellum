@@ -98,9 +98,13 @@ body{
 }
 
 #fd-error {
-    padding: .8em;	
+
 }
 
+.fd-message {
+    padding: .8em;
+    margin: .8em;
+}
 
 
 #fd-question-properties {
@@ -529,4 +533,9 @@ body{
 {
     position: relative;
     margin-bottom: 0px;
+}
+
+
+.dismiss-message-button {
+    float: right;
 }

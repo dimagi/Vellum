@@ -30,9 +30,13 @@ formdesigner.ui = function () {
             dataTree,
             LINK_CONTROL_MOVES_TO_DATA_TREE = true,
             DEBUG_MODE = false,
+            WARN_MSG_DIV = '#fd-warn',
+            ERROR_MSG_DIV = '#fd-error',
             TOKEN_INPUT = false; // change this if you want tokenized xpath mode
 
     that.TOKEN_INPUT = TOKEN_INPUT;
+
+
 
     /**
      * Displays an info box on the properties view.
@@ -40,24 +44,43 @@ formdesigner.ui = function () {
      * @param msg - the actual message contents
      * @param msgType - can be either 'warning' or 'error' - defaults to 'warning'
      */
-    var showMessage = function (msg, msgType) {
-        var div, messageLevel, iconClass, iconSpan, msgtxt, levelText, icon;
-        that.hideMessage();
-        div = $('#fd-props-message');
-
-        if (msgType === 'error') {
-            messageLevel = 'ui-state-error';
+    var showMessage = function (msg, msgLevel) {
+        var div, messageLevelState, iconClass, iconSpan, msgtxt, levelText, icon, dismissDiv;
+        if (msgLevel === 'error') {
+            that.hideMessage($(ERROR_MSG_DIV));
+            div = $(ERROR_MSG_DIV);
+            dismissDiv = $('<div id="parse-error-dismiss"></div>');
+            messageLevelState = 'ui-state-error';
             iconClass = 'ui-icon-alert';
         } else {
-            messageLevel = 'ui-state-highlight';
+            that.hideMessage($(WARN_MSG_DIV));
+            div = $(WARN_MSG_DIV);
+            dismissDiv = $('<div id="parse-warn-dismiss"></div>');
+            messageLevelState = 'ui-state-highlight';
             iconClass = 'ui-icon-info';
         }
+
+        dismissDiv.addClass('dismiss-message-button');
+
+        dismissDiv.button({
+                icons: {
+                    primary: "ui-icon-close"
+                },
+                text: false
+        });
+
+        dismissDiv.click(function (){
+           that.hideMessage(div)
+        });
+
+        div.prepend(dismissDiv);
+
         iconSpan = '<span class="ui-icon ' + iconClass + '" style="float: left; margin-right: .3em;"></span>';
         icon = $(iconSpan);
-        levelText = '<strong>' + formdesigner.util.capitaliseFirstLetter(msgType) + '<br /></strong>';
+        levelText = '<strong>' + formdesigner.util.capitaliseFirstLetter(msgLevel) + '<br /></strong>';
         msgtxt = '' + msg;
         div.append(icon).append(levelText).append(msgtxt);
-        div.addClass(messageLevel).addClass('ui-corner-all');
+        div.addClass(messageLevelState).addClass('ui-corner-all');
         div.show();
     };
     that.showMessage = showMessage;
@@ -65,8 +88,10 @@ formdesigner.ui = function () {
     /**
      * Hides the question properties message box;
      */
-    var hideMessage = function () {
-        var div = $('#fd-props-message');
+    var hideMessage = function (div) {
+        if (!div) {
+            div = $(ERROR_MSG_DIV);
+        }
         div.hide();
         div.removeClass('ui-corner-all').removeClass('ui-state-error').removeClass('ui-state-highlight');
         div.empty();
@@ -79,10 +104,6 @@ formdesigner.ui = function () {
      * @param msg
      */
     var showParseErrorMessage = function (msg) {
-//        var container = $('#fd-error');
-//        container.html(msg);
-//        container.addClass('ui-state-error');
-//        container.show();
         showMessage(msg,'error');
     };
     that.showParseErrorMessage = showParseErrorMessage;
@@ -93,13 +114,19 @@ formdesigner.ui = function () {
      * @param msg
      */
     var showParseWarnMessage = function (msg) {
-        showMessage(msg,'warn');
+        showMessage(msg,'warning');
     };
+    that.showParseWarnMessage = showParseWarnMessage;
 
     var hideParseErrorMessage = function () {
-        hideMessage();
+        hideMessage($(ERROR_MSG_DIV));
     };
     that.hideParseErrorMessage = hideParseErrorMessage;
+
+    var hideParseWarnMessage = function () {
+        hideMessage($(WARN_MSG_DIV));
+    };
+    that.hideParseWarnMessage = hideParseWarnMessage;
 
     function init_toolbar() {
         var toolbar = $(".fd-toolbar"), select, addbutstr, addbut;
@@ -769,23 +796,24 @@ formdesigner.ui = function () {
             });
 
             langList.val(formdesigner.currentItextDisplayLanguage);
-
-            str = '';
-            str = '<button id="fd-lang-disp-add-lang-button">Add Language</button>';
-            addLangButton = $(str);
-            addLangButton.button();
-            addLangButton.click(function () {
-                formdesigner.ui.showAddLanguageDialog();
-            });
-            div.append(addLangButton);
-            str = '';
-            str = '<button id="fd-lang-disp-remove-lang-button">Remove Langauge</button>';
-            removeLangButton = $(str);
-            removeLangButton.button();
-            removeLangButton.click(function () {
-                formdesigner.ui.showRemoveLanguageDialog();
-            });
-            div.append(removeLangButton);
+            if (formdesigner.opts.allowLanguageEdits) {
+                str = '';
+                str = '<button id="fd-lang-disp-add-lang-button">Add Language</button>';
+                addLangButton = $(str);
+                addLangButton.button();
+                addLangButton.click(function () {
+                    formdesigner.ui.showAddLanguageDialog();
+                });
+                div.append(addLangButton);
+                str = '';
+                str = '<button id="fd-lang-disp-remove-lang-button">Remove Langauge</button>';
+                removeLangButton = $(str);
+                removeLangButton.button();
+                removeLangButton.click(function () {
+                    formdesigner.ui.showRemoveLanguageDialog();
+                });
+                div.append(removeLangButton);
+            }
             div.append('<br/><br/><br/><br/><br/>');
             $('#fd-extra-settings').append(div);
             $(div).find('#fd-land-disp-select').chosen();
@@ -1980,6 +2008,7 @@ formdesigner.launch = function (opts) {
 
     //if Languages are provided as launch arguments, do not allow adding/removing additional languages.
     opts.allowLanguageEdits = !(opts["langs"] && opts["langs"].length > 0 && opts["langs"][0] !== "");
+    opts.langs = opts.allowLanguageEdits ? null : opts.langs;  //clean up so it's definitely an array with something or null.
 
 
     formdesigner.opts = opts;  //for additional options used elsewhere.
