@@ -39,7 +39,7 @@ formdesigner.controller = (function () {
             formdesigner.model.Itext.addLanguage("en");
         }
         
-        formdesigner.currentItextDisplayLanguage = formdesigner.opts.displayLanguage || 
+        formdesigner.currentItextDisplayLanguage = formdesigner.opts["displayLanguage"] ||
                                                    formdesigner.model.Itext.getDefaultLanguage();
         
         that.on('question-creation', function () {
@@ -66,26 +66,13 @@ formdesigner.controller = (function () {
                 formdesigner.util.setStandardMugEventResponses(mt.mug);
             });
 
-            //loop through and collect all parse error msgs to display them to the user
-            var pErrorMsgs = "";
-            for (var i=0; i<that.parseErrorMsgs.length; i++) {
-                if(that.parseErrorMsgs.hasOwnProperty(i)) {
-                    pErrorMsgs += "<li>" + that.parseErrorMsgs[i] + "</li>";  //Using HTML line breaks since these will get directly inserted into the DOM
-                }
-            }
-            if (pErrorMsgs) {
-                formdesigner.ui.showParseErrorMessage(pErrorMsgs);
+
+            if (that.parseErrorMsgs && that.parseErrorMsgs.length > 0) {
+                formdesigner.ui.showParseErrorMessage(that.parseErrorMsgs);
             }
 
-            //loop through and collect all parse warning msgs to display them to the user
-            var pWarnMsgs = "";
-            for (var i=0; i<that.parseWarningMsgs.length; i++) {
-                if(that.parseWarningMsgs.hasOwnProperty(i)) {
-                    pWarnMsgs += "<li>" + that.parseWarningMsgs[i] + "</li>";  //Using HTML line breaks since these will get directly inserted into the DOM
-                }
-            }
-            if (pWarnMsgs) {
-                formdesigner.ui.showParseWarnMessage(pWarnMsgs);
+            if (that.parseWarningMsgs && that.parseWarningMsgs.length > 0) {
+                formdesigner.ui.showParseWarnMessage(that.parseWarningMsgs);
             }
             
         });

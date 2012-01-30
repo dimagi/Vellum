@@ -30,8 +30,9 @@ formdesigner.ui = function () {
             dataTree,
             LINK_CONTROL_MOVES_TO_DATA_TREE = true,
             DEBUG_MODE = false,
-            WARN_MSG_DIV = '#fd-warn',
-            ERROR_MSG_DIV = '#fd-error',
+            WARN_MSG_DIV = '#fd-parse-warn',
+            ERROR_MSG_DIV = '#fd-parse-error',
+            FORM_WARN_DIV = '#fd-form-warn',
             TOKEN_INPUT = false; // change this if you want tokenized xpath mode
 
     that.TOKEN_INPUT = TOKEN_INPUT;
@@ -46,16 +47,23 @@ formdesigner.ui = function () {
      */
     var showMessage = function (msg, msgLevel) {
         var div, messageLevelState, iconClass, iconSpan, msgtxt, levelText, icon, dismissDiv;
+        dismissDiv = $('<div></div>');
         if (msgLevel === 'error') {
             that.hideMessage($(ERROR_MSG_DIV));
             div = $(ERROR_MSG_DIV);
-            dismissDiv = $('<div id="parse-error-dismiss"></div>');
+            dismissDiv.attr('id', "parse-error-dismiss");
             messageLevelState = 'ui-state-error';
             iconClass = 'ui-icon-alert';
-        } else {
+        } else if(msgLevel === 'warning') {
             that.hideMessage($(WARN_MSG_DIV));
             div = $(WARN_MSG_DIV);
-            dismissDiv = $('<div id="parse-warn-dismiss"></div>');
+            dismissDiv.attr('id',"parse-warn-dismiss");
+            messageLevelState = 'ui-state-highlight';
+            iconClass = 'ui-icon-info';
+        } else if (msgLevel === 'form-warning') {
+            that.hideMessage($(FORM_WARN_DIV));
+            div = $(FORM_WARN_DIV);
+            dismissDiv.attr('id',"parse-warn-dismiss");
             messageLevelState = 'ui-state-highlight';
             iconClass = 'ui-icon-info';
         }
@@ -75,10 +83,30 @@ formdesigner.ui = function () {
 
         div.prepend(dismissDiv);
 
-        iconSpan = '<span class="ui-icon ' + iconClass + '" style="float: left; margin-right: .3em;"></span>';
+        iconSpan = '<span></span>';
         icon = $(iconSpan);
-        levelText = '<strong>' + formdesigner.util.capitaliseFirstLetter(msgLevel) + '<br /></strong>';
-        msgtxt = '' + msg;
+        icon.addClass("ui-icon");
+        icon.addClass(iconClass);
+        icon.css('float','left');
+        icon.css('margin-right','.3em');
+        levelText = $('<strong><br /></strong>');
+        levelText.text(formdesigner.util.capitaliseFirstLetter(msgLevel));
+        var tempMsg;
+        msgtxt = $('<ul></ul>');
+        if (typeof msg === "string" || !(msg instanceof Array)) { //msg is a string or not-an-array (so try turn it into a string)
+            tempMsg = $('<li></li>');
+            tempMsg.append('' + msg);
+            msgtxt.append(tempMsg);
+        } else {
+            //msg is an array
+            for (var i=0;i<msg.length;i++) {
+                if(msg.hasOwnProperty(i)) {
+                    tempMsg = $('<li></li>');
+                    tempMsg.append(msg[i]);
+                    msgtxt.append(tempMsg);
+                }
+            }
+        }
         div.append(icon).append(levelText).append(msgtxt);
         div.addClass(messageLevelState).addClass('ui-corner-all');
         div.show();
@@ -92,6 +120,7 @@ formdesigner.ui = function () {
         if (!div) {
             div = $(ERROR_MSG_DIV);
         }
+        div = $(div);
         div.hide();
         div.removeClass('ui-corner-all').removeClass('ui-state-error').removeClass('ui-state-highlight');
         div.empty();
@@ -127,6 +156,17 @@ formdesigner.ui = function () {
         hideMessage($(WARN_MSG_DIV));
     };
     that.hideParseWarnMessage = hideParseWarnMessage;
+
+
+    var showFormWarnMessage = function (msg) {
+        showMessage(msg,'form-warning');
+    };
+    that.showFormWarnMessage = showFormWarnMessage;
+
+    var hideFormWarnMessage = function () {
+        hideMessage($(FORM_WARN_DIV));
+    };
+    that.hideFormWarnMessage = hideFormWarnMessage;
 
     function init_toolbar() {
         var toolbar = $(".fd-toolbar"), select, addbutstr, addbut;
@@ -429,7 +469,7 @@ formdesigner.ui = function () {
                         input = findInputByReference(name, i);
                         if (res === 'fail') {
                             setValidationFailedIcon(input.parent(), true, msg);
-                            propsMessage += '<p>' + msg + '</p>';
+                            propsMessage.push(msg);
                         } else if (res === 'pass') {
                             setValidationFailedIcon(input.parent(), false, msg);
                         }
@@ -451,18 +491,17 @@ formdesigner.ui = function () {
                 dProps = vObj.dataElement,
                 i, propsMessage, itextValidation;
 
-        hideMessage();
-        propsMessage = '';
+        that.hideFormWarnMessage();
+        propsMessage = [];
         loopValProps(bProps, 'bindElement');
         loopValProps(cProps, 'controlElement');
         loopValProps(dProps, 'dataElement');
         itextValidation = formdesigner.model.Itext.validateItext();
         if (itextValidation !== true) {
-            propsMessage += '<p>' + JSON.stringify(itextValidation) + '</p>';
+            propsMessage.push(JSON.stringify(itextValidation));
         }
-        if (propsMessage && propsMessage !== '') {
-            console.log('Here!', propsMessage);
-            that.showMessage(propsMessage, 'warning');
+        if (propsMessage.length > 0) {
+            that.showFormWarnMessage(propsMessage);
         }
 
 
