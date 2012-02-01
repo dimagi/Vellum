@@ -900,21 +900,6 @@ formdesigner.ui = function () {
 
         })();
 
-//        (function c_showDataView() {
-//             var showDataViewBut = $(
-//                     '<button id="fd-dataview-button" class="toolbarButton questionButton">'+
-//                 'Show Data View ' +
-//               '</button>');
-//             $('#fd-extra-advanced').append(showDataViewBut);
-//
-//             showDataViewBut.button().click(function () {
-//                 formdesigner.ui.showDataView();
-//             });
-//
-//            showDataViewBut.button('disable');
-//
-//         })();
-
         (function c_clearCruftyItext() {
             var clearCruftBut = $(
                     '<button id="fd-cruftyItextRemove-button" class="toolbarButton questionButton">' +
@@ -928,6 +913,7 @@ formdesigner.ui = function () {
                     formdesigner.ui.hideConfirmDialog();
                     window.setTimeout(function () {
                         formdesigner.controller.removeCruftyItext();
+                        formdesigner.controller.form.fire('form-property-changed');
                     }, 200);
                 };
 
@@ -1921,10 +1907,25 @@ formdesigner.ui = function () {
             }
         };
         var initXPathEditor = function() {
-            $("<div />").attr("id", "xpath-edit-head").addClass("ui-widget-header").text("Expression Editor").appendTo(editorPane);
-            var mainPane = $("<div />").attr("id", "xpath-edit-inner").appendTo(editorPane);
-            $("<label />").attr("for", "xpath-advanced-check").text("Advanced Mode?").appendTo(mainPane);
-            var advancedModeSelector = $("<input />").attr("type", "checkbox").attr("id", "xpath-advanced-check").appendTo(mainPane);
+            $("<div />")
+                    .attr("id", "xpath-edit-head")
+                    .addClass("ui-widget-header")
+                    .text("Expression Editor")
+                    .appendTo(editorPane);
+
+            var mainPane = $("<div />")
+                    .attr("id", "xpath-edit-inner")
+                    .appendTo(editorPane);
+
+            $("<label />")
+                    .attr("for", "xpath-advanced-check")
+                    .text("Advanced Mode?").
+                    appendTo(mainPane);
+
+            var advancedModeSelector = $("<input />")
+                    .attr("type", "checkbox")
+                    .attr("id", "xpath-advanced-check")
+                    .appendTo(mainPane);
             advancedModeSelector.css("clear", "both");
 
             advancedModeSelector.click(function() {
@@ -1936,9 +1937,17 @@ formdesigner.ui = function () {
             });
 
             // advanced UI
-            var advancedUI = $("<div />").attr("id", "xpath-advanced").appendTo(mainPane);
-            $("<label />").attr("for", "fd-xpath-editor-text").text("XPath String: ").appendTo(advancedUI);
-            $("<textarea />").attr("id", "fd-xpath-editor-text").attr("rows", "2").attr("cols", "50").appendTo(advancedUI);
+            var advancedUI = $("<div />").attr("id", "xpath-advanced")
+                    .appendTo(mainPane);
+
+            $("<label />").attr("for", "fd-xpath-editor-text")
+                    .text("XPath String: ")
+                    .appendTo(advancedUI);
+
+            $("<textarea />").attr("id", "fd-xpath-editor-text")
+                    .attr("rows", "2")
+                    .attr("cols", "50")
+                    .appendTo(advancedUI);
 
             // simple UI
             var simpleUI = $("<div />").attr("id", "xpath-simple").appendTo(mainPane);
@@ -1948,15 +1957,25 @@ formdesigner.ui = function () {
                 ["True when ANY of the expressions are true.", expTypes.OR]
             ];
 
-            constructSelect(topLevelJoinOps).appendTo(simpleUI).attr("id", "top-level-join-select");
-            $("<div />").attr("id", "fd-xpath-editor-expressions").appendTo(simpleUI);
-            var addExpressionButton = $("<button />").text("Add expression").button().appendTo(simpleUI);
+            constructSelect(topLevelJoinOps).appendTo(simpleUI)
+                    .attr("id", "top-level-join-select");
+
+            $("<div />").attr("id", "fd-xpath-editor-expressions")
+                    .appendTo(simpleUI);
+
+            var addExpressionButton = $("<button />").text("Add expression")
+                    .button()
+                    .appendTo(simpleUI);
+
             addExpressionButton.click(function() {
                 tryAddExpression();
             });
 
             // shared UI
-            var doneButton = $('<button />').text("Save").button().appendTo(mainPane);
+            var doneButton = $('<button />').text("Save to Form")
+                    .button()
+                    .appendTo(mainPane);
+
             doneButton.click(function() {
                 getExpressionInput().val(getExpressionFromUI());
                 var results = validateCurrent();
@@ -1966,6 +1985,7 @@ formdesigner.ui = function () {
                         property: $('#fd-xpath-editor').data("property"),
                         value:    getExpressionFromUI()
                     });
+                    formdesigner.controller.form.fire('form-property-changed');
                 } else {
                     getValidationSummary().text("Validation Failed! Please fix all errors before leaving this page. " + results[1]).removeClass("success").addClass("error");
                 }
@@ -1986,6 +2006,10 @@ formdesigner.ui = function () {
     };
 
     that.init = function() {
+//        //Override CCHQ's SaveButton labels:
+          //Bug: Does not work yet. See ticket: http://manage.dimagi.com/default.asp?31223
+//        SaveButton.message.SAVE = 'Save to Server';
+//        SaveButton.message.SAVED = 'Saved to Server';
         controller = formdesigner.controller;
         generate_scaffolding($(formdesigner.rootElement));
         init_toolbar();

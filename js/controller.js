@@ -749,10 +749,6 @@ formdesigner.controller = (function () {
 
         mug = mugType.mug;
 
-        //this allows the mug to respond to certain events in a common way.
-        //see method docs for further info
-//        formdesigner.util.setStandardMugEventResponses(mug);
-
         //set the 'currently selected mugType' to be that of this mugType's parent.
         controlTree = that.form.controlTree;
         parentMT = controlTree.getParentMugType(mugType);
@@ -841,6 +837,7 @@ formdesigner.controller = (function () {
             var loadButton = $('<button id ="fd-loadsource-button">Update Source</button>').appendTo(controls).button();
 	        loadButton.click(function () {
 	            that.loadXForm(output.val());
+                formdesigner.controller.form.fire('form-property-changed');
 	            $.fancybox.close();
 	        });
 	
@@ -969,6 +966,7 @@ formdesigner.controller = (function () {
         var updateButton = $('<button id ="fd-parsexls-button">Update Translations</button>').appendTo(controls).button();
         updateButton.click(function () {
             that.parseXLSItext(input.val());
+            formdesigner.controller.form.fire('form-property-changed');
             $.fancybox.close();
         });
         

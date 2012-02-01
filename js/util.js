@@ -791,8 +791,6 @@ formdesigner.util = (function(){
             text = text.replace(/"/g,'&quot;');
         }
         return text;
-        
-        text = text
     };
     
     // monkey patch the xmlwriter for convenience
