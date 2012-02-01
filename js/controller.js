@@ -1373,11 +1373,11 @@ formdesigner.controller = (function () {
                  * Determines what MugType this element should be
                  * and creates it.  Also modifies any existing mug that is associated
                  * with this element to fit the new type.
-                 * @param nodeID
+                 * @param nodePath
                  * @param controlEl
                  */
-                function classifyAndCreateMugType (nodeID, cEl) {
-                    var oldMT = that.form.getMugTypeByIDFromTree(nodeID, 'data')[0], //check the date node to see if there's a related MT already present
+                function classifyAndCreateMugType (nodePath, cEl) {
+                    var oldMT = that.getMugByPath(nodePath, 'data'), //check the date node to see if there's a related MT already present
                         mugType, mug, tagName, bindEl, dataEl, dataType, MTIdentifier,
                         //flags
                         hasBind = true;
@@ -1446,7 +1446,7 @@ formdesigner.controller = (function () {
                         console.log ("Exception Control Element", cEl);
                         throw 'New Control Element classified as non-existent MugType! Please create a rule for this case' +
                             ' in formdesigner.model.mugTypeMaker! IdentString:' + MTIdentifier + ",tagName:" + tagName +
-                                ",cEl:" + cEl + ",nodeID:" + nodeID;
+                                ",cEl:" + cEl + ",nodePath:" + nodePath;
                     }
 
                     if(oldMT) { //copy oldMT data to newly generated MT
@@ -1625,7 +1625,7 @@ formdesigner.controller = (function () {
                     }
                 }
                 if (parentNodeID) {
-                    parentMug = that.form.getMugTypeByIDFromTree(parentNodeID,'control')[0];
+                    parentMug = that.getMugByPath(parentPath,'data');
                 } else {
                     parentMug = null;
                 }
@@ -1642,9 +1642,9 @@ formdesigner.controller = (function () {
                     }
                 }
                 if (oldEl) {
-                    mType = classifyAndCreateMugType(nodeID,oldEl);
+                    mType = classifyAndCreateMugType(path,oldEl);
                 } else {
-                    mType = classifyAndCreateMugType(nodeID,el);
+                    mType = classifyAndCreateMugType(path,el);
                 }
                 populateMug(mType,el);
                 insertMTInControlTree(mType, parentMug);

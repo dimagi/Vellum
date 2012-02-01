@@ -64,7 +64,7 @@
       <bind nodeset="/safe_pregnancy/infants_delivered" type="xsd:int" relevant="/safe_pregnancy/what_happened='birth'" constraint=". &lt;= 8" jr:constraintMsg="Answer too high" action="enable"/>
       <bind nodeset="/safe_pregnancy/infants_survived" type="xsd:int" relevant="/safe_pregnancy/what_happened='birth' and /safe_pregnancy/infants_delivered &gt; 0" constraint=". &lt;= ../infants_delivered" jr:constraintMsg="Can't be more than # delivered" action="enable"/>
       <bind nodeset="/safe_pregnancy/infants_registered" type="xsd:string" relevant="/safe_pregnancy/infants_delivered &gt; 0 and /safe_pregnancy/infants_survived &gt; 0" action="enable"/>
-      <bind nodeset="/safe_pregnancy/infants_registered_prompt" type="xsd:string" relevant="/safe_pregnancy/infants_registered='no'" action="enable"/>
+      <bind nodeset="/safe_pregnancy/infants_registered_prompt" relevant="/safe_pregnancy/infants_registered='no'" action="enable"/>
       <bind nodeset="/safe_pregnancy/birth_type" type="xsd:string" relevant="/safe_pregnancy/what_happened='birth'" action="enable"/>
       <bind nodeset="/safe_pregnancy/other_birth_type" type="xsd:string" relevant="/safe_pregnancy/birth_type='other'" action="enable"/>
       <bind nodeset="/safe_pregnancy/birth_location" type="xsd:string" relevant="/safe_pregnancy/what_happened='birth'" action="enable"/>
@@ -101,12 +101,12 @@
       <bind nodeset="/safe_pregnancy/treatment_type" type="xsd:string" relevant="/safe_pregnancy/treatment='yes'" action="enable"/>
       <bind nodeset="/safe_pregnancy/treatment_why_not" type="xsd:string" relevant="/safe_pregnancy/treatment='no'" action="enable"/>
       <bind nodeset="/safe_pregnancy/treatment_why_not_other" type="xsd:string" relevant="/safe_pregnancy/treatment_why_not='other'" action="enable"/>
-      <bind nodeset="/safe_pregnancy/treatment_why_not_prompt" type="xsd:string" relevant="/safe_pregnancy/mother_survived='yes' and (/safe_pregnancy/treatment_why_not='no_medicine' or /safe_pregnancy/treatment_why_not='too_many_patients' or /safe_pregnancy/treatment_why_not='no_doctor' or /safe_pregnancy/treatment_why_not='no_health_workers' or /safe_pregnancy/treatment_why_not='other')" action="enable"/>
+      <bind nodeset="/safe_pregnancy/treatment_why_not_prompt" relevant="/safe_pregnancy/mother_survived='yes' and (/safe_pregnancy/treatment_why_not='no_medicine' or /safe_pregnancy/treatment_why_not='too_many_patients' or /safe_pregnancy/treatment_why_not='no_doctor' or /safe_pregnancy/treatment_why_not='no_health_workers' or /safe_pregnancy/treatment_why_not='other')" action="enable"/>
       <bind nodeset="/safe_pregnancy/family_planning" type="xsd:string" relevant="/safe_pregnancy/mother_survived='yes'" action="enable"/>
-      <bind nodeset="/safe_pregnancy/death_case_mother" type="xsd:string" relevant="/safe_pregnancy/mother_survived='no'" action="enable"/>
-      <bind nodeset="/safe_pregnancy/death_case_infant" type="xsd:string" relevant="/safe_pregnancy/infants_delivered - /safe_pregnancy/infants_survived &gt; 0"/>
-      <bind nodeset="/safe_pregnancy/newborn_case" type="xsd:string" relevant="/safe_pregnancy/infants_survived &gt;= 0" action="enable"/>
-      <bind nodeset="/safe_pregnancy/thank_you" type="xsd:string"/>
+      <bind nodeset="/safe_pregnancy/death_case_mother" relevant="/safe_pregnancy/mother_survived='no'" action="enable"/>
+      <bind nodeset="/safe_pregnancy/death_case_infant" relevant="/safe_pregnancy/infants_delivered - /safe_pregnancy/infants_survived &gt; 0"/>
+      <bind nodeset="/safe_pregnancy/newborn_case" relevant="/safe_pregnancy/infants_survived &gt;= 0" action="enable"/>
+      <bind nodeset="/safe_pregnancy/thank_you"/>
       <itext>
         <translation lang="sw" default="">
           <text id="yes">

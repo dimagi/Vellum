@@ -11,7 +11,7 @@ var validateCallbackFunc = function (testDescription) {
         }
         ok(data.success, 'Form Validates with JR validator:'+thisDesc);
         start();
-    }
+    };
     return func;
 };
 
@@ -19,22 +19,22 @@ $(document).ready(function(){
     formdesigner.launch({});
     var testXformBuffer = {};
     var testFormNames = [
-        "Follow-up a Household Referral.xml",
-        "Follow-up at household.xml",
-        "Pos Parto.xml",
-        "Registo.xml",
-        "Follow-up a pregnancy referral.xml",
-        "Gravidez.xml",
-        "Register a household.xml",
+//        "Follow-up a Household Referral.xml",
+//        "Follow-up at household.xml",
+//        "Pos Parto.xml",
+//        "Registo.xml",
+//        "Follow-up a pregnancy referral.xml",
+//        "Gravidez.xml",
+//        "Register a household.xml",
         "Close a pregnancy.xml",
-        "Follow-up a pregnancy.xml",
-        "NutritionAndHealth.xml",
-        "Register a pregnancy.xml"
+//        "Follow-up a pregnancy.xml",
+//        "NutritionAndHealth.xml",
+//        "Register a pregnancy.xml"
     ];
 
     var get_cchq_forms = function (name) {
         getFormFromServerAndPlaceInBuffer('fromcchq/' + name);
-    }
+    };
 
     var make_control_bind_data_mug = function(){
         var myMug;
@@ -1541,7 +1541,7 @@ start();
 //            console.error(d.exceptionData);
 //            throw 'Parse Error! :' + d.exceptionData;
 //
-//        })
+//        });
 //
 //        for (k in testFormNames) {
 //            asyncTest("Test form: " + testFormNames[k], (function(i) {
@@ -1550,9 +1550,10 @@ start();
 //                    var myform;
 //                    get_cchq_forms(testFormNames[i]);
 //                    myform = testXformBuffer['fromcchq/' + testFormNames[i]];
+//                    resetVellumForUnitTests();
 //                    c.loadXForm(myform);             //parse
 //                    prettyTreeBefore[0] = formdesigner.controller.form.controlTree.printTree();
-//                    prettyTreeBefore[1] = formdesigner.controller.form.dataTree.printTree()
+//                    prettyTreeBefore[1] = formdesigner.controller.form.dataTree.printTree();
 //                    output = c.form.createXForm();  //generate form with FD
 //                    validateFormWithJR(output, validateCallbackFunc('Iteration:' + i));     //validate
 //
