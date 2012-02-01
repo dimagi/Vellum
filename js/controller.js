@@ -1685,16 +1685,15 @@ formdesigner.controller = (function () {
 	            }
 
 
+                //if we were passed a list of languages (in order of preference from outside)...
                 if (argument_langs) {  //we make sure this is a valid list with things in it or null at init time.
                     for (var i = 0; i < argument_langs; i++) {
-                        //Add each language that's listed in the launch args.
                         if (argument_langs.hasOwnProperty(i)) {
                             Itext.addLanguage(argument_langs[i]);
                         }
                     }
-                    //grab the default language.
+                    //grab the new 'default' language. (Opts languages listing takes precedence over form specified default)
                     defaultExternalLang = argument_langs[0];
-                    Itext.setDefaultLanguage(defaultExternalLang); //set the form default to the one specified in initialization options.
                 }
 
 
@@ -1706,9 +1705,10 @@ formdesigner.controller = (function () {
                 if (el.attr('default') !== undefined) {
                     Itext.setDefaultLanguage(lang);
                 }
-                
-                //if we were passed a list of languages (in order of preference from outside)...
 
+                if (defaultExternalLang) {
+                    Itext.setDefaultLanguage(defaultExternalLang); //set the form default to the one specified in initialization options.
+                }
 
                 //loop through children
                 el.children().each(eachText)
@@ -2020,8 +2020,10 @@ formdesigner.controller = (function () {
      * to represent how things were just after the first
      * init call was made (used for example when wanting
      * to create a 'New Form'
+     *
+     * @param opts - pass a new set of launch options to be used for reset.
      */
-    that.resetFormDesigner = function () {
+    that.resetFormDesigner = function (opts) {
         resetControllerInternal();
         formdesigner.model.reset();
         formdesigner.ui.resetUI();

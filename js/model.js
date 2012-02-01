@@ -2992,7 +2992,7 @@ formdesigner.model = function () {
             for (var i = 0; i < validIDList.length; i++) {
                 this.items.push(validIDList[i]);
             }
-        }
+        };
         itext.resetItextList = resetItextList;
 
         /**

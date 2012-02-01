@@ -835,7 +835,7 @@ formdesigner.ui = function () {
             });
 
             langList.val(formdesigner.currentItextDisplayLanguage);
-            if (formdesigner.opts.allowLanguageEdits) {
+            if (formdesigner.opts.allowLanguageEdits || typeof formdesigner.opts.allowLanguageEdits === "undefined") {
                 str = '';
                 str = '<button id="fd-lang-disp-add-lang-button">Add Language</button>';
                 addLangButton = $(str);
@@ -2007,7 +2007,7 @@ formdesigner.ui = function () {
 
     that.init = function() {
 //        //Override CCHQ's SaveButton labels:
-          //Bug: Does not work yet. See ticket: http://manage.dimagi.com/default.asp?31223
+//        //Bug: Does not work yet. See ticket: http://manage.dimagi.com/default.asp?31223
 //        SaveButton.message.SAVE = 'Save to Server';
 //        SaveButton.message.SAVED = 'Saved to Server';
         controller = formdesigner.controller;

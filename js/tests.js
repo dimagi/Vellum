@@ -16,7 +16,7 @@ var validateCallbackFunc = function (testDescription) {
 };
 
 $(document).ready(function(){
-    formdesigner.launch({langs: ["en"]});
+    formdesigner.launch({});
     var testXformBuffer = {};
     var testFormNames = [
         "Follow-up a Household Referral.xml",
@@ -58,7 +58,7 @@ $(document).ready(function(){
         var spec = {
             dataValue: initialData,
             nodeID: "data_for_question1"
-        }
+        };
         var myData = formdesigner.model.DataElement(spec);
 
         //Bind Element
@@ -75,7 +75,7 @@ $(document).ready(function(){
             dataElement: myData,
             bindElement: myBind,
             controlElement: myControl
-        }
+        };
         myMug = new formdesigner.model.Mug(mugSpec);
 
         return {
@@ -84,7 +84,7 @@ $(document).ready(function(){
             bind: myBind,
             mug: myMug
         };
-    }
+    };
 
     var getFormFromServerAndPlaceInBuffer = function (formName) {
         $.ajax({
@@ -96,7 +96,7 @@ $(document).ready(function(){
                 testXformBuffer[formName] = xform;
             }
         });
-    }
+    };
 
     var giveMugFakeValues = function (mug, mugType) {
         function randomString() {
@@ -123,8 +123,8 @@ $(document).ready(function(){
                                 // hack for itext to properly be set
                                 if (j.indexOf("ItextID") !== -1) {
                                     mug.properties[i].properties[j] = formdesigner.model.ItextItem({
-                                        id: formdesigner.util.generate_item_label(),
-                                    })
+                                        id: formdesigner.util.generate_item_label()
+                                    });
                                     mug.properties[i].properties[j].setDefaultValue(randomString());
                                 } else {
                                     mug.properties[i].properties[j] = randomString();
@@ -142,7 +142,7 @@ $(document).ready(function(){
                 delete mug.properties.bindElement.properties["constraintMsgAttr"];
             }         
         }
-    }
+    };
 
     var addQuestionThroughUI = function (type) {
         var addbut, sel;
@@ -152,7 +152,7 @@ $(document).ready(function(){
         sel.val(type); //set the dropdown to the correct val
         addbut.click(); //click the add question button.
 
-    }
+    };
 
     var listsHaveSameContents = function (expect, actual) {
         equal(expect.length, actual.length, "Lists are the same length");
@@ -172,7 +172,7 @@ $(document).ready(function(){
 
         ////////
         liveText.addToken("Test String");
-        equal(liveText.renderString(),"Test String", "Check for correct rendering of added string 'Test String'")
+        equal(liveText.renderString(),"Test String", "Check for correct rendering of added string 'Test String'");
 
         ////////
         var testObj = (function (){
@@ -255,7 +255,7 @@ start();
         var spec = {
             name: name,
             defaultData: initialData
-        }
+        };
 
         var otherData = formdesigner.model.DataElement(spec);
         ok(typeof otherData === 'object', "Is it an object? (with args)");
@@ -367,6 +367,7 @@ start();
     });
 
     asyncTest("Validate mug itext properties", function(){
+        resetVellumForUnitTests();
         expect(7);
         var MugType = formdesigner.model.mugTypeMaker.stdTextQuestion(); //simulates a 'standard' text question
         var myMug = MugType.mug;
@@ -678,13 +679,14 @@ start();
 
     asyncTest("Tree insertion tests", function(){
         expect(4);
+        resetVellumForUnitTests();
         var mugTA = formdesigner.model.mugTypeMaker.stdGroup(),
             mugTB = formdesigner.model.mugTypeMaker.stdTextQuestion(),
             mugTC = formdesigner.model.mugTypeMaker.stdTextQuestion(),
             mugA = mugTA.mug,
             mugB = mugTB.mug,
             mugC = mugTC.mug;
-        formdesigner.controller.resetFormDesigner();
+
 
         var mugs = [mugTA, mugTB, mugTC];
         for (var i = 0; i < mugs.length; i++) {
@@ -727,7 +729,7 @@ start();
             mugA = mugTA.mug,
             mugB = mugTB.mug,
             mugC = mugTC.mug;
-            formdesigner.controller.resetFormDesigner();
+            resetVellumForUnitTests();
         var c = formdesigner.controller,
         m = formdesigner.model;
 
@@ -760,7 +762,7 @@ start();
     module("UI Create Questions Tests");
     asyncTest("Add A text question", function(){
 
-        formdesigner.controller.resetFormDesigner();
+        resetVellumForUnitTests();
 
         var c,ui, jstree, curMugType, addqbut;
 
@@ -794,7 +796,7 @@ start();
 
     module("Itext functionality testing");
     asyncTest("Itext Language Operations", function(){
-        formdesigner.controller.resetFormDesigner();
+        resetVellumForUnitTests();
         var IT = formdesigner.model.Itext;
         var otherLanguageName = "sw";
         ok(IT.getLanguages().length === 1, "Test that there is only one language at start");
@@ -826,7 +828,7 @@ start();
         });
 
         asyncTest("Crufty Itext Removal Controller Wrapper Func", function () {
-                        formdesigner.controller.resetFormDesigner();
+                        resetVellumForUnitTests();
             var cleanForm = 'form0.xml';
             var cruftyForm = 'form_with_crufty_itext1.xml';
 
@@ -837,9 +839,9 @@ start();
             getFormFromServerAndPlaceInBuffer(cruftyForm);
             cruftyForm = testXformBuffer[cruftyForm];
 
-            var cleanIDs = ["question1-label", "question2-label", "question3-label", "question4-label", "question5-label"];
+            var cleanIDs = ["question1", "question2", "question3", "question4", "question5"];
             
-            var crufyIDs = ["question1-label", "question2-label", "question3-label", "question4-label", "question5-label",
+            var crufyIDs = ["question1", "question2", "question3", "question4", "question5",
                             "cough", "TB_positive", "fever", "skin_infection", "wound_infection", "hiv_positive", "BP", 
                             "diabetes", "danger_sign_preg_mother", "preg_mother-TT", "preg_mother-ante_natal", "birth_registration"];
 
@@ -858,52 +860,44 @@ start();
 
 
         asyncTest("Test default language setting", function () {
-                        formdesigner.controller.resetFormDesigner();
-            var preLangs = formdesigner.opts.langs; 
-            formdesigner.opts.langs = [];
             var form = 'form_with_3_languages.xml';
-
+            resetVellumForUnitTests();
             var Itext = formdesigner.model.Itext;
             var c = formdesigner.controller;
             getFormFromServerAndPlaceInBuffer(form);
             form = testXformBuffer[form];
 
-
-            formdesigner.myform = form;
             //Test the clean form
             c.loadXForm(form);
 
             window.setTimeout(function () {
                 start();
-                console.log("def", Itext.getDefaultLanguage());
-                equal(Itext.getDefaultLanguage(), 'th', "Language was correctly set to 'th'");
-
+                equal(Itext.getDefaultLanguage(), 'th', "Default Language was correctly set to 'th'");
                 Itext.setDefaultLanguage('sw');
-                equal(Itext.getDefaultLanguage(), 'sw', "Language was correctly set to 'sw'");
-                // reset langs back
-                formdesigner.opts.langs = preLangs;                
+                equal(Itext.getDefaultLanguage(), 'sw', "Default Language was correctly set to 'sw'");
             },777);
             
             
         });
 
         asyncTest("Test default language by using external language list init option", function () {
-                        formdesigner.controller.resetFormDesigner();
+
             var form = 'form_with_3_languages.xml';
             var Itext = formdesigner.model.Itext;
             var c = formdesigner.controller;
-            var xmlString;
+            var xmlString, opts = {};
             getFormFromServerAndPlaceInBuffer(form);
             form = testXformBuffer[form];
-
-            var preLangs = formdesigner.opts.langs;
-            formdesigner.opts.langs = ["sw", "th", "en"]; //fake the mechanism by which options are usually passed in by the launcher
-                                                   // see formdesigner.launch() in ui.js
+            //fake the mechanism by which options are usually passed in by the launcher see formdesigner.launch() in ui.js
+            opts.langs = ["sw", "th", "en"];
+            formdesigner.opts = opts;
+            resetVellumForUnitTests(opts);
             c.loadXForm(form);
 
             window.setTimeout(function () {
 
-                equal(Itext.getDefaultLanguage(), 'sw', "Language was correctly set to 'sw' at parse time");
+                equal(Itext.getDefaultLanguage(), 'sw', "Default Language was correctly set to 'sw' at parse time");
+                equal(formdesigner.currentItextDisplayLanguage, 'sw', "Is the display language set to 'sw'?");
 
                 xmlString = c.form.createXForm();
                 validateFormWithJR(xmlString, validateCallbackFunc('Default Language Init w sw'));
@@ -911,9 +905,8 @@ start();
                 var grepVal = grep(xmlString,"default=").trim();
                 equal(grepVal, '<translation lang="sw" default="">', "default attr was correctly set");
 
-                formdesigner.opts.langs = preLangs;
-                Itext.setDefaultLanguage("en");
-start();
+
+                start();
 
             },777);
         });
@@ -931,7 +924,7 @@ start();
                 jstree = $("#fd-question-tree"),
                 curMugType,
                 addQbut;
-        c.resetFormDesigner();
+        resetVellumForUnitTests();
         start()
         addQbut = $('#fd-add-but');
         addQbut.click();
@@ -954,7 +947,7 @@ start();
             jstree = $("#fd-question-tree"),
             curMugType, Itext,
             addQbut, lastCreatedNode, addGroupBut, qTypeSel;
-        c.resetFormDesigner();
+        resetVellumForUnitTests();
 
         Itext = formdesigner.model.Itext;
 
@@ -1007,7 +1000,7 @@ start();
             jstree = $("#fd-question-tree"),
             curMugType,
             lastCreatedNode;
-        c.resetFormDesigner();
+        resetVellumForUnitTests();
 
         jstree.bind('create_node.jstree',function(e,data){
             lastCreatedNode = data.rslt.obj;
@@ -1030,7 +1023,7 @@ start();
             mugType,
             ufid1,ufid2,
             lastCreatedNode;
-        c.resetFormDesigner();
+        resetVellumForUnitTests();
         jstree.bind('create_node.jstree',function(e,data){
             lastCreatedNode = data.rslt.obj;
         })
@@ -1055,7 +1048,7 @@ start();
             formID, formName, lastCreatedNode,
             c = formdesigner.controller,
             jstree = $("#fd-question-tree");
-        c.resetFormDesigner();
+        resetVellumForUnitTests();
 
         var mType = formdesigner.util.getNewMugType(formdesigner.model.mugTypes.dataBind),
         mug = formdesigner.model.createMugFromMugType(mType),
@@ -1090,7 +1083,7 @@ start();
             jstree = $("#fd-question-tree"),
             curMugType,
             addQbut, lastCreatedNode, addGroupBut, qTypeSel, iiD, groupMT, Itext,mugProps,cEl,iID;
-        c.resetFormDesigner();
+        resetVellumForUnitTests();
         jstree.bind('create_node.jstree',function(e,data){
             lastCreatedNode = data.rslt.obj;
         })
@@ -1155,7 +1148,7 @@ start();
                     curMugType,
                     addQbut, lastCreatedNode, addGroupBut, qTypeSel, iiD, groupMT, Itext,mugProps,cEl,iID,
                     workingField;
-        c.resetFormDesigner();
+        resetVellumForUnitTests();
 
 //        start();
         Itext = formdesigner.model.Itext;
@@ -1359,7 +1352,7 @@ start();
                     curMugType,
                     addQbut, lastCreatedNode, addGroupBut, qTypeSel, iiD, groupMT, Itext,mugProps,cEl,iID,
                     workingField;
-        c.resetFormDesigner();
+        resetVellumForUnitTests();
 
 
         Itext = formdesigner.model.Itext;
@@ -1443,7 +1436,7 @@ start();
             curMugType,
             addQbut, lastCreatedNode, addGroupBut, qTypeSel, iiD, groupMT, Itext,mugProps,cEl,iID,
                 sourceDrop, parseButton, pErrors, expectedErrors, myxml;
-        c.resetFormDesigner();
+        resetVellumForUnitTests();
 
 
         getFormFromServerAndPlaceInBuffer('form_with_no_data_attrs.xml');
@@ -1451,15 +1444,14 @@ start();
         c.loadXForm(myxml); //load the xform using the standard pathway in the FD for parsing forms
         window.setTimeout(function () {
             expectedErrors = [
-                "warning::Form does not have a unique xform XMLNS (in data block). Will be added automatically",
-                "warning::Form JRM namespace attribute was not found in data block. One will be added automatically",
-                "warning::Form does not have a UIVersion attribute, one will be generated automatically",
-                "warning::Form does not have a Version attribute (in the data block), one will be added automatically",
-                "warning::Form does not have a Name! The default form name will be used"
+                "Form does not have a unique xform XMLNS (in data block). Will be added automatically",
+                "Form JRM namespace attribute was not found in data block. One will be added automatically",
+                "Form does not have a UIVersion attribute, one will be generated automatically",
+                "Form does not have a Version attribute (in the data block), one will be added automatically",
+                "Form does not have a Name! The default form name will be used"
             ];
             start();
-            pErrors = c.getParseErrorMsgs();
-            deepEqual(pErrors, expectedErrors, "Do the correct errors get generated for a form with no data block attributes?");
+            deepEqual(c.parseWarningMsgs, expectedErrors, "Do the correct warnings get generated for a form with no data block attributes?");
         }, 1000);
 
     });
@@ -1512,7 +1504,7 @@ start();
                 addQbut, lastCreatedNode, addGroupBut, qTypeSel, iiD, groupMT, Itext,mugProps,cEl,iID,
                 workingField, jstree;
 
-        c.resetFormDesigner();
+        resetVellumForUnitTests();
 
 
         Itext = formdesigner.model.Itext;
@@ -1608,6 +1600,20 @@ function validateFormWithJR(actual, successFunc, name) {
 
 //        $.ajaxSetup({"async": false});
     $.post('/formtranslate/validate/',{xform: actual},successFunc);
+}
+
+function resetVellumForUnitTests(opts) {
+    if (opts) {
+        formdesigner.opts = opts;
+    } else {
+        formdesigner.opts = {};
+    }
+    formdesigner.controller.resetFormDesigner();
+    if (!formdesigner.opts.langs) {
+        formdesigner.opts.allowLanguageEdits = true;
+        formdesigner.model.Itext.addLanguage("en"); //add a starting language
+        formdesigner.model.Itext.setDefaultLanguage("en");
+    }
 }
 
 function parseXMLAndGetSelector(xmlString) {
