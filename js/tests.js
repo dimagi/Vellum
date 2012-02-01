@@ -823,10 +823,6 @@ start();
         start();
     });
 
-        asyncTest("Crufty Itext Removal Funcs", function () {
-            start(); 
-        });
-
         asyncTest("Crufty Itext Removal Controller Wrapper Func", function () {
                         resetVellumForUnitTests();
             var cleanForm = 'form0.xml';
@@ -1046,25 +1042,29 @@ start();
             binds = xml.find('bind'),
             data = xml.find('instance').children(),
             formID, formName, lastCreatedNode,
-            c = formdesigner.controller,
+            c ,replaceSuccess,
             jstree = $("#fd-question-tree");
         resetVellumForUnitTests();
-
+        c = formdesigner.controller;
         var mType = formdesigner.util.getNewMugType(formdesigner.model.mugTypes.dataBind),
         mug = formdesigner.model.createMugFromMugType(mType),
         oldMT;
 
         jstree.bind('create_node.jstree',function(e,data){
             lastCreatedNode = data.rslt.obj;
-        })
+        });
 
         addQuestionThroughUI("Text Question");
-        oldMT = formdesigner.controller.form.getMugTypeByIDFromTree('question2', 'data');
+        oldMT = formdesigner.controller.form.getMugTypeByIDFromTree('question2', 'data')[0];
+        replaceSuccess = c.form.replaceMugType(oldMT,mType,'data');
         mType.mug = mug;
         mType.mug.properties.dataElement.properties.nodeID = 'HYAAA';
         mType.ufid = oldMT.ufid;
 
-        c.form.replaceMugType(oldMT,mType,'data');
+
+        ok(replaceSuccess, "Replace Operation was succesful");
+        equal(formdesigner.controller.form.getMugTypeByIDFromTree('HYAAA', 'data')[0], mType, "mug replacement worked");
+
         start();
     });
 
