@@ -187,7 +187,7 @@ formdesigner.widgets = (function () {
             } else {
                 //this.getControl().removeClass("auto-itext");
             }
-        }
+        };
         
         // support auto mode to keep ids in sync
         if (widget.currentValue.id === widget.autoGenerateId(widget.getNodeId())) {
@@ -245,7 +245,7 @@ formdesigner.widgets = (function () {
             }
         }); 
         return widget;
-    }
+    };
     
     that.checkboxWidget = function (mugType, path) {
                 
@@ -346,7 +346,7 @@ formdesigner.widgets = (function () {
 	               value: this.getValue()
 	            });
 	            formdesigner.controller.form.fire({ 
-	               type: "form-property-changed",
+	               type: "form-property-changed"
 	            });
 	        }
         };
@@ -430,7 +430,7 @@ formdesigner.widgets = (function () {
         
         var input = $("<select />").attr("id", widget.getID()).addClass("chzn-select");
         input.append($('<option value="blank" />'));
-        for (i in widget.definition.values) {
+        for (var i in widget.definition.values) {
             if (widget.definition.values.hasOwnProperty(i)) {
                 var strVal = formdesigner.util.fromCamelToRegularCase(widget.definition.values[i].replace('xsd:','')),
                     isSelected = '';
@@ -803,7 +803,7 @@ formdesigner.widgets = (function () {
              "bindElement/preload", "bindElement/preloadParams", 
              "controlElement/label", "controlElement/hintLabel", 
              "bindElement/constraintMsgAttr", "controlElement/labelItextID", 
-             "controlElement/hintItextID"], mugType);
+             "controlElement/hintItextID", "controlElement/repeat_count", "controlElement/no_add_remove"], mugType);
         var elements = elementPaths.map(wrapAsGeneric);
         
         if (elementPaths.indexOf("controlElement/hintItextID") !== -1) {

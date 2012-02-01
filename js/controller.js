@@ -1269,24 +1269,7 @@ formdesigner.controller = (function () {
 
         function parseBindList (bindList) {
 
-            /**
-             * Parses the required attribute string (expecting either "true()" or "false()" or nothing
-             * and returns either true, false or null
-             * @param attrString - string
-             */
-            function parseRequiredAttribute (attrString) {
-                if (!attrString) {
-                    return null;
-                }
-                var str = attrString.toLowerCase().replace(/\s/g, '');
-                if (str === 'true()') {
-                    return true;
-                } else if (str === 'false()') {
-                    return false;
-                } else {
-                    return null;
-                }
-            }
+
 
             /**
              * Takes in a path and converts it to an absolute path (if it isn't one already)
@@ -1348,7 +1331,7 @@ formdesigner.controller = (function () {
                 }
                                 
                 // TODO: parse constraint itext
-                attrs.requiredAttr = parseRequiredAttribute(el.attr('required'));
+                attrs.requiredAttr = formdesigner.util.parseBoolAttributeValue(el.attr('required'));
                 
                 attrs.preload = lookForNamespaced(el, "preload");
                 attrs.preloadParams = lookForNamespaced(el, "preloadParams");
@@ -1486,7 +1469,7 @@ formdesigner.controller = (function () {
                 }
 
                 function populateMug (MugType, cEl) {
-                    var labelEl, hintEl, Itext;
+                    var labelEl, hintEl, Itext, repeat_count, repeat_noaddremove;
                     Itext = formdesigner.model.Itext;
                     function parseLabel (lEl, MT) {
                         var labelVal = formdesigner.util.getXLabelValue($(lEl)),
@@ -1555,10 +1538,23 @@ formdesigner.controller = (function () {
                         }
                     }
 
+                    function parseRepeatVals (r_count, r_noaddremove, MT) {
+                        //MT.mug.properties.controlElement.properties
+                        if (r_count) {
+                            MT.mug.properties.controlElement.properties.repeat_count = r_count;
+                        }
+
+                        if(r_noaddremove) {
+                            MT.mug.properties.controlElement.properties.no_add_remove = r_noaddremove;
+                        }
+                    }
                     var tag = MugType.mug.properties.controlElement.properties.tagName;
                     if(tag === 'repeat'){
                         labelEl = $($(cEl).parent().children('label'));
                         hintEl = $(cEl).parent().children('hint');
+                        repeat_count = $(cEl).attr('jr:count');
+                        repeat_noaddremove = formdesigner.util.parseBoolAttributeValue($(cEl).attr('jr:noAddRemove'));
+
                     } else {
                         labelEl = $(cEl).children('label');
                         hintEl = $(cEl).children('hint');
@@ -1575,6 +1571,10 @@ formdesigner.controller = (function () {
                         parseDefaultValue($(cEl).children('value'),MugType);
                     }
 
+                    if (tag === 'repeat') {
+                        parseRepeatVals(repeat_count, repeat_noaddremove, MugType);
+                    }
+
                 }
 
                 function insertMTInControlTree (MugType, parentMT) {
@@ -1582,7 +1582,7 @@ formdesigner.controller = (function () {
                 }
 
                 //figures out if this control DOM element is a repeat
-                function isRepeat(groupEl) {
+                function isRepeatTest(groupEl) {
                     if($(groupEl)[0].tagName !== 'group') {
                         return false;
                     }
@@ -1600,11 +1600,12 @@ formdesigner.controller = (function () {
                     tagName,
                     couldHaveChildren = ['repeat', 'group', 'select', 'select1'],
                     children,
-                    bind;
+                    bind,
+                    isRepeat;
 
-
+                isRepeat = isRepeatTest(el);
                 //do the repeat switch thing
-                if(isRepeat(el)) {
+                if(isRepeat) {
                     oldEl = el;
                     el = $(el.children('repeat')[0]);
                 }

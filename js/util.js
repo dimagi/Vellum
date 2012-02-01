@@ -348,7 +348,7 @@ formdesigner.util = (function(){
        else
           alert("cannot parse xml string!");
        return dom;
-    }
+    };
     /**
      * Takes in a reference mugType and makes a copy of
      * the object (the copy is returned).
@@ -822,6 +822,39 @@ formdesigner.util = (function(){
     
     that.isSelectItem = function (mug) {
         return (mug.typeName === "Select Item")
+    };
+
+    /**
+     * Parses the required attribute string (expecting either "true()" or "false()" or nothing
+     * and returns either true, false or null
+     * @param attrString - string
+     */
+    that.parseBoolAttributeValue = function (attrString) {
+        if (!attrString) {
+            return null;
+        }
+        var str = attrString.toLowerCase().replace(/\s/g, '');
+        if (str === 'true()') {
+            return true;
+        } else if (str === 'false()') {
+            return false;
+        } else {
+            return null;
+        }
+    };
+
+    /**
+     * Converts true to 'true()' and false to 'false()'. Returns null for all else.
+     * @param req
+     */
+    that.createXPathBoolFromJS = function(req) {
+        if(req === true || req === 'true') {
+            return 'true()';
+        }else if (req === false || req === 'false') {
+            return 'false()';
+        } else {
+            return null;
+        }
     };
     
     /**

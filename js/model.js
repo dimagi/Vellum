@@ -1197,7 +1197,7 @@ formdesigner.model = function () {
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
         return mType;
-    }
+    };
 
     that.mugTypeMaker.stdSecret = function () {
         var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion),
@@ -1305,7 +1305,7 @@ formdesigner.model = function () {
         mType.mug.properties.controlElement.properties.name = "Double";
         mType.mug.properties.bindElement.properties.dataType = "xsd:double";
         return mType;
-    }
+    };
 
 
     that.mugTypeMaker.stdItem = function () {
@@ -1377,7 +1377,7 @@ formdesigner.model = function () {
         mType.mug.properties.controlElement.properties.name = 'Single-Select';
         mType.mug.properties.controlElement.properties.tagName = "select1";
         return mType;
-    }
+    };
 
     that.mugTypeMaker.stdGroup = function () {
         var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion),
@@ -1410,11 +1410,25 @@ formdesigner.model = function () {
         var mType;
 
         mType = formdesigner.model.mugTypeMaker.stdGroup();
+        mType.properties.controlElement.repeat_count = {
+            lstring: 'Repeat Count',
+            visibility: 'visible',
+            editable: 'w',
+            presence: 'optional'
+        };
+        mType.properties.controlElement.no_add_remove = {
+            lstring: 'Allow Repeat Add and Remove?',
+            visibility: 'visible',
+            editable: 'w',
+            presence: 'optional',
+            uiType: 'checkbox'
+        };
         mType.typeName = "Repeat";
         mType.mug.properties.controlElement.properties.name = "Repeat";
         mType.mug.properties.controlElement.properties.tagName = "repeat";
+
         return mType;
-    }
+    };
 
 
 
@@ -2099,7 +2113,7 @@ formdesigner.model = function () {
             var createDataBlock = function () {
                 // use dataTree.treeMap(func,listStore,afterChildfunc)
                 // create func that opens + creates the data tag, that can be recursively called on all children
-                // create afterChildfunc that closes the data tag
+                // create afterChildfunc which closes the data tag
                 function mapFunc (node) {
                     var xw = formdesigner.controller.XMLWriter,
                         defaultVal, extraXMLNS, keyAttr,
@@ -2135,53 +2149,32 @@ formdesigner.model = function () {
                 }
 
                 dataTree.treeMap(mapFunc, afterFunc);
-            }
+            };
 
             var createBindList = function () {
                 var xw = formdesigner.controller.XMLWriter,
                     bList = formdesigner.controller.form.getBindList(),
                     MT,
                         //vars populated by populateVariables()
-                        bEl,cons,consMsg,nodeset,type,relevant,required,calc,
+                        bEl,cons,consMsg,nodeset,type,relevant,required,calc,preld,preldParams,
                     i, attrs, j;
 
-                /**
-                 * Converts true to 'true()' and false to 'false()'. Returns null for all else.
-                 * @param req
-                 */
-                function createBindRequiredAttribute(req) {
-                    if(req === true) {
-                        return 'true()';
-                    }else if (req === false) {
-                        return 'false()';
-                    } else {
-                        return null;
-                    }
-                }
+
 
                 function populateVariables (MT){
                     bEl = MT.mug.properties.bindElement;
                     if (bEl) {
-                        cons = bEl.properties.constraintAttr;
-                        consMsg = bEl.properties.constraintMsgAttr;
-                        nodeset = dataTree.getAbsolutePath(MT);
-                        type = bEl.properties.dataType;
-                        relevant = bEl.properties.relevantAttr;
-                        required = createBindRequiredAttribute(bEl.properties.requiredAttr);
-                        calc = bEl.properties.calculateAttr;
-                        preld = bEl.properties.preload;
-                        preldParams = bEl.properties.preloadParams;
                         return {
-                            nodeset: nodeset,
-                            'type': type,
-                            constraint: cons,
-                            constraintMsg: consMsg,
+                            nodeset: dataTree.getAbsolutePath(MT),
+                            'type': bEl.properties.dataType,
+                            constraint: bEl.properties.constraintAttr,
+                            constraintMsg: bEl.properties.constraintMsgAttr,
                             constraintMsgItextID: bEl.properties.constraintMsgItextID.id,
-                            relevant: relevant,
-                            required: required,
-                            calculate: calc,
-                            preload: preld,
-                            preloadParams: preldParams
+                            relevant: bEl.properties.relevantAttr,
+                            required: formdesigner.util.createXPathBoolFromJS(bEl.properties.requiredAttr),
+                            calculate: bEl.properties.calculateAttr,
+                            preload: bEl.properties.preload,
+                            preloadParams: bEl.properties.preloadParams
                         }
                     } else {
                         return null;
@@ -2221,7 +2214,7 @@ formdesigner.model = function () {
             }
 
             var createControlBlock = function () {
-                var mapFunc, afterFunc
+                var mapFunc, afterFunc;
 
                 function mapFunc(node) {
                     if(node.isRootNode) { //skip
@@ -2269,7 +2262,7 @@ formdesigner.model = function () {
                         } else {
                             xmlWriter.writeStartElement(tagName);
                         }
-                        if (tagName !== 'group') {
+                        if (tagName !== 'group' && tagName !== 'repeat') {
                             createLabel();
                         }
                         //////////////////////////////////////////////////////////////////////////
@@ -2290,6 +2283,23 @@ formdesigner.model = function () {
                             }
                             absPath = formdesigner.controller.form.dataTree.getAbsolutePath(mugType);
                             xmlWriter.writeAttributeStringSafe(attr, absPath);
+                        }
+                        //////////////////////////////////////////////////////////////////////
+                        ///Set other relevant attributes
+
+                        if (tagName === 'repeat') {
+                            var r_count = cProps.repeat_count,
+                                r_noaddrem = cProps.no_add_remove;
+
+                            //make r_noaddrem an XPath bool
+                            r_noaddrem = formdesigner.util.createXPathBoolFromJS(r_noaddrem);
+
+                            if (r_count) {
+                                xmlWriter.writeAttributeStringSafe("jr:count",r_count);
+                            }
+                            if (r_noaddrem) {
+                                xmlWriter.writeAttributeStringSafe("jr:noAddRemove", r_noaddrem);
+                            }
                         }
                         //////////////////////////////////////////////////////////////////////
                         //Do hint label
@@ -2348,7 +2358,7 @@ formdesigner.model = function () {
                         xmlWriter.writeEndElement(); //special case where we have to close the repeat as well as the group tag.
                     }
 
-                };
+                }
 
                 controlTree.treeMap(mapFunc, afterFunc);
             };
