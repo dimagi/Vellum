@@ -50,7 +50,10 @@ formdesigner.util = (function(){
         "selectQuestion",
         "trigger",
         "secret",
-        "default"
+        "default",
+        "image",
+        "audio",
+        "video"
     ];
 
     /**
@@ -85,7 +88,7 @@ formdesigner.util = (function(){
         }
 
         function getStartTag (str) {
-            var re, res
+            var re, res;
             re = /<(?:"[^"]*"['"]*|'[^']*'['"]*|[^'">])+>/;
             res = re.exec(str);
             return res[0];
@@ -96,13 +99,13 @@ formdesigner.util = (function(){
         resStr = xmls.serializeToString(resEl);
         resStr = resStr.replace(getStartTag(resStr),'').replace(getEndTag(resStr),'');
         return resStr;
-    };
+    }
     that.getXLabelValue = getXLabelValue;
 
     var dumpFormTreesToConsole = function () {
         var vObj = [], vOut = [], i, invalidMT = [], mt;
                 console.group("Tree Pretty Print");
-                console.log("Control Tree:"+formdesigner.controller.form.controlTree.printTree())
+                console.log("Control Tree:"+formdesigner.controller.form.controlTree.printTree());
                 console.log("Data Tree:   "+formdesigner.controller.form.dataTree.printTree());
                 console.log("TREE VALIDATION RESULT",formdesigner.controller.form.controlTree.isTreeValid());
                 invalidMT = formdesigner.controller.form.getInvalidMugTypes();
@@ -130,7 +133,7 @@ formdesigner.util = (function(){
         // insert a space before all caps
         ret = myString.replace(/([A-Z])/g, ' $1')
         // uppercase the first character
-                .replace(/^./, function(str){ return str.toUpperCase(); })
+                .replace(/^./, function(str){ return str.toUpperCase(); });
 
         return ret;
     }

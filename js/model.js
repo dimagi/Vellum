@@ -1235,6 +1235,58 @@ formdesigner.model = function () {
         return mType;
     };
 
+    that.mugTypeMaker.stdAudio = function () {
+        var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion),
+                mug;
+        mType.typeName = "Audio Question";
+        mType.controlNodeAllowedChildren = false;
+        mType.properties.controlElement.mediaType = {
+            lstring: 'Media Type',
+            visibility: 'visible',
+            editable: 'w',
+            presence: 'required'
+        };
+
+        mug = that.createMugFromMugType(mType);
+        mType.mug = mug;
+        mType.mug.properties.controlElement.properties.name = "Audio";
+        mType.mug.properties.controlElement.properties.tagName = "upload";
+        mType.mug.properties.controlElement.properties.mediaType = "audio/*";
+        mType.mug.properties.bindElement.properties.dataType = "binary";
+
+        return mType;
+    };
+
+    that.mugTypeMaker.stdImage = function () {
+        var mType = formdesigner.util.getNewMugType(that.mugTypeMaker.stdAudio()),
+                mug;
+        mType.typeName = "Image Question";
+        mug = that.createMugFromMugType(mType);
+        mType.mug = mug;
+        mType.mug.properties.controlElement.properties.name = "Image";
+        mType.mug.properties.controlElement.properties.tagName = "upload";
+        mType.mug.properties.controlElement.properties.mediaType = "image/*";
+        mType.mug.properties.bindElement.properties.dataType = "binary";
+        return mType;
+    };
+
+    that.mugTypeMaker.stdVideo = function () {
+        var mType = formdesigner.util.getNewMugType(that.mugTypeMaker.stdAudio()),
+                mug;
+        mType.typeName = "Video Question";
+        mug = that.createMugFromMugType(mType);
+        mType.mug = mug;
+        mType.mug.properties.controlElement.properties.name = "Video";
+        mType.mug.properties.controlElement.properties.tagName = "upload";
+        mType.mug.properties.controlElement.properties.mediaType = "video/*";
+        mType.mug.properties.bindElement.properties.dataType = "binary";
+        return mType;
+    };
+
+
+
+
+
     that.mugTypeMaker.stdGeopoint = function () {
         var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion),
                 mug;
@@ -2235,6 +2287,7 @@ formdesigner.model = function () {
                     function createOpenControlTag(tagName,elLabel){
                         tagName = tagName.toLowerCase();
                         var isGroupOrRepeat = (tagName === 'group' || tagName === 'repeat');
+                        var isODKMedia = (tagName === 'upload');
 
                         /**
                          * Creates the label tag inside of a control Element in the xform
@@ -2299,6 +2352,11 @@ formdesigner.model = function () {
                             }
                             if (r_noaddrem) {
                                 xmlWriter.writeAttributeStringSafe("jr:noAddRemove", r_noaddrem);
+                            }
+                        } else if (isODKMedia) {
+                            var mediaType = cProps.mediaType;
+                            if (mediaType) {
+                                xmlWriter.writeAttributeStringSafe("mediatype", mediaType);
                             }
                         }
                         //////////////////////////////////////////////////////////////////////

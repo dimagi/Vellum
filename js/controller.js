@@ -500,6 +500,15 @@ formdesigner.controller = (function () {
                 case 'geopoint':
                     setType('geopoint');
                     break;
+                case 'image':
+                    setType('image');
+                    break;
+                case 'audio':
+                    setType('audio');
+                    break;
+                case 'video':
+                    setType('video');
+                    break;
 
 
             }
@@ -678,6 +687,15 @@ formdesigner.controller = (function () {
             case 'barcode':
                 mugType = formdesigner.model.mugTypeMaker.stdBarcode();
                 break;
+            case 'image':
+                mugType = formdesigner.model.mugTypeMaker.stdImage();
+                break;
+            case 'audio':
+                mugType = formdesigner.model.mugTypeMaker.stdAudio();
+                break;
+            case 'video':
+                mugType = formdesigner.model.mugTypeMaker.stdVideo();
+                break;
             default:
                 console.log("No standard mugType for selected question type:" + qType + " switching to 'Text Question' type!");
                 mugType = formdesigner.model.mugTypeMaker.stdTextQuestion();
@@ -709,7 +727,7 @@ formdesigner.controller = (function () {
         formdesigner.model.Itext.updateForNewMug(mugType);
         
         createQuestionInUITree(mugType);
-        createQuestionInDataTree(mugType);
+//        createQuestionInDataTree(mugType);
         
         
         // events
@@ -1307,7 +1325,7 @@ formdesigner.controller = (function () {
                 attrs.relevantAttr = el.attr('relevant');
                 attrs.calculateAttr = el.attr('calculate');
                 attrs.constraintAttr = el.attr('constraint');
-                
+
                 var constraintMsg = lookForNamespaced(el, "constraintMsg");
                 
                 var constraintItext = getITextReference(constraintMsg);
@@ -1366,7 +1384,7 @@ formdesigner.controller = (function () {
                  */
                 function classifyAndCreateMugType (nodePath, cEl) {
                     var oldMT = that.getMugByPath(nodePath, 'data'), //check the date node to see if there's a related MT already present
-                        mugType, mug, tagName, bindEl, dataEl, dataType, MTIdentifier,
+                        mugType, mug, tagName, bindEl, dataEl, dataType, MTIdentifier, mediaType,
                         //flags
                         hasBind = true;
 
@@ -1375,9 +1393,13 @@ formdesigner.controller = (function () {
                         bindEl = oldMT.mug.properties.bindElement;
                         if (bindEl) {
                             dataType = bindEl.properties.dataType;
+                            mediaType = cEl.attr('mediatype') ? cEl.attr('mediatype') : null;
                             if (dataType) {
                                 dataType = dataType.replace('xsd:',''); //strip out extranous namespace
                                 dataType = dataType.toLowerCase();
+                            }
+                            if(mediaType) {
+                                mediaType = mediaType.toLowerCase();
                             }
                         }else{
                             hasBind = false;
@@ -1400,6 +1422,8 @@ formdesigner.controller = (function () {
                         MTIdentifier = 'stdGroup';
                     }else if (tagName === 'secret') {
                         MTIdentifier = 'stdSecret';
+                    }else if (tagName === 'upload') {
+                        MTIdentifier = 'stdAudio';
                     }
 
                     //fine tune for special cases (repeats, groups, inputs)
@@ -1427,7 +1451,23 @@ formdesigner.controller = (function () {
                             tagName = 'repeat';
                             MTIdentifier = 'stdRepeat';
                         }
+                    }else if (MTIdentifier === 'stdAudio') {
+                        if(!mediaType) {
+                            throw 'Unable to parse binary question type. Path: ' +
+                                    formdesigner.controller.form.dataTree.getAbsolutePath(oldMT) +
+                                    'The question has no MediaType attribute assigned to it!'
+                        }
+
+                        if (mediaType === 'video/*') {
+                            MTIdentifier = 'stdVideo';
+                        } else if (mediaType === 'image/*') {
+                            MTIdentifier = 'stdImage';
+                        } else if (mediaType === 'audio/*') {
+                            MTIdentifier = 'stdAudio';
+                        }
+
                     }
+
                     try{
                         mugType = formdesigner.model.mugTypeMaker[MTIdentifier]();
                     }catch (e) {

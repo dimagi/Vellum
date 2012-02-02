@@ -170,8 +170,52 @@ formdesigner.ui = function () {
 
     function init_toolbar() {
         var toolbar = $(".fd-toolbar"), select, addbutstr, addbut;
+        select = $('<select></select>')
+                .attr('id','fd-question-select');
+        toolbar.prepend(select);
 
-        select = $('#fd-question-select');
+        function buildSelectDropDown () {
+            function makeOptionItem(idTag, attrvalue, label) {
+               var opt = $('<option></option>')
+                       .attr('id','fd-add-'+idTag+'-button')
+                       .attr('value',attrvalue)
+                       .addClass("questionButton")
+                       .addClass("toolbarButton")
+                       .text(label);
+               return opt;
+            }
+
+            var questions = [
+                //in the format: [id_tag, option_value_attribute, option_label]
+                ['text', 'Text Question', 'Text Question'],
+                ['secret', 'Secret Question', 'Password Question'],
+                ['group', 'Group', 'Group'],
+                ['select', 'Multi-Select Question', 'Multi-Select Question'],
+                ['item', 'Select Item', 'Select Item'],
+                ['1select', 'Single Select', 'Single Select'],
+                ['trigger', 'Label', 'Label'],
+                ['repeat', 'Repeat', 'Repeat'],
+                ['barcode', 'Barcode Question', 'Barcode Question'],
+                ['geopoint', 'Geopoint Question', 'Geopoint Question'],
+                ['int', 'Integer Number', 'Integer Number'],
+                ['double', 'Double Number', 'Decimal Number'],
+                ['long', 'Long Number', 'Long Number'],
+                ['image', 'Image Question', 'Image Question'],
+                ['audio', 'Audio Question', 'Audio Question'],
+                ['video', 'Video Question', 'Video Question'],
+                ['date', 'Date', 'Date'],
+                ['datetime', 'Date and Time', 'Date and Time'],
+                ['datanode', 'Data Node', 'Data Node']
+            ];
+            var i;
+            for (i=0;i<questions.length;i++) {
+                if(questions.hasOwnProperty(i)) {
+                    select.append(makeOptionItem(questions[i][0], questions[i][1], questions[i][2]))
+                }
+            }
+        }
+
+        buildSelectDropDown();
         addbutstr = '<button id="fd-add-but">Add</button>';
         select.after(addbutstr);
         addbut = $('#fd-add-but');
@@ -387,6 +431,27 @@ formdesigner.ui = function () {
                             "icon": {
                                 "image": jquery_icon_url,
                                 "position": "-16px -176px"
+                            },
+                            "valid_children" : "none"
+                        },
+                        "image" : {
+                            "icon": {
+                                "image": jquery_icon_url,
+                                "position": "-208px -128px"
+                            },
+                            "valid_children" : "none"
+                        },
+                        "audio" : {
+                            "icon": {
+                                "image": jquery_icon_url,
+                                "position": "-144px -160px"
+                            },
+                            "valid_children" : "none"
+                        },
+                        "video" : {
+                            "icon": {
+                                "image": jquery_icon_url,
+                                "position": "-224px -128px"
                             },
                             "valid_children" : "none"
                         },
