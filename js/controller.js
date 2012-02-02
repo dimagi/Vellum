@@ -382,11 +382,9 @@ formdesigner.controller = (function () {
      */
     function reloadUI () {
         var tree, treeFunc, loaderFunc, dataNodeList, i;
-
         //first clear out the existing UI
         formdesigner.ui.resetUI();
         that.setCurrentlySelectedMugType(null);
-
 
         treeFunc = function (node) {
             var mt;
@@ -406,11 +404,6 @@ formdesigner.controller = (function () {
         loaderFunc = that.loadMugTypeIntoUI;
         tree = that.form.controlTree;
         tree.treeMap(treeFunc);
-
-        loaderFunc = that.loadMugTypeIntoDataUITree;
-        tree = that.form.dataTree;
-        tree.treeMap(treeFunc);
-
         //get list of pure data nodes and throw them in the Question UI tree (at the bottom)
         dataNodeList = that.getDataNodeList();
         for (i in dataNodeList) {
@@ -418,17 +411,10 @@ formdesigner.controller = (function () {
                 that.loadMugTypeIntoUI(dataNodeList[i]);
             }
         }
-
-
         formdesigner.ui.setAllTreeValidationIcons();
-
         that.fire('fd-reload-ui');
-
     }
-
     that.reloadUI = reloadUI;
-
-
 
     /**
      * Goes through and grabs all of the data nodes (i.e. nodes that are only data nodes (possibly with a bind) without any
@@ -547,7 +533,6 @@ formdesigner.controller = (function () {
             formdesigner.ui.getQuestionJSTree().jstree("deselect_all");
             insertPosition = "last";
         }
-        
         $('#fd-question-tree').jstree("create",
             null, //reference node, use null if using UI plugin for currently selected
             insertPosition, //position relative to reference node
@@ -745,6 +730,7 @@ formdesigner.controller = (function () {
     that.createQuestion = createQuestion;
 
     var loadMugTypeIntoUI = function (mugType) {
+
         var mug, controlTree, parentMT, parentMTUfid, loadMTEvent = {};
 
         mug = mugType.mug;
@@ -752,6 +738,7 @@ formdesigner.controller = (function () {
         //set the 'currently selected mugType' to be that of this mugType's parent.
         controlTree = that.form.controlTree;
         parentMT = controlTree.getParentMugType(mugType);
+
         if(parentMT && mugType.properties.controlElement){ //check for control element because we want data nodes to be a flat list at bottom.
             parentMTUfid = parentMT.ufid;
             $('#fd-question-tree').jstree('select_node',$('#'+parentMTUfid), true);
@@ -760,6 +747,7 @@ formdesigner.controller = (function () {
             $('#fd-question-tree').jstree('deselect_all');
         }
         createQuestionInUITree(mugType);
+
         loadMTEvent.type= "mugtype-loaded";
         loadMTEvent.mugType = mugType;
         formdesigner.controller.fire(loadMTEvent);
