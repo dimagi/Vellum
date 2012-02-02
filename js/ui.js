@@ -168,6 +168,35 @@ formdesigner.ui = function () {
     };
     that.hideFormWarnMessage = hideFormWarnMessage;
 
+    var addQuestion = function(qType) {
+        try {
+            var newMug = formdesigner.controller.createQuestion(qType);
+            that.selectMugTypeInUI(newMug);
+
+            if(['image','audio','video'].indexOf(qType) !== -1) { //it's an ODK media question
+                showFormWarnMessage('This question type will ONLY work with CommCareODK/ODK Collect!');
+            }
+            return newMug;
+        } catch (e) {
+            if (e.name === "IllegalMove") {
+                if (qType == "item") {
+                    alert("You can't do that. Select items can only be added to Single Select or Multi-Select Questions.");
+                } else {
+                    alert("Sorry that question type can't be added to the currently selected question.");
+                }
+            } else if (e.name === "NoNodeFound") {
+                // this is the error that gets raised when you add to a select item.
+                // kinda sketch but more user friendly
+                alert("You can't add questions to Select Items. Select something else before adding your question.");
+            } else {
+                // we don't know what went wrong here.
+                throw e;
+            }
+
+        }
+    };
+    that.addQuestion = addQuestion;
+
     function init_toolbar() {
         var toolbar = $(".fd-toolbar"), select, addbutstr, addbut;
         select = $('<select></select>')
@@ -225,39 +254,15 @@ formdesigner.ui = function () {
             }
         });
 
-        function addQuestion() {
+        function addQuestionBySelect() {
             var selVal, qID,qType;
             selVal = $('#fd-question-select').val();
             qID = $('#fd-question-select').find('[value*="' + selVal + '"]').attr('id');
             qType = qID.split('-')[2];
-            try {
-                var newMug = formdesigner.controller.createQuestion(qType);
-                that.selectMugTypeInUI(newMug);
-
-                if(['image','audio','video'].indexOf(qType) !== -1) { //it's an ODK media question
-                    showFormWarnMessage('This question type will ONLY work with CommCareODK/ODK Collect!');
-                }
-
-            } catch (e) {
-                if (e.name === "IllegalMove") {
-                    if (qType == "item") {
-                        alert("You can't do that. Select items can only be added to Single Select or Multi-Select Questions.");
-                    } else {
-                        alert("Sorry that question type can't be added to the currently selected question.");
-                    }
-                } else if (e.name === "NoNodeFound") {
-                    // this is the error that gets raised when you add to a select item.
-                    // kinda sketch but more user friendly
-                    alert("You can't add questions to Select Items. Select something else before adding your question.");
-                } else {
-                    // we don't know what went wrong here.
-                    throw e;
-                }
-
-            }
+            that.addQuestion(qType);
         }
 
-        addbut.click(addQuestion);
+        addbut.click(addQuestionBySelect);
 
         select.chosen();
 
@@ -715,6 +720,20 @@ formdesigner.ui = function () {
                 that.displayMugDataProperties(formdesigner.controller.getCurrentlySelectedMugType());
             }
         }
+        var tagName,
+                newMug;
+        newMug = formdesigner.controller.getCurrentlySelectedMugType();
+        if (newMug.mug.properties.controlElement) {
+            tagName = newMug.mug.properties.controlElement.properties.tagName;
+        }
+
+        if(tagName) {
+            if (['item','select','select1'].indexOf(tagName) !== -1) {
+                that.showSelectItemAddButton();
+            } else {
+                that.hideSelectItemAddButton();
+            }
+        }
     }
 
     function selectMugTypeInUI(mugType) {
@@ -750,6 +769,30 @@ formdesigner.ui = function () {
     }
 
     that.forceUpdateUI = forceUpdateUI;
+
+    var showSelectItemAddButton = function () {
+        var qselect = $('#fd-question-select_chzn');
+        var addItemBut = $('#fd-add-item-select_ez');
+        if (addItemBut.length === 0) {
+            addItemBut = $('<button></button>')
+                    .attr('id','fd-add-item-select_ez')
+                    .text('Add Select Item');
+            addItemBut.button({
+                icons: {
+                    primary: "ui-icon-plusthick"
+                }
+            });
+            addItemBut.click(function () {that.addQuestion('item')});
+            qselect.after(addItemBut);
+        }
+        addItemBut.show();
+    };
+    that.showSelectItemAddButton = showSelectItemAddButton;
+
+    var hideSelectItemAddButton = function () {
+        $('#fd-add-item-select_ez').hide();
+    };
+    that.hideSelectItemAddButton = hideSelectItemAddButton;
 
     /**
      * Creates the UI tree
