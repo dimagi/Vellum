@@ -36,6 +36,7 @@ formdesigner.ui = function () {
             TOKEN_INPUT = false; // change this if you want tokenized xpath mode
 
     that.TOKEN_INPUT = TOKEN_INPUT;
+    that.ODK_ONLY_QUESTION_TYPES = ['image','audio','video','barcode'];
 
 
 
@@ -173,7 +174,8 @@ formdesigner.ui = function () {
             var newMug = formdesigner.controller.createQuestion(qType);
             that.selectMugTypeInUI(newMug);
 
-            if(['image','audio','video'].indexOf(qType) !== -1) { //it's an ODK media question
+
+            if(that.ODK_ONLY_QUESTION_TYPES.indexOf(qType) !== -1) { //it's an ODK media question
                 showFormWarnMessage('This question type will ONLY work with CommCareODK/ODK Collect!');
             }
             return newMug;
@@ -771,7 +773,7 @@ formdesigner.ui = function () {
     that.forceUpdateUI = forceUpdateUI;
 
     var showSelectItemAddButton = function () {
-        var qselect = $('#fd-question-select_chzn');
+        var rem_select = $('#fd-remove-button');
         var addItemBut = $('#fd-add-item-select_ez');
         if (addItemBut.length === 0) {
             addItemBut = $('<button></button>')
@@ -783,7 +785,7 @@ formdesigner.ui = function () {
                 }
             });
             addItemBut.click(function () {that.addQuestion('item')});
-            qselect.after(addItemBut);
+            rem_select.after(addItemBut);
         }
         addItemBut.show();
     };
