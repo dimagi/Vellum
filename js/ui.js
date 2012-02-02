@@ -233,6 +233,11 @@ formdesigner.ui = function () {
             try {
                 var newMug = formdesigner.controller.createQuestion(qType);
                 that.selectMugTypeInUI(newMug);
+
+                if(['image','audio','video'].indexOf(qType) !== -1) { //it's an ODK media question
+                    showFormWarnMessage('This question type will ONLY work with CommCareODK/ODK Collect!');
+                }
+
             } catch (e) {
                 if (e.name === "IllegalMove") {
                     if (qType == "item") {
