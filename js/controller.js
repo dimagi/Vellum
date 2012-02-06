@@ -1383,6 +1383,7 @@ formdesigner.controller = (function () {
                  * @param controlEl
                  */
                 function classifyAndCreateMugType (nodePath, cEl) {
+
                     var oldMT = that.getMugByPath(nodePath, 'data'), //check the date node to see if there's a related MT already present
                         mugType, mug, tagName, bindEl, dataEl, dataType, MTIdentifier, mediaType,
                         //flags
@@ -1405,6 +1406,57 @@ formdesigner.controller = (function () {
                             hasBind = false;
                         }
                     }
+
+                    function MTIdentifierFromInput () {
+                        if (!dataType) { return 'stdTextQuestion'; }
+                        var MTID = '';
+                        if(dataType === 'long') {
+                            MTID = 'stdLong';
+                        }else if(dataType === 'int') {
+                            MTID = 'stdInt';
+                        }else if(dataType === 'double') {
+                            MTID = 'stdDouble';
+                        }else if(dataType === 'geopoint') {
+                            MTID = 'stdGeopoint';
+                        }else if(dataType === 'barcode') {
+                            MTID = 'stdBarcode';
+                        }else if(dataType === 'string') {
+                            MTID = 'stdTextQuestion';
+                        }else if(dataType === 'date') {
+                            MTID = 'stdDate';
+                        }else if(dataType === 'datetime') {
+                            MTID = 'stdDateTime';
+                        }else {
+                            MTID = 'stdTextQuestion';
+                        }
+                        return MTID;
+                    }
+
+                    function MTIdentifierFromGroup () {
+                        if($(cEl).children('repeat').length > 0){
+                                tagName = 'repeat';
+                                return 'stdRepeat';
+                        } else {
+                            return 'stdGroup';
+                        }
+                    }
+
+                    function MTIdentifierFromUpload () {
+                        if(!mediaType) {
+                            throw 'Unable to parse binary question type. Path: ' +
+                                    formdesigner.controller.form.dataTree.getAbsolutePath(oldMT) +
+                                    'The question has no MediaType attribute assigned to it!'
+                        }
+                        if (mediaType === 'video/*') {
+                            return 'stdVideo';
+                        } else if (mediaType === 'image/*') {
+                            return 'stdImage';
+                        } else if (mediaType === 'audio/*') {
+                            return 'stdAudio';
+                        } else {
+                            throw 'Unrecognized upload question type for Element: ' + nodePath + '!';
+                        }
+                    }
                     
                     //broadly categorize
                     tagName = tagName.toLowerCase();
@@ -1415,57 +1467,15 @@ formdesigner.controller = (function () {
                     }else if (tagName === 'trigger') {
                         MTIdentifier = 'stdTrigger';
                     }else if (tagName === 'input') {
-                        MTIdentifier = 'stdTextQuestion';
+                        MTIdentifier = MTIdentifierFromInput();
                     }else if (tagName === 'item') {
                         MTIdentifier = 'stdItem';
                     }else if (tagName === 'group') {
-                        MTIdentifier = 'stdGroup';
+                        MTIdentifier = MTIdentifierFromGroup();
                     }else if (tagName === 'secret') {
                         MTIdentifier = 'stdSecret';
                     }else if (tagName === 'upload') {
-                        MTIdentifier = 'stdAudio';
-                    }
-
-                    //fine tune for special cases (repeats, groups, inputs)
-                    if (MTIdentifier === 'stdTextQuestion' && dataType){
-                        if(dataType === 'long') {
-                            MTIdentifier = 'stdLong';
-                        }else if(dataType === 'int') {
-                            MTIdentifier = 'stdInt';
-                        }else if(dataType === 'double') {
-                            MTIdentifier = 'stdDouble';
-                        }else if(dataType === 'geopoint') {
-                            MTIdentifier = 'stdGeopoint';
-                        }else if(dataType === 'barcode') {
-                            MTIdentifier = 'stdBarcode';
-                        }else if(dataType === 'string') {
-                            //do nothing, the ident is already correct.
-                        }else if(dataType === 'date') {
-                             MTIdentifier = 'stdDate';
-                        }else if(dataType === 'datetime') {
-                             MTIdentifier = 'stdDateTime';
-                        }
-
-                    }else if (MTIdentifier === 'stdGroup') {
-                        if($(cEl).children('repeat').length > 0){
-                            tagName = 'repeat';
-                            MTIdentifier = 'stdRepeat';
-                        }
-                    }else if (MTIdentifier === 'stdAudio') {
-                        if(!mediaType) {
-                            throw 'Unable to parse binary question type. Path: ' +
-                                    formdesigner.controller.form.dataTree.getAbsolutePath(oldMT) +
-                                    'The question has no MediaType attribute assigned to it!'
-                        }
-
-                        if (mediaType === 'video/*') {
-                            MTIdentifier = 'stdVideo';
-                        } else if (mediaType === 'image/*') {
-                            MTIdentifier = 'stdImage';
-                        } else if (mediaType === 'audio/*') {
-                            MTIdentifier = 'stdAudio';
-                        }
-
+                        MTIdentifier = MTIdentifierFromUpload();
                     }
 
                     try{
