@@ -518,6 +518,9 @@ body{
 .notice {background:#FFF6BF;color:#514721;border-color:#FFD324;}
 .success {background:#E6EFC2;color:#264409;border-color:#C6D880;}
 
+.bin-expression {
+    min-height: 35px;	
+}
 
 .xpath-edit-node, .expression-part, .op-select, .validation-results {
     vertical-align: text-bottom;
