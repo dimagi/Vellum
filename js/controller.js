@@ -2074,14 +2074,8 @@ formdesigner.controller = (function () {
         var actualTarget = $($(target.parents(".expression-part")[0]).find(".xpath-edit-node")[0]);
         if (actualTarget) {
             var mug = that.form.getMugTypeByUFID(sourceUid);
-            // with multi-question support, don't bother clearing it
-            if (formdesigner.ui.TOKEN_INPUT) {
-                // actualTarget.tokenInput("clear");
-                actualTarget.tokenInput("add", formdesigner.util.mugToAutoCompleteUIElement(mug));
-            } else {
-                // the .change fires the validation controls
-                actualTarget.val(actualTarget.val() + formdesigner.util.mugToXPathReference(mug)).change();
-            }
+            // the .change fires the validation controls
+            actualTarget.val(actualTarget.val() + formdesigner.util.mugToXPathReference(mug)).change();
         }
     };
     that.handleTreeDrop = handleTreeDrop;
