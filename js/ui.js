@@ -32,10 +32,8 @@ formdesigner.ui = function () {
             DEBUG_MODE = false,
             WARN_MSG_DIV = '#fd-parse-warn',
             ERROR_MSG_DIV = '#fd-parse-error',
-            FORM_WARN_DIV = '#fd-form-warn',
-            TOKEN_INPUT = false; // change this if you want tokenized xpath mode
+            FORM_WARN_DIV = '#fd-form-warn';
 
-    that.TOKEN_INPUT = TOKEN_INPUT;
     that.ODK_ONLY_QUESTION_TYPES = ['image','audio','video','barcode'];
 
 
@@ -1749,116 +1747,8 @@ formdesigner.ui = function () {
                 var deleteButton = $("<div />").text("Delete").button().css("float", "left").appendTo(expression);
                 var validationResults = $("<div />").addClass("validation-results").appendTo(expression);
 
-                // BEGIN token input code (not used, but configurably reenabled)
-                var updateTokenInputSelectOptions = function (inputControl, selectQuestion, value) {
-                    // this does nothing.
-
-                    // with token input enabled it correctly populates the autocomplete,
-                    // which only works on the right box
-                    if (TOKEN_INPUT) {
-                        // this is pretty ridiculous but it seems to work.
-                        // remove and re add the entire right expression part
-                        inputControl.parents(".expression-part").remove();
-                        inputControl = createQuestionInGroup("right");
-                        var children = formdesigner.controller.getChildren(selectQuestion);
-                        var autoCompleteChildren = children.map(function (item) {
-                            return formdesigner.util.mugToAutoCompleteUIElement(item);
-                        });
-                        var selectItemOptions = {
-                            theme: "facebook",
-                            //tokenLimit: 1,
-                            tokenDelimiter: " ",
-                            searchDelay: 0,
-                            allowFreetext: true,
-                            hintText: "Type in a select option name.",
-                            noResultsText: "No matching options found.",
-                            onAdd: validateExpression,
-                            onDelete: validateExpression
-                        };
-                        inputControl.tokenInput(autoCompleteChildren, selectItemOptions);
-                        var found = false;
-                        if (value && value instanceof xpathmodels.XPathStringLiteral) {
-                            for (var i = 0; i < children.length; i++) {
-                                if (children[i].mug.properties.controlElement.properties.defaultValue === value.value) {
-                                    inputControl.tokenInput("add", formdesigner.util.mugToAutoCompleteUIElement(children[i]));
-                                    found = true;
-                                    break;
-                                }
-                            }
-                        }
-                        if (value && !found) {
-                            // put in something, even though it wasn't properly handled
-                            inputControl.tokenInput("add", {id: value.toXPath(), name: value.toXPath()});
-                        }
-                        // reenable drop target
-                        expression.find(".token-input-list-facebook").addClass("jstree-drop");
-                    }
-                };
-
-                var setTokenInputOptions = function() {
-                    // set fancy input mode on the boxes
-                    var baseOptions = {theme: "facebook",
-                        //tokenLimit: 1,
-                        tokenDelimiter: " ",
-                        searchDelay: 0,
-                        allowFreetext: true,
-                        hintText: "Type in a question name or drag a question here.",
-                        noResultsText: "No questions found. Press 'ENTER' to use a freetext value.",
-                        onDelete: validateExpression
-                    };
-
-                    var leftOptions = formdesigner.util.clone(baseOptions);
-                    var rightOptions = formdesigner.util.clone(baseOptions);
-
-                    rightOptions.onAdd = validateExpression;
-                    leftOptions.onAdd = function (item) {
-                        validateExpression();
-                        // for the left input only, if we add a select question,
-                        // rebuild the autocomplete on the right side to support options
-                        if (item.uid) {
-                            // only questions have a uid
-                            var mug = formdesigner.controller.form.controlTree.getMugTypeFromUFID(item.uid);
-                            if (formdesigner.util.isSelect(mug)) {
-                                updateTokenInputSelectOptions(right, mug);
-                            }
-                        }
-                    };
-
-                    left.tokenInput(questionChoiceAutoComplete, leftOptions);
-                    right.tokenInput(questionChoiceAutoComplete, rightOptions);
-                    // also make them drop targets for the tree
-                    expression.find(".token-input-list-facebook").addClass("jstree-drop");
-                };
-
-                var updateTokenInputQuestionBox = function(input, expr, pairedExpr) {
-                    var mug;
-                    if (isPath(expr)) {
-                        mug = formdesigner.controller.getMugByPath(expr.toXPath());
-                        if (mug) {
-                            input.tokenInput("add", formdesigner.util.mugToAutoCompleteUIElement(mug));
-                            return;
-                        }
-                    } else if (isPath(pairedExpr)) {
-                        // potentially load the UI element for the select value
-                        // currently only if the left hand side is a select
-                        mug = formdesigner.controller.getMugByPath(pairedExpr.toXPath());
-                        if (mug && formdesigner.util.isSelect(mug)) {
-                            updateTokenInputSelectOptions(input, mug, expr);
-                            return;
-                        }
-                    }
-                    // default case
-                    input.tokenInput("add", {id: expr.toXPath(), name: expr.toXPath()});
-                };
-
-                // END token input code (not used, but configurably reenabled)
-
                 var populateQuestionInputBox = function (input, expr, pairedExpr) {
-                    if (TOKEN_INPUT) {
-                        updateTokenInputQuestionBox(input, expr, pairedExpr);
-                    } else {
-                        input.val(expr.toXPath());
-                    }
+                    input.val(expr.toXPath());
                 };
 
                 var setBasicOptions = function () {
@@ -1869,12 +1759,8 @@ formdesigner.ui = function () {
                     expression.find(".xpath-edit-node").change(validateExpression);
                 };
 
-                if (TOKEN_INPUT) {
-                    setTokenInputOptions();
-                } else {
-                    setBasicOptions();
-                }
-
+                setBasicOptions();
+                
                 deleteButton.click(function() {
                     var isFirst = expression.children(".join-select").length == 0;
                     expression.remove();
