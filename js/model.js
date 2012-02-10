@@ -1252,6 +1252,7 @@ formdesigner.model = function () {
         mType.mug.properties.controlElement.properties.name = "Audio";
         mType.mug.properties.controlElement.properties.tagName = "upload";
         mType.mug.properties.controlElement.properties.mediaType = "audio/*";
+        /* fix buggy eclipse syntax highlighter (because of above string) */ 
         mType.mug.properties.bindElement.properties.dataType = "binary";
 
         return mType;
@@ -1266,6 +1267,7 @@ formdesigner.model = function () {
         mType.mug.properties.controlElement.properties.name = "Image";
         mType.mug.properties.controlElement.properties.tagName = "upload";
         mType.mug.properties.controlElement.properties.mediaType = "image/*";
+        /* fix buggy eclipse syntax highlighter (because of above string) */ 
         mType.mug.properties.bindElement.properties.dataType = "binary";
         return mType;
     };
@@ -1279,6 +1281,7 @@ formdesigner.model = function () {
         mType.mug.properties.controlElement.properties.name = "Video";
         mType.mug.properties.controlElement.properties.tagName = "upload";
         mType.mug.properties.controlElement.properties.mediaType = "video/*";
+        /* fix buggy eclipse syntax highlighter (because of above string) */ 
         mType.mug.properties.bindElement.properties.dataType = "binary";
         return mType;
     };
@@ -2686,7 +2689,120 @@ formdesigner.model = function () {
     };
     that.Form = Form;
     
+    // Logic expressions
+    that.LogicExpression = function (exprText) {
+        var expr = {};
+        expr._text = exprText || "";
+        
+        expr.valid = false;
+        if (exprText) {
+            try {
+                expr.parsed = xpath.parse(exprText);
+                expr.valid = true;
+            } catch (err) {
+                // nothing to do
+            }
+        } else {
+            expr.empty = true;
+        }
+        
+        expr.getPaths = function () {
+            var paths = [];
+            if (this.parsed) {
+                var queue = [this.parsed], 
+                    node, i, children;
+                while (queue.length > 0) {
+                    node = queue.shift();
+                    if (node instanceof xpathmodels.XPathPathExpr) {
+                        paths.push(node);
+                    }
+                    children = node.getChildren();
+                    for (i = 0; i < children.length; i++) {
+                        queue.push(children[i]);
+                    }
+                }
+            }
+            return paths;
+        };
+        
+        expr.updatePath = function (from, to) {
+            var paths = this.getPaths(),
+                path;
+            
+            var replacePathInfo = function (source, destination) {
+                // copies information from source to destination in place,
+                // resulting in mutating destination while preserving the 
+                // original object reference.
+                destination.initial_context = source.initial_context;
+                destination.steps = source.steps;
+                destination.filter = source.filter;
+            };
+            
+            for (var i = 0; i < paths.length; i++) {
+                path = paths[i];
+                if (path.toXPath() === from) {
+                    replacePathInfo(xpath.parse(to), path);
+                }
+            }
+        };
+        
+        expr.getText = function () {
+            if (this.valid) {
+                return this.parsed.toXPath();
+            } else {
+                return this._text;
+            }
+        }
+        return expr;
+    };
     
+    that.LogicManager = (function () {
+        var logic = {};
+        
+        logic.all = [];
+        
+        logic.clearReferences = function (mug, property) {
+            this.all = this.all.filter(function (elem) { 
+                return elem.mug != mug.ufid || elem.property != property;
+            });
+        };
+        
+        logic.addReferences = function (mug, property) {
+            var expr = that.LogicExpression(mug.getPropertyValue(property));
+            var paths = expr.getPaths();
+            this.all = this.all.concat(paths.map(function (path) {
+                return {"mug": mug.ufid, "property": property, "path": path.toXPath()};      
+            }));
+        };
+        
+        logic.updateReferences = function (mug, property) {
+            this.clearReferences(mug, property);
+            this.addReferences(mug, property);
+        };
+        
+        logic.updatePath = function (from, to) {
+            var found = this.all.filter(function (elem) {
+                return elem.path === from;
+            });
+            var ref, mug, expr;
+            for (var i = 0; i < found.length; i++) {
+                ref = found[i];
+                mug = formdesigner.controller.getMTFromFormByUFID(ref.mug);
+                expr = that.LogicExpression(mug.getPropertyValue(ref.property));
+                orig = expr.getText();
+                expr.updatePath(from, to);
+                if (orig !== expr.getText()) {
+                    formdesigner.controller.setMugPropertyValue(mug.mug, ref.property.split("/")[0], 
+                                                                ref.property.split("/")[1], expr.getText(), mug);
+                } 
+            }
+            
+        };
+        
+        return logic;
+    }());
+    
+    // IText
     that.ItextForm = function (options) {
         var form = {};
         

@@ -35,7 +35,10 @@ formdesigner.util = (function(){
             VERIFY_ERROR : 3
     };
     that.VERIFY_CODES = VERIFY_CODES;
-
+    that.XPATH_REFERENCES = ["bindElement/requiredAttr", 
+                             "bindElement/relevantAttr",
+                             "bindElement/calculateAttr"]; 
+    
     var GROUP_OR_REPEAT_VALID_CHILDREN = that.GROUP_OR_REPEAT_VALID_CHILDREN = [
         "group",
         "repeat",
@@ -651,6 +654,25 @@ formdesigner.util = (function(){
             var MT = formdesigner.controller.getMTFromFormByUFID(e.mugTypeUfid);
             formdesigner.ui.showVisualValidation(MT);
             formdesigner.ui.setTreeValidationIcon(MT);
+        });
+
+        
+        // update the logic properties that reference the mug
+        mug.on('property-changed', function (e) {
+            if (e.previous !== e.val) {
+	            var mug = formdesigner.controller.getMTFromFormByUFID(e.mugTypeUfid);
+	            if (e.property === 'nodeID') {
+	                var currentPath = formdesigner.controller.form.dataTree.getAbsolutePath(mug);
+	                var parsed = xpath.parse(currentPath);
+	                parsed.steps[parsed.steps.length - 1].name = e.previous;
+	                formdesigner.model.LogicManager.updatePath(parsed.toXPath(), currentPath);
+	            } else {
+                    var propertyPath = [e.element, e.property].join("/");
+                    if (mug.getPropertyDefinition(propertyPath).uiType === "xpath") {
+	                    formdesigner.model.LogicManager.updateReferences(mug, propertyPath);
+	                }
+	            }
+	        }
         });
 
 

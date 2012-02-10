@@ -315,12 +315,14 @@ formdesigner.controller = (function () {
      * @param val new value the property should be set to.
      */
     that.setMugPropertyValue = function (myMug, element, property, val, mugType) {
+        var prev = myMug.properties[element].properties[property];
         myMug.properties[element].properties[property] = val;
         myMug.fire({
 			type: 'property-changed',
 			property: property,
 			element: element,
 			val: val,
+			previous: prev,
 			mugUfid: myMug.ufid,
 			mugTypeUfid: mugType.ufid
         });
@@ -1367,7 +1369,11 @@ formdesigner.controller = (function () {
                 if (oldMT.hasBindElement()) {
                     Itext.removeItem(oldMT.mug.properties.bindElement.properties.constraintMsgItextID);
                 }
-                
+                // update the LogicManager's references to paths 
+                // this is also not a great long term place for this logic
+                for (var i = 0; i < formdesigner.util.XPATH_REFERENCES.length; i++) {
+                    formdesigner.model.LogicManager.addReferences(mType, formdesigner.util.XPATH_REFERENCES[i]);
+                }
                 that.form.replaceMugType(oldMT, mType, 'data');
             }
             bindList.each(eachFunc);
@@ -1448,10 +1454,13 @@ formdesigner.controller = (function () {
                                     'The question has no MediaType attribute assigned to it!'
                         }
                         if (mediaType === 'video/*') {
+                            /* fix buggy eclipse syntax highlighter (because of above string) */ 
                             return 'stdVideo';
                         } else if (mediaType === 'image/*') {
+                            /* fix buggy eclipse syntax highlighter (because of above string) */ 
                             return 'stdImage';
                         } else if (mediaType === 'audio/*') {
+                            /* fix buggy eclipse syntax highlighter (because of above string) */ 
                             return 'stdAudio';
                         } else {
                             throw 'Unrecognized upload question type for Element: ' + nodePath + '!';
@@ -2090,7 +2099,7 @@ formdesigner.controller = (function () {
     
     var doneXPathEditor = function(options) {
         var mug = that.getCurrentlySelectedMugType();
-        mug.mug.properties[options.group].properties[options.property] = options.value;
+        that.setMugPropertyValue(mug.mug, options.group, options.property, options.value, mug) 
         formdesigner.ui.hideXPathEditor();
         formdesigner.ui.showTools();
         formdesigner.ui.displayMugProperties(mug);
