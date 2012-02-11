@@ -75,6 +75,14 @@ formdesigner.controller = (function () {
                 formdesigner.ui.showParseWarnMessage(that.parseWarningMsgs);
             }
             
+            // populate the LogicManager with initial path data
+            allMugs.map(function (mug) {
+                if (mug.hasBindElement()) {
+	                for (var i = 0; i < formdesigner.util.XPATH_REFERENCES.length; i++) {
+	                    formdesigner.model.LogicManager.addReferences(mug, formdesigner.util.XPATH_REFERENCES[i]);
+	                }
+                }
+            });
         });
         
         that.on('widget-value-changed', function (e) {
@@ -1368,11 +1376,6 @@ formdesigner.controller = (function () {
                 // this is ugly, and should be moved somewhere else
                 if (oldMT.hasBindElement()) {
                     Itext.removeItem(oldMT.mug.properties.bindElement.properties.constraintMsgItextID);
-                }
-                // update the LogicManager's references to paths 
-                // this is also not a great long term place for this logic
-                for (var i = 0; i < formdesigner.util.XPATH_REFERENCES.length; i++) {
-                    formdesigner.model.LogicManager.addReferences(mType, formdesigner.util.XPATH_REFERENCES[i]);
                 }
                 that.form.replaceMugType(oldMT, mType, 'data');
             }

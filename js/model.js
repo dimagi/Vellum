@@ -2769,9 +2769,21 @@ formdesigner.model = function () {
         
         logic.addReferences = function (mug, property) {
             var expr = that.LogicExpression(mug.getPropertyValue(property));
-            var paths = expr.getPaths();
+            var paths = expr.getPaths().filter(function (p) {
+                // currently we don't do anything with relative paths
+                return p.initial_context === xpathmodels.XPathInitialContextEnum.ROOT;
+            });
             this.all = this.all.concat(paths.map(function (path) {
-                return {"mug": mug.ufid, "property": property, "path": path.toXPath()};      
+                var refMug = formdesigner.controller.getMugByPath(path.toXPath());
+                if (!refMug) {
+                    formdesigner.ui.showParseWarnMessage(
+                        "The question " + mug.mug.properties.bindElement.properties.nodeID + 
+                        " references an unknown question " + path.toXPath() + 
+                        " in its " + mug.getPropertyDefinition(property).lstring + "."
+                    );
+                }
+                return {"mug": mug.ufid, "property": property, "path": path.toXPath(), 
+                        "ref": refMug ? refMug.ufid : ""};      
             }));
         };
         
@@ -2780,9 +2792,9 @@ formdesigner.model = function () {
             this.addReferences(mug, property);
         };
         
-        logic.updatePath = function (from, to) {
+        logic.updatePath = function (mugId, from, to) {
             var found = this.all.filter(function (elem) {
-                return elem.path === from;
+                return elem.ref === mugId;
             });
             var ref, mug, expr;
             for (var i = 0; i < found.length; i++) {
@@ -2797,6 +2809,10 @@ formdesigner.model = function () {
                 } 
             }
             
+        };
+        
+        logic.reset = function () {
+            this.all = [];
         };
         
         return logic;
@@ -3243,7 +3259,8 @@ formdesigner.model = function () {
      */
     that.reset = function () {
         that.form = new Form();
-        formdesigner.model.Itext.resetItext(formdesigner.opts.langs);
+        that.Itext.resetItext(formdesigner.opts.langs);
+        that.LogicManager.reset();
         formdesigner.controller.setForm(that.form);
     };
 

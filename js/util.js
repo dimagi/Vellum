@@ -35,9 +35,9 @@ formdesigner.util = (function(){
             VERIFY_ERROR : 3
     };
     that.VERIFY_CODES = VERIFY_CODES;
-    that.XPATH_REFERENCES = ["bindElement/requiredAttr", 
-                             "bindElement/relevantAttr",
-                             "bindElement/calculateAttr"]; 
+    that.XPATH_REFERENCES = ["bindElement/relevantAttr",
+                             "bindElement/calculateAttr",
+                             "bindElement/constraintAttr"]; 
     
     var GROUP_OR_REPEAT_VALID_CHILDREN = that.GROUP_OR_REPEAT_VALID_CHILDREN = [
         "group",
@@ -665,7 +665,7 @@ formdesigner.util = (function(){
 	                var currentPath = formdesigner.controller.form.dataTree.getAbsolutePath(mug);
 	                var parsed = xpath.parse(currentPath);
 	                parsed.steps[parsed.steps.length - 1].name = e.previous;
-	                formdesigner.model.LogicManager.updatePath(parsed.toXPath(), currentPath);
+	                formdesigner.model.LogicManager.updatePath(mug.ufid, parsed.toXPath(), currentPath);
 	            } else {
                     var propertyPath = [e.element, e.property].join("/");
                     if (mug.getPropertyDefinition(propertyPath).uiType === "xpath") {
