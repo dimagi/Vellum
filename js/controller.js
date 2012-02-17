@@ -926,19 +926,12 @@ formdesigner.controller = (function () {
          * @param val
          */
         
-        var tabSeparate = function (list) {
-            var cleanVal = function (val) {
-	            return val.replace(/\n/g, '');
-	        };
-	        return list.map(cleanVal).join("\t");
-        };
-        
         function makeRow (language, item, forms) {
             var values = forms.map(function (form) {
                 return item.hasForm(form) ? item.getForm(form).getValueOrDefault(language) : "";
             });
             var row = [language, item.id].concat(values);
-            return tabSeparate(row);
+            return formdesigner.util.tabSeparate(row);
         }
         
         var ret = [];
@@ -961,6 +954,64 @@ formdesigner.controller = (function () {
         return ret.join("\n");
     };
     that.generateItextXLS = generateItextXLS;
+
+    var generateExportXLS = function () {
+        
+        var languages = formdesigner.model.Itext.getLanguages();
+        var i;
+        // deduplicate
+        formdesigner.model.Itext.deduplicateIds();
+        
+        var mugTypeToExportRow = function (mugType) {
+            
+            var defaultOrNothing = function (item, language, form) {
+                return item.hasForm(form) ? item.getForm(form).getValueOrDefault(language) : "";
+            }
+            var fillBlanks = function (array, count) {
+                for (var i = 0; i < count; i++) {
+                    row.push("");
+                }
+            }
+            
+            var row = [];
+            var i;
+            // Question ID
+            row.push(mugType.getDefaultItextRoot());
+            if (mugType.hasControlElement()) {
+                // Question Type   
+                row.push(mugType.mug.properties.controlElement.properties.tagName);
+                // [language texts]
+                var itext = mugType.getItext(); 
+                for (i = 0; i < languages.length; i++) {
+                    row.push(defaultOrNothing(itext, languages[i], "default"));
+                }
+                // Audio File
+                row.push(defaultOrNothing(itext, formdesigner.model.Itext.getDefaultLanguage(), "audio"));
+                // Image File  
+                row.push(defaultOrNothing(itext, formdesigner.model.Itext.getDefaultLanguage(), "image"));
+            } else {
+                fillBlanks(row, 3 + languages.lengths);
+            }
+            if (mugType.hasBindElement()) {
+                // Skip Condition
+                row.push(mugType.mug.properties.bindElement.properties.relevantAttr || "");
+                // Constraint Condition                
+                row.push(mugType.mug.properties.bindElement.properties.constraintAttr || "");
+            } else {
+                fillBlanks(row, 2);
+            }
+            return formdesigner.util.tabSeparate(row);
+        };
+        
+        var headers = ["Question", "Type", "Audio", "Image", "Skip Condition", "Constraint Condition"];
+        for (i = 0; i < languages.length; i++) {
+            headers.splice(2 + i, 0, "Text (" + languages[i] + ")");
+        } 
+        var ret = that.getMugTypeList(true).map(mugTypeToExportRow);
+        ret.splice(0, 0, formdesigner.util.tabSeparate(headers));
+        return ret.join("\n");
+    };
+    that.generateExportXLS = generateExportXLS;
 
     var showItextDialog = function () {
     
@@ -996,6 +1047,31 @@ formdesigner.controller = (function () {
     };
     that.showItextDialog = showItextDialog;
 
+
+    var showExportDialog = function () {
+    
+        var input = $('#fd-source'),
+            controls = $("#fd-source-controls"),
+            help = $("#fd-source-help");
+            
+        // clear controls
+        controls.empty();
+        help.text("Copy and paste this content into a spreadsheet program like Excel " +
+                  "to easily share your form with others."); 
+        
+        // display current values
+        input.val(that.generateExportXLS());
+        
+        // add controls
+        var closeButton = $('<button id ="fd-close-popup-button">Close</button>').appendTo(controls).button();
+        closeButton.click(function () {
+            $.fancybox.close();
+        });
+        
+        // this shows the popup
+        $('#inline').click();
+    };
+    that.showExportDialog = showExportDialog;
 
     var setFormName = function (name) {
         that.form.formName = name;

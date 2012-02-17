@@ -280,19 +280,6 @@ formdesigner.ui = function () {
 
         })();
 
-        (function c_showLoadItextXLS() {
-            var editXLSBut = $(
-                    '<button id="fd-load-xls-button" class="toolbarButton questionButton">' +
-                            'Edit Bulk Translations' +
-                            '</button>');
-            $('#fd-extra-advanced').append(editXLSBut);
-
-            editXLSBut.button().click(function () {
-                formdesigner.controller.showItextDialog();
-
-            });
-        })();
-
         (function c_saveForm() {
             var savebut = $('<div id="fd-save-button" class="toolbarButton"/>');
             toolbar.append(savebut);
@@ -999,7 +986,34 @@ formdesigner.ui = function () {
             }
         });
 
+        (function c_showLoadItextXLS() {
+            var editXLSBut = $(
+                    '<button id="fd-load-xls-button" class="toolbarButton questionButton">' +
+                            'Edit Bulk Translations' +
+                            '</button>');
+            $('#fd-extra-advanced').append(editXLSBut);
 
+            editXLSBut.button().click(function () {
+                formdesigner.controller.showItextDialog();
+
+            });
+        })();
+
+        
+        (function c_showExport() {
+            var exportBut = $(
+                    '<button id="fd-export-xls-button" class="toolbarButton questionButton">' +
+                            'Export Form Contents' +
+                    '</button>');
+            $('#fd-extra-advanced').append(exportBut);
+
+            exportBut.button().click(function () {
+                formdesigner.controller.showExportDialog();
+
+            });
+        })();
+
+        
         (function c_generateSource() {
             var editSource = $(
                     '<button id="fd-editsource-button" class="toolbarButton questionButton">' +

@@ -823,6 +823,20 @@ formdesigner.util = (function(){
         return this.writeAttributeString(name, that.escapeQuotedXML(value, options));
     }; 
     
+    /**
+     * Turns a list of strings into a single tab separated straing.
+     * Replaces newlines with ' ' so they don't affect the spacing.
+     * @param list
+     */
+    
+    that.tabSeparate = function (list) {
+        var cleanVal = function (val) {
+            return val.replace(/\n/g, ' ');
+        };
+        return list.map(cleanVal).join("\t");
+    };
+    
+        
     that.mugToXPathReference = function (mug) {
         // for select items, return the quoted value.
         // for everything else return the path
