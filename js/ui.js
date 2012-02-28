@@ -281,7 +281,7 @@ formdesigner.ui = function () {
         })();
 
         (function c_saveForm() {
-            var savebut = $('<div class="btn btn-primary" id="fd-save-button" class="toolbarButton"/>');
+            var savebut = $('<div class="btn btn-success" id="fd-save-button" class="toolbarButton"/>');
             toolbar.append(savebut);
             formdesigner.controller.saveButton.ui.appendTo(savebut);
         })();
