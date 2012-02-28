@@ -245,7 +245,7 @@ formdesigner.ui = function () {
         }
 
         buildSelectDropDown();
-        addbutstr = '<button id="fd-add-but">Add</button>';
+        addbutstr = '<button class="btn btn-primary" id="fd-add-but">Add</button>';
         select.after(addbutstr);
         addbut = $('#fd-add-but');
         addbut.button({
@@ -269,7 +269,7 @@ formdesigner.ui = function () {
         //debug tools
         (function c_printDataTreeToConsole() {
             var printTreeBut = $(
-                    '<button id="fd-print-tree-button" class="toolbarButton questionButton">' +
+                    '<button class="btn" id="fd-print-tree-button" class="toolbarButton questionButton">' +
                             'Print tree to Console' +
                             '</button>');
             $('#fd-dragons').append(printTreeBut);
@@ -281,14 +281,14 @@ formdesigner.ui = function () {
         })();
 
         (function c_saveForm() {
-            var savebut = $('<div id="fd-save-button" class="toolbarButton"/>');
+            var savebut = $('<div class="btn btn-primary" id="fd-save-button" class="toolbarButton"/>');
             toolbar.append(savebut);
             formdesigner.controller.saveButton.ui.appendTo(savebut);
         })();
 
         (function c_removeSelected() {
             var removebut = $(
-                    '<button id="fd-remove-button" class="toolbarButton">' +
+                    '<button class="btn btn-danger" id="fd-remove-button" class="toolbarButton">' +
                             'Remove Selected' +
                             '</button>');
             toolbar.append(removebut);
@@ -761,7 +761,7 @@ formdesigner.ui = function () {
         var rem_select = $('#fd-remove-button');
         var addItemBut = $('#fd-add-item-select_ez');
         if (addItemBut.length === 0) {
-            addItemBut = $('<button></button>')
+            addItemBut = $('<button class="btn"></button>')
                     .attr('id','fd-add-item-select_ez')
                     .text('Add Select Item');
             addItemBut.button({
@@ -937,7 +937,7 @@ formdesigner.ui = function () {
             langList.val(formdesigner.currentItextDisplayLanguage);
             if (formdesigner.opts.allowLanguageEdits || typeof formdesigner.opts.allowLanguageEdits === "undefined") {
                 str = '';
-                str = '<button id="fd-lang-disp-add-lang-button">Add Language</button>';
+                str = '<button class="btn btn-primary" id="fd-lang-disp-add-lang-button">Add Language</button>';
                 addLangButton = $(str);
                 addLangButton.button();
                 addLangButton.click(function () {
@@ -945,7 +945,7 @@ formdesigner.ui = function () {
                 });
                 div.append(addLangButton);
                 str = '';
-                str = '<button id="fd-lang-disp-remove-lang-button">Remove Langauge</button>';
+                str = '<button class="btn btn-warning" id="fd-lang-disp-remove-lang-button">Remove Langauge</button>';
                 removeLangButton = $(str);
                 removeLangButton.button();
                 removeLangButton.click(function () {
@@ -988,7 +988,7 @@ formdesigner.ui = function () {
 
         (function c_showLoadItextXLS() {
             var editXLSBut = $(
-                    '<button id="fd-load-xls-button" class="toolbarButton questionButton">' +
+                    '<button class="btn" id="fd-load-xls-button" class="toolbarButton questionButton">' +
                             'Edit Bulk Translations' +
                             '</button>');
             $('#fd-extra-advanced').append(editXLSBut);
@@ -1002,7 +1002,7 @@ formdesigner.ui = function () {
         
         (function c_showExport() {
             var exportBut = $(
-                    '<button id="fd-export-xls-button" class="toolbarButton questionButton">' +
+                    '<button class="btn" id="fd-export-xls-button" class="toolbarButton questionButton">' +
                             'Export Form Contents' +
                     '</button>');
             $('#fd-extra-advanced').append(exportBut);
@@ -1016,7 +1016,7 @@ formdesigner.ui = function () {
         
         (function c_generateSource() {
             var editSource = $(
-                    '<button id="fd-editsource-button" class="toolbarButton questionButton">' +
+                    '<button class="btn" id="fd-editsource-button" class="toolbarButton questionButton">' +
                             'Edit Source XML' +
                             '</button>');
             $('#fd-extra-advanced').append(editSource);
@@ -1029,7 +1029,7 @@ formdesigner.ui = function () {
 
         (function c_clearCruftyItext() {
             var clearCruftBut = $(
-                    '<button id="fd-cruftyItextRemove-button" class="toolbarButton questionButton">' +
+                    '<button class="btn" id="fd-cruftyItextRemove-button" class="toolbarButton questionButton">' +
                             'Remove Unused Itext ' +
                             '</button>');
             $('#fd-extra-advanced').append(clearCruftBut);
@@ -1978,7 +1978,7 @@ formdesigner.ui = function () {
             $("<div />").attr("id", "fd-xpath-editor-expressions")
                     .appendTo(simpleUI);
 
-            var addExpressionButton = $("<button />").text("Add expression")
+            var addExpressionButton = $("<button />").text("Add expression").addClass("btn")
                     .button()
                     .appendTo(simpleUI);
 
@@ -1987,7 +1987,7 @@ formdesigner.ui = function () {
             });
 
             // shared UI
-            var doneButton = $('<button />').text("Save to Form")
+            var doneButton = $('<button />').text("Save to Form").addClass("btn").addClass("btn-primary")
                     .button()
                     .appendTo(mainPane);
 

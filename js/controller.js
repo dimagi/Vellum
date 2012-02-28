@@ -850,14 +850,14 @@ formdesigner.controller = (function () {
             }
             
             // add controls
-            var loadButton = $('<button id ="fd-loadsource-button">Update Source</button>').appendTo(controls).button();
+            var loadButton = $('<button class="btn btn-primary" id ="fd-loadsource-button">Update Source</button>').appendTo(controls).button();
 	        loadButton.click(function () {
 	            that.loadXForm(output.val());
                 formdesigner.controller.form.fire('form-property-changed');
 	            $.fancybox.close();
 	        });
 	
-	        var closeButton = $('<button id ="fd-close-popup-button">Close</button>').appendTo(controls).button();
+	        var closeButton = $('<button class="btn" id ="fd-close-popup-button">Close</button>').appendTo(controls).button();
 	        closeButton.click(function () {
 	            $.fancybox.close();
 	        });
@@ -1030,14 +1030,14 @@ formdesigner.controller = (function () {
         input.val(that.generateItextXLS());
         
         // add controls
-        var updateButton = $('<button id ="fd-parsexls-button">Update Translations</button>').appendTo(controls).button();
+        var updateButton = $('<button class="btn btn-primary" id ="fd-parsexls-button">Update Translations</button>').appendTo(controls).button();
         updateButton.click(function () {
             that.parseXLSItext(input.val());
             formdesigner.controller.form.fire('form-property-changed');
             $.fancybox.close();
         });
         
-        var closeButton = $('<button id ="fd-close-popup-button">Close</button>').appendTo(controls).button();
+        var closeButton = $('<button class="btn" id ="fd-close-popup-button">Close</button>').appendTo(controls).button();
         closeButton.click(function () {
             $.fancybox.close();
         });
@@ -1063,7 +1063,7 @@ formdesigner.controller = (function () {
         input.val(that.generateExportXLS());
         
         // add controls
-        var closeButton = $('<button id ="fd-close-popup-button">Close</button>').appendTo(controls).button();
+        var closeButton = $('<button class="btn" id ="fd-close-popup-button">Close</button>').appendTo(controls).button();
         closeButton.click(function () {
             $.fancybox.close();
         });
