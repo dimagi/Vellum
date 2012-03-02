@@ -283,7 +283,7 @@ formdesigner.widgets = (function () {
         var widget = that.textWidget(mugType, path);
         
         
-        var xPathButton = $('<button />').addClass("xpath-edit-button").text("Edit").button();
+        var xPathButton = $('<button />').addClass("xpath-edit-button").text("Edit").button().addClass('btn');
         xPathButton.data("group", widget.groupName).data("prop", widget.propName).data("inputControlID", widget.getID());
         xPathButton.click(function () {
             formdesigner.controller.displayXPathEditor({
@@ -640,7 +640,7 @@ formdesigner.widgets = (function () {
             }
             
             if (this.showAddFormButton) {
-	            var addButton = $("<div />").text("Add Content Item").button();
+	            var addButton = $("<div />").text("Add Content Item").button().addClass('btn');
 	            main = main.add(addButton);
 	            addButton.click(function () {
 	                var dialog = $("#fd-dialog-confirm");
