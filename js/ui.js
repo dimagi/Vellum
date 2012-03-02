@@ -1758,7 +1758,7 @@ formdesigner.ui = function () {
                 var left = createQuestionInGroup("left");
                 var op = createOperationSelector().appendTo(expression);
                 var right = createQuestionInGroup("right");
-                var deleteButton = $("<div />").text("Delete").button().css("float", "left").appendTo(expression);
+                var deleteButton = $("<div />").addClass('btn').addClass('btn-danger').text("Delete").button().css("float", "left").appendTo(expression);
                 var validationResults = $("<div />").addClass("validation-results").appendTo(expression);
 
                 var populateQuestionInputBox = function (input, expr, pairedExpr) {

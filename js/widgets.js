@@ -390,7 +390,7 @@ formdesigner.widgets = (function () {
 	            var uiElem = $("<div />").addClass("widget").attr("data-form", form);
 	            uiElem.append(this.getLabel());
 	            uiElem.append(this.getControl());
-	            var deleteButton = $('<button />').addClass("xpath-edit-button").text("Delete").button();
+	            var deleteButton = $('<button />').addClass("xpath-edit-button").addClass('btn').addClass('btn-danger').text("Delete").button();
 	            deleteButton.click(function () {
 	                widget.deleteValue();
 	                // this is a bit ridiculous but finds the right things to remove
