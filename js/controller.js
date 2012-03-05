@@ -1990,7 +1990,7 @@ formdesigner.controller = (function () {
      * @param treeType - Optional - either 'data' or 'control' or 'both'. Indicates which tree to do the move op in.  defaults to 'both'
      */
     var moveMugType = function (mugType, position, refMugType, treeType) {
-        var dataTree = that.form.dataTree, controlTree = that.form.controlTree;
+        var dataTree = that.form.dataTree, controlTree = that.form.controlTree, isDataTreeOp;
         if (!treeType) {
              treeType = 'both';
         }
@@ -1998,13 +1998,20 @@ formdesigner.controller = (function () {
             throw 'MOVE NOT ALLOWED!  MugType Move for MT:' + mugType + ', refMT:' + refMugType + ", position:" + position + " ABORTED";
         }
 
+        isDataTreeOp = refMugType && refMugType.typeName !== "Select Item";
+
+
         if (treeType === 'both') {
-            dataTree.insertMugType(mugType, position, refMugType);
+            if (isDataTreeOp) {
+                dataTree.insertMugType(mugType, position, refMugType);
+            }
             controlTree.insertMugType(mugType, position, refMugType);
         } else if (treeType === 'control') {
             controlTree.insertMugType(mugType, position, refMugType);
         } else if (treeType === 'data') {
-            dataTree.insertMugType(mugType, position, refMugType);
+            if (isDataTreeOp) {
+                dataTree.insertMugType(mugType, position, refMugType);
+            }
         } else {
            throw 'Invalid/Unrecognized TreeType specified in moveMugType: ' + treeType;
         }
