@@ -2055,11 +2055,19 @@ formdesigner.controller = (function () {
     };
 
     var getCurrentlySelectedMug = function () {
-        return that.getCurrentlySelectedMugType().mug;
+        var curMug = that.getCurrentlySelectedMugType();
+        if (curMug) {
+            return curMug.mug;
+        } else {
+            return null;
+        }
     };
     that.getCurrentlySelectedMug = getCurrentlySelectedMug;
 
     var getCurrentlySelectedMugType = function () {
+        if (!formdesigner.ui.getJSTreeCurrentlySelected().length) {
+            curSelMugType = null;
+        }
         return curSelMugType;
     };
     that.getCurrentlySelectedMugType = getCurrentlySelectedMugType;

@@ -501,6 +501,15 @@ formdesigner.ui = function () {
     };
     that.getQuestionJSTree = getQuestionJSTree;
 
+    /**
+     * Gets the node that's currently selected by the UI Tree (JSTree).
+     * Primarily used to sanity check against what the controller thinks is selected
+     */
+    var getJSTreeCurrentlySelected = function () {
+        return that.getJSTree().jstree('get_selected');
+    };
+    that.getJSTreeCurrentlySelected = getJSTreeCurrentlySelected;
+
     var getDataJSTree = function () {
         return $('#fd-data-tree');
     };
