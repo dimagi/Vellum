@@ -1855,7 +1855,9 @@ formdesigner.controller = (function () {
                 Itext.addLanguage("en");
                 Itext.setDefaultLanguage("en");
             }
-            formdesigner.currentItextDisplayLanguage = formdesigner.model.Itext.getDefaultLanguage();
+            if (!formdesigner.currentItextDisplayLanguage) {
+                formdesigner.currentItextDisplayLanguage = formdesigner.model.Itext.getDefaultLanguage();
+            }
         }
 
         that.resetParseErrorMsgs();
