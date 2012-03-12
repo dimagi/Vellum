@@ -501,6 +501,15 @@ formdesigner.ui = function () {
     };
     that.getQuestionJSTree = getQuestionJSTree;
 
+    /**
+     * Gets the node that's currently selected by the UI Tree (JSTree).
+     * Primarily used to sanity check against what the controller thinks is selected
+     */
+    var getJSTreeCurrentlySelected = function () {
+        return that.getJSTree().jstree('get_selected');
+    };
+    that.getJSTreeCurrentlySelected = getJSTreeCurrentlySelected;
+
     var getDataJSTree = function () {
         return $('#fd-data-tree');
     };
@@ -815,25 +824,29 @@ formdesigner.ui = function () {
         }).bind("select_node.jstree",
                 function (e, data) {
                     node_select(e, data);
-                }).bind("move_node.jstree", function (e, data) {
-                    var controller = formdesigner.controller,
-                            mugType = controller.form.controlTree.getMugTypeFromUFID($(data.rslt.o).attr('id')),
-                            refMugType = controller.form.controlTree.getMugTypeFromUFID($(data.rslt.r).attr('id')),
-                            position = data.rslt.p;
-                    controller.moveMugType(mugType, position, refMugType, 'both');
+        }).bind("move_node.jstree", function (e, data) {
+            var controller = formdesigner.controller,
+                    mugType = controller.form.controlTree.getMugTypeFromUFID($(data.rslt.o).attr('id')),
+                    refMugType = controller.form.controlTree.getMugTypeFromUFID($(data.rslt.r).attr('id')),
+                    position = data.rslt.p;
+            controller.moveMugType(mugType, position, refMugType, 'both');
 
-                    if (LINK_CONTROL_MOVES_TO_DATA_TREE) {   //for matching the move in the GUI question tree with the GUI Data Tree
-                        var elMT, elMTRef, pos;
-                        elMT = $('#' + mugType.ufid + '_data');
-                        elMTRef = $('#' + refMugType.ufid + '_data');
-                        if (elMTRef.length === 0) {
-                            elMTRef = -1;
-                        }
-                        pos = position;
-                        $('#fd-data-tree').jstree("move_node", elMT, elMTRef, pos, false);
-                    }
+            if (LINK_CONTROL_MOVES_TO_DATA_TREE) {   //for matching the move in the GUI question tree with the GUI Data Tree
+                var elMT, elMTRef, pos;
+                elMT = $('#' + mugType.ufid + '_data');
+                elMTRef = $('#' + refMugType.ufid + '_data');
+                if (elMTRef.length === 0) {
+                    elMTRef = -1;
+                }
+                pos = position;
+                $('#fd-data-tree').jstree("move_node", elMT, elMTRef, pos, false);
+            }
 
-                });
+        }).bind("deselect_all.jstree", function (e, data) {
+                hideSelectItemAddButton();
+        }).bind("deselect_node.jstree", function (e, data) {
+                hideSelectItemAddButton();
+        });
         questionTree = $("#fd-question-tree");
     }
 

@@ -1855,7 +1855,9 @@ formdesigner.controller = (function () {
                 Itext.addLanguage("en");
                 Itext.setDefaultLanguage("en");
             }
-            formdesigner.currentItextDisplayLanguage = formdesigner.model.Itext.getDefaultLanguage();
+            if (!formdesigner.currentItextDisplayLanguage) {
+                formdesigner.currentItextDisplayLanguage = formdesigner.model.Itext.getDefaultLanguage();
+            }
         }
 
         that.resetParseErrorMsgs();
@@ -1990,7 +1992,7 @@ formdesigner.controller = (function () {
      * @param treeType - Optional - either 'data' or 'control' or 'both'. Indicates which tree to do the move op in.  defaults to 'both'
      */
     var moveMugType = function (mugType, position, refMugType, treeType) {
-        var dataTree = that.form.dataTree, controlTree = that.form.controlTree;
+        var dataTree = that.form.dataTree, controlTree = that.form.controlTree, isDataTreeOp;
         if (!treeType) {
              treeType = 'both';
         }
@@ -1998,13 +2000,20 @@ formdesigner.controller = (function () {
             throw 'MOVE NOT ALLOWED!  MugType Move for MT:' + mugType + ', refMT:' + refMugType + ", position:" + position + " ABORTED";
         }
 
+        isDataTreeOp = refMugType && refMugType.typeName !== "Select Item";
+
+
         if (treeType === 'both') {
-            dataTree.insertMugType(mugType, position, refMugType);
+            if (isDataTreeOp) {
+                dataTree.insertMugType(mugType, position, refMugType);
+            }
             controlTree.insertMugType(mugType, position, refMugType);
         } else if (treeType === 'control') {
             controlTree.insertMugType(mugType, position, refMugType);
         } else if (treeType === 'data') {
-            dataTree.insertMugType(mugType, position, refMugType);
+            if (isDataTreeOp) {
+                dataTree.insertMugType(mugType, position, refMugType);
+            }
         } else {
            throw 'Invalid/Unrecognized TreeType specified in moveMugType: ' + treeType;
         }
@@ -2055,11 +2064,19 @@ formdesigner.controller = (function () {
     };
 
     var getCurrentlySelectedMug = function () {
-        return that.getCurrentlySelectedMugType().mug;
+        var curMug = that.getCurrentlySelectedMugType();
+        if (curMug) {
+            return curMug.mug;
+        } else {
+            return null;
+        }
     };
     that.getCurrentlySelectedMug = getCurrentlySelectedMug;
 
     var getCurrentlySelectedMugType = function () {
+        if (!formdesigner.ui.getJSTreeCurrentlySelected().length) {
+            curSelMugType = null;
+        }
         return curSelMugType;
     };
     that.getCurrentlySelectedMugType = getCurrentlySelectedMugType;
