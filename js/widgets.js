@@ -608,12 +608,30 @@ formdesigner.widgets = (function () {
         // needed for closure
         var textIdFunc = block.textIdFunc; 
         var slug = block.slug;
-        var addItextType = block.addItextType = function (form) {
+        
+        var getDefaultValue = function (formType) {
+            if (formType === "image" || formType === "audio") {
+                // default formats
+                // image: jr://file/commcare/image/form_id/question_id.png
+                // audio: jr://file/commcare/audio/form_id/question_id.mp3
+                var extension = (formType === "image") ? "png" : "mp3";
+                var ret = "jr://file/commcare/" + formType + "/" + 
+                       formdesigner.controller.form.formID + "/" + 
+                       mugType.getDefaultItextRoot() + "." + extension;
+                return ret;
+            } 
+            return null;
+        };
+        var addItextType = block.addItextType = function (form, value) {
             main.parent().find(".itext-language-section").each(function () {
                 var lang = $(this).data("language");
-                itextWidget = that.iTextWidget(mugType, lang, textIdFunc, slug, form);
+                var itextWidget = that.iTextWidget(mugType, lang, textIdFunc, slug, form);
                 itextWidget.getUIElement().appendTo($(this));
-                itextWidget.getTextItem().addForm(form);
+                var itextForm = itextWidget.getTextItem().getOrCreateForm(form);
+                if (value) {
+                    itextForm.setValue(lang, value);
+                    itextWidget.setValue(value);
+                }
             });
         };
         
@@ -648,7 +666,8 @@ formdesigner.widgets = (function () {
                 for (i = 0; i < defaultContentTypes.length; i++) {
 		            $("<div />").text(defaultContentTypes[i]).button().addClass('btn itext-option').click(
 		                function () {
-		                    addItextType($(this).text());
+		                    var form = $(this).text();
+		                    addItextType(form, getDefaultValue(form));
 		                }).appendTo(bg);
 		        }
                 var addButton = $("<div />").text("custom...").button().addClass('btn').appendTo(bg);
