@@ -2117,7 +2117,18 @@ formdesigner.launch = function (opts) {
         formdesigner.controller.loadXForm(formdesigner.loadMe);
 
     }
-
+    
+    // a bit hacky, but if a form name was specified, override 
+    // whatever happened during init / parsing with that. have 
+    // to wait for the load-complete event to be sure it's the 
+    // last thing on the stack. This will (intentionally) also
+    // override the form name anytime you manually load the xml.
+    if (opts.formName) {
+	    formdesigner.controller.on("parse-finish", function () {
+	        formdesigner.controller.setFormName(formdesigner.opts.formName);
+        });
+    } 
+    
     window.setTimeout(function () {
         formdesigner.ui.showWaitingDialog("Loading form...");
         formdesigner.controller.reloadUI();
