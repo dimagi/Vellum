@@ -640,8 +640,18 @@ formdesigner.widgets = (function () {
             }
             
             if (this.showAddFormButton) {
-	            var addButton = $("<div />").text("Add Content Item").button().addClass('btn');
-	            main = main.add(addButton);
+	            var defaultContentTypes = ["image", "audio", "video", "long", "short"];
+	            var iWrapper = $("<div />").addClass("itext-wrapper");
+	            main = main.add(iWrapper);
+	            $("<span />").text("Add: ").addClass("help-inline").appendTo(iWrapper);
+                var bg = $("<div />").addClass("btn-group itext-options").appendTo(iWrapper);
+                for (i = 0; i < defaultContentTypes.length; i++) {
+		            $("<div />").text(defaultContentTypes[i]).button().addClass('btn itext-option').click(
+		                function () {
+		                    addItextType($(this).text());
+		                }).appendTo(bg);
+		        }
+                var addButton = $("<div />").text("custom...").button().addClass('btn').appendTo(bg);
 	            addButton.click(function () {
 	                var dialog = $("#fd-dialog-confirm");
 	                dialog.dialog( "destroy" );
