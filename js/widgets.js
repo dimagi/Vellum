@@ -610,11 +610,12 @@ formdesigner.widgets = (function () {
         var slug = block.slug;
         
         var getDefaultValue = function (formType) {
-            if (formType === "image" || formType === "audio") {
+            if (formType === "image" || formType === "audio" || formType === "video") {
                 // default formats
                 // image: jr://file/commcare/image/form_id/question_id.png
                 // audio: jr://file/commcare/audio/form_id/question_id.mp3
-                var extension = (formType === "image") ? "png" : "mp3";
+                var extension = (formType === "image") ? "png" : 
+                    (formType == "audio") ? "mp3" : "3gp";
                 var ret = "jr://file/commcare/" + formType + "/" + 
                        formdesigner.controller.form.formID + "/" + 
                        mugType.getDefaultItextRoot() + "." + extension;
