@@ -4,6 +4,4 @@ mongoose.conf
 error_log.txt
 *.jar
 projectFilesBackup/
-css/formdesigner.css
-css/screen.css
 mongoose.exe
