@@ -160,7 +160,7 @@
   margin-top: 5px;
   margin-left: 5px;
   height: 900px;
-  width: 490px;
+  width: 445px;
   display: none;
   overflow-x: hidden;
 }
@@ -402,7 +402,7 @@
   position: relative;
 }
 .hq-oldstyle #formdesigner {
-  width: 996px;
+  width: 935px;
   margin: auto;
 }
 .hq-oldstyle #fd-props-mugtype-info {
@@ -531,4 +531,8 @@
 }
 .hq-oldstyle .dismiss-message-button {
   float: right;
+}
+
+.hq-oldstyle .itext-wrapper {
+    padding: 2em;
 }
