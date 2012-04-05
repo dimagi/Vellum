@@ -2133,11 +2133,14 @@ formdesigner.controller = (function () {
 
         formdesigner.XFORM_STRING = that.form.createXForm();
         function makeData () {
-            data = {
+            var data = {
                 xform: formdesigner.XFORM_STRING
             };
             if (that.form.formName) {
                 data["name"] = that.form.formName;
+            }
+            if (formdesigner.opts.CSRF_TOKEN) {
+               data['csrfmiddlewaretoken'] = formdesigner.opts.CSRF_TOKEN
             }
             return data;
         }
