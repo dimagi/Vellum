@@ -417,7 +417,7 @@
   padding: 0;
   position: absolute;
   text-align: center;
-  width: 710px;
+  width: 690px;
   z-index: 3;
   line-height: 25px;
 }
@@ -427,7 +427,7 @@
   margin-top: 5px;
   margin-left: 5px;
   height: 900px;
-  width: 713px;
+  width: 690px;
   overflow-x: hidden;
   display: none;
 }
