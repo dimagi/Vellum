@@ -1003,7 +1003,7 @@ formdesigner.controller = (function () {
             return formdesigner.util.tabSeparate(row);
         };
         
-        var headers = ["Question", "Type", "Audio", "Image", "Skip Condition", "Constraint Condition"];
+        var headers = ["Question", "Type", "Audio", "Image", "Display Condition", "Constraint Condition"];
         for (i = 0; i < languages.length; i++) {
             headers.splice(2 + i, 0, "Text (" + languages[i] + ")");
         } 

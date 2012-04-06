@@ -745,7 +745,7 @@ formdesigner.model = function () {
                     visibility: 'visible',
                     presence: 'optional',
                     uiType: "xpath",
-                    lstring: 'Skip Condition'
+                    lstring: 'Display Condition'
                 },
                 calculateAttr: {
                     editable: 'w',
