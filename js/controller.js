@@ -966,12 +966,12 @@ formdesigner.controller = (function () {
             
             var defaultOrNothing = function (item, language, form) {
                 return item.hasForm(form) ? item.getForm(form).getValueOrDefault(language) : "";
-            };
+            }
             var fillBlanks = function (array, count) {
                 for (var i = 0; i < count; i++) {
                     row.push("");
                 }
-            };
+            }
             
             var row = [];
             var i;
@@ -2132,22 +2132,10 @@ formdesigner.controller = (function () {
         $('body').ajaxStop(formdesigner.ui.hideConfirmDialog);
 
         formdesigner.XFORM_STRING = that.form.createXForm();
-        function makeData () {
-            var data = {
-                xform: formdesigner.XFORM_STRING
-            };
-            if (that.form.formName) {
-                data["name"] = that.form.formName;
-            }
-            if (formdesigner.opts.CSRF_TOKEN) {
-               data['csrfmiddlewaretoken'] = formdesigner.opts.CSRF_TOKEN
-            }
-            return data;
-        }
         saveButton.ajax({
             type: "POST",
             url: url,
-            data: makeData(),
+            data: {xform: formdesigner.XFORM_STRING},
             success: function (data) {
                 formdesigner.ui.hideConfirmDialog();
                 formdesigner.fire({
