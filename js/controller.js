@@ -2193,7 +2193,9 @@ formdesigner.controller = (function () {
     
     var doneXPathEditor = function(options) {
         var mug = that.getCurrentlySelectedMugType();
-        that.setMugPropertyValue(mug.mug, options.group, options.property, options.value, mug) 
+        if (!options.cancel) {
+            that.setMugPropertyValue(mug.mug, options.group, options.property, options.value, mug) 
+        }
         formdesigner.ui.hideXPathEditor();
         formdesigner.ui.showTools();
         formdesigner.ui.displayMugProperties(mug);

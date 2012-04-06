@@ -1997,9 +1997,12 @@ formdesigner.ui = function () {
             });
 
             // shared UI
+            var actions = $("<div />").addClass("btn-group")
+                    .css("padding-top", "5px").appendTo(mainPane);
+            
             var doneButton = $('<button />').text("Save to Form").addClass("btn").addClass("btn-primary")
                     .button()
-                    .appendTo(mainPane);
+                    .appendTo(actions);
 
             doneButton.click(function() {
                 getExpressionInput().val(getExpressionFromUI());
@@ -2015,6 +2018,16 @@ formdesigner.ui = function () {
                     getValidationSummary().text("Validation Failed! Please fix all errors before leaving this page. " + results[1]).removeClass("success").addClass("error");
                 }
             });
+            
+            var cancelButton = $('<button />').text("Cancel").addClass("btn")
+                    .button()
+                    .appendTo(actions);
+            cancelButton.click(function () {
+                formdesigner.controller.doneXPathEditor({
+                    cancel:   true
+                });
+            });
+            
             var validationSummary = $("<div />").attr("id", "fd-xpath-validation-summary").appendTo(mainPane);
         };
 
