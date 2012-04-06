@@ -745,6 +745,7 @@ formdesigner.model = function () {
                     visibility: 'visible',
                     presence: 'optional',
                     uiType: "xpath",
+                    xpathType: "bool",
                     lstring: 'Display Condition'
                 },
                 calculateAttr: {
@@ -752,6 +753,7 @@ formdesigner.model = function () {
                     visibility: 'visible',
                     presence: 'optional',
                     uiType: "xpath",
+                    xpathType: "generic",
                     lstring: 'Calculate Condition'
                 },
                 constraintAttr: {
@@ -759,6 +761,7 @@ formdesigner.model = function () {
                     visibility: 'visible',
                     presence: 'optional',
                     uiType: "xpath",
+                    xpathType: "bool",
                     lstring: 'Constraint Condition'
                 },
                 constraintMsgItextID: {

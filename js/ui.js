@@ -1902,13 +1902,11 @@ formdesigner.ui = function () {
             expressionPane.empty();
 
             // update expression builder
-            if (options.value) {
-                showSimpleMode(options.value);
+            if (options.xpathType === "bool") {
+	            showSimpleMode(options.value);
             } else {
-                // nothing to do
-                showSimpleMode();
+                showAdvancedMode(options.value);
             }
-
             $("#fd-xpath-editor-text").val(options.value);
 
         };
@@ -1967,14 +1965,15 @@ formdesigner.ui = function () {
                     .appendTo(mainPane);
 
             $("<label />").attr("for", "fd-xpath-editor-text")
-                    .text("XPath String: ")
+                    .text("XPath Expression: ")
                     .appendTo(advancedUI);
 
             $("<textarea />").attr("id", "fd-xpath-editor-text")
                     .attr("rows", "2")
                     .attr("cols", "50")
-                    .appendTo(advancedUI);
-
+                    .appendTo(advancedUI)
+                    .addClass("jstree-drop");
+                    
             // simple UI
             var simpleUI = $("<div />").attr("id", "xpath-simple").appendTo(mainPane);
 

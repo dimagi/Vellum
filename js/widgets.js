@@ -281,15 +281,14 @@ formdesigner.widgets = (function () {
     that.xPathWidget = function (mugType, path) {
                 
         var widget = that.textWidget(mugType, path);
-        
-        
         var xPathButton = $('<button />').addClass("xpath-edit-button").text("Edit").button().addClass('btn');
         xPathButton.data("group", widget.groupName).data("prop", widget.propName).data("inputControlID", widget.getID());
         xPathButton.click(function () {
             formdesigner.controller.displayXPathEditor({
-                group:    $(this).data("group"),
-                property: $(this).data("prop"),
-                value:    $("#" + $(this).data("inputControlID")).val()
+                group:     $(this).data("group"),
+                property:  $(this).data("prop"),
+                xpathType: widget.definition.xpathType,
+                value:     $("#" + $(this).data("inputControlID")).val()
             });
         });
         
