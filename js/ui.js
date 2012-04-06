@@ -667,9 +667,7 @@ formdesigner.ui = function () {
         }
 
         function updateDisplay() {
-            $('#fd-question-properties').animate({
-                height:'900px'
-            }, 200);
+            $('#fd-question-properties').animate({}, 200);
 
             that.hideQuestionProperties();
 
