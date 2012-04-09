@@ -758,10 +758,7 @@ formdesigner.controller = (function () {
             }
             
             // copy everything over
-            
-            
             newMugType.ufid = mugType.ufid;
-            
             var elems = ["dataElement", "bindElement", "controlElement"];
             for (var i = 0; i < elems.length; i ++) {
 	            if (mugType.mug.properties[elems[i]] && newMugType.mug.properties[elems[i]]) {
@@ -770,13 +767,14 @@ formdesigner.controller = (function () {
 	                                             ["nodeID"]);
 	            }
             }
+            
+            // update trees
             that.form.replaceMugType(mugType, newMugType, 'data');
             that.form.replaceMugType(mugType, newMugType, 'control');
             
             // update UI
             that.reloadUI();
-            formdesigner.ui.displayMugProperties(newMugType);
-                    
+            formdesigner.ui.selectMugTypeInUI(newMugType);
         } 
     };
     var loadMugTypeIntoUI = function (mugType) {
