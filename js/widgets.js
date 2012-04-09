@@ -6,7 +6,7 @@ formdesigner.widgets = (function () {
     var that = {};
     
     that.unchangeableQuestionTypes = [
-        "item", "group", "repeat", "datanode"
+        "item", "group", "repeat", "datanode", "trigger"
     ];
     
     that.getGroupName = function (path) {
