@@ -767,6 +767,10 @@ formdesigner.controller = (function () {
 	                                             ["nodeID"]);
 	            }
             }
+            // magic special cases
+            if (formdesigner.util.isSelect(newMugType) || newMugType.typeSlug === "trigger") {
+                newMugType.mug.properties.bindElement.properties.dataType = "";
+            } 
             
             // update trees
             that.form.replaceMugType(mugType, newMugType, 'data');
