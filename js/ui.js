@@ -36,7 +36,7 @@ formdesigner.ui = function () {
 
     that.ODK_ONLY_QUESTION_TYPES = ['image','audio','video','barcode'];
 
-
+            
 
     /**
      * Displays an info box on the properties view.
@@ -197,6 +197,26 @@ formdesigner.ui = function () {
     };
     that.addQuestion = addQuestion;
 
+    that.getQuestionTypeSelector = function () {
+        var select = $('<select />');
+        
+        function makeOptionItem(idTag, attrvalue, label) {
+           var opt = $('<option />')
+                   .attr('id', idTag)
+                   .attr('value', attrvalue)
+                   .text(label);
+           return opt;
+        }
+        
+        var questions = formdesigner.util.getQuestionList(); 
+        for (var i = 0; i < questions.length; i++) {
+            select.append(makeOptionItem(questions[i][0], 
+                                         questions[i][0], 
+                                         questions[i][1]));
+        }
+        return select;
+    };
+    
     function init_toolbar() {
         var toolbar = $(".fd-toolbar"), select, addbutstr, addbut;
         select = $('<select></select>')
@@ -214,33 +234,12 @@ formdesigner.ui = function () {
                return opt;
             }
 
-            var questions = [
-                //in the format: [id_tag, option_value_attribute, option_label]
-                ['text', 'Text Question', 'Text Question'],
-                ['secret', 'Secret Question', 'Password Question'],
-                ['group', 'Group', 'Group'],
-                ['select', 'Multi-Select Question', 'Multi-Select Question'],
-                ['item', 'Select Item', 'Select Item'],
-                ['1select', 'Single Select', 'Single Select'],
-                ['trigger', 'Label', 'Label'],
-                ['repeat', 'Repeat', 'Repeat'],
-                ['barcode', 'Barcode Question', 'Barcode Question'],
-                ['geopoint', 'Geopoint Question', 'Geopoint Question'],
-                ['int', 'Integer Number', 'Integer Number'],
-                ['double', 'Double Number', 'Decimal Number'],
-                ['long', 'Long Number', 'Long Number'],
-                ['image', 'Image Question', 'Image Question'],
-                ['audio', 'Audio Question', 'Audio Question'],
-                ['video', 'Video Question', 'Video Question'],
-                ['date', 'Date', 'Date'],
-                ['datetime', 'Date and Time', 'Date and Time'],
-                ['datanode', 'Data Node', 'Data Node']
-            ];
             var i;
-            for (i=0;i<questions.length;i++) {
-                if(questions.hasOwnProperty(i)) {
-                    select.append(makeOptionItem(questions[i][0], questions[i][1], questions[i][2]))
-                }
+            var questions = formdesigner.util.getQuestionList();
+            for (i = 0; i < questions.length; i++) {
+                select.append(makeOptionItem(questions[i][0], 
+                                             questions[i][1], 
+                                             questions[i][1]));
             }
         }
 
@@ -673,17 +672,10 @@ formdesigner.ui = function () {
 
             var content = $("#fd-props-content").empty();
 
-            // Add heading to indicate what kind of question vellum thinks this is
-            $("<h1 />").text(mugType.typeName).attr("id", "fd-props-mugtype-info").appendTo(content);
-
-            // TODO: where does this belong? eventually we want this to be per-question-type
-
             var sections = formdesigner.widgets.getSectionListForMug(mugType);
 
-            var sec;
             for (var i = 0; i < sections.length; i++) {
-                sec = sections[i];
-                sec.getSectionDisplay().appendTo(content);
+                sections[i].getSectionDisplay().appendTo(content);
             }
 
             attachCommonEventListeners();

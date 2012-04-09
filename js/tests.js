@@ -1407,7 +1407,7 @@ start();
         el = xml.find('[nodeset*='+curMugType.mug.properties.bindElement.properties.nodeID+']')
         equal($(el).attr('type'), 'xsd:long');
 
-        addQuestionThroughUI("Secret Question");
+        addQuestionThroughUI("Password Question");
         curMugType = getMTFromControlTree($(lastCreatedNode));
         ui.selectMugTypeInUI(curMugType);
         equal($('#bindElement-dataType').val(), 'xsd:string');

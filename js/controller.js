@@ -280,7 +280,7 @@ formdesigner.controller = (function () {
                 throw 'Node in tree without value?!?!'
             }
 
-            if(mt.typeName === "Select Item" && !includeSelectItems) { //skip Select Items
+            if(mt.typeSlug === "item" && !includeSelectItems) { //skip Select Items
                 return;
             }
 
@@ -638,6 +638,52 @@ formdesigner.controller = (function () {
             formdesigner.ui.getDataJSTree().jstree('select_node', oldSelectedMugEl);
         }
     }
+    
+    that.getMugTypeByQuestionType = function (qType) {
+        switch(qType.toLowerCase()) {
+            case 'text':
+                return formdesigner.model.mugTypeMaker.stdTextQuestion();
+            case 'group':
+                return formdesigner.model.mugTypeMaker.stdGroup();
+            case 'select':
+                return formdesigner.model.mugTypeMaker.stdMSelect();
+            case '1select':
+                return formdesigner.model.mugTypeMaker.stdSelect();
+            case 'secret':
+                return formdesigner.model.mugTypeMaker.stdSecret();
+             case 'item':
+                return formdesigner.model.mugTypeMaker.stdItem();
+            case 'trigger':
+                return formdesigner.model.mugTypeMaker.stdTrigger();
+            case 'repeat':
+                return formdesigner.model.mugTypeMaker.stdRepeat();
+            case 'int':
+                return formdesigner.model.mugTypeMaker.stdInt();
+            case 'long':
+                return formdesigner.model.mugTypeMaker.stdLong();
+            case 'double':
+                return formdesigner.model.mugTypeMaker.stdDouble();
+            case 'date':
+                return formdesigner.model.mugTypeMaker.stdDate();
+            case 'datetime':
+                return formdesigner.model.mugTypeMaker.stdDateTime();
+            case 'datanode':
+                return formdesigner.model.mugTypeMaker.stdDataBindOnly();
+            case 'geopoint':
+                return formdesigner.model.mugTypeMaker.stdGeopoint();
+            case 'barcode':
+                return formdesigner.model.mugTypeMaker.stdBarcode();
+            case 'image':
+                return formdesigner.model.mugTypeMaker.stdImage();
+            case 'audio':
+                return formdesigner.model.mugTypeMaker.stdAudio();
+            case 'video':
+                return formdesigner.model.mugTypeMaker.stdVideo();
+            default:
+                console.log("No standard mugType for selected question type:" + qType + " switching to 'Text Question' type!");
+                return formdesigner.model.mugTypeMaker.stdTextQuestion();
+        }
+    };
 
     /**
      * Convenience method for generating mug and mugType, calling UI and throwing
@@ -647,70 +693,7 @@ formdesigner.controller = (function () {
      */
     var createQuestion = function (qType) {
         var mugType, mug, createQuestionEvent = {};
-
-        switch(qType.toLowerCase()) {
-            case 'text':
-                mugType = formdesigner.model.mugTypeMaker.stdTextQuestion();
-                break;
-            case 'group':
-                mugType = formdesigner.model.mugTypeMaker.stdGroup();
-                break;
-            case 'select':
-                mugType = formdesigner.model.mugTypeMaker.stdMSelect();
-                break;
-            case '1select':
-                mugType = formdesigner.model.mugTypeMaker.stdSelect();
-                break;
-            case 'secret':
-                mugType = formdesigner.model.mugTypeMaker.stdSecret();
-                break;
-             case 'item':
-                mugType = formdesigner.model.mugTypeMaker.stdItem();
-                break;
-            case 'trigger':
-                mugType = formdesigner.model.mugTypeMaker.stdTrigger();
-                break;
-            case 'repeat':
-                mugType = formdesigner.model.mugTypeMaker.stdRepeat();
-                break;
-            case 'int':
-                mugType = formdesigner.model.mugTypeMaker.stdInt();
-                break;
-            case 'long':
-                mugType = formdesigner.model.mugTypeMaker.stdLong();
-                break;
-            case 'double':
-                mugType = formdesigner.model.mugTypeMaker.stdDouble();
-                break;
-            case 'date':
-                mugType = formdesigner.model.mugTypeMaker.stdDate();
-                break;
-            case 'datetime':
-                mugType = formdesigner.model.mugTypeMaker.stdDateTime();
-                break;
-            case 'datanode':
-                mugType = formdesigner.model.mugTypeMaker.stdDataBindOnly();
-                break;
-            case 'geopoint':
-                mugType = formdesigner.model.mugTypeMaker.stdGeopoint();
-                break;
-            case 'barcode':
-                mugType = formdesigner.model.mugTypeMaker.stdBarcode();
-                break;
-            case 'image':
-                mugType = formdesigner.model.mugTypeMaker.stdImage();
-                break;
-            case 'audio':
-                mugType = formdesigner.model.mugTypeMaker.stdAudio();
-                break;
-            case 'video':
-                mugType = formdesigner.model.mugTypeMaker.stdVideo();
-                break;
-            default:
-                console.log("No standard mugType for selected question type:" + qType + " switching to 'Text Question' type!");
-                mugType = formdesigner.model.mugTypeMaker.stdTextQuestion();
-        }
-
+        mugType = that.getMugTypeByQuestionType(qType);
         mug = mugType.mug;
 
         //this allows the mug to respond to certain events in a common way.
@@ -756,7 +739,46 @@ formdesigner.controller = (function () {
 
     };
     that.createQuestion = createQuestion;
-
+    
+    that.changeQuestionType = function (mugType, questionType) {
+        if (questionType !== mugType.typeSlug) {
+            // get the new mug type
+            var newMugType = that.getMugTypeByQuestionType(questionType);
+            
+            // check preconditions - if this is a select question with
+            // select items, you're only allowed to change it to another
+            // select question
+            var children = that.getChildren(mugType);
+            if (children.length > 0) {
+                if (!formdesigner.util.isSelect(newMugType)) {
+                    throw "you can't change a select-style question to a non-select-style " +
+                          "question if it has select items. Please remove all select items " +
+                          "and try again."
+                }
+            }
+            
+            // copy everything over
+            
+            
+            newMugType.ufid = mugType.ufid;
+            
+            var elems = ["dataElement", "bindElement", "controlElement"];
+            for (var i = 0; i < elems.length; i ++) {
+	            if (mugType.mug.properties[elems[i]] && newMugType.mug.properties[elems[i]]) {
+	                formdesigner.util.copySafely(mugType.mug.properties[elems[i]].properties,
+	                                             newMugType.mug.properties[elems[i]].properties,
+	                                             ["nodeID"]);
+	            }
+            }
+            that.form.replaceMugType(mugType, newMugType, 'data');
+            that.form.replaceMugType(mugType, newMugType, 'control');
+            
+            // update UI
+            that.reloadUI();
+            formdesigner.ui.displayMugProperties(newMugType);
+                    
+        } 
+    };
     var loadMugTypeIntoUI = function (mugType) {
 
         var mug, controlTree, parentMT, parentMTUfid, loadMTEvent = {};

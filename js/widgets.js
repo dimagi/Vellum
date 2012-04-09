@@ -5,6 +5,10 @@ if (typeof formdesigner === 'undefined') {
 formdesigner.widgets = (function () {
     var that = {};
     
+    that.unchangeableQuestionTypes = [
+        "item", "group", "repeat", "datanode"
+    ];
+    
     that.getGroupName = function (path) {
         return path.split("/")[0];
     };
@@ -459,6 +463,54 @@ formdesigner.widgets = (function () {
         return widget;    
     };
     
+    that.questionTypeSelectorWidget = function (mugType) {
+        var widget = that.baseWidget(mugType);
+        widget.definition = {};
+        widget.currentValue = mugType.typeSlug;
+        widget.propName = "Question Type";
+        
+        widget.getID = function () {
+            return "question-type";
+        };
+        
+        var input = formdesigner.ui.getQuestionTypeSelector();
+        // small hack: don't show data nodes or select items for now
+        for (var i = 0; i < that.unchangeableQuestionTypes.length; i++) {
+            input.find("#" + that.unchangeableQuestionTypes[i]).remove();
+        }
+        
+        // crazy temporary css hack
+        var label = widget.getLabel().css("float", "left").css("line-height", "40px");
+        widget.getLabel = function () {
+            
+            return label;
+        };
+        
+        widget.getControl = function () {
+            return input;
+        };
+        
+        widget.setValue = function (value) {
+            input.val(value);
+        };
+        
+        widget.getValue = function() {
+            return input.val();
+        };
+        
+        input.change(function () {
+            try {
+                formdesigner.controller.changeQuestionType(mugType, widget.getValue());
+            } catch (err) {
+                alert("Sorry, you can't do that because: " + err);
+                input.val(mugType.typeSlug);
+            }
+        });
+        
+        return widget;
+        
+    };
+    
     that.widgetTypeFromPropertyDefinition = function (propertyDef) {
         switch (propertyDef.uiType) {
             case "select":
@@ -484,6 +536,8 @@ formdesigner.widgets = (function () {
                     // default to "full"   
                     return that.iTextFieldBlock(mugType, definition);
                 }
+            case "questionType":
+                return that.questionTypeSelectorWidget(mugType);
             case "generic":
             default: 
                 var cls = that.widgetTypeFromPropertyDefinition(mugType.getPropertyDefinition(definition.path));
@@ -772,11 +826,6 @@ formdesigner.widgets = (function () {
     };
     that.getMainSection = function (mugType) {
         var elements = ["dataElement/nodeID"];
-                                             
-        if (!formdesigner.util.isSelect(mugType)) {
-            // don't allow switching types for selects
-            elements.push("bindElement/dataType");
-        }
         
         if (formdesigner.util.isSelectItem(mugType)) {
             elements.push("controlElement/defaultValue");
@@ -784,6 +833,9 @@ formdesigner.widgets = (function () {
         
         elements = filterByMugProperties(elements, mugType).map(wrapAsGeneric);
         
+        if (that.unchangeableQuestionTypes.indexOf(mugType.typeSlug) === -1) {
+            elements.splice(1, 0, {widgetType: "questionType", path: "system/questionType"});
+        }
         return that.genericSection(mugType, { 
                             slug: "main",
                             displayName: "Main Properties",

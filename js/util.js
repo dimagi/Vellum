@@ -58,7 +58,39 @@ formdesigner.util = (function(){
         "audio",
         "video"
     ];
-
+    
+    that.QUESTIONS = {
+        //in the format: {question_slug: question_label}
+        'text': 'Text Question',
+        'secret': 'Password Question',
+        'group': 'Group',
+        'select': 'Multi-Select Question',
+        'item': 'Select Item',
+        '1select': 'Single Select',
+        'trigger': 'Label',
+        'repeat': 'Repeat',
+        'barcode': 'Barcode Question',
+        'geopoint': 'Geopoint Question',
+        'int': 'Integer Number',
+        'double': 'Double Number',
+        'long': 'Long Number',
+        'image': 'Image Question',
+        'audio': 'Audio Question',
+        'video': 'Video Question',
+        'date': 'Date',
+        'datetime': 'Date and Time',
+        'datanode': 'Data Node'
+    };
+    
+    that.getQuestionList = function () {
+        var ret = [];
+        for (var q in that.QUESTIONS) {
+            if (that.QUESTIONS.hasOwnProperty(q)) {
+                ret.push([q, that.QUESTIONS[q]]);
+            }
+        }
+        return ret;
+    }
     /**
      * Grabs the value between the tags of the element passed in
      * and returns a string of everything inside.
@@ -125,7 +157,32 @@ formdesigner.util = (function(){
                 console.groupEnd();
     };
     that.dumpFormTreesToConsole = dumpFormTreesToConsole;
-
+    
+    /*
+     * Copies all properties from one object to another under the following rules:
+     *  - If the property doesn't exist on the destination object it is not copied
+     *  - If the property exists but is different on the destination object it is not copied
+     *
+     * This is used to attempt to copy as much as possible from one mug to 
+     * another while preserving the core structure.
+     * 
+     */
+    that.copySafely = function (from, to, forceOverride) {
+        if (!forceOverride) forceOverride = [];
+        if (to) {
+            for (var prop in from) {
+                if (from.hasOwnProperty(prop)) {
+                    if (forceOverride.indexOf(prop) !== -1 || 
+                        (to.hasOwnProperty(prop) && !to[prop])) {
+                        //console.log("setting ", prop, " to ", from[prop]);
+                        to[prop] = from[prop];
+                    } else {
+                        //console.log("won't set", prop, " to ", from[prop], " because it is ", to[prop]);
+                    }
+                }
+            }
+        }
+    };
     
     /**
      * From http://stackoverflow.com/questions/4149276/javascript-camelcase-to-regular-form
@@ -855,12 +912,12 @@ formdesigner.util = (function(){
     };
         
     that.isSelect = function (mug) {
-        return (mug.typeName === "Multi Select Question" ||
-                mug.typeName === "Single Select Question")
+        return (mug.typeSlug === "select" ||
+                mug.typeSlug === "1select");
     };
     
     that.isSelectItem = function (mug) {
-        return (mug.typeName === "Select Item")
+        return (mug.typeSlug === "item");
     };
 
     /**
