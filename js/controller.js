@@ -779,6 +779,9 @@ formdesigner.controller = (function () {
             // update UI
             that.reloadUI();
             formdesigner.ui.selectMugTypeInUI(newMugType);
+            formdesigner.controller.form.fire({ 
+                type: "form-property-changed"
+            }); 
         } 
     };
     var loadMugTypeIntoUI = function (mugType) {
