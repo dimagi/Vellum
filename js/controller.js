@@ -1134,7 +1134,7 @@ formdesigner.controller = (function () {
                       '"Edit Source XML" button or go back to download your form. <br>' +
                       "It is likely that your form contains errors.  You can check to see if " +
                       "your form is valid by pasting your entire form into the " +
-                      '<a href="' + validator_url + '">Form Validator (link)</a>';
+                      '<a href="' + validator_url + '" target="_blank">Form Validator (link)</a>';
             
             formdesigner.ui.showParseErrorMessage(msg);
 
