@@ -686,6 +686,7 @@ formdesigner.widgets = (function () {
                     itextForm.setValue(lang, value);
                     itextWidget.setValue(value);
                 }
+                itextWidget.fireChangeEvents();
             });
         };
         
