@@ -1520,6 +1520,7 @@ formdesigner.controller = (function () {
                     }
 
                     function MTIdentifierFromInput () {
+                        // TODO: Add appearance attribute support here?
                         if (!dataType) { return 'stdTextQuestion'; }
                         var MTID = '';
                         if(dataType === 'long') {
@@ -1727,7 +1728,9 @@ formdesigner.controller = (function () {
                     if (tag === 'repeat') {
                         parseRepeatVals(repeat_count, repeat_noaddremove, MugType);
                     }
-
+                    
+                    // add any arbitrary attributes that were directly on the control
+                    MugType.mug.properties.controlElement.properties._rawAttributes = formdesigner.util.getAttributes(cEl);
                 }
 
                 function insertMTInControlTree (MugType, parentMT) {
@@ -1768,6 +1771,10 @@ formdesigner.controller = (function () {
                     parentNode = null;
                 }
 
+                // NOTE: it appears this entire block should be wrapped with an
+                // if statement that can check whether the parentNode is null
+                // and not bother with this stuff if so, but I'm scared of 
+                // dragons so leaving as is.
                 parentPath = formdesigner.util.getPathFromControlElement(parentNode);
                 parentNodeID = formdesigner.util.getNodeIDFromPath(parentPath);
                 if(!parentNodeID) {
@@ -1782,8 +1789,6 @@ formdesigner.controller = (function () {
                 } else {
                     parentMug = null;
                 }
-
-
 
                 path = formdesigner.util.getPathFromControlElement(el);
                 nodeID = formdesigner.util.getNodeIDFromPath(path);

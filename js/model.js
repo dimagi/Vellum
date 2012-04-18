@@ -129,7 +129,7 @@ formdesigner.model = function () {
      * @param spec
      */
     var BindElement = function (spec) {
-        var that = {}, unusedXMLattrs = {};
+        var that = {};
         that.properties = {};
 
 
@@ -154,9 +154,6 @@ formdesigner.model = function () {
         that.toString = function () {
             return 'Bind Element: ' + this.properties.nodeID;
         }
-
-        //make the object capable of storing unused/unknown xml tag attributes
-        formdesigner.util.allowUnusedXMLAttributes(that);
 
         //make the object event aware
         formdesigner.util.eventuality(that);
@@ -287,9 +284,6 @@ formdesigner.model = function () {
             }
         }(spec));
 
-        //make the object capable of storing unused/unknown xml tag attributes
-        formdesigner.util.allowUnusedXMLAttributes(that);
-
         //give this object a unqiue fd id
         formdesigner.util.give_ufid(that);
 
@@ -339,9 +333,6 @@ formdesigner.model = function () {
                 }
             }
         }(spec));
-
-        //make the object capable of storing unused/unknown xml tag attributes
-        formdesigner.util.allowUnusedXMLAttributes(that);
 
         //make the object event aware
         formdesigner.util.eventuality(that);
@@ -1021,7 +1012,8 @@ formdesigner.model = function () {
                     if(mugProperties.hasOwnProperty(j)){
                         var pBlock = mugProperties[j];
                         for (z in pBlock.properties){
-                            if(pBlock.properties.hasOwnProperty(z)){
+                            // allow "_propertyName" convention for system properties
+                            if(pBlock.properties.hasOwnProperty(z) && z.indexOf("_") !== 0){
                                 var p = pBlock.properties[z],
                                         rule = propertiesObj[j][z];
                                 if(p && (!rule || rule.presence === 'notallowed')){
@@ -2313,7 +2305,6 @@ formdesigner.model = function () {
                         tagName = tagName.toLowerCase();
                         var isGroupOrRepeat = (tagName === 'group' || tagName === 'repeat');
                         var isODKMedia = (tagName === 'upload');
-
                         /**
                          * Creates the label tag inside of a control Element in the xform
                          */
@@ -2350,6 +2341,14 @@ formdesigner.model = function () {
                             xmlWriter.writeString(cProps.defaultValue);
                             xmlWriter.writeEndElement();
                         }
+                        
+                        // Write any custom attributes first
+                        for (var k in cProps._rawAttributes) {
+                            if (cProps._rawAttributes.hasOwnProperty(k)) {
+                                xmlWriter.writeAttributeStringSafe(k, cProps._rawAttributes[k]);
+                            }
+                        }
+                        
                         ///////////////////////////////////////////////////////////////////////////
                         ///Set the nodeset/ref attribute correctly
                         if (tagName !== 'item') {

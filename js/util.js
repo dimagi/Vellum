@@ -327,56 +327,15 @@ formdesigner.util = (function(){
     };
     that.generate_item_label = generate_item_label;
 
-    that.allowUnusedXMLAttributes = function(that){
-        var unusedXMLattrs = {},
-                unusedDOMNodes = [];
-
-
-        /**
-         * When parsing an XML form, store unused/unknown
-         * xml data associated with a bind/data/control here.
-         * If an attribute with this name already exists, it will
-         * be overwritten with the new value.
-         *
-         * THESE ARE ATTRIBUTES FOR THE MAIN TAG (e.g. bind, data node, control Node)
-         * USE addUnusedElement() to add entire unused/unrecognized nodes!
-         * @param name - Attribute name
-         * @param value - Attribute value
-         */
-        that.addUnusedAttr = function(name, value){
-            unusedXMLattrs[name] = value;
+    that.getAttributes = function (element) {
+        var attributes = $(element)[0].attributes;
+        var attrMap = {};
+        for (var i = 0; i < attributes.length; i++) {
+            attrMap[attributes[i].nodeName] = attributes[i].nodeValue;
         }
-
-        /**
-         * Gets all the unused/unknown XML node attributes
-         * that were associated with this bind during parse time.
-         *
-         * Format is a dictionary of {attrName: attrValue} pairs.
-         */
-        that.getUnusedAttr = function(){
-            return unusedXMLattrs;
-        }
-
-        /**
-         * Used for storing unused/unrecognized DOM Nodes
-         * at parse time.  When generating a new XML doc,
-         * these nodes can be retrieved and inserted into the new doc.
-         * @param DOMNode
-         */
-        that.addUnusedElement = function(DOMNode){
-            unusedDOMNodes.push(DOMNode);
-        }
-
-        /**
-         * Returns the unused DOM nodes as a list of DOM elements
-         */
-        that.getUnusedElements = function(){
-            return unusedDOMNodes;
-        }
-
-        return that;
-    }
-
+        return attrMap;
+    }; 
+    
     that.throwAndLogValidationError = function(vResult,mType,mug){
 //            console.group("Failed Validation Objectss");
 //            console.log("Validation Object:");
