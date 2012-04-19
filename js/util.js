@@ -174,11 +174,8 @@ formdesigner.util = (function(){
                 if (from.hasOwnProperty(prop)) {
                     if (forceOverride.indexOf(prop) !== -1 || 
                         (to.hasOwnProperty(prop) && !to[prop])) {
-                        //console.log("setting ", prop, " to ", from[prop]);
                         to[prop] = from[prop];
-                    } else {
-                        //console.log("won't set", prop, " to ", from[prop], " because it is ", to[prop]);
-                    }
+                    } 
                 }
             }
         }
@@ -256,11 +253,7 @@ formdesigner.util = (function(){
         if(!path){
             path = el.attr('nodeset');
         }
-        if(!path) {
-            return null;
-        }
-
-        return path;
+        return path || null;
     }
     that.getPathFromControlElement = getPathFromControlElement;
 
