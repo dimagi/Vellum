@@ -253,6 +253,29 @@ formdesigner.controller = (function () {
     };
     that.getMugByPath = getMugTypeByPath;
     
+    var getSingularMugTypeByNodeId = function (nodeId, treeType) {
+        if (!treeType) {
+            treeType = 'data';
+        }
+
+        if(!nodeId) { //no path specified
+            return null;
+        }
+        
+        var nodeMatches = function (node) {
+            var mt = node.getValue();
+            return (mt && mt.mug && mt.mug.getBindElementID() === nodeId) ? mt : null;
+        };
+        
+        var tree = (treeType === "data") ? that.form.dataTree : that.form.controlTree;
+        var matchList = tree.treeMap(nodeMatches).filter(function (m) { return m !== null; });
+        if (matchList.length !== 1) {
+            throw "Expected one result for node " + nodeId + " but found " + matchList.length;
+        }
+        return matchList[0];
+    };
+    that.getSingularMugTypeByNodeId = getSingularMugTypeByNodeId;
+    
     var getChildren = function (mug) {
         var children = that.form.controlTree.getNodeFromMugType(mug).getChildren();
         return children.map(function (item) { return item.getValue();});
@@ -1750,8 +1773,6 @@ formdesigner.controller = (function () {
                     nodeID,
                     mType,
                     parentNode,
-                    parentPath,
-                    parentNodeID,
                     parentMug,
                     tagName,
                     couldHaveChildren = ['repeat', 'group', 'select', 'select1'],
@@ -1771,34 +1792,48 @@ formdesigner.controller = (function () {
                     parentNode = null;
                 }
 
-                // NOTE: it appears this entire block should be wrapped with an
-                // if statement that can check whether the parentNode is null
-                // and not bother with this stuff if so, but I'm scared of 
-                // dragons so leaving as is.
-                parentPath = formdesigner.util.getPathFromControlElement(parentNode);
-                parentNodeID = formdesigner.util.getNodeIDFromPath(parentPath);
-                if(!parentNodeID) {
-                    //try looking for a control with a bind attribute
-                    bind = $(parentNode).attr('bind');
-                    if (bind) {
-                         parentNodeID = bind;
-                    }
-                }
-                if (parentNodeID) {
-                    parentMug = that.getMugByPath(parentPath,'data');
-                } else {
-                    parentMug = null;
-                }
+                var mugFromControlEl = function (el) {
+	                var nodeId, bind;
+	                var path = formdesigner.util.getPathFromControlElement(el);
 
-                path = formdesigner.util.getPathFromControlElement(el);
-                nodeID = formdesigner.util.getNodeIDFromPath(path);
-                if(!nodeID) {
-                    //try looking for a control with a bind attribute
-                    bind = $(el).attr('bind');
-                    if (bind) {
-                         nodeID = bind;
-                    }
+	                if (path) {
+	                    var nodeId = formdesigner.util.getNodeIDFromPath(path);
+	                } else {
+	                    // try looking for a control with a bind attribute
+                        bind = $(el).attr('bind');
+                        if (bind) {
+                            nodeId = bind;
+                        }
+	                }
+	                if (path) {
+	                    return that.getMugByPath(path, 'data');
+	                } else if (nodeId) {
+	                    try {
+	                        return that.getSingularMugTypeByNodeId(nodeId);
+	                    } catch (err) {
+	                        // may be fine if this was a parent lookup, 
+	                        // or will fail hard later if this creates an illegal move
+	                        return null;
+	                    }
+	                }
+	                return null;
+	            }
+                
+                if (parentNode) {
+                    parentMug = mugFromControlEl(parentNode);
                 }
+                
+                path = formdesigner.util.getPathFromControlElement(el);
+                if (path) {
+                    nodeID = formdesigner.util.getNodeIDFromPath(path);
+                } else {
+	                var existingMug = mugFromControlEl(el);
+	                if (existingMug) {
+	                    path = that.form.dataTree.getAbsolutePath(existingMug);
+	                    nodeID = existingMug.mug.getBindElementID() || existingMug.mug.getDataElementID();
+	                }
+                }
+                
                 if (oldEl) {
                     mType = classifyAndCreateMugType(path,oldEl);
                 } else {
@@ -1969,10 +2004,11 @@ formdesigner.controller = (function () {
             return true;
         }
 
+        // NOTE: why is this here?
         if(position === 'inside'){
             position = 'into';
-
         }
+        
         var oType = mugType.mug.properties.controlElement.properties.tagName,
                 rType = (!refMugType || refMugType === -1) ? 'group' : refMugType.mug.properties.controlElement.properties.tagName,
                 oIsGroupOrRepeat = (oType === 'repeat' || oType === 'group'),
