@@ -1030,8 +1030,10 @@ formdesigner.controller = (function () {
             if (mugType.hasControlElement()) {
                 // Question Type   
                 row.push(mugType.mug.properties.controlElement.properties.tagName);
+                // IText ID
+                var itext = mugType.getItext();
+                row.push(itext.id);
                 // [language texts]
-                var itext = mugType.getItext(); 
                 for (i = 0; i < languages.length; i++) {
                     row.push(defaultOrNothing(itext, languages[i], "default"));
                 }
@@ -1053,9 +1055,9 @@ formdesigner.controller = (function () {
             return formdesigner.util.tabSeparate(row);
         };
         
-        var headers = ["Question", "Type", "Audio", "Image", "Display Condition", "Constraint Condition"];
+        var headers = ["Question", "Type", "IText ID", "Audio", "Image", "Display Condition", "Constraint Condition"];
         for (i = 0; i < languages.length; i++) {
-            headers.splice(2 + i, 0, "Text (" + languages[i] + ")");
+            headers.splice(3 + i, 0, "Text (" + languages[i] + ")");
         } 
         var ret = that.getMugTypeList(true).map(mugTypeToExportRow);
         ret.splice(0, 0, formdesigner.util.tabSeparate(headers));
