@@ -953,7 +953,7 @@ formdesigner.controller = (function () {
             cells = rows[i].split('\t');
             lang = cells[0];
             iID = cells[1];
-            for (j = 2; j < cells.length || j < exportCols.length + 2; j++) {
+            for (j = 2; j < cells.length && j < exportCols.length + 2; j++) {
                 if (cells[j]) {
                     form = exportCols[j - 2];
                     val = cells[j];
