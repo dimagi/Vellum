@@ -222,7 +222,7 @@ formdesigner.util = (function(){
         }
 
         return result;
-    }
+    };
     that.mergeArray = mergeArray;
 
     /**
@@ -304,7 +304,7 @@ formdesigner.util = (function(){
         var ret = prefixStr + that.question_counter;
         that.question_counter += 1;
         return ret;
-    }
+    };
 
     /**
      * Generates a unique question ID (unique in this form) and
