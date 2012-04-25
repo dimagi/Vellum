@@ -72,7 +72,7 @@ formdesigner.util = (function(){
         'barcode': 'Barcode Question',
         'geopoint': 'Geopoint Question',
         'int': 'Integer Number',
-        'double': 'Double Number',
+        'double': 'Decimal Number',
         'long': 'Long Number',
         'image': 'Image Question',
         'audio': 'Audio Question',
@@ -574,8 +574,10 @@ formdesigner.util = (function(){
             'item',
             'output',
             'secret'
-    ]
+    ];
 
+
+    // TODO: what is this for?
     that.VALID_QUESTION_TYPE_NAMES = [
             'Text',
             'Group',
@@ -584,7 +586,8 @@ formdesigner.util = (function(){
             'Single-Select',
             'Multi-Select',
             'Integer',
-            'Double',
+            'Decimal', // one of these shouldn't be here
+            'Double',  // one of these shouldn't be here
             'Long',
             'Float',
             'Date',
@@ -596,7 +599,7 @@ formdesigner.util = (function(){
             'Barcode',
             'Secret',
             'Geopoint'
-    ]
+    ];
 
     /**
      * Shortcut func because I'm tired of typing this out all the time.
