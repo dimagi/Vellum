@@ -108,16 +108,6 @@ formdesigner.controller = (function () {
             widget.save();
         });
         
-        /**
-         * Remove itext of question that was just removed.
-         */
-        that.on('question-removed', function (e) {
-            var mt;
-            mt = e.mugType;
-            formdesigner.model.Itext.removeMugItext(mt);
-        });
-
-
         that.on('parse-error', function (e) {
             if(DEBUG_MODE) {
                 console.log('There was a parse error:', e);
@@ -367,14 +357,8 @@ formdesigner.controller = (function () {
      * Toggles the ui spinner (this operation could take a few seconds).
      */
     var removeCruftyItext = function () {
-        //show spinner
-        $.fancybox.showActivity();
-
         var validIds = that.getAllNonEmptyItextItemsFromMugs();
         formdesigner.model.Itext.resetItextList(validIds);
-
-        //hide spinner
-        $.fancybox.hideActivity();
     };
     that.removeCruftyItext = removeCruftyItext;
 
@@ -969,6 +953,8 @@ formdesigner.controller = (function () {
     var generateItextXLS = function () {
         var idata, row, iID, lang, form, val, Itext,
                 out = '';
+        
+        that.removeCruftyItext();
         Itext = formdesigner.model.Itext;
         
         /**

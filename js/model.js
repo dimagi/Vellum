@@ -2450,6 +2450,8 @@ formdesigner.model = function () {
                         langData, val, formData, form, i, allLangKeys, question, form;
                 
                 // here are the rules that govern itext
+                // 0. iText items which aren't referenced by any questions are 
+                // cleared from the form.
                 // 1. iText nodes for which values in _all_ languages are empty/blank 
                 // will be removed entirely from the form.
                 // 2. iText nodes that have a single value in _one_ language 
@@ -2461,6 +2463,7 @@ formdesigner.model = function () {
                 // 4. duplicate itext ids will be automatically updated to create
                 // non-duplicates
                 
+                formdesigner.controller.removeCruftyItext();
                 var Itext = formdesigner.model.Itext;
                 var languages = Itext.getLanguages();
                 var allItems = Itext.getNonEmptyItems();
@@ -3211,6 +3214,9 @@ formdesigner.model = function () {
          * @param mug
          */
         itext.removeMugItext = function (mugType) {
+            // NOTE: this is not currently used. We clear itext
+            // at form-generation time. This is because shared 
+            // itext makes removal problematic.
             var labelItext, hintItext, constraintItext;
             var mug = mugType.mug;
             if (mug){
