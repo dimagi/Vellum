@@ -1055,7 +1055,7 @@ formdesigner.controller = (function () {
             return formdesigner.util.tabSeparate(row);
         };
         
-        var headers = ["Question", "Type", "IText ID", "Audio", "Image", "Display Condition", "Constraint Condition"];
+        var headers = ["Question", "Type", "IText ID", "Audio", "Image", "Display Condition", "Validation Condition"];
         for (i = 0; i < languages.length; i++) {
             headers.splice(3 + i, 0, "Text (" + languages[i] + ")");
         } 

@@ -753,7 +753,7 @@ formdesigner.model = function () {
                     presence: 'optional',
                     uiType: "xpath",
                     xpathType: "bool",
-                    lstring: 'Constraint Condition'
+                    lstring: 'Validation Condition'
                 },
                 constraintMsgItextID: {
                     editable: 'w',

@@ -1264,7 +1264,7 @@ start();
         xml = parseXMLAndGetSelector(xmlString);
         bindVal = grep(xmlString,"<bind").trim();
         expected = '<bind nodeset="/My_Data_Node/textQuestion1" type="xsd:string" constraint="/data/bleeding_sign &gt;= 5 or /data/bleeding_sing &lt; 21" relevant="/data/bleeding_sign &gt;= 5 or /data/bleeding_sing &lt; 21" calculate="/data/bleeding_sign &gt;= 5 or /data/bleeding_sing &lt; 21" />'
-        equal(bindVal, expected, 'Was constraint condition with < or > signs rendered correctly in the UI?');
+        equal(bindVal, expected, 'Was validation condition with < or > signs rendered correctly in the UI?');
         workingField.val('');
 		triggerKeyEvents(workingField,32,false,false);
 		triggerKeyEvents(workingField,8,false,false);
