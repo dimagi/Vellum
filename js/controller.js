@@ -1241,8 +1241,6 @@ formdesigner.controller = (function () {
 	        }
         }
         
-        Itext.removeMugItext(mugType.mug);
-
         that.form.dataTree.removeMugType(mugType);
         that.form.controlTree.removeMugType(mugType);
 
