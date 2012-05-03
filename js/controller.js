@@ -1347,6 +1347,8 @@ formdesigner.controller = (function () {
                 if(keyAttr) {
                     mug.properties.dataElement.properties.keyAttr = keyAttr;
                 }
+                // add arbitrary attributes
+                mug.properties.dataElement.properties._rawAttributes = formdesigner.util.getAttributes(el)
                 
                 mType.mug = mug;
                 if ( parentNodeName === rootNodeName ) {

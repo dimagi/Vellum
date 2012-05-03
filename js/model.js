@@ -2189,25 +2189,32 @@ formdesigner.model = function () {
                         MT = node.getValue();
 
                     xw.writeStartElement(node.getID());
-                    if(!node.isRootNode && MT.mug.properties.dataElement.properties.dataValue){
-                        defaultVal = MT.mug.properties.dataElement.properties.dataValue;
-                        xw.writeString(defaultVal);
-                    }
-                    if(!node.isRootNode && MT.mug.properties.dataElement.properties.keyAttr){
-                        keyAttr = MT.mug.properties.dataElement.properties.keyAttr;
-                        xw.writeAttributeStringSafe("key", keyAttr);
-                    }
-                    if(!node.isRootNode && MT.mug.properties.dataElement.properties.xmlnsAttr){
-                        extraXMLNS = MT.mug.properties.dataElement.properties.xmlnsAttr;
-                        xw.writeAttributeStringSafe("xmlns", extraXMLNS);
-                    }
-                    if(!node.isRootNode && MT.typeName == "Repeat"){
-                        xw.writeAttributeStringSafe("jr:template","");
-                    }
-
-
+                    
                     if (node.isRootNode) {
                         createModelHeader();
+                    } else {
+                        // Write any custom attributes first
+	                    for (var k in MT.mug.properties.dataElement.properties._rawAttributes) {
+	                        if (MT.mug.properties.dataElement.properties._rawAttributes.hasOwnProperty(k)) {
+	                            xw.writeAttributeStringSafe(k, MT.mug.properties.dataElement.properties._rawAttributes[k]);
+	                        }
+	                    }
+	                    
+	                    if (MT.mug.properties.dataElement.properties.dataValue){
+	                        defaultVal = MT.mug.properties.dataElement.properties.dataValue;
+	                        xw.writeString(defaultVal);
+	                    }
+	                    if (MT.mug.properties.dataElement.properties.keyAttr){
+	                        keyAttr = MT.mug.properties.dataElement.properties.keyAttr;
+	                        xw.writeAttributeStringSafe("key", keyAttr);
+	                    }
+	                    if (MT.mug.properties.dataElement.properties.xmlnsAttr){
+	                        extraXMLNS = MT.mug.properties.dataElement.properties.xmlnsAttr;
+	                        xw.writeAttributeStringSafe("xmlns", extraXMLNS);
+	                    }
+	                    if (MT.typeName === "Repeat"){
+	                        xw.writeAttributeStringSafe("jr:template","");
+	                    }
                     }
                 }
 
