@@ -2805,7 +2805,7 @@ formdesigner.model = function () {
                 return p.initial_context === xpathmodels.XPathInitialContextEnum.ROOT;
             });
             this.all = this.all.concat(paths.map(function (path) {
-                var refMug = formdesigner.controller.getMugByPath(path.toXPath());
+                var refMug = formdesigner.controller.getMugByPath(path.pathWithoutPredicates());
                 if (!refMug) {
                     formdesigner.ui.showParseWarnMessage(
                         "The question " + mug.mug.properties.bindElement.properties.nodeID + 
