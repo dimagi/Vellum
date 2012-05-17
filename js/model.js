@@ -1126,7 +1126,7 @@ formdesigner.model = function () {
         //the controlElement is deleted.
         dataBind: function () {
             var mType = formdesigner.util.clone(RootMugType);
-
+            mType.typeSlug = "datanode";
             mType.typeName = "Data Node";
             mType.type = "db";
             delete mType.properties.controlElement;
