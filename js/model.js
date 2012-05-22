@@ -1872,8 +1872,13 @@ formdesigner.model = function () {
             var refNode, refNodeSiblings, refNodeIndex, refNodeParent, node;
             
             if (!formdesigner.controller.checkMoveOp(mugType, position, refMugType, treeType)) {
-                throw {name: "IllegalMove",
-                       message: 'Illegal Tree move requested! Doing nothing instead.'};
+                throw { 
+                    name: "IllegalMove",
+                    message: 'Illegal Tree move requested! Doing nothing instead.',
+                    mugType: mugType,
+                    position: position,
+                    refMugType: refMugType 
+                };
             }
 
             if (position !== null && typeof position !== 'string') {
