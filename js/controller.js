@@ -1348,7 +1348,7 @@ formdesigner.controller = (function () {
                     mug.properties.dataElement.properties.keyAttr = keyAttr;
                 }
                 // add arbitrary attributes
-                mug.properties.dataElement.properties._rawAttributes = formdesigner.util.getAttributes(el);
+                mug.properties.dataElement.properties._rawAttributes = formdesigner.util.getAttributes(el)
                 
                 mType.mug = mug;
                 if ( parentNodeName === rootNodeName ) {
@@ -1919,51 +1919,23 @@ formdesigner.controller = (function () {
 
         that.fire('parse-start');
         try {
-            var _getInstances = function (xml) {
-                // return all the instances in the form.
-                // if there's more than one, guarantee that the first item returned
-                // is the main instance.
-                var instances = xml.find("instance");
-                if (instances.length === 1) {
-                    return instances;
-                } else {
-                    var foundMain = false;
-                    var ret = [];
-                    for (var i = 0; i < instances.length; i++) {
-                        // the main should be the one without an ID
-                        if (!$(instances[i]).attr("id")) {
-                            if (foundMain) {
-                                throw "multiple unnamed instance elements found in the form! this is not allowed. please add id's to all but 1 instance.";
-                            }
-                            ret.splice(0, 0, instances[i]);
-                            foundMain = true;
-                        } else {
-                            ret.push(instances[i]);
-                        }
-                    }
-                    return ret;
-                }
-            };
-            var xmlDoc = $.parseXML(xmlString),
-                xml = $(xmlDoc),
-                binds = xml.find('bind'),
-                instances = _getInstances(xml),
-                controls = xml.find('h\\:body').children(),
-                itext = xml.find('itext'),
-                formID, formName, title;
+                var xmlDoc = $.parseXML(xmlString),
+                    xml = $(xmlDoc),
+                    binds = xml.find('bind'),
+                    data = xml.find('instance').children(),
+                    controls = xml.find('h\\:body').children(),
+                    itext = xml.find('itext'),
+                    formID, formName,
+                        title;
 
-            var data = $(instances[0]).children();
+
             if($(xml).find('parsererror').length > 0) {
                 throw 'PARSE ERROR! Message follows:' + $(xml).find('parsererror').find('div').html();
             }
-            
-            // NOTE: this is a bit odd - but seems to assume there's only one 
-            // child of the main instance, or that the last child should be 
-            // used as the form id
-            data.each(function () {
+            xml.find('instance').children().each(function () {
                 formID = this.nodeName;
             });
-            
+
             title = xml.find('title');
             if(title.length === 0) {
                 title = xml.find('h\\:title');
@@ -1973,12 +1945,8 @@ formdesigner.controller = (function () {
                 title = $(title).text();
                 that.form.formName = title;
             }
-            
-            // set all instance metadatas
-            that.form.instanceMetadata = instances.map(function (instance) {
-                return formdesigner.model.InstanceMetadata(formdesigner.util.getAttributes(instance)); 
-            });
-            
+
+
             if(data.length === 0) {
                 pError('error', 'No Data block was found in the form.  Please check that your form is valid!');
             }
