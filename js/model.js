@@ -2067,7 +2067,15 @@ formdesigner.model = function () {
         return that;
     };
     that.Tree = Tree;
-
+    
+    var InstanceMetadata = function (attributes) {
+        var that = {};
+        that.attributes = attributes;
+        return that;
+    };
+    
+    that.InstanceMetadata = InstanceMetadata;
+    
     var Form = function () {
         var that = {}, dataTree, controlTree;
 
@@ -2076,6 +2084,7 @@ formdesigner.model = function () {
             that.formID = 'data';
             that.dataTree = dataTree = new Tree('data');
             that.controlTree = controlTree = new Tree('control');
+            that.instanceMetadata = [InstanceMetadata({})];
         })();
 
         /**
@@ -2561,6 +2570,20 @@ formdesigner.model = function () {
                 xw.writeAttributeStringSafe( "xmlns:jr", "http://openrosa.org/javarosa" );
             }
 
+            var _writeInstanceAttributes = function (writer, instanceMetadata) {
+                for (var attrId in instanceMetadata.attributes) {
+                    if (instanceMetadata.attributes.hasOwnProperty(attrId)) {
+                        writer.writeAttributeStringSafe(attrId, instanceMetadata.attributes[attrId]);
+                    }
+                }
+            };
+            
+            var _writeInstance = function (writer, instanceMetadata) {
+                writer.writeStartElement('instance');
+                _writeInstanceAttributes(writer, instanceMetadata);
+                writer.writeEndElement(); 
+            };
+            
             var generateForm = function () {
                 var docString;
                 // first normalize the itext ids so we don't have any
@@ -2574,31 +2597,41 @@ formdesigner.model = function () {
                 //Generate header boilerplate up to instance level
                 xw.writeStartElement('h:html');
                 html_tag_boilerplate();
-                    xw.writeStartElement('h:head');
-                        xw.writeStartElement('h:title');
-                            xw.writeString(formdesigner.controller.form.formName);
-                        xw.writeEndElement();       //CLOSE TITLE
+                xw.writeStartElement('h:head');
+                xw.writeStartElement('h:title');
+                xw.writeString(formdesigner.controller.form.formName);
+                xw.writeEndElement();       //CLOSE TITLE
 
                 ////////////MODEL///////////////////
-                        xw.writeStartElement('model');
-                            xw.writeStartElement('instance');
-                                createDataBlock();
-                            xw.writeEndElement(); //CLOSE INSTANCE
-                        /////////////////BINDS /////////////////
-                            createBindList();
-                        ///////////////////////////////////////
-                        //////////ITEXT //////////////////////
-                            createITextBlock();
-                        ////////////////////////////////////
-                        xw.writeEndElement(); //CLOSE MODEL
+                xw.writeStartElement('model');
+                xw.writeStartElement('instance');
+                _writeInstanceAttributes(xw, formdesigner.controller.form.instanceMetadata[0]);
+                
+                createDataBlock();
+                xw.writeEndElement(); //CLOSE MAIN INSTANCE
+                
+                // other instances
+                for (var i = 1; i < formdesigner.controller.form.instanceMetadata.length; i++) {
+                    _writeInstance(xw, formdesigner.controller.form.instanceMetadata[i]);
+                }
+                
+                /////////////////BINDS /////////////////
+                createBindList();
+                ///////////////////////////////////////
+                
+                //////////ITEXT //////////////////////
+                createITextBlock();
+                ////////////////////////////////////
+                
+                xw.writeEndElement(); //CLOSE MODEL
                 ///////////////////////////////////
-                    xw.writeEndElement(); //CLOSE HEAD
+                xw.writeEndElement(); //CLOSE HEAD
 
-                    xw.writeStartElement('h:body');
+                xw.writeStartElement('h:body');
                 /////////////CONTROL BLOCK//////////////
-                        createControlBlock();
+                createControlBlock();
                 ////////////////////////////////////////
-                    xw.writeEndElement(); //CLOSE BODY
+                xw.writeEndElement(); //CLOSE BODY
                 xw.writeEndElement(); //CLOSE HTML
 
                 xw.writeEndDocument(); //CLOSE DOCUMENT
