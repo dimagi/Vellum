@@ -30,151 +30,99 @@ formdesigner.ui = function () {
             dataTree,
             LINK_CONTROL_MOVES_TO_DATA_TREE = true,
             DEBUG_MODE = false,
+            MESSAGES_DIV = '#fd-messages',
+            MESSAGE_TYPES = ["error", "parse-warning", "form-warning"],
             WARN_MSG_DIV = '#fd-parse-warn',
             ERROR_MSG_DIV = '#fd-parse-error',
             FORM_WARN_DIV = '#fd-form-warn';
-
-    that.ODK_ONLY_QUESTION_TYPES = ['image','audio','video','barcode'];
-
             
 
-    /**
-     * Displays an info box on the properties view.
-     * Use hideMessage() to hide.
-     * @param msg - the actual message contents
-     * @param msgType - can be either 'warning' or 'error' - defaults to 'warning'
-     */
-    var showMessage = function (msg, msgLevel) {
-        var div, messageLevelState, iconClass, iconSpan, msgtxt, levelText, icon, dismissDiv;
-        dismissDiv = $('<div></div>');
-        if (msgLevel === 'error') {
-            that.hideMessage($(ERROR_MSG_DIV));
-            div = $(ERROR_MSG_DIV);
-            dismissDiv.attr('id', "parse-error-dismiss");
-            messageLevelState = 'ui-state-error';
-            iconClass = 'ui-icon-alert';
-        } else if(msgLevel === 'warning') {
-            that.hideMessage($(WARN_MSG_DIV));
-            div = $(WARN_MSG_DIV);
-            dismissDiv.attr('id',"parse-warn-dismiss");
-            messageLevelState = 'ui-state-highlight';
-            iconClass = 'ui-icon-info';
-        } else if (msgLevel === 'form-warning') {
-            that.hideMessage($(FORM_WARN_DIV));
-            div = $(FORM_WARN_DIV);
-            dismissDiv.attr('id',"parse-warn-dismiss");
-            messageLevelState = 'ui-state-highlight';
-            iconClass = 'ui-icon-info';
+    that.ODK_ONLY_QUESTION_TYPES = ['image','audio','video','barcode'];
+    
+    var initMessagesPane = function () {
+        var messagesDiv = $(MESSAGES_DIV);
+        var displayClasses = {"error":   "fd-message ui-state-error ui-corner-all",
+                              "parse-warning": "fd-message ui-state-highlight ui-corner-all",
+                              "form-warning": "fd-message ui-state-highlight ui-corner-all"};
+        var iconClasses = {"error":   "ui-icon-alert",
+                           "parse-warning": "ui-icon-info",
+                           "form-warning": "ui-icon-info"};
+        var type, div, span, header, ul;
+        
+        for (var i = 0; i < MESSAGE_TYPES.length; i++) {
+            type = MESSAGE_TYPES[i];
+            div = $("<div />").addClass(type).addClass(displayClasses[type]).hide().appendTo(messagesDiv);
+            span = $("<span />").addClass("ui-icon").addClass(iconClasses[type]).appendTo(div);
+            header = $('<strong></strong>').text(formdesigner.util.capitaliseFirstLetter(type)).appendTo(div);
+            ul = $("<ul />").appendTo(div);
         }
-
-        dismissDiv.addClass('dismiss-message-button');
-
-        dismissDiv.button({
-                icons: {
-                    primary: "ui-icon-close"
-                },
-                text: false
-        });
-
-        dismissDiv.click(function (){
-           that.hideMessage(div)
-        });
-
-        div.prepend(dismissDiv);
-
-        iconSpan = '<span></span>';
-        icon = $(iconSpan);
-        icon.addClass("ui-icon");
-        icon.addClass(iconClass);
-        icon.css('float','left');
-        icon.css('margin-right','.3em');
-        levelText = $('<strong><br /></strong>');
-        levelText.text(formdesigner.util.capitaliseFirstLetter(msgLevel));
+    };
+    
+    that.currentErrors = [];
+    
+    that._getMessageDiv = function (type) {
+        return $(MESSAGES_DIV).find("." + type);
+    };
+    
+    that.showMessage = function (errorObj) {
+        var mainDiv = that._getMessageDiv(errorObj.level);
+        var ul = mainDiv.find("ul");
+        var msg = errorObj.message;
+        // TODO: I don't like this array business, should be refactored away to the callers.
         var tempMsg;
-        msgtxt = $('<ul></ul>');
-        if (typeof msg === "string" || !(msg instanceof Array)) { //msg is a string or not-an-array (so try turn it into a string)
+        if (typeof msg === "string" || !(msg instanceof Array)) { 
+            //msg is a string or not-an-array (so try turn it into a string)
             tempMsg = $('<li></li>');
             tempMsg.append('' + msg);
-            msgtxt.append(tempMsg);
+            ul.append(tempMsg);
         } else {
             //msg is an array
             for (var i=0;i<msg.length;i++) {
                 if(msg.hasOwnProperty(i)) {
                     tempMsg = $('<li></li>');
                     tempMsg.append(msg[i]);
-                    msgtxt.append(tempMsg);
+                    ul.append(tempMsg);
                 }
             }
         }
-        div.append(icon).append(levelText).append(msgtxt);
-        div.addClass(messageLevelState).addClass('ui-corner-all');
-        div.show();
+        mainDiv.show();
     };
-    that.showMessage = showMessage;
-
+    
     /**
      * Hides the question properties message box;
      */
-    var hideMessage = function (div) {
-        if (!div) {
-            div = $(ERROR_MSG_DIV);
-        }
-        div = $(div);
+    that.hideMessages = function (type) {
+        var div = that._getMessageDiv(type);
+        // clear list elements so they don't come back later
+        div.find("ul").empty();
         div.hide();
-        div.removeClass('ui-corner-all').removeClass('ui-state-error').removeClass('ui-state-highlight');
-        div.empty();
     };
-
-    that.hideMessage = hideMessage;
-
-    /**
-     * Convenience Method. See ui.showMessage();
-     * @param msg
-     */
-    var showParseErrorMessage = function (msg) {
-        showMessage(msg,'error');
+    
+    that.clearMessages = function () {
+        for (var i = 0; i < MESSAGE_TYPES.length; i++) {
+            that.hideMessages(MESSAGE_TYPES[i]);
+        }
     };
-    that.showParseErrorMessage = showParseErrorMessage;
-
-
-    /**
-     * Convenience method.  See ui.showMessage();
-     * @param msg
-     */
-    var showParseWarnMessage = function (msg) {
-        showMessage(msg,'warning');
+    
+    that.resetMessages = function (errors) {
+        that.clearMessages();
+        for (var i = 0; i < errors.length; i++) {
+            that.showMessage(errors[i]);
+        }
     };
-    that.showParseWarnMessage = showParseWarnMessage;
-
-    var hideParseErrorMessage = function () {
-        hideMessage($(ERROR_MSG_DIV));
-    };
-    that.hideParseErrorMessage = hideParseErrorMessage;
-
-    var hideParseWarnMessage = function () {
-        hideMessage($(WARN_MSG_DIV));
-    };
-    that.hideParseWarnMessage = hideParseWarnMessage;
-
-
-    var showFormWarnMessage = function (msg) {
-        showMessage(msg,'form-warning');
-    };
-    that.showFormWarnMessage = showFormWarnMessage;
-
-    var hideFormWarnMessage = function () {
-        hideMessage($(FORM_WARN_DIV));
-    };
-    that.hideFormWarnMessage = hideFormWarnMessage;
-
+    
     var addQuestion = function(qType) {
         try {
             var newMug = formdesigner.controller.createQuestion(qType);
             that.selectMugTypeInUI(newMug);
 
 
-            if(that.ODK_ONLY_QUESTION_TYPES.indexOf(qType) !== -1) { //it's an ODK media question
-                showFormWarnMessage('This question type will ONLY work with CommCareODK/ODK Collect!');
+            if(that.ODK_ONLY_QUESTION_TYPES.indexOf(qType) !== -1) { 
+                //it's an ODK media question
+                formdesigner.model.form.updateError(formdesigner.model.FormError({
+                    message: 'This question type will ONLY work with CommCareODK/ODK Collect!',
+                    level: 'form-warning',
+                }), {updateUI: true});
             }
             return newMug;
         } catch (e) {
@@ -559,10 +507,13 @@ formdesigner.ui = function () {
                 bProps = vObj.bindElement,
                 cProps = vObj.controlElement,
                 dProps = vObj.dataElement,
-                i, propsMessage, itextValidation;
+                // DRAGONS: this is used in a closure above so 
+                // don't assume it's not touched
+                propsMessage = [],
+                i, itextValidation;
 
-        that.hideFormWarnMessage();
-        propsMessage = [];
+        // for now form warnings get reset every time validation gets called.
+        formdesigner.model.form.clearErrors('form-warning', {updateUI: true});
         loopValProps(bProps, 'bindElement');
         loopValProps(cProps, 'controlElement');
         loopValProps(dProps, 'dataElement');
@@ -571,11 +522,16 @@ formdesigner.ui = function () {
             propsMessage.push(JSON.stringify(itextValidation));
         }
         if (propsMessage.length > 0) {
-            that.showFormWarnMessage(propsMessage);
+            for (var i = 0; i < propsMessage.length; i++) {
+	            formdesigner.model.form.updateError(formdesigner.model.FormError({
+	                    message: propsMessage[i],
+	                    level: 'form-warning',
+	                }));
+	        }
+	        formdesigner.ui.resetMessages(formdesigner.model.form.errors);
         }
-
-
     };
+    
     that.showVisualValidation = showVisualValidation;
 
     var displayMugDataProperties = that.displayMugDataProperties = function(mugType) {
@@ -2014,6 +1970,7 @@ formdesigner.ui = function () {
 //        SaveButton.message.SAVED = 'Saved to Server';
         controller = formdesigner.controller;
         generate_scaffolding($(formdesigner.rootElement));
+        initMessagesPane();
         init_toolbar();
         init_extra_tools();
         create_question_tree();

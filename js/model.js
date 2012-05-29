@@ -2073,8 +2073,26 @@ formdesigner.model = function () {
         that.attributes = attributes;
         return that;
     };
-    
     that.InstanceMetadata = InstanceMetadata;
+    
+    var FormError = function (options) {
+        var that = {};
+        that.message = options.message;
+        // the key is how uniqueness is determined
+        that.key = options.key; 
+        that.level = options.level || "form-warning";
+        that.options = options;
+        
+        that.isMatch = function (other) {
+            if (this.key && other.key) {
+                return this.key === other.key;
+            }
+            return false;
+        };
+        
+        return that;
+    };
+    that.FormError = FormError;
     
     var Form = function () {
         var that = {}, dataTree, controlTree;
@@ -2085,6 +2103,7 @@ formdesigner.model = function () {
             that.dataTree = dataTree = new Tree('data');
             that.controlTree = controlTree = new Tree('control');
             that.instanceMetadata = [InstanceMetadata({})];
+            that.errors = [];
         })();
 
         /**
@@ -2186,9 +2205,56 @@ formdesigner.model = function () {
             return result;
         }
         that.getInvalidMugTypeUFIDs = getInvalidMugTypeUFIDs;
-
         
-
+        that.updateError = function (errObj, options) {
+            options = options || {};
+            if (!errObj.key) {
+                that.errors.push(errObj);
+            }
+            else {
+                var removed = null;
+                for (var i = 0; i < that.errors.length; i++) {
+                    if (errObj.isMatch(that.errors[i])) {
+                        removed = that.errors.splice(i, 1, errObj);
+                    }
+                }
+                if (!removed) {
+                    that.errors.push(errObj);
+                }
+            }
+            if (options.updateUI) {
+                formdesigner.ui.resetMessages(that.errors);
+            }
+            
+        };
+        
+        that.clearErrors = function (type, options) {
+            options = options || {};
+            for (var i = 0; i < that.errors.length; i++) {
+                that.errors = that.errors.filter(function (err) {
+                    return err.level !== type;
+                });
+            }
+            if (options.updateUI) {
+                formdesigner.ui.resetMessages(that.errors);
+            }
+        };
+        
+        
+        that.clearError = function (errObj, options) {
+            options = options || {};
+            var removed = null;
+            for (var i = 0; i < that.errors.length; i++) {
+                if (errObj.isMatch(that.errors[i])) {
+                    removed = that.errors.splice(i, 1);
+                    break;
+                }
+            }
+            if (removed && options.updateUI) {
+                formdesigner.ui.resetMessages(that.errors);
+            }
+        };
+        
         /**
          * Generates an XML Xform and returns it as a string.
          */
@@ -2844,12 +2910,19 @@ formdesigner.model = function () {
             });
             this.all = this.all.concat(paths.map(function (path) {
                 var refMug = formdesigner.controller.getMugByPath(path.pathWithoutPredicates());
-                if (!refMug) {
-                    formdesigner.ui.showParseWarnMessage(
-                        "The question " + mug.mug.properties.bindElement.properties.nodeID + 
-                        " references an unknown question " + path.toXPath() + 
+                var error = that.FormError({
+                    level: "parse-warning",
+                    key: mug.ufid + "-" + "badpath",
+                    message: "The question '" + mug.mug.properties.bindElement.properties.nodeID + 
+                        "' references an unknown question " + path.toXPath() + 
                         " in its " + mug.getPropertyDefinition(property).lstring + "."
-                    );
+                                                
+                });
+                if (!refMug) {
+                    // formdesigner.form.errors
+                    formdesigner.controller.form.updateError(error, {updateUI: true});
+                } else {
+                    formdesigner.controller.form.clearError(error, {updateUI: true});
                 }
                 return {"mug": mug.ufid, "property": property, "path": path.toXPath(), 
                         "ref": refMug ? refMug.ufid : ""};      

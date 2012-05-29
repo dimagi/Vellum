@@ -66,14 +66,27 @@ formdesigner.controller = (function () {
                 formdesigner.util.setStandardMugEventResponses(mt.mug);
             });
 
-
-            if (that.parseErrorMsgs && that.parseErrorMsgs.length > 0) {
-                formdesigner.ui.showParseErrorMessage(that.parseErrorMsgs);
+            var i;
+            // update parse error and warn information in the model/UI
+            if (that.parseErrorMsgs) {
+                for (i = 0; i < that.parseErrorMsgs.length; i++) {
+                    formdesigner.controller.form.updateError(formdesigner.model.FormError({
+                        level: "error",
+                        message: that.parseErrorMsgs[i]
+                    }));
+                }
             }
 
-            if (that.parseWarningMsgs && that.parseWarningMsgs.length > 0) {
-                formdesigner.ui.showParseWarnMessage(that.parseWarningMsgs);
+            if (that.parseWarningMsgs) {
+                for (i = 0; i < that.parseWarningMsgs.length; i++) {
+                    formdesigner.controller.form.updateError(formdesigner.model.FormError({
+                        level: "parse-warning",
+                        message: that.parseWarningMsgs[i]
+                    }));
+                }
             }
+            formdesigner.ui.resetMessages(formdesigner.controller.form.errors);
+            
             
             // populate the LogicManager with initial path data
             allMugs.map(function (mug) {
@@ -1122,9 +1135,6 @@ formdesigner.controller = (function () {
         //universal flag for indicating that there's something wrong enough with the form that vellum can't deal.
         formdesigner.controller.formLoadingFailed = false;
 
-        formdesigner.ui.hideParseErrorMessage(); //if there is an error message from a previous parse, hide it now.
-        formdesigner.ui.hideParseWarnMessage();
-
         //Things to do to gracefully deal with a form loading failure
         function formLoadFailed(e) {
             var showSourceButton = $('#fd-editsource-button');
@@ -1147,8 +1157,11 @@ formdesigner.controller = (function () {
                       "your form is valid by pasting your entire form into the " +
                       '<a href="' + validator_url + '" target="_blank">Form Validator (link)</a>';
             
-            formdesigner.ui.showParseErrorMessage(msg);
-
+            formdesigner.model.form.updateError(formdesigner.model.FormError({
+                key: "global-parse-fail",
+                message: msg,
+                level: "error"
+            }), {updateUI: true});
         }
 
         formdesigner.on('load-form-error', formLoadFailed); 
@@ -1268,11 +1281,13 @@ formdesigner.controller = (function () {
 
     var resetParseErrorMsgs = function () {
         that.parseErrorMsgs = [];
+        formdesigner.model.form.clearErrors("error", {updateUI: true}); 
     };
     that.resetParseErrorMsgs = resetParseErrorMsgs;
 
     var resetParseWarningMsgs = function () {
         that.parseWarningMsgs = [];
+        formdesigner.model.form.clearErrors("parse-warning", {updateUI: true}); 
     };
     that.resetParseWarningMsgs = resetParseWarningMsgs;
 
@@ -1915,8 +1930,6 @@ formdesigner.controller = (function () {
             }
         }
 
-        that.resetParseErrorMsgs();
-
         that.fire('parse-start');
         try {
             var _getInstances = function (xml) {
@@ -1976,7 +1989,7 @@ formdesigner.controller = (function () {
             });
             
             if(data.length === 0) {
-                pError('error', 'No Data block was found in the form.  Please check that your form is valid!');
+                pError('No Data block was found in the form.  Please check that your form is valid!');
             }
             
             // parse itext first so all the other functions can access it
