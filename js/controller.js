@@ -388,8 +388,10 @@ formdesigner.controller = (function () {
         if (newMugType.properties.dataElement) {
             if (newMugType.properties.controlElement) {
                 dataTree.insertMugType(newMugType, formdesigner.util.getRelativeInsertPosition(refMugType, newMugType), refMugType);
-            } else { //no control node so getting a dynamic relative position is hard/impossible.  We default to 'after' until a user complains.
-                dataTree.insertMugType(newMugType, 'after', refMugType);
+            } else { 
+                // this is a data node. for now default to sticking these
+                // at the end of the form
+                dataTree.insertMugType(newMugType, 'after', null);
             }
         }
 
