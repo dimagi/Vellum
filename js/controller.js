@@ -394,7 +394,6 @@ formdesigner.controller = (function () {
                 dataTree.insertMugType(newMugType, 'after', null);
             }
         }
-
         if (newMugType.properties.controlElement) {
             controlTree.insertMugType(newMugType, formdesigner.util.getRelativeInsertPosition(refMugType, newMugType), refMugType);
         }
@@ -2034,7 +2033,12 @@ formdesigner.controller = (function () {
         if(treeType === 'data'){
             return true;
         }
-
+        
+        // for now don't allow data nodes to move
+        if (!mugType || !mugType.mug.properties.controlElement) {
+            return false;
+        }
+        
         // NOTE: why is this here?
         if(position === 'inside'){
             position = 'into';
