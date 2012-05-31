@@ -2039,21 +2039,19 @@ formdesigner.controller = (function () {
         }
         
         var oType = mugType.mug.properties.controlElement.properties.tagName,
-                rType = (!refMugType || refMugType === -1) ? 'group' : refMugType.mug.properties.controlElement.properties.tagName,
-                oIsGroupOrRepeat = (oType === 'repeat' || oType === 'group'),
-                oIsItemOrInputOrTrigger = (oType === 'item' || oType === 'input' || oType === 'trigger' || oType === 'secret'),
-                oIsSelect = (oType === 'select1' || oType === 'select'),
-                oIsItem = (oType === 'item'),
-                rIsSelect = (rType === 'select1' || rType === 'select'),
-                rIsItemOrInputOrTrigger = (rType === 'item' || rType === 'input' || rType === 'trigger' || rType === 'secret'),
-                rIsGroupOrRepeat = (rType === 'repeat' || rType === 'group');
+            rType = (!refMugType || refMugType === -1) ? 'group' : refMugType.mug.properties.controlElement.properties.tagName,
+            oIsGroupOrRepeat = (oType === 'repeat' || oType === 'group'),
+            oIsItemOrInputOrTrigger = (oType === 'item' || oType === 'input' || oType === 'trigger' || oType === 'secret'),
+            oIsSelect = (oType === 'select1' || oType === 'select'),
+            oIsItem = (oType === 'item'),
+            rIsSelect = (rType === 'select1' || rType === 'select'),
+            rIsItemOrInputOrTrigger = (rType === 'item' || rType === 'input' || rType === 'trigger' || rType === 'secret'),
+            rIsGroupOrRepeat = (rType === 'repeat' || rType === 'group');
 
         if (position !== 'into') {
             if (!refMugType) {
-//                throw "If refMugType is null in checkMoveOp() position MUST be 'into'! Position was: "+position;
                 return true;
             }
-
             var pRefMugType = that.form.controlTree.getParentMugType(refMugType);
             return checkMoveOp(mugType,'into',pRefMugType);
         }
@@ -2074,7 +2072,6 @@ formdesigner.controller = (function () {
         //we should never get here.
         console.error("checkMoveOp error..",mugType,position,refMugType,treeType);
         throw "Unknown controlElement type used, can't check if the MOVE_OP is valid or not!";
-
     };
 
 
@@ -2089,17 +2086,19 @@ formdesigner.controller = (function () {
      * @param treeType - Optional - either 'data' or 'control' or 'both'. Indicates which tree to do the move op in.  defaults to 'both'
      */
     var moveMugType = function (mugType, position, refMugType, treeType) {
-        var dataTree = that.form.dataTree, controlTree = that.form.controlTree, isDataTreeOp;
-        if (!treeType) {
-             treeType = 'both';
-        }
+        var dataTree = that.form.dataTree, 
+            controlTree = that.form.controlTree, 
+            isDataTreeOp;
+        
+        treeType = treeType || 'both';
+        
         if (!checkMoveOp(mugType, position, refMugType, treeType)) {
             throw 'MOVE NOT ALLOWED!  MugType Move for MT:' + mugType + ', refMT:' + refMugType + ", position:" + position + " ABORTED";
         }
 
         isDataTreeOp = refMugType && refMugType.typeName !== "Select Item";
 
-
+        var preMovePath = formdesigner.controller.form.dataTree.getAbsolutePath(mugType);
         if (treeType === 'both') {
             if (isDataTreeOp) {
                 dataTree.insertMugType(mugType, position, refMugType);
@@ -2115,6 +2114,17 @@ formdesigner.controller = (function () {
            throw 'Invalid/Unrecognized TreeType specified in moveMugType: ' + treeType;
         }
 
+        
+        var postMovePath = formdesigner.controller.form.dataTree.getAbsolutePath(mugType);
+        // update logic expressions that reference this
+        if (preMovePath !== postMovePath) {
+            formdesigner.model.LogicManager.updatePath(mugType.ufid, preMovePath, postMovePath);
+            // update UI
+            var currSelected = formdesigner.controller.getCurrentlySelectedMugType();
+            that.reloadUI();
+            formdesigner.ui.selectMugTypeInUI(currSelected);
+        }
+        
         //fire an form-property-changed event to sync up with the 'save to server' button disabled state
         formdesigner.controller.form.fire({
             type: 'form-property-changed'
