@@ -619,7 +619,7 @@ formdesigner.widgets = (function () {
             sec.accordion({
                 autoHeight: false,
                 collapsible: true,
-                active: false
+                active: options.active !== undefined ? options.active : false
             });
             
             return sec;
@@ -876,7 +876,8 @@ formdesigner.widgets = (function () {
         return that.accordionSection(mugType, {
                             slug: "logic",
                             displayName: "Logic Properties",
-                            elements: elements});
+                            elements: elements,
+                            active: 0});
     };
     
     that.getAdvancedSection = function (mugType) {
