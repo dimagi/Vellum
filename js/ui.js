@@ -28,7 +28,6 @@ formdesigner.ui = function () {
             controller = formdesigner.controller,
             questionTree,
             dataTree,
-            LINK_CONTROL_MOVES_TO_DATA_TREE = true,
             DEBUG_MODE = false,
             MESSAGES_DIV = '#fd-messages',
             MESSAGE_TYPES = ["error", "parse-warning", "form-warning"],
@@ -776,18 +775,6 @@ formdesigner.ui = function () {
                     refMugType = controller.form.controlTree.getMugTypeFromUFID($(data.rslt.r).attr('id')),
                     position = data.rslt.p;
             controller.moveMugType(mugType, position, refMugType, 'both');
-
-            if (LINK_CONTROL_MOVES_TO_DATA_TREE) {   //for matching the move in the GUI question tree with the GUI Data Tree
-                var elMT, elMTRef, pos;
-                elMT = $('#' + mugType.ufid + '_data');
-                elMTRef = $('#' + refMugType.ufid + '_data');
-                if (elMTRef.length === 0) {
-                    elMTRef = -1;
-                }
-                pos = position;
-                $('#fd-data-tree').jstree("move_node", elMT, elMTRef, pos, false);
-            }
-
         }).bind("deselect_all.jstree", function (e, data) {
                 hideSelectItemAddButton();
         }).bind("deselect_node.jstree", function (e, data) {
