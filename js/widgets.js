@@ -370,6 +370,14 @@ formdesigner.widgets = (function () {
                 item.removeForm(this.form);
             }
         };
+
+        // also special
+        widget.showUploadModal = function () {
+            type = this.getType();
+            if (type == 'image') {
+                $('.hqmedia-upload-Image').show();
+            }
+        }
         
         var input = $("<input />").attr("id", widget.getID()).attr("type", "text");
         
@@ -395,6 +403,14 @@ formdesigner.widgets = (function () {
 	            // gets the whole widget (label + control)
 	            var uiElem = $("<div />").addClass("widget").attr("data-form", form);
 	            uiElem.append(this.getLabel());
+                if (form == 'image' || form == 'audio') {
+                    var uploadButton = $('<button />').addClass("xpath-edit-button").addClass('btn').addClass('btn-primary').text("Upload").button();
+                    uploadButton.click(function() {
+                        widget.showUploadModal();
+                    });
+                    uiElem.append(uploadButton);
+                }
+
 	            uiElem.append(this.getControl());
 	            var deleteButton = $('<button />').addClass("xpath-edit-button").addClass('btn').addClass('btn-danger').text("Delete").button();
 	            deleteButton.click(function () {
