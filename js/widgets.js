@@ -380,13 +380,16 @@ formdesigner.widgets = (function () {
         input.keyup(widget.fireValueChanged());
         return widget;
     };
+
+    that.defaultContentTypes = ["image", "audio", "video", "long", "short"];
     
-    that.iTextWidget = function(mugType, language, itemFunc, slug, form) {
+    that.iTextWidget = function(mugType, language, itemFunc, slug, form, block) {
         
         var widget = that.baseItextWidget(mugType, language, itemFunc, slug, form);
         
         // a bit of a hack, only allow deletion for non-default forms
         if (form !== "default") {
+
             // override getUIElement to include the delete button
             widget.getUIElement = function () {
 	            // gets the whole widget (label + control)
@@ -399,9 +402,11 @@ formdesigner.widgets = (function () {
 	                // this is a bit ridiculous but finds the right things to remove
 	                uiElem.parent().parent().children(".itext-language-section")
                         .children('div[data-form="' + form + '"]').each(function () {
-                        $(this).remove();    
+                        $(this).remove();
 	                });
-	                widget.fireChangeEvents();
+                    block.formList.splice(block.formList.indexOf(form), 1);
+                    $($('.itext-options .itext-option')[that.defaultContentTypes.indexOf(form)]).removeClass('disabled');
+                    widget.fireChangeEvents();
 	            });
 	            uiElem.append(deleteButton);
                 return uiElem;
@@ -629,6 +634,7 @@ formdesigner.widgets = (function () {
     
     that.baseITextFieldBlock = function (mugType, options) {
         var block = {};
+
         block.mugType = mugType;
         block.textIdFunc = options.textIdFunc;
         block.slug = options.slug;
@@ -677,9 +683,16 @@ formdesigner.widgets = (function () {
             return null;
         };
         var addItextType = block.addItextType = function (form, value) {
+            if (block.formList.indexOf(form) != -1) {
+                return;
+            }
+            block.formList.push(form);
+
+            $($('.itext-options .itext-option')[that.defaultContentTypes.indexOf(form)]).addClass('disabled');
+
             main.parent().find(".itext-language-section").each(function () {
                 var lang = $(this).data("language");
-                var itextWidget = that.iTextWidget(mugType, lang, textIdFunc, slug, form);
+                var itextWidget = that.iTextWidget(mugType, lang, textIdFunc, slug, form, block);
                 itextWidget.getUIElement().appendTo($(this));
                 var itextForm = itextWidget.getTextItem().getOrCreateForm(form);
                 if (value) {
@@ -706,24 +719,26 @@ formdesigner.widgets = (function () {
                 for (var j = 0; j < this.formList.length; j++) {
                     // add widget
                     itextWidget = that.iTextWidget(mugType, this.langs[i], this.textIdFunc, 
-                                                   this.slug, this.formList[j]);
+                                                   this.slug, this.formList[j], block);
                     itextWidget.setValue(itextItem.getValue(this.formList[j], this.langs[i]));
                     itextWidget.getUIElement().appendTo(subSec);
                 }
             }
             
             if (this.showAddFormButton) {
-	            var defaultContentTypes = ["image", "audio", "video", "long", "short"];
+	            var defaultContentTypes = that.defaultContentTypes;
 	            var iWrapper = $("<div />").addClass("itext-wrapper");
 	            main = main.add(iWrapper);
 	            $("<span />").text("Add: ").addClass("help-inline").appendTo(iWrapper);
                 var bg = $("<div />").addClass("btn-group itext-options").appendTo(iWrapper);
                 for (i = 0; i < defaultContentTypes.length; i++) {
-		            $("<div />").text(defaultContentTypes[i]).button().addClass('btn itext-option').click(
+		            var btn = $("<div />").text(defaultContentTypes[i]).button().addClass('btn itext-option').click(
 		                function () {
 		                    var form = $(this).text();
 		                    addItextType(form, getDefaultValue(form));
 		                }).appendTo(bg);
+                    if (block.formList.indexOf(defaultContentTypes[i]) != -1)
+                        btn.addClass('disabled');
 		        }
                 var addButton = $("<div />").text("custom...").button().addClass('btn').appendTo(bg);
 	            addButton.click(function () {
