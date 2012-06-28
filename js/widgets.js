@@ -374,7 +374,10 @@ formdesigner.widgets = (function () {
         widget.addMultimediaButtons = function (uiElem, form) {
             var mediaDiv = $('<div />');
             var uploadButton = $('<button />').addClass("xpath-edit-button").addClass('btn').addClass('btn-primary').text("Update").button();
-            uploadButton.attr('data-bind', "click: uploadNewImage, uploadMediaButton: has_ref, uploadMediaButtonParams: {type: type, uid: uid}");
+            if (form == 'image')
+                uploadButton.attr('data-bind', "click: uploadNewImage, uploadMediaButton: has_ref, uploadMediaButtonParams: {type: type, uid: uid}");
+            else
+                uploadButton.attr('data-bind', "click: uploadNewAudio, uploadMediaButton: has_ref, uploadMediaButtonParams: {type: type, uid: uid}");
             mediaDiv.append(uploadButton);
             var previewButton = $('<div />')
             if (form == 'image')
