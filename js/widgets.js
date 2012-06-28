@@ -372,29 +372,30 @@ formdesigner.widgets = (function () {
         };
 
         widget.addMultimediaButtons = function (uiElem, form) {
-            var mediaDiv = $('<div />');
-            var uploadButton = $('<button />').addClass("xpath-edit-button").addClass('btn').addClass('btn-primary').text("Update").button();
+            var mediaSpan = $('<span />');
+
+            var uploadButton = $('<button />').addClass('btn').addClass('btn-primary').text("Update").button();
             if (form == 'image')
                 uploadButton.attr('data-bind', "click: uploadNewImage, uploadMediaButton: has_ref, uploadMediaButtonParams: {type: type, uid: uid}");
             else
                 uploadButton.attr('data-bind', "click: uploadNewAudio, uploadMediaButton: has_ref, uploadMediaButtonParams: {type: type, uid: uid}");
-            mediaDiv.append(uploadButton);
-            var previewButton = $('<div />')
+            mediaSpan.append(uploadButton).append(' ');
+            var previewButton = $('<span />')
             if (form == 'image')
                 previewButton.attr('data-bind', "previewHQImageButton: url");
             else
                 previewButton.attr('data-bind', "previewHQAudioButton: url, HQAudioIsPlaying: $root.is_audio_playing, previewHQAudioParams: {uid: uid}");
-            mediaDiv.append(previewButton.css('float', 'right'));
+            mediaSpan.append(previewButton).append(' ');
             var path = this.getValue();
             var uid = path.replace(/jr:\/\//g, '').replace(/\//g, '_').replace(/\./g, '_');
 
             var modal = $("#hqm-modal-" + form + "-prototype").clone().attr('id', 'hqm-' + form + '-modal-'+uid);
 
-            modal.find('input[type=text]').css('float', 'none');
+            modal.find('input[type=text]').css('float', 'none').css('text-align', 'left');
 
-            mediaDiv.append(modal);
-            mediaDiv.attr('data-bind', 'with: by_path.' + uid);
-            uiElem.append(mediaDiv);
+            mediaSpan.append(modal);
+            mediaSpan.attr('data-bind', 'with: by_path.' + uid);
+            uiElem.append(mediaSpan);
         }
 
         var input = $("<input />").attr("id", widget.getID()).attr("type", "text");
@@ -423,7 +424,12 @@ formdesigner.widgets = (function () {
 	            uiElem.append(this.getLabel());
 
 	            uiElem.append(this.getControl());
-	            var deleteButton = $('<button />').addClass("xpath-edit-button").addClass('btn').addClass('btn-danger').text("Delete").button();
+                var buttonDiv = $('<div />').css('text-align', 'right').css('clear', 'both');
+                if (MultimediaMap && (form == 'image' || form == 'audio')) {
+                    widget.addMultimediaButtons(buttonDiv, form);
+                }
+
+	            var deleteButton = $('<button />').addClass('btn').addClass('btn-danger').text("Delete").button();
 	            deleteButton.click(function () {
 	                widget.deleteValue();
 	                // this is a bit ridiculous but finds the right things to remove
@@ -435,11 +441,9 @@ formdesigner.widgets = (function () {
                     $($('.itext-options .itext-option')[that.defaultContentTypes.indexOf(form)]).removeClass('disabled');
                     widget.fireChangeEvents();
 	            });
-	            uiElem.append(deleteButton);
+	            buttonDiv.append(deleteButton);
 
-                if (MultimediaMap && (form == 'image' || form == 'audio')) {
-                    widget.addMultimediaButtons(uiElem, form);
-                }
+                uiElem.append(buttonDiv);
 
                 return uiElem;
 	        };
