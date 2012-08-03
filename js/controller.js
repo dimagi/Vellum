@@ -1986,7 +1986,10 @@ formdesigner.controller = (function () {
             
             // set all instance metadatas
             that.form.instanceMetadata = instances.map(function (instance) {
-                return formdesigner.model.InstanceMetadata(formdesigner.util.getAttributes(instance)); 
+                return formdesigner.model.InstanceMetadata(
+                    formdesigner.util.getAttributes(instance),
+                    $(instance).children()
+                ); 
             });
             
             if(data.length === 0) {

@@ -2068,9 +2068,10 @@ formdesigner.model = function () {
     };
     that.Tree = Tree;
     
-    var InstanceMetadata = function (attributes) {
+    var InstanceMetadata = function (attributes, children) {
         var that = {};
         that.attributes = attributes;
+        that.children = children;
         return that;
     };
     that.InstanceMetadata = InstanceMetadata;
@@ -2644,9 +2645,14 @@ formdesigner.model = function () {
                 }
             };
             
-            var _writeInstance = function (writer, instanceMetadata) {
+            var _writeInstance = function (writer, instanceMetadata, manualChildren) {
                 writer.writeStartElement('instance');
                 _writeInstanceAttributes(writer, instanceMetadata);
+                if (manualChildren && instanceMetadata.children) {
+                    // seriously, this is what you have to do
+                    // HT: http://stackoverflow.com/questions/652763/jquery-object-to-string
+                    writer.writeString($('<div>').append(instanceMetadata.children).clone().html());
+                }
                 writer.writeEndElement(); 
             };
             
@@ -2678,7 +2684,7 @@ formdesigner.model = function () {
                 
                 // other instances
                 for (var i = 1; i < formdesigner.controller.form.instanceMetadata.length; i++) {
-                    _writeInstance(xw, formdesigner.controller.form.instanceMetadata[i]);
+                    _writeInstance(xw, formdesigner.controller.form.instanceMetadata[i], true);
                 }
                 
                 /////////////////BINDS /////////////////
