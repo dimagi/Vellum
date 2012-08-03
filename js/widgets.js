@@ -772,7 +772,8 @@ formdesigner.widgets = (function () {
 
                 block.media_map = new MultimediaMap(loadedData, uploadUrl), main.parent()[0];
 
-                ko.applyBindings(block.media_map);
+                if (loadedData.audio.length > 0 || loadedData.images.length > 0)
+                    ko.applyBindings(block.media_map, document.getElementById("fd-ui-container"));
             });
         }
 
