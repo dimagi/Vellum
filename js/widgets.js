@@ -747,7 +747,7 @@ formdesigner.widgets = (function () {
             for (var i = 0; i < block.langs.length; i++) {
                 for (var j = 0; j < block.formList.length; j++) {
                     var form = block.formList[j];
-                    if (form !== 'default')
+                    if (form === 'image' || form === 'audio')
                         paths.push(itextItem.getValue(form, block.langs[i]));
                 }
             }
@@ -758,13 +758,13 @@ formdesigner.widgets = (function () {
                     for (var j = 0; j < block.formList.length; j++) {
                         // add widget
                         var form = block.formList[j];
-                        if (form !== 'default') {
+                        if (form === 'audio' || form === 'image') {
                             var path = itextItem.getValue(form, block.langs[i]);
                             var d = data[path] || {};
                             d.type = form;
-                            if (form == 'audio')
+                            if (form === 'audio')
                                 loadedData.audio.push(d);
-                            if (form == 'image')
+                            if (form === 'image')
                                 loadedData.images.push(d);
                         }
                     }
