@@ -394,7 +394,7 @@ formdesigner.widgets = (function () {
             modal.find('input[type=text]').css('float', 'none').css('text-align', 'left');
 
             mediaSpan.append(modal);
-            mediaSpan.attr('data-bind', 'with: by_path.' + uid);
+            mediaSpan.attr('data-bind', "with: by_path['" + uid + "']");
             uiElem.append(mediaSpan);
         }
 
