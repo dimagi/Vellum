@@ -371,32 +371,32 @@ formdesigner.widgets = (function () {
             }
         };
 
-        widget.addMultimediaButtons = function (uiElem, form) {
-            var mediaSpan = $('<span />');
-
-            var uploadButton = $('<button />').addClass('btn').addClass('btn-primary').text("Update").button();
-            if (form == 'image')
-                uploadButton.attr('data-bind', "click: uploadNewImage, uploadMediaButton: has_ref, uploadMediaButtonParams: {type: type, uid: uid}");
-            else
-                uploadButton.attr('data-bind', "click: uploadNewAudio, uploadMediaButton: has_ref, uploadMediaButtonParams: {type: type, uid: uid}");
-            mediaSpan.append(uploadButton).append(' ');
-            var previewButton = $('<span />')
-            if (form == 'image')
-                previewButton.attr('data-bind', "previewHQImageButton: url");
-            else
-                previewButton.attr('data-bind', "previewHQAudioButton: url, HQAudioIsPlaying: $root.is_audio_playing, previewHQAudioParams: {uid: uid}");
-            mediaSpan.append(previewButton).append(' ');
-            var path = this.getValue();
-            var uid = path.replace(/jr:\/\//g, '').replace(/\//g, '_').replace(/\./g, '_');
-
-            var modal = $("#hqm-modal-" + form + "-prototype").clone().attr('id', 'hqm-' + form + '-modal-'+uid);
-
-            modal.find('input[type=text]').css('float', 'none').css('text-align', 'left');
-
-            mediaSpan.append(modal);
-            mediaSpan.attr('data-bind', "with: by_path['" + uid + "']");
-            uiElem.append(mediaSpan);
-        }
+//        widget.addMultimediaButtons = function (uiElem, form) {
+//            var mediaSpan = $('<span />');
+//
+//            var uploadButton = $('<button />').addClass('btn').addClass('btn-primary').text("Update").button();
+//            if (form == 'image')
+//                uploadButton.attr('data-bind', "click: uploadNewImage, uploadMediaButton: has_ref, uploadMediaButtonParams: {type: type, uid: uid}");
+//            else
+//                uploadButton.attr('data-bind', "click: uploadNewAudio, uploadMediaButton: has_ref, uploadMediaButtonParams: {type: type, uid: uid}");
+//            mediaSpan.append(uploadButton).append(' ');
+//            var previewButton = $('<span />')
+//            if (form == 'image')
+//                previewButton.attr('data-bind', "previewHQImageButton: url");
+//            else
+//                previewButton.attr('data-bind', "previewHQAudioButton: url, HQAudioIsPlaying: $root.is_audio_playing, previewHQAudioParams: {uid: uid}");
+//            mediaSpan.append(previewButton).append(' ');
+//            var path = this.getValue();
+//            var uid = path.replace(/jr:\/\//g, '').replace(/\//g, '_').replace(/\./g, '_');
+//
+//            var modal = $("#hqm-modal-" + form + "-prototype").clone().attr('id', 'hqm-' + form + '-modal-'+uid);
+//
+//            modal.find('input[type=text]').css('float', 'none').css('text-align', 'left');
+//
+//            mediaSpan.append(modal);
+//            mediaSpan.attr('data-bind', "with: by_path['" + uid + "']");
+//            uiElem.append(mediaSpan);
+//        }
 
         var input = $("<input />").attr("id", widget.getID()).attr("type", "text");
 
@@ -425,9 +425,9 @@ formdesigner.widgets = (function () {
 
 	            uiElem.append(this.getControl());
                 var buttonDiv = $('<div />').css('text-align', 'right').css('clear', 'both');
-                if (MultimediaMap && (form == 'image' || form == 'audio')) {
-                    widget.addMultimediaButtons(buttonDiv, form);
-                }
+//                if (MultimediaMap && (form == 'image' || form == 'audio')) {
+//                    widget.addMultimediaButtons(buttonDiv, form);
+//                }
 
 	            var deleteButton = $('<button />').addClass('btn').addClass('btn-danger').text("Delete").button();
 	            deleteButton.click(function () {
@@ -770,7 +770,7 @@ formdesigner.widgets = (function () {
                     }
                 }
 
-                block.media_map = new MultimediaMap(loadedData, uploadUrl), main.parent()[0];
+//                block.media_map = new MultimediaMap(loadedData, uploadUrl), main.parent()[0];
 
                 if (loadedData.audio.length > 0 || loadedData.images.length > 0)
                     ko.applyBindings(block.media_map, document.getElementById("fd-ui-container"));
@@ -841,9 +841,9 @@ formdesigner.widgets = (function () {
             // init knockout
 
 
-            if (MultimediaMap) {
-                block.loadMediaData();
-            }
+//            if (MultimediaMap) {
+//                block.loadMediaData();
+//            }
 
 	        return main;
         };
