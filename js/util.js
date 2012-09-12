@@ -79,7 +79,8 @@ formdesigner.util = (function(){
         'video': 'Video Question',
         'date': 'Date',
         'datetime': 'Date and Time',
-        'datanode': 'Data Node'
+        'datanode': 'Data Node',
+        'unknown': 'Unknown Question Type'
     };
     
     that.getQuestionList = function () {
@@ -90,7 +91,11 @@ formdesigner.util = (function(){
             }
         }
         return ret;
-    }
+    };
+    
+    that.isReadOnly = function (mugType) {
+        return mugType.typeSlug === "unknown";
+    };
     /**
      * Grabs the value between the tags of the element passed in
      * and returns a string of everything inside.
@@ -740,6 +745,10 @@ formdesigner.util = (function(){
         if(!mugType || !mugType.mug) {
             return 'No Name!'
         }
+        if (formdesigner.util.isReadOnly(mugType)) {
+            return "Unknown (read-only) question type"            
+        }
+
         mugProps = mugType.mug.properties;
         if (mugProps.controlElement) {
             cEl = mugProps.controlElement.properties;
