@@ -2230,10 +2230,6 @@ formdesigner.controller = (function () {
         return data;
     };
     
-    that.getValidatedForm = function () {
-        
-    };
-
     var validateAndSaveXForm = function (url) {
         if (!url) {
             url = formdesigner.saveUrl;
