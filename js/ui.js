@@ -1388,7 +1388,9 @@ formdesigner.ui = function () {
      * @param cancelButName
      * @param cancelButFunction
      */
-    var setDialogInfo = that.setDialogInfo = function (message, confButName, confFunction, cancelButName, cancelButFunction) {
+    var setDialogInfo = that.setDialogInfo = function (message, confButName, confFunction, 
+                                                       cancelButName, cancelButFunction, title) {
+        title = title || "";
         var buttons = {}, opt,
                 dial = $('#fd-dialog-confirm'), contentStr;
         buttons[confButName] = confFunction;
@@ -1403,8 +1405,7 @@ formdesigner.ui = function () {
             message = "";
         }
         $('#fd-dialog-confirm .fd-message').text(message);
-
-        $("#fd-dialog-confirm").dialog("option", {buttons: buttons});
+        $("#fd-dialog-confirm").dialog("option", {buttons: buttons, "title": title});
     };
     that.setDialogInfo = setDialogInfo;
 
@@ -1425,7 +1426,8 @@ formdesigner.ui = function () {
             },
             close: function(event, ui) {
                 $(".ui-dialog-titlebar-close").show();
-            }
+            },
+            title: "Processing..."
         });
         contentStr = '<p>' +
                 '<span class="fd-message">' + msg + '</span><div id="fd-form-saving-anim"></div></p>';

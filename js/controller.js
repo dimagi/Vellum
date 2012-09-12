@@ -2288,7 +2288,8 @@ formdesigner.controller = (function () {
                 'Save Anyways', function () {
                     $(this).dialog("close");
                     send(formText)
-                });
+                },
+                'Form Validation Error');
             formdesigner.ui.showConfirmDialog();
         }
         if (parsed) {
