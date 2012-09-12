@@ -10,7 +10,7 @@ formdesigner.controller = (function () {
         FORM_SAVED = true,
         saveButton = SaveButton.init({
             save: function() {
-                that.sendXForm();
+                that.validateAndSaveXForm();
             },
             unsavedMessage: 'Are you sure you want to exit? All unsaved changes will be lost!'
         });
@@ -2229,9 +2229,8 @@ formdesigner.controller = (function () {
 
         return data;
     };
-
-
-    var sendXForm = function (url) {
+    
+    var validateAndSaveXForm = function (url) {
         if (!url) {
             url = formdesigner.saveUrl;
         }
@@ -2244,24 +2243,56 @@ formdesigner.controller = (function () {
                         $ (this) .dialog("close");
             });
         }
-        $('body').ajaxStart(formdesigner.ui.showWaitingDialog);
-        $('body').ajaxStop(formdesigner.ui.hideConfirmDialog);
+        
+        var send = function (formText) {
 
-        formdesigner.XFORM_STRING = that.form.createXForm();
-        saveButton.ajax({
-            type: "POST",
-            url: url,
-            data: {xform: formdesigner.XFORM_STRING},
-            success: function (data) {
-                formdesigner.ui.hideConfirmDialog();
-                formdesigner.fire({
-                    type: 'form-saved',
-                    response: data
-                });
-            }
-        });
+            $('body').ajaxStart(formdesigner.ui.showWaitingDialog);
+            $('body').ajaxStop(formdesigner.ui.hideConfirmDialog);
+    
+            formdesigner.XFORM_STRING = formText;
+            saveButton.ajax({
+                type: "POST",
+                url: url,
+                data: {xform: formdesigner.XFORM_STRING},
+                success: function (data) {
+                    formdesigner.ui.hideConfirmDialog();
+                    formdesigner.fire({
+                        type: 'form-saved',
+                        response: data
+                    });
+                }
+            });
+        };
+        
+        var formText = that.form.createXForm();
+        var parsed = false;
+        try {
+            $.parseXML(formText);
+            parsed = true;
+        } catch (err) {
+            // something went wrong parsing, but maybe the user wants to save anyway
+            // let's ask them with a scary message encouraging them not to.
+            var theScaryWarning = "It looks like your form is not valid XML. This can " +
+                "often happen if you use a reserved character in one of your questions. " +
+                "Characters to look out for are <, >, and &. You can still save, but " +
+                "Vellum will NOT LOAD THIS FORM again until you fix the XML by hand. " +
+                "What would you like to do?";
+            formdesigner.ui.setDialogInfo(theScaryWarning,
+                'Fix the problem (recommended)', function () {
+                    $(this).dialog("close");
+                },
+                'Save Anyways', function () {
+                    $(this).dialog("close");
+                    send(formText)
+                },
+                'Form Validation Error');
+            formdesigner.ui.showConfirmDialog();
+        }
+        if (parsed) {
+            send(formText);
+        }
     };
-    that.sendXForm = sendXForm;
+    that.validateAndSaveXForm = validateAndSaveXForm;
 
     /**
      * Used to reset the state of the controller if a FD wide reset is called
