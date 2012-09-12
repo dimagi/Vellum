@@ -6,7 +6,7 @@ formdesigner.widgets = (function () {
     var that = {};
 
     that.unchangeableQuestionTypes = [
-        "item", "group", "repeat", "datanode", "trigger"
+        "item", "group", "repeat", "datanode", "trigger", "unknown"
     ];
 
     that.getGroupName = function (path) {
@@ -551,7 +551,26 @@ formdesigner.widgets = (function () {
         return widget;
 
     };
+    
+    that.readOnlyControlWidget = function (mugType) {
+        var widget = that.baseWidget(mugType);
+        widget.definition = {};
+        widget.currentValue = $('<div>').append(mugType.mug.controlElementRaw).clone().html();
+        widget.propName = "Raw XML: ";
 
+        widget.getID = function () {
+            return "readonly-control";
+        };
+
+        widget.getControl = function () {
+            var control = $("<p />").text(this.currentValue);
+            return control;
+        };
+
+        return widget;
+
+    };
+    
     that.widgetTypeFromPropertyDefinition = function (propertyDef) {
         switch (propertyDef.uiType) {
             case "select":
@@ -579,6 +598,8 @@ formdesigner.widgets = (function () {
                 }
             case "questionType":
                 return that.questionTypeSelectorWidget(mugType);
+            case "readonlyControl":
+                return that.readOnlyControlWidget(mugType);
             case "generic":
             default:
                 var cls = that.widgetTypeFromPropertyDefinition(mugType.getPropertyDefinition(definition.path));
@@ -897,7 +918,9 @@ formdesigner.widgets = (function () {
         if (mugType.hasBindElement()) {
             sections.push(that.getLogicSection(mugType));
         }
-        sections.push(that.getAdvancedSection(mugType));
+        if (!formdesigner.util.isReadOnly(mugType)) {
+            sections.push(that.getAdvancedSection(mugType));
+        }            
         return sections;
     };
 
@@ -926,7 +949,7 @@ formdesigner.widgets = (function () {
     };
     that.getMainSection = function (mugType) {
         var elements = ["dataElement/nodeID"];
-
+        
         if (formdesigner.util.isSelectItem(mugType)) {
             elements.push("controlElement/defaultValue");
         }
@@ -935,6 +958,9 @@ formdesigner.widgets = (function () {
 
         if (that.unchangeableQuestionTypes.indexOf(mugType.typeSlug) === -1) {
             elements.splice(1, 0, {widgetType: "questionType", path: "system/questionType"});
+        }
+        if (formdesigner.util.isReadOnly(mugType)) {
+            elements.push({widgetType: "readonlyControl", path: "system/readonlyControl"});
         }
         return that.genericSection(mugType, {
                             slug: "main",
