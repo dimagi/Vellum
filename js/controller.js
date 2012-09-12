@@ -1619,8 +1619,11 @@ formdesigner.controller = (function () {
                         MTIdentifier = 'stdSecret';
                     }else if (tagName === 'upload') {
                         MTIdentifier = MTIdentifierFromUpload();
+                    } else {
+                        MTIdentifier = "unknown";
                     }
-
+                    
+                    
                     try{
                         mugType = formdesigner.model.mugTypeMaker[MTIdentifier]();
                     }catch (e) {
@@ -1651,6 +1654,12 @@ formdesigner.controller = (function () {
 
                 function populateMug (MugType, cEl) {
                     var labelEl, hintEl, Itext, repeat_count, repeat_noaddremove;
+                    
+                    if (formdesigner.util.isReadOnly(MugType)) {
+                        MugType.mug.controlElementRaw = cEl;
+                        return;
+                    }
+                    
                     Itext = formdesigner.model.Itext;
                     function parseLabel (lEl, MT) {
                         var labelVal = formdesigner.util.getXLabelValue($(lEl)),
@@ -1846,14 +1855,15 @@ formdesigner.controller = (function () {
                 populateMug(mType,el);
                 insertMTInControlTree(mType, parentMug);
 
-                tagName = mType.mug.properties.controlElement.properties.tagName.toLowerCase();
-                if(couldHaveChildren.indexOf(tagName) !== -1) {
-                    children = $(el).children().not('label').not('value').not('hint');
-                    children.each(eachFunc); //recurse down the tree
+                if (!formdesigner.util.isReadOnly(mType)) {
+                    tagName = mType.mug.properties.controlElement.properties.tagName.toLowerCase();
+                    if(couldHaveChildren.indexOf(tagName) !== -1) {
+                        children = $(el).children().not('label').not('value').not('hint');
+                        children.each(eachFunc); //recurse down the tree
+                    }
+                    // update any remaining itext
+                    Itext.updateForExistingMug(mType);
                 }
-                
-                // update any remaining itext
-                Itext.updateForExistingMug(mType);
             }
             controlsTree.each(eachFunc);
         }
@@ -2032,8 +2042,15 @@ formdesigner.controller = (function () {
      * @param rType - The type of the Reference controlElement being moved (use tagName!) e.g. "input" or "group"
      *                  if -1 is given, assumes rootNode.
      */
-    var checkMoveOp = that.checkMoveOp =function (mugType, position, refMugType, treeType) {
+    var checkMoveOp = that.checkMoveOp = function (mugType, position, refMugType, treeType) {
         if(treeType === 'data'){
+            return true;
+        }
+        
+        if (formdesigner.util.isReadOnly(mugType)) {
+            // for now just assume that anything "unknown" can live anywhere
+            // this is true of most itemsets which is the first use case of 
+            // this feature.
             return true;
         }
         

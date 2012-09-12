@@ -1079,6 +1079,10 @@ formdesigner.model = function () {
 
             mug = this.mug || null;
 
+            if (formdesigner.util.isReadOnly(this)) {
+                return {status: 'pass'};
+            }
+                
             if (!mug) {
                 throw 'MUST HAVE A MUG TO VALIDATE!';
             }
@@ -1159,6 +1163,15 @@ formdesigner.model = function () {
             mType.type = "c";
             delete mType.properties.dataElement;
             delete mType.properties.bindElement;
+            return mType;
+        }(),
+        readOnly: function () {
+            var mType = formdesigner.util.clone(RootMugType);
+            mType.typeName = "READ ONLY Mug";
+            mType.type = "readonly";
+            delete mType.properties.dataElement;
+            delete mType.properties.bindElement;
+            delete mType.properties.controlElement;
             return mType;
         }()
     };
@@ -1496,6 +1509,15 @@ formdesigner.model = function () {
         mType.mug.properties.controlElement.properties.name = "Repeat";
         mType.mug.properties.controlElement.properties.tagName = "repeat";
 
+        return mType;
+    };
+    
+    that.mugTypeMaker.unknown = function () {
+        var mType = formdesigner.util.getNewMugType(mugTypes.readOnly);
+        mType.typeSlug = "unknown";
+        mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
+        var mug = that.createMugFromMugType(mType);
+        mType.mug = mug;
         return mType;
     };
 
@@ -2378,10 +2400,15 @@ formdesigner.model = function () {
                         return;
                     }
 
-                    var mugType = node.getValue(),
-                        cProps = mugType.mug.properties.controlElement.properties,
+                    var mugType = node.getValue();
+                    var xmlWriter = formdesigner.controller.XMLWriter;
+                        
+                    if (formdesigner.util.isReadOnly(mugType)) {
+                        xmlWriter.writeString($('<div>').append(mugType.mug.controlElementRaw).clone().html());
+                        return;
+                    }
+                    var cProps = mugType.mug.properties.controlElement.properties,
                         label,
-                        xmlWriter = formdesigner.controller.XMLWriter,
                         hasItext,
                         isItextOptional;
 
@@ -2518,9 +2545,12 @@ formdesigner.model = function () {
                     if (node.isRootNode) {
                         return;
                     }
-
+                    var mugType = node.getValue();
+                    if (formdesigner.util.isReadOnly(mugType)) {
+                        return;
+                    }
+                    
                     var xmlWriter = formdesigner.controller.XMLWriter,
-                        mugType = node.getValue(),
                         tagName = mugType.mug.properties.controlElement.properties.tagName;
                     //finish off
                     xmlWriter.writeEndElement(); //close control tag.
