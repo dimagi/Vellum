@@ -476,14 +476,15 @@ formdesigner.controller = (function () {
 
     function createQuestionInUITree(mugType) {
         function treeSetItemType(mugType) {
-            var tString = mugType.mug.properties.controlElement ? mugType.mug.properties.controlElement.properties.name.toLowerCase() : 'data',
+            var tString = mugType.mug.properties.controlElement ? 
+                    mugType.mug.properties.controlElement.properties.name.toLowerCase() : 
+                    formdesigner.util.isReadOnly(mugType) ? 'unknown' : 'data',
                 setType = function (tType) {
                     var controlTree = $('#fd-question-tree'),
                         mugTUfid = mugType.ufid,
                         node = $('#'+mugTUfid);
                     controlTree.jstree("set_type",tType,node);
                 };
-
             switch(tString.toLowerCase()) {
                 case 'text':
                     setType("question");
@@ -539,6 +540,9 @@ formdesigner.controller = (function () {
                     break;
                 case 'video':
                     setType('video');
+                    break;
+                case 'unknown':
+                    setType('unknown');
                     break;
 
 
