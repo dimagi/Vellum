@@ -492,59 +492,15 @@ formdesigner.controller = (function () {
                 case 'integer':
                     setType("int");
                     break;
-                case 'double':
-                    setType("double");
-                    break;
-                case 'long':
-                    setType("long");
-                    break;
-                case 'group':
-                    setType("group");
-                    break;
-                case 'repeat':
-                    setType("repeat");
-                    break;
                 case 'multi-select':
                 case 'single-select':
                     setType("selectQuestion");
                     break;
-                case 'trigger':
-                    setType("trigger");
-                    break;
-                case 'item':
-                    setType("item");
-                    break;
-                case 'secret':
-                    setType("secret");
-                    break;
-                case 'date':
-                    setType("date");
-                    break;
-                case 'datetime':
-                    setType("datetime");
-                    break;
                 case 'data':
                     setType('dataNode');
                     break;
-                case 'barcode':
-                    setType('barcode');
-                    break;
-                case 'geopoint':
-                    setType('geopoint');
-                    break;
-                case 'image':
-                    setType('image');
-                    break;
-                case 'audio':
-                    setType('audio');
-                    break;
-                case 'video':
-                    setType('video');
-                    break;
-                case 'unknown':
-                    setType('unknown');
-                    break;
-
+                default:
+                    setType(tString.toLowerCase());
 
             }
         }
