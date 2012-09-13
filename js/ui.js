@@ -405,6 +405,12 @@ formdesigner.ui = function () {
                             },
                             "valid_children" : "none"
                         },
+                        "unknown" : {
+                            "icon": {
+                                "image": jquery_icon_url,
+                                "position": "-240px -128px"
+                            },
+                        },
                         "default" : {
                             "valid_children" : groupRepeatValidChildren
                         }

@@ -476,14 +476,15 @@ formdesigner.controller = (function () {
 
     function createQuestionInUITree(mugType) {
         function treeSetItemType(mugType) {
-            var tString = mugType.mug.properties.controlElement ? mugType.mug.properties.controlElement.properties.name.toLowerCase() : 'data',
+            var tString = mugType.mug.properties.controlElement ? 
+                    mugType.mug.properties.controlElement.properties.name.toLowerCase() : 
+                    formdesigner.util.isReadOnly(mugType) ? 'unknown' : 'data',
                 setType = function (tType) {
                     var controlTree = $('#fd-question-tree'),
                         mugTUfid = mugType.ufid,
                         node = $('#'+mugTUfid);
                     controlTree.jstree("set_type",tType,node);
                 };
-
             switch(tString.toLowerCase()) {
                 case 'text':
                     setType("question");
@@ -491,56 +492,15 @@ formdesigner.controller = (function () {
                 case 'integer':
                     setType("int");
                     break;
-                case 'double':
-                    setType("double");
-                    break;
-                case 'long':
-                    setType("long");
-                    break;
-                case 'group':
-                    setType("group");
-                    break;
-                case 'repeat':
-                    setType("repeat");
-                    break;
                 case 'multi-select':
                 case 'single-select':
                     setType("selectQuestion");
                     break;
-                case 'trigger':
-                    setType("trigger");
-                    break;
-                case 'item':
-                    setType("item");
-                    break;
-                case 'secret':
-                    setType("secret");
-                    break;
-                case 'date':
-                    setType("date");
-                    break;
-                case 'datetime':
-                    setType("datetime");
-                    break;
                 case 'data':
                     setType('dataNode');
                     break;
-                case 'barcode':
-                    setType('barcode');
-                    break;
-                case 'geopoint':
-                    setType('geopoint');
-                    break;
-                case 'image':
-                    setType('image');
-                    break;
-                case 'audio':
-                    setType('audio');
-                    break;
-                case 'video':
-                    setType('video');
-                    break;
-
+                default:
+                    setType(tString.toLowerCase());
 
             }
         }
