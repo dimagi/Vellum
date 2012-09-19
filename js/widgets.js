@@ -759,8 +759,8 @@ formdesigner.widgets = (function () {
                     itextForm.setValue(lang, value);
                 }
                 itextWidget.fireChangeEvents();
-                block.loadMediaData();
             });
+            block.loadMediaData();
         };
 
         block.loadMediaData = function () {
