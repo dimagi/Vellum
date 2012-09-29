@@ -83,10 +83,14 @@ formdesigner.util = (function(){
         'unknown': 'Unknown Question Type'
     };
     
+    // keep questions from showing up in the dropdown list here
+    that.UNEDITABLE_QUESTIONS = ["unknown", "item"];
+    
     that.getQuestionList = function () {
         var ret = [];
         for (var q in that.QUESTIONS) {
-            if (that.QUESTIONS.hasOwnProperty(q)) {
+            if (that.QUESTIONS.hasOwnProperty(q) && 
+                that.UNEDITABLE_QUESTIONS.indexOf(q) === -1 ) {
                 ret.push([q, that.QUESTIONS[q]]);
             }
         }
