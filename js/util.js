@@ -45,6 +45,7 @@ formdesigner.util = (function(){
         "question",
         "date",
         "datetime",
+        "time",
         "int",
         "barcode",
         "geopoint",
@@ -79,6 +80,7 @@ formdesigner.util = (function(){
         'video': 'Video Question',
         'date': 'Date',
         'datetime': 'Date and Time',
+        'time': 'Time',
         'datanode': 'Data Node',
         'unknown': 'Unknown Question Type'
     };
