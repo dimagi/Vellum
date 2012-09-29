@@ -648,6 +648,8 @@ formdesigner.controller = (function () {
                 return formdesigner.model.mugTypeMaker.stdDate();
             case 'datetime':
                 return formdesigner.model.mugTypeMaker.stdDateTime();
+            case 'time':
+                return formdesigner.model.mugTypeMaker.stdTime();
             case 'datanode':
                 return formdesigner.model.mugTypeMaker.stdDataBindOnly();
             case 'geopoint':
@@ -1526,6 +1528,8 @@ formdesigner.controller = (function () {
                             MTID = 'stdDate';
                         }else if(dataType === 'datetime') {
                             MTID = 'stdDateTime';
+                        }else if(dataType === 'time') {
+                            MTID = 'stdTime';
                         }else {
                             MTID = 'stdTextQuestion';
                         }

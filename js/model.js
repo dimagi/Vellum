@@ -1361,6 +1361,20 @@ formdesigner.model = function () {
         return mType;
     };
 
+    that.mugTypeMaker.stdTime = function () {
+        var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion),
+                mug;
+        mType.typeSlug = "time";
+        mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
+        mType.controlNodeAllowedChildren = false;
+        mug = that.createMugFromMugType(mType);
+        mType.mug = mug;
+        mType.mug.properties.controlElement.properties.name = "Time";
+        mType.mug.properties.controlElement.properties.tagName = "input";
+        mType.mug.properties.bindElement.properties.dataType = "xsd:time";
+        return mType;
+    };
+
     that.mugTypeMaker.stdLong = function () {
         var mType, mug;
         mType = formdesigner.model.mugTypeMaker.stdInt();
