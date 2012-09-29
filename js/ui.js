@@ -203,7 +203,7 @@ formdesigner.ui = function () {
         function addQuestionBySelect() {
             var selVal, qID,qType;
             selVal = $('#fd-question-select').val();
-            qID = $('#fd-question-select').find('[value*="' + selVal + '"]').attr('id');
+            qID = $('#fd-question-select').find('[value="' + selVal + '"]').attr('id');
             qType = qID.split('-')[2];
             that.addQuestion(qType);
         }
@@ -308,6 +308,13 @@ formdesigner.ui = function () {
                             "valid_children" : "none"
                         },
                         "datetime" : {
+                            "icon": {
+                                "image" : jquery_icon_url,
+                                "position": "-80px -112px"
+                            },
+                            "valid_children" : "none"
+                        },
+                        "time" : {
                             "icon": {
                                 "image" : jquery_icon_url,
                                 "position": "-80px -112px"
