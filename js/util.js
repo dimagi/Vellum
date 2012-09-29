@@ -84,7 +84,7 @@ formdesigner.util = (function(){
     };
     
     // keep questions from showing up in the dropdown list here
-    that.UNEDITABLE_QUESTIONS = ["unknown"];
+    that.UNEDITABLE_QUESTIONS = ["unknown", "item"];
     
     that.getQuestionList = function () {
         var ret = [];
