@@ -168,6 +168,22 @@ formdesigner.ui = function () {
         var toolbar = $(".fd-toolbar"), select, addbutstr, addbut;
         select = $('<select></select>')
                 .attr('id','fd-question-select');
+        (function c_removeSelected() {
+            var removebut = $(
+                '<button class="btn btn-danger" id="fd-remove-button" class="toolbarButton">' +
+                    'Remove Selected' +
+                    '</button>');
+            toolbar.prepend(removebut);
+
+            removebut.button({
+                icons: {
+                    primary: 'ui-icon-minusthick'
+                }
+            }).click(function () {
+                    var selected = formdesigner.controller.getCurrentlySelectedMugType();
+                    formdesigner.controller.removeMugTypeFromForm(selected);
+                });
+        })();
         toolbar.prepend(select);
 
         function buildSelectDropDown () {
@@ -230,23 +246,6 @@ formdesigner.ui = function () {
             var savebut = $('<div id="fd-save-button" class="toolbarButton"/>');
             toolbar.append(savebut);
             formdesigner.controller.saveButton.ui.appendTo(savebut);
-        })();
-
-        (function c_removeSelected() {
-            var removebut = $(
-                    '<button class="btn btn-danger" id="fd-remove-button" class="toolbarButton">' +
-                            'Remove Selected' +
-                            '</button>');
-            toolbar.append(removebut);
-
-            removebut.button({
-                icons: {
-                    primary: 'ui-icon-minusthick'
-                }
-            }).click(function () {
-                        var selected = formdesigner.controller.getCurrentlySelectedMugType();
-                        formdesigner.controller.removeMugTypeFromForm(selected);
-                    });
         })();
 
     }
@@ -866,14 +865,16 @@ formdesigner.ui = function () {
     var init_extra_tools = function() {
         function makeLangDrop() {
             var div, addLangButton, removeLangButton, langList, langs, i, str, selectedLang, Itext;
-            $('#fd-extra-settings').find('#fd-lang-disp-div').remove();
+            $('#fd-trees').find('#fd-lang-disp-div').remove();
             div = $('<div id="fd-lang-disp-div"></div>');
             Itext = formdesigner.model.Itext;
             langs = Itext.getLanguages();
-            div.append('<span class="fd-form-props-heading">Choose Display Language</span>');
+            if (langs.length < 2) {
+                return;
+            }
+            div.append('<label>Display Language: </label>');
 
-            str = '<select data-placeholder="Choose a Language" style="width:150px;" class="chzn-select" id="fd-land-disp-select">' +
-                    '<option value="blank"></option>';
+            str = '<select data-placeholder="Choose a Language" id="fd-land-disp-select">';
             for (i in langs) {
                 if (langs.hasOwnProperty(i)) {
                     if (Itext.getDefaultLanguage() === langs[i]) {
@@ -912,9 +913,7 @@ formdesigner.ui = function () {
                 });
                 div.append(removeLangButton);
             }
-            div.append('<br/><br/><br/><br/><br/>');
-            $('#fd-extra-settings').append(div);
-            $(div).find('#fd-land-disp-select').chosen();
+            $('#fd-question-tree-head').after(div);
         }
 
 
@@ -946,44 +945,23 @@ formdesigner.ui = function () {
         });
 
         (function c_showLoadItextXLS() {
-            var editXLSBut = $(
-                    '<button class="btn" id="fd-load-xls-button" class="toolbarButton questionButton">' +
-                            'Edit Bulk Translations' +
-                            '</button>');
-            $('#fd-extra-advanced').append(editXLSBut);
-
-            editXLSBut.button().click(function () {
+            $('#fd-load-xls-button').click(function () {
                 formdesigner.controller.showItextDialog();
-
             });
         })();
 
         
         (function c_showExport() {
-            var exportBut = $(
-                    '<button class="btn" id="fd-export-xls-button" class="toolbarButton questionButton">' +
-                            'Export Form Contents' +
-                    '</button>');
-            $('#fd-extra-advanced').append(exportBut);
-
-            exportBut.button().click(function () {
+            $('#fd-export-xls-button').click(function () {
                 formdesigner.controller.showExportDialog();
-
             });
         })();
 
         
         (function c_generateSource() {
-            var editSource = $(
-                    '<button class="btn" id="fd-editsource-button" class="toolbarButton questionButton">' +
-                            'Edit Source XML' +
-                            '</button>');
-            $('#fd-extra-advanced').append(editSource);
-
-            editSource.button().click(function () {
+            $('#fd-editsource-button').click(function () {
                 formdesigner.controller.showSourceXMLDialog();
             });
-
         })();
 
         $('#fd-extra-template-questions div').each(
