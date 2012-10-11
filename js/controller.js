@@ -989,7 +989,7 @@ formdesigner.controller = (function () {
             row.push(mugType.getDefaultItextRoot());
             if (mugType.hasControlElement()) {
                 // Question Type   
-                row.push(mugType.mug.properties.controlElement.properties.tagName);
+                row.push(formdesigner.util.QUESTIONS[mugType.typeSlug]);
                 // IText ID
                 var itext = mugType.getItext();
                 row.push(itext.id);
