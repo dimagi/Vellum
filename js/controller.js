@@ -1007,17 +1007,22 @@ formdesigner.controller = (function () {
                 fillBlanks(row, 3 + languages.lengths);
             }
             if (mugType.hasBindElement()) {
+                var bindElementProperties = mugType.mug.properties.bindElement.properties;
                 // Skip Condition
-                row.push(mugType.mug.properties.bindElement.properties.relevantAttr || "");
+                row.push(bindElementProperties.relevantAttr || "");
                 // Constraint Condition                
-                row.push(mugType.mug.properties.bindElement.properties.constraintAttr || "");
+                row.push(bindElementProperties.constraintAttr || "");
+                // Calculate Condition
+                row.push(bindElementProperties.calculateAttr || "");
+                // Required
+                row.push(bindElementProperties.requiredAttr ? 'yes' : 'no');
             } else {
-                fillBlanks(row, 2);
+                fillBlanks(row, 4);
             }
             return formdesigner.util.tabSeparate(row);
         };
         
-        var headers = ["Question", "Type", "IText ID", "Audio", "Image", "Display Condition", "Validation Condition"];
+        var headers = ["Question", "Type", "IText ID", "Audio", "Image", "Display Condition", "Validation Condition", "Calculate Condition", "Required"];
         for (i = 0; i < languages.length; i++) {
             headers.splice(3 + i, 0, "Text (" + languages[i] + ")");
         } 
