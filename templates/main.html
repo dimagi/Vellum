@@ -1,6 +1,21 @@
 <div id="fd-ui-container">
     <div id="fd-messages"></div>
-    <div id="fd-toolbar" class="fd-toolbar"></div>
+    <div id="fd-toolbar" class="fd-toolbar">
+        <div class="btn-group">
+            <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+                Advanced
+                <span class="caret"></span>
+            </a>
+            <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
+                <li><a id="fd-load-xls-button" tabindex="-1" href="#">Edit Bulk Translations</a></li>
+                <li><a id="fd-export-xls-button" tabindex="-1" href="#">Export Form Contents</a></li>
+                <li><a id="fd-editsource-button" tabindex="-1" href="#">Edit Source XML</a></li>
+                <li>
+                    <a tabindex="-1" href="#fd-form-opts" data-toggle="modal">Form Properties</a>
+                </li>
+            </ul>
+        </div>
+    </div>
     <div id="fd-trees">
         <div id="fd-question-tree-container" class="fd-tree">
             <div id="fd-question-tree-head" class="fd-head ui-widget-header">Question Tree</div>
@@ -15,26 +30,9 @@
         <div id="fd-props-head" class="fd-head ui-widget-header">Question Properties</div>
         <div id="fd-props-content"></div>
     </div>
-    <div id="fd-xpath-editor" class="fd-xpath-editor"></div>
-    <div id="fd-extra-tools" class="span-24 last fd-min">
-        <div id="fd-extra-props-head" class="fd-head ui-widget-header">Tools</div>
-        <!--<div id="fd-acc-min-max" class="fd-min-max">-->
-            <!--<div id="fd-min-max-button" />-->
-        <!--</div>-->
-        <div id="fd-extra-tools-accordion">
-            <h3><a href="#">Form Settings</a></h3>
-            <div id="fd-extra-settings" class="fd-extra-content">
-                <ul id="fd-form-opts-ul" class="fd-props-ul">
-                    <span class="fd-form-props-heading">Form Properties</span>
-                </ul>
-            </div>
-            <h3><a href="#">Advanced</a></h3>
-            <div id="fd-extra-advanced" class="fd-extra-content">
-            </div>
-            <h3><a href="#">Experimental Features</a></h3>
-            <div id="fd-dragons" class="fd-extra-content">
-            </div>
-        </div>
+    <div id="fd-xpath-editor" class="fd-xpath-editor">
+        <div id="fd-xpath-editor-head" class="fd-head ui-widget-header">Expression Editor</div>
+        <div id="fd-xpath-editor-content"></div>
     </div>
 
     <a id="inline" href="#data" style="display:none">This shows content of element who has id="data"</a>
@@ -44,6 +42,20 @@
             <div id="fd-source-help"></div>
             <textarea id="fd-source" class="span11" style="min-height: 300px;"></textarea>
             <div id="fd-source-controls"></div>
+        </div>
+    </div>
+
+    <div class="modal hide fade" id="fd-form-opts" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+            <h3 id="myModalLabel">Form Properties</h3>
+        </div>
+        <div class="modal-body">
+            <ul id="fd-form-opts-ul" class="fd-props-ul">
+            </ul>
+        </div>
+        <div class="modal-footer">
+            <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
         </div>
     </div>
 

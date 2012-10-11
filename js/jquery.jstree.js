@@ -340,7 +340,7 @@
 			load_open	: false,
 			strings		: {
 				loading		: "Loading ...",
-				new_node	: "New node",
+				new_node	: "[no text]",
 				multiple_selection : "Multiple selection"
 			}
 		},

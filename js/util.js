@@ -45,6 +45,7 @@ formdesigner.util = (function(){
         "question",
         "date",
         "datetime",
+        "time",
         "int",
         "barcode",
         "geopoint",
@@ -79,14 +80,19 @@ formdesigner.util = (function(){
         'video': 'Video Question',
         'date': 'Date',
         'datetime': 'Date and Time',
+        'time': 'Time',
         'datanode': 'Data Node',
         'unknown': 'Unknown Question Type'
     };
     
+    // keep questions from showing up in the dropdown list here
+    that.UNEDITABLE_QUESTIONS = ["unknown", "item"];
+    
     that.getQuestionList = function () {
         var ret = [];
         for (var q in that.QUESTIONS) {
-            if (that.QUESTIONS.hasOwnProperty(q)) {
+            if (that.QUESTIONS.hasOwnProperty(q) && 
+                that.UNEDITABLE_QUESTIONS.indexOf(q) === -1 ) {
                 ret.push([q, that.QUESTIONS[q]]);
             }
         }
