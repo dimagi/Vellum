@@ -1499,6 +1499,7 @@ formdesigner.ui = function () {
         });
 
         var editorPane = $('#fd-xpath-editor');
+        var editorContent = $('#fd-xpath-editor-content');
 
         var getExpressionInput = function () {
             return $("#fd-xpath-editor-text");
@@ -1831,25 +1832,17 @@ formdesigner.ui = function () {
             }
         };
         var initXPathEditor = function() {
-            $("<div />")
-                    .attr("id", "xpath-edit-head")
-                    .addClass("ui-widget-header")
-                    .text("Expression Editor")
-                    .appendTo(editorPane);
-
-            var mainPane = $("<div />")
-                    .attr("id", "xpath-edit-inner")
-                    .appendTo(editorPane);
+            var mainPane = editorContent;
 
             $("<label />")
                     .attr("for", "xpath-advanced-check")
                     .text("Advanced Mode?").
-                    appendTo(mainPane);
+                    appendTo(editorContent);
 
             var advancedModeSelector = $("<input />")
                     .attr("type", "checkbox")
                     .attr("id", "xpath-advanced-check")
-                    .appendTo(mainPane);
+                    .appendTo(editorContent);
             advancedModeSelector.css("clear", "both");
 
             advancedModeSelector.click(function() {
@@ -1862,7 +1855,7 @@ formdesigner.ui = function () {
 
             // advanced UI
             var advancedUI = $("<div />").attr("id", "xpath-advanced")
-                    .appendTo(mainPane);
+                    .appendTo(editorContent);
 
             $("<label />").attr("for", "fd-xpath-editor-text")
                     .text("XPath Expression: ")
@@ -1875,7 +1868,7 @@ formdesigner.ui = function () {
                     .addClass("jstree-drop");
                     
             // simple UI
-            var simpleUI = $("<div />").attr("id", "xpath-simple").appendTo(mainPane);
+            var simpleUI = $("<div />").attr("id", "xpath-simple").appendTo(editorContent);
 
             var topLevelJoinOps = [
                 ["True when ALL of the expressions are true.", expTypes.AND],
@@ -1898,7 +1891,7 @@ formdesigner.ui = function () {
 
             // shared UI
             var actions = $("<div />").addClass("btn-group")
-                    .css("padding-top", "5px").appendTo(mainPane);
+                    .css("padding-top", "5px").appendTo(editorContent);
             
             var doneButton = $('<button />').text("Save to Form").addClass("btn").addClass("btn-primary")
                     .button()
@@ -1928,10 +1921,10 @@ formdesigner.ui = function () {
                 });
             });
             
-            var validationSummary = $("<div />").attr("id", "fd-xpath-validation-summary").appendTo(mainPane);
+            var validationSummary = $("<div />").attr("id", "fd-xpath-validation-summary").appendTo(editorContent);
         };
 
-        if (editorPane.children().length === 0) {
+        if (editorContent.children().length === 0) {
             initXPathEditor();
         }
 
