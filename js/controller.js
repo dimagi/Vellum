@@ -967,70 +967,89 @@ formdesigner.controller = (function () {
     };
     that.generateItextXLS = generateItextXLS;
 
-    var generateExportXLS = function () {
+    that.generateExportXLS = function () {
         
         var languages = formdesigner.model.Itext.getLanguages();
         var i;
         // deduplicate
         formdesigner.model.Itext.deduplicateIds();
         
+        var columnOrder = [
+            "Question", 
+            "Type", 
+            "IText ID", 
+            "Audio", 
+            "Image",
+            "Display Condition", 
+            "Validation Condition", 
+            "Validation Message", 
+            "Calculate Condition", 
+            "Required"
+        ];
+
+        for (i = 0; i < languages.length; i++) {
+            columnOrder.splice(3 + i, 0, "Text (" + languages[i] + ")");
+        }
+
         var mugTypeToExportRow = function (mugType) {
-            
+            var row = {},
+                itext = mugType.getItext(),
+                defaultLanguage = formdesigner.model.Itext.getDefaultLanguage();
+
             var defaultOrNothing = function (item, language, form) {
                 return item.hasForm(form) ? item.getForm(form).getValueOrDefault(language) : "";
             }
-            var fillBlanks = function (array, count) {
-                for (var i = 0; i < count; i++) {
-                    row.push("");
+
+            // initialize all columns to empty string
+            for (var i = 0; i < columnOrder.length; i++) {
+                row[columnOrder[i]] = "";
+            }
+
+            row["Question"] = mugType.getDefaultItextRoot();
+            
+            if (mugType.hasControlElement()) {
+                row["Type"] = formdesigner.util.QUESTIONS[mugType.typeSlug];
+                row["IText ID"] = itext.id;
+                
+                for (var i = 0; i < languages.length; i++) {
+                    var key = "Text (" + languages[i] + ")";
+                    row[key] = defaultOrNothing(itext, languages[i], "default");
+                }
+
+                row["Audio"] = defaultOrNothing(itext, defaultLanguage, "audio");
+                row["Image"] = defaultOrNothing(itext, defaultLanguage, "image");
+            }
+            
+            if (mugType.hasBindElement()) {
+                var properties = mugType.mug.properties.bindElement.properties;
+                
+                row["Display Condition"] = properties.relevantAttr;
+                row["Calculate Condition"] = properties.calculateAttr;
+                row["Required"] = properties.requiredAttr ? 'yes' : 'no';
+
+                row["Validation Condition"] = properties.constraintAttr;
+                var constraintMsgItext = mugType.getConstraintMsgItext();
+                row["Validation Message"] = defaultOrNothing(constraintMsgItext, 
+                                                             defaultLanguage, 'default');
+            }
+
+            // make sure there aren't any null values
+            for (var prop in row) {
+                if (row.hasOwnProperty(prop)) {
+                    row[prop] = row[prop] || "";
                 }
             }
             
-            var row = [];
-            var i;
-            // Question ID
-            row.push(mugType.getDefaultItextRoot());
-            if (mugType.hasControlElement()) {
-                // Question Type   
-                row.push(mugType.mug.properties.controlElement.properties.tagName);
-                // IText ID
-                var itext = mugType.getItext();
-                row.push(itext.id);
-                // [language texts]
-                for (i = 0; i < languages.length; i++) {
-                    row.push(defaultOrNothing(itext, languages[i], "default"));
-                }
-                // Audio File
-                row.push(defaultOrNothing(itext, formdesigner.model.Itext.getDefaultLanguage(), "audio"));
-                // Image File  
-                row.push(defaultOrNothing(itext, formdesigner.model.Itext.getDefaultLanguage(), "image"));
-            } else {
-                fillBlanks(row, 3 + languages.lengths);
-            }
-            if (mugType.hasBindElement()) {
-                var bindElementProperties = mugType.mug.properties.bindElement.properties;
-                // Skip Condition
-                row.push(bindElementProperties.relevantAttr || "");
-                // Constraint Condition                
-                row.push(bindElementProperties.constraintAttr || "");
-                // Calculate Condition
-                row.push(bindElementProperties.calculateAttr || "");
-                // Required
-                row.push(bindElementProperties.requiredAttr ? 'yes' : 'no');
-            } else {
-                fillBlanks(row, 4);
-            }
-            return formdesigner.util.tabSeparate(row);
+            return formdesigner.util.tabSeparate(columnOrder.map(function (column) {
+                return row[column];
+            }));
         };
-        
-        var headers = ["Question", "Type", "IText ID", "Audio", "Image", "Display Condition", "Validation Condition", "Calculate Condition", "Required"];
-        for (i = 0; i < languages.length; i++) {
-            headers.splice(3 + i, 0, "Text (" + languages[i] + ")");
-        } 
-        var ret = that.getMugTypeList(true).map(mugTypeToExportRow);
-        ret.splice(0, 0, formdesigner.util.tabSeparate(headers));
-        return ret.join("\n");
+     
+        var headers = [formdesigner.util.tabSeparate(columnOrder)],
+            rows = headers.concat(that.getMugTypeList(true).map(mugTypeToExportRow));
+
+        return rows.join("\n");
     };
-    that.generateExportXLS = generateExportXLS;
 
     var showItextDialog = function () {
     
