@@ -673,6 +673,11 @@ formdesigner.ui = function () {
             "json_data" : {
                 "data" : []
             },
+            "core": {
+                strings: {
+                    new_node: "[no text]"
+                }
+            },
             "ui" : {
                 select_limit: 1
             },
