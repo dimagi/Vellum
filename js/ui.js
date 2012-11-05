@@ -26,9 +26,9 @@ formdesigner.ui = function () {
             question_list = [],
             buttons = {},
             controller = formdesigner.controller,
-            questionTree,
             dataTree,
             DEBUG_MODE = false,
+            QUESTION_TREE_DIV = '#fd-question-tree',
             MESSAGES_DIV = '#fd-messages',
             MESSAGE_TYPES = ["error", "parse-warning", "form-warning"],
             WARN_MSG_DIV = '#fd-parse-warn',
@@ -752,7 +752,8 @@ formdesigner.ui = function () {
      */
     function create_question_tree() {
         $.jstree._themes = formdesigner.staticPrefix + "themes/";
-        $("#fd-question-tree").jstree({
+        var questionTree = $(QUESTION_TREE_DIV);
+        questionTree.jstree({
             "json_data" : {
                 "data" : []
             },
@@ -792,7 +793,15 @@ formdesigner.ui = function () {
         }).bind("deselect_node.jstree", function (e, data) {
                 hideSelectItemAddButton();
         });
-        questionTree = $("#fd-question-tree");
+
+        $("#fd-expand-all").click(function() {
+            questionTree.jstree("open_all");
+        });
+
+        $("#fd-collapse-all").click(function() {
+            questionTree.jstree("close_all");
+        });
+
     }
 
     function create_data_tree() {
