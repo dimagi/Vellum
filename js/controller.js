@@ -535,7 +535,7 @@ formdesigner.controller = (function () {
         }
         $('#fd-question-tree').jstree("create",
             null, //reference node, use null if using UI plugin for currently selected
-            insertPosition, //position relative to reference node
+            insertPosition, // position relative to reference node
             objectData,
             null, //callback after creation, better to wait for event
             true  //skip_rename
@@ -2052,6 +2052,18 @@ formdesigner.controller = (function () {
             position = 'into';
         }
         
+        if (position !== 'into') {
+            if (!refMugType || !refMugType.hasControlElement()) {
+                return true;
+            }
+            var pRefMugType = that.form.controlTree.getParentMugType(refMugType);
+            return checkMoveOp(mugType,'into',pRefMugType);
+        } else {
+            if (refMugType && !refMugType.hasControlElement()) {
+                return false;
+            }
+        }
+
         var oType = mugType.mug.properties.controlElement.properties.tagName,
             rType = (!refMugType || refMugType === -1) ? 'group' : refMugType.mug.properties.controlElement.properties.tagName,
             oIsGroupOrRepeat = (oType === 'repeat' || oType === 'group'),
@@ -2061,14 +2073,6 @@ formdesigner.controller = (function () {
             rIsSelect = (rType === 'select1' || rType === 'select'),
             rIsItemOrInputOrTrigger = (rType === 'item' || rType === 'input' || rType === 'trigger' || rType === 'secret'),
             rIsGroupOrRepeat = (rType === 'repeat' || rType === 'group');
-
-        if (position !== 'into') {
-            if (!refMugType) {
-                return true;
-            }
-            var pRefMugType = that.form.controlTree.getParentMugType(refMugType);
-            return checkMoveOp(mugType,'into',pRefMugType);
-        }
 
         //from here it's safe to assume that position is always 'into'
         if (rIsItemOrInputOrTrigger) {
@@ -2105,7 +2109,6 @@ formdesigner.controller = (function () {
             isDataTreeOp;
         
         treeType = treeType || 'both';
-        
         if (!checkMoveOp(mugType, position, refMugType, treeType)) {
             throw 'MOVE NOT ALLOWED!  MugType Move for MT:' + mugType + ', refMT:' + refMugType + ", position:" + position + " ABORTED";
         }
@@ -2113,18 +2116,15 @@ formdesigner.controller = (function () {
         isDataTreeOp = refMugType && refMugType.typeName !== "Select Item";
 
         var preMovePath = formdesigner.controller.form.dataTree.getAbsolutePath(mugType);
-        if (treeType === 'both') {
-            if (isDataTreeOp) {
-                dataTree.insertMugType(mugType, position, refMugType);
-            }
+        var doDataTree = treeType === 'both' ? true : treeType === 'data';
+        var doControlTree = treeType === 'both' ? true : treeType === 'control';
+        if (doDataTree && isDataTreeOp) {
+            dataTree.insertMugType(mugType, position, refMugType);
+        }
+        if (doControlTree) {
             controlTree.insertMugType(mugType, position, refMugType);
-        } else if (treeType === 'control') {
-            controlTree.insertMugType(mugType, position, refMugType);
-        } else if (treeType === 'data') {
-            if (isDataTreeOp) {
-                dataTree.insertMugType(mugType, position, refMugType);
-            }
-        } else {
+        }
+        if (!doDataTree && !doControlTree) {
            throw 'Invalid/Unrecognized TreeType specified in moveMugType: ' + treeType;
         }
 
@@ -2136,7 +2136,9 @@ formdesigner.controller = (function () {
             // update UI
             var currSelected = formdesigner.controller.getCurrentlySelectedMugType();
             that.reloadUI();
-            formdesigner.ui.selectMugTypeInUI(currSelected);
+            if (currSelected !== null) {
+                formdesigner.ui.selectMugTypeInUI(currSelected);
+            }
         }
         
         //fire an form-property-changed event to sync up with the 'save to server' button disabled state
