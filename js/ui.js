@@ -821,10 +821,7 @@ formdesigner.ui = function () {
                                 mugType = controller.getMTFromFormByUFID($(m.o).attr('id')),
                                 refMugType = controller.form.dataTree.getMugTypeFromUFID($(m.r).attr('id')),
                                 position = m.p;
-                        var ret = controller.checkMoveOp(mugType, position, refMugType, 'data');
-                        console.log(ret);
-                        return ret;
-//                        return true;  //Data nodes have no bad moves (all data nodes can have data nodes as children)
+                        return controller.checkMoveOp(mugType, position, refMugType, 'data');
                     }
                 }
             },
