@@ -765,8 +765,8 @@ formdesigner.ui = function () {
                     "always_copy": false,
                     "check_move" : function (m) {
                         var controller = formdesigner.controller,
-                                mugType = controller.form.controlTree.getMugTypeFromUFID($(m.o).attr('id')),
-                                refMugType = controller.form.controlTree.getMugTypeFromUFID($(m.r).attr('id')),
+                                mugType = controller.getMTFromFormByUFID($(m.o).attr('id')),
+                                refMugType = controller.getMTFromFormByUFID($(m.r).attr('id')),
                                 position = m.p;
                         return controller.checkMoveOp(mugType, position, refMugType);
                     }
@@ -784,8 +784,8 @@ formdesigner.ui = function () {
                     node_select(e, data);
         }).bind("move_node.jstree", function (e, data) {
             var controller = formdesigner.controller,
-                    mugType = controller.form.controlTree.getMugTypeFromUFID($(data.rslt.o).attr('id')),
-                    refMugType = controller.form.controlTree.getMugTypeFromUFID($(data.rslt.r).attr('id')),
+                    mugType = controller.getMTFromFormByUFID($(data.rslt.o).attr('id')),
+                    refMugType = controller.getMTFromFormByUFID($(data.rslt.r).attr('id')),
                     position = data.rslt.p;
             controller.moveMugType(mugType, position, refMugType, 'both');
         }).bind("deselect_all.jstree", function (e, data) {
@@ -818,10 +818,12 @@ formdesigner.ui = function () {
                     "always_copy": false,
                     "check_move" : function (m) {
                         var controller = formdesigner.controller,
-                                mugType = controller.form.dataTree.getMugTypeFromUFID($(m.o).attr('id')),
+                                mugType = controller.getMTFromFormByUFID($(m.o).attr('id')),
                                 refMugType = controller.form.dataTree.getMugTypeFromUFID($(m.r).attr('id')),
                                 position = m.p;
-                        return controller.checkMoveOp(mugType, position, refMugType, 'data');
+                        var ret = controller.checkMoveOp(mugType, position, refMugType, 'data');
+                        console.log(ret);
+                        return ret;
 //                        return true;  //Data nodes have no bad moves (all data nodes can have data nodes as children)
                     }
                 }
