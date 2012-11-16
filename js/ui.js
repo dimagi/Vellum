@@ -874,7 +874,7 @@ formdesigner.ui = function () {
     var init_extra_tools = function() {
         function makeLangDrop() {
             var div, addLangButton, removeLangButton, langList, langs, i, str, selectedLang, Itext;
-            $('#fd-trees').find('#fd-lang-disp-div').remove();
+            $('#fd-question-tree-container').find('#fd-lang-disp-div').remove();
             div = $('<div id="fd-lang-disp-div"></div>');
             Itext = formdesigner.model.Itext;
             langs = Itext.getLanguages();
