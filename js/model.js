@@ -1924,7 +1924,7 @@ formdesigner.model = function () {
                 position = 'after';
             }
 
-            if (!refMugType) {
+            if (!refMugType || (!refMugType.hasControlElement() && treeType === 'control')) {
                 refNode = rootNode;
                 position = 'into';
             } else {
