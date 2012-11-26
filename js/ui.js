@@ -168,22 +168,6 @@ formdesigner.ui = function () {
         var toolbar = $(".fd-toolbar"), select, addbutstr, addbut;
         select = $('<select></select>')
                 .attr('id','fd-question-select');
-        (function c_removeSelected() {
-            var removebut = $(
-                '<button class="btn btn-danger" id="fd-remove-button" class="toolbarButton">' +
-                    'Remove Selected' +
-                    '</button>');
-            toolbar.prepend(removebut);
-
-            removebut.button({
-                icons: {
-                    primary: 'ui-icon-minusthick'
-                }
-            }).click(function () {
-                    var selected = formdesigner.controller.getCurrentlySelectedMugType();
-                    formdesigner.controller.removeMugTypeFromForm(selected);
-                });
-        })();
         toolbar.prepend(select);
 
         function buildSelectDropDown () {
@@ -646,6 +630,8 @@ formdesigner.ui = function () {
             }
 
             attachCommonEventListeners();
+
+
             $("#fd-question-properties").show();
         }
 
@@ -724,7 +710,6 @@ formdesigner.ui = function () {
     that.forceUpdateUI = forceUpdateUI;
 
     var showSelectItemAddButton = function () {
-        var rem_select = $('#fd-remove-button');
         var addItemBut = $('#fd-add-item-select_ez');
         if (addItemBut.length === 0) {
             addItemBut = $('<button class="btn"></button>')
@@ -736,7 +721,7 @@ formdesigner.ui = function () {
                 }
             });
             addItemBut.click(function () {that.addQuestion('item')});
-            rem_select.after(addItemBut);
+            $("#fd-add-but").after(addItemBut);
         }
         addItemBut.show();
     };
