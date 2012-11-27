@@ -236,25 +236,6 @@ formdesigner.ui = function () {
 
     that.buttons = buttons;
 
-    function getDataJSTreeTypes() {
-        var jquery_icon_url = formdesigner.iconUrl,
-                types = {
-                    "max_children" : -1,
-                    "valid_children" : "all",
-                    "types" : {
-                        "default" : {
-                            "icon": {
-                                "image": jquery_icon_url,
-                                "position": "-112px -144px"
-                            },
-                            "valid_children" : "all"
-                        }
-                    }
-                };
-
-        return types;
-    }
-
     function getJSTreeTypes() {
         var groupRepeatValidChildren = formdesigner.util.GROUP_OR_REPEAT_VALID_CHILDREN,
                 jquery_icon_url = formdesigner.iconUrl,
@@ -410,30 +391,8 @@ formdesigner.ui = function () {
 
     }
 
-    /**
-     * Determine if we're in DataView mode based on whether
-     * the data JS Tree (container) is visible or not.
-     */
-    var isInDataViewMode = function () {
-        var controlTreeContainer = $('#fd-question-tree-container');
-        if (controlTreeContainer.is(":visible")) {
-            return false;
-        } else { //we're in data view mode.
-            return true;
-        }
-    };
-    that.isInDataViewMode = isInDataViewMode;
-
-    /**
-     * returns either the Data UI tree or the Question JS Tree,
-     * depending on what's visible
-     */
     var getJSTree = function () {
-        if (isInDataViewMode()) {
-            return getDataJSTree();
-        } else {
-            return getQuestionJSTree();
-        }
+        return getQuestionJSTree();
     };
     that.getJSTree = getJSTree;
 
@@ -451,11 +410,6 @@ formdesigner.ui = function () {
         return that.getJSTree().jstree('get_selected');
     };
     that.getJSTreeCurrentlySelected = getJSTreeCurrentlySelected;
-
-    var getDataJSTree = function () {
-        return $('#fd-data-tree');
-    };
-    that.getDataJSTree = getDataJSTree;
 
     var showVisualValidation = function (mugType) {
         function setValidationFailedIcon(li, showIcon, message) {
@@ -595,25 +549,6 @@ formdesigner.ui = function () {
                 }
             });
 
-            function updateDataViewLabels() {
-                var mug, util, dataJSTree;
-                if (!mugType.properties.dataElement) {
-                    return; //this shouldn't do anything for MT's that don't have a Data Node
-                }
-                mug = mugType.mug,
-                        util = formdesigner.util;
-                dataJSTree = $('#fd-data-tree');
-
-                mug.on('property-changed', function(e) {
-                    if (e.property === 'nodeID' && e.element === 'dataElement') {
-                        var node = $('#' + e.mugTypeUfid + '_data');
-                        dataJSTree.jstree('rename_node', node, this.properties.dataElement.properties.nodeID);
-                    }
-                });
-            }
-
-            updateDataViewLabels();
-
         }
 
         function updateDisplay() {
@@ -653,11 +588,7 @@ formdesigner.ui = function () {
         // on the mug that was already selected
         if (!curMug || curMug.ufid !== curSelUfid) {
             formdesigner.controller.setCurrentlySelectedMugType(curSelUfid);
-            if ($(e.currentTarget).attr('id') === 'fd-question-tree') {
-                that.displayMugProperties(formdesigner.controller.getCurrentlySelectedMugType());
-            } else if ($(e.currentTarget).attr('id') === 'fd-data-tree') {
-                that.displayMugDataProperties(formdesigner.controller.getCurrentlySelectedMugType());
-            }
+            that.displayMugProperties(formdesigner.controller.getCurrentlySelectedMugType());
         }
         var tagName,
                 newMug;
@@ -787,53 +718,6 @@ formdesigner.ui = function () {
             questionTree.jstree("close_all");
         });
 
-    }
-
-    function create_data_tree() {
-        $.jstree._themes = formdesigner.staticPrefix + "themes/";
-        $("#fd-data-tree").jstree({
-            "json_data" : {
-                "data" : []
-            },
-            "ui" : {
-                select_limit: 1
-            },
-            "crrm" : {
-                "move": {
-                    "always_copy": false,
-                    "check_move" : function (m) {
-                        var controller = formdesigner.controller,
-                                mugType = controller.getMTFromFormByUFID($(m.o).attr('id')),
-                                refMugType = controller.form.dataTree.getMugTypeFromUFID($(m.r).attr('id')),
-                                position = m.p;
-                        return controller.checkMoveOp(mugType, position, refMugType, 'data');
-                    }
-                }
-            },
-            "dnd" : {
-                "drop_target" : false,
-                "drag_target" : false
-            },
-            "types": getDataJSTreeTypes(),
-            "plugins" : [ "themes", "json_data", "ui", "crrm", "types", "dnd" ]
-        }).bind("select_node.jstree",
-                function (e, data) {
-                    node_select(e, data);
-                }).bind("move_node.jstree",
-                function (e, data) {
-                    var controller, mugType, refMugType, position;
-                    controller = formdesigner.controller;
-                    mugType = controller.form.dataTree.getMugTypeFromUFID($(data.rslt.o).attr('id').replace('_data', ''));
-                    refMugType = controller.form.dataTree.getMugTypeFromUFID($(data.rslt.r).attr('id').replace('_data', ''));
-                    position = data.rslt.p;
-                    controller.moveMugType(mugType, position, refMugType, 'data');
-
-
-                }).bind("deselect_all.jstree", function (e, data) {
-//            formdesigner.controller.setCurrentlySelectedMugType(null);
-//            formdesigner.controller.curSelUfid = null;
-                });
-        dataTree = $("#fd-data-tree");
     }
 
     /**
@@ -1030,12 +914,11 @@ formdesigner.ui = function () {
      * Will clear icons for nodes that are valid (if they were invalid before)
      */
     var setAllTreeValidationIcons = function () {
-        var dTree, cTree, uiDTree, uiCTree, form,
+        var dTree, cTree, uiCTree, form,
                 invalidMTs, i, invalidMsg, liID;
 
         //init things
         uiCTree = $('#fd-question-tree');
-        uiDTree = $('#fd-data-tree');
         form = controller.form;
         cTree = form.controlTree;
         dTree = form.dataTree;
@@ -1044,19 +927,15 @@ formdesigner.ui = function () {
         function clearIcons(tree) {
             tree.find('.fd-tree-valid-alert-icon').remove();
         }
-
-        clearIcons(uiCTree); //clear existing warning icons to start fresh.
-        clearIcons(uiDTree); //same for data tree
+        
+        //clear existing warning icons to start fresh.
+        clearIcons(uiCTree); 
         invalidMTs = form.getInvalidMugTypeUFIDs();
         for (i in invalidMTs) {
             if (invalidMTs.hasOwnProperty(i)) {
                 invalidMsg = invalidMTs[i].message.replace(/"/g, "'");
                 //ui tree
                 liID = i;
-                setTreeNodeInvalid(liID, invalidMsg);
-
-                //data tree
-                liID = i + "_data";
                 setTreeNodeInvalid(liID, invalidMsg);
             }
         }
@@ -1079,19 +958,11 @@ formdesigner.ui = function () {
     };
     that.removeMugTypeFromUITree = removeMugTypeFromUITree;
 
-    var removeMugTypeFromDataTree = function (mugType) {
-        removeMugTypeFromTree(mugType, $('#fd-data-tree'));
-    };
-    that.removeMugTypeFromDataTree = removeMugTypeFromDataTree;
-
     var removeMugTypeFromTree = function (mugType, tree) {
         var el, ufid;
         tree = $(tree); //ensure it's a jquery element
         ufid = mugType.ufid;
         el = $("#" + ufid);
-        if (tree.attr('id') === 'fd-data-tree') {
-            el = $('#' + ufid + '_data');
-        }
         tree.jstree("remove", el);
     };
 
@@ -1135,7 +1006,6 @@ formdesigner.ui = function () {
         }
 
         clearUITree($('#fd-question-tree'));
-        clearUITree($('#fd-data-tree'));
 
         $('#fd-form-prop-formName-input').val(formdesigner.controller.form.formName);
         $('#fd-form-prop-formID-input').val(formdesigner.controller.form.formID);
@@ -1330,17 +1200,6 @@ formdesigner.ui = function () {
             }
         })
     };
-
-
-    /**
-     * A simple toggle for flipping the type of UI tree visible to the user.
-     */
-    var showDataView = function () {
-        that.hideQuestionProperties();
-        $('#fd-data-tree-container').toggle();
-        $('#fd-question-tree-container').toggle();
-    };
-    that.showDataView = showDataView;
 
     var showConfirmDialog = function () {
         $("#fd-dialog-confirm").dialog("open");
@@ -1940,9 +1799,7 @@ formdesigner.ui = function () {
         init_toolbar();
         init_extra_tools();
         create_question_tree();
-        create_data_tree();
-        //hide the data JSTree initially.
-        $('#fd-data-tree-container').hide();
+        //create_data_tree();
         init_form_paste();
         init_modal_dialogs();
 

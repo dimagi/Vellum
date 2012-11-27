@@ -23,7 +23,6 @@ formdesigner.controller = (function () {
         that.curSelUfid = null;
         // ui.questionTree.empty();
         // ui.dataTree.empty();
-        $('#fd-data-tree').empty();
 
         formdesigner.model.init();
         formdesigner.ui.init();
@@ -546,80 +545,6 @@ formdesigner.controller = (function () {
         formdesigner.ui.getQuestionJSTree().jstree("select_node", $('#' + oldSelected));
     }
 
-    function createQuestionInDataTree(mugType) {
-        function treeSetItemType(mugType) {
-            var mugTUfid = mugType.ufid,
-                node = $('#' + mugTUfid + "_data");
-            $('#fd-data-tree').jstree("set_type","default",node);
-        }
-
-        var mug = mugType.mug,
-            objectData = {},
-            insertPosition, curSelMugElData, curSelMugElQuestion, oldSelectedMugEl;
-
-        if (!mugType.properties.dataElement) { //this mug doesn't have a data node so shouldn't be included.
-            return;
-        }
-
-        objectData.state = 'open'; //should new node be open or closed?, omit for leaf
-        objectData.data = formdesigner.util.getDataMugDisplayName(mugType);
-        objectData.metadata = {
-                                'mugTypeUfid': mugType.ufid,
-                                'mugUfid': mug.ufid,
-                                'dataID':mug.getDataElementID(),
-                                'bindID':mug.getBindElementID()
-                                };
-        objectData.attr = {
-            "id" : mugType.ufid + "_data"
-        };
-
-//        insertPosition = formdesigner.util.getRelativeInsertPosition(curSelMugType,mugType);
-        insertPosition = "into"; //data nodes can always have children.
-
-        if (that.getCurrentlySelectedMugType()) {
-            curSelMugElData = $('#' + that.getCurrentlySelectedMugType().ufid + '_data'); //get corresponding Data Element
-            oldSelectedMugEl = curSelMugElData;
-            curSelMugElQuestion = ('#' + that.getCurrentlySelectedMugType().ufid); //remember what is selected in the question tree.
-            if (curSelMugElData.length === 0) {
-                var curParent = that.form.controlTree.getParentMugType();
-                if(curParent) {
-                    curSelMugElData = $('#' + curParent.ufid + '_data');
-                } else { //parent is root of tree
-                    curSelMugElData = null;
-                }
-            }
-
-            if (curSelMugElData) {
-                formdesigner.ui.getDataJSTree().jstree('select_node', curSelMugElData);
-            } else {
-                formdesigner.ui.getDataJSTree().jstree('deselect_all');
-            }
-        }else {
-            //nothing selected
-            curSelMugElData = null;
-            formdesigner.ui.getDataJSTree().jstree('deselect_all');
-        }
-
-        $('#fd-data-tree').jstree("create",
-            null, //reference node, use null if using UI plugin for currently selected
-            insertPosition, //position relative to reference node
-            objectData,
-            null, //callback after creation, better to wait for event
-            true  //skip_rename
-        );
-
-        treeSetItemType(mugType);
-
-        //if we're in question view mode, select the node that was previously selected in the question tree.
-        if(!formdesigner.ui.isInDataViewMode()) {
-            formdesigner.ui.getDataJSTree().jstree('deselect_all');
-            formdesigner.ui.getQuestionJSTree().jstree('select_node', curSelMugElQuestion);
-        } else { //if not, select what was originally selected in the data tree
-           formdesigner.ui.getQuestionJSTree().jstree('deselect_all');
-            formdesigner.ui.getDataJSTree().jstree('select_node', oldSelectedMugEl);
-        }
-    }
-    
     that.getMugTypeByQuestionType = function (qType) {
         switch(qType.toLowerCase()) {
             case 'text':
@@ -703,8 +628,6 @@ formdesigner.controller = (function () {
         formdesigner.model.Itext.updateForNewMug(mugType);
         
         createQuestionInUITree(mugType);
-//        createQuestionInDataTree(mugType);
-        
         
         // events
         createQuestionEvent.type = "question-creation";
@@ -793,36 +716,6 @@ formdesigner.controller = (function () {
         return mug;
     };
     that.loadMugTypeIntoUI = loadMugTypeIntoUI;
-
-
-    var loadMugTypeIntoDataUITree = function (mugType) {
-        var mug, dataTree, parentMT, parentMTUfid, loadMTEvent = {};
-
-        mug = mugType.mug;
-
-        //this allows the mug to respond to certain events in a common way.
-        //see method docs for further info
-//        formdesigner.util.setStandardMugEventResponses(mug);
-
-        //set the 'currently selected mugType' to be that of this mugType's parent.
-        dataTree = formdesigner.controller.form.dataTree;
-        parentMT = dataTree.getParentMugType(mugType);
-        if(parentMT){
-            parentMTUfid = parentMT.ufid;
-            $('#fd-data-tree').jstree('select_node',$('#'+parentMTUfid + '_data'), true);
-        }else{
-            parentMTUfid = null;
-            $('#fd-data-tree').jstree('deselect_all');
-        }
-
-        createQuestionInDataTree(mugType);
-        loadMTEvent.type= "mugtype-loaded";
-        loadMTEvent.mugType = mugType;
-        that.fire(loadMTEvent);
-
-        return mug;
-    };
-    that.loadMugTypeIntoDataUITree = loadMugTypeIntoDataUITree;
 
     that.XMLWriter = null;
     var initXMLWriter = function () {
