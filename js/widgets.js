@@ -652,6 +652,35 @@ formdesigner.widgets = (function () {
         return section;
     };
 
+    that.mainSection = function (mugType, options) {
+        var section = that.genericSection(mugType, options);
+        
+        // hack to add a remove button
+        var super_getSectionDisplay = section.getSectionDisplay;
+        section.getSectionDisplay = function() {
+            var el = super_getSectionDisplay.call(section);
+            var removebut = $('<button class="btn btn-danger" id="fd-remove-button">' +
+                              'Delete Question</button>');
+
+            removebut.button({
+                icons: {
+                    primary: 'ui-icon-minusthick'
+                }
+            }).click(function () {
+                var selected = formdesigner.controller.getCurrentlySelectedMugType();
+                formdesigner.controller.removeMugTypeFromForm(selected);
+            }).css({
+                float: 'right',
+                margin: '.5em 10px .5em 0'
+            });
+
+            el.find('.widget').first().find('input').before(removebut);
+            return el;
+        };
+
+        return section;
+    };
+
 
     that.accordionSection = function (mugType, options) {
         var section = that.baseSection(mugType, options);
@@ -963,36 +992,11 @@ formdesigner.widgets = (function () {
             elements.push({widgetType: "readonlyControl", path: "system/readonlyControl"});
         }
 
-        var section = that.genericSection(mugType, {
+        return that.mainSection(mugType, {
             slug: "main",
             displayName: "Main Properties",
             elements: elements
         });
-
-        // hack to add a remove button
-        var super_getSectionDisplay = section.getSectionDisplay;
-        section.getSectionDisplay = function() {
-            var el = super_getSectionDisplay.call(section);
-            var removebut = $('<button class="btn btn-danger" id="fd-remove-button">' +
-                              'Delete Question</button>');
-
-            removebut.button({
-                icons: {
-                    primary: 'ui-icon-minusthick'
-                }
-            }).click(function () {
-                var selected = formdesigner.controller.getCurrentlySelectedMugType();
-                formdesigner.controller.removeMugTypeFromForm(selected);
-            }).css({
-                float: 'right',
-                margin: '.5em 10px .5em 0'
-            });
-
-            el.find('.widget').first().find('input').before(removebut);
-            return el;
-        };
-
-        return section;
     };
 
     that.getContentSection = function (mugType) {
