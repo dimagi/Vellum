@@ -321,8 +321,21 @@ formdesigner.util = (function(){
      * Generates a unique question ID (unique in this form) and
      * returns it as a string.
      */
-    that.generate_question_id = function () {
-        return label_maker('question');
+    that.generate_question_id = function (question_id) {
+        if (question_id) {
+            var match = /(.+)-\d$/.exec(question_id) ;
+            if (match) {
+                question_id = match[1]; 
+            }
+            for (var i = 1;; i++) {
+                var new_id = question_id + "-" + i;
+                if (!formdesigner.model.questionIdCount(new_id)) {
+                    return new_id; 
+                }
+            }
+        } else {
+            return label_maker('question');
+        }
     };
 
 
@@ -503,15 +516,11 @@ formdesigner.util = (function(){
      * @return - String: 'first', 'inside' or 'after'
      */
     that.getRelativeInsertPosition = function(refMugType, newMugType){
-        console.log("refMugType", "newMugType", refMugType, newMugType);
-        var canHaveChildren;
-        if(!refMugType){
+        if (!refMugType) {
             return "into";
         }
 
-        canHaveChildren = formdesigner.util.canMugTypeHaveChildren(refMugType,newMugType);
-
-        if (canHaveChildren){
+        if (formdesigner.util.canMugTypeHaveChildren(refMugType,newMugType)) {
             return "into";
         } else {
             return "after";

@@ -30,8 +30,14 @@ formdesigner.widgets = (function () {
         };
 
         widget.getLabel = function () {
-            var label = $("<label />").text(this.getDisplayName()).attr("for", this.getID());
-            return label;
+            var displayName = this.getDisplayName();
+            if (displayName) {
+                return $("<label />")
+                    .text(displayName)
+                    .attr("for", this.getID());
+            } else {
+                return null;
+            }
         };
 
         widget.getControl = function () {
@@ -62,10 +68,35 @@ formdesigner.widgets = (function () {
 
         widget.getUIElement = function () {
             // gets the whole widget (label + control)
-	        var uiElem = $("<div />").addClass("widget");
-	        uiElem.append(this.getLabel());
-	        uiElem.append(this.getControl());
-	        return uiElem;
+            var uiElem = $("<div />").addClass("widget");
+            uiElem.append(this.getLabel());
+            uiElem.append(this.getControl());
+            return uiElem;
+        };
+
+        return widget;
+    };
+
+    /**
+     * @param html  raw HTML or jQuery object
+     */
+    that.htmlWidget = function (mugType, options) {
+        var id = options.id,
+            html = options.html,
+            widget = that.baseWidget(mugType);
+
+        if (typeof html === 'string') {
+            html = $(html);
+        }
+        
+        widget.definition = options;
+
+        widget.getID = function () { 
+            return id; 
+        };
+
+        widget.getControl = function () {
+            return html;
         };
 
         return widget;
@@ -590,6 +621,8 @@ formdesigner.widgets = (function () {
                 return that.questionTypeSelectorWidget(mugType);
             case "readonlyControl":
                 return that.readOnlyControlWidget(mugType);
+            case "html":
+                return that.htmlWidget(mugType, definition);
             case "generic":
             default:
                 var cls = that.widgetTypeFromPropertyDefinition(mugType.getPropertyDefinition(definition.path));
@@ -640,36 +673,6 @@ formdesigner.widgets = (function () {
         };
         return section;
     };
-
-    that.mainSection = function (mugType, options) {
-        var section = that.genericSection(mugType, options);
-        
-        // hack to add a remove button
-        var super_getSectionDisplay = section.getSectionDisplay;
-        section.getSectionDisplay = function() {
-            var el = super_getSectionDisplay.call(section);
-            var removebut = $('<button class="btn btn-danger" id="fd-remove-button">' +
-                              'Delete Question</button>');
-
-            removebut.button({
-                icons: {
-                    primary: 'ui-icon-minusthick'
-                }
-            }).click(function () {
-                var selected = formdesigner.controller.getCurrentlySelectedMugType();
-                formdesigner.controller.removeMugTypeFromForm(selected);
-            }).css({
-                float: 'right',
-                margin: '.5em 10px .5em 0'
-            });
-
-            el.find('.widget').first().find('input').before(removebut);
-            return el;
-        };
-
-        return section;
-    };
-
 
     that.accordionSection = function (mugType, options) {
         var section = that.baseSection(mugType, options);
@@ -981,7 +984,60 @@ formdesigner.widgets = (function () {
             elements.push({widgetType: "readonlyControl", path: "system/readonlyControl"});
         }
 
-        return that.mainSection(mugType, {
+        var deleteButton = $('<button class="btn btn-danger" id="fd-remove-button">'
+            + '<i class="icon icon-white icon-trash"></i> Delete</button>'
+        ).click(formdesigner.controller.removeCurrentQuestion);
+
+        var duplicateButton = $('<a class="btn dropdown-toggle" data-toggle="dropdown" href="#">'
+            + 'Duplicate <span class="caret"></span></a>');
+
+        var copyItext = $('<li><a href="#">Duplicate (Copy Itext)</a></li>')
+            .click(function () {
+                formdesigner.controller.duplicateCurrentQuestion({itext: 'copy'});
+            });
+
+        var linkItext = $('<li><a href="#">Duplicate (Link Itext)</a></li>')
+            .click(function() {
+                formdesigner.controller.duplicateCurrentQuestion({itext: 'link'});
+            });
+
+        var buttonGroups = [
+            [duplicateButton, [copyItext, linkItext]],
+            [deleteButton]
+        ];
+
+        var toolbar = $('<div class="btn-toolbar"></div>');
+
+        for (var i = 0; i < buttonGroups.length; i++) {
+            var buttons = buttonGroups[i],
+                buttonGroup = $('<div class="btn-group"></div>');
+
+            if (buttons[1] && $.isArray(buttons[1])) {
+                var menuOptions = buttons[1];
+                buttons[0].appendTo(buttonGroup);
+                var dropdown = $('<ul class="dropdown-menu"></ul>');
+
+                for (var j = 0; j < menuOptions.length; j++) {
+                    menuOptions[j].appendTo(dropdown); 
+                }
+                dropdown.appendTo(buttonGroup);
+            
+            } else {
+                for (var j = 0; j < buttons.length; j++) {
+                    buttons[j].appendTo(buttonGroup);
+                }
+            }
+            buttonGroup.appendTo(toolbar);
+        }
+
+        elements.push({
+            widgetType: "html",
+            lstring: "Question Actions",
+            id: 'question-actions',
+            html: toolbar
+        });
+
+        return that.genericSection(mugType, {
             slug: "main",
             displayName: "Main Properties",
             elements: elements

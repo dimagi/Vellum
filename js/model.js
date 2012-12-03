@@ -551,6 +551,19 @@ formdesigner.model = function () {
         return "pass";
     };
         
+    that.questionIdCount = function (qId) {
+        var allMugs = formdesigner.controller.getMugTypeList(),
+            count = 0;
+        for (var i = 0; i < allMugs.length; i++) {
+            var node = allMugs[i];
+            if (node.hasDataElement() && node.mug.properties.dataElement.properties.nodeID === qId) {
+                count++; 
+            }
+        }
+
+        return count;
+    };
+
     var validationFuncs = {
         //should be used to figure out the logic for label, defaultLabel, labelItext, etc properties
         nodeID: function (mugType, mug) {
@@ -559,17 +572,7 @@ formdesigner.model = function () {
             if (res !== "pass") {
                 return res;
             }
-            // check for dupes
-            var hasDuplicateId = function (qId) {
-                var allMugs = formdesigner.controller.getMugTypeList();
-                var hasDupeArray = allMugs.map(function (node) {
-                    // skip ourselves, checking for dupes
-                    return node.hasDataElement() && node.ufid != mugType.ufid && 
-                           node.mug.properties.dataElement.properties.nodeID === qId;
-                });
-                return hasDupeArray.indexOf(true) !== -1;
-            }
-            if (hasDuplicateId(qId)) {
+            if (that.questionIdCount(qId) > 1) {
                 return qId + " is a duplicate ID in the form. Question IDs must be unique.";
             }
             return "pass";
@@ -2971,8 +2974,13 @@ formdesigner.model = function () {
                 } else {
                     formdesigner.controller.form.clearError(error, {updateUI: true});
                 }
-                return {"mug": mug.ufid, "property": property, "path": path.toXPath(), 
-                        "ref": refMug ? refMug.ufid : ""};      
+                return {
+                    mug: mug.ufid, 
+                    ref: refMug ? refMug.ufid : "",
+                    property: property,
+                    path: path.toXPath(),
+                    sourcePath: formdesigner.controller.form.dataTree.getAbsolutePath(mug)
+                };      
             }));
         };
         
@@ -2980,10 +2988,33 @@ formdesigner.model = function () {
             this.clearReferences(mug, property);
             this.addReferences(mug, property);
         };
-        
-        logic.updatePath = function (mugId, from, to) {
+
+        logic.updateAllReferences = function (mug, clear) {
+            if (mug.hasBindElement()) {
+                for (var i = 0; i < formdesigner.util.XPATH_REFERENCES.length; i++) {
+                    var property = formdesigner.util.XPATH_REFERENCES[i];
+                    if (clear) {
+                        logic.clearReferences(mug, property);
+                    }
+                    logic.addReferences(mug, property);
+                }
+            }
+        };
+       
+        /**
+         * Update references to a node with its new path. Used when a node is
+         * moved or duplicated (with subtree).
+         *
+         * @param mugId - ufid of the mugType to update references for
+         * @param from - old absolute path of the mugType
+         * @param to - new absolute path of the mugType
+         * @param subtree - (optional) only replace references from nodes
+         *        beginning with this path (no trailing /)
+         */
+        logic.updatePath = function (mugId, from, to, subtree) {
             var found = this.all.filter(function (elem) {
-                return elem.ref === mugId;
+                return elem.ref === mugId && 
+                    (!subtree || elem.sourcePath === subtree || elem.sourcePath.indexOf(subtree + '/') === 0);
             });
             var ref, mug, expr;
             for (var i = 0; i < found.length; i++) {

@@ -86,15 +86,8 @@ formdesigner.controller = (function () {
             }
             formdesigner.ui.resetMessages(formdesigner.controller.form.errors);
             
-            
             // populate the LogicManager with initial path data
-            allMugs.map(function (mug) {
-                if (mug.hasBindElement()) {
-	                for (var i = 0; i < formdesigner.util.XPATH_REFERENCES.length; i++) {
-	                    formdesigner.model.LogicManager.addReferences(mug, formdesigner.util.XPATH_REFERENCES[i]);
-	                }
-                }
-            });
+            allMugs.map(formdesigner.model.LogicManager.updateAllReferences);
         });
         
         that.on('widget-value-changed', function (e) {
@@ -376,13 +369,17 @@ formdesigner.controller = (function () {
      * the currently selected mugType.
      * @param newMugType - new MT to be inserted into the Form object
      * @param refMugType - used to determine the relative position of the insertion (relative to the refMT)
+     * @param position - the position to use (default: auto)
      */
-    var insertMugTypeIntoForm = function (refMugType, newMugType) {
-        var dataTree = that.form.dataTree, controlTree = that.form.controlTree;
+    that.insertMugTypeIntoForm = function (refMugType, newMugType, position) {
+        var dataTree = that.form.dataTree,
+            controlTree = that.form.controlTree;
+
+        position = position || formdesigner.util.getRelativeInsertPosition(refMugType, newMugType);
 
         if (newMugType.properties.dataElement) {
             if (newMugType.properties.controlElement) {
-                dataTree.insertMugType(newMugType, formdesigner.util.getRelativeInsertPosition(refMugType, newMugType), refMugType);
+                dataTree.insertMugType(newMugType, position, refMugType);
             } else { 
                 // this is a data node. for now default to sticking these
                 // at the end of the form
@@ -390,7 +387,7 @@ formdesigner.controller = (function () {
             }
         }
         if (newMugType.properties.controlElement) {
-            controlTree.insertMugType(newMugType, formdesigner.util.getRelativeInsertPosition(refMugType, newMugType), refMugType);
+            controlTree.insertMugType(newMugType, position, refMugType);
         }
     };
 
@@ -463,7 +460,7 @@ formdesigner.controller = (function () {
     };
     that.showErrorMessage = showErrorMessage;
 
-    function createQuestionInUITree(mugType) {
+    function createQuestionInUITree(mugType, position) {
         function treeSetItemType(mugType) {
             var tString = mugType.mug.properties.controlElement ? 
                     mugType.mug.properties.controlElement.properties.name.toLowerCase() : 
@@ -516,7 +513,10 @@ formdesigner.controller = (function () {
         objectData.attr = {
             "id" : mugType.ufid
         };
-        if (mug.properties.controlElement) {
+
+        if (position) {
+            insertPosition = position;
+        } else if (mug.properties.controlElement) {
             insertPosition = formdesigner.util.getRelativeInsertPosition(that.getCurrentlySelectedMugType(),mugType);
         } else {
             formdesigner.ui.getQuestionJSTree().jstree("deselect_all");
@@ -589,18 +589,123 @@ formdesigner.controller = (function () {
      *
      * @param qType = type of question to be created.
      */
-    var createQuestion = function (qType) {
-        var mugType, mug, createQuestionEvent = {};
-        mugType = that.getMugTypeByQuestionType(qType);
-        mug = mugType.mug;
+    that.createQuestion = function (qType) {
+        return that.initQuestion(that.getMugTypeByQuestionType(qType));
+    };
 
+    that.duplicateCurrentQuestion = function (options) {
+        options = options || {};
+        options.itext = options.itext || "link";
+
+        /**
+         * Copy a MugType and its descendants and insert them after the original
+         * MugType. Returns an array with two values:
+         *  1. The duplicate MugType.
+         *  2. An array of path replacements that should be executed on logic references.
+         *
+         * @param mugType - the mugtype in the original tree to duplicate
+         * @param parentMugType - the mugtype in the duplicate tree to insert into
+         * @param options {
+         *          itext: 'link' (default) or 'copy'
+         *        }
+         */
+        function duplicateMugType(mugType, parentMugType, options) {
+            // clone mugType and give everything new unique IDs
+            var duplicate = $.extend(true, {}, mugType),
+                pathReplacements = [];
+
+            duplicate.parentMug = parentMugType;
+
+            formdesigner.util.give_ufid(duplicate);
+            formdesigner.util.give_ufid(duplicate.mug);
+            if (mugType.hasBindElement()) {
+                var newQuestionID = formdesigner.util.generate_question_id(
+                    mugType.mug.properties.bindElement.properties.nodeID
+                ); 
+                formdesigner.util.give_ufid(duplicate.mug.properties.bindElement);
+                duplicate.mug.properties.bindElement.properties.nodeID = newQuestionID;
+
+                if (mugType.hasDataElement()) {
+                    formdesigner.util.give_ufid(duplicate.mug.properties.dataElement);
+                    duplicate.mug.properties.dataElement.properties.nodeID = newQuestionID;
+                }
+            }
+            if (mugType.hasControlElement()) {
+                formdesigner.util.give_ufid(duplicate.mug.properties.controlElement);
+            }
+           
+            // insert mugtype into data and UI trees
+            formdesigner.ui.getQuestionJSTree()
+                .jstree("deselect_all");
+
+            if (parentMugType) {
+                formdesigner.ui.getQuestionJSTree().jstree("select_node", $('#' + parentMugType.ufid));
+            }
+            that.setCurrentlySelectedMugType(parentMugType);
+
+            that.initQuestion(duplicate, parentMugType, 'into');
+            formdesigner.model.LogicManager.updateAllReferences(duplicate);
+
+            that.setCurrentlySelectedMugType(duplicate);
+            formdesigner.ui.getQuestionJSTree()
+                .jstree("deselect_all")
+                .jstree("select_node", $('#' + duplicate.ufid));
+            
+            if (options.itext === "copy") {
+                // hack
+                $("#controlElement-labelItextID-auto-itext")
+                    .prop('checked', true)
+                    .change();
+            }
+
+            var children = that.getChildren(mugType);
+            for (var i = 0; i < children.length; i++) {
+                pathReplacements = pathReplacements.concat(
+                    duplicateMugType(children[i], duplicate, options)[1]);
+            }
+
+            that.setCurrentlySelectedMugType(parentMugType);
+            if (parentMugType) {
+                formdesigner.ui.getQuestionJSTree()
+                    .jstree("deselect_all")
+                    .jstree("select_node", $('#' + parentMugType.ufid));
+            }
+
+            pathReplacements.push({
+                mugId: mugType.ufid,
+                from: that.form.dataTree.getAbsolutePath(mugType),
+                to: that.form.dataTree.getAbsolutePath(duplicate)
+            });
+
+            return [duplicate, pathReplacements];
+        }
+
+        var selected = that.getCurrentlySelectedMugType(),
+            parent = that.form.controlTree.getParentMugType(selected),
+            foo = duplicateMugType(selected, parent, options),
+            duplicate = foo[0],
+            pathReplacements = foo[1];
+
+        for (var i = 0; i < pathReplacements.length; i++) {
+            var pr = pathReplacements[i];
+            formdesigner.model.LogicManager.updatePath(pr.mugId, pr.from, pr.to, 
+                that.form.dataTree.getAbsolutePath(duplicate));
+        }
+
+        formdesigner.ui.getQuestionJSTree()
+            .jstree("deselect_all")
+            .jstree("select_node", $('#' + selected.ufid));
+
+        that.form.fire({type: "form-property-changed"});
+    };
+
+    that.initQuestion = function (mugType, parentMugType, position) {
         //this allows the mug to respond to certain events in a common way.
         //see method docs for further info
-        formdesigner.util.setStandardMugEventResponses(mug);
+        formdesigner.util.setStandardMugEventResponses(mugType.mug);
 
-
-        var oldSelected = that.getCurrentlySelectedMugType();
-        var isDataNodeSelected = that.getCurrentlySelectedMugType() && !that.getCurrentlySelectedMugType().properties.controlElement;
+        var oldSelected = parentMugType || that.getCurrentlySelectedMugType();
+        var isDataNodeSelected = oldSelected && !oldSelected.properties.controlElement;
         if (isDataNodeSelected) {
             //select the lowest not-data-node and continue
             var tmpSelector = formdesigner.ui.getQuestionJSTree().find('li[rel!="dataNode"]');
@@ -613,11 +718,15 @@ formdesigner.controller = (function () {
                 that.curSelUfid = null;
             }
         }
-        insertMugTypeIntoForm(that.getCurrentlySelectedMugType(),mugType);
+        if (typeof parentMugType !== "undefined") {
+            that.insertMugTypeIntoForm(parentMugType, mugType, position || 'into');
+        } else {
+            that.insertMugTypeIntoForm(oldSelected, mugType);
+        }
         // update the itext values
         formdesigner.model.Itext.updateForNewMug(mugType);
         
-        createQuestionInUITree(mugType);
+        createQuestionInUITree(mugType, position);
         
         this.fire({
             type: "question-creation",
@@ -632,7 +741,10 @@ formdesigner.controller = (function () {
         }
 
         return mugType;
+    };
 
+    that.removeCurrentQuestion = function () {
+        that.removeMugTypeFromForm(that.getCurrentlySelectedMugType());
     };
     
     that.changeQuestionType = function (mugType, questionType) {
