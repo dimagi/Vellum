@@ -137,7 +137,7 @@ formdesigner.controller = (function () {
         return saveButton.state === "saved";
     };
     
-    var setForm = that.setForm = function (aForm) {
+    that.setForm = function (aForm) {
         that.form = aForm;
         formdesigner.util.setStandardFormEventResponses(that.form);
     };
@@ -278,11 +278,10 @@ formdesigner.controller = (function () {
     };
     that.getSingularMugTypeByNodeId = getSingularMugTypeByNodeId;
     
-    var getChildren = function (mug) {
-        var children = that.form.controlTree.getNodeFromMugType(mug).getChildren();
+    that.getChildren = function (mugType) {
+        var children = that.form.controlTree.getNodeFromMugType(mugType).getChildren();
         return children.map(function (item) { return item.getValue();});
     };
-    that.getChildren = getChildren;
     
     /**
      * Walks through both internal trees (data and control) and grabs
@@ -318,10 +317,7 @@ formdesigner.controller = (function () {
         cList = cTree.treeMap(treeFunc);
         dList = dTree.treeMap(treeFunc);
 
-        mergeList = formdesigner.util.mergeArray(cList, dList); //strip dupes and merge
-
-        return mergeList; //give it all back
-
+        return formdesigner.util.mergeArray(cList, dList); //strip dupes and merge
     };
     
     that.getMugTypeList = getMugTypeList;
@@ -397,12 +393,6 @@ formdesigner.controller = (function () {
             controlTree.insertMugType(newMugType, formdesigner.util.getRelativeInsertPosition(refMugType, newMugType), refMugType);
         }
     };
-    that.insertMugTypeIntoForm = insertMugTypeIntoForm;
-
-    var initController = function () {
-
-    };
-    that.initController = initController;
 
     /**
      * Controller internal function.  Goes through
@@ -629,22 +619,21 @@ formdesigner.controller = (function () {
         
         createQuestionInUITree(mugType);
         
-        // events
-        createQuestionEvent.type = "question-creation";
-        createQuestionEvent.mugType = mugType;
-        this.fire(createQuestionEvent);
-
+        this.fire({
+            type: "question-creation",
+            mugType: mugType
+        });
 
         //re-select what was originally selected at the start of this method (which gets changed when dealing with Data Nodes)
         if (isDataNodeSelected) {
-            formdesigner.ui.getQuestionJSTree().jstree("deselect_all");
-            formdesigner.ui.getQuestionJSTree().jstree("select_node", $('#' + oldSelected.ufid));
+            formdesigner.ui.getQuestionJSTree()
+                .jstree("deselect_all")
+                .jstree("select_node", $('#' + oldSelected.ufid));
         }
 
         return mugType;
 
     };
-    that.createQuestion = createQuestion;
     
     that.changeQuestionType = function (mugType, questionType) {
         if (questionType !== mugType.typeSlug) {
@@ -659,7 +648,7 @@ formdesigner.controller = (function () {
                 if (!formdesigner.util.isSelect(newMugType)) {
                     throw "you can't change a select-style question to a non-select-style " +
                           "question if it has select items. Please remove all select items " +
-                          "and try again."
+                          "and try again.";
                 }
             }
             
@@ -691,7 +680,6 @@ formdesigner.controller = (function () {
         } 
     };
     var loadMugTypeIntoUI = function (mugType) {
-
         var mug, controlTree, parentMT, parentMTUfid, loadMTEvent = {};
 
         mug = mugType.mug;
@@ -718,20 +706,18 @@ formdesigner.controller = (function () {
     that.loadMugTypeIntoUI = loadMugTypeIntoUI;
 
     that.XMLWriter = null;
-    var initXMLWriter = function () {
+    that.initXMLWriter = function () {
         var xw = new XMLWriter( 'UTF-8', '1.0' );
         xw.writeStartDocument();
         that.XMLWriter = xw;
     };
-    that.initXMLWriter = initXMLWriter;
 
     /**
      * Shows the source XML in a dialog window for editing, optionally
      * not displaying if there are validation errors and the user chooses
      * not to continue.
      */ 
-     
-    var showSourceXMLDialog = function () {
+    that.showSourceXMLDialog = function () {
         function showFormInLightBox () {
             // callback to actually render the form
             
@@ -743,7 +729,6 @@ formdesigner.controller = (function () {
             controls.empty();
             help.text("This is the raw XML. You can edit or paste into this box to make changes " +
                       "to your form. Press 'Update Source' to save changes, or 'Close' to cancel.");
-            
             
             // populate text
             if(!formdesigner.controller.formLoadingFailed){
@@ -764,8 +749,7 @@ formdesigner.controller = (function () {
 	        closeButton.click(function () {
 	            $.fancybox.close();
 	        });
-	        
-	        
+
             $('#inline').click();
         }
 
@@ -773,13 +757,11 @@ formdesigner.controller = (function () {
         function onContinue () {
             formdesigner.ui.hideConfirmDialog();
             showFormInLightBox();
-
         }
 
         function onAbort () {
             formdesigner.ui.hideConfirmDialog();
         }
-
         
         var msg = "There are validation errors in the form.  Do you want to continue anyway? WARNING:" +
             "The form will not be valid and likely not perform correctly on your device!";
@@ -791,8 +773,6 @@ formdesigner.controller = (function () {
             showFormInLightBox();
         }
     };
-    that.showSourceXMLDialog = showSourceXMLDialog;
-
 
     var parseXLSItext = function (str) {
         var rows = str.split('\n'),
@@ -891,7 +871,7 @@ formdesigner.controller = (function () {
 
             var defaultOrNothing = function (item, language, form) {
                 return item.hasForm(form) ? item.getForm(form).getValueOrDefault(language) : "";
-            }
+            };
 
             // initialize all columns to empty string
             for (var i = 0; i < columnOrder.length; i++) {
@@ -1918,12 +1898,13 @@ formdesigner.controller = (function () {
      * Checks that the specified move is legal. returns false if problem is found.
      *
      * THIS IS FOR NODES THAT HAVE A CONTROLELEMENT ONLY!
-     * @param oType - The type of ControlElement being moved (use tagName!) e.g. "input" or "group"
+     * @param mugType - The type of ControlElement being moved (use tagName!) e.g. "input" or "group"
      * @param position - position, can be "before', "after", "into"
-     * @param rType - The type of the Reference controlElement being moved (use tagName!) e.g. "input" or "group"
+     * @param refMugType - The type of the Reference controlElement being moved (use tagName!) e.g. "input" or "group"
      *                  if -1 is given, assumes rootNode.
      */
-    var checkMoveOp = that.checkMoveOp = function (mugType, position, refMugType, treeType) {
+    that.checkMoveOp = function (mugType, position, refMugType, treeType) {
+        return true;
         if(treeType === 'data'){
             return true;
         }
@@ -1950,7 +1931,7 @@ formdesigner.controller = (function () {
                 return true;
             }
             var pRefMugType = that.form.controlTree.getParentMugType(refMugType);
-            return checkMoveOp(mugType,'into',pRefMugType);
+            return that.checkMoveOp(mugType,'into',pRefMugType);
         } else {
             if (refMugType && !refMugType.hasControlElement()) {
                 return false;
@@ -1996,13 +1977,13 @@ formdesigner.controller = (function () {
      * @param refMugType
      * @param treeType - Optional - either 'data' or 'control' or 'both'. Indicates which tree to do the move op in.  defaults to 'both'
      */
-    var moveMugType = function (mugType, position, refMugType, treeType) {
+    that.moveMugType = function (mugType, position, refMugType, treeType) {
         var dataTree = that.form.dataTree, 
             controlTree = that.form.controlTree, 
             isDataTreeOp;
         
         treeType = treeType || 'both';
-        if (!checkMoveOp(mugType, position, refMugType, treeType)) {
+        if (!that.checkMoveOp(mugType, position, refMugType, treeType)) {
             throw 'MOVE NOT ALLOWED!  MugType Move for MT:' + mugType + ', refMT:' + refMugType + ", position:" + position + " ABORTED";
         }
 
@@ -2021,7 +2002,6 @@ formdesigner.controller = (function () {
            throw 'Invalid/Unrecognized TreeType specified in moveMugType: ' + treeType;
         }
 
-        
         var postMovePath = formdesigner.controller.form.dataTree.getAbsolutePath(mugType);
         // update logic expressions that reference this
         if (preMovePath !== postMovePath) {
@@ -2038,10 +2018,8 @@ formdesigner.controller = (function () {
         formdesigner.controller.form.fire({
             type: 'form-property-changed'
         });
-
-
     };
-    that.moveMugType = moveMugType;
+
     /**
      * Gets the label used to represent this mug in the UI tree
      * @param mugOrMugType - mug or mugType
@@ -2079,23 +2057,12 @@ formdesigner.controller = (function () {
         }
     };
 
-    var getCurrentlySelectedMug = function () {
-        var curMug = that.getCurrentlySelectedMugType();
-        if (curMug) {
-            return curMug.mug;
-        } else {
-            return null;
-        }
-    };
-    that.getCurrentlySelectedMug = getCurrentlySelectedMug;
-
-    var getCurrentlySelectedMugType = function () {
+    that.getCurrentlySelectedMugType = function () {
         if (!formdesigner.ui.getJSTreeCurrentlySelected().length) {
             curSelMugType = null;
         }
         return curSelMugType;
     };
-    that.getCurrentlySelectedMugType = getCurrentlySelectedMugType;
 
     /**
      * Returns a JSON representation of the
@@ -2249,11 +2216,8 @@ formdesigner.controller = (function () {
     };
     that.doneXPathEditor = doneXPathEditor;
     
-    
     //make controller event capable
     formdesigner.util.eventuality(that);
-
-
 
     return that;
 })();

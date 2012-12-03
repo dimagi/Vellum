@@ -27,7 +27,7 @@ formdesigner.widgets = (function () {
         widget.getDisplayName = function () {
             // use the display text, or the property name if none found
             return this.definition.lstring ? this.definition.lstring : this.propName;
-        }
+        };
 
         widget.getLabel = function () {
             var label = $("<label />").text(this.getDisplayName()).attr("for", this.getID());
@@ -42,7 +42,6 @@ formdesigner.widgets = (function () {
             throw ("must be overridden");
         };
 
-
         widget.setValue = function (val) {
             // noop
         };
@@ -50,7 +49,6 @@ formdesigner.widgets = (function () {
         widget.getValue = function () {
             // noop
         };
-
 
         widget.fireValueChanged = function () {
             var ref = this;
@@ -86,7 +84,6 @@ formdesigner.widgets = (function () {
             return this.path.split("/").join("-");
         };
 
-
         widget.save = function () {
             formdesigner.controller.setMugPropertyValue(this.mug.mug,
 	                                                    this.groupName,
@@ -95,7 +92,6 @@ formdesigner.widgets = (function () {
                                                         this.mug);
         };
         return widget;
-
     };
 
     that.textWidget = function (mugType, path) {
@@ -169,7 +165,6 @@ formdesigner.widgets = (function () {
             return this.getControl().val();
         };
 
-
         // auto checkbox
         var autoBoxId = widget.getID() + "-auto-itext";
         var autoBox = $("<input />").attr("type", "checkbox").attr("id", autoBoxId);
@@ -186,11 +181,6 @@ formdesigner.widgets = (function () {
 
         widget.setAutoMode = function (autoMode) {
             this.autoMode = autoMode;
-            if (autoMode) {
-                //this.getControl().addClass("auto-itext");
-            } else {
-                //this.getControl().removeClass("auto-itext");
-            }
         };
 
         // support auto mode to keep ids in sync
@@ -621,7 +611,7 @@ formdesigner.widgets = (function () {
 
         section.getId = function () {
             return "fd-question-edit-" + this.slug;
-        }
+        };
         return section;
     };
 
@@ -632,12 +622,11 @@ formdesigner.widgets = (function () {
 
             var inner = this;
             var toWidget = function (elementdefinition) {
-                var w = that.widgetFromMugAndDefinition(inner.mugType, elementdefinition);
-                return w;
-            }
+                return that.widgetFromMugAndDefinition(inner.mugType, elementdefinition);
+            };
             return this.elements.map(toWidget);
+        };
 
-        }
         section.getSectionDisplay = function () {
             // returns the actual display for the section
 
@@ -694,9 +683,9 @@ formdesigner.widgets = (function () {
             var inner = this;
             var toWidget = function (elementdef) {
                 return that.widgetFromMugAndDefinition(inner.mugType, elementdef);
-            }
+            };
             return this.elements.map(toWidget);
-        }
+        };
 
         section.getSectionDisplay = function () {
             // returns the actual display for the section
@@ -727,7 +716,7 @@ formdesigner.widgets = (function () {
 
         block.getTextId = function () {
             return this.textIdFunc(this.mugType);
-        }
+        };
 
         block.showAddFormButton = options.showAddFormButton;
         block.formList = block.getTextId().getFormNames();
@@ -825,7 +814,7 @@ formdesigner.widgets = (function () {
                 if (loadedData.audio.length > 0 || loadedData.images.length > 0)
                     ko.applyBindings(block.media_map, document.getElementById("fd-ui-container"));
             });
-        }
+        };
 
         var itextItem = block.getTextId();
 

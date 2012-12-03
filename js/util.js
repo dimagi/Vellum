@@ -39,7 +39,7 @@ formdesigner.util = (function(){
                              "bindElement/calculateAttr",
                              "bindElement/constraintAttr"]; 
     
-    var GROUP_OR_REPEAT_VALID_CHILDREN = that.GROUP_OR_REPEAT_VALID_CHILDREN = [
+    that.GROUP_OR_REPEAT_VALID_CHILDREN = [
         "group",
         "repeat",
         "question",
@@ -502,22 +502,21 @@ formdesigner.util = (function(){
      * @param newMugType - the new MT you want a relative position for
      * @return - String: 'first', 'inside' or 'after'
      */
-    var getRelativeInsertPosition = function(refMugType, newMugType){
-            var canHaveChildren;
-            if(!refMugType){
-                return "into";
-            }
+    that.getRelativeInsertPosition = function(refMugType, newMugType){
+        console.log("refMugType", "newMugType", refMugType, newMugType);
+        var canHaveChildren;
+        if(!refMugType){
+            return "into";
+        }
 
-            canHaveChildren = formdesigner.util.canMugTypeHaveChildren(refMugType,newMugType);
+        canHaveChildren = formdesigner.util.canMugTypeHaveChildren(refMugType,newMugType);
 
-            if(canHaveChildren){
-                return "into";
-            }else{
-                return "after";
-            }
+        if (canHaveChildren){
+            return "into";
+        } else {
+            return "after";
+        }
     };
-    that.getRelativeInsertPosition = getRelativeInsertPosition;
-
     
     var generate_guid = function() {
         // http://stackoverflow.com/questions/105034/how-to-create-a-guid-uuid-in-javascript
@@ -527,8 +526,8 @@ formdesigner.util = (function(){
         return (S4()+S4()+S4()+S4()+S4()+S4()+S4()+S4());
     };
 
-    var CHARS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-    var generate_xmlns_uuid = function () {
+    that.generate_xmlns_uuid = function () {
+        var CHARS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
         var uuid = [], r, i;
 
 		// rfc4122 requires these characters
@@ -544,19 +543,16 @@ formdesigner.util = (function(){
 			}
 		}
 		return uuid.toString().replace(/,/g,'');
-    }
-    that.generate_xmlns_uuid = generate_xmlns_uuid;
+    };
 
     /**
      * This method gives the passed object
-     * a Unique Mug ID plus standardized method(s)
-     * for accessing the ID.
+     * a Unique Mug ID
      * @param that
      */
-    var give_ufid = function(that){
+    that.give_ufid = function(that) {
         that.ufid = generate_guid();
     };
-    that.give_ufid = give_ufid;
 
     that.XSD_DATA_TYPES = [
             'xsd:boolean',
@@ -621,12 +617,11 @@ formdesigner.util = (function(){
     };
     that.exists = exists;
 
-    var getLabelItextID = function (mug) {
+    that.getLabelItextID = function (mug) {
         if(mug.properties.controlElement) {
             return mug.properties.controlElement.properties.labelItextID
         }
-    }
-    that.getLabelItextID = getLabelItextID;
+    };
 
     
     (function($) {
@@ -697,9 +692,7 @@ formdesigner.util = (function(){
 	            }
 	        }
         });
-
-
-    }
+    };
 
     /**
      * Bind some standard responses to the 'form-property-changed' event.
@@ -717,7 +710,7 @@ formdesigner.util = (function(){
         form.on('form-property-changed', function() {
             formdesigner.controller.setFormChanged();
         });
-    }
+    };
 
     /**
      * Renames a node in the JSTree display tree
@@ -727,13 +720,13 @@ formdesigner.util = (function(){
     that.changeUITreeNodeLabel = function (ufid, val) {
         var el = $('#' + ufid);
         $('#fd-question-tree').jstree('rename_node',el,val);
-    }
+    };
 
     that.getDataMugDisplayName = function (mugType) {
         var mugProps, dEl;
 
         if(!mugType || !mugType.mug) {
-            return 'No Name!'
+            return 'No Name!';
         }
 
         mugProps = mugType.mug.properties;
@@ -744,12 +737,12 @@ formdesigner.util = (function(){
         }
 
         return dEl.nodeID;
-    }
+    };
 
     that.getMugDisplayName = function (mugType) {
         var itextItem, nodeID, cEl,dEl,bEl, mugProps, disp, lang, Itext;
         if(!mugType || !mugType.mug) {
-            return 'No Name!'
+            return 'No Name!';
         }
         if (formdesigner.util.isReadOnly(mugType)) {
             return "Unknown (read-only) question type"            

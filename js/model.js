@@ -413,7 +413,7 @@ formdesigner.model = function () {
                 if (typeof bindElSpec.nodeID !== 'undefined') {
                     if (dataElSpec.nodeID) {
                         bindElSpec.nodeID = dataElSpec.nodeID; //make bind id match data id for convenience
-                    }else{
+                    } else {
                         bindElSpec.nodeID = formdesigner.util.generate_question_id();
                     }
                 }
@@ -428,13 +428,13 @@ formdesigner.model = function () {
         // utility functions
         mugType.hasControlElement = function () {
             return Boolean(this.mug.properties.controlElement);
-        }
+        };
         mugType.hasDataElement = function () {
             return Boolean(this.mug.properties.dataElement);
-        }
+        };
         mugType.hasBindElement = function () {
             return Boolean(this.mug.properties.bindElement);
-        }
+        };
         
         mugType.getDefaultItextRoot = function () {
             var nodeID, parent;
@@ -491,7 +491,6 @@ formdesigner.model = function () {
             } else {
                 return "";
             } 
-            
         };
         
         mugType.getDefaultLabelItext = function (defaultValue) {
@@ -2134,14 +2133,12 @@ formdesigner.model = function () {
     var Form = function () {
         var that = {}, dataTree, controlTree;
 
-        var init = (function () {
-            that.formName = 'New Form';
-            that.formID = 'data';
-            that.dataTree = dataTree = new Tree('data');
-            that.controlTree = controlTree = new Tree('control');
-            that.instanceMetadata = [InstanceMetadata({})];
-            that.errors = [];
-        })();
+        that.formName = 'New Form';
+        that.formID = 'data';
+        that.dataTree = dataTree = new Tree('data');
+        that.controlTree = controlTree = new Tree('control');
+        that.instanceMetadata = [InstanceMetadata({})];
+        that.errors = [];
 
         /**
          * Loops through the data and the control trees and picks out all the unique bind elements.
@@ -3000,9 +2997,8 @@ formdesigner.model = function () {
                                                                 ref.property.split("/")[1], expr.getText(), mug);
                 } 
             }
-            
         };
-        
+
         logic.reset = function () {
             this.all = [];
         };
@@ -3062,7 +3058,6 @@ formdesigner.model = function () {
      */
     
     that.ItextItem = function (options) {
-        
         var item = {}; 
         
         item.forms = options.forms || [];
@@ -3254,7 +3249,7 @@ formdesigner.model = function () {
         };
         
         /*
-         * Create a new blacnk item and add it to the list.
+         * Create a new blank item and add it to the list.
          */
         itext.createItem = function (id) {
             var item = new that.ItextItem({
@@ -3462,15 +3457,11 @@ formdesigner.model = function () {
     /**
      * An initialization function that sets up a number of different fields and properties
      */
-    var init = function () {
+    that.init = function () {
         var form = that.form = new Form();
         //set the form object in the controller so it has access to it as well
         formdesigner.controller.setForm(form);
     };
-    that.init = init;
-
-
-
 
     return that;
 }();

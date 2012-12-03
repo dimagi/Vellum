@@ -110,7 +110,7 @@ formdesigner.ui = function () {
         }
     };
     
-    var addQuestion = function(qType) {
+    that.addQuestion = function(qType) {
         try {
             var newMug = formdesigner.controller.createQuestion(qType);
             that.selectMugTypeInUI(newMug);
@@ -142,7 +142,6 @@ formdesigner.ui = function () {
 
         }
     };
-    that.addQuestion = addQuestion;
 
     that.getQuestionTypeSelector = function () {
         var select = $('<select />');
@@ -391,27 +390,23 @@ formdesigner.ui = function () {
 
     }
 
-    var getJSTree = function () {
-        return getQuestionJSTree();
+    that.getJSTree = function () {
+        return that.getQuestionJSTree();
     };
-    that.getJSTree = getJSTree;
 
-
-    var getQuestionJSTree = function () {
+    that.getQuestionJSTree = function () {
         return $('#fd-question-tree');
     };
-    that.getQuestionJSTree = getQuestionJSTree;
 
     /**
      * Gets the node that's currently selected by the UI Tree (JSTree).
      * Primarily used to sanity check against what the controller thinks is selected
      */
-    var getJSTreeCurrentlySelected = function () {
+    that.getJSTreeCurrentlySelected = function () {
         return that.getJSTree().jstree('get_selected');
     };
-    that.getJSTreeCurrentlySelected = getJSTreeCurrentlySelected;
 
-    var showVisualValidation = function (mugType) {
+    that.showVisualValidation = function (mugType) {
         function setValidationFailedIcon(li, showIcon, message) {
             var exists = ($(li).find('.fd-props-validate').length > 0);
             if (exists && showIcon) {
@@ -480,46 +475,14 @@ formdesigner.ui = function () {
 	        formdesigner.ui.resetMessages(formdesigner.model.form.errors);
         }
     };
-    
-    that.showVisualValidation = showVisualValidation;
-
-    var displayMugDataProperties = that.displayMugDataProperties = function(mugType) {
-        return displayMugProperties(mugType, false, true, true);
-    };
 
     /**
      * Draws the properties to be edited to the screen.
-     * @param mugType - the MugType that has been selected for editing
-     * @param showControl - Show control type properties? Optional, defaults to true
-     * @param showBind - Show bind type properties? Optional, defaults to true
-     * @param showData - Show data type properties? Optional, defaults to true
      */
-    var displayMugProperties = that.displayMugProperties = function (mugType, showControl, showBind, showData) {
+    that.displayMugProperties = function (mugType) {
         // always hide the xpath editor if necessary
         that.hideXPathEditor();
         that.showTools();
-
-        // set default values for properties
-        if (typeof showControl === 'undefined') {
-            showControl = true;
-        }
-        if (typeof showBind === 'undefined') {
-            showBind = true;
-        }
-        if (typeof showData === 'undefined') {
-            showData = true;
-        }
-
-        //Override these flags if the mugType doesn't actually contain these blocks;
-        showControl = showControl && mugType.properties.controlElement;
-        showBind = showBind && mugType.properties.bindElement;
-        showData = showData && mugType.properties.dataElement;
-
-        /**
-         * creates and returns a <ul> element with the heading set and the correct classes configured.
-         * @param heading
-         */
-
 
         function attachCommonEventListeners() {
             /**
@@ -548,7 +511,6 @@ formdesigner.ui = function () {
                     }
                 }
             });
-
         }
 
         function updateDisplay() {
@@ -557,7 +519,6 @@ formdesigner.ui = function () {
             that.hideQuestionProperties();
 
             var content = $("#fd-props-content").empty();
-
             var sections = formdesigner.widgets.getSectionListForMug(mugType);
 
             for (var i = 0; i < sections.length; i++) {
@@ -565,7 +526,6 @@ formdesigner.ui = function () {
             }
 
             attachCommonEventListeners();
-
 
             $("#fd-question-properties").show();
         }
@@ -606,19 +566,17 @@ formdesigner.ui = function () {
         }
     }
 
-    function selectMugTypeInUI(mugType) {
+    that.selectMugTypeInUI = function (mugType) {
         var ufid = mugType.ufid;
         return $('#fd-question-tree').jstree('select_node', $('#' + ufid), true);
-    }
+    };
 
-    that.selectMugTypeInUI = selectMugTypeInUI;
-
-    function forceUpdateUI() {
+    that.forceUpdateUI = function () {
         // after deleting a question the tree can in a state where nothing is
         // selected which makes the form designer sad.
         // If there is nothing selected and there are other questions, just select
         // the first thing. Otherwise, clear out the question editing pane.
-        var tree = getJSTree();
+        var tree = that.getJSTree();
         var selected = tree.jstree('get_selected');
         if (selected.length === 0) {
             // if there's any nodes in the tree, just select the first
@@ -638,9 +596,7 @@ formdesigner.ui = function () {
         }
     }
 
-    that.forceUpdateUI = forceUpdateUI;
-
-    var showSelectItemAddButton = function () {
+    that.showSelectItemAddButton = function () {
         var addItemBut = $('#fd-add-item-select_ez');
         if (addItemBut.length === 0) {
             addItemBut = $('<button class="btn"></button>')
@@ -656,12 +612,10 @@ formdesigner.ui = function () {
         }
         addItemBut.show();
     };
-    that.showSelectItemAddButton = showSelectItemAddButton;
 
-    var hideSelectItemAddButton = function () {
+    that.hideSelectItemAddButton = function () {
         $('#fd-add-item-select_ez').hide();
     };
-    that.hideSelectItemAddButton = hideSelectItemAddButton;
 
     /**
      * Creates the UI tree
@@ -700,19 +654,18 @@ formdesigner.ui = function () {
             },
             "types": getJSTreeTypes(),
             "plugins" : [ "themes", "json_data", "ui", "crrm", "types", "dnd" ]
-        }).bind("select_node.jstree",
-                function (e, data) {
-                    node_select(e, data);
-        }).bind("move_node.jstree", function (e, data) {
+        }).bind("select_node.jstree", 
+            node_select
+        ).bind("move_node.jstree", function (e, data) {
             var controller = formdesigner.controller,
                     mugType = controller.getMTFromFormByUFID($(data.rslt.o).attr('id')),
                     refMugType = controller.getMTFromFormByUFID($(data.rslt.r).attr('id')),
                     position = data.rslt.p;
             controller.moveMugType(mugType, position, refMugType, 'both');
         }).bind("deselect_all.jstree", function (e, data) {
-                hideSelectItemAddButton();
+            that.hideSelectItemAddButton();
         }).bind("deselect_node.jstree", function (e, data) {
-                hideSelectItemAddButton();
+            that.hideSelectItemAddButton();
         });
 
         $("#fd-expand-all").click(function() {
@@ -722,7 +675,6 @@ formdesigner.ui = function () {
         $("#fd-collapse-all").click(function() {
             questionTree.jstree("close_all");
         });
-
     }
 
     /**
@@ -748,12 +700,12 @@ formdesigner.ui = function () {
         function makeLangDrop() {
             var div, addLangButton, removeLangButton, langList, langs, i, str, selectedLang, Itext;
             $('#fd-question-tree-container').find('#fd-lang-disp-div').remove();
-            div = $('<div id="fd-lang-disp-div"></div>');
             Itext = formdesigner.model.Itext;
             langs = Itext.getLanguages();
             if (langs.length < 2) {
                 return;
             }
+            div = $('<div id="fd-lang-disp-div"></div>');
             div.append('<label>Display Language: </label>');
 
             str = '<select data-placeholder="Choose a Language" id="fd-land-disp-select">';
@@ -918,7 +870,7 @@ formdesigner.ui = function () {
      *
      * Will clear icons for nodes that are valid (if they were invalid before)
      */
-    var setAllTreeValidationIcons = function () {
+    that.setAllTreeValidationIcons = function () {
         var dTree, cTree, uiCTree, form,
                 invalidMTs, i, invalidMsg, liID;
 
@@ -946,9 +898,8 @@ formdesigner.ui = function () {
         }
 
     };
-    that.setAllTreeValidationIcons = setAllTreeValidationIcons;
 
-    var removeMugTypeFromUITree = function (mugType) {
+    that.removeMugTypeFromUITree = function (mugType) {
 //        var controlTree, el, ufid;
 //        ufid = mugType.ufid;
 //        el = $("#" + ufid);
@@ -961,7 +912,6 @@ formdesigner.ui = function () {
         removeMugTypeFromTree(mugType, $('#fd-question-tree'));
 
     };
-    that.removeMugTypeFromUITree = removeMugTypeFromUITree;
 
     var removeMugTypeFromTree = function (mugType, tree) {
         var el, ufid;
@@ -1036,7 +986,6 @@ formdesigner.ui = function () {
         // TODO: in making fd-save-button controlled by saveButton, do we need to do anything explicit here?
 //        $('#fd-save-button').button(butState);
 
-        $('#fd-remove-button').button(butState); //remove question button
         $('#fd-lang-disp-add-lang-button').button(butState);
         $('#fd-lang-disp-remove-lang-button').button(butState);
         $('#fd-load-xls-button').button(butState);
@@ -1057,15 +1006,13 @@ formdesigner.ui = function () {
 
     }
 
-    var disableUI = function () {
+    that.disableUI = function () {
         flipUI(false);
     };
-    that.disableUI = disableUI;
 
-    var enableUI = function () {
+    that.enableUI = function () {
         flipUI(true);
     };
-    that.enableUI = enableUI;
 
 
     function init_modal_dialogs() {
@@ -1129,7 +1076,7 @@ formdesigner.ui = function () {
                     // spaghetti requires the first call before the second
                     // and requires both of these calls after the reloadUI call
                     formdesigner.controller.setCurrentlySelectedMugType(currentMug.ufid);
-                    displayMugProperties(currentMug);
+                    that.displayMugProperties(currentMug);
                 }
 
             }
@@ -1200,7 +1147,7 @@ formdesigner.ui = function () {
                     // spaghetti requires the first call before the second
                     // and requires both of these calls after the reloadUI call
                     formdesigner.controller.setCurrentlySelectedMugType(currentMug.ufid);
-                    displayMugProperties(currentMug);
+                    that.displayMugProperties(currentMug);
                 }
             }
         })
@@ -1291,7 +1238,7 @@ formdesigner.ui = function () {
 
     var init_misc = function () {
         controller.on('question-creation', function (e) {
-            setAllTreeValidationIcons();
+            that.setAllTreeValidationIcons();
         });
     };
 
