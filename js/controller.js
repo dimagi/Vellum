@@ -652,10 +652,7 @@ formdesigner.controller = (function () {
                 .jstree("select_node", $('#' + duplicate.ufid));
             
             if (options.itext === "copy") {
-                // hack
-                $("#controlElement-labelItextID-auto-itext")
-                    .prop('checked', true)
-                    .change();
+                that.unlinkCurrentQuestionItext();
             }
 
             var children = that.getChildren(mugType);
@@ -745,6 +742,18 @@ formdesigner.controller = (function () {
 
     that.removeCurrentQuestion = function () {
         that.removeMugTypeFromForm(that.getCurrentlySelectedMugType());
+    };
+
+    that.unlinkCurrentQuestionItext = function () {
+        // hack
+        $("#controlElement-labelItextID-auto-itext")
+            .prop('checked', true)
+            .change();
+    };
+
+    that.isCurrentQuestionAutoItextId = function () {
+        // hack
+        return $("#controlElement-labelItextID-auto-itext").prop('checked');
     };
     
     that.changeQuestionType = function (mugType, questionType) {

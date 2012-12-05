@@ -556,8 +556,21 @@ formdesigner.model = function () {
             count = 0;
         for (var i = 0; i < allMugs.length; i++) {
             var node = allMugs[i];
-            if (node.hasDataElement() && node.mug.properties.dataElement.properties.nodeID === qId) {
+            if (node.hasDataElement() && qId === node.mug.properties.dataElement.properties.nodeID) {
                 count++; 
+            }
+        }
+
+        return count;
+    };
+
+    that.itextIdCount = function (id) {
+        var allMugs = formdesigner.controller.getMugTypeList(),
+            count = 0;
+        for (var i = 0; i < allMugs.length; i++) {
+            var node = allMugs[i];
+            if (node.hasControlElement() && id === node.mug.properties.controlElement.properties.labelItextID.id) {
+                count++;
             }
         }
 
@@ -3267,7 +3280,7 @@ formdesigner.model = function () {
         itext.hasItem = function (item) {
             return this.items.indexOf(item) !== -1;
         };
-        
+
         /**
          * Add an itext item to the global Itext object.
          * Item is an ItextItem object.
@@ -3331,9 +3344,7 @@ formdesigner.model = function () {
                 return item.id;
             });
         };
-                
-        
-        
+
         /**
          * Goes through the Itext data and verifies that
          * a) a default language is set to something that exists

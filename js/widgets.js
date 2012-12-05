@@ -822,11 +822,30 @@ formdesigner.widgets = (function () {
         var itextItem = block.getTextId();
 
         block.getUIElement = function () {
-
             var itextWidget, subBlock, subSec;
+
+            /*var sharedItextCount = formdesigner.model.itextIdCount(itextItem.id) - 1;
+            if (sharedItextCount > 0) {
+                var questions = formdesigner.util.pluralize("question"),
+                    unlink;
+                if (formdesigner.controller.isCurrentQuestionAutoItextId()) {
+                    unlink = $("<div>This question's display text is shared with " + sharedItextCount +
+                        " other " + questions + ". To unlink the display text, go to " + 
+                        (sharedItextCount !== 1 ? "one of " : "") + " the linked " + questions + ".</div>");
+                } else {
+                    unlink = $("<div>This question uses shared display text.</div>");
+                    $('<button class="btn">Unlink</button>').click(function () {
+                        formdesigner.controller.unlinkCurrentQuestionItext();
+                    }).appendTo(unlink);
+                }
+
+                main = main.add(unlink);
+            }*/
 
             for (var i = 0; i < this.langs.length; i++) {
                 subSec = $("<div />").addClass("itext-language-section").data("language", this.langs[i]);
+
+               
                 main = main.add(subSec);
                 // sub heading for language
                 $("<h3 />").text(this.langs[i]).appendTo(subSec);

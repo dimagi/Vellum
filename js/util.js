@@ -508,6 +508,10 @@ formdesigner.util = (function(){
     };
     that.capitaliseFirstLetter = capitaliseFirstLetter;
 
+    that.pluralize = function (noun, n) {
+        return noun + (n !== 1 ? 's' : '');
+    };
+
     /**
      * Determines where the newMugType should be inserted relative
      * to the refMugType.
