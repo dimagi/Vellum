@@ -1007,21 +1007,13 @@ formdesigner.widgets = (function () {
             + '<i class="icon icon-white icon-trash"></i> Delete</button>'
         ).click(formdesigner.controller.removeCurrentQuestion);
 
-        var duplicateButton = $('<a class="btn dropdown-toggle" data-toggle="dropdown" href="#">'
-            + 'Duplicate <span class="caret"></span></a>');
-
-        var copyItext = $('<li><a href="#">Duplicate (Copy Itext)</a></li>')
+        var duplicate = $('<button type="button" class="btn">Copy</button>')
             .click(function () {
                 formdesigner.controller.duplicateCurrentQuestion({itext: 'copy'});
             });
-
-        var linkItext = $('<li><a href="#">Duplicate (Link Itext)</a></li>')
-            .click(function() {
-                formdesigner.controller.duplicateCurrentQuestion({itext: 'link'});
-            });
-
+        
         var buttonGroups = [
-            [duplicateButton, [copyItext, linkItext]],
+            [duplicate],
             [deleteButton]
         ];
 
