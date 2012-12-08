@@ -39,26 +39,6 @@ formdesigner.util = (function(){
                              "bindElement/calculateAttr",
                              "bindElement/constraintAttr"]; 
     
-    that.GROUP_OR_REPEAT_VALID_CHILDREN = [
-        "group",
-        "repeat",
-        "question",
-        "date",
-        "datetime",
-        "time",
-        "int",
-        "barcode",
-        "geopoint",
-        "long",
-        "double",
-        "selectQuestion",
-        "trigger",
-        "secret",
-        "default",
-        "image",
-        "audio",
-        "video"
-    ];
     
     that.QUESTIONS = {
         //in the format: {question_slug: question_label}
@@ -394,8 +374,8 @@ formdesigner.util = (function(){
      * @param refMug
      */
     var getNewMugType = function(refMugType){
-        var newMugType = formdesigner.util.clone(refMugType);
-        formdesigner.util.give_ufid(newMugType);
+        var newMugType = that.clone(refMugType);
+        that.give_ufid(newMugType);
         return newMugType;
     };
     that.getNewMugType = getNewMugType;
@@ -469,40 +449,6 @@ formdesigner.util = (function(){
     };
     that.eventuality = eventuality;
 
-    /**
-     * Answers the question of whether
-     * the refMugType can have children of type ofTypeMug.
-     * @return list of strings indicating the allowed children types (if any).
-     * can be any of 'group' 'repeat' 'select' 'item' 'question'
-     */
-    var canMugTypeHaveChildren = function(refMugType,ofTypeMug){
-        var allowedChildren, n, targetMugTagName, refMugTagName,
-                makeLower = function(s){
-                    return s.toLowerCase();
-                };
-
-        if (!refMugType || !ofTypeMug || !refMugType.properties.controlElement) {
-            throw 'Cannot pass null argument or MugType without a controlElement!';
-        }
-        if(!refMugType.controlNodeCanHaveChildren){ return false; }
-        allowedChildren = refMugType.controlNodeAllowedChildren;
-        allowedChildren = allowedChildren.map(makeLower);
-        if (ofTypeMug.mug.properties.controlElement) {
-            targetMugTagName = ofTypeMug.mug.properties.controlElement.properties.tagName.toLowerCase();
-        } else if (ofTypeMug.typeName === "Data Node") {
-            targetMugTagName = 'data';
-        }
-        refMugTagName = refMugType.mug.properties.controlElement.properties.tagName.toLowerCase();
-
-        if(allowedChildren.indexOf(targetMugTagName) === -1 && targetMugTagName != 'data'){
-            return false;
-        }else{
-            return true;
-        }
-    
-    };
-    that.canMugTypeHaveChildren = canMugTypeHaveChildren;
-
     var capitaliseFirstLetter = function (string) {
         return string.charAt(0).toUpperCase() + string.slice(1);
     };
@@ -512,25 +458,6 @@ formdesigner.util = (function(){
         return noun + (n !== 1 ? 's' : '');
     };
 
-    /**
-     * Determines where the newMugType should be inserted relative
-     * to the refMugType.
-     * @param refMugType - the reference MT already in the tree
-     * @param newMugType - the new MT you want a relative position for
-     * @return - String: 'first', 'inside' or 'after'
-     */
-    that.getRelativeInsertPosition = function(refMugType, newMugType){
-        if (!refMugType) {
-            return "into";
-        }
-
-        if (formdesigner.util.canMugTypeHaveChildren(refMugType,newMugType)) {
-            return "into";
-        } else {
-            return "after";
-        }
-    };
-    
     var generate_guid = function() {
         // http://stackoverflow.com/questions/105034/how-to-create-a-guid-uuid-in-javascript
         var S4 = function() {
@@ -757,7 +684,7 @@ formdesigner.util = (function(){
         if(!mugType || !mugType.mug) {
             return 'No Name!';
         }
-        if (formdesigner.util.isReadOnly(mugType)) {
+        if (that.isReadOnly(mugType)) {
             return "Unknown (read-only) question type"            
         }
 

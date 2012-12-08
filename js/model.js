@@ -1111,13 +1111,6 @@ formdesigner.model = function () {
             return validationResult;
         },
 
-        //OBJECT FIELDS//
-        controlNodeCanHaveChildren: false,
-
-        /** A list of controlElement.tagName's that are valid children for this control element **/
-        controlNodeAllowedChildren : [],
-        dataNodeCanHaveChildren: true,
-
         mug: null,
         toString: function () {
             if (this.mug && this.mug.properties.dataElement) {
@@ -1205,7 +1198,6 @@ formdesigner.model = function () {
         mType.typeSlug = "text";
         mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
         
-        mType.controlNodeAllowedChildren = false;
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
         mType.mug.properties.controlElement.properties.name = "Text";
@@ -1220,7 +1212,6 @@ formdesigner.model = function () {
         mType.typeSlug = "datanode";
         mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
         
-        mType.controlNodeAllowedChildren = false;
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
         return mType;
@@ -1232,7 +1223,6 @@ formdesigner.model = function () {
         mType.typeSlug = "secret";
         mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
         
-        mType.controlNodeAllowedChildren = false;
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
         mType.mug.properties.controlElement.properties.name = "Secret";
@@ -1257,7 +1247,6 @@ formdesigner.model = function () {
         mType.typeSlug = "int";
         mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
         
-        mType.controlNodeAllowedChildren = false;
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
         mType.mug.properties.controlElement.properties.name = "Integer";
@@ -1271,7 +1260,6 @@ formdesigner.model = function () {
                 mug;
         mType.typeSlug = "audio";
         mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
-        mType.controlNodeAllowedChildren = false;
         mType.properties.controlElement.mediaType = {
             lstring: 'Media Type',
             visibility: 'visible',
@@ -1325,7 +1313,6 @@ formdesigner.model = function () {
                 mug;
         mType.typeSlug = "geopoint";
         mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
-        mType.controlNodeAllowedChildren = false;
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
         mType.mug.properties.controlElement.properties.name = "Geopoint";
@@ -1339,7 +1326,6 @@ formdesigner.model = function () {
                 mug;
         mType.typeSlug = "barcode";
         mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
-        mType.controlNodeAllowedChildren = false;
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
         mType.mug.properties.controlElement.properties.name = "Barcode";
@@ -1353,7 +1339,6 @@ formdesigner.model = function () {
                 mug;
         mType.typeSlug = "date";
         mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
-        mType.controlNodeAllowedChildren = false;
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
         mType.mug.properties.controlElement.properties.name = "Date";
@@ -1367,7 +1352,6 @@ formdesigner.model = function () {
                 mug;
         mType.typeSlug = "datetime";
         mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
-        mType.controlNodeAllowedChildren = false;
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
         mType.mug.properties.controlElement.properties.name = "DateTime";
@@ -1381,7 +1365,6 @@ formdesigner.model = function () {
                 mug;
         mType.typeSlug = "time";
         mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
-        mType.controlNodeAllowedChildren = false;
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
         mType.mug.properties.controlElement.properties.name = "Time";
@@ -1415,14 +1398,10 @@ formdesigner.model = function () {
 
     that.mugTypeMaker.stdItem = function () {
         var mType = formdesigner.util.getNewMugType(mugTypes.controlOnly),
-                mug,
-                vResult,
-                controlProps;
+            mug, vResult, controlProps;
 
         mType.typeSlug = "item";
         mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
-        mType.controlNodeAllowedChildren = false;
-
 
         controlProps = mType.properties.controlElement;
         controlProps.hintLabel.presence = 'notallowed';
@@ -1445,7 +1424,6 @@ formdesigner.model = function () {
 
         mType.typeSlug = "trigger";
         mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
-        mType.controlNodeAllowedChildren = false;
         mType.properties.bindElement.dataType.presence = 'notallowed';
         mType.properties.dataElement.dataValue.presence = 'optional';
 
@@ -1462,14 +1440,10 @@ formdesigner.model = function () {
 
     that.mugTypeMaker.stdMSelect = function () {
         var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion),
-                allowedChildren,
                 mug,
                 vResult;
-        mType.controlNodeCanHaveChildren = true;
         mType.typeSlug = "select";
         mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
-        allowedChildren = ['item'];
-        mType.controlNodeAllowedChildren = allowedChildren;
         mType.properties.bindElement.dataType.visibility = "hidden";
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
@@ -1490,14 +1464,10 @@ formdesigner.model = function () {
 
     that.mugTypeMaker.stdGroup = function () {
         var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion),
-                allowedChildren,
                 mug,
                 vResult;
-        mType.controlNodeCanHaveChildren = true;
         mType.typeSlug = "group";
         mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
-        allowedChildren = ['repeat', 'input', 'select', 'select1', 'group', 'trigger'];
-        mType.controlNodeAllowedChildren = allowedChildren;
         mType.properties.bindElement.dataType.presence = "notallowed";
         mType.properties.controlElement.hintItextID.presence = "notallowed";
         mType.properties.controlElement.hintLabel.presence = "notallowed";
@@ -1694,10 +1664,6 @@ formdesigner.model = function () {
              * Returns the parent if found, else null.
              */
             that.findParentNode = function (node) {
-                if (!node) {
-                    throw {name: "NoNodeFound",
-                           message: "No node specified, can't find 'null' in tree!"};
-                }
                 var i, parent = null;
                 if (!children || children.length === 0) {
                     return null;
@@ -1922,16 +1888,6 @@ formdesigner.model = function () {
         that.insertMugType = function (mugType, position, refMugType) {
             var refNode, refNodeSiblings, refNodeIndex, refNodeParent, node;
             
-            if (!formdesigner.controller.checkMoveOp(mugType, position, refMugType, treeType)) {
-                throw { 
-                    name: "IllegalMove",
-                    message: 'Illegal Tree move requested! Doing nothing instead.',
-                    mugType: mugType,
-                    position: position,
-                    refMugType: refMugType 
-                };
-            }
-
             if (position !== null && typeof position !== 'string') {
                 throw "position argument must be a string or null! Can be 'after', 'before' or 'into'";
             }
@@ -3025,6 +2981,8 @@ formdesigner.model = function () {
          *        beginning with this path (no trailing /)
          */
         logic.updatePath = function (mugId, from, to, subtree) {
+            if (from === to) { return; }
+
             var found = this.all.filter(function (elem) {
                 return elem.ref === mugId && 
                     (!subtree || elem.sourcePath === subtree || elem.sourcePath.indexOf(subtree + '/') === 0);
