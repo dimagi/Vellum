@@ -367,7 +367,7 @@ formdesigner.widgets = (function () {
 	               language: this.language,
 	               item: item,
 	               form: this.form,
-	               value: this.getValue()
+	               value: this.getValue(),
 	            });
 	            formdesigner.controller.form.fire({
 	               type: "form-property-changed"

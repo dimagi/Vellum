@@ -390,21 +390,6 @@ formdesigner.ui = function () {
 
     }
 
-    that.getJSTree = function () {
-        return that.getQuestionJSTree();
-    };
-
-    that.getQuestionJSTree = function () {
-        return $('#fd-question-tree');
-    };
-
-    /**
-     * Gets the node that's currently selected by the UI Tree (JSTree).
-     * Primarily used to sanity check against what the controller thinks is selected
-     */
-    that.getJSTreeCurrentlySelected = function () {
-        return that.getJSTree().jstree('get_selected');
-    };
 
     that.showVisualValidation = function (mugType) {
         function setValidationFailedIcon(li, showIcon, message) {
@@ -484,53 +469,49 @@ formdesigner.ui = function () {
         that.hideXPathEditor();
         that.showTools();
 
-        function attachCommonEventListeners() {
-            /**
-             * Sets things up such that if you alter one NodeID box (e.g. bind)
-             * the other NodeID (e.g. data) gets changed and the model gets updated too.
-             */
+        /* update display */
+        $('#fd-question-properties').animate({}, 200);
 
-            /**
-             * When either bindElement.nodeID or dataElement.nodeID changes value,
-             * the node label in the jstree (UITree) should be updated to reflect that change
-             */
+        that.hideQuestionProperties();
 
-            // this mainly updates the save button
-            mugType.mug.on('property-changed', function (e) {
-                formdesigner.controller.setFormChanged();
-            });
+        var content = $("#fd-props-content").empty();
+        var sections = formdesigner.widgets.getSectionListForMug(mugType);
 
-            // update the question tree (only if it's a data node, and only if
-            // it has changed)
-            mugType.mug.on('property-changed', function (e) {
-                if (e.property === 'nodeID' && e.element === 'dataElement') {
-                    var node = $('#' + e.mugTypeUfid);
-                    if (mugType.typeName === "Data Node" && e.val &&
-                            e.val !== $('#fd-question-tree').jstree("get_text", node)) {
-                        $('#fd-question-tree').jstree('rename_node', node, e.val);
-                    }
+        for (var i = 0; i < sections.length; i++) {
+            sections[i].getSectionDisplay().appendTo(content);
+        }
+
+        /* attach common event listeners */
+
+        /**
+         * Sets things up such that if you alter one NodeID box (e.g. bind)
+         * the other NodeID (e.g. data) gets changed and the model gets updated
+         * too.
+         * 
+         * When either bindElement.nodeID or dataElement.nodeID changes value,
+         * the node label in the jstree (UITree) should be updated to reflect
+         * that change
+         */
+
+        // this mainly updates the save button
+        mugType.mug.on('property-changed', function (e) {
+            formdesigner.controller.setFormChanged();
+        });
+
+        // update the question tree (only if it's a data node, and only if
+        // it has changed)
+        mugType.mug.on('property-changed', function (e) {
+            if (e.property === 'nodeID' && e.element === 'dataElement') {
+                var node = $('#' + e.mugTypeUfid);
+                if (mugType.typeName === "Data Node" && e.val &&
+                        e.val !== formdesigner.ui.jstree("get_text", node)) {
+                    formdesigner.ui.jstree('rename_node', node, e.val);
                 }
-            });
-        }
-
-        function updateDisplay() {
-            $('#fd-question-properties').animate({}, 200);
-
-            that.hideQuestionProperties();
-
-            var content = $("#fd-props-content").empty();
-            var sections = formdesigner.widgets.getSectionListForMug(mugType);
-
-            for (var i = 0; i < sections.length; i++) {
-                sections[i].getSectionDisplay().appendTo(content);
             }
+        });
 
-            attachCommonEventListeners();
+        $("#fd-question-properties").show();
 
-            $("#fd-question-properties").show();
-        }
-
-        updateDisplay();
         formdesigner.ui.showVisualValidation(mugType);
     };
 
@@ -568,7 +549,7 @@ formdesigner.ui = function () {
 
     that.selectMugTypeInUI = function (mugType) {
         var ufid = mugType.ufid;
-        return $('#fd-question-tree').jstree('select_node', $('#' + ufid), true);
+        return formdesigner.ui.jstree('select_node', '#' + ufid, true);
     };
 
     that.forceUpdateUI = function () {
@@ -576,15 +557,13 @@ formdesigner.ui = function () {
         // selected which makes the form designer sad.
         // If there is nothing selected and there are other questions, just select
         // the first thing. Otherwise, clear out the question editing pane.
-        var tree = that.getJSTree();
-        var selected = tree.jstree('get_selected');
+        var selected = that.jstree('get_selected');
         if (selected.length === 0) {
             // if there's any nodes in the tree, just select the first
             var all_nodes = $(tree).find("li");
             if (all_nodes.length > 0) {
-                tree.jstree('select_node', all_nodes[0]);
-            }
-            else {
+                that.jstree('select_node', all_nodes[0]);
+            } else {
                 // otherwise clear the Question Edit UI pane
                 that.hideQuestionProperties();
                 // and the selected mug + other stuff in the UI
@@ -617,65 +596,8 @@ formdesigner.ui = function () {
         $('#fd-add-item-select_ez').hide();
     };
 
-    /**
-     * Creates the UI tree
-     */
-    function create_question_tree() {
-        $.jstree._themes = formdesigner.staticPrefix + "themes/";
-        var questionTree = $(QUESTION_TREE_DIV);
-        questionTree.jstree({
-            "json_data" : {
-                "data" : []
-            },
-            "core": {
-                strings: {
-                    new_node: "[no text]"
-                }
-            },
-            "ui" : {
-                select_limit: 1
-            },
-            "crrm" : {
-                "move": {
-                    "always_copy": false,
-                    "check_move" : function (m) {
-                        var controller = formdesigner.controller,
-                                mugType = controller.getMTFromFormByUFID($(m.o).attr('id')),
-                                refMugType = controller.getMTFromFormByUFID($(m.r).attr('id')),
-                                position = m.p;
-                        return controller.checkMoveOp(mugType, position, refMugType);
-                    }
-                }
-            },
-            "dnd" : {
-                "drop_finish" : function(data) {
-                    formdesigner.controller.handleTreeDrop(data.o, data.r);
-                }
-            },
-            "types": getJSTreeTypes(),
-            "plugins" : [ "themes", "json_data", "ui", "crrm", "types", "dnd" ]
-        }).bind("select_node.jstree", 
-            node_select
-        ).bind("move_node.jstree", function (e, data) {
-            var controller = formdesigner.controller,
-                    mugType = controller.getMTFromFormByUFID($(data.rslt.o).attr('id')),
-                    refMugType = controller.getMTFromFormByUFID($(data.rslt.r).attr('id')),
-                    position = data.rslt.p;
-            controller.moveMugType(mugType, position, refMugType, 'both');
-        }).bind("deselect_all.jstree", function (e, data) {
-            that.hideSelectItemAddButton();
-        }).bind("deselect_node.jstree", function (e, data) {
-            that.hideSelectItemAddButton();
-        });
+    var questionTree;
 
-        $("#fd-expand-all").click(function() {
-            questionTree.jstree("open_all");
-        });
-
-        $("#fd-collapse-all").click(function() {
-            questionTree.jstree("close_all");
-        });
-    }
 
     /**
      *
@@ -871,22 +793,14 @@ formdesigner.ui = function () {
      * Will clear icons for nodes that are valid (if they were invalid before)
      */
     that.setAllTreeValidationIcons = function () {
-        var dTree, cTree, uiCTree, form,
-                invalidMTs, i, invalidMsg, liID;
+        var form = controller.form,
+            cTree = form.controlTree,
+            dTree = form.dataTree,
+            invalidMTs, i, invalidMsg, liID;
 
-        //init things
-        uiCTree = $('#fd-question-tree');
-        form = controller.form;
-        cTree = form.controlTree;
-        dTree = form.dataTree;
-
-
-        function clearIcons(tree) {
-            tree.find('.fd-tree-valid-alert-icon').remove();
-        }
-        
         //clear existing warning icons to start fresh.
-        clearIcons(uiCTree); 
+        formdesigner.ui.getJSTree().find('.fd-tree-valid-alert-icon').remove();
+        
         invalidMTs = form.getInvalidMugTypeUFIDs();
         for (i in invalidMTs) {
             if (invalidMTs.hasOwnProperty(i)) {
@@ -909,7 +823,7 @@ formdesigner.ui = function () {
 //        // In this case we select the topmost node (if available)
 //        // See also: forceUpdateUI
 //        controlTree.jstree("remove",el);
-        removeMugTypeFromTree(mugType, $('#fd-question-tree'));
+        removeMugTypeFromTree(mugType, formdesigner.ui.getJSTree());
 
     };
 
@@ -960,7 +874,7 @@ formdesigner.ui = function () {
             tree.find('ul').empty();
         }
 
-        clearUITree($('#fd-question-tree'));
+        clearUITree(formdesigner.ui.getJSTree());
 
         $('#fd-form-prop-formName-input').val(formdesigner.controller.form.formName);
         $('#fd-form-prop-formID-input').val(formdesigner.controller.form.formID);
@@ -1256,8 +1170,8 @@ formdesigner.ui = function () {
                     var node = $('#' + mug.ufid);
                     var it = mug.getItext();
                     if (it.id === e.item.id && e.form === "default") {
-                        if (e.value && e.value !== $('#fd-question-tree').jstree("get_text", node)) {
-                            $('#fd-question-tree').jstree('rename_node', node, e.value);
+                        if (e.value && e.value !== formdesigner.ui.jstree("get_text", node)) {
+                            formdesigner.ui.jstree('rename_node', node, e.value);
                         }
                     }
                 });
@@ -1271,8 +1185,8 @@ formdesigner.ui = function () {
             allMugs.map(function (mug) {
                 var node = $('#' + mug.ufid);
                 var it = mug.getItext();
-                if (it && it.getValue("default", currLang) !== $('#fd-question-tree').jstree("get_text", node)) {
-                    $('#fd-question-tree').jstree('rename_node', node, it.getValue("default", currLang));
+                if (it && it.getValue("default", currLang) !== formdesigner.ui.jstree("get_text", node)) {
+                    formdesigner.ui.jstree('rename_node', node, it.getValue("default", currLang));
                 }
             });
         });
@@ -1739,6 +1653,81 @@ formdesigner.ui = function () {
         $('#fd-xpath-editor').hide();
     };
 
+    that.createJSTree = function () {
+        $.jstree._themes = formdesigner.staticPrefix + "themes/";
+        questionTree = $(QUESTION_TREE_DIV);
+        questionTree.jstree({
+            "json_data" : {
+                "data" : []
+            },
+            "core": {
+                strings: {
+                    new_node: "[no text]"
+                }
+            },
+            "ui" : {
+                select_limit: 1
+            },
+            "crrm" : {
+                "move": {
+                    "always_copy": false,
+                    "check_move" : function (m) {
+                        var controller = formdesigner.controller,
+                                mugType = controller.getMTFromFormByUFID($(m.o).attr('id')),
+                                refMugType = controller.getMTFromFormByUFID($(m.r).attr('id')),
+                                position = m.p;
+                        return controller.checkMoveOp(mugType, position, refMugType);
+                    }
+                }
+            },
+            "dnd" : {
+                "drop_finish" : function(data) {
+                    formdesigner.controller.handleTreeDrop(data.o, data.r);
+                }
+            },
+            "types": getJSTreeTypes(),
+            "plugins" : [ "themes", "json_data", "ui", "crrm", "types", "dnd" ]
+        }).bind("select_node.jstree", 
+            node_select
+        ).bind("move_node.jstree", function (e, data) {
+            var controller = formdesigner.controller,
+                mugType = controller.getMTFromFormByUFID($(data.rslt.o).attr('id')),
+                refMugType = controller.getMTFromFormByUFID($(data.rslt.r).attr('id')),
+                position = data.rslt.p;
+
+            controller.moveMugType(mugType, position, refMugType, 'both');
+        }).bind("deselect_all.jstree", function (e, data) {
+            that.hideSelectItemAddButton();
+        }).bind("deselect_node.jstree", function (e, data) {
+            that.hideSelectItemAddButton();
+        });
+
+        $("#fd-expand-all").click(function() {
+            questionTree.jstree("open_all");
+        });
+
+        $("#fd-collapse-all").click(function() {
+            questionTree.jstree("close_all");
+        });
+    }
+
+    /**
+     * todo: don't look up DOM object every time
+     */
+    that.getJSTree = function () {
+        return questionTree;
+        return $(QUESTION_TREE_DIV);
+    };
+
+    var depth=0;
+    /**
+     * Wrapper for jstree() calls.  Also very useful for debugging.
+     */
+    that.jstree = function () {
+        var tree = that.getJSTree();
+        return tree.jstree.apply(tree, arguments);
+    };
+
     that.init = function() {
 //        //Override CCHQ's SaveButton labels:
 //        //Bug: Does not work yet. See ticket: http://manage.dimagi.com/default.asp?31223
@@ -1749,8 +1738,7 @@ formdesigner.ui = function () {
         initMessagesPane();
         init_toolbar();
         init_extra_tools();
-        create_question_tree();
-        //create_data_tree();
+        that.createJSTree();
         init_form_paste();
         init_modal_dialogs();
 
