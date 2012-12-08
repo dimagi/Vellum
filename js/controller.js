@@ -69,7 +69,7 @@ formdesigner.controller = (function () {
             // update parse error and warn information in the model/UI
             if (that.parseErrorMsgs) {
                 for (i = 0; i < that.parseErrorMsgs.length; i++) {
-                    formdesigner.controller.form.updateError(formdesigner.model.FormError({
+                    that.form.updateError(formdesigner.model.FormError({
                         level: "error",
                         message: that.parseErrorMsgs[i]
                     }));
@@ -78,13 +78,13 @@ formdesigner.controller = (function () {
 
             if (that.parseWarningMsgs) {
                 for (i = 0; i < that.parseWarningMsgs.length; i++) {
-                    formdesigner.controller.form.updateError(formdesigner.model.FormError({
+                    that.form.updateError(formdesigner.model.FormError({
                         level: "parse-warning",
                         message: that.parseWarningMsgs[i]
                     }));
                 }
             }
-            formdesigner.ui.resetMessages(formdesigner.controller.form.errors);
+            formdesigner.ui.resetMessages(that.form.errors);
             
             // populate the LogicManager with initial path data
             allMugs.map(formdesigner.model.LogicManager.updateAllReferences);
@@ -468,11 +468,20 @@ formdesigner.controller = (function () {
             objectData, insertPosition,
             typeString, type;
 
-        if (position) {
-            insertPosition = position;
-        } else if (mug.properties.controlElement) {
-            insertPosition = formdesigner.util.getRelativeInsertPosition(that.getCurrentlySelectedMugType(),mugType);
+        if (mug.properties.controlElement) {
+            if (position) {
+                console.log("a");
+                insertPosition = position;
+            } else {
+                console.log("b");
+                insertPosition = formdesigner.util.getRelativeInsertPosition(
+                    that.getCurrentlySelectedMugType(), 
+                    mugType
+                );
+            }
         } else {
+            // data node
+            console.log("data node");
             formdesigner.ui.jstree("deselect_all");
             insertPosition = "last";
         }
@@ -497,7 +506,7 @@ formdesigner.controller = (function () {
                 type = "selectQuestion";
                 break;
             case 'data':
-                type = 'dataNode';
+                type = 'datanode';
                 break;
             default:
                 type = typeString.toLowerCase();
@@ -711,7 +720,7 @@ formdesigner.controller = (function () {
         var isDataNodeSelected = oldSelected && !oldSelected.properties.controlElement;
         if (isDataNodeSelected) {
             //select the lowest not-data-node and continue
-            var tmpSelector = formdesigner.ui.getJSTree().find('li[rel!="dataNode"]');
+            var tmpSelector = formdesigner.ui.getJSTree().find('li[rel!="datanode"]');
             if (tmpSelector.length > 0) {
                 var newSelectEl = $(tmpSelector[tmpSelector.length - 1]);
                 formdesigner.ui.jstree("select_node", newSelectEl, false);
@@ -802,7 +811,7 @@ formdesigner.controller = (function () {
             // update UI
             that.reloadUI();
             formdesigner.ui.selectMugTypeInUI(newMugType);
-            formdesigner.controller.form.fire({ 
+            that.form.fire({ 
                 type: "form-property-changed"
             }); 
         } 
@@ -827,7 +836,7 @@ formdesigner.controller = (function () {
 
         loadMTEvent.type= "mugtype-loaded";
         loadMTEvent.mugType = mugType;
-        formdesigner.controller.fire(loadMTEvent);
+        that.fire(loadMTEvent);
 
         return mug;
     };
@@ -859,7 +868,7 @@ formdesigner.controller = (function () {
                       "to your form. Press 'Update Source' to save changes, or 'Close' to cancel.");
             
             // populate text
-            if(!formdesigner.controller.formLoadingFailed){
+            if(!that.formLoadingFailed){
                 output.val(that.form.createXForm());
             } else {
                 output.val(formdesigner.loadMe);
@@ -869,7 +878,7 @@ formdesigner.controller = (function () {
             var loadButton = $('<button class="btn btn-primary" id ="fd-loadsource-button">Update Source</button>').appendTo(controls).button();
 	        loadButton.click(function () {
 	            that.loadXForm(output.val());
-                formdesigner.controller.form.fire('form-property-changed');
+                that.form.fire('form-property-changed');
 	            $.fancybox.close();
 	        });
 	
@@ -1072,7 +1081,7 @@ formdesigner.controller = (function () {
         var updateButton = $('<button class="btn btn-primary" id ="fd-parsexls-button">Update Translations</button>').appendTo(controls).button();
         updateButton.click(function () {
             that.parseXLSItext(input.val());
-            formdesigner.controller.form.fire('form-property-changed');
+            that.form.fire('form-property-changed');
             $.fancybox.close();
         });
         
@@ -1121,12 +1130,12 @@ formdesigner.controller = (function () {
         $.fancybox.showActivity();
 
         //universal flag for indicating that there's something wrong enough with the form that vellum can't deal.
-        formdesigner.controller.formLoadingFailed = false;
+        that.formLoadingFailed = false;
 
         //Things to do to gracefully deal with a form loading failure
         function formLoadFailed(e) {
             var showSourceButton = $('#fd-editsource-button');
-            formdesigner.controller.formLoadingFailed = true;
+            that.formLoadingFailed = true;
 
             //populate formdesigner.loadMe (var used when loading a form given during initialization)
             //with the broken form, so that it can be viewed/edited by the showSource view
@@ -1193,7 +1202,7 @@ formdesigner.controller = (function () {
                     type: 'load-form-complete',
                     form : formString
                 });
-            if(!formdesigner.controller.formLoadingFailed) {
+            if(!that.formLoadingFailed) {
                 //re-enable all buttons and inputs in case they were disabled before.
                 formdesigner.ui.enableUI();
             }
@@ -1571,7 +1580,7 @@ formdesigner.controller = (function () {
                     function MTIdentifierFromUpload () {
                         if(!mediaType) {
                             throw 'Unable to parse binary question type. Path: ' +
-                                    formdesigner.controller.form.dataTree.getAbsolutePath(oldMT) +
+                                    that.form.dataTree.getAbsolutePath(oldMT) +
                                     'The question has no MediaType attribute assigned to it!'
                         }
                         if (mediaType === 'video/*') {
@@ -2115,7 +2124,7 @@ formdesigner.controller = (function () {
 
         isDataTreeOp = refMugType && refMugType.typeName !== "Select Item";
 
-        var preMovePath = formdesigner.controller.form.dataTree.getAbsolutePath(mugType);
+        var preMovePath = that.form.dataTree.getAbsolutePath(mugType);
         var doDataTree = treeType === 'both' ? true : treeType === 'data';
         var doControlTree = treeType === 'both' ? true : treeType === 'control';
         if (doDataTree && isDataTreeOp) {
@@ -2128,12 +2137,12 @@ formdesigner.controller = (function () {
            throw 'Invalid/Unrecognized TreeType specified in moveMugType: ' + treeType;
         }
 
-        var postMovePath = formdesigner.controller.form.dataTree.getAbsolutePath(mugType);
+        var postMovePath = that.form.dataTree.getAbsolutePath(mugType);
         // update logic expressions that reference this
         if (preMovePath !== postMovePath) {
             formdesigner.model.LogicManager.updatePath(mugType.ufid, preMovePath, postMovePath);
             // update UI
-            var currSelected = formdesigner.controller.getCurrentlySelectedMugType();
+            var currSelected = that.getCurrentlySelectedMugType();
             that.reloadUI();
             if (currSelected !== null) {
                 formdesigner.ui.selectMugTypeInUI(currSelected);
@@ -2141,7 +2150,7 @@ formdesigner.controller = (function () {
         }
         
         //fire an form-property-changed event to sync up with the 'save to server' button disabled state
-        formdesigner.controller.form.fire({
+        that.form.fire({
             type: 'form-property-changed'
         });
     };

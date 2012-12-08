@@ -457,7 +457,7 @@ formdesigner.ui = function () {
 	                    level: 'form-warning',
 	                }));
 	        }
-	        formdesigner.ui.resetMessages(formdesigner.model.form.errors);
+	        that.resetMessages(formdesigner.model.form.errors);
         }
     };
 
@@ -504,15 +504,15 @@ formdesigner.ui = function () {
             if (e.property === 'nodeID' && e.element === 'dataElement') {
                 var node = $('#' + e.mugTypeUfid);
                 if (mugType.typeName === "Data Node" && e.val &&
-                        e.val !== formdesigner.ui.jstree("get_text", node)) {
-                    formdesigner.ui.jstree('rename_node', node, e.val);
+                        e.val !== that.ui.jstree("get_text", node)) {
+                    that.jstree('rename_node', node, e.val);
                 }
             }
         });
 
         $("#fd-question-properties").show();
 
-        formdesigner.ui.showVisualValidation(mugType);
+        that.showVisualValidation(mugType);
     };
 
     /**
@@ -549,7 +549,7 @@ formdesigner.ui = function () {
 
     that.selectMugTypeInUI = function (mugType) {
         var ufid = mugType.ufid;
-        return formdesigner.ui.jstree('select_node', '#' + ufid, true);
+        return that.jstree('select_node', '#' + ufid, true);
     };
 
     that.forceUpdateUI = function () {
@@ -657,7 +657,7 @@ formdesigner.ui = function () {
                 addLangButton = $(str);
                 addLangButton.button();
                 addLangButton.click(function () {
-                    formdesigner.ui.showAddLanguageDialog();
+                    that.showAddLanguageDialog();
                 });
                 div.append(addLangButton);
                 str = '';
@@ -665,7 +665,7 @@ formdesigner.ui = function () {
                 removeLangButton = $(str);
                 removeLangButton.button();
                 removeLangButton.click(function () {
-                    formdesigner.ui.showRemoveLanguageDialog();
+                    that.showRemoveLanguageDialog();
                 });
                 div.append(removeLangButton);
             }
@@ -799,7 +799,7 @@ formdesigner.ui = function () {
             invalidMTs, i, invalidMsg, liID;
 
         //clear existing warning icons to start fresh.
-        formdesigner.ui.getJSTree().find('.fd-tree-valid-alert-icon').remove();
+        that.getJSTree().find('.fd-tree-valid-alert-icon').remove();
         
         invalidMTs = form.getInvalidMugTypeUFIDs();
         for (i in invalidMTs) {
@@ -823,7 +823,7 @@ formdesigner.ui = function () {
 //        // In this case we select the topmost node (if available)
 //        // See also: forceUpdateUI
 //        controlTree.jstree("remove",el);
-        removeMugTypeFromTree(mugType, formdesigner.ui.getJSTree());
+        removeMugTypeFromTree(mugType, that.getJSTree());
 
     };
 
@@ -865,16 +865,7 @@ formdesigner.ui = function () {
      * faster/easier than rebuilding the entire interface from scratch.
      */
     that.resetUI = function() {
-        /**
-         * Clear out all nodes from the given UI jsTree.
-         * @param tree - Jquery selector pointing to jstree instance
-         */
-        function clearUITree(tree) {
-            tree.jstree('deselect_all');
-            tree.find('ul').empty();
-        }
-
-        clearUITree(formdesigner.ui.getJSTree());
+        that.jstree('deselect_all')
 
         $('#fd-form-prop-formName-input').val(formdesigner.controller.form.formName);
         $('#fd-form-prop-formID-input').val(formdesigner.controller.form.formID);
@@ -1170,8 +1161,8 @@ formdesigner.ui = function () {
                     var node = $('#' + mug.ufid);
                     var it = mug.getItext();
                     if (it.id === e.item.id && e.form === "default") {
-                        if (e.value && e.value !== formdesigner.ui.jstree("get_text", node)) {
-                            formdesigner.ui.jstree('rename_node', node, e.value);
+                        if (e.value && e.value !== that.jstree("get_text", node)) {
+                            that.jstree('rename_node', node, e.value);
                         }
                     }
                 });
@@ -1185,8 +1176,8 @@ formdesigner.ui = function () {
             allMugs.map(function (mug) {
                 var node = $('#' + mug.ufid);
                 var it = mug.getItext();
-                if (it && it.getValue("default", currLang) !== formdesigner.ui.jstree("get_text", node)) {
-                    formdesigner.ui.jstree('rename_node', node, it.getValue("default", currLang));
+                if (it && it.getValue("default", currLang) !== that.jstree("get_text", node)) {
+                    that.jstree('rename_node', node, it.getValue("default", currLang));
                 }
             });
         });
@@ -1724,6 +1715,10 @@ formdesigner.ui = function () {
      * Wrapper for jstree() calls.  Also very useful for debugging.
      */
     that.jstree = function () {
+        if (arguments[0] == "create") {
+            console.error("create", arguments);
+        }
+
         var tree = that.getJSTree();
         return tree.jstree.apply(tree, arguments);
     };

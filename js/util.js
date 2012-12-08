@@ -394,8 +394,8 @@ formdesigner.util = (function(){
      * @param refMug
      */
     var getNewMugType = function(refMugType){
-        var newMugType = formdesigner.util.clone(refMugType);
-        formdesigner.util.give_ufid(newMugType);
+        var newMugType = that.clone(refMugType);
+        that.give_ufid(newMugType);
         return newMugType;
     };
     that.getNewMugType = getNewMugType;
@@ -524,7 +524,7 @@ formdesigner.util = (function(){
             return "into";
         }
 
-        if (formdesigner.util.canMugTypeHaveChildren(refMugType,newMugType)) {
+        if (that.canMugTypeHaveChildren(refMugType,newMugType)) {
             return "into";
         } else {
             return "after";
@@ -757,7 +757,7 @@ formdesigner.util = (function(){
         if(!mugType || !mugType.mug) {
             return 'No Name!';
         }
-        if (formdesigner.util.isReadOnly(mugType)) {
+        if (that.isReadOnly(mugType)) {
             return "Unknown (read-only) question type"            
         }
 
