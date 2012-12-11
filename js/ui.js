@@ -28,13 +28,13 @@ formdesigner.ui = function () {
             controller = formdesigner.controller,
             dataTree,
             DEBUG_MODE = false,
-            QUESTION_TREE_DIV = '#fd-question-tree',
             MESSAGES_DIV = '#fd-messages',
             MESSAGE_TYPES = ["error", "parse-warning", "form-warning"],
             WARN_MSG_DIV = '#fd-parse-warn',
             ERROR_MSG_DIV = '#fd-parse-error',
             FORM_WARN_DIV = '#fd-form-warn';
-            
+
+    that.QUESTION_TREE_DIV = 'fd-question-tree';
 
     that.ODK_ONLY_QUESTION_TYPES = ['image','audio','video','barcode'];
     
@@ -110,13 +110,12 @@ formdesigner.ui = function () {
         }
     };
     
-    that.addQuestion = function(qType) {
+    that.addQuestion = function (qType) {
         try {
             var newMug = formdesigner.controller.createQuestion(qType);
             that.selectMugTypeInUI(newMug);
 
-
-            if(that.ODK_ONLY_QUESTION_TYPES.indexOf(qType) !== -1) { 
+            if (that.ODK_ONLY_QUESTION_TYPES.indexOf(qType) !== -1) { 
                 //it's an ODK media question
                 formdesigner.model.form.updateError(formdesigner.model.FormError({
                     message: 'This question type will ONLY work with CommCareODK/ODK Collect!',
@@ -131,15 +130,10 @@ formdesigner.ui = function () {
                 } else {
                     alert("Sorry that question type can't be added to the currently selected question.");
                 }
-            } else if (e.name === "NoNodeFound") {
-                // this is the error that gets raised when you add to a select item.
-                // kinda sketch but more user friendly
-                alert("You can't add questions to Select Items. Select something else before adding your question.");
             } else {
                 // we don't know what went wrong here.
                 throw e;
             }
-
         }
     };
 
@@ -236,160 +230,178 @@ formdesigner.ui = function () {
     that.buttons = buttons;
 
     function getJSTreeTypes() {
-        var groupRepeatValidChildren = formdesigner.util.GROUP_OR_REPEAT_VALID_CHILDREN,
-                jquery_icon_url = formdesigner.iconUrl,
-                types = {
-                    "max_children" : -1,
-                    "valid_children" : groupRepeatValidChildren,
-                    "types" : {
-                        "group" : {
-                            "icon": {
-                                "image" : jquery_icon_url,
-                                "position": "-16px -96px"
-                            },
-                            "valid_children" : groupRepeatValidChildren
-                        },
-                        "repeat" : {
-                            "icon": {
-                                "image" : jquery_icon_url,
-                                "position": "-64px -80px"
-                            },
-                            "valid_children" : groupRepeatValidChildren
-                        },
-                        "question" : {
-                            "icon": {
-                                "image" : jquery_icon_url,
-                                "position": "-128px -96px"
-                            },
-                            "valid_children" : "none"
-                        },
-                        "date" : {
-                            "icon": {
-                                "image" : jquery_icon_url,
-                                "position": "-32px -112px"
-                            },
-                            "valid_children" : "none"
-                        },
-                        "datetime" : {
-                            "icon": {
-                                "image" : jquery_icon_url,
-                                "position": "-80px -112px"
-                            },
-                            "valid_children" : "none"
-                        },
-                        "time" : {
-                            "icon": {
-                                "image" : jquery_icon_url,
-                                "position": "-80px -112px"
-                            },
-                            "valid_children" : "none"
-                        },
-                        "int" : {
-                            "icon": {
-                                "image" : jquery_icon_url,
-                                "position": "-112px -112px"
-                            },
-                            "valid_children" : "none"
-                        },
-                        "long" : {
-                            "icon": {
-                                "image" : jquery_icon_url,
-                                "position": "-112px -112px"
-                            },
-                            "valid_children" : "none"
-                        },
-                        "double" : {
-                            "icon": {
-                                "image" : jquery_icon_url,
-                                "position": "-112px -112px"
-                            },
-                            "valid_children" : "none"
-                        },
-                        "selectQuestion" : {
-                            "icon": {
-                                "image" : jquery_icon_url,
-                                "position": "-96px -176px"
-                            },
-                            "valid_children": ["item"]
-                        },
-                        "item" : {
-                            "icon": {
-                                "image" : jquery_icon_url,
-                                "position": "-48px -128px"
-                            },
-                            "valid_children" : "none"
-                        },
-                        "trigger" : {
-                            "icon": {
-                                "image" : jquery_icon_url,
-                                "position": "-16px -144px"
-                            },
-                            "valid_children" : "none"
-                        },
-                        "secret" : {
-                            "icon": {
-                                "image": jquery_icon_url,
-                                "position": "-112px -128px"
-                            },
-                            "valid_children" : "none"
-                        },
-                        "barcode" : {
-                            "icon": {
-                                "image": jquery_icon_url,
-                                "position": "-48px -224px"
-                            },
-                            "valid_children" : "none"
-                        },
-                        "geopoint" : {
-                            "icon": {
-                                "image": jquery_icon_url,
-                                "position": "-16px -176px"
-                            },
-                            "valid_children" : "none"
-                        },
-                        "image" : {
-                            "icon": {
-                                "image": jquery_icon_url,
-                                "position": "-208px -128px"
-                            },
-                            "valid_children" : "none"
-                        },
-                        "audio" : {
-                            "icon": {
-                                "image": jquery_icon_url,
-                                "position": "-144px -160px"
-                            },
-                            "valid_children" : "none"
-                        },
-                        "video" : {
-                            "icon": {
-                                "image": jquery_icon_url,
-                                "position": "-224px -128px"
-                            },
-                            "valid_children" : "none"
-                        },
-                        "datanode" : {
-                            "icon": {
-                                "image": jquery_icon_url,
-                                "position": "-112px -144px"
-                            },
-                            "valid_children" : "none"
-                        },
-                        "unknown" : {
-                            "icon": {
-                                "image": jquery_icon_url,
-                                "position": "-240px -128px"
-                            },
-                        },
-                        "default" : {
-                            "valid_children" : groupRepeatValidChildren
-                        }
-                    }
-                };
-        return types;
+        var questionTypes = [
+            "group",
+            "repeat",
+            "question",
+            "date",
+            "datetime",
+            "time",
+            "int",
+            "barcode",
+            "geopoint",
+            "long",
+            "double",
+            "selectQuestion",
+            "trigger",
+            "secret",
+            "default",
+            "image",
+            "audio",
+            "video"
+        ],
+            allTypes = questionTypes.concat(["datanode"]),
+            jquery_icon_url = formdesigner.iconUrl;
 
-    }
-
+        return {
+            "max_children" : -1,
+            "valid_children" : allTypes,  // valid root node types (aka children of the root node)
+            "types" : {
+                "group" : {
+                    "icon": {
+                        "image" : jquery_icon_url,
+                        "position": "-16px -96px"
+                    },
+                    "valid_children" : questionTypes
+                },
+                "repeat" : {
+                    "icon": {
+                        "image" : jquery_icon_url,
+                        "position": "-64px -80px"
+                    },
+                    "valid_children" : questionTypes
+                },
+                "question" : {
+                    "icon": {
+                        "image" : jquery_icon_url,
+                        "position": "-128px -96px"
+                    },
+                    "valid_children" : "none"
+                },
+                "date" : {
+                    "icon": {
+                        "image" : jquery_icon_url,
+                        "position": "-32px -112px"
+                    },
+                    "valid_children" : "none"
+                },
+                "datetime" : {
+                    "icon": {
+                        "image" : jquery_icon_url,
+                        "position": "-80px -112px"
+                    },
+                    "valid_children" : "none"
+                },
+                "time" : {
+                    "icon": {
+                        "image" : jquery_icon_url,
+                        "position": "-80px -112px"
+                    },
+                    "valid_children" : "none"
+                },
+                "int" : {
+                    "icon": {
+                        "image" : jquery_icon_url,
+                        "position": "-112px -112px"
+                    },
+                    "valid_children" : "none"
+                },
+                "long" : {
+                    "icon": {
+                        "image" : jquery_icon_url,
+                        "position": "-112px -112px"
+                    },
+                    "valid_children" : "none"
+                },
+                "double" : {
+                    "icon": {
+                        "image" : jquery_icon_url,
+                        "position": "-112px -112px"
+                    },
+                    "valid_children" : "none"
+                },
+                "selectQuestion" : {
+                    "icon": {
+                        "image" : jquery_icon_url,
+                        "position": "-96px -176px"
+                    },
+                    "valid_children": ["item"]
+                },
+                "item" : {
+                    "icon": {
+                        "image" : jquery_icon_url,
+                        "position": "-48px -128px"
+                    },
+                    "valid_children" : "none"
+                },
+                "trigger" : {
+                    "icon": {
+                        "image" : jquery_icon_url,
+                        "position": "-16px -144px"
+                    },
+                    "valid_children" : "none"
+                },
+                "secret" : {
+                    "icon": {
+                        "image": jquery_icon_url,
+                        "position": "-112px -128px"
+                    },
+                    "valid_children" : "none"
+                },
+                "barcode" : {
+                    "icon": {
+                        "image": jquery_icon_url,
+                        "position": "-48px -224px"
+                    },
+                    "valid_children" : "none"
+                },
+                "geopoint" : {
+                    "icon": {
+                        "image": jquery_icon_url,
+                        "position": "-16px -176px"
+                    },
+                    "valid_children" : "none"
+                },
+                "image" : {
+                    "icon": {
+                        "image": jquery_icon_url,
+                        "position": "-208px -128px"
+                    },
+                    "valid_children" : "none"
+                },
+                "audio" : {
+                    "icon": {
+                        "image": jquery_icon_url,
+                        "position": "-144px -160px"
+                    },
+                    "valid_children" : "none"
+                },
+                "video" : {
+                    "icon": {
+                        "image": jquery_icon_url,
+                        "position": "-224px -128px"
+                    },
+                    "valid_children" : "none"
+                },
+                "datanode" : {
+                    "icon": {
+                        "image": jquery_icon_url,
+                        "position": "-112px -144px"
+                    },
+                    "valid_children" : "none"
+                },
+                "unknown" : {
+                    "icon": {
+                        "image": jquery_icon_url,
+                        "position": "-240px -128px"
+                    },
+                },
+                "default" : {
+                    "valid_children" : questionTypes
+                }
+            }
+        };
+    };
 
     that.showVisualValidation = function (mugType) {
         function setValidationFailedIcon(li, showIcon, message) {
@@ -521,6 +533,11 @@ formdesigner.ui = function () {
      * @param data
      */
     function node_select(e, data) {
+        // skip non-user trigger events 
+        if (data.args.length === 1) {
+            return;
+        }
+
         var curSelUfid = jQuery.data(data.rslt.obj[0], 'mugTypeUfid');
         // don't do anything if we're already on the selected node
         var curMug = formdesigner.controller.getCurrentlySelectedMugType();
@@ -573,7 +590,7 @@ formdesigner.ui = function () {
         } else {
             // already selected, nothing to do
         }
-    }
+    };
 
     that.showSelectItemAddButton = function () {
         var addItemBut = $('#fd-add-item-select_ez');
@@ -596,7 +613,7 @@ formdesigner.ui = function () {
         $('#fd-add-item-select_ez').hide();
     };
 
-    var questionTree;
+    that.questionTree = null;
 
 
     /**
@@ -865,7 +882,7 @@ formdesigner.ui = function () {
      * faster/easier than rebuilding the entire interface from scratch.
      */
     that.resetUI = function() {
-        that.jstree('deselect_all')
+        that.jstree('deselect_all');
 
         $('#fd-form-prop-formName-input').val(formdesigner.controller.form.formName);
         $('#fd-form-prop-formID-input').val(formdesigner.controller.form.formID);
@@ -1646,8 +1663,8 @@ formdesigner.ui = function () {
 
     that.createJSTree = function () {
         $.jstree._themes = formdesigner.staticPrefix + "themes/";
-        questionTree = $(QUESTION_TREE_DIV);
-        questionTree.jstree({
+        that.questionTree = $('#' + that.QUESTION_TREE_DIV);
+        that.questionTree.jstree({
             "json_data" : {
                 "data" : []
             },
@@ -1662,13 +1679,6 @@ formdesigner.ui = function () {
             "crrm" : {
                 "move": {
                     "always_copy": false,
-                    "check_move" : function (m) {
-                        var controller = formdesigner.controller,
-                                mugType = controller.getMTFromFormByUFID($(m.o).attr('id')),
-                                refMugType = controller.getMTFromFormByUFID($(m.r).attr('id')),
-                                position = m.p;
-                        return controller.checkMoveOp(mugType, position, refMugType);
-                    }
                 }
             },
             "dnd" : {
@@ -1694,11 +1704,11 @@ formdesigner.ui = function () {
         });
 
         $("#fd-expand-all").click(function() {
-            questionTree.jstree("open_all");
+            that.questionTree.jstree("open_all");
         });
 
         $("#fd-collapse-all").click(function() {
-            questionTree.jstree("close_all");
+            that.questionTree.jstree("close_all");
         });
     }
 
@@ -1706,18 +1716,16 @@ formdesigner.ui = function () {
      * todo: don't look up DOM object every time
      */
     that.getJSTree = function () {
-        return questionTree;
-        return $(QUESTION_TREE_DIV);
+        return that.questionTree;
     };
 
-    var depth=0;
     /**
      * Wrapper for jstree() calls.  Also very useful for debugging.
      */
     that.jstree = function () {
-        if (arguments[0] == "create") {
-            console.error("create", arguments);
-        }
+        //if (arguments[0] == "create") {
+            //console.error("create", arguments);
+        //}
 
         var tree = that.getJSTree();
         return tree.jstree.apply(tree, arguments);
