@@ -43,9 +43,6 @@ formdesigner.controller = (function () {
            that.setFormChanged(); //mark the form as 'changed'
         });
 
-        that.on('question-removed', function () {
-            that.setFormChanged();
-        });
         
         that.on('question-itext-changed', function () {
             that.setFormChanged();
@@ -389,13 +386,11 @@ formdesigner.controller = (function () {
 
             mt = node.getValue();
             if(!mt) {
-                throw 'Node in tree without value?!?!'
+                throw 'Node in tree without value?!?!';
             }
-
             loaderFunc(mt);
-
-
         };
+
         loaderFunc = that.loadMugTypeIntoUI;
         tree = that.form.controlTree;
         tree.treeMap(treeFunc);
@@ -1218,27 +1213,28 @@ formdesigner.controller = (function () {
         that.removeMugTypeFromForm(MT);
     };
 
-    that.removeMugTypeFromForm = function (mugType) {
-        var Itext = formdesigner.model.Itext,
-            children, i;
+    that._removeMugTypeFromForm = function (mugType) {
+        
         formdesigner.ui.removeMugTypeFromTree(mugType);
 
         var fromTree = that.form.controlTree.getNodeFromMugType(mugType);
         if (fromTree) {
-            children = that.form.controlTree.getNodeFromMugType(mugType).getChildrenMugTypes();
-            for (i in children) {
-                if(children.hasOwnProperty(i)) {
-                    that.removeMugTypeFromForm(children[i]);
-                }
+            var children = that.form.controlTree.getNodeFromMugType(mugType).getChildrenMugTypes();
+            for (var i = 0; i < children.length; i++) {
+                that._removeMugTypeFromForm(children[i]);
             }
         }
         
         that.form.dataTree.removeMugType(mugType);
         that.form.controlTree.removeMugType(mugType);
+    };
+
+    that.removeMugTypeFromForm = function (mugType) {
+        that._removeMugTypeFromForm(mugType);
         
         // ensure something is selected if possible
-        var selected = formdesigner.ui.jstree('get_selected');
-        if (selected.length === 0) {
+        var selected;
+        if (!formdesigner.ui.jstree('get_selected').length) {
             // if there's any nodes in the tree, just select the first
             var all_nodes = formdesigner.ui.getJSTree().find("li");
             if (all_nodes.length > 0) {
@@ -1251,16 +1247,17 @@ formdesigner.controller = (function () {
                 that.reloadUI();
                 selected = false;
             }
+        } else {
+            selected = true;
         }
-        
+       
         if (selected) {
             formdesigner.ui.displayMugProperties(that.getCurrentlySelectedMugType());
+        } else {
+            formdesigner.ui.hideQuestionProperties();
         }
 
-        that.fire({
-            type: "question-removed",
-            mugType: mugType
-        });
+        that.setFormChanged();
     };
 
     /**

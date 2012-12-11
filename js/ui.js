@@ -528,13 +528,12 @@ formdesigner.ui = function () {
     };
 
     /**
-     * Private function (to the UI anyway) for handling node_select events.
-     * @param e
-     * @param data
+     * Handler for node_select events. Does nothing for non-user triggered
+     * events, call directly if you want to use.
      */
-    function node_select(e, data) {
-        // skip non-user trigger events 
-        if (data.args.length === 1) {
+    that.handleNodeSelect = function (e, data) {
+        // skip non-user triggered events. call this directly if you want
+        if (data && data.args.length === 1) {
             return;
         }
 
@@ -551,7 +550,7 @@ formdesigner.ui = function () {
                 that.hideSelectItemAddButton();
             }
         }
-    }
+    };
 
     /**
      * Select the lowest top-level non-data node
@@ -560,7 +559,6 @@ formdesigner.ui = function () {
      *         nodes, otherwise false
      */
     that.selectLowestQuestionNode = function () {
-        //select the lowest not-data-node and continue
         var questions = formdesigner.ui.getJSTree().children().children().filter("[rel!='datanode']");
         if (questions.length > 0) {
             var newSelectEl = $(questions[questions.length - 1]);
@@ -1658,7 +1656,7 @@ formdesigner.ui = function () {
             "types": getJSTreeTypes(),
             "plugins" : [ "themes", "json_data", "ui", "crrm", "types", "dnd" ]
         }).bind("select_node.jstree", 
-            node_select
+            that.handleNodeSelect
         ).bind("move_node.jstree", function (e, data) {
             var controller = formdesigner.controller,
                 mugType = controller.getMTFromFormByUFID($(data.rslt.o).attr('id')),

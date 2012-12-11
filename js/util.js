@@ -685,7 +685,7 @@ formdesigner.util = (function(){
             return 'No Name!';
         }
         if (that.isReadOnly(mugType)) {
-            return "Unknown (read-only) question type"            
+            return "Unknown (read-only) question type";
         }
 
         mugProps = mugType.mug.properties;
@@ -713,12 +713,7 @@ formdesigner.util = (function(){
                     nodeID = dEl.nodeID;
                 }
             }
-            if(nodeID) {
-                disp = nodeID;
-            } else {
-                disp = 'No Display Name!';
-            }
-            return disp;
+            return nodeID;
         }
 
         lang = formdesigner.currentItextDisplayLanguage;
