@@ -538,25 +538,14 @@ formdesigner.ui = function () {
             return;
         }
 
-        var curSelUfid = jQuery.data(data.rslt.obj[0], 'mugTypeUfid');
-        // don't do anything if we're already on the selected node
-        var curMug = formdesigner.controller.getCurrentlySelectedMugType();
+        that.displayMugProperties(formdesigner.controller.getCurrentlySelectedMugType());
 
-        // don't bother resetting everything if they just clicked
-        // on the mug that was already selected
-        if (!curMug || curMug.ufid !== curSelUfid) {
-            formdesigner.controller.setCurrentlySelectedMugType(curSelUfid);
-            that.displayMugProperties(formdesigner.controller.getCurrentlySelectedMugType());
-        }
-        var tagName,
-                newMug;
-        newMug = formdesigner.controller.getCurrentlySelectedMugType();
-        if (newMug.mug.properties.controlElement) {
+        var newMug = formdesigner.controller.getCurrentlySelectedMugType(),
+            tagName;
+
+        if (newMug.hasControlElement()) {
             tagName = newMug.mug.properties.controlElement.properties.tagName;
-        }
-
-        if(tagName) {
-            if (['item','select','select1'].indexOf(tagName) !== -1) {
+            if (['item', 'select', 'select1'].indexOf(tagName) !== -1) {
                 that.showSelectItemAddButton();
             } else {
                 that.hideSelectItemAddButton();
@@ -564,33 +553,31 @@ formdesigner.ui = function () {
         }
     }
 
+    /**
+     * Select the lowest top-level non-data node
+     *
+     * @return jquery object for the lowest node if there are any question
+     *         nodes, otherwise false
+     */
+    that.selectLowestQuestionNode = function () {
+        //select the lowest not-data-node and continue
+        var questions = formdesigner.ui.getJSTree().children().children().filter("[rel!='datanode']");
+        if (questions.length > 0) {
+            var newSelectEl = $(questions[questions.length - 1]);
+            formdesigner.ui
+                .jstree("deselect_all")
+                .jstree("select_node", newSelectEl, false);
+            return newSelectEl;
+        } else {
+            return false;
+        }
+    };
+
     that.selectMugTypeInUI = function (mugType) {
         var ufid = mugType.ufid;
         return that.jstree('select_node', '#' + ufid, true);
     };
 
-    that.forceUpdateUI = function () {
-        // after deleting a question the tree can in a state where nothing is
-        // selected which makes the form designer sad.
-        // If there is nothing selected and there are other questions, just select
-        // the first thing. Otherwise, clear out the question editing pane.
-        var selected = that.jstree('get_selected');
-        if (selected.length === 0) {
-            // if there's any nodes in the tree, just select the first
-            var all_nodes = $(tree).find("li");
-            if (all_nodes.length > 0) {
-                that.jstree('select_node', all_nodes[0]);
-            } else {
-                // otherwise clear the Question Edit UI pane
-                that.hideQuestionProperties();
-                // and the selected mug + other stuff in the UI
-                formdesigner.controller.reloadUI();
-
-            }
-        } else {
-            // already selected, nothing to do
-        }
-    };
 
     that.showSelectItemAddButton = function () {
         var addItemBut = $('#fd-add-item-select_ez');
@@ -830,26 +817,8 @@ formdesigner.ui = function () {
 
     };
 
-    that.removeMugTypeFromUITree = function (mugType) {
-//        var controlTree, el, ufid;
-//        ufid = mugType.ufid;
-//        el = $("#" + ufid);
-//        controlTree = $("#fd-question-tree");
-//        // this event _usually_ will select another mug from the tree
-//        // but NOT if the first element is removed.
-//        // In this case we select the topmost node (if available)
-//        // See also: forceUpdateUI
-//        controlTree.jstree("remove",el);
-        removeMugTypeFromTree(mugType, that.getJSTree());
-
-    };
-
-    var removeMugTypeFromTree = function (mugType, tree) {
-        var el, ufid;
-        tree = $(tree); //ensure it's a jquery element
-        ufid = mugType.ufid;
-        el = $("#" + ufid);
-        tree.jstree("remove", el);
+    that.removeMugTypeFromTree = function (mugType) {
+        that.jstree("remove", '#' + mugType.ufid);
     };
 
     function setup_fancybox() {
