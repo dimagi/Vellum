@@ -39,26 +39,6 @@ formdesigner.util = (function(){
                              "bindElement/calculateAttr",
                              "bindElement/constraintAttr"]; 
     
-    var GROUP_OR_REPEAT_VALID_CHILDREN = that.GROUP_OR_REPEAT_VALID_CHILDREN = [
-        "group",
-        "repeat",
-        "question",
-        "date",
-        "datetime",
-        "time",
-        "int",
-        "barcode",
-        "geopoint",
-        "long",
-        "double",
-        "selectQuestion",
-        "trigger",
-        "secret",
-        "default",
-        "image",
-        "audio",
-        "video"
-    ];
     
     that.QUESTIONS = {
         //in the format: {question_slug: question_label}
@@ -321,8 +301,21 @@ formdesigner.util = (function(){
      * Generates a unique question ID (unique in this form) and
      * returns it as a string.
      */
-    that.generate_question_id = function () {
-        return label_maker('question');
+    that.generate_question_id = function (question_id) {
+        if (question_id) {
+            var match = /(.+)-\d$/.exec(question_id) ;
+            if (match) {
+                question_id = match[1]; 
+            }
+            for (var i = 1;; i++) {
+                var new_id = question_id + "-" + i;
+                if (!formdesigner.model.questionIdCount(new_id)) {
+                    return new_id; 
+                }
+            }
+        } else {
+            return label_maker('question');
+        }
     };
 
 
@@ -381,8 +374,8 @@ formdesigner.util = (function(){
      * @param refMug
      */
     var getNewMugType = function(refMugType){
-        var newMugType = formdesigner.util.clone(refMugType);
-        formdesigner.util.give_ufid(newMugType);
+        var newMugType = that.clone(refMugType);
+        that.give_ufid(newMugType);
         return newMugType;
     };
     that.getNewMugType = getNewMugType;
@@ -456,69 +449,15 @@ formdesigner.util = (function(){
     };
     that.eventuality = eventuality;
 
-    /**
-     * Answers the question of whether
-     * the refMugType can have children of type ofTypeMug.
-     * @return list of strings indicating the allowed children types (if any).
-     * can be any of 'group' 'repeat' 'select' 'item' 'question'
-     */
-    var canMugTypeHaveChildren = function(refMugType,ofTypeMug){
-        var allowedChildren, n, targetMugTagName, refMugTagName,
-                makeLower = function(s){
-                    return s.toLowerCase();
-                };
-
-        if (!refMugType || !ofTypeMug || !refMugType.properties.controlElement) {
-            throw 'Cannot pass null argument or MugType without a controlElement!';
-        }
-        if(!refMugType.controlNodeCanHaveChildren){ return false; }
-        allowedChildren = refMugType.controlNodeAllowedChildren;
-        allowedChildren = allowedChildren.map(makeLower);
-        if (ofTypeMug.mug.properties.controlElement) {
-            targetMugTagName = ofTypeMug.mug.properties.controlElement.properties.tagName.toLowerCase();
-        } else if (ofTypeMug.typeName === "Data Node") {
-            targetMugTagName = 'data';
-        }
-        refMugTagName = refMugType.mug.properties.controlElement.properties.tagName.toLowerCase();
-
-        if(allowedChildren.indexOf(targetMugTagName) === -1 && targetMugTagName != 'data'){
-            return false;
-        }else{
-            return true;
-        }
-    
-    };
-    that.canMugTypeHaveChildren = canMugTypeHaveChildren;
-
     var capitaliseFirstLetter = function (string) {
         return string.charAt(0).toUpperCase() + string.slice(1);
     };
     that.capitaliseFirstLetter = capitaliseFirstLetter;
 
-    /**
-     * Determines where the newMugType should be inserted relative
-     * to the refMugType.
-     * @param refMugType - the reference MT already in the tree
-     * @param newMugType - the new MT you want a relative position for
-     * @return - String: 'first', 'inside' or 'after'
-     */
-    var getRelativeInsertPosition = function(refMugType, newMugType){
-            var canHaveChildren;
-            if(!refMugType){
-                return "into";
-            }
-
-            canHaveChildren = formdesigner.util.canMugTypeHaveChildren(refMugType,newMugType);
-
-            if(canHaveChildren){
-                return "into";
-            }else{
-                return "after";
-            }
+    that.pluralize = function (noun, n) {
+        return noun + (n !== 1 ? 's' : '');
     };
-    that.getRelativeInsertPosition = getRelativeInsertPosition;
 
-    
     var generate_guid = function() {
         // http://stackoverflow.com/questions/105034/how-to-create-a-guid-uuid-in-javascript
         var S4 = function() {
@@ -527,8 +466,8 @@ formdesigner.util = (function(){
         return (S4()+S4()+S4()+S4()+S4()+S4()+S4()+S4());
     };
 
-    var CHARS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-    var generate_xmlns_uuid = function () {
+    that.generate_xmlns_uuid = function () {
+        var CHARS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
         var uuid = [], r, i;
 
 		// rfc4122 requires these characters
@@ -544,19 +483,16 @@ formdesigner.util = (function(){
 			}
 		}
 		return uuid.toString().replace(/,/g,'');
-    }
-    that.generate_xmlns_uuid = generate_xmlns_uuid;
+    };
 
     /**
      * This method gives the passed object
-     * a Unique Mug ID plus standardized method(s)
-     * for accessing the ID.
+     * a Unique Mug ID
      * @param that
      */
-    var give_ufid = function(that){
+    that.give_ufid = function(that) {
         that.ufid = generate_guid();
     };
-    that.give_ufid = give_ufid;
 
     that.XSD_DATA_TYPES = [
             'xsd:boolean',
@@ -621,12 +557,11 @@ formdesigner.util = (function(){
     };
     that.exists = exists;
 
-    var getLabelItextID = function (mug) {
+    that.getLabelItextID = function (mug) {
         if(mug.properties.controlElement) {
             return mug.properties.controlElement.properties.labelItextID
         }
-    }
-    that.getLabelItextID = getLabelItextID;
+    };
 
     
     (function($) {
@@ -697,9 +632,7 @@ formdesigner.util = (function(){
 	            }
 	        }
         });
-
-
-    }
+    };
 
     /**
      * Bind some standard responses to the 'form-property-changed' event.
@@ -717,7 +650,7 @@ formdesigner.util = (function(){
         form.on('form-property-changed', function() {
             formdesigner.controller.setFormChanged();
         });
-    }
+    };
 
     /**
      * Renames a node in the JSTree display tree
@@ -727,13 +660,13 @@ formdesigner.util = (function(){
     that.changeUITreeNodeLabel = function (ufid, val) {
         var el = $('#' + ufid);
         $('#fd-question-tree').jstree('rename_node',el,val);
-    }
+    };
 
     that.getDataMugDisplayName = function (mugType) {
         var mugProps, dEl;
 
         if(!mugType || !mugType.mug) {
-            return 'No Name!'
+            return 'No Name!';
         }
 
         mugProps = mugType.mug.properties;
@@ -744,14 +677,14 @@ formdesigner.util = (function(){
         }
 
         return dEl.nodeID;
-    }
+    };
 
     that.getMugDisplayName = function (mugType) {
         var itextItem, nodeID, cEl,dEl,bEl, mugProps, disp, lang, Itext;
         if(!mugType || !mugType.mug) {
-            return 'No Name!'
+            return 'No Name!';
         }
-        if (formdesigner.util.isReadOnly(mugType)) {
+        if (that.isReadOnly(mugType)) {
             return "Unknown (read-only) question type"            
         }
 

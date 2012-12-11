@@ -413,7 +413,7 @@ formdesigner.model = function () {
                 if (typeof bindElSpec.nodeID !== 'undefined') {
                     if (dataElSpec.nodeID) {
                         bindElSpec.nodeID = dataElSpec.nodeID; //make bind id match data id for convenience
-                    }else{
+                    } else {
                         bindElSpec.nodeID = formdesigner.util.generate_question_id();
                     }
                 }
@@ -428,13 +428,13 @@ formdesigner.model = function () {
         // utility functions
         mugType.hasControlElement = function () {
             return Boolean(this.mug.properties.controlElement);
-        }
+        };
         mugType.hasDataElement = function () {
             return Boolean(this.mug.properties.dataElement);
-        }
+        };
         mugType.hasBindElement = function () {
             return Boolean(this.mug.properties.bindElement);
-        }
+        };
         
         mugType.getDefaultItextRoot = function () {
             var nodeID, parent;
@@ -491,7 +491,6 @@ formdesigner.model = function () {
             } else {
                 return "";
             } 
-            
         };
         
         mugType.getDefaultLabelItext = function (defaultValue) {
@@ -552,6 +551,32 @@ formdesigner.model = function () {
         return "pass";
     };
         
+    that.questionIdCount = function (qId) {
+        var allMugs = formdesigner.controller.getMugTypeList(),
+            count = 0;
+        for (var i = 0; i < allMugs.length; i++) {
+            var node = allMugs[i];
+            if (node.hasDataElement() && qId === node.mug.properties.dataElement.properties.nodeID) {
+                count++; 
+            }
+        }
+
+        return count;
+    };
+
+    that.itextIdCount = function (id) {
+        var allMugs = formdesigner.controller.getMugTypeList(),
+            count = 0;
+        for (var i = 0; i < allMugs.length; i++) {
+            var node = allMugs[i];
+            if (node.hasControlElement() && id === node.mug.properties.controlElement.properties.labelItextID.id) {
+                count++;
+            }
+        }
+
+        return count;
+    };
+
     var validationFuncs = {
         //should be used to figure out the logic for label, defaultLabel, labelItext, etc properties
         nodeID: function (mugType, mug) {
@@ -560,17 +585,7 @@ formdesigner.model = function () {
             if (res !== "pass") {
                 return res;
             }
-            // check for dupes
-            var hasDuplicateId = function (qId) {
-                var allMugs = formdesigner.controller.getMugTypeList();
-                var hasDupeArray = allMugs.map(function (node) {
-                    // skip ourselves, checking for dupes
-                    return node.hasDataElement() && node.ufid != mugType.ufid && 
-                           node.mug.properties.dataElement.properties.nodeID === qId;
-                });
-                return hasDupeArray.indexOf(true) !== -1;
-            }
-            if (hasDuplicateId(qId)) {
+            if (that.questionIdCount(qId) > 1) {
                 return qId + " is a duplicate ID in the form. Question IDs must be unique.";
             }
             return "pass";
@@ -1096,13 +1111,6 @@ formdesigner.model = function () {
             return validationResult;
         },
 
-        //OBJECT FIELDS//
-        controlNodeCanHaveChildren: false,
-
-        /** A list of controlElement.tagName's that are valid children for this control element **/
-        controlNodeAllowedChildren : [],
-        dataNodeCanHaveChildren: true,
-
         mug: null,
         toString: function () {
             if (this.mug && this.mug.properties.dataElement) {
@@ -1190,7 +1198,6 @@ formdesigner.model = function () {
         mType.typeSlug = "text";
         mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
         
-        mType.controlNodeAllowedChildren = false;
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
         mType.mug.properties.controlElement.properties.name = "Text";
@@ -1205,7 +1212,6 @@ formdesigner.model = function () {
         mType.typeSlug = "datanode";
         mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
         
-        mType.controlNodeAllowedChildren = false;
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
         return mType;
@@ -1217,7 +1223,6 @@ formdesigner.model = function () {
         mType.typeSlug = "secret";
         mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
         
-        mType.controlNodeAllowedChildren = false;
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
         mType.mug.properties.controlElement.properties.name = "Secret";
@@ -1242,7 +1247,6 @@ formdesigner.model = function () {
         mType.typeSlug = "int";
         mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
         
-        mType.controlNodeAllowedChildren = false;
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
         mType.mug.properties.controlElement.properties.name = "Integer";
@@ -1256,7 +1260,6 @@ formdesigner.model = function () {
                 mug;
         mType.typeSlug = "audio";
         mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
-        mType.controlNodeAllowedChildren = false;
         mType.properties.controlElement.mediaType = {
             lstring: 'Media Type',
             visibility: 'visible',
@@ -1310,7 +1313,6 @@ formdesigner.model = function () {
                 mug;
         mType.typeSlug = "geopoint";
         mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
-        mType.controlNodeAllowedChildren = false;
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
         mType.mug.properties.controlElement.properties.name = "Geopoint";
@@ -1324,7 +1326,6 @@ formdesigner.model = function () {
                 mug;
         mType.typeSlug = "barcode";
         mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
-        mType.controlNodeAllowedChildren = false;
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
         mType.mug.properties.controlElement.properties.name = "Barcode";
@@ -1338,7 +1339,6 @@ formdesigner.model = function () {
                 mug;
         mType.typeSlug = "date";
         mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
-        mType.controlNodeAllowedChildren = false;
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
         mType.mug.properties.controlElement.properties.name = "Date";
@@ -1352,7 +1352,6 @@ formdesigner.model = function () {
                 mug;
         mType.typeSlug = "datetime";
         mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
-        mType.controlNodeAllowedChildren = false;
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
         mType.mug.properties.controlElement.properties.name = "DateTime";
@@ -1366,7 +1365,6 @@ formdesigner.model = function () {
                 mug;
         mType.typeSlug = "time";
         mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
-        mType.controlNodeAllowedChildren = false;
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
         mType.mug.properties.controlElement.properties.name = "Time";
@@ -1400,14 +1398,10 @@ formdesigner.model = function () {
 
     that.mugTypeMaker.stdItem = function () {
         var mType = formdesigner.util.getNewMugType(mugTypes.controlOnly),
-                mug,
-                vResult,
-                controlProps;
+            mug, vResult, controlProps;
 
         mType.typeSlug = "item";
         mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
-        mType.controlNodeAllowedChildren = false;
-
 
         controlProps = mType.properties.controlElement;
         controlProps.hintLabel.presence = 'notallowed';
@@ -1430,7 +1424,6 @@ formdesigner.model = function () {
 
         mType.typeSlug = "trigger";
         mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
-        mType.controlNodeAllowedChildren = false;
         mType.properties.bindElement.dataType.presence = 'notallowed';
         mType.properties.dataElement.dataValue.presence = 'optional';
 
@@ -1447,14 +1440,10 @@ formdesigner.model = function () {
 
     that.mugTypeMaker.stdMSelect = function () {
         var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion),
-                allowedChildren,
                 mug,
                 vResult;
-        mType.controlNodeCanHaveChildren = true;
         mType.typeSlug = "select";
         mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
-        allowedChildren = ['item'];
-        mType.controlNodeAllowedChildren = allowedChildren;
         mType.properties.bindElement.dataType.visibility = "hidden";
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
@@ -1475,14 +1464,10 @@ formdesigner.model = function () {
 
     that.mugTypeMaker.stdGroup = function () {
         var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion),
-                allowedChildren,
                 mug,
                 vResult;
-        mType.controlNodeCanHaveChildren = true;
         mType.typeSlug = "group";
         mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
-        allowedChildren = ['repeat', 'input', 'select', 'select1', 'group', 'trigger'];
-        mType.controlNodeAllowedChildren = allowedChildren;
         mType.properties.bindElement.dataType.presence = "notallowed";
         mType.properties.controlElement.hintItextID.presence = "notallowed";
         mType.properties.controlElement.hintLabel.presence = "notallowed";
@@ -1679,10 +1664,6 @@ formdesigner.model = function () {
              * Returns the parent if found, else null.
              */
             that.findParentNode = function (node) {
-                if (!node) {
-                    throw {name: "NoNodeFound",
-                           message: "No node specified, can't find 'null' in tree!"};
-                }
                 var i, parent = null;
                 if (!children || children.length === 0) {
                     return null;
@@ -1907,16 +1888,6 @@ formdesigner.model = function () {
         that.insertMugType = function (mugType, position, refMugType) {
             var refNode, refNodeSiblings, refNodeIndex, refNodeParent, node;
             
-            if (!formdesigner.controller.checkMoveOp(mugType, position, refMugType, treeType)) {
-                throw { 
-                    name: "IllegalMove",
-                    message: 'Illegal Tree move requested! Doing nothing instead.',
-                    mugType: mugType,
-                    position: position,
-                    refMugType: refMugType 
-                };
-            }
-
             if (position !== null && typeof position !== 'string') {
                 throw "position argument must be a string or null! Can be 'after', 'before' or 'into'";
             }
@@ -2134,14 +2105,12 @@ formdesigner.model = function () {
     var Form = function () {
         var that = {}, dataTree, controlTree;
 
-        var init = (function () {
-            that.formName = 'New Form';
-            that.formID = 'data';
-            that.dataTree = dataTree = new Tree('data');
-            that.controlTree = controlTree = new Tree('control');
-            that.instanceMetadata = [InstanceMetadata({})];
-            that.errors = [];
-        })();
+        that.formName = 'New Form';
+        that.formID = 'data';
+        that.dataTree = dataTree = new Tree('data');
+        that.controlTree = controlTree = new Tree('control');
+        that.instanceMetadata = [InstanceMetadata({})];
+        that.errors = [];
 
         /**
          * Loops through the data and the control trees and picks out all the unique bind elements.
@@ -2974,8 +2943,13 @@ formdesigner.model = function () {
                 } else {
                     formdesigner.controller.form.clearError(error, {updateUI: true});
                 }
-                return {"mug": mug.ufid, "property": property, "path": path.toXPath(), 
-                        "ref": refMug ? refMug.ufid : ""};      
+                return {
+                    mug: mug.ufid, 
+                    ref: refMug ? refMug.ufid : "",
+                    property: property,
+                    path: path.toXPath(),
+                    sourcePath: formdesigner.controller.form.dataTree.getAbsolutePath(mug)
+                };      
             }));
         };
         
@@ -2983,10 +2957,35 @@ formdesigner.model = function () {
             this.clearReferences(mug, property);
             this.addReferences(mug, property);
         };
-        
-        logic.updatePath = function (mugId, from, to) {
+
+        logic.updateAllReferences = function (mug, clear) {
+            if (mug.hasBindElement()) {
+                for (var i = 0; i < formdesigner.util.XPATH_REFERENCES.length; i++) {
+                    var property = formdesigner.util.XPATH_REFERENCES[i];
+                    if (clear) {
+                        logic.clearReferences(mug, property);
+                    }
+                    logic.addReferences(mug, property);
+                }
+            }
+        };
+       
+        /**
+         * Update references to a node with its new path. Used when a node is
+         * moved or duplicated (with subtree).
+         *
+         * @param mugId - ufid of the mugType to update references for
+         * @param from - old absolute path of the mugType
+         * @param to - new absolute path of the mugType
+         * @param subtree - (optional) only replace references from nodes
+         *        beginning with this path (no trailing /)
+         */
+        logic.updatePath = function (mugId, from, to, subtree) {
+            if (from === to) { return; }
+
             var found = this.all.filter(function (elem) {
-                return elem.ref === mugId;
+                return elem.ref === mugId && 
+                    (!subtree || elem.sourcePath === subtree || elem.sourcePath.indexOf(subtree + '/') === 0);
             });
             var ref, mug, expr;
             for (var i = 0; i < found.length; i++) {
@@ -3000,9 +2999,8 @@ formdesigner.model = function () {
                                                                 ref.property.split("/")[1], expr.getText(), mug);
                 } 
             }
-            
         };
-        
+
         logic.reset = function () {
             this.all = [];
         };
@@ -3062,7 +3060,6 @@ formdesigner.model = function () {
      */
     
     that.ItextItem = function (options) {
-        
         var item = {}; 
         
         item.forms = options.forms || [];
@@ -3241,7 +3238,7 @@ formdesigner.model = function () {
         itext.hasItem = function (item) {
             return this.items.indexOf(item) !== -1;
         };
-        
+
         /**
          * Add an itext item to the global Itext object.
          * Item is an ItextItem object.
@@ -3254,7 +3251,7 @@ formdesigner.model = function () {
         };
         
         /*
-         * Create a new blacnk item and add it to the list.
+         * Create a new blank item and add it to the list.
          */
         itext.createItem = function (id) {
             var item = new that.ItextItem({
@@ -3305,9 +3302,7 @@ formdesigner.model = function () {
                 return item.id;
             });
         };
-                
-        
-        
+
         /**
          * Goes through the Itext data and verifies that
          * a) a default language is set to something that exists
@@ -3462,15 +3457,11 @@ formdesigner.model = function () {
     /**
      * An initialization function that sets up a number of different fields and properties
      */
-    var init = function () {
+    that.init = function () {
         var form = that.form = new Form();
         //set the form object in the controller so it has access to it as well
         formdesigner.controller.setForm(form);
     };
-    that.init = init;
-
-
-
 
     return that;
 }();
