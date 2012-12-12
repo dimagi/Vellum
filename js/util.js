@@ -652,33 +652,6 @@ formdesigner.util = (function(){
         });
     };
 
-    /**
-     * Renames a node in the JSTree display tree
-     * @param ufid - MugType ufid
-     * @param val - New value of the display label
-     */
-    that.changeUITreeNodeLabel = function (ufid, val) {
-        var el = $('#' + ufid);
-        $('#fd-question-tree').jstree('rename_node',el,val);
-    };
-
-    that.getDataMugDisplayName = function (mugType) {
-        var mugProps, dEl;
-
-        if(!mugType || !mugType.mug) {
-            return 'No Name!';
-        }
-
-        mugProps = mugType.mug.properties;
-        if (mugProps.dataElement) {
-            dEl = mugProps.dataElement.properties;
-        } else {
-            return 'Has no Data Element!';
-        }
-
-        return dEl.nodeID;
-    };
-
     that.getMugDisplayName = function (mugType) {
         var itextItem, nodeID, cEl,dEl,bEl, mugProps, disp, lang, Itext;
         if(!mugType || !mugType.mug) {

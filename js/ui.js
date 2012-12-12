@@ -22,17 +22,20 @@ if (typeof formdesigner === 'undefined') {
 
 formdesigner.ui = function () {
     "use strict";
-    var that = {},
-            question_list = [],
-            buttons = {},
-            controller = formdesigner.controller,
-            dataTree,
-            DEBUG_MODE = false,
-            MESSAGES_DIV = '#fd-messages',
-            MESSAGE_TYPES = ["error", "parse-warning", "form-warning"],
-            WARN_MSG_DIV = '#fd-parse-warn',
-            ERROR_MSG_DIV = '#fd-parse-error',
-            FORM_WARN_DIV = '#fd-form-warn';
+    var that = {
+        QUESTION_TREE_DIV: 'fd-question-tree',
+        noTextString: '[no text]'
+    },
+        question_list = [],
+        buttons = {},
+        controller = formdesigner.controller,
+        dataTree,
+        DEBUG_MODE = false,
+        MESSAGES_DIV = '#fd-messages',
+        MESSAGE_TYPES = ["error", "parse-warning", "form-warning"],
+        WARN_MSG_DIV = '#fd-parse-warn',
+        ERROR_MSG_DIV = '#fd-parse-error',
+        FORM_WARN_DIV = '#fd-form-warn';
 
     that.QUESTION_TREE_DIV = 'fd-question-tree';
 
@@ -617,10 +620,24 @@ formdesigner.ui = function () {
                 formdesigner.fire('formdesigner.loading_complete');
             }
         });
-
     };
 
-    var init_extra_tools = function() {
+    that.changeTreeDisplayLanguage = function (lang) {
+        var itext = formdesigner.model.Itext;
+        
+        formdesigner.currentItextDisplayLanguage = lang;
+
+        that.getJSTree().find('li').each(function (i, el) {
+            var $el = $(el),
+                mugType = formdesigner.controller.form.getMugTypeByUFID($el.prop('id')),
+                itextID = mugType.mug.properties.controlElement.properties.labelItextID.id,
+                text = itext.getItem(itextID).getValue("default", lang);
+
+            that.jstree('rename_node', $el, text || that.noTextString);
+        });
+    };
+
+    var init_extra_tools = function () {
         function makeLangDrop() {
             var div, addLangButton, removeLangButton, langList, langs, i, str, selectedLang, Itext;
             $('#fd-question-tree-container').find('#fd-lang-disp-div').remove();
@@ -633,27 +650,20 @@ formdesigner.ui = function () {
             div.append('<label>Display Language: </label>');
 
             str = '<select data-placeholder="Choose a Language" id="fd-land-disp-select">';
-            for (i in langs) {
-                if (langs.hasOwnProperty(i)) {
-                    if (Itext.getDefaultLanguage() === langs[i]) {
-                        selectedLang = 'selected';
-                    }
-
-                    str = str + '<option value="' + langs[i] + '" >' + langs[i] + '</option>';
-                }
+            for (var i = 0; i < langs.length; i++) {
+                str = str + '<option value="' + langs[i] + '" >' + langs[i] + '</option>';
             }
-
             str += '</select>';
 
             langList = $(str);
-            div.append(langList);
-            langList.change(function (e) {
-                formdesigner.currentItextDisplayLanguage = $(this).val();
-                formdesigner.controller.reloadUI();
+            langList.change(function () {
+                that.changeTreeDisplayLanguage($(this).val());
             });
 
             langList.val(formdesigner.currentItextDisplayLanguage);
-            if (formdesigner.opts.allowLanguageEdits || typeof formdesigner.opts.allowLanguageEdits === "undefined") {
+            div.append(langList);
+            
+            if (formdesigner.opts.allowLanguageEdits) {
                 str = '';
                 str = '<button class="btn btn-primary" id="fd-lang-disp-add-lang-button">Add Language</button>';
                 addLangButton = $(str);
@@ -674,20 +684,13 @@ formdesigner.ui = function () {
             $('#fd-question-tree-head').after(div);
         }
 
-
-        var accContainer = $("#fd-extra-tools"),
-                accordion = $("#fd-extra-tools-accordion"),
-                minMax = $('#fd-acc-min-max'),
-                minMaxButton = $('#fd-min-max-button'),
-                questionProps = $('#fd-question-properties'),
-                fdTree = $('.fd-tree'),
-                fdContainer = $('#fd-ui-container');
+        var accordion = $("#fd-extra-tools-accordion"),
+            minMaxButton = $('#fd-min-max-button');
 
         makeLangDrop();
         formdesigner.controller.on('fd-reload-ui', function () {
             makeLangDrop();
         });
-
 
         accordion.hide();
         accordion.accordion({
@@ -702,34 +705,17 @@ formdesigner.ui = function () {
             }
         });
 
-        (function c_showLoadItextXLS() {
-            $('#fd-load-xls-button').click(function () {
-                formdesigner.controller.showItextDialog();
-            });
-        })();
+        $('#fd-load-xls-button').click(formdesigner.controller.showItextDialog);
+        $('#fd-export-xls-button').click(formdesigner.controller.showExportDialog);
+        $('#fd-editsource-button').click(formdesigner.controller.showSourceXMLDialog);
 
-        
-        (function c_showExport() {
-            $('#fd-export-xls-button').click(function () {
-                formdesigner.controller.showExportDialog();
+        $('#fd-extra-template-questions div').each(function () {
+            $(this).button({
+                icons : {
+                    primary : 'ui-icon-gear'
+                }
             });
-        })();
-
-        
-        (function c_generateSource() {
-            $('#fd-editsource-button').click(function () {
-                formdesigner.controller.showSourceXMLDialog();
-            });
-        })();
-
-        $('#fd-extra-template-questions div').each(
-                function() {
-                    $(this).button({
-                        icons : {
-                            primary : 'ui-icon-gear'
-                        }
-                    });
-                }).button("disable");
+        }).button("disable");
 
         function makeFormProp(propLabel, propName, keyUpFunc, initVal) {
             var liStr = '<li id="fd-form-prop-' + propName + '" class="fd-form-property"><span class="fd-form-property-text">' + propLabel + ': ' + '</span>' +
@@ -741,8 +727,6 @@ formdesigner.ui = function () {
             ul.append(li);
             $(li).find('input').val(initVal)
                     .keyup(keyUpFunc);
-
-
         }
 
         function fireFormPropChanged(propName, oldVal, newVal) {
@@ -1637,7 +1621,7 @@ formdesigner.ui = function () {
             },
             "core": {
                 strings: {
-                    new_node: "[no text]"
+                    new_node: that.noTextString
                 }
             },
             "ui" : {

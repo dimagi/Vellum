@@ -2160,7 +2160,7 @@ formdesigner.model = function () {
          * Searches through BOTH trees and returns
          * a MT if found (null if nothing found)
          */
-        var getMugTypeByUFID = function (ufid) {
+        that.getMugTypeByUFID = function (ufid) {
             var MT = dataTree.getMugTypeFromUFID(ufid);
             if(!MT) {
                 MT = controlTree.getMugTypeFromUFID(ufid);
@@ -2168,7 +2168,6 @@ formdesigner.model = function () {
 
             return MT;
         };
-        that.getMugTypeByUFID = getMugTypeByUFID;
 
         var getInvalidMugTypes = function () {
             var MTListC, MTListD, result, controlTree, dataTree,
