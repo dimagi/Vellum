@@ -372,12 +372,13 @@ formdesigner.controller = (function () {
      * and whatever other widgets need refreshing in order
      * for the user to start the editing process.
      */
-    function reloadUI () {
-        var tree, treeFunc, loaderFunc, dataNodeList, i;
+    that.reloadUI = function () {
+        var treeFunc, dataNodeList;
         //first clear out the existing UI
         formdesigner.ui.resetUI();
         that.setCurrentlySelectedMugType(null);
 
+        formdesigner.ui.skipNodeSelectEvent = true;
         treeFunc = function (node) {
             var mt;
             if(node.isRootNode) {
@@ -388,23 +389,20 @@ formdesigner.controller = (function () {
             if(!mt) {
                 throw 'Node in tree without value?!?!';
             }
-            loaderFunc(mt);
+            that.loadMugTypeIntoUI(mt);
         };
 
-        loaderFunc = that.loadMugTypeIntoUI;
-        tree = that.form.controlTree;
-        tree.treeMap(treeFunc);
+        that.form.controlTree.treeMap(treeFunc);
         //get list of pure data nodes and throw them in the Question UI tree (at the bottom)
         dataNodeList = that.getDataNodeList();
-        for (i in dataNodeList) {
-            if (dataNodeList.hasOwnProperty(i)) {
-                that.loadMugTypeIntoUI(dataNodeList[i]);
-            }
+        for (var i = 0; i < dataNodeList.length; i++) {
+            that.loadMugTypeIntoUI(dataNodeList[i]);
         }
         formdesigner.ui.setAllTreeValidationIcons();
+        formdesigner.ui.skipNodeSelectEvent = false;
+        formdesigner.ui.selectSomethingOrResetUI(true);
         that.fire('fd-reload-ui');
-    }
-    that.reloadUI = reloadUI;
+    };
 
     /**
      * Goes through and grabs all of the data nodes (i.e. nodes that are only data nodes (possibly with a bind) without any
@@ -614,6 +612,7 @@ formdesigner.controller = (function () {
                 formdesigner.util.give_ufid(duplicate.mug.properties.controlElement);
             }
            
+            formdesigner.ui.skipNodeSelectEvent = options.itext !== "copy";
             // insert mugtype into data and UI trees
             if (depth > 0) {
                 if (parentMugType) {
@@ -635,6 +634,7 @@ formdesigner.controller = (function () {
                 formdesigner.ui.displayMugProperties(duplicate);
                 that.unlinkCurrentQuestionItext();
             }
+            formdesigner.ui.skipNodeSelectEvent = true;
 
             var children = that.getChildren(mugType);
             depth++;
@@ -659,7 +659,8 @@ formdesigner.controller = (function () {
             return [duplicate, pathReplacements];
         }
 
-        var selected = that.getCurrentlySelectedMugType(),
+        var oldSkip = formdesigner.ui.skipNodeSelectEvent,
+            selected = that.getCurrentlySelectedMugType(),
             parent = that.form.controlTree.getParentMugType(selected),
             foo = duplicateMugType(selected, parent, options),
             duplicate = foo[0],
@@ -670,10 +671,13 @@ formdesigner.controller = (function () {
             formdesigner.model.LogicManager.updatePath(pr.mugId, pr.from, pr.to, 
                 that.form.dataTree.getAbsolutePath(duplicate));
         }
+        formdesigner.ui.skipNodeSelectEvent = false;
 
         formdesigner.ui
             .jstree("deselect_all")
             .jstree("select_node", '#' + selected.ufid);
+
+        formdesigner.ui.skipNodeSelectEvent = oldSkip;
 
         that.form.fire({type: "form-property-changed"});
     };
@@ -717,16 +721,19 @@ formdesigner.controller = (function () {
                 }
             }
         }
-        
-        formdesigner.ui.jstree("select_node", '#' + mugType.ufid);
+       
 
         if (typeof parentMugType !== "undefined") {
             that.insertMugTypeIntoForm(parentMugType, mugType, position || 'into');
         } else {
             that.insertMugTypeIntoForm(oldSelected, mugType);
         }
+        
         // update the itext values
         formdesigner.model.Itext.updateForNewMug(mugType);
+
+        formdesigner.ui.jstree("select_node", '#' + mugType.ufid);
+
         
         this.fire({
             type: "question-creation",
@@ -813,11 +820,13 @@ formdesigner.controller = (function () {
 
         mug = mugType.mug;
 
-        //set the 'currently selected mugType' to be that of this mugType's parent.
+        // set the 'currently selected mugType' to be that of this mugType's parent.
         controlTree = that.form.controlTree;
         parentMT = controlTree.getParentMugType(mugType);
-
-        if (parentMT && mugType.properties.controlElement) { //check for control element because we want data nodes to be a flat list at bottom.
+        
+        // check for control element because we want data nodes to be a flat
+        // list at bottom.
+        if (parentMT && mugType.properties.controlElement) {
             parentMTUfid = parentMT.ufid;
             formdesigner.ui.jstree('select_node', '#'+parentMTUfid, true);
         } else {
@@ -1231,32 +1240,7 @@ formdesigner.controller = (function () {
 
     that.removeMugTypeFromForm = function (mugType) {
         that._removeMugTypeFromForm(mugType);
-        
-        // ensure something is selected if possible
-        var selected;
-        if (!formdesigner.ui.jstree('get_selected').length) {
-            // if there's any nodes in the tree, just select the first
-            var all_nodes = formdesigner.ui.getJSTree().find("li");
-            if (all_nodes.length > 0) {
-                formdesigner.ui.jstree('select_node', all_nodes[0]);
-                selected = true;
-            } else {
-                // otherwise clear the Question Edit UI pane
-                formdesigner.ui.hideQuestionProperties();
-                // and the selected mug + other stuff in the UI
-                that.reloadUI();
-                selected = false;
-            }
-        } else {
-            selected = true;
-        }
-       
-        if (selected) {
-            formdesigner.ui.displayMugProperties(that.getCurrentlySelectedMugType());
-        } else {
-            formdesigner.ui.hideQuestionProperties();
-        }
-
+        formdesigner.ui.selectSomethingOrResetUI();
         that.setFormChanged();
     };
 
@@ -2108,6 +2092,9 @@ formdesigner.controller = (function () {
         }
     };
 
+    /**
+     * @deprecated
+     */
     that.getCurrentlySelectedMugType = function () {
         var selected = formdesigner.ui.jstree('get_selected');
 
@@ -2120,6 +2107,7 @@ formdesigner.controller = (function () {
     };
 
     /**
+     * @deprecated
      * Sets the currently selected (in the UI tree) MugType
      * so that the controller is aware of the currently
      * being worked on MT without having to do the call
@@ -2144,39 +2132,6 @@ formdesigner.controller = (function () {
         return curMT;
     };
 
-    /**
-     * Returns a JSON representation of the
-     * Control Tree (tweak this method for data tree)
-     * returns it as well as logging it to console.
-     */
-    that.get_form_data = function(){
-        var trees = [], wTree, i,j, data;
-        trees.push(getTree('data'));
-        trees.push(getTree('control'));
-
-        function printMug(mType){
-            return mType.mug;
-        }
-
-        function recurse(node){
-            var i,d = {}, children;
-            d.parent = printMug(node.getValue());
-            d.children = {};
-            children = node.getChildren();
-            for(i in children){
-                if(children.hasOwnProperty(i)){
-                    d.children[i] = (recurse(children[i]));
-                }
-            }
-
-            return d;
-        }
-
-        data = JSON.stringify(recurse(trees[0].rootNode),null,'\t');
-
-        return data;
-    };
-    
     var validateAndSaveXForm = function (url) {
         if (!url) {
             url = formdesigner.saveUrl;

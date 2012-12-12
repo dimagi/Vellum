@@ -114,30 +114,17 @@ formdesigner.ui = function () {
     };
     
     that.addQuestion = function (qType) {
-        try {
-            var newMug = formdesigner.controller.createQuestion(qType);
-            that.selectMugTypeInUI(newMug);
+        var newMug = formdesigner.controller.createQuestion(qType);
+        that.selectMugTypeInUI(newMug);
 
-            if (that.ODK_ONLY_QUESTION_TYPES.indexOf(qType) !== -1) { 
-                //it's an ODK media question
-                formdesigner.model.form.updateError(formdesigner.model.FormError({
-                    message: 'This question type will ONLY work with CommCareODK/ODK Collect!',
-                    level: 'form-warning',
-                }), {updateUI: true});
-            }
-            return newMug;
-        } catch (e) {
-            if (e.name === "IllegalMove") {
-                if (qType == "item") {
-                    alert("You can't do that. Select items can only be added to Single Select or Multi-Select Questions.");
-                } else {
-                    alert("Sorry that question type can't be added to the currently selected question.");
-                }
-            } else {
-                // we don't know what went wrong here.
-                throw e;
-            }
+        if (that.ODK_ONLY_QUESTION_TYPES.indexOf(qType) !== -1) { 
+            //it's an ODK media question
+            formdesigner.model.form.updateError(formdesigner.model.FormError({
+                message: 'This question type will ONLY work with CommCareODK/ODK Collect!',
+                level: 'form-warning'
+            }), {updateUI: true});
         }
+        return newMug;
     };
 
     that.getQuestionTypeSelector = function () {
@@ -531,28 +518,59 @@ formdesigner.ui = function () {
     };
 
     /**
-     * Handler for node_select events. Does nothing for non-user triggered
-     * events, call directly if you want to use.
+     * Handler for node_select events.
+     *
+     * Set that.skipNodeSelectEvent to true to disable during form loading,
+     * recursive question duplication, etc.
      */
     that.handleNodeSelect = function (e, data) {
-        // skip non-user triggered events. call this directly if you want
-        if (data && data.args.length === 1) {
+        if (that.skipNodeSelectEvent) {
             return;
         }
 
-        that.displayMugProperties(formdesigner.controller.getCurrentlySelectedMugType());
-
-        var newMug = formdesigner.controller.getCurrentlySelectedMugType(),
+        var ufid = $(data.rslt.obj[0]).prop('id'),
+            mugType = formdesigner.controller.getMTFromFormByUFID(ufid),
             tagName;
 
-        if (newMug.hasControlElement()) {
-            tagName = newMug.mug.properties.controlElement.properties.tagName;
+        that.displayMugProperties(mugType);
+
+        if (mugType.hasControlElement()) {
+            tagName = mugType.mug.properties.controlElement.properties.tagName;
             if (['item', 'select', 'select1'].indexOf(tagName) !== -1) {
                 that.showSelectItemAddButton();
             } else {
                 that.hideSelectItemAddButton();
             }
         }
+    };
+
+    /**
+     * Try to select any node in the UI tree, otherwise hide the question
+     * properties window. Used after initial load, question deletion, etc.
+     * 
+     * @return bool success
+     */
+    that.selectSomethingOrResetUI = function (forceDeselect) {
+        if (forceDeselect) {
+            that.jstree('deselect_all');
+        }
+        // ensure something is selected if possible
+        var selected;
+        if (!that.jstree('get_selected').length) {
+            // if there's any nodes in the tree, just select the first
+            var all_nodes = that.getJSTree().find("li");
+            if (all_nodes.length > 0) {
+                that.jstree('select_node', all_nodes[0]);
+                return true;
+            } else {
+                // otherwise clear the Question Edit UI pane
+                that.hideQuestionProperties();
+                that.jstree('deselect_all');
+                return false;
+            }
+        }
+
+        return true;
     };
 
     /**
@@ -629,11 +647,29 @@ formdesigner.ui = function () {
 
         that.getJSTree().find('li').each(function (i, el) {
             var $el = $(el),
-                mugType = formdesigner.controller.form.getMugTypeByUFID($el.prop('id')),
-                itextID = mugType.mug.properties.controlElement.properties.labelItextID.id,
-                text = itext.getItem(itextID).getValue("default", lang);
+                mugType = formdesigner.controller.form.getMugTypeByUFID($el.prop('id'));
 
-            that.jstree('rename_node', $el, text || that.noTextString);
+            // don't rename data nodes, they don't have itext
+            if (mugType.hasControlElement()) {
+
+                try {
+                    var itextID = mugType.mug.properties.controlElement.properties.labelItextID.id,
+                        text = itext.getItem(itextID).getValue("default", lang);
+                    that.jstree('rename_node', $el, text || that.noTextString);
+                } catch (e) {
+                    /* This happens immediately after question duplication when
+                     * we try to rename the duplicated node in the UI tree. The
+                     * form XML is correct and the inputs change the appropriate
+                     * strings in the XML and in the UI tree, so we're just
+                     * going to ignore the fact that this internal data
+                     * structure isn't initialized with the default language's
+                     * itext value for this field yet, and simply not rename the
+                     * UI node, which will produce the same behavior. */
+                    if (e !== "NoItextItemFound") {
+                        throw e;
+                    }
+                }
+            }
         });
     };
 
@@ -1128,7 +1164,7 @@ formdesigner.ui = function () {
                 allMugs.map(function (mug) {
                     var node = $('#' + mug.ufid);
                     var it = mug.getItext();
-                    if (it.id === e.item.id && e.form === "default") {
+                    if (it && it.id === e.item.id && e.form === "default") {
                         if (e.value && e.value !== that.jstree("get_text", node)) {
                             that.jstree('rename_node', node, e.value);
                         }
@@ -1674,12 +1710,14 @@ formdesigner.ui = function () {
      * Wrapper for jstree() calls.  Also very useful for debugging.
      */
     that.jstree = function () {
+        var tree = that.getJSTree(),
+            retval = tree.jstree.apply(tree, arguments);
+
         if (DEBUG_MODE) {
-            console.error(arguments);
+            console.error(arguments, retval);
         }
 
-        var tree = that.getJSTree();
-        return tree.jstree.apply(tree, arguments);
+        return retval;
     };
 
     that.init = function() {

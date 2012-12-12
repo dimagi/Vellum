@@ -3272,9 +3272,13 @@ formdesigner.model = function () {
             // in sync in multiple places though.
             // This could be worked around via careful event handling,
             // but is not implemented until we see slowness.
-            return formdesigner.util.reduceToOne(this.items, function (item) {
-                return item.id === iID;
-            }, "itext id = " + iID);
+            try {
+                return formdesigner.util.reduceToOne(this.items, function (item) {
+                    return item.id === iID;
+                }, "itext id = " + iID);
+            } catch (e) {
+                throw "NoItextItemFound";
+            }
         };
         
         itext.getOrCreateItem = function (id) {
