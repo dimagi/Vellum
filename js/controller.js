@@ -374,8 +374,6 @@ formdesigner.controller = (function () {
      */
     that.reloadUI = function () {
         var treeFunc, dataNodeList;
-        //first clear out the existing UI
-        formdesigner.ui.resetUI();
         that.setCurrentlySelectedMugType(null);
 
         formdesigner.ui.skipNodeSelectEvent = true;
@@ -796,8 +794,6 @@ formdesigner.controller = (function () {
             );
             
             // update UI
-            //that.reloadUI();
-            formdesigner.ui.selectMugTypeInUI(newMugType);
             that.form.fire({ 
                 type: "form-property-changed"
             }); 
@@ -1115,7 +1111,7 @@ formdesigner.controller = (function () {
     };
     that.setFormName = setFormName;
 
-    var loadXForm = function (formString) {
+    that.loadXForm = function (formString) {
         $.fancybox.showActivity();
 
         //universal flag for indicating that there's something wrong enough with the form that vellum can't deal.
@@ -1200,9 +1196,7 @@ formdesigner.controller = (function () {
 
         },
         500);
-
     };
-    that.loadXForm = loadXForm;
 
 
     that.removeMugTypeByUFID = function (ufid) {
@@ -2117,7 +2111,7 @@ formdesigner.controller = (function () {
         return curMT;
     };
 
-    var validateAndSaveXForm = function (url) {
+    that.validateAndSaveXForm = function (url) {
         if (!url) {
             url = formdesigner.saveUrl;
         }
@@ -2179,30 +2173,13 @@ formdesigner.controller = (function () {
             send(formText);
         }
     };
-    that.validateAndSaveXForm = validateAndSaveXForm;
 
-    /**
-     * Used to reset the state of the controller if a FD wide reset is called
-     * (see resetFormDesigner)
-     */
-    function resetControllerInternal () {
-            formdesigner.util.question_counter = 1;
-            //reset Options passed in to the initializer
-            that.setCurrentlySelectedMugType(null);
-    }
+    that.resetFormDesigner = function () {
+        formdesigner.util.question_counter = 1;
 
-    /**
-     * Used to clear out the state of the FormDesigner
-     * to represent how things were just after the first
-     * init call was made (used for example when wanting
-     * to create a 'New Form'
-     *
-     * @param opts - pass a new set of launch options to be used for reset.
-     */
-    that.resetFormDesigner = function (opts) {
-        resetControllerInternal();
         formdesigner.model.reset();
-        formdesigner.ui.resetUI();
+        formdesigner.ui.reset();
+        that.form.fire({type: 'form-property-changed'});
     };
     
     // tree drag and drop stuff, used by xpath

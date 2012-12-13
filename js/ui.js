@@ -61,6 +61,10 @@ formdesigner.ui = function () {
     };
     
     that.currentErrors = [];
+
+    that.reset = function () {
+        that.jstree("init");
+    };
     
     that._getMessageDiv = function (type) {
         return $(MESSAGES_DIV).find("." + type);
@@ -115,7 +119,8 @@ formdesigner.ui = function () {
     
     that.addQuestion = function (qType) {
         var newMug = formdesigner.controller.createQuestion(qType);
-        that.selectMugTypeInUI(newMug);
+
+        that.jstree('select_node', '#' + newMug.ufid, true);
 
         if (that.ODK_ONLY_QUESTION_TYPES.indexOf(qType) !== -1) { 
             //it's an ODK media question
@@ -592,12 +597,6 @@ formdesigner.ui = function () {
         }
     };
 
-    that.selectMugTypeInUI = function (mugType) {
-        var ufid = mugType.ufid;
-        return that.jstree('select_node', '#' + ufid, true);
-    };
-
-
     that.showSelectItemAddButton = function () {
         var addItemBut = $('#fd-add-item-select_ez');
         if (addItemBut.length === 0) {
@@ -862,19 +861,6 @@ formdesigner.ui = function () {
             $("#fd-form-paste-output").val(out);
         })
     }
-
-    /**
-     * Clears all elements of current form data (like in the Control/Data  tree)
-     * without destroying jqueryUI elements or other widgets.  Should be slightly
-     * faster/easier than rebuilding the entire interface from scratch.
-     */
-    that.resetUI = function() {
-        that.jstree('deselect_all');
-
-        $('#fd-form-prop-formName-input').val(formdesigner.controller.form.formName);
-        $('#fd-form-prop-formID-input').val(formdesigner.controller.form.formID);
-
-    };
 
     /**
      * Turns the UI on/off. Primarily used by disableUI() and enableUI()

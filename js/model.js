@@ -3461,9 +3461,9 @@ formdesigner.model = function () {
      * An initialization function that sets up a number of different fields and properties
      */
     that.init = function () {
-        var form = that.form = new Form();
+        that.form = new Form();
         //set the form object in the controller so it has access to it as well
-        formdesigner.controller.setForm(form);
+        formdesigner.controller.setForm(that.form);
     };
 
     return that;
