@@ -682,70 +682,58 @@ formdesigner.controller = (function () {
         that.form.fire({type: "form-property-changed"});
     };
 
-    that.initQuestion = function (mugType, parentMugType, position) {
+    that.initQuestion = function (mugType, refMugType, position) {
         formdesigner.util.setStandardMugEventResponses(mugType.mug);
-
-        var oldSelected = parentMugType || that.getCurrentlySelectedMugType();
-        var isDataNodeSelected = oldSelected && !oldSelected.hasControlElement();
-        if (isDataNodeSelected) {
-            if (!formdesigner.ui.selectLowestQuestionNode()) {
-                formdesigner.ui.jstree("deselect_all");
-            }
+        refMugType = refMugType || that.getCurrentlySelectedMugType();
+        
+        /* If a data node is currently selected, select the lowest question node
+         * so we never insert a non-data node after the beginning of the data
+         * nodes at the bottom. */
+        if (refMugType && !refMugType.hasControlElement()) {
+            formdesigner.ui.selectLowestQuestionNode();
         }
-       
-        if (!that.createQuestionInUITree(mugType, position)) {
-            // failed due to invalid type, try inserting into parent
-            var tree = that.form.controlTree;
-            parentMugType = tree.getParentMugType(oldSelected) || oldSelected;
-            formdesigner.ui.jstree("select_node", '#' + parentMugType.ufid);
+     
+        position = position || 'into';
+        var success = false;
 
-            if (!that.createQuestionInUITree(mugType)) {
-                // try grandparent
-                parentMugType = tree.getParentMugType(parentMugType) || parentMugType;
-                formdesigner.ui.jstree("select_node", '#' + parentMugType.ufid);
+        /* First try to insert into the currently selected question, then try to
+         * insert after it, then after all of its ancestors. */
+        while (!success && refMugType) {
+            formdesigner.ui.jstree("select_node", '#' + refMugType.ufid);
+            success = that.createQuestionInUITree(mugType, position);
 
-                if (!that.createQuestionInUITree(mugType)) {
-                    // try inserting into root
-                    var node = formdesigner.ui.selectLowestQuestionNode();
-                    if (node) {
-                        position = 'after';  // parentMugType is more like refMugType
-                        parentMugType = that.form.controlTree.getMugTypeFromUFID(node.prop('id'));
-                    } else {
-                        formdesigner.ui.jstree("deselect_all");
-                        position = 'into';
-                        parentMugType = null;
-                    }
-                    if (!that.createQuestionInUITree(mugType, position)) {
-                        return false;
-                    }
+            if (!success) {
+                if (position !== 'after') {
+                    position = 'after';
+                } else {
+                    refMugType = that.form.controlTree.getParentMugType(refMugType);
                 }
             }
         }
-       
 
-        if (typeof parentMugType !== "undefined") {
-            that.insertMugTypeIntoForm(parentMugType, mugType, position || 'into');
-        } else {
-            that.insertMugTypeIntoForm(oldSelected, mugType);
+        /* If that failed (the only case should be when trying to insert a data
+         * node), insert after the last non-data node. */
+        if (!success) {
+            formdesigner.ui.selectLowestQuestionNode();
+            refMugType = that.getCurrentlySelectedMugType();
+            position = 'after';
+            success = that.createQuestionInUITree(mugType, position);
         }
-        
-        // update the itext values
+
+        if (!success) {
+            return false;
+        }
+
+        // insert into model
+        that.insertMugTypeIntoForm(refMugType, mugType, position);
         formdesigner.model.Itext.updateForNewMug(mugType);
 
         formdesigner.ui.jstree("select_node", '#' + mugType.ufid);
-
         
         this.fire({
             type: "question-creation",
             mugType: mugType
         });
-
-        //re-select what was originally selected at the start of this method (which gets changed when dealing with Data Nodes)
-        if (isDataNodeSelected) {
-            formdesigner.ui
-                .jstree("deselect_all")
-                .jstree("select_node", '#' + oldSelected.ufid);
-        }
 
         return mugType;
     };
@@ -2092,9 +2080,6 @@ formdesigner.controller = (function () {
         }
     };
 
-    /**
-     * @deprecated
-     */
     that.getCurrentlySelectedMugType = function () {
         var selected = formdesigner.ui.jstree('get_selected');
 
@@ -2107,7 +2092,7 @@ formdesigner.controller = (function () {
     };
 
     /**
-     * @deprecated
+     * @deprecated (OLD)
      * Sets the currently selected (in the UI tree) MugType
      * so that the controller is aware of the currently
      * being worked on MT without having to do the call

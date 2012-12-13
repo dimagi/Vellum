@@ -580,12 +580,12 @@ formdesigner.ui = function () {
      *         nodes, otherwise false
      */
     that.selectLowestQuestionNode = function () {
-        var questions = formdesigner.ui.getJSTree().children().children().filter("[rel!='datanode']");
+        that.jstree("deselect_all");
+
+        var questions = that.getJSTree().children().children().filter("[rel!='datanode']");
         if (questions.length > 0) {
             var newSelectEl = $(questions[questions.length - 1]);
-            formdesigner.ui
-                .jstree("deselect_all")
-                .jstree("select_node", newSelectEl, false);
+            that.jstree("select_node", newSelectEl, false);
             return newSelectEl;
         } else {
             return false;
