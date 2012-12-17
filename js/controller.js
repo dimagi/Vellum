@@ -2237,10 +2237,12 @@ formdesigner.controller = (function () {
         return data;
     };
     
-    var validateAndSaveXForm = function (url) {
-        if (!url) {
-            url = formdesigner.saveUrl;
+    var validateAndSaveXForm = function () {
+        var getUrl = function (saveType) {
+            return saveType === 'patch' ?
+                formdesigner.patchUrl : formdesigner.saveUrl;
         }
+        var url = getUrl(formdesigner.saveType);
         if (!url) {
             formdesigner.ui.setDialogInfo("Error: Cannot send form, no save url specified!",
             'OK', function () {
@@ -2251,22 +2253,45 @@ formdesigner.controller = (function () {
             });
         }
         
-        var send = function (formText) {
-
+        var send = function (formText, saveType) {
+            var data;
+            saveType = saveType || formdesigner.saveType;
+            var url = getUrl(saveType);
             $('body').ajaxStart(formdesigner.ui.showWaitingDialog);
             $('body').ajaxStop(formdesigner.ui.hideConfirmDialog);
-    
-            formdesigner.XFORM_STRING = formText;
+
+            if (saveType === 'patch') {
+                var dmp = new diff_match_patch();
+                data = {
+                    patch: dmp.patch_toText(
+                        dmp.patch_make(formdesigner.originalXForm, formText)
+                    ),
+                    sha1: CryptoJS.SHA1(formdesigner.originalXForm).toString()
+                };
+            } else {
+                data = {xform: formText}
+            }
+
             saveButton.ajax({
                 type: "POST",
                 url: url,
-                data: {xform: formdesigner.XFORM_STRING},
+                data: data,
+                dataType: 'json',
                 success: function (data) {
+                    if (saveType === 'patch' && data.status === 'conflict') {
+                        // todo: display diff and ask instead overwriting
+//                        var diffHtml = dmp.diff_prettyHtml(
+//                            dmp.diff_main(formdesigner.originalXForm, data.xform)
+//                        );
+                        send(formText, 'full');
+                        return;
+                    }
                     formdesigner.ui.hideConfirmDialog();
                     formdesigner.fire({
                         type: 'form-saved',
                         response: data
                     });
+                    formdesigner.originalXForm = formText;
                 }
             });
         };
