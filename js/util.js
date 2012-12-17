@@ -686,24 +686,17 @@ formdesigner.util = (function(){
                     nodeID = dEl.nodeID;
                 }
             }
-            return nodeID;
+            return nodeID || cEl.defaultValue || undefined;
         }
 
-        lang = formdesigner.currentItextDisplayLanguage;
-        if(!lang) {
-            lang = Itext.getDefaultLanguage();
-        }
+        lang = formdesigner.currentItextDisplayLanguage || Itext.getDefaultLanguage();
 
         if(!lang) {
             return 'No Translation Data';
         }
 
-        if (!itextItem) {
-            return cEl.defaultValue || "";
-        } else {
-            disp = itextItem.getValue("default", lang);
-            return disp ? disp : itextItem.getValue("long", lang);
-        }
+        disp = itextItem.getValue("default", lang);
+        return disp ? disp : itextItem.getValue("long", lang);
     };
     
     /*
