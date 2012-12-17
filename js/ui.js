@@ -1757,6 +1757,7 @@ formdesigner.launch = function (opts) {
     }else{
         formdesigner.rootElement = '#formdesigner';
     }
+    formdesigner.saveType = opts.saveType || 'full';
 
     if(opts.staticPrefix){
         formdesigner.staticPrefix = opts.staticPrefix
@@ -1765,7 +1766,9 @@ formdesigner.launch = function (opts) {
     }
 
     formdesigner.saveUrl = opts.saveUrl;
+    formdesigner.patchUrl = opts.patchUrl;
     formdesigner.loadMe = opts.form;
+    formdesigner.originalXForm = opts.form;
     
     formdesigner.iconUrl = opts.iconUrl ? opts.iconUrl : "css/smoothness/images/ui-icons_888888_256x240.png";
 
