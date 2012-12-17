@@ -691,6 +691,7 @@ formdesigner.controller = (function () {
         if (refMugType && !refMugType.hasControlElement()) {
             var lowest = formdesigner.ui.selectLowestQuestionNode();
             refMugType = that.getMTFromFormByUFID($(lowest).prop('id'));
+            position = 'after'
         }
      
         position = position || 'into';
