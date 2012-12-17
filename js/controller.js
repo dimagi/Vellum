@@ -2278,13 +2278,20 @@ formdesigner.controller = (function () {
                 data: data,
                 dataType: 'json',
                 success: function (data) {
-                    if (saveType === 'patch' && data.status === 'conflict') {
-                        // todo: display diff and ask instead overwriting
-//                        var diffHtml = dmp.diff_prettyHtml(
-//                            dmp.diff_main(formdesigner.originalXForm, data.xform)
-//                        );
-                        send(formText, 'full');
-                        return;
+                    if (saveType === 'patch') {
+                        if (data.status === 'conflict') {
+                            /* todo: display diff and ask instead overwriting */
+//                            var diffHtml = dmp.diff_prettyHtml(
+//                                dmp.diff_main(formdesigner.originalXForm, data.xform)
+//                            );
+                            send(formText, 'full');
+                            return;
+                        } else {
+                            if (CryptoJS.SHA1(formText).toString() !== data.sha1) {
+                                console.error("sha1's didn't match");
+                                send(formText, 'full');
+                            }
+                        }
                     }
                     formdesigner.ui.hideConfirmDialog();
                     formdesigner.fire({
