@@ -511,7 +511,8 @@ formdesigner.ui = function () {
             if (e.property === 'nodeID' && e.element === 'dataElement') {
                 var node = $('#' + e.mugTypeUfid);
                 if (mugType.typeName === "Data Node" && e.val &&
-                        e.val !== that.ui.jstree("get_text", node)) {
+                    e.val !== that.jstree("get_text", node)) 
+                {
                     that.jstree('rename_node', node, e.val);
                 }
             }
