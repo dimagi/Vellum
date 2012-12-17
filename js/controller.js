@@ -688,7 +688,8 @@ formdesigner.controller = (function () {
          * so we never insert a non-data node after the beginning of the data
          * nodes at the bottom. */
         if (refMugType && !refMugType.hasControlElement()) {
-            formdesigner.ui.selectLowestQuestionNode();
+            var lowest = formdesigner.ui.selectLowestQuestionNode();
+            refMugType = that.getMTFromFormByUFID($(lowest).prop('id'));
         }
      
         position = position || 'into';
