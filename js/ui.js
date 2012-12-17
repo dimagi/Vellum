@@ -37,8 +37,6 @@ formdesigner.ui = function () {
         ERROR_MSG_DIV = '#fd-parse-error',
         FORM_WARN_DIV = '#fd-form-warn';
 
-    that.QUESTION_TREE_DIV = 'fd-question-tree';
-
     that.ODK_ONLY_QUESTION_TYPES = ['image','audio','video','barcode'];
     
     var initMessagesPane = function () {
@@ -63,7 +61,9 @@ formdesigner.ui = function () {
     that.currentErrors = [];
 
     that.reset = function () {
-        that.jstree("init");
+        that.getJSTree().children().children().each(function (i, el) {
+            that.jstree("delete_node", el);
+        });
     };
     
     that._getMessageDiv = function (type) {
