@@ -259,7 +259,8 @@ formdesigner.controller = (function () {
     that.getSingularMugTypeByNodeId = getSingularMugTypeByNodeId;
     
     that.getChildren = function (mugType) {
-        var children = that.form.controlTree.getNodeFromMugType(mugType).getChildren();
+        var node = that.form.controlTree.getNodeFromMugType(mugType),
+            children = node ? node.getChildren() : [];  // handles data node
         return children.map(function (item) { return item.getValue();});
     };
     
