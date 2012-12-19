@@ -2214,7 +2214,6 @@ formdesigner.controller = (function () {
 
         formdesigner.model.reset();
         formdesigner.ui.reset();
-        that.form.fire({type: 'form-property-changed'});
     };
     
     // tree drag and drop stuff, used by xpath
