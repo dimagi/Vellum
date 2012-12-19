@@ -57,13 +57,10 @@ formdesigner.widgets = (function () {
         };
 
         widget.fireValueChanged = function () {
-            var ref = this;
-            return function () {
-                formdesigner.controller.fire({
-                    type: 'widget-value-changed',
-                    widget: ref
-                });
-            };
+            formdesigner.controller.fire({
+                type: 'widget-value-changed',
+                widget: widget
+            });
         };
 
         widget.getUIElement = function () {
@@ -143,7 +140,7 @@ formdesigner.widgets = (function () {
             return input.val();
         };
 
-        input.keyup(widget.fireValueChanged());
+        input.keyup(widget.fireValueChanged);
         return widget;
     };
 
@@ -206,7 +203,7 @@ formdesigner.widgets = (function () {
             widget.setAutoMode(auto);
             if (auto) {
                 widget.updateAutoId();
-                widget.fireValueChanged()();
+                widget.fireValueChanged();
             }
         });
 
@@ -255,7 +252,7 @@ formdesigner.widgets = (function () {
                 var newVal = widget.autoGenerateId(e.val);
                 if (newVal !== widget.getValue()) {
                     widget.setUIValue(newVal);
-                    widget.fireValueChanged()();
+                    widget.fireValueChanged();
                 }
             }
         });
@@ -299,7 +296,7 @@ formdesigner.widgets = (function () {
             return input.prop("checked");
         };
 
-        input.change(widget.fireValueChanged());
+        input.change(widget.fireValueChanged);
         return widget;
     };
 
@@ -425,7 +422,7 @@ formdesigner.widgets = (function () {
             return input;
         };
 
-        input.keyup(widget.fireValueChanged());
+        input.keyup(widget.fireValueChanged);
         return widget;
     };
 
@@ -509,7 +506,7 @@ formdesigner.widgets = (function () {
         }
 
         widget.getControl = function () {
-        	return input;
+            return input;
         };
 
         widget.setValue = function (value) {
@@ -520,7 +517,7 @@ formdesigner.widgets = (function () {
             return input.val();
         };
 
-        input.change(widget.fireValueChanged());
+        input.change(widget.fireValueChanged);
 
         return widget;
     };
