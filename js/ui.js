@@ -1656,7 +1656,7 @@ formdesigner.ui = function () {
                         // disallow moving a data node or onto a data node
                         // unless both nodes are data nodes
                         var refIsData = $(m.r).attr('rel') === 'datanode',
-                            nodeIsData = $(m.r).attr('rel') === 'datanode';
+                            nodeIsData = $(m.o).attr('rel') === 'datanode';
 
                         if (refIsData + nodeIsData == 1) {
                             return false;
