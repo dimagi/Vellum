@@ -1999,7 +1999,7 @@ formdesigner.controller = (function () {
      * @param position - The position relative to the refMugType (can be 'before','after' or 'into')
      * @param refMugType
      */
-    that.moveMugType = function (mugType, position, refMugType) {
+    that.moveMugType = function (mugType, refMugType, position) {
         var dataTree = that.form.dataTree, 
             controlTree = that.form.controlTree, 
             preMovePath = dataTree.getAbsolutePath(mugType);
@@ -2007,11 +2007,14 @@ formdesigner.controller = (function () {
         if (refMugType && refMugType.typeName !== "Select Item") {
             dataTree.insertMugType(mugType, position, refMugType);
         }
-        controlTree.insertMugType(mugType, position, refMugType);
+        if (mugType.hasControlElement()) {
+            controlTree.insertMugType(mugType, position, refMugType);
+        }
 
         formdesigner.model.LogicManager.updatePath(mugType.ufid, 
             preMovePath, 
-            that.form.dataTree.getAbsolutePath(mugType));
+            dataTree.getAbsolutePath(mugType)
+        );
 
         //fire a form-property-changed event to sync up with the 'save to server' button disabled state
         that.form.fire({

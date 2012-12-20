@@ -1681,7 +1681,7 @@ formdesigner.ui = function () {
                 refMugType = controller.getMTFromFormByUFID($(data.rslt.r).attr('id')),
                 position = data.rslt.p;
 
-            controller.moveMugType(mugType, position, refMugType, 'both');
+            controller.moveMugType(mugType, refMugType, position);
         }).bind("deselect_all.jstree", function (e, data) {
             that.hideSelectItemAddButton();
         }).bind("deselect_node.jstree", function (e, data) {
