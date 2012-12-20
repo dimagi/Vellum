@@ -394,36 +394,23 @@ formdesigner.util = (function(){
     //Simple Event Framework
     //Just run your object through this function to make it event aware
     //Taken from 'JavaScript: The Good Parts'
-    var eventuality = function (that) {
+    that.eventuality = function (that) {
         var registry = {};
         that.fire = function (event) {
-    // Fire an event on an object. The event can be either
-    // a string containing the name of the event or an
-    // object containing a type property containing the
-    // name of the event. Handlers registered by the 'on'
-    // method that match the event name will be invoked.
             var array,
                 func,
                 handler,
                 i,
                 type = typeof event === 'string' ?
                         event : event.type;
-    // If an array of handlers exist for this event, then
-    // loop through it and execute the handlers in order.
             if (registry.hasOwnProperty(type)) {
                 array = registry[type];
                 for (i = 0; i < array.length; i += 1) {
                     handler = array[i];
-    // A handler record contains a method and an optional
-    // array of parameters. If the method is a name, look
-    // up the function.
                     func = handler.method;
                     if (typeof func === 'string') {
                         func = this[func];
                     }
-    // Invoke a handler. If the record contained
-    // parameters, then pass them. Otherwise, pass the
-    // event object.
                     func.apply(this,
                         handler.parameters || [event]);
                 }
@@ -431,9 +418,6 @@ formdesigner.util = (function(){
             return this;
         };
         that.on = function (type, method, parameters) {
-    // Register an event. Make a handler record. Put it
-    // in a handler array, making one if it doesn't yet
-    // exist for this type.
             var handler = {
                 method: method,
                 parameters: parameters
@@ -447,7 +431,6 @@ formdesigner.util = (function(){
         };
         return that;
     };
-    that.eventuality = eventuality;
 
     var capitaliseFirstLetter = function (string) {
         return string.charAt(0).toUpperCase() + string.slice(1);
@@ -557,13 +540,6 @@ formdesigner.util = (function(){
     };
     that.exists = exists;
 
-    that.getLabelItextID = function (mug) {
-        if(mug.properties.controlElement) {
-            return mug.properties.controlElement.properties.labelItextID
-        }
-    };
-
-    
     (function($) {
               // duck-punching to make attr() return a map
               var _old = $.fn.attr;
@@ -593,10 +569,10 @@ formdesigner.util = (function(){
      * @param mug
      */
     that.setStandardMugEventResponses = function (mug) {
-        //NOTE: 'this' is the mug responding to the event.
+        // NOTE: 'this' is the mug responding to the event.
 
-        //bind dataElement.nodeID and bindElement.nodeID together
         mug.on('property-changed',function (e) {
+            // bind dataElement.nodeID and bindElement.nodeID together
             if(e.property === 'nodeID'){
                 if(this.properties.dataElement){
                     this.properties.dataElement.properties.nodeID = e.val;
@@ -605,32 +581,28 @@ formdesigner.util = (function(){
                     this.properties.bindElement.properties.nodeID = e.val;
                 }
             }
-        });
 
-        //Update the status of the indicator icons indicating where validation has failed
-        mug.on('property-changed', function (e) {
+            // Update the status of the indicator icons indicating where
+            // validation has failed
             var MT = formdesigner.controller.getMTFromFormByUFID(e.mugTypeUfid);
             formdesigner.ui.showVisualValidation(MT);
             formdesigner.ui.setTreeValidationIcon(MT);
-        });
 
-        
-        // update the logic properties that reference the mug
-        mug.on('property-changed', function (e) {
+            // update the logic properties that reference the mug
             if (e.previous !== e.val) {
-	            var mug = formdesigner.controller.getMTFromFormByUFID(e.mugTypeUfid);
-	            if (e.property === 'nodeID') {
-	                var currentPath = formdesigner.controller.form.dataTree.getAbsolutePath(mug);
-	                var parsed = xpath.parse(currentPath);
-	                parsed.steps[parsed.steps.length - 1].name = e.previous;
-	                formdesigner.model.LogicManager.updatePath(mug.ufid, parsed.toXPath(), currentPath);
-	            } else {
+                var mug = formdesigner.controller.getMTFromFormByUFID(e.mugTypeUfid);
+                if (e.property === 'nodeID') {
+                    var currentPath = formdesigner.controller.form.dataTree.getAbsolutePath(mug);
+                    var parsed = xpath.parse(currentPath);
+                    parsed.steps[parsed.steps.length - 1].name = e.previous;
+                    formdesigner.model.LogicManager.updatePath(mug.ufid, parsed.toXPath(), currentPath);
+                } else {
                     var propertyPath = [e.element, e.property].join("/");
                     if (mug.getPropertyDefinition(propertyPath).uiType === "xpath") {
-	                    formdesigner.model.LogicManager.updateReferences(mug, propertyPath);
-	                }
-	            }
-	        }
+                        formdesigner.model.LogicManager.updateReferences(mug, propertyPath);
+                    }
+                }
+            }
         });
     };
 

@@ -56,12 +56,31 @@ formdesigner.widgets = (function () {
             // noop
         };
 
-        widget.fireValueChanged = function () {
-            formdesigner.controller.fire({
-                type: 'widget-value-changed',
-                widget: widget
-            });
+        widget.updateValue = function () {
+            // When a widget's value changes, do whatever work you need to in 
+            // the model/UI to make sure we are in a consistent state.
+            
+            var val = widget.getValue();
+            if (widget.propName === 'nodeID' && val.indexOf(" ") != -1){ 
+                // attempt to sanitize nodeID
+                // TODO, still may allow some bad values
+                widget.setValue(val.replace(/\s/g,'_'));
+            }
+            
+            //short circuit the mug property changing process for when the
+            //nodeID is changed to empty-string (i.e. when the user backspaces
+            //the whole value).  This allows us to keep a reference to everything
+            //and rename smoothly to the new value the user will ultimately enter.
+            if (val === "" && (widget.propName === 'nodeID')) {
+                return;
+            }
+            
+            widget.save();
         };
+
+        widget.save = function () {
+            throw 'Not Implemented';
+        }
 
         widget.getUIElement = function () {
             // gets the whole widget (label + control)
@@ -140,7 +159,7 @@ formdesigner.widgets = (function () {
             return input.val();
         };
 
-        input.keyup(widget.fireValueChanged);
+        input.keyup(widget.updateValue);
         return widget;
     };
 
@@ -203,7 +222,7 @@ formdesigner.widgets = (function () {
             widget.setAutoMode(auto);
             if (auto) {
                 widget.updateAutoId();
-                widget.fireValueChanged();
+                widget.updateValue();
             }
         });
 
@@ -248,11 +267,12 @@ formdesigner.widgets = (function () {
             // keep the ids in sync if we're in auto mode
             if (widget.autoMode &&
                 (e.property === "nodeID" ||
-                 (widget.isSelectItem && e.property === "defaultValue"))) {
+                 widget.isSelectItem && e.property === "defaultValue")) 
+            {
                 var newVal = widget.autoGenerateId(e.val);
                 if (newVal !== widget.getValue()) {
                     widget.setUIValue(newVal);
-                    widget.fireValueChanged();
+                    widget.updateValue();
                 }
             }
         });
@@ -296,7 +316,7 @@ formdesigner.widgets = (function () {
             return input.prop("checked");
         };
 
-        input.change(widget.fireValueChanged);
+        input.change(widget.updateValue);
         return widget;
     };
 
@@ -422,7 +442,7 @@ formdesigner.widgets = (function () {
             return input;
         };
 
-        input.keyup(widget.fireValueChanged);
+        input.keyup(widget.updateValue);
         return widget;
     };
 
@@ -517,7 +537,7 @@ formdesigner.widgets = (function () {
             return input.val();
         };
 
-        input.change(widget.fireValueChanged);
+        input.change(widget.updateValue);
 
         return widget;
     };

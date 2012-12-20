@@ -491,6 +491,8 @@ formdesigner.ui = function () {
         /* attach common event listeners */
 
         /**
+         * (These comments are old and I don't know what they refer to - MW)
+         *
          * Sets things up such that if you alter one NodeID box (e.g. bind)
          * the other NodeID (e.g. data) gets changed and the model gets updated
          * too.
@@ -500,14 +502,11 @@ formdesigner.ui = function () {
          * that change
          */
 
-        // this mainly updates the save button
-        mugType.mug.on('property-changed', function (e) {
-            formdesigner.controller.setFormChanged();
-        });
-
         // update the question tree (only if it's a data node, and only if
         // it has changed)
         mugType.mug.on('property-changed', function (e) {
+            formdesigner.controller.setFormChanged();
+
             if (e.property === 'nodeID' && e.element === 'dataElement') {
                 var node = $('#' + e.mugTypeUfid);
                 if (mugType.typeName === "Data Node" && e.val &&

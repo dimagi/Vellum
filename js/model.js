@@ -35,7 +35,6 @@ formdesigner.model = function () {
     var Mug = function (spec) {
         var that = {}, mySpec, dataElement, bindElement, controlElement;
 
-        //give this object a unqiue fd id
         formdesigner.util.give_ufid(that);
 
         that.properties = {};
@@ -132,8 +131,6 @@ formdesigner.model = function () {
         var that = {};
         that.properties = {};
 
-
-        //give this object a unqiue fd id
         formdesigner.util.give_ufid(that);
         var attributes;
 
@@ -284,10 +281,7 @@ formdesigner.model = function () {
             }
         }(spec));
 
-        //give this object a unqiue fd id
         formdesigner.util.give_ufid(that);
-
-        //make the object event aware
         formdesigner.util.eventuality(that);
         return that;
     };
@@ -317,7 +311,6 @@ formdesigner.model = function () {
         that.properties = {};
 
         var typeName, controlName, label, hintLabel, labelItext, hintItext, defaultValue;
-        //give this object a unique fd id
         formdesigner.util.give_ufid(that);
 
         (function constructor(mySpec) {
@@ -2723,9 +2716,7 @@ formdesigner.model = function () {
 
                 return docString;
             };
-            var xformString = generateForm();
-            this.fire('xform-created');
-            return xformString;
+            return generateForm();
         };
         that.createXForm = createXForm;
 

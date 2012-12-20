@@ -85,29 +85,6 @@ formdesigner.controller = (function () {
             allMugs.map(formdesigner.model.LogicManager.updateAllReferences);
         });
         
-        that.on('widget-value-changed', function (e) {
-            // When a widget's value changes, do whatever work you need to in 
-            // the model/UI to make sure we are in a consistent state.
-            
-            var widget = e.widget;
-            var val = widget.getValue();
-            if (widget.propName === 'nodeID' && val.indexOf(" ") != -1){ 
-                // attempt to sanitize nodeID
-                // TODO, still may allow some bad values
-                widget.setValue(val.replace(/\s/g,'_'));
-            }
-            
-            //short circuit the mug property changing process for when the
-            //nodeID is changed to empty-string (i.e. when the user backspaces
-            //the whole value).  This allows us to keep a reference to everything
-            //and rename smoothly to the new value the user will ultimately enter.
-            if (val === "" && (widget.propName === 'nodeID')) {
-                return;
-            }
-            
-            widget.save();
-        });
-        
         that.on('parse-error', function (e) {
             if(DEBUG_MODE) {
                 console.log('There was a parse error:', e);
@@ -270,7 +247,7 @@ formdesigner.controller = (function () {
      * a flat list of unique mugTypes.  This list is primarily fo the
      * autocomplete skip logic wizard.
      */
-    var getMugTypeList = function (includeSelectItems) {
+    that.getMugTypeList = function (includeSelectItems) {
         var cTree, dTree, treeFunc, cList, dList, mergeList;
         //use formdesigner.util.mergeArray
 
@@ -300,10 +277,6 @@ formdesigner.controller = (function () {
 
         return formdesigner.util.mergeArray(cList, dList); //strip dupes and merge
     };
-    
-    that.getMugTypeList = getMugTypeList;
-
-
 
     /**
      * @param myMug - the mug thats value needs to be set
@@ -591,25 +564,31 @@ formdesigner.controller = (function () {
             var duplicate = $.extend(true, {}, mugType),
                 pathReplacements = [];
 
+            // ensure consistency            
             duplicate.parentMug = parentMugType;
-
             formdesigner.util.give_ufid(duplicate);
             formdesigner.util.give_ufid(duplicate.mug);
+            // clear existing event handlers for the source question
+            formdesigner.util.eventuality(duplicate.mug);
+            formdesigner.util.setStandardMugEventResponses(duplicate.mug);
+
             if (mugType.hasBindElement()) {
                 var newQuestionID = formdesigner.util.generate_question_id(
                     mugType.mug.properties.bindElement.properties.nodeID
                 ); 
-                formdesigner.util.give_ufid(duplicate.mug.properties.bindElement);
+                //formdesigner.util.give_ufid(duplicate.mug.properties.bindElement);
                 duplicate.mug.properties.bindElement.properties.nodeID = newQuestionID;
 
                 if (mugType.hasDataElement()) {
-                    formdesigner.util.give_ufid(duplicate.mug.properties.dataElement);
+                    //formdesigner.util.give_ufid(duplicate.mug.properties.dataElement);
                     duplicate.mug.properties.dataElement.properties.nodeID = newQuestionID;
                 }
+
+                if (mugType.hasControlElement()) {
+                    //formdesigner.util.give_ufid(duplicate.mug.properties.controlElement);
+                }
             }
-            if (mugType.hasControlElement()) {
-                formdesigner.util.give_ufid(duplicate.mug.properties.controlElement);
-            }
+
            
             formdesigner.ui.skipNodeSelectEvent = options.itext !== "copy";
             // insert mugtype into data and UI trees
