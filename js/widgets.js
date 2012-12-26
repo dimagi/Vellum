@@ -1024,10 +1024,11 @@ formdesigner.widgets = (function () {
             + '<i class="icon icon-white icon-trash"></i> Delete</button>'
         ).click(formdesigner.controller.removeCurrentQuestion);
 
-        var duplicate = $('<button type="button" class="btn">Copy</button>')
-            .click(function () {
-                formdesigner.controller.duplicateCurrentQuestion({itext: 'copy'});
-            });
+        var duplicate = $('<button type="button" class="btn">'
+            + '<i class="icon icon-copy"></i> Copy</button>'
+        ).click(function () {
+            formdesigner.controller.duplicateCurrentQuestion({itext: 'copy'});
+        });
         
         var buttonGroups = [
             [duplicate],
