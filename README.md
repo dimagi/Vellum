@@ -41,6 +41,6 @@ control. Edit `_less/main.less` with your changes and then run
 
     lessc _less/main.less > css/main.css 
 
-For any change that modifies a .less file, please make two separate commits, one
-with your .less changes and any associated changes, and one with just the
-compiled CSS file changes.
+For any change that modifies a .less file, unless it's a very small change,
+pleas try to make two separate commits, one with your .less changes and any
+associated changes, and one with just the compiled CSS file changes.
