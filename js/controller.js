@@ -670,7 +670,7 @@ formdesigner.controller = (function () {
         if (refMugType && !refMugType.hasControlElement()) {
             var lowest = formdesigner.ui.selectLowestQuestionNode();
             refMugType = that.getMTFromFormByUFID($(lowest).prop('id'));
-            position = 'after'
+            position = 'after';
         }
      
         position = position || 'into';
@@ -724,10 +724,14 @@ formdesigner.controller = (function () {
 
     that.unlinkCurrentQuestionItext = function () {
         // hack
-        $("#controlElement-labelItextID-auto-itext," + 
-          "#bindElement-constraintMsgItextID-auto-itext")
-            .prop('checked', true)
-            .change();
+        $("#controlElement-labelItextID-auto-itext")
+            .prop('checked', true).change();
+
+        if ($.trim($("#bindElement-constraintMsgItextID").val())) {
+            $("#bindElement-constraintMsgItextID-auto-itext")
+                .prop('checked', true).change();
+        }
+
     };
 
     that.isCurrentQuestionAutoItextId = function () {
