@@ -576,8 +576,8 @@ formdesigner.controller = (function () {
                 var newQuestionID = formdesigner.util.generate_question_id(
                     mugType.mug.properties.bindElement.properties.nodeID
                 ); 
-                //formdesigner.util.give_ufid(duplicate.mug.properties.bindElement);
                 duplicate.mug.properties.bindElement.properties.nodeID = newQuestionID;
+                //formdesigner.util.give_ufid(duplicate.mug.properties.bindElement);
 
                 if (mugType.hasDataElement()) {
                     //formdesigner.util.give_ufid(duplicate.mug.properties.dataElement);
@@ -653,7 +653,7 @@ formdesigner.controller = (function () {
 
         formdesigner.ui
             .jstree("deselect_all")
-            .jstree("select_node", '#' + selected.ufid);
+            .jstree("select_node", '#' + duplicate.ufid);
 
         formdesigner.ui.skipNodeSelectEvent = oldSkip;
 
@@ -724,7 +724,8 @@ formdesigner.controller = (function () {
 
     that.unlinkCurrentQuestionItext = function () {
         // hack
-        $("#controlElement-labelItextID-auto-itext")
+        $("#controlElement-labelItextID-auto-itext," + 
+          "#bindElement-constraintMsgItextID-auto-itext")
             .prop('checked', true)
             .change();
     };

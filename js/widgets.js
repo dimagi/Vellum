@@ -1020,11 +1020,11 @@ formdesigner.widgets = (function () {
             elements.push({widgetType: "readonlyControl", path: "system/readonlyControl"});
         }
 
-        var deleteButton = $('<button class="btn btn-danger" id="fd-remove-button">'
+        var deleteButton = $('<button class="btn btn-danger" id="fd-remove-button" tabindex="-1">'
             + '<i class="icon icon-white icon-trash"></i> Delete</button>'
         ).click(formdesigner.controller.removeCurrentQuestion);
 
-        var duplicate = $('<button type="button" class="btn">'
+        var duplicate = $('<button type="button" class="btn" tabindex="-1">'
             + '<i class="icon icon-copy"></i> Copy</button>'
         ).click(function () {
             formdesigner.controller.duplicateCurrentQuestion({itext: 'copy'});
