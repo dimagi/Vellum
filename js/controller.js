@@ -572,23 +572,27 @@ formdesigner.controller = (function () {
             formdesigner.util.eventuality(duplicate.mug);
             formdesigner.util.setStandardMugEventResponses(duplicate.mug);
 
-            if (mugType.hasBindElement()) {
+            if (mugType.hasBindElement() && 
+                mugType.mug.properties.bindElement.properties.nodeID) 
+            {
                 var newQuestionID = formdesigner.util.generate_question_id(
                     mugType.mug.properties.bindElement.properties.nodeID
                 ); 
                 duplicate.mug.properties.bindElement.properties.nodeID = newQuestionID;
-                //formdesigner.util.give_ufid(duplicate.mug.properties.bindElement);
 
                 if (mugType.hasDataElement()) {
-                    //formdesigner.util.give_ufid(duplicate.mug.properties.dataElement);
                     duplicate.mug.properties.dataElement.properties.nodeID = newQuestionID;
                 }
-
-                if (mugType.hasControlElement()) {
-                    //formdesigner.util.give_ufid(duplicate.mug.properties.controlElement);
-                }
             }
-
+            
+            if (depth === 0 && mugType.hasControlElement() && 
+                mugType.mug.properties.controlElement.properties.defaultValue)
+            {
+                var newItemValue = formdesigner.util.generate_question_id(
+                    mugType.mug.properties.controlElement.properties.defaultValue
+                );
+                duplicate.mug.properties.controlElement.properties.defaultValue = newItemValue;
+            }
            
             formdesigner.ui.skipNodeSelectEvent = options.itext !== "copy";
             // insert mugtype into data and UI trees
