@@ -27,11 +27,17 @@ formdesigner.widgets = (function () {
         widget.getDisplayName = function () {
             // use the display text, or the property name if none found
             return this.definition.lstring ? this.definition.lstring : this.propName;
-        }
+        };
 
         widget.getLabel = function () {
-            var label = $("<label />").text(this.getDisplayName()).attr("for", this.getID());
-            return label;
+            var displayName = this.getDisplayName();
+            if (displayName) {
+                return $("<label />")
+                    .text(displayName)
+                    .attr("for", this.getID());
+            } else {
+                return null;
+            }
         };
 
         widget.getControl = function () {
@@ -42,7 +48,6 @@ formdesigner.widgets = (function () {
             throw ("must be overridden");
         };
 
-
         widget.setValue = function (val) {
             // noop
         };
@@ -51,23 +56,63 @@ formdesigner.widgets = (function () {
             // noop
         };
 
-
-        widget.fireValueChanged = function () {
-            var ref = this;
-            return function () {
-                formdesigner.controller.fire({
-                    type: 'widget-value-changed',
-                    widget: ref
-                });
-            };
+        widget.updateValue = function () {
+            // When a widget's value changes, do whatever work you need to in 
+            // the model/UI to make sure we are in a consistent state.
+            
+            var val = widget.getValue();
+            if (widget.propName === 'nodeID' && val.indexOf(" ") != -1){ 
+                // attempt to sanitize nodeID
+                // TODO, still may allow some bad values
+                widget.setValue(val.replace(/\s/g,'_'));
+            }
+            
+            //short circuit the mug property changing process for when the
+            //nodeID is changed to empty-string (i.e. when the user backspaces
+            //the whole value).  This allows us to keep a reference to everything
+            //and rename smoothly to the new value the user will ultimately enter.
+            if (val === "" && (widget.propName === 'nodeID')) {
+                return;
+            }
+            
+            widget.save();
         };
+
+        widget.save = function () {
+            throw 'Not Implemented';
+        }
 
         widget.getUIElement = function () {
             // gets the whole widget (label + control)
-	        var uiElem = $("<div />").addClass("widget");
-	        uiElem.append(this.getLabel());
-	        uiElem.append(this.getControl());
-	        return uiElem;
+            var uiElem = $("<div />").addClass("widget");
+            uiElem.append(this.getLabel());
+            uiElem.append(this.getControl());
+            return uiElem;
+        };
+
+        return widget;
+    };
+
+    /**
+     * @param html  raw HTML or jQuery object
+     */
+    that.htmlWidget = function (mugType, options) {
+        var id = options.id,
+            html = options.html,
+            widget = that.baseWidget(mugType);
+
+        if (typeof html === 'string') {
+            html = $(html);
+        }
+        
+        widget.definition = options;
+
+        widget.getID = function () { 
+            return id; 
+        };
+
+        widget.getControl = function () {
+            return html;
         };
 
         return widget;
@@ -86,7 +131,6 @@ formdesigner.widgets = (function () {
             return this.path.split("/").join("-");
         };
 
-
         widget.save = function () {
             formdesigner.controller.setMugPropertyValue(this.mug.mug,
 	                                                    this.groupName,
@@ -95,7 +139,6 @@ formdesigner.widgets = (function () {
                                                         this.mug);
         };
         return widget;
-
     };
 
     that.textWidget = function (mugType, path) {
@@ -116,7 +159,7 @@ formdesigner.widgets = (function () {
             return input.val();
         };
 
-        input.keyup(widget.fireValueChanged());
+        input.keyup(widget.updateValue);
         return widget;
     };
 
@@ -169,7 +212,6 @@ formdesigner.widgets = (function () {
             return this.getControl().val();
         };
 
-
         // auto checkbox
         var autoBoxId = widget.getID() + "-auto-itext";
         var autoBox = $("<input />").attr("type", "checkbox").attr("id", autoBoxId);
@@ -180,17 +222,12 @@ formdesigner.widgets = (function () {
             widget.setAutoMode(auto);
             if (auto) {
                 widget.updateAutoId();
-                widget.fireValueChanged()();
+                widget.updateValue();
             }
         });
 
         widget.setAutoMode = function (autoMode) {
             this.autoMode = autoMode;
-            if (autoMode) {
-                //this.getControl().addClass("auto-itext");
-            } else {
-                //this.getControl().removeClass("auto-itext");
-            }
         };
 
         // support auto mode to keep ids in sync
@@ -230,11 +267,12 @@ formdesigner.widgets = (function () {
             // keep the ids in sync if we're in auto mode
             if (widget.autoMode &&
                 (e.property === "nodeID" ||
-                 (widget.isSelectItem && e.property === "defaultValue"))) {
+                 widget.isSelectItem && e.property === "defaultValue")) 
+            {
                 var newVal = widget.autoGenerateId(e.val);
                 if (newVal !== widget.getValue()) {
                     widget.setUIValue(newVal);
-                    widget.fireValueChanged()();
+                    widget.updateValue();
                 }
             }
         });
@@ -278,7 +316,7 @@ formdesigner.widgets = (function () {
             return input.prop("checked");
         };
 
-        input.change(widget.fireValueChanged());
+        input.change(widget.updateValue);
         return widget;
     };
 
@@ -346,7 +384,7 @@ formdesigner.widgets = (function () {
 	               language: this.language,
 	               item: item,
 	               form: this.form,
-	               value: this.getValue()
+	               value: this.getValue(),
 	            });
 	            formdesigner.controller.form.fire({
 	               type: "form-property-changed"
@@ -404,7 +442,7 @@ formdesigner.widgets = (function () {
             return input;
         };
 
-        input.keyup(widget.fireValueChanged());
+        input.keyup(widget.updateValue);
         return widget;
     };
 
@@ -488,7 +526,7 @@ formdesigner.widgets = (function () {
         }
 
         widget.getControl = function () {
-        	return input;
+            return input;
         };
 
         widget.setValue = function (value) {
@@ -499,7 +537,7 @@ formdesigner.widgets = (function () {
             return input.val();
         };
 
-        input.change(widget.fireValueChanged());
+        input.change(widget.updateValue);
 
         return widget;
     };
@@ -600,6 +638,8 @@ formdesigner.widgets = (function () {
                 return that.questionTypeSelectorWidget(mugType);
             case "readonlyControl":
                 return that.readOnlyControlWidget(mugType);
+            case "html":
+                return that.htmlWidget(mugType, definition);
             case "generic":
             default:
                 var cls = that.widgetTypeFromPropertyDefinition(mugType.getPropertyDefinition(definition.path));
@@ -621,7 +661,7 @@ formdesigner.widgets = (function () {
 
         section.getId = function () {
             return "fd-question-edit-" + this.slug;
-        }
+        };
         return section;
     };
 
@@ -632,12 +672,11 @@ formdesigner.widgets = (function () {
 
             var inner = this;
             var toWidget = function (elementdefinition) {
-                var w = that.widgetFromMugAndDefinition(inner.mugType, elementdefinition);
-                return w;
-            }
+                return that.widgetFromMugAndDefinition(inner.mugType, elementdefinition);
+            };
             return this.elements.map(toWidget);
+        };
 
-        }
         section.getSectionDisplay = function () {
             // returns the actual display for the section
 
@@ -652,36 +691,6 @@ formdesigner.widgets = (function () {
         return section;
     };
 
-    that.mainSection = function (mugType, options) {
-        var section = that.genericSection(mugType, options);
-        
-        // hack to add a remove button
-        var super_getSectionDisplay = section.getSectionDisplay;
-        section.getSectionDisplay = function() {
-            var el = super_getSectionDisplay.call(section);
-            var removebut = $('<button class="btn btn-danger" id="fd-remove-button">' +
-                              'Delete Question</button>');
-
-            removebut.button({
-                icons: {
-                    primary: 'ui-icon-minusthick'
-                }
-            }).click(function () {
-                var selected = formdesigner.controller.getCurrentlySelectedMugType();
-                formdesigner.controller.removeMugTypeFromForm(selected);
-            }).css({
-                float: 'right',
-                margin: '.5em 10px .5em 0'
-            });
-
-            el.find('.widget').first().find('input').before(removebut);
-            return el;
-        };
-
-        return section;
-    };
-
-
     that.accordionSection = function (mugType, options) {
         var section = that.baseSection(mugType, options);
 
@@ -694,9 +703,9 @@ formdesigner.widgets = (function () {
             var inner = this;
             var toWidget = function (elementdef) {
                 return that.widgetFromMugAndDefinition(inner.mugType, elementdef);
-            }
+            };
             return this.elements.map(toWidget);
-        }
+        };
 
         section.getSectionDisplay = function () {
             // returns the actual display for the section
@@ -727,7 +736,7 @@ formdesigner.widgets = (function () {
 
         block.getTextId = function () {
             return this.textIdFunc(this.mugType);
-        }
+        };
 
         block.showAddFormButton = options.showAddFormButton;
         block.formList = block.getTextId().getFormNames();
@@ -825,16 +834,35 @@ formdesigner.widgets = (function () {
                 if (loadedData.audio.length > 0 || loadedData.images.length > 0)
                     ko.applyBindings(block.media_map, document.getElementById("fd-ui-container"));
             });
-        }
+        };
 
         var itextItem = block.getTextId();
 
         block.getUIElement = function () {
-
             var itextWidget, subBlock, subSec;
+
+            /*var sharedItextCount = formdesigner.model.itextIdCount(itextItem.id) - 1;
+            if (sharedItextCount > 0) {
+                var questions = formdesigner.util.pluralize("question"),
+                    unlink;
+                if (formdesigner.controller.isCurrentQuestionAutoItextId()) {
+                    unlink = $("<div>This question's display text is shared with " + sharedItextCount +
+                        " other " + questions + ". To unlink the display text, go to " + 
+                        (sharedItextCount !== 1 ? "one of " : "") + " the linked " + questions + ".</div>");
+                } else {
+                    unlink = $("<div>This question uses shared display text.</div>");
+                    $('<button class="btn">Unlink</button>').click(function () {
+                        formdesigner.controller.unlinkCurrentQuestionItext();
+                    }).appendTo(unlink);
+                }
+
+                main = main.add(unlink);
+            }*/
 
             for (var i = 0; i < this.langs.length; i++) {
                 subSec = $("<div />").addClass("itext-language-section").data("language", this.langs[i]);
+
+               
                 main = main.add(subSec);
                 // sub heading for language
                 $("<h3 />").text(this.langs[i]).appendTo(subSec);
@@ -992,7 +1020,53 @@ formdesigner.widgets = (function () {
             elements.push({widgetType: "readonlyControl", path: "system/readonlyControl"});
         }
 
-        return that.mainSection(mugType, {
+        var deleteButton = $('<button class="btn btn-danger" id="fd-remove-button" tabindex="-1">'
+            + '<i class="icon icon-white icon-trash"></i> Delete</button>'
+        ).click(formdesigner.controller.removeCurrentQuestion);
+
+        var duplicate = $('<button type="button" class="btn" tabindex="-1">'
+            + '<i class="icon icon-copy"></i> Copy</button>'
+        ).click(function () {
+            formdesigner.controller.duplicateCurrentQuestion({itext: 'copy'});
+        });
+        
+        var buttonGroups = [
+            [duplicate],
+            [deleteButton]
+        ];
+
+        var toolbar = $('<div class="btn-toolbar"></div>');
+
+        for (var i = 0; i < buttonGroups.length; i++) {
+            var buttons = buttonGroups[i],
+                buttonGroup = $('<div class="btn-group"></div>');
+
+            if (buttons[1] && $.isArray(buttons[1])) {
+                var menuOptions = buttons[1];
+                buttons[0].appendTo(buttonGroup);
+                var dropdown = $('<ul class="dropdown-menu"></ul>');
+
+                for (var j = 0; j < menuOptions.length; j++) {
+                    menuOptions[j].appendTo(dropdown); 
+                }
+                dropdown.appendTo(buttonGroup);
+            
+            } else {
+                for (var j = 0; j < buttons.length; j++) {
+                    buttons[j].appendTo(buttonGroup);
+                }
+            }
+            buttonGroup.appendTo(toolbar);
+        }
+
+        elements.push({
+            widgetType: "html",
+            lstring: "Question Actions",
+            id: 'question-actions',
+            html: toolbar
+        });
+
+        return that.genericSection(mugType, {
             slug: "main",
             displayName: "Main Properties",
             elements: elements

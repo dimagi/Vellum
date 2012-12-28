@@ -425,6 +425,9 @@
   clear: both;
   margin-bottom: .3em;
 }
+.hq-oldstyle #fd-props-content fieldset div.widget .btn-group {
+  margin-left: 60px;
+}
 .hq-oldstyle #fd-props-content fieldset label {
   font-weight: normal;
   display: inline-block;

@@ -39,26 +39,6 @@ formdesigner.util = (function(){
                              "bindElement/calculateAttr",
                              "bindElement/constraintAttr"]; 
     
-    var GROUP_OR_REPEAT_VALID_CHILDREN = that.GROUP_OR_REPEAT_VALID_CHILDREN = [
-        "group",
-        "repeat",
-        "question",
-        "date",
-        "datetime",
-        "time",
-        "int",
-        "barcode",
-        "geopoint",
-        "long",
-        "double",
-        "selectQuestion",
-        "trigger",
-        "secret",
-        "default",
-        "image",
-        "audio",
-        "video"
-    ];
     
     that.QUESTIONS = {
         //in the format: {question_slug: question_label}
@@ -321,8 +301,21 @@ formdesigner.util = (function(){
      * Generates a unique question ID (unique in this form) and
      * returns it as a string.
      */
-    that.generate_question_id = function () {
-        return label_maker('question');
+    that.generate_question_id = function (question_id) {
+        if (question_id) {
+            var match = /(.+)-\d$/.exec(question_id) ;
+            if (match) {
+                question_id = match[1]; 
+            }
+            for (var i = 1;; i++) {
+                var new_id = question_id + "-" + i;
+                if (!formdesigner.model.questionIdCount(new_id)) {
+                    return new_id; 
+                }
+            }
+        } else {
+            return label_maker('question');
+        }
     };
 
 
@@ -381,8 +374,8 @@ formdesigner.util = (function(){
      * @param refMug
      */
     var getNewMugType = function(refMugType){
-        var newMugType = formdesigner.util.clone(refMugType);
-        formdesigner.util.give_ufid(newMugType);
+        var newMugType = that.clone(refMugType);
+        that.give_ufid(newMugType);
         return newMugType;
     };
     that.getNewMugType = getNewMugType;
@@ -401,36 +394,23 @@ formdesigner.util = (function(){
     //Simple Event Framework
     //Just run your object through this function to make it event aware
     //Taken from 'JavaScript: The Good Parts'
-    var eventuality = function (that) {
+    that.eventuality = function (that) {
         var registry = {};
         that.fire = function (event) {
-    // Fire an event on an object. The event can be either
-    // a string containing the name of the event or an
-    // object containing a type property containing the
-    // name of the event. Handlers registered by the 'on'
-    // method that match the event name will be invoked.
             var array,
                 func,
                 handler,
                 i,
                 type = typeof event === 'string' ?
                         event : event.type;
-    // If an array of handlers exist for this event, then
-    // loop through it and execute the handlers in order.
             if (registry.hasOwnProperty(type)) {
                 array = registry[type];
                 for (i = 0; i < array.length; i += 1) {
                     handler = array[i];
-    // A handler record contains a method and an optional
-    // array of parameters. If the method is a name, look
-    // up the function.
                     func = handler.method;
                     if (typeof func === 'string') {
                         func = this[func];
                     }
-    // Invoke a handler. If the record contained
-    // parameters, then pass them. Otherwise, pass the
-    // event object.
                     func.apply(this,
                         handler.parameters || [event]);
                 }
@@ -438,9 +418,6 @@ formdesigner.util = (function(){
             return this;
         };
         that.on = function (type, method, parameters) {
-    // Register an event. Make a handler record. Put it
-    // in a handler array, making one if it doesn't yet
-    // exist for this type.
             var handler = {
                 method: method,
                 parameters: parameters
@@ -454,71 +431,16 @@ formdesigner.util = (function(){
         };
         return that;
     };
-    that.eventuality = eventuality;
-
-    /**
-     * Answers the question of whether
-     * the refMugType can have children of type ofTypeMug.
-     * @return list of strings indicating the allowed children types (if any).
-     * can be any of 'group' 'repeat' 'select' 'item' 'question'
-     */
-    var canMugTypeHaveChildren = function(refMugType,ofTypeMug){
-        var allowedChildren, n, targetMugTagName, refMugTagName,
-                makeLower = function(s){
-                    return s.toLowerCase();
-                };
-
-        if (!refMugType || !ofTypeMug || !refMugType.properties.controlElement) {
-            throw 'Cannot pass null argument or MugType without a controlElement!';
-        }
-        if(!refMugType.controlNodeCanHaveChildren){ return false; }
-        allowedChildren = refMugType.controlNodeAllowedChildren;
-        allowedChildren = allowedChildren.map(makeLower);
-        if (ofTypeMug.mug.properties.controlElement) {
-            targetMugTagName = ofTypeMug.mug.properties.controlElement.properties.tagName.toLowerCase();
-        } else if (ofTypeMug.typeName === "Data Node") {
-            targetMugTagName = 'data';
-        }
-        refMugTagName = refMugType.mug.properties.controlElement.properties.tagName.toLowerCase();
-
-        if(allowedChildren.indexOf(targetMugTagName) === -1 && targetMugTagName != 'data'){
-            return false;
-        }else{
-            return true;
-        }
-    
-    };
-    that.canMugTypeHaveChildren = canMugTypeHaveChildren;
 
     var capitaliseFirstLetter = function (string) {
         return string.charAt(0).toUpperCase() + string.slice(1);
     };
     that.capitaliseFirstLetter = capitaliseFirstLetter;
 
-    /**
-     * Determines where the newMugType should be inserted relative
-     * to the refMugType.
-     * @param refMugType - the reference MT already in the tree
-     * @param newMugType - the new MT you want a relative position for
-     * @return - String: 'first', 'inside' or 'after'
-     */
-    var getRelativeInsertPosition = function(refMugType, newMugType){
-            var canHaveChildren;
-            if(!refMugType){
-                return "into";
-            }
-
-            canHaveChildren = formdesigner.util.canMugTypeHaveChildren(refMugType,newMugType);
-
-            if(canHaveChildren){
-                return "into";
-            }else{
-                return "after";
-            }
+    that.pluralize = function (noun, n) {
+        return noun + (n !== 1 ? 's' : '');
     };
-    that.getRelativeInsertPosition = getRelativeInsertPosition;
 
-    
     var generate_guid = function() {
         // http://stackoverflow.com/questions/105034/how-to-create-a-guid-uuid-in-javascript
         var S4 = function() {
@@ -527,8 +449,8 @@ formdesigner.util = (function(){
         return (S4()+S4()+S4()+S4()+S4()+S4()+S4()+S4());
     };
 
-    var CHARS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-    var generate_xmlns_uuid = function () {
+    that.generate_xmlns_uuid = function () {
+        var CHARS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
         var uuid = [], r, i;
 
 		// rfc4122 requires these characters
@@ -544,19 +466,16 @@ formdesigner.util = (function(){
 			}
 		}
 		return uuid.toString().replace(/,/g,'');
-    }
-    that.generate_xmlns_uuid = generate_xmlns_uuid;
+    };
 
     /**
      * This method gives the passed object
-     * a Unique Mug ID plus standardized method(s)
-     * for accessing the ID.
+     * a Unique Mug ID
      * @param that
      */
-    var give_ufid = function(that){
+    that.give_ufid = function(that) {
         that.ufid = generate_guid();
     };
-    that.give_ufid = give_ufid;
 
     that.XSD_DATA_TYPES = [
             'xsd:boolean',
@@ -621,14 +540,6 @@ formdesigner.util = (function(){
     };
     that.exists = exists;
 
-    var getLabelItextID = function (mug) {
-        if(mug.properties.controlElement) {
-            return mug.properties.controlElement.properties.labelItextID
-        }
-    }
-    that.getLabelItextID = getLabelItextID;
-
-    
     (function($) {
               // duck-punching to make attr() return a map
               var _old = $.fn.attr;
@@ -658,10 +569,10 @@ formdesigner.util = (function(){
      * @param mug
      */
     that.setStandardMugEventResponses = function (mug) {
-        //NOTE: 'this' is the mug responding to the event.
+        // NOTE: 'this' is the mug responding to the event.
 
-        //bind dataElement.nodeID and bindElement.nodeID together
         mug.on('property-changed',function (e) {
+            // bind dataElement.nodeID and bindElement.nodeID together
             if(e.property === 'nodeID'){
                 if(this.properties.dataElement){
                     this.properties.dataElement.properties.nodeID = e.val;
@@ -670,36 +581,30 @@ formdesigner.util = (function(){
                     this.properties.bindElement.properties.nodeID = e.val;
                 }
             }
-        });
 
-        //Update the status of the indicator icons indicating where validation has failed
-        mug.on('property-changed', function (e) {
+            // Update the status of the indicator icons indicating where
+            // validation has failed
             var MT = formdesigner.controller.getMTFromFormByUFID(e.mugTypeUfid);
             formdesigner.ui.showVisualValidation(MT);
             formdesigner.ui.setTreeValidationIcon(MT);
-        });
 
-        
-        // update the logic properties that reference the mug
-        mug.on('property-changed', function (e) {
+            // update the logic properties that reference the mug
             if (e.previous !== e.val) {
-	            var mug = formdesigner.controller.getMTFromFormByUFID(e.mugTypeUfid);
-	            if (e.property === 'nodeID') {
-	                var currentPath = formdesigner.controller.form.dataTree.getAbsolutePath(mug);
-	                var parsed = xpath.parse(currentPath);
-	                parsed.steps[parsed.steps.length - 1].name = e.previous;
-	                formdesigner.model.LogicManager.updatePath(mug.ufid, parsed.toXPath(), currentPath);
-	            } else {
+                var mug = formdesigner.controller.getMTFromFormByUFID(e.mugTypeUfid);
+                if (e.property === 'nodeID') {
+                    var currentPath = formdesigner.controller.form.dataTree.getAbsolutePath(mug);
+                    var parsed = xpath.parse(currentPath);
+                    parsed.steps[parsed.steps.length - 1].name = e.previous;
+                    formdesigner.model.LogicManager.updatePath(mug.ufid, parsed.toXPath(), currentPath);
+                } else {
                     var propertyPath = [e.element, e.property].join("/");
                     if (mug.getPropertyDefinition(propertyPath).uiType === "xpath") {
-	                    formdesigner.model.LogicManager.updateReferences(mug, propertyPath);
-	                }
-	            }
-	        }
+                        formdesigner.model.LogicManager.updateReferences(mug, propertyPath);
+                    }
+                }
+            }
         });
-
-
-    }
+    };
 
     /**
      * Bind some standard responses to the 'form-property-changed' event.
@@ -717,42 +622,15 @@ formdesigner.util = (function(){
         form.on('form-property-changed', function() {
             formdesigner.controller.setFormChanged();
         });
-    }
-
-    /**
-     * Renames a node in the JSTree display tree
-     * @param ufid - MugType ufid
-     * @param val - New value of the display label
-     */
-    that.changeUITreeNodeLabel = function (ufid, val) {
-        var el = $('#' + ufid);
-        $('#fd-question-tree').jstree('rename_node',el,val);
-    }
-
-    that.getDataMugDisplayName = function (mugType) {
-        var mugProps, dEl;
-
-        if(!mugType || !mugType.mug) {
-            return 'No Name!'
-        }
-
-        mugProps = mugType.mug.properties;
-        if (mugProps.dataElement) {
-            dEl = mugProps.dataElement.properties;
-        } else {
-            return 'Has no Data Element!';
-        }
-
-        return dEl.nodeID;
-    }
+    };
 
     that.getMugDisplayName = function (mugType) {
         var itextItem, nodeID, cEl,dEl,bEl, mugProps, disp, lang, Itext;
         if(!mugType || !mugType.mug) {
-            return 'No Name!'
+            return 'No Name!';
         }
-        if (formdesigner.util.isReadOnly(mugType)) {
-            return "Unknown (read-only) question type"            
+        if (that.isReadOnly(mugType)) {
+            return "Unknown (read-only) question type";
         }
 
         mugProps = mugType.mug.properties;
@@ -780,29 +658,17 @@ formdesigner.util = (function(){
                     nodeID = dEl.nodeID;
                 }
             }
-            if(nodeID) {
-                disp = nodeID;
-            } else {
-                disp = 'No Display Name!';
-            }
-            return disp;
+            return nodeID || cEl.defaultValue || undefined;
         }
 
-        lang = formdesigner.currentItextDisplayLanguage;
-        if(!lang) {
-            lang = Itext.getDefaultLanguage();
-        }
+        lang = formdesigner.currentItextDisplayLanguage || Itext.getDefaultLanguage();
 
         if(!lang) {
             return 'No Translation Data';
         }
 
-        if (!itextItem) {
-            return cEl.defaultValue || "";
-        } else {
-            disp = itextItem.getValue("default", lang);
-            return disp ? disp : itextItem.getValue("long", lang);
-        }
+        disp = itextItem.getValue("default", lang);
+        return disp ? disp : itextItem.getValue("long", lang);
     };
     
     /*
