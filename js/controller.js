@@ -19,9 +19,6 @@ formdesigner.controller = (function () {
         xpathmodels.DEBUG_MODE = DEBUG_MODE;
         formdesigner.util.question_counter = 1;
         
-        // ui.questionTree.empty();
-        // ui.dataTree.empty();
-
         formdesigner.model.init();
         formdesigner.ui.init();
         that.setCurrentlySelectedMugType(null);
@@ -2013,7 +2010,7 @@ formdesigner.controller = (function () {
             controlTree = that.form.controlTree, 
             preMovePath = dataTree.getAbsolutePath(mugType);
 
-        if (refMugType && refMugType.typeName !== "Select Item") {
+        if (mugType.hasDataElement()) {
             dataTree.insertMugType(mugType, position, refMugType);
         }
         if (mugType.hasControlElement()) {
