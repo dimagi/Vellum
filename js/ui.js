@@ -1186,9 +1186,10 @@ formdesigner.ui = function () {
 
 
     that.showXPathEditor = function (options) {
-        /*
+        var addExpressionButton;
+
+        /**
          * All the logic to display the XPath Editor widget.
-         *
          */
         var expTypes = xpathmodels.XPathExpressionTypeEnum;
         var questionList = formdesigner.controller.getMugTypeList();
@@ -1503,6 +1504,9 @@ formdesigner.ui = function () {
             // update expression builder
             if (options.xpathType === "bool") {
 	            showSimpleMode(options.value);
+                if (!options.value) {
+                    addExpressionButton.click();
+                }
             } else {
                 showAdvancedMode(options.value);
             }
@@ -1579,7 +1583,7 @@ formdesigner.ui = function () {
             $("<div />").attr("id", "fd-xpath-editor-expressions")
                     .appendTo(simpleUI);
 
-            var addExpressionButton = $("<button />").text("Add expression").addClass("btn")
+            addExpressionButton = $("<button />").text("Add expression").addClass("btn")
                     .button()
                     .appendTo(simpleUI);
 
