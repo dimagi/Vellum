@@ -531,6 +531,14 @@ formdesigner.model = function () {
         return "pass";            
     };
     
+    /**
+     * Check if value is a valid XML attribute value (additionally disallow all
+     * ' and ")
+     */
+    that.isValidAttributeValue = function (value) {
+        return (/^[^<&'"]*$/).test(value);
+    };
+
     var validateItextItem = function (itextItem, name) {
         if (itextItem) {
 	        var val = itextItem.defaultValue();
@@ -591,11 +599,10 @@ formdesigner.model = function () {
             var itextBlock = mugType.getItext();
             hasLabelItextID = Boolean(itextBlock && itextBlock.id);
             
-            if (hasLabelItextID){
-                var res = validateElementName(itextBlock.id, "Label IText ID");
-	            if (res !== "pass") {
-	                return res;
-	            }
+            if (hasLabelItextID) {
+                if (!that.isValidAttributeValue(itextBlock.id)) {
+                    return itextBlock.id + " is not a valid ID";
+                }
                 hasItext = itextBlock.hasHumanReadableItext();
             } else {
                 hasItext = false;
@@ -613,7 +620,7 @@ formdesigner.model = function () {
             } else if (!hasLabel && !hasLabelItextID) {
                 missing = 'a display label ID';
             } else if (!hasLabel) {
-                missing = 'a display label'
+                missing = 'a display label';
             } else if (!hasLabelItextID) {
                 missing = 'a display label ID';
             }
@@ -626,13 +633,11 @@ formdesigner.model = function () {
             Itext = formdesigner.model.Itext;
             hintItext = controlElement.hintItextID;
             if (hintItext && hintItext.id) {
-                var res = validateElementName(hintItext.id, "Hint IText ID");
-                if (res !== "pass") {
-                    return res;
+                if (!that.isValidAttributeValue(hintItext.id)) {
+                    return hintItext.id + " is not a valid ID";
                 }
-                
             }
-            if(controlBlock.hintItextID === 'required' && !hintIID) {
+            if (controlBlock.hintItextID === 'required' && !hintIID) {
                 return 'Hint Itext ID is required but not present in this question!';
             }
             
@@ -644,9 +649,8 @@ formdesigner.model = function () {
             
             var constraintItext = bindElement.constraintMsgItextID;
             if (constraintItext && constraintItext.id) {
-                var res = validateElementName(constraintItext.id, "Constraint IText ID");
-                if (res !== "pass") {
-                    return res;
+                if (!that.isValidAttributeValue(constraintItext.id)) {
+                    return constraintItext.id + " is not a valid ID";
                 }
             }
             if (constraintItext && constraintItext.id && !bindElement.constraintAttr) {
