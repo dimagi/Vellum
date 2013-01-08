@@ -679,6 +679,7 @@ formdesigner.util = (function(){
         var elementNameRegex = /^(?!XML)[a-zA-Z][\w0-9-]*$/;
         return elementNameRegex.test(name);
     };
+
     
     /*
      * Assumes we're in a quoted string, and replaces special characters
