@@ -61,10 +61,12 @@ formdesigner.widgets = (function () {
             // the model/UI to make sure we are in a consistent state.
             
             var val = widget.getValue();
-            if (widget.propName === 'nodeID' && val.indexOf(" ") != -1){ 
-                // attempt to sanitize nodeID
+            if ((widget.propName === 'nodeID' || widget.propName === 'defaultValue')
+                && val.indexOf(' ') !== -1) 
+            { 
+                // attempt to sanitize nodeID and select item values
                 // TODO, still may allow some bad values
-                widget.setValue(val.replace(/\s/g,'_'));
+                widget.setValue(val.replace(/\s/g, '_'));
             }
             
             //short circuit the mug property changing process for when the
@@ -80,7 +82,7 @@ formdesigner.widgets = (function () {
 
         widget.save = function () {
             throw 'Not Implemented';
-        }
+        };
 
         widget.getUIElement = function () {
             // gets the whole widget (label + control)
