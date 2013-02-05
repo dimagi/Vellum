@@ -153,7 +153,7 @@ formdesigner.ui = function () {
     };
     
     function init_toolbar() {
-        var toolbar = $(".fd-toolbar"), select, addbutstr, addbut;
+        var toolbar = $(".fd-toolbar"), select, addbut;
         select = $('<select></select>')
                 .attr('id','fd-question-select');
         toolbar.prepend(select);
@@ -179,8 +179,7 @@ formdesigner.ui = function () {
         }
 
         buildSelectDropDown();
-        addbutstr = '<button class="btn btn-primary" id="fd-add-but">Add</button>';
-        select.after(addbutstr);
+        select.after('<button class="btn btn-primary" id="fd-add-but">Add</button>');
         addbut = $('#fd-add-but');
         addbut.button({
             icons:{
@@ -1684,6 +1683,8 @@ formdesigner.ui = function () {
                 position = data.rslt.p;
 
             controller.moveMugType(mugType, refMugType, position);
+
+            that.displayMugProperties(controller.getCurrentlySelectedMugType());
         }).bind("deselect_all.jstree", function (e, data) {
             that.hideSelectItemAddButton();
         }).bind("deselect_node.jstree", function (e, data) {
@@ -1699,9 +1700,6 @@ formdesigner.ui = function () {
         });
     }
 
-    /**
-     * todo: don't look up DOM object every time
-     */
     that.getJSTree = function () {
         return that.questionTree;
     };
