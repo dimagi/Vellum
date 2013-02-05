@@ -733,6 +733,11 @@ formdesigner.controller = (function () {
                 .prop('checked', true).change();
         }
 
+        if ($.trim($("#controlElement-hintItextID").val())) {
+            $("#controlElement-hintItextID-auto-itext")
+                .prop('checked', true).change();
+        }
+
     };
 
     that.isCurrentQuestionAutoItextId = function () {
