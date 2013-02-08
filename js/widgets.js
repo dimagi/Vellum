@@ -843,24 +843,6 @@ formdesigner.widgets = (function () {
         block.getUIElement = function () {
             var itextWidget, subBlock, subSec;
 
-            /*var sharedItextCount = formdesigner.model.itextIdCount(itextItem.id) - 1;
-            if (sharedItextCount > 0) {
-                var questions = formdesigner.util.pluralize("question"),
-                    unlink;
-                if (formdesigner.controller.isCurrentQuestionAutoItextId()) {
-                    unlink = $("<div>This question's display text is shared with " + sharedItextCount +
-                        " other " + questions + ". To unlink the display text, go to " + 
-                        (sharedItextCount !== 1 ? "one of " : "") + " the linked " + questions + ".</div>");
-                } else {
-                    unlink = $("<div>This question uses shared display text.</div>");
-                    $('<button class="btn">Unlink</button>').click(function () {
-                        formdesigner.controller.unlinkCurrentQuestionItext();
-                    }).appendTo(unlink);
-                }
-
-                main = main.add(unlink);
-            }*/
-
             for (var i = 0; i < this.langs.length; i++) {
                 subSec = $("<div />").addClass("itext-language-section").data("language", this.langs[i]);
 
@@ -1076,11 +1058,17 @@ formdesigner.widgets = (function () {
     };
 
     that.getContentSection = function (mugType) {
-        elements = [{ widgetType: "itext",
-                      slug: "text",
-                      displayMode: "full",
-                      textIdFunc: function (mt) { return mt.getItext() },
-                      showAddFormButton: true}];
+        var showAddFormButton = (mugType.typeSlug !== 'group' && 
+                                 mugType.typeSlug !== 'repeat');
+            
+        elements = [{
+            widgetType: "itext",
+            slug: "text",
+            displayMode: "full",
+            textIdFunc: function (mt) { return mt.getItext() },
+            showAddFormButton: showAddFormButton
+        }];
+
         return that.genericSection(mugType, {
             displayName: "Content",
             slug: "content",
@@ -1089,11 +1077,23 @@ formdesigner.widgets = (function () {
     };
 
     that.getLogicSection = function (mugType) {
-        var elementPaths = filterByMugProperties(
-            ["bindElement/requiredAttr",
-             "bindElement/relevantAttr", "bindElement/calculateAttr",
-             "bindElement/constraintAttr",
-             "bindElement/constraintMsgItextID"], mugType)
+        var properties;
+        if (mugType.typeSlug == 'datanode') {
+            properties = [
+                "bindElement/calculateAttr",
+                "bindElement/relevantAttr",
+            ];
+        } else {
+            properties = [
+                "bindElement/requiredAttr",
+                "bindElement/relevantAttr",
+                "bindElement/constraintAttr",
+                "bindElement/constraintMsgItextID"
+            ];
+        }
+
+        var elementPaths = filterByMugProperties(properties, mugType);
+
         var elements = elementPaths.map(wrapAsGeneric);
         if (elementPaths.indexOf("bindElement/constraintMsgItextID") !== -1) {
             // only add the itext if the constraint was relevant
@@ -1104,6 +1104,12 @@ formdesigner.widgets = (function () {
 	                        textIdFunc: function (mt) { return mt.getConstraintMsgItext() },
 	                        showAddFormButton: false});
         }
+
+        if (mugType.typeSlug == 'repeat') {
+            elements.push(wrapAsGeneric("controlElement/repeat_count"));
+            elements.push(wrapAsGeneric("controlElement/no_add_remove"));
+        }
+
         return that.accordionSection(mugType, {
                             slug: "logic",
                             displayName: "Logic Properties",
@@ -1112,22 +1118,40 @@ formdesigner.widgets = (function () {
     };
 
     that.getAdvancedSection = function (mugType) {
-        var elementPaths = filterByMugProperties(
-            ["dataElement/dataValue", "dataElement/keyAttr", "dataElement/xmlnsAttr",
-             "bindElement/preload", "bindElement/preloadParams",
-             "controlElement/label", "controlElement/hintLabel",
-             "bindElement/constraintMsgAttr", "controlElement/labelItextID",
-             "controlElement/hintItextID", "controlElement/repeat_count", "controlElement/no_add_remove"], mugType);
+
+        var properties = [
+            "dataElement/dataValue",
+            "dataElement/keyAttr",
+            "dataElement/xmlnsAttr",
+            "bindElement/preload",
+            "bindElement/preloadParams",
+            "controlElement/label",
+            "controlElement/hintLabel",
+            "bindElement/constraintMsgAttr",
+            "controlElement/labelItextID",
+            "controlElement/hintItextID",
+        ];
+
+        // don't show non-itext constaint message input if it doesn't already
+        // exist
+        if (mugType.hasBindElement() && !mugType.mug.properties.bindElement.properties.constraintMsgAttr) {
+            properties.splice(properties.indexOf('bindElement/constraintMsgAttr'), 1);
+        }
+
+        var elementPaths = filterByMugProperties(properties, mugType);
         var elements = elementPaths.map(wrapAsGeneric);
 
         if (elementPaths.indexOf("controlElement/hintItextID") !== -1) {
 	        // only add the itext if the hint was relevant
-	        elements.push({ widgetType: "itext",
-	                        displayMode: "inline",
-	                        slug: "hint",
-	                        displayName: "Hint",
-	                        textIdFunc: function (mt) { return mt.getHintItext() },
-	                        showAddFormButton: false});
+
+	        elements.push({ 
+                widgetType: "itext",
+                displayMode: "inline",
+                slug: "hint",
+                displayName: "Hint",
+                textIdFunc: function (mt) { return mt.getHintItext() },
+                showAddFormButton: false
+            });
         }
         return that.accordionSection(mugType, {
                             slug: "advanced",

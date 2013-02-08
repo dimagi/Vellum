@@ -325,8 +325,9 @@ formdesigner.util = (function(){
     that.generate_item_label = generate_item_label;
 
     that.getAttributes = function (element) {
-        var attributes = $(element)[0].attributes;
-        var attrMap = {};
+        var attributes = $(element)[0].attributes,
+            attrMap = {};
+
         for (var i = 0; i < attributes.length; i++) {
             attrMap[attributes[i].nodeName] = attributes[i].nodeValue;
         }
