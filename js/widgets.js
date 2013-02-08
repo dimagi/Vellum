@@ -1058,11 +1058,17 @@ formdesigner.widgets = (function () {
     };
 
     that.getContentSection = function (mugType) {
-        elements = [{ widgetType: "itext",
-                      slug: "text",
-                      displayMode: "full",
-                      textIdFunc: function (mt) { return mt.getItext() },
-                      showAddFormButton: true}];
+        var showAddFormButton = (mugType.typeSlug !== 'group' && 
+                                 mugType.typeSlug !== 'repeat');
+            
+        elements = [{
+            widgetType: "itext",
+            slug: "text",
+            displayMode: "full",
+            textIdFunc: function (mt) { return mt.getItext() },
+            showAddFormButton: showAddFormButton
+        }];
+
         return that.genericSection(mugType, {
             displayName: "Content",
             slug: "content",
@@ -1124,12 +1130,15 @@ formdesigner.widgets = (function () {
 
         if (elementPaths.indexOf("controlElement/hintItextID") !== -1) {
 	        // only add the itext if the hint was relevant
-	        elements.push({ widgetType: "itext",
-	                        displayMode: "inline",
-	                        slug: "hint",
-	                        displayName: "Hint",
-	                        textIdFunc: function (mt) { return mt.getHintItext() },
-	                        showAddFormButton: false});
+
+	        elements.push({ 
+                widgetType: "itext",
+                displayMode: "inline",
+                slug: "hint",
+                displayName: "Hint",
+                textIdFunc: function (mt) { return mt.getHintItext() },
+                showAddFormButton: false
+            });
         }
         return that.accordionSection(mugType, {
                             slug: "advanced",
