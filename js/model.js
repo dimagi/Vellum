@@ -150,7 +150,7 @@ formdesigner.model = function () {
 
         that.toString = function () {
             return 'Bind Element: ' + this.properties.nodeID;
-        }
+        };
 
         //make the object event aware
         formdesigner.util.eventuality(that);
@@ -2434,6 +2434,10 @@ formdesigner.model = function () {
                         
                         // Write any custom attributes first
                         for (var k in cProps._rawAttributes) {
+                            if (k === 'jr:count') {
+                                continue;
+                            }
+
                             if (cProps._rawAttributes.hasOwnProperty(k)) {
                                 xmlWriter.writeAttributeStringSafe(k, cProps._rawAttributes[k]);
                             }
