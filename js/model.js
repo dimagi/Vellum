@@ -2256,21 +2256,22 @@ formdesigner.model = function () {
                 formdesigner.ui.resetMessages(that.errors);
             }
         };
-        
+
         /**
          * Generates an XML Xform and returns it as a string.
          */
-        var createXForm = function () {
+        that.createXForm = function () {
+            var xmlWriter = new XMLWriter( 'UTF-8', '1.0' );
+
             var createDataBlock = function () {
                 // use dataTree.treeMap(func,listStore,afterChildfunc)
                 // create func that opens + creates the data tag, that can be recursively called on all children
                 // create afterChildfunc which closes the data tag
                 function mapFunc (node) {
-                    var xw = formdesigner.controller.XMLWriter,
-                        defaultVal, extraXMLNS, keyAttr,
+                    var defaultVal, extraXMLNS, keyAttr,
                         MT = node.getValue();
 
-                    xw.writeStartElement(node.getID());
+                    xmlWriter.writeStartElement(node.getID());
                     
                     if (node.isRootNode) {
                         createModelHeader();
@@ -2278,31 +2279,30 @@ formdesigner.model = function () {
                         // Write any custom attributes first
 	                    for (var k in MT.mug.properties.dataElement.properties._rawAttributes) {
 	                        if (MT.mug.properties.dataElement.properties._rawAttributes.hasOwnProperty(k)) {
-	                            xw.writeAttributeStringSafe(k, MT.mug.properties.dataElement.properties._rawAttributes[k]);
+	                            xmlWriter.writeAttributeStringSafe(k, MT.mug.properties.dataElement.properties._rawAttributes[k]);
 	                        }
 	                    }
 	                    
 	                    if (MT.mug.properties.dataElement.properties.dataValue){
 	                        defaultVal = MT.mug.properties.dataElement.properties.dataValue;
-	                        xw.writeString(defaultVal);
+	                        xmlWriter.writeString(defaultVal);
 	                    }
 	                    if (MT.mug.properties.dataElement.properties.keyAttr){
 	                        keyAttr = MT.mug.properties.dataElement.properties.keyAttr;
-	                        xw.writeAttributeStringSafe("key", keyAttr);
+	                        xmlWriter.writeAttributeStringSafe("key", keyAttr);
 	                    }
 	                    if (MT.mug.properties.dataElement.properties.xmlnsAttr){
 	                        extraXMLNS = MT.mug.properties.dataElement.properties.xmlnsAttr;
-	                        xw.writeAttributeStringSafe("xmlns", extraXMLNS);
+	                        xmlWriter.writeAttributeStringSafe("xmlns", extraXMLNS);
 	                    }
 	                    if (MT.typeName === "Repeat"){
-	                        xw.writeAttributeStringSafe("jr:template","");
+	                        xmlWriter.writeAttributeStringSafe("jr:template","");
 	                    }
                     }
                 }
 
                 function afterFunc (node) {
-                    var xw = formdesigner.controller.XMLWriter;
-                    xw.writeEndElement();
+                    xmlWriter.writeEndElement();
                     //data elements only require one close element call with nothing else fancy.
                 }
 
@@ -2310,8 +2310,7 @@ formdesigner.model = function () {
             };
 
             var createBindList = function () {
-                var xw = formdesigner.controller.XMLWriter,
-                    bList = formdesigner.controller.form.getBindList(),
+                var bList = formdesigner.controller.form.getBindList(),
                     MT,
                         //vars populated by populateVariables()
                         bEl,cons,consMsg,nodeset,type,relevant,required,calc,preld,preldParams,
@@ -2344,27 +2343,27 @@ formdesigner.model = function () {
                         MT = bList[i];
                         attrs = populateVariables(MT);
                         if(attrs.nodeset){
-                            xw.writeStartElement('bind');
+                            xmlWriter.writeStartElement('bind');
                         }
                         for (j in attrs) { //for each populated property
                             if(attrs.hasOwnProperty(j)){
                                 if(attrs[j]){ //if property has a useful bind attribute value
                                     if (j === "constraintMsg"){
-                                        xw.writeAttributeStringSafe("jr:constraintMsg",attrs[j]); //write it
+                                        xmlWriter.writeAttributeStringSafe("jr:constraintMsg",attrs[j]); //write it
                                     } else if (j === "constraintMsgItextID") {
-                                        xw.writeAttributeStringSafe("jr:constraintMsg",  "jr:itext('" + attrs[j] + "')")
+                                        xmlWriter.writeAttributeStringSafe("jr:constraintMsg",  "jr:itext('" + attrs[j] + "')")
                                     } else if (j === "preload") {
-                                        xw.writeAttributeStringSafe("jr:preload", attrs[j]);
+                                        xmlWriter.writeAttributeStringSafe("jr:preload", attrs[j]);
                                     } else if (j === "preloadParams") {
-                                        xw.writeAttributeStringSafe("jr:preloadParams", attrs[j]);
+                                        xmlWriter.writeAttributeStringSafe("jr:preloadParams", attrs[j]);
                                     } else {
-                                        xw.writeAttributeStringSafe(j,attrs[j]);
+                                        xmlWriter.writeAttributeStringSafe(j,attrs[j]);
                                     } //write it
                                 }
                             }
                         }
                         if(attrs.nodeset) {
-                            xw.writeEndElement();
+                            xmlWriter.writeEndElement();
                         }
 
                     }
@@ -2380,16 +2379,13 @@ formdesigner.model = function () {
                     }
 
                     var mugType = node.getValue();
-                    var xmlWriter = formdesigner.controller.XMLWriter;
                         
                     if (formdesigner.util.isReadOnly(mugType)) {
                         xmlWriter.writeString($('<div>').append(mugType.mug.controlElementRaw).clone().html());
                         return;
                     }
                     var cProps = mugType.mug.properties.controlElement.properties,
-                        label,
-                        hasItext,
-                        isItextOptional;
+                        label, hasItext, isItextOptional;
 
                     /**
                      * @param tagName
@@ -2415,7 +2411,7 @@ formdesigner.model = function () {
                             }
                         }
 
-                        //////Special logic block to make sure the label ends up in the right place
+                        // Special logic block to make sure the label ends up in the right place
                         if (isGroupOrRepeat) {
                             xmlWriter.writeStartElement('group');
                             createLabel();
@@ -2428,7 +2424,7 @@ formdesigner.model = function () {
                         if (tagName !== 'group' && tagName !== 'repeat') {
                             createLabel();
                         }
-                        //////////////////////////////////////////////////////////////////////////
+                        
                         if (tagName === 'item' && cProps.defaultValue) {
                             //do a value tag for an item MugType
                             xmlWriter.writeStartElement('value');
@@ -2443,8 +2439,7 @@ formdesigner.model = function () {
                             }
                         }
                         
-                        ///////////////////////////////////////////////////////////////////////////
-                        ///Set the nodeset/ref attribute correctly
+                        // Set the nodeset/ref attribute correctly
                         if (tagName !== 'item') {
                             var attr, absPath;
                             if (tagName === 'repeat') {
@@ -2455,8 +2450,8 @@ formdesigner.model = function () {
                             absPath = formdesigner.controller.form.dataTree.getAbsolutePath(mugType);
                             xmlWriter.writeAttributeStringSafe(attr, absPath);
                         }
-                        //////////////////////////////////////////////////////////////////////
-                        ///Set other relevant attributes
+                        
+                        // Set other relevant attributes
 
                         if (tagName === 'repeat') {
                             var r_count = cProps.repeat_count,
@@ -2468,6 +2463,7 @@ formdesigner.model = function () {
                             if (r_count) {
                                 xmlWriter.writeAttributeStringSafe("jr:count",r_count);
                             }
+
                             if (r_noaddrem) {
                                 xmlWriter.writeAttributeStringSafe("jr:noAddRemove", r_noaddrem);
                             }
@@ -2477,8 +2473,8 @@ formdesigner.model = function () {
                                 xmlWriter.writeAttributeStringSafe("mediatype", mediaType);
                             }
                         }
-                        //////////////////////////////////////////////////////////////////////
-                        //Do hint label
+                        
+                        // Do hint label
                         if( tagName !== 'item' && tagName !== 'repeat'){
                             if(cProps.hintLabel || (cProps.hintItextID && cProps.hintItextID.id)) {
                                 xmlWriter.writeStartElement('hint');
@@ -2492,9 +2488,7 @@ formdesigner.model = function () {
                                 xmlWriter.writeEndElement();
                             }
                         }
-                        ///////////////////////////////////////
                     }
-
 
                     //create the label object (for createOpenControlTag())
                     if (cProps.label) {
@@ -2506,14 +2500,12 @@ formdesigner.model = function () {
                             label = {};
                         }
                         
-                        
                         label.ref = "jr:itext('" + cProps.labelItextID.id + "')";
                         isItextOptional = mugType.properties.controlElement.labelItextID.presence == 'optional'; //iID is optional so by extension Itext is optional.
                         if (cProps.labelItextID.isEmpty() && isItextOptional) {
                             label.ref = '';
                         }
                     }
-                    ////////////
 
                     createOpenControlTag(cProps.tagName, label);
 
@@ -2529,8 +2521,7 @@ formdesigner.model = function () {
                         return;
                     }
                     
-                    var xmlWriter = formdesigner.controller.XMLWriter,
-                        tagName = mugType.mug.properties.controlElement.properties.tagName;
+                    var tagName = mugType.mug.properties.controlElement.properties.tagName;
                     //finish off
                     xmlWriter.writeEndElement(); //close control tag.
                     if(tagName === 'repeat'){
@@ -2543,8 +2534,8 @@ formdesigner.model = function () {
             };
 
             var createITextBlock = function () {
-                var xmlWriter = formdesigner.controller.XMLWriter, lang, id,
-                        langData, val, formData, form, i, allLangKeys, question, form;
+                var lang, id, langData, val, formData, 
+                    form, i, allLangKeys, question, form;
                 
                 // here are the rules that govern itext
                 // 0. iText items which aren't referenced by any questions are 
@@ -2600,8 +2591,7 @@ formdesigner.model = function () {
             };
 
             var createModelHeader = function () {
-                var xw = formdesigner.controller.XMLWriter,
-                        uuid, uiVersion, version, formName, jrm;
+                var uuid, uiVersion, version, formName, jrm;
                 //assume we're currently pointed at the opening date block tag
                 //e.g. <model><instance><data> <--- we're at <data> now.
 
@@ -2630,20 +2620,19 @@ formdesigner.model = function () {
                     formName = "New Form";
                 }
 
-                xw.writeAttributeStringSafe("xmlns:jrm",jrm);
-                xw.writeAttributeStringSafe("xmlns", uuid);
-                xw.writeAttributeStringSafe("uiVersion", uiVersion);
-                xw.writeAttributeStringSafe("version", version);
-                xw.writeAttributeStringSafe("name", formName);
+                xmlWriter.writeAttributeStringSafe("xmlns:jrm",jrm);
+                xmlWriter.writeAttributeStringSafe("xmlns", uuid);
+                xmlWriter.writeAttributeStringSafe("uiVersion", uiVersion);
+                xmlWriter.writeAttributeStringSafe("version", version);
+                xmlWriter.writeAttributeStringSafe("name", formName);
             };
 
             function html_tag_boilerplate () {
-                var xw = formdesigner.controller.XMLWriter;
-                xw.writeAttributeStringSafe( "xmlns:h", "http://www.w3.org/1999/xhtml" );
-                xw.writeAttributeStringSafe( "xmlns:orx", "http://openrosa.org/jr/xforms" );
-                xw.writeAttributeStringSafe( "xmlns", "http://www.w3.org/2002/xforms" );
-                xw.writeAttributeStringSafe( "xmlns:xsd", "http://www.w3.org/2001/XMLSchema" );
-                xw.writeAttributeStringSafe( "xmlns:jr", "http://openrosa.org/javarosa" );
+                xmlWriter.writeAttributeStringSafe( "xmlns:h", "http://www.w3.org/1999/xhtml" );
+                xmlWriter.writeAttributeStringSafe( "xmlns:orx", "http://openrosa.org/jr/xforms" );
+                xmlWriter.writeAttributeStringSafe( "xmlns", "http://www.w3.org/2002/xforms" );
+                xmlWriter.writeAttributeStringSafe( "xmlns:xsd", "http://www.w3.org/2001/XMLSchema" );
+                xmlWriter.writeAttributeStringSafe( "xmlns:jr", "http://openrosa.org/javarosa" );
             }
 
             var _writeInstanceAttributes = function (writer, instanceMetadata) {
@@ -2671,29 +2660,26 @@ formdesigner.model = function () {
                 // duplicates
                 formdesigner.model.Itext.deduplicateIds();
                 
-                formdesigner.controller.initXMLWriter();
-                var xw = formdesigner.controller.XMLWriter;
-
-                xw.writeStartDocument();
+                xmlWriter.writeStartDocument();
                 //Generate header boilerplate up to instance level
-                xw.writeStartElement('h:html');
+                xmlWriter.writeStartElement('h:html');
                 html_tag_boilerplate();
-                xw.writeStartElement('h:head');
-                xw.writeStartElement('h:title');
-                xw.writeString(formdesigner.controller.form.formName);
-                xw.writeEndElement();       //CLOSE TITLE
+                xmlWriter.writeStartElement('h:head');
+                xmlWriter.writeStartElement('h:title');
+                xmlWriter.writeString(formdesigner.controller.form.formName);
+                xmlWriter.writeEndElement();       //CLOSE TITLE
 
                 ////////////MODEL///////////////////
-                xw.writeStartElement('model');
-                xw.writeStartElement('instance');
-                _writeInstanceAttributes(xw, formdesigner.controller.form.instanceMetadata[0]);
+                xmlWriter.writeStartElement('model');
+                xmlWriter.writeStartElement('instance');
+                _writeInstanceAttributes(xmlWriter, formdesigner.controller.form.instanceMetadata[0]);
                 
                 createDataBlock();
-                xw.writeEndElement(); //CLOSE MAIN INSTANCE
+                xmlWriter.writeEndElement(); //CLOSE MAIN INSTANCE
                 
                 // other instances
                 for (var i = 1; i < formdesigner.controller.form.instanceMetadata.length; i++) {
-                    _writeInstance(xw, formdesigner.controller.form.instanceMetadata[i], true);
+                    _writeInstance(xmlWriter, formdesigner.controller.form.instanceMetadata[i], true);
                 }
                 
                 /////////////////BINDS /////////////////
@@ -2704,25 +2690,24 @@ formdesigner.model = function () {
                 createITextBlock();
                 ////////////////////////////////////
                 
-                xw.writeEndElement(); //CLOSE MODEL
+                xmlWriter.writeEndElement(); //CLOSE MODEL
                 ///////////////////////////////////
-                xw.writeEndElement(); //CLOSE HEAD
+                xmlWriter.writeEndElement(); //CLOSE HEAD
 
-                xw.writeStartElement('h:body');
+                xmlWriter.writeStartElement('h:body');
                 /////////////CONTROL BLOCK//////////////
                 createControlBlock();
                 ////////////////////////////////////////
-                xw.writeEndElement(); //CLOSE BODY
-                xw.writeEndElement(); //CLOSE HTML
+                xmlWriter.writeEndElement(); //CLOSE BODY
+                xmlWriter.writeEndElement(); //CLOSE HTML
 
-                xw.writeEndDocument(); //CLOSE DOCUMENT
-                docString = xw.flush();
+                xmlWriter.writeEndDocument(); //CLOSE DOCUMENT
+                docString = xmlWriter.flush();
 
                 return docString;
             };
             return generateForm();
         };
-        that.createXForm = createXForm;
 
         /**
          * Goes through all mugs (in data and control tree and bindList)

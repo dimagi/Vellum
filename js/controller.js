@@ -820,13 +820,6 @@ formdesigner.controller = (function () {
     };
     that.loadMugTypeIntoUI = loadMugTypeIntoUI;
 
-    that.XMLWriter = null;
-    that.initXMLWriter = function () {
-        var xw = new XMLWriter( 'UTF-8', '1.0' );
-        xw.writeStartDocument();
-        that.XMLWriter = xw;
-    };
-
     /**
      * Shows the source XML in a dialog window for editing, optionally
      * not displaying if there are validation errors and the user chooses
