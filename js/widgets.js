@@ -1071,11 +1071,14 @@ formdesigner.widgets = (function () {
     };
 
     that.getLogicSection = function (mugType) {
-        var elementPaths = filterByMugProperties(
-            ["bindElement/requiredAttr",
-             "bindElement/relevantAttr", "bindElement/calculateAttr",
-             "bindElement/constraintAttr",
-             "bindElement/constraintMsgItextID"], mugType)
+        var elementPaths = filterByMugProperties([
+            "bindElement/requiredAttr",
+            "bindElement/relevantAttr", 
+            "bindElement/calculateAttr",
+            "bindElement/constraintAttr",
+            "bindElement/constraintMsgItextID"
+        ], mugType);
+
         var elements = elementPaths.map(wrapAsGeneric);
         if (elementPaths.indexOf("bindElement/constraintMsgItextID") !== -1) {
             // only add the itext if the constraint was relevant
@@ -1094,12 +1097,29 @@ formdesigner.widgets = (function () {
     };
 
     that.getAdvancedSection = function (mugType) {
-        var elementPaths = filterByMugProperties(
-            ["dataElement/dataValue", "dataElement/keyAttr", "dataElement/xmlnsAttr",
-             "bindElement/preload", "bindElement/preloadParams",
-             "controlElement/label", "controlElement/hintLabel",
-             "bindElement/constraintMsgAttr", "controlElement/labelItextID",
-             "controlElement/hintItextID", "controlElement/repeat_count", "controlElement/no_add_remove"], mugType);
+
+        var properties = [
+            "dataElement/dataValue",
+            "dataElement/keyAttr",
+            "dataElement/xmlnsAttr",
+            "bindElement/preload",
+            "bindElement/preloadParams",
+            "controlElement/label",
+            "controlElement/hintLabel",
+            "bindElement/constraintMsgAttr",
+            "controlElement/labelItextID",
+            "controlElement/hintItextID",
+            "controlElement/repeat_count",
+            "controlElement/no_add_remove"
+        ];
+
+        // don't show non-itext constaint message input if it doesn't already
+        // exist
+        if (mugType.hasBindElement() && !mugType.mug.properties.bindElement.properties.constraintMsgAttr) {
+            properties.splice(properties.indexOf('bindElement/constraintMsgAttr'), 1);
+        }
+
+        var elementPaths = filterByMugProperties(properties, mugType);
         var elements = elementPaths.map(wrapAsGeneric);
 
         if (elementPaths.indexOf("controlElement/hintItextID") !== -1) {
