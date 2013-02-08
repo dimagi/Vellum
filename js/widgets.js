@@ -1077,13 +1077,15 @@ formdesigner.widgets = (function () {
     };
 
     that.getLogicSection = function (mugType) {
-        var elementPaths = filterByMugProperties([
+        var properties = [
             "bindElement/requiredAttr",
             "bindElement/relevantAttr", 
             "bindElement/calculateAttr",
             "bindElement/constraintAttr",
             "bindElement/constraintMsgItextID"
-        ], mugType);
+        ];
+
+        var elementPaths = filterByMugProperties(properties, mugType);
 
         var elements = elementPaths.map(wrapAsGeneric);
         if (elementPaths.indexOf("bindElement/constraintMsgItextID") !== -1) {
@@ -1095,6 +1097,12 @@ formdesigner.widgets = (function () {
 	                        textIdFunc: function (mt) { return mt.getConstraintMsgItext() },
 	                        showAddFormButton: false});
         }
+
+        if (mugType.typeSlug == 'repeat') {
+            elements.push(wrapAsGeneric("controlElement/repeat_count"));
+            elements.push(wrapAsGeneric("controlElement/no_add_remove"));
+        }
+
         return that.accordionSection(mugType, {
                             slug: "logic",
                             displayName: "Logic Properties",
@@ -1115,8 +1123,6 @@ formdesigner.widgets = (function () {
             "bindElement/constraintMsgAttr",
             "controlElement/labelItextID",
             "controlElement/hintItextID",
-            "controlElement/repeat_count",
-            "controlElement/no_add_remove"
         ];
 
         // don't show non-itext constaint message input if it doesn't already
