@@ -1077,13 +1077,20 @@ formdesigner.widgets = (function () {
     };
 
     that.getLogicSection = function (mugType) {
-        var properties = [
-            "bindElement/requiredAttr",
-            "bindElement/relevantAttr", 
-            "bindElement/calculateAttr",
-            "bindElement/constraintAttr",
-            "bindElement/constraintMsgItextID"
-        ];
+        var properties;
+        if (mugType.typeSlug == 'datanode') {
+            properties = [
+                "bindElement/calculateAttr",
+                "bindElement/relevantAttr",
+            ];
+        } else {
+            properties = [
+                "bindElement/requiredAttr",
+                "bindElement/relevantAttr",
+                "bindElement/constraintAttr",
+                "bindElement/constraintMsgItextID"
+            ];
+        }
 
         var elementPaths = filterByMugProperties(properties, mugType);
 
