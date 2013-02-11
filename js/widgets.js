@@ -1078,9 +1078,16 @@ formdesigner.widgets = (function () {
 
     that.getLogicSection = function (mugType) {
         var properties;
-        if (mugType.typeSlug == 'datanode') {
+        if (mugType.typeSlug === 'datanode') {
             properties = [
                 "bindElement/calculateAttr",
+                "bindElement/relevantAttr",
+            ];
+        } else if (mugType.typeSlug === 'group' || 
+                   mugType.typeSlug === 'repeat') 
+        {
+            properties = [
+                "bindElement/requiredAttr",
                 "bindElement/relevantAttr",
             ];
         } else {
@@ -1090,6 +1097,7 @@ formdesigner.widgets = (function () {
                 "bindElement/constraintAttr",
                 "bindElement/constraintMsgItextID"
             ];
+        
         }
 
         var elementPaths = filterByMugProperties(properties, mugType);
