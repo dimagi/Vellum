@@ -1491,7 +1491,8 @@ formdesigner.model = function () {
             lstring: 'Repeat Count',
             visibility: 'visible',
             editable: 'w',
-            presence: 'optional'
+            presence: 'optional',
+            uiType: 'droppable-text',
         };
         mType.properties.controlElement.no_add_remove = {
             lstring: 'Allow Repeat Add and Remove?',
