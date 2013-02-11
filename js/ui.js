@@ -1565,6 +1565,10 @@ formdesigner.ui = function () {
                     .attr("cols", "50")
                     .appendTo(advancedUI)
                     .addClass("jstree-drop");
+            
+            $("<p>Hint: you can drag a question into the box.</p>")
+                .appendTo(advancedUI);
+
                     
             // simple UI
             var simpleUI = $("<div />").attr("id", "xpath-simple").appendTo(editorContent);
