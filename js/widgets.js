@@ -165,6 +165,16 @@ formdesigner.widgets = (function () {
         return widget;
     };
 
+    that.droppableTextWidget = function (mugType, path) {
+        var widget = that.textWidget(mugType, path);
+
+        widget.getControl().addClass('jstree-drop')
+            .attr('placeholder', 'Hint: drag a question here.')
+            .change(widget.updateValue);
+
+        return widget;
+    };
+
     that.iTextIDWidget = function (mugType, path) {
         // a special text widget that holds itext ids
         var widget = that.textWidget(mugType, path);
@@ -621,6 +631,8 @@ formdesigner.widgets = (function () {
                 return that.xPathWidget;
             case "itext-id":
                 return that.iTextIDWidget;
+            case "droppable-text":
+                return that.droppableTextWidget;
             default:
                 return that.textWidget;
         }
