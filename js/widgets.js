@@ -1124,11 +1124,11 @@ formdesigner.widgets = (function () {
             "controlElement/labelItextID"
         ];
 
-        /* This is a bit of a hack. Since constraintMsgItextID is an attribute
-         * of the bind element and the parsing of bind elements doesn't know
-         * what type an element is, it's difficult to do this properly with
-         * controlElement.constraintMsgItextID.presence = "notallowed" in the group
-         * mugtype definition. */
+        // This is a bit of a hack. Since constraintMsgItextID is an attribute
+        // of the bind element and the parsing of bind elements doesn't know
+        // what type an element is, it's difficult to do this properly with
+        // controlElement.constraintMsgItextID.presence = "notallowed" in the group
+        // mugtype definition.
         if (!(mugType.typeSlug === 'group' || mugType.typeSlug === 'repeat')) {
             properties.push("bindElement/constraintMsgItextID");
         }
