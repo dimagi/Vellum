@@ -1571,8 +1571,13 @@ formdesigner.ui = function () {
             $("<textarea />").attr("id", "fd-xpath-editor-text")
                     .attr("rows", "2")
                     .attr("cols", "50")
+                    .attr("style", "width:540px; height:140px")
                     .appendTo(advancedUI)
                     .addClass("jstree-drop");
+            
+            $("<p>Hint: you can drag a question into the box.</p>")
+                .appendTo(advancedUI);
+
                     
             // simple UI
             var simpleUI = $("<div />").attr("id", "xpath-simple").appendTo(editorContent);
