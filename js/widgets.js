@@ -421,33 +421,6 @@ formdesigner.widgets = (function () {
             }
         };
 
-//        widget.addMultimediaButtons = function (uiElem, form) {
-//            var mediaSpan = $('<span />');
-//
-//            var uploadButton = $('<button />').addClass('btn').addClass('btn-primary').text("Update").button();
-//            if (form == 'image')
-//                uploadButton.attr('data-bind', "click: uploadNewImage, uploadMediaButton: has_ref, uploadMediaButtonParams: {type: type, uid: uid}");
-//            else
-//                uploadButton.attr('data-bind', "click: uploadNewAudio, uploadMediaButton: has_ref, uploadMediaButtonParams: {type: type, uid: uid}");
-//            mediaSpan.append(uploadButton).append(' ');
-//            var previewButton = $('<span />')
-//            if (form == 'image')
-//                previewButton.attr('data-bind', "previewHQImageButton: url");
-//            else
-//                previewButton.attr('data-bind', "previewHQAudioButton: url, HQAudioIsPlaying: $root.is_audio_playing, previewHQAudioParams: {uid: uid}");
-//            mediaSpan.append(previewButton).append(' ');
-//            var path = this.getValue();
-//            var uid = path.replace(/jr:\/\//g, '').replace(/\//g, '_').replace(/\./g, '_');
-//
-//            var modal = $("#hqm-modal-" + form + "-prototype").clone().attr('id', 'hqm-' + form + '-modal-'+uid);
-//
-//            modal.find('input[type=text]').css('float', 'none').css('text-align', 'left');
-//
-//            mediaSpan.append(modal);
-//            mediaSpan.attr('data-bind', "with: by_path['" + uid + "']");
-//            uiElem.append(mediaSpan);
-//        }
-
         var input = $("<input />").attr("id", widget.getID()).attr("type", "text");
 
         widget.getControl = function () {
@@ -853,11 +826,8 @@ formdesigner.widgets = (function () {
         var itextItem = block.getTextId();
 
         block.getUIElement = function () {
-            var itextWidget, subBlock, subSec;
-
             for (var i = 0; i < this.langs.length; i++) {
-                subSec = $("<div />").addClass("itext-language-section").data("language", this.langs[i]);
-
+                var subSec = $("<div />").addClass("itext-language-section").data("language", this.langs[i]);
                
                 main = main.add(subSec);
                 // sub heading for language
@@ -865,9 +835,8 @@ formdesigner.widgets = (function () {
 
                 // loop through items, add to UI
                 for (var j = 0; j < this.formList.length; j++) {
-                    // add widget
-                    itextWidget = that.iTextWidget(mugType, this.langs[i], this.textIdFunc,
-                                                   this.slug, this.formList[j], block);
+                    var itextWidget = that.iTextWidget(mugType, this.langs[i], this.textIdFunc,
+                                                       this.slug, this.formList[j], block);
                     itextWidget.setValue(itextItem.getValue(this.formList[j], this.langs[i]));
                     var uiElem = itextWidget.getUIElement();
 
@@ -912,13 +881,6 @@ formdesigner.widgets = (function () {
 	            });
 	        }
 
-            // init knockout
-
-
-//            if (MultimediaMap) {
-//                block.loadMediaData();
-//            }
-
 	        return main;
         };
 
@@ -936,15 +898,10 @@ formdesigner.widgets = (function () {
         var itextItem = block.getTextId();
 
         block.getUIElement = function () {
-            var itextWidget, subBlock, subSec;
-
             for (var i = 0; i < this.langs.length; i++) {
-
-                // loop through items, add to UI
                 for (var j = 0; j < this.formList.length; j++) {
-                    // add widget
-                    itextWidget = that.iTextInlineWidget(mugType, this.langs[i], this.textIdFunc,
-                                                         this.slug, this.formList[j], this.displayName);
+                    var itextWidget = that.iTextInlineWidget(mugType, this.langs[i], this.textIdFunc,
+                                                             this.slug, this.formList[j], this.displayName);
                     itextWidget.setValue(itextItem.getValue(this.formList[j], this.langs[i]));
                     main = main.add(itextWidget.getUIElement());
                 }
