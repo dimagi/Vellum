@@ -359,10 +359,19 @@ formdesigner.widgets = (function () {
     };
 
     that.baseItextWidget = function (mugType, language, itemFunc, slug, form) {
-        var widget = that.baseWidget(mugType);
+        var widget = that.baseWidget(mugType),
+            _updateValue = widget.updateValue;
+
         widget.language = language;
         widget.form = form;
         widget.slug = slug;
+
+        // this is a bit of a hack 
+        widget.elementPrefix = {
+            constraint: "#bindElement-constraintMsgItextID",
+            hint: "#controlElement-hintItextID",
+            text: "#controlElement-labelItextID"
+        }[slug];
 
         widget.getTextItem = function () {
             return itemFunc(this.mug);
@@ -385,6 +394,17 @@ formdesigner.widgets = (function () {
 
         widget.getValue = function() {
             return input.val();
+        };
+
+        widget.updateValue = function () {
+            widget.checkAutoIDIfNeeded();
+            _updateValue();
+        };
+
+        widget.checkAutoIDIfNeeded = function() {
+            if (!$.trim($(widget.elementPrefix).val())) {
+                $(widget.elementPrefix + "-auto-itext").prop('checked', true).change();
+            }
         };
 
         widget.fireChangeEvents = function () {
@@ -480,7 +500,6 @@ formdesigner.widgets = (function () {
     };
 
     that.iTextInlineWidget = function (mugType, language, itemFunc, slug, form, displayName) {
-
         var widget = that.baseItextWidget(mugType, language, itemFunc, slug, form);
 
         widget.getDisplayName = function () {
@@ -1047,6 +1066,7 @@ formdesigner.widgets = (function () {
 
     that.getLogicSection = function (mugType) {
         var properties;
+
         if (mugType.typeSlug === 'datanode') {
             properties = [
                 "bindElement/calculateAttr",
@@ -1064,15 +1084,13 @@ formdesigner.widgets = (function () {
                 "bindElement/requiredAttr",
                 "bindElement/relevantAttr",
                 "bindElement/constraintAttr",
-                "bindElement/constraintMsgItextID"
             ];
-        
         }
 
         var elementPaths = filterByMugProperties(properties, mugType);
 
         var elements = elementPaths.map(wrapAsGeneric);
-        if (elementPaths.indexOf("bindElement/constraintMsgItextID") !== -1) {
+        if (elementPaths.indexOf("bindElement/constraintAttr") !== -1) {
             // only add the itext if the constraint was relevant
 	        elements.push({ widgetType: "itext",
 	                        displayMode: "inline",
@@ -1095,7 +1113,6 @@ formdesigner.widgets = (function () {
     };
 
     that.getAdvancedSection = function (mugType) {
-
         var properties = [
             "dataElement/dataValue",
             "dataElement/keyAttr",
@@ -1104,28 +1121,34 @@ formdesigner.widgets = (function () {
             "bindElement/preloadParams",
             "controlElement/label",
             "controlElement/hintLabel",
-            "bindElement/constraintMsgAttr",
-            "controlElement/labelItextID",
-            "controlElement/hintItextID",
+            "controlElement/labelItextID"
         ];
 
-        // don't show non-itext constaint message input if it doesn't already
-        // exist
-        if (mugType.hasBindElement() && !mugType.mug.properties.bindElement.properties.constraintMsgAttr) {
-            properties.splice(properties.indexOf('bindElement/constraintMsgAttr'), 1);
+        /* This is a bit of a hack. Since constraintMsgItextID is an attribute
+         * of the bind element and the parsing of bind elements doesn't know
+         * what type an element is, it's difficult to do this properly with
+         * controlElement.constraintMsgItextID.presence = "notallowed" in the group
+         * mugtype definition. */
+        if (!(mugType.typeSlug === 'group' || mugType.typeSlug === 'repeat')) {
+            properties.push("bindElement/constraintMsgItextID");
         }
 
-        var elementPaths = filterByMugProperties(properties, mugType);
-        var elements = elementPaths.map(wrapAsGeneric);
+        properties.push("controlElement/hintItextID");
+
+        // only show non-itext constaint message input if it has a value
+        if (mugType.hasBindElement() && mugType.mug.properties.bindElement.properties.constraintMsgAttr) {
+            properties.push("bindElement/constraintMsgAttr");
+        }
+
+        var elementPaths = filterByMugProperties(properties, mugType),
+            elements = elementPaths.map(wrapAsGeneric);
 
         if (elementPaths.indexOf("controlElement/hintItextID") !== -1) {
-	        // only add the itext if the hint was relevant
-
 	        elements.push({ 
                 widgetType: "itext",
                 displayMode: "inline",
                 slug: "hint",
-                displayName: "Hint",
+                displayName: "Hint Message",
                 textIdFunc: function (mt) { return mt.getHintItext() },
                 showAddFormButton: false
             });

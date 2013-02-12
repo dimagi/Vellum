@@ -1395,7 +1395,7 @@ formdesigner.controller = (function () {
                     parsed.initial_context = xpathmodels.XPathInitialContextEnum.ROOT;
                 }
                 newPath = parsed.toXPath();
-                return newPath
+                return newPath;
             }
 
             bindList.each(function () {
@@ -1425,9 +1425,9 @@ formdesigner.controller = (function () {
                 attrs.calculateAttr = el.attr('calculate');
                 attrs.constraintAttr = el.attr('constraint');
 
-                var constraintMsg = lookForNamespaced(el, "constraintMsg");
-                
-                var constraintItext = getITextReference(constraintMsg);
+                var constraintMsg = lookForNamespaced(el, "constraintMsg"),
+                    constraintItext = getITextReference(constraintMsg);
+
                 if (constraintItext) {
                     attrs.constraintMsgItextID = Itext.getOrCreateItem(constraintItext);
                 } else {
@@ -1435,7 +1435,6 @@ formdesigner.controller = (function () {
                     attrs.constraintMsgAttr = constraintMsg;    
                 }
                                 
-                // TODO: parse constraint itext
                 attrs.requiredAttr = formdesigner.util.parseBoolAttributeValue(el.attr('required'));
                 
                 attrs.preload = lookForNamespaced(el, "preload");

@@ -869,7 +869,7 @@ formdesigner.model = function () {
                     editable: 'w',
                     visibility: 'advanced',
                     presence: 'optional',
-                    lstring: "Question HINT Itext ID",
+                    lstring: "Hint Itext ID",
                     uiType: "itext-id",
                     validationFunc: validationFuncs.hintItextID
                 }
@@ -2343,7 +2343,8 @@ formdesigner.model = function () {
                             type: bEl.properties.dataType,
                             constraint: bEl.properties.constraintAttr,
                             constraintMsg: bEl.properties.constraintMsgAttr,
-                            constraintMsgItextID: bEl.properties.constraintMsgItextID.id,
+                            constraintMsgItextID: bEl.properties.constraintMsgItextID ? 
+                                bEl.properties.constraintMsgItextID.id : undefined,
                             relevant: bEl.properties.relevantAttr,
                             required: formdesigner.util.createXPathBoolFromJS(bEl.properties.requiredAttr),
                             calculate: bEl.properties.calculateAttr,
