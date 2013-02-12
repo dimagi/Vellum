@@ -228,6 +228,7 @@ formdesigner.ui = function () {
             "group",
             "repeat",
             "question",
+            "phonenumber",
             "date",
             "datetime",
             "time",
@@ -269,6 +270,13 @@ formdesigner.ui = function () {
                     "icon": {
                         "image" : jquery_icon_url,
                         "position": "-128px -96px"
+                    },
+                    "valid_children" : "none"
+                },
+                "phonenumber": {
+                    "icon": {
+                        "image": jquery_icon_url,
+                        "position": "-32px -176px"
                     },
                     "valid_children" : "none"
                 },

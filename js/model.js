@@ -838,6 +838,12 @@ formdesigner.model = function () {
                     presence: 'required',
                     values: formdesigner.util.VALID_CONTROL_TAG_NAMES
                 },
+                appearance: {
+                    editable: 'r',
+                    visibility: 'hidden',
+                    presence: 'optional',
+                    lstring: 'Appearance Attribute'
+                },
                 label: {
                     editable: 'w',
                     visibility: 'hidden',
@@ -1191,7 +1197,7 @@ formdesigner.model = function () {
     that.mugTypeMaker = {};
     that.mugTypeMaker.stdTextQuestion = function () {
         var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion),
-                mug;
+            mug;
         mType.typeSlug = "text";
         mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
         
@@ -1203,9 +1209,19 @@ formdesigner.model = function () {
         return mType;
     };
 
+    that.mugTypeMaker.stdPhoneNumber = function () {
+        var mType = formdesigner.model.mugTypeMaker.stdTextQuestion();
+        mType.typeSlug = "phonenumber";
+        mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
+        mType.mug.properties.controlElement.properties.name = "PhoneNumber";
+        mType.mug.properties.controlElement.properties.appearance = "numeric";
+
+        return mType;
+    };
+
     that.mugTypeMaker.stdDataBindOnly = function () {
         var mType = formdesigner.util.getNewMugType(mugTypes.dataBind),
-        mug;
+            mug;
         mType.typeSlug = "datanode";
         mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
         
@@ -1216,7 +1232,7 @@ formdesigner.model = function () {
 
     that.mugTypeMaker.stdSecret = function () {
         var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion),
-                mug;
+            mug;
         mType.typeSlug = "secret";
         mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
         
@@ -1240,7 +1256,7 @@ formdesigner.model = function () {
 
     that.mugTypeMaker.stdInt = function () {
         var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion),
-                mug;
+            mug;
         mType.typeSlug = "int";
         mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
         
@@ -1254,7 +1270,7 @@ formdesigner.model = function () {
 
     that.mugTypeMaker.stdAudio = function () {
         var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion),
-                mug;
+            mug;
         mType.typeSlug = "audio";
         mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
         mType.properties.controlElement.mediaType = {
@@ -1277,7 +1293,7 @@ formdesigner.model = function () {
 
     that.mugTypeMaker.stdImage = function () {
         var mType = formdesigner.util.getNewMugType(that.mugTypeMaker.stdAudio()),
-                mug;
+            mug;
         mType.typeSlug = "image";
         mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
         mug = that.createMugFromMugType(mType);
@@ -1292,7 +1308,7 @@ formdesigner.model = function () {
 
     that.mugTypeMaker.stdVideo = function () {
         var mType = formdesigner.util.getNewMugType(that.mugTypeMaker.stdAudio()),
-                mug;
+            mug;
         mType.typeSlug = "video";
         mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
         mug = that.createMugFromMugType(mType);
@@ -1307,7 +1323,7 @@ formdesigner.model = function () {
 
     that.mugTypeMaker.stdGeopoint = function () {
         var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion),
-                mug;
+            mug;
         mType.typeSlug = "geopoint";
         mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
         mug = that.createMugFromMugType(mType);
@@ -1320,7 +1336,7 @@ formdesigner.model = function () {
 
     that.mugTypeMaker.stdBarcode = function () {
         var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion),
-                mug;
+            mug;
         mType.typeSlug = "barcode";
         mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
         mug = that.createMugFromMugType(mType);
@@ -1346,7 +1362,7 @@ formdesigner.model = function () {
 
     that.mugTypeMaker.stdDateTime = function () {
         var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion),
-                mug;
+            mug;
         mType.typeSlug = "datetime";
         mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
         mug = that.createMugFromMugType(mType);
@@ -1359,7 +1375,7 @@ formdesigner.model = function () {
 
     that.mugTypeMaker.stdTime = function () {
         var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion),
-                mug;
+            mug;
         mType.typeSlug = "time";
         mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
         mug = that.createMugFromMugType(mType);
@@ -2324,7 +2340,7 @@ formdesigner.model = function () {
                     if (bEl) {
                         return {
                             nodeset: dataTree.getAbsolutePath(MT),
-                            'type': bEl.properties.dataType,
+                            type: bEl.properties.dataType,
                             constraint: bEl.properties.constraintAttr,
                             constraintMsg: bEl.properties.constraintMsgAttr,
                             constraintMsgItextID: bEl.properties.constraintMsgItextID.id,
@@ -2346,20 +2362,18 @@ formdesigner.model = function () {
                         if(attrs.nodeset){
                             xmlWriter.writeStartElement('bind');
                         }
-                        for (j in attrs) { //for each populated property
-                            if(attrs.hasOwnProperty(j)){
-                                if(attrs[j]){ //if property has a useful bind attribute value
-                                    if (j === "constraintMsg"){
-                                        xmlWriter.writeAttributeStringSafe("jr:constraintMsg",attrs[j]); //write it
-                                    } else if (j === "constraintMsgItextID") {
-                                        xmlWriter.writeAttributeStringSafe("jr:constraintMsg",  "jr:itext('" + attrs[j] + "')")
-                                    } else if (j === "preload") {
-                                        xmlWriter.writeAttributeStringSafe("jr:preload", attrs[j]);
-                                    } else if (j === "preloadParams") {
-                                        xmlWriter.writeAttributeStringSafe("jr:preloadParams", attrs[j]);
-                                    } else {
-                                        xmlWriter.writeAttributeStringSafe(j,attrs[j]);
-                                    } //write it
+                        for (j in attrs) {
+                            if (attrs.hasOwnProperty(j) && attrs[j]) {
+                                if (j === "constraintMsg"){
+                                    xmlWriter.writeAttributeStringSafe("jr:constraintMsg",attrs[j]); //write it
+                                } else if (j === "constraintMsgItextID") {
+                                    xmlWriter.writeAttributeStringSafe("jr:constraintMsg",  "jr:itext('" + attrs[j] + "')")
+                                } else if (j === "preload") {
+                                    xmlWriter.writeAttributeStringSafe("jr:preload", attrs[j]);
+                                } else if (j === "preloadParams") {
+                                    xmlWriter.writeAttributeStringSafe("jr:preloadParams", attrs[j]);
+                                } else {
+                                    xmlWriter.writeAttributeStringSafe(j,attrs[j]);
                                 }
                             }
                         }
@@ -2479,6 +2493,10 @@ formdesigner.model = function () {
                             }
                         }
                         
+                        if (cProps.appearance) {
+                            xmlWriter.writeAttributeStringSafe("appearance", cProps.appearance);
+                        }
+                        
                         // Do hint label
                         if( tagName !== 'item' && tagName !== 'repeat'){
                             if(cProps.hintLabel || (cProps.hintItextID && cProps.hintItextID.id)) {
@@ -2493,6 +2511,7 @@ formdesigner.model = function () {
                                 xmlWriter.writeEndElement();
                             }
                         }
+
                     }
 
                     //create the label object (for createOpenControlTag())

@@ -484,6 +484,8 @@ formdesigner.controller = (function () {
         switch(qType.toLowerCase()) {
             case 'text':
                 return formdesigner.model.mugTypeMaker.stdTextQuestion();
+            case 'phonenumber':
+                return formdesigner.model.mugTypeMaker.stdPhoneNumber();
             case 'group':
                 return formdesigner.model.mugTypeMaker.stdGroup();
             case 'select':
@@ -1375,9 +1377,6 @@ formdesigner.controller = (function () {
         }
 
         function parseBindList (bindList) {
-
-
-
             /**
              * Takes in a path and converts it to an absolute path (if it isn't one already)
              * @param path - a relative or absolute nodeset path
@@ -1399,9 +1398,7 @@ formdesigner.controller = (function () {
                 return newPath
             }
 
-            formdesigner.processPath = processPath;
-
-            function eachFunc () {
+            bindList.each(function () {
                 var el = $(this),
                     attrs = {},
                     mType = formdesigner.util.getNewMugType(formdesigner.model.mugTypes.dataBind),
@@ -1423,6 +1420,7 @@ formdesigner.controller = (function () {
                 if(attrs.dataType && attrs.dataType.toLowerCase() === 'xsd:integer') {  //normalize this dataType ('int' and 'integer' are both valid).
                     attrs.dataType = 'xsd:int';
                 }
+                attrs.appearance = el.attr('appearance');
                 attrs.relevantAttr = el.attr('relevant');
                 attrs.calculateAttr = el.attr('calculate');
                 attrs.constraintAttr = el.attr('constraint');
@@ -1469,8 +1467,7 @@ formdesigner.controller = (function () {
                     Itext.removeItem(oldMT.mug.properties.bindElement.properties.constraintMsgItextID);
                 }
                 that.form.replaceMugType(oldMT, mType, 'data');
-            }
-            bindList.each(eachFunc);
+            });
         }
 
         function parseControlTree (controlsTree) {
@@ -1484,8 +1481,8 @@ formdesigner.controller = (function () {
                  */
                 function classifyAndCreateMugType (nodePath, cEl) {
 
-                    var oldMT = that.getMugByPath(nodePath, 'data'), //check the date node to see if there's a related MT already present
-                        mugType, mug, tagName, bindEl, dataEl, dataType, MTIdentifier, mediaType,
+                    var oldMT = that.getMugByPath(nodePath, 'data'), //check the data node to see if there's a related MT already present
+                        mugType, mug, tagName, bindEl, dataEl, dataType, appearance, MTIdentifier, mediaType,
                         //flags
                         hasBind = true;
 
@@ -1494,9 +1491,10 @@ formdesigner.controller = (function () {
                         bindEl = oldMT.mug.properties.bindElement;
                         if (bindEl) {
                             dataType = bindEl.properties.dataType;
+                            appearance = cEl.attr('appearance');
                             mediaType = cEl.attr('mediatype') ? cEl.attr('mediatype') : null;
                             if (dataType) {
-                                dataType = dataType.replace('xsd:',''); //strip out extranous namespace
+                                dataType = dataType.replace('xsd:',''); //strip out extraneous namespace
                                 dataType = dataType.toLowerCase();
                             }
                             if(mediaType) {
@@ -1508,31 +1506,34 @@ formdesigner.controller = (function () {
                     }
 
                     function MTIdentifierFromInput () {
-                        // TODO: Add appearance attribute support here?
-                        if (!dataType) { return 'stdTextQuestion'; }
-                        var MTID = '';
-                        if(dataType === 'long') {
-                            MTID = 'stdLong';
-                        }else if(dataType === 'int') {
-                            MTID = 'stdInt';
-                        }else if(dataType === 'double') {
-                            MTID = 'stdDouble';
-                        }else if(dataType === 'geopoint') {
-                            MTID = 'stdGeopoint';
-                        }else if(dataType === 'barcode') {
-                            MTID = 'stdBarcode';
-                        }else if(dataType === 'string') {
-                            MTID = 'stdTextQuestion';
-                        }else if(dataType === 'date') {
-                            MTID = 'stdDate';
-                        }else if(dataType === 'datetime') {
-                            MTID = 'stdDateTime';
-                        }else if(dataType === 'time') {
-                            MTID = 'stdTime';
-                        }else {
-                            MTID = 'stdTextQuestion';
+                        if (!dataType) { 
+                            return 'stdTextQuestion'; 
                         }
-                        return MTID;
+                        if(dataType === 'long') {
+                            return 'stdLong';
+                        }else if(dataType === 'int') {
+                            return 'stdInt';
+                        }else if(dataType === 'double') {
+                            return 'stdDouble';
+                        }else if(dataType === 'geopoint') {
+                            return 'stdGeopoint';
+                        }else if(dataType === 'barcode') {
+                            return 'stdBarcode';
+                        }else if(dataType === 'string') {
+                            if (appearance === "numeric") {
+                                return 'stdPhoneNumber';
+                            } else {
+                                return 'stdTextQuestion';
+                            }
+                        }else if(dataType === 'date') {
+                            return 'stdDate';
+                        }else if(dataType === 'datetime') {
+                            return 'stdDateTime';
+                        }else if(dataType === 'time') {
+                            return 'stdTime';
+                        }else {
+                            return 'stdTextQuestion';
+                        }
                     }
 
                     function MTIdentifierFromGroup () {
