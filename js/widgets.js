@@ -359,10 +359,19 @@ formdesigner.widgets = (function () {
     };
 
     that.baseItextWidget = function (mugType, language, itemFunc, slug, form) {
-        var widget = that.baseWidget(mugType);
+        var widget = that.baseWidget(mugType),
+            _updateValue = widget.updateValue;
+
         widget.language = language;
         widget.form = form;
         widget.slug = slug;
+
+        // this is a bit of a hack 
+        widget.elementPrefix = {
+            constraint: "#bindElement-constraintMsgItextID",
+            hint: "#controlElement-hintItextID",
+            text: "#controlElement-labelItextID"
+        }[slug];
 
         widget.getTextItem = function () {
             return itemFunc(this.mug);
@@ -385,6 +394,17 @@ formdesigner.widgets = (function () {
 
         widget.getValue = function() {
             return input.val();
+        };
+
+        widget.updateValue = function () {
+            widget.checkAutoIDIfNeeded();
+            _updateValue();
+        };
+
+        widget.checkAutoIDIfNeeded = function() {
+            if (!$.trim($(widget.elementPrefix).val())) {
+                $(widget.elementPrefix + "-auto-itext").prop('checked', true).change();
+            }
         };
 
         widget.fireChangeEvents = function () {
@@ -420,33 +440,6 @@ formdesigner.widgets = (function () {
                 item.removeForm(this.form);
             }
         };
-
-//        widget.addMultimediaButtons = function (uiElem, form) {
-//            var mediaSpan = $('<span />');
-//
-//            var uploadButton = $('<button />').addClass('btn').addClass('btn-primary').text("Update").button();
-//            if (form == 'image')
-//                uploadButton.attr('data-bind', "click: uploadNewImage, uploadMediaButton: has_ref, uploadMediaButtonParams: {type: type, uid: uid}");
-//            else
-//                uploadButton.attr('data-bind', "click: uploadNewAudio, uploadMediaButton: has_ref, uploadMediaButtonParams: {type: type, uid: uid}");
-//            mediaSpan.append(uploadButton).append(' ');
-//            var previewButton = $('<span />')
-//            if (form == 'image')
-//                previewButton.attr('data-bind', "previewHQImageButton: url");
-//            else
-//                previewButton.attr('data-bind', "previewHQAudioButton: url, HQAudioIsPlaying: $root.is_audio_playing, previewHQAudioParams: {uid: uid}");
-//            mediaSpan.append(previewButton).append(' ');
-//            var path = this.getValue();
-//            var uid = path.replace(/jr:\/\//g, '').replace(/\//g, '_').replace(/\./g, '_');
-//
-//            var modal = $("#hqm-modal-" + form + "-prototype").clone().attr('id', 'hqm-' + form + '-modal-'+uid);
-//
-//            modal.find('input[type=text]').css('float', 'none').css('text-align', 'left');
-//
-//            mediaSpan.append(modal);
-//            mediaSpan.attr('data-bind', "with: by_path['" + uid + "']");
-//            uiElem.append(mediaSpan);
-//        }
 
         var input = $("<input />").attr("id", widget.getID()).attr("type", "text");
 
@@ -507,7 +500,6 @@ formdesigner.widgets = (function () {
     };
 
     that.iTextInlineWidget = function (mugType, language, itemFunc, slug, form, displayName) {
-
         var widget = that.baseItextWidget(mugType, language, itemFunc, slug, form);
 
         widget.getDisplayName = function () {
@@ -853,11 +845,8 @@ formdesigner.widgets = (function () {
         var itextItem = block.getTextId();
 
         block.getUIElement = function () {
-            var itextWidget, subBlock, subSec;
-
             for (var i = 0; i < this.langs.length; i++) {
-                subSec = $("<div />").addClass("itext-language-section").data("language", this.langs[i]);
-
+                var subSec = $("<div />").addClass("itext-language-section").data("language", this.langs[i]);
                
                 main = main.add(subSec);
                 // sub heading for language
@@ -865,9 +854,8 @@ formdesigner.widgets = (function () {
 
                 // loop through items, add to UI
                 for (var j = 0; j < this.formList.length; j++) {
-                    // add widget
-                    itextWidget = that.iTextWidget(mugType, this.langs[i], this.textIdFunc,
-                                                   this.slug, this.formList[j], block);
+                    var itextWidget = that.iTextWidget(mugType, this.langs[i], this.textIdFunc,
+                                                       this.slug, this.formList[j], block);
                     itextWidget.setValue(itextItem.getValue(this.formList[j], this.langs[i]));
                     var uiElem = itextWidget.getUIElement();
 
@@ -912,13 +900,6 @@ formdesigner.widgets = (function () {
 	            });
 	        }
 
-            // init knockout
-
-
-//            if (MultimediaMap) {
-//                block.loadMediaData();
-//            }
-
 	        return main;
         };
 
@@ -936,15 +917,10 @@ formdesigner.widgets = (function () {
         var itextItem = block.getTextId();
 
         block.getUIElement = function () {
-            var itextWidget, subBlock, subSec;
-
             for (var i = 0; i < this.langs.length; i++) {
-
-                // loop through items, add to UI
                 for (var j = 0; j < this.formList.length; j++) {
-                    // add widget
-                    itextWidget = that.iTextInlineWidget(mugType, this.langs[i], this.textIdFunc,
-                                                         this.slug, this.formList[j], this.displayName);
+                    var itextWidget = that.iTextInlineWidget(mugType, this.langs[i], this.textIdFunc,
+                                                             this.slug, this.formList[j], this.displayName);
                     itextWidget.setValue(itextItem.getValue(this.formList[j], this.langs[i]));
                     main = main.add(itextWidget.getUIElement());
                 }
@@ -1090,6 +1066,7 @@ formdesigner.widgets = (function () {
 
     that.getLogicSection = function (mugType) {
         var properties;
+
         if (mugType.typeSlug === 'datanode') {
             properties = [
                 "bindElement/calculateAttr",
@@ -1107,15 +1084,13 @@ formdesigner.widgets = (function () {
                 "bindElement/requiredAttr",
                 "bindElement/relevantAttr",
                 "bindElement/constraintAttr",
-                "bindElement/constraintMsgItextID"
             ];
-        
         }
 
         var elementPaths = filterByMugProperties(properties, mugType);
 
         var elements = elementPaths.map(wrapAsGeneric);
-        if (elementPaths.indexOf("bindElement/constraintMsgItextID") !== -1) {
+        if (elementPaths.indexOf("bindElement/constraintAttr") !== -1) {
             // only add the itext if the constraint was relevant
 	        elements.push({ widgetType: "itext",
 	                        displayMode: "inline",
@@ -1138,7 +1113,6 @@ formdesigner.widgets = (function () {
     };
 
     that.getAdvancedSection = function (mugType) {
-
         var properties = [
             "dataElement/dataValue",
             "dataElement/keyAttr",
@@ -1147,28 +1121,34 @@ formdesigner.widgets = (function () {
             "bindElement/preloadParams",
             "controlElement/label",
             "controlElement/hintLabel",
-            "bindElement/constraintMsgAttr",
-            "controlElement/labelItextID",
-            "controlElement/hintItextID",
+            "controlElement/labelItextID"
         ];
 
-        // don't show non-itext constaint message input if it doesn't already
-        // exist
-        if (mugType.hasBindElement() && !mugType.mug.properties.bindElement.properties.constraintMsgAttr) {
-            properties.splice(properties.indexOf('bindElement/constraintMsgAttr'), 1);
+        // This is a bit of a hack. Since constraintMsgItextID is an attribute
+        // of the bind element and the parsing of bind elements doesn't know
+        // what type an element is, it's difficult to do this properly with
+        // controlElement.constraintMsgItextID.presence = "notallowed" in the group
+        // mugtype definition.
+        if (!(mugType.typeSlug === 'group' || mugType.typeSlug === 'repeat')) {
+            properties.push("bindElement/constraintMsgItextID");
         }
 
-        var elementPaths = filterByMugProperties(properties, mugType);
-        var elements = elementPaths.map(wrapAsGeneric);
+        properties.push("controlElement/hintItextID");
+
+        // only show non-itext constaint message input if it has a value
+        if (mugType.hasBindElement() && mugType.mug.properties.bindElement.properties.constraintMsgAttr) {
+            properties.push("bindElement/constraintMsgAttr");
+        }
+
+        var elementPaths = filterByMugProperties(properties, mugType),
+            elements = elementPaths.map(wrapAsGeneric);
 
         if (elementPaths.indexOf("controlElement/hintItextID") !== -1) {
-	        // only add the itext if the hint was relevant
-
 	        elements.push({ 
                 widgetType: "itext",
                 displayMode: "inline",
                 slug: "hint",
-                displayName: "Hint",
+                displayName: "Hint Message",
                 textIdFunc: function (mt) { return mt.getHintItext() },
                 showAddFormButton: false
             });
