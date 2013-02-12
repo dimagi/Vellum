@@ -43,6 +43,7 @@ formdesigner.util = (function(){
     that.QUESTIONS = {
         //in the format: {question_slug: question_label}
         'text': 'Text Question',
+        'phonenumber': 'Phone Number or Numeric ID',
         'secret': 'Password Question',
         'group': 'Group',
         'select': 'Multi-Select Question',
@@ -497,6 +498,7 @@ formdesigner.util = (function(){
 
     that.VALID_CONTROL_TAG_NAMES = [
             'input',
+            'phonenumber',
             '1select',
             'select',
             'group',
@@ -511,6 +513,7 @@ formdesigner.util = (function(){
     // TODO: what is this for?
     that.VALID_QUESTION_TYPE_NAMES = [
             'Text',
+            'Phone Number or Numeric ID',
             'Group',
             'Repeat',
             'Trigger',
