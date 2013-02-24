@@ -629,7 +629,7 @@ formdesigner.util = (function(){
     };
 
     that.getMugDisplayName = function (mugType) {
-        var itextItem, nodeID, cEl,dEl,bEl, mugProps, disp, lang, Itext;
+        var itextItem, cEl,dEl,bEl, mugProps, disp, lang, Itext;
         if(!mugType || !mugType.mug) {
             return 'No Name!';
         }
@@ -653,7 +653,9 @@ formdesigner.util = (function(){
             itextItem = cEl.labelItextID;
         }
 
-        if(!itextItem) {
+        var getNodeID = function () {
+            var nodeID;
+
             if(bEl) {
                 nodeID = bEl.nodeID;
             }
@@ -662,7 +664,12 @@ formdesigner.util = (function(){
                     nodeID = dEl.nodeID;
                 }
             }
-            return nodeID || cEl.defaultValue || undefined;
+            nodeID = nodeID || cEl.defaultValue;
+            return nodeID ? "[" + nodeID + "]" : undefined;
+        };
+
+        if (!itextItem) {
+            return getNodeID();
         }
 
         lang = formdesigner.currentItextDisplayLanguage || Itext.getDefaultLanguage();
@@ -672,7 +679,16 @@ formdesigner.util = (function(){
         }
 
         disp = itextItem.getValue("default", lang);
-        return disp ? disp : itextItem.getValue("long", lang);
+        if (disp) {
+            return disp;
+        }
+
+        long = itextItem.getValue("long", lang);
+        if (long) {
+            return long;
+        }
+
+        return getNodeID();
     };
     
     /*
