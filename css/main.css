@@ -2,7 +2,6 @@
   /* to prevent flicker */
 
   display: none;
-  margin-bottom: 60px;
   font-size: 12px;
 }
 .hq-oldstyle #main_container {
@@ -18,15 +17,6 @@
 }
 .hq-oldstyle label {
   display: inline;
-}
-.hq-oldstyle h1,
-.hq-oldstyle h2 {
-  font-size: 13px;
-  line-height: normal;
-  width: auto;
-}
-.hq-oldstyle ul {
-  margin: 0;
 }
 .hq-oldstyle .container::before,
 .hq-oldstyle .container::after {
