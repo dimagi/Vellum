@@ -224,7 +224,7 @@ formdesigner.controller = (function () {
         };
         
         var tree = (treeType === "data") ? that.form.dataTree : that.form.controlTree;
-        var matchList = tree.treeMap(nodeMatches).filter(function (m) { return m !== null; });
+        var matchList = tree.treeMap(nodeMatches, {store: []}).filter(function (m) { return m !== null; });
         if (matchList.length !== 1) {
             throw "Expected one result for node " + nodeId + " but found " + matchList.length;
         }
@@ -269,8 +269,8 @@ formdesigner.controller = (function () {
         cTree = that.form.controlTree;
         dTree = that.form.dataTree;
 
-        cList = cTree.treeMap(treeFunc);
-        dList = dTree.treeMap(treeFunc);
+        cList = cTree.treeMap(treeFunc, {store: []});
+        dList = dTree.treeMap(treeFunc, {store: []});
 
         return formdesigner.util.mergeArray(cList, dList); //strip dupes and merge
     };
@@ -391,7 +391,7 @@ formdesigner.controller = (function () {
             }
         };
 
-        return  that.form.dataTree.treeMap(treeFunc);
+        return that.form.dataTree.treeMap(treeFunc, {store: []});
     };
 
     that.getJSTreeTypeFromMugType = function (mugType) {
@@ -433,11 +433,12 @@ formdesigner.controller = (function () {
      */
     that.createQuestionInUITree = function (mugType, position) {
         var mug = mugType.mug,
-            controlTagName = mug.properties.controlElement ? mug.properties.controlElement.properties.tagName : null,
+            hasControlElement = mugType.hasControlElement(),
+            controlTagName = hasControlElement ? mug.properties.controlElement.properties.tagName : null,
             isGroupOrRepeat = (controlTagName === 'group' || controlTagName === 'repeat'),
             objectData, insertPosition;
 
-        if (mug.properties.controlElement) {
+        if (hasControlElement) {
             insertPosition = position || "into";
         } else {
             // data node
@@ -794,18 +795,17 @@ formdesigner.controller = (function () {
             }); 
         } 
     };
-    var loadMugTypeIntoUI = function (mugType) {
-        var mug, controlTree, parentMT, parentMTUfid, loadMTEvent = {};
 
-        mug = mugType.mug;
+    that.loadMugTypeIntoUI = function (mugType) {
+        var parentMT, parentMTUfid;
 
         // set the 'currently selected mugType' to be that of this mugType's parent.
-        controlTree = that.form.controlTree;
-        parentMT = controlTree.getParentMugType(mugType);
         
         // check for control element because we want data nodes to be a flat
         // list at bottom.
-        if (parentMT && mugType.properties.controlElement) {
+        if (mugType.hasControlElement() && 
+            (parentMT = that.form.controlTree.getParentMugType(mugType))) 
+        {
             parentMTUfid = parentMT.ufid;
             formdesigner.ui.jstree('select_node', '#'+parentMTUfid, true);
         } else {

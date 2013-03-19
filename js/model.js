@@ -1763,21 +1763,20 @@ formdesigner.model = function () {
              * @param nodeFunc
              * @param store
              */
-            that.treeMap = function (nodeFunc, store, afterChildFunc) {
-                var result, child;
-                result = nodeFunc(this); //call on self
-                if(result){
-                    store.push(result);
+            that.treeMap = function (nodeFunc, options) {
+                var result = nodeFunc(this); //call on self
+                if (result && options.store !== false){
+                    options.store.push(result);
                 }
-                for(child in this.getChildren()){
-                    if(this.getChildren().hasOwnProperty(child)){
-                        this.getChildren()[child].treeMap(nodeFunc, store, afterChildFunc); //have each children also perform the func
-                    }
+
+                this.getChildren().map(function (child) {
+                    child.treeMap(nodeFunc, options);
+                })
+
+                if (options.afterChildFunc){
+                    options.afterChildFunc(this, result);
                 }
-                if(afterChildFunc){
-                    afterChildFunc(this, result);
-                }
-                return store; //return the results
+                return options.store; //return the results
             };
 
             /**
@@ -2055,8 +2054,11 @@ formdesigner.model = function () {
          * @param func - a function called on each node, the node is the only argument
          * @param afterChildFunc - a function called after the above function is called on each child of the current node.
          */
-        that.treeMap = function (func, afterChildFunc) {
-            return rootNode.treeMap(func, [], afterChildFunc);
+        that.treeMap = function (func, options) {
+            options = options || {};
+            options.store = options.store || false;
+
+            return rootNode.treeMap(func, options);
         };
 
         /**
@@ -2150,8 +2152,8 @@ formdesigner.model = function () {
 
             dataTree = this.dataTree;
             controlTree = this.controlTree;
-            dBindList = dataTree.treeMap(getBind);
-            cBindList = controlTree.treeMap(getBind);
+            dBindList = dataTree.treeMap(getBind, {store: []});
+            cBindList = controlTree.treeMap(getBind, {store: []});
 
             //compare results, grab uniques
             for(i in dBindList){
@@ -2201,8 +2203,8 @@ formdesigner.model = function () {
 
             dataTree = this.dataTree;
             controlTree = this.controlTree;
-            MTListC = controlTree.treeMap(mapFunc);
-            MTListD = dataTree.treeMap(mapFunc);
+            MTListC = controlTree.treeMap(mapFunc, {store: []});
+            MTListD = dataTree.treeMap(mapFunc, {store: []});
             result = formdesigner.util.mergeArray(MTListC, MTListD);
 
             return result;
@@ -2323,7 +2325,7 @@ formdesigner.model = function () {
                     //data elements only require one close element call with nothing else fancy.
                 }
 
-                dataTree.treeMap(mapFunc, afterFunc);
+                dataTree.treeMap(mapFunc, {afterFunc: afterFunc});
             };
 
             var createBindList = function () {
@@ -2555,7 +2557,7 @@ formdesigner.model = function () {
 
                 }
 
-                controlTree.treeMap(mapFunc, afterFunc);
+                controlTree.treeMap(mapFunc, {afterFunc: afterFunc});
             };
 
             var createITextBlock = function () {
@@ -2795,9 +2797,9 @@ formdesigner.model = function () {
 
             var retVal;
             if (treeType === 'data') {
-                retVal = dataTree.treeMap(mapFunc);
+                retVal = dataTree.treeMap(mapFunc, {store: []});
             }else if (treeType === 'control') {
-                retVal = controlTree.treeMap(mapFunc);
+                retVal = controlTree.treeMap(mapFunc, {store: []});
             }else{
                 throw 'Invalid TreeType specified! Use either "data" or "control"';
             }
@@ -2832,7 +2834,7 @@ formdesigner.model = function () {
             }else {
                 tree = controlTree;
             }
-            result = tree.treeMap(treeFunc);
+            result = tree.treeMap(treeFunc, {store: []});
             if(result.length > 0){
                 return result[0];
             }else {
