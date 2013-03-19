@@ -807,7 +807,8 @@ formdesigner.controller = (function () {
             }); 
         } 
     };
-    var loadMugTypeIntoUI = function (mugType) {
+
+    that.loadMugTypeIntoUI = function (mugType) {
         var mug, controlTree, parentMT, parentMTUfid, loadMTEvent = {};
 
         mug = mugType.mug;
