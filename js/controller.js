@@ -1929,23 +1929,11 @@ formdesigner.controller = (function () {
             };
             var xmlDoc = $.parseXML(xmlString),
                 xml = $(xmlDoc),
-                head = xml.find('h\\:head, head'),
-                title = head.children('h\\:title, title'),
-                binds = head.find('bind'),
+                binds = xml.find('bind'),
                 instances = _getInstances(xml),
-                itext = head.find('itext'),
-                formID;
-
-            that.form.extraHeadNodes = [];
-            var extraHeadTags = [
-                "odkx\\:intent, intent"
-            ];
-            extraHeadTags.map(function (tag) {
-                var found = head.children(tag);
-                if (found.length) {
-                    that.form.extraHeadNodes.push(found[0]);
-                }
-            });
+                controls = xml.find('h\\:body').children(),
+                itext = xml.find('itext'),
+                formID, formName, title;
 
             var data = $(instances[0]).children();
             if($(xml).find('parsererror').length > 0) {
@@ -1959,8 +1947,14 @@ formdesigner.controller = (function () {
                 formID = this.nodeName;
             });
             
+            title = xml.find('title');
+            if(title.length === 0) {
+                title = xml.find('h\\:title');
+            }
+
             if(title.length > 0) {
-                that.form.formName = $(title).text();
+                title = $(title).text();
+                that.form.formName = title;
             }
             
             // set all instance metadatas
@@ -1981,8 +1975,11 @@ formdesigner.controller = (function () {
             parseDataTree (data[0]);
             parseBindList (binds);
 
-            var controls = xml.find('h\\:body, body').children();
+            if(controls.length === 0) {
+                controls = xml.find('body').children();
+            }
             parseControlTree(controls);
+            
 
             that.fire({
                 type: 'parse-finish'

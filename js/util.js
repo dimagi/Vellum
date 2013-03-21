@@ -345,7 +345,8 @@ formdesigner.util = (function(){
 //            console.log(mug);
 //            console.groupEnd();
             throw 'Newly created mug did not validate! MugType and Mug logged to console...'
-    };
+    }
+
 
     that.parseXml = function (xml) {
        var dom = null;
@@ -369,23 +370,6 @@ formdesigner.util = (function(){
           alert("cannot parse xml string!");
        return dom;
     };
-
-    that.serializeXml = function (xmlNode) {
-        try {
-            // Gecko- and Webkit-based browsers (Firefox, Chrome), Opera.
-            return (new XMLSerializer()).serializeToString(xmlNode);
-        } catch (e) {
-            try {
-                // Internet Explorer
-                return xmlNode.xml;
-            } catch (e) {
-                // Other browsers without XML Serializer
-                alert('XML serialization not supported');
-            }
-        }
-        return false;
-    };
-
     /**
      * Takes in a reference mugType and makes a copy of
      * the object (the copy is returned).
