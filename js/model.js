@@ -2707,16 +2707,16 @@ formdesigner.model = function () {
                     _writeInstance(xmlWriter, formdesigner.controller.form.instanceMetadata[i], true);
                 }
                 
+                /////////////////BINDS /////////////////
                 createBindList();
+                ///////////////////////////////////////
                 
+                //////////ITEXT //////////////////////
                 createITextBlock();
+                ////////////////////////////////////
                 
                 xmlWriter.writeEndElement(); //CLOSE MODEL
-
-                formdesigner.controller.form.extraHeadNodes.map(function (node) {
-                    xmlWriter.writeString(formdesigner.util.serializeXml(node));
-                });
-
+                ///////////////////////////////////
                 xmlWriter.writeEndElement(); //CLOSE HEAD
 
                 xmlWriter.writeStartElement('h:body');
