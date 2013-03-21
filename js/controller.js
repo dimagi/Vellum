@@ -22,6 +22,11 @@ formdesigner.controller = (function () {
         formdesigner.model.init();
         formdesigner.ui.init();
         that.setCurrentlySelectedMugType(null);
+
+        // anything required to get the formdesigner into a consistent state
+        // that needs to happen for both new forms and forms loaded from a
+        // string 
+        that.form.extraHeadNodes = [];
         
         if (formdesigner.opts.langs && formdesigner.opts.langs.length > 0) {
             // override the languages with whatever is passed in
