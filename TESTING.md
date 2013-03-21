@@ -1,6 +1,8 @@
 Vellum test plan
 ================
 
+## All changes
+
 On a newly created form (use two languages) and an existing form:
 
 1. Click add to add a Text Question. The Save button should change from gray to green.
@@ -11,7 +13,7 @@ On a newly created form (use two languages) and an existing form:
 
 On the newly created form:
 
-*Steps 4-10 are optional depending on the nature of the change.*
+## Optional depending on change
 
 4. Click Copy to copy the question you created. A copy should be created in the tree with the same name and a different ID.  Verify in Edit Source XML that the correct data, bind, itext, and control structure exists.
 
@@ -33,18 +35,14 @@ On the newly created form:
 
 10. Drag the select question above the group.  Verify in the first data node that the referenced path in the calculate condition changed.
 
+11. Verify that the tree is collapsible where it should be.
+
 Verify that the XML reflects the changes made above.
 
-</optional>
-
-11. Verify that the tree is collapsible where it should be.
+## All changes
 
 12. Click Edit Bulk Translations, change a question label, click Update Translations, and verify that this worked using Edit Source XML.
 
 13. Click Export Form Contents. It should work.
 
 14. Switch the Display Language. Verify that the question names in the question tree changed.
-
-
-
-
