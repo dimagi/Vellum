@@ -349,6 +349,15 @@ formdesigner.controller = (function () {
      * for the user to start the editing process.
      */
     that.reloadUI = function () {
+        // monkey patch jstree.create to be faster, see
+        // https://groups.google.com/d/msg/jstree/AT8b9fWdBw8/SB3bXFwYbiQJ
+        // Patching clean_node as described in the above link actually seems to
+        // lead to a slight decrease in speed, and also messes up the
+        // collapsibility of internal nodes, so we don't do that.
+        
+        var get_rollback = $.jstree._fn.get_rollback;
+        $.jstree._fn.get_rollback = function(){};
+
         var treeFunc, dataNodeList;
         that.setCurrentlySelectedMugType(null);
 
@@ -376,6 +385,10 @@ formdesigner.controller = (function () {
         formdesigner.ui.skipNodeSelectEvent = false;
         formdesigner.ui.selectSomethingOrResetUI(true);
         that.fire('fd-reload-ui');
+
+        // restore original jstree behavior
+        $.jstree._fn.get_rollback = get_rollback;
+
     };
 
     /**
@@ -799,7 +812,8 @@ formdesigner.controller = (function () {
             }); 
         } 
     };
-    var loadMugTypeIntoUI = function (mugType) {
+
+    that.loadMugTypeIntoUI = function (mugType) {
         var mug, controlTree, parentMT, parentMTUfid, loadMTEvent = {};
 
         mug = mugType.mug;
@@ -818,14 +832,7 @@ formdesigner.controller = (function () {
             formdesigner.ui.jstree('deselect_all');
         }
         that.createQuestionInUITree(mugType);
-
-        loadMTEvent.type= "mugtype-loaded";
-        loadMTEvent.mugType = mugType;
-        that.fire(loadMTEvent);
-
-        return mug;
     };
-    that.loadMugTypeIntoUI = loadMugTypeIntoUI;
 
     /**
      * Shows the source XML in a dialog window for editing, optionally
