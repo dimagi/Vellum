@@ -22,6 +22,11 @@ formdesigner.controller = (function () {
         formdesigner.model.init();
         formdesigner.ui.init();
         that.setCurrentlySelectedMugType(null);
+
+        // anything required to get the formdesigner into a consistent state
+        // that needs to happen for both new forms and forms loaded from a
+        // string 
+        that.form.extraHeadNodes = [];
         
         if (formdesigner.opts.langs && formdesigner.opts.langs.length > 0) {
             // override the languages with whatever is passed in
@@ -344,6 +349,15 @@ formdesigner.controller = (function () {
      * for the user to start the editing process.
      */
     that.reloadUI = function () {
+        // monkey patch jstree.create to be faster, see
+        // https://groups.google.com/d/msg/jstree/AT8b9fWdBw8/SB3bXFwYbiQJ
+        // Patching clean_node as described in the above link actually seems to
+        // lead to a slight decrease in speed, and also messes up the
+        // collapsibility of internal nodes, so we don't do that.
+        
+        var get_rollback = $.jstree._fn.get_rollback;
+        $.jstree._fn.get_rollback = function(){};
+
         var treeFunc, dataNodeList;
         that.setCurrentlySelectedMugType(null);
 
@@ -371,6 +385,10 @@ formdesigner.controller = (function () {
         formdesigner.ui.skipNodeSelectEvent = false;
         formdesigner.ui.selectSomethingOrResetUI(true);
         that.fire('fd-reload-ui');
+
+        // restore original jstree behavior
+        $.jstree._fn.get_rollback = get_rollback;
+
     };
 
     /**
@@ -794,7 +812,8 @@ formdesigner.controller = (function () {
             }); 
         } 
     };
-    var loadMugTypeIntoUI = function (mugType) {
+
+    that.loadMugTypeIntoUI = function (mugType) {
         var mug, controlTree, parentMT, parentMTUfid, loadMTEvent = {};
 
         mug = mugType.mug;
@@ -813,14 +832,7 @@ formdesigner.controller = (function () {
             formdesigner.ui.jstree('deselect_all');
         }
         that.createQuestionInUITree(mugType);
-
-        loadMTEvent.type= "mugtype-loaded";
-        loadMTEvent.mugType = mugType;
-        that.fire(loadMTEvent);
-
-        return mug;
     };
-    that.loadMugTypeIntoUI = loadMugTypeIntoUI;
 
     /**
      * Shows the source XML in a dialog window for editing, optionally
@@ -1929,11 +1941,23 @@ formdesigner.controller = (function () {
             };
             var xmlDoc = $.parseXML(xmlString),
                 xml = $(xmlDoc),
-                binds = xml.find('bind'),
+                head = xml.find('h\\:head, head'),
+                title = head.children('h\\:title, title'),
+                binds = head.find('bind'),
                 instances = _getInstances(xml),
-                controls = xml.find('h\\:body').children(),
-                itext = xml.find('itext'),
-                formID, formName, title;
+                itext = head.find('itext'),
+                formID;
+
+            that.form.extraHeadNodes = [];
+            var extraHeadTags = [
+                "odkx\\:intent, intent"
+            ];
+            extraHeadTags.map(function (tag) {
+                var found = head.children(tag);
+                if (found.length) {
+                    that.form.extraHeadNodes.push(found[0]);
+                }
+            });
 
             var data = $(instances[0]).children();
             if($(xml).find('parsererror').length > 0) {
@@ -1947,14 +1971,8 @@ formdesigner.controller = (function () {
                 formID = this.nodeName;
             });
             
-            title = xml.find('title');
-            if(title.length === 0) {
-                title = xml.find('h\\:title');
-            }
-
             if(title.length > 0) {
-                title = $(title).text();
-                that.form.formName = title;
+                that.form.formName = $(title).text();
             }
             
             // set all instance metadatas
@@ -1975,11 +1993,8 @@ formdesigner.controller = (function () {
             parseDataTree (data[0]);
             parseBindList (binds);
 
-            if(controls.length === 0) {
-                controls = xml.find('body').children();
-            }
+            var controls = xml.find('h\\:body, body').children();
             parseControlTree(controls);
-            
 
             that.fire({
                 type: 'parse-finish'

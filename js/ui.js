@@ -1476,12 +1476,6 @@ formdesigner.ui = function () {
                 console.log("setting ui for", xpathstring);
             }
             var results = validate(xpathstring);
-            var advancedFailover = function (text) {
-                alert("We couldn't interpret your expression to our format, so defaulting to advanced mode. " +
-                        "Please fix your expression before using the expression builder. To start over " +
-                        "delete the contents of the advanced editor box and uncheck 'Advanced Mode'.");
-                showAdvancedMode(text);
-            };
             if (results[0]) {
                 // it parsed correctly, try to load it.
                 var parsed = results[1];
@@ -1490,10 +1484,10 @@ formdesigner.ui = function () {
                     // it succeeded. nothing more to do
                 } else {
                     // show advanced mode.
-                    advancedFailover(parsed.toXPath());
+                    showAdvancedMode(parsed.toXPath(), true);
                 }
             } else {
-                advancedFailover(xpathstring);
+                showAdvancedMode(xpathstring, true);
             }
         };
         var updateXPathEditor = function(options) {
@@ -1520,17 +1514,19 @@ formdesigner.ui = function () {
         };
 
         // toggle simple/advanced mode
-        var showAdvancedMode = function (text) {
+        var showAdvancedMode = function (text, showNotice) {
             getExpressionInput().val(text);
             getExpressionPane().empty();
             $("#xpath-advanced-check").attr("checked", true);
             $("#xpath-advanced").show();
             $("#xpath-simple").hide();
+            $("#xpath-advanced-notice").toggle(typeof showNotice != 'undefined' ? showNotice : false)
         };
         var showSimpleMode = function (text) {
             $("#xpath-simple").show();
             $("#xpath-advanced").hide();
             $("#xpath-advanced-check").attr("checked", false);
+            $("#xpath-advanced-notice").hide();
             getExpressionPane().empty();
             // this sometimes sends us back to advanced mode (if we couldn't parse)
             // for now consider that fine.
@@ -1540,6 +1536,12 @@ formdesigner.ui = function () {
         };
         var initXPathEditor = function() {
             var mainPane = editorContent;
+
+            $("<div />").attr("id", "xpath-advanced-notice")
+                .addClass("alert")
+                .text("Sorry, your logic is too complicated for our logic builder." +
+                    "   You can only edit this logic in Advanced Mode.")
+                .appendTo(editorContent);
 
             $("<label />")
                     .attr("for", "xpath-advanced-check")

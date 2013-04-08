@@ -161,7 +161,7 @@ formdesigner.widgets = (function () {
             return input.val();
         };
 
-        input.keyup(widget.updateValue);
+        input.bind("change keyup", widget.updateValue);
         return widget;
     };
 
@@ -402,8 +402,15 @@ formdesigner.widgets = (function () {
         };
 
         widget.checkAutoIDIfNeeded = function() {
-            if (!$.trim($(widget.elementPrefix).val())) {
-                $(widget.elementPrefix + "-auto-itext").prop('checked', true).change();
+            var $idInput = $(widget.elementPrefix),
+                currentId = $.trim($idInput.val()),
+                $autoIdCheckbox = $(widget.elementPrefix + "-auto-itext");
+
+            if (widget.getValue() && !currentId) {
+                $autoIdCheckbox.prop('checked', true).change();
+            } else if (!widget.getValue() && currentId) {
+                $autoIdCheckbox.prop('checked', false).change();
+                $idInput.val('').change();
             }
         };
 
