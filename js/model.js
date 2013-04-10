@@ -638,10 +638,10 @@ formdesigner.model = function () {
                 }
             }
             if (controlBlock.hintItextID === 'required' && !hintIID) {
-                return 'Hint Itext ID is required but not present in this question!';
+                return 'Hint ID is required but not present in this question!';
             }
             
-            return validateItextItem(hintItext, "Hint Itext");
+            return validateItextItem(hintItext, "Hint");
         },
         constraintItextId: function (mugType, mug) {
             var bindElement = mug.properties.bindElement.properties;
@@ -654,9 +654,9 @@ formdesigner.model = function () {
                 }
             }
             if (constraintItext && constraintItext.id && !bindElement.constraintAttr) {
-                return "Can't have a constraint Itext ID without a constraint";
+                return "Can't have a Validation Error Message ID without a Validation Condition";
             }
-            return validateItextItem(constraintItext, "Constraint Itext");
+            return validateItextItem(constraintItext, "Validation Error Message");
         },
         defaultValue: function (mugType, mug) {
             if (/\s/.test(mug.properties.controlElement.properties.defaultValue)) {
@@ -725,7 +725,7 @@ formdesigner.model = function () {
                     editable: 'w',
                     visibility: 'advanced',
                     presence: 'optional',
-                    lstring: "Special Data Node XMLNS attribute"
+                    lstring: "Special Hidden Value XMLNS attribute"
                 }
             },
             bindElement: {
@@ -771,7 +771,7 @@ formdesigner.model = function () {
                     editable: 'w',
                     visibility: 'advanced',
                     presence: 'optional',
-                    lstring: "Constraint Itext ID",
+                    lstring: "Validation Error Message ID",
                     uiType: "itext-id",
                     validationFunc: validationFuncs.constraintItextId
                 },
@@ -785,12 +785,12 @@ formdesigner.model = function () {
                         var hasConstraintMsg = (bindBlock.constraintMsgAttr || 
                                                 (bindBlock.constraintMsgItextID && bindBlock.constraintMsgItextID.id));
                         if (hasConstraintMsg && !hasConstraint) {
-                            return 'ERROR: Bind cannot have a Constraint Message with no Constraint!';
+                            return 'ERROR: You cannot have a Validation Error Message with no Validation COndition!';
                         } else {
                             return 'pass';
                         }
                     },
-                    lstring: 'Constraint Message'
+                    lstring: 'Validation Error Message'
                 },
                 requiredAttr: {
                     editable: 'w',
@@ -1142,7 +1142,7 @@ formdesigner.model = function () {
         dataBind: function () {
             var mType = formdesigner.util.clone(RootMugType);
             mType.typeSlug = "datanode";
-            mType.typeName = "Data Node";
+            mType.typeName = "Hidden Value";
             mType.type = "db";
             delete mType.properties.controlElement;
             return mType;
