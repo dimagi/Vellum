@@ -62,7 +62,7 @@ formdesigner.util = (function(){
         'date': 'Date',
         'datetime': 'Date and Time',
         'time': 'Time',
-        'datanode': 'Data Node',
+        'datanode': 'Hidden Value',
         'unknown': 'Unknown Question Type'
     };
     
