@@ -468,9 +468,6 @@
   display: inline-block;
   margin-left: .4em;
 }
-.hq-oldstyle .expression-part {
-  padding-bottom: 8px;
-}
 .hq-oldstyle .xpath-edit-node {
   width: 180px !important;
 }
