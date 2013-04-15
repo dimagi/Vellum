@@ -609,7 +609,7 @@ formdesigner.ui = function () {
         if (addItemBut.length === 0) {
             addItemBut = $('<button class="btn"></button>')
                     .attr('id','fd-add-item-select_ez')
-                    .text('Add Select Item');
+                    .text('Add Choice');
             addItemBut.button({
                 icons: {
                     primary: "ui-icon-plusthick"
