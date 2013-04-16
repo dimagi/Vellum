@@ -46,9 +46,9 @@ formdesigner.util = (function(){
         'phonenumber': 'Phone Number or Numeric ID',
         'secret': 'Password Question',
         'group': 'Group',
-        'select': 'Multi-Select Question',
-        'item': 'Select Item',
-        '1select': 'Single Select',
+        'select': 'Multiple Choice (Multiple Answers)',
+        'item': 'Choice',
+        '1select': 'Multiple Choice (Single Answer)',
         'trigger': 'Label',
         'repeat': 'Repeat',
         'barcode': 'Barcode Question',
@@ -62,7 +62,7 @@ formdesigner.util = (function(){
         'date': 'Date',
         'datetime': 'Date and Time',
         'time': 'Time',
-        'datanode': 'Data Node',
+        'datanode': 'Hidden Value',
         'unknown': 'Unknown Question Type'
     };
     
