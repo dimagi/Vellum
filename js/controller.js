@@ -972,7 +972,6 @@ formdesigner.controller = (function () {
         var columnOrder = [
             "Question", 
             "Type", 
-            "IText ID", 
             "Audio", 
             "Image",
             "Display Condition", 
@@ -983,7 +982,7 @@ formdesigner.controller = (function () {
         ];
 
         for (i = 0; i < languages.length; i++) {
-            columnOrder.splice(3 + i, 0, "Text (" + languages[i] + ")");
+            columnOrder.splice(2 + i, 0, "Text (" + languages[i] + ")");
         }
 
         var mugTypeToExportRow = function (mugType) {
@@ -1004,7 +1003,6 @@ formdesigner.controller = (function () {
             
             if (mugType.hasControlElement()) {
                 row["Type"] = formdesigner.util.QUESTIONS[mugType.typeSlug];
-                row["IText ID"] = itext.id;
                 
                 for (var i = 0; i < languages.length; i++) {
                     var key = "Text (" + languages[i] + ")";
