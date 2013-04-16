@@ -516,7 +516,7 @@ formdesigner.ui = function () {
 
             if (e.property === 'nodeID' && e.element === 'dataElement') {
                 var node = $('#' + e.mugTypeUfid);
-                if (mugType.typeName === "Data Node" && e.val &&
+                if (mugType.typeSlug === "datanode" && e.val &&
                     e.val !== that.jstree("get_text", node)) 
                 {
                     that.jstree('rename_node', node, e.val);
@@ -609,7 +609,7 @@ formdesigner.ui = function () {
         if (addItemBut.length === 0) {
             addItemBut = $('<button class="btn"></button>')
                     .attr('id','fd-add-item-select_ez')
-                    .text('Add Select Item');
+                    .text('Add Choice');
             addItemBut.button({
                 icons: {
                     primary: "ui-icon-plusthick"
