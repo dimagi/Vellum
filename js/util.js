@@ -47,7 +47,7 @@ formdesigner.util = (function(){
         'secret': 'Password Question',
         'group': 'Group',
         'select': 'Multiple Choice (Multiple Answers)',
-        'item': 'Choice',
+        'item': 'Select Item',
         '1select': 'Multiple Choice (Single Answer)',
         'trigger': 'Label',
         'repeat': 'Repeat',
