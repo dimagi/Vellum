@@ -47,7 +47,7 @@ formdesigner.util = (function(){
         'secret': 'Password Question',
         'group': 'Group',
         'select': 'Multiple Choice (Multiple Answers)',
-        'item': 'Select Item',
+        'item': 'Choice',
         '1select': 'Multiple Choice (Single Answer)',
         'trigger': 'Label',
         'repeat': 'Repeat',
@@ -772,7 +772,7 @@ formdesigner.util = (function(){
     that.mugToXPathReference = function (mug) {
         // for select items, return the quoted value.
         // for everything else return the path
-        if (mug.typeName === "Select Item") {
+        if (mug.typeName === "Choice") {
             return '"' + mug.mug.properties.controlElement.properties.defaultValue + '"';
         } else {
             // for the currently selected mug, return a "."
