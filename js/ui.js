@@ -632,8 +632,8 @@ formdesigner.ui = function () {
      *
      * @param rootElement
      */
-    var generate_scaffolding = function (rootElement) {
-        var root = $(rootElement);
+    var generate_scaffolding = function () {
+        var root = $(formdesigner.rootElement);
         root.empty();
         $.ajax({
             url: formdesigner.staticPrefix + 'templates/main.html',
@@ -641,7 +641,6 @@ formdesigner.ui = function () {
             cache: false,
             success: function(html) {
                 root.append(html);
-                formdesigner.fire('formdesigner.loading_complete');
             }
         });
     };
@@ -1739,7 +1738,7 @@ formdesigner.ui = function () {
 //        SaveButton.message.SAVE = 'Save to Server';
 //        SaveButton.message.SAVED = 'Saved to Server';
         controller = formdesigner.controller;
-        generate_scaffolding($(formdesigner.rootElement));
+        generate_scaffolding();
         initMessagesPane();
         init_toolbar();
         init_extra_tools();
@@ -1778,11 +1777,7 @@ formdesigner.launch = function (opts) {
     if(!opts){
         opts = {};
     }
-    if(opts.rootElement){
-        formdesigner.rootElement = opts.rootElement;
-    }else{
-        formdesigner.rootElement = '#formdesigner';
-    }
+    formdesigner.rootElement = opts.rootElement || "#formdesigner";
     formdesigner.saveType = opts.saveType || 'full';
 
     if(opts.staticPrefix){
