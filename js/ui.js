@@ -1133,10 +1133,6 @@ formdesigner.ui = function () {
         showConfirmDialog();
     };
 
-    that.hideWaitingDialog = function () {
-        hideConfirmDialog();
-    };
-
     var init_misc = function () {
         controller.on('question-creation', function (e) {
             that.setAllTreeValidationIcons();
@@ -1811,7 +1807,6 @@ formdesigner.launch = function (opts) {
 
     if(formdesigner.loadMe) {
         formdesigner.controller.loadXForm(formdesigner.loadMe);
-
     }
     
     // a bit hacky, but if a form name was specified, override 
@@ -1824,15 +1819,6 @@ formdesigner.launch = function (opts) {
 	        formdesigner.controller.setFormName(formdesigner.opts.formName);
         });
     } 
-    
-    window.setTimeout(function () {
-        formdesigner.ui.showWaitingDialog("Loading form...");
-        formdesigner.controller.reloadUI();
-        formdesigner.ui.hideConfirmDialog();
-    }, 400);
-
-
-
 };
 
 formdesigner.rootElement = '';
