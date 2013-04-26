@@ -632,8 +632,8 @@ formdesigner.ui = function () {
      *
      * @param rootElement
      */
-    var generate_scaffolding = function (rootElement) {
-        var root = $(rootElement);
+    var generate_scaffolding = function () {
+        var root = $(formdesigner.rootElement);
         root.empty();
         $.ajax({
             url: formdesigner.staticPrefix + 'templates/main.html',
@@ -641,7 +641,6 @@ formdesigner.ui = function () {
             cache: false,
             success: function(html) {
                 root.append(html);
-                formdesigner.fire('formdesigner.loading_complete');
             }
         });
     };
@@ -1132,10 +1131,6 @@ formdesigner.ui = function () {
         $('#fd-form-saving-anim').append('<img src="' + formdesigner.staticPrefix + 'images/ajax-loader.gif" id="fd-form-saving-img"/>');
 
         showConfirmDialog();
-    };
-
-    that.hideWaitingDialog = function () {
-        hideConfirmDialog();
     };
 
     var init_misc = function () {
@@ -1739,7 +1734,7 @@ formdesigner.ui = function () {
 //        SaveButton.message.SAVE = 'Save to Server';
 //        SaveButton.message.SAVED = 'Saved to Server';
         controller = formdesigner.controller;
-        generate_scaffolding($(formdesigner.rootElement));
+        generate_scaffolding();
         initMessagesPane();
         init_toolbar();
         init_extra_tools();
@@ -1778,11 +1773,7 @@ formdesigner.launch = function (opts) {
     if(!opts){
         opts = {};
     }
-    if(opts.rootElement){
-        formdesigner.rootElement = opts.rootElement;
-    }else{
-        formdesigner.rootElement = '#formdesigner';
-    }
+    formdesigner.rootElement = opts.rootElement || "#formdesigner";
     formdesigner.saveType = opts.saveType || 'full';
 
     if(opts.staticPrefix){
@@ -1816,7 +1807,6 @@ formdesigner.launch = function (opts) {
 
     if(formdesigner.loadMe) {
         formdesigner.controller.loadXForm(formdesigner.loadMe);
-
     }
     
     // a bit hacky, but if a form name was specified, override 
@@ -1829,15 +1819,6 @@ formdesigner.launch = function (opts) {
 	        formdesigner.controller.setFormName(formdesigner.opts.formName);
         });
     } 
-    
-    window.setTimeout(function () {
-        formdesigner.ui.showWaitingDialog("Loading form...");
-        formdesigner.controller.reloadUI();
-        formdesigner.ui.hideConfirmDialog();
-    }, 400);
-
-
-
 };
 
 formdesigner.rootElement = '';
