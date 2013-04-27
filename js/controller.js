@@ -1931,8 +1931,7 @@ formdesigner.controller = (function () {
                 title = head.children('h\\:title, title'),
                 binds = head.find('bind'),
                 instances = _getInstances(xml),
-                itext = head.find('itext'),
-                formID;
+                itext = head.find('itext');
 
             that.form.extraHeadNodes = [];
             var extraHeadTags = [
@@ -1949,13 +1948,6 @@ formdesigner.controller = (function () {
             if($(xml).find('parsererror').length > 0) {
                 throw 'PARSE ERROR! Message follows:' + $(xml).find('parsererror').find('div').html();
             }
-            
-            // NOTE: this is a bit odd - but seems to assume there's only one 
-            // child of the main instance, or that the last child should be 
-            // used as the form id
-            data.each(function () {
-                formID = this.nodeName;
-            });
             
             if(title.length > 0) {
                 that.form.formName = $(title).text();
