@@ -1144,25 +1144,15 @@ formdesigner.controller = (function () {
             }), {updateUI: true});
         }
 
-        formdesigner.on('load-form-error', formLoadFailed); 
-
         window.setTimeout(function () { //wait for the spinner to come up.
-            formdesigner.fire({
-                    type: 'load-form-start',
-                    form : formString
-            });
-
             try {
                 that.resetFormDesigner();
                 formdesigner.model.Itext.resetItext(); //Clear out any ideas about itext since we'll be loading in that information now.
                 that.parseXML(formString);
                 that.reloadUI();
             } catch (e) {
-                formdesigner.fire({
-                    type: 'load-form-error',
-                    errorObj : e,
-                    form : formString
-                });
+                formLoadFailed(e);
+                
                 console.log('E OBJ', e);
                 // hack: don't display the whole invalid XML block if it
                 // was a parse error
@@ -1181,10 +1171,6 @@ formdesigner.controller = (function () {
                 formdesigner.ui.showConfirmDialog();
             }
 
-            formdesigner.fire({
-                    type: 'load-form-complete',
-                    form : formString
-                });
             if(!that.formLoadingFailed) {
                 //re-enable all buttons and inputs in case they were disabled before.
                 formdesigner.ui.enableUI();
@@ -1325,7 +1311,7 @@ formdesigner.controller = (function () {
                 extraXMLNS = $(el).attr('xmlns');
                 keyAttr = $(el).attr('key');
 
-                mType.typeName = "Data Node";
+                mType.typeName = "Hidden Value";
                 mug = formdesigner.model.createMugFromMugType(mType);
 
                 mug.properties.dataElement.properties.nodeID = nodeID;

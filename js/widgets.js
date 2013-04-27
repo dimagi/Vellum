@@ -1110,7 +1110,7 @@ formdesigner.widgets = (function () {
 	        elements.push({ widgetType: "itext",
 	                        displayMode: "inline",
 	                        slug: "constraint",
-	                        displayName: "Constraint Message",
+	                        displayName: "Validation Error Message",
 	                        textIdFunc: function (mt) { return mt.getConstraintMsgItext() },
 	                        showAddFormButton: false});
         }

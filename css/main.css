@@ -1,13 +1,3 @@
-.hq-oldstyle {
-  /* to prevent flicker */
-
-  display: none;
-  margin-bottom: 60px;
-  font-size: 12px;
-}
-.hq-oldstyle #main_container {
-  padding: 10px;
-}
 .hq-oldstyle select {
   height: auto;
   width: auto;
@@ -18,15 +8,6 @@
 }
 .hq-oldstyle label {
   display: inline;
-}
-.hq-oldstyle h1,
-.hq-oldstyle h2 {
-  font-size: 13px;
-  line-height: normal;
-  width: auto;
-}
-.hq-oldstyle ul {
-  margin: 0;
 }
 .hq-oldstyle .container::before,
 .hq-oldstyle .container::after {
@@ -486,9 +467,6 @@
   vertical-align: text-bottom;
   display: inline-block;
   margin-left: .4em;
-}
-.hq-oldstyle .expression-part {
-  padding-bottom: 8px;
 }
 .hq-oldstyle .xpath-edit-node {
   width: 180px !important;
