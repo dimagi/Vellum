@@ -598,15 +598,12 @@ formdesigner.model = function () {
             hasLabel = Boolean(controlBlock.label);
             var itextBlock = mugType.getItext();
             hasLabelItextID = Boolean(itextBlock && itextBlock.id);
-            
-            if (hasLabelItextID) {
-                if (!that.isValidAttributeValue(itextBlock.id)) {
-                    return itextBlock.id + " is not a valid ID";
-                }
-                hasItext = itextBlock.hasHumanReadableItext();
-            } else {
-                hasItext = false;
+
+            if (hasLabelItextID && !that.isValidAttributeValue(itextBlock.id)) {
+                return itextBlock.id + " is not a valid Itext ID";
             }
+            hasItext = itextBlock && itextBlock.hasHumanReadableItext();
+            
             if (hasLabel) {
                 return 'pass';
             } else if (!hasLabel && !hasItext && (mugType.properties.controlElement.label.presence === 'optional' || 
