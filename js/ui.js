@@ -1133,12 +1133,6 @@ formdesigner.ui = function () {
         showConfirmDialog();
     };
 
-    var init_misc = function () {
-        controller.on('question-creation', function (e) {
-            that.setAllTreeValidationIcons();
-        });
-    };
-
     var set_event_listeners = function () {
         formdesigner.controller.on("question-itext-changed", function (e) {
             // Update any display values that are affected
@@ -1742,7 +1736,6 @@ formdesigner.ui = function () {
         init_form_paste();
         init_modal_dialogs();
 
-        init_misc();
         set_event_listeners();
 
         setup_fancybox();
