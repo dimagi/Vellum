@@ -965,26 +965,36 @@ formdesigner.controller = (function () {
     that.generateExportXLS = function () {
         
         var languages = formdesigner.model.Itext.getLanguages();
-        var i;
         // deduplicate
         formdesigner.model.Itext.deduplicateIds();
+
+        var itextColumns = {
+            "default": "Text",
+            "audio": "Audio",
+            "image": "Image"
+        };
         
         var columnOrder = [
             "Question", 
-            "Type", 
-            "IText ID", 
-            "Audio", 
-            "Image",
+            "Type"
+        ];
+        
+        for (var type in itextColumns) {
+            var colName = itextColumns[type];
+            
+            for (var i = 0; i < languages.length; i++) {
+                columnOrder.push(colName + " (" + languages[i] + ")");
+            }
+        }
+
+        columnOrder = columnOrder.concat([
             "Display Condition", 
             "Validation Condition", 
             "Validation Message", 
             "Calculate Condition", 
             "Required"
-        ];
+        ]);
 
-        for (i = 0; i < languages.length; i++) {
-            columnOrder.splice(3 + i, 0, "Text (" + languages[i] + ")");
-        }
 
         var mugTypeToExportRow = function (mugType) {
             var row = {},
@@ -1004,15 +1014,15 @@ formdesigner.controller = (function () {
             
             if (mugType.hasControlElement()) {
                 row["Type"] = formdesigner.util.QUESTIONS[mugType.typeSlug];
-                row["IText ID"] = itext.id;
-                
-                for (var i = 0; i < languages.length; i++) {
-                    var key = "Text (" + languages[i] + ")";
-                    row[key] = defaultOrNothing(itext, languages[i], "default");
-                }
+               
+                for (var type in itextColumns) {
+                    var colName = itextColumns[type];
 
-                row["Audio"] = defaultOrNothing(itext, defaultLanguage, "audio");
-                row["Image"] = defaultOrNothing(itext, defaultLanguage, "image");
+                    for (var i = 0; i < languages.length; i++) {
+                        var key = colName + " (" + languages[i] + ")";
+                        row[key] = defaultOrNothing(itext, languages[i], type);
+                    }
+                }
             }
             
             if (mugType.hasBindElement()) {
