@@ -118,6 +118,8 @@ formdesigner.ui = function () {
     };
     
     that.addQuestion = function (qType) {
+        console.log("added question");
+        console.log(qType);
         var newMug = formdesigner.controller.createQuestion(qType);
 
         that.jstree('select_node', '#' + newMug.ufid, true);
@@ -133,7 +135,8 @@ formdesigner.ui = function () {
     };
 
     that.getQuestionTypeSelector = function () {
-        var select = $('<select />');
+        // the question type selector inside the question form itself
+        var select = $('<select data-bar="foo" />');
         
         function makeOptionItem(idTag, attrvalue, label) {
            var opt = $('<option />')
@@ -143,7 +146,8 @@ formdesigner.ui = function () {
            return opt;
         }
         
-        var questions = formdesigner.util.getQuestionList(); 
+        var questions = formdesigner.util.getQuestionList();
+        console.log(questions);
         for (var i = 0; i < questions.length; i++) {
             select.append(makeOptionItem(questions[i][0], 
                                          questions[i][0], 
@@ -151,53 +155,64 @@ formdesigner.ui = function () {
         }
         return select;
     };
+
+    that.QuestionTypeButton = function (buttonSpec) {
+        var self = this;
+        self.slug = buttonSpec[0];
+        self.title = buttonSpec[1];
+        self.icon = (buttonSpec.length > 2) ? buttonSpec[2] : null;
+
+        self.addQuestionToTree = function () {
+
+        };
+    };
+
+    that.QuestionTypeGroup = function (groupData) {
+        var self = this;
+        self.groupData = groupData;
+        self.questionTypeTemplate = "fd-question-type-template";
+
+        self.init = function () {
+            self.defaultQuestion = new formdesigner.ui.QuestionTypeButton(self.groupData.group);
+            self.groupID = "fd-question-group-" + self.defaultQuestion.slug;
+            self.questions = _.map(self.groupData.questions, function (questionSpec) {
+                return new formdesigner.ui.QuestionTypeButton(questionSpec);
+            });
+        };
+
+        self.getFormattedTemplate = function () {
+            var $template = $('#'+self.questionTypeTemplate);
+            return _.template($template.text(), {
+                groupID: self.groupID,
+                defaultQuestion: self.defaultQuestion,
+                questions: self.questions
+            });
+        };
+
+        self.activateGroup = function () {
+            var $questionGroup = $('#'+self.groupID);
+            $questionGroup.find('.fd-question-type').click(function (event) {
+                var qType = $(this).data('qtype');
+                that.addQuestion(qType);
+                event.preventDefault();
+            });
+            $questionGroup.find('.fd-question-type-default i').tooltip();
+        };
+    };
     
     function init_toolbar() {
-        var toolbar = $(".fd-toolbar"), select, addbut;
-        select = $('<select></select>')
-                .attr('id','fd-question-select');
-        toolbar.prepend(select);
 
-        function buildSelectDropDown () {
-            function makeOptionItem(idTag, attrvalue, label) {
-               var opt = $('<option></option>')
-                       .attr('id','fd-add-'+idTag+'-button')
-                       .attr('value',attrvalue)
-                       .addClass("questionButton")
-                       .addClass("toolbarButton")
-                       .text(label);
-               return opt;
-            }
+        var toolbar = $(".fd-toolbar");
 
-            var i;
-            var questions = formdesigner.util.getQuestionList();
-            for (i = 0; i < questions.length; i++) {
-                select.append(makeOptionItem(questions[i][0], 
-                                             questions[i][1], 
-                                             questions[i][1]));
-            }
-        }
+        var $questionTypeContainer = $('.fd-question-type-container');
 
-        buildSelectDropDown();
-        select.after('<button class="btn btn-primary" id="fd-add-but">Add</button>');
-        addbut = $('#fd-add-but');
-        addbut.button({
-            icons:{
-                primary: 'ui-icon-plusthick'
-            }
+        _.each(formdesigner.util.QUESTION_GROUPS, function (groupData) {
+            console.log(groupData);
+            var questionGroup = new formdesigner.ui.QuestionTypeGroup(groupData);
+            questionGroup.init();
+            $questionTypeContainer.append(questionGroup.getFormattedTemplate());
+            questionGroup.activateGroup();
         });
-
-        function addQuestionBySelect() {
-            var selVal, qID,qType;
-            selVal = $('#fd-question-select').val();
-            qID = $('#fd-question-select').find('[value="' + selVal + '"]').attr('id');
-            qType = qID.split('-')[2];
-            that.addQuestion(qType);
-        }
-
-        addbut.click(addQuestionBySelect);
-
-        select.chosen();
 
         //debug tools
         (function c_printDataTreeToConsole() {
@@ -214,9 +229,8 @@ formdesigner.ui = function () {
         })();
 
         (function c_saveForm() {
-            var savebut = $('<div id="fd-save-button" class="toolbarButton"/>');
-            toolbar.append(savebut);
-            formdesigner.controller.saveButton.ui.appendTo(savebut);
+            var $saveButtonContainer = $('#fd-save-button');
+            formdesigner.controller.saveButton.ui.appendTo($saveButtonContainer);
         })();
 
     }
@@ -1822,3 +1836,6 @@ formdesigner.launch = function (opts) {
 };
 
 formdesigner.rootElement = '';
+
+
+

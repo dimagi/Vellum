@@ -41,15 +41,16 @@ formdesigner.util = (function(){
     
     
     that.QUESTIONS = {
-        //in the format: {question_slug: question_label}
-        'text': 'Text Question',
+        // in the format: {question_slug: question_label}
+        // NOTE: this will be deprecated soon
+        'text': 'Text Question', //
         'phonenumber': 'Phone Number or Numeric ID',
         'secret': 'Password Question',
         'group': 'Group',
-        'select': 'Multiple Choice (Multiple Answers)',
+        'select': 'Multiple Choice (Multiple Answers)', //
         'item': 'Choice',
-        '1select': 'Multiple Choice (Single Answer)',
-        'trigger': 'Label',
+        '1select': 'Multiple Choice (Single Answer)', //
+        'trigger': 'Label', //
         'repeat': 'Repeat',
         'barcode': 'Barcode Question',
         'geopoint': 'Geopoint Question',
@@ -65,6 +66,70 @@ formdesigner.util = (function(){
         'datanode': 'Hidden Value',
         'unknown': 'Unknown Question Type'
     };
+
+    that.QUESTION_GROUPS = [
+        {
+            group: ['text', 'Text', 'icon-vellum-text'],  // [<default_slug>, <title>, <icon-class>]
+            questions: [
+                ['text', 'Text Question', null],  // [<slug>, <title>, <icon-class>]
+                ['trigger', 'Label', null]
+            ]
+        },
+        {
+            group: ['1select', 'Multiple Choice', 'icon-th-list'],
+            questions: [
+                ['1select', 'Single Answer', null],
+                ['select', 'Multiple Answer', null]
+            ]
+        },
+
+        {
+            group: ['int', 'Number', 'icon-vellum-numeric'],
+            questions: [
+                ['int', 'Integer', null],
+                ['phonenumber', 'Phone Number or Numeric ID', null],
+                ['double', 'Decimal', null],
+                ['long', 'Long', null]
+            ]
+        },
+        {
+            group: ['date', 'Date', 'icon-calendar'],
+            questions: [
+                ['date', 'Date', null],
+                ['time', 'Time', null],
+                ['datetime', 'Date and Time', null]
+            ]
+        },
+        {
+            group: ['datanode', 'Hidden Value', 'icon-vellum-data'],
+            questions: [
+                ['datanode', 'Hidden Value', null]
+            ]
+        },
+        {
+            group: ['group', 'Groups', 'icon-folder-open'],
+            questions: [
+                ['group', 'Group', null],
+                ['repeat', 'Repeat Group', null]
+            ]
+        },
+        {
+            group: ['image', 'Multimedia Capture', 'icon-camera'],
+            questions: [
+                ['image', 'Image Capture', null],
+                ['audio', 'Audio Capture', null],
+                ['video', 'Video Capture', null]
+            ]
+        },
+        {
+            group: ['geopoint', 'Advanced', 'icon-map-marker'],
+            questions: [
+                ['geopoint', 'GPS', null],
+                ['barcode', 'Barcode Scan', null],
+                ['secret', 'Password', null]
+            ]
+        }
+    ];
     
     // keep questions from showing up in the dropdown list here
     that.UNEDITABLE_QUESTIONS = ["unknown", "item"];

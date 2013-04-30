@@ -1,12 +1,15 @@
 <div id="fd-ui-container">
     <div id="fd-messages"></div>
-    <div id="fd-toolbar" class="fd-toolbar">
-        <div class="btn-group">
-            <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
-                Advanced
-                <span class="caret"></span>
-            </a>
-            <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
+    <div id="fd-save-button"></div>
+    <ul class="nav nav-tabs fd-nav">
+        <li class="active"><a href="#">Form</a></li>
+        <li class="dropdown">
+            <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                <i class="icon-wrench"></i>
+                Tools
+                <b class="caret"></b>
+              </a>
+            <ul class="dropdown-menu">
                 <li><a id="fd-load-xls-button" tabindex="-1" href="#">Edit Bulk Translations</a></li>
                 <li><a id="fd-export-xls-button" tabindex="-1" href="#">Export Form Contents</a></li>
                 <li><a id="fd-editsource-button" tabindex="-1" href="#">Edit Source XML</a></li>
@@ -14,7 +17,10 @@
                     <a tabindex="-1" href="#fd-form-opts" data-toggle="modal">Form Properties</a>
                 </li>
             </ul>
-        </div>
+        </li>
+    </ul>
+    <div id="fd-toolbar" class="fd-toolbar">
+        <div class="fd-question-type-container"></div>
     </div>
     <div id="fd-question-tree-container" class="fd-tree">
         <div id="fd-question-tree-head" class="fd-head ui-widget-header">Question Tree</div>
@@ -62,4 +68,26 @@
     </div>
 
 </div>
+
+<script type="text/template" id="fd-question-type-template">
+    <div id="<%= groupID %>" class="btn-group fd-question-type-group">
+        <a class="btn btn-large fd-question-type fd-question-type-default"
+           data-qtype="<%= defaultQuestion.slug %>"
+           href="#">
+            <i class="<%= defaultQuestion.icon %>"
+               data-title="<%= defaultQuestion.title %>"></i>
+        </a>
+        <a class="btn btn-large dropdown-toggle" data-toggle="dropdown" href="#"><span class="caret"></span></a>
+        <ul class="dropdown-menu">
+            <% for (var q=0; q < questions.length; q++) {
+                var question = questions[q]; %>
+            <li>
+                <a class="fd-question-type" data-qtype="<%= question.slug %>" href="#">
+                    <% if (question.icon) { %><i class="<%= question.icon %>"></i><% } %> <%= question.title %>
+                </a>
+            </li>
+            <% } %>
+        </ul>
+    </div>
+</script>
 
