@@ -118,12 +118,8 @@ formdesigner.ui = function () {
     };
     
     that.addQuestion = function (qType) {
-        console.log("added question");
-        console.log(qType);
         var newMug = formdesigner.controller.createQuestion(qType);
-
         that.jstree('select_node', '#' + newMug.ufid, true);
-
         if (that.ODK_ONLY_QUESTION_TYPES.indexOf(qType) !== -1) { 
             //it's an ODK media question
             formdesigner.model.form.updateError(formdesigner.model.FormError({
@@ -147,7 +143,6 @@ formdesigner.ui = function () {
         }
         
         var questions = formdesigner.util.getQuestionList();
-        console.log(questions);
         for (var i = 0; i < questions.length; i++) {
             select.append(makeOptionItem(questions[i][0], 
                                          questions[i][0], 
@@ -161,10 +156,6 @@ formdesigner.ui = function () {
         self.slug = buttonSpec[0];
         self.title = buttonSpec[1];
         self.icon = (buttonSpec.length > 2) ? buttonSpec[2] : null;
-
-        self.addQuestionToTree = function () {
-
-        };
     };
 
     that.QuestionTypeGroup = function (groupData) {
@@ -207,7 +198,6 @@ formdesigner.ui = function () {
         var $questionTypeContainer = $('.fd-question-type-container');
 
         _.each(formdesigner.util.QUESTION_GROUPS, function (groupData) {
-            console.log(groupData);
             var questionGroup = new formdesigner.ui.QuestionTypeGroup(groupData);
             questionGroup.init();
             $questionTypeContainer.append(questionGroup.getFormattedTemplate());
