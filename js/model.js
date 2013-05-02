@@ -597,7 +597,7 @@ formdesigner.model = function () {
             controlBlock = mug.properties.controlElement.properties;
             hasLabel = Boolean(controlBlock.label);
             var itextBlock = mugType.getItext();
-            hasLabelItextID = Boolean(itextBlock && itextBlock.id);
+            hasLabelItextID = itextBlock && (typeof itextBlock.id !== "undefined");
 
             if (hasLabelItextID && !that.isValidAttributeValue(itextBlock.id)) {
                 return itextBlock.id + " is not a valid Itext ID";
