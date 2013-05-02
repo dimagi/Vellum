@@ -161,20 +161,32 @@ formdesigner.ui = function () {
     that.QuestionTypeGroup = function (groupData) {
         var self = this;
         self.groupData = groupData;
-        self.questionTypeTemplate = "fd-question-type-template";
+        self.questionTypeTemplate = "fd-question-type-group-template";
+        self.showDropdown = true;
+        self.relatedQuestions = [];
 
         self.init = function () {
             self.defaultQuestion = new formdesigner.ui.QuestionTypeButton(self.groupData.group);
-            self.groupID = "fd-question-group-" + self.defaultQuestion.slug;
-            self.questions = _.map(self.groupData.questions, function (questionSpec) {
-                return new formdesigner.ui.QuestionTypeButton(questionSpec);
-            });
+            self.groupID = formdesigner.util.getQuestionTypeGroupID(self.defaultQuestion.slug);
+            if ('showDropdown' in self.groupData) {
+                self.showDropdown = self.groupData.showDropdown;
+            }
+            if ('related' in self.groupData) {
+                self.relatedQuestions = _.map(self.groupData.related, self.makeQuestion);
+            }
+            self.questions = _.map(self.groupData.questions, self.makeQuestion);
+        };
+
+        self.makeQuestion = function (questionSpec) {
+            return new formdesigner.ui.QuestionTypeButton(questionSpec);
         };
 
         self.getFormattedTemplate = function () {
             var $template = $('#'+self.questionTypeTemplate);
             return _.template($template.text(), {
                 groupID: self.groupID,
+                showDropdown: self.showDropdown,
+                relatedQuestions: self.relatedQuestions,
                 defaultQuestion: self.defaultQuestion,
                 questions: self.questions
             });
@@ -183,24 +195,47 @@ formdesigner.ui = function () {
         self.activateGroup = function () {
             var $questionGroup = $('#'+self.groupID);
             $questionGroup.find('.fd-question-type').click(function (event) {
-                var qType = $(this).data('qtype');
-                that.addQuestion(qType);
+                if (!$(this).hasClass('disabled')) {
+                    that.addQuestion($(this).data('qtype'));
+                }
                 event.preventDefault();
             });
-            $questionGroup.find('.fd-question-type-default i').tooltip();
+            $questionGroup.find('.btn.fd-question-type > span').tooltip({
+                title: function () {
+                    var qLabel = $(this).data('qlabel'),
+                        $qType = $(this).parent();
+
+                    if($qType.hasClass('disabled')) {
+                        qLabel = qLabel + " (add "+$qType.prev().find('span').data('qlabel')+" first)";
+                    }
+                    return qLabel;
+                }
+            });
         };
+    };
+
+    that.activateQuestionTypeGroup = function (slug) {
+        var $questionGroup = $('#' + formdesigner.util.getQuestionTypeGroupID(slug));
+        $questionGroup.find('.btn').addClass('btn-primary');
+        $questionGroup.find('.fd-question-type-related').removeClass('disabled');
+    };
+
+    that.resetQuestionTypeGroups = function () {
+        var $questionGroupContainer = $('#fd-container-question-type-group');
+        $questionGroupContainer.find('.btn').removeClass('btn-primary');
+        $questionGroupContainer.find('.fd-question-type-related').addClass('disabled');
     };
     
     function init_toolbar() {
 
         var toolbar = $(".fd-toolbar");
 
-        var $questionTypeContainer = $('.fd-question-type-container');
+        var $questionGroupContainer = $('#fd-container-question-type-group');
 
         _.each(formdesigner.util.QUESTION_GROUPS, function (groupData) {
             var questionGroup = new formdesigner.ui.QuestionTypeGroup(groupData);
             questionGroup.init();
-            $questionTypeContainer.append(questionGroup.getFormattedTemplate());
+            $questionGroupContainer.append(questionGroup.getFormattedTemplate());
             questionGroup.activateGroup();
         });
 
@@ -400,7 +435,7 @@ formdesigner.ui = function () {
                     "icon": {
                         "image": jquery_icon_url,
                         "position": "-240px -128px"
-                    },
+                    }
                 },
                 "default" : {
                     "valid_children" : questionTypes
@@ -472,7 +507,7 @@ formdesigner.ui = function () {
             for (var i = 0; i < propsMessage.length; i++) {
 	            formdesigner.model.form.updateError(formdesigner.model.FormError({
 	                    message: propsMessage[i],
-	                    level: 'form-warning',
+	                    level: 'form-warning'
 	                }));
 	        }
 	        that.resetMessages(formdesigner.model.form.errors);
@@ -546,17 +581,15 @@ formdesigner.ui = function () {
 
         var ufid = $(data.rslt.obj[0]).prop('id'),
             mugType = formdesigner.controller.getMTFromFormByUFID(ufid),
-            tagName;
+            typeSlug;
 
         that.displayMugProperties(mugType);
-
-        if (mugType.hasControlElement()) {
-            tagName = mugType.mug.properties.controlElement.properties.tagName;
-            if (['item', 'select', 'select1'].indexOf(tagName) !== -1) {
-                that.showSelectItemAddButton();
-            } else {
-                that.hideSelectItemAddButton();
-            }
+        typeSlug = mugType.typeSlug;
+        // First neutralize all the existing buttons.
+        that.resetQuestionTypeGroups();
+        var groupSlug = formdesigner.util.QUESTION_TYPE_TO_GROUP[typeSlug];
+        if (groupSlug) {
+            that.activateQuestionTypeGroup(groupSlug);
         }
     };
 
@@ -606,27 +639,6 @@ formdesigner.ui = function () {
         } else {
             return false;
         }
-    };
-
-    that.showSelectItemAddButton = function () {
-        var addItemBut = $('#fd-add-item-select_ez');
-        if (addItemBut.length === 0) {
-            addItemBut = $('<button class="btn"></button>')
-                    .attr('id','fd-add-item-select_ez')
-                    .text('Add Choice');
-            addItemBut.button({
-                icons: {
-                    primary: "ui-icon-plusthick"
-                }
-            });
-            addItemBut.click(function () {that.addQuestion('item')});
-            $("#fd-add-but").after(addItemBut);
-        }
-        addItemBut.show();
-    };
-
-    that.hideSelectItemAddButton = function () {
-        $('#fd-add-item-select_ez').hide();
     };
 
     that.questionTree = null;
@@ -1700,9 +1712,9 @@ formdesigner.ui = function () {
 
             that.displayMugProperties(controller.getCurrentlySelectedMugType());
         }).bind("deselect_all.jstree", function (e, data) {
-            that.hideSelectItemAddButton();
+            that.resetQuestionTypeGroups();
         }).bind("deselect_node.jstree", function (e, data) {
-            that.hideSelectItemAddButton();
+            that.resetQuestionTypeGroups();
         });
 
         $("#fd-expand-all").click(function() {

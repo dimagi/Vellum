@@ -20,7 +20,8 @@
         </li>
     </ul>
     <div id="fd-toolbar" class="fd-toolbar">
-        <div class="fd-question-type-container"></div>
+        <h2><i class="icon-plus"></i></h2>
+        <div id="fd-container-question-type-group"></div>
     </div>
     <div id="fd-question-tree-container" class="fd-tree">
         <div id="fd-question-tree-head" class="fd-head ui-widget-header">Question Tree</div>
@@ -69,25 +70,38 @@
 
 </div>
 
-<script type="text/template" id="fd-question-type-template">
+<script type="text/template" id="fd-question-type-group-template">
     <div id="<%= groupID %>" class="btn-group fd-question-type-group">
         <a class="btn btn-large fd-question-type fd-question-type-default"
            data-qtype="<%= defaultQuestion.slug %>"
            href="#">
-            <i class="<%= defaultQuestion.icon %>"
-               data-title="<%= defaultQuestion.title %>"></i>
+            <span data-qlabel="<%= defaultQuestion.title %>">
+                <i class="<%= defaultQuestion.icon %>"></i>
+            </span>
         </a>
+        <% _.each(relatedQuestions, function (related) { %>
+        <a class="btn btn-large fd-question-type fd-question-type-related disabled"
+           data-qtype="<%= related.slug %>"
+           href="#">
+            <span data-qlabel="<%= related.title %>">
+                <i class="<%= related.icon %>"></i>
+            </span>
+        </a>
+        <% }); %>
+        <% if (showDropdown) { %>
         <a class="btn btn-large dropdown-toggle" data-toggle="dropdown" href="#"><span class="caret"></span></a>
         <ul class="dropdown-menu">
             <% for (var q=0; q < questions.length; q++) {
                 var question = questions[q]; %>
             <li>
-                <a class="fd-question-type" data-qtype="<%= question.slug %>" href="#">
+                <a class="fd-question-type"
+                   data-qtype="<%= question.slug %>"
+                   href="#">
                     <% if (question.icon) { %><i class="<%= question.icon %>"></i><% } %> <%= question.title %>
                 </a>
             </li>
             <% } %>
         </ul>
+        <% } %>
     </div>
 </script>
-

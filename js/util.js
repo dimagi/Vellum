@@ -76,7 +76,10 @@ formdesigner.util = (function(){
             ]
         },
         {
-            group: ['1select', 'Multiple Choice', 'icon-th-list'],
+            group: ['1select', 'Multiple Choice', 'icon-vellum-multi-choice'],
+            related: [
+                ['item', 'Choice', 'icon-circle-blank']
+            ],
             questions: [
                 ['1select', 'Single Answer', null],
                 ['select', 'Multiple Answer', null]
@@ -101,7 +104,8 @@ formdesigner.util = (function(){
             ]
         },
         {
-            group: ['datanode', 'Hidden Value', 'icon-vellum-data'],
+            group: ['datanode', 'Hidden Value', 'icon-vellum-variable'],
+            showDropdown: false,
             questions: [
                 ['datanode', 'Hidden Value', null]
             ]
@@ -130,6 +134,24 @@ formdesigner.util = (function(){
             ]
         }
     ];
+
+    that.getQuestionTypeGroupID = function (slug) {
+        return "fd-question-group-" + slug;
+    };
+
+    that.getQuestionTypeToGroup = function () {
+        var groups = {};
+        _.each(that.QUESTION_GROUPS, function (groupData) {
+            var groupSlug = groupData.group[0],
+                allQuestions = _.union(groupData.questions, groupData.related || []);
+             _.each(allQuestions, function (q) {
+                groups[q[0]] = groupSlug;
+            });
+        });
+        return groups;
+    };
+
+    that.QUESTION_TYPE_TO_GROUP = that.getQuestionTypeToGroup();
     
     // keep questions from showing up in the dropdown list here
     that.UNEDITABLE_QUESTIONS = ["unknown", "item"];

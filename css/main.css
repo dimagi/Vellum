@@ -399,9 +399,6 @@
   clear: both;
   margin-bottom: .3em;
 }
-#formdesigner #fd-props-content fieldset div.widget .btn-group {
-  margin-left: 60px;
-}
 #formdesigner #fd-props-content fieldset label {
   font-weight: normal;
   display: inline-block;
