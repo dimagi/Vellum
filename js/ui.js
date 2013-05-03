@@ -207,6 +207,8 @@ formdesigner.ui = function () {
 
                     if($qType.hasClass('disabled')) {
                         qLabel = qLabel + " (add "+$qType.prev().find('span').data('qlabel')+" first)";
+                    } else {
+                        qLabel = "Add " + qLabel;
                     }
                     return qLabel;
                 }
@@ -216,13 +218,11 @@ formdesigner.ui = function () {
 
     that.activateQuestionTypeGroup = function (slug) {
         var $questionGroup = $('#' + formdesigner.util.getQuestionTypeGroupID(slug));
-        $questionGroup.find('.btn').addClass('btn-primary');
         $questionGroup.find('.fd-question-type-related').removeClass('disabled');
     };
 
     that.resetQuestionTypeGroups = function () {
         var $questionGroupContainer = $('#fd-container-question-type-group');
-        $questionGroupContainer.find('.btn').removeClass('btn-primary');
         $questionGroupContainer.find('.fd-question-type-related').addClass('disabled');
     };
     

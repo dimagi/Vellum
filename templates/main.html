@@ -20,7 +20,6 @@
         </li>
     </ul>
     <div id="fd-toolbar" class="fd-toolbar">
-        <h2><i class="icon-plus"></i></h2>
         <div id="fd-container-question-type-group"></div>
     </div>
     <div id="fd-question-tree-container" class="fd-tree">
@@ -79,15 +78,6 @@
                 <i class="<%= defaultQuestion.icon %>"></i>
             </span>
         </a>
-        <% _.each(relatedQuestions, function (related) { %>
-        <a class="btn btn-large fd-question-type fd-question-type-related disabled"
-           data-qtype="<%= related.slug %>"
-           href="#">
-            <span data-qlabel="<%= related.title %>">
-                <i class="<%= related.icon %>"></i>
-            </span>
-        </a>
-        <% }); %>
         <% if (showDropdown) { %>
         <a class="btn btn-large dropdown-toggle" data-toggle="dropdown" href="#"><span class="caret"></span></a>
         <ul class="dropdown-menu">
@@ -103,5 +93,14 @@
             <% } %>
         </ul>
         <% } %>
+        <% _.each(relatedQuestions, function (related) { %>
+        <a class="btn btn-large fd-question-type fd-question-type-related disabled"
+           data-qtype="<%= related.slug %>"
+           href="#">
+            <span data-qlabel="<%= related.title %>">
+                <i class="<%= related.icon %>"></i>
+            </span>
+        </a>
+        <% }); %>
     </div>
 </script>
