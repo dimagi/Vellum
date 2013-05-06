@@ -71,7 +71,7 @@ formdesigner.util = (function(){
         {
             group: ['text', 'Text', 'icon-vellum-text'],  // [<default_slug>, <title>, <icon-class>]
             questions: [
-                ['text', 'Text Question', null],  // [<slug>, <title>, <icon-class>]
+                ['text', 'Text Question', 'icon-vellum-text'],  // [<slug>, <title>, <icon-class>]
                 ['trigger', 'Label', null]
             ]
         },
@@ -81,18 +81,18 @@ formdesigner.util = (function(){
                 ['item', 'Choice', 'icon-circle-blank']
             ],
             questions: [
-                ['1select', 'Single Answer', null],
-                ['select', 'Multiple Answer', null]
+                ['1select', 'Single Answer', 'icon-vellum-multi-choice'],
+                ['select', 'Multiple Answer', 'icon-vellum-multi-choice']
             ]
         },
 
         {
             group: ['int', 'Number', 'icon-vellum-numeric'],
             questions: [
-                ['int', 'Integer', null],
+                ['int', 'Integer', 'icon-vellum-numeric'],
                 ['phonenumber', 'Phone Number or Numeric ID', null],
-                ['double', 'Decimal', null],
-                ['long', 'Long', null]
+                ['double', 'Decimal', 'icon-vellum-numeric'],
+                ['long', 'Long', 'icon-vellum-numeric']
             ]
         },
         {
@@ -139,7 +139,7 @@ formdesigner.util = (function(){
         return "fd-question-group-" + slug;
     };
 
-    that.getQuestionTypeToGroup = function () {
+    var getQuestionTypeToGroup = function () {
         var groups = {};
         _.each(that.QUESTION_GROUPS, function (groupData) {
             var groupSlug = groupData.group[0],
@@ -151,7 +151,7 @@ formdesigner.util = (function(){
         return groups;
     };
 
-    that.QUESTION_TYPE_TO_GROUP = that.getQuestionTypeToGroup();
+    that.QUESTION_TYPE_TO_GROUP = getQuestionTypeToGroup();
     
     // keep questions from showing up in the dropdown list here
     that.UNEDITABLE_QUESTIONS = ["unknown", "item"];
