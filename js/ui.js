@@ -306,10 +306,7 @@ formdesigner.ui = function () {
                     "valid_children" : questionTypes
                 },
                 "question" : {
-                    "icon": {
-                        "image" : jquery_icon_url,
-                        "position": "-128px -96px"
-                    },
+
                     "valid_children" : "none"
                 },
                 "phonenumber": {
@@ -1715,6 +1712,10 @@ formdesigner.ui = function () {
             that.resetQuestionTypeGroups();
         }).bind("deselect_node.jstree", function (e, data) {
             that.resetQuestionTypeGroups();
+        }).bind('before.jstree', function (e, data) {
+            if (data.args[0] && $(data.args[0]).attr('id')) {
+                that.overrideJSTreeIcon($(data.args[0]).attr('id'));
+            }
         });
 
         $("#fd-expand-all").click(function() {
@@ -1724,7 +1725,19 @@ formdesigner.ui = function () {
         $("#fd-collapse-all").click(function() {
             that.questionTree.jstree("close_all");
         });
-    }
+    };
+
+    that.overrideJSTreeIcon = function (node_id) {
+        var $questionNode = $('#'+node_id),
+            mugType = formdesigner.controller.getMTFromFormByUFID(node_id);
+        if ($questionNode.find('> a > i').length == 0 && mugType) {
+            if (mugType.typeSlug == 'int') {
+               $questionNode.find('> a > ins').after('<i class="icon-vellum-numeric"></i>');
+            } else {
+                $questionNode.find('> a > ins').after('<i class="icon-vellum-text"></i>');
+            }
+        }
+    };
 
     that.getJSTree = function () {
         return that.questionTree;
