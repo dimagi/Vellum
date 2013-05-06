@@ -206,7 +206,7 @@ formdesigner.ui = function () {
                         $qType = $(this).parent();
 
                     if($qType.hasClass('disabled')) {
-                        qLabel = qLabel + " (add "+$qType.prev().find('span').data('qlabel')+" first)";
+                        qLabel = qLabel + " (add " + $($qType.parent().find('.btn:first-child span')).data('qlabel') + " first)";
                     } else {
                         qLabel = "Add " + qLabel;
                     }
