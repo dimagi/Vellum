@@ -1730,12 +1730,12 @@ formdesigner.ui = function () {
     that.overrideJSTreeIcon = function (node_id) {
         var $questionNode = $('#'+node_id),
             mugType = formdesigner.controller.getMTFromFormByUFID(node_id);
-        if ($questionNode.find('> a > i').length == 0 && mugType) {
+        if ($questionNode.find('> a > ins').attr('class') == 'jstree-icon' && mugType) {
             var iconClass = formdesigner.util.QUESTION_TYPE_TO_ICONS[mugType.typeSlug];
             if (!iconClass) {
                 iconClass = 'icon-circle';
             }
-            $questionNode.find('> a > ins').after('<i class="' + iconClass + '"></i>&nbsp;');
+            $questionNode.find('> a > ins').addClass(iconClass);
         }
     };
 
