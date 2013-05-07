@@ -85,7 +85,6 @@ formdesigner.util = (function(){
                 ['select', 'Multiple Answer', 'icon-vellum-multi-select']
             ]
         },
-
         {
             group: ['int', 'Number', 'icon-vellum-numeric'],
             questions: [
@@ -158,11 +157,9 @@ formdesigner.util = (function(){
         _.each(that.QUESTION_GROUPS, function (groupData) {
             var allQuestions = _.union(groupData.questions, groupData.related || []);
              _.each(allQuestions, function (q) {
-                 console.log(q);
                  typeToIcons[q[0]] = q[2];
             });
         });
-        console.log(typeToIcons);
         return typeToIcons;
     };
 
