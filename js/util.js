@@ -76,13 +76,13 @@ formdesigner.util = (function(){
             ]
         },
         {
-            group: ['1select', 'Multiple Choice', 'icon-vellum-multi-choice'],
+            group: ['1select', 'Multiple Choice', 'icon-vellum-single-select'],
             related: [
                 ['item', 'Choice', 'icon-circle-blank']
             ],
             questions: [
-                ['1select', 'Single Answer', 'icon-vellum-multi-choice'],
-                ['select', 'Multiple Answer', 'icon-vellum-multi-choice']
+                ['1select', 'Single Answer', 'icon-vellum-single-select'],
+                ['select', 'Multiple Answer', 'icon-vellum-multi-select']
             ]
         },
 
@@ -90,9 +90,9 @@ formdesigner.util = (function(){
             group: ['int', 'Number', 'icon-vellum-numeric'],
             questions: [
                 ['int', 'Integer', 'icon-vellum-numeric'],
-                ['phonenumber', 'Phone Number or Numeric ID', 'icon-phone'],
-                ['double', 'Decimal', 'icon-vellum-numeric'],
-                ['long', 'Long', 'icon-vellum-numeric']
+                ['phonenumber', 'Phone Number or Numeric ID', 'icon-signal'],
+                ['double', 'Decimal', 'icon-vellum-decimal'],
+                ['long', 'Long', 'icon-vellum-long']
             ]
         },
         {
@@ -100,7 +100,7 @@ formdesigner.util = (function(){
             questions: [
                 ['date', 'Date', 'icon-calendar'],
                 ['time', 'Time', 'icon-time'],
-                ['datetime', 'Date and Time', 'icon-calendar']
+                ['datetime', 'Date and Time', 'icon-vellum-datetime']
             ]
         },
         {
@@ -121,7 +121,7 @@ formdesigner.util = (function(){
             group: ['image', 'Multimedia Capture', 'icon-camera'],
             questions: [
                 ['image', 'Image Capture', 'icon-camera'],
-                ['audio', 'Audio Capture', 'icon-bullhorn'],
+                ['audio', 'Audio Capture', 'icon-vellum-audio-capture'],
                 ['video', 'Video Capture', 'icon-facetime-video']
             ]
         },
