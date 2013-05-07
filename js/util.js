@@ -72,7 +72,7 @@ formdesigner.util = (function(){
             group: ['text', 'Text', 'icon-vellum-text'],  // [<default_slug>, <title>, <icon-class>]
             questions: [
                 ['text', 'Text Question', 'icon-vellum-text'],  // [<slug>, <title>, <icon-class>]
-                ['trigger', 'Label', null]
+                ['trigger', 'Label', 'icon-tag']
             ]
         },
         {
@@ -90,7 +90,7 @@ formdesigner.util = (function(){
             group: ['int', 'Number', 'icon-vellum-numeric'],
             questions: [
                 ['int', 'Integer', 'icon-vellum-numeric'],
-                ['phonenumber', 'Phone Number or Numeric ID', null],
+                ['phonenumber', 'Phone Number or Numeric ID', 'icon-phone'],
                 ['double', 'Decimal', 'icon-vellum-numeric'],
                 ['long', 'Long', 'icon-vellum-numeric']
             ]
@@ -98,39 +98,39 @@ formdesigner.util = (function(){
         {
             group: ['date', 'Date', 'icon-calendar'],
             questions: [
-                ['date', 'Date', null],
-                ['time', 'Time', null],
-                ['datetime', 'Date and Time', null]
+                ['date', 'Date', 'icon-calendar'],
+                ['time', 'Time', 'icon-time'],
+                ['datetime', 'Date and Time', 'icon-calendar']
             ]
         },
         {
             group: ['datanode', 'Hidden Value', 'icon-vellum-variable'],
             showDropdown: false,
             questions: [
-                ['datanode', 'Hidden Value', null]
+                ['datanode', 'Hidden Value', 'icon-vellum-variable']
             ]
         },
         {
             group: ['group', 'Groups', 'icon-folder-open'],
             questions: [
-                ['group', 'Group', null],
-                ['repeat', 'Repeat Group', null]
+                ['group', 'Group', 'icon-folder-open'],
+                ['repeat', 'Repeat Group', 'icon-retweet']
             ]
         },
         {
             group: ['image', 'Multimedia Capture', 'icon-camera'],
             questions: [
-                ['image', 'Image Capture', null],
-                ['audio', 'Audio Capture', null],
-                ['video', 'Video Capture', null]
+                ['image', 'Image Capture', 'icon-camera'],
+                ['audio', 'Audio Capture', 'icon-bullhorn'],
+                ['video', 'Video Capture', 'icon-facetime-video']
             ]
         },
         {
             group: ['geopoint', 'Advanced', 'icon-map-marker'],
             questions: [
-                ['geopoint', 'GPS', null],
-                ['barcode', 'Barcode Scan', null],
-                ['secret', 'Password', null]
+                ['geopoint', 'GPS', 'icon-map-marker'],
+                ['barcode', 'Barcode Scan', 'icon-barcode'],
+                ['secret', 'Password', 'icon-key']
             ]
         }
     ];
@@ -152,6 +152,21 @@ formdesigner.util = (function(){
     };
 
     that.QUESTION_TYPE_TO_GROUP = getQuestionTypeToGroup();
+
+    var getQuestionTypeToIcon = function () {
+        var typeToIcons = {};
+        _.each(that.QUESTION_GROUPS, function (groupData) {
+            var allQuestions = _.union(groupData.questions, groupData.related || []);
+             _.each(allQuestions, function (q) {
+                 console.log(q);
+                 typeToIcons[q[0]] = q[2];
+            });
+        });
+        console.log(typeToIcons);
+        return typeToIcons;
+    };
+
+    that.QUESTION_TYPE_TO_ICONS = getQuestionTypeToIcon();
     
     // keep questions from showing up in the dropdown list here
     that.UNEDITABLE_QUESTIONS = ["unknown", "item"];

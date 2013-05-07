@@ -1731,11 +1731,11 @@ formdesigner.ui = function () {
         var $questionNode = $('#'+node_id),
             mugType = formdesigner.controller.getMTFromFormByUFID(node_id);
         if ($questionNode.find('> a > i').length == 0 && mugType) {
-            if (mugType.typeSlug == 'int') {
-               $questionNode.find('> a > ins').after('<i class="icon-vellum-numeric"></i>');
-            } else {
-                $questionNode.find('> a > ins').after('<i class="icon-vellum-text"></i>');
+            var iconClass = formdesigner.util.QUESTION_TYPE_TO_ICONS[mugType.typeSlug];
+            if (!iconClass) {
+                iconClass = 'icon-circle';
             }
+            $questionNode.find('> a > ins').after('<i class="' + iconClass + '"></i>&nbsp;');
         }
     };
 
