@@ -1,25 +1,23 @@
 <div id="fd-ui-container">
     <div id="fd-messages"></div>
-    <div id="fd-save-button"></div>
-    <ul class="nav nav-tabs fd-nav">
-        <li class="active"><a href="#">Form</a></li>
-        <li class="dropdown">
-            <a class="dropdown-toggle" data-toggle="dropdown" href="#">
-                <i class="icon-wrench"></i>
-                Tools
-                <b class="caret"></b>
-              </a>
-            <ul class="dropdown-menu">
-                <li><a id="fd-load-xls-button" tabindex="-1" href="#">Edit Bulk Translations</a></li>
-                <li><a id="fd-export-xls-button" tabindex="-1" href="#">Export Form Contents</a></li>
-                <li><a id="fd-editsource-button" tabindex="-1" href="#">Edit Source XML</a></li>
-                <li>
-                    <a tabindex="-1" href="#fd-form-opts" data-toggle="modal">Form Properties</a>
-                </li>
-            </ul>
-        </li>
-    </ul>
     <div id="fd-toolbar" class="fd-toolbar">
+        <div id="fd-form-actions" class="pull-right">
+            <div class="btn-group">
+                <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+                    <i class="icon-wrench"></i> Tools
+                    <span class="caret"></span>
+                </a>
+                <ul class="dropdown-menu">
+                    <li><a id="fd-load-xls-button" tabindex="-1" href="#">Edit Bulk Translations</a></li>
+                    <li><a id="fd-export-xls-button" tabindex="-1" href="#">Export Form Contents</a></li>
+                    <li><a id="fd-editsource-button" tabindex="-1" href="#">Edit Source XML</a></li>
+                    <li>
+                        <a tabindex="-1" href="#fd-form-opts" data-toggle="modal">Form Properties</a>
+                    </li>
+                </ul>
+            </div>
+            <div id="fd-save-button"></div>
+        </div>
         <div id="fd-container-question-type-group"></div>
     </div>
     <div id="fd-question-tree-container" class="fd-tree">

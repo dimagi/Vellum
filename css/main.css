@@ -228,9 +228,6 @@
   vertical-align: middle;
   width: 200px;
 }
-#formdesigner #fd-save-button {
-  float: right;
-}
 #formdesigner #fd-question-properties ul li:hover {
   background: #f0f8ff;
 }
