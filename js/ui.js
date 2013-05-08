@@ -132,7 +132,7 @@ formdesigner.ui = function () {
 
     that.getQuestionTypeSelector = function () {
         // the question type selector inside the question form itself
-        var select = $('<select data-bar="foo" />');
+        var select = $('<select/>');
         
         function makeOptionItem(idTag, attrvalue, label) {
            var opt = $('<option />')
@@ -1718,9 +1718,17 @@ formdesigner.ui = function () {
         }).bind("deselect_node.jstree", function (e, data) {
             that.resetQuestionTypeGroups();
         }).bind('before.jstree', function (e, data) {
-            if (data.args[0] && $(data.args[0]).attr('id')) {
-                that.overrideJSTreeIcon($(data.args[0]).attr('id'));
+            var nodeId, qtype;
+            if (data.func == 'is_selected' || data.func == 'get_text') {
+                nodeId = $(data.args[0]).attr('id');
+            } else if (data.func == 'set_type') {
+                qtype = data.args[2];
+                nodeId = data.args[1].replace('#', '');
             }
+            if (nodeId) {
+                that.overrideJSTreeIcon(nodeId, qtype);
+            }
+
         });
 
         $("#fd-expand-all").click(function() {
@@ -1732,15 +1740,19 @@ formdesigner.ui = function () {
         });
     };
 
-    that.overrideJSTreeIcon = function (node_id) {
+    that.overrideJSTreeIcon = function (node_id, qtype) {
         var $questionNode = $('#'+node_id),
+            iconClass,
             mugType = formdesigner.controller.getMTFromFormByUFID(node_id);
-        if ($questionNode.find('> a > ins').attr('class') == 'jstree-icon' && mugType) {
-            var iconClass = formdesigner.util.QUESTION_TYPE_TO_ICONS[mugType.typeSlug];
-            if (!iconClass) {
-                iconClass = 'icon-circle';
-            }
-            $questionNode.find('> a > ins').addClass(iconClass);
+        if (!qtype && mugType) {
+            qtype = mugType.typeSlug;
+        }
+        iconClass = formdesigner.util.QUESTION_TYPE_TO_ICONS[qtype];
+        if (!iconClass) {
+            iconClass = 'icon-circle';
+        }
+        if (!$questionNode.find('> a > ins').hasClass(iconClass)) {
+            $questionNode.find('> a > ins').attr('class', 'jstree-icon').addClass(iconClass);
         }
     };
 
