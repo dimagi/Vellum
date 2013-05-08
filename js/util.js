@@ -125,7 +125,8 @@ formdesigner.util = (function(){
             ]
         },
         {
-            group: ['geopoint', 'Advanced', 'icon-map-marker'],
+            group: ['geopoint', 'Advanced', ''],
+            textOnly: true,
             questions: [
                 ['geopoint', 'GPS', 'icon-map-marker'],
                 ['barcode', 'Barcode Scan', 'icon-barcode'],

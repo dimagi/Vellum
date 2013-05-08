@@ -68,7 +68,8 @@
 </div>
 
 <script type="text/template" id="fd-question-type-group-template">
-    <div id="<%= groupID %>" class="btn-group fd-question-type-group">
+    <div id="<%= groupID %>" class="btn-group fd-question-type-group <% if (textOnly) { %>fd-question-type-group-advanced<% } %>">
+        <% if (!textOnly) { %>
         <a class="btn btn-large fd-question-type fd-question-type-default"
            data-qtype="<%= defaultQuestion.slug %>"
            href="#">
@@ -76,11 +77,13 @@
                 <i class="<%= defaultQuestion.icon %>"></i>
             </span>
         </a>
+        <% } %>
         <% if (showDropdown) { %>
-        <a class="btn btn-large dropdown-toggle" data-toggle="dropdown" href="#"><span class="caret"></span></a>
+        <a class="btn btn-large dropdown-toggle" data-toggle="dropdown" href="#"><% if (textOnly) { %>
+            <i class="<%= defaultQuestion.icon %>"></i> <%= defaultQuestion.title %>
+            <% } %><span class="caret"></span></a>
         <ul class="dropdown-menu">
-            <% for (var q=0; q < questions.length; q++) {
-                var question = questions[q]; %>
+            <% _.each(questions, function (question) { %>
             <li>
                 <a class="fd-question-type"
                    data-qtype="<%= question.slug %>"
@@ -88,7 +91,7 @@
                     <% if (question.icon) { %><i class="<%= question.icon %>"></i><% } %> <%= question.title %>
                 </a>
             </li>
-            <% } %>
+            <% }); %>
         </ul>
         <% } %>
         <% _.each(relatedQuestions, function (related) { %>

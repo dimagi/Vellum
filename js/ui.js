@@ -163,6 +163,7 @@ formdesigner.ui = function () {
         self.groupData = groupData;
         self.questionTypeTemplate = "fd-question-type-group-template";
         self.showDropdown = true;
+        self.textOnly = false;
         self.relatedQuestions = [];
 
         self.init = function () {
@@ -173,6 +174,9 @@ formdesigner.ui = function () {
             }
             if ('related' in self.groupData) {
                 self.relatedQuestions = _.map(self.groupData.related, self.makeQuestion);
+            }
+            if ('textOnly' in self.groupData) {
+                self.textOnly = self.groupData.textOnly;
             }
             self.questions = _.map(self.groupData.questions, self.makeQuestion);
         };
@@ -186,6 +190,7 @@ formdesigner.ui = function () {
             return _.template($template.text(), {
                 groupID: self.groupID,
                 showDropdown: self.showDropdown,
+                textOnly: self.textOnly,
                 relatedQuestions: self.relatedQuestions,
                 defaultQuestion: self.defaultQuestion,
                 questions: self.questions
