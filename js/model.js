@@ -597,16 +597,13 @@ formdesigner.model = function () {
             controlBlock = mug.properties.controlElement.properties;
             hasLabel = Boolean(controlBlock.label);
             var itextBlock = mugType.getItext();
-            hasLabelItextID = Boolean(itextBlock && itextBlock.id);
-            
-            if (hasLabelItextID) {
-                if (!that.isValidAttributeValue(itextBlock.id)) {
-                    return itextBlock.id + " is not a valid ID";
-                }
-                hasItext = itextBlock.hasHumanReadableItext();
-            } else {
-                hasItext = false;
+            hasLabelItextID = itextBlock && (typeof itextBlock.id !== "undefined");
+
+            if (hasLabelItextID && !that.isValidAttributeValue(itextBlock.id)) {
+                return itextBlock.id + " is not a valid Itext ID";
             }
+            hasItext = itextBlock && itextBlock.hasHumanReadableItext();
+            
             if (hasLabel) {
                 return 'pass';
             } else if (!hasLabel && !hasItext && (mugType.properties.controlElement.label.presence === 'optional' || 
@@ -1511,7 +1508,7 @@ formdesigner.model = function () {
             uiType: 'droppable-text',
         };
         mType.properties.controlElement.no_add_remove = {
-            lstring: 'Allow Repeat Add and Remove?',
+            lstring: 'Disallow Repeat Add and Remove?',
             visibility: 'visible',
             editable: 'w',
             presence: 'optional',
