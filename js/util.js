@@ -95,7 +95,7 @@ formdesigner.util = (function(){
      * @param el - jquery selector or string used in the selector pointing to a DOM element.
      */
     var xmls = new XMLSerializer();
-    function getXLabelValue (el){
+    that.getXLabelValue = function(el){
         var resStr, resEl;
         function getEndTag (str) {
             var res, reo, last;
@@ -125,9 +125,12 @@ formdesigner.util = (function(){
         if(!resEl) { return; }
         resStr = xmls.serializeToString(resEl);
         resStr = resStr.replace(getStartTag(resStr),'').replace(getEndTag(resStr),'');
+        
+        // XMLSerializer unescapes escaped carriage returns
+        resStr = resStr.replace(String.fromCharCode(10), '&#10;');
+
         return resStr;
     }
-    that.getXLabelValue = getXLabelValue;
 
     var dumpFormTreesToConsole = function () {
         var vObj = [], vOut = [], i, invalidMT = [], mt;
