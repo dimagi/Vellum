@@ -297,17 +297,9 @@ formdesigner.ui = function () {
             "valid_children" : allTypes,  // valid root node types (aka children of the root node)
             "types" : {
                 "group" : {
-                    "icon": {
-                        "image" : jquery_icon_url,
-                        "position": "-16px -96px"
-                    },
                     "valid_children" : questionTypes
                 },
                 "repeat" : {
-                    "icon": {
-                        "image" : jquery_icon_url,
-                        "position": "-64px -80px"
-                    },
                     "valid_children" : questionTypes
                 },
                 "question" : {
@@ -315,129 +307,57 @@ formdesigner.ui = function () {
                     "valid_children" : "none"
                 },
                 "phonenumber": {
-                    "icon": {
-                        "image": jquery_icon_url,
-                        "position": "-32px -176px"
-                    },
                     "valid_children" : "none"
                 },
                 "date" : {
-                    "icon": {
-                        "image" : jquery_icon_url,
-                        "position": "-32px -112px"
-                    },
                     "valid_children" : "none"
                 },
                 "datetime" : {
-                    "icon": {
-                        "image" : jquery_icon_url,
-                        "position": "-80px -112px"
-                    },
                     "valid_children" : "none"
                 },
                 "time" : {
-                    "icon": {
-                        "image" : jquery_icon_url,
-                        "position": "-80px -112px"
-                    },
                     "valid_children" : "none"
                 },
                 "int" : {
-                    "icon": {
-                        "image" : jquery_icon_url,
-                        "position": "-112px -112px"
-                    },
                     "valid_children" : "none"
                 },
                 "long" : {
-                    "icon": {
-                        "image" : jquery_icon_url,
-                        "position": "-112px -112px"
-                    },
                     "valid_children" : "none"
                 },
                 "double" : {
-                    "icon": {
-                        "image" : jquery_icon_url,
-                        "position": "-112px -112px"
-                    },
                     "valid_children" : "none"
                 },
                 "selectQuestion" : {
-                    "icon": {
-                        "image" : jquery_icon_url,
-                        "position": "-96px -176px"
-                    },
                     "valid_children": ["item"]
                 },
                 "item" : {
-                    "icon": {
-                        "image" : jquery_icon_url,
-                        "position": "-48px -128px"
-                    },
                     "valid_children" : "none"
                 },
                 "trigger" : {
-                    "icon": {
-                        "image" : jquery_icon_url,
-                        "position": "-16px -144px"
-                    },
                     "valid_children" : "none"
                 },
                 "secret" : {
-                    "icon": {
-                        "image": jquery_icon_url,
-                        "position": "-112px -128px"
-                    },
                     "valid_children" : "none"
                 },
                 "barcode" : {
-                    "icon": {
-                        "image": jquery_icon_url,
-                        "position": "-48px -224px"
-                    },
                     "valid_children" : "none"
                 },
                 "geopoint" : {
-                    "icon": {
-                        "image": jquery_icon_url,
-                        "position": "-16px -176px"
-                    },
                     "valid_children" : "none"
                 },
                 "image" : {
-                    "icon": {
-                        "image": jquery_icon_url,
-                        "position": "-208px -128px"
-                    },
                     "valid_children" : "none"
                 },
                 "audio" : {
-                    "icon": {
-                        "image": jquery_icon_url,
-                        "position": "-144px -160px"
-                    },
                     "valid_children" : "none"
                 },
                 "video" : {
-                    "icon": {
-                        "image": jquery_icon_url,
-                        "position": "-224px -128px"
-                    },
                     "valid_children" : "none"
                 },
                 "datanode" : {
-                    "icon": {
-                        "image": jquery_icon_url,
-                        "position": "-112px -144px"
-                    },
                     "valid_children" : "none"
                 },
                 "unknown" : {
-                    "icon": {
-                        "image": jquery_icon_url,
-                        "position": "-240px -128px"
-                    }
                 },
                 "default" : {
                     "valid_children" : questionTypes
