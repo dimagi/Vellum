@@ -1632,7 +1632,8 @@ formdesigner.ui = function () {
         }).bind("deselect_node.jstree", function (e, data) {
             that.resetQuestionTypeGroups();
         }).bind('before.jstree', function (e, data) {
-            var nodeId, qtype;
+            var nodeId,
+                qtype;
             if (data.func == 'is_selected' || data.func == 'get_text') {
                 nodeId = $(data.args[0]).attr('id');
             } else if (data.func == 'set_type') {

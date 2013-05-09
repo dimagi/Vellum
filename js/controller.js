@@ -810,8 +810,10 @@ formdesigner.controller = (function () {
             // update UI
             that.form.fire({ 
                 type: "form-property-changed"
-            }); 
-        } 
+            });
+        } else {
+            formdesigner.ui.overrideJSTreeIcon(mugType.ufid, questionType);
+        }
     };
 
     that.loadMugTypeIntoUI = function (mugType) {
