@@ -1949,8 +1949,10 @@ formdesigner.controller = (function () {
             ];
             extraHeadTags.map(function (tag) {
                 var found = head.children(tag);
-                if (found.length) {
-                    that.form.extraHeadNodes.push(found[0]);
+                for (var i = 0; i < found.length; i++) {
+                    if (found.length) {
+                        that.form.extraHeadNodes.push(found[i]);
+                    }
                 }
             });
 
