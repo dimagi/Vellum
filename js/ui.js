@@ -289,8 +289,7 @@ formdesigner.ui = function () {
             "audio",
             "video"
         ],
-            allTypes = questionTypes.concat(["datanode"]),
-            jquery_icon_url = formdesigner.iconUrl;
+            allTypes = questionTypes.concat(["datanode"]);
 
         return {
             "max_children" : -1,
@@ -1746,8 +1745,6 @@ formdesigner.launch = function (opts) {
     formdesigner.patchUrl = opts.patchUrl;
     formdesigner.loadMe = opts.form;
     formdesigner.originalXForm = opts.form;
-    
-    formdesigner.iconUrl = opts.iconUrl ? opts.iconUrl : "css/smoothness/images/ui-icons_888888_256x240.png";
 
     //if Languages are provided as launch arguments, do not allow adding/removing additional languages.
     opts.allowLanguageEdits = !(opts["langs"] && opts["langs"].length > 0 && opts["langs"][0] !== "");
