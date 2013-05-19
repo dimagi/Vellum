@@ -221,9 +221,12 @@ formdesigner.ui = function () {
         };
     };
 
-    that.activateQuestionTypeGroup = function (slug) {
-        var $questionGroup = $('#' + formdesigner.util.getQuestionTypeGroupID(slug));
-        $questionGroup.find('.fd-question-type-related').removeClass('disabled');
+    that.activateQuestionTypeGroup = function (qytpe) {
+        var groupSlug = formdesigner.util.QUESTION_TYPE_TO_GROUP[qytpe];
+        if (groupSlug) {
+            var $questionGroup = $('#' + formdesigner.util.getQuestionTypeGroupID(groupSlug));
+            $questionGroup.find('.fd-question-type-related').removeClass('disabled');
+        }
     };
 
     that.resetQuestionTypeGroups = function () {
@@ -363,7 +366,7 @@ formdesigner.ui = function () {
                 }
             }
         };
-    };
+    }
 
     that.showVisualValidation = function (mugType) {
         function setValidationFailedIcon(li, showIcon, message) {
@@ -508,10 +511,7 @@ formdesigner.ui = function () {
         typeSlug = mugType.typeSlug;
         // First neutralize all the existing buttons.
         that.resetQuestionTypeGroups();
-        var groupSlug = formdesigner.util.QUESTION_TYPE_TO_GROUP[typeSlug];
-        if (groupSlug) {
-            that.activateQuestionTypeGroup(groupSlug);
-        }
+        that.activateQuestionTypeGroup(typeSlug);
     };
 
     /**
@@ -1668,6 +1668,8 @@ formdesigner.ui = function () {
         if (!$questionNode.find('> a > ins').hasClass(iconClass)) {
             $questionNode.find('> a > ins').attr('class', 'jstree-icon').addClass(iconClass);
         }
+        that.resetQuestionTypeGroups();
+        that.activateQuestionTypeGroup(qtype);
     };
 
     that.getJSTree = function () {
