@@ -30,7 +30,6 @@ Form Options:
 * saveUrl : "URL that the FD should post saved forms to",
 * [form] : "string of the xml form that you wish to load"
 * [formName] : "Default Form Name"
-* iconUrl: URL pointing to jquery-ui icons.png
 
 Contributing
 ------------

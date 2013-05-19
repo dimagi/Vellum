@@ -1,20 +1,24 @@
 <div id="fd-ui-container">
     <div id="fd-messages"></div>
     <div id="fd-toolbar" class="fd-toolbar">
-        <div class="btn-group">
-            <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
-                Advanced
-                <span class="caret"></span>
-            </a>
-            <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
-                <li><a id="fd-load-xls-button" tabindex="-1" href="#">Edit Bulk Translations</a></li>
-                <li><a id="fd-export-xls-button" tabindex="-1" href="#">Export Form Contents</a></li>
-                <li><a id="fd-editsource-button" tabindex="-1" href="#">Edit Source XML</a></li>
-                <li>
-                    <a tabindex="-1" href="#fd-form-opts" data-toggle="modal">Form Properties</a>
-                </li>
-            </ul>
+        <div id="fd-form-actions" class="pull-right">
+            <div class="btn-group">
+                <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+                    <i class="icon-wrench"></i> Tools
+                    <span class="caret"></span>
+                </a>
+                <ul class="dropdown-menu">
+                    <li><a id="fd-load-xls-button" tabindex="-1" href="#">Edit Bulk Translations</a></li>
+                    <li><a id="fd-export-xls-button" tabindex="-1" href="#">Export Form Contents</a></li>
+                    <li><a id="fd-editsource-button" tabindex="-1" href="#">Edit Source XML</a></li>
+                    <li>
+                        <a tabindex="-1" href="#fd-form-opts" data-toggle="modal">Form Properties</a>
+                    </li>
+                </ul>
+            </div>
+            <div id="fd-save-button"></div>
         </div>
+        <div id="fd-container-question-type-group"></div>
     </div>
     <div id="fd-question-tree-container" class="fd-tree">
         <div id="fd-question-tree-head" class="fd-head ui-widget-header">Question Tree</div>
@@ -63,3 +67,41 @@
 
 </div>
 
+<script type="text/template" id="fd-question-type-group-template">
+    <div id="<%= groupID %>" class="btn-group fd-question-type-group <% if (textOnly) { %>fd-question-type-group-advanced<% } %>">
+        <% if (!textOnly) { %>
+        <a class="btn btn-large fd-question-type fd-question-type-default"
+           data-qtype="<%= defaultQuestion.slug %>"
+           href="#">
+            <span data-qlabel="<%= defaultQuestion.title %>">
+                <i class="<%= defaultQuestion.icon %>"></i>
+            </span>
+        </a>
+        <% } %>
+        <% if (showDropdown) { %>
+        <a class="btn btn-large dropdown-toggle" data-toggle="dropdown" href="#"><% if (textOnly) { %>
+            <i class="<%= defaultQuestion.icon %>"></i> <%= defaultQuestion.title %>
+            <% } %><span class="caret"></span></a>
+        <ul class="dropdown-menu">
+            <% _.each(questions, function (question) { %>
+            <li>
+                <a class="fd-question-type"
+                   data-qtype="<%= question.slug %>"
+                   href="#">
+                    <% if (question.icon) { %><i class="<%= question.icon %>"></i><% } %> <%= question.title %>
+                </a>
+            </li>
+            <% }); %>
+        </ul>
+        <% } %>
+        <% _.each(relatedQuestions, function (related) { %>
+        <a class="btn btn-large fd-question-type fd-question-type-related disabled"
+           data-qtype="<%= related.slug %>"
+           href="#">
+            <span data-qlabel="<%= related.title %>">
+                <i class="<%= related.icon %>"></i>
+            </span>
+        </a>
+        <% }); %>
+    </div>
+</script>

@@ -803,14 +803,17 @@ formdesigner.controller = (function () {
 
             formdesigner.ui.jstree("set_type", 
                 that.getJSTreeTypeFromMugType(newMugType), 
-                '#' + mugType.ufid
+                '#' + mugType.ufid,
+                questionType
             );
             
             // update UI
             that.form.fire({ 
                 type: "form-property-changed"
-            }); 
-        } 
+            });
+        } else {
+            formdesigner.ui.overrideJSTreeIcon(mugType.ufid, questionType);
+        }
     };
 
     that.loadMugTypeIntoUI = function (mugType) {
