@@ -119,9 +119,7 @@ formdesigner.ui = function () {
     
     that.addQuestion = function (qType) {
         var newMug = formdesigner.controller.createQuestion(qType);
-
         that.jstree('select_node', '#' + newMug.ufid, true);
-
         if (that.ODK_ONLY_QUESTION_TYPES.indexOf(qType) !== -1) { 
             //it's an ODK media question
             formdesigner.model.form.updateError(formdesigner.model.FormError({
@@ -133,7 +131,8 @@ formdesigner.ui = function () {
     };
 
     that.getQuestionTypeSelector = function () {
-        var select = $('<select />');
+        // the question type selector inside the question form itself
+        var select = $('<select/>');
         
         function makeOptionItem(idTag, attrvalue, label) {
            var opt = $('<option />')
@@ -143,7 +142,7 @@ formdesigner.ui = function () {
            return opt;
         }
         
-        var questions = formdesigner.util.getQuestionList(); 
+        var questions = formdesigner.util.getQuestionList();
         for (var i = 0; i < questions.length; i++) {
             select.append(makeOptionItem(questions[i][0], 
                                          questions[i][0], 
@@ -151,53 +150,102 @@ formdesigner.ui = function () {
         }
         return select;
     };
+
+    that.QuestionTypeButton = function (buttonSpec) {
+        var self = this;
+        self.slug = buttonSpec[0];
+        self.title = buttonSpec[1];
+        self.icon = (buttonSpec.length > 2) ? buttonSpec[2] : null;
+    };
+
+    that.QuestionTypeGroup = function (groupData) {
+        var self = this;
+        self.groupData = groupData;
+        self.questionTypeTemplate = "fd-question-type-group-template";
+        self.showDropdown = true;
+        self.textOnly = false;
+        self.relatedQuestions = [];
+
+        self.init = function () {
+            self.defaultQuestion = new formdesigner.ui.QuestionTypeButton(self.groupData.group);
+            self.groupID = formdesigner.util.getQuestionTypeGroupID(self.defaultQuestion.slug);
+            if ('showDropdown' in self.groupData) {
+                self.showDropdown = self.groupData.showDropdown;
+            }
+            if ('related' in self.groupData) {
+                self.relatedQuestions = _.map(self.groupData.related, self.makeQuestion);
+            }
+            if ('textOnly' in self.groupData) {
+                self.textOnly = self.groupData.textOnly;
+            }
+            self.questions = _.map(self.groupData.questions, self.makeQuestion);
+        };
+
+        self.makeQuestion = function (questionSpec) {
+            return new formdesigner.ui.QuestionTypeButton(questionSpec);
+        };
+
+        self.getFormattedTemplate = function () {
+            var $template = $('#'+self.questionTypeTemplate);
+            return _.template($template.text(), {
+                groupID: self.groupID,
+                showDropdown: self.showDropdown,
+                textOnly: self.textOnly,
+                relatedQuestions: self.relatedQuestions,
+                defaultQuestion: self.defaultQuestion,
+                questions: self.questions
+            });
+        };
+
+        self.activateGroup = function () {
+            var $questionGroup = $('#'+self.groupID);
+            $questionGroup.find('.fd-question-type').click(function (event) {
+                if (!$(this).hasClass('disabled')) {
+                    that.addQuestion($(this).data('qtype'));
+                }
+                event.preventDefault();
+            });
+            $questionGroup.find('.btn.fd-question-type > span').tooltip({
+                title: function () {
+                    var qLabel = $(this).data('qlabel'),
+                        $qType = $(this).parent();
+
+                    if($qType.hasClass('disabled')) {
+                        qLabel = qLabel + " (add " + $($qType.parent().find('.btn:first-child span')).data('qlabel') + " first)";
+                    } else {
+                        qLabel = "Add " + qLabel;
+                    }
+                    return qLabel;
+                }
+            });
+        };
+    };
+
+    that.activateQuestionTypeGroup = function (qytpe) {
+        var groupSlug = formdesigner.util.QUESTION_TYPE_TO_GROUP[qytpe];
+        if (groupSlug) {
+            var $questionGroup = $('#' + formdesigner.util.getQuestionTypeGroupID(groupSlug));
+            $questionGroup.find('.fd-question-type-related').removeClass('disabled');
+        }
+    };
+
+    that.resetQuestionTypeGroups = function () {
+        var $questionGroupContainer = $('#fd-container-question-type-group');
+        $questionGroupContainer.find('.fd-question-type-related').addClass('disabled');
+    };
     
     function init_toolbar() {
-        var toolbar = $(".fd-toolbar"), select, addbut;
-        select = $('<select></select>')
-                .attr('id','fd-question-select');
-        toolbar.prepend(select);
 
-        function buildSelectDropDown () {
-            function makeOptionItem(idTag, attrvalue, label) {
-               var opt = $('<option></option>')
-                       .attr('id','fd-add-'+idTag+'-button')
-                       .attr('value',attrvalue)
-                       .addClass("questionButton")
-                       .addClass("toolbarButton")
-                       .text(label);
-               return opt;
-            }
+        var toolbar = $(".fd-toolbar");
 
-            var i;
-            var questions = formdesigner.util.getQuestionList();
-            for (i = 0; i < questions.length; i++) {
-                select.append(makeOptionItem(questions[i][0], 
-                                             questions[i][1], 
-                                             questions[i][1]));
-            }
-        }
+        var $questionGroupContainer = $('#fd-container-question-type-group');
 
-        buildSelectDropDown();
-        select.after('<button class="btn btn-primary" id="fd-add-but">Add</button>');
-        addbut = $('#fd-add-but');
-        addbut.button({
-            icons:{
-                primary: 'ui-icon-plusthick'
-            }
+        _.each(formdesigner.util.QUESTION_GROUPS, function (groupData) {
+            var questionGroup = new formdesigner.ui.QuestionTypeGroup(groupData);
+            questionGroup.init();
+            $questionGroupContainer.append(questionGroup.getFormattedTemplate());
+            questionGroup.activateGroup();
         });
-
-        function addQuestionBySelect() {
-            var selVal, qID,qType;
-            selVal = $('#fd-question-select').val();
-            qID = $('#fd-question-select').find('[value="' + selVal + '"]').attr('id');
-            qType = qID.split('-')[2];
-            that.addQuestion(qType);
-        }
-
-        addbut.click(addQuestionBySelect);
-
-        select.chosen();
 
         //debug tools
         (function c_printDataTreeToConsole() {
@@ -214,9 +262,8 @@ formdesigner.ui = function () {
         })();
 
         (function c_saveForm() {
-            var savebut = $('<div id="fd-save-button" class="toolbarButton"/>');
-            toolbar.append(savebut);
-            formdesigner.controller.saveButton.ui.appendTo(savebut);
+            var $saveButtonContainer = $('#fd-save-button');
+            formdesigner.controller.saveButton.ui.appendTo($saveButtonContainer);
         })();
 
     }
@@ -245,165 +292,81 @@ formdesigner.ui = function () {
             "audio",
             "video"
         ],
-            allTypes = questionTypes.concat(["datanode"]),
-            jquery_icon_url = formdesigner.iconUrl;
+            allTypes = questionTypes.concat(["datanode"]);
 
         return {
             "max_children" : -1,
             "valid_children" : allTypes,  // valid root node types (aka children of the root node)
             "types" : {
                 "group" : {
-                    "icon": {
-                        "image" : jquery_icon_url,
-                        "position": "-16px -96px"
-                    },
                     "valid_children" : questionTypes
                 },
                 "repeat" : {
-                    "icon": {
-                        "image" : jquery_icon_url,
-                        "position": "-64px -80px"
-                    },
                     "valid_children" : questionTypes
                 },
                 "question" : {
-                    "icon": {
-                        "image" : jquery_icon_url,
-                        "position": "-128px -96px"
-                    },
+
                     "valid_children" : "none"
                 },
                 "phonenumber": {
-                    "icon": {
-                        "image": jquery_icon_url,
-                        "position": "-32px -176px"
-                    },
                     "valid_children" : "none"
                 },
                 "date" : {
-                    "icon": {
-                        "image" : jquery_icon_url,
-                        "position": "-32px -112px"
-                    },
                     "valid_children" : "none"
                 },
                 "datetime" : {
-                    "icon": {
-                        "image" : jquery_icon_url,
-                        "position": "-80px -112px"
-                    },
                     "valid_children" : "none"
                 },
                 "time" : {
-                    "icon": {
-                        "image" : jquery_icon_url,
-                        "position": "-80px -112px"
-                    },
                     "valid_children" : "none"
                 },
                 "int" : {
-                    "icon": {
-                        "image" : jquery_icon_url,
-                        "position": "-112px -112px"
-                    },
                     "valid_children" : "none"
                 },
                 "long" : {
-                    "icon": {
-                        "image" : jquery_icon_url,
-                        "position": "-112px -112px"
-                    },
                     "valid_children" : "none"
                 },
                 "double" : {
-                    "icon": {
-                        "image" : jquery_icon_url,
-                        "position": "-112px -112px"
-                    },
                     "valid_children" : "none"
                 },
                 "selectQuestion" : {
-                    "icon": {
-                        "image" : jquery_icon_url,
-                        "position": "-96px -176px"
-                    },
                     "valid_children": ["item"]
                 },
                 "item" : {
-                    "icon": {
-                        "image" : jquery_icon_url,
-                        "position": "-48px -128px"
-                    },
                     "valid_children" : "none"
                 },
                 "trigger" : {
-                    "icon": {
-                        "image" : jquery_icon_url,
-                        "position": "-16px -144px"
-                    },
                     "valid_children" : "none"
                 },
                 "secret" : {
-                    "icon": {
-                        "image": jquery_icon_url,
-                        "position": "-112px -128px"
-                    },
                     "valid_children" : "none"
                 },
                 "barcode" : {
-                    "icon": {
-                        "image": jquery_icon_url,
-                        "position": "-48px -224px"
-                    },
                     "valid_children" : "none"
                 },
                 "geopoint" : {
-                    "icon": {
-                        "image": jquery_icon_url,
-                        "position": "-16px -176px"
-                    },
                     "valid_children" : "none"
                 },
                 "image" : {
-                    "icon": {
-                        "image": jquery_icon_url,
-                        "position": "-208px -128px"
-                    },
                     "valid_children" : "none"
                 },
                 "audio" : {
-                    "icon": {
-                        "image": jquery_icon_url,
-                        "position": "-144px -160px"
-                    },
                     "valid_children" : "none"
                 },
                 "video" : {
-                    "icon": {
-                        "image": jquery_icon_url,
-                        "position": "-224px -128px"
-                    },
                     "valid_children" : "none"
                 },
                 "datanode" : {
-                    "icon": {
-                        "image": jquery_icon_url,
-                        "position": "-112px -144px"
-                    },
                     "valid_children" : "none"
                 },
                 "unknown" : {
-                    "icon": {
-                        "image": jquery_icon_url,
-                        "position": "-240px -128px"
-                    },
                 },
                 "default" : {
                     "valid_children" : questionTypes
                 }
             }
         };
-    };
+    }
 
     that.showVisualValidation = function (mugType) {
         function setValidationFailedIcon(li, showIcon, message) {
@@ -468,7 +431,7 @@ formdesigner.ui = function () {
             for (var i = 0; i < propsMessage.length; i++) {
 	            formdesigner.model.form.updateError(formdesigner.model.FormError({
 	                    message: propsMessage[i],
-	                    level: 'form-warning',
+	                    level: 'form-warning'
 	                }));
 	        }
 	        that.resetMessages(formdesigner.model.form.errors);
@@ -542,18 +505,13 @@ formdesigner.ui = function () {
 
         var ufid = $(data.rslt.obj[0]).prop('id'),
             mugType = formdesigner.controller.getMTFromFormByUFID(ufid),
-            tagName;
+            typeSlug;
 
         that.displayMugProperties(mugType);
-
-        if (mugType.hasControlElement()) {
-            tagName = mugType.mug.properties.controlElement.properties.tagName;
-            if (['item', 'select', 'select1'].indexOf(tagName) !== -1) {
-                that.showSelectItemAddButton();
-            } else {
-                that.hideSelectItemAddButton();
-            }
-        }
+        typeSlug = mugType.typeSlug;
+        // First neutralize all the existing buttons.
+        that.resetQuestionTypeGroups();
+        that.activateQuestionTypeGroup(typeSlug);
     };
 
     /**
@@ -602,27 +560,6 @@ formdesigner.ui = function () {
         } else {
             return false;
         }
-    };
-
-    that.showSelectItemAddButton = function () {
-        var addItemBut = $('#fd-add-item-select_ez');
-        if (addItemBut.length === 0) {
-            addItemBut = $('<button class="btn"></button>')
-                    .attr('id','fd-add-item-select_ez')
-                    .text('Add Choice');
-            addItemBut.button({
-                icons: {
-                    primary: "ui-icon-plusthick"
-                }
-            });
-            addItemBut.click(function () {that.addQuestion('item')});
-            $("#fd-add-but").after(addItemBut);
-        }
-        addItemBut.show();
-    };
-
-    that.hideSelectItemAddButton = function () {
-        $('#fd-add-item-select_ez').hide();
     };
 
     that.questionTree = null;
@@ -1690,9 +1627,22 @@ formdesigner.ui = function () {
 
             that.displayMugProperties(controller.getCurrentlySelectedMugType());
         }).bind("deselect_all.jstree", function (e, data) {
-            that.hideSelectItemAddButton();
+            that.resetQuestionTypeGroups();
         }).bind("deselect_node.jstree", function (e, data) {
-            that.hideSelectItemAddButton();
+            that.resetQuestionTypeGroups();
+        }).bind('before.jstree', function (e, data) {
+            var nodeId,
+                qtype;
+            if (data.func == 'is_selected' || data.func == 'get_text') {
+                nodeId = $(data.args[0]).attr('id');
+            } else if (data.func == 'set_type') {
+                qtype = data.args[2];
+                nodeId = data.args[1].replace('#', '');
+            }
+            if (nodeId) {
+                that.overrideJSTreeIcon(nodeId, qtype);
+            }
+
         });
 
         $("#fd-expand-all").click(function() {
@@ -1702,7 +1652,25 @@ formdesigner.ui = function () {
         $("#fd-collapse-all").click(function() {
             that.questionTree.jstree("close_all");
         });
-    }
+    };
+
+    that.overrideJSTreeIcon = function (node_id, qtype) {
+        var $questionNode = $('#'+node_id),
+            iconClass,
+            mugType = formdesigner.controller.getMTFromFormByUFID(node_id);
+        if (!qtype && mugType) {
+            qtype = mugType.typeSlug;
+        }
+        iconClass = formdesigner.util.QUESTION_TYPE_TO_ICONS[qtype];
+        if (!iconClass) {
+            iconClass = 'icon-circle';
+        }
+        if (!$questionNode.find('> a > ins').hasClass(iconClass)) {
+            $questionNode.find('> a > ins').attr('class', 'jstree-icon').addClass(iconClass);
+        }
+        that.resetQuestionTypeGroups();
+        that.activateQuestionTypeGroup(qtype);
+    };
 
     that.getJSTree = function () {
         return that.questionTree;
@@ -1779,8 +1747,6 @@ formdesigner.launch = function (opts) {
     formdesigner.patchUrl = opts.patchUrl;
     formdesigner.loadMe = opts.form;
     formdesigner.originalXForm = opts.form;
-    
-    formdesigner.iconUrl = opts.iconUrl ? opts.iconUrl : "css/smoothness/images/ui-icons_888888_256x240.png";
 
     //if Languages are provided as launch arguments, do not allow adding/removing additional languages.
     opts.allowLanguageEdits = !(opts["langs"] && opts["langs"].length > 0 && opts["langs"][0] !== "");
@@ -1815,3 +1781,6 @@ formdesigner.launch = function (opts) {
 };
 
 formdesigner.rootElement = '';
+
+
+

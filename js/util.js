@@ -41,15 +41,16 @@ formdesigner.util = (function(){
     
     
     that.QUESTIONS = {
-        //in the format: {question_slug: question_label}
-        'text': 'Text Question',
+        // in the format: {question_slug: question_label}
+        // NOTE: this will be deprecated soon
+        'text': 'Text Question', //
         'phonenumber': 'Phone Number or Numeric ID',
         'secret': 'Password Question',
         'group': 'Group',
-        'select': 'Multiple Choice (Multiple Answers)',
+        'select': 'Multiple Choice (Multiple Answers)', //
         'item': 'Choice',
-        '1select': 'Multiple Choice (Single Answer)',
-        'trigger': 'Label',
+        '1select': 'Multiple Choice (Single Answer)', //
+        'trigger': 'Label', //
         'repeat': 'Repeat',
         'barcode': 'Barcode Question',
         'geopoint': 'Geopoint Question',
@@ -65,6 +66,105 @@ formdesigner.util = (function(){
         'datanode': 'Hidden Value',
         'unknown': 'Unknown Question Type'
     };
+
+    that.QUESTION_GROUPS = [
+        {
+            group: ['text', 'Text', 'icon-vellum-text'],  // [<default_slug>, <title>, <icon-class>]
+            questions: [
+                ['text', 'Text Question', 'icon-vellum-text'],  // [<slug>, <title>, <icon-class>]
+                ['trigger', 'Label', 'icon-tag']
+            ]
+        },
+        {
+            group: ['1select', 'Multiple Choice', 'icon-vellum-single-select'],
+            related: [
+                ['item', 'Choice', 'icon-circle-blank']
+            ],
+            questions: [
+                ['1select', 'Single Answer', 'icon-vellum-single-select'],
+                ['select', 'Multiple Answer', 'icon-vellum-multi-select']
+            ]
+        },
+        {
+            group: ['int', 'Number', 'icon-vellum-numeric'],
+            questions: [
+                ['int', 'Integer', 'icon-vellum-numeric'],
+                ['phonenumber', 'Phone Number or Numeric ID', 'icon-signal'],
+                ['double', 'Decimal', 'icon-vellum-decimal'],
+                ['long', 'Long', 'icon-vellum-long']
+            ]
+        },
+        {
+            group: ['date', 'Date', 'icon-calendar'],
+            questions: [
+                ['date', 'Date', 'icon-calendar'],
+                ['time', 'Time', 'icon-time'],
+                ['datetime', 'Date and Time', 'icon-vellum-datetime']
+            ]
+        },
+        {
+            group: ['datanode', 'Hidden Value', 'icon-vellum-variable'],
+            showDropdown: false,
+            questions: [
+                ['datanode', 'Hidden Value', 'icon-vellum-variable']
+            ]
+        },
+        {
+            group: ['group', 'Groups', 'icon-folder-open'],
+            questions: [
+                ['group', 'Group', 'icon-folder-open'],
+                ['repeat', 'Repeat Group', 'icon-retweet']
+            ]
+        },
+        {
+            group: ['image', 'Multimedia Capture', 'icon-camera'],
+            questions: [
+                ['image', 'Image Capture', 'icon-camera'],
+                ['audio', 'Audio Capture', 'icon-vellum-audio-capture'],
+                ['video', 'Video Capture', 'icon-facetime-video']
+            ]
+        },
+        {
+            group: ['geopoint', 'Advanced', ''],
+            textOnly: true,
+            questions: [
+                ['geopoint', 'GPS', 'icon-map-marker'],
+                ['barcode', 'Barcode Scan', 'icon-barcode'],
+                ['secret', 'Password', 'icon-key']
+            ]
+        }
+    ];
+
+    that.getQuestionTypeGroupID = function (slug) {
+        return "fd-question-group-" + slug;
+    };
+
+    var getQuestionTypeToGroup = function () {
+        var groups = {};
+        _.each(that.QUESTION_GROUPS, function (groupData) {
+            var groupSlug = groupData.group[0],
+                allQuestions = _.union(groupData.questions, groupData.related || []);
+             _.each(allQuestions, function (q) {
+                groups[q[0]] = groupSlug;
+            });
+        });
+        return groups;
+    };
+
+    that.QUESTION_TYPE_TO_GROUP = getQuestionTypeToGroup();
+
+    var getQuestionTypeToIcon = function () {
+        var typeToIcons = {};
+        _.each(that.QUESTION_GROUPS, function (groupData) {
+            var allQuestions = _.union(groupData.questions, groupData.related || []);
+             _.each(allQuestions, function (q) {
+                 typeToIcons[q[0]] = q[2];
+            });
+        });
+        return typeToIcons;
+    };
+
+    that.QUESTION_TYPE_TO_ICONS = getQuestionTypeToIcon();
     
     // keep questions from showing up in the dropdown list here
     that.UNEDITABLE_QUESTIONS = ["unknown", "item"];

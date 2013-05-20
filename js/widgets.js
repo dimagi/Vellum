@@ -983,6 +983,8 @@ formdesigner.widgets = (function () {
         }
         return ret;
     };
+
+
     that.getMainSection = function (mugType) {
         var elements = ["dataElement/nodeID"];
         
