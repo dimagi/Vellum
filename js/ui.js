@@ -37,7 +37,7 @@ formdesigner.ui = function () {
         ERROR_MSG_DIV = '#fd-parse-error',
         FORM_WARN_DIV = '#fd-form-warn';
 
-    that.ODK_ONLY_QUESTION_TYPES = ['image','audio','video','barcode'];
+    that.ODK_ONLY_QUESTION_TYPES = ['image', 'audio', 'video', 'barcode', 'androidintent'];
     
     var initMessagesPane = function () {
         var messagesDiv = $(MESSAGES_DIV);
@@ -282,6 +282,7 @@ formdesigner.ui = function () {
             "int",
             "barcode",
             "geopoint",
+            "androidintent",
             "long",
             "double",
             "selectQuestion",
@@ -345,6 +346,9 @@ formdesigner.ui = function () {
                     "valid_children" : "none"
                 },
                 "geopoint" : {
+                    "valid_children" : "none"
+                },
+                "androidintent": {
                     "valid_children" : "none"
                 },
                 "image" : {

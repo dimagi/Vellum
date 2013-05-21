@@ -37,7 +37,7 @@ formdesigner.util = (function(){
     that.VERIFY_CODES = VERIFY_CODES;
     that.XPATH_REFERENCES = ["bindElement/relevantAttr",
                              "bindElement/calculateAttr",
-                             "bindElement/constraintAttr"]; 
+                             "bindElement/constraintAttr"];
 
     that.QUESTION_GROUPS = [
         {
@@ -102,7 +102,8 @@ formdesigner.util = (function(){
             questions: [
                 ['geopoint', 'GPS', 'icon-map-marker'],
                 ['barcode', 'Barcode Scan', 'icon-barcode'],
-                ['secret', 'Password', 'icon-key']
+                ['secret', 'Password', 'icon-key'],
+                ['androidintent', 'Android App Callout', 'icon-circle']
             ]
         }
     ];
@@ -599,7 +600,8 @@ formdesigner.util = (function(){
             'xsd:string',
             'xsd:time',
             'geopoint',
-            'barcode'
+            'barcode',
+            'androidintent'
     ];
 
     that.VALID_CONTROL_TAG_NAMES = [
@@ -638,7 +640,8 @@ formdesigner.util = (function(){
             'GPS',
             'Barcode',
             'Secret',
-            'Geopoint'
+            'Geopoint',
+            'AndroidIntent'
     ];
 
     /**

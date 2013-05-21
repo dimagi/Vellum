@@ -1331,6 +1331,20 @@ formdesigner.model = function () {
         return mType;
     };
 
+    that.mugTypeMaker.stdAndroidIntent = function () {
+        var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion),
+            mug;
+        mType.typeSlug = "androidintent";
+        mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
+        mug = that.createMugFromMugType(mType);
+        mType.mug = mug;
+        mType.mug.properties.controlElement.properties.name = "AndroidIntent";
+        mType.mug.properties.controlElement.properties.tagName = "input";
+        mType.mug.properties.bindElement.properties.dataType = "intent";
+        mType.mug.properties.controlElement.properties.appearance = "intent"; // todo should say intent:VALUE
+        return mType;
+    };
+
     that.mugTypeMaker.stdBarcode = function () {
         var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion),
             mug;

@@ -536,6 +536,8 @@ formdesigner.controller = (function () {
                 return formdesigner.model.mugTypeMaker.stdGeopoint();
             case 'barcode':
                 return formdesigner.model.mugTypeMaker.stdBarcode();
+            case 'androidintent':
+                return formdesigner.model.mugTypeMaker.stdAndroidIntent();
             case 'image':
                 return formdesigner.model.mugTypeMaker.stdImage();
             case 'audio':
@@ -1529,6 +1531,8 @@ formdesigner.controller = (function () {
                             return 'stdGeopoint';
                         }else if(dataType === 'barcode') {
                             return 'stdBarcode';
+                        }else if(dataType === 'intent') {
+                            return 'stdAndroidIntent';
                         }else if(dataType === 'string') {
                             if (appearance === "numeric") {
                                 return 'stdPhoneNumber';
