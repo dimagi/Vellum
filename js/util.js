@@ -103,7 +103,7 @@ formdesigner.util = (function(){
                 ['geopoint', 'GPS', 'icon-map-marker'],
                 ['barcode', 'Barcode Scan', 'icon-barcode'],
                 ['secret', 'Password', 'icon-key'],
-                ['androidintent', 'Android App Callout', 'icon-circle']
+                ['androidintent', 'Android App Callout', 'icon-vellum-android-intent']
             ]
         }
     ];
