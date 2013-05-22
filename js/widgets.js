@@ -6,7 +6,7 @@ formdesigner.widgets = (function () {
     var that = {};
 
     that.unchangeableQuestionTypes = [
-        "item", "group", "repeat", "datanode", "trigger", "unknown"
+        "item", "group", "repeat", "datanode", "trigger", "unknown", "androidintent"
     ];
 
     that.getGroupName = function (path) {
@@ -600,6 +600,37 @@ formdesigner.widgets = (function () {
         return widget;
 
     };
+
+    that.androidIntentAppIdWidget = function (mugType) {
+        var widget = that.baseWidget(mugType);
+        widget.definition = {};
+        widget.propName = "Application ID";
+
+        widget.getID = function () {
+            return "intent-app-id";
+        };
+
+        var input = $("<input />").attr("id", widget.getID()).attr("type", "text").attr('placeholder', 'Insert Android Application ID');
+
+        widget.getControl = function () {
+            return input;
+        };
+
+        widget.setValue = function (value) {
+            input.val(value);
+        };
+
+        widget.getValue = function() {
+            return input.val();
+        };
+
+        input.change(function () {
+           mugType.mug.properties.controlElement.properties.appearance = "intent:" + input.val();
+        });
+
+        return widget;
+
+    };
     
     that.readOnlyControlWidget = function (mugType) {
         var widget = that.baseWidget(mugType);
@@ -649,6 +680,8 @@ formdesigner.widgets = (function () {
                 }
             case "questionType":
                 return that.questionTypeSelectorWidget(mugType);
+            case "androidIntentAppId":
+                return that.androidIntentAppIdWidget(mugType);
             case "readonlyControl":
                 return that.readOnlyControlWidget(mugType);
             case "html":
@@ -999,6 +1032,10 @@ formdesigner.widgets = (function () {
         }
         if (formdesigner.util.isReadOnly(mugType)) {
             elements.push({widgetType: "readonlyControl", path: "system/readonlyControl"});
+        }
+
+        if (mugType.typeSlug == 'androidintent') {
+            elements.push({widgetType: "androidIntentAppId", path: "system/androidIntentAppId"});
         }
 
         var deleteButton = $('<button class="btn btn-danger" id="fd-remove-button" tabindex="-1">'
