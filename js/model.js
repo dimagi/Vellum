@@ -1341,7 +1341,6 @@ formdesigner.model = function () {
         mType.mug.properties.controlElement.properties.name = "AndroidIntent";
         mType.mug.properties.controlElement.properties.tagName = "input";
         mType.mug.properties.bindElement.properties.dataType = "intent";
-        mType.mug.properties.controlElement.properties.appearance = "intent"; // todo should say intent:VALUE
         return mType;
     };
 
