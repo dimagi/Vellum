@@ -841,6 +841,12 @@ formdesigner.model = function () {
                     presence: 'optional',
                     lstring: 'Appearance Attribute'
                 },
+                isAppearanceIntent: { // internal use
+                    editable: 'r',
+                    visibility: 'hidden',
+                    presence: 'optional',
+                    lstring: 'Appearance for Android Intent'
+                },
                 label: {
                     editable: 'w',
                     visibility: 'hidden',
@@ -1338,9 +1344,13 @@ formdesigner.model = function () {
         mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
+
         mType.mug.properties.controlElement.properties.name = "AndroidIntent";
         mType.mug.properties.controlElement.properties.tagName = "input";
+        mType.mug.properties.controlElement.properties.isAppearanceIntent = true;
+
         mType.mug.properties.bindElement.properties.dataType = "intent";
+
         return mType;
     };
 
@@ -2394,7 +2404,7 @@ formdesigner.model = function () {
 
                     }
                 }
-            }
+            };
 
             var createControlBlock = function () {
                 var mapFunc, afterFunc;
@@ -2504,8 +2514,12 @@ formdesigner.model = function () {
                             }
                         }
                         
-                        if (cProps.appearance) {
-                            xmlWriter.writeAttributeStringSafe("appearance", cProps.appearance);
+                        if (cProps.appearance || cProps.isAppearanceIntent) {
+                            if (cProps.isAppearanceIntent) {
+                                xmlWriter.writeAttributeStringSafe("appearance", 'intent:' + mugType.mug.properties.dataElement.properties.nodeID);
+                            } else {
+                                xmlWriter.writeAttributeStringSafe("appearance", cProps.appearance);
+                            }
                         }
                         
                         // Do hint label
