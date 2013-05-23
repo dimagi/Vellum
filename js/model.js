@@ -1343,7 +1343,6 @@ formdesigner.model = function () {
 
         mType.mug.properties.controlElement.properties.name = "AndroidIntent";
         mType.mug.properties.controlElement.properties.tagName = "input";
-        mType.mug.properties.controlElement.properties.appearance = true;
         mType.getAppearanceAttribute = function () {
             return 'intent:' + mType.mug.properties.dataElement.properties.nodeID;
         };
@@ -2512,9 +2511,10 @@ formdesigner.model = function () {
                                 xmlWriter.writeAttributeStringSafe("mediatype", mediaType);
                             }
                         }
-                        
-                        if (cProps.appearance) {
-                            xmlWriter.writeAttributeStringSafe("appearance", mugType.getAppearanceAttribute());
+
+                        var appearanceAttr = mugType.getAppearanceAttribute();
+                        if (appearanceAttr) {
+                            xmlWriter.writeAttributeStringSafe("appearance", appearanceAttr);
                         }
                         
                         // Do hint label
