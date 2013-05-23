@@ -2514,12 +2514,10 @@ formdesigner.model = function () {
                             }
                         }
                         
-                        if (cProps.appearance || cProps.isAppearanceIntent) {
-                            if (cProps.isAppearanceIntent) {
-                                xmlWriter.writeAttributeStringSafe("appearance", 'intent:' + mugType.mug.properties.dataElement.properties.nodeID);
-                            } else {
-                                xmlWriter.writeAttributeStringSafe("appearance", cProps.appearance);
-                            }
+                        if (cProps.isAppearanceIntent) {
+                            xmlWriter.writeAttributeStringSafe("appearance", 'intent:' + mugType.mug.properties.dataElement.properties.nodeID);
+                        } else if (cProps.appearance) {
+                            xmlWriter.writeAttributeStringSafe("appearance", cProps.appearance);
                         }
                         
                         // Do hint label
