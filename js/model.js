@@ -841,12 +841,6 @@ formdesigner.model = function () {
                     presence: 'optional',
                     lstring: 'Appearance Attribute'
                 },
-                isAppearanceIntent: { // internal use
-                    editable: 'r',
-                    visibility: 'hidden',
-                    presence: 'optional',
-                    lstring: 'Appearance for Android Intent'
-                },
                 label: {
                     editable: 'w',
                     visibility: 'hidden',
@@ -878,7 +872,9 @@ formdesigner.model = function () {
                 }
             }
         },
-        
+        getAppearanceAttribute: function () {
+            return (this.mug.properties.controlElement && this.mug.properties.controlElement.properties.appearance) ? (this.mug.properties.controlElement.properties.appearance) : null;
+        },
         getPropertyDefinition: function (index) {
             // get a propery definition by a string or list index
             // assumes strings are split by the "/" character
@@ -1347,7 +1343,10 @@ formdesigner.model = function () {
 
         mType.mug.properties.controlElement.properties.name = "AndroidIntent";
         mType.mug.properties.controlElement.properties.tagName = "input";
-        mType.mug.properties.controlElement.properties.isAppearanceIntent = true;
+        mType.mug.properties.controlElement.properties.appearance = true;
+        mType.getAppearanceAttribute = function () {
+            return 'intent:' + mType.mug.properties.dataElement.properties.nodeID;
+        };
 
         mType.mug.properties.bindElement.properties.dataType = "intent";
 
@@ -2514,10 +2513,8 @@ formdesigner.model = function () {
                             }
                         }
                         
-                        if (cProps.isAppearanceIntent) {
-                            xmlWriter.writeAttributeStringSafe("appearance", 'intent:' + mugType.mug.properties.dataElement.properties.nodeID);
-                        } else if (cProps.appearance) {
-                            xmlWriter.writeAttributeStringSafe("appearance", cProps.appearance);
+                        if (cProps.appearance) {
+                            xmlWriter.writeAttributeStringSafe("appearance", mugType.getAppearanceAttribute());
                         }
                         
                         // Do hint label
