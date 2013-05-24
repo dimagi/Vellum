@@ -2257,7 +2257,7 @@ formdesigner.intentManager = (function () {
         self.writeXML = function (xmlWriter, currentNodeID) {
             xmlWriter.writeStartElement('odkx:intent');
             xmlWriter.writeAttributeStringSafe("xmlns:odkx", self.xmlns);
-            xmlWriter.writeAttributeStringSafe("id", currentNodeID);
+            xmlWriter.writeAttributeStringSafe("id", currentNodeID || self.initialNodeID);
             xmlWriter.writeAttributeStringSafe("class", self.path);
             xmlWriter.writeEndElement('odkx:intent');
         }
@@ -2293,10 +2293,16 @@ formdesigner.intentManager = (function () {
                 tag = new ODKXIntentTag(mugType.mug.properties.dataElement.properties.nodeID, path);
             }
             mugType.intentTag = tag;
+            that.initialIntentTags = _.without(that.initialIntentTags, tag);
         }
     };
 
     that.writeIntentXML = function (xmlWriter, dataTree) {
+        // make sure any leftover intent tags are still kept
+        that.initialIntentTags.map(function (tag) {
+           tag.writeXML(xmlWriter, null);
+        });
+
         var intents,
             getIntentMugTypes = function(node) {
                 var MT = node.getValue();
@@ -2310,9 +2316,11 @@ formdesigner.intentManager = (function () {
                 }
             };
         intents = dataTree.treeMap(getIntentMugTypes);
+        xmlWriter.writeComment('Intents inserted by Vellum:');
         intents.map(function (intentMT) {
             intentMT.intentTag.writeXML(xmlWriter, intentMT.mug.properties.dataElement.properties.nodeID);
         });
+
     };
 
     return that;
