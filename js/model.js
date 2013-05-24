@@ -1348,6 +1348,7 @@ formdesigner.model = function () {
         };
 
         mType.mug.properties.bindElement.properties.dataType = "intent";
+        mType.intentTag = null;
 
         return mType;
     };
@@ -2186,7 +2187,7 @@ formdesigner.model = function () {
                 }
             }
             return bList;
-        }
+        };
 
         /**
          * Searches through BOTH trees and returns
@@ -2732,9 +2733,7 @@ formdesigner.model = function () {
                 
                 xmlWriter.writeEndElement(); //CLOSE MODEL
 
-                formdesigner.controller.form.extraHeadNodes.map(function (node) {
-                    xmlWriter.writeString(formdesigner.util.serializeXml(node));
-                });
+                formdesigner.intentManager.writeIntentXML(xmlWriter, dataTree);
 
                 xmlWriter.writeEndElement(); //CLOSE HEAD
 
