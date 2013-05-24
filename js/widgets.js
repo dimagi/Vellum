@@ -604,7 +604,8 @@ formdesigner.widgets = (function () {
     that.androidIntentAppIdWidget = function (mugType) {
         var widget = that.baseWidget(mugType);
         widget.definition = {};
-        widget.propName = "Application ID";
+        widget.currentValue = (mugType.intentTag) ? mugType.intentTag.path: "";
+        widget.propName = "Application Class Path";
 
         widget.getID = function () {
             return "intent-app-id";
@@ -624,9 +625,12 @@ formdesigner.widgets = (function () {
             return input.val();
         };
 
-        input.change(function () {
-           mugType.mug.properties.controlElement.properties.appearance = "intent:" + input.val();
-        });
+        widget.updateValue = function () {
+            formdesigner.controller.setFormChanged();
+            mugType.intentTag.path = widget.getValue();
+        };
+
+        input.bind("change keyup", widget.updateValue);
 
         return widget;
 
