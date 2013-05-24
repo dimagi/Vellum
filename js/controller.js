@@ -2296,7 +2296,7 @@ formdesigner.intentManager = (function () {
         }
     };
 
-    that.getIntentXML = function (xmlWriter, dataTree) {
+    that.writeIntentXML = function (xmlWriter, dataTree) {
         var intents,
             getIntentMugTypes = function(node) {
                 var MT = node.getValue();
