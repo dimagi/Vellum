@@ -635,6 +635,106 @@ formdesigner.widgets = (function () {
         return widget;
 
     };
+
+    that.baseKeyValueWidget = function (mugType) {
+        var widget = that.baseWidget(mugType);
+        widget.definition = {};
+
+        // todo make a style for this when vellum gets a facelift
+        widget.kvInput = $('<div style="display: inline-block; vertical-align: top; width: 405px; float: right;" />');
+
+        widget.getControl = function () {
+            return widget.kvInput;
+        };
+
+        widget.setValue = function (value) {
+            var kvTemplate = $('#fd-template-widget-control-keyvalue');
+            widget.kvInput.html(_.template(kvTemplate.text(), {
+                pairs: value
+            }));
+            widget.kvInput.find('input').bind('change keyup', widget.updateValue);
+            widget.kvInput.find('.fd-kv-add-pair').click(function (e) {
+                widget.refreshControl();
+                e.preventDefault();
+            });
+            widget.kvInput.find('.fd-kv-remove-pair').click(function (e) {
+                $(this).parent().remove();
+                widget.refreshControl();
+                widget.save();
+                e.preventDefault();
+            })
+        };
+
+        widget.getValue = function () {
+            var currentValues = {};
+            _.each(widget.kvInput.find('.fd-kv-pair'), function (kvPair) {
+                var $pair = $(kvPair);
+                currentValues[$pair.find('.fd-kv-key').val()] = $pair.find('.fd-kv-val').val();
+            });
+            return currentValues;
+        };
+
+        widget.getValidValues = function () {
+            var values = _.clone(widget.getValue());
+            if (values[""]) {
+                delete values[""];
+            }
+            return values;
+        };
+
+        widget.updateValue = function () {
+            var currentValues = widget.getValue();
+            if (!("" in currentValues)) {
+                widget.kvInput.find('.btn').removeClass('hide');
+                widget.kvInput.find('.fd-kv-remove-pair').removeClass('hide');
+            }
+            widget.save();
+        };
+
+        widget.refreshControl = function () {
+            widget.setValue(widget.getValue());
+        };
+
+        return widget;
+    };
+
+    that.androidIntentExtraWidget = function (mugType) {
+        var widget = that.baseKeyValueWidget(mugType);
+        widget.currentValue = (mugType.intentTag) ? mugType.intentTag.extra : {};
+        widget.propName = "Extra";
+
+        widget.getID = function () {
+            return "intent-extra";
+        };
+
+        widget.save = function () {
+            if (mugType.intentTag) {
+                mugType.intentTag.extra = widget.getValidValues();
+                formdesigner.controller.setFormChanged();
+            }
+        };
+
+        return widget;
+    };
+
+    that.androidIntentResponseWidget = function (mugType) {
+        var widget = that.baseKeyValueWidget(mugType);
+        widget.currentValue = (mugType.intentTag) ? mugType.intentTag.response : {};
+        widget.propName = "Response";
+
+        widget.getID = function () {
+            return "intent-response";
+        };
+
+        widget.save = function () {
+            if (mugType.intentTag) {
+                mugType.intentTag.response = widget.getValidValues();
+                formdesigner.controller.setFormChanged();
+            }
+        };
+
+        return widget;
+    };
     
     that.readOnlyControlWidget = function (mugType) {
         var widget = that.baseWidget(mugType);
@@ -686,6 +786,10 @@ formdesigner.widgets = (function () {
                 return that.questionTypeSelectorWidget(mugType);
             case "androidIntentAppId":
                 return that.androidIntentAppIdWidget(mugType);
+            case "androidIntentExtra":
+                return that.androidIntentExtraWidget(mugType);
+            case "androidIntentResponse":
+                return that.androidIntentResponseWidget(mugType);
             case "readonlyControl":
                 return that.readOnlyControlWidget(mugType);
             case "html":
@@ -1040,6 +1144,8 @@ formdesigner.widgets = (function () {
 
         if (mugType.typeSlug == 'androidintent') {
             elements.push({widgetType: "androidIntentAppId", path: "system/androidIntentAppId"});
+            elements.push({widgetType: "androidIntentExtra", path: "system/androidIntentExtra"});
+            elements.push({widgetType: "androidIntentResponse", path: "system/androidIntentResponse"});
         }
 
         var deleteButton = $('<button class="btn btn-danger" id="fd-remove-button" tabindex="-1">'

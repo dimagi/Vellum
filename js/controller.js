@@ -2246,7 +2246,7 @@ formdesigner.controller = (function () {
 formdesigner.intentManager = (function () {
     "use strict";
     var that = {};
-    that.initialIntentTags = [];
+    that.initialIntentTags = {};
 
     var ODKXIntentTag = function (nodeID, path) {
         var self = this;
@@ -2254,23 +2254,53 @@ formdesigner.intentManager = (function () {
         self.path = path || "";
         self.xmlns = "http://opendatakit.org/xforms";
 
+        self.extra = {};
+        self.response = {};
+
+        self.parseInnerTags = function (tagObj, innerTag, store) {
+            _.each(tagObj.find(innerTag), function (inner) {
+                var $innerTag = $(inner);
+                store[$innerTag.attr('key')] = $innerTag.attr('ref');
+            });
+        };
+
+        self._writeInnerTagXML = function(xmlWriter, innerTag, store) {
+            if (store) {
+                _.each(store, function (ref, key) {
+                    if (key) {
+                        xmlWriter.writeStartElement(innerTag);
+                        xmlWriter.writeAttributeStringSafe("key", key);
+                        xmlWriter.writeAttributeStringSafe("ref", ref);
+                        xmlWriter.writeEndElement();
+                    }
+                });
+            }
+        };
+
         self.writeXML = function (xmlWriter, currentNodeID) {
             xmlWriter.writeStartElement('odkx:intent');
             xmlWriter.writeAttributeStringSafe("xmlns:odkx", self.xmlns);
             xmlWriter.writeAttributeStringSafe("id", currentNodeID || self.initialNodeID);
             xmlWriter.writeAttributeStringSafe("class", self.path);
+            self._writeInnerTagXML(xmlWriter, 'extra', self.extra);
+            self._writeInnerTagXML(xmlWriter, 'response', self.response);
             xmlWriter.writeEndElement('odkx:intent');
-        }
+        };
     };
 
     that.parseIntentTagsFromHead = function (tags) {
         _.each(tags, function (tagXML) {
-            var $tag = $(tagXML);
+            var $tag, tagId, newTag, xmlns;
+            $tag = $(tagXML);
 
-            var newTag = new ODKXIntentTag($tag.attr('id'), $tag.attr('class')),
-                xmlns = $tag.attr('xmlns:odkx');
+            tagId = $tag.attr('id');
+            newTag = new ODKXIntentTag(tagId, $tag.attr('class'));
+
+            xmlns = $tag.attr('xmlns:odkx');
             newTag.xmlns = xmlns || newTag.xmlns;
-            that.initialIntentTags.push(newTag);
+            newTag.parseInnerTags($tag, 'extra', newTag.extra);
+            newTag.parseInnerTags($tag, 'response', newTag.response);
+            that.initialIntentTags[tagId] = newTag;
         });
     };
 
@@ -2293,13 +2323,13 @@ formdesigner.intentManager = (function () {
                 tag = new ODKXIntentTag(mugType.mug.properties.dataElement.properties.nodeID, path);
             }
             mugType.intentTag = tag;
-            that.initialIntentTags = _.without(that.initialIntentTags, tag);
+            delete that.initialIntentTags[tag.initialNodeID];
         }
     };
 
     that.writeIntentXML = function (xmlWriter, dataTree) {
         // make sure any leftover intent tags are still kept
-        that.initialIntentTags.map(function (tag) {
+        _.each(that.initialIntentTags, function (tag) {
            tag.writeXML(xmlWriter, null);
         });
 
