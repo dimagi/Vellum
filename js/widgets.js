@@ -605,7 +605,7 @@ formdesigner.widgets = (function () {
         var widget = that.baseWidget(mugType);
         widget.definition = {};
         widget.currentValue = (mugType.intentTag) ? mugType.intentTag.path: "";
-        widget.propName = "Application Class Path";
+        widget.propName = "Intent ID";
 
         widget.getID = function () {
             return "intent-app-id";
