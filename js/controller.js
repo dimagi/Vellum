@@ -725,6 +725,7 @@ formdesigner.controller = (function () {
         // insert into model
         that.insertMugTypeIntoForm(refMugType, mugType, position);
         formdesigner.model.Itext.updateForNewMug(mugType);
+        formdesigner.intentManager.syncMugTypeWithIntent(mugType);
 
         formdesigner.ui.jstree("select_node", '#' + mugType.ufid);
         
@@ -732,8 +733,6 @@ formdesigner.controller = (function () {
             type: "question-creation",
             mugType: mugType
         });
-
-        formdesigner.intentManager.syncMugTypeWithIntent(mugType);
 
         return mugType;
     };
@@ -2346,11 +2345,12 @@ formdesigner.intentManager = (function () {
                 }
             };
         intents = dataTree.treeMap(getIntentMugTypes);
-        xmlWriter.writeComment('Intents inserted by Vellum:');
-        intents.map(function (intentMT) {
-            intentMT.intentTag.writeXML(xmlWriter, intentMT.mug.properties.dataElement.properties.nodeID);
-        });
-
+        if (intents.length > 0) {
+            xmlWriter.writeComment('Intents inserted by Vellum:');
+            intents.map(function (intentMT) {
+                intentMT.intentTag.writeXML(xmlWriter, intentMT.mug.properties.dataElement.properties.nodeID);
+            });
+        }
     };
 
     return that;
