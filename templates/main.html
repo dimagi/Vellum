@@ -65,6 +65,8 @@
 	    
     </div>
 
+    <div id="fd-multimedia-modal-container"></div>
+
 </div>
 
 <script type="text/template" id="fd-question-type-group-template">
@@ -104,4 +106,119 @@
         </a>
         <% }); %>
     </div>
+</script>
+
+<script type="text/template" id="fd-template-multimedia-modal">
+    <div class="modal hide fade" id="<%= modalId %>">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h3>Upload <%= mediaType %></h3>
+        </div>
+        <div class="modal-body form form-horizontal">
+            <div class="control-group">
+                <label class="control-label">
+                    Select New <%= mediaType %>
+                </label>
+                <div class="controls">
+                    <div class="hqm-select-files-container">
+                        <button class="hqm-select btn btn-primary" role="button">Select <%= mediaType %></button>
+                    </div>
+                    <div class="hqm-queue"></div>
+                </div>
+            </div>
+            <div class="control-group hqm-existing hide">
+                <label class="control-label">
+                    Current <%= mediaType %>
+                </label>
+                <div class="controls">
+                </div>
+            </div>
+            <div class="hqm-upload-form">
+                <fieldset>
+                    <legend>Upload Options</legend>
+                    <div class="control-group">
+                        <label class="control-label">Share <%= mediaType %></label>
+                        <div class="controls">
+                            <label class="checkbox"><input class="hqm-share-media" name="shared" value="t" type="checkbox" /> Yes, share my <%= mediaType %>.</label>
+                        </div>
+                    </div>
+                </fieldset>
+                <fieldset class="hqm-sharing hide">
+                    <legend>Multimedia Sharing Options</legend>
+                    <div class="control-group">
+                        <label class="control-label" for="fd-mm-<%= mediaType %>-license">License</label>
+                        <div class="controls">
+                            <select name="license" id="fd-mm-<%= mediaType %>-license">
+                                <option value="cc-nc">Creative Commons Attribution, Non-Commercial</option>
+                                <option value="cc-nd">Creative Commons Attribution, No Derivatives</option>
+                                <option value="cc" selected="selected">Creative Commons Attribution</option>
+                                <option value="cc-nc-sa">Creative Commons Attribution, Non-Commercial, and Share Alike</option>
+                                <option value="cc-nc-nd">Creative Commons Attribution, Non-Commercial, and No Derivatives</option>
+                                <option value="cc-sa">Creative Commons Attribution, Share Alike</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label" for="fd-mm-<%= mediaType %>-author">Author</label>
+                        <div class="controls">
+                            <input type="text"
+                                   name="author"
+                                   id="fd-mm-<%= mediaType %>-author"
+                                   placeholder="Enter the name of the author." />
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label" for="fd-mm-<%= mediaType %>-attribution">Attribution Notes</label>
+                        <div class="controls">
+                            <textarea name="attribution-notes"
+                                   id="fd-mm-<%= mediaType %>-attribution"
+                                   rows="2"></textarea>
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <a href="#" class="btn" data-dismiss="modal">Close</a>
+            <a href="#" class="btn disabled hqm-upload hqm-upload-confirm"><i class="icon-cloud-upload"></i> Begin Upload</a>
+        </div>
+    </div>
+</script>
+
+<script type="text/template" id="fd-template-multimedia-queue">
+    <div id="<%= unique_id %>" style="clear: both;">
+        <div class="alert alert-success" style="margin-bottom: 2px; margin-top: 10px;">
+            <i class="icon-ok"></i> <%= file_name %> <strong>[<%= file_size %> MB]</strong>
+        </div>
+        <div class="hqm-progress">
+            <div class="progress progress-striped active" style="margin-bottom: 5px;">
+                <div class="bar" style="width: 0%;"></div>
+            </div>
+            <p class="text-success hqm-begin">
+                Ready to upload. Click <strong>Begin Upload</strong> below to start.
+            </p>
+            <p class="text-error hqm-error hide">
+                <span class="label label-important">There were errors.</span>
+            </p>
+            <a href="#" class="btn btn-inverse btn-mini pull-right hqm-remove">
+                <i class="icon-remove"></i> Select another file
+            </a>
+            <a href="#" class="btn btn-danger btn-mini pull-right hqm-cancel hide">
+                <i class="icon-remove"></i> Cancel Upload
+            </a>
+        </div>
+        <div class="hqm-status"></div>
+    </div>
+</script>
+
+<script type="text/template" id="fd-template-multimedia-errors">
+    <% if (errors.length > 0) { %>
+        <div class="alert alert-error">
+            <h5>Errors found</h5>
+            <% for (var e = 0; e < errors.length; e++) {
+                var error = errors[e]; %>
+                <p><%= error %></p>
+            <% } %>
+        </div>
+    <% } %>
 </script>

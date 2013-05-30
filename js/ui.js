@@ -1745,6 +1745,7 @@ formdesigner.launch = function (opts) {
 
     formdesigner.saveUrl = opts.saveUrl;
     formdesigner.patchUrl = opts.patchUrl;
+    formdesigner.multimediaUrls = opts.multimediaUrls;
     formdesigner.loadMe = opts.form;
     formdesigner.originalXForm = opts.form;
 
