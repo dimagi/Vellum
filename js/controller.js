@@ -2245,7 +2245,7 @@ formdesigner.controller = (function () {
 formdesigner.intentManager = (function () {
     "use strict";
     var that = {};
-    that.initialIntentTags = {};
+    that.unmappedIntentTags = {};
 
     var ODKXIntentTag = function (nodeID, path) {
         var self = this;
@@ -2299,13 +2299,13 @@ formdesigner.intentManager = (function () {
             newTag.xmlns = xmlns || newTag.xmlns;
             newTag.parseInnerTags($tag, 'extra', newTag.extra);
             newTag.parseInnerTags($tag, 'response', newTag.response);
-            that.initialIntentTags[tagId] = newTag;
+            that.unmappedIntentTags[tagId] = newTag;
         });
     };
 
     that.getParsedIntentTagWithID = function (nodeID) {
         var intentTag = null;
-        _.each(that.initialIntentTags, function (tag) {
+        _.each(that.unmappedIntentTags, function (tag) {
             if (tag.initialNodeID == nodeID) {
                 intentTag = tag;
             }
@@ -2322,13 +2322,13 @@ formdesigner.intentManager = (function () {
                 tag = new ODKXIntentTag(mugType.mug.properties.dataElement.properties.nodeID, path);
             }
             mugType.intentTag = tag;
-            delete that.initialIntentTags[tag.initialNodeID];
+            delete that.unmappedIntentTags[tag.initialNodeID];
         }
     };
 
     that.writeIntentXML = function (xmlWriter, dataTree) {
         // make sure any leftover intent tags are still kept
-        _.each(that.initialIntentTags, function (tag) {
+        _.each(that.unmappedIntentTags, function (tag) {
            tag.writeXML(xmlWriter, null);
         });
 
