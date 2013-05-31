@@ -506,6 +506,15 @@ formdesigner.widgets = (function () {
         return widget;
     };
 
+    that.iTextMediaWidget = function (mugType, language, itemFunc, slug, form, block) {
+        var widget = that.iTextWidget(mugType, language, itemFunc, slug, form, block);
+
+        console.log('itext media');
+        console.log(form);
+
+        return widget;
+    };
+
     that.iTextInlineWidget = function (mugType, language, itemFunc, slug, form, displayName) {
         var widget = that.baseItextWidget(mugType, language, itemFunc, slug, form);
 
@@ -647,6 +656,8 @@ formdesigner.widgets = (function () {
                     // default to "full"
                     return that.iTextFieldBlock(mugType, definition);
                 }
+            case "itextMultimedia":
+                return that.iTextMultimediaBlock(mugType, definition);
             case "questionType":
                 return that.questionTypeSelectorWidget(mugType);
             case "readonlyControl":
@@ -771,25 +782,11 @@ formdesigner.widgets = (function () {
 
     that.iTextFieldBlock = function (mugType, options) {
         var block = that.baseITextFieldBlock(mugType, options);
-        var main = $("");
+        var main = $('<div class="well well-vellum well-itext" />');
+
         // needed for closure
         var textIdFunc = block.textIdFunc;
         var slug = block.slug;
-
-        var getDefaultValue = function (formType) {
-            if (formType === "image" || formType === "audio" || formType === "video") {
-                // default formats
-                // image: jr://file/commcare/image/form_id/question_id.png
-                // audio: jr://file/commcare/audio/form_id/question_id.mp3
-                var extension = (formType === "image") ? "png" :
-                    (formType == "audio") ? "mp3" : "3gp";
-                var ret = "jr://file/commcare/" + formType + "/" +
-                       formdesigner.controller.form.formID + "/" +
-                       mugType.getDefaultItextRoot() + "." + extension;
-                return ret;
-            }
-            return null;
-        };
 
         var addItextType = block.addItextType = function (form, value) {
             if (block.formList.indexOf(form) != -1) {
@@ -800,52 +797,20 @@ formdesigner.widgets = (function () {
             $($('.itext-options .itext-option')[that.defaultContentTypes.indexOf(form)]).addClass('disabled');
 
             main.parent().find(".itext-language-section").each(function () {
-                var lang = $(this).data("language");
-                var itextWidget = that.iTextWidget(mugType, lang, textIdFunc, slug, form, block);
+                var lang, itextWidget, uiElem, itextForm;
+
+                lang = $(this).data("language");
+                itextWidget = that.iTextWidget(mugType, lang, textIdFunc, slug, form, block);
                 itextWidget.setValue(value);
-                var uiElem = itextWidget.getUIElement();
+
+                uiElem = itextWidget.getUIElement();
                 uiElem.appendTo($(this));
-                var itextForm = itextWidget.getTextItem().getOrCreateForm(form);
+
+                itextForm = itextWidget.getTextItem().getOrCreateForm(form);
                 if (value) {
                     itextForm.setValue(lang, value);
                 }
                 itextWidget.fireChangeEvents();
-            });
-            block.loadMediaData();
-        };
-
-        block.loadMediaData = function () {
-            var paths = [];
-            for (var i = 0; i < block.langs.length; i++) {
-                for (var j = 0; j < block.formList.length; j++) {
-                    var form = block.formList[j];
-                    if (form === 'image' || form === 'audio')
-                        paths.push(itextItem.getValue(form, block.langs[i]));
-                }
-            }
-
-            $.getJSON(lookupUrlsUrl, {path: paths}, function(data) {
-                var loadedData = {images: [], audio: []};
-                for (var i = 0; i < block.langs.length; i++) {
-                    for (var j = 0; j < block.formList.length; j++) {
-                        // add widget
-                        var form = block.formList[j];
-                        if (form === 'audio' || form === 'image') {
-                            var path = itextItem.getValue(form, block.langs[i]);
-                            var d = data[path] || {};
-                            d.type = form;
-                            if (form === 'audio')
-                                loadedData.audio.push(d);
-                            if (form === 'image')
-                                loadedData.images.push(d);
-                        }
-                    }
-                }
-
-//                block.media_map = new MultimediaMap(loadedData, uploadUrl), main.parent()[0];
-
-                if (loadedData.audio.length > 0 || loadedData.images.length > 0)
-                    ko.applyBindings(block.media_map, document.getElementById("fd-ui-container"));
             });
         };
 
@@ -855,18 +820,21 @@ formdesigner.widgets = (function () {
             for (var i = 0; i < this.langs.length; i++) {
                 var subSec = $("<div />").addClass("itext-language-section").data("language", this.langs[i]);
                
-                main = main.add(subSec);
+                main = main.append(subSec);
                 // sub heading for language
                 $("<h3 />").text(this.langs[i]).appendTo(subSec);
 
                 // loop through items, add to UI
                 for (var j = 0; j < this.formList.length; j++) {
-                    var itextWidget = that.iTextWidget(mugType, this.langs[i], this.textIdFunc,
-                                                       this.slug, this.formList[j], block);
-                    itextWidget.setValue(itextItem.getValue(this.formList[j], this.langs[i]));
-                    var uiElem = itextWidget.getUIElement();
-
-                    uiElem.appendTo(subSec);
+                    var formType = this.formList[j],
+                        language = this.langs[i];
+                    if (formdesigner.multimedia.SUPPORTED_MEDIA_TYPES.indexOf(formType) < 0) {
+                        var itextWidget = that.iTextWidget(mugType, language, this.textIdFunc,
+                            this.slug, formType, block);
+                        itextWidget.setValue(itextItem.getValue(formType, language));
+                        var uiElem = itextWidget.getUIElement();
+                        uiElem.appendTo(subSec);
+                    }
                 }
             }
 
@@ -880,7 +848,7 @@ formdesigner.widgets = (function () {
 		            var btn = $("<div />").text(defaultContentTypes[i]).button().addClass('btn itext-option').click(
 		                function () {
 		                    var form = $(this).text();
-		                    addItextType(form, getDefaultValue(form));
+//		                    addItextType(form, getDefaultValue(form));
 		                }).appendTo(bg);
                     if (block.formList.indexOf(defaultContentTypes[i]) != -1)
                         btn.addClass('disabled');
@@ -909,6 +877,71 @@ formdesigner.widgets = (function () {
 
 	        return main;
         };
+
+        return block;
+    };
+
+    that.iTextMultimediaBlock = function (mugType, options) {
+        console.log('itext multimedia block');
+        var block = that.baseITextFieldBlock(mugType, options),
+            itextItem = block.getTextId(),
+            main = $('<div class="well well-vellum well-itextmedia" />');
+
+        var getDefaultValue = function (formType) {
+            console.log('default value');
+            if (formType === "image" || formType === "audio" || formType === "video") {
+                // default formats
+                // image: jr://file/commcare/image/form_id/question_id.png
+                // audio: jr://file/commcare/audio/form_id/question_id.mp3
+                var extension = (formType === "image") ? "png" :
+                    (formType == "audio") ? "mp3" : "3gp";
+                var ret = "jr://file/commcare/" + formType + "/" +
+                       formdesigner.controller.form.formID + "/" +
+                       mugType.getDefaultItextRoot() + "." + extension;
+                return ret;
+            }
+            return null;
+        };
+
+        block.getUIElement = function () {
+            for (var i = 0; i < this.langs.length; i++) {
+                var language = this.langs[i];
+                var subSec = $("<div />").addClass("itext-language-section").data("language", language);
+
+                main = main.append(subSec);
+
+                // sub heading for language
+                $("<h3 />").text(language).appendTo(subSec);
+
+                // loop through items, add to UI
+                for (var j = 0; j < this.formList.length; j++) {
+                    var formType = this.formList[j];
+                    if (formdesigner.multimedia.SUPPORTED_MEDIA_TYPES.indexOf(formType) >= 0) {
+                        var itextWidget = that.iTextMediaWidget(mugType, language, block.textIdFunc,
+                            block.slug, formType, block);
+                        itextWidget.setValue(itextItem.getValue(formType, language));
+                        var uiElem = itextWidget.getUIElement();
+                        uiElem.appendTo(subSec);
+                    }
+                }
+            }
+            return main;
+        };
+
+
+
+//        block.loadMediaData = function () {
+//            console.log('loadMediaData');
+//            var paths = [];
+//            for (var i = 0; i < block.langs.length; i++) {
+//                for (var j = 0; j < block.formList.length; j++) {
+//                    var form = block.formList[j];
+//                    console.log(form);
+//                    if (form === 'image' || form === 'audio' || form === 'video')
+//                        paths.push(itextItem.getValue(form, block.langs[i]));
+//                }
+//            }
+//        };
 
         return block;
     };
@@ -1059,12 +1092,20 @@ formdesigner.widgets = (function () {
                                  mugType.typeSlug !== 'repeat');
             
         elements = [{
-            widgetType: "itext",
-            slug: "text",
-            displayMode: "full",
-            textIdFunc: function (mt) { return mt.getItext() },
-            showAddFormButton: showAddFormButton
-        }];
+                widgetType: "itext",
+                slug: "text",
+                displayMode: "full",
+                textIdFunc: function (mt) { return mt.getItext() },
+                showAddFormButton: showAddFormButton
+            },
+            {
+                widgetType: "itextMultimedia",
+                slug: "multimedia",
+                displayMode: "full",
+                textIdFunc: function (mt) { return mt.getItext() },
+                showAddFormButton: showAddFormButton
+            }
+        ];
 
         return that.genericSection(mugType, {
             displayName: "Content",
