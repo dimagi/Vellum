@@ -1700,6 +1700,7 @@ formdesigner.ui = function () {
         initMessagesPane();
         init_toolbar();
         init_extra_tools();
+        formdesigner.multimedia.initControllers();
         that.createJSTree();
         init_form_paste();
         init_modal_dialogs();
@@ -1745,7 +1746,10 @@ formdesigner.launch = function (opts) {
 
     formdesigner.saveUrl = opts.saveUrl;
     formdesigner.patchUrl = opts.patchUrl;
-    formdesigner.multimediaUrls = opts.multimediaUrls;
+
+    formdesigner.isMultimediaEnabled = _.isObject(opts.multimediaConfig);
+    formdesigner.multimediaConfig = opts.multimediaConfig;
+
     formdesigner.loadMe = opts.form;
     formdesigner.originalXForm = opts.form;
 
