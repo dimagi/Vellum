@@ -86,9 +86,17 @@ formdesigner.widgets = (function () {
 
         widget.getUIElement = function () {
             // gets the whole widget (label + control)
-            var uiElem = $("<div />").addClass("widget");
-            uiElem.append(this.getLabel());
-            uiElem.append(this.getControl());
+            var uiElem = $("<div />").addClass("widget control-group"),
+                $control, $label;
+
+            $label = this.getLabel();
+            $label.addClass('control-label');
+            uiElem.append($label);
+
+            var $controls = $('<div class="controls" />');
+            $controls.append(this.getControl());
+            uiElem.append($controls);
+
             return uiElem;
         };
 
@@ -147,7 +155,7 @@ formdesigner.widgets = (function () {
         // a text widget
         var widget = that.normalWidget(mugType, path);
 
-	    var input = $("<input />").attr("id", widget.getID()).attr("type", "text");
+	    var input = $("<input />").attr("id", widget.getID()).attr("type", "text").addClass('input-block-level');
 
 	    widget.getControl = function () {
             return input;
@@ -227,7 +235,7 @@ formdesigner.widgets = (function () {
         // auto checkbox
         var autoBoxId = widget.getID() + "-auto-itext";
         var autoBox = $("<input />").attr("type", "checkbox").attr("id", autoBoxId);
-        var autoBoxLabel = $("<label />").text("auto?").attr("for", autoBoxId);
+        var autoBoxLabel = $("<label />").text("auto?").attr("for", autoBoxId).addClass('checkbox');
 
         autoBox.change(function () {
             var auto = $(this).prop("checked");
@@ -250,13 +258,26 @@ formdesigner.widgets = (function () {
 
         widget.getUIElement = function () {
             // gets the whole widget (label + control)
-            var uiElem = $("<div />").addClass("widget");
-            uiElem.append(this.getLabel());
-            uiElem.append(this.getControl());
-            var autoDiv = $("<div />").addClass("auto-itext");
+            var uiElem = $("<div />").addClass("widget control-group"),
+                $controls = $('<div class="controls" />'),
+                $label;
+
+            $label = this.getLabel();
+            $label.addClass('control-label');
+            uiElem.append($label);
+
+            var $input = this.getControl();
+            $input.removeClass('input-block-level');
+            $input.addClass('input-large');
+            $controls.append($input);
+
+
+            var autoDiv = $("<span />").addClass("auto-itext help-inline");
+            autoBoxLabel.prepend(autoBox);
             autoDiv.append(autoBoxLabel);
-            autoDiv.append(autoBox);
-            uiElem.append(autoDiv);
+            $controls.append(autoDiv);
+            uiElem.append($controls);
+
             return uiElem;
         };
 
@@ -312,14 +333,6 @@ formdesigner.widgets = (function () {
 	        return input;
         };
 
-        widget.getUIElement = function () {
-            // override this because the label comes after the control
-            var uiElem = $("<div />").addClass("widget");
-            uiElem.append(this.getControl());
-            uiElem.append(this.getLabel());
-            return uiElem;
-        };
-
         widget.setValue = function (value) {
             input.prop("checked", value);
         };
@@ -348,10 +361,15 @@ formdesigner.widgets = (function () {
 
         widget.getUIElement = function () {
             // gets the whole widget (label + control)
-            var uiElem = $("<div />").addClass("widget");
-            uiElem.append(this.getLabel());
-            uiElem.append(this.getControl());
-            uiElem.append(xPathButton);
+            var uiElem = $("<div />").addClass("widget control-group"),
+                $controls = $('<div class="controls" />'),
+                $label;
+            $label = this.getLabel();
+            $label.addClass('control-label');
+            uiElem.append($label);
+            $controls.append(this.getControl());
+            $controls.append(xPathButton);
+            uiElem.append($controls);
             return uiElem;
         };
 
@@ -448,7 +466,7 @@ formdesigner.widgets = (function () {
             }
         };
 
-        var input = $("<input />").attr("id", widget.getID()).attr("type", "text");
+        var input = $("<input />").attr("id", widget.getID()).attr("type", "text").addClass('input-block-level');
 
         widget.getControl = function () {
             return input;
@@ -577,13 +595,6 @@ formdesigner.widgets = (function () {
         for (var i = 0; i < that.unchangeableQuestionTypes.length; i++) {
             input.find("#" + that.unchangeableQuestionTypes[i]).remove();
         }
-
-        // crazy temporary css hack
-        var label = widget.getLabel().css("float", "left").css("line-height", "40px");
-        widget.getLabel = function () {
-
-            return label;
-        };
 
         widget.getControl = function () {
             return input;

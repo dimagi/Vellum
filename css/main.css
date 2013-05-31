@@ -1,13 +1,43 @@
-#formdesigner select {
+#formdesigner.standalone select {
   height: auto;
   width: auto;
   display: inline;
 }
-#formdesigner input {
+#formdesigner.standalone input {
   display: inline;
 }
-#formdesigner label {
+#formdesigner.standalone label {
   display: inline;
+}
+#formdesigner.standalone #fd-props-content fieldset div.widget {
+  clear: both;
+  margin-bottom: .3em;
+}
+#formdesigner.standalone #fd-props-content fieldset label {
+  font-weight: normal;
+  display: inline-block;
+  padding-top: .4em;
+}
+#formdesigner.standalone #fd-props-content fieldset input[type="text"],
+#formdesigner.standalone #fd-props-content fieldset select,
+#formdesigner.standalone #fd-props-content fieldset .btn-toolbar {
+  display: inline;
+  width: 380px;
+  float: right;
+  margin: .5em 10px .5em 0;
+}
+#formdesigner.standalone #fd-props-content fieldset select {
+  width: 220px;
+  margin-right: 175px;
+}
+#formdesigner.standalone #fd-props-content fieldset .xpath-edit-button {
+  float: right;
+  margin-right: 2em;
+}
+#formdesigner.standalone #fd-props-content fieldset .auto-itext {
+  float: right;
+  margin-right: 2em;
+  display: inline-block;
 }
 #formdesigner .container::before,
 #formdesigner .container::after {
@@ -352,9 +382,6 @@
 #formdesigner #fd-add-but {
   position: relative;
 }
-#formdesigner #formdesigner {
-  width: 996px;
-}
 #formdesigner #fd-props-mugtype-info {
   border: 1px solid #bbbbbb;
   text-align: center;
@@ -391,36 +418,6 @@
   font-size: 1.1em;
   font-weight: bold;
   line-height: 1em;
-}
-#formdesigner #fd-props-content fieldset div.widget {
-  clear: both;
-  margin-bottom: .3em;
-}
-#formdesigner #fd-props-content fieldset label {
-  font-weight: normal;
-  display: inline-block;
-  padding-top: .4em;
-}
-#formdesigner #fd-props-content fieldset input[type="text"],
-#formdesigner #fd-props-content fieldset select,
-#formdesigner #fd-props-content fieldset .btn-toolbar {
-  display: inline;
-  width: 380px;
-  float: right;
-  margin: .5em 10px .5em 0;
-}
-#formdesigner #fd-props-content fieldset select {
-  width: 220px;
-  margin-right: 175px;
-}
-#formdesigner #fd-props-content fieldset .xpath-edit-button {
-  float: right;
-  margin-right: 2em;
-}
-#formdesigner #fd-props-content fieldset .auto-itext {
-  float: right;
-  margin-right: 2em;
-  display: inline-block;
 }
 #formdesigner .question-section {
   margin-bottom: 1em;
