@@ -667,8 +667,6 @@ formdesigner.widgets = (function () {
                     // default to "full"
                     return that.iTextFieldBlock(mugType, definition);
                 }
-            case "itextMultimedia":
-                return that.iTextMultimediaBlock(mugType, definition);
             case "questionType":
                 return that.questionTypeSelectorWidget(mugType);
             case "readonlyControl":
@@ -793,25 +791,33 @@ formdesigner.widgets = (function () {
 
     that.iTextFieldBlock = function (mugType, options) {
         var block = that.baseITextFieldBlock(mugType, options);
-        var main = $('<div class="well well-vellum well-itext" />');
+
+        block.defaultContentTypes = ['long', 'short'];
+        block.contentTypeIcons = _.extend({}, formdesigner.multimedia.ICONS);
 
         // needed for closure
-        var textIdFunc = block.textIdFunc;
-        var slug = block.slug;
+        var textIdFunc = block.textIdFunc,
+            slug = block.slug,
+            $container = $('<div />'),
+            multimediaTypes = _.clone(formdesigner.multimedia.SUPPORTED_MEDIA_TYPES);
 
-        var addItextType = block.addItextType = function (form, value) {
+        var addItextType = function (form, value) {
             if (block.formList.indexOf(form) != -1) {
                 return;
             }
             block.formList.push(form);
 
-            $($('.itext-options .itext-option')[that.defaultContentTypes.indexOf(form)]).addClass('disabled');
+            $('#' + formdesigner.util.getAddNewItextItemId(form)).addClass('disabled');
 
-            main.parent().find(".itext-language-section").each(function () {
+            $container.parent().find(".itext-language-section").each(function () {
+
                 var lang, itextWidget, uiElem, itextForm;
 
                 lang = $(this).data("language");
-                itextWidget = that.iTextWidget(mugType, lang, textIdFunc, slug, form, block);
+
+                itextWidget = (multimediaTypes.indexOf(form) >= 0) ?
+                                that.iTextMediaWidget(mugType, lang, textIdFunc, slug, form, block) :
+                                that.iTextWidget(mugType, lang, textIdFunc, slug, form, block);
                 itextWidget.setValue(value);
 
                 uiElem = itextWidget.getUIElement();
@@ -825,23 +831,43 @@ formdesigner.widgets = (function () {
             });
         };
 
-        var itextItem = block.getTextId();
+        block.getDefaultValue = function (formType) {
+            if (multimediaTypes.indexOf(formType) >= 0) {
+                // default formats
+                // image: jr://file/commcare/image/form_id/question_id.png
+                // audio: jr://file/commcare/audio/form_id/question_id.mp3
+                var extension = formdesigner.multimedia.DEFAULT_EXTENSIONS[formType];
+                return "jr://file/commcare/" + formType + "/" +
+                       formdesigner.controller.form.formID + "/" +
+                       mugType.getDefaultItextRoot() + "." + extension;
+            }
+            return null;
+        };
+
+        block.getFilteredFormList = function () {
+            return block.formList;
+        };
 
         block.getUIElement = function () {
-            for (var i = 0; i < this.langs.length; i++) {
-                var subSec = $("<div />").addClass("itext-language-section").data("language", this.langs[i]);
-               
-                main = main.append(subSec);
-                // sub heading for language
-                $("<h3 />").text(this.langs[i]).appendTo(subSec);
+            var itextItem = block.getTextId(),
+                formList = block.getFilteredFormList();
 
-                // loop through items, add to UI
-                for (var j = 0; j < this.formList.length; j++) {
-                    var formType = this.formList[j],
-                        language = this.langs[i];
-                    if (formdesigner.multimedia.SUPPORTED_MEDIA_TYPES.indexOf(formType) < 0) {
-                        var itextWidget = that.iTextWidget(mugType, language, this.textIdFunc,
-                            this.slug, formType, block);
+            if (formList) {
+                for (var i = 0; i < this.langs.length; i++) {
+                    var language = block.langs[i];
+
+                    var subSec = $("<div />").addClass("itext-language-section well well-vellum").data("language", language);
+                    $container.append(subSec);
+
+                    // sub heading for language
+                    $("<h3 />").text(language).appendTo(subSec);
+
+                    // loop through items, add to UI
+                    for (var j = 0; j < formList.length; j++) {
+                        var formType = formList[j],
+                            itextWidget = (multimediaTypes.indexOf(formType) >= 0) ?
+                                that.iTextMediaWidget(mugType, language, block.textIdFunc, block.slug, formType, block) :
+                                that.iTextWidget(mugType, language, block.textIdFunc, block.slug, formType, block);
                         itextWidget.setValue(itextItem.getValue(formType, language));
                         var uiElem = itextWidget.getUIElement();
                         uiElem.appendTo(subSec);
@@ -850,24 +876,13 @@ formdesigner.widgets = (function () {
             }
 
             if (this.showAddFormButton) {
-	            var defaultContentTypes = that.defaultContentTypes;
-	            var iWrapper = $("<div />").addClass("itext-wrapper").css('clear', 'both');
-	            main = main.add(iWrapper);
-	            $("<span />").text("Add: ").addClass("help-inline").appendTo(iWrapper);
-                var bg = $("<div />").addClass("btn-group itext-options").appendTo(iWrapper);
-                for (i = 0; i < defaultContentTypes.length; i++) {
-		            var btn = $("<div />").text(defaultContentTypes[i]).button().addClass('btn itext-option').click(
-		                function () {
-		                    var form = $(this).text();
-//		                    addItextType(form, getDefaultValue(form));
-		                }).appendTo(bg);
-                    if (block.formList.indexOf(defaultContentTypes[i]) != -1)
-                        btn.addClass('disabled');
-		        }
-                var addButton = $("<div />").text("custom...").button().addClass('btn').appendTo(bg);
-	            addButton.click(function () {
+                $container.append(block.getAddItextGroup("Add Multimedia", multimediaTypes));
+                var $otherGroup = block.getAddItextGroup("Add Other", block.defaultContentTypes);
+
+                var $customButton = $("<div />").text("custom...").button().addClass('btn');
+	            $customButton.click(function () {
 	                var dialog = $("#fd-dialog-confirm");
-	                dialog.dialog( "destroy" );
+	                dialog.dialog("destroy");
 	                dialog.empty();
 	                $("<label />").attr("for", "new-itext-id").text("Content type: ").appendTo(dialog);
 	                var input = $("<input />").addClass("fd-property-input").attr("id", "new-itext-id").appendTo(dialog);
@@ -884,75 +899,55 @@ formdesigner.widgets = (function () {
 	                    }
 	               });
 	            });
+
+                $otherGroup.find('.btn-group').append($customButton);
+
+                $container.append($otherGroup);
 	        }
 
-	        return main;
+	        return $container;
         };
 
-        return block;
-    };
+        block.getAddItextGroup = function (addText, contentTypes) {
+            var $addItextBtn = $("<div />").addClass("itext-wrapper control-group"),
+                $controls = $('<div class="controls" />');
+            $("<label />").text(addText).addClass("control-label").appendTo($addItextBtn);
 
-    that.iTextMultimediaBlock = function (mugType, options) {
-        console.log('itext multimedia block');
-        var block = that.baseITextFieldBlock(mugType, options),
-            itextItem = block.getTextId(),
-            main = $('<div class="well well-vellum well-itextmedia" />');
+            var $btnGroup = block.getContentTypeButtons(contentTypes);
+            $controls.append($btnGroup);
+            $addItextBtn.append($controls);
 
-        var getDefaultValue = function (formType) {
-            console.log('default value');
-            if (formType === "image" || formType === "audio" || formType === "video") {
-                // default formats
-                // image: jr://file/commcare/image/form_id/question_id.png
-                // audio: jr://file/commcare/audio/form_id/question_id.mp3
-                var extension = (formType === "image") ? "png" :
-                    (formType == "audio") ? "mp3" : "3gp";
-                var ret = "jr://file/commcare/" + formType + "/" +
-                       formdesigner.controller.form.formID + "/" +
-                       mugType.getDefaultItextRoot() + "." + extension;
-                return ret;
-            }
-            return null;
+            return $addItextBtn;
         };
 
-        block.getUIElement = function () {
-            for (var i = 0; i < this.langs.length; i++) {
-                var language = this.langs[i];
-                var subSec = $("<div />").addClass("itext-language-section").data("language", language);
+        block.getContentTypeButtons = function (contentTypes) {
+            var formList = block.getFilteredFormList();
 
-                main = main.append(subSec);
+            var $buttonGroup = $("<div />").addClass("btn-group itext-options");
+            for (var i = 0; i < contentTypes.length; i++) {
+                var contentType = contentTypes[i],
+                    $btn = $('<div />');
+                $btn.text(contentType)
+                    .button()
+                    .attr('id', formdesigner.util.getAddNewItextItemId(contentType))
+                    .data('formtype', contentType)
+                    .addClass('btn itext-option').click(
+                    function () {
+                        var form = $(this).data('formtype');
+		                    addItextType(form, block.getDefaultValue(form));
+                    }).appendTo($buttonGroup);
 
-                // sub heading for language
-                $("<h3 />").text(language).appendTo(subSec);
+                var iconClass = block.contentTypeIcons[contentType];
+                if (iconClass) {
+                    $btn.prepend($('<i />').addClass(iconClass).after(" "));
+                }
 
-                // loop through items, add to UI
-                for (var j = 0; j < this.formList.length; j++) {
-                    var formType = this.formList[j];
-                    if (formdesigner.multimedia.SUPPORTED_MEDIA_TYPES.indexOf(formType) >= 0) {
-                        var itextWidget = that.iTextMediaWidget(mugType, language, block.textIdFunc,
-                            block.slug, formType, block);
-                        itextWidget.setValue(itextItem.getValue(formType, language));
-                        var uiElem = itextWidget.getUIElement();
-                        uiElem.appendTo(subSec);
-                    }
+                if (formList.indexOf(contentType) != -1) {
+                    $btn.addClass('disabled');
                 }
             }
-            return main;
+            return $buttonGroup;
         };
-
-
-
-//        block.loadMediaData = function () {
-//            console.log('loadMediaData');
-//            var paths = [];
-//            for (var i = 0; i < block.langs.length; i++) {
-//                for (var j = 0; j < block.formList.length; j++) {
-//                    var form = block.formList[j];
-//                    console.log(form);
-//                    if (form === 'image' || form === 'audio' || form === 'video')
-//                        paths.push(itextItem.getValue(form, block.langs[i]));
-//                }
-//            }
-//        };
 
         return block;
     };
@@ -1105,13 +1100,6 @@ formdesigner.widgets = (function () {
         elements = [{
                 widgetType: "itext",
                 slug: "text",
-                displayMode: "full",
-                textIdFunc: function (mt) { return mt.getItext() },
-                showAddFormButton: showAddFormButton
-            },
-            {
-                widgetType: "itextMultimedia",
-                slug: "multimedia",
                 displayMode: "full",
                 textIdFunc: function (mt) { return mt.getItext() },
                 showAddFormButton: showAddFormButton
