@@ -484,20 +484,23 @@ formdesigner.widgets = (function () {
 
         // a bit of a hack, only allow deletion for non-default forms
         if (form !== "default") {
-
             // override getUIElement to include the delete button
             widget.getUIElement = function () {
 	            // gets the whole widget (label + control)
-	            var uiElem = $("<div />").addClass("widget").attr("data-form", form).css('clear', 'both');
-	            uiElem.append(this.getLabel());
+	            var uiElem = $("<div />").addClass("widget control-group").attr("data-form", form),
+                    $controls = $('<div class="controls controls-row" />'),
+                    $label;
 
-	            uiElem.append(this.getControl());
-                var buttonDiv = $('<div />').css('text-align', 'right').css('clear', 'both');
-//                if (MultimediaMap && (form == 'image' || form == 'audio')) {
-//                    widget.addMultimediaButtons(buttonDiv, form);
-//                }
+                $label = this.getLabel();
+                $label.addClass('control-label');
+	            uiElem.append($label);
 
-	            var deleteButton = $('<button />').addClass('btn').addClass('btn-danger').text("Delete").button();
+                var $input = this.getControl();
+                $input.addClass('span10');
+                $input.removeClass('input-block-level');
+                $controls.append($input);
+
+	            var deleteButton = $($('#fd-template-button-remove').html());
 	            deleteButton.click(function () {
 	                widget.deleteValue();
 	                // this is a bit ridiculous but finds the right things to remove
@@ -506,12 +509,13 @@ formdesigner.widgets = (function () {
                         $(this).remove();
 	                });
                     block.formList.splice(block.formList.indexOf(form), 1);
-                    $($('.itext-options .itext-option')[that.defaultContentTypes.indexOf(form)]).removeClass('disabled');
+                    $('#' + formdesigner.util.getAddNewItextItemId(form)).removeClass('disabled');
                     widget.fireChangeEvents();
 	            });
-	            buttonDiv.append(deleteButton);
 
-                uiElem.append(buttonDiv);
+	            $controls.append($('<div class="span2" />').append(deleteButton));
+
+	            uiElem.append($controls);
 
                 return uiElem;
 	        };
