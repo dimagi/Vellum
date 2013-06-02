@@ -29,6 +29,18 @@ formdesigner.multimedia = (function () {
         ]
     };
 
+    that.DEFAULT_EXTENSIONS = {
+        image: 'png',
+        audio: 'mp3',
+        video: '3gp'
+    };
+
+    that.ICONS = {
+        image: 'icon-picture',
+        audio: 'icon-volume-up',
+        video: 'icon-facetime-video'
+    };
+
     that.PREVIEW_TEMPLATES = {
         image: '#fd-template-multimedia-existing-image',
         audio: '#fd-template-multimedia-existing-audio',
