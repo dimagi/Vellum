@@ -179,6 +179,10 @@ formdesigner.util = (function(){
         }
         return ret;
     };
+
+    that.getAddNewItextItemId = function (itextType) {
+        return 'fd-itext-add-new-' + itextType;
+    };
     
     that.isReadOnly = function (mugType) {
         return mugType.typeSlug === "unknown";
