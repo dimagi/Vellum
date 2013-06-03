@@ -68,7 +68,7 @@ formdesigner.multimedia = (function () {
         media.initUploadController = function () {
             var $uploaderModal = $(media.getUploadModal());
             $('#fd-multimedia-modal-container').append($uploaderModal);
-            media.uploadController = new HQMediaFileUploadController(media.uploaderSlug, media.mediaType, {
+            media.uploadController = new formdesigner.multimediaConfig.uploadControllerClass(media.uploaderSlug, media.mediaType, {
                 fileFilters: that.SUPPORTED_EXTENSIONS[media.mediaType],
                 uploadURL: formdesigner.multimediaConfig.uploadUrls[media.mediaType],
                 swfURL: formdesigner.multimediaConfig.swfURL,
