@@ -140,8 +140,5 @@ formdesigner.multimedia = (function () {
         return ref;
     };
 
-    // make multimedia event capable
-    formdesigner.util.eventuality(that);
-
     return that;
 })();
