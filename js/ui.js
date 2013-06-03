@@ -1753,7 +1753,6 @@ formdesigner.launch = function (opts) {
     formdesigner.saveUrl = opts.saveUrl;
     formdesigner.patchUrl = opts.patchUrl;
 
-    formdesigner.isMultimediaEnabled = _.isObject(opts.multimediaConfig);
     formdesigner.multimediaConfig = opts.multimediaConfig;
 
     formdesigner.loadMe = opts.form;

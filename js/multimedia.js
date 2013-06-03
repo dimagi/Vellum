@@ -47,6 +47,12 @@ formdesigner.multimedia = (function () {
         video: '#fd-template-multimedia-existing-video'
     };
 
+    that.SLUG_TO_CLASS = {
+        image: 'CommCareImage',
+        audio: 'CommCareAudio',
+        video: 'CommCareVideo'
+    };
+
     function MultimediaController (uploaderSlug, mediaTypeSlug) {
         var media = this;
         media.uploaderSlug = uploaderSlug;
@@ -77,16 +83,61 @@ formdesigner.multimedia = (function () {
         };
     }
 
+    that.objectMap = {};
+
     that.initControllers = function () {
-        console.log(formdesigner.multimediaConfig.objectMap);
-        that.imageControl = new MultimediaController('fd_hqimage', 'image');
-        that.imageControl.initUploadController();
+        that.isUploadEnabled = _.isObject(formdesigner.multimediaConfig);
+        if (that.isUploadEnabled) {
+            that.imageControl = new MultimediaController('fd_hqimage', 'image');
+            that.imageControl.initUploadController();
 
-        that.audioControl = new MultimediaController('fd_hqaudio', 'audio');
-        that.audioControl.initUploadController();
+            that.audioControl = new MultimediaController('fd_hqaudio', 'audio');
+            that.audioControl.initUploadController();
 
-        that.videoControl = new MultimediaController('fd_hqvideo', 'video');
-        that.videoControl.initUploadController();
+            that.videoControl = new MultimediaController('fd_hqvideo', 'video');
+            that.videoControl.initUploadController();
+
+            that.SLUG_TO_CONTROL = {
+                'image': that.imageControl,
+                'audio': that.audioControl,
+                'video': that.videoControl
+            };
+
+            that.objectMap = formdesigner.multimediaConfig.objectMap;
+        }
+    };
+
+    that.multimediaReference = function (mediaType) {
+        var ref = {};
+        ref.mediaType = mediaType;
+
+        ref.updateRef = function (path) {
+            ref.path = path;
+            ref.linkedObj = that.objectMap[path];
+        };
+
+        ref.getUrl = function () {
+            return ref.linkedObj.url;
+        };
+
+        ref.isMediaMatched = function () {
+            return _.isObject(ref.linkedObj);
+        };
+
+        ref.updateController = function () {
+            var uploadController = formdesigner.multimedia.SLUG_TO_CONTROL[ref.mediaType].uploadController;
+            uploadController.resetUploader();
+            uploadController.currentReference = ref;
+            uploadController.uploadParams = {
+                path: ref.path,
+                media_type : formdesigner.multimedia.SLUG_TO_CLASS[ref.mediaType],
+                old_ref: (ref.isMediaMatched()) ? ref.linkedObj.m_id : "",
+                replace_attachment: true
+            };
+            uploadController.updateUploadFormUI();
+        };
+
+        return ref;
     };
 
     // make multimedia event capable

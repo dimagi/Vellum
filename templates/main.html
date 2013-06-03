@@ -121,7 +121,7 @@
                 </label>
                 <div class="controls">
                     <div class="hqm-select-files-container">
-                        <button class="hqm-select btn btn-primary" role="button">Select <%= mediaType %></button>
+                        <button class="hqm-select btn btn-primary" role="button">Select File</button>
                     </div>
                     <div class="hqm-queue"></div>
                 </div>
@@ -248,6 +248,13 @@
     </p>
 </script>
 
+<script type="text/template" id="fd-template-multimedia-nomedia">
+    <p class="fd-mm-no-ref">
+        <i class="<%=iconClass%>"></i>
+        No Reference
+    </p>
+</script>
+
 <script type="text/template" id="fd-template-multimedia-existing-video">
     <p>
         <a href="<%= url %>"
@@ -262,4 +269,24 @@
 
 <script type="text/template" id="fd-template-button-remove">
     <button class="btn btn-danger"><i class="icon-remove"></i></button>
+</script>
+
+<script type="text/template" id="fd-template-multmedia-upload-trigger">
+    <a href="#<%= uploaderId %>"
+       class="btn btn-primary"
+       data-toggle="modal">
+        <% if (multimediaExists) { %>Replace<% } else { %>Upload<% } %> <%=mediaType%>
+    </a>
+</script>
+
+<script type="text/template" id="fd-template-multimedia-block">
+    <div class="well clearfix">
+        <div class="fd-mm-upload-trigger"></div>
+        <hr />
+        <h5><i class="icon-cog"></i> Advanced</h5>
+        <div class="control-row fd-mm-path hide">
+            <button class="btn btn-inverse span3 fd-mm-path-hide">Hide Path</button> <div class="fd-mm-path-input span9"></div>
+        </div>
+        <button class="btn btn-inverse fd-mm-path-show">Show Path</button>
+    </div>
 </script>
