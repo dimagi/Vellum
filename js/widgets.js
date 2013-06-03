@@ -655,8 +655,6 @@ formdesigner.widgets = (function () {
 
         widget.handleUploadComplete = function (event, data) {
             if (data.ref && data.ref.path) {
-                console.log('updating ref');
-                console.log(data.ref);
                 formdesigner.multimedia.objectMap[data.ref.path] = data.ref;
             }
             widget.updateMultimediaBlockUI();
