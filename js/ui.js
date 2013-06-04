@@ -132,7 +132,7 @@ formdesigner.ui = function () {
 
     that.getQuestionTypeSelector = function () {
         // the question type selector inside the question form itself
-        var select = $('<select/>');
+        var select = $('<select />').attr('tabindex', -1);
         
         function makeOptionItem(idTag, attrvalue, label) {
            var opt = $('<option />')
