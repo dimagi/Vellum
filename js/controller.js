@@ -789,13 +789,13 @@ formdesigner.controller = (function () {
 	            if (mugType.mug.properties[elems[i]] && newMugType.mug.properties[elems[i]]) {
 	                formdesigner.util.copySafely(mugType.mug.properties[elems[i]].properties,
 	                                             newMugType.mug.properties[elems[i]].properties,
-	                                             ["nodeID"]);
+	                                             ["nodeID"], ["appearance"]);
 	            }
             }
             // magic special cases
             if (formdesigner.util.isSelect(newMugType) || newMugType.typeSlug === "trigger") {
                 newMugType.mug.properties.bindElement.properties.dataType = "";
-            } 
+            }
             
             // update trees
             that.form.replaceMugType(mugType, newMugType, 'data');
