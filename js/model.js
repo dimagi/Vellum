@@ -2331,7 +2331,7 @@ formdesigner.model = function () {
 	                        extraXMLNS = MT.mug.properties.dataElement.properties.xmlnsAttr;
 	                        xmlWriter.writeAttributeStringSafe("xmlns", extraXMLNS);
 	                    }
-	                    if (MT.typeName === "Repeat"){
+	                    if (MT.typeSlug === "repeat"){
 	                        xmlWriter.writeAttributeStringSafe("jr:template","");
 	                    }
                     }

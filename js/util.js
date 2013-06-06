@@ -867,7 +867,7 @@ formdesigner.util = (function(){
     that.mugToXPathReference = function (mug) {
         // for select items, return the quoted value.
         // for everything else return the path
-        if (mug.typeName === "Choice") {
+        if (mug.typeSlug === "item") {
             return '"' + mug.mug.properties.controlElement.properties.defaultValue + '"';
         } else {
             // for the currently selected mug, return a "."
