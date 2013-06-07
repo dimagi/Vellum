@@ -793,7 +793,7 @@ formdesigner.widgets = (function () {
         widget.definition = {};
 
         // todo make a style for this when vellum gets a facelift
-        widget.kvInput = $('<div style="display: inline-block; vertical-align: top; width: 405px; float: right;" />');
+        widget.kvInput = $('<div class="control-row" />');
 
         widget.getControl = function () {
             return widget.kvInput;
@@ -810,7 +810,7 @@ formdesigner.widgets = (function () {
                 e.preventDefault();
             });
             widget.kvInput.find('.fd-kv-remove-pair').click(function (e) {
-                $(this).parent().remove();
+                $(this).parent().parent().remove();
                 widget.refreshControl();
                 widget.save();
                 e.preventDefault();
