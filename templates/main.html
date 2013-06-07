@@ -105,3 +105,18 @@
         <% }); %>
     </div>
 </script>
+
+<script type="text/template" id="fd-template-widget-control-keyvalue">
+    <div class="well form form-inline">
+    <% pairs[""] = ""; %>
+    <% _.each(pairs, function (v, k) { %>
+        <div class="fd-kv-pair">
+            <input style="float: none; width: 100px;" class="fd-kv-key" type="text" value="<%=k%>" placeholder="key" />&rarr;
+            <input style="float: none; width: 160px;" class="fd-kv-val" type="text" value="<%=v%>" placeholder="value" />
+            <a href="#" class="btn fd-kv-remove-pair btn-small btn-danger<% if (k =='') { %> hide<% } %>"><i class="icon-remove"></i></a>
+        </div>
+    <% }); %>
+    <a href="#" class="btn fd-kv-add-pair hide"><i class="icon-plus"></i> Add Key&rarr;Value Pair</a>
+    </div>
+</script>
+

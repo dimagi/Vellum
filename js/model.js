@@ -872,7 +872,9 @@ formdesigner.model = function () {
                 }
             }
         },
-        
+        getAppearanceAttribute: function () {
+            return (this.mug.properties.controlElement && this.mug.properties.controlElement.properties.appearance) ? (this.mug.properties.controlElement.properties.appearance) : null;
+        },
         getPropertyDefinition: function (index) {
             // get a propery definition by a string or list index
             // assumes strings are split by the "/" character
@@ -1328,6 +1330,26 @@ formdesigner.model = function () {
         mType.mug.properties.controlElement.properties.name = "Geopoint";
         mType.mug.properties.controlElement.properties.tagName = "input";
         mType.mug.properties.bindElement.properties.dataType = "geopoint";
+        return mType;
+    };
+
+    that.mugTypeMaker.stdAndroidIntent = function () {
+        var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion),
+            mug;
+        mType.typeSlug = "androidintent";
+        mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
+        mug = that.createMugFromMugType(mType);
+        mType.mug = mug;
+
+        mType.mug.properties.controlElement.properties.name = "AndroidIntent";
+        mType.mug.properties.controlElement.properties.tagName = "input";
+        mType.getAppearanceAttribute = function () {
+            return 'intent:' + mType.mug.properties.dataElement.properties.nodeID;
+        };
+
+        mType.mug.properties.bindElement.properties.dataType = "intent";
+        mType.intentTag = null;
+
         return mType;
     };
 
@@ -2165,7 +2187,7 @@ formdesigner.model = function () {
                 }
             }
             return bList;
-        }
+        };
 
         /**
          * Searches through BOTH trees and returns
@@ -2309,7 +2331,7 @@ formdesigner.model = function () {
 	                        extraXMLNS = MT.mug.properties.dataElement.properties.xmlnsAttr;
 	                        xmlWriter.writeAttributeStringSafe("xmlns", extraXMLNS);
 	                    }
-	                    if (MT.typeName === "Repeat"){
+	                    if (MT.typeSlug === "repeat"){
 	                        xmlWriter.writeAttributeStringSafe("jr:template","");
 	                    }
                     }
@@ -2381,7 +2403,7 @@ formdesigner.model = function () {
 
                     }
                 }
-            }
+            };
 
             var createControlBlock = function () {
                 var mapFunc, afterFunc;
@@ -2490,9 +2512,10 @@ formdesigner.model = function () {
                                 xmlWriter.writeAttributeStringSafe("mediatype", mediaType);
                             }
                         }
-                        
-                        if (cProps.appearance) {
-                            xmlWriter.writeAttributeStringSafe("appearance", cProps.appearance);
+
+                        var appearanceAttr = mugType.getAppearanceAttribute();
+                        if (appearanceAttr) {
+                            xmlWriter.writeAttributeStringSafe("appearance", appearanceAttr);
                         }
                         
                         // Do hint label
@@ -2710,9 +2733,7 @@ formdesigner.model = function () {
                 
                 xmlWriter.writeEndElement(); //CLOSE MODEL
 
-                formdesigner.controller.form.extraHeadNodes.map(function (node) {
-                    xmlWriter.writeString(formdesigner.util.serializeXml(node));
-                });
+                formdesigner.intentManager.writeIntentXML(xmlWriter, dataTree);
 
                 xmlWriter.writeEndElement(); //CLOSE HEAD
 
