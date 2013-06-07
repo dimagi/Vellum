@@ -37,35 +37,7 @@ formdesigner.util = (function(){
     that.VERIFY_CODES = VERIFY_CODES;
     that.XPATH_REFERENCES = ["bindElement/relevantAttr",
                              "bindElement/calculateAttr",
-                             "bindElement/constraintAttr"]; 
-    
-    
-    that.QUESTIONS = {
-        // in the format: {question_slug: question_label}
-        // NOTE: this will be deprecated soon
-        'text': 'Text Question', //
-        'phonenumber': 'Phone Number or Numeric ID',
-        'secret': 'Password Question',
-        'group': 'Group',
-        'select': 'Multiple Choice (Multiple Answers)', //
-        'item': 'Choice',
-        '1select': 'Multiple Choice (Single Answer)', //
-        'trigger': 'Label', //
-        'repeat': 'Repeat',
-        'barcode': 'Barcode Question',
-        'geopoint': 'Geopoint Question',
-        'int': 'Integer Number',
-        'double': 'Decimal Number',
-        'long': 'Long Number',
-        'image': 'Image Question',
-        'audio': 'Audio Question',
-        'video': 'Video Question',
-        'date': 'Date',
-        'datetime': 'Date and Time',
-        'time': 'Time',
-        'datanode': 'Hidden Value',
-        'unknown': 'Unknown Question Type'
-    };
+                             "bindElement/constraintAttr"];
 
     that.QUESTION_GROUPS = [
         {
@@ -130,7 +102,8 @@ formdesigner.util = (function(){
             questions: [
                 ['geopoint', 'GPS', 'icon-map-marker'],
                 ['barcode', 'Barcode Scan', 'icon-barcode'],
-                ['secret', 'Password', 'icon-key']
+                ['secret', 'Password', 'icon-key'],
+                ['androidintent', 'Android App Callout', 'icon-vellum-android-intent']
             ]
         }
     ];
@@ -138,6 +111,21 @@ formdesigner.util = (function(){
     that.getQuestionTypeGroupID = function (slug) {
         return "fd-question-group-" + slug;
     };
+
+    var getQuestionTypeToName = function () {
+        var names = {
+            'unknown': 'Unknown Question Type'
+        };
+        _.each(that.QUESTION_GROUPS, function (groupData) {
+            var allQuestions = _.union(groupData.questions, groupData.related || []);
+             _.each(allQuestions, function (q) {
+                names[q[0]] = q[1];
+            });
+        });
+        return names;
+    };
+
+    that.QUESTIONS = getQuestionTypeToName();
 
     var getQuestionTypeToGroup = function () {
         var groups = {};
@@ -618,7 +606,8 @@ formdesigner.util = (function(){
             'xsd:string',
             'xsd:time',
             'geopoint',
-            'barcode'
+            'barcode',
+            'androidintent'
     ];
 
     that.VALID_CONTROL_TAG_NAMES = [
@@ -657,7 +646,8 @@ formdesigner.util = (function(){
             'GPS',
             'Barcode',
             'Secret',
-            'Geopoint'
+            'Geopoint',
+            'AndroidIntent'
     ];
 
     /**
@@ -881,7 +871,7 @@ formdesigner.util = (function(){
     that.mugToXPathReference = function (mug) {
         // for select items, return the quoted value.
         // for everything else return the path
-        if (mug.typeName === "Choice") {
+        if (mug.typeSlug === "item") {
             return '"' + mug.mug.properties.controlElement.properties.defaultValue + '"';
         } else {
             // for the currently selected mug, return a "."

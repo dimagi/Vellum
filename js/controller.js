@@ -22,11 +22,6 @@ formdesigner.controller = (function () {
         formdesigner.model.init();
         formdesigner.ui.init();
         that.setCurrentlySelectedMugType(null);
-
-        // anything required to get the formdesigner into a consistent state
-        // that needs to happen for both new forms and forms loaded from a
-        // string 
-        that.form.extraHeadNodes = [];
         
         if (formdesigner.opts.langs && formdesigner.opts.langs.length > 0) {
             // override the languages with whatever is passed in
@@ -536,6 +531,8 @@ formdesigner.controller = (function () {
                 return formdesigner.model.mugTypeMaker.stdGeopoint();
             case 'barcode':
                 return formdesigner.model.mugTypeMaker.stdBarcode();
+            case 'androidintent':
+                return formdesigner.model.mugTypeMaker.stdAndroidIntent();
             case 'image':
                 return formdesigner.model.mugTypeMaker.stdImage();
             case 'audio':
@@ -728,6 +725,7 @@ formdesigner.controller = (function () {
         // insert into model
         that.insertMugTypeIntoForm(refMugType, mugType, position);
         formdesigner.model.Itext.updateForNewMug(mugType);
+        formdesigner.intentManager.syncMugTypeWithIntent(mugType);
 
         formdesigner.ui.jstree("select_node", '#' + mugType.ufid);
         
@@ -1534,6 +1532,8 @@ formdesigner.controller = (function () {
                             return 'stdGeopoint';
                         }else if(dataType === 'barcode') {
                             return 'stdBarcode';
+                        }else if(dataType === 'intent') {
+                            return 'stdAndroidIntent';
                         }else if(dataType === 'string') {
                             if (appearance === "numeric") {
                                 return 'stdPhoneNumber';
@@ -1743,6 +1743,8 @@ formdesigner.controller = (function () {
                     if (tag === 'repeat') {
                         parseRepeatVals(repeat_count, repeat_noaddremove, MugType);
                     }
+
+                    formdesigner.intentManager.syncMugTypeWithIntent(MugType);
                     
                     // add any arbitrary attributes that were directly on the control
                     MugType.mug.properties.controlElement.properties._rawAttributes = formdesigner.util.getAttributes(cEl);
@@ -1949,17 +1951,12 @@ formdesigner.controller = (function () {
                 instances = _getInstances(xml),
                 itext = head.find('itext');
 
-            that.form.extraHeadNodes = [];
-            var extraHeadTags = [
+            var intentTags = [
                 "odkx\\:intent, intent"
             ];
-            extraHeadTags.map(function (tag) {
-                var found = head.children(tag);
-                for (var i = 0; i < found.length; i++) {
-                    if (found.length) {
-                        that.form.extraHeadNodes.push(found[i]);
-                    }
-                }
+            intentTags.map(function (tag) {
+                var foundTags = head.children(tag);
+                formdesigner.intentManager.parseIntentTagsFromHead(foundTags);
             });
 
             var data = $(instances[0]).children();
@@ -2245,6 +2242,121 @@ formdesigner.controller = (function () {
     
     //make controller event capable
     formdesigner.util.eventuality(that);
+
+    return that;
+})();
+
+
+formdesigner.intentManager = (function () {
+    "use strict";
+    var that = {};
+    that.unmappedIntentTags = {};
+
+    var ODKXIntentTag = function (nodeID, path) {
+        var self = this;
+        self.initialNodeID = nodeID;
+        self.path = path || "";
+        self.xmlns = "http://opendatakit.org/xforms";
+
+        self.extra = {};
+        self.response = {};
+
+        self.parseInnerTags = function (tagObj, innerTag, store) {
+            _.each(tagObj.find(innerTag), function (inner) {
+                var $innerTag = $(inner);
+                store[$innerTag.attr('key')] = $innerTag.attr('ref');
+            });
+        };
+
+        self._writeInnerTagXML = function(xmlWriter, innerTag, store) {
+            if (store) {
+                _.each(store, function (ref, key) {
+                    if (key) {
+                        xmlWriter.writeStartElement(innerTag);
+                        xmlWriter.writeAttributeStringSafe("key", key);
+                        xmlWriter.writeAttributeStringSafe("ref", ref);
+                        xmlWriter.writeEndElement();
+                    }
+                });
+            }
+        };
+
+        self.writeXML = function (xmlWriter, currentNodeID) {
+            xmlWriter.writeStartElement('odkx:intent');
+            xmlWriter.writeAttributeStringSafe("xmlns:odkx", self.xmlns);
+            xmlWriter.writeAttributeStringSafe("id", currentNodeID || self.initialNodeID);
+            xmlWriter.writeAttributeStringSafe("class", self.path);
+            self._writeInnerTagXML(xmlWriter, 'extra', self.extra);
+            self._writeInnerTagXML(xmlWriter, 'response', self.response);
+            xmlWriter.writeEndElement('odkx:intent');
+        };
+    };
+
+    that.parseIntentTagsFromHead = function (tags) {
+        _.each(tags, function (tagXML) {
+            var $tag, tagId, newTag, xmlns;
+            $tag = $(tagXML);
+
+            tagId = $tag.attr('id');
+            newTag = new ODKXIntentTag(tagId, $tag.attr('class'));
+
+            xmlns = $tag.attr('xmlns:odkx');
+            newTag.xmlns = xmlns || newTag.xmlns;
+            newTag.parseInnerTags($tag, 'extra', newTag.extra);
+            newTag.parseInnerTags($tag, 'response', newTag.response);
+            that.unmappedIntentTags[tagId] = newTag;
+        });
+    };
+
+    that.getParsedIntentTagWithID = function (nodeID) {
+        var intentTag = null;
+        _.each(that.unmappedIntentTags, function (tag) {
+            if (tag.initialNodeID == nodeID) {
+                intentTag = tag;
+            }
+        });
+        return intentTag;
+    };
+
+    that.syncMugTypeWithIntent = function (mugType) {
+        // called when initializing a mugType from a parsed form
+        if (mugType.typeSlug == 'androidintent') {
+            var tag = that.getParsedIntentTagWithID(mugType.mug.properties.dataElement.properties.nodeID);
+            if (!tag) {
+                var path = (mugType.intentTag) ? mugType.intentTag.path : null;
+                tag = new ODKXIntentTag(mugType.mug.properties.dataElement.properties.nodeID, path);
+            }
+            mugType.intentTag = tag;
+            delete that.unmappedIntentTags[tag.initialNodeID];
+        }
+    };
+
+    that.writeIntentXML = function (xmlWriter, dataTree) {
+        // make sure any leftover intent tags are still kept
+        _.each(that.unmappedIntentTags, function (tag) {
+           tag.writeXML(xmlWriter, null);
+        });
+
+        var intents,
+            getIntentMugTypes = function(node) {
+                var MT = node.getValue();
+                if (!MT || node.isRootNode) {
+                    return null;
+                }
+                if (MT.mug.properties.bindElement && MT.mug.properties.bindElement.properties.dataType == 'intent') {
+                    return MT;
+                } else {
+                    return null;
+                }
+            };
+        intents = dataTree.treeMap(getIntentMugTypes);
+        if (intents.length > 0) {
+            xmlWriter.writeComment('Intents inserted by Vellum:');
+            intents.map(function (intentMT) {
+                intentMT.intentTag.writeXML(xmlWriter, intentMT.mug.properties.dataElement.properties.nodeID);
+            });
+        }
+    };
 
     return that;
 })();
