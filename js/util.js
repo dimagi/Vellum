@@ -260,19 +260,21 @@ formdesigner.util = (function(){
     /*
      * Copies all properties from one object to another under the following rules:
      *  - If the property doesn't exist on the destination object it is not copied
-     *  - If the property exists but is different on the destination object it is not copied
      *
      * This is used to attempt to copy as much as possible from one mug to 
      * another while preserving the core structure.
      * 
      */
-    that.copySafely = function (from, to, forceOverride) {
-        if (!forceOverride) forceOverride = [];
+    that.copySafely = function (from, to, forceOverride, skip) {
+        forceOverride = forceOverride || [];
+        skip = skip || [];
+
         if (to) {
             for (var prop in from) {
                 if (from.hasOwnProperty(prop)) {
-                    if (forceOverride.indexOf(prop) !== -1 || 
-                        (to.hasOwnProperty(prop) && !to[prop])) {
+                    if (skip.indexOf(prop) === -1 &&
+                        (forceOverride.indexOf(prop) !== -1 || 
+                         (to.hasOwnProperty(prop) && !to[prop]))) {
                         to[prop] = from[prop];
                     } 
                 }
