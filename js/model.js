@@ -2949,21 +2949,23 @@ formdesigner.model = function () {
                 // currently we don't do anything with relative paths
                 return p.initial_context === xpathmodels.XPathInitialContextEnum.ROOT;
             });
+            var errorKey = mug.ufid + "-" + "badpath",
+                errors = false;
+
             this.all = this.all.concat(paths.map(function (path) {
                 var refMug = formdesigner.controller.getMugByPath(path.pathWithoutPredicates());
-                var error = that.FormError({
-                    level: "parse-warning",
-                    key: mug.ufid + "-" + "badpath",
-                    message: "The question '" + mug.mug.properties.bindElement.properties.nodeID + 
-                        "' references an unknown question " + path.toXPath() + 
-                        " in its " + mug.getPropertyDefinition(property).lstring + "."
-                                                
-                });
                 if (!refMug) {
-                    // formdesigner.form.errors
-                    formdesigner.controller.form.updateError(error, {updateUI: true});
-                } else {
-                    formdesigner.controller.form.clearError(error, {updateUI: true});
+                    errors = true;
+                    formdesigner.controller.form.updateError(that.FormError({
+                        level: "parse-warning",
+                        key: errorKey,
+                        message: "The question '" + mug.mug.properties.bindElement.properties.nodeID + 
+                            "' references an unknown question " + path.toXPath() + 
+                            " in its " + mug.getPropertyDefinition(property).lstring + "."
+                                                    
+                    }), {
+                        updateUI: true
+                    });
                 }
                 return {
                     mug: mug.ufid, 
@@ -2972,7 +2974,12 @@ formdesigner.model = function () {
                     path: path.toXPath(),
                     sourcePath: formdesigner.controller.form.dataTree.getAbsolutePath(mug)
                 };      
-            }));
+            }))
+           
+            if (!errors) {
+                formdesigner.controller.form.clearError(that.FormError({key: errorKey}), {updateUI: true});
+            }        
+
         };
         
         logic.updateReferences = function (mug, property) {
