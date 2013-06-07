@@ -736,6 +736,11 @@ formdesigner.ui = function () {
         };
         makeFormProp("Form ID", "formID", formIDFunc, formdesigner.controller.form.formID);
 
+        $('<p>Note: changing the Form ID here will not automatically change ' +
+          ' the Form ID in existing references in your logic conditions.  ' + 
+          'If you change the Form ID, you must manually change any ' +
+          'existing logic references.</p>').appendTo('#fd-form-opts-ul');
+
     };
 
 
