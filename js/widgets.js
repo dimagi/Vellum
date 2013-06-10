@@ -86,9 +86,17 @@ formdesigner.widgets = (function () {
 
         widget.getUIElement = function () {
             // gets the whole widget (label + control)
-            var uiElem = $("<div />").addClass("widget");
-            uiElem.append(this.getLabel());
-            uiElem.append(this.getControl());
+            var uiElem = $("<div />").addClass("widget control-group"),
+                $control, $label;
+
+            $label = this.getLabel();
+            $label.addClass('control-label');
+            uiElem.append($label);
+
+            var $controls = $('<div class="controls" />');
+            $controls.append(this.getControl());
+            uiElem.append($controls);
+
             return uiElem;
         };
 
@@ -147,7 +155,7 @@ formdesigner.widgets = (function () {
         // a text widget
         var widget = that.normalWidget(mugType, path);
 
-	    var input = $("<input />").attr("id", widget.getID()).attr("type", "text");
+	    var input = $("<input />").attr("id", widget.getID()).attr("type", "text").addClass('input-block-level');
 
 	    widget.getControl = function () {
             return input;
@@ -227,7 +235,7 @@ formdesigner.widgets = (function () {
         // auto checkbox
         var autoBoxId = widget.getID() + "-auto-itext";
         var autoBox = $("<input />").attr("type", "checkbox").attr("id", autoBoxId);
-        var autoBoxLabel = $("<label />").text("auto?").attr("for", autoBoxId);
+        var autoBoxLabel = $("<label />").text("auto?").attr("for", autoBoxId).addClass('checkbox');
 
         autoBox.change(function () {
             var auto = $(this).prop("checked");
@@ -250,13 +258,26 @@ formdesigner.widgets = (function () {
 
         widget.getUIElement = function () {
             // gets the whole widget (label + control)
-            var uiElem = $("<div />").addClass("widget");
-            uiElem.append(this.getLabel());
-            uiElem.append(this.getControl());
-            var autoDiv = $("<div />").addClass("auto-itext");
+            var uiElem = $("<div />").addClass("widget control-group"),
+                $controls = $('<div class="controls" />'),
+                $label;
+
+            $label = this.getLabel();
+            $label.addClass('control-label');
+            uiElem.append($label);
+
+            var $input = this.getControl();
+            $input.removeClass('input-block-level');
+            $input.addClass('input-large');
+            $controls.append($input);
+
+
+            var autoDiv = $("<span />").addClass("auto-itext help-inline");
+            autoBoxLabel.prepend(autoBox);
             autoDiv.append(autoBoxLabel);
-            autoDiv.append(autoBox);
-            uiElem.append(autoDiv);
+            $controls.append(autoDiv);
+            uiElem.append($controls);
+
             return uiElem;
         };
 
@@ -312,14 +333,6 @@ formdesigner.widgets = (function () {
 	        return input;
         };
 
-        widget.getUIElement = function () {
-            // override this because the label comes after the control
-            var uiElem = $("<div />").addClass("widget");
-            uiElem.append(this.getControl());
-            uiElem.append(this.getLabel());
-            return uiElem;
-        };
-
         widget.setValue = function (value) {
             input.prop("checked", value);
         };
@@ -348,10 +361,15 @@ formdesigner.widgets = (function () {
 
         widget.getUIElement = function () {
             // gets the whole widget (label + control)
-            var uiElem = $("<div />").addClass("widget");
-            uiElem.append(this.getLabel());
-            uiElem.append(this.getControl());
-            uiElem.append(xPathButton);
+            var uiElem = $("<div />").addClass("widget control-group"),
+                $controls = $('<div class="controls" />'),
+                $label;
+            $label = this.getLabel();
+            $label.addClass('control-label');
+            uiElem.append($label);
+            $controls.append(this.getControl());
+            $controls.append(xPathButton);
+            uiElem.append($controls);
             return uiElem;
         };
 
@@ -448,7 +466,7 @@ formdesigner.widgets = (function () {
             }
         };
 
-        var input = $("<input />").attr("id", widget.getID()).attr("type", "text");
+        var input = $("<input />").attr("id", widget.getID()).attr("type", "text").addClass('input-block-level');
 
         widget.getControl = function () {
             return input;
@@ -458,51 +476,192 @@ formdesigner.widgets = (function () {
         return widget;
     };
 
-    that.defaultContentTypes = ["image", "audio", "video", "long", "short"];
-
     that.iTextWidget = function(mugType, language, itemFunc, slug, form, block) {
-
         var widget = that.baseItextWidget(mugType, language, itemFunc, slug, form);
 
-        // a bit of a hack, only allow deletion for non-default forms
-        if (form !== "default") {
+        widget.getDisplayName = function () {
+            return widget.getType();
+        };
 
-            // override getUIElement to include the delete button
-            widget.getUIElement = function () {
-	            // gets the whole widget (label + control)
-	            var uiElem = $("<div />").addClass("widget").attr("data-form", form).css('clear', 'both');
-	            uiElem.append(this.getLabel());
 
-	            uiElem.append(this.getControl());
-                var buttonDiv = $('<div />').css('text-align', 'right').css('clear', 'both');
-//                if (MultimediaMap && (form == 'image' || form == 'audio')) {
-//                    widget.addMultimediaButtons(buttonDiv, form);
-//                }
 
-	            var deleteButton = $('<button />').addClass('btn').addClass('btn-danger').text("Delete").button();
-	            deleteButton.click(function () {
-	                widget.deleteValue();
-	                // this is a bit ridiculous but finds the right things to remove
-	                uiElem.parent().parent().children(".itext-language-section")
-                        .children('div[data-form="' + form + '"]').each(function () {
+        return widget;
+    };
+
+    that.iTextRemovableWidget = function(mugType, language, itemFunc, slug, form, block) {
+        var widget = that.iTextWidget(mugType, language, itemFunc, slug, form);
+
+        widget.getUIElement = function () {
+            // gets the whole widget (label + control)
+            var uiElem = $("<div />").addClass("widget control-group").attr("data-form", form),
+                $controls = $('<div class="controls controls-row" />'),
+                $label, $input, $deleteButton;
+
+            $label = this.getLabel();
+            $label.addClass('control-label');
+            uiElem.append($label);
+
+            $input = this.getControl();
+            $input.addClass('span10');
+            $input.removeClass('input-block-level');
+            $controls.append($input);
+
+            $controls.append($('<div class="span2" />').append(widget.getDeleteButton()));
+
+            uiElem.append($controls);
+
+            return uiElem;
+        };
+
+        widget.getDeleteButton = function () {
+            var $deleteButton = $($('#fd-template-button-remove').html());
+            $deleteButton.click(function () {
+                widget.deleteValue();
+                // this is a bit ridiculous but finds the right things to remove
+                $("#fd-question-edit-content .itext-language-section")
+                    .children('div[data-form="' + form + '"]')
+                    .each(function () {
                         $(this).remove();
-	                });
-                    block.formList.splice(block.formList.indexOf(form), 1);
-                    $($('.itext-options .itext-option')[that.defaultContentTypes.indexOf(form)]).removeClass('disabled');
-                    widget.fireChangeEvents();
-	            });
-	            buttonDiv.append(deleteButton);
-
-                uiElem.append(buttonDiv);
-
-                return uiElem;
-	        };
-
-        }
+                });
+                block.formList.splice(block.formList.indexOf(form), 1);
+                $('#' + formdesigner.util.getAddNewItextItemId(form)).removeClass('disabled');
+                widget.fireChangeEvents();
+            });
+            return $deleteButton;
+        };
 
         widget.getDisplayName = function () {
-            return this.getType();
+            return widget.getType();
         };
+
+        return widget;
+    };
+
+    that.iTextMediaWidget = function (mugType, language, itemFunc, slug, form, block) {
+        var widget = that.iTextRemovableWidget(mugType, language, itemFunc, slug, form, block);
+
+        widget.mediaRef = formdesigner.multimedia.multimediaReference(form);
+
+        var $input = widget.getControl(),
+            $uiElem = $("<div />");
+
+        widget.getPreviewUI = function () {
+            var currentPath = widget.getValue(),
+                $preview;
+            if (currentPath in formdesigner.multimedia.objectMap) {
+                var linkedObject = formdesigner.multimedia.objectMap[currentPath];
+                $preview = _.template($(formdesigner.multimedia.PREVIEW_TEMPLATES[form]).text(), {
+                    url: linkedObject.url
+                });
+            } else {
+                $preview = _.template($('#fd-template-multimedia-nomedia').text(), {
+                    iconClass: formdesigner.multimedia.ICONS[form]
+                })
+            }
+            return $preview;
+        };
+
+        widget.getUploadButtonUI = function () {
+            var currentPath = widget.getValue(),
+                $uploadBtn;
+            $uploadBtn = $(_.template($('#fd-template-multmedia-upload-trigger').text(), {
+                multimediaExists: currentPath in formdesigner.multimedia.objectMap,
+                uploaderId: formdesigner.multimedia.SLUG_TO_CONTROL[form].uploaderSlug,
+                mediaType: form
+            }));
+            $uploadBtn.click(function () {
+                widget.mediaRef.updateController();
+            });
+            return $uploadBtn;
+        };
+
+        widget.updateReference = function () {
+            var currentPath = widget.getValue();
+            $uiElem.attr('data-hqmediapath', currentPath);
+            widget.mediaRef.updateRef(currentPath);
+        };
+
+
+
+        widget.getPreviewContainerId = function () {
+            return  'fd-mm-preview-container-' + form;
+        };
+
+        widget.getUIElement = function () {
+            $uiElem = $("<div />").addClass("widget control-group").attr("data-form", form);
+            var $controls = $('<div class="controls control-row" />'),
+                $previewContainer = $('<div />').addClass('fd-mm-preview-container span2'),
+                $uploadContainer = $('<div />').addClass('fd-mm-upload-container span8'),
+                $label;
+
+            $label = widget.getLabel();
+            $label.addClass('control-label');
+            $uiElem.append($label);
+
+            widget.updateReference();
+
+            $previewContainer.attr('id', widget.getPreviewContainerId());
+            $previewContainer.html(widget.getPreviewUI());
+            $previewContainer.find('.existing-media').tooltip();
+
+            $controls.append($previewContainer);
+
+            if (formdesigner.multimedia.isUploadEnabled) {
+                $uploadContainer.html($('#fd-template-multimedia-block').html());
+                $uploadContainer.find('.fd-mm-upload-trigger').append(widget.getUploadButtonUI());
+                $uploadContainer.find('.fd-mm-path-input').append($input);
+                $uploadContainer.find('.fd-mm-path-show').click(function () {
+                    var $showBtn = $(this);
+                    $showBtn.addClass('hide');
+                    $showBtn.parent().find('.fd-mm-path').removeClass('hide');
+                });
+                $uploadContainer.find('.fd-mm-path-hide').click(function () {
+                    var $hideBtn = $(this);
+                    $hideBtn.parent().addClass('hide');
+                    $hideBtn.parent().parent().find('.fd-mm-path-show').removeClass('hide');
+                });
+            } else {
+                $uploadContainer.append($input);
+            }
+
+            $controls.append($uploadContainer);
+
+            $controls.append($('<div class="span2" />').append(widget.getDeleteButton()));
+
+            $uiElem.append($controls);
+
+            $uiElem.on('mediaUploadComplete', widget.handleUploadComplete);
+
+            return $uiElem;
+        };
+
+        widget.getDisplayName = function () {
+            return "Multimedia: " + widget.getType();
+        };
+
+        widget.updateMultimediaBlockUI = function () {
+            var $previewContainer = $uiElem.find('.fd-mm-preview-container');
+            $previewContainer.html(widget.getPreviewUI());
+            $previewContainer.find('.existing-media').tooltip();
+
+            var $uploadContainer = $uiElem.find('.fd-mm-upload-container');
+            $uploadContainer.find('.fd-mm-upload-trigger').empty();
+            $uploadContainer.find('.fd-mm-upload-trigger').append(widget.getUploadButtonUI());
+
+            widget.updateReference();
+        };
+
+        $input.bind("change keyup", widget.updateMultimediaBlockUI);
+
+        widget.handleUploadComplete = function (event, data) {
+            if (data.ref && data.ref.path) {
+                formdesigner.multimedia.objectMap[data.ref.path] = data.ref;
+            }
+            widget.updateMultimediaBlockUI();
+        };
+
+
+
         return widget;
     };
 
@@ -569,13 +728,6 @@ formdesigner.widgets = (function () {
             input.find("#" + that.unchangeableQuestionTypes[i]).remove();
         }
 
-        // crazy temporary css hack
-        var label = widget.getLabel().css("float", "left").css("line-height", "40px");
-        widget.getLabel = function () {
-
-            return label;
-        };
-
         widget.getControl = function () {
             return input;
         };
@@ -641,7 +793,7 @@ formdesigner.widgets = (function () {
         widget.definition = {};
 
         // todo make a style for this when vellum gets a facelift
-        widget.kvInput = $('<div style="display: inline-block; vertical-align: top; width: 405px; float: right;" />');
+        widget.kvInput = $('<div class="control-row" />');
 
         widget.getControl = function () {
             return widget.kvInput;
@@ -658,7 +810,7 @@ formdesigner.widgets = (function () {
                 e.preventDefault();
             });
             widget.kvInput.find('.fd-kv-remove-pair').click(function (e) {
-                $(this).parent().remove();
+                $(this).parent().parent().remove();
                 widget.refreshControl();
                 widget.save();
                 e.preventDefault();
@@ -912,124 +1064,105 @@ formdesigner.widgets = (function () {
 
     that.iTextFieldBlock = function (mugType, options) {
         var block = that.baseITextFieldBlock(mugType, options);
-        var main = $("");
+
+        block.defaultContentTypes = ['long', 'short'];
+        block.contentTypeIcons = _.extend({}, formdesigner.multimedia.ICONS);
+
         // needed for closure
-        var textIdFunc = block.textIdFunc;
-        var slug = block.slug;
+        var textIdFunc = block.textIdFunc,
+            slug = block.slug,
+            $container = $('<div />'),
+            multimediaTypes = _.clone(formdesigner.multimedia.SUPPORTED_MEDIA_TYPES);
 
-        var getDefaultValue = function (formType) {
-            if (formType === "image" || formType === "audio" || formType === "video") {
-                // default formats
-                // image: jr://file/commcare/image/form_id/question_id.png
-                // audio: jr://file/commcare/audio/form_id/question_id.mp3
-                var extension = (formType === "image") ? "png" :
-                    (formType == "audio") ? "mp3" : "3gp";
-                var ret = "jr://file/commcare/" + formType + "/" +
-                       formdesigner.controller.form.formID + "/" +
-                       mugType.getDefaultItextRoot() + "." + extension;
-                return ret;
-            }
-            return null;
-        };
-
-        var addItextType = block.addItextType = function (form, value) {
+        var addItextType = function (form, value) {
             if (block.formList.indexOf(form) != -1) {
                 return;
             }
             block.formList.push(form);
 
-            $($('.itext-options .itext-option')[that.defaultContentTypes.indexOf(form)]).addClass('disabled');
+            $('#' + formdesigner.util.getAddNewItextItemId(form)).addClass('disabled');
 
-            main.parent().find(".itext-language-section").each(function () {
-                var lang = $(this).data("language");
-                var itextWidget = that.iTextWidget(mugType, lang, textIdFunc, slug, form, block);
+            $container.parent().find(".itext-language-section").each(function () {
+
+                var lang, itextWidget, uiElem, itextForm;
+
+                lang = $(this).data("language");
+
+                itextWidget = (multimediaTypes.indexOf(form) >= 0) ?
+                                that.iTextMediaWidget(mugType, lang, textIdFunc, slug, form, block) :
+                                that.iTextRemovableWidget(mugType, lang, textIdFunc, slug, form, block);
+
                 itextWidget.setValue(value);
-                var uiElem = itextWidget.getUIElement();
+
+                uiElem = itextWidget.getUIElement();
                 uiElem.appendTo($(this));
-                var itextForm = itextWidget.getTextItem().getOrCreateForm(form);
+
+                itextForm = itextWidget.getTextItem().getOrCreateForm(form);
                 if (value) {
                     itextForm.setValue(lang, value);
                 }
                 itextWidget.fireChangeEvents();
             });
-            block.loadMediaData();
         };
 
-        block.loadMediaData = function () {
-            var paths = [];
-            for (var i = 0; i < block.langs.length; i++) {
-                for (var j = 0; j < block.formList.length; j++) {
-                    var form = block.formList[j];
-                    if (form === 'image' || form === 'audio')
-                        paths.push(itextItem.getValue(form, block.langs[i]));
-                }
+        block.getDefaultValue = function (formType) {
+            if (multimediaTypes.indexOf(formType) >= 0) {
+                // default formats
+                // image: jr://file/commcare/image/form_id/question_id.png
+                // audio: jr://file/commcare/audio/form_id/question_id.mp3
+                var extension = formdesigner.multimedia.DEFAULT_EXTENSIONS[formType];
+                return "jr://file/commcare/" + formType + "/" +
+                       formdesigner.controller.form.formID + "/" +
+                       mugType.getDefaultItextRoot() + "." + extension;
             }
-
-            $.getJSON(lookupUrlsUrl, {path: paths}, function(data) {
-                var loadedData = {images: [], audio: []};
-                for (var i = 0; i < block.langs.length; i++) {
-                    for (var j = 0; j < block.formList.length; j++) {
-                        // add widget
-                        var form = block.formList[j];
-                        if (form === 'audio' || form === 'image') {
-                            var path = itextItem.getValue(form, block.langs[i]);
-                            var d = data[path] || {};
-                            d.type = form;
-                            if (form === 'audio')
-                                loadedData.audio.push(d);
-                            if (form === 'image')
-                                loadedData.images.push(d);
-                        }
-                    }
-                }
-
-//                block.media_map = new MultimediaMap(loadedData, uploadUrl), main.parent()[0];
-
-                if (loadedData.audio.length > 0 || loadedData.images.length > 0)
-                    ko.applyBindings(block.media_map, document.getElementById("fd-ui-container"));
-            });
+            return null;
         };
 
-        var itextItem = block.getTextId();
+        block.getFilteredFormList = function () {
+            return block.formList;
+        };
 
         block.getUIElement = function () {
-            for (var i = 0; i < this.langs.length; i++) {
-                var subSec = $("<div />").addClass("itext-language-section").data("language", this.langs[i]);
-               
-                main = main.add(subSec);
-                // sub heading for language
-                $("<h3 />").text(this.langs[i]).appendTo(subSec);
+            var itextItem = block.getTextId(),
+                formList = block.getFilteredFormList();
 
-                // loop through items, add to UI
-                for (var j = 0; j < this.formList.length; j++) {
-                    var itextWidget = that.iTextWidget(mugType, this.langs[i], this.textIdFunc,
-                                                       this.slug, this.formList[j], block);
-                    itextWidget.setValue(itextItem.getValue(this.formList[j], this.langs[i]));
-                    var uiElem = itextWidget.getUIElement();
+            if (formList) {
+                for (var i = 0; i < this.langs.length; i++) {
+                    var language = block.langs[i];
 
-                    uiElem.appendTo(subSec);
+                    var subSec = $("<div />").addClass("itext-language-section well well-vellum").data("language", language);
+                    $container.append(subSec);
+
+                    // sub heading for language
+                    $("<h3 />").text(language).appendTo(subSec);
+
+                    // loop through items, add to UI
+                    for (var j = 0; j < formList.length; j++) {
+                        var formType = formList[j], itextWidget;
+
+                        if (formType === 'default') {
+                            itextWidget = that.iTextWidget(mugType, language, block.textIdFunc, block.slug, formType, block);
+                        } else if (multimediaTypes.indexOf(formType) >= 0) {
+                            itextWidget = that.iTextMediaWidget(mugType, language, block.textIdFunc, block.slug, formType, block);
+                        } else {
+                            itextWidget = that.iTextRemovableWidget(mugType, language, block.textIdFunc, block.slug, formType, block);
+                        }
+
+                        itextWidget.setValue(itextItem.getValue(formType, language));
+                        var uiElem = itextWidget.getUIElement();
+                        uiElem.appendTo(subSec);
+                    }
                 }
             }
 
             if (this.showAddFormButton) {
-	            var defaultContentTypes = that.defaultContentTypes;
-	            var iWrapper = $("<div />").addClass("itext-wrapper").css('clear', 'both');
-	            main = main.add(iWrapper);
-	            $("<span />").text("Add: ").addClass("help-inline").appendTo(iWrapper);
-                var bg = $("<div />").addClass("btn-group itext-options").appendTo(iWrapper);
-                for (i = 0; i < defaultContentTypes.length; i++) {
-		            var btn = $("<div />").text(defaultContentTypes[i]).button().addClass('btn itext-option').click(
-		                function () {
-		                    var form = $(this).text();
-		                    addItextType(form, getDefaultValue(form));
-		                }).appendTo(bg);
-                    if (block.formList.indexOf(defaultContentTypes[i]) != -1)
-                        btn.addClass('disabled');
-		        }
-                var addButton = $("<div />").text("custom...").button().addClass('btn').appendTo(bg);
-	            addButton.click(function () {
+                $container.append(block.getAddItextGroup("Add Multimedia", multimediaTypes));
+                var $otherGroup = block.getAddItextGroup("Add Other", block.defaultContentTypes);
+
+                var $customButton = $("<div />").text("custom...").button().addClass('btn');
+	            $customButton.click(function () {
 	                var dialog = $("#fd-dialog-confirm");
-	                dialog.dialog( "destroy" );
+	                dialog.dialog("destroy");
 	                dialog.empty();
 	                $("<label />").attr("for", "new-itext-id").text("Content type: ").appendTo(dialog);
 	                var input = $("<input />").addClass("fd-property-input").attr("id", "new-itext-id").appendTo(dialog);
@@ -1046,9 +1179,54 @@ formdesigner.widgets = (function () {
 	                    }
 	               });
 	            });
+
+                $otherGroup.find('.btn-group').append($customButton);
+
+                $container.append($otherGroup);
 	        }
 
-	        return main;
+	        return $container;
+        };
+
+        block.getAddItextGroup = function (addText, contentTypes) {
+            var $addItextBtn = $("<div />").addClass("itext-wrapper control-group"),
+                $controls = $('<div class="controls" />');
+            $("<label />").text(addText).addClass("control-label").appendTo($addItextBtn);
+
+            var $btnGroup = block.getContentTypeButtons(contentTypes);
+            $controls.append($btnGroup);
+            $addItextBtn.append($controls);
+
+            return $addItextBtn;
+        };
+
+        block.getContentTypeButtons = function (contentTypes) {
+            var formList = block.getFilteredFormList();
+
+            var $buttonGroup = $("<div />").addClass("btn-group itext-options");
+            for (var i = 0; i < contentTypes.length; i++) {
+                var contentType = contentTypes[i],
+                    $btn = $('<div />');
+                $btn.text(contentType)
+                    .button()
+                    .attr('id', formdesigner.util.getAddNewItextItemId(contentType))
+                    .data('formtype', contentType)
+                    .addClass('btn itext-option').click(
+                    function () {
+                        var form = $(this).data('formtype');
+		                    addItextType(form, block.getDefaultValue(form));
+                    }).appendTo($buttonGroup);
+
+                var iconClass = block.contentTypeIcons[contentType];
+                if (iconClass) {
+                    $btn.prepend($('<i />').addClass(iconClass).after(" "));
+                }
+
+                if (formList.indexOf(contentType) != -1) {
+                    $btn.addClass('disabled');
+                }
+            }
+            return $buttonGroup;
         };
 
         return block;
@@ -1206,12 +1384,13 @@ formdesigner.widgets = (function () {
                                  mugType.typeSlug !== 'repeat');
             
         elements = [{
-            widgetType: "itext",
-            slug: "text",
-            displayMode: "full",
-            textIdFunc: function (mt) { return mt.getItext() },
-            showAddFormButton: showAddFormButton
-        }];
+                widgetType: "itext",
+                slug: "text",
+                displayMode: "full",
+                textIdFunc: function (mt) { return mt.getItext() },
+                showAddFormButton: showAddFormButton
+            }
+        ];
 
         return that.genericSection(mugType, {
             displayName: "Content",

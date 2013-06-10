@@ -628,8 +628,9 @@ formdesigner.ui = function () {
             if (langs.length < 2) {
                 return;
             }
-            div = $('<div id="fd-lang-disp-div"></div>');
-            div.append('<label>Display Language: </label>');
+            // todo this is really gross, should get turned into a template at some point. :|
+            div = $('<div id="fd-lang-disp-div" class="control-group"></div>');
+            div.append('<label for="fd-land-disp-select" class="control-label">Display Language: </label>');
 
             str = '<select data-placeholder="Choose a Language" id="fd-land-disp-select">';
             for (var i = 0; i < langs.length; i++) {
@@ -643,10 +644,11 @@ formdesigner.ui = function () {
             });
 
             langList.val(formdesigner.currentItextDisplayLanguage);
-            div.append(langList);
+            var $controls = $('<div class="controls" />');
+            $controls.append(langList);
+            div.append($controls);
             
             if (formdesigner.opts.allowLanguageEdits) {
-                str = '';
                 str = '<button class="btn btn-primary" id="fd-lang-disp-add-lang-button">Add Language</button>';
                 addLangButton = $(str);
                 addLangButton.button();
@@ -654,7 +656,6 @@ formdesigner.ui = function () {
                     that.showAddLanguageDialog();
                 });
                 div.append(addLangButton);
-                str = '';
                 str = '<button class="btn btn-warning" id="fd-lang-disp-remove-lang-button">Remove Langauge</button>';
                 removeLangButton = $(str);
                 removeLangButton.button();
@@ -663,7 +664,9 @@ formdesigner.ui = function () {
                 });
                 div.append(removeLangButton);
             }
-            $('#fd-question-tree-head').after(div);
+            var $formHoriz = $('<div class="form form-horizontal" />');
+            $formHoriz.append(div);
+            $('#fd-question-tree-head').after($formHoriz);
         }
 
         var accordion = $("#fd-extra-tools-accordion"),
@@ -1478,16 +1481,18 @@ formdesigner.ui = function () {
                     "   You can only edit this logic in Advanced Mode.")
                 .appendTo(editorContent);
 
-            $("<label />")
-                    .attr("for", "xpath-advanced-check")
-                    .text("Advanced Mode?").
-                    appendTo(editorContent);
+            var $label = $("<label />")
+                .attr("for", "xpath-advanced-check")
+                .text("Advanced Mode?")
+                .addClass('checkbox');
+
 
             var advancedModeSelector = $("<input />")
-                    .attr("type", "checkbox")
-                    .attr("id", "xpath-advanced-check")
-                    .appendTo(editorContent);
-            advancedModeSelector.css("clear", "both");
+                .attr("type", "checkbox")
+                .attr("id", "xpath-advanced-check");
+
+            $label.prepend(advancedModeSelector);
+            editorContent.append($label);
 
             advancedModeSelector.click(function() {
                 if ($(this).is(':checked')) {
@@ -1525,7 +1530,8 @@ formdesigner.ui = function () {
             ];
 
             constructSelect(topLevelJoinOps).appendTo(simpleUI)
-                    .attr("id", "top-level-join-select");
+                .attr("id", "top-level-join-select")
+                .addClass('input-xxlarge');
 
             $("<div />").attr("id", "fd-xpath-editor-expressions")
                     .appendTo(simpleUI);
@@ -1709,6 +1715,7 @@ formdesigner.ui = function () {
         initMessagesPane();
         init_toolbar();
         init_extra_tools();
+        formdesigner.multimedia.initControllers();
         that.createJSTree();
         init_form_paste();
         init_modal_dialogs();
@@ -1754,6 +1761,9 @@ formdesigner.launch = function (opts) {
 
     formdesigner.saveUrl = opts.saveUrl;
     formdesigner.patchUrl = opts.patchUrl;
+
+    formdesigner.multimediaConfig = opts.multimediaConfig;
+
     formdesigner.loadMe = opts.form;
     formdesigner.originalXForm = opts.form;
 
