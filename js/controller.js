@@ -918,6 +918,11 @@ formdesigner.controller = (function () {
             }
         }
         that.fire({type: "global-itext-changed"});
+
+        var currentMug = formdesigner.controller.getCurrentlySelectedMugType();
+        if (currentMug) {
+            formdesigner.ui.displayMugProperties(currentMug);
+        }
     };
     
     that.parseXLSItext = parseXLSItext;
