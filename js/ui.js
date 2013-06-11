@@ -1,5 +1,9 @@
 /*jslint maxerr: 50, indent: 4 */
 /*globals $,document,console*/
+define([
+    'jquery' // Since jquery-ui mutates $ (aka "is broken") it must re-export the symbol
+], function($) {
+
 
 if(!Object.keys) {
     Object.keys = function(o){
@@ -1792,4 +1796,6 @@ formdesigner.launch = function (opts) {
 formdesigner.rootElement = '';
 
 
+    return formdesigner.ui;
 
+});

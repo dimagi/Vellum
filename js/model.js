@@ -2,9 +2,15 @@
 /**
  * Model classes and functions for the FormDesigner
  */
+define([
+    './util'
+], function(util) {
+
 if (typeof formdesigner === 'undefined') {
     var formdesigner = {};
 }
+
+formdesigner.util = util;
 
 function stacktrace() {
   function st2(f) {
@@ -3491,3 +3497,7 @@ formdesigner.model = function () {
 
     return that;
 }();
+
+
+    return formdesigner.model;
+});
