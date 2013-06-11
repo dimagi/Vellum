@@ -31,6 +31,25 @@ Form Options:
 * [form] : "string of the xml form that you wish to load"
 * [formName] : "Default Form Name"
 
+Testing
+-------
+
+The short story:
+
+```
+$ cd js
+$ npm install -d
+$ open tests/runner.html  # Or however you get htis HTML file loaded in a browser
+```
+
+Ideally, though not working today, this can be run on the command-line via:
+
+```
+$ npm install -g mocha-phantomjs
+$ mocha-phantomjs tests/runner.html
+```
+
+
 Contributing
 ------------
 
@@ -43,3 +62,4 @@ control. Edit `_less/main.less` with your changes and then run
 For any change that modifies a .less file, unless it's a very small change,
 pleas try to make two separate commits, one with your .less changes and any
 associated changes, and one with just the compiled CSS file changes.
+
