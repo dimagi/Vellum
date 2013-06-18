@@ -60,10 +60,10 @@ formdesigner.widgets = (function () {
             // When a widget's value changes, do whatever work you need to in 
             // the model/UI to make sure we are in a consistent state.
             
-            var val = widget.getValue();
-            if ((widget.propName === 'nodeID' || widget.propName === 'defaultValue')
-                && val.indexOf(' ') !== -1) 
-            { 
+            var isID = (['nodeID', 'defaultValue'].indexOf(widget.propName) !== -1),
+                val = widget.getValue();
+
+            if (isID && val.indexOf(' ') !== -1) { 
                 // attempt to sanitize nodeID and select item values
                 // TODO, still may allow some bad values
                 widget.setValue(val.replace(/\s/g, '_'));
@@ -73,7 +73,7 @@ formdesigner.widgets = (function () {
             //nodeID is changed to empty-string (i.e. when the user backspaces
             //the whole value).  This allows us to keep a reference to everything
             //and rename smoothly to the new value the user will ultimately enter.
-            if (val === "" && (widget.propName === 'nodeID')) {
+            if (isID && val === "" && false) {
                 return;
             }
             
