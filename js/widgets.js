@@ -238,22 +238,23 @@ formdesigner.widgets = (function () {
         var autoBoxLabel = $("<label />").text("auto?").attr("for", autoBoxId).addClass('checkbox');
 
         autoBox.change(function () {
-            var auto = $(this).prop("checked");
-            widget.setAutoMode(auto);
-            if (auto) {
+            if ($(this).prop('checked')) {
                 widget.updateAutoId();
                 widget.updateValue();
             }
         });
 
         widget.setAutoMode = function (autoMode) {
-            this.autoMode = autoMode;
+            autoBox.prop("checked", autoMode);
+        };
+
+        widget.getAutoMode = function () {
+            return autoBox.prop('checked');
         };
 
         // support auto mode to keep ids in sync
         if (widget.currentValue.id === widget.autoGenerateId(widget.getNodeId())) {
             widget.setAutoMode(true);
-            autoBox.prop("checked", true);
         }
 
         widget.getUIElement = function () {
@@ -298,7 +299,7 @@ formdesigner.widgets = (function () {
 
         widget.mug.mug.on('property-changed', function (e) {
             // keep the ids in sync if we're in auto mode
-            if (widget.autoMode &&
+            if (widget.getAutoMode() &&
                 (e.property === "nodeID" ||
                  widget.isSelectItem && e.property === "defaultValue")) 
             {
@@ -314,9 +315,7 @@ formdesigner.widgets = (function () {
             // turn off auto-mode if the id is ever manually overridden
             var newVal = $(this).val();
             if (newVal !== widget.autoGenerateId(widget.getNodeId())) {
-                autoBox.prop("checked", false);
                 widget.setAutoMode(false);
-
             }
         });
         return widget;
