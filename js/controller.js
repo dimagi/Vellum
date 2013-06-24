@@ -801,8 +801,7 @@ formdesigner.controller = (function () {
 
             formdesigner.ui.jstree("set_type", 
                 that.getJSTreeTypeFromMugType(newMugType), 
-                '#' + mugType.ufid,
-                questionType
+                '#' + mugType.ufid
             );
             
             // update UI
