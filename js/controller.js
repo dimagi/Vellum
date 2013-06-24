@@ -1763,7 +1763,6 @@ formdesigner.controller = (function () {
 
                 var el = $ ( this ), oldEl,
                     path,
-                    nodeID,
                     mType,
                     parentNode,
                     parentMug,
@@ -1817,13 +1816,10 @@ formdesigner.controller = (function () {
                 }
                 
                 path = formdesigner.util.getPathFromControlElement(el);
-                if (path) {
-                    nodeID = formdesigner.util.getNodeIDFromPath(path);
-                } else {
+                if (!path) {
 	                var existingMug = mugFromControlEl(el);
 	                if (existingMug) {
 	                    path = that.form.dataTree.getAbsolutePath(existingMug);
-	                    nodeID = existingMug.mug.getBindElementID() || existingMug.mug.getDataElementID();
 	                }
                 }
                 
