@@ -344,6 +344,26 @@ formdesigner.widgets = (function () {
         return widget;
     };
 
+    that.checkboxAppearanceWidget = function (mugType, path) {
+        var widget = that.checkboxWidget(mugType, path);
+        widget.currentValue = mugType.getAppearanceAttribute() === widget.definition.appearance_type;
+
+        var input = widget.getControl();
+
+        widget.updateMugTypeAppearance = function () {
+            if (widget.getValue()) {
+                mugType.setAppearanceAttribute(widget.definition.appearance_type);
+            } else {
+                mugType.setAppearanceAttribute(null);
+            }
+            widget.updateValue();
+        };
+
+        input.change(widget.updateMugTypeAppearance);
+
+        return widget;
+    };
+
     that.xPathWidget = function (mugType, path) {
 
         var widget = that.textWidget(mugType, path);
@@ -910,6 +930,8 @@ formdesigner.widgets = (function () {
         switch (propertyDef.uiType) {
             case "select":
                 return that.selectWidget;
+            case "checkboxAppearance":
+                return that.checkboxAppearanceWidget;
             case "checkbox":
                 return that.checkboxWidget;
             case "xpath":
@@ -1317,6 +1339,10 @@ formdesigner.widgets = (function () {
         }
         if (formdesigner.util.isReadOnly(mugType)) {
             elements.push({widgetType: "readonlyControl", path: "system/readonlyControl"});
+        }
+
+        if (mugType.typeSlug == 'group') {
+            elements.push(wrapAsGeneric("controlElement/field_list_attr"));
         }
 
         if (mugType.typeSlug == 'androidintent') {

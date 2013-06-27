@@ -741,7 +741,7 @@ formdesigner.model = function () {
                     values: formdesigner.util.VALID_CONTROL_TAG_NAMES
                 },
                 appearance: {
-                    editable: 'r',
+                    editable: 'w',
                     visibility: 'hidden',
                     presence: 'optional',
                     lstring: 'Appearance Attribute'
@@ -779,6 +779,9 @@ formdesigner.model = function () {
         },
         getAppearanceAttribute: function () {
             return (this.mug.properties.controlElement && this.mug.properties.controlElement.properties.appearance) ? (this.mug.properties.controlElement.properties.appearance) : null;
+        },
+        setAppearanceAttribute: function (attrVal) {
+            this.mug.properties.controlElement.properties.appearance = attrVal;
         },
         getPropertyDefinition: function (index) {
             // get a propery definition by a string or list index
@@ -1415,6 +1418,15 @@ formdesigner.model = function () {
         mType.mug = mug;
         mType.mug.properties.controlElement.properties.name = "Group";
         mType.mug.properties.controlElement.properties.tagName = "group";
+
+        mType.properties.controlElement.field_list_attr = {
+            lstring: 'Display as list of questions?',
+            visibility: 'visible',
+            editable: 'w',
+            presence: 'optional',
+            appearance_type: 'field-list',
+            uiType: 'checkboxAppearance'
+        };
         
         vResult = mType.validateMug();
 //        if(vResult.status !== 'pass'){
@@ -1432,7 +1444,7 @@ formdesigner.model = function () {
             visibility: 'visible',
             editable: 'w',
             presence: 'optional',
-            uiType: 'droppable-text',
+            uiType: 'droppable-text'
         };
         mType.properties.controlElement.no_add_remove = {
             lstring: 'Disallow Repeat Add and Remove?',
@@ -2375,6 +2387,9 @@ formdesigner.model = function () {
                         // Write any custom attributes first
                         for (var k in cProps._rawAttributes) {
                             if (k === 'jr:count') {
+                                continue;
+                            }
+                            if (k === 'appearance') {
                                 continue;
                             }
 

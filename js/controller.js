@@ -1628,6 +1628,10 @@ formdesigner.controller = (function () {
                         delete mugType.mug.properties.bindElement;
                     }
 
+                    if (appearance) {
+                        mugType.setAppearanceAttribute(appearance);
+                    }
+
                     return mugType;
                 }
 
