@@ -741,7 +741,7 @@ formdesigner.model = function () {
                     values: formdesigner.util.VALID_CONTROL_TAG_NAMES
                 },
                 appearance: {
-                    editable: 'w',
+                    editable: 'r',
                     visibility: 'hidden',
                     presence: 'optional',
                     lstring: 'Appearance Attribute'
@@ -1418,15 +1418,6 @@ formdesigner.model = function () {
         mType.mug = mug;
         mType.mug.properties.controlElement.properties.name = "Group";
         mType.mug.properties.controlElement.properties.tagName = "group";
-
-        mType.properties.controlElement.field_list_attr = {
-            lstring: 'Display as list of questions?',
-            visibility: 'visible',
-            editable: 'w',
-            presence: 'optional',
-            appearance_type: 'field-list',
-            uiType: 'checkboxAppearance'
-        };
         
         vResult = mType.validateMug();
 //        if(vResult.status !== 'pass'){
