@@ -1733,7 +1733,6 @@ formdesigner.controller = (function () {
                         hintEl = $(cEl).children('hint');
                     }
 
-                    var cannottHaveDefaultValue = ['select', 'select1', 'repeat', 'group', 'trigger'];
                     if (labelEl.length > 0) {
                         parseLabel(labelEl, MugType);
                     }
