@@ -73,7 +73,7 @@ formdesigner.widgets = (function () {
             //nodeID is changed to empty-string (i.e. when the user backspaces
             //the whole value).  This allows us to keep a reference to everything
             //and rename smoothly to the new value the user will ultimately enter.
-            if (isID && val === "" && false) {
+            if (isID && val === "") {
                 return;
             }
             
