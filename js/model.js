@@ -1417,9 +1417,6 @@ formdesigner.model = function () {
         mType.mug.properties.controlElement.properties.tagName = "group";
         
         vResult = mType.validateMug();
-//        if(vResult.status !== 'pass'){
-//            formdesigner.util.throwAndLogValidationError(vResult,mType,mType.mug);
-//        }
         return mType;
     };
 
