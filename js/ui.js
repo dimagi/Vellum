@@ -37,7 +37,7 @@ formdesigner.ui = function () {
         ERROR_MSG_DIV = '#fd-parse-error',
         FORM_WARN_DIV = '#fd-form-warn';
 
-    that.ODK_ONLY_QUESTION_TYPES = ['image', 'audio', 'video', 'barcode', 'androidintent'];
+    that.ODK_ONLY_QUESTION_TYPES = ['image', 'audio', 'video', 'fieldlist', 'barcode', 'androidintent'];
     
     var initMessagesPane = function () {
         var messagesDiv = $(MESSAGES_DIV);
@@ -293,7 +293,7 @@ formdesigner.ui = function () {
             "audio",
             "video"
         ],
-            allTypes = questionTypes.concat(["datanode"]);
+            allTypes = questionTypes.concat(["datanode", "fieldlist"]);
 
         return {
             "max_children" : -1,
@@ -304,6 +304,9 @@ formdesigner.ui = function () {
                 },
                 "repeat" : {
                     "valid_children" : questionTypes
+                },
+                "fieldlist" : {
+                    'valid_children': _.without(questionTypes, "group", "repeat")
                 },
                 "question" : {
 

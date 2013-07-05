@@ -6,7 +6,7 @@ formdesigner.widgets = (function () {
     var that = {};
 
     that.unchangeableQuestionTypes = [
-        "item", "group", "repeat", "datanode", "trigger", "unknown", "androidintent"
+        "item", "group", "repeat", "fieldlist", "datanode", "trigger", "unknown", "androidintent"
     ];
 
     that.getGroupName = function (path) {
@@ -1380,7 +1380,8 @@ formdesigner.widgets = (function () {
 
     that.getContentSection = function (mugType) {
         var showAddFormButton = (mugType.typeSlug !== 'group' && 
-                                 mugType.typeSlug !== 'repeat');
+                                 mugType.typeSlug !== 'repeat' &&
+                                 mugType.typeSlug !== 'fieldlist');
             
         elements = [{
                 widgetType: "itext",
@@ -1407,7 +1408,8 @@ formdesigner.widgets = (function () {
                 "bindElement/relevantAttr",
             ];
         } else if (mugType.typeSlug === 'group' || 
-                   mugType.typeSlug === 'repeat') 
+                   mugType.typeSlug === 'repeat' ||
+                   mugType.typeSlug === 'fieldlist')
         {
             properties = [
                 "bindElement/requiredAttr",
@@ -1471,7 +1473,7 @@ formdesigner.widgets = (function () {
         // what type an element is, it's difficult to do this properly with
         // controlElement.constraintMsgItextID.presence = "notallowed" in the group
         // mugtype definition.
-        if (!(mugType.typeSlug === 'group' || mugType.typeSlug === 'repeat')) {
+        if (!(mugType.typeSlug === 'group' || mugType.typeSlug === 'repeat' || mugType.typeSlug === 'fieldlist')) {
             properties.push("bindElement/constraintMsgItextID");
         }
 

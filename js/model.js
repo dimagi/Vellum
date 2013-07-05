@@ -1426,6 +1426,21 @@ formdesigner.model = function () {
         return mType;
     };
 
+    that.mugTypeMaker.stdFieldList = function () {
+        var mType = formdesigner.model.mugTypeMaker.stdGroup(),
+            mug;
+        mType.typeSlug = "fieldlist";
+        mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
+        mug = that.createMugFromMugType(mType);
+        mType.mug = mug;
+        mType.mug.properties.controlElement.properties.name = "FieldList";
+        mType.mug.properties.controlElement.properties.tagName = "group";
+
+        mType.setAppearanceAttribute('field-list');
+
+        return mType;
+    };
+
     that.mugTypeMaker.stdRepeat = function () {
         var mType;
 
