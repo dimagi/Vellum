@@ -433,57 +433,6 @@ formdesigner.util = (function(){
         return attrMap;
     }; 
     
-    that.throwAndLogValidationError = function(vResult,mType,mug){
-//            console.group("Failed Validation Objectss");
-//            console.log("Validation Object:");
-//            console.log(vResult);
-//            console.log("MugType");
-//            console.log(mType);
-//            console.log("Mug");
-//            console.log(mug);
-//            console.groupEnd();
-            throw 'Newly created mug did not validate! MugType and Mug logged to console...'
-    };
-
-    that.parseXml = function (xml) {
-       var dom = null;
-       if (window.DOMParser) {
-          try {
-             dom = (new DOMParser()).parseFromString(xml, "text/xml");
-          }
-          catch (e) { dom = null; }
-       }
-       else if (window.ActiveXObject) {
-          try {
-             dom = new ActiveXObject('Microsoft.XMLDOM');
-             dom.async = false;
-             if (!dom.loadXML(xml)) // parse error ..
-
-                window.alert(dom.parseError.reason + dom.parseError.srcText);
-          }
-          catch (e) { dom = null; }
-       }
-       else
-          alert("cannot parse xml string!");
-       return dom;
-    };
-
-    that.serializeXml = function (xmlNode) {
-        try {
-            // Gecko- and Webkit-based browsers (Firefox, Chrome), Opera.
-            return (new XMLSerializer()).serializeToString(xmlNode);
-        } catch (e) {
-            try {
-                // Internet Explorer
-                return xmlNode.xml;
-            } catch (e) {
-                // Other browsers without XML Serializer
-                alert('XML serialization not supported');
-            }
-        }
-        return false;
-    };
-
     /**
      * Takes in a reference mugType and makes a copy of
      * the object (the copy is returned).
@@ -495,17 +444,6 @@ formdesigner.util = (function(){
         return newMugType;
     };
     that.getNewMugType = getNewMugType;
-
-    var DefinitionValidationException = function(message){
-        this.message = message;
-        this.name = "DefinitionValidationException";
-    };
-    that.DefinitionValidationException = DefinitionValidationException;
-
-    var verify_mug = function(mug, definition){
-        return VERIFY_CODES.VERIFY_ERROR; //not implemented yet!
-    };
-    that.verify_mug = verify_mug;
 
     //Simple Event Framework
     //Just run your object through this function to make it event aware

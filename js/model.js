@@ -1420,9 +1420,6 @@ formdesigner.model = function () {
         mType.mug.properties.controlElement.properties.tagName = "group";
         
         vResult = mType.validateMug();
-//        if(vResult.status !== 'pass'){
-//            formdesigner.util.throwAndLogValidationError(vResult,mType,mType.mug);
-//        }
         return mType;
     };
 
@@ -2304,26 +2301,23 @@ formdesigner.model = function () {
                         attrs = populateVariables(MT);
                         if(attrs.nodeset){
                             xmlWriter.writeStartElement('bind');
-                        }
-                        for (j in attrs) {
-                            if (attrs.hasOwnProperty(j) && attrs[j]) {
-                                if (j === "constraintMsg"){
-                                    xmlWriter.writeAttributeStringSafe("jr:constraintMsg",attrs[j]); //write it
-                                } else if (j === "constraintMsgItextID") {
-                                    xmlWriter.writeAttributeStringSafe("jr:constraintMsg",  "jr:itext('" + attrs[j] + "')")
-                                } else if (j === "preload") {
-                                    xmlWriter.writeAttributeStringSafe("jr:preload", attrs[j]);
-                                } else if (j === "preloadParams") {
-                                    xmlWriter.writeAttributeStringSafe("jr:preloadParams", attrs[j]);
-                                } else {
-                                    xmlWriter.writeAttributeStringSafe(j,attrs[j]);
+                            for (j in attrs) {
+                                if (attrs.hasOwnProperty(j) && attrs[j]) {
+                                    if (j === "constraintMsg"){
+                                        xmlWriter.writeAttributeStringSafe("jr:constraintMsg",attrs[j]); //write it
+                                    } else if (j === "constraintMsgItextID") {
+                                        xmlWriter.writeAttributeStringSafe("jr:constraintMsg",  "jr:itext('" + attrs[j] + "')")
+                                    } else if (j === "preload") {
+                                        xmlWriter.writeAttributeStringSafe("jr:preload", attrs[j]);
+                                    } else if (j === "preloadParams") {
+                                        xmlWriter.writeAttributeStringSafe("jr:preloadParams", attrs[j]);
+                                    } else {
+                                        xmlWriter.writeAttributeStringSafe(j,attrs[j]);
+                                    }
                                 }
                             }
-                        }
-                        if(attrs.nodeset) {
                             xmlWriter.writeEndElement();
                         }
-
                     }
                 }
             };
