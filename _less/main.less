@@ -148,7 +148,6 @@
         background: none repeat scroll 0 0 white;
         border: 1px solid @gray;
         float: left;
-        height: @containerHeight;
         margin-top: 5px;
         overflow-x: hidden;
         overflow-y: auto;
@@ -196,11 +195,14 @@
         float: right;
         margin-top: 5px;
 
-        height: @containerHeight;
         width: @contentWidth;
         display: none;
         overflow-x:hidden;
 
+    }
+
+    .fd-scrollable-content {
+      height: @containerHeight;
     }
 
     #fd-ui-container td {
@@ -337,6 +339,7 @@
         height: 24px;
         padding: 0;
         position: absolute;
+        top:0;
         text-align: center;
         width: 500px;
         z-index: 3;

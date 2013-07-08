@@ -126,7 +126,6 @@
   background: none repeat scroll 0 0 white;
   border: 1px solid #bbbbbb;
   float: left;
-  height: 606px;
   margin-top: 5px;
   overflow-x: hidden;
   overflow-y: auto;
@@ -164,10 +163,12 @@
   border: 1px solid #bbbbbb;
   float: right;
   margin-top: 5px;
-  height: 606px;
   width: 69%;
   display: none;
   overflow-x: hidden;
+}
+#formdesigner .fd-scrollable-content {
+  height: 606px;
 }
 #formdesigner #fd-ui-container td {
   text-align: center;
@@ -286,6 +287,7 @@
   height: 24px;
   padding: 0;
   position: absolute;
+  top: 0;
   text-align: center;
   width: 500px;
   z-index: 3;

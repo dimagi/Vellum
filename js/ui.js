@@ -622,7 +622,7 @@ formdesigner.ui = function () {
     var init_extra_tools = function () {
         function makeLangDrop() {
             var div, addLangButton, removeLangButton, langList, langs, i, str, selectedLang, Itext;
-            $('#fd-question-tree-container').find('#fd-lang-disp-div').remove();
+            $('#fd-question-tree-lang').find('#fd-lang-disp-div').remove();
             Itext = formdesigner.model.Itext;
             langs = Itext.getLanguages();
             if (langs.length < 2) {
@@ -666,7 +666,7 @@ formdesigner.ui = function () {
             }
             var $formHoriz = $('<div class="form form-horizontal" />');
             $formHoriz.append(div);
-            $('#fd-question-tree-head').after($formHoriz);
+            $('#fd-question-tree-lang').html($formHoriz);
         }
 
         var accordion = $("#fd-extra-tools-accordion"),
@@ -1723,6 +1723,8 @@ formdesigner.ui = function () {
         set_event_listeners();
 
         setup_fancybox();
+
+        formdesigner.windowManager.init();
     };
 
 
@@ -1763,6 +1765,8 @@ formdesigner.launch = function (opts) {
     formdesigner.patchUrl = opts.patchUrl;
 
     formdesigner.multimediaConfig = opts.multimediaConfig;
+
+    formdesigner.windowConfig = opts.windowConfig || {};
 
     formdesigner.loadMe = opts.form;
     formdesigner.originalXForm = opts.form;
