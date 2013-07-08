@@ -67,6 +67,16 @@
   font-size: 13px;
   text-align: left;
 }
+#formdesigner .fd-scrollable {
+  width: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  height: 606px;
+}
+#formdesigner .fd-scrollable.fd-scrollable-tree {
+  overflow-x: auto;
+  height: 406px;
+}
 #formdesigner {
   /* overrides for stuff in jquery UI */
 
@@ -123,12 +133,9 @@
   position: relative;
 }
 #formdesigner .fd-tree {
-  background: none repeat scroll 0 0 white;
+  background: none;
   border: 1px solid #bbbbbb;
   float: left;
-  margin-top: 5px;
-  overflow-x: hidden;
-  overflow-y: auto;
   position: relative;
   width: 30%;
 }
@@ -162,13 +169,9 @@
 #formdesigner #fd-xpath-editor {
   border: 1px solid #bbbbbb;
   float: right;
-  margin-top: 5px;
   width: 69%;
   display: none;
-  overflow-x: hidden;
-}
-#formdesigner .fd-scrollable-content {
-  height: 606px;
+  overflow: hidden;
 }
 #formdesigner #fd-ui-container td {
   text-align: center;
@@ -296,9 +299,6 @@
 #formdesigner #fd-question-tree-head {
   position: relative;
   width: 100%;
-}
-#formdesigner #fd-question-tree-container {
-  overflow-x: auto;
 }
 #formdesigner #fd-data-tree-head {
   position: relative;

@@ -20,22 +20,28 @@
         </div>
         <div id="fd-container-question-type-group"></div>
     </div>
-    <div id="fd-question-tree-container" class="fd-tree fd-column fd-scrollable-content">
+    <div id="fd-question-tree-container" class="fd-tree fd-column">
         <div id="fd-question-tree-head" class="fd-head ui-widget-header">Question Tree</div>
         <div id="fd-question-tree-lang"></div>
         <div id="fd-question-tree-actions">
             <button id="fd-expand-all" class="btn">Expand All</button>
             <button id="fd-collapse-all" class="btn">Collapse All</button>
         </div>
-        <div id="fd-question-tree"></div>
+        <div class="fd-scrollable fd-scrollable-tree">
+            <div id="fd-question-tree"></div>
+        </div>
     </div>
-    <div id="fd-question-properties" class="fd-column fd-scrollable-content">
+    <div id="fd-question-properties" class="fd-column">
         <div id="fd-props-head" class="fd-head ui-widget-header">Question Properties</div>
-        <div id="fd-props-content" class="form form-horizontal"></div>
+        <div class="fd-scrollable fd-scrollable-main">
+            <div id="fd-props-content" class="form form-horizontal"></div>
+        </div>
     </div>
-    <div id="fd-xpath-editor" class="fd-column fd-scrollable-content">
+    <div id="fd-xpath-editor" class="fd-column">
         <div id="fd-xpath-editor-head" class="fd-head ui-widget-header">Expression Editor</div>
-        <div id="fd-xpath-editor-content"></div>
+        <div class="fd-scrollable fd-scrollable-main">
+            <div id="fd-xpath-editor-content"></div>
+        </div>
     </div>
 
     <a id="inline" href="#data" style="display:none">This shows content of element who has id="data"</a>

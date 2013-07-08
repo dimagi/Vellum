@@ -86,6 +86,17 @@
     text-align: left;
 }
 
+#formdesigner .fd-scrollable {
+  width: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  height: @containerHeight;
+
+  &.fd-scrollable-tree {
+    overflow-x: auto;
+    height: @containerHeight - 200;
+  }
+}
 
 #formdesigner {
     .loadingBar{
@@ -145,12 +156,9 @@
         position:relative;
     }
     .fd-tree{
-        background: none repeat scroll 0 0 white;
+        background: none;
         border: 1px solid @gray;
         float: left;
-        margin-top: 5px;
-        overflow-x: hidden;
-        overflow-y: auto;
         position: relative;
         width: 30%;
     }
@@ -190,19 +198,13 @@
     }
 
 
-    #fd-question-properties, #fd-xpath-editor {
+    #fd-question-properties,
+    #fd-xpath-editor {
         border: 1px solid @gray;
         float: right;
-        margin-top: 5px;
-
         width: @contentWidth;
         display: none;
-        overflow-x:hidden;
-
-    }
-
-    .fd-scrollable-content {
-      height: @containerHeight;
+        overflow: hidden;
     }
 
     #fd-ui-container td {
@@ -349,10 +351,6 @@
     #fd-question-tree-head {
         position: relative;
         width: 100%;
-    }
-
-    #fd-question-tree-container {
-        overflow-x:auto;
     }
 
     #fd-data-tree-head {
