@@ -31,32 +31,9 @@ formdesigner.ui = function () {
         controller = formdesigner.controller,
         dataTree,
         DEBUG_MODE = false,
-        MESSAGES_DIV = '#fd-messages',
-        MESSAGE_TYPES = ["error", "parse-warning", "form-warning"],
-        WARN_MSG_DIV = '#fd-parse-warn',
-        ERROR_MSG_DIV = '#fd-parse-error',
-        FORM_WARN_DIV = '#fd-form-warn';
+        MESSAGES_DIV = '#fd-messages';
 
     that.ODK_ONLY_QUESTION_TYPES = ['image', 'audio', 'video', 'barcode', 'androidintent'];
-    
-    var initMessagesPane = function () {
-        var messagesDiv = $(MESSAGES_DIV);
-        var displayClasses = {"error":   "fd-message ui-state-error ui-corner-all",
-                              "parse-warning": "fd-message ui-state-highlight ui-corner-all",
-                              "form-warning": "fd-message ui-state-highlight ui-corner-all"};
-        var iconClasses = {"error":   "ui-icon-alert",
-                           "parse-warning": "ui-icon-info",
-                           "form-warning": "ui-icon-info"};
-        var type, div, span, header, ul;
-        
-        for (var i = 0; i < MESSAGE_TYPES.length; i++) {
-            type = MESSAGE_TYPES[i];
-            div = $("<div />").addClass(type).addClass(displayClasses[type]).hide().appendTo(messagesDiv);
-            span = $("<span />").addClass("ui-icon").addClass(iconClasses[type]).appendTo(div);
-            header = $('<strong></strong>').text(formdesigner.util.capitaliseFirstLetter(type)).appendTo(div);
-            ul = $("<ul />").appendTo(div);
-        }
-    };
     
     that.currentErrors = [];
 
@@ -66,48 +43,25 @@ formdesigner.ui = function () {
         });
     };
     
-    that._getMessageDiv = function (type) {
-        return $(MESSAGES_DIV).find("." + type);
-    };
-    
     that.showMessage = function (errorObj) {
-        var mainDiv = that._getMessageDiv(errorObj.level);
-        var ul = mainDiv.find("ul");
-        var msg = errorObj.message;
+        var messages = errorObj.message;
         // TODO: I don't like this array business, should be refactored away to the callers.
-        var tempMsg;
-        if (typeof msg === "string" || !(msg instanceof Array)) { 
+        if (typeof messages === "string" || !(messages instanceof Array)) {
             //msg is a string or not-an-array (so try turn it into a string)
-            tempMsg = $('<li></li>');
-            tempMsg.append('' + msg);
-            ul.append(tempMsg);
-        } else {
-            //msg is an array
-            for (var i=0;i<msg.length;i++) {
-                if(msg.hasOwnProperty(i)) {
-                    tempMsg = $('<li></li>');
-                    tempMsg.append(msg[i]);
-                    ul.append(tempMsg);
-                }
-            }
+            messages = ['' + messages];
         }
-        mainDiv.show();
-    };
-    
-    /**
-     * Hides the question properties message box;
-     */
-    that.hideMessages = function (type) {
-        var div = that._getMessageDiv(type);
-        // clear list elements so they don't come back later
-        div.find("ul").empty();
-        div.hide();
+
+        var $messageContainer = $(MESSAGES_DIV);
+        $messageContainer.empty();
+        $messageContainer.html(_.template($('#fd-template-message-alert').text(), {
+            messageType: formdesigner.util.MESSAGES[errorObj.level],
+            messages: messages
+        }));
+        $messageContainer.find('.alert').removeClass('hide').addClass('in');
     };
     
     that.clearMessages = function () {
-        for (var i = 0; i < MESSAGE_TYPES.length; i++) {
-            that.hideMessages(MESSAGE_TYPES[i]);
-        }
+        $(MESSAGES_DIV).empty();
     };
     
     that.resetMessages = function (errors) {
@@ -1712,7 +1666,6 @@ formdesigner.ui = function () {
 //        SaveButton.message.SAVED = 'Saved to Server';
         controller = formdesigner.controller;
         generate_scaffolding();
-        initMessagesPane();
         init_toolbar();
         init_extra_tools();
         formdesigner.multimedia.initControllers();

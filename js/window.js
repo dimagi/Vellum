@@ -30,13 +30,17 @@ formdesigner.windowManager = (function () {
         $formdesigner.css('width', $formdesigner.parent().width());
         $formdesigner.css('position', position);
 
-        console.log(that.getCurrentBottomOffset());
-
         var availableColumnSpace = availableSpace - ($('.fd-toolbar').outerHeight() + that.getCurrentBottomOffset()),
-            columnHeight;
+            columnHeight, scrollableContentHeight, treeHeight;
 
         columnHeight = (availableColumnSpace > that.minHeight) ? availableColumnSpace : that.minHeight;
         $('#formdesigner .fd-column').css('height', columnHeight + 'px');
+
+        scrollableContentHeight = columnHeight - $('.fd-head').outerHeight();
+        $('#formdesigner .fd-scrollable.fd-scrollable-main').css('height', scrollableContentHeight + 'px');
+
+        treeHeight = scrollableContentHeight - $('#fd-question-tree-lang').outerHeight() - $('#fd-question-tree-actions').outerHeight();
+        $('#formdesigner .fd-scrollable.fd-scrollable-tree').css('height', treeHeight + 'px');
     };
 
     that.getCurrentTopOffset = function () {
