@@ -170,7 +170,8 @@ formdesigner.ui = function () {
                         qLabel = "Add " + qLabel;
                     }
                     return qLabel;
-                }
+                },
+                placement: 'bottom'
             });
         };
     };
