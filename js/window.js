@@ -32,11 +32,11 @@ formdesigner.windowManager = (function () {
 
         console.log(that.getCurrentBottomOffset());
 
-        var availableQuestionSpace = availableSpace - ($('.fd-toolbar').outerHeight() + that.getCurrentBottomOffset()),
-            questionHeight;
+        var availableColumnSpace = availableSpace - ($('.fd-toolbar').outerHeight() + that.getCurrentBottomOffset()),
+            columnHeight;
 
-        questionHeight = (availableQuestionSpace > that.minHeight) ? availableQuestionSpace : that.minHeight;
-        $('#formdesigner .fd-scrollable-content').css('height', questionHeight + 'px');
+        columnHeight = (availableColumnSpace > that.minHeight) ? availableColumnSpace : that.minHeight;
+        $('#formdesigner .fd-column').css('height', columnHeight + 'px');
     };
 
     that.getCurrentTopOffset = function () {
