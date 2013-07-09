@@ -33,7 +33,7 @@ formdesigner.windowManager = (function () {
         var availableColumnSpace = availableSpace - ($('.fd-toolbar').outerHeight() + that.getCurrentBottomOffset()),
             columnHeight, scrollableContentHeight, treeHeight;
 
-        columnHeight = (availableColumnSpace > that.minHeight) ? availableColumnSpace : that.minHeight;
+        columnHeight = Math.max(availableColumnSpace, that.minHeight);
         $('#formdesigner .fd-column').css('height', columnHeight + 'px');
 
         scrollableContentHeight = columnHeight - $('.fd-head').outerHeight();
