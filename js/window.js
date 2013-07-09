@@ -53,10 +53,6 @@ formdesigner.windowManager = (function () {
         return Math.min(Math.max(that.offset.bottom - scrollBottom, 0), that.offset.bottom);
     };
 
-    that.checkIfFixed = function (e) {
-
-    };
-
     return that;
 
 })();
