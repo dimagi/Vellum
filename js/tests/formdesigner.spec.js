@@ -5,7 +5,6 @@ define([
     'chai',
     'formdesigner'
 ], function(_, chai, formdesigner) {
-    'use strict';
 
     var assert = chai.assert;
 

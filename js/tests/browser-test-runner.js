@@ -1,11 +1,17 @@
 require([ 
     "require",
-    "mocha"
-], function(requirejs, mocha) {
+    //"mocha"
+], function(requirejs) {
     'use strict';
 
-    mocha.setup('bdd');
-    requirejs(['tests/all'], function() {
-        mocha.run();
-    });
+    if (window.mochaPhantomJS) { 
+        requirejs(['tests/all'], function() {
+            mochaPhantomJS.run(); 
+        });
+    }
+    else { 
+        requirejs(['tests/all'], function() {
+            mocha.run();
+        });
+    }
 });
