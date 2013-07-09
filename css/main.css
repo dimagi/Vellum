@@ -1,3 +1,6 @@
+/*
+  Styles specific to standalone vellum.
+*/
 #formdesigner.standalone select {
   height: auto;
   width: auto;
@@ -63,9 +66,14 @@
   float: right;
   margin-top: 5px;
 }
-#formdesigner .ui-accordion .ui-accordion-header a {
-  font-size: 13px;
-  text-align: left;
+#formdesigner.standalone body {
+  font-family: "Helvetica Neue", "Helvetica", "Verdana", "Arial", sans-serif;
+  overflow-x: hidden;
+}
+#formdesigner .fd-toolbar {
+  padding: 5px;
+  margin-top: 0px;
+  vertical-align: middle;
 }
 #formdesigner .fd-scrollable {
   width: 100%;
@@ -77,9 +85,10 @@
   overflow-x: auto;
   height: 406px;
 }
+#formdesigner #fd-props-content .ui-widget {
+  font-family: inherit;
+}
 #formdesigner {
-  /* overrides for stuff in jquery UI */
-
   /* new question UI styling */
 
   /* xpath editor styling */
@@ -100,37 +109,6 @@
 }
 #formdesigner .myProgressBar {
   width: 90%;
-}
-#formdesigner body {
-  font-family: "Helvetica Neue", "Helvetica", "Verdana", "Arial", sans-serif;
-  overflow-x: hidden;
-}
-#formdesigner #fd-props-content .ui-widget {
-  font-family: inherit;
-}
-#formdesigner #fd-question-table {
-  border: 1px solid #bbbbbb;
-  width: 50em;
-}
-#formdesigner .fd-question-table-header {
-  font: bold;
-}
-#formdesigner .fd-monitor-window-textarea {
-  width: 49em;
-  height: 30em;
-}
-#formdesigner .fd-toolbar {
-  padding: 5px;
-  /*border: 1px solid black;*/
-
-  margin-top: 0px;
-  vertical-align: middle;
-}
-#formdesigner .ui-state-error a {
-  font-weight: bold;
-}
-#formdesigner #fd-trees {
-  position: relative;
 }
 #formdesigner .fd-tree {
   background: none;
