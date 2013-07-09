@@ -34,6 +34,6 @@
     ],
     "main": "ui.js",
     "scripts": {
-        "test": "mocha-phantomjs tests/browser-test-runner.js"
+        "test": "mocha-phantomjs tests/browser-test-runner.html"
     }
 }
