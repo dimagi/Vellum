@@ -13,7 +13,8 @@ formdesigner.windowManager = (function () {
         that.minHeight = formdesigner.windowConfig.minHeight || 200;
         that.offset = {
             top: formdesigner.windowConfig.topOffset || $('#formdesigner').offset().top-1,
-            bottom: formdesigner.windowConfig.bottomOffset || 0
+            bottom: formdesigner.windowConfig.bottomOffset || 0,
+            left: formdesigner.windowConfig.leftOffset || $('#formdesigner').offset().left
         };
 
         that.adjustToWindow();
@@ -30,6 +31,8 @@ formdesigner.windowManager = (function () {
         $formdesigner.css('width', $formdesigner.parent().width());
         $formdesigner.css('position', position);
 
+        $formdesigner.css('left', that.getCurrentLeftOffset() + 'px');
+
         var availableColumnSpace = availableSpace - ($('.fd-toolbar').outerHeight() + that.getCurrentBottomOffset()),
             columnHeight, scrollableContentHeight, treeHeight;
 
@@ -44,13 +47,21 @@ formdesigner.windowManager = (function () {
     };
 
     that.getCurrentTopOffset = function () {
-        var scrollPosition = $(window).scrollTop();
-        return Math.min(Math.max(that.offset.top - scrollPosition, 0), that.offset.top);
+        var scrollPosition = $(window).scrollTop(),
+            topOffset = (typeof that.offset.top === 'function') ? that.offset.top() : that.offset.top;
+        return Math.min(Math.max(topOffset - scrollPosition, 0), topOffset);
     };
 
     that.getCurrentBottomOffset = function () {
-        var scrollBottom = $(document).height() - ($(window).height() + $(document).scrollTop());
-        return Math.min(Math.max(that.offset.bottom - scrollBottom, 0), that.offset.bottom);
+        var scrollBottom = $(document).height() - ($(window).height() + $(document).scrollTop()),
+            offsetBottom = (typeof that.offset.bottom === 'function') ? that.offset.bottom() : that.offset.bottom;
+        return Math.min(Math.max(offsetBottom - scrollBottom, 0), offsetBottom);
+    };
+
+    that.getCurrentLeftOffset = function () {
+        var scrollLeft = $(window).scrollLeft(),
+            offsetLeft = (typeof that.offset.left === 'function') ? that.offset.left() : that.offset.left;
+        return Math.min(offsetLeft - scrollLeft, offsetLeft);
     };
 
     return that;
