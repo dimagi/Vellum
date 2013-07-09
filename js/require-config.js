@@ -6,8 +6,7 @@ requirejs.config({
     },
     packages: [
         {"name": "chai", "main": "chai.js", "location": "node_modules/chai" },
-        {"name": "mocha", "main": "mocha.js", "location": "node_modules/mocha" },
-        {"name": "xmldom", "main": "dom-parser.js", "location": "node_modules/xmldom" }
+        //{"name": "mocha", "main": "mocha.js", "location": "node_modules/mocha" }
     ],
     urlArgs: "v=" + (new Date).getTime(),
     waitSeconds: 0,
@@ -24,9 +23,9 @@ requirejs.config({
             deps: ["jquery"],
             exports: "jQuery"
         },
-        "mocha": {
-            exports: "mocha"
-        },
+        //"mocha": {
+        //    exports: "mocha"
+        //},
         "underscore": {
             exports: "_"
         },
