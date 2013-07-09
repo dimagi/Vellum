@@ -165,101 +165,6 @@ formdesigner.model = function () {
     that.BindElement = BindElement;
 
     /**
-     * A LiveText object is able to
-     * take in Strings and Objects (with their specified
-     * callback functions that produce strings) in order
-     * render a LiveString with the latest changes to the objects
-     * it is tracking, on command (call renderString on this object
-     * to get a... rendered string).
-     */
-    var LiveText = function () {
-        //Todo eventually: add checking for null pointer tokens
-
-        var that = {};
-
-        var phrases = [];
-
-        /**
-         * Renders the token in the phrases list specified by tokenIndex
-         * and returns it as a string
-         * @param tokenIndex
-         */
-        var getRenderedToken = function (tokenIndex) {
-            var tObj;
-            var outString = '';
-            if (tokenIndex > phrases.length - 1) {
-                return undefined;
-            }
-            tObj = phrases[tokenIndex];
-            if (typeof tObj.refObj === 'undefined') {
-                throw "incorrect Live Object added to LiveText! Can't render string.";
-            } else if (typeof tObj.refObj === 'string') {
-                outString += tObj.refObj;
-            } else {
-                outString += tObj.callback.apply(tObj.refObj, tObj.params);
-            }
-            return outString;
-        };
-
-        /**
-         * Get the string this liveText represents
-         * with all the function/object references replaced with
-         * their textual representations (use add()
-         * to add strings/objects when building a liveText)
-         */
-        that.renderString = function () {
-            var outString = "";
-            var i;
-            for (i = 0; i < phrases.length; i++) {
-                outString += getRenderedToken(i);
-            }
-            return outString;
-        };
-
-
-        //////TODO REMOVE CALLBACK PARAMS
-
-
-        /**
-         * Add a token to the list
-         * of this liveText object.
-         * When adding a string,
-         * the callback param is optional.  When
-         * adding anything else, specify a callback function
-         * to call (with or without params). If no callback
-         * is specified in that case, an exception will be thrown
-         * @param token - the object (or string) that represents the string data
-         * @param callback - the callback function that should be used on the token obj to retrieve a string (if token is an object)
-         * @param params is an array of arguments to be applied to the callback function (if a callback was specified)
-         */
-        that.addToken = function (token, callback, params) {
-            var tObj = {};
-            if (typeof token === 'string') {
-                tObj.refObj = token;
-            } else {
-                tObj.refObj = token;
-                tObj.callback = callback;
-                tObj.params = params;
-            }
-            phrases.push(tObj);
-        };
-
-        /**
-         * Returns the list of token objects
-         * (an array of mixed strings and/or objects)
-         */
-        that.getTokenList = function () {
-            return phrases;
-        };
-
-
-        //make this object event aware.
-        formdesigner.util.eventuality(that);
-        return that;
-    };
-    that.LiveText = LiveText;
-
-    /**
      * DataElement is the object representing the final resting (storage)
      * place of data entered by the user and/or manipulated by the form.
      *
@@ -1518,9 +1423,6 @@ formdesigner.model = function () {
         mType.mug.properties.controlElement.properties.tagName = "group";
         
         vResult = mType.validateMug();
-//        if(vResult.status !== 'pass'){
-//            formdesigner.util.throwAndLogValidationError(vResult,mType,mType.mug);
-//        }
         return mType;
     };
 
@@ -2387,26 +2289,23 @@ formdesigner.model = function () {
                         attrs = populateVariables(MT);
                         if(attrs.nodeset){
                             xmlWriter.writeStartElement('bind');
-                        }
-                        for (j in attrs) {
-                            if (attrs.hasOwnProperty(j) && attrs[j]) {
-                                if (j === "constraintMsg"){
-                                    xmlWriter.writeAttributeStringSafe("jr:constraintMsg",attrs[j]); //write it
-                                } else if (j === "constraintMsgItextID") {
-                                    xmlWriter.writeAttributeStringSafe("jr:constraintMsg",  "jr:itext('" + attrs[j] + "')")
-                                } else if (j === "preload") {
-                                    xmlWriter.writeAttributeStringSafe("jr:preload", attrs[j]);
-                                } else if (j === "preloadParams") {
-                                    xmlWriter.writeAttributeStringSafe("jr:preloadParams", attrs[j]);
-                                } else {
-                                    xmlWriter.writeAttributeStringSafe(j,attrs[j]);
+                            for (j in attrs) {
+                                if (attrs.hasOwnProperty(j) && attrs[j]) {
+                                    if (j === "constraintMsg"){
+                                        xmlWriter.writeAttributeStringSafe("jr:constraintMsg",attrs[j]); //write it
+                                    } else if (j === "constraintMsgItextID") {
+                                        xmlWriter.writeAttributeStringSafe("jr:constraintMsg",  "jr:itext('" + attrs[j] + "')")
+                                    } else if (j === "preload") {
+                                        xmlWriter.writeAttributeStringSafe("jr:preload", attrs[j]);
+                                    } else if (j === "preloadParams") {
+                                        xmlWriter.writeAttributeStringSafe("jr:preloadParams", attrs[j]);
+                                    } else {
+                                        xmlWriter.writeAttributeStringSafe(j,attrs[j]);
+                                    }
                                 }
                             }
-                        }
-                        if(attrs.nodeset) {
                             xmlWriter.writeEndElement();
                         }
-
                     }
                 }
             };
@@ -2955,21 +2854,23 @@ formdesigner.model = function () {
                 // currently we don't do anything with relative paths
                 return p.initial_context === xpathmodels.XPathInitialContextEnum.ROOT;
             });
+            var errorKey = mug.ufid + "-" + "badpath",
+                errors = false;
+
             this.all = this.all.concat(paths.map(function (path) {
                 var refMug = formdesigner.controller.getMugByPath(path.pathWithoutPredicates());
-                var error = that.FormError({
-                    level: "parse-warning",
-                    key: mug.ufid + "-" + "badpath",
-                    message: "The question '" + mug.mug.properties.bindElement.properties.nodeID + 
-                        "' references an unknown question " + path.toXPath() + 
-                        " in its " + mug.getPropertyDefinition(property).lstring + "."
-                                                
-                });
                 if (!refMug) {
-                    // formdesigner.form.errors
-                    formdesigner.controller.form.updateError(error, {updateUI: true});
-                } else {
-                    formdesigner.controller.form.clearError(error, {updateUI: true});
+                    errors = true;
+                    formdesigner.controller.form.updateError(that.FormError({
+                        level: "parse-warning",
+                        key: errorKey,
+                        message: "The question '" + mug.mug.properties.bindElement.properties.nodeID + 
+                            "' references an unknown question " + path.toXPath() + 
+                            " in its " + mug.getPropertyDefinition(property).lstring + "."
+                                                    
+                    }), {
+                        updateUI: true
+                    });
                 }
                 return {
                     mug: mug.ufid, 
@@ -2978,7 +2879,12 @@ formdesigner.model = function () {
                     path: path.toXPath(),
                     sourcePath: formdesigner.controller.form.dataTree.getAbsolutePath(mug)
                 };      
-            }));
+            }))
+           
+            if (!errors) {
+                formdesigner.controller.form.clearError(that.FormError({key: errorKey}), {updateUI: true});
+            }        
+
         };
         
         logic.updateReferences = function (mug, property) {

@@ -809,8 +809,7 @@ formdesigner.controller = (function () {
 
             formdesigner.ui.jstree("set_type", 
                 that.getJSTreeTypeFromMugType(newMugType), 
-                '#' + mugType.ufid,
-                questionType
+                '#' + mugType.ufid
             );
             
             // update UI
@@ -926,6 +925,11 @@ formdesigner.controller = (function () {
             }
         }
         that.fire({type: "global-itext-changed"});
+
+        var currentMug = formdesigner.controller.getCurrentlySelectedMugType();
+        if (currentMug) {
+            formdesigner.ui.displayMugProperties(currentMug);
+        }
     };
     
     that.parseXLSItext = parseXLSItext;
@@ -1767,7 +1771,6 @@ formdesigner.controller = (function () {
 
                 var el = $ ( this ), oldEl,
                     path,
-                    nodeID,
                     mType,
                     parentNode,
                     parentMug,
@@ -1790,28 +1793,23 @@ formdesigner.controller = (function () {
                 }
 
                 var mugFromControlEl = function (el) {
-	                var nodeId, bind;
-	                var path = formdesigner.util.getPathFromControlElement(el);
+	                var path = formdesigner.util.getPathFromControlElement(el),
+	                    nodeId;
 
 	                if (path) {
-	                    var nodeId = formdesigner.util.getNodeIDFromPath(path);
-	                } else {
-	                    // try looking for a control with a bind attribute
-                        bind = $(el).attr('bind');
-                        if (bind) {
-                            nodeId = bind;
-                        }
-	                }
-	                if (path) {
 	                    return that.getMugByPath(path, 'data');
-	                } else if (nodeId) {
-	                    try {
-	                        return that.getSingularMugTypeByNodeId(nodeId);
-	                    } catch (err) {
-	                        // may be fine if this was a parent lookup, 
-	                        // or will fail hard later if this creates an illegal move
-	                        return null;
-	                    }
+	                } else {
+                        nodeId = $(el).attr('bind');
+
+                        if (nodeId) {
+                            try {
+                                return that.getSingularMugTypeByNodeId(nodeId);
+                            } catch (err) {
+                                // may be fine if this was a parent lookup, 
+                                // or will fail hard later if this creates an illegal move
+                                return null;
+                            }
+                        }
 	                }
 	                return null;
 	            }
@@ -1821,13 +1819,10 @@ formdesigner.controller = (function () {
                 }
                 
                 path = formdesigner.util.getPathFromControlElement(el);
-                if (path) {
-                    nodeID = formdesigner.util.getNodeIDFromPath(path);
-                } else {
+                if (!path) {
 	                var existingMug = mugFromControlEl(el);
 	                if (existingMug) {
 	                    path = that.form.dataTree.getAbsolutePath(existingMug);
-	                    nodeID = existingMug.mug.getBindElementID() || existingMug.mug.getDataElementID();
 	                }
                 }
                 

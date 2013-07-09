@@ -2,18 +2,56 @@
 @contentWidth: 69%;
 @gray: #bbb;
 
-#formdesigner select {
+#formdesigner.standalone select {
     height: auto;
     width: auto;
     display: inline;
 }
 
-#formdesigner input {
+#formdesigner.standalone input {
     display: inline;
 }
 
-#formdesigner label {
+#formdesigner.standalone label {
     display: inline;
+}
+
+#formdesigner.standalone {
+  #fd-props-content fieldset div.widget {
+        clear: both;
+        margin-bottom: .3em;
+    }
+
+    #fd-props-content fieldset label {
+        font-weight: normal;
+        display: inline-block;
+        padding-top: .4em;
+    }
+
+    #fd-props-content fieldset input[type="text"],
+    #fd-props-content fieldset select,
+    #fd-props-content fieldset .btn-toolbar  {
+        display: inline;
+        width: 380px;
+        float: right;
+        margin: .5em 10px .5em 0;
+    }
+
+    #fd-props-content fieldset select {
+        width: 220px;
+        margin-right: 175px;
+    }
+
+    #fd-props-content fieldset .xpath-edit-button {
+        float: right;
+        margin-right: 2em;
+    }
+
+    #fd-props-content fieldset .auto-itext {
+        float: right;
+        margin-right: 2em;
+        display: inline-block;
+    }
 }
 
 #formdesigner {
@@ -418,10 +456,6 @@
         position:relative;
     }
 
-    #formdesigner {
-        width: 996px;
-    }
-
     #fd-props-mugtype-info {
         border: 1px solid @gray;
         text-align: center;
@@ -468,40 +502,6 @@
         font-size: 1.1em;
         font-weight: bold;
         line-height: 1em;
-    }
-
-    #fd-props-content fieldset div.widget {
-        clear: both;
-        margin-bottom: .3em;
-    }
-
-    #fd-props-content fieldset label {
-        font-weight: normal;
-        display: inline-block;
-        padding-top: .4em;
-    }
-
-    #fd-props-content fieldset input[type="text"], #fd-props-content fieldset select, #fd-props-content fieldset .btn-toolbar  {
-        display: inline;
-        width: 380px;
-        float: right;
-        margin: .5em 10px .5em 0;
-    }
-
-    #fd-props-content fieldset select {
-        width: 220px;
-        margin-right: 175px;
-    }
-
-    #fd-props-content fieldset .xpath-edit-button {
-        float: right;
-        margin-right: 2em;
-    }
-
-    #fd-props-content fieldset .auto-itext {
-        float: right;
-        margin-right: 2em;
-        display: inline-block;
     }
 
     .question-section {

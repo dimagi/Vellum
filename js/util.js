@@ -178,6 +178,10 @@ formdesigner.util = (function(){
         }
         return ret;
     };
+
+    that.getAddNewItextItemId = function (itextType) {
+        return 'fd-itext-add-new-' + itextType;
+    };
     
     that.isReadOnly = function (mugType) {
         return mugType.typeSlug === "unknown";
@@ -408,12 +412,12 @@ formdesigner.util = (function(){
      */
     that.generate_question_id = function (question_id) {
         if (question_id) {
-            var match = /(.+)-\d$/.exec(question_id) ;
+            var match = /^copy-(\d+)-of-(.+)$/.exec(question_id) ;
             if (match) {
-                question_id = match[1]; 
+                question_id = match[2]; 
             }
             for (var i = 1;; i++) {
-                var new_id = question_id + "-" + i;
+                var new_id = "copy-" + i + "-of-" + question_id;
                 if (!formdesigner.model.questionIdCount(new_id)) {
                     return new_id; 
                 }
@@ -439,57 +443,6 @@ formdesigner.util = (function(){
         return attrMap;
     }; 
     
-    that.throwAndLogValidationError = function(vResult,mType,mug){
-//            console.group("Failed Validation Objectss");
-//            console.log("Validation Object:");
-//            console.log(vResult);
-//            console.log("MugType");
-//            console.log(mType);
-//            console.log("Mug");
-//            console.log(mug);
-//            console.groupEnd();
-            throw 'Newly created mug did not validate! MugType and Mug logged to console...'
-    };
-
-    that.parseXml = function (xml) {
-       var dom = null;
-       if (window.DOMParser) {
-          try {
-             dom = (new DOMParser()).parseFromString(xml, "text/xml");
-          }
-          catch (e) { dom = null; }
-       }
-       else if (window.ActiveXObject) {
-          try {
-             dom = new ActiveXObject('Microsoft.XMLDOM');
-             dom.async = false;
-             if (!dom.loadXML(xml)) // parse error ..
-
-                window.alert(dom.parseError.reason + dom.parseError.srcText);
-          }
-          catch (e) { dom = null; }
-       }
-       else
-          alert("cannot parse xml string!");
-       return dom;
-    };
-
-    that.serializeXml = function (xmlNode) {
-        try {
-            // Gecko- and Webkit-based browsers (Firefox, Chrome), Opera.
-            return (new XMLSerializer()).serializeToString(xmlNode);
-        } catch (e) {
-            try {
-                // Internet Explorer
-                return xmlNode.xml;
-            } catch (e) {
-                // Other browsers without XML Serializer
-                alert('XML serialization not supported');
-            }
-        }
-        return false;
-    };
-
     /**
      * Takes in a reference mugType and makes a copy of
      * the object (the copy is returned).
@@ -501,17 +454,6 @@ formdesigner.util = (function(){
         return newMugType;
     };
     that.getNewMugType = getNewMugType;
-
-    var DefinitionValidationException = function(message){
-        this.message = message;
-        this.name = "DefinitionValidationException";
-    };
-    that.DefinitionValidationException = DefinitionValidationException;
-
-    var verify_mug = function(mug, definition){
-        return VERIFY_CODES.VERIFY_ERROR; //not implemented yet!
-    };
-    that.verify_mug = verify_mug;
 
     //Simple Event Framework
     //Just run your object through this function to make it event aware
@@ -713,7 +655,7 @@ formdesigner.util = (function(){
             var MT = formdesigner.controller.getMTFromFormByUFID(e.mugTypeUfid);
             formdesigner.ui.showVisualValidation(MT);
             formdesigner.ui.setTreeValidationIcon(MT);
-
+            
             // update the logic properties that reference the mug
             if (e.previous !== e.val) {
                 var mug = formdesigner.controller.getMTFromFormByUFID(e.mugTypeUfid);
@@ -726,6 +668,32 @@ formdesigner.util = (function(){
                     var propertyPath = [e.element, e.property].join("/");
                     if (mug.getPropertyDefinition(propertyPath).uiType === "xpath") {
                         formdesigner.model.LogicManager.updateReferences(mug, propertyPath);
+                    }
+                }
+            }
+
+            // update the itext ids of child items if they weren't manually set
+            if (e.property === "nodeID" && that.isSelect(MT)) {
+                var node = formdesigner.controller.form.controlTree.getNodeFromMugType(MT),
+                    children = node.getChildrenMugTypes(),
+                    mug = this;
+            
+                var setNodeID = function (val) {
+                    mug.properties.dataElement.properties.nodeID = val;
+                    mug.properties.bindElement.properties.nodeID = val;
+                };
+
+                for (var i = 0; i < children.length; i++) {
+                    var child = children[i];
+
+                    // Temporarily set select's nodeID to old value so we can
+                    // test whether the old item's itext id was autogenerated.
+                    setNodeID(e.previous);
+                    if (child.getItext().id === child.getDefaultLabelItextId()) {
+                        setNodeID(e.val);
+                        child.setItextID(child.getDefaultLabelItextId());
+                    } else {
+                        setNodeID(e.val);
                     }
                 }
             }
