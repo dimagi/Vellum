@@ -39,24 +39,6 @@ formdesigner.util = (function(){
                              "bindElement/calculateAttr",
                              "bindElement/constraintAttr"];
 
-    that.MESSAGES = {
-        "error": {
-            cssClass: "alert-error",
-            title: "Error",
-            icon: "icon-exclamation-sign"
-        },
-        "parse-warning": {
-            cssClass: "",
-            title: "Parse Warning",
-            icon: "icon-warning-sign"
-        },
-        "form-warning": {
-            cssClass: "",
-            title: "Form Warning",
-            icon: "icon-info-sign"
-        }
-    };
-
     that.QUESTION_GROUPS = [
         {
             group: ['text', 'Text', 'icon-vellum-text'],  // [<default_slug>, <title>, <icon-class>]
