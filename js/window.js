@@ -61,7 +61,7 @@ formdesigner.windowManager = (function () {
     that.getCurrentLeftOffset = function () {
         var scrollLeft = $(window).scrollLeft(),
             offsetLeft = (typeof that.offset.left === 'function') ? that.offset.left() : that.offset.left;
-        return Math.min(Math.max(offsetLeft - scrollLeft, 0), offsetLeft);
+        return Math.min(offsetLeft - scrollLeft, offsetLeft);
     };
 
     return that;
