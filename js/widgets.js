@@ -1164,7 +1164,7 @@ formdesigner.widgets = (function () {
 	                dialog.dialog("destroy");
 	                dialog.empty();
 	                $("<label />").attr("for", "new-itext-id").text("Content type: ").appendTo(dialog);
-	                var input = $("<input />").addClass("fd-property-input").attr("id", "new-itext-id").appendTo(dialog);
+	                var input = $("<input />").attr("id", "new-itext-id").appendTo(dialog);
 	                dialog.dialog({
 	                    title: "New Content Item Type",
 	                    buttons: {
