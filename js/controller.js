@@ -801,7 +801,8 @@ formdesigner.controller = (function () {
 
             formdesigner.ui.jstree("set_type", 
                 that.getJSTreeTypeFromMugType(newMugType), 
-                '#' + mugType.ufid
+                '#' + mugType.ufid,
+                questionType
             );
             
             // update UI
@@ -1763,6 +1764,7 @@ formdesigner.controller = (function () {
 
                 var el = $ ( this ), oldEl,
                     path,
+                    nodeID,
                     mType,
                     parentNode,
                     parentMug,
@@ -1785,23 +1787,28 @@ formdesigner.controller = (function () {
                 }
 
                 var mugFromControlEl = function (el) {
-	                var path = formdesigner.util.getPathFromControlElement(el),
-	                    nodeId;
+	                var nodeId, bind;
+	                var path = formdesigner.util.getPathFromControlElement(el);
 
 	                if (path) {
-	                    return that.getMugByPath(path, 'data');
+	                    var nodeId = formdesigner.util.getNodeIDFromPath(path);
 	                } else {
-                        nodeId = $(el).attr('bind');
-
-                        if (nodeId) {
-                            try {
-                                return that.getSingularMugTypeByNodeId(nodeId);
-                            } catch (err) {
-                                // may be fine if this was a parent lookup, 
-                                // or will fail hard later if this creates an illegal move
-                                return null;
-                            }
+	                    // try looking for a control with a bind attribute
+                        bind = $(el).attr('bind');
+                        if (bind) {
+                            nodeId = bind;
                         }
+	                }
+	                if (path) {
+	                    return that.getMugByPath(path, 'data');
+	                } else if (nodeId) {
+	                    try {
+	                        return that.getSingularMugTypeByNodeId(nodeId);
+	                    } catch (err) {
+	                        // may be fine if this was a parent lookup, 
+	                        // or will fail hard later if this creates an illegal move
+	                        return null;
+	                    }
 	                }
 	                return null;
 	            }
@@ -1811,10 +1818,13 @@ formdesigner.controller = (function () {
                 }
                 
                 path = formdesigner.util.getPathFromControlElement(el);
-                if (!path) {
+                if (path) {
+                    nodeID = formdesigner.util.getNodeIDFromPath(path);
+                } else {
 	                var existingMug = mugFromControlEl(el);
 	                if (existingMug) {
 	                    path = that.form.dataTree.getAbsolutePath(existingMug);
+	                    nodeID = existingMug.mug.getBindElementID() || existingMug.mug.getDataElementID();
 	                }
                 }
                 
