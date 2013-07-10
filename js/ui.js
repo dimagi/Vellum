@@ -220,20 +220,6 @@ formdesigner.ui = function () {
             questionGroup.activateGroup();
         });
 
-        //debug tools
-        (function c_printDataTreeToConsole() {
-            var printTreeBut = $(
-                    '<button class="btn" id="fd-print-tree-button" class="toolbarButton questionButton">' +
-                            'Print tree to Console' +
-                            '</button>');
-            $('#fd-dragons').append(printTreeBut);
-
-            printTreeBut.button().click(function () {
-                formdesigner.util.dumpFormTreesToConsole();
-            });
-
-        })();
-
         (function c_saveForm() {
             var $saveButtonContainer = $('#fd-save-button');
             formdesigner.controller.saveButton.ui.appendTo($saveButtonContainer);
