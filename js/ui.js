@@ -642,17 +642,9 @@ formdesigner.ui = function () {
             $('#fd-question-tree-lang').html($formHoriz);
         }
 
-        var minMaxButton = $('#fd-min-max-button');
-
         makeLangDrop();
         formdesigner.controller.on('fd-reload-ui', function () {
             makeLangDrop();
-        });
-        
-        minMaxButton.button({
-            icons: {
-                primary: 'ui-icon-arrowthick-2-n-s'
-            }
         });
 
         $('#fd-load-xls-button').click(formdesigner.controller.showItextDialog);
