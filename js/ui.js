@@ -766,8 +766,6 @@ formdesigner.ui = function () {
             butState = 'disable';
         }
 
-        // buttons
-        $('#fd-add-but').button(butState);
         // TODO: in making fd-save-button controlled by saveButton, do we need to do anything explicit here?
 //        $('#fd-save-button').button(butState);
 

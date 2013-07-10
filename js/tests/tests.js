@@ -145,6 +145,7 @@ $(document).ready(function(){
     };
 
     var addQuestionThroughUI = function (type) {
+        // todo, this test is completely out of date. Fix.
         var addbut, sel;
         addbut = $('#fd-add-but');
         sel = $('#fd-question-select');
@@ -730,6 +731,7 @@ start();
             curMugType = e.mugType;
         });
 
+        // todo out of date reference, does not exist in template
         addqbut = $('#fd-add-but');
         addqbut.click();
         addqbut.click();
@@ -873,6 +875,7 @@ start();
                 addQbut;
         resetVellumForUnitTests();
         start()
+        // todo out of date reference. fix?
         addQbut = $('#fd-add-but');
         addQbut.click();
         addQbut.click();
