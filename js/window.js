@@ -28,22 +28,22 @@ formdesigner.windowManager = (function () {
         $formdesigner.css('height', availableSpace + 'px');
         $formdesigner.parent().css('height', availableSpace + 'px');
 
-        $formdesigner.css('width', $formdesigner.parent().width());
-        $formdesigner.css('position', position);
-
-        $formdesigner.css('left', that.getCurrentLeftOffset() + 'px');
+        $formdesigner.css('width', $formdesigner.parent().width())
+            .css('position', position)
+            .css('left', that.getCurrentLeftOffset() + 'px');
 
         var availableColumnSpace = availableSpace - ($('.fd-toolbar').outerHeight() + that.getCurrentBottomOffset()),
-            columnHeight, scrollableContentHeight, treeHeight;
+            panelHeight, columnHeight, treeHeight;
 
-        columnHeight = Math.max(availableColumnSpace, that.minHeight);
-        $('#formdesigner .fd-column').css('height', columnHeight + 'px');
+        panelHeight = Math.max(availableColumnSpace, that.minHeight);
+        columnHeight = panelHeight - $('.fd-head').outerHeight();
+        treeHeight = columnHeight - $('#fd-question-tree-lang').outerHeight() - $('#fd-question-tree-actions').outerHeight();
 
-        scrollableContentHeight = columnHeight - $('.fd-head').outerHeight();
-        $('#formdesigner .fd-scrollable.fd-scrollable-main').css('height', scrollableContentHeight + 'px');
+        $formdesigner.find('.fd-column').css('height', panelHeight + 'px')
+            .find('.fd-scrollable').css('height', columnHeight + 'px');
 
-        treeHeight = scrollableContentHeight - $('#fd-question-tree-lang').outerHeight() - $('#fd-question-tree-actions').outerHeight();
-        $('#formdesigner .fd-scrollable.fd-scrollable-tree').css('height', treeHeight + 'px');
+        $formdesigner.find('.fd-tree').css('height', panelHeight + 'px')
+            .find('.fd-scrollable').css('height', treeHeight + 'px');
     };
 
     that.getCurrentTopOffset = function () {
