@@ -952,7 +952,7 @@ formdesigner.widgets = (function () {
         }
     };
 
-    that.baseSection = function (mugType, options) {
+    that.questionSection = function (mugType, options) {
         // functional inheritance
         var section = {};
         section.mugType = mugType;
@@ -961,8 +961,8 @@ formdesigner.widgets = (function () {
         section.elements = options.elements;
         section.isCollapsed = !!(options.isCollapsed);
 
-        section.getHeader = function () {
-            return $('<h2 />').text(this.displayName);
+        section.getId = function () {
+            return "fd-question-edit-" + this.slug;
         };
 
         section.processBaseTemplate = function () {
@@ -973,77 +973,24 @@ formdesigner.widgets = (function () {
             })
         };
 
-        section.getId = function () {
-            return "fd-question-edit-" + this.slug;
-        };
-        return section;
-    };
-
-    that.genericSection = function (mugType, options) {
-        var section = that.baseSection(mugType, options);
-
         section.getWidgets = function () {
-
-            var inner = this;
             var toWidget = function (elementdefinition) {
-                return that.widgetFromMugAndDefinition(inner.mugType, elementdefinition);
+                return that.widgetFromMugAndDefinition(section.mugType, elementdefinition);
             };
-            return this.elements.map(toWidget);
+            return section.elements.map(toWidget);
         };
 
         section.getSectionDisplay = function () {
-            // returns the actual display for the section
-
-            var header = this.getHeader();
-            var sec = $("<fieldset />").attr("id", this.getId()).addClass("question-section");
-
-//            return header.add(sec);
-
             var $sec = $(section.processBaseTemplate()),
                 $fieldsetContent;
             $fieldsetContent = $sec.find('.fd-fieldset-content');
-            this.getWidgets().map(function (elemWidget) {
+            section.getWidgets().map(function (elemWidget) {
                 elemWidget.setValue(elemWidget.currentValue);
                 $fieldsetContent.append(elemWidget.getUIElement());
             });
             return $sec;
         };
-        return section;
-    };
 
-    that.accordionSection = function (mugType, options) {
-        var section = that.baseSection(mugType, options);
-
-        section.getHeader = function () {
-            return $('<h3><a href="#">' + this.displayName + '</a></h3>');
-        };
-
-        section.getWidgets = function () {
-            // TODO: don't copy paste this -- break into subsections?
-            var inner = this;
-            var toWidget = function (elementdef) {
-                return that.widgetFromMugAndDefinition(inner.mugType, elementdef);
-            };
-            return this.elements.map(toWidget);
-        };
-
-        section.getSectionDisplay = function () {
-            // returns the actual display for the section
-            var sec = $("<fieldset />").attr("id", this.getId()).addClass("question-section");
-            this.getHeader().appendTo(sec);
-            var inner = $('<div />').appendTo(sec);
-            this.getWidgets().map(function (elemWidget) {
-                elemWidget.setValue(elemWidget.currentValue);
-                elemWidget.getUIElement().appendTo(inner);
-            });
-            sec.accordion({
-                autoHeight: false,
-                collapsible: true,
-                active: options.active !== undefined ? options.active : false
-            });
-
-            return sec;
-        };
         return section;
     };
 
@@ -1349,7 +1296,7 @@ formdesigner.widgets = (function () {
             elements.push({widgetType: "androidIntentResponse", path: "system/androidIntentResponse"});
         }
 
-        return that.genericSection(mugType, {
+        return that.questionSection(mugType, {
             slug: "main",
             displayName: "Main Properties",
             elements: elements
@@ -1369,7 +1316,7 @@ formdesigner.widgets = (function () {
             }
         ];
 
-        return that.genericSection(mugType, {
+        return that.questionSection(mugType, {
             displayName: "Content",
             slug: "content",
             elements: elements
@@ -1425,11 +1372,12 @@ formdesigner.widgets = (function () {
             elements.push(wrapAsGeneric("controlElement/no_add_remove"));
         }
 
-        return that.accordionSection(mugType, {
-                            slug: "logic",
-                            displayName: "Logic Properties",
-                            elements: elements,
-                            active: 0});
+        return that.questionSection(mugType, {
+            slug: "logic",
+            displayName: "Logic Properties",
+            elements: elements,
+            isCollapsed: true
+        });
     };
 
     that.getAdvancedSection = function (mugType) {
@@ -1473,11 +1421,13 @@ formdesigner.widgets = (function () {
                 showAddFormButton: false
             });
         }
-        return that.accordionSection(mugType, {
-                            slug: "advanced",
-                            type: "accordion",
-                            displayName: "Advanced Properties",
-                            elements: elements});
+        return that.questionSection(mugType, {
+            slug: "advanced",
+            type: "accordion",
+            displayName: "Advanced Properties",
+            elements: elements,
+            isCollapsed: true
+        });
     };
 
     return that;
