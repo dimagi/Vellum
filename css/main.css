@@ -1,4 +1,7 @@
 /*
+  Vellum Styles
+*/
+/*
   Styles specific to standalone vellum.
 */
 #formdesigner.standalone select {
@@ -70,6 +73,9 @@
   font-family: "Helvetica Neue", "Helvetica", "Verdana", "Arial", sans-serif;
   overflow-x: hidden;
 }
+#formdesigner #fd-ui-container {
+  width: 100%;
+}
 #formdesigner .fd-toolbar {
   padding: 5px;
   margin-top: 0px;
@@ -81,119 +87,18 @@
   overflow-y: auto;
   height: 606px;
 }
-#formdesigner .fd-scrollable.fd-scrollable-tree {
-  overflow-x: auto;
-  height: 406px;
-}
-#formdesigner #fd-props-content .ui-widget {
-  font-family: inherit;
-}
-#formdesigner {
-  /* new question UI styling */
-
-  /* xpath editor styling */
-
-  /* stolen from blueprint */
-
-}
-#formdesigner .loadingBar {
-  z-index: 9999;
-  position: fixed;
-  margin: 0px;
-  padding: 0px;
-  top: 0px;
-  width: 100%;
-  height: 100%;
-  /*display:none*/
-
-}
-#formdesigner .myProgressBar {
-  width: 90%;
-}
-#formdesigner .fd-tree {
-  background: none;
-  border: 1px solid #bbbbbb;
-  float: left;
-  position: relative;
-  width: 30%;
-}
-#formdesigner #fd-props-advanced {
-  margin-right: 5px;
-}
-#formdesigner #fd-question-tree {
-  clear: right;
-  float: left;
-  background: none;
-}
-#formdesigner #fd-data-tree {
-  background: none;
-}
-#formdesigner #fd-data-tree-container {
-  float: left;
-  left: -360px;
-  /*top:500px;*/
-
-  position: absolute;
-  z-index: 0;
-  overflow: auto;
-  margin-top: 10px;
-  width: 280px;
-}
 #formdesigner .fd-message {
   padding: .8em;
   margin: .8em;
-}
-#formdesigner #fd-question-properties,
-#formdesigner #fd-xpath-editor {
-  border: 1px solid #bbbbbb;
-  float: right;
-  width: 69%;
-  display: none;
-  overflow: hidden;
-}
-#formdesigner #fd-ui-container td {
-  text-align: center;
-}
-#formdesigner .fd-properties-block-header {
-  text-align: left;
 }
 #formdesigner .fd-props-ul {
   list-style-type: none;
   margin: 0;
   padding: 0;
   position: relative;
-  /*top: -20px;*/
-
 }
-#formdesigner #fd-adv-props-content .fd-props-ul {
+#formdesigner #fd-form-opts-ul {
   list-style-type: none;
-  margin: 0;
-  padding: 0;
-  /*padding-top:20px;*/
-
-  position: relative;
-  top: -20px;
-}
-#formdesigner #fd-extra-tools-accordion .fd-props-ul {
-  list-style-type: none;
-  margin: 0;
-  padding: 30px 0 0 5px;
-  position: relative;
-  top: -20px;
-}
-#formdesigner #fd-acc-min-max {
-  cursor: pointer;
-  float: left;
-  left: -237px;
-  margin: 0;
-  padding: 0;
-  top: 237px;
-  width: 498px;
-  z-index: 5;
-}
-#formdesigner #textDrop {
-  width: 640px;
-  height: 640px;
 }
 #formdesigner #fd-source {
   width: 800px;
@@ -203,42 +108,6 @@
 #formdesigner #fd-source-controls {
   width: 800px;
   padding: 1em;
-}
-#formdesigner .fd-property-input {
-  margin-top: 0;
-  padding-bottom: 2px;
-  padding-left: 5px;
-  padding-top: 0;
-  width: 80%;
-}
-#formdesigner .fd-property {
-  display: table;
-  padding: 5px 0 5px 5px;
-  width: 100%;
-}
-#formdesigner .fd-property-text {
-  height: 50px;
-  position: relative;
-}
-#formdesigner #fd-question-properties ul {
-  list-style-type: none;
-}
-#formdesigner #fd-form-opts-ul {
-  list-style-type: none;
-}
-#formdesigner #fd-question-properties ul li.fd-property:nth-child(even) {
-  background: #fafaff;
-}
-#formdesigner .questionButton {
-  margin: 1px;
-  vertical-align: middle;
-  width: 200px;
-}
-#formdesigner #fd-question-properties ul li:hover {
-  background: #f0f8ff;
-}
-#formdesigner .fd-props-heading {
-  font-weight: bold;
 }
 #formdesigner .fd-props-validate {
   float: right;
@@ -255,97 +124,22 @@
   line-height: 25px;
   width: 100%;
 }
-#formdesigner #fd-data-tree-head {
-  position: relative;
-  width: 100%;
-}
-#formdesigner #fd-props-content {
-  padding: 5px;
-  position: relative;
-}
-#formdesigner .fd-tree-valid-alert-icon {
-  display: inline;
-  position: absolute;
-}
-#formdesigner #fd-adv-props-content {
-  padding: 0;
-  overflow-x: hidden;
-  /*width: 100%;*/
-
-}
-#formdesigner .fd-template-but {
-  width: 200px;
-  margin: 2px;
-}
-#formdesigner #fd-ui-container {
-  width: 100%;
-}
-#formdesigner #fd-min-max-button {
-  float: right;
-  height: 21px;
+#formdesigner .questionButton {
   margin: 1px;
-  width: 37px;
-}
-#formdesigner .fd-prop-input-div {
-  float: right;
-  width: 320px;
-}
-#formdesigner #fd-parsexml-button {
-  float: right;
-  margin-left: 2px;
-  margin-right: 0;
-  margin-top: 7px;
-}
-#formdesigner #fd-extra-template-questions,
-#formdesigner #fd-extra-advanced,
-#formdesigner #fd-dragons,
-#formdesigner #fd-extra-settings {
-  margin: 0;
-  overflow-x: hidden;
-  padding-left: 2px;
-}
-#formdesigner .fd-prop-input-div-checkbox {
-  float: right;
-  width: 150px;
-}
-#formdesigner #fd-props-message {
-  margin: 0;
-  text-align: center;
   vertical-align: middle;
-}
-#formdesigner #fd-itext-lang-select_chzn {
-  float: left;
-}
-#formdesigner #fd-itext-add-lang-button {
-  float: right;
+  width: 200px;
 }
 #formdesigner #fd-form-saving-img {
   display: block;
   margin-left: auto;
   margin-right: auto;
 }
-#formdesigner #fd-question-add {
-  display: inline-block;
-}
-#formdesigner #fd-question-select {
-  position: relative;
-  width: 280px;
-}
-#formdesigner #fd-question-select_chzn {
-  clear: none;
-  float: left;
-  margin-right: 5px;
-}
-#formdesigner #fd-add-but {
+#formdesigner #fd-props-content {
+  padding: 5px;
   position: relative;
 }
-#formdesigner #fd-props-mugtype-info {
-  border: 1px solid #bbbbbb;
-  text-align: center;
-}
-#formdesigner #xpath-edit-inner {
-  padding-top: 25px;
-  margin: 5px;
+#formdesigner #fd-props-content .ui-widget {
+  font-family: inherit;
 }
 #formdesigner #fd-props-content h1 {
   font-weight: bold;
@@ -379,47 +173,83 @@
 #formdesigner .question-section {
   margin-bottom: 1em;
 }
-#formdesigner .error,
-#formdesigner .notice,
-#formdesigner .success {
+#formdesigner .fd-column {
+  border: 1px solid #bbbbbb;
+  float: right;
+  width: 69%;
+  display: none;
+  overflow: hidden;
+}
+#formdesigner #fd-question-properties ul {
+  list-style-type: none;
+}
+#formdesigner #fd-question-properties ul li.fd-property:nth-child(even) {
+  background: #FAFAFF;
+}
+#formdesigner #fd-question-properties ul li:hover {
+  background: #f0f8ff;
+}
+#formdesigner #fd-xpath-editor {
+  /* stolen from blueprint */
+
+}
+#formdesigner #fd-xpath-editor .error,
+#formdesigner #fd-xpath-editor .notice,
+#formdesigner #fd-xpath-editor .success {
   padding: .4em;
   border: 2px solid #ddd;
 }
-#formdesigner .error {
+#formdesigner #fd-xpath-editor .error {
   background: #FBE3E4;
   color: #8a1f11;
   border-color: #FBC2C4;
 }
-#formdesigner .notice {
+#formdesigner #fd-xpath-editor .notice {
   background: #FFF6BF;
   color: #514721;
   border-color: #FFD324;
 }
-#formdesigner .success {
+#formdesigner #fd-xpath-editor .success {
   background: #E6EFC2;
   color: #264409;
   border-color: #C6D880;
 }
-#formdesigner .bin-expression {
+#formdesigner #fd-xpath-editor .bin-expression {
   min-height: 35px;
 }
-#formdesigner .xpath-edit-node,
-#formdesigner .expression-part,
-#formdesigner .op-select,
-#formdesigner .validation-results {
+#formdesigner #fd-xpath-editor .xpath-edit-node,
+#formdesigner #fd-xpath-editor .expression-part,
+#formdesigner #fd-xpath-editor .op-select,
+#formdesigner #fd-xpath-editor .validation-results {
   vertical-align: text-bottom;
   display: inline-block;
   margin-left: .4em;
 }
-#formdesigner .xpath-edit-node {
+#formdesigner #fd-xpath-editor .xpath-edit-node {
   width: 180px !important;
 }
-#formdesigner .validation-results {
+#formdesigner #fd-xpath-editor .validation-results {
   position: relative;
   margin-bottom: 0px;
 }
-#formdesigner .dismiss-message-button {
-  float: right;
+#formdesigner .fd-tree {
+  clear: right;
+  float: left;
+  background: none;
+  border: 1px solid #bbbbbb;
+  position: relative;
+  width: 30%;
+}
+#formdesigner .fd-tree .fd-scrollable {
+  overflow-x: auto;
+  height: 406px;
+}
+#formdesigner #fd-question-tree {
+  background: #ffffff;
+}
+#formdesigner .fd-tree-valid-alert-icon {
+  display: inline;
+  position: absolute;
 }
 #formdesigner #fd-lang-disp-div {
   padding-left: 10px;

@@ -1,6 +1,96 @@
 #formdesigner #fd-props-content {
+  padding: 5px;
+  position: relative;
   // todo: ui-widget necessary?
   .ui-widget { font-family: inherit; }
 
+  h1 {
+    font-weight: bold;
+    font-size: 1.4em;
+    margin-bottom: .5em;
+  }
 
+  h2 {
+    font-size: 1.1em;
+    border: 1px solid lightgray;
+    border-bottom: 0;
+    text-align: center;
+    background-color: whitesmoke;
+    padding: .2em;
+    font-weight: bold;
+    margin-bottom: 0;
+  }
+
+  .ui-accordion-content {
+    padding: 1em .5em;
+  }
+
+  fieldset:not(.ui-widget) {
+    padding:0 .4em .4em .4em;
+    margin:0 0 1.5em 0;
+    border:1px solid #ccc;
+  }
+
+  fieldset h3 {
+    text-align: left;
+    font-size: 1.1em;
+    font-weight: bold;
+    line-height: 1em;
+  }
+}
+
+#formdesigner .question-section {
+  margin-bottom: 1em;
+}
+
+#formdesigner .fd-column {
+  border: 1px solid @gray;
+  float: right;
+  width: @contentWidth;
+  display: none;
+  overflow: hidden;
+}
+
+#formdesigner #fd-question-properties {
+  ul {
+    list-style-type: none;
+
+    li {
+      &.fd-property:nth-child(even) {
+        background: #FAFAFF;
+      }
+      &:hover {
+        background: #f0f8ff;
+      }
+    }
+
+  }
+}
+
+
+#formdesigner #fd-xpath-editor {
+  /* stolen from blueprint */
+  .error, .notice, .success {padding:.4em; border:2px solid #ddd;}
+  .error {background:#FBE3E4;color:#8a1f11;border-color:#FBC2C4;}
+  .notice {background:#FFF6BF;color:#514721;border-color:#FFD324;}
+  .success {background:#E6EFC2;color:#264409;border-color:#C6D880;}
+
+  .bin-expression {
+    min-height: 35px;
+  }
+
+  .xpath-edit-node, .expression-part, .op-select, .validation-results {
+    vertical-align: text-bottom;
+    display: inline-block;
+    margin-left: .4em;
+  }
+
+  .xpath-edit-node {
+    width: 180px !important;
+  }
+
+  .validation-results {
+    position: relative;
+    margin-bottom: 0px;
+  }
 }

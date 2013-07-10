@@ -1,0 +1,37 @@
+#formdesigner .fd-tree {
+  clear:right;
+  float:left;
+  background: none;
+  border: 1px solid @gray;
+  position: relative;
+  width: 30%;
+
+  .fd-scrollable {
+    overflow-x: auto;
+    height: @containerHeight - 200;
+  }
+}
+
+#formdesigner #fd-question-tree {
+  background: @white;
+}
+
+#formdesigner .fd-tree-valid-alert-icon {
+  // todo, investigate usage
+  display:inline;
+  position:absolute;
+}
+
+#formdesigner #fd-lang-disp-div {
+  padding-left: 10px;
+  border-top: 1px solid transparent;
+  border-bottom: 1px solid #CCC;
+  font-size: .8em;
+}
+
+#formdesigner #fd-messages {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+}
