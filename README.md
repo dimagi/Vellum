@@ -39,15 +39,12 @@ The short story:
 ```
 $ cd js
 $ npm install -d
-$ open tests/runner.html  # Or however you get htis HTML file loaded in a browser
-```
-
-Ideally, though not working today, this can be run on the command-line via:
-
-```
+$ open tests/browser-test-runner.html  # Or however you get htis HTML file loaded in a browser
 $ npm install -g mocha-phantomjs
-$ mocha-phantomjs tests/runner.html
+$ mocha-phantomjs tests/browser-test-runner.html
 ```
+
+TODO: Make tests runnable directly in node without the phantomjs intermediary
 
 
 Contributing
