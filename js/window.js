@@ -21,29 +21,38 @@ formdesigner.windowManager = (function () {
     };
 
     that.adjustToWindow = function () {
-        var availableSpace = $(window).height() - that.getCurrentTopOffset(),
+        var availableVertSpace = $(window).height() - that.getCurrentTopOffset(),
+            availableHorizSpace = $('.hq-content').width(),
             position = (that.getCurrentTopOffset() === 0) ? 'fixed' : 'static',
             $formdesigner = $('#formdesigner');
-
-        $formdesigner.css('height', availableSpace + 'px');
-        $formdesigner.parent().css('height', availableSpace + 'px');
+        $formdesigner.css('height', availableVertSpace + 'px');
+        $formdesigner.parent().css('height', availableVertSpace + 'px');
 
         $formdesigner.css('width', $formdesigner.parent().width())
             .css('position', position)
             .css('left', that.getCurrentLeftOffset() + 'px');
 
-        var availableColumnSpace = availableSpace - ($('.fd-toolbar').outerHeight() + that.getCurrentBottomOffset()),
+        var availableColumnSpace = availableVertSpace - ($('.fd-toolbar').outerHeight() + that.getCurrentBottomOffset()),
             panelHeight, columnHeight, treeHeight;
 
         panelHeight = Math.max(availableColumnSpace, that.minHeight);
         columnHeight = panelHeight - $('.fd-head').outerHeight();
         treeHeight = columnHeight - $('#fd-question-tree-lang').outerHeight() - $('#fd-question-tree-actions').outerHeight();
 
-        $formdesigner.find('.fd-column').css('height', panelHeight + 'px')
+        $formdesigner.find('.fd-content').css('height', panelHeight + 'px');
+
+        $formdesigner.find('.fd-content-left')
+            .find('.fd-scrollable').css('height', treeHeight + 'px');
+
+        $formdesigner.find('.fd-content-right')
+            .css('width', availableHorizSpace - that.geLeftWidth() + 'px')
             .find('.fd-scrollable').css('height', columnHeight + 'px');
 
-        $formdesigner.find('.fd-tree').css('height', panelHeight + 'px')
-            .find('.fd-scrollable').css('height', treeHeight + 'px');
+    };
+
+
+    that.geLeftWidth = function () {
+        return $('.fd-content-left').outerWidth() + $('.fd-content-divider').outerWidth(true) + 2;
     };
 
     that.getCurrentTopOffset = function () {

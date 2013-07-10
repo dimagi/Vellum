@@ -81,6 +81,21 @@
   margin-top: 0px;
   vertical-align: middle;
 }
+#formdesigner .fd-row {
+  width: 100%;
+  clear: both;
+}
+#formdesigner .fd-content {
+  float: left;
+}
+#formdesigner .fd-content-left {
+  width: 30%;
+}
+#formdesigner .fd-content-divider {
+  width: 5px;
+  margin: 0 1px;
+  background: #bbbbbb;
+}
 #formdesigner .fd-scrollable {
   width: 100%;
   overflow-x: hidden;
@@ -113,7 +128,6 @@
   float: right;
 }
 #formdesigner .fd-head {
-  border: 1px solid #D3D3D3;
   color: #ffffff;
   font-size: 17px;
   font-weight: bold;
@@ -133,6 +147,10 @@
   display: block;
   margin-left: auto;
   margin-right: auto;
+}
+#formdesigner #fd-question-properties,
+#formdesigner #fd-xpath-editor {
+  display: none;
 }
 #formdesigner #fd-props-content {
   padding: 5px;
@@ -172,13 +190,6 @@
 }
 #formdesigner .question-section {
   margin-bottom: 1em;
-}
-#formdesigner .fd-column {
-  border: 1px solid #bbbbbb;
-  float: right;
-  width: 69%;
-  display: none;
-  overflow: hidden;
 }
 #formdesigner #fd-question-properties ul {
   list-style-type: none;
@@ -232,17 +243,8 @@
   position: relative;
   margin-bottom: 0px;
 }
-#formdesigner .fd-tree {
-  clear: right;
-  float: left;
-  background: none;
-  border: 1px solid #bbbbbb;
-  position: relative;
-  width: 30%;
-}
 #formdesigner .fd-tree .fd-scrollable {
   overflow-x: auto;
-  height: 406px;
 }
 #formdesigner #fd-question-tree {
   background: #ffffff;
