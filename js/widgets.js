@@ -959,9 +959,18 @@ formdesigner.widgets = (function () {
         section.slug = options.slug || "anon";
         section.displayName = options.displayName;
         section.elements = options.elements;
+        section.isCollapsed = !!(options.isCollapsed);
 
         section.getHeader = function () {
             return $('<h2 />').text(this.displayName);
+        };
+
+        section.processBaseTemplate = function () {
+            return _.template($('#fd-template-question-fieldset').text(), {
+                fieldsetId: section.getId(),
+                fieldsetTitle: section.displayName,
+                isCollapsed: section.isCollapsed
+            })
         };
 
         section.getId = function () {
@@ -987,11 +996,17 @@ formdesigner.widgets = (function () {
 
             var header = this.getHeader();
             var sec = $("<fieldset />").attr("id", this.getId()).addClass("question-section");
+
+//            return header.add(sec);
+
+            var $sec = $(section.processBaseTemplate()),
+                $fieldsetContent;
+            $fieldsetContent = $sec.find('.fd-fieldset-content');
             this.getWidgets().map(function (elemWidget) {
                 elemWidget.setValue(elemWidget.currentValue);
-                elemWidget.getUIElement().appendTo(sec);
+                $fieldsetContent.append(elemWidget.getUIElement());
             });
-            return header.add(sec);
+            return $sec;
         };
         return section;
     };
@@ -1257,13 +1272,23 @@ formdesigner.widgets = (function () {
         return block;
     };
 
+    that.getToolbarForMug = function (mugType) {
+        var $baseToolbar = $(_.template($('#fd-template-question-toolbar').text(), {
+            toolbarId: "fd-question-toolbar-" + mugType.slug
+        }));
+        $baseToolbar.find('#fd-button-remove').click(formdesigner.controller.removeCurrentQuestion);
+        $baseToolbar.find('#fd-button-copy').click(function () {
+            formdesigner.controller.duplicateCurrentQuestion({itext: 'copy'});
+        });
+        return $baseToolbar;
+    };
+
     /**
      * Hard coded function to map mugs to the types of things
      * that they display
      *
      */
     that.getSectionListForMug = function (mugType) {
-
         sections = [];
         sections.push(that.getMainSection(mugType));
         if (mugType.hasControlElement()) {
@@ -1302,7 +1327,6 @@ formdesigner.widgets = (function () {
         return ret;
     };
 
-
     that.getMainSection = function (mugType) {
         var elements = ["dataElement/nodeID"];
         
@@ -1324,52 +1348,6 @@ formdesigner.widgets = (function () {
             elements.push({widgetType: "androidIntentExtra", path: "system/androidIntentExtra"});
             elements.push({widgetType: "androidIntentResponse", path: "system/androidIntentResponse"});
         }
-
-        var deleteButton = $('<button class="btn btn-danger" id="fd-remove-button" tabindex="-1">'
-            + '<i class="icon icon-white icon-trash"></i> Delete</button>'
-        ).click(formdesigner.controller.removeCurrentQuestion);
-
-        var duplicate = $('<button type="button" class="btn" tabindex="-1">'
-            + '<i class="icon icon-copy"></i> Copy</button>'
-        ).click(function () {
-            formdesigner.controller.duplicateCurrentQuestion({itext: 'copy'});
-        });
-        
-        var buttonGroups = [
-            [duplicate],
-            [deleteButton]
-        ];
-
-        var toolbar = $('<div class="btn-toolbar"></div>');
-
-        for (var i = 0; i < buttonGroups.length; i++) {
-            var buttons = buttonGroups[i],
-                buttonGroup = $('<div class="btn-group"></div>');
-
-            if (buttons[1] && $.isArray(buttons[1])) {
-                var menuOptions = buttons[1];
-                buttons[0].appendTo(buttonGroup);
-                var dropdown = $('<ul class="dropdown-menu"></ul>');
-
-                for (var j = 0; j < menuOptions.length; j++) {
-                    menuOptions[j].appendTo(dropdown); 
-                }
-                dropdown.appendTo(buttonGroup);
-            
-            } else {
-                for (var j = 0; j < buttons.length; j++) {
-                    buttons[j].appendTo(buttonGroup);
-                }
-            }
-            buttonGroup.appendTo(toolbar);
-        }
-
-        elements.push({
-            widgetType: "html",
-            lstring: "Question Actions",
-            id: 'question-actions',
-            html: toolbar
-        });
 
         return that.genericSection(mugType, {
             slug: "main",

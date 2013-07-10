@@ -1078,7 +1078,7 @@ start();
         jstree.jstree('select_node',$('#'+ groupMT.ufid),true);
 
         //remove it
-        $('#fd-remove-button').click();
+        $('#fd-button-remove').click();
 
         //test if form is valid
         ok(formdesigner.controller.form.isFormValid(), 'Form Should pass all Validation Tests');

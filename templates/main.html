@@ -336,3 +336,30 @@
     </div>
 </script>
 
+<script type="text/template" id="fd-template-question-toolbar">
+    <div id="<%=toolbarId%>" class="clearfix">
+        <div class="btn-toolbar pull-right">
+            <button id="fd-button-copy" type="button" class="btn" tabindex="-1">
+                <i class="icon-copy"></i> Copy
+            </button>
+            <button id="fd-button-remove" type="button" class="btn btn-danger"  tabindex="-1">
+                <i class="icon-trash"></i> Delete
+            </button>
+        </div>
+    </div>
+</script>
+
+<script type="text/template" id="fd-template-question-fieldset">
+    <fieldset class="accordion-group">
+        <legend class="accordion-heading">
+            <a class="accordion-toggle<% if (isCollapsed) { %> collapsed<% } %>" href="#<%=fieldsetId%>" data-toggle="collapse">
+                <i class="icon-double-angle-down"></i>
+                <%=fieldsetTitle%>
+            </a>
+        </legend>
+        <div id="<%=fieldsetId%>" class="accordion-body collapse<% if (!isCollapsed) { %> in<% } %>" >
+            <div class="accordion-inner fd-fieldset-content"></div>
+        </div>
+    </fieldset>
+</script>
+

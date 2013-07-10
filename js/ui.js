@@ -414,11 +414,13 @@ formdesigner.ui = function () {
 
         that.hideQuestionProperties();
 
-        var content = $("#fd-props-content").empty();
-        var sections = formdesigner.widgets.getSectionListForMug(mugType);
+        var $content = $("#fd-props-content").empty(),
+            questionToolbar = formdesigner.widgets.getToolbarForMug(mugType),
+            sections = formdesigner.widgets.getSectionListForMug(mugType);
 
+        $content.append(questionToolbar);
         for (var i = 0; i < sections.length; i++) {
-            sections[i].getSectionDisplay().appendTo(content);
+            sections[i].getSectionDisplay().appendTo($content);
         }
 
         /* attach common event listeners */
