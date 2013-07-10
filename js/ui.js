@@ -637,14 +637,6 @@ formdesigner.ui = function () {
         $('#fd-export-xls-button').click(formdesigner.controller.showExportDialog);
         $('#fd-editsource-button').click(formdesigner.controller.showSourceXMLDialog);
 
-        $('#fd-extra-template-questions div').each(function () {
-            $(this).button({
-                icons : {
-                    primary : 'ui-icon-gear'
-                }
-            });
-        }).button("disable");
-
         function makeFormProp(propLabel, propName, keyUpFunc, initVal) {
             var liStr = '<li id="fd-form-prop-' + propName + '" class="fd-form-property"><span class="fd-form-property-text">' + propLabel + ': ' + '</span>' +
                     '<input id="fd-form-prop-' + propName + '-' + 'input" class="fd-form-property-input">' +
