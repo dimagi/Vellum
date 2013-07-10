@@ -86,7 +86,7 @@ formdesigner.util = (function(){
             questions: [
                 ['group', 'Group', 'icon-folder-open'],
                 ['repeat', 'Repeat Group', 'icon-retweet'],
-                ['fieldlist', 'Field List', 'icon-reorder']
+                ['fieldlist', 'Question List', 'icon-reorder']
             ]
         },
         {
