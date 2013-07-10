@@ -642,21 +642,13 @@ formdesigner.ui = function () {
             $('#fd-question-tree-lang').html($formHoriz);
         }
 
-        var accordion = $("#fd-extra-tools-accordion"),
-            minMaxButton = $('#fd-min-max-button');
+        var minMaxButton = $('#fd-min-max-button');
 
         makeLangDrop();
         formdesigner.controller.on('fd-reload-ui', function () {
             makeLangDrop();
         });
-
-        accordion.hide();
-        accordion.accordion({
-            autoHeight: false
-        });
-
-        accordion.show();
-        accordion.accordion("resize");
+        
         minMaxButton.button({
             icons: {
                 primary: 'ui-icon-arrowthick-2-n-s'
