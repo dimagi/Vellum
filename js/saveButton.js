@@ -1,3 +1,9 @@
+if (typeof define !== 'function') { var define = require('amdefine')(module); }
+define([
+    'jquery',
+    'jquery-ui'
+], function($) {
+
 var SaveButton = {
     /*
         options: {
@@ -132,3 +138,6 @@ var eventize = function (that) {
     return that;
 };
 
+    return SaveButton;
+
+});

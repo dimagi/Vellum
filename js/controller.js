@@ -1,6 +1,14 @@
+if (typeof define !== 'function') { var define = require('amdefine')(module); }
+define([
+    './util',
+    './saveButton'
+], function(util, SaveButton) {
+
 if (typeof formdesigner === 'undefined') {
     var formdesigner = {};
 }
+
+formdesigner.util = util;
 
 formdesigner.controller = (function () {
     "use strict";
@@ -2360,3 +2368,7 @@ formdesigner.intentManager = (function () {
 
     return that;
 })();
+
+    return formdesigner.controller;
+    
+});

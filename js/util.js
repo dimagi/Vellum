@@ -1,6 +1,17 @@
 /**
  * Just some useful JS tools and idioms
  */
+if (typeof define !== 'function') { var define = require('amdefine')(module); }
+define([
+    'jquery',
+    'underscore',
+    'xml-writer'
+], function(jQuery, _, XMLWriter) {
+
+    var $ = jQuery;
+    
+    //if (typeof XMLSerializer === 'undefined')
+    //    XMLSerializer = xmldom.XMLSerializer; // For node.js command-line use and automated testing.
 
 if(typeof Object.create !== 'function') {
     Object.create = function(obj) {
@@ -919,3 +930,6 @@ formdesigner.util = (function(){
     return that;
 
 }());
+
+return formdesigner.util;
+});
