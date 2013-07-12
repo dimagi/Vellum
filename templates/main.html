@@ -336,6 +336,13 @@
     </div>
 </script>
 
+<script type="text/template" id="fd-template-alert-local">
+    <div class="alert <%=alertLevel%> fade in">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        <div class="alert-content"></div>
+    </div>
+</script>
+
 <script type="text/template" id="fd-template-question-toolbar">
     <div id="<%=toolbarId%>" class="clearfix">
         <div class="btn-toolbar pull-right">
@@ -363,6 +370,12 @@
     </fieldset>
 </script>
 
+<script type="text/template" id="fd-template-control-group">
+    <div class="control-group">
+        <label<% if (controlId) { %> id="<%=controlId%>"<% } %> class="control-label"><%=label%></label>
+        <div class="controls"></div>
+    </div>
+</script>
 
 <script type="text/template" id="fd-template-modal-content">
     <div class="modal-header">
