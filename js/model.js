@@ -419,7 +419,7 @@ formdesigner.model = function () {
             if (this.hasControlElement()) {
                 return this.mug.properties.controlElement.properties.hintItextID;
             }
-        }
+        };
         mugType.getConstraintMsgItext = function () {
             if (this.hasBindElement()) {
                 return this.mug.properties.bindElement.properties.constraintMsgItextID;
@@ -2973,7 +2973,8 @@ formdesigner.model = function () {
         
         form.isEmpty = function () {
             for (var lang in this.data) {
-                if (this.data.hasOwnProperty(lang) && this.data[lang]) {
+                if (this.data.hasOwnProperty(lang) && this.data[lang] !== undefined) {
+                    console.log('not empty');
                     return false;
                 }
             }

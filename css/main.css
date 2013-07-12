@@ -1,6 +1,33 @@
 /*
   Vellum Styles
 */
+.clearfix {
+  *zoom: 1;
+}
+.clearfix:before,
+.clearfix:after {
+  display: table;
+  content: "";
+  line-height: 0;
+}
+.clearfix:after {
+  clear: both;
+}
+.hide-text {
+  font: 0/0 a;
+  color: transparent;
+  text-shadow: none;
+  background-color: transparent;
+  border: 0;
+}
+.input-block-level {
+  display: block;
+  width: 100%;
+  min-height: 30px;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
 /*
   Styles specific to standalone vellum.
 */
@@ -94,7 +121,7 @@
 #formdesigner .fd-content-divider {
   width: 5px;
   margin: 0 1px;
-  background: #bbbbbb;
+  background: #f4f4f4;
 }
 #formdesigner .fd-scrollable {
   width: 100%;
@@ -264,4 +291,19 @@
   bottom: 0;
   left: 0;
   width: 100%;
+}
+#formdesigner .itext-lang-group-config {
+  margin-right: 45px;
+  margin-bottom: 20px;
+  background: #f4f4f4;
+  padding: 10px 10px 10px 0;
+  -webkit-border-radius: 10px;
+  -moz-border-radius: 10px;
+  border-radius: 10px;
+}
+#formdesigner .itext-lang-group-config:last-of-type {
+  margin-bottom: 0;
+}
+#formdesigner .itext-lang-group-config .control-group:last-child {
+  margin-bottom: 0;
 }
