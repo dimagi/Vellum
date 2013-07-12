@@ -71,7 +71,7 @@ formdesigner.ui = function () {
 
         $(MESSAGES_DIV)
             .empty()
-            .html(_.template($('#fd-template-message-alert').text(), {
+            .html(_.template($('#fd-template-alert-global').text(), {
                 messageType: that.MESSAGE_TYPES[errorObj.level],
                 messages: messages
             }))
