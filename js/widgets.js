@@ -9,6 +9,10 @@ formdesigner.widgets = (function () {
         "item", "group", "repeat", "datanode", "trigger", "unknown", "androidintent"
     ];
 
+    that.reservedItextContentTypes = [
+        'default', 'short', 'long', 'audio', 'video', 'image'
+    ];
+
     that.getGroupName = function (path) {
         return path.split("/")[0];
     };
