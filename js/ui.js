@@ -88,6 +88,20 @@ formdesigner.ui = function () {
             that.showMessage(errors[i]);
         }
     };
+
+    that.generateNewModal = function (modalTitle, modalButtons) {
+        var $modal = $('#fd-modal-generic'),
+            $modalContent = formdesigner.ui.getTemplateObject('#fd-template-modal-content', {
+                modalTitle: modalTitle,
+                modalButtons: modalButtons || []
+            });
+        $modal.html($modalContent);
+        return $modal;
+    };
+
+    that.getTemplateObject = function (templateSelector, templateParams) {
+        return $(_.template($(templateSelector).text(), templateParams));
+    };
     
     that.addQuestion = function (qType) {
         var newMug = formdesigner.controller.createQuestion(qType);

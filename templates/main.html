@@ -78,9 +78,9 @@
         </div>
     </div>
 
-    <div id="fd-dialog-confirm" title="Dialog Box">
-	    
-    </div>
+    <div id="fd-dialog-confirm" title="Dialog Box"></div>
+
+    <div id="fd-modal-generic" class="modal hide fade"></div>
 
     <div id="fd-multimedia-modal-container"></div>
 
@@ -363,3 +363,22 @@
     </fieldset>
 </script>
 
+
+<script type="text/template" id="fd-template-modal-content">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+        <h3><%=modalTitle%></h3>
+    </div>
+    <div class="modal-body form form-horizontal">
+    </div>
+    <div class="modal-footer">
+        <% _.each(modalButtons, function (button) { %>
+        <button id="<%=button.id%>"
+                class="btn <%=button.cssClasses%>"
+                <% _.each(button.attributes, function (attrib, val) { %><%=attrib%>="<%=val%>"<% }); %>>
+            <%=button.title%>
+        </button>
+        <% }); %>
+        <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+    </div>
+</script>
