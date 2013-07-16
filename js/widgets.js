@@ -626,7 +626,7 @@ formdesigner.widgets = (function () {
 
                     itextWidget.fireChangeEvents();
                 });
-                $blockUI.append($groupContainer);
+                $blockUI.find('.new-itext-control-group').after($groupContainer);
                 $groupContainer.before(block.getDeleteFormButton(form));
             };
         };
@@ -640,7 +640,7 @@ formdesigner.widgets = (function () {
                 label: block.displayName,
                 controlId: null
             });
-            $addFormControls.find('.controls').append(block.getAddFormButtons());
+            $addFormControls.addClass('new-itext-control-group').find('.controls').append(block.getAddFormButtons());
             $blockUI.prepend($addFormControls);
 
             var $formGroup = $blockUI.find('.itext-lang-group');
