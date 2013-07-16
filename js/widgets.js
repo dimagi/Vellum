@@ -462,6 +462,7 @@ formdesigner.widgets = (function () {
         block.isCustomAllowed = options.isCustomAllowed;
         block.activeForms = block.getItextItem().getFormNames();
         block.displayName = options.displayName;
+        block.formToIcon = options.formToIcon || {};
 
         block.getItextWidget = function () {
             return that.itextFormWidget;
@@ -494,6 +495,12 @@ formdesigner.widgets = (function () {
                     .addClass('btn itext-option').click(function () {
                         block.getAddItextFn(form)();
                     });
+
+                var iconClass = block.formToIcon[form];
+                if (iconClass) {
+                    $btn.prepend($('<i />').addClass(iconClass).after(" "));
+                }
+
                 if (block.activeForms.indexOf(form) != -1) {
                     $btn.addClass('disabled');
                 }
