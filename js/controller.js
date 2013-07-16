@@ -422,29 +422,14 @@ formdesigner.controller = (function () {
         var typeString, type;
 
         if (mugType.mug.properties.controlElement) {
-            typeString = mugType.mug.properties.controlElement.properties.name.toLowerCase();
+            typeString = mugType.typeSlug;
         } else if (formdesigner.util.isReadOnly(mugType)) {
             typeString = 'unknown';
         } else {
             typeString = 'datanode';
         }
-
-        switch (typeString.toLowerCase()) {
-            case 'text':
-                type = "question";
-                break;
-            case 'integer':
-                type = "int";
-                break;
-            case 'multi-select':
-            case 'single-select':
-                type = "selectQuestion";
-                break;
-            default:
-                type = typeString.toLowerCase();
-        }
-
-        return type;
+        
+        return typeString;
     };
 
     /**
