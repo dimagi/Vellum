@@ -681,6 +681,9 @@ formdesigner.widgets = (function () {
             .attr("type", "text")
             .addClass('input-block-level itext-widget-input');
 
+        $input.keyup(widget.updateValue);
+        $input.bind('question-itext-form-deleted', widget.fireChangeEvents);
+
         widget.getControl = function () {
             return $input;
         };
@@ -693,7 +696,7 @@ formdesigner.widgets = (function () {
             return $input.val();
         };
 
-        widget.getDefaultValue = function (form) {
+        widget.getDefaultValue = function () {
             return null;
         };
 
@@ -723,8 +726,6 @@ formdesigner.widgets = (function () {
 	        }
         };
 
-        $input.keyup(widget.updateValue);
-        $input.bind('question-itext-form-deleted', widget.fireChangeEvents);
 
         return widget;
 
