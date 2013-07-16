@@ -1366,22 +1366,20 @@ formdesigner.ui = function () {
         }).bind("deselect_node.jstree", function (e, data) {
             that.resetQuestionTypeGroups();
         }).bind('before.jstree', function (e, data) {
-            var nodeId, qtype;
-            if (data.func == 'is_selected' || data.func == 'get_text') {
-                nodeId = $(data.args[0]).attr('id');
-            } else if (data.func == 'set_type') {
-                qtype = data.args[2];
-                nodeId = data.args[1].replace('#', '');
-            }
-
-            if (nodeId) {
-                that.overrideJSTreeIcon(nodeId, qtype);
-            }
-
             if (data.func === 'select_node' && that.isSelectNodeBlocked(e, data)) {
                 e.stopImmediatePropagation();
                 return false;
             }
+        }).bind('create_node.jstree', function (e, data) {
+            that.overrideJSTreeIcon(
+                data.args[2].attr.id,
+                data.args[2].attr.rel
+            );
+        }).bind('set_type.jstree', function (e, data) {
+            that.overrideJSTreeIcon(
+                data.args[1].replace('#', ''),
+                data.args[0]
+            );
         });
 
         $("#fd-expand-all").click(function() {
