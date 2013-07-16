@@ -631,8 +631,11 @@ formdesigner.widgets = (function () {
             };
         };
 
-        var $blockUI = block.getUIElement();
+        var $blockUI = $('<div />'),
+            _getParentUIElement = block.getUIElement;
         block.getUIElement = function () {
+            $blockUI = _getParentUIElement();
+
             var $addFormControls = formdesigner.ui.getTemplateObject('#fd-template-control-group', {
                 label: block.displayName,
                 controlId: null
