@@ -223,116 +223,6 @@ formdesigner.ui = function () {
 
     }
 
-    that.buttons = buttons;
-
-    function getJSTreeTypes() {
-        var questionTypes = [
-            "group",
-            "repeat",
-            "question",
-            "phonenumber",
-            "date",
-            "datetime",
-            "time",
-            "int",
-            "barcode",
-            "geopoint",
-            "androidintent",
-            "long",
-            "double",
-            "selectQuestion",
-            "trigger",
-            "secret",
-            "default",
-            "image",
-            "audio",
-            "video"
-        ],
-            allTypes = questionTypes.concat([
-                "datanode",
-                "fieldlist"  // you can't have nested field lists or other group types because it's not supported in the current implementation of CommCare ODK
-            ]);
-
-        return {
-            "max_children" : -1,
-            "valid_children" : allTypes,  // valid root node types (aka children of the root node)
-            "types" : {
-                "group" : {
-                    "valid_children" : questionTypes
-                },
-                "repeat" : {
-                    "valid_children" : questionTypes
-                },
-                "fieldlist" : {
-                    'valid_children': _.without(questionTypes, "group", "repeat")
-                },
-                "question" : {
-
-                    "valid_children" : "none"
-                },
-                "phonenumber": {
-                    "valid_children" : "none"
-                },
-                "date" : {
-                    "valid_children" : "none"
-                },
-                "datetime" : {
-                    "valid_children" : "none"
-                },
-                "time" : {
-                    "valid_children" : "none"
-                },
-                "int" : {
-                    "valid_children" : "none"
-                },
-                "long" : {
-                    "valid_children" : "none"
-                },
-                "double" : {
-                    "valid_children" : "none"
-                },
-                "selectQuestion" : {
-                    "valid_children": ["item"]
-                },
-                "item" : {
-                    "valid_children" : "none"
-                },
-                "trigger" : {
-                    "valid_children" : "none"
-                },
-                "secret" : {
-                    "valid_children" : "none"
-                },
-                "barcode" : {
-                    "valid_children" : "none"
-                },
-                "geopoint" : {
-                    "valid_children" : "none"
-                },
-                "androidintent": {
-                    "valid_children" : "none"
-                },
-                "image" : {
-                    "valid_children" : "none"
-                },
-                "audio" : {
-                    "valid_children" : "none"
-                },
-                "video" : {
-                    "valid_children" : "none"
-                },
-                "datanode" : {
-                    "valid_children" : "none"
-                },
-                "unknown" : {
-                },
-                "default" : {
-                    "valid_children" : questionTypes
-                }
-            }
-        };
-    }
-
     that.showVisualValidation = function (mugType) {
         function setValidationFailedIcon(li, showIcon, message) {
             var exists = ($(li).find('.fd-props-validate').length > 0);
@@ -1458,7 +1348,7 @@ formdesigner.ui = function () {
                     formdesigner.controller.handleTreeDrop(data.o, data.r);
                 }
             },
-            "types": getJSTreeTypes(),
+            "types": formdesigner.util.getJSTreeTypes(),
             "plugins" : [ "themes", "json_data", "ui", "crrm", "types", "dnd" ]
         }).bind("select_node.jstree", 
             that.handleNodeSelect
