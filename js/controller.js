@@ -1404,7 +1404,6 @@ formdesigner.controller = (function () {
                 extraXMLNS = $(el).attr('xmlns');
                 keyAttr = $(el).attr('key');
 
-                mType.typeName = "Hidden Value";
                 mug = formdesigner.model.createMugFromMugType(mType);
 
                 mug.properties.dataElement.properties.nodeID = nodeID;

@@ -199,23 +199,19 @@ formdesigner.model = function () {
      * of user viewable content.
      * spec:
      * {
-     *  typeName, //the type string indicating what type of Control Element this is
-     *            //see the control_definitions (tag_name) object e.g. "input"
-     *  controlName //control_definition.controlElement.controlType.name; e.g. "text"
      *  //optional:
      *  label
      *  hintLabel
      *  labelItext
      *  hintItext
      *  defaultValue
-     *
      * }
      */
     var ControlElement = function (spec) {
         var that = {};
         that.properties = {};
 
-        var typeName, controlName, label, hintLabel, labelItext, hintItext, defaultValue;
+        var label, hintLabel, labelItext, hintItext, defaultValue;
         formdesigner.util.give_ufid(that);
 
         (function constructor(mySpec) {
@@ -576,7 +572,6 @@ formdesigner.model = function () {
 
 
     var RootMugType = {
-        typeName: "The Abstract Mug Type Definition", //human readable Type Name (Can be anything)
         type : "root", //easier machine readable value for the above;
         //type var can contain the following values: 'd', 'b', 'c', ('data', 'bind' and 'control' respectively)
         // or any combination of them. For example, a Mug that contains a dataElement and a controlElement (but no bindElement)
@@ -1029,7 +1024,7 @@ formdesigner.model = function () {
             if (this.mug && this.mug.properties.dataElement) {
                 return this.mug.properties.dataElement.properties.nodeID;
             } else {
-                return this.typeName;
+                return this.typeSlug;
             }
         }
 
@@ -1052,27 +1047,23 @@ formdesigner.model = function () {
         dataBind: function () {
             var mType = formdesigner.util.clone(RootMugType);
             mType.typeSlug = "datanode";
-            mType.typeName = "Hidden Value";
             mType.type = "db";
             delete mType.properties.controlElement;
             return mType;
         }(),
         dataBindControlQuestion: function () {
             var mType = formdesigner.util.clone(RootMugType);
-            mType.typeName = "Data Bind Control Question Mug";
             mType.type = "dbc";
             return mType;
         }(),
         dataControlQuestion: function () {
             var mType = formdesigner.util.clone(RootMugType);
-            mType.typeName = "Data + Control Question Mug";
             mType.type = "dc";
             delete mType.properties.bindElement;
             return mType;
         }(),
         dataOnly: function () {
             var mType = formdesigner.util.clone(RootMugType);
-            mType.typeName = "Data ONLY Mug";
             mType.type = "d";
             delete mType.properties.controlElement;
             delete mType.properties.bindElement;
@@ -1080,7 +1071,6 @@ formdesigner.model = function () {
         }(),
         controlOnly: function () {
             var mType = formdesigner.util.clone(RootMugType);
-            mType.typeName = "Control ONLY Mug";
             mType.type = "c";
             delete mType.properties.dataElement;
             delete mType.properties.bindElement;
@@ -1088,7 +1078,6 @@ formdesigner.model = function () {
         }(),
         readOnly: function () {
             var mType = formdesigner.util.clone(RootMugType);
-            mType.typeName = "READ ONLY Mug";
             mType.type = "readonly";
             delete mType.properties.dataElement;
             delete mType.properties.bindElement;
@@ -1109,7 +1098,6 @@ formdesigner.model = function () {
         var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion),
             mug;
         mType.typeSlug = "text";
-        mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
         
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
@@ -1122,7 +1110,6 @@ formdesigner.model = function () {
     that.mugTypeMaker.stdPhoneNumber = function () {
         var mType = formdesigner.model.mugTypeMaker.stdTextQuestion();
         mType.typeSlug = "phonenumber";
-        mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
         mType.mug.properties.controlElement.properties.name = "PhoneNumber";
         mType.mug.properties.controlElement.properties.appearance = "numeric";
 
@@ -1133,7 +1120,6 @@ formdesigner.model = function () {
         var mType = formdesigner.util.getNewMugType(mugTypes.dataBind),
             mug;
         mType.typeSlug = "datanode";
-        mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
         
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
@@ -1144,7 +1130,6 @@ formdesigner.model = function () {
         var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion),
             mug;
         mType.typeSlug = "secret";
-        mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
         
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
@@ -1168,7 +1153,6 @@ formdesigner.model = function () {
         var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion),
             mug;
         mType.typeSlug = "int";
-        mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
         
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
@@ -1182,7 +1166,6 @@ formdesigner.model = function () {
         var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion),
             mug;
         mType.typeSlug = "audio";
-        mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
         mType.properties.controlElement.mediaType = {
             lstring: 'Media Type',
             visibility: 'visible',
@@ -1205,7 +1188,6 @@ formdesigner.model = function () {
         var mType = formdesigner.util.getNewMugType(that.mugTypeMaker.stdAudio()),
             mug;
         mType.typeSlug = "image";
-        mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
         mType.mug.properties.controlElement.properties.name = "Image";
@@ -1220,7 +1202,6 @@ formdesigner.model = function () {
         var mType = formdesigner.util.getNewMugType(that.mugTypeMaker.stdAudio()),
             mug;
         mType.typeSlug = "video";
-        mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
         mType.mug.properties.controlElement.properties.name = "Video";
@@ -1235,7 +1216,6 @@ formdesigner.model = function () {
         var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion),
             mug;
         mType.typeSlug = "geopoint";
-        mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
         mType.mug.properties.controlElement.properties.name = "Geopoint";
@@ -1248,7 +1228,6 @@ formdesigner.model = function () {
         var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion),
             mug;
         mType.typeSlug = "androidintent";
-        mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
 
@@ -1268,7 +1247,6 @@ formdesigner.model = function () {
         var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion),
             mug;
         mType.typeSlug = "barcode";
-        mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
         mType.mug.properties.controlElement.properties.name = "Barcode";
@@ -1281,7 +1259,6 @@ formdesigner.model = function () {
         var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion),
                 mug;
         mType.typeSlug = "date";
-        mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
         mType.mug.properties.controlElement.properties.name = "Date";
@@ -1294,7 +1271,6 @@ formdesigner.model = function () {
         var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion),
             mug;
         mType.typeSlug = "datetime";
-        mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
         mType.mug.properties.controlElement.properties.name = "DateTime";
@@ -1307,7 +1283,6 @@ formdesigner.model = function () {
         var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion),
             mug;
         mType.typeSlug = "time";
-        mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
         mType.mug.properties.controlElement.properties.name = "Time";
@@ -1321,7 +1296,6 @@ formdesigner.model = function () {
         mType = formdesigner.model.mugTypeMaker.stdInt();
         mug = mType.mug;
         mType.typeSlug = "long";
-        mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
         mType.mug.properties.controlElement.properties.name = "Long";
         mType.mug.properties.bindElement.properties.dataType = "xsd:long";
         return mType;
@@ -1332,7 +1306,6 @@ formdesigner.model = function () {
         mType = formdesigner.model.mugTypeMaker.stdInt();
         mug = mType.mug;
         mType.typeSlug = "double";
-        mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
         mType.mug.properties.controlElement.properties.name = "Double";
         mType.mug.properties.bindElement.properties.dataType = "xsd:double";
         return mType;
@@ -1344,7 +1317,6 @@ formdesigner.model = function () {
             mug, vResult, controlProps;
 
         mType.typeSlug = "item";
-        mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
 
         controlProps = mType.properties.controlElement;
         controlProps.hintLabel.presence = 'notallowed';
@@ -1366,7 +1338,6 @@ formdesigner.model = function () {
                 vResult, controlProps, bindProps;
 
         mType.typeSlug = "trigger";
-        mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
         mType.properties.bindElement.dataType.presence = 'notallowed';
         mType.properties.dataElement.dataValue.presence = 'optional';
 
@@ -1386,7 +1357,6 @@ formdesigner.model = function () {
                 mug,
                 vResult;
         mType.typeSlug = "select";
-        mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
         mType.properties.bindElement.dataType.visibility = "hidden";
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
@@ -1399,7 +1369,6 @@ formdesigner.model = function () {
         var mType = formdesigner.model.mugTypeMaker.stdMSelect(), mug;
         mug = mType.mug;
         mType.typeSlug = "1select";
-        mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
         mType.mug.properties.controlElement.properties.name = 'Single-Select';
         mType.mug.properties.controlElement.properties.tagName = "select1";
         return mType;
@@ -1410,7 +1379,6 @@ formdesigner.model = function () {
                 mug,
                 vResult;
         mType.typeSlug = "group";
-        mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
         mType.properties.bindElement.dataType.presence = "notallowed";
         mType.properties.controlElement.hintItextID.presence = "notallowed";
         mType.properties.controlElement.hintLabel.presence = "notallowed";
@@ -1463,7 +1431,6 @@ formdesigner.model = function () {
             uiType: 'checkbox'
         };
         mType.typeSlug = "repeat";
-        mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
         mType.mug.properties.controlElement.properties.name = "Repeat";
         mType.mug.properties.controlElement.properties.tagName = "repeat";
 
@@ -1473,7 +1440,6 @@ formdesigner.model = function () {
     that.mugTypeMaker.unknown = function () {
         var mType = formdesigner.util.getNewMugType(mugTypes.readOnly);
         mType.typeSlug = "unknown";
-        mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
         var mug = that.createMugFromMugType(mType);
         mType.mug = mug;
         return mType;
