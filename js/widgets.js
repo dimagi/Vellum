@@ -34,11 +34,11 @@ formdesigner.widgets = (function () {
         };
 
         widget.getLabel = function () {
-            var displayName = this.getDisplayName();
+            var displayName = widget.getDisplayName();
             if (displayName) {
                 return $("<label />")
                     .text(displayName)
-                    .attr("for", this.getID());
+                    .attr("for", widget.getID());
             } else {
                 return null;
             }
@@ -91,14 +91,14 @@ formdesigner.widgets = (function () {
         widget.getUIElement = function () {
             // gets the whole widget (label + control)
             var uiElem = $("<div />").addClass("widget control-group"),
-                $control, $label;
+                $controls, $label;
 
-            $label = this.getLabel();
+            $label = widget.getLabel();
             $label.addClass('control-label');
             uiElem.append($label);
 
-            var $controls = $('<div class="controls" />');
-            $controls.append(this.getControl());
+            $controls = $('<div class="controls" />');
+            $controls.append(widget.getControl());
             uiElem.append($controls);
 
             return uiElem;
