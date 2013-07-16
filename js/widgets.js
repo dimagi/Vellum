@@ -654,6 +654,20 @@ formdesigner.widgets = (function () {
         return block;
     };
 
+    that.itextMediaBlock = function (mugType, options) {
+        var block = that.itextConfigurableBlock(mugType, options);
+
+        block.getForms = function () {
+            return _.intersection(block.activeForms, block.forms);
+        };
+
+        block.getItextWidget = function () {
+            return that.itextMediaWidget;
+        };
+
+        return block;
+    };
+
     that.baseItextWidget = function (mugType, language, form, options) {
         var widget = that.baseWidget(mugType);
 
@@ -770,9 +784,23 @@ formdesigner.widgets = (function () {
         return widget;
     };
 
+    that.itextMediaWidget = function (mugType, language, form, options) {
+        var widget = that.itextFormWidget(mugType, language, form, options);
+        widget.mediaRef = formdesigner.multimedia.multimediaReference(form);
 
+        var $input = widget.getControl();
 
+        widget.getDefaultValue = function () {
+            if (formdesigner.multimedia.SUPPORTED_MEDIA_TYPES.indexOf(form) != -1) {
+                // default formats
+                // image: jr://file/commcare/image/form_id/question_id.png
+                // audio: jr://file/commcare/audio/form_id/question_id.mp3
+                var extension = formdesigner.multimedia.DEFAULT_EXTENSIONS[form];
+                return "jr://file/commcare/" + form + "/" +
+                       formdesigner.controller.form.formID + "/" +
+                       mugType.getDefaultItextRoot() + "." + extension;
             }
+            return null;
         };
 
         widget.getPreviewUI = function () {
@@ -786,7 +814,7 @@ formdesigner.widgets = (function () {
             } else {
                 $preview = _.template($('#fd-template-multimedia-nomedia').text(), {
                     iconClass: formdesigner.multimedia.ICONS[form]
-                })
+                });
             }
             return $preview;
         };
@@ -794,46 +822,92 @@ formdesigner.widgets = (function () {
         widget.getUploadButtonUI = function () {
             var currentPath = widget.getValue(),
                 $uploadBtn;
+            $uploadBtn = formdesigner.ui.getTemplateObject('#fd-template-multmedia-upload-trigger', {
                 multimediaExists: currentPath in formdesigner.multimedia.objectMap,
                 uploaderId: formdesigner.multimedia.SLUG_TO_CONTROL[form].uploaderSlug,
                 mediaType: form
+            });
             $uploadBtn.click(function () {
                 widget.mediaRef.updateController();
             });
             return $uploadBtn;
         };
 
+        widget.getPreviewID = function () {
+            return  widget.getID() + '-preview-block';
         };
 
+        widget.getUploadID = function () {
+            return widget.getID() + '-upload-block';
         };
 
+        var $uiElem = $('<div />'),
+            _getParentUIElement = widget.getUIElement;
         widget.getUIElement = function () {
+            $uiElem = _getParentUIElement();
+            var $controlBlock = $uiElem.find('.controls'),
+                $previewContainer = $('<div />')
+                    .attr('id', widget.getPreviewID()).addClass('fd-mm-preview-container span2'),
+                $uploadContainer = $('<div />')
+                    .attr('id', widget.getUploadID()).addClass('fd-mm-upload-container span10');
+            $controlBlock.empty()
+                .addClass('control-row').attr('data-form', form);
 
             widget.updateReference();
 
+            $previewContainer.attr('id', widget.getPreviewID())
+                .html(widget.getPreviewUI());
+            $controlBlock.append($previewContainer);
 
             if (formdesigner.multimedia.isUploadEnabled) {
                 $uploadContainer.html($('#fd-template-multimedia-block').html());
+
+                $uploadContainer.find('.fd-mm-upload-trigger')
+                    .append(widget.getUploadButtonUI());
+                $uploadContainer.find('.fd-mm-path-input')
+                    .append($input);
+
+                $uploadContainer.find('.fd-mm-path-show').click(function (e) {
                     var $showBtn = $(this);
                     $showBtn.addClass('hide');
+                    $('#' + widget.getUploadID()).find('.fd-mm-path').removeClass('hide');
+                    e.preventDefault();
                 });
+
+                $uploadContainer.find('.fd-mm-path-hide').click(function (e) {
                     var $hideBtn = $(this);
                     $hideBtn.parent().addClass('hide');
+                    $('#' + widget.getUploadID()).find('.fd-mm-path-show').removeClass('hide');
+                    e.preventDefault();
                 });
             } else {
                 $uploadContainer.append($input);
             }
 
+            $controlBlock.append($uploadContainer);
 
             $uiElem.on('mediaUploadComplete', widget.handleUploadComplete);
+            // reapply bindings because we removed the input from the UI
+            $input.keyup(widget.updateValue);
+            $input.bind('question-itext-form-deleted', widget.fireChangeEvents);
+            $input.bind("change keyup", widget.updateMultimediaBlockUI)
 
             return $uiElem;
         };
 
+        widget.updateReference = function () {
+            var currentPath = widget.getValue();
+            $uiElem.attr('data-hqmediapath', currentPath);
+            widget.mediaRef.updateRef(currentPath);
         };
 
         widget.updateMultimediaBlockUI = function () {
+            $('#' + widget.getPreviewID()).html(widget.getPreviewUI())
+                .find('.existing-media').tooltip();
 
+            $uiElem.find('.fd-mm-upload-trigger')
+                .empty()
+                .append(widget.getUploadButtonUI());
 
             widget.updateReference();
         };
@@ -1103,6 +1177,8 @@ formdesigner.widgets = (function () {
                 return that.itextLabelBlock(mugType, definition);
             case "itextConfig":
                 return that.itextConfigurableBlock(mugType, definition);
+            case "itextMedia":
+                return that.itextMediaBlock(mugType, definition);
             case "questionType":
                 return that.questionTypeSelectorWidget(mugType);
             case "androidIntentAppId":
