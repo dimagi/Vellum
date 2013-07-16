@@ -770,172 +770,10 @@ formdesigner.widgets = (function () {
         return widget;
     };
 
-    that.baseItextWidgetOld = function (mugType, language, itemFunc, slug, form) {
-        var widget = that.baseWidget(mugType),
-            _updateValue = widget.updateValue;
 
-        widget.language = language;
-        widget.form = form;
-        widget.slug = slug;
 
-        // this is a bit of a hack 
-        widget.elementPrefix = {
-            constraint: "#bindElement-constraintMsgItextID",
-            hint: "#controlElement-hintItextID",
-            text: "#controlElement-labelItextID"
-        }[slug];
-
-        widget.getTextItem = function () {
-            return itemFunc(this.mug);
-        };
-
-        widget.getID = function () {
-            return "itext-" + this.language + "-" + this.slug + "-" + this.form;
-        };
-
-        widget.getType = function () {
-            if (this.form === "default") {
-                return "Display Text";
-            }
-            return this.form;
-        };
-
-        widget.setValue = function (value) {
-            input.val(value);
-        };
-
-        widget.getValue = function() {
-            return input.val();
-        };
-
-        widget.updateValue = function () {
-            widget.checkAutoIDIfNeeded();
-            _updateValue();
-        };
-
-        widget.checkAutoIDIfNeeded = function() {
-            var $idInput = $(widget.elementPrefix),
-                currentId = $.trim($idInput.val()),
-                $autoIdCheckbox = $(widget.elementPrefix + "-auto-itext");
-
-            if (widget.getValue() && !currentId) {
-                $autoIdCheckbox.prop('checked', true).change();
-            } else if (!widget.getValue() && currentId) {
-                $autoIdCheckbox.prop('checked', false).change();
-                $idInput.val('').change();
             }
         };
-
-        widget.fireChangeEvents = function () {
-            item = this.getTextItem();
-            if (item) {
-	            // fire the property changed event(s)
-	            formdesigner.controller.fire({
-	               type: "question-itext-changed",
-	               language: this.language,
-	               item: item,
-	               form: this.form,
-	               value: this.getValue(),
-	            });
-	            formdesigner.controller.form.fire({
-	               type: "form-property-changed"
-	            });
-	        }
-        };
-        widget.save = function () {
-            // override save to reference the itext, rather than
-            // a property of the mug
-            item = this.getTextItem();
-            if (item) {
-	            item.getForm(this.form).setValue(this.language, this.getValue());
-	            this.fireChangeEvents();
-	        }
-        };
-
-        // this is special
-        widget.deleteValue = function () {
-            item = this.getTextItem();
-            if (item) {
-                item.removeForm(this.form);
-            }
-        };
-
-        var input = $("<input />").attr("id", widget.getID()).attr("type", "text").addClass('input-block-level');
-
-        widget.getControl = function () {
-            return input;
-        };
-
-        input.keyup(widget.updateValue);
-        return widget;
-    };
-
-    that.itextFormWidgetOld = function(mugType, language, itemFunc, slug, form, block) {
-        var widget = that.baseItextWidgetOld(mugType, language, itemFunc, slug, form);
-
-        widget.getDisplayName = function () {
-            return widget.getType();
-        };
-
-        return widget;
-    };
-
-    that.iTextRemovableWidgetOld = function(mugType, language, itemFunc, slug, form, block) {
-        var widget = that.itextFormWidgetOld(mugType, language, itemFunc, slug, form);
-
-        widget.getUIElement = function () {
-            // gets the whole widget (label + control)
-            var uiElem = $("<div />").addClass("widget control-group").attr("data-form", form),
-                $controls = $('<div class="controls controls-row" />'),
-                $label, $input, $deleteButton;
-
-            $label = this.getLabel();
-            $label.addClass('control-label');
-            uiElem.append($label);
-
-            $input = this.getControl();
-            $input.addClass('span10');
-            $input.removeClass('input-block-level');
-            $controls.append($input);
-
-            $controls.append($('<div class="span2" />').append(widget.getDeleteButton()));
-
-            uiElem.append($controls);
-
-            return uiElem;
-        };
-
-        widget.getDeleteButton = function () {
-            var $deleteButton = $($('#fd-template-button-remove').html());
-            $deleteButton.click(function () {
-                widget.deleteValue();
-                // this is a bit ridiculous but finds the right things to remove
-                $("#fd-question-edit-content .itext-language-section")
-                    .children('div[data-form="' + form + '"]')
-                    .each(function () {
-                        $(this).remove();
-                });
-                block.formList.splice(block.formList.indexOf(form), 1);
-                $('#' + formdesigner.util.getAddNewItextItemId(form)).removeClass('disabled');
-                widget.fireChangeEvents();
-            });
-            return $deleteButton;
-        };
-
-        widget.getDisplayName = function () {
-            return widget.getType();
-        };
-
-        return widget;
-    };
-
-    that.iTextMediaWidget = function (mugType, language, itemFunc, slug, form, block) {
-        var widget = that.iTextRemovableWidgetOld(mugType, language, itemFunc, slug, form, block);
-
-        widget.mediaRef = formdesigner.multimedia.multimediaReference(form);
-
-        var $input = widget.getControl(),
-            $uiElem = $("<div />");
 
         widget.getPreviewUI = function () {
             var currentPath = widget.getValue(),
@@ -956,113 +794,55 @@ formdesigner.widgets = (function () {
         widget.getUploadButtonUI = function () {
             var currentPath = widget.getValue(),
                 $uploadBtn;
-            $uploadBtn = $(_.template($('#fd-template-multmedia-upload-trigger').text(), {
                 multimediaExists: currentPath in formdesigner.multimedia.objectMap,
                 uploaderId: formdesigner.multimedia.SLUG_TO_CONTROL[form].uploaderSlug,
                 mediaType: form
-            }));
             $uploadBtn.click(function () {
                 widget.mediaRef.updateController();
             });
             return $uploadBtn;
         };
 
-        widget.updateReference = function () {
-            var currentPath = widget.getValue();
-            $uiElem.attr('data-hqmediapath', currentPath);
-            widget.mediaRef.updateRef(currentPath);
         };
 
-
-
-        widget.getPreviewContainerId = function () {
-            return  'fd-mm-preview-container-' + form;
         };
 
         widget.getUIElement = function () {
-            $uiElem = $("<div />").addClass("widget control-group").attr("data-form", form);
-            var $controls = $('<div class="controls control-row" />'),
-                $previewContainer = $('<div />').addClass('fd-mm-preview-container span2'),
-                $uploadContainer = $('<div />').addClass('fd-mm-upload-container span8'),
-                $label;
-
-            $label = widget.getLabel();
-            $label.addClass('control-label');
-            $uiElem.append($label);
 
             widget.updateReference();
 
-            $previewContainer.attr('id', widget.getPreviewContainerId());
-            $previewContainer.html(widget.getPreviewUI());
-            $previewContainer.find('.existing-media').tooltip();
-
-            $controls.append($previewContainer);
 
             if (formdesigner.multimedia.isUploadEnabled) {
                 $uploadContainer.html($('#fd-template-multimedia-block').html());
-                $uploadContainer.find('.fd-mm-upload-trigger').append(widget.getUploadButtonUI());
-                $uploadContainer.find('.fd-mm-path-input').append($input);
-                $uploadContainer.find('.fd-mm-path-show').click(function () {
                     var $showBtn = $(this);
                     $showBtn.addClass('hide');
-                    $showBtn.parent().find('.fd-mm-path').removeClass('hide');
                 });
-                $uploadContainer.find('.fd-mm-path-hide').click(function () {
                     var $hideBtn = $(this);
                     $hideBtn.parent().addClass('hide');
-                    $hideBtn.parent().parent().find('.fd-mm-path-show').removeClass('hide');
                 });
             } else {
                 $uploadContainer.append($input);
             }
 
-            $controls.append($uploadContainer);
-
-            $controls.append($('<div class="span2" />').append(widget.getDeleteButton()));
-
-            $uiElem.append($controls);
 
             $uiElem.on('mediaUploadComplete', widget.handleUploadComplete);
 
             return $uiElem;
         };
 
-        widget.getDisplayName = function () {
-            return "Multimedia: " + widget.getType();
         };
 
         widget.updateMultimediaBlockUI = function () {
-            var $previewContainer = $uiElem.find('.fd-mm-preview-container');
-            $previewContainer.html(widget.getPreviewUI());
-            $previewContainer.find('.existing-media').tooltip();
 
-            var $uploadContainer = $uiElem.find('.fd-mm-upload-container');
-            $uploadContainer.find('.fd-mm-upload-trigger').empty();
-            $uploadContainer.find('.fd-mm-upload-trigger').append(widget.getUploadButtonUI());
 
             widget.updateReference();
         };
-
-        $input.bind("change keyup", widget.updateMultimediaBlockUI);
 
         widget.handleUploadComplete = function (event, data) {
             if (data.ref && data.ref.path) {
                 formdesigner.multimedia.objectMap[data.ref.path] = data.ref;
             }
             widget.updateMultimediaBlockUI();
-        };
-
-
-
-        return widget;
-    };
-
-    that.iTextInlineWidget = function (mugType, language, itemFunc, slug, form, displayName) {
-        var widget = that.baseItextWidgetOld(mugType, language, itemFunc, slug, form);
-
-        widget.getDisplayName = function () {
-            var formSpecifier = (this.form === "default") ? "" : " - " + this.form;
-            return displayName + formSpecifier + " (" + language + ")";
         };
 
         return widget;
@@ -1319,13 +1099,6 @@ formdesigner.widgets = (function () {
     that.widgetFromMugAndDefinition = function (mugType, definition) {
         // there is probably one layer of indirection too many here
         switch (definition.widgetType) {
-            case "itext":
-                if (definition.displayMode === "inline") {
-                    return that.iTextFieldBlockInline(mugType, definition);
-                } else {
-                    // default to "full"
-                    return that.iTextFieldBlock(mugType, definition);
-                }
             case "itextLabel":
                 return that.itextLabelBlock(mugType, definition);
             case "itextConfig":
@@ -1391,231 +1164,11 @@ formdesigner.widgets = (function () {
         return section;
     };
 
-    that.baseITextFieldBlock = function (mugType, options) {
-        var block = {};
-
-        block.mugType = mugType;
-        block.textIdFunc = options.textIdFunc;
-        block.slug = options.slug;
-
-        block.getTextId = function () {
-            return this.textIdFunc(this.mugType);
-        };
-
-        block.showAddFormButton = options.showAddFormButton;
-        block.formList = block.getTextId().getFormNames();
-        block.displayName = options.displayName || "";
-
-        block.langs = formdesigner.model.Itext.getLanguages();
-
-        // hack, so they adhere to the same api
-        block.setValue = function (val) {
-            // noop
-        };
-
-        block.getValue = function () {
-            // noop
-        };
-
-        return block;
-    };
-
-    that.iTextFieldBlock = function (mugType, options) {
-        var block = that.baseITextFieldBlock(mugType, options);
-
-        block.defaultContentTypes = ['long', 'short'];
-        block.contentTypeIcons = _.extend({}, formdesigner.multimedia.ICONS);
-
-        // needed for closure
-        var textIdFunc = block.textIdFunc,
-            slug = block.slug,
-            $container = $('<div />'),
-            multimediaTypes = _.clone(formdesigner.multimedia.SUPPORTED_MEDIA_TYPES);
-
-        var addItextType = function (form, value) {
-            // form is really slug
-            if (block.formList.indexOf(form) != -1) {
-                return;
-            }
-            block.formList.push(form);
-
-            $('#' + formdesigner.util.getAddNewItextItemId(form)).addClass('disabled');
-
-            $container.parent().find(".itext-language-section").each(function () {
-
-                var lang, itextWidget, uiElem, itextForm;
-
-                lang = $(this).data("language");
-
-                itextWidget = (multimediaTypes.indexOf(form) >= 0) ?
-                                that.iTextMediaWidget(mugType, lang, textIdFunc, slug, form, block) :
-                                that.iTextRemovableWidgetOld(mugType, lang, textIdFunc, slug, form, block);
-
-                itextWidget.setValue(value);
-
-                uiElem = itextWidget.getUIElement();
-                uiElem.appendTo($(this));
-
-                itextForm = itextWidget.getTextItem().getOrCreateForm(form);
-                if (value) {
-                    itextForm.setValue(lang, value);
-                }
-                itextWidget.fireChangeEvents();
-            });
-        };
-
-        block.getDefaultValue = function (formType) {
-            if (multimediaTypes.indexOf(formType) >= 0) {
-                // default formats
-                // image: jr://file/commcare/image/form_id/question_id.png
-                // audio: jr://file/commcare/audio/form_id/question_id.mp3
-                var extension = formdesigner.multimedia.DEFAULT_EXTENSIONS[formType];
-                return "jr://file/commcare/" + formType + "/" +
-                       formdesigner.controller.form.formID + "/" +
-                       mugType.getDefaultItextRoot() + "." + extension;
-            }
-            return null;
-        };
-
-        block.getFilteredFormList = function () {
-            return block.formList;
-        };
-
-        block.getUIElement = function () {
-            var itextItem = block.getTextId(),
-                formList = block.getFilteredFormList();
-
-            if (formList) {
-                for (var i = 0; i < this.langs.length; i++) {
-                    var language = block.langs[i];
-
-                    var subSec = $("<div />").addClass("itext-language-section well well-vellum").data("language", language);
-                    $container.append(subSec);
-
-                    // sub heading for language
-                    $("<h3 />").text(language).appendTo(subSec);
-
-                    // loop through items, add to UI
-                    for (var j = 0; j < formList.length; j++) {
-                        var formType = formList[j], itextWidget;
-
-                        if (formType === 'default') {
-                            itextWidget = that.itextFormWidgetOld(mugType, language, block.textIdFunc, block.slug, formType, block);
-                        } else if (multimediaTypes.indexOf(formType) >= 0) {
-                            itextWidget = that.iTextMediaWidget(mugType, language, block.textIdFunc, block.slug, formType, block);
-                        } else {
-                            itextWidget = that.iTextRemovableWidgetOld(mugType, language, block.textIdFunc, block.slug, formType, block);
-                        }
-
-                        itextWidget.setValue(itextItem.getValue(formType, language));
-                        var uiElem = itextWidget.getUIElement();
-                        uiElem.appendTo(subSec);
-                    }
-                }
-            }
-
-            if (this.showAddFormButton) {
-                $container.append(block.getAddItextGroup("Add Multimedia", multimediaTypes));
-                var $otherGroup = block.getAddItextGroup("Add Other", block.defaultContentTypes);
-
-                var $customButton = $("<div />").text("custom...").button().addClass('btn');
-	            $customButton.click(function () {
-	                var dialog = $("#fd-dialog-confirm");
-	                dialog.dialog("destroy");
-	                dialog.empty();
-	                $("<label />").attr("for", "new-itext-id").text("Content type: ").appendTo(dialog);
-	                var input = $("<input />").attr("id", "new-itext-id").appendTo(dialog);
-	                dialog.dialog({
-	                    title: "New Content Item Type",
-	                    buttons: {
-	                        "Add": function () {
-	                            addItextType(input.val());
-	                            $(this).dialog("close");
-	                        },
-	                        "Cancel": function () {
-	                            $(this).dialog("close");
-	                        }
-	                    }
-	               });
-	            });
-
-                $otherGroup.find('.btn-group').append($customButton);
-
-                $container.append($otherGroup);
-	        }
-
-	        return $container;
-        };
-
-        block.getAddItextGroup = function (addText, contentTypes) {
-            var $addItextBtn = $("<div />").addClass("itext-wrapper control-group"),
-                $controls = $('<div class="controls" />');
-            $("<label />").text(addText).addClass("control-label").appendTo($addItextBtn);
-
-            var $btnGroup = block.getContentTypeButtons(contentTypes);
-            $controls.append($btnGroup);
-            $addItextBtn.append($controls);
-
-            return $addItextBtn;
-        };
-
-        block.getContentTypeButtons = function (contentTypes) {
-            var formList = block.getFilteredFormList();
-
-            var $buttonGroup = $("<div />").addClass("btn-group itext-options");
-            for (var i = 0; i < contentTypes.length; i++) {
-                var contentType = contentTypes[i],
-                    $btn = $('<div />');
-                $btn.text(contentType)
-                    .button()
-                    .attr('id', formdesigner.util.getAddNewItextItemId(contentType))
-                    .data('formtype', contentType)
-                    .addClass('btn itext-option').click(
-                    function () {
-                        var form = $(this).data('formtype');
-		                    addItextType(form, block.getDefaultValue(form));
-                    }).appendTo($buttonGroup);
-
-                var iconClass = block.contentTypeIcons[contentType];
-                if (iconClass) {
-                    $btn.prepend($('<i />').addClass(iconClass).after(" "));
-                }
-
-                if (formList.indexOf(contentType) != -1) {
-                    $btn.addClass('disabled');
-                }
-            }
-            return $buttonGroup;
-        };
-
-        return block;
-    };
-
-    that.iTextFieldBlockInline = function (mugType, options) {
-        // an inline way of displaying itext blocks.
-        // doesn't support adding fields
-        // show's each langauge in the label
-
-        var block = that.baseITextFieldBlock(mugType, options);
-        var main = $("");
-
-        var itextItem = block.getTextId();
-
-        block.getUIElement = function () {
-            for (var i = 0; i < this.langs.length; i++) {
-                for (var j = 0; j < this.formList.length; j++) {
-                    var itextWidget = that.iTextInlineWidget(mugType, this.langs[i], this.textIdFunc,
-                                                             this.slug, this.formList[j], this.displayName);
-                    itextWidget.setValue(itextItem.getValue(this.formList[j], this.langs[i]));
-                    main = main.add(itextWidget.getUIElement());
-                }
-            }
-
-            return main;
-        };
-
-        return block;
-    };
+    /**
+     * Hard coded function to map mugs to the types of things
+     * that they display
+     *
+     */
 
     that.getToolbarForMug = function (mugType) {
         var $baseToolbar = formdesigner.ui.getTemplateObject('#fd-template-question-toolbar', {
@@ -1628,11 +1181,6 @@ formdesigner.widgets = (function () {
         return $baseToolbar;
     };
 
-    /**
-     * Hard coded function to map mugs to the types of things
-     * that they display
-     *
-     */
     that.getSectionListForMug = function (mugType) {
         sections = [];
         sections.push(that.getMainSection(mugType));
@@ -1716,13 +1264,7 @@ formdesigner.widgets = (function () {
         var showAddFormButton = (mugType.typeSlug !== 'group' && 
                                  mugType.typeSlug !== 'repeat');
             
-        elements = [{
-                widgetType: "itext",
-                slug: "text",
-                displayMode: "full",
-                textIdFunc: function (mt) { return mt.getItext() },
-                showAddFormButton: showAddFormButton
-            }
+        elements = [
         ];
 
         return that.questionSection(mugType, {
