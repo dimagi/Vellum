@@ -337,7 +337,7 @@ formdesigner.ui = function () {
 
             if (e.property === 'nodeID' && e.element === 'dataElement') {
                 var node = $('#' + e.mugTypeUfid);
-                if (mugType.typeSlug === "datanode" && e.val &&
+                if (mugType.typeSlug === "stdDataBindOnly" && e.val &&
                     e.val !== that.jstree("get_text", node)) 
                 {
                     that.jstree('rename_node', node, e.val);
@@ -345,7 +345,7 @@ formdesigner.ui = function () {
             }
             if (mugType.hasBindElement()) {
                 var bindElement = mugType.mug.properties.bindElement.properties;
-                if (e.property === 'constraintAttr' && mugType.typeSlug !== 'datanode') {
+                if (e.property === 'constraintAttr' && mugType.typeSlug !== 'stdDataBindOnly') {
                     var $constraintItext = $(formdesigner.ui.CONSTRAINT_ITEXT_BLOCK_SELECTOR);
                     if (e.val) {
                         $constraintItext.removeClass('hide');
@@ -384,14 +384,12 @@ formdesigner.ui = function () {
         }
 
         var ufid = $(data.rslt.obj[0]).prop('id'),
-            mugType = formdesigner.controller.getMTFromFormByUFID(ufid),
-            typeSlug;
+            mugType = formdesigner.controller.getMTFromFormByUFID(ufid);
 
         that.displayMugProperties(mugType);
-        typeSlug = mugType.typeSlug;
         // First neutralize all the existing buttons.
         that.resetQuestionTypeGroups();
-        that.activateQuestionTypeGroup(typeSlug);
+        that.activateQuestionTypeGroup(mugType.typeSlug);
     };
 
     that.isSelectNodeBlocked = function (e, data) {
@@ -444,7 +442,7 @@ formdesigner.ui = function () {
      */
     that.selectLowestQuestionNode = function () {
         that.jstree("deselect_all");
-        var questions = that.getJSTree().children().children().filter("[rel!='datanode']");
+        var questions = that.getJSTree().children().children().filter("[rel!='stdDataBindOnly']");
         if (questions.length > 0) {
             var newSelectEl = $(questions[questions.length - 1]);
             that.jstree("select_node", newSelectEl, false);
@@ -1332,8 +1330,8 @@ formdesigner.ui = function () {
                     "check_move": function (m) {
                         // disallow moving a data node or onto a data node
                         // unless both nodes are data nodes
-                        var refIsData = $(m.r).attr('rel') === 'datanode',
-                            nodeIsData = $(m.o).attr('rel') === 'datanode';
+                        var refIsData = $(m.r).attr('rel') === 'stdDataBindOnly',
+                            nodeIsData = $(m.o).attr('rel') === 'stdDataBindOnly';
 
                         if (refIsData + nodeIsData == 1) {
                             return false;

@@ -1398,7 +1398,7 @@ formdesigner.widgets = (function () {
 
         elements = filterByMugProperties(elements, mugType).map(wrapAsGeneric);
 
-        if (mugType.typeSlug !== 'datanode') {
+        if (mugType.typeSlug !== 'stdDataBindOnly') {
             elements.push({
                 widgetType: "itextLabel",
                 itextType: "label",
@@ -1413,7 +1413,7 @@ formdesigner.widgets = (function () {
             elements.push({widgetType: "readonlyControl", path: "system/readonlyControl"});
         }
 
-        if (mugType.typeSlug == 'androidintent') {
+        if (mugType.typeSlug == 'stdAndroidIntent') {
             elements.push({widgetType: "androidIntentAppId", path: "system/androidIntentAppId"});
             elements.push({widgetType: "androidIntentExtra", path: "system/androidIntentExtra"});
             elements.push({widgetType: "androidIntentResponse", path: "system/androidIntentResponse"});
@@ -1456,7 +1456,7 @@ formdesigner.widgets = (function () {
     that.getLogicSection = function (mugType) {
         var properties;
 
-        if (mugType.typeSlug === 'datanode') {
+        if (mugType.typeSlug === 'stdDataBindOnly') {
             properties = [
                 "bindElement/calculateAttr",
                 "bindElement/relevantAttr"
@@ -1494,12 +1494,12 @@ formdesigner.widgets = (function () {
             // think they can edit an input when they really can't, but we
             // shouldn't break existing forms doing this.
             if (mugType.mug.properties.bindElement.properties.calculateAttr &&
-                mugType.typeSlug !== 'datanode') {
+                mugType.typeSlug !== 'stdDataBindOnly') {
                 properties.push("bindElement/calculateAttr");
             }
         }
 
-        if (mugType.typeSlug == 'repeat') {
+        if (mugType.typeSlug == 'stdRepeat') {
             elements.push(wrapAsGeneric("controlElement/repeat_count"));
             elements.push(wrapAsGeneric("controlElement/no_add_remove"));
         }
@@ -1529,7 +1529,7 @@ formdesigner.widgets = (function () {
         // what type an element is, it's difficult to do this properly with
         // controlElement.constraintMsgItextID.presence = "notallowed" in the group
         // mugtype definition.
-        if (!(mugType.typeSlug === 'group' || mugType.typeSlug === 'repeat' || mugType.typeSlug === 'fieldlist')) {
+        if (!(mugType.typeSlug === 'stdGroup' || mugType.typeSlug === 'stdRepeat' || mugType.typeSlug === 'stdFieldList')) {
             properties.push("bindElement/constraintMsgItextID");
         }
 

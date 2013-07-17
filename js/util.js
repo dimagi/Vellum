@@ -41,70 +41,70 @@ formdesigner.util = (function(){
 
     that.QUESTION_GROUPS = [
         {
-            group: ['text', 'Text', 'icon-vellum-text'],  // [<default_slug>, <title>, <icon-class>]
+            group: ['stdTextQuestion', 'Text', 'icon-vellum-text'],  // [<default_slug>, <title>, <icon-class>]
             questions: [
-                ['text', 'Text Question', 'icon-vellum-text'],  // [<slug>, <title>, <icon-class>]
-                ['trigger', 'Label', 'icon-tag']
+                ['stdTextQuestion', 'Text Question', 'icon-vellum-text'],  // [<slug>, <title>, <icon-class>]
+                ['stdTrigger', 'Label', 'icon-tag']
             ]
         },
         {
-            group: ['1select', 'Single Choice', 'icon-vellum-single-select'],
+            group: ['stdSelect', 'Single Choice', 'icon-vellum-single-select'],
             related: [
-                ['item', 'Choice', 'icon-circle-blank']
+                ['stdItem', 'Choice', 'icon-circle-blank']
             ],
             questions: [
-                ['1select', 'Single Choice', 'icon-vellum-single-select'],
-                ['select', 'Multiple Choice', 'icon-vellum-multi-select']
+                ['stdSelect', 'Single Choice', 'icon-vellum-single-select'],
+                ['stdMSelect', 'Multiple Choice', 'icon-vellum-multi-select']
             ]
         },
         {
-            group: ['int', 'Number', 'icon-vellum-numeric'],
+            group: ['stdInt', 'Number', 'icon-vellum-numeric'],
             questions: [
-                ['int', 'Integer', 'icon-vellum-numeric'],
-                ['phonenumber', 'Phone Number or Numeric ID', 'icon-signal'],
-                ['double', 'Decimal', 'icon-vellum-decimal'],
-                ['long', 'Long', 'icon-vellum-long']
+                ['stdInt', 'Integer', 'icon-vellum-numeric'],
+                ['stdPhoneNumber', 'Phone Number or Numeric ID', 'icon-signal'],
+                ['stdDouble', 'Decimal', 'icon-vellum-decimal'],
+                ['stdLong', 'Long', 'icon-vellum-long']
             ]
         },
         {
-            group: ['date', 'Date', 'icon-calendar'],
+            group: ['stdDate', 'Date', 'icon-calendar'],
             questions: [
-                ['date', 'Date', 'icon-calendar'],
-                ['time', 'Time', 'icon-time'],
-                ['datetime', 'Date and Time', 'icon-vellum-datetime']
+                ['stdDate', 'Date', 'icon-calendar'],
+                ['stdTime', 'Time', 'icon-time'],
+                ['stdDateTime', 'Date and Time', 'icon-vellum-datetime']
             ]
         },
         {
-            group: ['datanode', 'Hidden Value', 'icon-vellum-variable'],
+            group: ['stdDataBindOnly', 'Hidden Value', 'icon-vellum-variable'],
             showDropdown: false,
             questions: [
-                ['datanode', 'Hidden Value', 'icon-vellum-variable']
+                ['stdDataBindOnly', 'Hidden Value', 'icon-vellum-variable']
             ]
         },
         {
-            group: ['group', 'Groups', 'icon-folder-open'],
+            group: ['stdGroup', 'Groups', 'icon-folder-open'],
             questions: [
-                ['group', 'Group', 'icon-folder-open'],
-                ['repeat', 'Repeat Group', 'icon-retweet'],
-                ['fieldlist', 'Question List', 'icon-reorder']
+                ['stdGroup', 'Group', 'icon-folder-open'],
+                ['stdRepeat', 'Repeat Group', 'icon-retweet'],
+                ['stdFieldList', 'Question List', 'icon-reorder']
             ]
         },
         {
-            group: ['image', 'Multimedia Capture', 'icon-camera'],
+            group: ['stdImage', 'Multimedia Capture', 'icon-camera'],
             questions: [
-                ['image', 'Image Capture', 'icon-camera'],
-                ['audio', 'Audio Capture', 'icon-vellum-audio-capture'],
-                ['video', 'Video Capture', 'icon-facetime-video']
+                ['stdImage', 'Image Capture', 'icon-camera'],
+                ['stdAudio', 'Audio Capture', 'icon-vellum-audio-capture'],
+                ['stdVideo', 'Video Capture', 'icon-facetime-video']
             ]
         },
         {
-            group: ['geopoint', 'Advanced', ''],
+            group: ['stdGeopoint', 'Advanced', ''],
             textOnly: true,
             questions: [
-                ['geopoint', 'GPS', 'icon-map-marker'],
-                ['barcode', 'Barcode Scan', 'icon-barcode'],
-                ['secret', 'Password', 'icon-key'],
-                ['androidintent', 'Android App Callout', 'icon-vellum-android-intent']
+                ['stdGeopoint', 'GPS', 'icon-map-marker'],
+                ['stdBarcode', 'Barcode Scan', 'icon-barcode'],
+                ['stdSecret', 'Password', 'icon-key'],
+                ['stdAndroidIntent', 'Android App Callout', 'icon-vellum-android-intent']
             ]
         }
     ];
@@ -113,18 +113,16 @@ formdesigner.util = (function(){
         var typeSlugs = $.map(that.QUESTIONS, function (el, i) { return i; }),
             types = {};
 
-        for (var k in ['datanode', 'item']) {
-            typeSlugs.splice(typeSlugs.indexOf(k), 1);
-        }
+        typeSlugs = _.without(typeSlugs, 'stdDataBindOnly', 'stdItem');
 
         for (var i = 0, slug; i < typeSlugs.length; slug = typeSlugs[i++]) { 
             var children;
-            if (slug === "group" || slug === "repeat") {
+            if (slug === "stdGroup" || slug === "stdRepeat") {
                 children = typeSlugs;
-            } else if (slug === 'fieldlist') {
-                children = _.without(typeSlugs, 'group', 'repeat');
-            } else if (slug === "1select" || slug === "select") {
-                children = ['item'];
+            } else if (slug === 'stdFieldList') {
+                children = _.without(typeSlugs, 'stdGroup', 'stdRepeat');
+            } else if (slug === "stdSelect" || slug === "stdMSelect") {
+                children = ['stdItem'];
             } else {
                 children = "none";
             }
@@ -134,7 +132,7 @@ formdesigner.util = (function(){
 
         return {
             "max_children" : -1,
-            "valid_children" : typeSlugs.concat(['datanode']),  // valid root node types
+            "valid_children" : typeSlugs.concat(['stdDataBindOnly']),  // valid root node types
             "types" : types
         };
     };
@@ -187,13 +185,22 @@ formdesigner.util = (function(){
     
     // keep questions from showing up in the dropdown list here
     that.UNCHANGEABLE_QUESTIONS = [
-        "item", "group", "repeat", "datanode", "trigger", "unknown", "androidintent", "fieldlist"
+        "stdItem", 
+        "stdGroup", 
+        "stdRepeat", 
+        "stdDataBindOnly", 
+        "stdTrigger", 
+        "unknown", 
+        "stdAndroidIntent", 
+        "stdFieldList"
     ];
 
     // these questions are groups or repeats (or similar types of things).
     // They don't have any human readable itext
     that.SPECIAL_GROUP_QUESTIONS = [
-        'group', 'repeat', 'fieldlist'
+        'stdGroup', 
+        'stdRepeat', 
+        'stdFieldList'
     ];
     
     that.getQuestionList = function (currentType) {
@@ -902,7 +909,7 @@ formdesigner.util = (function(){
     that.mugToXPathReference = function (mug) {
         // for choices, return the quoted value.
         // for everything else return the path
-        if (mug.typeSlug === "item") {
+        if (mug.typeSlug === "stdItem") {
             return '"' + mug.mug.properties.controlElement.properties.defaultValue + '"';
         } else {
             // for the currently selected mug, return a "."
@@ -917,12 +924,12 @@ formdesigner.util = (function(){
     };
         
     that.isSelect = function (mug) {
-        return (mug.typeSlug === "select" ||
-                mug.typeSlug === "1select");
+        return (mug.typeSlug === "stdMSelect" ||
+                mug.typeSlug === "stdSelect");
     };
     
     that.isSelectItem = function (mug) {
-        return (mug.typeSlug === "item");
+        return (mug.typeSlug === "stdItem");
     };
 
     /**

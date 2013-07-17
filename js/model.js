@@ -1046,7 +1046,7 @@ formdesigner.model = function () {
         //the controlElement is deleted.
         dataBind: function () {
             var mType = formdesigner.util.clone(RootMugType);
-            mType.typeSlug = "datanode";
+            mType.typeSlug = "stdDataBindOnly";
             mType.type = "db";
             delete mType.properties.controlElement;
             return mType;
@@ -1064,6 +1064,9 @@ formdesigner.model = function () {
         }(),
         dataOnly: function () {
             var mType = formdesigner.util.clone(RootMugType);
+            // we autocreate binds for all data nodes so it will always be
+            // stdDataBindOnly
+            mType.typeSlug = "stdDataBindOnly";
             mType.type = "d";
             delete mType.properties.controlElement;
             delete mType.properties.bindElement;
@@ -1097,7 +1100,6 @@ formdesigner.model = function () {
     that.mugTypeMaker.stdTextQuestion = function () {
         var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion),
             mug;
-        mType.typeSlug = "text";
         
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
@@ -1109,7 +1111,6 @@ formdesigner.model = function () {
 
     that.mugTypeMaker.stdPhoneNumber = function () {
         var mType = formdesigner.model.mugTypeMaker.stdTextQuestion();
-        mType.typeSlug = "phonenumber";
         mType.mug.properties.controlElement.properties.name = "PhoneNumber";
         mType.mug.properties.controlElement.properties.appearance = "numeric";
 
@@ -1119,7 +1120,6 @@ formdesigner.model = function () {
     that.mugTypeMaker.stdDataBindOnly = function () {
         var mType = formdesigner.util.getNewMugType(mugTypes.dataBind),
             mug;
-        mType.typeSlug = "datanode";
         
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
@@ -1129,7 +1129,6 @@ formdesigner.model = function () {
     that.mugTypeMaker.stdSecret = function () {
         var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion),
             mug;
-        mType.typeSlug = "secret";
         
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
@@ -1152,7 +1151,6 @@ formdesigner.model = function () {
     that.mugTypeMaker.stdInt = function () {
         var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion),
             mug;
-        mType.typeSlug = "int";
         
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
@@ -1165,7 +1163,6 @@ formdesigner.model = function () {
     that.mugTypeMaker.stdAudio = function () {
         var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion),
             mug;
-        mType.typeSlug = "audio";
         mType.properties.controlElement.mediaType = {
             lstring: 'Media Type',
             visibility: 'visible',
@@ -1187,7 +1184,6 @@ formdesigner.model = function () {
     that.mugTypeMaker.stdImage = function () {
         var mType = formdesigner.util.getNewMugType(that.mugTypeMaker.stdAudio()),
             mug;
-        mType.typeSlug = "image";
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
         mType.mug.properties.controlElement.properties.name = "Image";
@@ -1201,7 +1197,6 @@ formdesigner.model = function () {
     that.mugTypeMaker.stdVideo = function () {
         var mType = formdesigner.util.getNewMugType(that.mugTypeMaker.stdAudio()),
             mug;
-        mType.typeSlug = "video";
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
         mType.mug.properties.controlElement.properties.name = "Video";
@@ -1215,7 +1210,6 @@ formdesigner.model = function () {
     that.mugTypeMaker.stdGeopoint = function () {
         var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion),
             mug;
-        mType.typeSlug = "geopoint";
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
         mType.mug.properties.controlElement.properties.name = "Geopoint";
@@ -1227,7 +1221,6 @@ formdesigner.model = function () {
     that.mugTypeMaker.stdAndroidIntent = function () {
         var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion),
             mug;
-        mType.typeSlug = "androidintent";
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
 
@@ -1246,7 +1239,6 @@ formdesigner.model = function () {
     that.mugTypeMaker.stdBarcode = function () {
         var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion),
             mug;
-        mType.typeSlug = "barcode";
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
         mType.mug.properties.controlElement.properties.name = "Barcode";
@@ -1258,7 +1250,6 @@ formdesigner.model = function () {
     that.mugTypeMaker.stdDate = function () {
         var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion),
                 mug;
-        mType.typeSlug = "date";
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
         mType.mug.properties.controlElement.properties.name = "Date";
@@ -1270,7 +1261,6 @@ formdesigner.model = function () {
     that.mugTypeMaker.stdDateTime = function () {
         var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion),
             mug;
-        mType.typeSlug = "datetime";
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
         mType.mug.properties.controlElement.properties.name = "DateTime";
@@ -1282,7 +1272,6 @@ formdesigner.model = function () {
     that.mugTypeMaker.stdTime = function () {
         var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion),
             mug;
-        mType.typeSlug = "time";
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
         mType.mug.properties.controlElement.properties.name = "Time";
@@ -1295,7 +1284,6 @@ formdesigner.model = function () {
         var mType, mug;
         mType = formdesigner.model.mugTypeMaker.stdInt();
         mug = mType.mug;
-        mType.typeSlug = "long";
         mType.mug.properties.controlElement.properties.name = "Long";
         mType.mug.properties.bindElement.properties.dataType = "xsd:long";
         return mType;
@@ -1305,7 +1293,6 @@ formdesigner.model = function () {
         var mType, mug;
         mType = formdesigner.model.mugTypeMaker.stdInt();
         mug = mType.mug;
-        mType.typeSlug = "double";
         mType.mug.properties.controlElement.properties.name = "Double";
         mType.mug.properties.bindElement.properties.dataType = "xsd:double";
         return mType;
@@ -1315,8 +1302,6 @@ formdesigner.model = function () {
     that.mugTypeMaker.stdItem = function () {
         var mType = formdesigner.util.getNewMugType(mugTypes.controlOnly),
             mug, vResult, controlProps;
-
-        mType.typeSlug = "item";
 
         controlProps = mType.properties.controlElement;
         controlProps.hintLabel.presence = 'notallowed';
@@ -1337,7 +1322,6 @@ formdesigner.model = function () {
                 mug,
                 vResult, controlProps, bindProps;
 
-        mType.typeSlug = "trigger";
         mType.properties.bindElement.dataType.presence = 'notallowed';
         mType.properties.dataElement.dataValue.presence = 'optional';
 
@@ -1356,7 +1340,6 @@ formdesigner.model = function () {
         var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion),
                 mug,
                 vResult;
-        mType.typeSlug = "select";
         mType.properties.bindElement.dataType.visibility = "hidden";
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
@@ -1368,7 +1351,6 @@ formdesigner.model = function () {
     that.mugTypeMaker.stdSelect = function () {
         var mType = formdesigner.model.mugTypeMaker.stdMSelect(), mug;
         mug = mType.mug;
-        mType.typeSlug = "1select";
         mType.mug.properties.controlElement.properties.name = 'Single-Select';
         mType.mug.properties.controlElement.properties.tagName = "select1";
         return mType;
@@ -1378,7 +1360,6 @@ formdesigner.model = function () {
         var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion),
                 mug,
                 vResult;
-        mType.typeSlug = "group";
         mType.properties.bindElement.dataType.presence = "notallowed";
         mType.properties.controlElement.hintItextID.presence = "notallowed";
         mType.properties.controlElement.hintLabel.presence = "notallowed";
@@ -1400,8 +1381,6 @@ formdesigner.model = function () {
         // functionality.
         var mType = formdesigner.model.mugTypeMaker.stdGroup(),
             mug;
-        mType.typeSlug = "fieldlist";
-        mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
         mType.mug.properties.controlElement.properties.name = "FieldList";
@@ -1430,7 +1409,6 @@ formdesigner.model = function () {
             presence: 'optional',
             uiType: 'checkbox'
         };
-        mType.typeSlug = "repeat";
         mType.mug.properties.controlElement.properties.name = "Repeat";
         mType.mug.properties.controlElement.properties.tagName = "repeat";
 
@@ -1439,7 +1417,6 @@ formdesigner.model = function () {
     
     that.mugTypeMaker.unknown = function () {
         var mType = formdesigner.util.getNewMugType(mugTypes.readOnly);
-        mType.typeSlug = "unknown";
         var mug = that.createMugFromMugType(mType);
         mType.mug = mug;
         return mType;
@@ -2223,7 +2200,7 @@ formdesigner.model = function () {
 	                        extraXMLNS = MT.mug.properties.dataElement.properties.xmlnsAttr;
 	                        xmlWriter.writeAttributeStringSafe("xmlns", extraXMLNS);
 	                    }
-	                    if (MT.typeSlug === "repeat"){
+	                    if (MT.typeSlug === "stdRepeat"){
 	                        xmlWriter.writeAttributeStringSafe("jr:template","");
 	                    }
                     }
