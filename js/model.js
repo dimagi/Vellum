@@ -718,12 +718,6 @@ formdesigner.model = function () {
                 }
             },
             controlElement: {
-                name: { //internal use
-                    editable: 'w',
-                    visibility: 'hidden',
-                    presence: 'required',
-                    values: formdesigner.util.VALID_QUESTION_TYPE_NAMES
-                },
                 defaultValue: {
 		            lstring: 'Choice Value',
 		            visibility: 'hidden',
@@ -1103,7 +1097,6 @@ formdesigner.model = function () {
         
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
-        mType.mug.properties.controlElement.properties.name = "Text";
         mType.mug.properties.controlElement.properties.tagName = "input";
         mType.mug.properties.bindElement.properties.dataType = "xsd:string";
         return mType;
@@ -1111,7 +1104,6 @@ formdesigner.model = function () {
 
     that.mugTypeMaker.stdPhoneNumber = function () {
         var mType = formdesigner.model.mugTypeMaker.stdTextQuestion();
-        mType.mug.properties.controlElement.properties.name = "PhoneNumber";
         mType.mug.properties.controlElement.properties.appearance = "numeric";
 
         return mType;
@@ -1132,7 +1124,6 @@ formdesigner.model = function () {
         
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
-        mType.mug.properties.controlElement.properties.name = "Secret";
         mType.mug.properties.controlElement.properties.tagName = "secret";
 
         mType.properties.bindElement.dataType.validationFunc = function (mt,m) {
@@ -1154,7 +1145,6 @@ formdesigner.model = function () {
         
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
-        mType.mug.properties.controlElement.properties.name = "Integer";
         mType.mug.properties.controlElement.properties.tagName = "input";
         mType.mug.properties.bindElement.properties.dataType = "xsd:int";
         return mType;
@@ -1172,7 +1162,6 @@ formdesigner.model = function () {
 
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
-        mType.mug.properties.controlElement.properties.name = "Audio";
         mType.mug.properties.controlElement.properties.tagName = "upload";
         mType.mug.properties.controlElement.properties.mediaType = "audio/*";
         /* fix buggy eclipse syntax highlighter (because of above string) */ 
@@ -1186,7 +1175,6 @@ formdesigner.model = function () {
             mug;
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
-        mType.mug.properties.controlElement.properties.name = "Image";
         mType.mug.properties.controlElement.properties.tagName = "upload";
         mType.mug.properties.controlElement.properties.mediaType = "image/*";
         /* fix buggy eclipse syntax highlighter (because of above string) */ 
@@ -1199,7 +1187,6 @@ formdesigner.model = function () {
             mug;
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
-        mType.mug.properties.controlElement.properties.name = "Video";
         mType.mug.properties.controlElement.properties.tagName = "upload";
         mType.mug.properties.controlElement.properties.mediaType = "video/*";
         /* fix buggy eclipse syntax highlighter (because of above string) */ 
@@ -1212,7 +1199,6 @@ formdesigner.model = function () {
             mug;
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
-        mType.mug.properties.controlElement.properties.name = "Geopoint";
         mType.mug.properties.controlElement.properties.tagName = "input";
         mType.mug.properties.bindElement.properties.dataType = "geopoint";
         return mType;
@@ -1224,7 +1210,6 @@ formdesigner.model = function () {
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
 
-        mType.mug.properties.controlElement.properties.name = "AndroidIntent";
         mType.mug.properties.controlElement.properties.tagName = "input";
         mType.getAppearanceAttribute = function () {
             return 'intent:' + mType.mug.properties.dataElement.properties.nodeID;
@@ -1241,7 +1226,6 @@ formdesigner.model = function () {
             mug;
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
-        mType.mug.properties.controlElement.properties.name = "Barcode";
         mType.mug.properties.controlElement.properties.tagName = "input";
         mType.mug.properties.bindElement.properties.dataType = "barcode";
         return mType;
@@ -1252,7 +1236,6 @@ formdesigner.model = function () {
                 mug;
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
-        mType.mug.properties.controlElement.properties.name = "Date";
         mType.mug.properties.controlElement.properties.tagName = "input";
         mType.mug.properties.bindElement.properties.dataType = "xsd:date";
         return mType;
@@ -1263,7 +1246,6 @@ formdesigner.model = function () {
             mug;
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
-        mType.mug.properties.controlElement.properties.name = "DateTime";
         mType.mug.properties.controlElement.properties.tagName = "input";
         mType.mug.properties.bindElement.properties.dataType = "xsd:dateTime";
         return mType;
@@ -1274,7 +1256,6 @@ formdesigner.model = function () {
             mug;
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
-        mType.mug.properties.controlElement.properties.name = "Time";
         mType.mug.properties.controlElement.properties.tagName = "input";
         mType.mug.properties.bindElement.properties.dataType = "xsd:time";
         return mType;
@@ -1284,7 +1265,6 @@ formdesigner.model = function () {
         var mType, mug;
         mType = formdesigner.model.mugTypeMaker.stdInt();
         mug = mType.mug;
-        mType.mug.properties.controlElement.properties.name = "Long";
         mType.mug.properties.bindElement.properties.dataType = "xsd:long";
         return mType;
     };
@@ -1293,7 +1273,6 @@ formdesigner.model = function () {
         var mType, mug;
         mType = formdesigner.model.mugTypeMaker.stdInt();
         mug = mType.mug;
-        mType.mug.properties.controlElement.properties.name = "Double";
         mType.mug.properties.bindElement.properties.dataType = "xsd:double";
         return mType;
     };
@@ -1312,7 +1291,6 @@ formdesigner.model = function () {
          
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
-        mType.mug.properties.controlElement.properties.name = "Item";
         mType.mug.properties.controlElement.properties.tagName = "item";
         return mType;
     };
@@ -1331,7 +1309,6 @@ formdesigner.model = function () {
 
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
-        mType.mug.properties.controlElement.properties.name = "Trigger";
         mType.mug.properties.controlElement.properties.tagName = "trigger";
         return mType;
     };
@@ -1343,7 +1320,6 @@ formdesigner.model = function () {
         mType.properties.bindElement.dataType.visibility = "hidden";
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
-        mType.mug.properties.controlElement.properties.name = "Multi-Select";
         mType.mug.properties.controlElement.properties.tagName = "select";
         return mType;
     };
@@ -1351,7 +1327,6 @@ formdesigner.model = function () {
     that.mugTypeMaker.stdSelect = function () {
         var mType = formdesigner.model.mugTypeMaker.stdMSelect(), mug;
         mug = mType.mug;
-        mType.mug.properties.controlElement.properties.name = 'Single-Select';
         mType.mug.properties.controlElement.properties.tagName = "select1";
         return mType;
     };
@@ -1368,7 +1343,6 @@ formdesigner.model = function () {
         mType.properties.dataElement.dataValue.presence = "notallowed";
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
-        mType.mug.properties.controlElement.properties.name = "Group";
         mType.mug.properties.controlElement.properties.tagName = "group";
         
         vResult = mType.validateMug();
@@ -1409,7 +1383,6 @@ formdesigner.model = function () {
             presence: 'optional',
             uiType: 'checkbox'
         };
-        mType.mug.properties.controlElement.properties.name = "Repeat";
         mType.mug.properties.controlElement.properties.tagName = "repeat";
 
         return mType;

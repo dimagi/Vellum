@@ -639,34 +639,6 @@ formdesigner.util = (function(){
             'secret'
     ];
 
-
-    // TODO: what is this for?
-    that.VALID_QUESTION_TYPE_NAMES = [
-            'Text',
-            'Phone Number or Numeric ID',
-            'Group',
-            'Repeat',
-            'FieldList',
-            'Trigger',
-            'Single-Select',
-            'Multi-Select',
-            'Integer',
-            'Decimal', // one of these shouldn't be here
-            'Double',  // one of these shouldn't be here
-            'Long',
-            'Float',
-            'Date',
-            'DateTime',
-            'Time',
-            'Picture',
-            'Audio',
-            'GPS',
-            'Barcode',
-            'Secret',
-            'Geopoint',
-            'AndroidIntent'
-    ];
-
     /**
      * Shortcut func because I'm tired of typing this out all the time.
      * @param obj
