@@ -39,150 +39,7 @@ formdesigner.util = (function(){
                              "bindElement/calculateAttr",
                              "bindElement/constraintAttr"];
 
-    that.QUESTION_GROUPS = [
-        {
-            group: ['stdTextQuestion', 'Text', 'icon-vellum-text'],  // [<default_slug>, <title>, <icon-class>]
-            questions: [
-                ['stdTextQuestion', 'Text Question', 'icon-vellum-text'],  // [<slug>, <title>, <icon-class>]
-                ['stdTrigger', 'Label', 'icon-tag']
-            ]
-        },
-        {
-            group: ['stdSelect', 'Single Choice', 'icon-vellum-single-select'],
-            related: [
-                ['stdItem', 'Choice', 'icon-circle-blank']
-            ],
-            questions: [
-                ['stdSelect', 'Single Choice', 'icon-vellum-single-select'],
-                ['stdMSelect', 'Multiple Choice', 'icon-vellum-multi-select']
-            ]
-        },
-        {
-            group: ['stdInt', 'Number', 'icon-vellum-numeric'],
-            questions: [
-                ['stdInt', 'Integer', 'icon-vellum-numeric'],
-                ['stdPhoneNumber', 'Phone Number or Numeric ID', 'icon-signal'],
-                ['stdDouble', 'Decimal', 'icon-vellum-decimal'],
-                ['stdLong', 'Long', 'icon-vellum-long']
-            ]
-        },
-        {
-            group: ['stdDate', 'Date', 'icon-calendar'],
-            questions: [
-                ['stdDate', 'Date', 'icon-calendar'],
-                ['stdTime', 'Time', 'icon-time'],
-                ['stdDateTime', 'Date and Time', 'icon-vellum-datetime']
-            ]
-        },
-        {
-            group: ['stdDataBindOnly', 'Hidden Value', 'icon-vellum-variable'],
-            showDropdown: false,
-            questions: [
-                ['stdDataBindOnly', 'Hidden Value', 'icon-vellum-variable']
-            ]
-        },
-        {
-            group: ['stdGroup', 'Groups', 'icon-folder-open'],
-            questions: [
-                ['stdGroup', 'Group', 'icon-folder-open'],
-                ['stdRepeat', 'Repeat Group', 'icon-retweet'],
-                ['stdFieldList', 'Question List', 'icon-reorder']
-            ]
-        },
-        {
-            group: ['stdImage', 'Multimedia Capture', 'icon-camera'],
-            questions: [
-                ['stdImage', 'Image Capture', 'icon-camera'],
-                ['stdAudio', 'Audio Capture', 'icon-vellum-audio-capture'],
-                ['stdVideo', 'Video Capture', 'icon-facetime-video']
-            ]
-        },
-        {
-            group: ['stdGeopoint', 'Advanced', ''],
-            textOnly: true,
-            questions: [
-                ['stdGeopoint', 'GPS', 'icon-map-marker'],
-                ['stdBarcode', 'Barcode Scan', 'icon-barcode'],
-                ['stdSecret', 'Password', 'icon-key'],
-                ['stdAndroidIntent', 'Android App Callout', 'icon-vellum-android-intent']
-            ]
-        }
-    ];
 
-    that.getJSTreeTypes = function() {
-        var typeSlugs = $.map(that.QUESTIONS, function (el, i) { return i; }),
-            types = {};
-
-        typeSlugs = _.without(typeSlugs, 'stdDataBindOnly', 'stdItem');
-
-        for (var i = 0, slug; i < typeSlugs.length; slug = typeSlugs[i++]) { 
-            var children;
-            if (slug === "stdGroup" || slug === "stdRepeat") {
-                children = typeSlugs;
-            } else if (slug === 'stdFieldList') {
-                children = _.without(typeSlugs, 'stdGroup', 'stdRepeat');
-            } else if (slug === "stdSelect" || slug === "stdMSelect") {
-                children = ['stdItem'];
-            } else {
-                children = "none";
-            }
-
-            types[slug] = {valid_children: children};
-        }
-
-        return {
-            "max_children" : -1,
-            "valid_children" : typeSlugs.concat(['stdDataBindOnly']),  // valid root node types
-            "types" : types
-        };
-    };
-
-    that.getQuestionTypeGroupID = function (slug) {
-        return "fd-question-group-" + slug;
-    };
-
-    var getQuestionTypeToName = function () {
-        var names = {
-            'unknown': 'Unknown Question Type'
-        };
-        _.each(that.QUESTION_GROUPS, function (groupData) {
-            var allQuestions = _.union(groupData.questions, groupData.related || []);
-             _.each(allQuestions, function (q) {
-                names[q[0]] = q[1];
-            });
-        });
-        return names;
-    };
-
-    that.QUESTIONS = getQuestionTypeToName();
-
-    var getQuestionTypeToGroup = function () {
-        var groups = {};
-        _.each(that.QUESTION_GROUPS, function (groupData) {
-            var groupSlug = groupData.group[0],
-                allQuestions = _.union(groupData.questions, groupData.related || []);
-             _.each(allQuestions, function (q) {
-                groups[q[0]] = groupSlug;
-            });
-        });
-        return groups;
-    };
-
-    that.QUESTION_TYPE_TO_GROUP = getQuestionTypeToGroup();
-
-    var getQuestionTypeToIcon = function () {
-        var typeToIcons = {};
-        _.each(that.QUESTION_GROUPS, function (groupData) {
-            var allQuestions = _.union(groupData.questions, groupData.related || []);
-             _.each(allQuestions, function (q) {
-                 typeToIcons[q[0]] = q[2];
-            });
-        });
-        return typeToIcons;
-    };
-
-    that.QUESTION_TYPE_TO_ICONS = getQuestionTypeToIcon();
-    
     // keep questions from showing up in the dropdown list here
     that.UNCHANGEABLE_QUESTIONS = [
         "stdItem", 
@@ -205,14 +62,14 @@ formdesigner.util = (function(){
     
     that.getQuestionList = function (currentType) {
         var ret = [];
-        for (var q in that.QUESTIONS) {
-            if (that.QUESTIONS.hasOwnProperty(q) && 
+        for (var q in formdesigner.ui.QUESTIONS) {
+            if (formdesigner.ui.QUESTIONS.hasOwnProperty(q) && 
                 that.UNCHANGEABLE_QUESTIONS.indexOf(q) === -1 &&
                 q !== currentType) {
                 ret.push({
                     slug: q,
-                    name: that.QUESTIONS[q],
-                    icon: that.QUESTION_TYPE_TO_ICONS[q]
+                    name: formdesigner.ui.QUESTIONS[q],
+                    icon: formdesigner.ui.QUESTION_TYPE_TO_ICONS[q]
                 });
             }
         }

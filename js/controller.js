@@ -901,10 +901,9 @@ formdesigner.controller = (function () {
             }
 
             row["Question"] = mugType.getDefaultItextRoot();
-            
+            row["Type"] = mugType.typeName;
+
             if (mugType.hasControlElement()) {
-                row["Type"] = formdesigner.util.QUESTIONS[mugType.typeName];
-               
                 for (var type in itextColumns) {
                     var colName = itextColumns[type];
 
