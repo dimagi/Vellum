@@ -648,9 +648,9 @@ formdesigner.ui = function () {
             makeLangDrop();
         });
 
-        $('#fd-load-xls-button').click(formdesigner.controller.showItextDialog);
-        $('#fd-export-xls-button').click(formdesigner.controller.showExportDialog);
-        $('#fd-editsource-button').click(formdesigner.controller.showSourceXMLDialog);
+        $('#fd-load-xls-button').stopLink().click(formdesigner.controller.showItextDialog);
+        $('#fd-export-xls-button').stopLink().click(formdesigner.controller.showExportDialog);
+        $('#fd-editsource-button').stopLink().click(formdesigner.controller.showSourceXMLDialog);
 
         function makeFormProp(propLabel, propName, keyUpFunc, initVal) {
             var liStr = '<li id="fd-form-prop-' + propName + '" class="fd-form-property"><span class="fd-form-property-text">' + propLabel + ': ' + '</span>' +
