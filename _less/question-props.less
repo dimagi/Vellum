@@ -15,6 +15,50 @@
   }
 }
 
+#formdesigner #fd-props-content {
+  padding: 0 @gridGutterWidth;
+}
+
+#formdesigner .question-section {
+  margin-bottom: 1em;
+}
+
+#formdesigner .fd-question-fieldset {
+  border: none;
+  position: relative;
+
+  .accordion-heading {
+    margin-bottom: 0;
+  }
+
+  .accordion-toggle {
+    .transition(background .4s ease-in-out);
+    &:hover {
+      background-color: lighten(@grayLighter, 3);
+      text-decoration: none;
+    }
+  }
+
+  > .fd-help {
+    position: absolute;
+    right: 15px;
+    top: 7px;
+    display: block;
+    font-size: @baseFontSize*2;
+    padding: 5px;
+
+
+    &:hover {
+      text-decoration: none;
+      color: @green;
+    }
+  }
+
+  .accordion-inner {
+    padding-bottom: @gridGutterWidth;
+  }
+}
+
 .well-vellum {
   margin: 0 0 @gridGutterWidth;
   background-color: desaturate(lighten(@blueLight, 50), 40);
@@ -74,3 +118,5 @@
     .opacity(100);
   }
 }
+
+

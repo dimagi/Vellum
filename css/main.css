@@ -274,54 +274,6 @@
 #formdesigner #fd-xpath-editor {
   display: none;
 }
-#formdesigner #fd-props-content {
-  padding: 5px;
-  position: relative;
-}
-#formdesigner #fd-props-content .ui-widget {
-  font-family: inherit;
-}
-#formdesigner #fd-props-content h1 {
-  font-weight: bold;
-  font-size: 1.4em;
-  margin-bottom: .5em;
-}
-#formdesigner #fd-props-content h2 {
-  font-size: 1.1em;
-  border: 1px solid lightgray;
-  border-bottom: 0;
-  text-align: center;
-  background-color: whitesmoke;
-  padding: .2em;
-  font-weight: bold;
-  margin-bottom: 0;
-}
-#formdesigner #fd-props-content .ui-accordion-content {
-  padding: 1em .5em;
-}
-#formdesigner #fd-props-content fieldset:not(.ui-widget) {
-  padding: 0 .4em .4em .4em;
-  margin: 0 0 1.5em 0;
-  border: 1px solid #ccc;
-}
-#formdesigner #fd-props-content fieldset h3 {
-  text-align: left;
-  font-size: 1.1em;
-  font-weight: bold;
-  line-height: 1em;
-}
-#formdesigner .question-section {
-  margin-bottom: 1em;
-}
-#formdesigner #fd-question-properties ul {
-  list-style-type: none;
-}
-#formdesigner #fd-question-properties ul li.fd-property:nth-child(even) {
-  background: #FAFAFF;
-}
-#formdesigner #fd-question-properties ul li:hover {
-  background: #f0f8ff;
-}
 #formdesigner #fd-xpath-editor {
   /* stolen from blueprint */
 
@@ -401,6 +353,44 @@
 }
 #formdesigner .itext-lang-group-config .control-group:last-child {
   margin-bottom: 0;
+}
+#formdesigner #fd-props-content {
+  padding: 0 20px;
+}
+#formdesigner .question-section {
+  margin-bottom: 1em;
+}
+#formdesigner .fd-question-fieldset {
+  border: none;
+  position: relative;
+}
+#formdesigner .fd-question-fieldset .accordion-heading {
+  margin-bottom: 0;
+}
+#formdesigner .fd-question-fieldset .accordion-toggle {
+  -webkit-transition: background 0.4s ease-in-out;
+  -moz-transition: background 0.4s ease-in-out;
+  -o-transition: background 0.4s ease-in-out;
+  transition: background 0.4s ease-in-out;
+}
+#formdesigner .fd-question-fieldset .accordion-toggle:hover {
+  background-color: #f6f6f6;
+  text-decoration: none;
+}
+#formdesigner .fd-question-fieldset > .fd-help {
+  position: absolute;
+  right: 15px;
+  top: 7px;
+  display: block;
+  font-size: 28px;
+  padding: 5px;
+}
+#formdesigner .fd-question-fieldset > .fd-help:hover {
+  text-decoration: none;
+  color: #46a546;
+}
+#formdesigner .fd-question-fieldset .accordion-inner {
+  padding-bottom: 20px;
 }
 .well-vellum {
   margin: 0 0 20px;
