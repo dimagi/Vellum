@@ -609,7 +609,7 @@ formdesigner.ui = function () {
             div = $('<div id="fd-lang-disp-div" class="control-group"></div>');
             div.append('<label for="fd-land-disp-select" class="control-label">Display Language: </label>');
 
-            str = '<select data-placeholder="Choose a Language" id="fd-land-disp-select">';
+            str = '<select data-placeholder="Choose a Language" class="input-small" id="fd-land-disp-select">';
             for (var i = 0; i < langs.length; i++) {
                 str = str + '<option value="' + langs[i] + '" >' + langs[i] + '</option>';
             }

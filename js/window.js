@@ -9,6 +9,7 @@ formdesigner.windowManager = (function () {
     that.init = function () {
         $(window).resize(that.adjustToWindow);
         $(document).scroll(that.adjustToWindow);
+         $('#fd-ui-container').css('top', '0px');
 
         that.minHeight = formdesigner.windowConfig.minHeight || 200;
         that.offset = {
@@ -24,7 +25,7 @@ formdesigner.windowManager = (function () {
         var availableVertSpace = $(window).height() - that.getCurrentTopOffset(),
             availableHorizSpace = $('.hq-content').width(),
             position = (that.getCurrentTopOffset() === 0) ? 'fixed' : 'static',
-            $formdesigner = $('#formdesigner');
+            $formdesigner = $('#fd-ui-container');
         $formdesigner.css('height', availableVertSpace + 'px');
         $formdesigner.parent().css('height', availableVertSpace + 'px');
 
