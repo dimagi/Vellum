@@ -381,7 +381,14 @@
 </script>
 
 <script type="text/template" id="fd-template-question-fieldset">
-    <fieldset class="accordion-group">
+    <fieldset class="accordion-group fd-question-fieldset">
+        <% if (helpTitle && helpText) { %>
+        <a href="<%=helpLink%>" class="fd-help pull-right"
+                data-title="<%=helpTitle%>"
+                data-content="<%=helpText%>"
+                data-placement="left">
+        </a>
+        <% } %>
         <legend class="accordion-heading">
             <a class="accordion-toggle<% if (isCollapsed) { %> collapsed<% } %>" href="#<%=fieldsetId%>" data-toggle="collapse">
                 <i class="icon-double-angle-down"></i>

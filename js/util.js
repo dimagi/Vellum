@@ -926,3 +926,23 @@ formdesigner.util = (function(){
     return that;
 
 }());
+
+
+// jquery extensions
+
+$.fn.stopLink = function() {
+    // stops anchor tags from clicking through
+    this.click(function (e) {
+        e.preventDefault();
+    });
+    return this;
+};
+
+$.fn.fdHelp = function () {
+    // creates a help popover, requires twitter bootstrap
+    this.append($('<i />').addClass('icon-question-sign'))
+        .popover({
+            trigger: 'hover'
+        });
+    return this;
+};

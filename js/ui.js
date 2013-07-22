@@ -446,6 +446,7 @@ formdesigner.ui = function () {
         });
 
         $("#fd-question-properties").show();
+        $('.fd-help').fdHelp();
 
         that.showVisualValidation(mugType);
     };

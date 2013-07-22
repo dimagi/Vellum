@@ -1159,6 +1159,9 @@ formdesigner.widgets = (function () {
         section.displayName = options.displayName;
         section.elements = options.elements;
         section.isCollapsed = !!(options.isCollapsed);
+        section.helpTitle = options.helpTitle || "";
+        section.helpText = options.helpText || "";
+        section.helpLink = options.helpLink || "#";
 
         section.getId = function () {
             return "fd-question-edit-" + this.slug;
@@ -1168,7 +1171,10 @@ formdesigner.widgets = (function () {
             return formdesigner.ui.getTemplateObject('#fd-template-question-fieldset', {
                 fieldsetId: section.getId(),
                 fieldsetTitle: section.displayName,
-                isCollapsed: section.isCollapsed
+                isCollapsed: section.isCollapsed,
+                helpTitle: section.helpTitle,
+                helpText: section.helpText,
+                helpLink: section.helpLink
             });
         };
 
