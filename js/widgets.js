@@ -381,6 +381,7 @@ formdesigner.widgets = (function () {
         block.mugType = mugType;
         block.slug = options.slug;
         block.languages = formdesigner.model.Itext.getLanguages();
+        block.defaultLang = formdesigner.model.Itext.getDefaultLanguage();
         block.getItextByMugType = options.getItextByMugType;
         block.forms = options.forms || ["default"];
 
@@ -432,8 +433,16 @@ formdesigner.widgets = (function () {
             _.each(block.getForms(), function (form) {
                 var $formGroup = block.getFormGroupContainer(form);
                 _.each(block.languages, function (lang) {
-                    var itextWidget = itextWidgetFn(mugType, lang, form, options);
-                    itextWidget.setValue(itextItem.getValue(form, lang));
+                    var itextWidget = itextWidgetFn(mugType, lang, form, options),
+                        currentVal = itextItem.getValue(form, lang);
+                    if (lang !== block.defaultLang) {
+                        var defaultVal = itextItem.defaultValue();
+                        itextWidget.setPlaceholder(defaultVal);
+                        if (defaultVal === currentVal) {
+                            currentVal = "";
+                        }
+                    }
+                    itextWidget.setValue(currentVal);
                     $formGroup.append(itextWidget.getUIElement());
                 });
                 $blockUI.append($formGroup);
@@ -670,22 +679,33 @@ formdesigner.widgets = (function () {
         var widget = that.baseWidget(mugType);
 
         widget.displayName = options.displayName;
-        widget.language = language;
         widget.slug = options.slug;
         widget.form = form || "default";
+
+        widget.language = language;
+        widget.languageName = formdesigner.langCodeToName[widget.language] || widget.language;
+        widget.showOneLanguage = formdesigner.model.Itext.getLanguages().length < 2;
+        widget.defaultLang = formdesigner.model.Itext.getDefaultLanguage();
 
         widget.itextItem = options.getItextByMugType(mugType);
 
         widget.getLangDesc = function () {
-            return " (" + widget.language + ")";
+            if (widget.showOneLanguage) {
+                return "";
+            }
+            return " (" + widget.languageName + ")";
         };
 
         widget.getDisplayName = function () {
             return widget.displayName + widget.getLangDesc();
         };
 
+        widget.getIDByLang = function (lang) {
+            return "itext-" + lang + "-" + widget.slug;
+        };
+
         widget.getID = function () {
-            return "itext-" + widget.language + "-" + widget.slug;
+            return widget.getIDByLang(widget.language);
         };
 
         var $input = $("<input />")
@@ -704,6 +724,10 @@ formdesigner.widgets = (function () {
             $input.val(val);
         };
 
+        widget.setPlaceholder = function (val) {
+            $input.attr("placeholder", val);
+        };
+
         widget.getValue = function () {
             return $input.val();
         };
@@ -711,6 +735,12 @@ formdesigner.widgets = (function () {
         widget.getDefaultValue = function () {
             return null;
         };
+
+        formdesigner.controller.on('question-itext-changed', function () {
+            if (widget.language !== widget.defaultLang) {
+                widget.setPlaceholder(widget.itextItem.getValue(widget.form, widget.defaultLang));
+            }
+        });
 
         widget.fireChangeEvents = function () {
             var itextItem = widget.itextItem;
