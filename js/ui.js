@@ -245,7 +245,7 @@ formdesigner.ui = function () {
             "audio",
             "video"
         ],
-            allTypes = questionTypes.concat(["datanode"]);
+            allTypes = questionTypes.concat(["datanode", "fieldlist"]);
 
         return {
             "max_children" : -1,
@@ -256,6 +256,9 @@ formdesigner.ui = function () {
                 },
                 "repeat" : {
                     "valid_children" : questionTypes
+                },
+                "fieldlist" : {
+                    'valid_children': _.without(questionTypes, "group", "repeat")
                 },
                 "question" : {
 

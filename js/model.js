@@ -780,6 +780,9 @@ formdesigner.model = function () {
         getAppearanceAttribute: function () {
             return (this.mug.properties.controlElement && this.mug.properties.controlElement.properties.appearance) ? (this.mug.properties.controlElement.properties.appearance) : null;
         },
+        setAppearanceAttribute: function (attrVal) {
+            this.mug.properties.controlElement.properties.appearance = attrVal;
+        },
         getPropertyDefinition: function (index) {
             // get a propery definition by a string or list index
             // assumes strings are split by the "/" character
@@ -1420,6 +1423,21 @@ formdesigner.model = function () {
         return mType;
     };
 
+    that.mugTypeMaker.stdFieldList = function () {
+        var mType = formdesigner.model.mugTypeMaker.stdGroup(),
+            mug;
+        mType.typeSlug = "fieldlist";
+        mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
+        mug = that.createMugFromMugType(mType);
+        mType.mug = mug;
+        mType.mug.properties.controlElement.properties.name = "FieldList";
+        mType.mug.properties.controlElement.properties.tagName = "group";
+
+        mType.setAppearanceAttribute('field-list');
+
+        return mType;
+    };
+
     that.mugTypeMaker.stdRepeat = function () {
         var mType;
 
@@ -1429,7 +1447,7 @@ formdesigner.model = function () {
             visibility: 'visible',
             editable: 'w',
             presence: 'optional',
-            uiType: 'droppable-text',
+            uiType: 'droppable-text'
         };
         mType.properties.controlElement.no_add_remove = {
             lstring: 'Disallow Repeat Add and Remove?',
@@ -2369,6 +2387,9 @@ formdesigner.model = function () {
                         // Write any custom attributes first
                         for (var k in cProps._rawAttributes) {
                             if (k === 'jr:count') {
+                                continue;
+                            }
+                            if (k === 'appearance') {
                                 continue;
                             }
 

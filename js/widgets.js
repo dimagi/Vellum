@@ -1315,7 +1315,8 @@ formdesigner.widgets = (function () {
 
     that.getContentSection = function (mugType) {
         var showAddFormButton = (mugType.typeSlug !== 'group' && 
-                                 mugType.typeSlug !== 'repeat');
+                                 mugType.typeSlug !== 'repeat' &&
+                                 mugType.typeSlug !== 'fieldlist');
             
         elements = [
         ];
@@ -1336,7 +1337,8 @@ formdesigner.widgets = (function () {
                 "bindElement/relevantAttr",
             ];
         } else if (mugType.typeSlug === 'group' || 
-                   mugType.typeSlug === 'repeat') 
+                   mugType.typeSlug === 'repeat' ||
+                   mugType.typeSlug === 'fieldlist')
         {
             properties = [
                 "bindElement/requiredAttr",
@@ -1405,7 +1407,7 @@ formdesigner.widgets = (function () {
         // what type an element is, it's difficult to do this properly with
         // controlElement.constraintMsgItextID.presence = "notallowed" in the group
         // mugtype definition.
-        if (!(mugType.typeSlug === 'group' || mugType.typeSlug === 'repeat')) {
+        if (!(mugType.typeSlug === 'group' || mugType.typeSlug === 'repeat' || mugType.typeSlug === 'fieldlist')) {
             properties.push("bindElement/constraintMsgItextID");
         }
 
