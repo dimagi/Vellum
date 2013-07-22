@@ -345,9 +345,8 @@ formdesigner.widgets = (function () {
     };
 
     that.xPathWidget = function (mugType, path) {
-
         var widget = that.textWidget(mugType, path);
-        var xPathButton = $('<button />').addClass("xpath-edit-button").text("Edit").button().addClass('btn');
+        var xPathButton = $('<button />').addClass("xpath-edit-button pull-right").text("Edit").stopLink().addClass('btn');
         xPathButton.data("group", widget.groupName).data("prop", widget.propName).data("inputControlID", widget.getID());
         xPathButton.click(function () {
             formdesigner.controller.displayXPathEditor({
@@ -361,13 +360,14 @@ formdesigner.widgets = (function () {
         widget.getUIElement = function () {
             // gets the whole widget (label + control)
             var uiElem = $("<div />").addClass("widget control-group"),
-                $controls = $('<div class="controls" />'),
+                $controls = $('<div />').addClass('controls'),
                 $label;
             $label = this.getLabel();
             $label.addClass('control-label');
-            uiElem.append($label);
-            $controls.append(this.getControl());
-            $controls.append(xPathButton);
+            uiElem.append($label)
+                .append(xPathButton);
+            $controls.append(this.getControl())
+                .css('margin-right', '60px');
             uiElem.append($controls);
             return uiElem;
         };
