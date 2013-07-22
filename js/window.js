@@ -9,7 +9,6 @@ formdesigner.windowManager = (function () {
     that.init = function () {
         $(window).resize(that.adjustToWindow);
         $(document).scroll(that.adjustToWindow);
-         $('#fd-ui-container').css('top', '0px');
 
         that.minHeight = formdesigner.windowConfig.minHeight || 200;
         that.offset = {

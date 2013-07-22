@@ -404,7 +404,9 @@ formdesigner.widgets = (function () {
             throw ("getItextWidget should be overridden");
         };
 
-        var $blockUI = $("<div />").attr('id', block.getID());
+        var $blockUI = $("<div />")
+            .attr('id', block.getID())
+            .addClass('itext-block-container');
         block.getContainerElement = function () {
             return $blockUI;
         };
@@ -735,7 +737,6 @@ formdesigner.widgets = (function () {
 	            widget.fireChangeEvents();
 	        }
         };
-
 
         return widget;
 

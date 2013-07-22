@@ -101,6 +101,7 @@
   overflow-x: hidden;
 }
 #formdesigner #fd-ui-container {
+  top: 0;
   width: 100%;
 }
 #formdesigner .fd-toolbar {
@@ -174,9 +175,6 @@
   display: block;
   margin-left: auto;
   margin-right: auto;
-}
-#formdesigner {
-  top: 0;
 }
 #formdesigner .fd-toolbar #fd-container-question-type-group {
   display: inline-block;
@@ -327,11 +325,16 @@
   display: inline;
   position: absolute;
 }
-#formdesigner #fd-lang-disp-div {
-  padding-left: 10px;
-  border-top: 1px solid transparent;
-  border-bottom: 1px solid #CCC;
-  font-size: .8em;
+#formdesigner .fd-lang-display-selector {
+  padding: 10px;
+  background-color: #f4f4f4;
+  text-align: center;
+}
+#formdesigner #fd-question-tree-actions {
+  text-align: center;
+  padding: 10px;
+  border-bottom: 1px solid #f4f4f4;
+  margin-bottom: 5px;
 }
 #formdesigner #fd-messages {
   position: fixed;
@@ -353,6 +356,15 @@
 }
 #formdesigner .itext-lang-group-config .control-group:last-child {
   margin-bottom: 0;
+}
+#formdesigner .itext-block-container {
+  margin-bottom: 20px;
+}
+#formdesigner .itext-block-container:last-child {
+  margin-bottom: 0;
+}
+#formdesigner .itext-block-container > .btn-danger {
+  margin-top: 10px;
 }
 #formdesigner #fd-props-content {
   padding: 0 20px;
@@ -396,10 +408,6 @@
   margin: 0 0 20px;
   background-color: #fafbfc;
 }
-#formdesigner #fd-lang-disp-div.control-group {
-  margin-bottom: 0;
-  padding: 5px 0;
-}
 .fd-mm-preview-container {
   text-align: center;
 }
@@ -414,7 +422,7 @@
   text-transform: capitalize;
 }
 .fd-mm-upload-container > .control-row {
-  margin: 10px 10px 10px 0;
+  margin: 0px 0px 10px 0;
 }
 .fd-mm-no-ref {
   color: #999999;
@@ -426,7 +434,7 @@
   display: block;
   font-size: 56px;
 }
-#formdesigner .itext-language-section .control-label {
+#formdesigner .itext-lang-group .control-label {
   text-transform: capitalize;
 }
 #formdesigner #fd-messages .alert {
