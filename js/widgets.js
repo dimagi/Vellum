@@ -1348,14 +1348,6 @@ formdesigner.widgets = (function () {
                 "bindElement/relevantAttr",
                 "bindElement/constraintAttr"
             ];
-
-            // only show calculate condition for non-data nodes if it already
-            // exists.  It's a highly discouraged use-case because the user will
-            // think they can edit an input when they really can't, but we
-            // shouldn't break existing forms doing this.
-            if (mugType.mug.properties.bindElement.properties.calculateAttr) {
-                properties.push("bindElement/calculateAttr");
-            }
         }
 
         var elementPaths = filterByMugProperties(properties, mugType);
@@ -1369,8 +1361,18 @@ formdesigner.widgets = (function () {
                 getItextByMugType: function (mugType) {
                     return mugType.getConstraintMsgItext();
                 },
-                displayName: "Validation Error Message"
+                displayName: "Validation Message"
 	        });
+
+
+            // only show calculate condition for non-data nodes if it already
+            // exists.  It's a highly discouraged use-case because the user will
+            // think they can edit an input when they really can't, but we
+            // shouldn't break existing forms doing this.
+            if (mugType.mug.properties.bindElement.properties.calculateAttr &&
+                mugType.typeSlug !== 'datanode') {
+                properties.push("bindElement/calculateAttr");
+            }
         }
 
         if (mugType.typeSlug == 'repeat') {

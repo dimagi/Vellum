@@ -443,10 +443,29 @@ formdesigner.ui = function () {
                     that.jstree('rename_node', node, e.val);
                 }
             }
+
+            var bindElement = mugType.mug.properties.bindElement.properties;
+            if (e.property === 'constraintAttr' && mugType.typeSlug !== 'datanode') {
+                var $constraintItext = $('#itext-block-constraint-group-default');
+                if (e.val) {
+                    $constraintItext.removeClass('hide');
+                } else if (!bindElement.constraintMsgItextID.id) {
+                    $constraintItext.addClass('hide');
+                }
+            }
+
+            if (e.property === 'constraintMsgItextID' && !e.val.id && !bindElement.constraintAttr) {
+                $('#itext-block-constraint-group-default').addClass('hide');
+            }
         });
 
         $("#fd-question-properties").show();
         $('.fd-help').fdHelp();
+
+        var $validationCondition = $('#bindElement-constraintAttr');
+        if ($validationCondition && !$validationCondition.val()) {
+            $('#itext-block-constraint-group-default').addClass('hide');
+        }
 
         that.showVisualValidation(mugType);
     };
