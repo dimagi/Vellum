@@ -55,27 +55,26 @@
         </div>
     </div>
 
-    <div class="modal hide fade" id="fd-form-opts" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-        <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-            <h3 id="myModalLabel">Form Properties</h3>
-        </div>
-        <div class="modal-body">
-            <ul id="fd-form-opts-ul" class="fd-props-ul">
-            </ul>
-        </div>
-        <div class="modal-footer">
-            <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-        </div>
-    </div>
+
 
     <div id="fd-dialog-confirm" title="Dialog Box">
 	    
     </div>
-
-    <div id="fd-multimedia-modal-container"></div>
-
 </div>
+<div class="modal hide fade" id="fd-form-opts" tabindex="-1" role="dialog">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">×</button>
+        <h3 id="myModalLabel">Form Properties</h3>
+    </div>
+    <div class="modal-body">
+        <ul id="fd-form-opts-ul" class="fd-props-ul">
+        </ul>
+    </div>
+    <div class="modal-footer">
+        <button class="btn" data-dismiss="modal">Close</button>
+    </div>
+</div>
+<div id="fd-multimedia-modal-container"></div>
 
 <script type="text/template" id="fd-question-type-group-template">
     <div id="<%= groupID %>" class="btn-group fd-question-type-group <% if (textOnly) { %>fd-question-type-group-advanced<% } %>">
