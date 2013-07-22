@@ -563,6 +563,60 @@ formdesigner.ui = function () {
         });
     };
 
+    that.makeLanguageSelectorDropdown = function () {
+        var addLangButton,
+            removeLangButton,
+            langList,
+            langs,
+            str,
+            Itext,
+            $langSelector,
+            fullLangs;
+        Itext = formdesigner.model.Itext;
+        langs = Itext.getLanguages();
+
+        if (langs.length < 2) {
+            return;
+        }
+
+        fullLangs = _.map(langs, function (lang) {
+            return {
+                code: lang,
+                name: formdesigner.langCodeToName[lang] || lang
+            }
+        });
+
+        $langSelector = formdesigner.ui.getTemplateObject('#fd-template-language-selector', {
+            languages: fullLangs
+        });
+
+        langList = $langSelector.find('select');
+        langList.change(function () {
+            that.changeTreeDisplayLanguage($(this).val());
+        });
+
+        langList.val(formdesigner.currentItextDisplayLanguage);
+
+        if (formdesigner.opts.allowLanguageEdits) {
+            str = '<button class="btn btn-primary" id="fd-lang-disp-add-lang-button">Add Language</button>';
+            addLangButton = $(str);
+            addLangButton.button();
+            addLangButton.click(function () {
+                that.showAddLanguageDialog();
+            });
+            $langSelector.append(addLangButton);
+            str = '<button class="btn btn-warning" id="fd-lang-disp-remove-lang-button">Remove Langauge</button>';
+            removeLangButton = $(str);
+            removeLangButton.button();
+            removeLangButton.click(function () {
+                that.showRemoveLanguageDialog();
+            });
+            $langSelector.append(removeLangButton);
+        }
+
+        $('#fd-question-tree-lang').html($langSelector);
+    };
+
     that.changeTreeDisplayLanguage = function (lang) {
         var itext = formdesigner.model.Itext;
         
@@ -597,58 +651,12 @@ formdesigner.ui = function () {
     };
 
     var init_extra_tools = function () {
-        function makeLangDrop() {
-            var div, addLangButton, removeLangButton, langList, langs, i, str, selectedLang, Itext;
-            $('#fd-question-tree-lang').find('#fd-lang-disp-div').remove();
-            Itext = formdesigner.model.Itext;
-            langs = Itext.getLanguages();
-            if (langs.length < 2) {
-                return;
-            }
-            // todo this is really gross, should get turned into a template at some point. :|
-            div = $('<div id="fd-lang-disp-div" class="control-group"></div>');
-            div.append('<label for="fd-land-disp-select" class="control-label">Display Language: </label>');
-
-            str = '<select data-placeholder="Choose a Language" class="input-small" id="fd-land-disp-select">';
-            for (var i = 0; i < langs.length; i++) {
-                str = str + '<option value="' + langs[i] + '" >' + langs[i] + '</option>';
-            }
-            str += '</select>';
-
-            langList = $(str);
-            langList.change(function () {
-                that.changeTreeDisplayLanguage($(this).val());
-            });
-
-            langList.val(formdesigner.currentItextDisplayLanguage);
-            var $controls = $('<div class="controls" />');
-            $controls.append(langList);
-            div.append($controls);
-            
-            if (formdesigner.opts.allowLanguageEdits) {
-                str = '<button class="btn btn-primary" id="fd-lang-disp-add-lang-button">Add Language</button>';
-                addLangButton = $(str);
-                addLangButton.button();
-                addLangButton.click(function () {
-                    that.showAddLanguageDialog();
-                });
-                div.append(addLangButton);
-                str = '<button class="btn btn-warning" id="fd-lang-disp-remove-lang-button">Remove Langauge</button>';
-                removeLangButton = $(str);
-                removeLangButton.button();
-                removeLangButton.click(function () {
-                    that.showRemoveLanguageDialog();
-                });
-                div.append(removeLangButton);
-            }
-            var $formHoriz = $('<div class="form form-horizontal" />');
-            $formHoriz.append(div);
-            $('#fd-question-tree-lang').html($formHoriz);
-        }
-
-        makeLangDrop();
+        that.makeLanguageSelectorDropdown();
         formdesigner.controller.on('fd-reload-ui', function () {
-            makeLangDrop();
+            that.makeLanguageSelectorDropdown();
+        });
+        formdesigner.controller.on('fd-update-language-name', function () {
+            that.makeLanguageSelectorDropdown();
         });
 
         $('#fd-load-xls-button').stopLink().click(formdesigner.controller.showItextDialog);
