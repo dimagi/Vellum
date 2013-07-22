@@ -155,14 +155,21 @@ formdesigner.util = (function(){
     that.QUESTION_TYPE_TO_ICONS = getQuestionTypeToIcon();
     
     // keep questions from showing up in the dropdown list here
-    that.UNEDITABLE_QUESTIONS = ["unknown", "item"];
+    that.UNCHANGEABLE_QUESTIONS = [
+        "item", "group", "repeat", "datanode", "trigger", "unknown", "androidintent", "fieldlist"
+    ];
     
-    that.getQuestionList = function () {
+    that.getQuestionList = function (currentType) {
         var ret = [];
         for (var q in that.QUESTIONS) {
             if (that.QUESTIONS.hasOwnProperty(q) && 
-                that.UNEDITABLE_QUESTIONS.indexOf(q) === -1 ) {
-                ret.push([q, that.QUESTIONS[q]]);
+                that.UNCHANGEABLE_QUESTIONS.indexOf(q) === -1 &&
+                q != currentType) {
+                ret.push({
+                    slug: q,
+                    name: that.QUESTIONS[q],
+                    icon: that.QUESTION_TYPE_TO_ICONS[q]
+                });
             }
         }
         return ret;

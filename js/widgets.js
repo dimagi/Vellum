@@ -5,10 +5,6 @@ if (typeof formdesigner === 'undefined') {
 formdesigner.widgets = (function () {
     var that = {};
 
-    that.unchangeableQuestionTypes = [
-        "item", "group", "repeat", "datanode", "trigger", "unknown", "androidintent"
-    ];
-
     that.reservedItextContentTypes = [
         'default', 'short', 'long', 'audio', 'video', 'image'
     ];
@@ -958,47 +954,6 @@ formdesigner.widgets = (function () {
         return widget;
     };
 
-    that.questionTypeSelectorWidget = function (mugType) {
-        var widget = that.baseWidget(mugType);
-        widget.definition = {};
-        widget.currentValue = mugType.typeSlug;
-        widget.propName = "Question Type";
-
-        widget.getID = function () {
-            return "question-type";
-        };
-
-        var input = formdesigner.ui.getQuestionTypeSelector();
-        // small hack: don't show data nodes or select items for now
-        for (var i = 0; i < that.unchangeableQuestionTypes.length; i++) {
-            input.find("#" + that.unchangeableQuestionTypes[i]).remove();
-        }
-
-        widget.getControl = function () {
-            return input;
-        };
-
-        widget.setValue = function (value) {
-            input.val(value);
-        };
-
-        widget.getValue = function() {
-            return input.val();
-        };
-
-        input.change(function () {
-            try {
-                formdesigner.controller.changeQuestionType(mugType, widget.getValue());
-            } catch (err) {
-                alert("Sorry, you can't do that because: " + err);
-                input.val(mugType.typeSlug);
-            }
-        });
-
-        return widget;
-
-    };
-
     that.androidIntentAppIdWidget = function (mugType) {
         var widget = that.baseWidget(mugType);
         widget.definition = {};
@@ -1179,8 +1134,6 @@ formdesigner.widgets = (function () {
                 return that.itextConfigurableBlock(mugType, definition);
             case "itextMedia":
                 return that.itextMediaBlock(mugType, definition);
-            case "questionType":
-                return that.questionTypeSelectorWidget(mugType);
             case "androidIntentAppId":
                 return that.androidIntentAppIdWidget(mugType);
             case "androidIntentExtra":
@@ -1248,13 +1201,33 @@ formdesigner.widgets = (function () {
 
     that.getToolbarForMug = function (mugType) {
         var $baseToolbar = formdesigner.ui.getTemplateObject('#fd-template-question-toolbar', {
-            toolbarId: "fd-question-toolbar-" + mugType.slug
+            toolbarId: "fd-question-toolbar"
         });
         $baseToolbar.find('#fd-button-remove').click(formdesigner.controller.removeCurrentQuestion);
         $baseToolbar.find('#fd-button-copy').click(function () {
             formdesigner.controller.duplicateCurrentQuestion({itext: 'copy'});
         });
+        if (formdesigner.util.UNCHANGEABLE_QUESTIONS.indexOf(mugType.typeSlug) === -1) {
+            $baseToolbar.find('.btn-toolbar.pull-left').prepend(this.getQuestionTypeChanger(mugType));
+        }
         return $baseToolbar;
+    };
+
+    that.getQuestionTypeChanger = function (mugType) {
+        var $questionTypeChanger = formdesigner.ui.getTemplateObject('#fd-template-question-type-changer', {
+            currentQuestionIcon: formdesigner.util.QUESTION_TYPE_TO_ICONS[mugType.typeSlug],
+            questions: formdesigner.util.getQuestionList(mugType.typeSlug)
+        });
+        $questionTypeChanger.find('.change-question').click(function (e) {
+            try {
+                formdesigner.controller.changeQuestionType(mugType, $(this).data('qtype'));
+            } catch (err) {
+                alert("Sorry, you can't do that because: " + err);
+                input.val(mugType.typeSlug);
+            }
+            e.preventDefault();
+        });
+        return $questionTypeChanger;
     };
 
     that.getSectionListForMug = function (mugType) {
@@ -1298,15 +1271,13 @@ formdesigner.widgets = (function () {
 
     that.getMainSection = function (mugType) {
         var elements = ["dataElement/nodeID"];
-        
+
         if (formdesigner.util.isSelectItem(mugType)) {
             elements.push("controlElement/defaultValue");
         }
 
         elements = filterByMugProperties(elements, mugType).map(wrapAsGeneric);
 
-        if (that.unchangeableQuestionTypes.indexOf(mugType.typeSlug) === -1) {
-            elements.splice(1, 0, {widgetType: "questionType", path: "system/questionType"});
         }
         if (formdesigner.util.isReadOnly(mugType)) {
             elements.push({widgetType: "readonlyControl", path: "system/readonlyControl"});

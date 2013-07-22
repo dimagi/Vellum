@@ -764,6 +764,7 @@ formdesigner.controller = (function () {
     };
     
     that.changeQuestionType = function (mugType, questionType) {
+        var $currentChanger = $('#fd-question-toolbar .question-type-changer');
         if (questionType !== mugType.typeSlug) {
             // get the new mug type
             var newMugType = that.getMugTypeByQuestionType(questionType);
@@ -804,6 +805,9 @@ formdesigner.controller = (function () {
                 '#' + mugType.ufid,
                 questionType
             );
+
+            // update question type changer
+            $currentChanger.after(formdesigner.widgets.getQuestionTypeChanger(newMugType)).remove();
             
             // update UI
             that.form.fire({ 
@@ -811,6 +815,9 @@ formdesigner.controller = (function () {
             });
         } else {
             formdesigner.ui.overrideJSTreeIcon(mugType.ufid, questionType);
+
+            // update question type changer
+            $currentChanger.after(formdesigner.widgets.getQuestionTypeChanger(mugType)).remove();
         }
     };
 

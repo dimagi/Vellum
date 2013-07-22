@@ -116,27 +116,6 @@ formdesigner.ui = function () {
         return newMug;
     };
 
-    that.getQuestionTypeSelector = function () {
-        // the question type selector inside the question form itself
-        var select = $('<select />').attr('tabindex', -1);
-        
-        function makeOptionItem(idTag, attrvalue, label) {
-           var opt = $('<option />')
-                   .attr('id', idTag)
-                   .attr('value', attrvalue)
-                   .text(label);
-           return opt;
-        }
-        
-        var questions = formdesigner.util.getQuestionList();
-        for (var i = 0; i < questions.length; i++) {
-            select.append(makeOptionItem(questions[i][0], 
-                                         questions[i][0], 
-                                         questions[i][1]));
-        }
-        return select;
-    };
-
     that.QuestionTypeButton = function (buttonSpec) {
         var self = this;
         self.slug = buttonSpec[0];
