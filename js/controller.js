@@ -35,6 +35,17 @@ formdesigner.controller = (function () {
         
         formdesigner.currentItextDisplayLanguage = formdesigner.opts.displayLanguage ||
                                                    formdesigner.model.Itext.getDefaultLanguage();
+
+        // fetch language names
+        formdesigner.langCodeToName = {};
+        _.each(formdesigner.opts.langs, function(langcode) {
+            $.getJSON('/langcodes/langs.json', {term: langcode}, function(res) {
+                if (res.length >= 1) {
+                    formdesigner.langCodeToName[res[0].code] = res[0].name;
+                    that.fire('fd-update-language-name');
+                }
+            });
+        });
         
         that.on('question-creation', function () {
            that.setFormChanged(); //mark the form as 'changed'
