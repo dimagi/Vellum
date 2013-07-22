@@ -159,6 +159,12 @@ formdesigner.util = (function(){
     that.UNCHANGEABLE_QUESTIONS = [
         "item", "group", "repeat", "datanode", "trigger", "unknown", "androidintent", "fieldlist"
     ];
+
+    // these questions are groups or repeats (or similar types of things).
+    // They don't have any human readable itext
+    that.SPECIAL_GROUP_QUESTIONS = [
+        'group', 'repeat', 'fieldlist'
+    ];
     
     that.getQuestionList = function (currentType) {
         var ret = [];

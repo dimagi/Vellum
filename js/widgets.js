@@ -1239,11 +1239,11 @@ formdesigner.widgets = (function () {
     that.getSectionListForMug = function (mugType) {
         sections = [];
         sections.push(that.getMainSection(mugType));
-        if (mugType.hasControlElement()) {
-            sections.push(that.getContentSection(mugType));
-        }
         if (mugType.hasBindElement()) {
             sections.push(that.getLogicSection(mugType));
+        }
+        if (mugType.hasControlElement() && !mugType.isSpecialGroup()) {
+            sections.push(that.getContentSection(mugType));
         }
         if (!formdesigner.util.isReadOnly(mugType)) {
             sections.push(that.getAdvancedSection(mugType));
@@ -1284,7 +1284,17 @@ formdesigner.widgets = (function () {
 
         elements = filterByMugProperties(elements, mugType).map(wrapAsGeneric);
 
+        if (!mugType.isSpecialGroup() && mugType.typeSlug !== 'datanode') {
+            elements.push({
+                widgetType: "itextLabel",
+                slug: "text",
+                getItextByMugType: function (mugType) {
+                    return mugType.getItext();
+                },
+                displayName: "Label"
+            });
         }
+
         if (formdesigner.util.isReadOnly(mugType)) {
             elements.push({widgetType: "readonlyControl", path: "system/readonlyControl"});
         }
@@ -1295,36 +1305,47 @@ formdesigner.widgets = (function () {
             elements.push({widgetType: "androidIntentResponse", path: "system/androidIntentResponse"});
         }
 
-        elements.push({
-            widgetType: "itextConfig",
-            displayName: "Configurable",
-            slug: "text",
-            getItextByMugType: function (mugType) {
-                return mugType.getItext();
-            },
-            forms: ['long', 'short'],
-            isCustomAllowed: true
-        });
+        elements.push();
 
         return that.questionSection(mugType, {
             slug: "main",
             displayName: "Main Properties",
-            elements: elements
+            elements: elements,
+            helpTitle: "Text",
+            helpText: "help text"
         });
     };
 
     that.getContentSection = function (mugType) {
-        var showAddFormButton = (mugType.typeSlug !== 'group' && 
-                                 mugType.typeSlug !== 'repeat' &&
-                                 mugType.typeSlug !== 'fieldlist');
             
-        elements = [
+        var elements = [
+            {
+                widgetType: "itextMedia",
+                displayName: "Add Multimedia",
+                slug: "text",
+                getItextByMugType: function (mugType) {
+                    return mugType.getItext();
+                },
+                forms: formdesigner.multimedia.SUPPORTED_MEDIA_TYPES,
+                formToIcon: formdesigner.multimedia.ICONS
+            },
+            {
+                widgetType: "itextConfig",
+                displayName: "Add Other Content",
+                slug: "text",
+                getItextByMugType: function (mugType) {
+                    return mugType.getItext();
+                },
+                forms: ['long', 'short'],
+                isCustomAllowed: true
+            }
         ];
 
         return that.questionSection(mugType, {
-            displayName: "Content",
+            displayName: "Media and Content",
             slug: "content",
-            elements: elements
+            elements: elements,
+            isCollapsed: true
         });
     };
 
@@ -1333,16 +1354,13 @@ formdesigner.widgets = (function () {
 
         if (mugType.typeSlug === 'datanode') {
             properties = [
-                "bindElement/calculateAttr",
                 "bindElement/relevantAttr",
+                "bindElement/calculateAttr"
             ];
-        } else if (mugType.typeSlug === 'group' || 
-                   mugType.typeSlug === 'repeat' ||
-                   mugType.typeSlug === 'fieldlist')
-        {
+        } else if (mugType.isSpecialGroup()) {
             properties = [
                 "bindElement/requiredAttr",
-                "bindElement/relevantAttr",
+                "bindElement/relevantAttr"
             ];
         } else {
             properties = [
@@ -1385,8 +1403,7 @@ formdesigner.widgets = (function () {
         return that.questionSection(mugType, {
             slug: "logic",
             displayName: "Logic Properties",
-            elements: elements,
-            isCollapsed: true
+            elements: elements
         });
     };
 

@@ -333,7 +333,10 @@ formdesigner.model = function () {
         mugType.hasBindElement = function () {
             return Boolean(this.mug.properties.bindElement);
         };
-        
+        mugType.isSpecialGroup = function () {
+            return formdesigner.util.SPECIAL_GROUP_QUESTIONS.indexOf(this.typeSlug) !== -1;
+        };
+
         mugType.getDefaultItextRoot = function () {
             var nodeID, parent;
             if (this.hasBindElement()) { //try for the bindElement nodeID
