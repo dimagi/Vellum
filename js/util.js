@@ -48,9 +48,9 @@ formdesigner.util = (function(){
             ]
         },
         {
-            group: ['1select', 'Multiple Choice', 'icon-vellum-single-select'],
+            group: ['1select', 'Multiple Answer', 'icon-vellum-single-select'],
             related: [
-                ['item', 'Choice', 'icon-circle-blank']
+                ['item', 'Answer', 'icon-circle-blank']
             ],
             questions: [
                 ['1select', 'Single Answer', 'icon-vellum-single-select'],

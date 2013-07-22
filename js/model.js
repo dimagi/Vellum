@@ -727,7 +727,7 @@ formdesigner.model = function () {
                     values: formdesigner.util.VALID_QUESTION_TYPE_NAMES
                 },
                 defaultValue: {
-		            lstring: 'Item Value',
+		            lstring: 'Answer Value',
 		            visibility: 'hidden',
 		            editable: 'w',
 		            presence: 'optional',
