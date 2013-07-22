@@ -2998,7 +2998,6 @@ formdesigner.model = function () {
         form.isEmpty = function () {
             for (var lang in this.data) {
                 if (this.data.hasOwnProperty(lang) && this.data[lang] !== undefined) {
-                    console.log('not empty');
                     return false;
                 }
             }
