@@ -855,67 +855,6 @@ formdesigner.controller = (function () {
         that.createQuestionInUITree(mugType);
     };
 
-    /**
-     * Shows the source XML in a dialog window for editing, optionally
-     * not displaying if there are validation errors and the user chooses
-     * not to continue.
-     */ 
-    that.showSourceXMLDialog = function () {
-        function showFormInLightBox () {
-            // callback to actually render the form
-            
-            var output = $('#fd-source'),
-                controls = $("#fd-source-controls"),
-                help = $("#fd-source-help");
-            
-            // clear controls
-            controls.empty();
-            help.text("This is the raw XML. You can edit or paste into this box to make changes " +
-                      "to your form. Press 'Update Source' to save changes, or 'Close' to cancel.");
-            
-            // populate text
-            if(!that.formLoadingFailed){
-                output.val(that.form.createXForm());
-            } else {
-                output.val(formdesigner.loadMe);
-            }
-            
-            // add controls
-            var loadButton = $('<button class="btn btn-primary" id ="fd-loadsource-button">Update Source</button>').appendTo(controls).button();
-	        loadButton.click(function () {
-	            that.loadXForm(output.val());
-                that.form.fire('form-property-changed');
-	            $.fancybox.close();
-	        });
-	
-	        var closeButton = $('<button class="btn" id ="fd-close-popup-button">Close</button>').appendTo(controls).button();
-	        closeButton.click(function () {
-	            $.fancybox.close();
-	        });
-
-            $('#inline').click();
-        }
-
-        // There are validation errors but user continues anyway
-        function onContinue () {
-            formdesigner.ui.hideConfirmDialog();
-            showFormInLightBox();
-        }
-
-        function onAbort () {
-            formdesigner.ui.hideConfirmDialog();
-        }
-        
-        var msg = "There are validation errors in the form.  Do you want to continue anyway? WARNING:" +
-            "The form will not be valid and likely not perform correctly on your device!";
-
-        formdesigner.ui.setDialogInfo(msg,'Continue',onContinue,'Abort',onAbort);
-        if (!that.form.isFormValid()) {
-            formdesigner.ui.showConfirmDialog();
-        } else {
-            showFormInLightBox();
-        }
-    };
 
     var parseXLSItext = function (str) {
         var rows = str.split('\n'),
@@ -1082,65 +1021,212 @@ formdesigner.controller = (function () {
         return rows.join("\n");
     };
 
-    var showItextDialog = function () {
-    
-        var input = $('#fd-source'),
-            controls = $("#fd-source-controls"),
-            help = $("#fd-source-help");
-            
-        // clear controls
-        controls.empty();
-        help.text("Copy these translations into a spreadsheet program like Excel. " + 
-                  "You can edit them there and then paste them back here when you're " +
-                  "done. These will update the translations used in your form. Press " + 
-                  "'Update Translations' to save changes, or 'Close' to cancel.");
-        
+    that.showItextDialog = function () {
+        var $modal,
+            $updateForm,
+            $textarea;
+
+        $modal = formdesigner.ui.generateNewModal("Edit Bulk Translations", [
+            {
+                id: 'fd-update-translations-button',
+                title: "Update Translations",
+                cssClasses: "btn-primary"
+            }
+        ]);
+        $updateForm = formdesigner.ui.getTemplateObject('#fd-template-form-edit-source', {
+            description: "Copy these translations into a spreadsheet program like Excel. You can edit them there and " +
+                         "then paste them back here when you're done. These will update the translations used in your" +
+                         " form. Press 'Update Translations' to save changes, or 'Close' to cancel."
+        });
+        $modal.find('.modal-body').html($updateForm);
+
         // display current values
-        input.val(that.generateItextXLS());
-        
-        // add controls
-        var updateButton = $('<button class="btn btn-primary" id ="fd-parsexls-button">Update Translations</button>').appendTo(controls).button();
-        updateButton.click(function () {
-            that.parseXLSItext(input.val());
+        $textarea = $updateForm.find('textarea');
+        $textarea.val(that.generateItextXLS());
+
+        $modal.find('#fd-update-translations-button').click(function () {
+            that.parseXLSItext($textarea.val());
             that.form.fire('form-property-changed');
-            $.fancybox.close();
+            $modal.modal('hide');
         });
-        
-        var closeButton = $('<button class="btn" id ="fd-close-popup-button">Close</button>').appendTo(controls).button();
-        closeButton.click(function () {
-            $.fancybox.close();
-        });
-        
-        // this shows the popup
-        $('#inline').click();
+
+        $modal.modal('show');
     };
-    that.showItextDialog = showItextDialog;
 
 
-    var showExportDialog = function () {
-    
-        var input = $('#fd-source'),
-            controls = $("#fd-source-controls"),
-            help = $("#fd-source-help");
-            
-        // clear controls
-        controls.empty();
-        help.text("Copy and paste this content into a spreadsheet program like Excel " +
-                  "to easily share your form with others."); 
-        
+    that.showExportDialog = function () {
+        var $modal,
+            $exportForm;
+
+        $modal = formdesigner.ui.generateNewModal("Export Form Contents", []);
+        $exportForm = formdesigner.ui.getTemplateObject('#fd-template-form-edit-source', {
+            description: "Copy and paste this content into a spreadsheet program like Excel " +
+                         "to easily share your form with others."
+        });
+        $modal.find('.modal-body').html($exportForm);
+
         // display current values
-        input.val(that.generateExportXLS());
-        
-        // add controls
-        var closeButton = $('<button class="btn" id ="fd-close-popup-button">Close</button>').appendTo(controls).button();
-        closeButton.click(function () {
-            $.fancybox.close();
-        });
-        
-        // this shows the popup
-        $('#inline').click();
+        $exportForm.find('textarea').val(that.generateExportXLS());
+
+        $modal.modal('show');
     };
-    that.showExportDialog = showExportDialog;
+
+    that.showFormPropertiesDialog = function () {
+        // moved over just for display purposes, apparently the original wasn't working perfectly, so this is a todo
+        var $modal,
+            $modalBody,
+            formProperties;
+
+        $modal = formdesigner.ui.generateNewModal("Edit Form Properties", []);
+        $modalBody = $modal.find('.modal-body');
+
+        $modalBody.append($('<p />').text("Note: changing the Form ID here will not automatically change " +
+                                          "the Form ID in existing references in your logic conditions.  " +
+                                          "If you change the Form ID, you must manually change any " +
+                                          "existing logic references."));
+
+        formProperties = [
+            {
+                label: "Form Name",
+                slug: "formName"
+            },
+            {
+                label: "Form ID",
+                slug: "formID",
+                cleanValue: function (val) {
+                    return val.replace(/ /g, '_');
+                }
+            }
+        ];
+
+        function fireFormPropChanged(propName, oldVal, newVal) {
+            formdesigner.controller.form.fire({
+                type: 'form-property-changed',
+                propName: propName,
+                oldVal: oldVal,
+                newVal: newVal
+            });
+        }
+
+        _.each(formProperties, function (prop) {
+            var $propertyInput = formdesigner.ui.getTemplateObject('#fd-template-control-group-stdInput', {
+                label: prop.label,
+                controlId: 'fd-form-prop-' + prop.slug + '-input'
+            });
+            $modalBody.append($propertyInput);
+            $propertyInput.find('input')
+                .val(formdesigner.controller.form[prop.slug])
+                .on('keyup', function () {
+                    var currentVal = $(this).val();
+                    if (typeof prop.cleanValue === 'function') {
+                        currentVal = prop.cleanValue(currentVal);
+                        $(this).val(currentVal);
+                    }
+                    fireFormPropChanged(prop.slug, formdesigner.controller.form[prop.slug], currentVal);
+                    formdesigner.controller.form[prop.slug] = currentVal;
+                });
+        });
+
+        $modal.modal('show');
+    };
+
+
+    /**
+     * Shows the source XML in a dialog window for editing, optionally
+     * not displaying if there are validation errors and the user chooses
+     * not to continue.
+     */
+    that.showSourceXMLDialog = function () {
+        function showSourceInModal () {
+            var $modal,
+                $updateForm,
+                $textarea,
+                codeMirror,
+                modalHeaderHeight,
+                modalFooterHeight,
+                modalHeight,
+                modalBodyHeight;
+
+            $modal = formdesigner.ui.generateNewModal("Edit Form's Source XML", [
+                {
+                    id: 'fd-update-source-button',
+                    title: "Update Source",
+                    cssClasses: "btn-primary"
+                }
+            ]);
+            $updateForm = formdesigner.ui.getTemplateObject('#fd-template-form-edit-source', {
+                description: "This is the raw XML. You can edit or paste into this box to make changes " +
+                             "to your form. Press 'Update Source' to save changes, or 'Close' to cancel."
+            });
+            modalHeaderHeight = $modal.find('.modal-header').outerHeight();
+            modalFooterHeight = $modal.find('.modal-footer').outerHeight();
+            modalHeight = $(window).height() - 40;
+            modalBodyHeight = modalHeight - (modalFooterHeight - modalHeaderHeight) - 126;
+
+            $modal
+                .css('height', modalHeight + 'px')
+                .css('width', $(window).width() - 40 + 'px');
+
+            $modal.addClass('fd-source-modal')
+                .removeClass('form-horizontal')
+                .find('.modal-body')
+                .html($updateForm)
+                .css('height', modalBodyHeight + 'px');
+
+            $textarea = $updateForm.find('textarea');
+
+            // populate text
+            if(!that.formLoadingFailed){
+                $textarea.val(that.form.createXForm());
+            } else {
+                $textarea.val(formdesigner.loadMe);
+            }
+
+            try {
+                codeMirror = CodeMirror.fromTextArea($textarea.get(0));
+                codeMirror.setOption('lineNumbers', true);
+                codeMirror.setSize('100%', '100%');
+            } catch (e) {
+                // pass
+            }
+
+            $modal.find('#fd-update-source-button').click(function () {
+                if (codeMirror) {
+                    codeMirror.save();
+                }
+                that.loadXForm($textarea.val());
+                that.form.fire('form-property-changed');
+                $modal.modal('hide');
+            });
+
+            $modal.modal('show');
+            $modal.on('shown', function () {
+                if (codeMirror) {
+                    codeMirror.refresh();
+                }
+            });
+        }
+
+        // There are validation errors but user continues anyway
+        function onContinue () {
+            formdesigner.ui.hideConfirmDialog();
+            showSourceInModal();
+        }
+
+        function onAbort () {
+            formdesigner.ui.hideConfirmDialog();
+        }
+
+        var msg = "There are validation errors in the form.  Do you want to continue anyway? WARNING:" +
+                  "The form will not be valid and likely not perform correctly on your device!";
+
+        formdesigner.ui.setDialogInfo(msg,'Continue',onContinue,'Abort',onAbort);
+        if (!that.form.isFormValid()) {
+            formdesigner.ui.showConfirmDialog();
+        } else {
+            showSourceInModal();
+        }
+    };
 
     var setFormName = function (name) {
         that.form.formName = name;

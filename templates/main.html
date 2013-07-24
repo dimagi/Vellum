@@ -10,9 +10,7 @@
                     <li><a id="fd-load-xls-button" tabindex="-1" href="#">Edit Bulk Translations</a></li>
                     <li><a id="fd-export-xls-button" tabindex="-1" href="#">Export Form Contents</a></li>
                     <li><a id="fd-editsource-button" tabindex="-1" href="#">Edit Source XML</a></li>
-                    <li>
-                        <a tabindex="-1" href="#fd-form-opts" data-toggle="modal">Form Properties</a>
-                    </li>
+                    <li><a id="fd-formproperties-button" tabindex="-1" href="#" >Form Properties</a></li>
                 </ul>
             </div>
             <div id="fd-save-button"></div>
@@ -57,33 +55,12 @@
     <div id="fd-messages"></div>
 
     <a id="inline" href="#data" style="display:none">This shows content of element who has id="data"</a>
-    <!--<div id="fd-form-paste"><textarea rows="20" cols="20" id="fd-form-paste-textarea"></textarea> <textarea rows="10" cols="10" id="fd-form-paste-output">output</textarea></div>-->
-    <div style="display:none">
-        <div id="data">
-            <div id="fd-source-help"></div>
-            <textarea id="fd-source" class="span11" style="min-height: 300px;"></textarea>
-            <div id="fd-source-controls"></div>
-        </div>
-    </div>
 
     <div id="fd-dialog-confirm" title="Dialog Box"></div>
 </div>
 <!-- Begin modal divs -->
-<div class="modal hide fade" id="fd-form-opts" tabindex="-1" role="dialog">
-    <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal">×</button>
-        <h3 id="myModalLabel">Form Properties</h3>
-    </div>
-    <div class="modal-body">
-        <ul id="fd-form-opts-ul" class="fd-props-ul">
-        </ul>
-    </div>
-    <div class="modal-footer">
-        <button class="btn" data-dismiss="modal">Close</button>
-    </div>
-</div>
 <div id="fd-multimedia-modal-container"></div>
-<div id="fd-modal-generic" class="modal hide fade"></div>
+<div id="fd-modal-generic-container"></div>
 <!-- end modal divs -->
 
 
@@ -404,27 +381,38 @@
 
 <script type="text/template" id="fd-template-control-group">
     <div class="control-group">
-        <label<% if (controlId) { %> id="<%=controlId%>"<% } %> class="control-label"><%=label%></label>
+        <label<% if (controlId) { %> for="<%=controlId%>"<% } %> class="control-label"><%=label%></label>
         <div class="controls"></div>
     </div>
 </script>
 
+<script type="text/template" id="fd-template-control-group-stdInput">
+    <div class="control-group">
+        <label for="<%=controlId%>" class="control-label"><%=label%></label>
+        <div class="controls">
+            <input id="<%=controlId%>" type="text" />
+        </div>
+    </div>
+</script>
+
 <script type="text/template" id="fd-template-modal-content">
-    <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-        <h3><%=modalTitle%></h3>
-    </div>
-    <div class="modal-body form form-horizontal">
-    </div>
-    <div class="modal-footer">
-        <% _.each(modalButtons, function (button) { %>
-        <button id="<%=button.id%>"
-                class="btn <%=button.cssClasses%>"
-                <% _.each(button.attributes, function (attrib, val) { %><%=attrib%>="<%=val%>"<% }); %>>
-            <%=button.title%>
-        </button>
-        <% }); %>
-        <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+    <div id="fd-modal-generic" class="modal hide fade">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+            <h3><%=modalTitle%></h3>
+        </div>
+        <div class="modal-body form form-horizontal">
+        </div>
+        <div class="modal-footer">
+            <% _.each(modalButtons, function (button) { %>
+            <button id="<%=button.id%>"
+                    class="btn <%=button.cssClasses%>"
+                    <% _.each(button.attributes, function (attrib, val) { %><%=attrib%>="<%=val%>"<% }); %>>
+                <%=button.title%>
+            </button>
+            <% }); %>
+            <button class="btn default-close-button" data-dismiss="modal" aria-hidden="true"><%=closeButtonTitle%></button>
+        </div>
     </div>
 </script>
 
@@ -438,5 +426,16 @@
             </option>
             <% }); %>
         </select>
+    </div>
+</script>
+
+<script type="text/template" id="fd-template-form-edit-source">
+    <div class="fd-source-container">
+        <p>
+            <%=description%>
+        </p>
+        <div class="control-row">
+            <textarea class="span12" rows="16" id="fd-source-textarea"></textarea>
+        </div>
     </div>
 </script>

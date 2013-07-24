@@ -89,13 +89,14 @@ formdesigner.ui = function () {
         }
     };
 
-    that.generateNewModal = function (modalTitle, modalButtons) {
-        var $modal = $('#fd-modal-generic'),
-            $modalContent = formdesigner.ui.getTemplateObject('#fd-template-modal-content', {
+    that.generateNewModal = function (modalTitle, modalButtons, closeButtonTitle) {
+        var $modalContainer = $('#fd-modal-generic-container'),
+            $modal = formdesigner.ui.getTemplateObject('#fd-template-modal-content', {
                 modalTitle: modalTitle,
-                modalButtons: modalButtons || []
+                modalButtons: modalButtons || [],
+                closeButtonTitle: closeButtonTitle || "Close"
             });
-        $modal.html($modalContent);
+        $modalContainer.html($modal);
         return $modal;
     };
 
