@@ -439,3 +439,94 @@
         </div>
     </div>
 </script>
+
+<script type="text/template" id="fd-template-xpath">
+    <div class="fd-xpath-editor-container form form-horizontal">
+
+        <fieldset id="xpath-advanced" class="hide">
+            <legend><i class="icon-cog"></i> Edit Expression (Advanced)</legend>
+             <button class="btn btn-primary pull-right xpath-mode-toggle" id="fd-xpath-show-simple-button">
+                Show Simple Mode
+            </button>
+            <div class="alert hide" id="xpath-advanced-notice">
+                <p>Sorry, your logic is too complicated for our logic builder.</p>
+                <p>You can only edit this logic in Advanced Mode.</p>
+            </div>
+            <div class="control-group">
+                <label class="control-label" for="fd-xpath-editor-text">
+                    XPath Expression:
+                </label>
+                <div class="controls">
+                    <textarea id="fd-xpath-editor-text"
+                              rows="20"
+                              class="input-block-level jstree-drop"></textarea>
+                    <p class="help-block">Hint: You can drag a question into the box.</p>
+                </div>
+            </div>
+        </fieldset>
+
+        <fieldset id="xpath-simple" class="hide">
+            <legend>Edit Expression</legend>
+            <button class="btn btn-inverse pull-right xpath-mode-toggle" id="fd-xpath-show-advanced-button">
+                <i class="icon-cog"></i> Show Advanced Mode
+            </button>
+            <div class="control-group">
+                <label class="control-label">Result is:</label>
+                <div class="controls">
+                    <select class="input-block-level" id="top-level-join-select">
+                        <% _.each(topLevelJoinOpts, function (opt) { %>
+                        <option value="<%=opt[1]%>"><%=opt[0]%></option>
+                        <% }); %>
+                    </select>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label">Configure Expression:</label>
+                <div class="controls">
+                    <div id="fd-xpath-editor-expressions"> expression pane</div>
+                    <button class="btn" id="fd-add-exp"><i class="icon-plus"></i> Add Expression</button>
+                </div>
+            </div>
+        </fieldset>
+
+        <p id="fd-xpath-validation-summary" class="alert hide"></p>
+
+        <div class="form-actions">
+            <button class="btn btn-primary" id="fd-xpath-save-button">Save</button>
+            <button class="btn" id="fd-xpath-cancel-button">Cancel</button>
+        </div>
+    </div>
+</script>
+
+<script type="text/template" id="fd-template-xpath-expression">
+    <div class="control-group xpath-expression-group">
+        <button class="btn btn-danger xpath-delete-expression pull-right"><i class="icon-remove"></i></button>
+        <div class="validation-result-container pull-left">
+            <p class="validation-results alert alert-success hide">
+                <i class="icon-ok"></i> ok
+            </p>
+            <p class="validation-results alert alert-error hide">
+                <i class="icon-warning-sign"></i> fix
+            </p>
+        </div>
+        <div class="control-row xpath-expression-row">
+            <div class="span4">
+                <input class="input-block-level left-question xpath-edit-node jstree-drop"
+                       type="text" placeholder="Hint: drag a question here." />
+            </div>
+            <div class="span4">
+                <select class="input-block-level op-select">
+                    <% _.each(operationOpts, function (opt) { %>
+                    <option value="<%=opt[1]%>"><%=opt[0]%></option>
+                    <% }); %>
+                </select>
+            </div>
+            <div class="span4">
+                <input class="input-block-level right-question xpath-edit-node jstree-drop"
+                       type="text" placeholder="Hint: drag a question here." />
+            </div>
+        </div>
+    </div>
+</script>
+
+

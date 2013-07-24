@@ -1096,7 +1096,7 @@ formdesigner.ui = function () {
         };
 
         var getExpressionFromUI = function () {
-            if ($("#xpath-advanced-check").is(':checked')) {
+            if ($("#xpath-simple").hasClass('hide')) {
                 // advanced
                 return getExpressionInput().val();
             } else {
@@ -1118,14 +1118,6 @@ formdesigner.ui = function () {
 
         var validateCurrent = function () {
             return validate(getExpressionFromUI());
-        };
-
-        var constructSelect = function (ops) {
-            var sel = $("<select />");
-            for (var i = 0; i < ops.length; i++) {
-                $("<option />").text(ops[i][0]).val(ops[i][1]).appendTo(sel);
-            }
-            return sel;
         };
 
 
@@ -1159,92 +1151,49 @@ formdesigner.ui = function () {
                 return true;
             };
 
-            var createJoinSelector = function() {
-                var ops = [
-                    ["and", expTypes.AND],
-                    ["or", expTypes.OR]
-                ];
-                return constructSelect(ops).addClass("join-select");
-            };
-
             var newExpressionUIElement = function (expOp) {
 
-                // create the UI for an individual expression
-                var createQuestionAcceptor = function() {
-                    var questionAcceptor = $("<input />").attr("type", "text").attr("placeholder", "Hint: drag a question here.");
-                    return questionAcceptor;
-                };
-
-                var createOperationSelector = function() {
-                    var ops = [
+                var $expUI = formdesigner.ui.getTemplateObject('#fd-template-xpath-expression', {
+                    operationOpts: [
                         ["is equal to", expTypes.EQ],
                         ["is not equal to", expTypes.NEQ],
                         ["is less than", expTypes.LT],
                         ["is less than or equal to", expTypes.LTE],
                         ["is greater than", expTypes.GT],
                         ["is greater than or equal to", expTypes.GTE]
-                    ];
-
-                    return constructSelect(ops).addClass("op-select");
-                };
-
-                var expression = $("<div />").addClass("bin-expression");
-
-                var createQuestionInGroup = function (type) {
-                    var group = $("<div />").addClass("expression-part").appendTo(expression);
-                    return createQuestionAcceptor().addClass(type + "-question xpath-edit-node").appendTo(group);
-                };
+                    ]
+                });
 
                 var getLeftQuestionInput = function () {
-                    return $(expression.find(".left-question")[0]);
+                    return $($expUI.find(".left-question")[0]);
                 };
 
                 var getRightQuestionInput = function () {
-                    return $(expression.find(".right-question")[0]);
-                };
-
-                var getValidationResults = function () {
-                    return $(expression.find(".validation-results")[0]);
+                    return $($expUI.find(".right-question")[0]);
                 };
 
                 var validateExpression = function(item) {
                     var le = getLeftQuestionInput().val(),
-                            re = getRightQuestionInput().val();
+                        re = getRightQuestionInput().val();
+
+                    $expUI.find('.validation-results').addClass('hide');
+
                     if (le && validate(le)[0] && re && validate(re)[0]) {
-                        getValidationResults().text("ok").addClass("success ui-icon-circle-check").removeClass("error");
+                        $expUI.find('.validation-results.alert-success').removeClass('hide');
                     } else {
-                        getValidationResults().text("fix").addClass("error").removeClass("success");
+                        $expUI.find('.validation-results.alert-error').removeClass('hide');
                     }
                 };
-
-                var left = createQuestionInGroup("left");
-                var op = createOperationSelector().appendTo(expression);
-                var right = createQuestionInGroup("right");
-                var deleteButton = $("<div />").addClass('btn').addClass('btn-danger').text("Delete").button().css("float", "left").appendTo(expression);
-                var validationResults = $("<div />").addClass("validation-results").appendTo(expression);
 
                 var populateQuestionInputBox = function (input, expr, pairedExpr) {
                     input.val(expr.toXPath());
                 };
 
-                var setBasicOptions = function () {
-                    // just make the inputs droppable and add event handlers to validate
-                    // the inputs
-                    expression.find(".xpath-edit-node").addClass("jstree-drop");
-                    expression.find(".xpath-edit-node").keyup(validateExpression);
-                    expression.find(".xpath-edit-node").change(validateExpression);
-                };
+                // add event handlers to validate the inputs
+                $expUI.find('.xpath-edit-node').on('keyup change', validateExpression);
 
-                setBasicOptions();
-                
-                deleteButton.click(function() {
-                    var isFirst = expression.children(".join-select").length == 0;
-                    expression.remove();
-                    if (isFirst && getExpressionList().length > 0) {
-                        // when removing the first expression, make sure to update the
-                        // next one in the UI to not have a join, if necessary.
-                        $($(getExpressionList()[0]).children(".join-select")).remove();
-                    }
+                $expUI.find('.xpath-delete-expression').click(function() {
+                    $expUI.remove();
                 });
 
                 if (expOp) {
@@ -1253,12 +1202,12 @@ formdesigner.ui = function () {
                         console.log("populating", expOp.toString());
                     }
                     populateQuestionInputBox(getLeftQuestionInput(), expOp.left);
-                    op.val(xpathmodels.expressionTypeEnumToXPathLiteral(expOp.type));
+                    $expUI.find('.op-select').val(xpathmodels.expressionTypeEnumToXPathLiteral(expOp.type));
                     // the population of the left can affect the right,
                     // so we need to update the reference
                     populateQuestionInputBox(getRightQuestionInput(), expOp.right, expOp.left);
                 }
-                return expression;
+                return $expUI;
             };
 
             var failAndClear = function () {
@@ -1274,12 +1223,6 @@ formdesigner.ui = function () {
             if (!parsedExpression) {
                 // just create a new expression
                 expressionUIElem = newExpressionUIElement();
-                // and if it's not the first additionally add the join selector
-                if (getExpressionPane().children().length !== 0) {
-                    // No longer handled internally
-                    // TODO: clean up
-                    // createJoinSelector().prependTo(expressionUIElem);
-                }
                 return expressionUIElem.appendTo(expressionPane);
             } else {
                 // we're creating for an existing expression, this is more complicated
@@ -1340,7 +1283,10 @@ formdesigner.ui = function () {
             // set data properties for callbacks and such
             editorPane.data("group", options.group).data("property", options.property);
             // clear validation text
-            getValidationSummary().text("").removeClass("error").removeClass("success");
+            getValidationSummary()
+                .text("")
+                .removeClass("alert-error alert-success")
+                .addClass("hide");
 
             // clear expression builder
             var expressionPane = getExpressionPane();
@@ -1355,24 +1301,27 @@ formdesigner.ui = function () {
             } else {
                 showAdvancedMode(options.value);
             }
-            $("#fd-xpath-editor-text").val(options.value);
 
+            $("#fd-xpath-editor-text").val(options.value);
         };
 
         // toggle simple/advanced mode
         var showAdvancedMode = function (text, showNotice) {
             getExpressionInput().val(text);
             getExpressionPane().empty();
-            $("#xpath-advanced-check").attr("checked", true);
-            $("#xpath-advanced").show();
-            $("#xpath-simple").hide();
-            $("#xpath-advanced-notice").toggle(typeof showNotice != 'undefined' ? showNotice : false)
+
+            $("#xpath-advanced").removeClass('hide');
+            $("#xpath-simple").addClass('hide');
+            if (showNotice) {
+                $("#xpath-advanced-notice").removeClass('hide');
+            } else {
+                $("#xpath-advanced-notice").addClass('hide');
+            }
         };
         var showSimpleMode = function (text) {
-            $("#xpath-simple").show();
-            $("#xpath-advanced").hide();
-            $("#xpath-advanced-check").attr("checked", false);
-            $("#xpath-advanced-notice").hide();
+            $("#xpath-simple").removeClass('hide');
+            $("#xpath-advanced").addClass('hide');
+
             getExpressionPane().empty();
             // this sometimes sends us back to advanced mode (if we couldn't parse)
             // for now consider that fine.
@@ -1380,87 +1329,29 @@ formdesigner.ui = function () {
                 setUIForExpression(text);
             }
         };
+
         var initXPathEditor = function() {
-            var mainPane = editorContent;
+            var $xpathUI = formdesigner.ui.getTemplateObject('#fd-template-xpath', {
+                topLevelJoinOpts: [
+                    ["True when ALL of the expressions are true.", expTypes.AND],
+                    ["True when ANY of the expressions are true.", expTypes.OR]
+                ]
+            });
+            editorContent.append($xpathUI);
 
-            $("<div />").attr("id", "xpath-advanced-notice")
-                .addClass("alert")
-                .text("Sorry, your logic is too complicated for our logic builder." +
-                    "   You can only edit this logic in Advanced Mode.")
-                .appendTo(editorContent);
-
-            var $label = $("<label />")
-                .attr("for", "xpath-advanced-check")
-                .text("Advanced Mode?")
-                .addClass('checkbox');
-
-
-            var advancedModeSelector = $("<input />")
-                .attr("type", "checkbox")
-                .attr("id", "xpath-advanced-check");
-
-            $label.prepend(advancedModeSelector);
-            editorContent.append($label);
-
-            advancedModeSelector.click(function() {
-                if ($(this).is(':checked')) {
-                    showAdvancedMode(getExpressionFromSimpleMode());
-                } else {
-                    showSimpleMode(getExpressionInput().val());
-                }
+            $xpathUI.find('#fd-xpath-show-advanced-button').click(function () {
+                showAdvancedMode(getExpressionFromSimpleMode());
             });
 
-            // advanced UI
-            var advancedUI = $("<div />").attr("id", "xpath-advanced")
-                    .appendTo(editorContent);
+            $xpathUI.find('#fd-xpath-show-simple-button').click(function () {
+                showSimpleMode(getExpressionInput().val());
+            });
 
-            $("<label />").attr("for", "fd-xpath-editor-text")
-                    .text("XPath Expression: ")
-                    .appendTo(advancedUI);
-
-            $("<textarea />").attr("id", "fd-xpath-editor-text")
-                    .attr("rows", "2")
-                    .attr("cols", "50")
-                    .attr("style", "width:540px; height:140px")
-                    .appendTo(advancedUI)
-                    .addClass("jstree-drop");
-            
-            $("<p>Hint: you can drag a question into the box.</p>")
-                .appendTo(advancedUI);
-
-                    
-            // simple UI
-            var simpleUI = $("<div />").attr("id", "xpath-simple").appendTo(editorContent);
-
-            var topLevelJoinOps = [
-                ["True when ALL of the expressions are true.", expTypes.AND],
-                ["True when ANY of the expressions are true.", expTypes.OR]
-            ];
-
-            constructSelect(topLevelJoinOps).appendTo(simpleUI)
-                .attr("id", "top-level-join-select")
-                .addClass('input-xxlarge');
-
-            $("<div />").attr("id", "fd-xpath-editor-expressions")
-                    .appendTo(simpleUI);
-
-            var addExpressionButton = $("<button id='fd-add-exp'/>").text("Add expression").addClass("btn")
-                    .button()
-                    .appendTo(simpleUI);
-
-            addExpressionButton.click(function() {
+            $xpathUI.find('#fd-add-exp').click(function () {
                 tryAddExpression();
             });
 
-            // shared UI
-            var actions = $("<div />").addClass("btn-group")
-                    .css("padding-top", "5px").appendTo(editorContent);
-            
-            var doneButton = $('<button />').text("Save to Form").addClass("btn").addClass("btn-primary")
-                    .button()
-                    .appendTo(actions);
-
-            doneButton.click(function() {
+            $xpathUI.find('#fd-xpath-save-button').click(function() {
                 getExpressionInput().val(getExpressionFromUI());
                 var results = validateCurrent();
                 if (results[0]) {
@@ -1474,17 +1365,12 @@ formdesigner.ui = function () {
                     getValidationSummary().text("Validation Failed! Please fix all errors before leaving this page. " + results[1]).removeClass("success").addClass("error");
                 }
             });
-            
-            var cancelButton = $('<button />').text("Cancel").addClass("btn")
-                    .button()
-                    .appendTo(actions);
-            cancelButton.click(function () {
+
+            $xpathUI.find('#fd-xpath-cancel-button').click(function () {
                 formdesigner.controller.doneXPathEditor({
                     cancel:   true
                 });
             });
-            
-            var validationSummary = $("<div />").attr("id", "fd-xpath-validation-summary").appendTo(editorContent);
         };
 
         if (editorContent.children().length === 0) {
