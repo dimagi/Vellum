@@ -1300,8 +1300,6 @@ formdesigner.controller = (function () {
                 formdesigner.ui.enableUI();
             }
             $.fancybox.hideActivity();
-
-
         },
         500);
     };
@@ -2214,7 +2212,7 @@ formdesigner.controller = (function () {
         var getUrl = function (saveType) {
             return saveType === 'patch' ?
                 formdesigner.patchUrl : formdesigner.saveUrl;
-        }
+        };
         var url = getUrl(formdesigner.saveType);
         if (!url) {
             formdesigner.ui.setDialogInfo("Error: Cannot send form, no save url specified!",
