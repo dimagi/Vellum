@@ -39,34 +39,6 @@
   margin: .8em;
 }
 
-#formdesigner .fd-props-ul {
-  // todo, investigate where this style is
-  list-style-type: none;
-  margin: 0;
-  padding: 0;
-  position: relative;
-}
-
-#formdesigner #fd-form-opts-ul {
-  list-style-type: none;
-}
-
-#formdesigner {
-  #fd-source {
-    width: 800px;
-    height: 800px;
-  }
-  #fd-source-help, #fd-source-controls {
-    width: 800px;
-    padding: 1em;
-  }
-}
-
-#formdesigner .fd-props-validate {
-  // todo, investigate usage
-  float: right;
-}
-
 #formdesigner .fd-head {
   color: @white;
   font-size: 17px;
@@ -77,13 +49,6 @@
   z-index: 3;
   line-height:25px;
   width: 100%;
-}
-
-#formdesigner .questionButton {
-  // todo investigate usage
-  margin: 1px;
-  vertical-align: middle;
-  width: 200px;
 }
 
 #formdesigner #fd-form-saving-img {
@@ -187,4 +152,37 @@
   }
 }
 
+#formdesigner .fd-source-modal {
+  left: 20px;
+  margin-left: 0;
+  height: 93%;
+  top: 20px;
+
+  .modal-body {
+    max-height: none;
+  }
+  .fd-source-container {
+    height: 100%;
+    >.control-row {
+      height: 95%;
+      textarea {
+        height: 100%;
+      }
+    }
+  }
+}
+
+#formdesigner #fd-messages {
+  .alert {
+    .box-shadow(0px 0px 10px rgba(0, 0, 0, 0.4));
+    margin: @gridGutterWidth;
+  }
+}
+
+#formdesigner .fd-toolbar .tooltip {
+  .tooltip-inner { .box-shadow(0px 0px 10px rgba(255, 255, 255, 0.75)); }
+  &.in {
+    .opacity(100);
+  }
+}
 

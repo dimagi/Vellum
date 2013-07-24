@@ -134,27 +134,6 @@
   padding: .8em;
   margin: .8em;
 }
-#formdesigner .fd-props-ul {
-  list-style-type: none;
-  margin: 0;
-  padding: 0;
-  position: relative;
-}
-#formdesigner #fd-form-opts-ul {
-  list-style-type: none;
-}
-#formdesigner #fd-source {
-  width: 800px;
-  height: 800px;
-}
-#formdesigner #fd-source-help,
-#formdesigner #fd-source-controls {
-  width: 800px;
-  padding: 1em;
-}
-#formdesigner .fd-props-validate {
-  float: right;
-}
 #formdesigner .fd-head {
   color: #ffffff;
   font-size: 17px;
@@ -165,11 +144,6 @@
   z-index: 3;
   line-height: 25px;
   width: 100%;
-}
-#formdesigner .questionButton {
-  margin: 1px;
-  vertical-align: middle;
-  width: 200px;
 }
 #formdesigner #fd-form-saving-img {
   display: block;
@@ -268,52 +242,55 @@
 #formdesigner #fd-save-button > .pull-right {
   float: none;
 }
+#formdesigner .fd-source-modal {
+  left: 20px;
+  margin-left: 0;
+  height: 93%;
+  top: 20px;
+}
+#formdesigner .fd-source-modal .modal-body {
+  max-height: none;
+}
+#formdesigner .fd-source-modal .fd-source-container {
+  height: 100%;
+}
+#formdesigner .fd-source-modal .fd-source-container > .control-row {
+  height: 95%;
+}
+#formdesigner .fd-source-modal .fd-source-container > .control-row textarea {
+  height: 100%;
+}
+#formdesigner #fd-messages .alert {
+  -webkit-box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.4);
+  -moz-box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.4);
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.4);
+  margin: 20px;
+}
+#formdesigner .fd-toolbar .tooltip .tooltip-inner {
+  -webkit-box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.75);
+  -moz-box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.75);
+  box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.75);
+}
+#formdesigner .fd-toolbar .tooltip.in {
+  opacity: 1;
+  filter: alpha(opacity=100);
+}
 #formdesigner #fd-question-properties,
 #formdesigner #fd-xpath-editor {
   display: none;
 }
-#formdesigner #fd-xpath-editor {
-  /* stolen from blueprint */
-
+#formdesigner #fd-default-panel {
+  border-top: 1px solid #f4f4f4;
 }
-#formdesigner #fd-xpath-editor .error,
-#formdesigner #fd-xpath-editor .notice,
-#formdesigner #fd-xpath-editor .success {
-  padding: .4em;
-  border: 2px solid #ddd;
+#formdesigner #fd-default-panel .well {
+  width: 80%;
+  margin: 40px auto;
 }
-#formdesigner #fd-xpath-editor .error {
-  background: #FBE3E4;
-  color: #8a1f11;
-  border-color: #FBC2C4;
-}
-#formdesigner #fd-xpath-editor .notice {
-  background: #FFF6BF;
-  color: #514721;
-  border-color: #FFD324;
-}
-#formdesigner #fd-xpath-editor .success {
-  background: #E6EFC2;
-  color: #264409;
-  border-color: #C6D880;
-}
-#formdesigner #fd-xpath-editor .bin-expression {
-  min-height: 35px;
-}
-#formdesigner #fd-xpath-editor .xpath-edit-node,
-#formdesigner #fd-xpath-editor .expression-part,
-#formdesigner #fd-xpath-editor .op-select,
-#formdesigner #fd-xpath-editor .validation-results {
-  vertical-align: text-bottom;
-  display: inline-block;
-  margin-left: .4em;
-}
-#formdesigner #fd-xpath-editor .xpath-edit-node {
-  width: 180px !important;
-}
-#formdesigner #fd-xpath-editor .validation-results {
-  position: relative;
-  margin-bottom: 0px;
+#formdesigner .fd-panel-toolbar {
+  min-height: 46px;
+  margin-bottom: 5px;
+  border-bottom: 1px solid #f4f4f4;
+  padding: 0 20px;
 }
 #formdesigner .fd-tree .fd-scrollable {
   overflow-x: auto;
@@ -332,9 +309,9 @@
 }
 #formdesigner #fd-question-tree-actions {
   text-align: center;
-  padding: 10px;
-  border-bottom: 1px solid #f4f4f4;
-  margin-bottom: 5px;
+}
+#formdesigner #fd-question-tree-actions > div {
+  padding-top: 10px;
 }
 #formdesigner #fd-messages {
   position: fixed;
@@ -437,18 +414,37 @@
 #formdesigner .itext-lang-group .control-label {
   text-transform: capitalize;
 }
-#formdesigner #fd-messages .alert {
-  -webkit-box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.4);
-  -moz-box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.4);
-  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.4);
-  margin: 20px;
+#formdesigner #fd-xpath-editor-content {
+  padding: 20px;
 }
-#formdesigner .fd-toolbar .tooltip .tooltip-inner {
-  -webkit-box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.75);
-  -moz-box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.75);
-  box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.75);
+#formdesigner #fd-xpath-editor .xpath-expression-group .validation-result-container {
+  width: 60px;
+  margin-top: -1px;
 }
-#formdesigner .fd-toolbar .tooltip.in {
-  opacity: 1;
-  filter: alpha(opacity=100);
+#formdesigner #fd-xpath-editor .xpath-expression-group .validation-result-container .validation-results {
+  padding: 5px 10px;
+  margin-bottom: 0;
+}
+#formdesigner #fd-xpath-editor .xpath-expression-group .xpath-expression-row {
+  margin-left: 70px;
+  margin-right: 45px;
+}
+#formdesigner #fd-xpath-editor .fd-xpath-editor-container fieldset {
+  position: relative;
+}
+#formdesigner #fd-xpath-editor .xpath-mode-toggle {
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+#formdesigner #fd-xpath-editor-expressions {
+  background-color: #f4f4f4;
+  padding: 10px;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+  margin-bottom: 10px;
+}
+#formdesigner #fd-xpath-editor-expressions .control-group:last-child {
+  margin-bottom: 0;
 }
