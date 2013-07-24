@@ -533,7 +533,6 @@ formdesigner.ui = function () {
      */
     that.selectLowestQuestionNode = function () {
         that.jstree("deselect_all");
-
         var questions = that.getJSTree().children().children().filter("[rel!='datanode']");
         if (questions.length > 0) {
             var newSelectEl = $(questions[questions.length - 1]);
@@ -663,48 +662,9 @@ formdesigner.ui = function () {
         $('#fd-load-xls-button').stopLink().click(formdesigner.controller.showItextDialog);
         $('#fd-export-xls-button').stopLink().click(formdesigner.controller.showExportDialog);
         $('#fd-editsource-button').stopLink().click(formdesigner.controller.showSourceXMLDialog);
-
-        function makeFormProp(propLabel, propName, keyUpFunc, initVal) {
-            var liStr = '<li id="fd-form-prop-' + propName + '" class="fd-form-property"><span class="fd-form-property-text">' + propLabel + ': ' + '</span>' +
-                    '<input id="fd-form-prop-' + propName + '-' + 'input" class="fd-form-property-input">' +
-                    '</li>',
-                    li = $(liStr),
-                    ul = $('#fd-form-opts-ul');
-
-            ul.append(li);
-            $(li).find('input').val(initVal)
-                    .keyup(keyUpFunc);
-        }
-
-        function fireFormPropChanged(propName, oldVal, newVal) {
-            formdesigner.controller.form.fire({
-                type: 'form-property-changed',
-                propName: propName,
-                oldVal: oldVal,
-                newVal: newVal
-            })
-        }
-
-        var formNameFunc = function (e) {
-            fireFormPropChanged('formName', formdesigner.controller.form.formName, $(this).val());
-            formdesigner.controller.form.formName = $(this).val();
-        };
-        makeFormProp("Form Name", "formName", formNameFunc, formdesigner.controller.form.formName);
-
-        var formIDFunc = function (e) {
-            $(this).val($(this).val().replace(/ /g, '_'));
-            fireFormPropChanged('formID', formdesigner.controller.form.formID, $(this).val());
-            formdesigner.controller.form.formID = $(this).val();
-        };
-        makeFormProp("Form ID", "formID", formIDFunc, formdesigner.controller.form.formID);
-
-        $('<p>Note: changing the Form ID here will not automatically change ' +
-          ' the Form ID in existing references in your logic conditions.  ' + 
-          'If you change the Form ID, you must manually change any ' +
-          'existing logic references.</p>').appendTo('#fd-form-opts-ul');
+        $('#fd-formproperties-button').stopLink().click(formdesigner.controller.showFormPropertiesDialog);
 
     };
-
 
     var setTreeNodeInvalid = function (uid, msg) {
         $($('#' + uid)[0]).append('<div class="ui-icon ui-icon-alert fd-tree-valid-alert-icon" title="' + msg + '"></div>')
@@ -764,10 +724,6 @@ formdesigner.ui = function () {
             onClosed: function() {
             }
         });
-
-        $('#fancybox-overlay').click(function () {
-
-        })
     }
 
     function init_form_paste() {
@@ -798,14 +754,7 @@ formdesigner.ui = function () {
 
         $('#fd-lang-disp-add-lang-button').button(butState);
         $('#fd-lang-disp-remove-lang-button').button(butState);
-        $('#fd-load-xls-button').button(butState);
-        $('#fd-editsource-button').button(butState);
-        $('#fd-cruftyItextRemove-button').button(butState);
         //Print tree to console button is not disabled since it's almost always useful.
-
-        //inputs
-        $('#fd-form-prop-formName-input').prop('enabled', state);
-        $('#fd-form-prop-formID-input').prop('enabled', state);
 
         //other stuff
         if (state) {
@@ -1115,7 +1064,6 @@ formdesigner.ui = function () {
         var getExpressionList = function () {
             return getExpressionPane().children();
         };
-
         var getTopLevelJoinSelect = function () {
             return $(editorPane.find("#top-level-join-select")[0]);
         };
@@ -1685,11 +1633,6 @@ formdesigner.ui = function () {
 
         formdesigner.windowManager.init();
     };
-
-
-    $(document).ready(function () {
-
-    });
 
     return that;
 }();
