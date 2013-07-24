@@ -416,7 +416,7 @@ formdesigner.ui = function () {
             questionToolbar = formdesigner.widgets.getToolbarForMug(mugType),
             sections = formdesigner.widgets.getSectionListForMug(mugType);
 
-        $content.append(questionToolbar);
+        $('#fd-props-toolbar').html(questionToolbar);
         for (var i = 0; i < sections.length; i++) {
             sections[i].getSectionDisplay().appendTo($content);
         }

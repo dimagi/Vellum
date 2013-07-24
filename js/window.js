@@ -25,19 +25,23 @@ formdesigner.windowManager = (function () {
             availableHorizSpace = $('.hq-content').width(),
             position = (that.getCurrentTopOffset() === 0) ? 'fixed' : 'static',
             $formdesigner = $('#fd-ui-container');
-        $formdesigner.css('height', availableVertSpace + 'px');
+
+        // so that the document doesn't have to resize for the footer.
         $formdesigner.parent().css('height', availableVertSpace + 'px');
+
+        availableVertSpace = availableVertSpace - that.getCurrentBottomOffset();
+        $formdesigner.css('height', availableVertSpace + 'px');
 
         $formdesigner.css('width', $formdesigner.parent().width())
             .css('position', position)
             .css('left', that.getCurrentLeftOffset() + 'px');
 
-        var availableColumnSpace = availableVertSpace - ($('.fd-toolbar').outerHeight() + that.getCurrentBottomOffset()),
-            panelHeight, columnHeight, treeHeight;
+        var availableColumnSpace = availableVertSpace - $('.fd-toolbar').outerHeight(),
+            panelHeight, columnHeight, treeHeight, questionPropHeight;
 
-        panelHeight = Math.max(availableColumnSpace, that.minHeight);
+        panelHeight = Math.max(availableColumnSpace - 5, that.minHeight);
         columnHeight = panelHeight - $('.fd-head').outerHeight();
-        treeHeight = columnHeight - $('#fd-question-tree-lang').outerHeight() - $('#fd-question-tree-actions').outerHeight();
+        treeHeight = columnHeight;
 
         $formdesigner.find('.fd-content').css('height', panelHeight + 'px');
 
@@ -46,7 +50,10 @@ formdesigner.windowManager = (function () {
 
         $formdesigner.find('.fd-content-right')
             .css('width', availableHorizSpace - that.geLeftWidth() + 'px')
-            .find('.fd-scrollable').css('height', columnHeight + 'px');
+            .find('.fd-scrollable.full').css('height', columnHeight + 'px');
+
+        $formdesigner.find('#fd-props-scrollable')
+            .css('height', columnHeight - $('#fd-props-toolbar').outerHeight(true) + 'px');
 
     };
 
@@ -62,9 +69,7 @@ formdesigner.windowManager = (function () {
     };
 
     that.getCurrentBottomOffset = function () {
-        var scrollBottom = $(document).height() - ($(window).height() + $(document).scrollTop()),
-            offsetBottom = (typeof that.offset.bottom === 'function') ? that.offset.bottom() : that.offset.bottom;
-        return Math.min(Math.max(offsetBottom - scrollBottom, 0), offsetBottom);
+        return (typeof that.offset.bottom === 'function') ? that.offset.bottom() : that.offset.bottom;
     };
 
     that.getCurrentLeftOffset = function () {

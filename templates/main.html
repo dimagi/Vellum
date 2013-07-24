@@ -22,14 +22,14 @@
         <div class="fd-content fd-content-left">
            <div id="fd-question-tree-container" class="fd-tree">
                 <div id="fd-question-tree-head" class="fd-head">Question Tree</div>
-                <div id="fd-question-tree-lang"></div>
-                <div id="fd-question-tree-actions">
-                    <div class="btn-group">
-                        <button id="fd-expand-all" class="btn"><i class="icon-double-angle-down"></i> Expand All</button>
-                        <button id="fd-collapse-all" class="btn"><i class="icon-double-angle-right"></i> Collapse All</button>
-                    </div>
-                </div>
                 <div class="fd-scrollable fd-scrollable-tree">
+                    <div id="fd-question-tree-lang"></div>
+                    <div id="fd-question-tree-actions" class="fd-panel-toolbar">
+                        <div class="btn-group">
+                            <button id="fd-expand-all" class="btn"><i class="icon-double-angle-down"></i> Expand All</button>
+                            <button id="fd-collapse-all" class="btn"><i class="icon-double-angle-right"></i> Collapse All</button>
+                        </div>
+                    </div>
                     <div id="fd-question-tree"></div>
                 </div>
             </div>
@@ -38,13 +38,14 @@
         <div class="fd-content fd-content-right">
             <div id="fd-question-properties" class="fd-column">
                 <div id="fd-props-head" class="fd-head">Question Properties</div>
-                <div class="fd-scrollable">
+                <div id="fd-props-toolbar" class="fd-panel-toolbar"></div>
+                <div id="fd-props-scrollable" class="fd-scrollable">
                     <form id="fd-props-content" class="form form-horizontal"></form>
                 </div>
             </div>
             <div id="fd-xpath-editor" class="fd-column">
                 <div id="fd-xpath-editor-head" class="fd-head">Expression Editor</div>
-                <div class="fd-scrollable">
+                <div class="fd-scrollable full">
                     <div id="fd-xpath-editor-content"></div>
                 </div>
             </div>
@@ -331,9 +332,8 @@
 </script>
 
 <script type="text/template" id="fd-template-question-toolbar">
-    <div id="<%=toolbarId%>" class="clearfix">
+    <div class="fd-question-toolbar-container clearfix">
         <div class="btn-toolbar pull-left">
-
             <button id="fd-button-copy" type="button" class="btn" tabindex="-1">
                 <i class="icon-copy"></i> Copy
             </button>

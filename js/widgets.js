@@ -1233,9 +1233,7 @@ formdesigner.widgets = (function () {
      */
 
     that.getToolbarForMug = function (mugType) {
-        var $baseToolbar = formdesigner.ui.getTemplateObject('#fd-template-question-toolbar', {
-            toolbarId: "fd-question-toolbar"
-        });
+        var $baseToolbar = formdesigner.ui.getTemplateObject('#fd-template-question-toolbar', {});
         $baseToolbar.find('#fd-button-remove').click(formdesigner.controller.removeCurrentQuestion);
         $baseToolbar.find('#fd-button-copy').click(function () {
             formdesigner.controller.duplicateCurrentQuestion({itext: 'copy'});
