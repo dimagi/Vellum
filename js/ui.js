@@ -402,6 +402,7 @@ formdesigner.ui = function () {
      * Draws the properties to be edited to the screen.
      */
     that.displayMugProperties = function (mugType) {
+        $('#fd-default-panel').addClass('hide');
         // always hide the xpath editor if necessary
         that.hideXPathEditor();
         that.showTools();
@@ -1596,6 +1597,8 @@ formdesigner.launch = function (opts) {
 
     if(formdesigner.loadMe) {
         formdesigner.controller.loadXForm(formdesigner.loadMe);
+    } else {
+        $('#fd-default-panel').removeClass('hide');
     }
     
     // a bit hacky, but if a form name was specified, override 
