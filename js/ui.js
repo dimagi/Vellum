@@ -496,6 +496,19 @@ formdesigner.ui = function () {
         that.activateQuestionTypeGroup(typeSlug);
     };
 
+    that.isSelectNodeBlocked = function (e, data) {
+        if (that.isXpathEditorActive) {
+            var $modal = formdesigner.ui.generateNewModal("Unsaved Changes in Editor", [], "OK");
+            $modal.removeClass('fade');
+            $modal.find('.modal-body')
+                .append($('<p />').text("You have UNSAVED changes in the Expression Editor. Please save "+
+                                        "changes before switching questions."));
+            $modal.modal('show');
+            return true;
+        }
+        return false;
+    };
+
     /**
      * Try to select any node in the UI tree, otherwise hide the question
      * properties window. Used after initial load, question deletion, etc.
@@ -1040,6 +1053,7 @@ formdesigner.ui = function () {
 
 
     that.showXPathEditor = function (options) {
+        formdesigner.ui.isXpathEditorActive = true;
         /**
          * All the logic to display the XPath Editor widget.
          */
@@ -1382,6 +1396,7 @@ formdesigner.ui = function () {
     };
 
     that.hideXPathEditor = function() {
+        formdesigner.ui.isXpathEditorActive = false;
         $('#fd-xpath-editor').hide();
     };
 
@@ -1440,18 +1455,22 @@ formdesigner.ui = function () {
         }).bind("deselect_node.jstree", function (e, data) {
             that.resetQuestionTypeGroups();
         }).bind('before.jstree', function (e, data) {
-            var nodeId,
-                qtype;
+            var nodeId, qtype;
             if (data.func == 'is_selected' || data.func == 'get_text') {
                 nodeId = $(data.args[0]).attr('id');
             } else if (data.func == 'set_type') {
                 qtype = data.args[2];
                 nodeId = data.args[1].replace('#', '');
             }
+
             if (nodeId) {
                 that.overrideJSTreeIcon(nodeId, qtype);
             }
 
+            if (data.func === 'select_node' && that.isSelectNodeBlocked(e, data)) {
+                e.stopImmediatePropagation();
+                return false;
+            }
         });
 
         $("#fd-expand-all").click(function() {
