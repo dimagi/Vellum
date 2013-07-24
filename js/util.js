@@ -972,7 +972,7 @@ $.fn.stopLink = function() {
 $.fn.fdHelp = function () {
     // creates a help popover, requires twitter bootstrap
     this.append($('<i />').addClass('icon-question-sign'))
-        .popover({
+        .popout({
             trigger: 'hover'
         });
     return this;
