@@ -360,10 +360,10 @@
 
 <script type="text/template" id="fd-template-question-fieldset">
     <fieldset class="accordion-group fd-question-fieldset">
-        <% if (helpTitle && helpText) { %>
-        <a href="<%=helpLink%>" class="fd-help pull-right"
-                data-title="<%=helpTitle%>"
-                data-content="<%=helpText%>"
+        <% if (help) { %>
+        <a href="<%=help.link%>" target="_blank" class="fd-help pull-right"
+                data-title="<%=help.title%>"
+                data-content="<%=help.text%>"
                 data-placement="left">
         </a>
         <% } %>

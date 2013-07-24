@@ -182,6 +182,30 @@ formdesigner.util = (function(){
         return ret;
     };
 
+    that.HELP_TEXT_FOR_SECTION = {
+        main: {
+            title: "Main Properties",
+            text: "The Question ID uniquely identifies the question in the form and in exports.  " +
+                "Label is what is shown on the phone for the chosen language. ",
+            link: "https://confluence.dimagi.com/display/commcarepublic/Form+Designer"
+        },
+        logic: {
+            title: "Logic Properties",
+            text: "These provide more control over how the form works.  You can add logic to hide a question " +
+                "based on a previous answer, to make the question required, or to validate the answer.",
+            link: "https://confluence.dimagi.com/display/commcarepublic/Form+Designer"
+        },
+        content: {
+            title: "Media and Content",
+            text: "This will allow you to add images, audio or video media to a question, or other custom content.",
+            link: "https://confluence.dimagi.com/display/commcarepublic/Multimedia+in+CommCare"
+        },
+        advanced: {
+            title: "Advanced Properties",
+            text: "These are advanced settings and are not needed for most applications.  " +
+                "Please only change these if you have a specific need!",
+            link: "https://confluence.dimagi.com/display/commcarepublic/Form+Designer"
+        }
     };
     
     that.isReadOnly = function (mugType) {

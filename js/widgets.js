@@ -1190,9 +1190,7 @@ formdesigner.widgets = (function () {
         section.displayName = options.displayName;
         section.elements = options.elements;
         section.isCollapsed = !!(options.isCollapsed);
-        section.helpTitle = options.helpTitle || "";
-        section.helpText = options.helpText || "";
-        section.helpLink = options.helpLink || "#";
+        section.help = options.help || {};
 
         section.getId = function () {
             return "fd-question-edit-" + this.slug;
@@ -1203,9 +1201,7 @@ formdesigner.widgets = (function () {
                 fieldsetId: section.getId(),
                 fieldsetTitle: section.displayName,
                 isCollapsed: section.isCollapsed,
-                helpTitle: section.helpTitle,
-                helpText: section.helpText,
-                helpLink: section.helpLink
+                help: section.help
             });
         };
 
@@ -1342,8 +1338,7 @@ formdesigner.widgets = (function () {
             slug: "main",
             displayName: "Main Properties",
             elements: elements,
-            helpTitle: "Text",
-            helpText: "help text"
+            help: formdesigner.util.HELP_TEXT_FOR_SECTION.main
         });
     };
 
@@ -1376,7 +1371,8 @@ formdesigner.widgets = (function () {
             displayName: "Media and Content",
             slug: "content",
             elements: elements,
-            isCollapsed: true
+            isCollapsed: false,
+            help: formdesigner.util.HELP_TEXT_FOR_SECTION.content
         });
     };
 
@@ -1434,7 +1430,8 @@ formdesigner.widgets = (function () {
         return that.questionSection(mugType, {
             slug: "logic",
             displayName: "Logic Properties",
-            elements: elements
+            elements: elements,
+            help: formdesigner.util.HELP_TEXT_FOR_SECTION.logic
         });
     };
 
@@ -1484,7 +1481,8 @@ formdesigner.widgets = (function () {
             type: "accordion",
             displayName: "Advanced Properties",
             elements: elements,
-            isCollapsed: true
+            isCollapsed: true,
+            help: formdesigner.util.HELP_TEXT_FOR_SECTION.advanced
         });
     };
 
