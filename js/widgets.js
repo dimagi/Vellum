@@ -399,7 +399,7 @@ formdesigner.widgets = (function () {
         };
         
         var input = $("<input />").attr("id", widget.getID()).attr("type", "text").addClass('input-block-level')
-            .keyup(function () {
+            .bind("keyup change", function () {
                 widget.updateValue();
                 onChange();
             });
@@ -413,6 +413,7 @@ formdesigner.widgets = (function () {
         };
 
         widget.fireChangeEvents = function () {
+            onChange();
             item = this.getTextItem();
             if (item) {
 	            // fire the property changed event(s)
@@ -464,7 +465,7 @@ formdesigner.widgets = (function () {
     };
 
     that.iTextRemovableWidget = function(mugType, language, itemFunc, slug, form, block, change) {
-        var widget = that.iTextWidget(mugType, language, itemFunc, slug, form, change);
+        var widget = that.iTextWidget(mugType, language, itemFunc, slug, form, block, change);
 
         widget.getUIElement = function () {
             // gets the whole widget (label + control)
@@ -531,7 +532,7 @@ formdesigner.widgets = (function () {
             } else {
                 $preview = _.template($('#fd-template-multimedia-nomedia').text(), {
                     iconClass: formdesigner.multimedia.ICONS[form]
-                })
+                });
             }
             return $preview;
         };
@@ -539,7 +540,7 @@ formdesigner.widgets = (function () {
         widget.getUploadButtonUI = function () {
             var currentPath = widget.getValue(),
                 $uploadBtn;
-            $uploadBtn = $(_.template($('#fd-template-multmedia-upload-trigger').text(), {
+            $uploadBtn = $(_.template($('#fd-template-multimedia-upload-trigger').text(), {
                 multimediaExists: currentPath in formdesigner.multimedia.objectMap,
                 uploaderId: formdesigner.multimedia.SLUG_TO_CONTROL[form].uploaderSlug,
                 mediaType: form
@@ -555,8 +556,6 @@ formdesigner.widgets = (function () {
             $uiElem.attr('data-hqmediapath', currentPath);
             widget.mediaRef.updateRef(currentPath);
         };
-
-
 
         widget.getPreviewContainerId = function () {
             return  'fd-mm-preview-container-' + form;
@@ -634,8 +633,6 @@ formdesigner.widgets = (function () {
             }
             widget.updateMultimediaBlockUI();
         };
-
-
 
         return widget;
     };
