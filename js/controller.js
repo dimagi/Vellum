@@ -501,6 +501,8 @@ formdesigner.controller = (function () {
                 return formdesigner.model.mugTypeMaker.stdPhoneNumber();
             case 'group':
                 return formdesigner.model.mugTypeMaker.stdGroup();
+            case 'fieldlist':
+                return formdesigner.model.mugTypeMaker.stdFieldList();
             case 'select':
                 return formdesigner.model.mugTypeMaker.stdMSelect();
             case '1select':
@@ -1552,9 +1554,11 @@ formdesigner.controller = (function () {
                     }
 
                     function MTIdentifierFromGroup () {
-                        if($(cEl).children('repeat').length > 0){
-                                tagName = 'repeat';
-                                return 'stdRepeat';
+                        if ($(cEl).attr('appearance') === 'field-list') {
+                            return 'stdFieldList';
+                        } else if ($(cEl).children('repeat').length > 0) {
+                            tagName = 'repeat';
+                            return 'stdRepeat';
                         } else {
                             return 'stdGroup';
                         }
@@ -1626,6 +1630,10 @@ formdesigner.controller = (function () {
                         mugType.type = mugType.type.replace ('b',''); //strip 'b' from type string
                         delete mugType.properties.bindElement;
                         delete mugType.mug.properties.bindElement;
+                    }
+
+                    if (appearance) {
+                        mugType.setAppearanceAttribute(appearance);
                     }
 
                     return mugType;
@@ -1729,7 +1737,6 @@ formdesigner.controller = (function () {
                         hintEl = $(cEl).children('hint');
                     }
 
-                    var cannottHaveDefaultValue = ['select', 'select1', 'repeat', 'group', 'trigger'];
                     if (labelEl.length > 0) {
                         parseLabel(labelEl, MugType);
                     }
@@ -1768,7 +1775,7 @@ formdesigner.controller = (function () {
                     parentNode,
                     parentMug,
                     tagName,
-                    couldHaveChildren = ['repeat', 'group', 'select', 'select1'],
+                    couldHaveChildren = ['repeat', 'group', 'fieldlist', 'select', 'select1'],
                     children,
                     bind,
                     isRepeat;
