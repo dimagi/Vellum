@@ -85,7 +85,8 @@ formdesigner.util = (function(){
             group: ['group', 'Groups', 'icon-folder-open'],
             questions: [
                 ['group', 'Group', 'icon-folder-open'],
-                ['repeat', 'Repeat Group', 'icon-retweet']
+                ['repeat', 'Repeat Group', 'icon-retweet'],
+                ['fieldlist', 'Question List', 'icon-reorder']
             ]
         },
         {
@@ -555,6 +556,7 @@ formdesigner.util = (function(){
             'select',
             'group',
             'repeat',
+            'fieldlist',
             'trigger',
             'item',
             'output',
@@ -568,6 +570,7 @@ formdesigner.util = (function(){
             'Phone Number or Numeric ID',
             'Group',
             'Repeat',
+            'FieldList',
             'Trigger',
             'Single-Select',
             'Multi-Select',
