@@ -220,7 +220,7 @@ formdesigner.util = (function(){
         resStr = resStr.replace(getStartTag(resStr),'').replace(getEndTag(resStr),'');
         
         // XMLSerializer unescapes escaped carriage returns
-        resStr = resStr.replace(String.fromCharCode(10), '&#10;');
+        resStr = resStr.replace(new RegExp(String.fromCharCode(10), 'g'), '&#10;');
 
         return resStr;
     }
@@ -402,12 +402,12 @@ formdesigner.util = (function(){
      */
     that.generate_question_id = function (question_id) {
         if (question_id) {
-            var match = /(.+)-\d$/.exec(question_id) ;
+            var match = /^copy-(\d+)-of-(.+)$/.exec(question_id) ;
             if (match) {
-                question_id = match[1]; 
+                question_id = match[2]; 
             }
             for (var i = 1;; i++) {
-                var new_id = question_id + "-" + i;
+                var new_id = "copy-" + i + "-of-" + question_id;
                 if (!formdesigner.model.questionIdCount(new_id)) {
                     return new_id; 
                 }
