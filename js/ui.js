@@ -246,7 +246,10 @@ formdesigner.ui = function () {
             "audio",
             "video"
         ],
-            allTypes = questionTypes.concat(["datanode", "fieldlist"]);
+            allTypes = questionTypes.concat([
+                "datanode",
+                "fieldlist"  // you can't have nested field lists or other group types because it's not supported in the current implementation of CommCare ODK
+            ]);
 
         return {
             "max_children" : -1,

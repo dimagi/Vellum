@@ -255,7 +255,7 @@ formdesigner.util = (function(){
         resStr = resStr.replace(getStartTag(resStr),'').replace(getEndTag(resStr),'');
         
         // XMLSerializer unescapes escaped carriage returns
-        resStr = resStr.replace(String.fromCharCode(10), '&#10;');
+        resStr = resStr.replace(new RegExp(String.fromCharCode(10), 'g'), '&#10;');
 
         return resStr;
     }

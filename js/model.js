@@ -1427,6 +1427,9 @@ formdesigner.model = function () {
     };
 
     that.mugTypeMaker.stdFieldList = function () {
+        // This is just a group, but appearance = 'field-list' displays it as a list of grouped questions.
+        // It's a separate question type because it can't nest other group types and it has a very different end-user
+        // functionality.
         var mType = formdesigner.model.mugTypeMaker.stdGroup(),
             mug;
         mType.typeSlug = "fieldlist";
