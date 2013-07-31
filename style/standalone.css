@@ -1,0 +1,99 @@
+.clearfix {
+  *zoom: 1;
+}
+.clearfix:before,
+.clearfix:after {
+  display: table;
+  content: "";
+  line-height: 0;
+}
+.clearfix:after {
+  clear: both;
+}
+.hide-text {
+  font: 0/0 a;
+  color: transparent;
+  text-shadow: none;
+  background-color: transparent;
+  border: 0;
+}
+.input-block-level {
+  display: block;
+  width: 100%;
+  min-height: 30px;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+/*
+  Styles specific to standalone vellum.
+*/
+.standalone select {
+  height: auto;
+  width: auto;
+  display: inline;
+}
+.standalone input {
+  display: inline;
+}
+.standalone label {
+  display: inline;
+}
+.standalone #fd-props-content fieldset div.widget {
+  clear: both;
+  margin-bottom: .3em;
+}
+.standalone #fd-props-content fieldset label {
+  font-weight: normal;
+  display: inline-block;
+  padding-top: .4em;
+}
+.standalone #fd-props-content fieldset input[type="text"],
+.standalone #fd-props-content fieldset select,
+.standalone #fd-props-content fieldset .btn-toolbar {
+  display: inline;
+  width: 380px;
+  float: right;
+  margin: .5em 10px .5em 0;
+}
+.standalone #fd-props-content fieldset select {
+  width: 220px;
+  margin-right: 175px;
+}
+.standalone #fd-props-content fieldset .xpath-edit-button {
+  float: right;
+  margin-right: 2em;
+}
+.standalone #fd-props-content fieldset .auto-itext {
+  float: right;
+  margin-right: 2em;
+  display: inline-block;
+}
+#formdesigner .container::before,
+#formdesigner .container::after {
+  display: none;
+}
+#formdesigner .dataTables_filter label,
+#formdesigner .dataTables_length label {
+  color: #ffffff;
+  font-weight: bold;
+}
+#formdesigner .dataTables_filter {
+  float: right;
+  line-height: 20px;
+}
+#formdesigner .dataTables_length {
+  padding-left: 10px;
+  padding-top: 5px;
+}
+#formdesigner .dataTables_length label {
+  margin-bottom: 0;
+}
+#formdesigner .dataTables_paginate {
+  float: right;
+  margin-top: 5px;
+}
+.standalone body {
+  font-family: "Helvetica Neue", "Helvetica", "Verdana", "Arial", sans-serif;
+  overflow-x: hidden;
+}

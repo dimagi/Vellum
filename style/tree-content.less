@@ -1,31 +1,33 @@
-#formdesigner .fd-tree {
+@import "lib/main";
+
+.fd-tree {
   .fd-scrollable {
     overflow-x: auto;
   }
 }
 
-#formdesigner #fd-question-tree {
+#fd-question-tree {
   background: @white;
 }
 
-#formdesigner .fd-tree-valid-alert-icon {
+.fd-tree-valid-alert-icon {
   // todo, investigate usage
   display:inline;
   position:absolute;
 }
 
-#formdesigner .fd-lang-display-selector {
+.fd-lang-display-selector {
   padding: @gridGutterWidth/2;
   background-color: @navbarBackground;
   text-align: center;
 }
 
-#formdesigner #fd-question-tree-actions {
+#fd-question-tree-actions {
   text-align: center;
   > div { padding-top: @gridGutterWidth/2; }
 }
 
-#formdesigner #fd-messages {
+#fd-messages {
   position: fixed;
   bottom: 0;
   left: 0;

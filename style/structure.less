@@ -1,45 +1,47 @@
-#formdesigner #fd-ui-container {
+@import "lib/main";
+
+#fd-ui-container {
   top: 0;
   width: 100%;
 }
 
-#formdesigner .fd-toolbar {
+.fd-toolbar {
   padding: 5px;
   margin-top: 0px;
   vertical-align: middle;
 }
 
-#formdesigner .fd-row {
+.fd-row {
   width: 100%;
   clear: both;
 }
 
-#formdesigner .fd-content {
+.fd-content {
   float: left;
 }
-#formdesigner .fd-content-left {
+.fd-content-left {
   width: 30%;
 }
 
-#formdesigner .fd-content-divider {
+.fd-content-divider {
   width: 5px;
   margin: 0 1px;
   background: @navbarBackground;
 }
 
-#formdesigner .fd-scrollable {
+.fd-scrollable {
   width: 100%;
   overflow-x: hidden;
   overflow-y: auto;
   height: @containerHeight;
 }
 
-#formdesigner .fd-message {
+.fd-message {
   padding: .8em;
   margin: .8em;
 }
 
-#formdesigner .fd-head {
+.fd-head {
   color: @white;
   font-size: 17px;
   font-weight: bold;
@@ -51,13 +53,13 @@
   width: 100%;
 }
 
-#formdesigner #fd-form-saving-img {
+#fd-form-saving-img {
   display: block;
   margin-left: auto;
   margin-right: auto;
 }
 
-#formdesigner .fd-toolbar {
+.fd-toolbar {
   #fd-container-question-type-group {
     display: inline-block;
     vertical-align: middle;
@@ -104,27 +106,27 @@
   }
 }
 
-#formdesigner .fd-question-type .tooltip {
+.fd-question-type .tooltip {
   display: absolute !important;
 }
 
-#formdesigner .fd-head {
+.fd-head {
   background: @blue;
   font-weight: normal !important;
   padding: 2px 0 !important;
   font-size: @baseFontSize*1.1 !important;
 }
 
-#formdesigner .jstree a > ins.jstree-icon {
+.jstree a > ins.jstree-icon {
   background: none;
   font-size: .85em;
 }
 
-#formdesigner .jstree a > ins {
+.jstree a > ins {
   color: @blueLight;
 }
 
-#formdesigner .jstree a {
+.jstree a {
   color: darken(@blueDark, 10);
   line-height: 18px;
   padding: 1px 6px 3px;
@@ -139,20 +141,20 @@
   }
 }
 
-#formdesigner #fd-form-actions {
+#fd-form-actions {
   padding-right: @gridGutterWidth;
   > div {
     display: inline-block;
   }
 }
 
-#formdesigner #fd-save-button {
+#fd-save-button {
   > .pull-right {
     float: none; // HACK HACK HACK The javascript from main.js is causing issues.
   }
 }
 
-#formdesigner .fd-source-modal {
+.fd-source-modal {
   left: 20px;
   margin-left: 0;
   height: 93%;
@@ -172,14 +174,14 @@
   }
 }
 
-#formdesigner #fd-messages {
+#fd-messages {
   .alert {
     .box-shadow(0px 0px 10px rgba(0, 0, 0, 0.4));
     margin: @gridGutterWidth;
   }
 }
 
-#formdesigner .fd-toolbar .tooltip {
+.fd-toolbar .tooltip {
   .tooltip-inner { .box-shadow(0px 0px 10px rgba(255, 255, 255, 0.75)); }
   &.in {
     .opacity(100);
