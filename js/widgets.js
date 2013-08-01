@@ -210,12 +210,12 @@ formdesigner.widgets = (function () {
             }
         };
 
-        widget.getItextIDSlug = function () {
+        widget.getItextType = function () {
             return widget.propName.replace("ItextID", "");
         };
 
         widget.autoGenerateId = function (nodeId) {
-            return widget.getRootId() + nodeId + "-" + widget.getItextIDSlug();
+            return widget.getRootId() + nodeId + "-" + widget.getItextType();
         };
 
         widget.setUIValue = function (val) {
@@ -343,8 +343,7 @@ formdesigner.widgets = (function () {
         };
 
         formdesigner.controller.on('update-question-itextid', function (e) {
-            console.log(widget.getItextIDSlug());
-            if (e.slug === widget.getItextIDSlug()) {
+            if (e.itextType === widget.getItextType()) {
                 widget.handleItextLabelChange(e);
             }
         });
@@ -410,7 +409,7 @@ formdesigner.widgets = (function () {
         var block = {};
 
         block.mugType = mugType;
-        block.slug = options.slug;
+        block.itextType = options.itextType;
         block.languages = formdesigner.model.Itext.getLanguages();
         block.defaultLang = formdesigner.model.Itext.getDefaultLanguage();
         block.getItextByMugType = options.getItextByMugType;
@@ -429,7 +428,7 @@ formdesigner.widgets = (function () {
         };
 
         block.getID = function () {
-            return "itext-block-" + block.slug;
+            return "itext-block-" + block.itextType;
         };
 
         block.getItextWidget = function () {
@@ -444,7 +443,7 @@ formdesigner.widgets = (function () {
         };
 
         block.getFormGroupID = function (form) {
-            return 'itext-block-' + block.slug + '-group-' + form;
+            return 'itext-block-' + block.itextType + '-group-' + form;
         };
 
         block.getFormGroupContainer = function (form) {
@@ -521,7 +520,7 @@ formdesigner.widgets = (function () {
         };
 
         block.getAddFormButtonID = function (form) {
-            return 'itext-block-' + block.slug + '-add-form-' + form;
+            return 'itext-block-' + block.itextType + '-add-form-' + form;
         };
 
         block.getAddFormButtons = function () {
@@ -710,7 +709,7 @@ formdesigner.widgets = (function () {
         var widget = that.baseWidget(mugType);
 
         widget.displayName = options.displayName;
-        widget.slug = options.slug;
+        widget.itextType = options.itextType;
         widget.form = form || "default";
 
         widget.language = language;
@@ -732,7 +731,7 @@ formdesigner.widgets = (function () {
         };
 
         widget.getIDByLang = function (lang) {
-            return "itext-" + lang + "-" + widget.slug;
+            return "itext-" + lang + "-" + widget.itextType;
         };
 
         widget.getID = function () {
@@ -809,8 +808,7 @@ formdesigner.widgets = (function () {
         widget.updateItextIdElement = function () {
             formdesigner.controller.fire({
                type: "update-question-itextid",
-               language: widget.language,
-               slug: widget.slug,
+               itextType: widget.itextType,
                value: widget.getValue(),
                getIDByLang: widget.getIDByLang
             });
@@ -1333,7 +1331,7 @@ formdesigner.widgets = (function () {
         if (!mugType.isSpecialGroup() && mugType.typeSlug !== 'datanode') {
             elements.push({
                 widgetType: "itextLabel",
-                slug: "label",
+                itextType: "label",
                 getItextByMugType: function (mugType) {
                     return mugType.getItext();
                 },
@@ -1367,7 +1365,7 @@ formdesigner.widgets = (function () {
             {
                 widgetType: "itextMedia",
                 displayName: "Add Multimedia",
-                slug: "text",
+                itextType: "label",
                 getItextByMugType: function (mugType) {
                     return mugType.getItext();
                 },
@@ -1377,7 +1375,7 @@ formdesigner.widgets = (function () {
             {
                 widgetType: "itextConfig",
                 displayName: "Add Other Content",
-                slug: "text",
+                itextType: "label",
                 getItextByMugType: function (mugType) {
                     return mugType.getItext();
                 },
@@ -1423,7 +1421,7 @@ formdesigner.widgets = (function () {
             // only add the itext if the constraint was relevant
 	        elements.push({
                 widgetType: "itextLabel",
-                slug: "constraintMsg",
+                itextType: "constraintMsg",
                 getItextByMugType: function (mugType) {
                     return mugType.getConstraintMsgItext();
                 },
@@ -1488,7 +1486,7 @@ formdesigner.widgets = (function () {
         if (elementPaths.indexOf("controlElement/hintItextID") !== -1) {
 	        elements.push({
                 widgetType: "itextLabel",
-                slug: "hint",
+                itextType: "hint",
                 getItextByMugType: function (mugType) {
                     return mugType.getHintItext();
                 },
