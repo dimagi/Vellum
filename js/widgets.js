@@ -319,18 +319,23 @@ formdesigner.widgets = (function () {
         });
 
         widget.handleItextLabelChange = function (e) {
-            // Clears the autoID input and unchecks the checkbox if there is no corresponding itext
-            // present in any language, auto-generates the id if there is.
+            // Makes sure that there is an autoID present if itext of the same type
+            // exists for any form in any language.
 
             var currentVal = widget.getValue(),
-                isItextPresent = false;
+                isItextPresent = false,
+                currentForms = widget.itextItem.getForms();
 
-            _.each(widget.langs, function (lang) {
-                var $textInput = $('#' + e.getIDByLang(lang));
-                if ($textInput.val()) {
-                    isItextPresent = true;
+            // _.each doesn't have a way to break out of it
+            itextCheck:
+            for (var form, f = 0; form = currentForms[f]; f++) {
+                for (var lang, l = 0; lang = widget.langs[l]; l++) {
+                    if (form.getValue(lang)) {
+                        isItextPresent = true;
+                        break itextCheck;
+                    }
                 }
-            });
+            }
 
             if (isItextPresent && !currentVal) {
                 widget.setAutoMode(true);
@@ -705,7 +710,7 @@ formdesigner.widgets = (function () {
         return block;
     };
 
-    that.baseItextWidget = function (mugType, language, form, options) {
+    that.itextLabelWidget = function (mugType, language, form, options) {
         var widget = that.baseWidget(mugType);
 
         widget.displayName = options.displayName;
@@ -786,6 +791,10 @@ formdesigner.widgets = (function () {
 	            formdesigner.controller.form.fire({
 	               type: "form-property-changed"
 	            });
+                formdesigner.controller.fire({
+                   type: "update-question-itextid",
+                   itextType: widget.itextType
+                });
 	        }
         };
 
@@ -802,26 +811,8 @@ formdesigner.widgets = (function () {
 
     };
 
-    that.itextLabelWidget = function (mugType, language, form, options) {
-        var widget = that.baseItextWidget(mugType, language, form, options);
-
-        widget.updateItextIdElement = function () {
-            formdesigner.controller.fire({
-               type: "update-question-itextid",
-               itextType: widget.itextType,
-               value: widget.getValue(),
-               getIDByLang: widget.getIDByLang
-            });
-        };
-
-        var $input = widget.getControl();
-        $input.keyup(widget.updateItextIdElement);
-
-        return widget;
-    };
-
     that.itextFormWidget = function (mugType, language, form, options) {
-        var widget = that.baseItextWidget(mugType, language, form, options);
+        var widget = that.itextLabelWidget(mugType, language, form, options);
 
         widget.getDisplayName = function () {
             return form + widget.getLangDesc();
