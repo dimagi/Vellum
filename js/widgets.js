@@ -226,12 +226,7 @@ formdesigner.widgets = (function () {
             widget.setUIValue(widget.autoGenerateId(widget.getNodeId()));
         };
 
-        widget.getItextItem = function () {
-            return widget.itextItem;
-        };
-
         widget.setValue = function (value) {
-            widget.itextItem = value;
             widget.setUIValue(value.id);
         };
 
@@ -664,7 +659,7 @@ formdesigner.widgets = (function () {
 
                     $groupContainer.append(itextWidget.getUIElement());
 
-                    itextForm = itextWidget.itextItem.getOrCreateForm(form);
+                    itextForm = itextWidget.getItextItem().getOrCreateForm(form);
                     if (defaultValue) {
                         itextForm.setValue(lang, defaultValue);
                     }
@@ -725,12 +720,9 @@ formdesigner.widgets = (function () {
         widget.showOneLanguage = formdesigner.model.Itext.getLanguages().length < 2;
         widget.defaultLang = formdesigner.model.Itext.getDefaultLanguage();
 
-        widget.itextItem = options.getItextByMugType(mugType);
-
         widget.getItextItem = function () {
-            // apparently the autoItextID widget has a habit of destroying itextItems. Try to fetch the current
-            // itext item if possible. If not, have a lingering one around to say that you should exist.
-            return options.getItextByMugType(mugType) || widget.itextItem;
+            // Make sure the real itextItem is being updated at all times, not a stale one.
+            return options.getItextByMugType(mugType);
         };
 
         widget.getLangDesc = function () {
