@@ -849,7 +849,7 @@ formdesigner.widgets = (function () {
         widget.getUploadButtonUI = function () {
             var currentPath = widget.getValue(),
                 $uploadBtn;
-            $uploadBtn = formdesigner.ui.getTemplateObject('#fd-template-multmedia-upload-trigger', {
+            $uploadBtn = formdesigner.ui.getTemplateObject('#fd-template-multimedia-upload-trigger', {
                 multimediaExists: currentPath in formdesigner.multimedia.objectMap,
                 uploaderId: formdesigner.multimedia.SLUG_TO_CONTROL[form].uploaderSlug,
                 mediaType: form
