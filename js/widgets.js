@@ -324,15 +324,18 @@ formdesigner.widgets = (function () {
 
             var currentVal = widget.getValue(),
                 isItextPresent = false,
-                currentForms = widget.itextItem.getForms();
+                itextItem = e.itextItem;
 
-            // _.each doesn't have a way to break out of it
-            itextCheck:
-            for (var form, f = 0; form = currentForms[f]; f++) {
-                for (var lang, l = 0; lang = widget.langs[l]; l++) {
-                    if (form.getValue(lang)) {
-                        isItextPresent = true;
-                        break itextCheck;
+            if (itextItem) {
+                var currentForms = itextItem.getForms();
+                // _.each doesn't have a way to break out of it
+                itextCheck:
+                for (var form, f = 0; form = currentForms[f]; f++) {
+                    for (var lang, l = 0; lang = widget.langs[l]; l++) {
+                        if (form.getValue(lang)) {
+                            isItextPresent = true;
+                            break itextCheck;
+                        }
                     }
                 }
             }
@@ -724,6 +727,12 @@ formdesigner.widgets = (function () {
 
         widget.itextItem = options.getItextByMugType(mugType);
 
+        widget.getItextItem = function () {
+            // apparently the autoItextID widget has a habit of destroying itextItems. Try to fetch the current
+            // itext item if possible. If not, have a lingering one around to say that you should exist.
+            return options.getItextByMugType(mugType) || widget.itextItem;
+        };
+
         widget.getLangDesc = function () {
             if (widget.showOneLanguage) {
                 return "";
@@ -773,12 +782,12 @@ formdesigner.widgets = (function () {
 
         formdesigner.controller.on('question-itext-changed', function () {
             if (widget.language !== widget.defaultLang) {
-                widget.setPlaceholder(widget.itextItem.getValue(widget.form, widget.defaultLang));
+                widget.setPlaceholder(widget.getItextItem().getValue(widget.form, widget.defaultLang));
             }
         });
 
         widget.fireChangeEvents = function () {
-            var itextItem = widget.itextItem;
+            var itextItem = widget.getItextItem();
             if (itextItem) {
 	            // fire the property changed event(s)
 	            formdesigner.controller.fire({
@@ -793,13 +802,14 @@ formdesigner.widgets = (function () {
 	            });
                 formdesigner.controller.fire({
                    type: "update-question-itextid",
-                   itextType: widget.itextType
+                   itextType: widget.itextType,
+                   itextItem: itextItem
                 });
 	        }
         };
 
         widget.save = function () {
-            var itextItem = widget.itextItem;
+            var itextItem = widget.getItextItem();
             if (itextItem) {
                 var itextForm = itextItem.getForm(widget.form);
 	            itextForm.setValue(widget.language, widget.getValue());
