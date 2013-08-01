@@ -1289,7 +1289,7 @@ formdesigner.widgets = (function () {
             sections.push(that.getLogicSection(mugType));
         }
         if (mugType.hasControlElement() && !mugType.isSpecialGroup()) {
-            sections.push(that.getContentSection(mugType));
+            sections.push(that.getMediaSection(mugType));
         }
         if (!formdesigner.util.isReadOnly(mugType)) {
             sections.push(that.getAdvancedSection(mugType));
@@ -1355,13 +1355,13 @@ formdesigner.widgets = (function () {
 
         return that.questionSection(mugType, {
             slug: "main",
-            displayName: "Main Properties",
+            displayName: "Basic",
             elements: elements,
             help: formdesigner.util.HELP_TEXT_FOR_SECTION.main
         });
     };
 
-    that.getContentSection = function (mugType) {
+    that.getMediaSection = function (mugType) {
             
         var elements = [
             {
@@ -1373,21 +1373,11 @@ formdesigner.widgets = (function () {
                 },
                 forms: formdesigner.multimedia.SUPPORTED_MEDIA_TYPES,
                 formToIcon: formdesigner.multimedia.ICONS
-            },
-            {
-                widgetType: "itextConfig",
-                displayName: "Add Other Content",
-                itextType: "label",
-                getItextByMugType: function (mugType) {
-                    return mugType.getItext();
-                },
-                forms: ['long', 'short'],
-                isCustomAllowed: true
             }
         ];
 
         return that.questionSection(mugType, {
-            displayName: "Media and Content",
+            displayName: "Media",
             slug: "content",
             elements: elements,
             isCollapsed: false,
@@ -1448,7 +1438,7 @@ formdesigner.widgets = (function () {
 
         return that.questionSection(mugType, {
             slug: "logic",
-            displayName: "Logic Properties",
+            displayName: "Logic",
             elements: elements,
             help: formdesigner.util.HELP_TEXT_FOR_SECTION.logic
         });
@@ -1495,10 +1485,24 @@ formdesigner.widgets = (function () {
                 displayName: "Hint Message"
 	        });
         }
+        
+        if (mugType.hasControlElement() && !mugType.isSpecialGroup()) {
+            elements.push({
+                widgetType: "itextConfig",
+                displayName: "Add Other Content",
+                itextType: "label",
+                getItextByMugType: function (mugType) {
+                    return mugType.getItext();
+                },
+                forms: ['long', 'short'],
+                isCustomAllowed: true
+            });
+        }
+
         return that.questionSection(mugType, {
             slug: "advanced",
             type: "accordion",
-            displayName: "Advanced Properties",
+            displayName: "Advanced",
             elements: elements,
             isCollapsed: true,
             help: formdesigner.util.HELP_TEXT_FOR_SECTION.advanced
