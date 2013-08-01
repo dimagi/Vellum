@@ -1321,7 +1321,7 @@ formdesigner.widgets = (function () {
 
         elements = filterByMugProperties(elements, mugType).map(wrapAsGeneric);
 
-        if (!mugType.isSpecialGroup() && mugType.typeSlug !== 'datanode') {
+        if (mugType.typeSlug !== 'datanode') {
             elements.push({
                 widgetType: "itextLabel",
                 itextType: "label",
