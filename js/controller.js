@@ -777,7 +777,7 @@ formdesigner.controller = (function () {
     };
     
     that.changeQuestionType = function (mugType, questionType) {
-        var $currentChanger = $('#fd-question-toolbar .question-type-changer');
+        var $currentChanger = $('#fd-question-changer');
         if (questionType !== mugType.typeSlug) {
             // get the new mug type
             var newMugType = that.getMugTypeByQuestionType(questionType);

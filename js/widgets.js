@@ -1270,6 +1270,7 @@ formdesigner.widgets = (function () {
             }
             e.preventDefault();
         });
+        $questionTypeChanger.attr('id', 'fd-question-changer');
         return $questionTypeChanger;
     };
 
