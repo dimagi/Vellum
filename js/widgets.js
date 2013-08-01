@@ -189,30 +189,37 @@ formdesigner.widgets = (function () {
 
         widget.isSelectItem = formdesigner.util.isSelectItem(widget.mug);
         widget.parentMug = widget.isSelectItem ? formdesigner.controller.form.controlTree.getParentMugType(widget.mug) : null;
+        widget.langs = formdesigner.model.Itext.getLanguages();
+
+        var $input = widget.getControl();
 
         // a few little hacks to support auto-update of select items
         widget.getRootId = function () {
-            if (this.isSelectItem) {
-                return this.parentMug.getDefaultItextRoot() + "-";
+            if (widget.isSelectItem) {
+                return widget.parentMug.getDefaultItextRoot() + "-";
             }
             return "";
         };
 
         widget.getNodeId = function () {
-            if (!this.isSelectItem) {
-                return this.mug.getDefaultItextRoot();
+            if (!widget.isSelectItem) {
+                return widget.mug.getDefaultItextRoot();
             } else {
-                var val = this.mug.mug.properties.controlElement.properties.defaultValue;
+                var val = widget.mug.mug.properties.controlElement.properties.defaultValue;
                 return val ? val : "null";
             }
         };
 
+        widget.getItextIDSlug = function () {
+            return widget.propName.replace("ItextID", "");
+        };
+
         widget.autoGenerateId = function (nodeId) {
-            return this.getRootId() + nodeId + "-" + widget.propName.replace("ItextID", "");
+            return widget.getRootId() + nodeId + "-" + widget.getItextIDSlug();
         };
 
         widget.setUIValue = function (val) {
-            this.getControl().val(val);
+            $input.val(val);
         };
 
         widget.updateAutoId = function () {
@@ -220,24 +227,23 @@ formdesigner.widgets = (function () {
         };
 
         widget.getItextItem = function () {
-            return this.itextItem;
+            return widget.itextItem;
         };
 
         widget.setValue = function (value) {
-            this.itextItem = value;
-            this.setUIValue(value.id);
+            widget.itextItem = value;
+            widget.setUIValue(value.id);
         };
 
         widget.getValue = function() {
-            return this.getControl().val();
+            return $input.val();
         };
 
         // auto checkbox
         var autoBoxId = widget.getID() + "-auto-itext";
-        var autoBox = $("<input />").attr("type", "checkbox").attr("id", autoBoxId);
-        var autoBoxLabel = $("<label />").text("auto?").attr("for", autoBoxId).addClass('checkbox');
+        var $autoBox = $("<input />").attr("type", "checkbox").attr("id", autoBoxId);
 
-        autoBox.change(function () {
+        $autoBox.change(function () {
             if ($(this).prop('checked')) {
                 widget.updateAutoId();
                 widget.updateValue();
@@ -245,11 +251,11 @@ formdesigner.widgets = (function () {
         });
 
         widget.setAutoMode = function (autoMode) {
-            autoBox.prop("checked", autoMode);
+            $autoBox.prop("checked", autoMode);
         };
 
         widget.getAutoMode = function () {
-            return autoBox.prop('checked');
+            return $autoBox.prop('checked');
         };
 
         // support auto mode to keep ids in sync
@@ -257,43 +263,36 @@ formdesigner.widgets = (function () {
             widget.setAutoMode(true);
         }
 
+        var _getUIElement = widget.getUIElement;
         widget.getUIElement = function () {
-            // gets the whole widget (label + control)
-            var uiElem = $("<div />").addClass("widget control-group"),
-                $controls = $('<div class="controls" />'),
-                $label;
+            var $uiElem = _getUIElement(),
+                $autoBoxContainer = $('<div />').addClass('pull-right fd-itextID-checkbox-container'),
+                $autoBoxLabel = $("<label />").text("auto?").attr("for", autoBoxId).addClass('checkbox');
 
-            $label = this.getLabel();
-            $label.addClass('control-label');
-            uiElem.append($label);
+            $autoBoxLabel.prepend($autoBox);
+            $autoBoxContainer.append($autoBoxLabel);
 
-            var $input = this.getControl();
-            $input.removeClass('input-block-level');
-            $input.addClass('input-large');
-            $controls.append($input);
+            $uiElem.find('.controls')
+                .addClass('fd-itextID-controls')
+                .before($autoBoxContainer);
 
-
-            var autoDiv = $("<span />").addClass("auto-itext help-inline");
-            autoBoxLabel.prepend(autoBox);
-            autoDiv.append(autoBoxLabel);
-            $controls.append(autoDiv);
-            uiElem.append($controls);
-
-            return uiElem;
+            return $uiElem;
         };
 
 
         widget.save = function () {
             // override save to call out to rename itext
-            var oldItext = this.mug.getPropertyValue(this.path);
-            var val = this.getValue();
+            var oldItext = widget.mug.getPropertyValue(this.path);
+            var val = widget.getValue();
             if (oldItext.id !== val) {
                 oldItext.id = val;
-                formdesigner.controller.setMugPropertyValue(this.mug.mug,
-	                                                        this.groupName,
-	                                                        this.propName,
-	                                                        oldItext,
-	                                                        this.mug);
+                formdesigner.controller.setMugPropertyValue(
+                    widget.mug.mug,
+                    widget.groupName,
+                    widget.propName,
+                    oldItext,
+                    widget.mug
+                );
             }
         };
 
