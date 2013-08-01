@@ -64,11 +64,6 @@
   float: right;
   margin-right: 2em;
 }
-.standalone #fd-props-content fieldset .auto-itext {
-  float: right;
-  margin-right: 2em;
-  display: inline-block;
-}
 #formdesigner .container::before,
 #formdesigner .container::after {
   display: none;

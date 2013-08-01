@@ -120,3 +120,18 @@
 .itext-lang-group .control-label {
   text-transform: capitalize;
 }
+.fd-itextID-controls {
+  margin-right: 75px;
+}
+.fd-itextID-checkbox-container {
+  width: 55px;
+  padding: 0 5px;
+  background-color: #f1f9f1;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+}
+.fd-itextID-checkbox-container label {
+  display: block;
+  margin: 4px auto 5px;
+}
