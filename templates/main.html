@@ -26,8 +26,8 @@
                     <div id="fd-question-tree-lang"></div>
                     <div id="fd-question-tree-actions" class="fd-panel-toolbar">
                         <div class="btn-group">
-                            <button id="fd-expand-all" class="btn"><i class="icon-double-angle-down"></i> Expand All</button>
-                            <button id="fd-collapse-all" class="btn"><i class="icon-double-angle-right"></i> Collapse All</button>
+                            <button type="button" id="fd-expand-all" class="btn"><i class="icon-double-angle-down"></i> Expand All</button>
+                            <button type="button" id="fd-collapse-all" class="btn"><i class="icon-double-angle-right"></i> Collapse All</button>
                         </div>
                     </div>
                     <div id="fd-question-tree"></div>
@@ -124,7 +124,7 @@
                 </label>
                 <div class="controls">
                     <div class="hqm-select-files-container">
-                        <button class="hqm-select btn btn-primary" role="button">Select File</button>
+                        <button class="hqm-select btn btn-primary" type="button">Select File</button>
                     </div>
                     <div class="hqm-queue"></div>
                 </div>
@@ -271,7 +271,7 @@
 </script>
 
 <script type="text/template" id="fd-template-button-remove">
-    <button class="btn btn-danger"><i class="icon-remove"></i></button>
+    <button type="button" class="btn btn-danger"><i class="icon-remove"></i></button>
 </script>
 
 <script type="text/template" id="fd-template-multimedia-upload-trigger">
@@ -285,14 +285,14 @@
 <script type="text/template" id="fd-template-multimedia-block">
     <div class="control-row clearfix">
         <div class="span12">
-            <button class="btn btn-inverse fd-mm-path-show pull-right"><i class="icon-cog"></i> Advanced: Show Path</button>
+            <button type="button" class="btn btn-inverse fd-mm-path-show pull-right"><i class="icon-cog"></i> Advanced: Show Path</button>
             <div class="fd-mm-upload-trigger"></div>
         </div>
     </div>
     <div class="control-row">
         <div class="fd-mm-path hide span12">
             <div class="fd-mm-path-input span9"></div>
-            <button class="btn btn-inverse span3 fd-mm-path-hide">Hide Path</button>
+            <button type="button" class="btn btn-inverse span3 fd-mm-path-hide">Hide Path</button>
         </div>
     </div>
 </script>
@@ -451,7 +451,7 @@
 
         <fieldset id="xpath-advanced" class="hide">
             <legend><i class="icon-cog"></i> Edit Expression (Advanced)</legend>
-             <button class="btn btn-primary pull-right xpath-mode-toggle" id="fd-xpath-show-simple-button">
+             <button type="button" class="btn btn-primary pull-right xpath-mode-toggle" id="fd-xpath-show-simple-button">
                 Show Simple Mode
             </button>
             <div class="alert hide" id="xpath-advanced-notice">
@@ -473,7 +473,7 @@
 
         <fieldset id="xpath-simple" class="hide">
             <legend>Edit Expression</legend>
-            <button class="btn btn-inverse pull-right xpath-mode-toggle" id="fd-xpath-show-advanced-button">
+            <button type="button" class="btn btn-inverse pull-right xpath-mode-toggle" id="fd-xpath-show-advanced-button">
                 <i class="icon-cog"></i> Show Advanced Mode
             </button>
             <div class="control-group">
@@ -490,7 +490,7 @@
                 <label class="control-label">Configure Expression:</label>
                 <div class="controls">
                     <div id="fd-xpath-editor-expressions"> expression pane</div>
-                    <button class="btn" id="fd-add-exp"><i class="icon-plus"></i> Add Expression</button>
+                    <button type="button" class="btn" id="fd-add-exp"><i class="icon-plus"></i> Add Expression</button>
                 </div>
             </div>
         </fieldset>
@@ -498,15 +498,15 @@
         <p id="fd-xpath-validation-summary" class="alert hide"></p>
 
         <div class="form-actions">
-            <button class="btn btn-primary" id="fd-xpath-save-button">Save</button>
-            <button class="btn" id="fd-xpath-cancel-button">Cancel</button>
+            <button type="button" class="btn btn-primary" id="fd-xpath-save-button">Save</button>
+            <button type="button" class="btn" id="fd-xpath-cancel-button">Cancel</button>
         </div>
     </div>
 </script>
 
 <script type="text/template" id="fd-template-xpath-expression">
     <div class="control-group xpath-expression-group">
-        <button class="btn btn-danger xpath-delete-expression pull-right"><i class="icon-remove"></i></button>
+        <button type="button" class="btn btn-danger xpath-delete-expression pull-right"><i class="icon-remove"></i></button>
         <div class="validation-result-container pull-left">
             <p class="validation-results alert alert-success hide">
                 <i class="icon-ok"></i> ok

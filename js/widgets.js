@@ -379,7 +379,12 @@ formdesigner.widgets = (function () {
 
     that.xPathWidget = function (mugType, path) {
         var widget = that.textWidget(mugType, path);
-        var xPathButton = $('<button />').addClass("xpath-edit-button pull-right").text("Edit").stopLink().addClass('btn');
+        var xPathButton = $('<button />')
+            .addClass("xpath-edit-button pull-right")
+            .text("Edit")
+            .stopLink()
+            .addClass('btn')
+            .attr('type', 'button');
         xPathButton.data("group", widget.groupName).data("prop", widget.propName).data("inputControlID", widget.getID());
         xPathButton.click(function () {
             formdesigner.controller.displayXPathEditor({
@@ -554,7 +559,10 @@ formdesigner.widgets = (function () {
         };
 
         block.getAddCustomItextButton = function () {
-            var $customButton = $("<div />").text("custom...").button().addClass('btn'),
+            var $customButton = $("<button />")
+                    .text("custom...")
+                    .addClass('btn')
+                    .attr('type', 'button'),
                 newItextBtnId = 'fd-new-itext-button',
                 newItextInputId = 'fd-new-itext-input';
 
