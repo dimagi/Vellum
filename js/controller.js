@@ -835,8 +835,6 @@ formdesigner.controller = (function () {
         // TODO: should this be configurable? 
         var exportCols = ["default", "audio", "image" , "video"];
         var languages = Itext.getLanguages();
-        // deduplicate
-        Itext.deduplicateIds();
         var allItems = Itext.getNonEmptyItems();
         var language, item, i, j;
         if (languages.length > 0) {
@@ -855,8 +853,6 @@ formdesigner.controller = (function () {
     that.generateExportXLS = function () {
         
         var languages = formdesigner.model.Itext.getLanguages();
-        // deduplicate
-        formdesigner.model.Itext.deduplicateIds();
 
         var itextColumns = {
             "default": "Text",

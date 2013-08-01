@@ -2620,9 +2620,6 @@ formdesigner.model = function () {
             
             var generateForm = function () {
                 var docString;
-                // first normalize the itext ids so we don't have any
-                // duplicates
-                formdesigner.model.Itext.deduplicateIds();
                 
                 xmlWriter.writeStartDocument();
                 //Generate header boilerplate up to instance level
@@ -3168,22 +3165,6 @@ formdesigner.model = function () {
             return this.getNonEmptyItems().map(function (item) {
                 return item.id;
             });
-        };
-        
-        itext.deduplicateIds = function () {
-            var nonEmpty = this.getNonEmptyItems();
-            var found = [];
-            var counter, item, origId;
-            for (var i = 0; i < nonEmpty.length; i++) {
-                item = nonEmpty[i];
-                origId = item.id;
-                counter = 2;
-                while (found.indexOf(item.id) !== -1) {
-                    item.id = origId + counter;
-                    counter = counter + 1;
-                }
-                found.push(item.id);
-            }
         };
         
         itext.hasItem = function (item) {
