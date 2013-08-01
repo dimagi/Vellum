@@ -317,6 +317,38 @@ formdesigner.widgets = (function () {
                 widget.setAutoMode(false);
             }
         });
+
+        widget.handleItextLabelChange = function (e) {
+            // Clears the autoID input and unchecks the checkbox if there is no corresponding itext
+            // present in any language, auto-generates the id if there is.
+
+            var currentVal = widget.getValue(),
+                isItextPresent = false;
+
+            _.each(widget.langs, function (lang) {
+                var $textInput = $('#' + e.getIDByLang(lang));
+                if ($textInput.val()) {
+                    isItextPresent = true;
+                }
+            });
+
+            if (isItextPresent && !currentVal) {
+                widget.setAutoMode(true);
+                widget.updateAutoId();
+                widget.updateValue();
+            } else if (!isItextPresent && currentVal) {
+                widget.setAutoMode(false);
+                widget.setValue('');
+            }
+        };
+
+        formdesigner.controller.on('update-question-itextid', function (e) {
+            console.log(widget.getItextIDSlug());
+            if (e.slug === widget.getItextIDSlug()) {
+                widget.handleItextLabelChange(e);
+            }
+        });
+
         return widget;
     };
 
@@ -773,28 +805,18 @@ formdesigner.widgets = (function () {
 
     that.itextLabelWidget = function (mugType, language, form, options) {
         var widget = that.baseItextWidget(mugType, language, form, options);
-        // this is a bit of a hack
-        widget.itextIdElementSelector = {
-            constraint: "#bindElement-constraintMsgItextID",
-            hint: "#controlElement-hintItextID",
-            text: "#controlElement-labelItextID"
-        }[widget.slug];
-
-        var $input = widget.getControl();
 
         widget.updateItextIdElement = function () {
-             var $idInput = $(widget.itextIdElementSelector),
-                currentId = $.trim($idInput.val()),
-                $autoIdCheckbox = $(widget.itextIdElementSelector + "-auto-itext");
-
-            if (widget.getValue() && !currentId) {
-                $autoIdCheckbox.prop('checked', true).change();
-            } else if (!widget.getValue() && currentId) {
-                $autoIdCheckbox.prop('checked', false).change();
-                $idInput.val('').change();
-            }
+            formdesigner.controller.fire({
+               type: "update-question-itextid",
+               language: widget.language,
+               slug: widget.slug,
+               value: widget.getValue(),
+               getIDByLang: widget.getIDByLang
+            });
         };
 
+        var $input = widget.getControl();
         $input.keyup(widget.updateItextIdElement);
 
         return widget;
@@ -1311,7 +1333,7 @@ formdesigner.widgets = (function () {
         if (!mugType.isSpecialGroup() && mugType.typeSlug !== 'datanode') {
             elements.push({
                 widgetType: "itextLabel",
-                slug: "text",
+                slug: "label",
                 getItextByMugType: function (mugType) {
                     return mugType.getItext();
                 },
@@ -1401,7 +1423,7 @@ formdesigner.widgets = (function () {
             // only add the itext if the constraint was relevant
 	        elements.push({
                 widgetType: "itextLabel",
-                slug: "constraint",
+                slug: "constraintMsg",
                 getItextByMugType: function (mugType) {
                     return mugType.getConstraintMsgItext();
                 },
