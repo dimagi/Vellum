@@ -2872,7 +2872,7 @@ formdesigner.model = function () {
                 // currently we don't do anything with relative paths
                 return p.initial_context === xpathmodels.XPathInitialContextEnum.ROOT;
             });
-            var errorKey = mug.ufid + "-" + "badpath",
+            var errorKey = mug.ufid + "-" + property + "-" + "badpath",
                 errors = false;
 
             this.all = this.all.concat(paths.map(function (path) {
