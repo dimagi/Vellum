@@ -828,6 +828,11 @@ formdesigner.widgets = (function () {
             return form + widget.getLangDesc();
         };
 
+        var _getID = widget.getID;
+        widget.getID = function () {
+            return _getID() + "-" + form;
+        };
+
         return widget;
     };
 
