@@ -93,6 +93,8 @@
 }
 .fd-mm-preview-container {
   text-align: center;
+  width: 115px;
+  float: left;
 }
 .fd-mm-preview-container img {
   padding: .5em;
@@ -104,8 +106,17 @@
 .fd-mm-upload-container .btn {
   text-transform: capitalize;
 }
+.fd-mm-upload-container {
+  margin-left: 125px;
+}
 .fd-mm-upload-container > .control-row {
   margin: 0px 0px 10px 0;
+}
+.fd-mm-upload-container > .control-row:first-child {
+  height: 25px;
+}
+.fd-mm-path-input {
+  margin-right: 92px;
 }
 .fd-mm-no-ref {
   color: #999999;

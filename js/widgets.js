@@ -899,9 +899,11 @@ formdesigner.widgets = (function () {
             $uiElem = _getParentUIElement();
             var $controlBlock = $uiElem.find('.controls'),
                 $previewContainer = $('<div />')
-                    .attr('id', widget.getPreviewID()).addClass('fd-mm-preview-container span2'),
+                    .attr('id', widget.getPreviewID())
+                    .addClass('fd-mm-preview-container'),
                 $uploadContainer = $('<div />')
-                    .attr('id', widget.getUploadID()).addClass('fd-mm-upload-container span10');
+                    .attr('id', widget.getUploadID())
+                    .addClass('fd-mm-upload-container');
             $controlBlock.empty()
                 .addClass('control-row').attr('data-form', form);
 
