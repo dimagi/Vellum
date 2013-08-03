@@ -169,7 +169,7 @@ formdesigner.widgets = (function () {
             return input.val();
         };
 
-        input.bind("change keypress", widget.updateValue);
+        input.bind("change keyup", widget.updateValue);
         return widget;
     };
 
@@ -311,7 +311,7 @@ formdesigner.widgets = (function () {
             }
         });
 
-        widget.getControl().keypress(function () {
+        widget.getControl().keyup(function () {
             // turn off auto-mode if the id is ever manually overridden
             var newVal = $(this).val();
             if (newVal !== widget.autoGenerateId(widget.getNodeId())) {
@@ -471,7 +471,7 @@ formdesigner.widgets = (function () {
             return input;
         };
 
-        input.keypress(widget.updateValue);
+        input.keyup(widget.updateValue);
         return widget;
     };
 
@@ -650,7 +650,7 @@ formdesigner.widgets = (function () {
             widget.updateReference();
         };
 
-        $input.bind("change keypress", widget.updateMultimediaBlockUI);
+        $input.bind("change keyup", widget.updateMultimediaBlockUI);
 
         widget.handleUploadComplete = function (event, data) {
             if (data.ref && data.ref.path) {
@@ -781,7 +781,7 @@ formdesigner.widgets = (function () {
             mugType.intentTag.path = widget.getValue();
         };
 
-        input.bind("change keypress", widget.updateValue);
+        input.bind("change keyup", widget.updateValue);
 
         return widget;
 
@@ -803,7 +803,7 @@ formdesigner.widgets = (function () {
             widget.kvInput.html(_.template(kvTemplate.text(), {
                 pairs: value
             }));
-            widget.kvInput.find('input').bind('change keypress', widget.updateValue);
+            widget.kvInput.find('input').bind('change keyup', widget.updateValue);
             widget.kvInput.find('.fd-kv-add-pair').click(function (e) {
                 widget.refreshControl();
                 e.preventDefault();
