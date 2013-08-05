@@ -171,6 +171,8 @@
   left: 20px;
   margin-left: 0;
   height: 93%;
+}
+.fd-source-modal.fade.in {
   top: 20px;
 }
 .fd-source-modal .modal-body {
