@@ -2875,12 +2875,15 @@ formdesigner.model = function () {
                 // currently we don't do anything with relative paths
                 return p.initial_context === xpathmodels.XPathInitialContextEnum.ROOT;
             });
-            var errorKey = mug.ufid + "-" + "badpath",
+            var errorKey = mug.ufid + "-" + property + "-" + "badpath",
                 errors = false;
 
             this.all = this.all.concat(paths.map(function (path) {
-                var refMug = formdesigner.controller.getMugByPath(path.pathWithoutPredicates());
-                if (!refMug) {
+                var pathString = path.pathWithoutPredicates(),
+                    pathWithoutRoot = pathString.substring(1 + pathString.indexOf('/', 1))
+                    refMug = formdesigner.controller.getMugByPath(pathString);
+
+                if (!refMug && formdesigner.allowedDataNodeReferences.indexOf(pathWithoutRoot) == -1) {
                     errors = true;
                     formdesigner.controller.form.updateError(that.FormError({
                         level: "parse-warning",

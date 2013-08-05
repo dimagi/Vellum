@@ -1575,6 +1575,8 @@ formdesigner.launch = function (opts) {
     formdesigner.saveUrl = opts.saveUrl;
     formdesigner.patchUrl = opts.patchUrl;
 
+    formdesigner.allowedDataNodeReferences = opts.allowedDataNodeReferences || [];
+
     formdesigner.multimediaConfig = opts.multimediaConfig;
 
     formdesigner.windowConfig = opts.windowConfig || {};
