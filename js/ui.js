@@ -1187,10 +1187,6 @@ formdesigner.ui = function () {
             return [true, null];
         };
 
-        var validateCurrent = function () {
-            return validate(getExpressionFromUI());
-        };
-
         var constructSelect = function (ops) {
             var sel = $("<select />");
             for (var i = 0; i < ops.length; i++) {
@@ -1531,16 +1527,24 @@ formdesigner.ui = function () {
                     .button()
                     .appendTo(actions);
 
+            var saveExpression = function(expression) {
+                formdesigner.controller.doneXPathEditor({
+                    group:    $('#fd-xpath-editor').data("group"),
+                    property: $('#fd-xpath-editor').data("property"),
+                    value:    expression
+                });
+                formdesigner.controller.form.fire('form-property-changed');
+            };
+
             doneButton.click(function() {
-                getExpressionInput().val(getExpressionFromUI());
-                var results = validateCurrent();
+                var uiExpression  = getExpressionFromUI();
+                getExpressionInput().val(uiExpression);
+                var results = validate(uiExpression);
                 if (results[0]) {
-                    formdesigner.controller.doneXPathEditor({
-                        group:    $('#fd-xpath-editor').data("group"),
-                        property: $('#fd-xpath-editor').data("property"),
-                        value:    getExpressionFromUI()
-                    });
-                    formdesigner.controller.form.fire('form-property-changed');
+                    saveExpression(uiExpression);
+                } else if (uiExpression.match('instance\\(')) {
+                    saveExpression(uiExpression);
+                    alert("This expression is too complex for us to verify; specifically, it makes use of the 'instance' construct. Please be aware that if you use this construct you're on your own in verifying that your expression is correct.");
                 } else {
                     getValidationSummary().text("Validation Failed! Please fix all errors before leaving this page. " + results[1]).removeClass("success").addClass("error");
                 }
