@@ -1474,7 +1474,7 @@ formdesigner.widgets = (function () {
 
         properties.push("controlElement/hintItextID");
 
-        // only show non-itext constaint message input if it has a value
+        // only show non-itext constraint message input if it has a value
         if (mugType.hasBindElement() && mugType.mug.properties.bindElement.properties.constraintMsgAttr) {
             properties.push("bindElement/constraintMsgAttr");
         }
