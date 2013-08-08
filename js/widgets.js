@@ -1397,8 +1397,8 @@ formdesigner.widgets = (function () {
 
         if (mugType.typeSlug === 'datanode') {
             properties = [
-                "bindElement/relevantAttr",
-                "bindElement/calculateAttr"
+                "bindElement/calculateAttr",
+                "bindElement/relevantAttr"
             ];
         } else if (mugType.isSpecialGroup()) {
             properties = [
