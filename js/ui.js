@@ -52,6 +52,8 @@ formdesigner.ui = function () {
     };
 
     that.ODK_ONLY_QUESTION_TYPES = ['image', 'audio', 'video', 'barcode', 'androidintent'];
+
+    that.CONSTRAINT_ITEXT_BLOCK_SELECTOR = '#itext-block-constraintMsg';
     
     that.currentErrors = [];
 
@@ -454,7 +456,7 @@ formdesigner.ui = function () {
             if (mugType.hasBindElement()) {
                 var bindElement = mugType.mug.properties.bindElement.properties;
                 if (e.property === 'constraintAttr' && mugType.typeSlug !== 'datanode') {
-                    var $constraintItext = $('#itext-block-constraint-group-default');
+                    var $constraintItext = $(formdesigner.ui.CONSTRAINT_ITEXT_BLOCK_SELECTOR);
                     if (e.val) {
                         $constraintItext.removeClass('hide');
                     } else if (!bindElement.constraintMsgItextID.id) {
@@ -463,7 +465,7 @@ formdesigner.ui = function () {
                 }
 
                 if (e.property === 'constraintMsgItextID' && !e.val.id && !bindElement.constraintAttr) {
-                    $('#itext-block-constraint-group-default').addClass('hide');
+                    $(formdesigner.ui.CONSTRAINT_ITEXT_BLOCK_SELECTOR).addClass('hide');
                 }
             }
 
@@ -474,7 +476,7 @@ formdesigner.ui = function () {
 
         var $validationCondition = $('#bindElement-constraintAttr');
         if ($validationCondition && !$validationCondition.val()) {
-            $('#itext-block-constraint-group-default').addClass('hide');
+            $(formdesigner.ui.CONSTRAINT_ITEXT_BLOCK_SELECTOR).addClass('hide');
         }
 
         that.showVisualValidation(mugType);
