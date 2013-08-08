@@ -64,7 +64,7 @@ formdesigner.widgets = (function () {
                 val = widget.getValue();
 
             if (isID && val.indexOf(' ') !== -1) { 
-                // attempt to sanitize nodeID and select item values
+                // attempt to sanitize nodeID and choice values
                 // TODO, still may allow some bad values
                 widget.setValue(val.replace(/\s/g, '_'));
             }
@@ -193,7 +193,7 @@ formdesigner.widgets = (function () {
 
         var $input = widget.getControl();
 
-        // a few little hacks to support auto-update of select items
+        // a few little hacks to support auto-update of choices
         widget.getRootId = function () {
             if (widget.isSelectItem) {
                 return widget.parentMug.getDefaultItextRoot() + "-";

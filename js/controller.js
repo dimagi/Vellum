@@ -251,7 +251,7 @@ formdesigner.controller = (function () {
     
     /**
      * Walks through both internal trees (data and control) and grabs
-     * all mugTypes that are not (1)Select Items.  Returns
+     * all mugTypes that are not (1)Choices.  Returns
      * a flat list of unique mugTypes.  This list is primarily fo the
      * autocomplete skip logic wizard.
      */
@@ -270,7 +270,7 @@ formdesigner.controller = (function () {
                 throw 'Node in tree without value?!?!'
             }
 
-            if(mt.typeSlug === "item" && !includeSelectItems) { //skip Select Items
+            if(mt.typeSlug === "item" && !includeSelectItems) { //skip Choices
                 return;
             }
 
@@ -783,13 +783,13 @@ formdesigner.controller = (function () {
             var newMugType = that.getMugTypeByQuestionType(questionType);
             
             // check preconditions - if this is a select question with
-            // select items, you're only allowed to change it to another
+            // choices, you're only allowed to change it to another
             // select question
             var children = that.getChildren(mugType);
             if (children.length > 0) {
                 if (!formdesigner.util.isSelect(newMugType)) {
-                    throw "you can't change a select-style question to a non-select-style " +
-                          "question if it has select items. Please remove all select items " +
+                    throw "you can't change a Multiple/Single Choice question to a non-Choice " +
+                          "question if it has Choices. Please remove all Choices " +
                           "and try again.";
                 }
             }

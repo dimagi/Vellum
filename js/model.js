@@ -345,7 +345,7 @@ formdesigner.model = function () {
                 // if nothing, try the dataElement nodeID
                 nodeID = this.mug.properties.dataElement.properties.nodeID;
             } else if (formdesigner.util.isSelectItem(this)) {
-                // if it's a select item, generate based on the parent and value
+                // if it's a choice, generate based on the parent and value
                 parent = formdesigner.controller.form.controlTree.getParentMugType(this);
                 if (parent) {
                     nodeID = parent.getDefaultItextRoot() + "-" + this.mug.properties.controlElement.properties.defaultValue;
@@ -730,7 +730,7 @@ formdesigner.model = function () {
                     values: formdesigner.util.VALID_QUESTION_TYPE_NAMES
                 },
                 defaultValue: {
-		            lstring: 'Answer Value',
+		            lstring: 'Choice Value',
 		            visibility: 'hidden',
 		            editable: 'w',
 		            presence: 'optional',

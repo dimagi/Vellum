@@ -48,13 +48,13 @@ formdesigner.util = (function(){
             ]
         },
         {
-            group: ['1select', 'Multiple Answer', 'icon-vellum-single-select'],
+            group: ['1select', 'Single Choice', 'icon-vellum-single-select'],
             related: [
-                ['item', 'Answer', 'icon-circle-blank']
+                ['item', 'Choice', 'icon-circle-blank']
             ],
             questions: [
-                ['1select', 'Single Answer', 'icon-vellum-single-select'],
-                ['select', 'Multiple Answer', 'icon-vellum-multi-select']
+                ['1select', 'Single Choice', 'icon-vellum-single-select'],
+                ['select', 'Multiple Choice', 'icon-vellum-multi-select']
             ]
         },
         {
@@ -875,7 +875,7 @@ formdesigner.util = (function(){
     
         
     that.mugToXPathReference = function (mug) {
-        // for select items, return the quoted value.
+        // for choices, return the quoted value.
         // for everything else return the path
         if (mug.typeSlug === "item") {
             return '"' + mug.mug.properties.controlElement.properties.defaultValue + '"';
