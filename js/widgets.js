@@ -342,7 +342,9 @@ formdesigner.widgets = (function () {
             } else if (!isItextPresent && currentVal) {
                 widget.setAutoMode(false);
                 widget.setValue('');
+                widget.updateValue();
             }
+
         };
 
         formdesigner.controller.on('update-question-itextid', function (e) {

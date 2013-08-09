@@ -542,7 +542,7 @@ formdesigner.model = function () {
                     return hintItext.id + " is not a valid ID";
                 }
             }
-            if (controlBlock.hintItextID === 'required' && !hintIID) {
+            if (controlBlock.hintItextID === 'required' && !hintItext.id) {
                 return 'Hint ID is required but not present in this question!';
             }
             
