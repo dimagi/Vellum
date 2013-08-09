@@ -638,8 +638,11 @@ formdesigner.widgets = (function () {
                 .click(function () {
                     var $formGroup = $('#' + block.getFormGroupID(form));
                     block.deleteItextForm(form);
-                    $formGroup.find('.itext-widget-input')
-                        .trigger('question-itext-form-deleted');
+                    console.log('delete clicked');
+                    formdesigner.controller.fire({
+                        type: 'question-itext-deleted',
+                        form: form
+                    });
                     $formGroup.remove();
                     $(this).remove();
                     $('#' + block.getAddFormButtonID(form)).removeClass('disabled');
@@ -659,20 +662,10 @@ formdesigner.widgets = (function () {
                 $('#' + block.getAddFormButtonID(form)).addClass('disabled');
                 var $groupContainer = block.getFormGroupContainer(form);
                 _.each(block.languages, function (lang) {
-                    var itextWidget = itextWidgetFn(mugType, lang, form, options),
-                        itextForm, defaultValue;
-
-                    defaultValue = itextWidget.getDefaultValue();
-                    itextWidget.setValue(defaultValue);
-
+                    var itextWidget = itextWidgetFn(mugType, lang, form, options);
+                    console.log('adding new block');
+                    itextWidget.init();
                     $groupContainer.append(itextWidget.getUIElement());
-
-                    itextForm = itextWidget.getItextItem().getOrCreateForm(form);
-                    if (defaultValue) {
-                        itextForm.setValue(lang, defaultValue);
-                    }
-
-                    itextWidget.fireChangeEvents();
                 });
                 $blockUI.find('.new-itext-control-group').after($groupContainer);
                 $groupContainer.before(block.getDeleteFormButton(form));
@@ -752,13 +745,27 @@ formdesigner.widgets = (function () {
             return widget.getIDByLang(widget.language);
         };
 
+        widget.init = function () {
+            var defaultValue = widget.getDefaultValue();
+            widget.getItextItem().getOrCreateForm(widget.form);
+            widget.setValue(defaultValue);
+            widget.updateValue();
+        };
+
+        widget.destroy = function (e) {
+            if (e.form === widget.form) {
+                widget.fireChangeEvents();
+            }
+        };
+
         var $input = $("<input />")
             .attr("id", widget.getID())
             .attr("type", "text")
             .addClass('input-block-level itext-widget-input');
 
-        $input.keyup(widget.updateValue);
-        $input.bind('question-itext-form-deleted', widget.fireChangeEvents);
+        $input.on('change keyup', widget.updateValue);
+
+        formdesigner.controller.on('question-itext-deleted', widget.destroy);
 
         widget.getControl = function () {
             return $input;
@@ -780,11 +787,19 @@ formdesigner.widgets = (function () {
             return null;
         };
 
-        formdesigner.controller.on('question-itext-changed', function () {
-            if (widget.language !== widget.defaultLang) {
-                widget.setPlaceholder(widget.getItextItem().getValue(widget.form, widget.defaultLang));
-            }
-        });
+        if (widget.language !== widget.defaultLang) {
+            formdesigner.controller.on('defaultLanguage-itext-changed', function () {
+                var itextItem = widget.getItextItem(),
+                    defaultFormValue;
+                defaultFormValue = itextItem.getValue(widget.form, widget.defaultLang);
+                widget.setPlaceholder(defaultFormValue);
+                if (!widget.getValue()) {
+                    // if this itext field is already blank, make sure you update it to have the same value as the
+                    // default value for this form
+                    widget.setItextFormValue(defaultFormValue);
+                }
+            });
+        }
 
         widget.fireChangeEvents = function () {
             var itextItem = widget.getItextItem();
@@ -795,7 +810,7 @@ formdesigner.widgets = (function () {
 	               language: widget.language,
 	               item: itextItem,
 	               form: widget.form,
-	               value: widget.getValue()
+	               value: itextItem.getValue(widget.form, widget.language)
 	            });
 	            formdesigner.controller.form.fire({
 	               type: "form-property-changed"
@@ -805,15 +820,22 @@ formdesigner.widgets = (function () {
                    itextType: widget.itextType,
                    itextItem: itextItem
                 });
+                if (widget.language === widget.defaultLang) {
+                    formdesigner.controller.fire('defaultLanguage-itext-changed');
+                }
 	        }
         };
 
         widget.save = function () {
+            widget.setItextFormValue(widget.getValue());
+        };
+
+        widget.setItextFormValue = function (value) {
             var itextItem = widget.getItextItem();
             if (itextItem) {
                 var itextForm = itextItem.getForm(widget.form);
-	            itextForm.setValue(widget.language, widget.getValue());
-	            widget.fireChangeEvents();
+	            itextForm.setValue(widget.language, value);
+                widget.fireChangeEvents();
 	        }
         };
 
@@ -942,9 +964,8 @@ formdesigner.widgets = (function () {
 
             $uiElem.on('mediaUploadComplete', widget.handleUploadComplete);
             // reapply bindings because we removed the input from the UI
-            $input.keyup(widget.updateValue);
-            $input.bind('question-itext-form-deleted', widget.fireChangeEvents);
-            $input.bind("change keyup", widget.updateMultimediaBlockUI)
+            $input.bind("change keyup", widget.updateValue);
+            $input.bind("change keyup", widget.updateMultimediaBlockUI);
 
             return $uiElem;
         };
