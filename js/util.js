@@ -804,11 +804,6 @@ formdesigner.util = (function(){
             return disp;
         }
 
-        long = itextItem.getValue("long", lang);
-        if (long) {
-            return long;
-        }
-
         return getNodeID();
     };
     

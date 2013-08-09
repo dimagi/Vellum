@@ -653,6 +653,7 @@ formdesigner.ui = function () {
                 try {
                     var itextID = mugType.mug.properties.controlElement.properties.labelItextID.id,
                         text = itext.getItem(itextID).getValue("default", lang);
+                    text = text || formdesigner.util.getMugDisplayName(mugType);
                     that.jstree('rename_node', $el, text || that.noTextString);
                 } catch (e) {
                     /* This happens immediately after question duplication when
@@ -1023,11 +1024,12 @@ formdesigner.ui = function () {
             var allMugs = formdesigner.controller.getMugTypeList(true);
             if (formdesigner.currentItextDisplayLanguage === e.language) {
                 allMugs.map(function (mug) {
-                    var node = $('#' + mug.ufid);
-                    var it = mug.getItext();
+                    var node = $('#' + mug.ufid),
+                        treeName = e.value || formdesigner.util.getMugDisplayName(mug),
+                        it = mug.getItext();
                     if (it && it.id === e.item.id && e.form === "default") {
-                        if (e.value && e.value !== that.jstree("get_text", node)) {
-                            that.jstree('rename_node', node, e.value);
+                        if (treeName !== that.jstree("get_text", node)) {
+                            that.jstree('rename_node', node, treeName);
                         }
                     }
                 });
@@ -1039,10 +1041,12 @@ formdesigner.ui = function () {
             var allMugs = formdesigner.controller.getMugTypeList(true);
             var currLang = formdesigner.currentItextDisplayLanguage;
             allMugs.map(function (mug) {
-                var node = $('#' + mug.ufid);
-                var it = mug.getItext();
-                if (it && it.getValue("default", currLang) !== that.jstree("get_text", node)) {
-                    that.jstree('rename_node', node, it.getValue("default", currLang));
+                var node = $('#' + mug.ufid),
+                    it = mug.getItext();
+                var treeName = (it) ? it.getValue("default", currLang) : formdesigner.util.getMugDisplayName(mug);
+                treeName = treeName || formdesigner.util.getMugDisplayName(mug);
+                if (treeName !== that.jstree("get_text", node)) {
+                    that.jstree('rename_node', node, treeName);
                 }
             });
         });
