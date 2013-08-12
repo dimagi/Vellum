@@ -477,7 +477,7 @@
             </div>
         </fieldset>
 
-        <fieldset id="xpath-simple" class="hide">
+        <fieldset id="xpath-simple" class="hide fieldset-condensed">
             <legend>Edit Expression</legend>
             <button type="button" class="btn btn-inverse pull-right xpath-mode-toggle" id="fd-xpath-show-advanced-button">
                 <i class="icon-cog"></i> Show Advanced Mode
@@ -493,7 +493,7 @@
                 </div>
             </div>
             <div class="control-group">
-                <label class="control-label">Configure Expression:</label>
+                <label class="control-label">Expression:</label>
                 <div class="controls">
                     <div id="fd-xpath-editor-expressions"> expression pane</div>
                     <p class="help-block pull-right">
@@ -509,7 +509,7 @@
 
         <p id="fd-xpath-validation-summary" class="alert hide"></p>
 
-        <div class="form-actions">
+        <div id="fd-xpath-actions" class="form-actions form-actions-condensed">
             <button type="button" class="btn btn-primary" id="fd-xpath-save-button">Save</button>
             <button type="button" class="btn" id="fd-xpath-cancel-button">Cancel</button>
         </div>
@@ -519,12 +519,12 @@
 <script type="text/template" id="fd-template-xpath-expression">
     <div class="control-group xpath-expression-group">
         <button type="button" class="btn btn-danger xpath-delete-expression pull-right"><i class="icon-remove"></i></button>
-        <div class="validation-result-container pull-left">
+        <div class="validation-result-container pull-right">
             <p class="validation-results alert alert-success hide">
-                <i class="icon-ok"></i> ok
+                <i class="icon-ok"></i>
             </p>
             <p class="validation-results alert alert-error hide">
-                <i class="icon-warning-sign"></i> fix
+                <i class="icon-warning-sign"></i>
             </p>
         </div>
         <div class="control-row xpath-expression-row">

@@ -29,16 +29,16 @@
   padding: 20px;
 }
 #fd-xpath-editor .xpath-expression-group .validation-result-container {
-  width: 60px;
+  width: 34px;
   margin-top: -1px;
+  margin-right: 5px;
 }
 #fd-xpath-editor .xpath-expression-group .validation-result-container .validation-results {
   padding: 5px 10px;
   margin-bottom: 0;
 }
 #fd-xpath-editor .xpath-expression-group .xpath-expression-row {
-  margin-left: 70px;
-  margin-right: 45px;
+  margin-right: 80px;
 }
 #fd-xpath-editor .fd-xpath-editor-container fieldset {
   position: relative;
@@ -58,4 +58,13 @@
 }
 #fd-xpath-editor-expressions .control-group:last-child {
   margin-bottom: 0;
+}
+.fieldset-condensed .control-label {
+  width: 90px;
+}
+.fieldset-condensed .controls {
+  margin-left: 100px;
+}
+.form-horizontal .form-actions-condensed {
+  padding-left: 100px;
 }

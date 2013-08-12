@@ -1334,6 +1334,7 @@ formdesigner.ui = function () {
 
             $("#xpath-advanced").removeClass('hide');
             $("#xpath-simple").addClass('hide');
+            $('#fd-xpath-actions').removeClass('form-actions-condensed');
             if (showNotice) {
                 $("#xpath-advanced-notice").removeClass('hide');
             } else {
@@ -1342,6 +1343,7 @@ formdesigner.ui = function () {
         };
         var showSimpleMode = function (text) {
             $("#xpath-simple").removeClass('hide');
+            $('#fd-xpath-actions').addClass('form-actions-condensed');
             $("#xpath-advanced").addClass('hide');
 
             getExpressionPane().empty();
