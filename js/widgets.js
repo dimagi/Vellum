@@ -640,7 +640,6 @@ formdesigner.widgets = (function () {
                 .click(function () {
                     var $formGroup = $('#' + block.getFormGroupID(form));
                     block.deleteItextForm(form);
-                    console.log('delete clicked');
                     formdesigner.controller.fire({
                         type: 'question-itext-deleted',
                         form: form
@@ -665,7 +664,6 @@ formdesigner.widgets = (function () {
                 var $groupContainer = block.getFormGroupContainer(form);
                 _.each(block.languages, function (lang) {
                     var itextWidget = itextWidgetFn(mugType, lang, form, options);
-                    console.log('adding new block');
                     itextWidget.init();
                     $groupContainer.append(itextWidget.getUIElement());
                 });
@@ -790,15 +788,21 @@ formdesigner.widgets = (function () {
         };
 
         if (widget.language !== widget.defaultLang) {
-            formdesigner.controller.on('defaultLanguage-itext-changed', function () {
-                var itextItem = widget.getItextItem(),
-                    defaultFormValue;
-                defaultFormValue = itextItem.getValue(widget.form, widget.defaultLang);
-                widget.setPlaceholder(defaultFormValue);
-                if (!widget.getValue()) {
-                    // if this itext field is already blank, make sure you update it to have the same value as the
-                    // default value for this form
-                    widget.setItextFormValue(defaultFormValue);
+            formdesigner.controller.on('defaultLanguage-itext-changed', function (e) {
+                if (e.form == widget.form && e.itextType == widget.itextType) {
+                    var itextItem = widget.getItextItem(),
+                        defaultLangValue,
+                        currentLangValue;
+                    defaultLangValue = itextItem.getValue(widget.form, widget.defaultLang);
+                    currentLangValue = itextItem.getValue(widget.form, widget.language);
+                    widget.setPlaceholder(defaultLangValue);
+                    if (defaultLangValue !== currentLangValue
+                        && !currentLangValue) {
+                        // If the itext input has no value,
+                        // make sure you update the property to have the same value as the
+                        // default value.
+                        widget.setItextFormValue(defaultLangValue);
+                    }
                 }
             });
         }
@@ -823,7 +827,11 @@ formdesigner.widgets = (function () {
                    itextItem: itextItem
                 });
                 if (widget.language === widget.defaultLang) {
-                    formdesigner.controller.fire('defaultLanguage-itext-changed');
+                    formdesigner.controller.fire({
+                        type: 'defaultLanguage-itext-changed',
+                        form: widget.form,
+                        itextType: widget.itextType
+                    });
                 }
 	        }
         };
