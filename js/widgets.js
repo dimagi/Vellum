@@ -347,7 +347,7 @@ formdesigner.widgets = (function () {
 
         };
 
-        formdesigner.controller.on('update-question-itextid', function (e) {
+        widget.mug.mug.on('update-question-itextid', function (e) {
             if (e.itextType === widget.getItextType()) {
                 widget.handleItextLabelChange(e);
             }
@@ -467,22 +467,13 @@ formdesigner.widgets = (function () {
         };
 
         block.getUIElement = function () {
-            var itextWidgetFn = block.getItextWidget(),
-                itextItem = block.getItextItem();
+            var itextWidgetFn = block.getItextWidget();
 
             _.each(block.getForms(), function (form) {
                 var $formGroup = block.getFormGroupContainer(form);
                 _.each(block.languages, function (lang) {
-                    var itextWidget = itextWidgetFn(mugType, lang, form, options),
-                        currentVal = itextItem.getValue(form, lang);
-                    if (lang !== block.defaultLang) {
-                        var defaultVal = itextItem.defaultValue();
-                        itextWidget.setPlaceholder(defaultVal);
-                        if (defaultVal === currentVal) {
-                            currentVal = "";
-                        }
-                    }
-                    itextWidget.setValue(currentVal);
+                    var itextWidget = itextWidgetFn(mugType, lang, form, options);
+                    itextWidget.init();
                     $formGroup.append(itextWidget.getUIElement());
                 });
                 $blockUI.append($formGroup);
@@ -640,7 +631,7 @@ formdesigner.widgets = (function () {
                 .click(function () {
                     var $formGroup = $('#' + block.getFormGroupID(form));
                     block.deleteItextForm(form);
-                    formdesigner.controller.fire({
+                    mugType.mug.fire({
                         type: 'question-itext-deleted',
                         form: form
                     });
@@ -664,7 +655,7 @@ formdesigner.widgets = (function () {
                 var $groupContainer = block.getFormGroupContainer(form);
                 _.each(block.languages, function (lang) {
                     var itextWidget = itextWidgetFn(mugType, lang, form, options);
-                    itextWidget.init();
+                    itextWidget.init(true);
                     $groupContainer.append(itextWidget.getUIElement());
                 });
                 $blockUI.find('.new-itext-control-group').after($groupContainer);
@@ -720,6 +711,8 @@ formdesigner.widgets = (function () {
         widget.languageName = formdesigner.langCodeToName[widget.language] || widget.language;
         widget.showOneLanguage = formdesigner.model.Itext.getLanguages().length < 2;
         widget.defaultLang = formdesigner.model.Itext.getDefaultLanguage();
+        widget.isDefaultLang = widget.language === widget.defaultLang;
+        widget.isSyncedWithDefaultLang = false;
 
         widget.getItextItem = function () {
             // Make sure the real itextItem is being updated at all times, not a stale one.
@@ -745,11 +738,41 @@ formdesigner.widgets = (function () {
             return widget.getIDByLang(widget.language);
         };
 
-        widget.init = function () {
-            var defaultValue = widget.getDefaultValue();
-            widget.getItextItem().getOrCreateForm(widget.form);
-            widget.setValue(defaultValue);
-            widget.updateValue();
+        widget.init = function (loadDefaults) {
+            // Note, there are TWO defaults here.
+            // There is the default value when this widget is initialized.
+            // There is the value of the default language.
+            if (loadDefaults) {
+                var defaultValue = widget.getDefaultValue();
+                widget.getItextItem().getOrCreateForm(widget.form);
+                widget.setValue(defaultValue);
+                widget.updateValue();
+            } else {
+                var itextItem = widget.getItextItem(),
+                    currentLangValue,
+                    defaultLangValue;
+                defaultLangValue = itextItem.getValue(widget.form, widget.defaultLang);
+                currentLangValue = itextItem.getValue(widget.form, widget.language);
+                if (!widget.isDefaultLang) {
+                    widget.setPlaceholder(defaultLangValue);
+                }
+
+                if (!widget.isDefaultLang
+                    && (defaultLangValue === currentLangValue) || !currentLangValue) {
+                    widget.setValue("");
+                } else {
+                    widget.setValue(currentLangValue);
+                }
+            }
+        };
+
+        var _updateValue = widget.updateValue;
+        widget.updateValue = function () {
+            _updateValue();
+            if (!widget.getValue() && !widget.isDefaultLang) {
+                var defaultLangValue = widget.getItextItem().getValue(widget.form, widget.defaultLang);
+                widget.setItextFormValue(defaultLangValue);
+            }
         };
 
         widget.destroy = function (e) {
@@ -761,14 +784,17 @@ formdesigner.widgets = (function () {
         var $input = $("<input />")
             .attr("id", widget.getID())
             .attr("type", "text")
-            .addClass('input-block-level itext-widget-input');
+            .addClass('input-block-level itext-widget-input')
+            .on('change keyup', widget.updateValue);
 
-        $input.on('change keyup', widget.updateValue);
-
-        formdesigner.controller.on('question-itext-deleted', widget.destroy);
+        widget.mug.mug.on('question-itext-deleted', widget.destroy);
 
         widget.getControl = function () {
             return $input;
+        };
+
+        widget.toggleDefaultLangSync = function (val) {
+            widget.isSyncedWithDefaultLang = !val && !widget.isDefaultLang;
         };
 
         widget.setValue = function (val) {
@@ -787,21 +813,19 @@ formdesigner.widgets = (function () {
             return null;
         };
 
-        if (widget.language !== widget.defaultLang) {
-            formdesigner.controller.on('defaultLanguage-itext-changed', function (e) {
+        if (!widget.isDefaultLang) {
+            widget.mug.mug.on('defaultLanguage-itext-changed', function (e) {
                 if (e.form == widget.form && e.itextType == widget.itextType) {
                     var itextItem = widget.getItextItem(),
                         defaultLangValue,
                         currentLangValue;
                     defaultLangValue = itextItem.getValue(widget.form, widget.defaultLang);
                     currentLangValue = itextItem.getValue(widget.form, widget.language);
-                    widget.setPlaceholder(defaultLangValue);
-                    if (defaultLangValue !== currentLangValue
-                        && !currentLangValue) {
-                        // If the itext input has no value,
-                        // make sure you update the property to have the same value as the
-                        // default value.
-                        widget.setItextFormValue(defaultLangValue);
+                    widget.setPlaceholder(e.value);
+                    if ((currentLangValue === e.prevValue && !widget.getValue())
+                        || !currentLangValue) {
+                        // Make sure all the defaults keep in sync.
+                        widget.setItextFormValue(e.value);
                     }
                 }
             });
@@ -821,18 +845,11 @@ formdesigner.widgets = (function () {
 	            formdesigner.controller.form.fire({
 	               type: "form-property-changed"
 	            });
-                formdesigner.controller.fire({
-                   type: "update-question-itextid",
+                widget.mug.mug.fire({
+                   type: 'update-question-itextid',
                    itextType: widget.itextType,
                    itextItem: itextItem
                 });
-                if (widget.language === widget.defaultLang) {
-                    formdesigner.controller.fire({
-                        type: 'defaultLanguage-itext-changed',
-                        form: widget.form,
-                        itextType: widget.itextType
-                    });
-                }
 	        }
         };
 
@@ -843,6 +860,17 @@ formdesigner.widgets = (function () {
         widget.setItextFormValue = function (value) {
             var itextItem = widget.getItextItem();
             if (itextItem) {
+
+                if (widget.isDefaultLang) {
+                    widget.mug.mug.fire({
+                        type: 'defaultLanguage-itext-changed',
+                        form: widget.form,
+                        prevValue: itextItem.getValue(widget.form, widget.language),
+                        value: value,
+                        itextType: widget.itextType
+                    });
+                }
+
                 var itextForm = itextItem.getForm(widget.form);
 	            itextForm.setValue(widget.language, value);
                 widget.fireChangeEvents();
@@ -890,6 +918,9 @@ formdesigner.widgets = (function () {
         widget.getPreviewUI = function () {
             var currentPath = widget.getValue(),
                 $preview;
+            if (!currentPath && !widget.isDefaultLang) {
+                currentPath = widget.getItextItem().getValue(widget.form, widget.defaultLang);
+            }
             if (currentPath in formdesigner.multimedia.objectMap) {
                 var linkedObject = formdesigner.multimedia.objectMap[currentPath];
                 $preview = _.template($(formdesigner.multimedia.PREVIEW_TEMPLATES[form]).text(), {
