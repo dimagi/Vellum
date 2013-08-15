@@ -171,7 +171,7 @@ formdesigner.util = (function(){
         for (var q in that.QUESTIONS) {
             if (that.QUESTIONS.hasOwnProperty(q) && 
                 that.UNCHANGEABLE_QUESTIONS.indexOf(q) === -1 &&
-                q != currentType) {
+                q !== currentType) {
                 ret.push({
                     slug: q,
                     name: that.QUESTIONS[q],
