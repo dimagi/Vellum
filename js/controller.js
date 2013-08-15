@@ -1072,7 +1072,8 @@ formdesigner.controller = (function () {
     };
 
     that.showFormPropertiesDialog = function () {
-        // moved over just for display purposes, apparently the original wasn't working perfectly, so this is a todo
+        // moved over just for display purposes, apparently the original
+        // wasn't working perfectly, so this is a todo
         var $modal,
             $modalBody,
             formProperties;
