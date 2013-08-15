@@ -1315,12 +1315,6 @@ formdesigner.widgets = (function () {
         return section;
     };
 
-    /**
-     * Hard coded function to map mugs to the types of things
-     * that they display
-     *
-     */
-
     that.getToolbarForMug = function (mugType) {
         var $baseToolbar = formdesigner.ui.getTemplateObject('#fd-template-question-toolbar', {});
         $baseToolbar.find('#fd-button-remove').click(formdesigner.controller.removeCurrentQuestion);
@@ -1352,7 +1346,12 @@ formdesigner.widgets = (function () {
     };
 
     that.getSectionListForMug = function (mugType) {
-        sections = [];
+        /**
+         * Hard coded function to map mugs to the types of things
+         * that they display
+         *
+         */
+        var sections = [];
         sections.push(that.getMainSection(mugType));
         if (mugType.hasBindElement()) {
             sections.push(that.getLogicSection(mugType));
