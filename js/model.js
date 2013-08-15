@@ -559,7 +559,7 @@ formdesigner.model = function () {
                 }
             }
             if (constraintItext && constraintItext.id && !bindElement.constraintAttr) {
-                return "Can't have a Validation Message without a Validation Condition";
+                return "Can't have a Validation Message ID without a Validation Condition";
             }
             return validateItextItem(constraintItext, "Validation Error Message");
         },
