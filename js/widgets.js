@@ -323,18 +323,18 @@ formdesigner.widgets = (function () {
 
             if (itextItem) {
                 var currentForms = itextItem.getForms();
-                // _.each doesn't have a way to break out of it
-                itextCheck:
-                for (var form, f = 0; form = currentForms[f]; f++) {
-                    for (var lang, l = 0; lang = widget.langs[l]; l++) {
-                        if (form.getValue(lang)) {
-                            isItextPresent = true;
-                            break itextCheck;
+                isItextPresent = (function () {
+                    for (var form, f = 0; form = currentForms[f]; f++) {
+                        for (var lang, l = 0; lang = widget.langs[l]; l++) {
+                            if (form.getValue(lang)) {
+                                return true;
+                            }
                         }
                     }
-                }
+                    return false;
+                })();
             }
-
+            
             if (isItextPresent && !currentVal) {
                 widget.setAutoMode(true);
                 widget.updateAutoId();
