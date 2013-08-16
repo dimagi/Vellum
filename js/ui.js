@@ -52,6 +52,8 @@ formdesigner.ui = function () {
     };
 
     that.ODK_ONLY_QUESTION_TYPES = ['image', 'audio', 'video', 'barcode', 'androidintent'];
+
+    that.CONSTRAINT_ITEXT_BLOCK_SELECTOR = '#itext-block-constraintMsg';
     
     that.currentErrors = [];
 
@@ -71,7 +73,7 @@ formdesigner.ui = function () {
 
         $(MESSAGES_DIV)
             .empty()
-            .html(_.template($('#fd-template-message-alert').text(), {
+            .html(_.template($('#fd-template-alert-global').text(), {
                 messageType: that.MESSAGE_TYPES[errorObj.level],
                 messages: messages
             }))
@@ -88,6 +90,21 @@ formdesigner.ui = function () {
             that.showMessage(errors[i]);
         }
     };
+
+    that.generateNewModal = function (modalTitle, modalButtons, closeButtonTitle) {
+        var $modalContainer = $('#fd-modal-generic-container'),
+            $modal = formdesigner.ui.getTemplateObject('#fd-template-modal-content', {
+                modalTitle: modalTitle,
+                modalButtons: modalButtons || [],
+                closeButtonTitle: closeButtonTitle || "Close"
+            });
+        $modalContainer.html($modal);
+        return $modal;
+    };
+
+    that.getTemplateObject = function (templateSelector, templateParams) {
+        return $(_.template($(templateSelector).text(), templateParams));
+    };
     
     that.addQuestion = function (qType) {
         var newMug = formdesigner.controller.createQuestion(qType);
@@ -100,27 +117,6 @@ formdesigner.ui = function () {
             }), {updateUI: true});
         }
         return newMug;
-    };
-
-    that.getQuestionTypeSelector = function () {
-        // the question type selector inside the question form itself
-        var select = $('<select />').attr('tabindex', -1);
-        
-        function makeOptionItem(idTag, attrvalue, label) {
-           var opt = $('<option />')
-                   .attr('id', idTag)
-                   .attr('value', attrvalue)
-                   .text(label);
-           return opt;
-        }
-        
-        var questions = formdesigner.util.getQuestionList();
-        for (var i = 0; i < questions.length; i++) {
-            select.append(makeOptionItem(questions[i][0], 
-                                         questions[i][0], 
-                                         questions[i][1]));
-        }
-        return select;
     };
 
     that.QuestionTypeButton = function (buttonSpec) {
@@ -219,20 +215,6 @@ formdesigner.ui = function () {
             $questionGroupContainer.append(questionGroup.getFormattedTemplate());
             questionGroup.activateGroup();
         });
-
-        //debug tools
-        (function c_printDataTreeToConsole() {
-            var printTreeBut = $(
-                    '<button class="btn" id="fd-print-tree-button" class="toolbarButton questionButton">' +
-                            'Print tree to Console' +
-                            '</button>');
-            $('#fd-dragons').append(printTreeBut);
-
-            printTreeBut.button().click(function () {
-                formdesigner.util.dumpFormTreesToConsole();
-            });
-
-        })();
 
         (function c_saveForm() {
             var $saveButtonContainer = $('#fd-save-button');
@@ -425,6 +407,7 @@ formdesigner.ui = function () {
      * Draws the properties to be edited to the screen.
      */
     that.displayMugProperties = function (mugType) {
+        $('#fd-default-panel').addClass('hide');
         // always hide the xpath editor if necessary
         that.hideXPathEditor();
         that.showTools();
@@ -434,11 +417,13 @@ formdesigner.ui = function () {
 
         that.hideQuestionProperties();
 
-        var content = $("#fd-props-content").empty();
-        var sections = formdesigner.widgets.getSectionListForMug(mugType);
+        var $content = $("#fd-props-content").empty(),
+            questionToolbar = formdesigner.widgets.getToolbarForMug(mugType),
+            sections = formdesigner.widgets.getSectionListForMug(mugType);
 
+        $('#fd-props-toolbar').html(questionToolbar);
         for (var i = 0; i < sections.length; i++) {
-            sections[i].getSectionDisplay().appendTo(content);
+            sections[i].getSectionDisplay().appendTo($content);
         }
 
         /* attach common event listeners */
@@ -468,9 +453,31 @@ formdesigner.ui = function () {
                     that.jstree('rename_node', node, e.val);
                 }
             }
+            if (mugType.hasBindElement()) {
+                var bindElement = mugType.mug.properties.bindElement.properties;
+                if (e.property === 'constraintAttr' && mugType.typeSlug !== 'datanode') {
+                    var $constraintItext = $(formdesigner.ui.CONSTRAINT_ITEXT_BLOCK_SELECTOR);
+                    if (e.val) {
+                        $constraintItext.removeClass('hide');
+                    } else if (!bindElement.constraintMsgItextID.id) {
+                        $constraintItext.addClass('hide');
+                    }
+                }
+
+                if (e.property === 'constraintMsgItextID' && !e.val.id && !bindElement.constraintAttr) {
+                    $(formdesigner.ui.CONSTRAINT_ITEXT_BLOCK_SELECTOR).addClass('hide');
+                }
+            }
+
         });
 
         $("#fd-question-properties").show();
+        $('.fd-help').fdHelp();
+
+        var $validationCondition = $('#bindElement-constraintAttr');
+        if ($validationCondition && !$validationCondition.val()) {
+            $(formdesigner.ui.CONSTRAINT_ITEXT_BLOCK_SELECTOR).addClass('hide');
+        }
 
         that.showVisualValidation(mugType);
     };
@@ -495,6 +502,19 @@ formdesigner.ui = function () {
         // First neutralize all the existing buttons.
         that.resetQuestionTypeGroups();
         that.activateQuestionTypeGroup(typeSlug);
+    };
+
+    that.isSelectNodeBlocked = function (e, data) {
+        if (that.isXpathEditorActive) {
+            var $modal = formdesigner.ui.generateNewModal("Unsaved Changes in Editor", [], "OK");
+            $modal.removeClass('fade');
+            $modal.find('.modal-body')
+                .append($('<p />').text("You have UNSAVED changes in the Expression Editor. Please save "+
+                                        "changes before switching questions."));
+            $modal.modal('show');
+            return true;
+        }
+        return false;
     };
 
     /**
@@ -534,7 +554,6 @@ formdesigner.ui = function () {
      */
     that.selectLowestQuestionNode = function () {
         that.jstree("deselect_all");
-
         var questions = that.getJSTree().children().children().filter("[rel!='datanode']");
         if (questions.length > 0) {
             var newSelectEl = $(questions[questions.length - 1]);
@@ -565,6 +584,60 @@ formdesigner.ui = function () {
         });
     };
 
+    that.makeLanguageSelectorDropdown = function () {
+        var addLangButton,
+            removeLangButton,
+            langList,
+            langs,
+            str,
+            Itext,
+            $langSelector,
+            fullLangs;
+        Itext = formdesigner.model.Itext;
+        langs = Itext.getLanguages();
+
+        if (langs.length < 2) {
+            return;
+        }
+
+        fullLangs = _.map(langs, function (lang) {
+            return {
+                code: lang,
+                name: formdesigner.langCodeToName[lang] || lang
+            }
+        });
+
+        $langSelector = formdesigner.ui.getTemplateObject('#fd-template-language-selector', {
+            languages: fullLangs
+        });
+
+        langList = $langSelector.find('select');
+        langList.change(function () {
+            that.changeTreeDisplayLanguage($(this).val());
+        });
+
+        langList.val(formdesigner.currentItextDisplayLanguage);
+
+        if (formdesigner.opts.allowLanguageEdits) {
+            str = '<button class="btn btn-primary" id="fd-lang-disp-add-lang-button">Add Language</button>';
+            addLangButton = $(str);
+            addLangButton.button();
+            addLangButton.click(function () {
+                that.showAddLanguageDialog();
+            });
+            $langSelector.append(addLangButton);
+            str = '<button class="btn btn-warning" id="fd-lang-disp-remove-lang-button">Remove Langauge</button>';
+            removeLangButton = $(str);
+            removeLangButton.button();
+            removeLangButton.click(function () {
+                that.showRemoveLanguageDialog();
+            });
+            $langSelector.append(removeLangButton);
+        }
+
+        $('#fd-question-tree-lang').html($langSelector);
+    };
+
     that.changeTreeDisplayLanguage = function (lang) {
         var itext = formdesigner.model.Itext;
         
@@ -580,6 +653,7 @@ formdesigner.ui = function () {
                 try {
                     var itextID = mugType.mug.properties.controlElement.properties.labelItextID.id,
                         text = itext.getItem(itextID).getValue("default", lang);
+                    text = text || formdesigner.util.getMugDisplayName(mugType);
                     that.jstree('rename_node', $el, text || that.noTextString);
                 } catch (e) {
                     /* This happens immediately after question duplication when
@@ -599,129 +673,20 @@ formdesigner.ui = function () {
     };
 
     var init_extra_tools = function () {
-        function makeLangDrop() {
-            var div, addLangButton, removeLangButton, langList, langs, i, str, selectedLang, Itext;
-            $('#fd-question-tree-lang').find('#fd-lang-disp-div').remove();
-            Itext = formdesigner.model.Itext;
-            langs = Itext.getLanguages();
-            if (langs.length < 2) {
-                return;
-            }
-            // todo this is really gross, should get turned into a template at some point. :|
-            div = $('<div id="fd-lang-disp-div" class="control-group"></div>');
-            div.append('<label for="fd-land-disp-select" class="control-label">Display Language: </label>');
-
-            str = '<select data-placeholder="Choose a Language" class="input-small" id="fd-land-disp-select">';
-            for (var i = 0; i < langs.length; i++) {
-                str = str + '<option value="' + langs[i] + '" >' + langs[i] + '</option>';
-            }
-            str += '</select>';
-
-            langList = $(str);
-            langList.change(function () {
-                that.changeTreeDisplayLanguage($(this).val());
-            });
-
-            langList.val(formdesigner.currentItextDisplayLanguage);
-            var $controls = $('<div class="controls" />');
-            $controls.append(langList);
-            div.append($controls);
-            
-            if (formdesigner.opts.allowLanguageEdits) {
-                str = '<button class="btn btn-primary" id="fd-lang-disp-add-lang-button">Add Language</button>';
-                addLangButton = $(str);
-                addLangButton.button();
-                addLangButton.click(function () {
-                    that.showAddLanguageDialog();
-                });
-                div.append(addLangButton);
-                str = '<button class="btn btn-warning" id="fd-lang-disp-remove-lang-button">Remove Langauge</button>';
-                removeLangButton = $(str);
-                removeLangButton.button();
-                removeLangButton.click(function () {
-                    that.showRemoveLanguageDialog();
-                });
-                div.append(removeLangButton);
-            }
-            var $formHoriz = $('<div class="form form-horizontal" />');
-            $formHoriz.append(div);
-            $('#fd-question-tree-lang').html($formHoriz);
-        }
-
-        var accordion = $("#fd-extra-tools-accordion"),
-            minMaxButton = $('#fd-min-max-button');
-
-        makeLangDrop();
+        that.makeLanguageSelectorDropdown();
         formdesigner.controller.on('fd-reload-ui', function () {
-            makeLangDrop();
+            that.makeLanguageSelectorDropdown();
+        });
+        formdesigner.controller.on('fd-update-language-name', function () {
+            that.makeLanguageSelectorDropdown();
         });
 
-        accordion.hide();
-        accordion.accordion({
-            autoHeight: false
-        });
-
-        accordion.show();
-        accordion.accordion("resize");
-        minMaxButton.button({
-            icons: {
-                primary: 'ui-icon-arrowthick-2-n-s'
-            }
-        });
-
-        $('#fd-load-xls-button').click(formdesigner.controller.showItextDialog);
-        $('#fd-export-xls-button').click(formdesigner.controller.showExportDialog);
-        $('#fd-editsource-button').click(formdesigner.controller.showSourceXMLDialog);
-
-        $('#fd-extra-template-questions div').each(function () {
-            $(this).button({
-                icons : {
-                    primary : 'ui-icon-gear'
-                }
-            });
-        }).button("disable");
-
-        function makeFormProp(propLabel, propName, keyUpFunc, initVal) {
-            var liStr = '<li id="fd-form-prop-' + propName + '" class="fd-form-property"><span class="fd-form-property-text">' + propLabel + ': ' + '</span>' +
-                    '<input id="fd-form-prop-' + propName + '-' + 'input" class="fd-form-property-input">' +
-                    '</li>',
-                    li = $(liStr),
-                    ul = $('#fd-form-opts-ul');
-
-            ul.append(li);
-            $(li).find('input').val(initVal)
-                    .keyup(keyUpFunc);
-        }
-
-        function fireFormPropChanged(propName, oldVal, newVal) {
-            formdesigner.controller.form.fire({
-                type: 'form-property-changed',
-                propName: propName,
-                oldVal: oldVal,
-                newVal: newVal
-            })
-        }
-
-        var formNameFunc = function (e) {
-            fireFormPropChanged('formName', formdesigner.controller.form.formName, $(this).val());
-            formdesigner.controller.form.formName = $(this).val();
-        };
-        makeFormProp("Form Name", "formName", formNameFunc, formdesigner.controller.form.formName);
-
-        var formIDFunc = function (e) {
-            $(this).val($(this).val().replace(/ /g, '_'));
-            fireFormPropChanged('formID', formdesigner.controller.form.formID, $(this).val());
-            formdesigner.controller.form.formID = $(this).val();
-        };
-        makeFormProp("Form ID", "formID", formIDFunc, formdesigner.controller.form.formID);
-
-        $('<p>Note: changing the Form ID here will not automatically change ' +
-          ' the Form ID in existing references in your logic conditions.  ' + 
-          'If you change the Form ID, you must manually change any ' +
-          'existing logic references.</p>').appendTo('#fd-form-opts-ul');
+        $('#fd-load-xls-button').stopLink().click(formdesigner.controller.showItextDialog);
+        $('#fd-export-xls-button').stopLink().click(formdesigner.controller.showExportDialog);
+        $('#fd-editsource-button').stopLink().click(formdesigner.controller.showSourceXMLDialog);
+        $('#fd-formproperties-button').stopLink().click(formdesigner.controller.showFormPropertiesDialog);
 
     };
-
 
     var setTreeNodeInvalid = function (uid, msg) {
         $($('#' + uid)[0]).append('<div class="ui-icon ui-icon-alert fd-tree-valid-alert-icon" title="' + msg + '"></div>')
@@ -781,10 +746,6 @@ formdesigner.ui = function () {
             onClosed: function() {
             }
         });
-
-        $('#fancybox-overlay').click(function () {
-
-        })
     }
 
     function init_form_paste() {
@@ -810,21 +771,12 @@ formdesigner.ui = function () {
             butState = 'disable';
         }
 
-        // buttons
-        $('#fd-add-but').button(butState);
         // TODO: in making fd-save-button controlled by saveButton, do we need to do anything explicit here?
 //        $('#fd-save-button').button(butState);
 
         $('#fd-lang-disp-add-lang-button').button(butState);
         $('#fd-lang-disp-remove-lang-button').button(butState);
-        $('#fd-load-xls-button').button(butState);
-        $('#fd-editsource-button').button(butState);
-        $('#fd-cruftyItextRemove-button').button(butState);
         //Print tree to console button is not disabled since it's almost always useful.
-
-        //inputs
-        $('#fd-form-prop-formName-input').prop('enabled', state);
-        $('#fd-form-prop-formID-input').prop('enabled', state);
 
         //other stuff
         if (state) {
@@ -1072,11 +1024,12 @@ formdesigner.ui = function () {
             var allMugs = formdesigner.controller.getMugTypeList(true);
             if (formdesigner.currentItextDisplayLanguage === e.language) {
                 allMugs.map(function (mug) {
-                    var node = $('#' + mug.ufid);
-                    var it = mug.getItext();
+                    var node = $('#' + mug.ufid),
+                        treeName = e.value || formdesigner.util.getMugDisplayName(mug),
+                        it = mug.getItext();
                     if (it && it.id === e.item.id && e.form === "default") {
-                        if (e.value && e.value !== that.jstree("get_text", node)) {
-                            that.jstree('rename_node', node, e.value);
+                        if (treeName !== that.jstree("get_text", node)) {
+                            that.jstree('rename_node', node, treeName);
                         }
                     }
                 });
@@ -1088,10 +1041,12 @@ formdesigner.ui = function () {
             var allMugs = formdesigner.controller.getMugTypeList(true);
             var currLang = formdesigner.currentItextDisplayLanguage;
             allMugs.map(function (mug) {
-                var node = $('#' + mug.ufid);
-                var it = mug.getItext();
-                if (it && it.getValue("default", currLang) !== that.jstree("get_text", node)) {
-                    that.jstree('rename_node', node, it.getValue("default", currLang));
+                var node = $('#' + mug.ufid),
+                    it = mug.getItext();
+                var treeName = (it) ? it.getValue("default", currLang) : formdesigner.util.getMugDisplayName(mug);
+                treeName = treeName || formdesigner.util.getMugDisplayName(mug);
+                if (treeName !== that.jstree("get_text", node)) {
+                    that.jstree('rename_node', node, treeName);
                 }
             });
         });
@@ -1110,6 +1065,7 @@ formdesigner.ui = function () {
 
 
     that.showXPathEditor = function (options) {
+        formdesigner.ui.isXpathEditorActive = true;
         /**
          * All the logic to display the XPath Editor widget.
          */
@@ -1134,7 +1090,6 @@ formdesigner.ui = function () {
         var getExpressionList = function () {
             return getExpressionPane().children();
         };
-
         var getTopLevelJoinSelect = function () {
             return $(editorPane.find("#top-level-join-select")[0]);
         };
@@ -1167,7 +1122,7 @@ formdesigner.ui = function () {
         };
 
         var getExpressionFromUI = function () {
-            if ($("#xpath-advanced-check").is(':checked')) {
+            if ($("#xpath-simple").hasClass('hide')) {
                 // advanced
                 return getExpressionInput().val();
             } else {
@@ -1185,14 +1140,6 @@ formdesigner.ui = function () {
                 }
             }
             return [true, null];
-        };
-
-        var constructSelect = function (ops) {
-            var sel = $("<select />");
-            for (var i = 0; i < ops.length; i++) {
-                $("<option />").text(ops[i][0]).val(ops[i][1]).appendTo(sel);
-            }
-            return sel;
         };
 
 
@@ -1226,92 +1173,49 @@ formdesigner.ui = function () {
                 return true;
             };
 
-            var createJoinSelector = function() {
-                var ops = [
-                    ["and", expTypes.AND],
-                    ["or", expTypes.OR]
-                ];
-                return constructSelect(ops).addClass("join-select");
-            };
-
             var newExpressionUIElement = function (expOp) {
 
-                // create the UI for an individual expression
-                var createQuestionAcceptor = function() {
-                    var questionAcceptor = $("<input />").attr("type", "text").attr("placeholder", "Hint: drag a question here.");
-                    return questionAcceptor;
-                };
-
-                var createOperationSelector = function() {
-                    var ops = [
+                var $expUI = formdesigner.ui.getTemplateObject('#fd-template-xpath-expression', {
+                    operationOpts: [
                         ["is equal to", expTypes.EQ],
                         ["is not equal to", expTypes.NEQ],
                         ["is less than", expTypes.LT],
                         ["is less than or equal to", expTypes.LTE],
                         ["is greater than", expTypes.GT],
                         ["is greater than or equal to", expTypes.GTE]
-                    ];
-
-                    return constructSelect(ops).addClass("op-select");
-                };
-
-                var expression = $("<div />").addClass("bin-expression");
-
-                var createQuestionInGroup = function (type) {
-                    var group = $("<div />").addClass("expression-part").appendTo(expression);
-                    return createQuestionAcceptor().addClass(type + "-question xpath-edit-node").appendTo(group);
-                };
+                    ]
+                });
 
                 var getLeftQuestionInput = function () {
-                    return $(expression.find(".left-question")[0]);
+                    return $($expUI.find(".left-question")[0]);
                 };
 
                 var getRightQuestionInput = function () {
-                    return $(expression.find(".right-question")[0]);
-                };
-
-                var getValidationResults = function () {
-                    return $(expression.find(".validation-results")[0]);
+                    return $($expUI.find(".right-question")[0]);
                 };
 
                 var validateExpression = function(item) {
                     var le = getLeftQuestionInput().val(),
-                            re = getRightQuestionInput().val();
+                        re = getRightQuestionInput().val();
+
+                    $expUI.find('.validation-results').addClass('hide');
+
                     if (le && validate(le)[0] && re && validate(re)[0]) {
-                        getValidationResults().text("ok").addClass("success ui-icon-circle-check").removeClass("error");
+                        $expUI.find('.validation-results.alert-success').removeClass('hide');
                     } else {
-                        getValidationResults().text("fix").addClass("error").removeClass("success");
+                        $expUI.find('.validation-results.alert-error').removeClass('hide');
                     }
                 };
-
-                var left = createQuestionInGroup("left");
-                var op = createOperationSelector().appendTo(expression);
-                var right = createQuestionInGroup("right");
-                var deleteButton = $("<div />").addClass('btn').addClass('btn-danger').text("Delete").button().css("float", "left").appendTo(expression);
-                var validationResults = $("<div />").addClass("validation-results").appendTo(expression);
 
                 var populateQuestionInputBox = function (input, expr, pairedExpr) {
                     input.val(expr.toXPath());
                 };
 
-                var setBasicOptions = function () {
-                    // just make the inputs droppable and add event handlers to validate
-                    // the inputs
-                    expression.find(".xpath-edit-node").addClass("jstree-drop");
-                    expression.find(".xpath-edit-node").keyup(validateExpression);
-                    expression.find(".xpath-edit-node").change(validateExpression);
-                };
+                // add event handlers to validate the inputs
+                $expUI.find('.xpath-edit-node').on('keyup change', validateExpression);
 
-                setBasicOptions();
-                
-                deleteButton.click(function() {
-                    var isFirst = expression.children(".join-select").length == 0;
-                    expression.remove();
-                    if (isFirst && getExpressionList().length > 0) {
-                        // when removing the first expression, make sure to update the
-                        // next one in the UI to not have a join, if necessary.
-                        $($(getExpressionList()[0]).children(".join-select")).remove();
-                    }
+                $expUI.find('.xpath-delete-expression').click(function() {
+                    $expUI.remove();
                 });
 
                 if (expOp) {
@@ -1320,12 +1224,12 @@ formdesigner.ui = function () {
                         console.log("populating", expOp.toString());
                     }
                     populateQuestionInputBox(getLeftQuestionInput(), expOp.left);
-                    op.val(xpathmodels.expressionTypeEnumToXPathLiteral(expOp.type));
+                    $expUI.find('.op-select').val(xpathmodels.expressionTypeEnumToXPathLiteral(expOp.type));
                     // the population of the left can affect the right,
                     // so we need to update the reference
                     populateQuestionInputBox(getRightQuestionInput(), expOp.right, expOp.left);
                 }
-                return expression;
+                return $expUI;
             };
 
             var failAndClear = function () {
@@ -1341,12 +1245,6 @@ formdesigner.ui = function () {
             if (!parsedExpression) {
                 // just create a new expression
                 expressionUIElem = newExpressionUIElement();
-                // and if it's not the first additionally add the join selector
-                if (getExpressionPane().children().length !== 0) {
-                    // No longer handled internally
-                    // TODO: clean up
-                    // createJoinSelector().prependTo(expressionUIElem);
-                }
                 return expressionUIElem.appendTo(expressionPane);
             } else {
                 // we're creating for an existing expression, this is more complicated
@@ -1407,7 +1305,10 @@ formdesigner.ui = function () {
             // set data properties for callbacks and such
             editorPane.data("group", options.group).data("property", options.property);
             // clear validation text
-            getValidationSummary().text("").removeClass("error").removeClass("success");
+            getValidationSummary()
+                .text("")
+                .removeClass("alert-error alert-success")
+                .addClass("hide");
 
             // clear expression builder
             var expressionPane = getExpressionPane();
@@ -1422,24 +1323,29 @@ formdesigner.ui = function () {
             } else {
                 showAdvancedMode(options.value);
             }
-            $("#fd-xpath-editor-text").val(options.value);
 
+            $("#fd-xpath-editor-text").val(options.value);
         };
 
         // toggle simple/advanced mode
         var showAdvancedMode = function (text, showNotice) {
             getExpressionInput().val(text);
             getExpressionPane().empty();
-            $("#xpath-advanced-check").attr("checked", true);
-            $("#xpath-advanced").show();
-            $("#xpath-simple").hide();
-            $("#xpath-advanced-notice").toggle(typeof showNotice != 'undefined' ? showNotice : false)
+
+            $("#xpath-advanced").removeClass('hide');
+            $("#xpath-simple").addClass('hide');
+            $('#fd-xpath-actions').removeClass('form-actions-condensed');
+            if (showNotice) {
+                $("#xpath-advanced-notice").removeClass('hide');
+            } else {
+                $("#xpath-advanced-notice").addClass('hide');
+            }
         };
         var showSimpleMode = function (text) {
-            $("#xpath-simple").show();
-            $("#xpath-advanced").hide();
-            $("#xpath-advanced-check").attr("checked", false);
-            $("#xpath-advanced-notice").hide();
+            $("#xpath-simple").removeClass('hide');
+            $('#fd-xpath-actions').addClass('form-actions-condensed');
+            $("#xpath-advanced").addClass('hide');
+
             getExpressionPane().empty();
             // this sometimes sends us back to advanced mode (if we couldn't parse)
             // for now consider that fine.
@@ -1447,87 +1353,30 @@ formdesigner.ui = function () {
                 setUIForExpression(text);
             }
         };
+
         var initXPathEditor = function() {
-            var mainPane = editorContent;
+            var $xpathUI = formdesigner.ui.getTemplateObject('#fd-template-xpath', {
+                topLevelJoinOpts: [
+                    ["True when ALL of the expressions are true.", expTypes.AND],
+                    ["True when ANY of the expressions are true.", expTypes.OR]
+                ]
+            });
+            editorContent.append($xpathUI);
 
-            $("<div />").attr("id", "xpath-advanced-notice")
-                .addClass("alert")
-                .text("Sorry, your logic is too complicated for our logic builder." +
-                    "   You can only edit this logic in Advanced Mode.")
-                .appendTo(editorContent);
-
-            var $label = $("<label />")
-                .attr("for", "xpath-advanced-check")
-                .text("Advanced Mode?")
-                .addClass('checkbox');
-
-
-            var advancedModeSelector = $("<input />")
-                .attr("type", "checkbox")
-                .attr("id", "xpath-advanced-check");
-
-            $label.prepend(advancedModeSelector);
-            editorContent.append($label);
-
-            advancedModeSelector.click(function() {
-                if ($(this).is(':checked')) {
-                    showAdvancedMode(getExpressionFromSimpleMode());
-                } else {
-                    showSimpleMode(getExpressionInput().val());
-                }
+            $xpathUI.find('#fd-xpath-show-advanced-button').click(function () {
+                showAdvancedMode(getExpressionFromSimpleMode());
             });
 
-            // advanced UI
-            var advancedUI = $("<div />").attr("id", "xpath-advanced")
-                    .appendTo(editorContent);
+            $xpathUI.find('#fd-xpath-show-simple-button').click(function () {
+                showSimpleMode(getExpressionInput().val());
+            });
 
-            $("<label />").attr("for", "fd-xpath-editor-text")
-                    .text("XPath Expression: ")
-                    .appendTo(advancedUI);
-
-            $("<textarea />").attr("id", "fd-xpath-editor-text")
-                    .attr("rows", "2")
-                    .attr("cols", "50")
-                    .attr("style", "width:540px; height:140px")
-                    .appendTo(advancedUI)
-                    .addClass("jstree-drop");
-            
-            $("<p>Hint: you can drag a question into the box.</p>")
-                .appendTo(advancedUI);
-
-                    
-            // simple UI
-            var simpleUI = $("<div />").attr("id", "xpath-simple").appendTo(editorContent);
-
-            var topLevelJoinOps = [
-                ["True when ALL of the expressions are true.", expTypes.AND],
-                ["True when ANY of the expressions are true.", expTypes.OR]
-            ];
-
-            constructSelect(topLevelJoinOps).appendTo(simpleUI)
-                .attr("id", "top-level-join-select")
-                .addClass('input-xxlarge');
-
-            $("<div />").attr("id", "fd-xpath-editor-expressions")
-                    .appendTo(simpleUI);
-
-            var addExpressionButton = $("<button id='fd-add-exp'/>").text("Add expression").addClass("btn")
-                    .button()
-                    .appendTo(simpleUI);
-
-            addExpressionButton.click(function() {
+            $xpathUI.find('#fd-add-exp').click(function () {
                 tryAddExpression();
             });
 
-            // shared UI
-            var actions = $("<div />").addClass("btn-group")
-                    .css("padding-top", "5px").appendTo(editorContent);
-            
-            var doneButton = $('<button />').text("Save to Form").addClass("btn").addClass("btn-primary")
-                    .button()
-                    .appendTo(actions);
-
             var saveExpression = function(expression) {
+
                 formdesigner.controller.doneXPathEditor({
                     group:    $('#fd-xpath-editor').data("group"),
                     property: $('#fd-xpath-editor').data("property"),
@@ -1536,7 +1385,7 @@ formdesigner.ui = function () {
                 formdesigner.controller.form.fire('form-property-changed');
             };
 
-            doneButton.click(function() {
+            $xpathUI.find('#fd-xpath-save-button').click(function() {
                 var uiExpression  = getExpressionFromUI();
                 getExpressionInput().val(uiExpression);
                 var results = validate(uiExpression);
@@ -1544,22 +1393,19 @@ formdesigner.ui = function () {
                     saveExpression(uiExpression);
                 } else if (uiExpression.match('instance\\(')) {
                     saveExpression(uiExpression);
-                    alert("This expression is too complex for us to verify; specifically, it makes use of the 'instance' construct. Please be aware that if you use this construct you're on your own in verifying that your expression is correct.");
+                    alert("This expression is too complex for us to verify; specifically, it makes use of the " +
+                        "'instance' construct. Please be aware that if you use this construct you're " +
+                        "on your own in verifying that your expression is correct.");
                 } else {
                     getValidationSummary().text("Validation Failed! Please fix all errors before leaving this page. " + results[1]).removeClass("success").addClass("error");
                 }
             });
-            
-            var cancelButton = $('<button />').text("Cancel").addClass("btn")
-                    .button()
-                    .appendTo(actions);
-            cancelButton.click(function () {
+
+            $xpathUI.find('#fd-xpath-cancel-button').click(function () {
                 formdesigner.controller.doneXPathEditor({
                     cancel:   true
                 });
             });
-            
-            var validationSummary = $("<div />").attr("id", "fd-xpath-validation-summary").appendTo(editorContent);
         };
 
         if (editorContent.children().length === 0) {
@@ -1571,6 +1417,7 @@ formdesigner.ui = function () {
     };
 
     that.hideXPathEditor = function() {
+        formdesigner.ui.isXpathEditorActive = false;
         $('#fd-xpath-editor').hide();
     };
 
@@ -1629,18 +1476,22 @@ formdesigner.ui = function () {
         }).bind("deselect_node.jstree", function (e, data) {
             that.resetQuestionTypeGroups();
         }).bind('before.jstree', function (e, data) {
-            var nodeId,
-                qtype;
+            var nodeId, qtype;
             if (data.func == 'is_selected' || data.func == 'get_text') {
                 nodeId = $(data.args[0]).attr('id');
             } else if (data.func == 'set_type') {
                 qtype = data.args[2];
                 nodeId = data.args[1].replace('#', '');
             }
+
             if (nodeId) {
                 that.overrideJSTreeIcon(nodeId, qtype);
             }
 
+            if (data.func === 'select_node' && that.isSelectNodeBlocked(e, data)) {
+                e.stopImmediatePropagation();
+                return false;
+            }
         });
 
         $("#fd-expand-all").click(function() {
@@ -1709,11 +1560,6 @@ formdesigner.ui = function () {
         formdesigner.windowManager.init();
     };
 
-
-    $(document).ready(function () {
-
-    });
-
     return that;
 }();
 
@@ -1773,6 +1619,8 @@ formdesigner.launch = function (opts) {
 
     if(formdesigner.loadMe) {
         formdesigner.controller.loadXForm(formdesigner.loadMe);
+    } else {
+        $('#fd-default-panel').removeClass('hide');
     }
     
     // a bit hacky, but if a form name was specified, override 

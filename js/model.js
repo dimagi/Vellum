@@ -333,7 +333,10 @@ formdesigner.model = function () {
         mugType.hasBindElement = function () {
             return Boolean(this.mug.properties.bindElement);
         };
-        
+        mugType.isSpecialGroup = function () {
+            return formdesigner.util.SPECIAL_GROUP_QUESTIONS.indexOf(this.typeSlug) !== -1;
+        };
+
         mugType.getDefaultItextRoot = function () {
             var nodeID, parent;
             if (this.hasBindElement()) { //try for the bindElement nodeID
@@ -342,7 +345,7 @@ formdesigner.model = function () {
                 // if nothing, try the dataElement nodeID
                 nodeID = this.mug.properties.dataElement.properties.nodeID;
             } else if (formdesigner.util.isSelectItem(this)) {
-                // if it's a select item, generate based on the parent and value
+                // if it's a choice, generate based on the parent and value
                 parent = formdesigner.controller.form.controlTree.getParentMugType(this);
                 if (parent) {
                     nodeID = parent.getDefaultItextRoot() + "-" + this.mug.properties.controlElement.properties.defaultValue;
@@ -419,7 +422,7 @@ formdesigner.model = function () {
             if (this.hasControlElement()) {
                 return this.mug.properties.controlElement.properties.hintItextID;
             }
-        }
+        };
         mugType.getConstraintMsgItext = function () {
             if (this.hasBindElement()) {
                 return this.mug.properties.bindElement.properties.constraintMsgItextID;
@@ -539,7 +542,7 @@ formdesigner.model = function () {
                     return hintItext.id + " is not a valid ID";
                 }
             }
-            if (controlBlock.hintItextID === 'required' && !hintIID) {
+            if (controlBlock.hintItextID === 'required' && !hintItext.id) {
                 return 'Hint ID is required but not present in this question!';
             }
             
@@ -556,7 +559,7 @@ formdesigner.model = function () {
                 }
             }
             if (constraintItext && constraintItext.id && !bindElement.constraintAttr) {
-                return "Can't have a Validation Error Message ID without a Validation Condition";
+                return "Can't have a Validation Message ID without a Validation Condition";
             }
             return validateItextItem(constraintItext, "Validation Error Message");
         },
@@ -727,7 +730,7 @@ formdesigner.model = function () {
                     values: formdesigner.util.VALID_QUESTION_TYPE_NAMES
                 },
                 defaultValue: {
-		            lstring: 'Item Value',
+		            lstring: 'Choice Value',
 		            visibility: 'hidden',
 		            editable: 'w',
 		            presence: 'optional',
@@ -3000,7 +3003,7 @@ formdesigner.model = function () {
         
         form.isEmpty = function () {
             for (var lang in this.data) {
-                if (this.data.hasOwnProperty(lang) && this.data[lang]) {
+                if (this.data.hasOwnProperty(lang) && this.data[lang] !== undefined) {
                     return false;
                 }
             }

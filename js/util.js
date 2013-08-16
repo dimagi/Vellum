@@ -48,13 +48,13 @@ formdesigner.util = (function(){
             ]
         },
         {
-            group: ['1select', 'Multiple Choice', 'icon-vellum-single-select'],
+            group: ['1select', 'Single Choice', 'icon-vellum-single-select'],
             related: [
                 ['item', 'Choice', 'icon-circle-blank']
             ],
             questions: [
-                ['1select', 'Single Answer', 'icon-vellum-single-select'],
-                ['select', 'Multiple Answer', 'icon-vellum-multi-select']
+                ['1select', 'Single Choice', 'icon-vellum-single-select'],
+                ['select', 'Multiple Choice', 'icon-vellum-multi-select']
             ]
         },
         {
@@ -156,21 +156,60 @@ formdesigner.util = (function(){
     that.QUESTION_TYPE_TO_ICONS = getQuestionTypeToIcon();
     
     // keep questions from showing up in the dropdown list here
-    that.UNEDITABLE_QUESTIONS = ["unknown", "item"];
+    that.UNCHANGEABLE_QUESTIONS = [
+        "item", "group", "repeat", "datanode", "trigger", "unknown", "androidintent", "fieldlist"
+    ];
+
+    // these questions are groups or repeats (or similar types of things).
+    // They don't have any human readable itext
+    that.SPECIAL_GROUP_QUESTIONS = [
+        'group', 'repeat', 'fieldlist'
+    ];
     
-    that.getQuestionList = function () {
+    that.getQuestionList = function (currentType) {
         var ret = [];
         for (var q in that.QUESTIONS) {
             if (that.QUESTIONS.hasOwnProperty(q) && 
-                that.UNEDITABLE_QUESTIONS.indexOf(q) === -1 ) {
-                ret.push([q, that.QUESTIONS[q]]);
+                that.UNCHANGEABLE_QUESTIONS.indexOf(q) === -1 &&
+                q !== currentType) {
+                ret.push({
+                    slug: q,
+                    name: that.QUESTIONS[q],
+                    icon: that.QUESTION_TYPE_TO_ICONS[q]
+                });
             }
         }
         return ret;
     };
 
-    that.getAddNewItextItemId = function (itextType) {
-        return 'fd-itext-add-new-' + itextType;
+    that.HELP_TEXT_FOR_SECTION = {
+        main: {
+            title: "Basic",
+            text: "<p>The <strong>Question ID</strong> is a unique identifier for a question. " +
+                "It does not appear on the phone. It is the name of the question in data exports.</p>" +
+                "<p>The <strong>Label</strong> is text that appears in the application. " +
+                "This text will not appear in data exports.</p> " +
+                "<p>Click through for more info.</p>",
+            link: "https://confluence.dimagi.com/display/commcarepublic/Form+Designer"
+        },
+        logic: {
+            title: "Logic",
+            text: "Use logic to control when questions are asked and what answers are valid. " +
+                "You can add logic to display a question based on a previous answer, to make " +
+                "the question required or ensure the answer is in a valid range.",
+            link: "https://confluence.dimagi.com/display/commcarepublic/Form+Designer"
+        },
+        content: {
+            title: "Media",
+            text: "This will allow you to add images, audio or video media to a question, or other custom content.",
+            link: "https://confluence.dimagi.com/display/commcarepublic/Multimedia+in+CommCare"
+        },
+        advanced: {
+            title: "Advanced",
+            text: "These are advanced settings and are not needed for most applications.  " +
+                "Please only change these if you have a specific need!",
+            link: "https://confluence.dimagi.com/display/commcarepublic/Form+Designer"
+        }
     };
     
     that.isReadOnly = function (mugType) {
@@ -765,11 +804,6 @@ formdesigner.util = (function(){
             return disp;
         }
 
-        long = itextItem.getValue("long", lang);
-        if (long) {
-            return long;
-        }
-
         return getNodeID();
     };
     
@@ -836,7 +870,7 @@ formdesigner.util = (function(){
     
         
     that.mugToXPathReference = function (mug) {
-        // for select items, return the quoted value.
+        // for choices, return the quoted value.
         // for everything else return the path
         if (mug.typeSlug === "item") {
             return '"' + mug.mug.properties.controlElement.properties.defaultValue + '"';
@@ -922,3 +956,24 @@ formdesigner.util = (function(){
     return that;
 
 }());
+
+
+// jquery extensions
+
+$.fn.stopLink = function() {
+    // stops anchor tags from clicking through
+    this.click(function (e) {
+        e.preventDefault();
+    });
+    return this;
+};
+
+$.fn.fdHelp = function () {
+    // creates a help popover, requires twitter bootstrap
+    this.append($('<i />').addClass('icon-question-sign'))
+        .popout({
+            trigger: 'hover',
+            html: true
+        });
+    return this;
+};

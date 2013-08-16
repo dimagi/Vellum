@@ -54,12 +54,6 @@ Contributing
 ------------
 
 To modify Vellum's CSS, you need to have [LESS](http://lesscss.org) installed.
-Currently we keep both .less source files and compiled CSS files in version
-control. Edit `_less/main.less` with your changes and then run
-
-    lessc _less/main.less > css/main.css 
-
-For any change that modifies a .less file, unless it's a very small change,
-pleas try to make two separate commits, one with your .less changes and any
-associated changes, and one with just the compiled CSS file changes.
+You each file in `style` is compiled individually and share a common library `style/lib/main.less`
+with useful mixins and variables borrowed from [Twitter Bootstrap](http://getbootstrap.com).
 

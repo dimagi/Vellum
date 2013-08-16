@@ -22,9 +22,9 @@ On the newly created form:
 6. Create the following structure using the question dropdown and add button:
 
 - Group
-  - Multi-Select
-    - Select Item
-    - Select Item
+  - Multiple Choice
+    - Choice
+    - Choice
 - Data Node
 
 7. Change the Multi-Select question type to Single Select.  This should change the tag in the control XML from select to select1.
