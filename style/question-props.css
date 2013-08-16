@@ -1,0 +1,148 @@
+.clearfix {
+  *zoom: 1;
+}
+.clearfix:before,
+.clearfix:after {
+  display: table;
+  content: "";
+  line-height: 0;
+}
+.clearfix:after {
+  clear: both;
+}
+.hide-text {
+  font: 0/0 a;
+  color: transparent;
+  text-shadow: none;
+  background-color: transparent;
+  border: 0;
+}
+.input-block-level {
+  display: block;
+  width: 100%;
+  min-height: 30px;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+#formdesigner .itext-lang-group-config {
+  margin-right: 45px;
+  margin-bottom: 20px;
+  background: #f4f4f4;
+  padding: 10px 10px 10px 0;
+  -webkit-border-radius: 10px;
+  -moz-border-radius: 10px;
+  border-radius: 10px;
+}
+#formdesigner .itext-lang-group-config:last-of-type {
+  margin-bottom: 0;
+}
+#formdesigner .itext-lang-group-config .control-group:last-child {
+  margin-bottom: 0;
+}
+.itext-block-container {
+  margin-bottom: 20px;
+}
+.itext-block-container:last-child {
+  margin-bottom: 0;
+}
+.itext-block-container > .btn-danger {
+  margin-top: 10px;
+}
+#fd-props-content {
+  padding: 0 20px;
+}
+.question-section {
+  margin-bottom: 1em;
+}
+.fd-question-fieldset {
+  border: none;
+  position: relative;
+}
+.fd-question-fieldset .accordion-heading {
+  margin-bottom: 0;
+}
+.fd-question-fieldset .accordion-toggle {
+  -webkit-transition: background 0.4s ease-in-out;
+  -moz-transition: background 0.4s ease-in-out;
+  -o-transition: background 0.4s ease-in-out;
+  transition: background 0.4s ease-in-out;
+}
+.fd-question-fieldset .accordion-toggle:hover {
+  background-color: #f6f6f6;
+  text-decoration: none;
+}
+.fd-question-fieldset > .fd-help {
+  position: absolute;
+  right: 15px;
+  top: 7px;
+  display: block;
+  font-size: 28px;
+  padding: 5px;
+}
+.fd-question-fieldset > .fd-help:hover {
+  text-decoration: none;
+  color: #46a546;
+}
+.fd-question-fieldset .accordion-inner {
+  padding-bottom: 20px;
+}
+.well-vellum {
+  margin: 0 0 20px;
+  background-color: #fafbfc;
+}
+.fd-mm-preview-container {
+  text-align: center;
+  width: 115px;
+  float: left;
+}
+.fd-mm-preview-container img {
+  padding: .5em;
+  background-color: #ffffff;
+  border: 1px solid #eeeeee;
+  margin-bottom: 10px;
+}
+.fd-mm-preview-container .btn,
+.fd-mm-upload-container .btn {
+  text-transform: capitalize;
+}
+.fd-mm-upload-container {
+  margin-left: 125px;
+}
+.fd-mm-upload-container > .control-row {
+  margin: 0px 0px 10px 0;
+}
+.fd-mm-upload-container > .control-row:first-child {
+  height: 25px;
+}
+.fd-mm-path-input {
+  margin-right: 92px;
+}
+.fd-mm-no-ref {
+  color: #999999;
+  background-color: #ffffff;
+  border: 1px solid #eeeeee;
+  padding: 10px;
+}
+.fd-mm-no-ref i {
+  display: block;
+  font-size: 56px;
+}
+.itext-lang-group .control-label {
+  text-transform: capitalize;
+}
+.fd-itextID-controls {
+  margin-right: 75px;
+}
+.fd-itextID-checkbox-container {
+  width: 55px;
+  padding: 0 5px;
+  background-color: #f1f9f1;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+}
+.fd-itextID-checkbox-container label {
+  display: block;
+  margin: 4px auto 5px;
+}

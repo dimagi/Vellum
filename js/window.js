@@ -9,7 +9,6 @@ formdesigner.windowManager = (function () {
     that.init = function () {
         $(window).resize(that.adjustToWindow);
         $(document).scroll(that.adjustToWindow);
-         $('#fd-ui-container').css('top', '0px');
 
         that.minHeight = formdesigner.windowConfig.minHeight || 200;
         that.offset = {
@@ -22,29 +21,45 @@ formdesigner.windowManager = (function () {
     };
 
     that.adjustToWindow = function () {
-        var availableSpace = $(window).height() - that.getCurrentTopOffset(),
+        var availableVertSpace = $(window).height() - that.getCurrentTopOffset(),
+            availableHorizSpace = $('.hq-content').width(),
             position = (that.getCurrentTopOffset() === 0) ? 'fixed' : 'static',
             $formdesigner = $('#fd-ui-container');
 
-        $formdesigner.css('height', availableSpace + 'px');
-        $formdesigner.parent().css('height', availableSpace + 'px');
+        // so that the document doesn't have to resize for the footer.
+        $formdesigner.parent().css('height', availableVertSpace + 'px');
 
-        $formdesigner.css('width', $formdesigner.parent().width());
-        $formdesigner.css('position', position);
+        availableVertSpace = availableVertSpace - that.getCurrentBottomOffset();
+        $formdesigner.css('height', availableVertSpace + 'px');
 
-        $formdesigner.css('left', that.getCurrentLeftOffset() + 'px');
+        $formdesigner.css('width', $formdesigner.parent().width())
+            .css('position', position)
+            .css('left', that.getCurrentLeftOffset() + 'px');
 
-        var availableColumnSpace = availableSpace - ($('.fd-toolbar').outerHeight() + that.getCurrentBottomOffset()),
-            columnHeight, scrollableContentHeight, treeHeight;
+        var availableColumnSpace = availableVertSpace - $('.fd-toolbar').outerHeight(),
+            panelHeight, columnHeight, treeHeight, questionPropHeight;
 
-        columnHeight = Math.max(availableColumnSpace, that.minHeight);
-        $('#formdesigner .fd-column').css('height', columnHeight + 'px');
+        panelHeight = Math.max(availableColumnSpace - 5, that.minHeight);
+        columnHeight = panelHeight - $('.fd-head').outerHeight();
+        treeHeight = columnHeight;
 
-        scrollableContentHeight = columnHeight - $('.fd-head').outerHeight();
-        $('#formdesigner .fd-scrollable.fd-scrollable-main').css('height', scrollableContentHeight + 'px');
+        $formdesigner.find('.fd-content').css('height', panelHeight + 'px');
 
-        treeHeight = scrollableContentHeight - $('#fd-question-tree-lang').outerHeight() - $('#fd-question-tree-actions').outerHeight();
-        $('#formdesigner .fd-scrollable.fd-scrollable-tree').css('height', treeHeight + 'px');
+        $formdesigner.find('.fd-content-left')
+            .find('.fd-scrollable').css('height', treeHeight + 'px');
+
+        $formdesigner.find('.fd-content-right')
+            .css('width', availableHorizSpace - that.geLeftWidth() + 'px')
+            .find('.fd-scrollable.full').css('height', columnHeight + 'px');
+
+        $formdesigner.find('#fd-props-scrollable')
+            .css('height', columnHeight - $('#fd-props-toolbar').outerHeight(true) + 'px');
+
+    };
+
+
+    that.geLeftWidth = function () {
+        return $('.fd-content-left').outerWidth() + $('.fd-content-divider').outerWidth(true) + 2;
     };
 
     that.getCurrentTopOffset = function () {
@@ -54,9 +69,7 @@ formdesigner.windowManager = (function () {
     };
 
     that.getCurrentBottomOffset = function () {
-        var scrollBottom = $(document).height() - ($(window).height() + $(document).scrollTop()),
-            offsetBottom = (typeof that.offset.bottom === 'function') ? that.offset.bottom() : that.offset.bottom;
-        return Math.min(Math.max(offsetBottom - scrollBottom, 0), offsetBottom);
+        return (typeof that.offset.bottom === 'function') ? that.offset.bottom() : that.offset.bottom;
     };
 
     that.getCurrentLeftOffset = function () {

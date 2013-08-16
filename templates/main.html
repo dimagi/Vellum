@@ -10,74 +10,66 @@
                     <li><a id="fd-load-xls-button" tabindex="-1" href="#">Edit Bulk Translations</a></li>
                     <li><a id="fd-export-xls-button" tabindex="-1" href="#">Export Form Contents</a></li>
                     <li><a id="fd-editsource-button" tabindex="-1" href="#">Edit Source XML</a></li>
-                    <li>
-                        <a tabindex="-1" href="#fd-form-opts" data-toggle="modal">Form Properties</a>
-                    </li>
+                    <li><a id="fd-formproperties-button" tabindex="-1" href="#" >Form Properties</a></li>
                 </ul>
             </div>
             <div id="fd-save-button"></div>
         </div>
         <div id="fd-container-question-type-group"></div>
     </div>
-    <div id="fd-question-tree-container" class="fd-tree fd-column">
-        <div id="fd-question-tree-head" class="fd-head">Question Tree</div>
-        <div id="fd-question-tree-lang"></div>
-        <div id="fd-question-tree-actions">
-            <button id="fd-expand-all" class="btn">Expand All</button>
-            <button id="fd-collapse-all" class="btn">Collapse All</button>
+
+    <div class="fd-row">
+        <div class="fd-content fd-content-left">
+           <div id="fd-question-tree-container" class="fd-tree">
+                <div id="fd-question-tree-head" class="fd-head">Question Tree</div>
+                <div class="fd-scrollable fd-scrollable-tree">
+                    <div id="fd-question-tree-lang"></div>
+                    <div id="fd-question-tree-actions" class="fd-panel-toolbar">
+                        <div class="btn-group">
+                            <button type="button" id="fd-expand-all" class="btn"><i class="icon-double-angle-down"></i> Expand All</button>
+                            <button type="button" id="fd-collapse-all" class="btn"><i class="icon-double-angle-right"></i> Collapse All</button>
+                        </div>
+                    </div>
+                    <div id="fd-question-tree"></div>
+                </div>
+            </div>
         </div>
-        <div class="fd-scrollable fd-scrollable-tree">
-            <div id="fd-question-tree"></div>
+        <div class="fd-content fd-content-divider"></div>
+        <div class="fd-content fd-content-right">
+            <div id="fd-question-properties" class="fd-column">
+                <div id="fd-props-head" class="fd-head">Question Properties</div>
+                <div id="fd-props-toolbar" class="fd-panel-toolbar"></div>
+                <div id="fd-props-scrollable" class="fd-scrollable">
+                    <form id="fd-props-content" class="form form-horizontal"></form>
+                </div>
+            </div>
+            <div id="fd-xpath-editor" class="fd-column">
+                <div id="fd-xpath-editor-head" class="fd-head">Expression Editor</div>
+                <div class="fd-scrollable full">
+                    <div id="fd-xpath-editor-content"></div>
+                </div>
+            </div>
+            <div id="fd-default-panel" class="fd-column hide">
+                <div class="well">
+                    <h2>Welcome to your new form!</h2>
+                    <p><i class="icon-arrow-left"></i> Please add a question to get started.</p>
+                </div>
+            </div>
         </div>
-    </div>
-    <div id="fd-question-properties" class="fd-column">
-        <div id="fd-props-head" class="fd-head">Question Properties</div>
-        <div class="fd-scrollable fd-scrollable-main">
-            <div id="fd-props-content" class="form form-horizontal"></div>
-        </div>
-    </div>
-    <div id="fd-xpath-editor" class="fd-column">
-        <div id="fd-xpath-editor-head" class="fd-head">Expression Editor</div>
-        <div class="fd-scrollable fd-scrollable-main">
-            <a href="https://help.commcarehq.org/display/commcarepublic/Common+Logic+and+Calculations">
-                Guide to Common Logic and Calculations
-            </a>
-            <div id="fd-xpath-editor-content"></div>
-        </div>
+
     </div>
 
     <div id="fd-messages"></div>
 
     <a id="inline" href="#data" style="display:none">This shows content of element who has id="data"</a>
-    <!--<div id="fd-form-paste"><textarea rows="20" cols="20" id="fd-form-paste-textarea"></textarea> <textarea rows="10" cols="10" id="fd-form-paste-output">output</textarea></div>-->
-    <div style="display:none">
-        <div id="data">
-            <div id="fd-source-help"></div>
-            <textarea id="fd-source" class="span11" style="min-height: 300px;"></textarea>
-            <div id="fd-source-controls"></div>
-        </div>
-    </div>
 
-
-
-    <div id="fd-dialog-confirm" title="Dialog Box">
-	    
-    </div>
+    <div id="fd-dialog-confirm" title="Dialog Box"></div>
 </div>
-<div class="modal hide fade" id="fd-form-opts" tabindex="-1" role="dialog">
-    <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal">×</button>
-        <h3 id="myModalLabel">Form Properties</h3>
-    </div>
-    <div class="modal-body">
-        <ul id="fd-form-opts-ul" class="fd-props-ul">
-        </ul>
-    </div>
-    <div class="modal-footer">
-        <button class="btn" data-dismiss="modal">Close</button>
-    </div>
-</div>
+<!-- Begin modal divs -->
 <div id="fd-multimedia-modal-container"></div>
+<div id="fd-modal-generic-container"></div>
+<!-- end modal divs -->
+
 
 <script type="text/template" id="fd-question-type-group-template">
     <div id="<%= groupID %>" class="btn-group fd-question-type-group <% if (textOnly) { %>fd-question-type-group-advanced<% } %>">
@@ -132,7 +124,7 @@
                 </label>
                 <div class="controls">
                     <div class="hqm-select-files-container">
-                        <button class="hqm-select btn btn-primary" role="button">Select File</button>
+                        <button class="hqm-select btn btn-primary" type="button">Select File</button>
                     </div>
                     <div class="hqm-queue"></div>
                 </div>
@@ -279,10 +271,10 @@
 </script>
 
 <script type="text/template" id="fd-template-button-remove">
-    <button class="btn btn-danger"><i class="icon-remove"></i></button>
+    <button type="button" class="btn btn-danger"><i class="icon-remove"></i></button>
 </script>
 
-<script type="text/template" id="fd-template-multmedia-upload-trigger">
+<script type="text/template" id="fd-template-multimedia-upload-trigger">
     <a href="#<%= uploaderId %>"
        class="btn btn-primary"
        data-toggle="modal">
@@ -291,14 +283,17 @@
 </script>
 
 <script type="text/template" id="fd-template-multimedia-block">
-    <div class="well clearfix">
-        <div class="fd-mm-upload-trigger"></div>
-        <hr />
-        <h5><i class="icon-cog"></i> Advanced</h5>
-        <div class="control-row fd-mm-path hide">
-            <button class="btn btn-inverse span3 fd-mm-path-hide">Hide Path</button> <div class="fd-mm-path-input span9"></div>
+    <div class="control-row">
+        <div class="span12">
+            <button type="button" class="btn btn-inverse fd-mm-path-show pull-right"><i class="icon-cog"></i> Advanced: Show Path</button>
+            <div class="fd-mm-upload-trigger"></div>
         </div>
-        <button class="btn btn-inverse fd-mm-path-show">Show Path</button>
+    </div>
+    <div class="control-row">
+        <div class="fd-mm-path hide span12">
+            <button type="button" class="btn btn-inverse fd-mm-path-hide pull-right">Hide Path</button>
+            <div class="fd-mm-path-input"></div>
+        </div>
     </div>
 </script>
 
@@ -317,7 +312,7 @@
     </div>
 </script>
 
-<script type="text/template" id="fd-template-message-alert">
+<script type="text/template" id="fd-template-alert-global">
     <div class="alert alert-block <%=messageType.cssClass%> fade hide">
         <button type="button" class="close" data-dismiss="alert">&times;</button>
         <h4><% if (messageType.icon) { %><i class="<%=messageType.icon%>"></i> <% } %><%=messageType.title%></h4>
@@ -328,4 +323,228 @@
         </ul>
     </div>
 </script>
+
+<script type="text/template" id="fd-template-alert-local">
+    <div class="alert <%=alertLevel%> fade in">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        <div class="alert-content"></div>
+    </div>
+</script>
+
+<script type="text/template" id="fd-template-question-toolbar">
+    <div class="fd-question-toolbar-container clearfix">
+        <div class="btn-toolbar pull-left">
+            <button id="fd-button-copy" type="button" class="btn" tabindex="-1">
+                <i class="icon-copy"></i> Copy
+            </button>
+        </div>
+        <div class="btn-toolbar pull-right">
+            <button id="fd-button-remove" type="button" class="btn btn-danger"  tabindex="-1">
+                <i class="icon-trash"></i> Delete
+            </button>
+        </div>
+    </div>
+</script>
+
+<script type="text/template" id="fd-template-question-type-changer">
+    <div class="btn-group question-type-changer">
+        <a class="btn dropdown-toggle current-question" data-toggle="dropdown" href="#">
+            <i class="<%=currentQuestionIcon%>"></i> <span class="caret"></span>
+        </a>
+        <ul class="dropdown-menu">
+            <li class="nav-header">Change Question Type To</li>
+            <% _.each(questions, function(question) { %>
+            <li>
+                <a href="#" class="change-question" data-qtype="<%=question.slug%>">
+                    <i class="<%=question.icon%>"></i> <%=question.name%>
+                </a>
+            </li>
+            <% }); %>
+        </ul>
+    </div>
+</script>
+
+<script type="text/template" id="fd-template-question-fieldset">
+    <fieldset class="accordion-group fd-question-fieldset">
+        <% if (help) { %>
+        <a href="<%=help.link%>" target="_blank" class="fd-help pull-right"
+                data-title="<%=help.title%>"
+                data-content="<%=help.text%>"
+                data-placement="left">
+        </a>
+        <% } %>
+        <legend class="accordion-heading">
+            <a class="accordion-toggle<% if (isCollapsed) { %> collapsed<% } %>" href="#<%=fieldsetId%>" data-toggle="collapse">
+                <i class="icon-double-angle-down"></i>
+                <%=fieldsetTitle%>
+            </a>
+        </legend>
+        <div id="<%=fieldsetId%>" class="accordion-body collapse<% if (!isCollapsed) { %> in<% } %>" >
+            <div class="accordion-inner fd-fieldset-content"></div>
+        </div>
+    </fieldset>
+</script>
+
+<script type="text/template" id="fd-template-control-group">
+    <div class="control-group">
+        <label<% if (controlId) { %> for="<%=controlId%>"<% } %> class="control-label"><%=label%></label>
+        <div class="controls"></div>
+    </div>
+</script>
+
+<script type="text/template" id="fd-template-control-group-stdInput">
+    <div class="control-group">
+        <label for="<%=controlId%>" class="control-label"><%=label%></label>
+        <div class="controls">
+            <input id="<%=controlId%>" type="text" />
+        </div>
+    </div>
+</script>
+
+<script type="text/template" id="fd-template-modal-content">
+    <div id="fd-modal-generic" class="modal hide fade">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+            <h3><%=modalTitle%></h3>
+        </div>
+        <div class="modal-body form form-horizontal">
+        </div>
+        <div class="modal-footer">
+            <% _.each(modalButtons, function (button) { %>
+            <button id="<%=button.id%>"
+                    class="btn <%=button.cssClasses%>"
+                    <% _.each(button.attributes, function (attrib, val) { %><%=attrib%>="<%=val%>"<% }); %>>
+                <%=button.title%>
+            </button>
+            <% }); %>
+            <button class="btn default-close-button" data-dismiss="modal" aria-hidden="true"><%=closeButtonTitle%></button>
+        </div>
+    </div>
+</script>
+
+<script type="text/template" id="fd-template-language-selector">
+    <div class="fd-lang-display-selector form form-inline">
+        <label for="fd-lang-display-select">Current Language: </label>
+        <select id="fd-lang-display-select" class="input-medium">
+            <% _.each(languages, function(language) { %>
+            <option value="<%=language.code%>"<% if (language.selected) { %> selected="selected"<% } %>>
+                <%=language.name%><% if (language.name !== language.code) { %> (<%=language.code%>) <% } %>
+            </option>
+            <% }); %>
+        </select>
+    </div>
+</script>
+
+<script type="text/template" id="fd-template-form-edit-source">
+    <div class="fd-source-container">
+        <p>
+            <%=description%>
+        </p>
+        <div class="control-row">
+            <textarea class="span12" rows="16" id="fd-source-textarea"></textarea>
+        </div>
+    </div>
+</script>
+
+<script type="text/template" id="fd-template-xpath">
+    <div class="fd-xpath-editor-container form form-horizontal">
+
+        <fieldset id="xpath-advanced" class="hide">
+            <legend><i class="icon-cog"></i> Edit Expression (Advanced) </legend>
+            <button type="button" class="btn btn-primary pull-right xpath-mode-toggle" id="fd-xpath-show-simple-button">
+                Show Simple Mode
+            </button>
+            <div class="alert hide" id="xpath-advanced-notice">
+                <p>Sorry, your logic is too complicated for our logic builder.</p>
+                <p>You can only edit this logic in Advanced Mode.</p>
+            </div>
+            <div class="control-group">
+                <label class="control-label" for="fd-xpath-editor-text">
+                    XPath Expression:
+                </label>
+                <div class="controls">
+                    <textarea id="fd-xpath-editor-text"
+                              rows="20"
+                              class="input-block-level jstree-drop"></textarea>
+                    <p class="help-block">Hint: You can drag a question into the box.</p>
+                    <p class="help-block">
+                        <a target="_blank"
+                           href="https://help.commcarehq.org/display/commcarepublic/Common+Logic+and+Calculations">
+                            <i class="icon-info-sign"></i> Guide to Common Logic and Calculations
+                        </a>
+                    </p>
+                </div>
+            </div>
+        </fieldset>
+
+        <fieldset id="xpath-simple" class="hide fieldset-condensed">
+            <legend>Edit Expression</legend>
+            <button type="button" class="btn btn-inverse pull-right xpath-mode-toggle" id="fd-xpath-show-advanced-button">
+                <i class="icon-cog"></i> Show Advanced Mode
+            </button>
+            <div class="control-group">
+                <label class="control-label">Result is:</label>
+                <div class="controls">
+                    <select class="input-block-level" id="top-level-join-select">
+                        <% _.each(topLevelJoinOpts, function (opt) { %>
+                        <option value="<%=opt[1]%>"><%=opt[0]%></option>
+                        <% }); %>
+                    </select>
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label">Expression:</label>
+                <div class="controls">
+                    <div id="fd-xpath-editor-expressions"> expression pane</div>
+                    <p class="help-block pull-right">
+                        <a target="_blank"
+                           href="https://help.commcarehq.org/display/commcarepublic/Common+Logic+and+Calculations">
+                            <i class="icon-info-sign"></i> Guide to Common Logic and Calculations
+                        </a>
+                    </p>
+                    <p><button type="button" class="btn" id="fd-add-exp"><i class="icon-plus"></i> Add Expression</button></p>
+                </div>
+            </div>
+        </fieldset>
+
+        <p id="fd-xpath-validation-summary" class="alert hide"></p>
+
+        <div id="fd-xpath-actions" class="form-actions form-actions-condensed">
+            <button type="button" class="btn btn-primary" id="fd-xpath-save-button">Save</button>
+            <button type="button" class="btn" id="fd-xpath-cancel-button">Cancel</button>
+        </div>
+    </div>
+</script>
+
+<script type="text/template" id="fd-template-xpath-expression">
+    <div class="control-group xpath-expression-group">
+        <button type="button" class="btn btn-danger xpath-delete-expression pull-right"><i class="icon-remove"></i></button>
+        <div class="validation-result-container pull-right">
+            <p class="validation-results alert alert-success hide">
+                <i class="icon-ok"></i>
+            </p>
+            <p class="validation-results alert alert-error hide">
+                <i class="icon-warning-sign"></i>
+            </p>
+        </div>
+        <div class="control-row xpath-expression-row">
+            <div class="span4">
+                <input class="input-block-level left-question xpath-edit-node jstree-drop"
+                       type="text" placeholder="Hint: drag a question here." />
+            </div>
+            <div class="span4">
+                <select class="input-block-level op-select">
+                    <% _.each(operationOpts, function (opt) { %>
+                    <option value="<%=opt[1]%>"><%=opt[0]%></option>
+                    <% }); %>
+                </select>
+            </div>
+            <div class="span4">
+                <input class="input-block-level right-question xpath-edit-node jstree-drop"
+                       type="text" placeholder="Hint: drag a question here." />
+            </div>
+        </div>
+    </div>
+</script>
+
 
