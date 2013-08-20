@@ -507,7 +507,7 @@
             </div>
         </fieldset>
 
-        <p id="fd-xpath-validation-summary" class="alert hide"></p>
+        <div id="fd-xpath-validation-summary" class="hide"></div>
 
         <div id="fd-xpath-actions" class="form-actions form-actions-condensed">
             <button type="button" class="btn btn-primary" id="fd-xpath-save-button">Save</button>
@@ -544,6 +544,19 @@
                        type="text" placeholder="Hint: drag a question here." />
             </div>
         </div>
+    </div>
+</script>
+
+<script type="text/template" id="fd-template-xpath-validation-errors">
+    <div class="alert alert-error">
+        <h4><i class="icon-warning-sign"></i> Validation Failed</h4>
+        <p>Please fix all errors before leaving this page:</p>
+        <%=errors%>
+        <ul>
+        <% _.each(errors, function (error) { %>
+            <li><%=error%></li>
+        <% }); %>
+        </ul>
     </div>
 </script>
 

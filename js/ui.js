@@ -1307,7 +1307,6 @@ formdesigner.ui = function () {
             // clear validation text
             getValidationSummary()
                 .text("")
-                .removeClass("alert-error alert-success")
                 .addClass("hide");
 
             // clear expression builder
@@ -1397,7 +1396,11 @@ formdesigner.ui = function () {
                         "'instance' construct. Please be aware that if you use this construct you're " +
                         "on your own in verifying that your expression is correct.");
                 } else {
-                    getValidationSummary().text("Validation Failed! Please fix all errors before leaving this page. " + results[1]).removeClass("success").addClass("error");
+                    getValidationSummary()
+                        .html(formdesigner.ui.getTemplateObject('#fd-template-xpath-validation-errors', {
+                            errors: results[1]
+                        }))
+                        .removeClass("hide");
                 }
             });
 
