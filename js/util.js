@@ -39,6 +39,13 @@ formdesigner.util = (function(){
                              "bindElement/calculateAttr",
                              "bindElement/constraintAttr"];
 
+    that.ICON_ALIASES = {
+        'item': {
+            '1select': 'icon-circle-blank',
+            'select': 'icon-check-empty'
+        }
+    };
+
     that.QUESTION_GROUPS = [
         {
             group: ['text', 'Text', 'icon-vellum-text'],  // [<default_slug>, <title>, <icon-class>]

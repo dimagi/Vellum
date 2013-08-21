@@ -1524,9 +1524,23 @@ formdesigner.ui = function () {
         if (!qtype && mugType) {
             qtype = mugType.typeSlug;
         }
+
         iconClass = formdesigner.util.QUESTION_TYPE_TO_ICONS[qtype];
+
+        if (qtype in formdesigner.util.ICON_ALIASES) {
+            var $parentNode, parentMugType, iconAlias;
+            try {
+                $parentNode = $questionNode.parent().parent();
+                parentMugType = formdesigner.controller.getMTFromFormByUFID($parentNode.attr('id'));
+                iconAlias = formdesigner.util.ICON_ALIASES[qtype][parentMugType.typeSlug];
+            } catch (e) {
+                // pass
+            }
+            iconClass = iconAlias || iconClass;  // default to the original icon if the alias is null
+        }
+
         if (!iconClass) {
-            iconClass = 'icon-circle';
+            iconClass = 'icon-circle';  // this should only appear if something goes horribly wrong.
         }
         if (!$questionNode.find('> a > ins').hasClass(iconClass)) {
             $questionNode.find('> a > ins').attr('class', 'jstree-icon').addClass(iconClass);
