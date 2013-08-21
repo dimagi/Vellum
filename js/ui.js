@@ -1065,7 +1065,6 @@ formdesigner.ui = function () {
 
 
     that.showXPathEditor = function (options) {
-        formdesigner.ui.isXpathEditorActive = true;
         /**
          * All the logic to display the XPath Editor widget.
          */
@@ -1142,6 +1141,11 @@ formdesigner.ui = function () {
             return [true, null];
         };
 
+        var markEditorAsActive = function () {
+            if (!formdesigner.ui.isXpathEditorActive) {
+                formdesigner.ui.isXpathEditorActive = true;
+            }
+        };
 
         var tryAddExpression = function(parsedExpression, joiningOp) {
             // trys to add an expression to the UI.
@@ -1195,6 +1199,8 @@ formdesigner.ui = function () {
                 };
 
                 var validateExpression = function(item) {
+                    markEditorAsActive();
+
                     var le = getLeftQuestionInput().val(),
                         re = getRightQuestionInput().val();
 
@@ -1301,6 +1307,7 @@ formdesigner.ui = function () {
                 showAdvancedMode(xpathstring, true);
             }
         };
+
         var updateXPathEditor = function(options) {
             // set data properties for callbacks and such
             editorPane.data("group", options.group).data("property", options.property);
@@ -1372,6 +1379,10 @@ formdesigner.ui = function () {
 
             $xpathUI.find('#fd-add-exp').click(function () {
                 tryAddExpression();
+            });
+
+            $xpathUI.find('#fd-xpath-editor-text').on('change keyup', function (){
+                markEditorAsActive();
             });
 
             var saveExpression = function(expression) {
