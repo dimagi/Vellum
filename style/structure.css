@@ -133,31 +133,6 @@
   padding: 2px 0 !important;
   font-size: 15.400000000000002px !important;
 }
-.jstree a > ins.jstree-icon {
-  background: none;
-  font-size: .85em;
-}
-.jstree a > ins {
-  color: #2787d0;
-}
-.jstree a {
-  color: #37475d;
-  line-height: 18px;
-  padding: 1px 6px 3px;
-  -webkit-border-radius: 5px;
-  -moz-border-radius: 5px;
-  border-radius: 5px;
-}
-.jstree a.jstree-hovered,
-.jstree a.jstree-clicked {
-  border: none;
-  background: #e3effb;
-}
-.jstree a.jstree-clicked {
-  -webkit-box-shadow: 0px 0px 4px rgba(21, 87, 162, 0.6);
-  -moz-box-shadow: 0px 0px 4px rgba(21, 87, 162, 0.6);
-  box-shadow: 0px 0px 4px rgba(21, 87, 162, 0.6);
-}
 #fd-form-actions {
   padding-right: 20px;
 }

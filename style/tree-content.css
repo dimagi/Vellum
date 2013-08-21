@@ -52,3 +52,28 @@
   left: 0;
   width: 100%;
 }
+.jstree a {
+  color: #37475d;
+  line-height: 18px;
+  padding: 1px 6px 3px !important;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+}
+.jstree a.jstree-hovered,
+.jstree a.jstree-clicked {
+  border: none;
+  background: #eaeff5;
+}
+.jstree a.jstree-clicked {
+  -webkit-box-shadow: 0px 0px 4px rgba(21, 87, 162, 0.6);
+  -moz-box-shadow: 0px 0px 4px rgba(21, 87, 162, 0.6);
+  box-shadow: 0px 0px 4px rgba(21, 87, 162, 0.6);
+}
+.jstree a > ins.jstree-icon {
+  background: none;
+  font-size: .85em;
+}
+.jstree a > ins {
+  color: #2787d0;
+}
