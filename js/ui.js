@@ -1099,7 +1099,6 @@ formdesigner.ui = function () {
 
 
     that.showXPathEditor = function (options) {
-        formdesigner.ui.isXpathEditorActive = true;
         /**
          * All the logic to display the XPath Editor widget.
          */
@@ -1176,6 +1175,11 @@ formdesigner.ui = function () {
             return [true, null];
         };
 
+        var markEditorAsActive = function () {
+            if (!formdesigner.ui.isXpathEditorActive) {
+                formdesigner.ui.isXpathEditorActive = true;
+            }
+        };
 
         var tryAddExpression = function(parsedExpression, joiningOp) {
             // trys to add an expression to the UI.
@@ -1229,6 +1233,8 @@ formdesigner.ui = function () {
                 };
 
                 var validateExpression = function(item) {
+                    markEditorAsActive();
+
                     var le = getLeftQuestionInput().val(),
                         re = getRightQuestionInput().val();
 
@@ -1335,13 +1341,13 @@ formdesigner.ui = function () {
                 showAdvancedMode(xpathstring, true);
             }
         };
+
         var updateXPathEditor = function(options) {
             // set data properties for callbacks and such
             editorPane.data("group", options.group).data("property", options.property);
             // clear validation text
             getValidationSummary()
                 .text("")
-                .removeClass("alert-error alert-success")
                 .addClass("hide");
 
             // clear expression builder
@@ -1409,6 +1415,10 @@ formdesigner.ui = function () {
                 tryAddExpression();
             });
 
+            $xpathUI.find('#fd-xpath-editor-text').on('change keyup', function (){
+                markEditorAsActive();
+            });
+
             var saveExpression = function(expression) {
 
                 formdesigner.controller.doneXPathEditor({
@@ -1431,7 +1441,11 @@ formdesigner.ui = function () {
                         "'instance' construct. Please be aware that if you use this construct you're " +
                         "on your own in verifying that your expression is correct.");
                 } else {
-                    getValidationSummary().text("Validation Failed! Please fix all errors before leaving this page. " + results[1]).removeClass("success").addClass("error");
+                    getValidationSummary()
+                        .html(formdesigner.ui.getTemplateObject('#fd-template-xpath-validation-errors', {
+                            errors: results[1]
+                        }))
+                        .removeClass("hide");
                 }
             });
 
