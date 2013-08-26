@@ -2538,20 +2538,23 @@ formdesigner.model = function () {
                         }
                         for (var j = 0; j < allItems.length; j++) {
                             item = allItems[j];
-                            xmlWriter.writeStartElement("text");
-                            xmlWriter.writeAttributeStringSafe("id", item.id);
-                            forms = item.getForms();
-                            for (var k = 0; k < forms.length; k++) {
-                                form = forms[k];
-                                val = form.getValueOrDefault(lang);
-                                xmlWriter.writeStartElement("value");
-                                if(form.name !== "default") {
-                                    xmlWriter.writeAttributeStringSafe('form', form.name);
+                            if (item.id) {
+                                xmlWriter.writeStartElement("text");
+                                xmlWriter.writeAttributeStringSafe("id", item.id);
+                                forms = item.getForms();
+                                for (var k = 0; k < forms.length; k++) {
+                                    form = forms[k];
+                                    val = form.getValueOrDefault(lang);
+                                    xmlWriter.writeStartElement("value");
+                                    if(form.name !== "default") {
+                                        xmlWriter.writeAttributeStringSafe('form', form.name);
+                                    }
+                                    xmlWriter.writeString(val);
+                                    xmlWriter.writeEndElement();
                                 }
-                                xmlWriter.writeString(val);
-                                xmlWriter.writeEndElement();    
+                                xmlWriter.writeEndElement();
                             }
-                            xmlWriter.writeEndElement();
+
                         }
                         xmlWriter.writeEndElement();
                     }
