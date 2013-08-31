@@ -1847,10 +1847,8 @@ formdesigner.controller = (function () {
         var Itext = formdesigner.model.Itext;
 
         function eachLang() {
-            
             var el = $(this), defaultExternalLang;
             var lang = el.attr('lang');
-            var argument_langs = formdesigner.opts["langs"];
             
             function eachText() {
                 var textEl = $ (this);
@@ -1868,28 +1866,13 @@ formdesigner.controller = (function () {
                 textEl.children().each(eachValue);
             }
 
-            //if we were passed a list of languages (in order of preference from outside)...
-            if (argument_langs) {  //we make sure this is a valid list with things in it or null at init time.
-                for (var i = 0; i < argument_langs; i++) {
-                    if (argument_langs.hasOwnProperty(i)) {
-                        Itext.addLanguage(argument_langs[i]);
-                    }
-                }
-                //grab the new 'default' language. (Opts languages listing takes precedence over form specified default)
-                defaultExternalLang = argument_langs[0];
-            }
-
-            if (argument_langs && argument_langs.indexOf(lang) === -1) { //this language does not exist in the list of langs provided in launch args
+            if (formdesigner.opts.langs && formdesigner.opts.langs.indexOf(lang) === -1) { //this language does not exist in the list of langs provided in launch args
                 that.addParseWarningMsg("The Following Language will be deleted from the form as it is not listed as a language in CommCareHQ: <b>" + lang + "</b>");
                 return; //the data for this language will be dropped.
             }
             Itext.addLanguage(lang);
             if (el.attr('default') !== undefined) {
                 Itext.setDefaultLanguage(lang);
-            }
-
-            if (defaultExternalLang) {
-                Itext.setDefaultLanguage(defaultExternalLang); //set the form default to the one specified in initialization options.
             }
 
             //loop through children
