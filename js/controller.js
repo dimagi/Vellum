@@ -1889,10 +1889,6 @@ formdesigner.controller = (function () {
                 textEl.children().each(eachValue);
             }
 
-            if (formdesigner.opts.langs && formdesigner.opts.langs.indexOf(lang) === -1) { //this language does not exist in the list of langs provided in launch args
-                that.addParseWarningMsg("The Following Language will be deleted from the form as it is not listed as a language in CommCareHQ: <b>" + lang + "</b>");
-                return; //the data for this language will be dropped.
-            }
             Itext.addLanguage(lang);
             if (el.attr('default') !== undefined) {
                 Itext.setDefaultLanguage(lang);
