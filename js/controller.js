@@ -1388,7 +1388,10 @@ formdesigner.controller = (function () {
     var getITextReference = function (value) {
         try {
             var parsed = xpath.parse(value);
-            if (parsed instanceof xpathmodels.XPathFuncExpr && parsed.id === "jr:itext") {
+            if (parsed instanceof xpathmodels.XPathFuncExpr && 
+                parsed.id === "jr:itext" &&
+                itextReferencesToIgnore.indexOf(parsed.args[0].value) === -1) 
+            {
                 return parsed.args[0].value;
             } 
         } catch (err) {
@@ -1867,11 +1870,22 @@ formdesigner.controller = (function () {
     }
 
     // ITEXT PARSING FUNCTIONS
+    // ids for empty itext items, i.e., <text id="foo"><value></value></text>.
+    // Seen in uploaded FormHub forms.
+    var itextReferencesToIgnore; 
 
     function parseItextBlock (itextBlock) {
+        var emptyItextIDs = {};
+
         function eachLang() {
             var el = $(this), defaultExternalLang;
             var lang = el.attr('lang');
+
+            // handle FormHub forms which use 'eng' instead of 'en' as the
+            // language code for English
+            if (lang === "eng") {
+                lang = "en";
+            }
             
             function eachText() {
                 var textEl = $ (this);
@@ -1879,12 +1893,15 @@ formdesigner.controller = (function () {
                 var item = Itext.getOrCreateItem(id);
                 
                 function eachValue() {
-                    var valEl = $(this);
-                    var curForm = valEl.attr('form');
-                    if(!curForm) {
-                        curForm = "default";
+                    var valEl = $(this),
+                        curForm = valEl.attr('form') || "default",
+                        content = formdesigner.util.getXLabelValue(valEl);
+
+                    if (content) {
+                        item.getOrCreateForm(curForm).setValue(lang, content);
+                    } else {
+                        emptyItextIDs[id] = 1 + (emptyItextIDs[id] || 0);
                     }
-                    item.getOrCreateForm(curForm).setValue(lang, formdesigner.util.getXLabelValue(valEl));
                 }
                 textEl.children().each(eachValue);
             }
@@ -1907,7 +1924,16 @@ formdesigner.controller = (function () {
             formdesigner.model.Itext.setDefaultLanguage(formdesigner.opts.langs[0]);
         }
         $(itextBlock).children().each(eachLang);
-        if (Itext.getLanguages().length === 0) {
+        var numLanguages = Itext.getLanguages().length;
+
+        itextReferencesToIgnore = [];
+        for (var id in emptyItextIDs) {
+            if (emptyItextIDs[id] == numLanguages) {
+                itextReferencesToIgnore.push(id);
+            }
+        }
+
+        if (numLanguages === 0) {
             // there likely wasn't itext in the form or config. At least
             // set a default language
             Itext.addLanguage("en");
