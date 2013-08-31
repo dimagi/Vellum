@@ -1557,7 +1557,6 @@ formdesigner.controller = (function () {
      * @param controlEl
      */
     function classifyAndCreateMugType (nodePath, cEl) {
-
         var oldMT = that.getMugByPath(nodePath, 'data'), //check the data node to see if there's a related MT already present
             mugType, mug, tagName, bindEl, dataEl, dataType, appearance, MTIdentifier, mediaType,
             //flags
@@ -1592,7 +1591,13 @@ formdesigner.controller = (function () {
         }else if (tagName === 'trigger') {
             MTIdentifier = 'stdTrigger';
         }else if (tagName === 'input') {
-            MTIdentifier = MTIdentifierFromInput(dataType, appearance);
+            if (cEl.attr('readonly') === 'true()') {
+                MTIdentifier = 'stdTrigger';
+                cEl.removeAttr('readonly');
+                delete bindEl.properties.dataType;
+            } else {
+                MTIdentifier = MTIdentifierFromInput(dataType, appearance);
+            }
         }else if (tagName === 'item') {
             MTIdentifier = 'stdItem';
         }else if (tagName === 'group') {
