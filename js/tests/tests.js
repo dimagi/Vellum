@@ -799,7 +799,6 @@ start();
             c.loadXForm(cruftyForm);
             window.setTimeout(function () {
                 start();
-                c.removeCruftyItext();
                 same(Itext.getNonEmptyItemIds(), cleanIDs, "Controller function for UI for cleaning out Crufty Itext produces correct results");
 
             },700);

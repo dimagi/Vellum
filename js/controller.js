@@ -115,52 +115,6 @@ formdesigner.controller = (function () {
         formdesigner.util.setStandardFormEventResponses(that.form);
     };
 
-
-    /**
-     * Walks through both internal trees (data and control) and grabs
-     * the Itext id's from any Mugs that are found.  Returns
-     * a flat list of iIDs.  This list is primarily used
-     * for trimming out crufty itext.  See also
-     * formdesigner.model.Itext.removeCruftyItext()
-     */
-    var getAllNonEmptyItextItemsFromMugs = function () {
-        
-        // get all the itext references in the forms
-        var ret = [];
-        var appendItemsIfPresent = function (node) {
-            if (node.isRootNode) {
-                return;
-            }
-
-            var mt = node.getValue();
-            if(!mt) {
-                throw 'Node in tree without value?!?!'
-            }
-            
-            var thingsToGet = ['controlElement/labelItextID', 'controlElement/hintItextID', 
-                               'bindElement/constraintMsgItextID'] ; 
-        
-            var val;            
-            for (var i = 0; i < thingsToGet.length; i++) {
-	            try {
-	                val = mt.getPropertyValue(thingsToGet[i]);
-	                if (val && !val.isEmpty() && ret.indexOf(val) === -1) {
-	                   // it was there and not present so add it to the list
-	                   ret.push(val);
-	                } 
-	            } catch (err) {
-	                // probably just wasn't in the mug
-	            }
-            }    
-        };
-        
-        that.form.controlTree.treeMap(appendItemsIfPresent);
-        that.form.dataTree.treeMap(appendItemsIfPresent);
-        return ret; 
-
-    };
-    that.getAllNonEmptyItextItemsFromMugs = getAllNonEmptyItextItemsFromMugs;
-
     /**
      * Returns a MugType NOT a Mug!
      * @param path - String of path you want
@@ -306,18 +260,6 @@ formdesigner.controller = (function () {
         });
     };
 
-    /**
-     * Function for triggering a clean out of the itext
-     * where all ids + itext data are removed that are
-     * found to not be linked to any element in the form.
-     *
-     * Toggles the ui spinner (this operation could take a few seconds).
-     */
-    var removeCruftyItext = function () {
-        var validIds = that.getAllNonEmptyItextItemsFromMugs();
-        formdesigner.model.Itext.resetItextList(validIds);
-    };
-    that.removeCruftyItext = removeCruftyItext;
 
     /**
      * Inserts a new MugType into the relevant Trees (and their
@@ -815,7 +757,6 @@ formdesigner.controller = (function () {
         var idata, row, iID, lang, form, val, Itext,
                 out = '';
         
-        that.removeCruftyItext();
         Itext = formdesigner.model.Itext;
         
         /**
