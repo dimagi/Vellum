@@ -1398,6 +1398,11 @@ formdesigner.controller = (function () {
         return false;
     };
     
+    function getLabelRef($lEl) {
+        var ref = $lEl.attr('ref');
+        return ref ? getITextReference(ref) : null;
+    }
+
     var lookForNamespaced = function (element, reference) {
         // due to the fact that FF and Webkit store namespaced
         // values slightly differently, we have to look in 
@@ -1407,12 +1412,13 @@ formdesigner.controller = (function () {
 
     var Itext = formdesigner.model.Itext;
 
+
     // CONTROL PARSING FUNCTIONS
     function parseLabel(lEl, MT) {
-        var labelVal = formdesigner.util.getXLabelValue($(lEl)),
-            labelRef = $(lEl).attr('ref'),
-            cProps = MT.mug.properties.controlElement.properties,
-            asItext;
+        var $lEl = $(lEl),
+            labelVal = formdesigner.util.getXLabelValue($lEl),
+            labelRef = getLabelRef($lEl),
+            cProps = MT.mug.properties.controlElement.properties;
         var labelItext;
         cProps.label = labelVal;
         
@@ -1425,16 +1431,11 @@ formdesigner.controller = (function () {
         };
         
         if (labelRef){
-            //strip itext incantation
-            asItext = getITextReference(labelRef);
-            if (asItext) {
-                labelItext = Itext.getOrCreateItem(asItext);
-            } else {
-                // this is likely an error, though not sure what we should do here
-                // for now just populate with the default
-                labelItext = newLabelItext(MT);
-            }
+            labelItext = Itext.getOrCreateItem(labelRef);
         } else {
+            // if there was a ref attribute but it wasn't formatted like an
+            // itext reference, it's likely an error, though not sure what
+            // we should do here for now just populate with the default
             labelItext = newLabelItext(MT);
         }
         
@@ -1451,14 +1452,13 @@ formdesigner.controller = (function () {
     }
 
     function parseHint (hEl, MT) {
-        var hintVal = formdesigner.util.getXLabelValue($(hEl)),
-            hintRef = $(hEl).attr('ref'),
+        var $hEl = $(hEl),
+            hintVal = formdesigner.util.getXLabelValue($hEl),
+            hintRef = getLabelRef($hEl),
             cProps = MT.mug.properties.controlElement.properties;
 
-        //strip itext incantation
-        var asItext = getITextReference(hintRef);
-        if (asItext) {
-            cProps.hintItextID = Itext.getOrCreateItem(asItext);
+        if (hintRef) {
+            cProps.hintItextID = Itext.getOrCreateItem(hintRef);
         } else {
             // couldn't parse the hint as itext.
             // just create an empty placeholder for it
