@@ -291,10 +291,6 @@ formdesigner.model = function () {
         if (mugSpec) {
             mug = new Mug(mugSpec);
             if (controlElSpec) {
-                if (formdesigner.util.isSelectItem(mugType) &&
-                    typeof controlElSpec.defaultValue !== 'undefined') {
-                    controlElSpec.defaultValue = formdesigner.util.generate_item_label();
-                }
                 mug.properties.controlElement = new ControlElement(controlElSpec);
             }
             if (dataElSpec) {
@@ -1348,6 +1344,8 @@ formdesigner.model = function () {
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
         mType.mug.properties.controlElement.properties.tagName = "item";
+        mType.mug.properties.controlElement.properties.defaultValue = formdesigner.util.generate_item_label();
+
         return mType;
     };
 
