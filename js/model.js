@@ -798,6 +798,9 @@ formdesigner.model = function () {
             }
             return ret;
         },
+        getIcon: function () {
+            return this.icon;
+        },
         //for validating a mug against this internal definition we have.
         validateMug : function () {
             /**
@@ -1333,6 +1336,14 @@ formdesigner.model = function () {
             mug, vResult, controlProps;
         mType.typeName = 'Choice';
         mType.icon = 'icon-circle-blank';
+        mType.iconFromParent = {
+            'stdMSelect': 'icon-check-empty',
+        };
+
+        mType.getIcon = function () {
+            var parentMT = formdesigner.controller.form.controlTree.getParentMugType(mType);
+            return mType.iconFromParent[parentMT.typeSlug] || mType.icon;
+        };
 
         controlProps = mType.properties.controlElement;
         controlProps.hintLabel.presence = 'notallowed';
