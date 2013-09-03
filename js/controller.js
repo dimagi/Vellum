@@ -754,6 +754,10 @@ formdesigner.controller = (function () {
                 '#' + mugType.ufid
             );
 
+            if (formdesigner.util.isSelect(newMugType)) {
+                that.updateMugChildren(newMugType);
+            }
+
             // update question type changer
             $currentChanger.after(formdesigner.widgets.getQuestionTypeChanger(newMugType)).remove();
             
@@ -764,9 +768,22 @@ formdesigner.controller = (function () {
         } else {
             formdesigner.ui.overrideJSTreeIcon(mugType.ufid, questionType);
 
+            if (formdesigner.util.isSelect(mugType)) {
+                that.updateMugChildren(mugType);
+            }
+
             // update question type changer
             $currentChanger.after(formdesigner.widgets.getQuestionTypeChanger(mugType)).remove();
         }
+    };
+
+    that.updateMugChildren = function (parentMugType) {
+        _.each(that.getChildren(parentMugType), function (childMugType) {
+            that.fire({
+                type: "update-icon",
+                mugType: childMugType
+            });
+        });
     };
 
     that.loadMugTypeIntoUI = function (mugType) {
