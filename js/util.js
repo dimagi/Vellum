@@ -39,143 +39,37 @@ formdesigner.util = (function(){
                              "bindElement/calculateAttr",
                              "bindElement/constraintAttr"];
 
-    that.QUESTION_GROUPS = [
-        {
-            group: ['text', 'Text', 'icon-vellum-text'],  // [<default_slug>, <title>, <icon-class>]
-            questions: [
-                ['text', 'Text Question', 'icon-vellum-text'],  // [<slug>, <title>, <icon-class>]
-                ['trigger', 'Label', 'icon-tag']
-            ]
-        },
-        {
-            group: ['1select', 'Single Choice', 'icon-vellum-single-select'],
-            related: [
-                ['item', 'Choice', 'icon-circle-blank']
-            ],
-            questions: [
-                ['1select', 'Single Choice', 'icon-vellum-single-select'],
-                ['select', 'Multiple Choice', 'icon-vellum-multi-select']
-            ]
-        },
-        {
-            group: ['int', 'Number', 'icon-vellum-numeric'],
-            questions: [
-                ['int', 'Integer', 'icon-vellum-numeric'],
-                ['phonenumber', 'Phone Number or Numeric ID', 'icon-signal'],
-                ['double', 'Decimal', 'icon-vellum-decimal'],
-                ['long', 'Long', 'icon-vellum-long']
-            ]
-        },
-        {
-            group: ['date', 'Date', 'icon-calendar'],
-            questions: [
-                ['date', 'Date', 'icon-calendar'],
-                ['time', 'Time', 'icon-time'],
-                ['datetime', 'Date and Time', 'icon-vellum-datetime']
-            ]
-        },
-        {
-            group: ['datanode', 'Hidden Value', 'icon-vellum-variable'],
-            showDropdown: false,
-            questions: [
-                ['datanode', 'Hidden Value', 'icon-vellum-variable']
-            ]
-        },
-        {
-            group: ['group', 'Groups', 'icon-folder-open'],
-            questions: [
-                ['group', 'Group', 'icon-folder-open'],
-                ['repeat', 'Repeat Group', 'icon-retweet'],
-                ['fieldlist', 'Question List', 'icon-reorder']
-            ]
-        },
-        {
-            group: ['image', 'Multimedia Capture', 'icon-camera'],
-            questions: [
-                ['image', 'Image Capture', 'icon-camera'],
-                ['audio', 'Audio Capture', 'icon-vellum-audio-capture'],
-                ['video', 'Video Capture', 'icon-facetime-video']
-            ]
-        },
-        {
-            group: ['geopoint', 'Advanced', ''],
-            textOnly: true,
-            questions: [
-                ['geopoint', 'GPS', 'icon-map-marker'],
-                ['barcode', 'Barcode Scan', 'icon-barcode'],
-                ['secret', 'Password', 'icon-key'],
-                ['androidintent', 'Android App Callout', 'icon-vellum-android-intent']
-            ]
-        }
-    ];
 
-    that.getQuestionTypeGroupID = function (slug) {
-        return "fd-question-group-" + slug;
-    };
-
-    var getQuestionTypeToName = function () {
-        var names = {
-            'unknown': 'Unknown Question Type'
-        };
-        _.each(that.QUESTION_GROUPS, function (groupData) {
-            var allQuestions = _.union(groupData.questions, groupData.related || []);
-             _.each(allQuestions, function (q) {
-                names[q[0]] = q[1];
-            });
-        });
-        return names;
-    };
-
-    that.QUESTIONS = getQuestionTypeToName();
-
-    var getQuestionTypeToGroup = function () {
-        var groups = {};
-        _.each(that.QUESTION_GROUPS, function (groupData) {
-            var groupSlug = groupData.group[0],
-                allQuestions = _.union(groupData.questions, groupData.related || []);
-             _.each(allQuestions, function (q) {
-                groups[q[0]] = groupSlug;
-            });
-        });
-        return groups;
-    };
-
-    that.QUESTION_TYPE_TO_GROUP = getQuestionTypeToGroup();
-
-    var getQuestionTypeToIcon = function () {
-        var typeToIcons = {};
-        _.each(that.QUESTION_GROUPS, function (groupData) {
-            var allQuestions = _.union(groupData.questions, groupData.related || []);
-             _.each(allQuestions, function (q) {
-                 typeToIcons[q[0]] = q[2];
-            });
-        });
-        return typeToIcons;
-    };
-
-    that.QUESTION_TYPE_TO_ICONS = getQuestionTypeToIcon();
-    
     // keep questions from showing up in the dropdown list here
     that.UNCHANGEABLE_QUESTIONS = [
-        "item", "group", "repeat", "datanode", "trigger", "unknown", "androidintent", "fieldlist"
+        "stdItem", 
+        "stdGroup", 
+        "stdRepeat", 
+        "stdDataBindOnly", 
+        "stdTrigger", 
+        "unknown", 
+        "stdAndroidIntent", 
+        "stdFieldList"
     ];
 
     // these questions are groups or repeats (or similar types of things).
     // They don't have any human readable itext
     that.SPECIAL_GROUP_QUESTIONS = [
-        'group', 'repeat', 'fieldlist'
+        'stdGroup', 
+        'stdRepeat', 
+        'stdFieldList'
     ];
     
     that.getQuestionList = function (currentType) {
         var ret = [];
-        for (var q in that.QUESTIONS) {
-            if (that.QUESTIONS.hasOwnProperty(q) && 
+        for (var q in formdesigner.ui.QUESTIONS) {
+            if (formdesigner.ui.QUESTIONS.hasOwnProperty(q) && 
                 that.UNCHANGEABLE_QUESTIONS.indexOf(q) === -1 &&
                 q !== currentType) {
                 ret.push({
                     slug: q,
-                    name: that.QUESTIONS[q],
-                    icon: that.QUESTION_TYPE_TO_ICONS[q]
+                    name: formdesigner.ui.QUESTIONS[q],
+                    icon: formdesigner.ui.QUESTION_TYPE_TO_ICONS[q]
                 });
             }
         }
@@ -602,34 +496,6 @@ formdesigner.util = (function(){
             'secret'
     ];
 
-
-    // TODO: what is this for?
-    that.VALID_QUESTION_TYPE_NAMES = [
-            'Text',
-            'Phone Number or Numeric ID',
-            'Group',
-            'Repeat',
-            'FieldList',
-            'Trigger',
-            'Single-Select',
-            'Multi-Select',
-            'Integer',
-            'Decimal', // one of these shouldn't be here
-            'Double',  // one of these shouldn't be here
-            'Long',
-            'Float',
-            'Date',
-            'DateTime',
-            'Time',
-            'Picture',
-            'Audio',
-            'GPS',
-            'Barcode',
-            'Secret',
-            'Geopoint',
-            'AndroidIntent'
-    ];
-
     /**
      * Shortcut func because I'm tired of typing this out all the time.
      * @param obj
@@ -872,7 +738,7 @@ formdesigner.util = (function(){
     that.mugToXPathReference = function (mug) {
         // for choices, return the quoted value.
         // for everything else return the path
-        if (mug.typeSlug === "item") {
+        if (mug.typeSlug === "stdItem") {
             return '"' + mug.mug.properties.controlElement.properties.defaultValue + '"';
         } else {
             // for the currently selected mug, return a "."
@@ -887,12 +753,12 @@ formdesigner.util = (function(){
     };
         
     that.isSelect = function (mug) {
-        return (mug.typeSlug === "select" ||
-                mug.typeSlug === "1select");
+        return (mug.typeSlug === "stdMSelect" ||
+                mug.typeSlug === "stdSelect");
     };
     
     that.isSelectItem = function (mug) {
-        return (mug.typeSlug === "item");
+        return (mug.typeSlug === "stdItem");
     };
 
     /**

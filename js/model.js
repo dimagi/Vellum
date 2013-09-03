@@ -199,23 +199,19 @@ formdesigner.model = function () {
      * of user viewable content.
      * spec:
      * {
-     *  typeName, //the type string indicating what type of Control Element this is
-     *            //see the control_definitions (tag_name) object e.g. "input"
-     *  controlName //control_definition.controlElement.controlType.name; e.g. "text"
      *  //optional:
      *  label
      *  hintLabel
      *  labelItext
      *  hintItext
      *  defaultValue
-     *
      * }
      */
     var ControlElement = function (spec) {
         var that = {};
         that.properties = {};
 
-        var typeName, controlName, label, hintLabel, labelItext, hintItext, defaultValue;
+        var label, hintLabel, labelItext, hintItext, defaultValue;
         formdesigner.util.give_ufid(that);
 
         (function constructor(mySpec) {
@@ -576,7 +572,6 @@ formdesigner.model = function () {
 
 
     var RootMugType = {
-        typeName: "The Abstract Mug Type Definition", //human readable Type Name (Can be anything)
         type : "root", //easier machine readable value for the above;
         //type var can contain the following values: 'd', 'b', 'c', ('data', 'bind' and 'control' respectively)
         // or any combination of them. For example, a Mug that contains a dataElement and a controlElement (but no bindElement)
@@ -723,12 +718,6 @@ formdesigner.model = function () {
                 }
             },
             controlElement: {
-                name: { //internal use
-                    editable: 'w',
-                    visibility: 'hidden',
-                    presence: 'required',
-                    values: formdesigner.util.VALID_QUESTION_TYPE_NAMES
-                },
                 defaultValue: {
 		            lstring: 'Choice Value',
 		            visibility: 'hidden',
@@ -1029,7 +1018,7 @@ formdesigner.model = function () {
             if (this.mug && this.mug.properties.dataElement) {
                 return this.mug.properties.dataElement.properties.nodeID;
             } else {
-                return this.typeName;
+                return this.typeSlug;
             }
         }
 
@@ -1051,28 +1040,27 @@ formdesigner.model = function () {
         //the controlElement is deleted.
         dataBind: function () {
             var mType = formdesigner.util.clone(RootMugType);
-            mType.typeSlug = "datanode";
-            mType.typeName = "Hidden Value";
+            mType.typeSlug = "stdDataBindOnly";
             mType.type = "db";
             delete mType.properties.controlElement;
             return mType;
         }(),
         dataBindControlQuestion: function () {
             var mType = formdesigner.util.clone(RootMugType);
-            mType.typeName = "Data Bind Control Question Mug";
             mType.type = "dbc";
             return mType;
         }(),
         dataControlQuestion: function () {
             var mType = formdesigner.util.clone(RootMugType);
-            mType.typeName = "Data + Control Question Mug";
             mType.type = "dc";
             delete mType.properties.bindElement;
             return mType;
         }(),
         dataOnly: function () {
             var mType = formdesigner.util.clone(RootMugType);
-            mType.typeName = "Data ONLY Mug";
+            // we autocreate binds for all data nodes so it will always be
+            // stdDataBindOnly
+            mType.typeSlug = "stdDataBindOnly";
             mType.type = "d";
             delete mType.properties.controlElement;
             delete mType.properties.bindElement;
@@ -1080,7 +1068,6 @@ formdesigner.model = function () {
         }(),
         controlOnly: function () {
             var mType = formdesigner.util.clone(RootMugType);
-            mType.typeName = "Control ONLY Mug";
             mType.type = "c";
             delete mType.properties.dataElement;
             delete mType.properties.bindElement;
@@ -1088,7 +1075,6 @@ formdesigner.model = function () {
         }(),
         readOnly: function () {
             var mType = formdesigner.util.clone(RootMugType);
-            mType.typeName = "READ ONLY Mug";
             mType.type = "readonly";
             delete mType.properties.dataElement;
             delete mType.properties.bindElement;
@@ -1108,12 +1094,12 @@ formdesigner.model = function () {
     that.mugTypeMaker.stdTextQuestion = function () {
         var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion),
             mug;
-        mType.typeSlug = "text";
-        mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
+
+        mType.typeName = 'Text';
+        mType.icon = 'icon-vellum-text';
         
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
-        mType.mug.properties.controlElement.properties.name = "Text";
         mType.mug.properties.controlElement.properties.tagName = "input";
         mType.mug.properties.bindElement.properties.dataType = "xsd:string";
         return mType;
@@ -1121,9 +1107,10 @@ formdesigner.model = function () {
 
     that.mugTypeMaker.stdPhoneNumber = function () {
         var mType = formdesigner.model.mugTypeMaker.stdTextQuestion();
-        mType.typeSlug = "phonenumber";
-        mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
-        mType.mug.properties.controlElement.properties.name = "PhoneNumber";
+
+        mType.typeName = 'Phone Number or Numeric ID';
+        mType.icon = 'icon-signal';
+
         mType.mug.properties.controlElement.properties.appearance = "numeric";
 
         return mType;
@@ -1132,8 +1119,9 @@ formdesigner.model = function () {
     that.mugTypeMaker.stdDataBindOnly = function () {
         var mType = formdesigner.util.getNewMugType(mugTypes.dataBind),
             mug;
-        mType.typeSlug = "datanode";
-        mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
+
+        mType.typeName = 'Hidden Value';
+        mType.icon = 'icon-vellum-variable';
         
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
@@ -1143,12 +1131,12 @@ formdesigner.model = function () {
     that.mugTypeMaker.stdSecret = function () {
         var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion),
             mug;
-        mType.typeSlug = "secret";
-        mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
+
+        mType.typeName = 'Password';
+        mType.icon = 'icon-key';
         
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
-        mType.mug.properties.controlElement.properties.name = "Secret";
         mType.mug.properties.controlElement.properties.tagName = "secret";
 
         mType.properties.bindElement.dataType.validationFunc = function (mt,m) {
@@ -1167,12 +1155,12 @@ formdesigner.model = function () {
     that.mugTypeMaker.stdInt = function () {
         var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion),
             mug;
-        mType.typeSlug = "int";
-        mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
+
+        mType.typeName = 'Integer';
+        mType.icon = 'icon-vellum-numeric';
         
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
-        mType.mug.properties.controlElement.properties.name = "Integer";
         mType.mug.properties.controlElement.properties.tagName = "input";
         mType.mug.properties.bindElement.properties.dataType = "xsd:int";
         return mType;
@@ -1181,8 +1169,9 @@ formdesigner.model = function () {
     that.mugTypeMaker.stdAudio = function () {
         var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion),
             mug;
-        mType.typeSlug = "audio";
-        mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
+
+        mType.typeName = 'Audio Capture';
+        mType.icon = 'icon-vellum-audio-capture';
         mType.properties.controlElement.mediaType = {
             lstring: 'Media Type',
             visibility: 'visible',
@@ -1192,7 +1181,6 @@ formdesigner.model = function () {
 
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
-        mType.mug.properties.controlElement.properties.name = "Audio";
         mType.mug.properties.controlElement.properties.tagName = "upload";
         mType.mug.properties.controlElement.properties.mediaType = "audio/*";
         /* fix buggy eclipse syntax highlighter (because of above string) */ 
@@ -1204,11 +1192,12 @@ formdesigner.model = function () {
     that.mugTypeMaker.stdImage = function () {
         var mType = formdesigner.util.getNewMugType(that.mugTypeMaker.stdAudio()),
             mug;
-        mType.typeSlug = "image";
-        mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
+
+        mType.typeName = 'Image Capture';
+        mType.icon = 'icon-camera';
+
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
-        mType.mug.properties.controlElement.properties.name = "Image";
         mType.mug.properties.controlElement.properties.tagName = "upload";
         mType.mug.properties.controlElement.properties.mediaType = "image/*";
         /* fix buggy eclipse syntax highlighter (because of above string) */ 
@@ -1219,11 +1208,12 @@ formdesigner.model = function () {
     that.mugTypeMaker.stdVideo = function () {
         var mType = formdesigner.util.getNewMugType(that.mugTypeMaker.stdAudio()),
             mug;
-        mType.typeSlug = "video";
-        mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
+
+        mType.typeName = 'Video Capture';
+        mType.icon = 'icon-facetime-video';
+
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
-        mType.mug.properties.controlElement.properties.name = "Video";
         mType.mug.properties.controlElement.properties.tagName = "upload";
         mType.mug.properties.controlElement.properties.mediaType = "video/*";
         /* fix buggy eclipse syntax highlighter (because of above string) */ 
@@ -1234,11 +1224,12 @@ formdesigner.model = function () {
     that.mugTypeMaker.stdGeopoint = function () {
         var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion),
             mug;
-        mType.typeSlug = "geopoint";
-        mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
+
+        mType.typeName = 'GPS';
+        mType.icon = 'icon-map-marker';
+
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
-        mType.mug.properties.controlElement.properties.name = "Geopoint";
         mType.mug.properties.controlElement.properties.tagName = "input";
         mType.mug.properties.bindElement.properties.dataType = "geopoint";
         return mType;
@@ -1247,12 +1238,13 @@ formdesigner.model = function () {
     that.mugTypeMaker.stdAndroidIntent = function () {
         var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion),
             mug;
-        mType.typeSlug = "androidintent";
-        mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
+
+        mType.typeName = 'Android App Callout';
+        mType.icon = 'icon-vellum-android-intent';
+
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
 
-        mType.mug.properties.controlElement.properties.name = "AndroidIntent";
         mType.mug.properties.controlElement.properties.tagName = "input";
         mType.getAppearanceAttribute = function () {
             return 'intent:' + mType.mug.properties.dataElement.properties.nodeID;
@@ -1267,11 +1259,12 @@ formdesigner.model = function () {
     that.mugTypeMaker.stdBarcode = function () {
         var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion),
             mug;
-        mType.typeSlug = "barcode";
-        mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
+
+        mType.typeName = 'Barcode Scan';
+        mType.icon = 'icon-vellum-android-intent';
+
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
-        mType.mug.properties.controlElement.properties.name = "Barcode";
         mType.mug.properties.controlElement.properties.tagName = "input";
         mType.mug.properties.bindElement.properties.dataType = "barcode";
         return mType;
@@ -1280,11 +1273,11 @@ formdesigner.model = function () {
     that.mugTypeMaker.stdDate = function () {
         var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion),
                 mug;
-        mType.typeSlug = "date";
-        mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
+        mType.typeName = 'Date';
+        mType.icon = 'icon-calendar';
+
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
-        mType.mug.properties.controlElement.properties.name = "Date";
         mType.mug.properties.controlElement.properties.tagName = "input";
         mType.mug.properties.bindElement.properties.dataType = "xsd:date";
         return mType;
@@ -1293,11 +1286,11 @@ formdesigner.model = function () {
     that.mugTypeMaker.stdDateTime = function () {
         var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion),
             mug;
-        mType.typeSlug = "datetime";
-        mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
+        mType.typeName = 'Date and Time';
+        mType.icon = 'icon-vellum-datetime';
+
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
-        mType.mug.properties.controlElement.properties.name = "DateTime";
         mType.mug.properties.controlElement.properties.tagName = "input";
         mType.mug.properties.bindElement.properties.dataType = "xsd:dateTime";
         return mType;
@@ -1306,11 +1299,11 @@ formdesigner.model = function () {
     that.mugTypeMaker.stdTime = function () {
         var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion),
             mug;
-        mType.typeSlug = "time";
-        mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
+        mType.typeName = 'Time';
+        mType.icon = 'icon-time';
+
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
-        mType.mug.properties.controlElement.properties.name = "Time";
         mType.mug.properties.controlElement.properties.tagName = "input";
         mType.mug.properties.bindElement.properties.dataType = "xsd:time";
         return mType;
@@ -1319,10 +1312,10 @@ formdesigner.model = function () {
     that.mugTypeMaker.stdLong = function () {
         var mType, mug;
         mType = formdesigner.model.mugTypeMaker.stdInt();
+        mType.typeName = 'Long';
+        mType.icon = 'icon-vellum-long';
+
         mug = mType.mug;
-        mType.typeSlug = "long";
-        mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
-        mType.mug.properties.controlElement.properties.name = "Long";
         mType.mug.properties.bindElement.properties.dataType = "xsd:long";
         return mType;
     };
@@ -1330,10 +1323,10 @@ formdesigner.model = function () {
     that.mugTypeMaker.stdDouble = function () {
         var mType, mug;
         mType = formdesigner.model.mugTypeMaker.stdInt();
+        mType.typeName = 'Decimal';
+        mType.icon = 'icon-vellum-decimal';
+
         mug = mType.mug;
-        mType.typeSlug = "double";
-        mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
-        mType.mug.properties.controlElement.properties.name = "Double";
         mType.mug.properties.bindElement.properties.dataType = "xsd:double";
         return mType;
     };
@@ -1342,9 +1335,8 @@ formdesigner.model = function () {
     that.mugTypeMaker.stdItem = function () {
         var mType = formdesigner.util.getNewMugType(mugTypes.controlOnly),
             mug, vResult, controlProps;
-
-        mType.typeSlug = "item";
-        mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
+        mType.typeName = 'Choice';
+        mType.icon = 'icon-circle-blank';
 
         controlProps = mType.properties.controlElement;
         controlProps.hintLabel.presence = 'notallowed';
@@ -1355,7 +1347,6 @@ formdesigner.model = function () {
          
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
-        mType.mug.properties.controlElement.properties.name = "Item";
         mType.mug.properties.controlElement.properties.tagName = "item";
         return mType;
     };
@@ -1364,9 +1355,9 @@ formdesigner.model = function () {
         var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion),
                 mug,
                 vResult, controlProps, bindProps;
+        mType.typeName = 'Label';
+        mType.icon = 'icon-tag';
 
-        mType.typeSlug = "trigger";
-        mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
         mType.properties.bindElement.dataType.presence = 'notallowed';
         mType.properties.dataElement.dataValue.presence = 'optional';
 
@@ -1376,7 +1367,6 @@ formdesigner.model = function () {
 
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
-        mType.mug.properties.controlElement.properties.name = "Trigger";
         mType.mug.properties.controlElement.properties.tagName = "trigger";
         return mType;
     };
@@ -1385,22 +1375,22 @@ formdesigner.model = function () {
         var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion),
                 mug,
                 vResult;
-        mType.typeSlug = "select";
-        mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
+        mType.typeName = 'Multiple Answer';
+        mType.icon = 'icon-vellum-multi-select';
+
         mType.properties.bindElement.dataType.visibility = "hidden";
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
-        mType.mug.properties.controlElement.properties.name = "Multi-Select";
         mType.mug.properties.controlElement.properties.tagName = "select";
         return mType;
     };
 
     that.mugTypeMaker.stdSelect = function () {
         var mType = formdesigner.model.mugTypeMaker.stdMSelect(), mug;
+        mType.typeName = 'Single Answer';
+        mType.icon = 'icon-vellum-single-select';
+
         mug = mType.mug;
-        mType.typeSlug = "1select";
-        mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
-        mType.mug.properties.controlElement.properties.name = 'Single-Select';
         mType.mug.properties.controlElement.properties.tagName = "select1";
         return mType;
     };
@@ -1409,8 +1399,9 @@ formdesigner.model = function () {
         var mType = formdesigner.util.getNewMugType(mugTypes.dataBindControlQuestion),
                 mug,
                 vResult;
-        mType.typeSlug = "group";
-        mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
+        mType.typeName = 'Group';
+        mType.icon = 'icon-folder-open';
+
         mType.properties.bindElement.dataType.presence = "notallowed";
         mType.properties.controlElement.hintItextID.presence = "notallowed";
         mType.properties.controlElement.hintLabel.presence = "notallowed";
@@ -1419,10 +1410,9 @@ formdesigner.model = function () {
         mType.properties.dataElement.dataValue.presence = "notallowed";
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
-        mType.mug.properties.controlElement.properties.name = "Group";
         mType.mug.properties.controlElement.properties.tagName = "group";
         
-        vResult = mType.validateMug();
+        //vResult = mType.validateMug();
         return mType;
     };
 
@@ -1432,11 +1422,11 @@ formdesigner.model = function () {
         // functionality.
         var mType = formdesigner.model.mugTypeMaker.stdGroup(),
             mug;
-        mType.typeSlug = "fieldlist";
-        mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
+        mType.typeName = 'Question List';
+        mType.icon = 'icon-reorder';
+
         mug = that.createMugFromMugType(mType);
         mType.mug = mug;
-        mType.mug.properties.controlElement.properties.name = "FieldList";
         mType.mug.properties.controlElement.properties.tagName = "group";
 
         mType.setAppearanceAttribute('field-list');
@@ -1448,6 +1438,9 @@ formdesigner.model = function () {
         var mType;
 
         mType = formdesigner.model.mugTypeMaker.stdGroup();
+        mType.typeName = 'Repeat Group';
+        mType.icon = 'icon-retweet';
+
         mType.properties.controlElement.repeat_count = {
             lstring: 'Repeat Count',
             visibility: 'visible',
@@ -1462,9 +1455,6 @@ formdesigner.model = function () {
             presence: 'optional',
             uiType: 'checkbox'
         };
-        mType.typeSlug = "repeat";
-        mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
-        mType.mug.properties.controlElement.properties.name = "Repeat";
         mType.mug.properties.controlElement.properties.tagName = "repeat";
 
         return mType;
@@ -1472,8 +1462,8 @@ formdesigner.model = function () {
     
     that.mugTypeMaker.unknown = function () {
         var mType = formdesigner.util.getNewMugType(mugTypes.readOnly);
-        mType.typeSlug = "unknown";
-        mType.typeName = formdesigner.util.QUESTIONS[mType.typeSlug];
+        mType.typeName = 'Unknown Question Type';
+
         var mug = that.createMugFromMugType(mType);
         mType.mug = mug;
         return mType;
@@ -2257,7 +2247,7 @@ formdesigner.model = function () {
 	                        extraXMLNS = MT.mug.properties.dataElement.properties.xmlnsAttr;
 	                        xmlWriter.writeAttributeStringSafe("xmlns", extraXMLNS);
 	                    }
-	                    if (MT.typeSlug === "repeat"){
+	                    if (MT.typeSlug === "stdRepeat"){
 	                        xmlWriter.writeAttributeStringSafe("jr:template","");
 	                    }
                     }
