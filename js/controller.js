@@ -270,7 +270,7 @@ formdesigner.controller = (function () {
                 throw 'Node in tree without value?!?!'
             }
 
-            if(mt.typeSlug === "item" && !includeSelectItems) { //skip Choices
+            if(mt.typeSlug === "stdItem" && !includeSelectItems) { //skip Choices
                 return;
             }
 
@@ -418,35 +418,6 @@ formdesigner.controller = (function () {
         return  that.form.dataTree.treeMap(treeFunc);
     };
 
-    that.getJSTreeTypeFromMugType = function (mugType) {
-        var typeString, type;
-
-        if (mugType.mug.properties.controlElement) {
-            typeString = mugType.mug.properties.controlElement.properties.name.toLowerCase();
-        } else if (formdesigner.util.isReadOnly(mugType)) {
-            typeString = 'unknown';
-        } else {
-            typeString = 'datanode';
-        }
-
-        switch (typeString.toLowerCase()) {
-            case 'text':
-                type = "question";
-                break;
-            case 'integer':
-                type = "int";
-                break;
-            case 'multi-select':
-            case 'single-select':
-                type = "selectQuestion";
-                break;
-            default:
-                type = typeString.toLowerCase();
-        }
-
-        return type;
-    };
-
     /**
      * Create a new node from mugType relative to the currently selected node.
      *
@@ -465,6 +436,7 @@ formdesigner.controller = (function () {
             insertPosition = position || "into";
         } else {
             // data node
+            
             formdesigner.ui.jstree("deselect_all");
             insertPosition = "last";
         }
@@ -479,7 +451,7 @@ formdesigner.controller = (function () {
             },
             attr: {
                 id: mugType.ufid,
-                rel: that.getJSTreeTypeFromMugType(mugType)
+                rel: mugType.typeSlug
             },
             state: isGroupOrRepeat ? 'open' : undefined
         };
@@ -505,57 +477,13 @@ formdesigner.controller = (function () {
     };
 
     that.getMugTypeByQuestionType = function (qType) {
-        switch(qType.toLowerCase()) {
-            case 'text':
-                return formdesigner.model.mugTypeMaker.stdTextQuestion();
-            case 'phonenumber':
-                return formdesigner.model.mugTypeMaker.stdPhoneNumber();
-            case 'group':
-                return formdesigner.model.mugTypeMaker.stdGroup();
-            case 'fieldlist':
-                return formdesigner.model.mugTypeMaker.stdFieldList();
-            case 'select':
-                return formdesigner.model.mugTypeMaker.stdMSelect();
-            case '1select':
-                return formdesigner.model.mugTypeMaker.stdSelect();
-            case 'secret':
-                return formdesigner.model.mugTypeMaker.stdSecret();
-             case 'item':
-                return formdesigner.model.mugTypeMaker.stdItem();
-            case 'trigger':
-                return formdesigner.model.mugTypeMaker.stdTrigger();
-            case 'repeat':
-                return formdesigner.model.mugTypeMaker.stdRepeat();
-            case 'int':
-                return formdesigner.model.mugTypeMaker.stdInt();
-            case 'long':
-                return formdesigner.model.mugTypeMaker.stdLong();
-            case 'double':
-                return formdesigner.model.mugTypeMaker.stdDouble();
-            case 'date':
-                return formdesigner.model.mugTypeMaker.stdDate();
-            case 'datetime':
-                return formdesigner.model.mugTypeMaker.stdDateTime();
-            case 'time':
-                return formdesigner.model.mugTypeMaker.stdTime();
-            case 'datanode':
-                return formdesigner.model.mugTypeMaker.stdDataBindOnly();
-            case 'geopoint':
-                return formdesigner.model.mugTypeMaker.stdGeopoint();
-            case 'barcode':
-                return formdesigner.model.mugTypeMaker.stdBarcode();
-            case 'androidintent':
-                return formdesigner.model.mugTypeMaker.stdAndroidIntent();
-            case 'image':
-                return formdesigner.model.mugTypeMaker.stdImage();
-            case 'audio':
-                return formdesigner.model.mugTypeMaker.stdAudio();
-            case 'video':
-                return formdesigner.model.mugTypeMaker.stdVideo();
-            default:
-                console.log("No standard mugType for selected question type:" + qType + " switching to 'Text Question' type!");
-                return formdesigner.model.mugTypeMaker.stdTextQuestion();
+        if (!formdesigner.model.mugTypeMaker.hasOwnProperty(qType)) {
+            qType = 'stdTextQuestion';
         }
+        var mugType = formdesigner.model.mugTypeMaker[qType]();
+        mugType.typeSlug = qType; 
+        mugType.mug.typeSlug = qType;
+        return mugType;
     };
 
     /**
@@ -805,7 +733,7 @@ formdesigner.controller = (function () {
 	            }
             }
             // magic special cases
-            if (formdesigner.util.isSelect(newMugType) || newMugType.typeSlug === "trigger") {
+            if (formdesigner.util.isSelect(newMugType) || newMugType.typeSlug === "stdTrigger") {
                 newMugType.mug.properties.bindElement.properties.dataType = "";
             }
             
@@ -814,9 +742,8 @@ formdesigner.controller = (function () {
             that.form.replaceMugType(mugType, newMugType, 'control');
 
             formdesigner.ui.jstree("set_type", 
-                that.getJSTreeTypeFromMugType(newMugType), 
-                '#' + mugType.ufid,
-                questionType
+                newMugType.typeSlug, 
+                '#' + mugType.ufid
             );
 
             // update question type changer
@@ -835,7 +762,7 @@ formdesigner.controller = (function () {
     };
 
     that.loadMugTypeIntoUI = function (mugType) {
-        var mug, controlTree, parentMT, parentMTUfid, loadMTEvent = {};
+        var mug, controlTree, parentMT;
 
         mug = mugType.mug;
 
@@ -846,10 +773,8 @@ formdesigner.controller = (function () {
         // check for control element because we want data nodes to be a flat
         // list at bottom.
         if (parentMT && mugType.properties.controlElement) {
-            parentMTUfid = parentMT.ufid;
-            formdesigner.ui.jstree('select_node', '#'+parentMTUfid, true);
+            formdesigner.ui.jstree('select_node', '#'+parentMT.ufid, true);
         } else {
-            parentMTUfid = null;
             formdesigner.ui.jstree('deselect_all');
         }
         that.createQuestionInUITree(mugType);
@@ -976,10 +901,9 @@ formdesigner.controller = (function () {
             }
 
             row["Question"] = mugType.getDefaultItextRoot();
-            
+            row["Type"] = mugType.typeName;
+
             if (mugType.hasControlElement()) {
-                row["Type"] = formdesigner.util.QUESTIONS[mugType.typeSlug];
-               
                 for (var type in itextColumns) {
                     var colName = itextColumns[type];
 
@@ -1434,7 +1358,6 @@ formdesigner.controller = (function () {
                 extraXMLNS = $(el).attr('xmlns');
                 keyAttr = $(el).attr('key');
 
-                mType.typeName = "Hidden Value";
                 mug = formdesigner.model.createMugFromMugType(mType);
 
                 mug.properties.dataElement.properties.nodeID = nodeID;
@@ -1709,9 +1632,8 @@ formdesigner.controller = (function () {
                         MTIdentifier = "unknown";
                     }
                     
-                    
                     try{
-                        mugType = formdesigner.model.mugTypeMaker[MTIdentifier]();
+                        mugType = that.getMugTypeByQuestionType(MTIdentifier);
                     }catch (e) {
                         console.log ("Exception Control Element", cEl);
                         throw 'New Control Element classified as non-existent MugType! Please create a rule for this case' +
@@ -2421,7 +2343,7 @@ formdesigner.intentManager = (function () {
 
     that.syncMugTypeWithIntent = function (mugType) {
         // called when initializing a mugType from a parsed form
-        if (mugType.typeSlug == 'androidintent') {
+        if (mugType.typeSlug == 'stdAndroidIntent') {
             var tag = that.getParsedIntentTagWithID(mugType.mug.properties.dataElement.properties.nodeID);
             if (!tag) {
                 var path = (mugType.intentTag) ? mugType.intentTag.path : null;
