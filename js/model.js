@@ -1336,13 +1336,14 @@ formdesigner.model = function () {
             mug, vResult, controlProps;
         mType.typeName = 'Choice';
         mType.icon = 'icon-circle-blank';
-        mType.iconFromParent = {
-            'stdMSelect': 'icon-check-empty',
+        mType.iconByParentType = {
+            'stdSelect': mType.icon,
+            'stdMSelect': 'icon-check-empty'
         };
 
         mType.getIcon = function () {
             var parentMT = formdesigner.controller.form.controlTree.getParentMugType(mType);
-            return mType.iconFromParent[parentMT.typeSlug] || mType.icon;
+            return mType.iconByParentType[parentMT.typeSlug];
         };
 
         controlProps = mType.properties.controlElement;
