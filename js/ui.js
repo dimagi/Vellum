@@ -1085,7 +1085,11 @@ formdesigner.ui = function () {
             });
         });
 
-        formdesigner.controller.on('update-icon', function (e) {
+        formdesigner.controller.on('question-creation', function (e) {
+            that.overrideJSTreeIcon(e.mugType.ufid, e.mugType.typeSlug, e.mugType);
+        });
+
+        formdesigner.controller.on('parent-question-type-changed', function (e) {
             that.overrideJSTreeIcon(e.mugType.ufid, e.mugType.typeSlug, e.mugType);
         });
     };

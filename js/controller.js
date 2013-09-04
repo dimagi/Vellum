@@ -669,14 +669,6 @@ formdesigner.controller = (function () {
         formdesigner.intentManager.syncMugTypeWithIntent(mugType);
 
         formdesigner.ui.jstree("select_node", '#' + mugType.ufid);
-
-        // This is necessary because we'll sometimes need to call getIcon from a mugType that's actually initialized in
-        // the form to determine the true icon. (e.g. getMTFromFormByUFID will return null on the previous create_node
-        // jstree event)
-        this.fire({
-            type: "update-icon",
-            mugType: mugType
-        });
         
         this.fire({
             type: "question-creation",
@@ -780,7 +772,7 @@ formdesigner.controller = (function () {
     that.updateMugChildren = function (parentMugType) {
         _.each(that.getChildren(parentMugType), function (childMugType) {
             that.fire({
-                type: "update-icon",
+                type: "parent-question-type-changed",
                 mugType: childMugType
             });
         });
