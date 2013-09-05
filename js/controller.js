@@ -746,6 +746,8 @@ formdesigner.controller = (function () {
                 '#' + mugType.ufid
             );
 
+            mugType = newMugType;
+
             // update question type changer
             $currentChanger.after(formdesigner.widgets.getQuestionTypeChanger(newMugType)).remove();
             
@@ -759,6 +761,19 @@ formdesigner.controller = (function () {
             // update question type changer
             $currentChanger.after(formdesigner.widgets.getQuestionTypeChanger(mugType)).remove();
         }
+
+        if (formdesigner.util.isSelect(mugType)) {
+            that.updateMugChildren(mugType);
+        }
+    };
+
+    that.updateMugChildren = function (parentMugType) {
+        _.each(that.getChildren(parentMugType), function (childMugType) {
+            that.fire({
+                type: "parent-question-type-changed",
+                mugType: childMugType
+            });
+        });
     };
 
     that.loadMugTypeIntoUI = function (mugType) {

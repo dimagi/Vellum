@@ -1329,7 +1329,7 @@ formdesigner.widgets = (function () {
 
     that.getQuestionTypeChanger = function (mugType) {
         var $questionTypeChanger = formdesigner.ui.getTemplateObject('#fd-template-question-type-changer', {
-            currentQuestionIcon: mugType.icon,
+            currentQuestionIcon: mugType.getIcon(),
             questions: formdesigner.util.getQuestionList(mugType.typeSlug)
         });
         $questionTypeChanger.find('.change-question').click(function (e) {
