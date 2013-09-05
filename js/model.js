@@ -3181,6 +3181,11 @@ formdesigner.model = function () {
         };
         
         itext.deduplicateIds = function () {
+            console.log(formdesigner.controller.itextDenormalizationEnabled);
+            if (!formdesigner.controller.itextDenormalizationEnabled) {
+                return;
+            }
+
             var nonEmpty = this.getNonEmptyItems();
             var found = [];
             var counter, item, origId;

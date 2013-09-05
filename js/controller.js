@@ -1010,6 +1010,8 @@ formdesigner.controller = (function () {
         $modal.modal('show');
     };
 
+    that.itextDenormalizationEnabled = true;
+
     that.showFormPropertiesDialog = function () {
         // moved over just for display purposes, apparently the original
         // wasn't working perfectly, so this is a todo
@@ -1028,14 +1030,22 @@ formdesigner.controller = (function () {
         formProperties = [
             {
                 label: "Form Name",
-                slug: "formName"
+                slug: "formName",
+                type: "text"
             },
             {
                 label: "Form ID",
                 slug: "formID",
+                type: "text",
                 cleanValue: function (val) {
                     return val.replace(/ /g, '_');
                 }
+            },
+            {
+                label: "Enable Display Text Denormalization?",
+                slug: "enable-denormalization",
+                type: "checkbox",
+                checked: true
             }
         ];
 
@@ -1049,22 +1059,32 @@ formdesigner.controller = (function () {
         }
 
         _.each(formProperties, function (prop) {
-            var $propertyInput = formdesigner.ui.getTemplateObject('#fd-template-control-group-stdInput', {
-                label: prop.label,
+            var template = "#fd-template-control-group-" + (
+                prop.type === "checkbox" ? "checkbox" : "stdInput");
+
+            var $propertyInput = formdesigner.ui.getTemplateObject(template, $.extend(prop, {
                 controlId: 'fd-form-prop-' + prop.slug + '-input'
-            });
+            }));
             $modalBody.append($propertyInput);
-            $propertyInput.find('input')
-                .val(formdesigner.controller.form[prop.slug])
-                .on('keyup', function () {
-                    var currentVal = $(this).val();
-                    if (typeof prop.cleanValue === 'function') {
-                        currentVal = prop.cleanValue(currentVal);
-                        $(this).val(currentVal);
-                    }
-                    fireFormPropChanged(prop.slug, formdesigner.controller.form[prop.slug], currentVal);
-                    formdesigner.controller.form[prop.slug] = currentVal;
-                });
+            var $input = $propertyInput.find('input');
+
+            if (prop.type === "checkbox") {
+                $input.attr('checked', that.itextDenormalizationEnabled)
+                    .on('change', function () {
+                        that.itextDenormalizationEnabled = $(this).is(':checked');
+                    });
+            } else {
+                $input.val(that.form[prop.slug])
+                    .on('keyup', function () {
+                        var currentVal = $(this).val();
+                        if (typeof prop.cleanValue === 'function') {
+                            currentVal = prop.cleanValue(currentVal);
+                            $(this).val(currentVal);
+                        }
+                        fireFormPropChanged(prop.slug, that.form[prop.slug], currentVal);
+                        that.form[prop.slug] = currentVal;
+                    });
+            }
         });
 
         $modal.modal('show');

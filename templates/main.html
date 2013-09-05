@@ -401,6 +401,17 @@
     </div>
 </script>
 
+<script type="text/template" id="fd-template-control-group-checkbox">
+    <div class="control-group">
+        <label for="<%=controlId%>" class="control-label"><%=label%></label>
+        <div class="controls">
+            <input id="<%=controlId%>" type="checkbox" 
+                <% if (checked) { %> checked="checked" <% } %>
+                />
+        </div>
+    </div>
+</script>
+
 <script type="text/template" id="fd-template-modal-content">
     <div id="fd-modal-generic" class="modal hide fade">
         <div class="modal-header">
