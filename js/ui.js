@@ -1568,7 +1568,10 @@ formdesigner.ui = function () {
         if (!qtype && mugType) {
             qtype = mugType.typeSlug;
         }
-        iconClass = (mugType) ? mugType.getIcon() : that.QUESTION_TYPE_TO_ICONS[qtype];
+        iconClass = that.QUESTION_TYPE_TO_ICONS[qtype];
+        if (mugType) {
+            iconClass = mugType.getIcon() || iconClass;
+        }
         if (!iconClass) {
             iconClass = 'icon-circle';
         }
