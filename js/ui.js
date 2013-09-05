@@ -1084,6 +1084,14 @@ formdesigner.ui = function () {
                 }
             });
         });
+
+        formdesigner.controller.on('question-creation', function (e) {
+            that.overrideJSTreeIcon(e.mugType.ufid, e.mugType.typeSlug, e.mugType);
+        });
+
+        formdesigner.controller.on('parent-question-type-changed', function (e) {
+            that.overrideJSTreeIcon(e.mugType.ufid, e.mugType.typeSlug, e.mugType);
+        });
     };
 
     that.hideQuestionProperties = function() {
@@ -1549,14 +1557,18 @@ formdesigner.ui = function () {
         });
     };
 
-    that.overrideJSTreeIcon = function (node_id, qtype) {
+
+
+    that.overrideJSTreeIcon = function (node_id, qtype, mugType) {
         var $questionNode = $('#'+node_id),
-            iconClass,
+            iconClass;
+        if (!mugType) {
             mugType = formdesigner.controller.getMTFromFormByUFID(node_id);
+        }
         if (!qtype && mugType) {
             qtype = mugType.typeSlug;
         }
-        iconClass = that.QUESTION_TYPE_TO_ICONS[qtype];
+        iconClass = (mugType) ? mugType.getIcon() : that.QUESTION_TYPE_TO_ICONS[qtype];
         if (!iconClass) {
             iconClass = 'icon-circle';
         }
