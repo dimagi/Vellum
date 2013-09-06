@@ -39,7 +39,6 @@ formdesigner.util = (function(){
                              "bindElement/calculateAttr",
                              "bindElement/constraintAttr"];
 
-
     // keep questions from showing up in the dropdown list here
     that.UNCHANGEABLE_QUESTIONS = [
         "stdItem", 
