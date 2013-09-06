@@ -3021,7 +3021,9 @@ formdesigner.model = function () {
      */
     
     that.ItextItem = function (options) {
-        var item = {}; 
+        var item = {};
+
+        item.refCount = 0;
         
         item.forms = options.forms || [];
         item.id = options.id || "";
@@ -3214,7 +3216,7 @@ formdesigner.model = function () {
         /*
          * Create a new blank item and add it to the list.
          */
-        itext.createItem = function (id) {
+        itext.createItem = function (id, incrementRefCount) {
             var item = new that.ItextItem({
                 id: id,
                 forms: [new that.ItextForm({
@@ -3222,32 +3224,40 @@ formdesigner.model = function () {
                         })]
             });
             this.addItem(item);
+            if (incrementRefCount) {
+                item.refCount++;
+            }
             return item;
         };
         
         /**
          * Get the Itext Item by ID.
          */
-        itext.getItem = function (iID) {
+        itext.getItem = function (iID, incrementRefCount) {
             // this is O[n] when it could be O[1] with some other
             // data structure. That would require keeping the ids
             // in sync in multiple places though.
             // This could be worked around via careful event handling,
             // but is not implemented until we see slowness.
             try {
-                return formdesigner.util.reduceToOne(this.items, function (item) {
+                var item = formdesigner.util.reduceToOne(this.items, function (item) {
                     return item.id === iID;
                 }, "itext id = " + iID);
+                
+                if (incrementRefCount) {
+                    item.refCount++;
+                }
+                return item;
             } catch (e) {
                 throw "NoItextItemFound";
             }
         };
         
-        itext.getOrCreateItem = function (id) {
+        itext.getOrCreateItem = function (id, incrementRefCount) {
             try {
-                return this.getItem(id);
+                return this.getItem(id, incrementRefCount);
             } catch (err) {
-                return this.createItem(id); 
+                return this.createItem(id, incrementRefCount); 
             }
         };
         
@@ -3384,20 +3394,22 @@ formdesigner.model = function () {
             if (mugType.hasControlElement()) {
                 // set label if not there
                 if (!mugType.mug.properties.controlElement.properties.labelItextID) {
-		            mugType.mug.properties.controlElement.properties.labelItextID = mugType.getDefaultLabelItext(defaultLabelValue);
-		            this.addItem(mugType.mug.properties.controlElement.properties.labelItextID);
+                    var labelItextID = mugType.getDefaultLabelItext(defaultLabelValue);
+                    labelItextID.refCount++;
+		            mugType.mug.properties.controlElement.properties.labelItextID = labelItextID;
+		            this.addItem(labelItextID);
 	            }
 	            // set hint if legal and not there
 	            if (mugType.properties.controlElement.hintItextID.presence !== "notallowed" &&
 	                !mugType.mug.properties.controlElement.properties.hintItextID) {
-	                mugType.mug.properties.controlElement.properties.hintItextID = this.createItem("");
+	                mugType.mug.properties.controlElement.properties.hintItextID = this.createItem("", true);
 	            }
 	        }
 	        if (mugType.hasBindElement()) {
 	            // set constraint msg if legal and not there
 	            if (mugType.properties.bindElement.constraintMsgItextID.presence !== "notallowed" &&
 	                !mugType.mug.properties.bindElement.properties.constraintMsgItextID) {
-	                mugType.mug.properties.bindElement.properties.constraintMsgItextID = this.createItem("");
+	                mugType.mug.properties.bindElement.properties.constraintMsgItextID = this.createItem("", true);
 	            }
 	        }
 	    };

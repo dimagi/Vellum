@@ -1486,9 +1486,9 @@ formdesigner.controller = (function () {
                     constraintItext = getITextReference(constraintMsg);
 
                 if (constraintItext) {
-                    attrs.constraintMsgItextID = Itext.getOrCreateItem(constraintItext);
+                    attrs.constraintMsgItextID = Itext.getOrCreateItem(constraintItext, true);
                 } else {
-                    attrs.constraintMsgItextID = Itext.createItem("");
+                    attrs.constraintMsgItextID = Itext.createItem("", true);
                     attrs.constraintMsgAttr = constraintMsg;    
                 }
                                 
@@ -1708,7 +1708,7 @@ formdesigner.controller = (function () {
                             //strip itext incantation
                             asItext = getITextReference(labelRef);
                             if (asItext) {
-                                labelItext = Itext.getOrCreateItem(asItext);
+                                labelItext = Itext.getOrCreateItem(asItext, true);
                             } else {
                                 // this is likely an error, though not sure what we should do here
                                 // for now just populate with the default
@@ -1738,11 +1738,11 @@ formdesigner.controller = (function () {
                         //strip itext incantation
                         var asItext = getITextReference(hintRef);
                         if (asItext) {
-                            cProps.hintItextID = Itext.getOrCreateItem(asItext);
+                            cProps.hintItextID = Itext.getOrCreateItem(asItext, true);
                         } else {
                             // couldn't parse the hint as itext.
                             // just create an empty placeholder for it
-                            cProps.hintItextID = Itext.createItem(""); 
+                            cProps.hintItextID = Itext.createItem("", true); 
                         }
                         cProps.hintLabel = hintVal;
                     }
