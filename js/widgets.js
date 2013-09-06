@@ -279,7 +279,13 @@ formdesigner.widgets = (function () {
             // override save to call out to rename itext
             var oldItext = widget.mug.getPropertyValue(this.path);
             var val = widget.getValue();
+
             if (oldItext.id !== val) {
+                if (oldItext.refCount > 1) {
+                    oldItext.refCount--;
+                    oldItext = $.extend(true, {}, oldItext, {refCount: 1});
+                    formdesigner.model.Itext.addItem(oldItext);
+                }
                 oldItext.id = val;
                 formdesigner.controller.setMugPropertyValue(
                     widget.mug.mug,
