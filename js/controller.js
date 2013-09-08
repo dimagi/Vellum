@@ -2118,10 +2118,18 @@ formdesigner.controller = (function () {
 
             if (saveType === 'patch') {
                 var dmp = new diff_match_patch();
+                var patch = dmp.patch_toText(
+                    dmp.patch_make(formdesigner.originalXForm, formText)
+                );
+                // abort if diff too long and send full instead
+                if (patch.length > formText.length) {
+                    saveType = 'full';
+                }
+            }
+
+            if (saveType === 'patch') {
                 data = {
-                    patch: dmp.patch_toText(
-                        dmp.patch_make(formdesigner.originalXForm, formText)
-                    ),
+                    patch: patch,
                     sha1: CryptoJS.SHA1(formdesigner.originalXForm).toString()
                 };
             } else {
