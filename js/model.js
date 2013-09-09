@@ -3006,7 +3006,7 @@ formdesigner.model = function () {
         
         form.isEmpty = function () {
             for (var lang in this.data) {
-                if (this.data.hasOwnProperty(lang) && this.data[lang] !== undefined) {
+                if (this.data.hasOwnProperty(lang) && this.data[lang]) {
                     return false;
                 }
             }
