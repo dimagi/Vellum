@@ -2509,6 +2509,8 @@ formdesigner.model = function () {
                     form, i, allLangKeys, question, form;
                 
                 // here are the rules that govern itext
+                // 0. iText items which aren't referenced by any questions are 
+                // cleared from the form.
                 // 1. iText nodes for which values in _all_ languages are empty/blank 
                 // will be removed entirely from the form.
                 // 2. iText nodes that have a single value in _one_ language 
@@ -2520,6 +2522,7 @@ formdesigner.model = function () {
                 // 4. duplicate itext ids will be automatically updated to create
                 // non-duplicates
                 
+                formdesigner.controller.removeCruftyItext();
                 var Itext = formdesigner.model.Itext;
                 var languages = Itext.getLanguages();
                 var allItems = Itext.getNonEmptyItems();
@@ -3314,6 +3317,25 @@ formdesigner.model = function () {
             }
         };
 
+        /**
+         * Takes in a list of Itext Items and resets this object to only
+         * include those items. 
+         *
+         * PERMANENTLY DELETES ALL OTHER ITEXT ITEMS FROM THE MODEL
+         *
+         * For generating a list of useful IDs see:
+         * formdesigner.controller.getAllNonEmptyItextItemsFromMugs()
+         *
+         * @param validIDList
+         */
+        
+        var resetItextList = function (validIDList) {
+            this.items = [];
+            for (var i = 0; i < validIDList.length; i++) {
+                this.items.push(validIDList[i]);
+            }
+        };
+        itext.resetItextList = resetItextList;
 
         /**
          * Remove all Itext associated with the given mug
