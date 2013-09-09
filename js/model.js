@@ -3352,9 +3352,7 @@ formdesigner.model = function () {
          * @param mug
          */
         itext.removeMugItext = function (mugType) {
-            // NOTE: this is not currently used. We clear itext
-            // at form-generation time. This is because shared 
-            // itext makes removal problematic.
+            // Only removes itext for a mug if it finds a one-to-one reference mapping.
             var labelItext, hintItext, constraintItext;
             var mug = mugType.mug;
             if (mug){
@@ -3362,16 +3360,16 @@ formdesigner.model = function () {
 	                //attempt to remove Itext
 	                labelItext = mug.properties.controlElement.properties.labelItextID;
 	                hintItext = mug.properties.controlElement.properties.hintItextID;
-	                if (labelItext) {
+	                if (labelItext && labelItext.refCount == 1) {
 	                    this.removeItem(labelItext);
 	                }
-	                if (hintItext) {
+	                if (hintItext && hintItext.refCount == 1) {
 	                    this.removeItem(hintItext);
 	                }
 	            } 
 	            if (mug.properties.bindElement) {
 	                constraintItext = mug.properties.bindElement.properties.constraintMsgItextID;
-	                if (constraintItext) {
+	                if (constraintItext && constraintItext.refCount == 1) {
 	                    this.removeItem(constraintItext);
 	                }
 	            }

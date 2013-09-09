@@ -1264,6 +1264,7 @@ formdesigner.controller = (function () {
         
         that.form.dataTree.removeMugType(mugType);
         that.form.controlTree.removeMugType(mugType);
+        formdesigner.model.Itext.removeMugItext(mugType);
     };
 
     that.removeMugTypeFromForm = function (mugType) {
