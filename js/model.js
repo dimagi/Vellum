@@ -2538,23 +2538,20 @@ formdesigner.model = function () {
                         }
                         for (var j = 0; j < allItems.length; j++) {
                             item = allItems[j];
-                            if (item.id) {
-                                xmlWriter.writeStartElement("text");
-                                xmlWriter.writeAttributeStringSafe("id", item.id);
-                                forms = item.getForms();
-                                for (var k = 0; k < forms.length; k++) {
-                                    form = forms[k];
-                                    val = form.getValueOrDefault(lang);
-                                    xmlWriter.writeStartElement("value");
-                                    if(form.name !== "default") {
-                                        xmlWriter.writeAttributeStringSafe('form', form.name);
-                                    }
-                                    xmlWriter.writeString(val);
-                                    xmlWriter.writeEndElement();
+                            xmlWriter.writeStartElement("text");
+                            xmlWriter.writeAttributeStringSafe("id", item.id);
+                            forms = item.getForms();
+                            for (var k = 0; k < forms.length; k++) {
+                                form = forms[k];
+                                val = form.getValueOrDefault(lang);
+                                xmlWriter.writeStartElement("value");
+                                if(form.name !== "default") {
+                                    xmlWriter.writeAttributeStringSafe('form', form.name);
                                 }
-                                xmlWriter.writeEndElement();
+                                xmlWriter.writeString(val);
+                                xmlWriter.writeEndElement();    
                             }
-
+                            xmlWriter.writeEndElement();
                         }
                         xmlWriter.writeEndElement();
                     }
@@ -3006,7 +3003,7 @@ formdesigner.model = function () {
         
         form.isEmpty = function () {
             for (var lang in this.data) {
-                if (this.data.hasOwnProperty(lang) && this.data[lang] !== undefined) {
+                if (this.data.hasOwnProperty(lang) && this.data[lang]) {
                     return false;
                 }
             }
