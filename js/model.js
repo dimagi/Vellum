@@ -2552,7 +2552,6 @@ formdesigner.model = function () {
                                 xmlWriter.writeEndElement();
                             }
                             xmlWriter.writeEndElement();
-
                         }
                         xmlWriter.writeEndElement();
                     }
