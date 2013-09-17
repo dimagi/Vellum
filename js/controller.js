@@ -2176,7 +2176,6 @@ formdesigner.controller = (function () {
         var send = function (formText, saveType) {
             var data;
             saveType = saveType || formdesigner.saveType;
-            var url = getUrl(saveType);
             $('body').ajaxStart(formdesigner.ui.showWaitingDialog);
             $('body').ajaxStop(formdesigner.ui.hideConfirmDialog);
 
@@ -2190,6 +2189,8 @@ formdesigner.controller = (function () {
                     saveType = 'full';
                 }
             }
+
+            var url = getUrl(saveType);
 
             if (saveType === 'patch') {
                 data = {
