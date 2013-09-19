@@ -487,7 +487,7 @@ formdesigner.ui = function () {
                     prevNameForTree = '[' + e.previous + ']';
                 if (e.val && (
                     (mugType.typeSlug === "stdDataBindOnly" && newNameForTree !== that.jstree("get_text", node)) ||
-                    (mugType.typeSlug !== "stdDataBindOnly" && prevNameForTree == that.jstree("get_text", node)
+                    (mugType.typeSlug !== "stdDataBindOnly" && prevNameForTree === that.jstree("get_text", node)
                         && mugType.getItext() && mugType.getItext().isEmpty()) )
                 ) {
                     that.jstree('rename_node', node, newNameForTree);
