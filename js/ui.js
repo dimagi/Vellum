@@ -483,12 +483,10 @@ formdesigner.ui = function () {
 
             if (e.property === 'nodeID' && e.element === 'dataElement') {
                 var node = $('#' + e.mugTypeUfid),
-                    newNameForTree = '[' + e.val +']',
-                    prevNameForTree = '[' + e.previous + ']';
+                    newNameForTree = '[' + e.val +']';
                 if (e.val && (
                     (mugType.typeSlug === "stdDataBindOnly" && newNameForTree !== that.jstree("get_text", node)) ||
-                    (mugType.typeSlug !== "stdDataBindOnly" && prevNameForTree === that.jstree("get_text", node)
-                        && mugType.getItext() && mugType.getItext().isEmpty()) )
+                    (mugType.getItext() && mugType.getItext().isEmpty()) )
                 ) {
                     that.jstree('rename_node', node, newNameForTree);
                 }
