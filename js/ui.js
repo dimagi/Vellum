@@ -253,16 +253,21 @@ formdesigner.ui = function () {
     };
     
     that.addQuestion = function (qType) {
-        var newMug = formdesigner.controller.createQuestion(qType);
-        that.jstree('select_node', '#' + newMug.ufid, true);
-        if (that.ODK_ONLY_QUESTION_TYPES.indexOf(qType) !== -1) { 
-            //it's an ODK media question
-            formdesigner.model.form.updateError(formdesigner.model.FormError({
-                message: 'This question type will ONLY work with Android phones!',
-                level: 'form-warning'
-            }), {updateUI: true});
+        if (that.hasXpathEditorChanged) {
+            that.alertUnsavedChangesInXpathEditor();
+            return null;
+        } else {
+            var newMug = formdesigner.controller.createQuestion(qType);
+            that.jstree('select_node', '#' + newMug.ufid, true);
+            if (that.ODK_ONLY_QUESTION_TYPES.indexOf(qType) !== -1) {
+                //it's an ODK media question
+                formdesigner.model.form.updateError(formdesigner.model.FormError({
+                    message: 'This question type will ONLY work with Android phones!',
+                    level: 'form-warning'
+                }), {updateUI: true});
+            }
+            return newMug;
         }
-        return newMug;
     };
 
     that.QuestionTypeButton = function (buttonSpec) {
