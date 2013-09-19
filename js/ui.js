@@ -483,12 +483,14 @@ formdesigner.ui = function () {
 
             if (e.property === 'nodeID' && e.element === 'dataElement') {
                 var node = $('#' + e.mugTypeUfid),
-                    node_name = '[' + e.val +']';
+                    newNameForTree = '[' + e.val +']',
+                    prevNameForTree = '[' + e.previous + ']';
                 if (e.val && (
-                    (mugType.typeSlug === "stdDataBindOnly" && node_name !== that.jstree("get_text", node)) ||
-                    (mugType.typeSlug !== "stdDataBindOnly" &&'[' + e.previous + ']' == that.jstree("get_text", node)))
+                    (mugType.typeSlug === "stdDataBindOnly" && newNameForTree !== that.jstree("get_text", node)) ||
+                    (mugType.typeSlug !== "stdDataBindOnly" && prevNameForTree == that.jstree("get_text", node)
+                        && mugType.getItext() && mugType.getItext().isEmpty()) )
                 ) {
-                    that.jstree('rename_node', node, node_name);
+                    that.jstree('rename_node', node, newNameForTree);
                 }
             }
             if (mugType.hasBindElement()) {
