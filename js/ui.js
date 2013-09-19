@@ -482,11 +482,13 @@ formdesigner.ui = function () {
             formdesigner.controller.setFormChanged();
 
             if (e.property === 'nodeID' && e.element === 'dataElement') {
-                var node = $('#' + e.mugTypeUfid);
-                if (mugType.typeSlug === "stdDataBindOnly" && e.val &&
-                    e.val !== that.jstree("get_text", node)) 
-                {
-                    that.jstree('rename_node', node, e.val);
+                var node = $('#' + e.mugTypeUfid),
+                    node_name = '[' + e.val +']';
+                if (e.val && (
+                    (mugType.typeSlug === "stdDataBindOnly" && node_name !== that.jstree("get_text", node)) ||
+                    (mugType.typeSlug !== "stdDataBindOnly" &&'[' + e.previous + ']' == that.jstree("get_text", node)))
+                ) {
+                    that.jstree('rename_node', node, node_name);
                 }
             }
             if (mugType.hasBindElement()) {
