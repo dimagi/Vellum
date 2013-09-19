@@ -539,7 +539,7 @@ formdesigner.ui = function () {
     };
 
     that.isSelectNodeBlocked = function (e, data) {
-        if (that.isXpathEditorActive) {
+        if (that.hasXpathEditorChanged) {
             var $modal = formdesigner.ui.generateNewModal("Unsaved Changes in Editor", [], "OK");
             $modal.removeClass('fade');
             $modal.find('.modal-body')
@@ -1183,12 +1183,6 @@ formdesigner.ui = function () {
             return [true, null];
         };
 
-        var markEditorAsActive = function () {
-            if (!formdesigner.ui.isXpathEditorActive) {
-                formdesigner.ui.isXpathEditorActive = true;
-            }
-        };
-
         var tryAddExpression = function(parsedExpression, joiningOp) {
             // trys to add an expression to the UI.
             // if the expression is empty just appends a new div for the expression.
@@ -1241,7 +1235,7 @@ formdesigner.ui = function () {
                 };
 
                 var validateExpression = function(item) {
-                    markEditorAsActive();
+                    formdesigner.ui.hasXpathEditorChanged = true;
 
                     var le = getLeftQuestionInput().val(),
                         re = getRightQuestionInput().val();
@@ -1424,7 +1418,7 @@ formdesigner.ui = function () {
             });
 
             $xpathUI.find('#fd-xpath-editor-text').on('change keyup', function (){
-                markEditorAsActive();
+                formdesigner.ui.hasXpathEditorChanged = true;
             });
 
             var saveExpression = function(expression) {
@@ -1473,7 +1467,7 @@ formdesigner.ui = function () {
     };
 
     that.hideXPathEditor = function() {
-        formdesigner.ui.isXpathEditorActive = false;
+        formdesigner.ui.hasXpathEditorChanged = false;
         $('#fd-xpath-editor').hide();
     };
 
