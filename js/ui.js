@@ -540,15 +540,27 @@ formdesigner.ui = function () {
 
     that.isSelectNodeBlocked = function (e, data) {
         if (that.hasXpathEditorChanged) {
+            that.alertUnsavedChangesInXpathEditor();
+            return true;
+        }
+        return false;
+    };
+
+    that.alertUnsavedChangesInXpathEditor = function () {
+        if (!that.isUnsavedAlertVisible) {
+            that.isUnsavedAlertVisible = true;
+
             var $modal = formdesigner.ui.generateNewModal("Unsaved Changes in Editor", [], "OK");
             $modal.removeClass('fade');
             $modal.find('.modal-body')
                 .append($('<p />').text("You have UNSAVED changes in the Expression Editor. Please save "+
                                         "changes before switching questions."));
-            $modal.modal('show');
-            return true;
+            $modal
+                .modal('show')
+                .on('hide', function () {
+                    that.isUnsavedAlertVisible = false;
+                });
         }
-        return false;
     };
 
     /**
