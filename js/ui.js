@@ -253,16 +253,21 @@ formdesigner.ui = function () {
     };
     
     that.addQuestion = function (qType) {
-        var newMug = formdesigner.controller.createQuestion(qType);
-        that.jstree('select_node', '#' + newMug.ufid, true);
-        if (that.ODK_ONLY_QUESTION_TYPES.indexOf(qType) !== -1) { 
-            //it's an ODK media question
-            formdesigner.model.form.updateError(formdesigner.model.FormError({
-                message: 'This question type will ONLY work with Android phones!',
-                level: 'form-warning'
-            }), {updateUI: true});
+        if (that.hasXpathEditorChanged) {
+            that.alertUnsavedChangesInXpathEditor();
+            return null;
+        } else {
+            var newMug = formdesigner.controller.createQuestion(qType);
+            that.jstree('select_node', '#' + newMug.ufid, true);
+            if (that.ODK_ONLY_QUESTION_TYPES.indexOf(qType) !== -1) {
+                //it's an ODK media question
+                formdesigner.model.form.updateError(formdesigner.model.FormError({
+                    message: 'This question type will ONLY work with Android phones!',
+                    level: 'form-warning'
+                }), {updateUI: true});
+            }
+            return newMug;
         }
-        return newMug;
     };
 
     that.QuestionTypeButton = function (buttonSpec) {
@@ -544,16 +549,28 @@ formdesigner.ui = function () {
     };
 
     that.isSelectNodeBlocked = function (e, data) {
-        if (that.isXpathEditorActive) {
+        if (that.hasXpathEditorChanged) {
+            that.alertUnsavedChangesInXpathEditor();
+            return true;
+        }
+        return false;
+    };
+
+    that.alertUnsavedChangesInXpathEditor = function () {
+        if (!that.isUnsavedAlertVisible) {
+            that.isUnsavedAlertVisible = true;
+
             var $modal = formdesigner.ui.generateNewModal("Unsaved Changes in Editor", [], "OK");
             $modal.removeClass('fade');
             $modal.find('.modal-body')
                 .append($('<p />').text("You have UNSAVED changes in the Expression Editor. Please save "+
                                         "changes before switching questions."));
-            $modal.modal('show');
-            return true;
+            $modal
+                .modal('show')
+                .on('hide', function () {
+                    that.isUnsavedAlertVisible = false;
+                });
         }
-        return false;
     };
 
     /**
@@ -1188,12 +1205,6 @@ formdesigner.ui = function () {
             return [true, null];
         };
 
-        var markEditorAsActive = function () {
-            if (!formdesigner.ui.isXpathEditorActive) {
-                formdesigner.ui.isXpathEditorActive = true;
-            }
-        };
-
         var tryAddExpression = function(parsedExpression, joiningOp) {
             // trys to add an expression to the UI.
             // if the expression is empty just appends a new div for the expression.
@@ -1246,7 +1257,7 @@ formdesigner.ui = function () {
                 };
 
                 var validateExpression = function(item) {
-                    markEditorAsActive();
+                    formdesigner.ui.hasXpathEditorChanged = true;
 
                     var le = getLeftQuestionInput().val(),
                         re = getRightQuestionInput().val();
@@ -1429,7 +1440,7 @@ formdesigner.ui = function () {
             });
 
             $xpathUI.find('#fd-xpath-editor-text').on('change keyup', function (){
-                markEditorAsActive();
+                formdesigner.ui.hasXpathEditorChanged = true;
             });
 
             var saveExpression = function(expression) {
@@ -1478,7 +1489,7 @@ formdesigner.ui = function () {
     };
 
     that.hideXPathEditor = function() {
-        formdesigner.ui.isXpathEditorActive = false;
+        formdesigner.ui.hasXpathEditorChanged = false;
         $('#fd-xpath-editor').hide();
     };
 
