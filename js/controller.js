@@ -2270,11 +2270,20 @@ formdesigner.controller = (function () {
     
     // tree drag and drop stuff, used by xpath
     var handleTreeDrop = function(source, target) {
-        var target = $(target), sourceUid = $(source).attr("id");
+        var target = $(target),
+            sourceUid = $(source).attr("id"),
+            caret = target.caret();
+
         if (target) {
             var mug = that.form.getMugTypeByUFID(sourceUid);
+            var val = target.val();
+            
             // the .change fires the validation controls
-            target.val(target.val() + formdesigner.util.mugToXPathReference(mug)).change();
+            target.val(
+                val.substring(0, caret) + 
+                formdesigner.util.mugToXPathReference(mug) + 
+                val.substring(caret)
+            ).change();
         }
     };
     that.handleTreeDrop = handleTreeDrop;
