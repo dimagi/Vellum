@@ -804,15 +804,6 @@ formdesigner.ui = function () {
         });
     }
 
-    function init_form_paste() {
-        var tarea = $("#fd-form-paste-textarea");
-        tarea.change(function() {
-            var parser = new controller.Parser();
-            var out = parser.parse(tarea.val());
-            $("#fd-form-paste-output").val(out);
-        })
-    }
-
     /**
      * Turns the UI on/off. Primarily used by disableUI() and enableUI()
      * @param state - if false: turn UI off.  if true turn UI on.
@@ -1621,13 +1612,13 @@ formdesigner.ui = function () {
 //        //Bug: Does not work yet. See ticket: http://manage.dimagi.com/default.asp?31223
 //        SaveButton.message.SAVE = 'Save to Server';
 //        SaveButton.message.SAVED = 'Saved to Server';
-        controller = formdesigner.controller;
         generate_scaffolding();
         init_toolbar();
         init_extra_tools();
         formdesigner.multimedia.initControllers();
         that.createJSTree();
-        init_form_paste();
+
+
         init_modal_dialogs();
 
         set_event_listeners();
