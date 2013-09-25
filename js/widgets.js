@@ -397,6 +397,8 @@ formdesigner.widgets = (function () {
             });
         });
 
+        widget.getControl().addClass('jstree-drop');
+
         widget.getUIElement = function () {
             // gets the whole widget (label + control)
             var uiElem = $("<div />").addClass("widget control-group"),
