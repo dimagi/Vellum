@@ -786,7 +786,7 @@ formdesigner.widgets = (function () {
         var $input = $("<input />")
             .attr("id", widget.getID())
             .attr("type", "text")
-            .addClass('input-block-level itext-widget-input')
+            .addClass('input-block-level itext-widget-input jstree-drop jstree-drop-text')
             .on('change keyup', widget.updateValue);
 
         widget.mug.mug.on('question-itext-deleted', widget.destroy);

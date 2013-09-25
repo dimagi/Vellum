@@ -2275,13 +2275,18 @@ formdesigner.controller = (function () {
             caret = target.caret();
 
         if (target) {
-            var mug = that.form.getMugTypeByUFID(sourceUid);
-            var val = target.val();
+            var val = target.val(),
+                reference = formdesigner.util.mugToXPathReference(
+                    that.form.getMugTypeByUFID(sourceUid));
+
+            if (target.hasClass('jstree-drop-text')) {
+                reference = '<output ref="' + reference + '"/>';
+            }
             
             // the .change fires the validation controls
             target.val(
                 val.substring(0, caret) + 
-                formdesigner.util.mugToXPathReference(mug) + 
+                reference + 
                 val.substring(caret)
             ).change();
         }
