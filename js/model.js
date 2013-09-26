@@ -14,6 +14,78 @@ function stacktrace() {
   return st2(arguments.callee.caller);
 }
 
+function ItextItem(options) {
+    this.forms = options.forms || [];
+    this.id = options.id || "";
+}
+
+ItextItem.prototype = {
+    getForms: function () {
+        return this.forms;
+    },
+    getFormNames: function () {
+        return this.forms.map(function (form) {
+            return form.name;
+        });
+    },
+    hasForm: function (name) {
+        return this.getFormNames().indexOf(name) !== -1;
+    },
+    getForm: function (name) {
+        return formdesigner.util.reduceToOne(this.forms, function (form) {
+            return form.name === name;
+        }, "form name = " + name);
+    },
+    getOrCreateForm: function (name) {
+        try {
+            return this.getForm(name);
+        } catch (err) {
+            return this.addForm(name);
+        }
+    },
+    addForm: function (name) {
+        if (!this.hasForm(name)) {
+            var newForm = new formdesigner.model.ItextForm({name: name});
+            this.forms.push(newForm);
+            return newForm;
+        }
+    },
+    removeForm: function (name) {
+        var names = this.getFormNames();
+        var index = names.indexOf(name);
+        if (index !== -1) {
+            this.forms.splice(index, 1);
+        }
+    },
+    getValue: function(form, language) {
+        if (this.hasForm(form)) {
+            return this.getForm(form).getValue(language);
+        }
+    },
+    defaultValue: function() {
+        return this.getValue("default", formdesigner.model.Itext.getDefaultLanguage())
+    },
+    setDefaultValue: function(val) {
+        this.getOrCreateForm("default").setValue(formdesigner.model.Itext.getDefaultLanguage(), val)
+    },
+    isEmpty: function () {
+        if (this.forms) {
+            var nonEmptyItems = formdesigner.util.filterList(this.forms, function (form) {
+                return !form.isEmpty();
+            });
+            return nonEmptyItems.length === 0;
+        }
+        return true;
+    },
+    hasHumanReadableItext: function() {
+        return Boolean(this.hasForm('default') || 
+                       this.hasForm('long')    || 
+                       this.hasForm('short'));
+    }
+};
+
+
+
 formdesigner.model = function () {
     var that = {};
     var exists = formdesigner.util.exists; //jack it from the util module
@@ -389,7 +461,7 @@ formdesigner.model = function () {
         mugType.getDefaultLabelItext = function (defaultValue) {
             var formData = {};
             formData[that.Itext.getDefaultLanguage()] = defaultValue;
-            return new that.ItextItem({
+            return new ItextItem({
                 id: this.getDefaultLabelItextId(),
                 forms: [new that.ItextForm({
                             name: "default",
@@ -2997,97 +3069,7 @@ formdesigner.model = function () {
         return form; 
     };
 
-    /*
-     * An "item" of itext.
-     */
-    
-    that.ItextItem = function (options) {
-        var item = {}; 
-        
-        item.forms = options.forms || [];
-        item.id = options.id || "";
-        
-        item.getForms = function () {
-            return this.forms;
-        };
-        
-        item.getFormNames = function () {
-            return this.forms.map(function (form) {
-                return form.name;
-            });
-        };
-        
-        item.hasForm = function (name) {
-            return this.getFormNames().indexOf(name) !== -1;
-        };
-        
-        item.getForm = function (name) {
-            return formdesigner.util.reduceToOne(this.forms, function (form) {
-                return form.name === name;
-            }, "form name = " + name);
-        };
-        
-        item.getOrCreateForm = function (name) {
-            try {
-                return this.getForm(name);
-            } catch (err) {
-                return this.addForm(name);
-            }
-        };
-        
-        item.addForm = function (name) {
-            if (!this.hasForm(name)) {
-                var newForm = new that.ItextForm({name: name});
-                this.forms.push(newForm);
-                return newForm;
-            }
-        };
-        
-        item.removeForm = function (name) {
-            var names = this.getFormNames();
-            var index = names.indexOf(name);
-            if (index !== -1) {
-                this.forms.splice(index, 1);
-            }
-        };
-        
-        item.getValue = function(form, language) {
-            if (this.hasForm(form)) {
-                return this.getForm(form).getValue(language);
-            }
-        };
-        
-        item.defaultValue = function() {
-            return this.getValue("default", that.Itext.getDefaultLanguage())
-        };
-        
-        item.setDefaultValue = function(val) {
-            this.getOrCreateForm("default").setValue(that.Itext.getDefaultLanguage(), val)
-        };
-        
-        item.isEmpty = function () {
-            if (this.forms) {
-                var nonEmptyItems = formdesigner.util.filterList(this.forms, function (form) {
-                    return !form.isEmpty();
-                });
-                return nonEmptyItems.length === 0;
-            }
-            return true;
-        };
-        
-        
-        item.hasHumanReadableItext = function() {
-            return Boolean(this.hasForm('default') || 
-                           this.hasForm('long')    || 
-                           this.hasForm('short'));
-        };
-        
-        
-        return item; 
-        
-    };
-
-    /**
+        /**
      * The itext holder object. Access all Itext through this gate.
      *
      * Expected forms of itext:
@@ -3196,7 +3178,7 @@ formdesigner.model = function () {
          * Create a new blank item and add it to the list.
          */
         itext.createItem = function (id) {
-            var item = new that.ItextItem({
+            var item = new ItextItem({
                 id: id,
                 forms: [new that.ItextForm({
                             name: "default",

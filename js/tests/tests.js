@@ -122,7 +122,7 @@ $(document).ready(function(){
                             } else {
                                 // hack for itext to properly be set
                                 if (j.indexOf("ItextID") !== -1) {
-                                    mug.properties[i].properties[j] = formdesigner.model.ItextItem({
+                                    mug.properties[i].properties[j] = ItextItem({
                                         id: formdesigner.util.generate_item_label()
                                     });
                                     mug.properties[i].properties[j].setDefaultValue(randomString());
