@@ -49,7 +49,7 @@ formdesigner.windowManager = (function () {
         $formdesigner.find('.fd-content').css('height', panelHeight + 'px');
 
         $formdesigner.find('.fd-content-left')
-            .find('.fd-scrollable').css('height', treeHeight + 'px');
+            .find('.fd-scrollable').css('height', (treeHeight - 400) + 'px');
 
         $formdesigner.find('.fd-content-right')
             .css('width', availableHorizSpace - that.geLeftWidth() + 'px')

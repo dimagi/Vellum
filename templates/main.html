@@ -6,7 +6,7 @@
                     <i class="icon-wrench"></i> Tools
                     <span class="caret"></span>
                 </a>
-                <ul class="dropdown-menu">
+                <ul id="fd-main-menu" class="dropdown-menu">
                     <li><a id="fd-load-xls-button" tabindex="-1" href="#">Edit Bulk Translations</a></li>
                     <li><a id="fd-export-xls-button" tabindex="-1" href="#">Export Form Contents</a></li>
                     <li><a id="fd-editsource-button" tabindex="-1" href="#">Edit Source XML</a></li>
@@ -31,6 +31,25 @@
                         </div>
                     </div>
                     <div id="fd-question-tree"></div>
+                </div>
+            </div>
+            <div id="fd-case-properties-container">
+                <div id="fd-case-properties-head" class="fd-head">Case Properties
+
+                    <a href="http://foo.com" target="_blank" class="fd-help"
+                        data-title="Case Properties"
+                        data-placement="left"
+                        data-content="This is a list of all the case properties
+                        potentially available to this form.  You can drag a
+                        case property into a logic condition or display message
+                        to create a reference to that case property.  Click on
+                        a property below for more information about where it's
+                        created and used."></a>
+                    
+                </div>
+                <div id="fd-case-properties-list" class="fd-scrollable fd-scrollable-tree">
+                </div>
+                <div id="fd-parent-case-properties-list" class="fd-scrollable fd-scrollable-tree">
                 </div>
             </div>
         </div>
@@ -69,7 +88,6 @@
 <div id="fd-multimedia-modal-container"></div>
 <div id="fd-modal-generic-container"></div>
 <!-- end modal divs -->
-
 
 <script type="text/template" id="fd-question-type-group-template">
     <div id="<%= groupID %>" class="btn-group fd-question-type-group <% if (textOnly) { %>fd-question-type-group-advanced<% } %>">

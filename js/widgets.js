@@ -397,7 +397,7 @@ formdesigner.widgets = (function () {
             });
         });
 
-        widget.getControl().addClass('jstree-drop');
+        widget.getControl().addClass('jstree-drop fd-case-property-drop');
 
         widget.getUIElement = function () {
             // gets the whole widget (label + control)
@@ -786,7 +786,8 @@ formdesigner.widgets = (function () {
         var $input = $("<input />")
             .attr("id", widget.getID())
             .attr("type", "text")
-            .addClass('input-block-level itext-widget-input jstree-drop jstree-drop-text')
+            .addClass('input-block-level itext-widget-input')
+            .addClass('jstree-drop fd-case-property-drop fd-drop-text')
             .on('change keyup', widget.updateValue);
 
         widget.mug.mug.on('question-itext-deleted', widget.destroy);
@@ -1410,6 +1411,9 @@ formdesigner.widgets = (function () {
                 displayName: "Label"
             });
         }
+
+        var widgets = _(_.flatten(_(formdesigner.pluginManager.call("getWidgets", mugType)))).filter(_.identity);
+        elements = elements.concat(widgets);
 
         if (formdesigner.util.isReadOnly(mugType)) {
             elements.push({widgetType: "readonlyControl", path: "system/readonlyControl"});

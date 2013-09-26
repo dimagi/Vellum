@@ -742,6 +742,15 @@ formdesigner.ui = function () {
         $('#fd-editsource-button').stopLink().click(formdesigner.controller.showSourceXMLDialog);
         $('#fd-formproperties-button').stopLink().click(formdesigner.controller.showFormPropertiesDialog);
 
+        var menuItems = _.filter(
+            _(formdesigner.pluginManager.call("getMenuItem")).flatten(), function (m) { 
+                return m; 
+            });
+
+        _(menuItems).each(function (m) {
+            m.prop('tabindex', '-1');
+            $("<li/>").append(m).appendTo("#fd-main-menu");
+        });
     };
 
     var setTreeNodeInvalid = function (uid, msg) {
@@ -1626,11 +1635,239 @@ formdesigner.ui = function () {
         setup_fancybox();
 
         formdesigner.windowManager.init();
+
+        formdesigner.pluginManager.call("init");
     };
 
     return that;
 }();
 
+var PluginManager = function () {
+    this.plugins = [];
+
+    this.register = function (plugin) {
+        this.plugins.push(plugin);
+    };
+
+    this.call = function (hookName) {
+        var hookArguments = Array.prototype.slice.call(arguments, 1);
+
+        return _.map(this.plugins, function (plugin) {
+            var fn = plugin[hookName];
+            if (fn) {
+                return fn.apply(plugin, hookArguments);
+            }
+        });
+    };
+};
+
+var CommCarePlugin = function (options) {
+    var that = this;
+    that.options = options;
+    console.log(options);
+
+    that.caseReservedWords = options.case_reserved_words;
+    that.modules = options.modules;
+    that.currentFormId = options.current_form;
+    that.currentModuleId = options.current_module;
+
+    that._addCaseProperty = function (type, name, sourceQuestion) {
+        if (!that.caseProperties[type]) {
+            that.caseProperties[type] = {}; 
+        }
+
+        if (!that.caseProperties[type][name]) {
+            that.caseProperties[type][name] = [];
+        }
+
+        that.caseProperties[type][name].push(sourceQuestion);
+    };
+
+    // collect a flat list of possible case properties for each case type, with
+    // source question info.  Also add some convenience references in the input.
+    that._loadModules = function (modules) {
+        that.modules = modules;
+        that.caseProperties = {};
+
+        _(that.modules).each(function (module, id) {
+            _(module.forms).each(function (form, id) {
+                form.module = module;
+                form.questionsByPath = _(form.questions).indexBy('value');
+                _(form.questions).each(function (q) { 
+                    q.form = form
+                });
+
+                var update_case = form.actions.update_case,
+                    open_case = form.actions.open_case;
+                
+                if (open_case.condition !== 'never' && open_case.name_path) {
+                    that._addCaseProperty(
+                        module.case_type, 
+                        "name", 
+                        form.questionsByPath[open_case.name_path]
+                    );
+                }
+
+                if (update_case.condition !== 'never') {
+                    _(update_case.update).each(function (path, propName) {
+                        that._addCaseProperty(
+                            module.case_type,
+                            propName,
+                            form.questionsByPath[path]
+                        );
+                    });
+                }
+
+                _(form.actions.subcases).each(function (subcase) {
+                    that._addCaseProperty(
+                        subcase.case_type,
+                        "name",
+                        form.questionsByPath[subcase.case_name]
+                    );
+
+                    _(subcase.case_properties).each(function (path, propName) {
+                        that._addCaseProperty(
+                            subcase.case_type,
+                            propName,
+                            form.questionsByPath[path]
+                        );
+                    });
+                });
+            });
+        });
+    };
+
+    that.foo = function () {
+        that.currentModule = that.modules[that.currentModuleId];
+        that.currentForm = that.currentModule.forms[that.currentFormId];
+        that.caseType = that.currentModule.case_type;
+        console.log(that.currentForm);
+  
+        that.updatedCaseTypes = [];
+        if (that.currentForm.actions.update_case.condition !== "never") {
+            that.updatedCaseTypes.push(that.currentModule.case_type);
+        }
+        that.updatedCaseTypes = that.updatedCaseTypes.concat(
+            _(that.currentForm.actions.subcases).pluck("case_type")
+        );
+
+        that.parentCaseType = null;
+        _(that.modules).each(function (module) {
+            _(module.forms).each(function (form) {
+                _(form.actions.subcases).each(function (subcase) {
+                    if (!that.parentCaseType && 
+                        subcase.case_type === that.caseType) 
+                    {
+                        that.parentCaseType = module.case_type;
+                    }
+                });
+            });
+        });
+        
+        that.updateableCaseTypes = [];
+        if (that.parentCaseType) {
+            that.updateableCaseTypes.push(that.parentCaseType);
+        }
+        that.updateableCaseTypes = that.updateableCaseTypes.concat(that.updatedCaseTypes);
+
+        // does this form create or update a case in its own module, or does it only
+        // create subcases in other modules (which aren't child cases, though)?
+        //that.updatesOwnCase = that.currentForm.actions.update_case.condition !== "never";
+        //that.subcaseTypes = _.pluck(that.currentForm.actions.subcases, "case_type");
+
+        //that.moduleNamesByType = {};
+        //_.each(that.modules, function (module) {
+            //that.moduleNamesByType[module.case_type] = module.name.en;
+        //});
+    };
+
+
+    that.init = function () {
+        that._loadModules(that.modules, that.currentModuleId, that.currentFormId);
+        that.foo();
+        that.draggedProperty = null;
+
+
+        _(that.caseProperties).each(function (properties, module) {
+            if (!(module === that.currentModule.case_type ||
+                  module === that.parentCaseType)) 
+            {
+                return;
+            }
+            var isParentCase = module === that.parentCaseType,
+                typeLabel = isParentCase ? "Parent Case" : "This Case";
+
+            var html = "<h4>" + typeLabel + " (<tt>" + module + "</tt>)</h4>";
+            html += "<ul>";
+            _(properties).each(function (sourceQuestions, name) {
+                var sourceForms = _(sourceQuestions).map(function (q) {
+                    return q.form.name
+                })
+                html += "<li><a href='#' class='case-property' " +
+                    "data-property-name='" + name + "' " +
+                    (isParentCase ? "data-parent-case='true' " : "") +
+                    ">" + name + "</a></li>";
+            });
+            html += "</ul>";
+            $("#fd-case-properties-list").append($("<div/>").html(html));
+        });
+    };
+
+    that.getMenuItem = function () {
+        return $("<a id='fd-show-case-management' href='#'>"
+            + "Case Management</a>");
+    
+    };
+
+    that.getWidgets = function (mugType) {
+        var widgets = [];
+
+        return _(that.updateableCaseTypes).map(function (case_type) {
+            return {
+                "widgetType": "generic",
+                "path": "bindElement/preloadParams"
+            };
+        });
+    };
+
+    $(document).on('click', '.case-property', function (e) {
+        e.preventDefault();
+    });
+    // handlers adapted from jstree dnd plugin
+    $(document).on("mousedown", '.case-property', function (e) {
+        e.preventDefault();
+        $.vakata.dnd.drag_start(e, { 
+            jstree : false, 
+            obj : e.target
+        }, "<ins class='jstree-icon'></ins>" + $(e.target).text() );
+
+        var theme = formdesigner.ui.jstree("get_theme");
+        $.vakata.dnd.helper.attr("class", "jstree-dnd-helper jstree-" + theme); 
+        $.vakata.dnd.helper.children("ins").attr("class","jstree-invalid");
+        that.draggedProperty = e.target;
+    });
+    $(document).on("mouseenter", "input", function (event) {
+        if (that.draggedProperty && 
+            $(event.target).hasClass('fd-case-property-drop'))
+        {
+            $.vakata.dnd.helper.children("ins").attr("class","jstree-ok");
+        }
+    });
+    $(document).on("mouseleave", "input", function (event) {
+        if (that.draggedProperty) {
+            $.vakata.dnd.helper.children("ins").attr("class","jstree-invalid");
+        }
+    });
+    $(document).on("mouseup", function (event) {
+        if(that.draggedProperty && 
+           $.vakata.dnd.helper.children("ins").hasClass("jstree-ok"))
+        {
+            formdesigner.controller.handleCasePropertyDrop(
+                that.draggedProperty, event.target);
+        }
+        that.draggedProperty = null;
+    });
+};
 /**
  *
  * @param opts - {
@@ -1644,6 +1881,11 @@ formdesigner.ui = function () {
  */
 formdesigner.launch = function (opts) {
     formdesigner.util.eventuality(formdesigner);
+   
+    console.log(opts.commcareOptions);
+    formdesigner.pluginManager = new PluginManager();
+    formdesigner.pluginManager.register(
+        new CommCarePlugin(opts.commcareOptions));
 
     if(!opts){
         opts = {};
@@ -1700,7 +1942,8 @@ formdesigner.launch = function (opts) {
 	    formdesigner.controller.on("parse-finish", function () {
 	        formdesigner.controller.setFormName(formdesigner.opts.formName);
         });
-    } 
+    }
+
 };
 
 formdesigner.rootElement = '';

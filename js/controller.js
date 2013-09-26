@@ -2267,31 +2267,49 @@ formdesigner.controller = (function () {
         formdesigner.model.reset();
         formdesigner.ui.reset();
     };
-    
-    // tree drag and drop stuff, used by xpath
-    var handleTreeDrop = function(source, target) {
+   
+    var handleDrop = function (value, target) {
         var target = $(target),
-            sourceUid = $(source).attr("id"),
+            val = target.val(),
             caret = target.caret();
 
-        if (target) {
-            var val = target.val(),
-                reference = formdesigner.util.mugToXPathReference(
-                    that.form.getMugTypeByUFID(sourceUid));
-
-            if (target.hasClass('jstree-drop-text')) {
-                reference = '<output ref="' + reference + '"/>';
-            }
-            
-            // the .change fires the validation controls
-            target.val(
-                val.substring(0, caret) + 
-                reference + 
-                val.substring(caret)
-            ).change();
+        if (!target) {
+            return;
         }
+
+        if (target.hasClass('fd-drop-text')) {
+            value = '<output ref="' + value + '"/>';
+        }
+
+        // the .change fires the validation controls
+        target.val(
+            val.substring(0, caret) + 
+            value + 
+            val.substring(caret)
+        ).change();
     };
-    that.handleTreeDrop = handleTreeDrop;
+    // tree drag and drop stuff, used by xpath
+    that.handleTreeDrop = function(source, target) {
+        handleDrop(
+            formdesigner.util.mugToXPathReference(
+                that.form.getMugTypeByUFID($(source).attr("id"))),
+            target
+        );
+    };
+
+    that.handleCasePropertyDrop = function (source, target) {
+        var $source = $(source),
+            property = $source.data("property-name"),
+            isParentProperty = $source.data('parent-case') === true,
+            reference;
+
+        if (isParentProperty) {
+            reference = "instance('casedb')/casedb/case[@case_id=instance('casedb')/casedb/case[@case_id=instance('commcaresession')/session/data/case_id]/index/parent]/" + property;
+        } else {
+            reference = "instance('casedb')/casedb/case[@case_id=instance('commcaresession')/session/data/case_id]/" + property;
+        }
+        handleDrop(reference, target);
+    };
     
     // here is the xpath stuff
     var displayXPathEditor = function(options) {
