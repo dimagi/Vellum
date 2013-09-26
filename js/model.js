@@ -1765,22 +1765,6 @@ formdesigner.model = function () {
         }(treeType);
         that.rootNode = rootNode;
 
-        /** Private Function
-         * Adds a node to the top level (as a child of the abstract root node)
-         *
-         * @param parentNode - the parent to which the specified node should be added
-         * if null is given, the node will be added to the top level of the tree (as a child
-         * of the abstract rootNode).
-         * @param node - the specified node to be added to the tree.
-         */
-        var addNode = function (node, parentNode) {
-            if (parentNode) {
-                parentNode.addChild(node);
-            } else {
-                rootNode.addChild(node);
-            }
-        };
-
         that.getParentNode = function (node) {
             if (this.rootNode === node) { //special case:
                 return this.rootNode;
