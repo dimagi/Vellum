@@ -1994,7 +1994,7 @@ var mugs = (function () {
             Itext = formdesigner.model.Itext;
             controlBlock = mug.controlElement;
             hasLabel = Boolean(controlBlock.label);
-            var itextBlock = mug.getItext();
+            var itextBlock = mug.controlElement.labelItextID;
             hasLabelItextID = itextBlock && (typeof itextBlock.id !== "undefined");
 
             if (hasLabelItextID && !isValidAttributeValue(itextBlock.id)) {
@@ -2101,14 +2101,14 @@ var mugs = (function () {
             visibility: 'visible',
             presence: 'optional',
             values: formdesigner.util.XSD_DATA_TYPES,
-            uiType: 'select',
+            uiType: formdesigner.widgets.selectWidget,
             lstring: 'Data Type'
         },
         relevantAttr: {
             editable: 'w',
             visibility: 'visible',
             presence: 'optional',
-            uiType: "xpath",
+            uiType: formdesigner.widgets.xPathWidget,
             xpathType: "bool",
             lstring: 'Display Condition'
         },
@@ -2116,7 +2116,7 @@ var mugs = (function () {
             editable: 'w',
             visibility: 'visible',
             presence: 'optional',
-            uiType: "xpath",
+            uiType: formdesigner.widgets.xPathWidget,
             xpathType: "generic",
             lstring: 'Calculate Condition'
         },
@@ -2124,7 +2124,7 @@ var mugs = (function () {
             editable: 'w',
             visibility: 'visible',
             presence: 'optional',
-            uiType: "xpath",
+            uiType: formdesigner.widgets.xPathWidget,
             xpathType: "bool",
             lstring: 'Validation Condition'
         },
@@ -2133,7 +2133,7 @@ var mugs = (function () {
             visibility: 'advanced',
             presence: 'optional',
             lstring: "Validation Error Message ID",
-            uiType: "itext-id",
+            uiType: formdesigner.widgets.iTextIDWidget,
             validationFunc: validationFuncs.constraintItextId
         },
         constraintMsgAttr: {
@@ -2158,7 +2158,7 @@ var mugs = (function () {
             visibility: 'visible',
             presence: 'optional',
             lstring: "Is this Question Required?",
-            uiType: "checkbox"
+            uiType: formdesigner.widgets.checkboxWidget
         },
         preload: {
             editable: 'w',
@@ -2217,7 +2217,7 @@ var mugs = (function () {
             visibility: 'advanced',
             presence: 'optional',
             lstring: "Question Itext ID",
-            uiType: "itext-id",
+            uiType: formdesigner.widgets.iTextIDWidget,
             validationFunc : validationFuncs.label
         },
         hintItextID: {
@@ -2225,7 +2225,7 @@ var mugs = (function () {
             visibility: 'advanced',
             presence: 'optional',
             lstring: "Hint Itext ID",
-            uiType: "itext-id",
+            uiType: formdesigner.widgets.iTextIDWidget,
             validationFunc: validationFuncs.hintItextID
         }
     };
@@ -2307,16 +2307,19 @@ var mugs = (function () {
         setAppearanceAttribute: function (attrVal) {
             this.controlElement.appearance = attrVal;
         },
+        // get a propery definition by a string or list index
+        // assumes strings are split by the "/" character. Returns null if this
+        // mug doesn't have a definition for that property.
         getPropertyDefinition: function (index) {
-            // todo: kill
-            // get a propery definition by a string or list index
-            // assumes strings are split by the "/" character
             if (!(index instanceof Array)) {
                 index = index.split("/");
             } 
             // this will raise a reference error if you give it a bad value
             var ret = this.__spec[index[0]];
             for (var i = 1; i < index.length; i++) {
+                if (!ret) {
+                    return null;
+                }
                 ret = ret[index[i]];
             }
             return ret;
@@ -2437,16 +2440,6 @@ var mugs = (function () {
                 return this.controlElement.labelItextID;
             } 
         },
-        getHintItext: function () {
-            if (this.controlElement) {
-                return this.controlElement.hintItextID;
-            }
-        },
-        getConstraintMsgItext: function () {
-            if (this.bindElement) {
-                return this.bindElement.constraintMsgItextID;
-            }
-        }
     });
 
     var DataBindOnly = BaseMug.$extend({
@@ -2792,14 +2785,14 @@ var mugs = (function () {
                     visibility: 'visible',
                     editable: 'w',
                     presence: 'optional',
-                    uiType: 'droppable-text'
+                    uiType: formdesigner.widgets.droppableTextWidget
                 },
                 no_add_remove: {
                     lstring: 'Disallow Repeat Add and Remove?',
                     visibility: 'visible',
                     editable: 'w',
                     presence: 'optional',
-                    uiType: 'checkbox'
+                    uiType: formdesigner.widgets.checkboxWidget
                 }
             });
         }

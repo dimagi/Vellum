@@ -427,7 +427,7 @@ formdesigner.ui = function () {
                 if (e.val && (
                     (mug.__className === "DataBindOnly" && newNameForTree !== that.jstree("get_text", node)) ||
                     (!(mug.__className === "DataBindOnly") &&
-                        (!mug.getItext() || (mug.getItext() && mug.getItext().isEmpty()) )
+                        (!mug.controlElement.labelItextID || (mug.controlElement.labelItextID && mug.controlElement.labelItextID.isEmpty()) )
                         )
                     )
                 ) {
@@ -1010,7 +1010,7 @@ formdesigner.ui = function () {
                 allMugs.map(function (mug) {
                     var node = $('#' + mug.ufid),
                         treeName = e.value || formdesigner.util.getMugDisplayName(mug),
-                        it = mug.getItext();
+                        it = mug.controlElement ? mug.controlElement.labelItextID : null;
                     if (it && it.id === e.item.id && e.form === "default") {
                         if (treeName !== that.jstree("get_text", node)) {
                             that.jstree('rename_node', node, treeName);
@@ -1026,7 +1026,7 @@ formdesigner.ui = function () {
             var currLang = formdesigner.currentItextDisplayLanguage;
             allMugs.map(function (mug) {
                 var node = $('#' + mug.ufid),
-                    it = mug.getItext();
+                    it = mug.controlElement ? mug.controlElement.labelItextID : null;
                 var treeName = (it) ? it.getValue("default", currLang) : formdesigner.util.getMugDisplayName(mug);
                 treeName = treeName || formdesigner.util.getMugDisplayName(mug);
                 if (treeName !== that.jstree("get_text", node)) {

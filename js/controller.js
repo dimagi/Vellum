@@ -870,7 +870,7 @@ formdesigner.controller = (function () {
 
         var mugToExportRow = function (mug) {
             var row = {},
-                itext = mug.getItext(),
+                itext = mug.controlElement.labelItextID,
                 defaultLanguage = formdesigner.model.Itext.getDefaultLanguage();
 
             var defaultOrNothing = function (item, language, form) {
@@ -902,9 +902,9 @@ formdesigner.controller = (function () {
                 row["Required"] = mug.bindElement.requiredAttr ? 'yes' : 'no';
 
                 row["Validation Condition"] = mug.bindElement.constraintAttr;
-                var constraintMsgItext = mug.getConstraintMsgItext();
-                row["Validation Message"] = defaultOrNothing(constraintMsgItext, 
-                                                             defaultLanguage, 'default');
+                row["Validation Message"] = defaultOrNothing(
+                    mug.controlElement ? mug.controlElement.constraintMsgItextID : null,
+                    defaultLanguage, 'default');
             }
 
             // make sure there aren't any null values
