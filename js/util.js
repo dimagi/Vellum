@@ -39,41 +39,7 @@ formdesigner.util = (function(){
                              "bindElement/calculateAttr",
                              "bindElement/constraintAttr"];
 
-    // keep questions from showing up in the dropdown list here
-    that.UNCHANGEABLE_QUESTIONS = [
-        "stdItem", 
-        "stdGroup", 
-        "stdRepeat", 
-        "stdDataBindOnly", 
-        "stdTrigger", 
-        "unknown", 
-        "stdAndroidIntent", 
-        "stdFieldList"
-    ];
 
-    // these questions are groups or repeats (or similar types of things).
-    // They don't have any human readable itext
-    that.SPECIAL_GROUP_QUESTIONS = [
-        'stdGroup', 
-        'stdRepeat', 
-        'stdFieldList'
-    ];
-    
-    that.getQuestionList = function (currentType) {
-        var ret = [];
-        for (var q in formdesigner.ui.QUESTIONS) {
-            if (formdesigner.ui.QUESTIONS.hasOwnProperty(q) && 
-                that.UNCHANGEABLE_QUESTIONS.indexOf(q) === -1 &&
-                q !== currentType) {
-                ret.push({
-                    slug: q,
-                    name: formdesigner.ui.QUESTIONS[q],
-                    icon: formdesigner.ui.QUESTION_TYPE_TO_ICONS[q]
-                });
-            }
-        }
-        return ret;
-    };
 
     that.HELP_TEXT_FOR_SECTION = {
         main: {
@@ -105,9 +71,6 @@ formdesigner.util = (function(){
         }
     };
     
-    that.isReadOnly = function (mugType) {
-        return mugType.typeSlug === "unknown";
-    };
     /**
      * Grabs the value between the tags of the element passed in
      * and returns a string of everything inside.
@@ -157,52 +120,6 @@ formdesigner.util = (function(){
         return resStr;
     }
 
-    var dumpFormTreesToConsole = function () {
-        var vObj = [], vOut = [], i, invalidMT = [], mt;
-                console.group("Tree Pretty Print");
-                console.log("Control Tree:"+formdesigner.controller.form.controlTree.printTree());
-                console.log("Data Tree:   "+formdesigner.controller.form.dataTree.printTree());
-                console.log("TREE VALIDATION RESULT",formdesigner.controller.form.controlTree.isTreeValid());
-                invalidMT = formdesigner.controller.form.getInvalidMugTypes();
-
-                console.log("TREE MAP INVALID UFIDS", formdesigner.controller.form.getInvalidMugTypeUFIDs());
-                for (i in invalidMT){
-                    if(invalidMT.hasOwnProperty(i)){
-                        mt = invalidMT[i];
-                        vOut.push(mt);
-                        vOut.push(mt.validateMug());
-                    }
-                }
-                console.log("INVALID MTs,VALIDATION OBJ",vOut);
-                console.groupEnd();
-    };
-    that.dumpFormTreesToConsole = dumpFormTreesToConsole;
-    
-    /*
-     * Copies all properties from one object to another under the following rules:
-     *  - If the property doesn't exist on the destination object it is not copied
-     *
-     * This is used to attempt to copy as much as possible from one mug to 
-     * another while preserving the core structure.
-     * 
-     */
-    that.copySafely = function (from, to, forceOverride, skip) {
-        forceOverride = forceOverride || [];
-        skip = skip || [];
-
-        if (to) {
-            for (var prop in from) {
-                if (from.hasOwnProperty(prop)) {
-                    if (skip.indexOf(prop) === -1 &&
-                        (forceOverride.indexOf(prop) !== -1 || 
-                         (to.hasOwnProperty(prop) && !to[prop]))) {
-                        to[prop] = from[prop];
-                    } 
-                }
-            }
-        }
-    };
-    
     /**
      * From http://stackoverflow.com/questions/4149276/javascript-camelcase-to-regular-form
      * @param myString
@@ -366,16 +283,16 @@ formdesigner.util = (function(){
     }; 
     
     /**
-     * Takes in a reference mugType and makes a copy of
+     * Takes in a reference mug and makes a copy of
      * the object (the copy is returned).
      * @param refMug
      */
-    var getNewMugType = function(refMugType){
-        var newMugType = that.clone(refMugType);
-        that.give_ufid(newMugType);
-        return newMugType;
-    };
-    that.getNewMugType = getNewMugType;
+    //var getNewMug = function(refMug){
+        //var newMug = that.clone(refMug);
+        //that.give_ufid(newMug);
+        //return newMug;
+    //};
+    //that.getNewMug = getNewMug;
 
     //Simple Event Framework
     //Just run your object through this function to make it event aware
@@ -417,11 +334,6 @@ formdesigner.util = (function(){
         };
         return that;
     };
-
-    var capitaliseFirstLetter = function (string) {
-        return string.charAt(0).toUpperCase() + string.slice(1);
-    };
-    that.capitaliseFirstLetter = capitaliseFirstLetter;
 
     that.pluralize = function (noun, n) {
         return noun + (n !== 1 ? 's' : '');
@@ -496,35 +408,6 @@ formdesigner.util = (function(){
     ];
 
     /**
-     * Shortcut func because I'm tired of typing this out all the time.
-     * @param obj
-     */
-    var exists = function(obj){
-        return typeof obj !== 'undefined';
-    };
-    that.exists = exists;
-
-    (function($) {
-              // duck-punching to make attr() return a map
-              var _old = $.fn.attr;
-              $.fn.attr = function() {
-                  var a, aLength, attributes,	map;
-                  if (this[0] && arguments.length === 0) {
-                            map = {};
-                            attributes = this[0].attributes;
-                            aLength = attributes.length;
-                            for (a = 0; a < aLength; a++) {
-                                      map[attributes[a].name] = attributes[a].value;
-                            }
-                            return map;
-                  } else {
-                            return _old.apply(this, arguments);
-                  }
-        }
-    }(jQuery));
-
-
-    /**
      * Bind a number of standard event responses to a mug
      * so that it responds in a pre-determined fashion to default things
      *
@@ -538,23 +421,23 @@ formdesigner.util = (function(){
         mug.on('property-changed',function (e) {
             // bind dataElement.nodeID and bindElement.nodeID together
             if(e.property === 'nodeID'){
-                if(this.properties.dataElement){
-                    this.properties.dataElement.properties.nodeID = e.val;
+                if(this.dataElement){
+                    this.dataElement.nodeID = e.val;
                 }
-                if(this.properties.bindElement){
-                    this.properties.bindElement.properties.nodeID = e.val;
+                if(this.bindElement){
+                    this.bindElement.nodeID = e.val;
                 }
             }
 
             // Update the status of the indicator icons indicating where
             // validation has failed
-            var MT = formdesigner.controller.getMTFromFormByUFID(e.mugTypeUfid);
-            formdesigner.ui.showVisualValidation(MT);
-            formdesigner.ui.setTreeValidationIcon(MT);
+            var mug = formdesigner.controller.getMugFromFormByUFID(e.mugUfid);
+            formdesigner.ui.showVisualValidation(mug);
+            formdesigner.ui.setTreeValidationIcon(mug);
             
             // update the logic properties that reference the mug
             if (e.previous !== e.val) {
-                var mug = formdesigner.controller.getMTFromFormByUFID(e.mugTypeUfid);
+                var mug = formdesigner.controller.getMugFromFormByUFID(e.mugUfid);
                 if (e.property === 'nodeID') {
                     var currentPath = formdesigner.controller.form.dataTree.getAbsolutePath(mug);
                     var parsed = xpath.parse(currentPath);
@@ -569,14 +452,14 @@ formdesigner.util = (function(){
             }
 
             // update the itext ids of child items if they weren't manually set
-            if (e.property === "nodeID" && that.isSelect(MT)) {
-                var node = formdesigner.controller.form.controlTree.getNodeFromMugType(MT),
-                    children = node.getChildrenMugTypes(),
+            if (e.property === "nodeID" && (mug.__className === "Select" || mug.__className === "MSelect")) {
+                var node = formdesigner.controller.form.controlTree.getNodeFromMug(mug),
+                    children = node.getChildrenMugs(),
                     mug = this;
             
                 var setNodeID = function (val) {
-                    mug.properties.dataElement.properties.nodeID = val;
-                    mug.properties.bindElement.properties.nodeID = val;
+                    mug.dataElement.nodeID = val;
+                    mug.bindElement.nodeID = val;
                 };
 
                 for (var i = 0; i < children.length; i++) {
@@ -602,10 +485,10 @@ formdesigner.util = (function(){
      */
     that.setStandardFormEventResponses = function (form) {
         form.on('form-property-changed', function (e) {
-            var MT = formdesigner.controller.getCurrentlySelectedMugType();
-            if (MT) {
-                formdesigner.ui.showVisualValidation(MT);
-                formdesigner.ui.setTreeValidationIcon(MT);
+            var mug = formdesigner.controller.getCurrentlySelectedMug();
+            if (mug) {
+                formdesigner.ui.showVisualValidation(mug);
+                formdesigner.ui.setTreeValidationIcon(mug);
             }
         });
 
@@ -614,25 +497,18 @@ formdesigner.util = (function(){
         });
     };
 
-    that.getMugDisplayName = function (mugType) {
-        var itextItem, cEl,dEl,bEl, mugProps, disp, lang, Itext;
-        if(!mugType || !mugType.mug) {
+    that.getMugDisplayName = function (mug) {
+        var itextItem, cEl,dEl,bEl, disp, lang, Itext;
+        if(!mug) {
             return 'No Name!';
         }
-        if (that.isReadOnly(mugType)) {
+        if (mug.__className === "ReadOnly") {
             return "Unknown (read-only) question type";
         }
 
-        mugProps = mugType.mug.properties;
-        if (mugProps.controlElement) {
-            cEl = mugProps.controlElement.properties;
-        }
-        if (mugProps.dataElement) {
-            dEl = mugProps.dataElement.properties;
-        }
-        if (mugProps.bindElement) {
-            bEl = mugProps.bindElement.properties;
-        }
+        cEl = mug.controlElement;
+        dEl = mug.dataElement;
+        bEl = mug.bindElement;
         Itext = formdesigner.model.Itext;
 
         if(cEl) {
@@ -737,29 +613,14 @@ formdesigner.util = (function(){
     that.mugToXPathReference = function (mug) {
         // for choices, return the quoted value.
         // for everything else return the path
-        if (mug.typeSlug === "stdItem") {
-            return '"' + mug.mug.properties.controlElement.properties.defaultValue + '"';
+        if (mug.__className === "Item") {
+            return '"' + mug.controlElement.defaultValue + '"';
         } else {
             // for the currently selected mug, return a "."
-            return (mug.ufid === formdesigner.controller.getCurrentlySelectedMugType().ufid) ? "." : formdesigner.controller.form.dataTree.getAbsolutePath(mug);
+            return (mug.ufid === formdesigner.controller.getCurrentlySelectedMug().ufid) ? "." : formdesigner.controller.form.dataTree.getAbsolutePath(mug);
         }
     };
     
-    that.mugToAutoCompleteUIElement = function (mug) {
-        return {id:   that.mugToXPathReference(mug),
-                uid:  mug.ufid,
-                name: that.getMugDisplayName(mug) };
-    };
-        
-    that.isSelect = function (mug) {
-        return (mug.typeSlug === "stdMSelect" ||
-                mug.typeSlug === "stdSelect");
-    };
-    
-    that.isSelectItem = function (mug) {
-        return (mug.typeSlug === "stdItem");
-    };
-
     /**
      * Parses the required attribute string (expecting either "true()" or "false()" or nothing
      * and returns either true, false or null
@@ -793,19 +654,6 @@ formdesigner.util = (function(){
         }
     };
     
-    /**
-     * Filter a list based on a function
-     */
-    that.filterList = function (list, func) {
-        var ret = [];
-        for (var i = 0; i < list.length; i++) {
-            if (func(list[i])) {
-                ret.push(list[i]);
-            }
-        }
-        return ret;
-    };
-    
     that.getOneOrFail = function (list, infoMsg) {
         if (list.length === 0) {
             throw ("No match for " + infoMsg + " found!");
@@ -816,7 +664,7 @@ formdesigner.util = (function(){
     };
     
     that.reduceToOne = function (list, func, infoMsg) {
-        return that.getOneOrFail(that.filterList(list, func), infoMsg);
+        return that.getOneOrFail(_(list).filter(func), infoMsg);
     };
     return that;
 
