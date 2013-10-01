@@ -2114,7 +2114,11 @@ var mugs = (function () {
         },
         calculateAttr: {
             editable: 'w',
-            visibility: 'visible',
+            // only show calculate condition for non-data nodes if it already
+            // exists.  It's a highly discouraged use-case because the user will
+            // think they can edit an input when they really can't, but we
+            // shouldn't break existing forms doing this.
+            visibility: 'visible_if_present',
             presence: 'optional',
             uiType: formdesigner.widgets.xPathWidget,
             xpathType: "generic",
@@ -2136,9 +2140,10 @@ var mugs = (function () {
             uiType: formdesigner.widgets.iTextIDWidget,
             validationFunc: validationFuncs.constraintItextId
         },
+        // non-itext constraint message
         constraintMsgAttr: {
             editable: 'w',
-            visibility: 'hidden',
+            visibility: 'visible_if_present',
             presence: 'optional',
             validationFunc : function (mug) {
                 var bindBlock = mug.bindElement;
@@ -2180,13 +2185,6 @@ var mugs = (function () {
     };
 
     var DEFAULT_CONTROL_ELEMENT_SPEC = {
-        defaultValue: {
-            lstring: 'Choice Value',
-            visibility: 'hidden',
-            editable: 'w',
-            presence: 'optional',
-            validationFunc: validationFuncs.defaultValue
-        },
         tagName: { //internal use
             editable: 'r',
             visibility: 'hidden',
@@ -2202,15 +2200,30 @@ var mugs = (function () {
         label: {
             editable: 'w',
             visibility: 'hidden',
-            presence: 'optional',
+            presence: 'visible_if_present',
             validationFunc : validationFuncs.label,
             lstring: "Default Label"
         },
         hintLabel: {
             editable: 'w',
-            visibility: 'advanced',
+            visibility: 'visible_if_present',
             presence: 'optional',
             lstring: "Hint Label"
+        },
+        // virtual property used to define a widget
+        labelItext: {
+            editable: 'w',
+            visibility: 'controlElement/labelItextID',
+            presence: 'optional',
+            uiType: formdesigner.widgets.itextLabelBlock,
+            widgetOptions: {
+                itextType: "label",
+                getItextByMug: function (mug) {
+                    return mug.controlElement.labelItextID;
+                },
+                displayName: "Label"
+            },
+            lstring: "Label"
         },
         labelItextID: {
             editable: 'w',
@@ -2218,7 +2231,29 @@ var mugs = (function () {
             presence: 'optional',
             lstring: "Question Itext ID",
             uiType: formdesigner.widgets.iTextIDWidget,
-            validationFunc : validationFuncs.label
+            validationFunc : validationFuncs.label,
+            widgetOptions: {
+                displayName: "Add Other Content",
+                itextType: "label",
+                getItextByMug: function (mug) {
+                    return mug.controlElement.labelItextID;
+                },
+                forms: ['long', 'short'],
+                isCustomAllowed: true
+            }
+        },
+        // virtual property used to get a widget
+        hintItext: {
+            editable: 'w',
+            visibility: 'controlElement/hintItextID',
+            uiType: formdesigner.widgets.itextLabelBlock,
+            widgetOptions: {
+                itextType: "hint",
+                getItextByMug: function (mug) {
+                    return mug.controlElement.hintItextID;
+                },
+                displayName: "Hint Message"
+            }
         },
         hintItextID: {
             editable: 'w',
@@ -2226,7 +2261,63 @@ var mugs = (function () {
             presence: 'optional',
             lstring: "Hint Itext ID",
             uiType: formdesigner.widgets.iTextIDWidget,
-            validationFunc: validationFuncs.hintItextID
+            validationFunc: validationFuncs.hintItextID,
+            widgetOptions: {
+                itextType: "hint",
+                getItextByMug: function (mug) {
+                    return mug.controlElement.hintItextID;
+                },
+                displayName: "Hint Message"
+            }
+        },
+        // virtual property used to define a widget
+        constraintMsgItext: {
+            editable: 'w',
+            visibility: 'bindElement/constraintMsgItextID',
+            presence: 'optional',
+            uiType: formdesigner.widgets.itextLabelBlock,
+            widgetOptions: {
+                itextType: "constraintMsg",
+                getItextByMug: function (mug) {
+                    return mug.controlElement.constraintMsgItextID;
+                },
+                displayName: "Validation Message"
+            },
+            lstring: 'Validation Message',
+        },
+        // virtual property used to get a widget
+        otherItext: {
+            editable: 'w',
+            visibility: 'controlElement/labelItextID',
+            presence: 'optional',
+            lstring: "Add Other Content",
+            uiType: formdesigner.widgets.itextConfigurableBlock,
+            widgetOptions: {
+                displayName: "Add Other Content",
+                itextType: "label",
+                getItextByMug: function (mug) {
+                    return mug.controlElement.labelItextID;
+                },
+                forms: ['long', 'short'],
+                isCustomAllowed: true
+            }
+        },
+        // virtual property used to get a widget
+        mediaItext: {
+            editable: 'w',
+            visibility: 'controlElement/labelItextID',
+            presence: 'optional',
+            lstring: 'Add Multimedia',
+            uiType: formdesigner.widgets.itextMediaBlock,
+            widgetOptions: {
+                displayName: "Add Multimedia",
+                itextType: "label",
+                getItextByMug: function (mug) {
+                    return mug.controlElement.labelItextID;
+                },
+                forms: formdesigner.multimedia.SUPPORTED_MEDIA_TYPES,
+                formToIcon: formdesigner.multimedia.ICONS
+            }
         }
     };
 
@@ -2307,9 +2398,8 @@ var mugs = (function () {
         setAppearanceAttribute: function (attrVal) {
             this.controlElement.appearance = attrVal;
         },
-        // get a propery definition by a string or list index
-        // assumes strings are split by the "/" character. Returns null if this
-        // mug doesn't have a definition for that property.
+        // get a property definition by a /-delimited string or list index
+        // Returns null if this mug doesn't have a definition for that property.
         getPropertyDefinition: function (index) {
             if (!(index instanceof Array)) {
                 index = index.split("/");
@@ -2324,6 +2414,9 @@ var mugs = (function () {
             }
             return ret;
         },
+        // get a property value by a /-delimited string or list index
+        // Returns null if this mug doesn't have the element on which the
+        // property is defined.
         getPropertyValue: function (index) {
             // get a propery value by a string or list index
             // assumes strings are split by the "/" character
@@ -2333,6 +2426,9 @@ var mugs = (function () {
             // this will raise a reference error if you give it a bad value
             var ret = this[index[0]];
             for (var i = 1; i < index.length; i++) {
+                if (!ret) {
+                    return null;
+                }
                 ret = ret[index[i]];
             }
             return ret;
@@ -2448,6 +2544,13 @@ var mugs = (function () {
         isTypeChangeable: false,
         getControlElementSpec: function () {
             return null;
+        },
+        getBindElementSpec: function () {
+            var spec = this.$super();
+            spec.requiredAttr.presence = "notallowed";
+            spec.constraintAttr.presence = "notallowed";
+            spec.calculateAttr.visibility = "visible";
+            return spec;
         }
     });
     
@@ -2468,7 +2571,12 @@ var mugs = (function () {
             return null;
         },
         getControlElementSpec: function () {
-            return null;
+            return {
+                // virtual property used to get a widget
+                readonlyControl: {
+                    uiType: formdesigner.widgets.readOnlyControlWidget
+                }
+            };
         }
     });
 
@@ -2587,6 +2695,26 @@ var mugs = (function () {
             this.controlElement.tagName = "input";
             this.bindElement.dataType = "intent";
         },
+        getControlElementSpec: function () {
+            var spec = this.$super();
+            // virtual properties used to get widgets
+            spec.controlElement = $.extend(spec.controlElement, {
+                androidIntentAppId: {
+                    visibility: 'visible',
+                    uiType: formdesigner.widgets.androidIntentAppIdWidget
+                },
+                androidIntentExtra: {
+                    visibility: 'visible',
+                    uiType: formdesigner.widgets.androidIntentExtraWidget
+                },
+                androidIntentResponse: {
+                    visibility: 'visible',
+                    uiType: formdesigner.widgets.androidIntentResponseWidget
+                }
+            });
+
+            return spec;
+        },
         // todo: move to spec system
         getAppearanceAttribute: function () {
             return 'intent:' + this.dataElement.nodeID;
@@ -2670,6 +2798,13 @@ var mugs = (function () {
         },
         getControlElementSpec: function () {
             var spec = this.$super();
+            spec.defaultValue = {
+                lstring: 'Choice Value',
+                visibility: 'hidden',
+                editable: 'w',
+                presence: 'optional',
+                validationFunc: validationFuncs.defaultValue
+            };
             spec.hintLabel.presence = 'notallowed';
             spec.hintItextID.presence = 'notallowed';
 
@@ -2738,13 +2873,16 @@ var mugs = (function () {
             var spec = this.$super();
             spec.hintItextID.presence = "notallowed";
             spec.hintLabel.presence = "notallowed";
-            spec.label.presence = "optional";
-            spec.labelItextID.presence = "optional";
+            spec.mediaItext.presence = "notallowed";
+            spec.otherItext.presence = "notallowed";
+            delete spec.otherItext;
             return spec;
         },
         getBindElementSpec: function () {
             var spec = this.$super();
             spec.dataType.presence = "notallowed";
+            spec.calculateAttr.presence = "notallowed";
+            spec.constraintMsgItextID.presence = "notallowed";
             return spec;
         },
         getDataElementSpec: function () {

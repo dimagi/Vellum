@@ -379,6 +379,30 @@ formdesigner.ui = function () {
         that.resetMessages(formdesigner.model.form.errors);
     };
 
+    function getWidgetClassAndOptions(propPath, mug) {
+        var propDef = mug.getPropertyDefinition(propPath),
+            propVal = mug.getPropertyValue(propPath);
+
+        if (propDef && propDef.visibility &&
+            propDef.visibility.indexOf('/') !== -1 &&
+                !getWidgetClassAndOptions(propDef.visibility, mug))
+        {
+            return null;
+        }
+
+        if (!propDef || 
+            (!propVal &&
+             (propDef.visibility === "visible_if_present" ||
+              propDef.presence === "notallowed")))
+        {
+            return null;
+        }
+        return {
+            widgetClass: propDef.uiType || formdesigner.widgets.textWidget,
+            options: $.extend(true, {path: propPath}, propDef,
+                              propDef.widgetOptions)
+        };
+    }
     /**
      * Draws the properties to be edited to the screen.
      */
@@ -399,7 +423,20 @@ formdesigner.ui = function () {
 
         $('#fd-props-toolbar').html(questionToolbar);
         for (var i = 0; i < sections.length; i++) {
-            sections[i].getSectionDisplay().appendTo($content);
+            var section = sections[i];
+
+            section.mug = mug;
+            section.properties = _(section.properties)
+                .map(function (property) {
+                    var foo = getWidgetClassAndOptions(property, mug);
+                    return foo;
+                })
+                .filter(_.identity);
+           
+            if (section.properties.length) {
+                formdesigner.widgets.questionSection(mug, section)
+                    .getSectionDisplay().appendTo($content);
+            }
         }
 
         /* attach common event listeners */

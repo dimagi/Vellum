@@ -38,38 +38,6 @@ formdesigner.util = (function(){
     that.XPATH_REFERENCES = ["bindElement/relevantAttr",
                              "bindElement/calculateAttr",
                              "bindElement/constraintAttr"];
-
-
-
-    that.HELP_TEXT_FOR_SECTION = {
-        main: {
-            title: "Basic",
-            text: "<p>The <strong>Question ID</strong> is a unique identifier for a question. " +
-                "It does not appear on the phone. It is the name of the question in data exports.</p>" +
-                "<p>The <strong>Label</strong> is text that appears in the application. " +
-                "This text will not appear in data exports.</p> " +
-                "<p>Click through for more info.</p>",
-            link: "https://confluence.dimagi.com/display/commcarepublic/Form+Designer"
-        },
-        logic: {
-            title: "Logic",
-            text: "Use logic to control when questions are asked and what answers are valid. " +
-                "You can add logic to display a question based on a previous answer, to make " +
-                "the question required or ensure the answer is in a valid range.",
-            link: "https://confluence.dimagi.com/display/commcarepublic/Form+Designer"
-        },
-        content: {
-            title: "Media",
-            text: "This will allow you to add images, audio or video media to a question, or other custom content.",
-            link: "https://confluence.dimagi.com/display/commcarepublic/Multimedia+in+CommCare"
-        },
-        advanced: {
-            title: "Advanced",
-            text: "These are advanced settings and are not needed for most applications.  " +
-                "Please only change these if you have a specific need!",
-            link: "https://confluence.dimagi.com/display/commcarepublic/Form+Designer"
-        }
-    };
     
     /**
      * Grabs the value between the tags of the element passed in

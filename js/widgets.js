@@ -1211,13 +1211,14 @@ formdesigner.widgets = (function () {
         return widget;
 
     };
-    
+
+
     that.questionSection = function (mug, options) {
         var section = {};
         section.mug = mug;
         section.slug = options.slug || "anon";
         section.displayName = options.displayName;
-        section.widgets = options.widgets;
+        section.properties = options.properties;
         section.isCollapsed = !!(options.isCollapsed);
         section.help = options.help || {};
 
@@ -1238,20 +1239,8 @@ formdesigner.widgets = (function () {
             var $sec = section.getBaseTemplate(),
                 $fieldsetContent;
             $fieldsetContent = $sec.find('.fd-fieldset-content');
-            section.widgets.map(function (widgetDefinition) {
-                var widgetClass = widgetDefinition.widgetType;
-
-                if (!widgetClass) {
-                    var propertyDefinition = section.mug.getPropertyDefinition(
-                            widgetDefinition.path);
-
-                    if (!propertyDefinition) {
-                        return;
-                    }
-                    widgetClass = propertyDefinition.uiType || that.textWidget;
-                }
-                var elemWidget = widgetClass(section.mug, widgetDefinition);
-
+            section.properties.map(function (prop) {
+                var elemWidget = prop.widgetClass(section.mug, prop.options);
                 elemWidget.setValue(elemWidget.currentValue);
                 $fieldsetContent.append(elemWidget.getUIElement());
             });
@@ -1308,259 +1297,106 @@ formdesigner.widgets = (function () {
     };
 
     that.getSectionListForMug = function (mug) {
-        /**
-         * Hard coded function to map mugs to the types of things
-         * that they display
-         *
-         */
-        var sections = [];
-        sections.push(that.getMainSection(mug));
-        if (mug.bindElement) {
-            sections.push(that.getLogicSection(mug));
-        }
-        if (mug.controlElement && !mug.isSpecialGroup) {
-            sections.push(that.getMediaSection(mug));
-        }
-        if (!(mug.__className === "ReadOnly")) {
-            sections.push(that.getAdvancedSection(mug));
-        }            
-        return sections;
-    };
-
-    that.getMainSection = function (mug) {
-        var widgets = [{
-            path: "dataElement/nodeID"
-        }];
-
-        if (mug.__className === "Item") {
-            widgets.push({
-                path: "controlElement/defaultValue",
-            });
-        }
-
-        if (!(mug.__className === "DataBindOnly")) {
-            widgets.push({
-                widgetType: that.itextLabelBlock,
-                itextType: "label",
-                getItextByMug: function (mug) {
-                    return mug.controlElement.labelItextID;
-                },
-                displayName: "Label"
-            });
-        }
-
-        if (mug.__className === "ReadOnly") {
-            widgets.push({
-                widgetType: that.readOnlyControlWidget,
-                path: "system/readonlyControl"
-            });
-        }
-
-        if (mug.__className === "AndroidIntent") {
-            widgets.push({
-                widgetType: that.androidIntentAppIdWidget,
-                path: "system/androidIntentAppId"
-            });
-            widgets.push({
-                widgetType: that.androidIntentExtraWidget,
-                path: "system/androidIntentExtra"
-            });
-            widgets.push({
-                widgetType: that.androidIntentResponseWidget,
-                path: "system/androidIntentResponse"
-            });
-        }
-
-        return that.questionSection(mug, {
-            slug: "main",
-            displayName: "Basic",
-            widgets: widgets,
-            help: formdesigner.util.HELP_TEXT_FOR_SECTION.main
-        });
-    };
-
-    that.getMediaSection = function (mug) {
-            
-        var widgets = [
+        return [
             {
-                widgetType: that.itextMediaBlock,
-                displayName: "Add Multimedia",
-                itextType: "label",
-                getItextByMug: function (mug) {
-                    return mug.controlElement.labelItextID;
-                },
-                forms: formdesigner.multimedia.SUPPORTED_MEDIA_TYPES,
-                formToIcon: formdesigner.multimedia.ICONS
+                slug: "main",
+                displayName: "Basic",
+                properties: that.getMainProperties(mug),
+                help: {
+                    title: "Basic",
+                    text: "<p>The <strong>Question ID</strong> is a unique identifier for a question. " +
+                        "It does not appear on the phone. It is the name of the question in data exports.</p>" +
+                        "<p>The <strong>Label</strong> is text that appears in the application. " +
+                        "This text will not appear in data exports.</p> " +
+                        "<p>Click through for more info.</p>",
+                    link: "https://confluence.dimagi.com/display/commcarepublic/Form+Designer"
+                }
+            },
+            {
+                slug: "logic",
+                displayName: "Logic",
+                properties: that.getLogicProperties(mug),
+                help: {
+                    title: "Logic",
+                    text: "Use logic to control when questions are asked and what answers are valid. " +
+                        "You can add logic to display a question based on a previous answer, to make " +
+                        "the question required or ensure the answer is in a valid range.",
+                    link: "https://confluence.dimagi.com/display/commcarepublic/Form+Designer"
+                }
+            },
+            {
+                displayName: "Media",
+                slug: "content",
+                properties: that.getMediaProperties(mug),
+                isCollapsed: false,
+                help: {
+                    title: "Media",
+                    text: "This will allow you to add images, audio or video media to a question, or other custom content.",
+                    link: "https://confluence.dimagi.com/display/commcarepublic/Multimedia+in+CommCare"
+                }
+            },
+            {
+                slug: "advanced",
+                type: "accordion",
+                displayName: "Advanced",
+                properties: that.getAdvancedProperties(mug),
+                isCollapsed: true,
+                help: {
+                    title: "Advanced",
+                    text: "These are advanced settings and are not needed for most applications.  " +
+                        "Please only change these if you have a specific need!",
+                    link: "https://confluence.dimagi.com/display/commcarepublic/Form+Designer"
+                }
             }
         ];
-
-        return that.questionSection(mug, {
-            displayName: "Media",
-            slug: "content",
-            widgets: widgets,
-            isCollapsed: false,
-            help: formdesigner.util.HELP_TEXT_FOR_SECTION.content
-        });
     };
 
-    that.getLogicSection = function (mug) {
-        var widgets;
-
-        if (mug.__className === "DataBindOnly") {
-            widgets = [
-                {
-                    path: "bindElement/calculateAttr",
-                },
-                {
-                    path: "bindElement/relevantAttr"
-                }
-            ];
-        } else if (mug.isSpecialGroup) {
-            widgets = [
-                {
-                    path: "bindElement/requiredAttr",
-                },
-                {
-                    path: "bindElement/relevantAttr"
-                }
-            ];
-        } else {
-            widgets = [
-                {
-                    path: "bindElement/requiredAttr",
-                },
-                {
-                    path: "bindElement/relevantAttr",
-                }
-            ];
-            
-            // only show calculate condition for non-data nodes if it already
-            // exists.  It's a highly discouraged use-case because the user will
-            // think they can edit an input when they really can't, but we
-            // shouldn't break existing forms doing this.
-            if (mug.bindElement.calculateAttr &&
-                mug.__className !== "DataBindOnly") 
-            {
-                widgets.push({
-                    path: "bindElement/calculateAttr"
-                });
-            }
-
-            widgets = widgets.concat([
-                {
-                    path: "bindElement/constraintAttr"
-                },
-                {
-                    widgetType: that.itextLabelBlock,
-                    itextType: "constraintMsg",
-                    getItextByMug: function (mug) {
-                        return mug.controlElement.constraintMsgItextID;
-                    },
-                    displayName: "Validation Message"
-                }
-            ]);
-        }
-
-        if (mug.__className === "Repeat") {
-            widgets.push({
-                path: "controlElement/repeat_count"
-            });
-            widgets.push({
-                path: "controlElement/no_add_remove"
-            });
-        }
-
-        return that.questionSection(mug, {
-            slug: "logic",
-            displayName: "Logic",
-            widgets: widgets,
-            help: formdesigner.util.HELP_TEXT_FOR_SECTION.logic
-        });
-    };
-
-    that.getAdvancedSection = function (mug) {
-        var widgets = [
-            {
-                path: "dataElement/dataValue"
-            },
-            {
-                path: "dataElement/keyAttr",
-            },
-            {
-                path: "dataElement/xmlnsAttr",
-            },
-            {
-                path: "bindElement/preload",
-            },
-            {
-                path: "bindElement/preloadParams",
-            },
-            {
-                path: "controlElement/label",
-            },
-            {
-                path: "controlElement/hintLabel",
-            },
-            {
-                path: "controlElement/labelItextID",
-            },
+    that.getMainProperties = function (mug) {
+        return [
+            "dataElement/nodeID",
+            "controlElement/defaultValue",
+            "controlElement/labelItext",
+            "controlElement/readOnlyControl",
+            "controlElement/androidIntentAppId",
+            "controlElement/androidIntentExtra",
+            "controlElement/androidIntentResponse"
         ];
+    };
 
-        // This is a bit of a hack. Since constraintMsgItextID is an attribute
-        // of the bind element and the parsing of bind elements doesn't know
-        // what type an element is, it's difficult to do this properly with
-        // controlElement.constraintMsgItextID.presence = "notallowed" in the group
-        // mug definition.
-        if (!mug.isSpecialGroup) {
-            widgets.push({
-                path: "bindElement/constraintMsgItextID",
-            });
-        }
+    that.getMediaProperties = function (mug) {
+        return [
+            "controlElement/mediaItext"
+        ];
+    };
 
-        widgets.push({
-            path: "controlElement/hintItextID",
-        });
+    that.getLogicProperties = function (mug) {
+        return [
+            "bindElement/calculateAttr",
+            "bindElement/requiredAttr",
+            "bindElement/relevantAttr",
+            "bindElement/constraintAttr",
+            "controlElement/constraintMsgItext",
+            "controlElement/repeat_count",
+            "controlElement/no_add_remove"
+        ];
+    };
 
-        // only show non-itext constraint message input if it has a value
-        if (mug.bindElement && mug.bindElement.constraintMsgAttr) {
-            widgets.push({
-                path: "bindElement/constraintMsgAttr",
-            });
-        }
-
-        // todo: add back check in new architecture
-        //if (elementPaths.indexOf("controlElement/hintItextID") !== -1) {
-	        widgets.push({
-                widgetType: that.itextLabelBlock,
-                itextType: "hint",
-                getItextByMug: function (mug) {
-                    return mug.controlElement.hintItextID;
-                },
-                displayName: "Hint Message"
-	        });
-        //}
-        
-        if (mug.controlElement && !mug.isSpecialGroup) {
-            widgets.push({
-                widgetType: that.itextConfigurableBlock,
-                displayName: "Add Other Content",
-                itextType: "label",
-                getItextByMug: function (mug) {
-                    return mug.controlElement.labelItextID;
-                },
-                forms: ['long', 'short'],
-                isCustomAllowed: true
-            });
-        }
-
-        return that.questionSection(mug, {
-            slug: "advanced",
-            type: "accordion",
-            displayName: "Advanced",
-            widgets: widgets,
-            isCollapsed: true,
-            help: formdesigner.util.HELP_TEXT_FOR_SECTION.advanced
-        });
+    that.getAdvancedProperties = function (mug) {
+        return [
+            "dataElement/dataValue",
+            "dataElement/keyAttr",
+            "dataElement/xmlnsAttr",
+            "bindElement/preload",
+            "bindElement/preloadParams",
+            "controlElement/label",
+            "controlElement/hintLabel",
+            "controlElement/labelItextID",
+            "bindElement/constraintMsgItextID",
+            "controlElement/hintItextID",
+            "bindElement/constraintMsgAttr",
+            "controlElement/hintItext",
+            "controlElement/otherItext"
+        ];
     };
 
     return that;
