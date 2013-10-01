@@ -2549,7 +2549,7 @@ formdesigner.model = function () {
                                     xmlWriter.writeAttributeStringSafe('form', form.name);
                                 }
                                 xmlWriter.writeString(val);
-                                xmlWriter.writeEndElement();    
+                                xmlWriter.writeEndElement();
                             }
                             xmlWriter.writeEndElement();
                         }

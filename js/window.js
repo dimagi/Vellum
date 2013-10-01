@@ -22,9 +22,10 @@ formdesigner.windowManager = (function () {
 
     that.adjustToWindow = function () {
         var availableVertSpace = $(window).height() - that.getCurrentTopOffset(),
-            availableHorizSpace = $('.hq-content').width(),
+            availableHorizSpace,
             position = (that.getCurrentTopOffset() === 0) ? 'fixed' : 'static',
             $formdesigner = $('#fd-ui-container');
+
 
         // so that the document doesn't have to resize for the footer.
         $formdesigner.parent().css('height', availableVertSpace + 'px');
@@ -35,6 +36,8 @@ formdesigner.windowManager = (function () {
         $formdesigner.css('width', $formdesigner.parent().width())
             .css('position', position)
             .css('left', that.getCurrentLeftOffset() + 'px');
+
+        availableHorizSpace = $('.hq-content').width();
 
         var availableColumnSpace = availableVertSpace - $('.fd-toolbar').outerHeight(),
             panelHeight, columnHeight, treeHeight, questionPropHeight;
