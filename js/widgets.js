@@ -101,7 +101,6 @@ formdesigner.widgets = (function () {
     };
 
     that.normalWidget = function(mug, options) {
-        // for "normal" = non-itext widgets.
         var widget = that.baseWidget(mug),
             path = options.path;
         widget.path = path;

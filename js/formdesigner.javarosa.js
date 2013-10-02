@@ -1625,8 +1625,11 @@ formdesigner.plugins.javaRosa = function (options) {
     
     };
 
-    this.getErrors = function () {
-    
+    this.getFormErrors = function () {
+        var itextValidation = Itext.validateItext();
+        if (itextValidation !== true) {
+            return itextValidation;
+        }
     };
 
     this.reset = function () {

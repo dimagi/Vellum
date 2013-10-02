@@ -355,11 +355,10 @@ formdesigner.ui = function () {
         // for now form warnings get reset every time validation gets called.
         formdesigner.model.form.clearErrors('form-warning', {updateUI: true});
        
-        var errors = mug.getErrors();
-        var itextValidation = formdesigner.pluginManager.javaRosa.Itext.validateItext();
-        if (itextValidation !== true) {
-            errors.concat(itextValidation);
-        }
+        var errors = mug.getErrors().concat(_.filter(_.flatten(
+                formdesigner.pluginManager.call('getFormErrors')),
+                _.identity));
+
         _(errors).each(function (error) {
             var input = findInputByReference(name, "foo-id");  // todo: make work
             setValidationFailedIcon(input.parent(), true, error);
@@ -1680,6 +1679,7 @@ formdesigner.launch = function (opts) {
             'contributeToMainProperties': 'process_sequentially',
             'contributeToLogicProperties': 'process_sequentially',
             'contributeToAdvancedProperties': 'process_sequentially',
+            'getFormErrors': 'return_all',
             'preSerialize': 'return_all',
         }
     });
