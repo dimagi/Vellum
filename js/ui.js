@@ -1677,6 +1677,9 @@ formdesigner.launch = function (opts) {
             'contributeToDataElementSpec': 'process_sequentially',
             'contributeToBindElementSpec': 'process_sequentially',
             'contributeToControlElementSpec': 'process_sequentially',
+            'contributeToMainProperties': 'process_sequentially',
+            'contributeToLogicProperties': 'process_sequentially',
+            'contributeToAdvancedProperties': 'process_sequentially',
             'preSerialize': 'return_all',
         }
     });

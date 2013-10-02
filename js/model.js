@@ -1472,6 +1472,7 @@ var mugs = (function () {
             }
             return "pass";
         }, 
+        // todo: fix itext plugin abstraction barrier break here
         label: function (mug) {
             var controlBlock, hasLabel, hasLabelItextID, missing, hasItext, Itext;
             Itext = formdesigner.pluginManager.javaRosa.Itext;
@@ -1525,12 +1526,6 @@ var mugs = (function () {
             visibility: 'advanced',
             presence: 'optional',
             lstring: 'Default Data Value'
-        },
-        keyAttr: {
-            editable: 'w',
-            visibility: 'advanced',
-            presence: 'optional',
-            lstring: 'JR:Preload key value'
         },
         xmlnsAttr: {
             editable: 'w',
@@ -1607,18 +1602,6 @@ var mugs = (function () {
             presence: 'optional',
             lstring: "Is this Question Required?",
             uiType: formdesigner.widgets.checkboxWidget
-        },
-        preload: {
-            editable: 'w',
-            visibility: 'advanced',
-            presence: 'optional',
-            lstring: "JR Preload"
-        },
-        preloadParams: {
-            editable: 'w',
-            visibility: 'advanced',
-            presence: 'optional',
-            lstring: "JR Preload Param"
         },
         nodeset: {
             editable: 'r',

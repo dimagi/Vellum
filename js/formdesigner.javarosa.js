@@ -3,6 +3,8 @@
  *
  * A Vellum plugin to support JavaRosa extensions to the XForm spec,
  * particularly IText.
+ *
+ * Also adds specs for the JavaRosa preload attributes.
  */
 
 RESERVED_ITEXT_CONTENT_TYPES = [
@@ -1386,10 +1388,29 @@ formdesigner.plugins.javaRosa = function (options) {
     };
     
     this.contributeToDataElementSpec = function (spec, mug) {
+        spec.keyAttr = {
+            editable: 'w',
+            visibility: 'advanced',
+            presence: 'optional',
+            lstring: 'JR:Preload key value'
+        };
         return spec;
     };
 
     this.contributeToBindElementSpec = function (spec, mug) {
+        spec.preload = {
+            editable: 'w',
+            visibility: 'advanced',
+            presence: 'optional',
+            lstring: "JR Preload"
+        };
+        spec.preloadParams = {
+            editable: 'w',
+            visibility: 'advanced',
+            presence: 'optional',
+            lstring: "JR Preload Param"
+        };
+
         // hide non-itext constraint message unless it's present
         spec.constraintMsgAttr.visibility = "visible_if_present";
         spec.constraintMsgItextID = {
@@ -1556,20 +1577,39 @@ formdesigner.plugins.javaRosa = function (options) {
         return spec;
     };
 
-    this.contributeToSections = function (sections) {
-    
-    };
-
     this.contributeToMainProperties = function (properties) {
-    
+        properties.splice(
+            1 + properties.indexOf('controlElement/label'), 0,
+            'controlElement/labelItext'
+        );
+        return properties;
     };
 
     this.contributeToLogicProperties = function (properties) {
-    
+        properties.splice(
+            1 + properties.indexOf('bindElement/constraintAttr'), 0,
+            'controlElement/constraintMsgItext'
+        );
+        return properties;
     };
 
     this.contributeToAdvancedProperties = function (properties) {
-    
+        properties.splice(
+            1 + properties.indexOf('dataElement/xmlnsAttr'), 0,
+            'dataElement/keyAttr',
+            'bindElement/preload',
+            'bindElement/preloadParams'
+        );
+
+        properties = properties.concat([
+            'controlElement/labelItextID',
+            'bindElement/constraintMsgItextID',
+            'controlElement/hintItextID',
+            'controlElement/hintItext',
+            'controlElement/otherItext'
+        ]);
+
+        return properties;
     };
 
 

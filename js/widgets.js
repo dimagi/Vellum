@@ -156,7 +156,6 @@ formdesigner.widgets = (function () {
         return widget;
     };
 
-
     that.checkboxWidget = function (mug, options) {
 
         var widget = that.normalWidget(mug, options);
@@ -545,15 +544,15 @@ formdesigner.widgets = (function () {
     };
 
     that.getMainProperties = function (mug) {
-        return [
+        return formdesigner.pluginManager.call('contributeToMainProperties', [
             "dataElement/nodeID",
             "controlElement/defaultValue",
-            "controlElement/labelItext",
+            "controlElement/label",
             "controlElement/readOnlyControl",
             "controlElement/androidIntentAppId",
             "controlElement/androidIntentExtra",
             "controlElement/androidIntentResponse"
-        ];
+        ]);
     };
 
     that.getMediaProperties = function (mug) {
@@ -563,33 +562,24 @@ formdesigner.widgets = (function () {
     };
 
     that.getLogicProperties = function (mug) {
-        return [
+        return formdesigner.pluginManager.call('contributeToLogicProperties', [
             "bindElement/calculateAttr",
             "bindElement/requiredAttr",
             "bindElement/relevantAttr",
             "bindElement/constraintAttr",
-            "controlElement/constraintMsgItext",
             "controlElement/repeat_count",
             "controlElement/no_add_remove"
-        ];
+        ]);
     };
 
     that.getAdvancedProperties = function (mug) {
-        return [
+        return formdesigner.pluginManager.call('contributeToAdvancedProperties', [
             "dataElement/dataValue",
-            "dataElement/keyAttr",
             "dataElement/xmlnsAttr",
-            "bindElement/preload",
-            "bindElement/preloadParams",
             "controlElement/label",
             "controlElement/hintLabel",
-            "controlElement/labelItextID",
-            "bindElement/constraintMsgItextID",
-            "controlElement/hintItextID",
             "bindElement/constraintMsgAttr",
-            "controlElement/hintItext",
-            "controlElement/otherItext"
-        ];
+        ]);
     };
 
     return that;
