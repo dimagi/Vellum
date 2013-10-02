@@ -908,20 +908,6 @@ formdesigner.model = (function () {
         return count;
     };
     
-    //that.itextIdCount = function (id) {
-        //var allMugs = formdesigner.controller.getMugList(),
-            //count = 0;
-        //for (var i = 0; i < allMugs.length; i++) {
-            //var node = allMugs[i];
-            //if (node.controlElement && id === node.mug.controlElement.labelItextID.id) {
-                //count++;
-            //}
-        //}
-
-        //return count;
-    //};
-    
-    
     var InstanceMetadata = function (attributes, children) {
         var that = {};
         that.attributes = attributes;
