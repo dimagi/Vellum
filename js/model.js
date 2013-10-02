@@ -1530,7 +1530,7 @@ var mugs = (function () {
         xmlnsAttr: {
             editable: 'w',
             visibility: 'advanced',
-            presence: 'optional',
+            presence: 'notallowed',
             lstring: "Special Hidden Value XMLNS attribute"
         }
     };
@@ -1872,6 +1872,11 @@ var mugs = (function () {
         typeName: 'Hidden Value',
         icon: 'icon-vellum-variable',
         isTypeChangeable: false,
+        getDataElementSpec: function () {
+            var spec = this.$super();
+            spec.xmlnsAttr.presence = "optional";
+            return spec;
+        },
         getControlElementSpec: function () {
             return null;
         },
