@@ -980,7 +980,6 @@ formdesigner.model = (function () {
                 // 4. duplicate itext ids will be automatically updated to create
                 // non-duplicates
                 
-                formdesigner.controller.removeCruftyItext();
                 var Itext = formdesigner.pluginManager.javaRosa.Itext;
                 var languages = Itext.getLanguages();
                 var allItems = Itext.getNonEmptyItems();
@@ -1015,8 +1014,6 @@ formdesigner.model = (function () {
                     }
                     xmlWriter.writeEndElement();
                 }
-
-                //done with Itext block generation.
             };
 
             var createModelHeader = function () {
@@ -1085,9 +1082,7 @@ formdesigner.model = (function () {
             
             var generateForm = function () {
                 var docString;
-                // first normalize the itext ids so we don't have any
-                // duplicates
-                formdesigner.pluginManager.javaRosa.Itext.deduplicateIds();
+                formdesigner.pluginManager.call("preSerialize");
                 
                 xmlWriter.writeStartDocument();
                 //Generate header boilerplate up to instance level

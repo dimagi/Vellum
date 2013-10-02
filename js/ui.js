@@ -1676,7 +1676,7 @@ formdesigner.launch = function (opts) {
             'contributeToDataElementSpec': 'process_sequentially',
             'contributeToBindElementSpec': 'process_sequentially',
             'contributeToControlElementSpec': 'process_sequentially',
-
+            'preSerialize': 'return_all',
         }
     });
     formdesigner.pluginManager.register('javaRosa', new formdesigner.plugins.javaRosa());

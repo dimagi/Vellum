@@ -1304,8 +1304,12 @@ formdesigner.plugins.javaRosa = function (options) {
     
     };
 
-    this.preSerialize = function (mug) {
-    
+    this.preSerialize = function () {
+        Itext.deduplicateIds();
+
+        // remove crufty itext that isn't linked to anything in the form
+        var validIds = formdesigner.controller.getAllNonEmptyItextItemsFromMugs();
+        Itext.resetItextList(validIds);
     };
 
     // return an extended version of mugClass with any methods that are

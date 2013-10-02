@@ -121,7 +121,7 @@ formdesigner.controller = (function () {
      * the Itext id's from any Mugs that are found.  Returns
      * a flat list of iIDs.  This list is primarily used
      * for trimming out crufty itext.  See also
-     * formdesigner.pluginManager.javaRosa.Itext.removeCruftyItext()
+     * formdesigner.plugins.javaRosa.preSerialize()
      */
     var getAllNonEmptyItextItemsFromMugs = function () {
         
@@ -296,19 +296,6 @@ formdesigner.controller = (function () {
 			mugUfid: myMug.ufid
         });
     };
-
-    /**
-     * Function for triggering a clean out of the itext
-     * where all ids + itext data are removed that are
-     * found to not be linked to any element in the form.
-     *
-     * Toggles the ui spinner (this operation could take a few seconds).
-     */
-    var removeCruftyItext = function () {
-        var validIds = that.getAllNonEmptyItextItemsFromMugs();
-        formdesigner.pluginManager.javaRosa.Itext.resetItextList(validIds);
-    };
-    that.removeCruftyItext = removeCruftyItext;
 
     /**
      * Inserts a new Mug into the relevant Trees (and their
@@ -796,8 +783,8 @@ formdesigner.controller = (function () {
     var generateItextXLS = function () {
         var idata, row, iID, lang, form, val, Itext,
                 out = '';
-        
-        that.removeCruftyItext();
+       
+        formdesigner.pluginManager.call('preSerialize');
         Itext = formdesigner.pluginManager.javaRosa.Itext;
         
         /**
@@ -817,8 +804,6 @@ formdesigner.controller = (function () {
         // TODO: should this be configurable? 
         var exportCols = ["default", "audio", "image" , "video"];
         var languages = Itext.getLanguages();
-        // deduplicate
-        Itext.deduplicateIds();
         var allItems = Itext.getNonEmptyItems();
         var language, item, i, j;
         if (languages.length > 0) {
@@ -835,10 +820,8 @@ formdesigner.controller = (function () {
     that.generateItextXLS = generateItextXLS;
 
     that.generateExportXLS = function () {
-        
+        formdesigner.pluginManager.call('preSerialize');
         var languages = formdesigner.pluginManager.javaRosa.Itext.getLanguages();
-        // deduplicate
-        formdesigner.pluginManager.javaRosa.Itext.deduplicateIds();
 
         var itextColumns = {
             "default": "Text",
