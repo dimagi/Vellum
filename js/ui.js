@@ -698,11 +698,33 @@ formdesigner.ui = function () {
             that.makeLanguageSelectorDropdown();
         });
 
-        $('#fd-load-xls-button').stopLink().click(formdesigner.controller.showItextDialog);
-        $('#fd-export-xls-button').stopLink().click(formdesigner.controller.showExportDialog);
-        $('#fd-editsource-button').stopLink().click(formdesigner.controller.showSourceXMLDialog);
-        $('#fd-formproperties-button').stopLink().click(formdesigner.controller.showFormPropertiesDialog);
+        var menuItems = [
+            {
+                name: "Export Form Contents",
+                action: formdesigner.controller.showExportDialog
+            },
+            {
+                name: "Edit Source XML",
+                action: formdesigner.controller.showSourceXMLDialog
+            },
+            {
+                name: "Form Properties",
+                action: formdesigner.controller.showFormPropertiesDialog
+            }
+        ].concat(_.filter(_.flatten(
+                formdesigner.pluginManager.call('getToolsMenuItems')
+            ), _.identity));
 
+        var $toolsMenu = $("#fd-tools-menu");
+        _(menuItems).each(function (menuItem) {
+            var $a = $("<a tabindex='-1' href='#'>" + menuItem.name + "</a>").click(
+                function (e) {
+                    e.preventDefault();
+                    menuItem.action();
+                }
+            );
+            $("<li></li>").append($a).appendTo($toolsMenu);
+        });
     };
 
     var setTreeNodeInvalid = function (uid, msg) {
@@ -1670,6 +1692,7 @@ formdesigner.launch = function (opts) {
 
     formdesigner.pluginManager = new PluginManager({
         methods: {
+            'getToolsMenuItems': 'return_all',
             'init': 'return_all',
             'beforeParse': 'return_all',
             'contributeToModelXML': 'return_all',

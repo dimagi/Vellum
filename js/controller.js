@@ -749,76 +749,6 @@ formdesigner.controller = (function () {
         that.createQuestionInUITree(mug);
     };
 
-
-    var parseXLSItext = function (str) {
-        var rows = str.split('\n'),
-                i, j, cells, lang,iID, form, val, Itext;
-        
-        // TODO: should this be configurable? 
-        var exportCols = ["default", "audio", "image" , "video"];
-                
-        Itext = formdesigner.pluginManager.javaRosa.Itext;
-        for (i = 0; i < rows.length; i++) {
-            cells = rows[i].split('\t');
-            lang = cells[0];
-            iID = cells[1];
-            for (j = 2; j < cells.length && j < exportCols.length + 2; j++) {
-                if (cells[j]) {
-                    form = exportCols[j - 2];
-                    val = cells[j];
-                    Itext.getOrCreateItem(iID).getOrCreateForm(form).setValue(lang, val);
-                }
-            }
-        }
-        that.fire({type: "global-itext-changed"});
-
-        var currentMug = that.getCurrentlySelectedMug();
-        if (currentMug) {
-            formdesigner.ui.displayMugProperties(currentMug);
-        }
-    };
-    
-    that.parseXLSItext = parseXLSItext;
-
-    var generateItextXLS = function () {
-        var idata, row, iID, lang, form, val, Itext,
-                out = '';
-       
-        formdesigner.pluginManager.call('preSerialize');
-        Itext = formdesigner.pluginManager.javaRosa.Itext;
-        
-        /**
-         * Cleans Itext so that it fits the csv spec. For now just replaces newlines with ''
-         * @param val
-         */
-        
-        function makeRow (language, item, forms) {
-            var values = forms.map(function (form) {
-                return item.hasForm(form) ? item.getForm(form).getValueOrDefault(language) : "";
-            });
-            var row = [language, item.id].concat(values);
-            return formdesigner.util.tabSeparate(row);
-        }
-        
-        var ret = [];
-        // TODO: should this be configurable? 
-        var exportCols = ["default", "audio", "image" , "video"];
-        var languages = Itext.getLanguages();
-        var allItems = Itext.getNonEmptyItems();
-        var language, item, i, j;
-        if (languages.length > 0) {
-            for (i = 0; i < languages.length; i++) {
-                language = languages[i];
-                for (j = 0; j < allItems.length; j++) {
-                    item = allItems[j];
-                    ret.push(makeRow(language, item, exportCols));
-                }       
-            }
-        }
-        return ret.join("\n");
-    };
-    that.generateItextXLS = generateItextXLS;
-
     that.generateExportXLS = function () {
         formdesigner.pluginManager.call('preSerialize');
         var languages = formdesigner.pluginManager.javaRosa.Itext.getLanguages();
@@ -908,37 +838,6 @@ formdesigner.controller = (function () {
         return rows.join("\n");
     };
 
-    that.showItextDialog = function () {
-        var $modal,
-            $updateForm,
-            $textarea;
-
-        $modal = formdesigner.ui.generateNewModal("Edit Bulk Translations", [
-            {
-                id: 'fd-update-translations-button',
-                title: "Update Translations",
-                cssClasses: "btn-primary"
-            }
-        ]);
-        $updateForm = formdesigner.ui.getTemplateObject('#fd-template-form-edit-source', {
-            description: "Copy these translations into a spreadsheet program like Excel. You can edit them there and " +
-                         "then paste them back here when you're done. These will update the translations used in your" +
-                         " form. Press 'Update Translations' to save changes, or 'Close' to cancel."
-        });
-        $modal.find('.modal-body').html($updateForm);
-
-        // display current values
-        $textarea = $updateForm.find('textarea');
-        $textarea.val(that.generateItextXLS());
-
-        $modal.find('#fd-update-translations-button').click(function () {
-            that.parseXLSItext($textarea.val());
-            that.form.fire('form-property-changed');
-            $modal.modal('hide');
-        });
-
-        $modal.modal('show');
-    };
 
 
     that.showExportDialog = function () {

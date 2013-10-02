@@ -1231,6 +1231,104 @@ var itextMediaWidget = function (mug, language, form, options) {
     return widget;
 };
 
+var parseXLSItext = function (str, Itext) {
+    var rows = str.split('\n'),
+            i, j, cells, lang,iID, form, val;
+    
+    // TODO: should this be configurable? 
+    var exportCols = ["default", "audio", "image" , "video"];
+            
+    for (i = 0; i < rows.length; i++) {
+        cells = rows[i].split('\t');
+        lang = cells[0];
+        iID = cells[1];
+        for (j = 2; j < cells.length && j < exportCols.length + 2; j++) {
+            if (cells[j]) {
+                form = exportCols[j - 2];
+                val = cells[j];
+                Itext.getOrCreateItem(iID).getOrCreateForm(form).setValue(lang, val);
+            }
+        }
+    }
+    formdesigner.controller.fire({type: "global-itext-changed"});
+
+    // todo: make this more generic as part of the plugin interface
+    var currentMug = formdesigner.controller.getCurrentlySelectedMug();
+    if (currentMug) {
+        formdesigner.ui.displayMugProperties(currentMug);
+    }
+};
+
+var generateItextXLS = function (Itext) {
+    var idata, row, iID, lang, form, val, out = '';
+   
+    formdesigner.pluginManager.call('preSerialize');
+    
+    /**
+     * Cleans Itext so that it fits the csv spec. For now just replaces newlines with ''
+     * @param val
+     */
+    
+    function makeRow (language, item, forms) {
+        var values = forms.map(function (form) {
+            return item.hasForm(form) ? item.getForm(form).getValueOrDefault(language) : "";
+        });
+        var row = [language, item.id].concat(values);
+        return formdesigner.util.tabSeparate(row);
+    }
+    
+    var ret = [];
+    // TODO: should this be configurable? 
+    var exportCols = ["default", "audio", "image" , "video"];
+    var languages = Itext.getLanguages();
+    var allItems = Itext.getNonEmptyItems();
+    var language, item, i, j;
+    if (languages.length > 0) {
+        for (i = 0; i < languages.length; i++) {
+            language = languages[i];
+            for (j = 0; j < allItems.length; j++) {
+                item = allItems[j];
+                ret.push(makeRow(language, item, exportCols));
+            }       
+        }
+    }
+    return ret.join("\n");
+};
+
+var showItextDialog = function (Itext) {
+    var $modal,
+        $updateForm,
+        $textarea;
+
+    $modal = formdesigner.ui.generateNewModal("Edit Bulk Translations", [
+        {
+            id: 'fd-update-translations-button',
+            title: "Update Translations",
+            cssClasses: "btn-primary"
+        }
+    ]);
+    $updateForm = formdesigner.ui.getTemplateObject('#fd-template-form-edit-source', {
+        description: "Copy these translations into a spreadsheet program " + 
+        "like Excel. You can edit them there and then paste them back " +
+        "here when you're done. These will update the translations used in " +
+        "your form. Press 'Update Translations' to save changes, or 'Close' " +
+        "to cancel."
+    });
+    $modal.find('.modal-body').html($updateForm);
+
+    // display current values
+    $textarea = $updateForm.find('textarea');
+    $textarea.val(generateItextXLS(Itext));
+
+    $modal.find('#fd-update-translations-button').click(function () {
+        parseXLSItext($textarea.val(), Itext);
+        formdesigner.controller.form.fire('form-property-changed');
+        $modal.modal('hide');
+    });
+
+    $modal.modal('show');
+};
+
 formdesigner = formdesigner || {};
 formdesigner.plugins = formdesigner.plugins || {};
 
@@ -1621,8 +1719,15 @@ formdesigner.plugins.javaRosa = function (options) {
     
     };
 
-    this.getMenuItems = function () {
-    
+    this.getToolsMenuItems = function () {
+        return [
+            {
+                name: "Edit Bulk Translations",
+                action: function () {
+                    showItextDialog(Itext);
+                }
+            }
+        ];
     };
 
     this.getFormErrors = function () {
@@ -1635,6 +1740,4 @@ formdesigner.plugins.javaRosa = function (options) {
     this.reset = function () {
     
     };
-
-
 };
