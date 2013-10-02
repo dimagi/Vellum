@@ -456,7 +456,7 @@ formdesigner.ui = function () {
                 if (e.val && (
                     (mug.__className === "DataBindOnly" && newNameForTree !== that.jstree("get_text", node)) ||
                     (!(mug.__className === "DataBindOnly") &&
-                        (!mug.controlElement.labelItextID || (mug.controlElement.labelItextID && mug.controlElement.labelItextID.isEmpty()) )
+                        (!mug.controlElement || !mug.controlElement.labelItextID || (mug.controlElement.labelItextID && mug.controlElement.labelItextID.isEmpty()) )
                         )
                     )
                 ) {

@@ -1535,7 +1535,7 @@ var mugs = (function () {
             Itext = formdesigner.pluginManager.javaRosa.Itext;
             controlBlock = mug.controlElement;
             hasLabel = Boolean(controlBlock.label);
-            var itextBlock = mug.controlElement.labelItextID;
+            var itextBlock = controlBlock ? mug.controlElement.labelItextID : null;
             hasLabelItextID = itextBlock && (typeof itextBlock.id !== "undefined");
 
             if (hasLabelItextID && !formdesigner.util.isValidAttributeValue(itextBlock.id)) {

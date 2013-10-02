@@ -869,11 +869,12 @@ formdesigner.controller = (function () {
 
         var mugToExportRow = function (mug) {
             var row = {},
-                itext = mug.controlElement.labelItextID,
+                itext = mug.controlElement ? mug.controlElement.labelItextID : null,
                 defaultLanguage = formdesigner.pluginManager.javaRosa.Itext.getDefaultLanguage();
 
             var defaultOrNothing = function (item, language, form) {
-                return item.hasForm(form) ? item.getForm(form).getValueOrDefault(language) : "";
+                return (item && item.hasForm(form)) ? 
+                    item.getForm(form).getValueOrDefault(language) : "";
             };
 
             // initialize all columns to empty string
