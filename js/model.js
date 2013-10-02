@@ -2328,6 +2328,7 @@ var mugs = (function () {
     var BaseMug = Class.$extend({
         // whether you can change to or from this question's type in the UI
         isTypeChangeable: true,
+        isODKOnly: false,
         __init__: function (options) {
             var options = options || {};
             var self = this;
@@ -2635,6 +2636,7 @@ var mugs = (function () {
     var Audio = BaseMug.$extend({
         typeName: 'Audio Capture',
         icon: 'icon-vellum-audio-capture',
+        isODKOnly: true,
         __init__: function (options) {
             this.$super(options);
             this.controlElement.tagName = "upload";
@@ -2656,6 +2658,7 @@ var mugs = (function () {
     var Image = Audio.$extend({
         typeName: 'Image Capture',
         icon: 'icon-camera',
+        isODKOnly: true,
         __init__: function (options) {
             this.$super(options);
             this.controlElement.tagName = "upload";
@@ -2667,6 +2670,7 @@ var mugs = (function () {
     var Video = Audio.$extend({
         typeName: 'Video Capture',
         icon: 'icon-facetime-video',
+        isODKOnly: true,
         __init__: function (options) {
             this.$super(options);
             this.controlElement.tagName = "upload";
@@ -2688,6 +2692,7 @@ var mugs = (function () {
     var AndroidIntent = BaseMug.$extend({
         typeName: 'Android App Callout',
         icon: 'icon-vellum-android-intent',
+        isODKOnly: true,
         isTypeChangeable: false,
         intentTag: null,
         __init__: function (options) {
@@ -2724,6 +2729,7 @@ var mugs = (function () {
     var Barcode = BaseMug.$extend({
         typeName: 'Barcode Scan',
         icon: 'icon-vellum-android-intent',
+        isODKOnly: true,
         __init__: function (options) {
             this.$super(options);
             this.controlElement.tagName = "input";

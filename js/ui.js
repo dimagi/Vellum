@@ -51,14 +51,6 @@ formdesigner.ui = function () {
         }
     };
 
-    that.ODK_ONLY_QUESTION_TYPES = [
-        'stdImage',
-        'stdAudio', 
-        'stdVideo',
-        'stdBarcode', 
-        'stdAndroidIntent'
-    ];
-    
     that.QUESTION_GROUPS = [
         {
             group: ["Text", 'Text'],  // key in mugs, <title>
@@ -225,7 +217,7 @@ formdesigner.ui = function () {
             var newMug = new mugs[qType](); 
             formdesigner.controller.initQuestion(newMug);
             that.jstree('select_node', '#' + newMug.ufid, true);
-            if (that.ODK_ONLY_QUESTION_TYPES.indexOf(qType) !== -1) {
+            if (newMug.isODKOnly) {
                 //it's an ODK media question
                 formdesigner.model.form.updateError(formdesigner.model.FormError({
                     message: 'This question type will ONLY work with Android phones!',
