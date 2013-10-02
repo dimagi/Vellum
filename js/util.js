@@ -40,6 +40,14 @@ formdesigner.util = (function(){
                              "bindElement/constraintAttr"];
     
     /**
+     * Check if value is a valid XML attribute value (additionally disallow all
+     * ' and ")
+     */
+    that.isValidAttributeValue = function (value) {
+        return (/^[^<&'"]*$/).test(value);
+    };
+    
+    /**
      * Grabs the value between the tags of the element passed in
      * and returns a string of everything inside.
      *
@@ -478,7 +486,7 @@ formdesigner.util = (function(){
         cEl = mug.controlElement;
         dEl = mug.dataElement;
         bEl = mug.bindElement;
-        Itext = formdesigner.model.Itext;
+        Itext = formdesigner.pluginManager.javaRosa.Itext;
 
         if(cEl) {
             itextItem = cEl.labelItextID;

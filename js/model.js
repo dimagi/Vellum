@@ -6,419 +6,6 @@ if (typeof formdesigner === 'undefined') {
     var formdesigner = {};
 }
 
-function ItextItem(options) {
-    this.forms = options.forms || [];
-    this.id = options.id || "";
-}
-
-ItextItem.prototype = {
-    getForms: function () {
-        return this.forms;
-    },
-    getFormNames: function () {
-        return this.forms.map(function (form) {
-            return form.name;
-        });
-    },
-    hasForm: function (name) {
-        return this.getFormNames().indexOf(name) !== -1;
-    },
-    getForm: function (name) {
-        return formdesigner.util.reduceToOne(this.forms, function (form) {
-            return form.name === name;
-        }, "form name = " + name);
-    },
-    getOrCreateForm: function (name) {
-        try {
-            return this.getForm(name);
-        } catch (err) {
-            return this.addForm(name);
-        }
-    },
-    addForm: function (name) {
-        if (!this.hasForm(name)) {
-            var newForm = new ItextForm({name: name});
-            this.forms.push(newForm);
-            return newForm;
-        }
-    },
-    removeForm: function (name) {
-        var names = this.getFormNames();
-        var index = names.indexOf(name);
-        if (index !== -1) {
-            this.forms.splice(index, 1);
-        }
-    },
-    getValue: function(form, language) {
-        if (this.hasForm(form)) {
-            return this.getForm(form).getValue(language);
-        }
-    },
-    defaultValue: function() {
-        return this.getValue("default", formdesigner.model.Itext.getDefaultLanguage())
-    },
-    setDefaultValue: function(val) {
-        this.getOrCreateForm("default").setValue(formdesigner.model.Itext.getDefaultLanguage(), val)
-    },
-    isEmpty: function () {
-        if (this.forms) {
-            var nonEmptyItems = _(this.forms).filter(function (form) {
-                return !form.isEmpty();
-            });
-            return nonEmptyItems.length === 0;
-        }
-        return true;
-    },
-    hasHumanReadableItext: function() {
-        return Boolean(this.hasForm('default') || 
-                       this.hasForm('long')    || 
-                       this.hasForm('short'));
-    }
-};
-
-var ItextForm = function (options) {
-    var form = {};
-    
-    form.data = options.data || {};
-    form.name = options.name || "default";
-    
-    form.getValue = function (lang) {
-        return this.data[lang];
-    };
-    
-    form.setValue = function (lang, value) {
-        this.data[lang] = value;
-    };
-    
-    form.getValueOrDefault = function (lang) {
-        // check the actual language first
-        if (this.data[lang]) {
-            return this.data[lang];
-        }
-        var defLang = formdesigner.model.Itext.getDefaultLanguage();
-        // check the default, if necesssary
-        if (lang !== defLang && this.data[defLang]) {
-            return this.data[defLang];
-        }
-        // check arbitrarily for something
-        for (var i in this.data) {
-            if (this.data.hasOwnProperty(i)) {
-                return this.data[i];
-            }
-        }
-        // there wasn't anything
-        return "";
-    };
-    
-    form.isEmpty = function () {
-        for (var lang in this.data) {
-            if (this.data.hasOwnProperty(lang) && this.data[lang]) {
-                return false;
-            }
-        }
-        return true;
-    };
-    
-    return form; 
-};
-
-/**
- * The itext holder object. Access all Itext through this gate.
- *
- * Expected forms of itext:
- * - default (i.e. no special form)
- * - long
- * - short
- * - image
- * - audio
- * - hint
- *
- */
-var Itext = function() {
-    var itext = {}; 
-    
-    itext.languages = [];
-    
-    itext.getLanguages = function () {
-        return this.languages;
-    };
-    
-    itext.hasLanguage = function (lang) {
-        return this.languages.indexOf(lang) !== -1;
-    };
-    
-    itext.addLanguage = function (lang) {
-        if (!this.hasLanguage(lang)) {
-            this.languages.push(lang);
-        } 
-    };
-    
-    itext.removeLanguage = function (lang) {
-        if(this.hasLanguage(lang)) {
-            this.languages.splice(this.languages.indexOf(lang), 1);
-        }
-        // if we removed the default, reset it
-        if (this.getDefaultLanguage() === lang) {
-            this.setDefaultLanguage(this.languages.length > 0 ? this.languages[0] : "");
-        }
-    };
-    
-    itext.setDefaultLanguage = function (lang) {
-        this.defaultLanguage = lang;
-    };
-
-    itext.getDefaultLanguage = function () {
-        if (this.defaultLanguage) {
-            return this.defaultLanguage;
-        } else {
-            // dynamically generate default arbitrarily
-            return this.languages.length > 0 ? this.languages[0] : "";
-        }
-        
-        
-    };
-    
-    itext.items = [];
-    
-    itext.getItems = function () {
-        return this.items;
-    };
-    
-    itext.getNonEmptyItems = function () {
-        return _(this.items).filter(function (item) {
-            return !item.isEmpty();
-        });
-    };
-    
-    itext.getNonEmptyItemIds = function () {
-        return this.getNonEmptyItems().map(function (item) {
-            return item.id;
-        });
-    };
-    
-    itext.deduplicateIds = function () {
-        var nonEmpty = this.getNonEmptyItems();
-        var found = [];
-        var counter, item, origId;
-        for (var i = 0; i < nonEmpty.length; i++) {
-            item = nonEmpty[i];
-            origId = item.id;
-            counter = 2;
-            while (found.indexOf(item.id) !== -1) {
-                item.id = origId + counter;
-                counter = counter + 1;
-            }
-            found.push(item.id);
-        }
-    };
-    
-    itext.hasItem = function (item) {
-        return this.items.indexOf(item) !== -1;
-    };
-
-    /**
-     * Add an itext item to the global Itext object.
-     * Item is an ItextItem object.
-     * Does nothing if the item was already in the itext object.
-     */
-    itext.addItem = function (item) {
-        if (!this.hasItem(item)) {
-            this.items.push(item);
-        } 
-    };
-    
-    /*
-     * Create a new blank item and add it to the list.
-     */
-    itext.createItem = function (id) {
-        var item = new ItextItem({
-            id: id,
-            forms: [new ItextForm({
-                        name: "default",
-                    })]
-        });
-        this.addItem(item);
-        return item;
-    };
-    
-    /**
-     * Get the Itext Item by ID.
-     */
-    itext.getItem = function (iID) {
-        // this is O[n] when it could be O[1] with some other
-        // data structure. That would require keeping the ids
-        // in sync in multiple places though.
-        // This could be worked around via careful event handling,
-        // but is not implemented until we see slowness.
-        try {
-            return formdesigner.util.reduceToOne(this.items, function (item) {
-                return item.id === iID;
-            }, "itext id = " + iID);
-        } catch (e) {
-            throw "NoItextItemFound";
-        }
-    };
-    
-    itext.getOrCreateItem = function (id) {
-        try {
-            return this.getItem(id);
-        } catch (err) {
-            return this.createItem(id); 
-        }
-    };
-    
-    itext.removeItem = function (item) {
-        var index = this.items.indexOf(item);
-        if (index !== -1) {
-            this.items.splice(index, 1);
-        } 
-    };
-    
-    /**
-     * Generates a flat list of all unique Itext IDs currently in the
-     * Itext object.
-     */
-    itext.getAllItemIDs = function () {
-        return this.items.map(function (item) {
-            return item.id;
-        });
-    };
-
-    /**
-     * Goes through the Itext data and verifies that
-     * a) a default language is set to something that exists
-     * b) That every iID that exists in the DB has a translation in the default language (causes commcare to fail if not the case)
-     *
-     * if a) fails, will throw an exception
-     * if b) fails, will return a dict of all offending iIDs that need a translation in order to pass validation with
-     * the KEYs being ItextIDs and the values being descriptive error messages.
-     *
-     * if everything passes will return true
-     */
-    itext.validateItext = function () {
-        // TODO: fill this back in
-        
-        var dLang = this.getDefaultLanguage();
-
-        if(!dLang){
-            throw 'No Default Language set! Aborting validation. You should set one!';
-        }
-
-        if(!this.hasLanguage(dLang)){
-            throw 'Default language is set to a language that does not exist in the Itext DB!';
-        }
-
-        return true
-    };
-    
-    itext.clear = function () {
-        delete this.languages;
-        delete this.items;
-        this.languages = [];
-        this.items = [];
-        
-    };
-    
-
-    /**
-     * Blows away all data stored in the Itext object
-     * and resets it to pristine condition (i.e. as if the FD was freshly launched)
-     */
-    itext.resetItext = function (langs) {
-        this.clear();
-        if (langs && langs.length > 0) {
-            for (var i = 0; i < langs.length; i++) {
-                this.addLanguage(langs[i]);
-            }
-        }
-    };
-
-    /**
-     * Takes in a list of Itext Items and resets this object to only
-     * include those items. 
-     *
-     * PERMANENTLY DELETES ALL OTHER ITEXT ITEMS FROM THE MODEL
-     *
-     * For generating a list of useful IDs see:
-     * formdesigner.controller.getAllNonEmptyItextItemsFromMugs()
-     *
-     * @param validIDList
-     */
-    
-    var resetItextList = function (validIDList) {
-        this.items = [];
-        for (var i = 0; i < validIDList.length; i++) {
-            this.items.push(validIDList[i]);
-        }
-    };
-    itext.resetItextList = resetItextList;
-
-    /**
-     * Remove all Itext associated with the given mug
-     * @param mug
-     */
-    itext.removeMugItext = function (mug) {
-        // NOTE: this is not currently used. We clear itext
-        // at form-generation time. This is because shared 
-        // itext makes removal problematic.
-        var labelItext, hintItext, constraintItext;
-        var mug = mug;
-        if (mug){
-            if (mug.controlElement) {
-                //attempt to remove Itext
-                labelItext = mug.controlElement.labelItextID;
-                hintItext = mug.controlElement.hintItextID;
-                if (labelItext) {
-                    this.removeItem(labelItext);
-                }
-                if (hintItext) {
-                    this.removeItem(hintItext);
-                }
-            } 
-            if (mug.bindElement) {
-                constraintItext = mug.bindElement.constraintMsgItextID;
-                if (constraintItext) {
-                    this.removeItem(constraintItext);
-                }
-            }
-        }
-    };
-
-    itext.updateForNewMug = function(mug) {
-        // for new mugs, generate a label
-        return this.updateForMug(mug, mug.getDefaultLabelValue());
-    };
-    
-    itext.updateForExistingMug = function(mug) {
-        // for existing, just use what's there
-        return this.updateForMug(mug, mug.getLabelValue());
-    };
-    
-    itext.updateForMug = function (mug, defaultLabelValue) {
-        // set default itext id/values
-        if (mug.controlElement) {
-            // set label if not there
-            if (!mug.controlElement.labelItextID) {
-                mug.controlElement.labelItextID = mug.getDefaultLabelItext(defaultLabelValue);
-                this.addItem(mug.controlElement.labelItextID);
-            }
-            // set hint if legal and not there
-            if (mug.controlElement.__spec.hintItextID.presence !== "notallowed" &&
-                !mug.controlElement.hintItextID) {
-                mug.controlElement.hintItextID = this.createItem("");
-            }
-        }
-        if (mug.bindElement) {
-            // set constraint msg if legal and not there
-            if (mug.bindElement.__spec.constraintMsgItextID.presence !== "notallowed" &&
-                !mug.bindElement.constraintMsgItextID) {
-                mug.bindElement.constraintMsgItextID = this.createItem("");
-            }
-        }
-    };
-
-    return itext;
-};
 
 
 /**
@@ -1394,7 +981,7 @@ formdesigner.model = (function () {
                 // non-duplicates
                 
                 formdesigner.controller.removeCruftyItext();
-                var Itext = formdesigner.model.Itext;
+                var Itext = formdesigner.pluginManager.javaRosa.Itext;
                 var languages = Itext.getLanguages();
                 var allItems = Itext.getNonEmptyItems();
                 var item, forms, form;
@@ -1500,7 +1087,7 @@ formdesigner.model = (function () {
                 var docString;
                 // first normalize the itext ids so we don't have any
                 // duplicates
-                formdesigner.model.Itext.deduplicateIds();
+                formdesigner.pluginManager.javaRosa.Itext.deduplicateIds();
                 
                 xmlWriter.writeStartDocument();
                 //Generate header boilerplate up to instance level
@@ -1820,9 +1407,6 @@ formdesigner.model = (function () {
         return logic;
     }());
     
-    // IText
-    that.Itext = Itext(); 
-
 
     /**
      * Called during a reset.  Resets the state of all
@@ -1830,7 +1414,7 @@ formdesigner.model = (function () {
      */
     that.reset = function () {
         that.form = new Form();
-        that.Itext.resetItext(formdesigner.opts.langs);
+        formdesigner.pluginManager.javaRosa.Itext.resetItext(formdesigner.opts.langs);
         that.LogicManager.reset();
         formdesigner.controller.setForm(that.form);
     };
@@ -1926,27 +1510,6 @@ var MugElement = Class.$extend({
 });
 
 var mugs = (function () {
-    /**
-     * Check if value is a valid XML attribute value (additionally disallow all
-     * ' and ")
-     */
-    var isValidAttributeValue = function (value) {
-        return (/^[^<&'"]*$/).test(value);
-    };
-
-    var validateItextItem = function (itextItem, name) {
-        if (itextItem) {
-	        var val = itextItem.defaultValue();
-	        if (itextItem.id && !val) {
-	            return "Question has " + name + " ID but no " + name + " label!";
-	        }
-	        if (val && !itextItem.id) {
-	            return "Question has " + name + " label but no " + name + " ID!";
-	        }
-        }
-        return "pass";
-    };
-    
     var validateElementName = function (value, displayName) {
         if (!formdesigner.util.isValidElementName(value)) {
             return value + " is not a legal " + displayName + ". Must start with a letter and contain only letters, numbers, and '-' or '_' characters.";
@@ -1969,13 +1532,13 @@ var mugs = (function () {
         }, 
         label: function (mug) {
             var controlBlock, hasLabel, hasLabelItextID, missing, hasItext, Itext;
-            Itext = formdesigner.model.Itext;
+            Itext = formdesigner.pluginManager.javaRosa.Itext;
             controlBlock = mug.controlElement;
             hasLabel = Boolean(controlBlock.label);
             var itextBlock = mug.controlElement.labelItextID;
             hasLabelItextID = itextBlock && (typeof itextBlock.id !== "undefined");
 
-            if (hasLabelItextID && !isValidAttributeValue(itextBlock.id)) {
+            if (hasLabelItextID && !formdesigner.util.isValidAttributeValue(itextBlock.id)) {
                 return itextBlock.id + " is not a valid Itext ID";
             }
             hasItext = itextBlock && itextBlock.hasHumanReadableItext();
@@ -1999,37 +1562,6 @@ var mugs = (function () {
             }
             return 'Question is missing ' + missing + ' value!';
         },
-        hintItextID: function (mug) {
-            var hintItext, itextVal, Itext, controlElement;
-            controlElement = mug.controlElement;
-            Itext = formdesigner.model.Itext;
-            hintItext = controlElement.hintItextID;
-            if (hintItext && hintItext.id) {
-                if (!isValidAttributeValue(hintItext.id)) {
-                    return hintItext.id + " is not a valid ID";
-                }
-            }
-            if (mug.controlElement.__spec.hintItextID.presence === 'required' && !hintItext.id) {
-                return 'Hint ID is required but not present in this question!';
-            }
-            
-            return validateItextItem(hintItext, "Hint");
-        },
-        constraintItextId: function (mug) {
-            var bindElement = mug.bindElement;
-            var IT = formdesigner.model.Itext;
-            
-            var constraintItext = bindElement.constraintMsgItextID;
-            if (constraintItext && constraintItext.id) {
-                if (!isValidAttributeValue(constraintItext.id)) {
-                    return constraintItext.id + " is not a valid ID";
-                }
-            }
-            if (constraintItext && constraintItext.id && !bindElement.constraintAttr) {
-                return "Can't have a Validation Message ID without a Validation Condition";
-            }
-            return validateItextItem(constraintItext, "Validation Error Message");
-        },
         defaultValue: function (mug) {
             if (/\s/.test(mug.controlElement.defaultValue)) {
                 return "Whitespace in values is not allowed.";
@@ -2037,7 +1569,6 @@ var mugs = (function () {
             return "pass";
         }
     };
-
 
     var DEFAULT_DATA_ELEMENT_SPEC = {
         nodeID: {
@@ -2110,18 +1641,10 @@ var mugs = (function () {
             xpathType: "bool",
             lstring: 'Validation Condition'
         },
-        constraintMsgItextID: {
-            editable: 'w',
-            visibility: 'advanced',
-            presence: 'optional',
-            lstring: "Validation Error Message ID",
-            uiType: formdesigner.widgets.iTextIDWidget,
-            validationFunc: validationFuncs.constraintItextId
-        },
         // non-itext constraint message
         constraintMsgAttr: {
             editable: 'w',
-            visibility: 'visible_if_present',
+            visibility: 'visible',
             presence: 'optional',
             validationFunc : function (mug) {
                 var bindBlock = mug.bindElement;
@@ -2177,126 +1700,17 @@ var mugs = (function () {
         },
         label: {
             editable: 'w',
-            visibility: 'hidden',
-            presence: 'visible_if_present',
+            visibility: 'visible',
+            presence: 'optional',
             validationFunc : validationFuncs.label,
             lstring: "Default Label"
         },
         hintLabel: {
             editable: 'w',
-            visibility: 'visible_if_present',
+            visibility: 'visible',
             presence: 'optional',
             lstring: "Hint Label"
         },
-        // virtual property used to define a widget
-        labelItext: {
-            editable: 'w',
-            visibility: 'controlElement/labelItextID',
-            presence: 'optional',
-            uiType: formdesigner.widgets.itextLabelBlock,
-            widgetOptions: {
-                itextType: "label",
-                getItextByMug: function (mug) {
-                    return mug.controlElement.labelItextID;
-                },
-                displayName: "Label"
-            },
-            lstring: "Label"
-        },
-        labelItextID: {
-            editable: 'w',
-            visibility: 'advanced',
-            presence: 'optional',
-            lstring: "Question Itext ID",
-            uiType: formdesigner.widgets.iTextIDWidget,
-            validationFunc : validationFuncs.label,
-            widgetOptions: {
-                displayName: "Add Other Content",
-                itextType: "label",
-                getItextByMug: function (mug) {
-                    return mug.controlElement.labelItextID;
-                },
-                forms: ['long', 'short'],
-                isCustomAllowed: true
-            }
-        },
-        // virtual property used to get a widget
-        hintItext: {
-            editable: 'w',
-            visibility: 'controlElement/hintItextID',
-            uiType: formdesigner.widgets.itextLabelBlock,
-            widgetOptions: {
-                itextType: "hint",
-                getItextByMug: function (mug) {
-                    return mug.controlElement.hintItextID;
-                },
-                displayName: "Hint Message"
-            }
-        },
-        hintItextID: {
-            editable: 'w',
-            visibility: 'advanced',
-            presence: 'optional',
-            lstring: "Hint Itext ID",
-            uiType: formdesigner.widgets.iTextIDWidget,
-            validationFunc: validationFuncs.hintItextID,
-            widgetOptions: {
-                itextType: "hint",
-                getItextByMug: function (mug) {
-                    return mug.controlElement.hintItextID;
-                },
-                displayName: "Hint Message"
-            }
-        },
-        // virtual property used to define a widget
-        constraintMsgItext: {
-            editable: 'w',
-            visibility: 'bindElement/constraintMsgItextID',
-            presence: 'optional',
-            uiType: formdesigner.widgets.itextLabelBlock,
-            widgetOptions: {
-                itextType: "constraintMsg",
-                getItextByMug: function (mug) {
-                    return mug.controlElement.constraintMsgItextID;
-                },
-                displayName: "Validation Message"
-            },
-            lstring: 'Validation Message',
-        },
-        // virtual property used to get a widget
-        otherItext: {
-            editable: 'w',
-            visibility: 'controlElement/labelItextID',
-            presence: 'optional',
-            lstring: "Add Other Content",
-            uiType: formdesigner.widgets.itextConfigurableBlock,
-            widgetOptions: {
-                displayName: "Add Other Content",
-                itextType: "label",
-                getItextByMug: function (mug) {
-                    return mug.controlElement.labelItextID;
-                },
-                forms: ['long', 'short'],
-                isCustomAllowed: true
-            }
-        },
-        // virtual property used to get a widget
-        mediaItext: {
-            editable: 'w',
-            visibility: 'controlElement/labelItextID',
-            presence: 'optional',
-            lstring: 'Add Multimedia',
-            uiType: formdesigner.widgets.itextMediaBlock,
-            widgetOptions: {
-                displayName: "Add Multimedia",
-                itextType: "label",
-                getItextByMug: function (mug) {
-                    return mug.controlElement.labelItextID;
-                },
-                forms: formdesigner.multimedia.SUPPORTED_MEDIA_TYPES,
-                formToIcon: formdesigner.multimedia.ICONS
-            }
-        }
     };
 
     /**
@@ -2349,13 +1763,25 @@ var mugs = (function () {
             };
         },
         getDataElementSpec: function () {
-            return $.extend(true, {}, DEFAULT_DATA_ELEMENT_SPEC);
+            return formdesigner.pluginManager.call(
+                'contributeToDataElementSpec', 
+                $.extend(true, {}, DEFAULT_DATA_ELEMENT_SPEC),
+                this
+            )
         },
         getBindElementSpec: function () {
-            return $.extend(true, {}, DEFAULT_BIND_ELEMENT_SPEC);
+            return formdesigner.pluginManager.call(
+                'contributeToBindElementSpec',
+                $.extend(true, {}, DEFAULT_BIND_ELEMENT_SPEC),
+                this
+            );
         },
         getControlElementSpec: function () {
-            return $.extend(true, {}, DEFAULT_CONTROL_ELEMENT_SPEC);
+            return formdesigner.pluginManager.call(
+                'contributeToControlElementSpec',
+                $.extend(true, {}, DEFAULT_CONTROL_ELEMENT_SPEC),
+                this
+            );
         },
         getBindElementID: function () {
             if (this.bindElement) {
@@ -2493,7 +1919,7 @@ var mugs = (function () {
         
         getDefaultLabelItext: function (defaultValue) {
             var formData = {};
-            formData[formdesigner.model.Itext.getDefaultLanguage()] = defaultValue;
+            formData[formdesigner.pluginManager.javaRosa.Itext.getDefaultLanguage()] = defaultValue;
             return new ItextItem({
                 id: this.getDefaultLabelItextId(),
                 forms: [new ItextForm({
@@ -2855,18 +2281,14 @@ var mugs = (function () {
         },
         getControlElementSpec: function () {
             var spec = this.$super();
-            spec.hintItextID.presence = "notallowed";
             spec.hintLabel.presence = "notallowed";
-            spec.mediaItext.presence = "notallowed";
-            spec.otherItext.presence = "notallowed";
-            delete spec.otherItext;
             return spec;
         },
         getBindElementSpec: function () {
             var spec = this.$super();
             spec.dataType.presence = "notallowed";
             spec.calculateAttr.presence = "notallowed";
-            spec.constraintMsgItextID.presence = "notallowed";
+            spec.constraintAttr.presence = "notallowed";
             return spec;
         },
         getDataElementSpec: function () {

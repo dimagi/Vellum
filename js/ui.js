@@ -356,7 +356,7 @@ formdesigner.ui = function () {
         formdesigner.model.form.clearErrors('form-warning', {updateUI: true});
        
         var errors = mug.getErrors();
-        var itextValidation = formdesigner.model.Itext.validateItext();
+        var itextValidation = formdesigner.pluginManager.javaRosa.Itext.validateItext();
         if (itextValidation !== true) {
             errors.concat(itextValidation);
         }
@@ -612,7 +612,7 @@ formdesigner.ui = function () {
             Itext,
             $langSelector,
             fullLangs;
-        Itext = formdesigner.model.Itext;
+        Itext = formdesigner.pluginManager.javaRosa.Itext;
         langs = Itext.getLanguages();
 
         if (langs.length < 2) {
@@ -658,7 +658,7 @@ formdesigner.ui = function () {
     };
 
     that.changeTreeDisplayLanguage = function (lang) {
-        var itext = formdesigner.model.Itext;
+        var itext = formdesigner.pluginManager.javaRosa.Itext;
         
         formdesigner.currentItextDisplayLanguage = lang;
 
@@ -830,7 +830,7 @@ formdesigner.ui = function () {
         function beforeClose(event, ui) {
             //grab the input value and add the new language
             if ($('#fd-new-lang-input').val()) {
-                formdesigner.model.Itext.addLanguage($('#fd-new-lang-input').val())
+                formdesigner.pluginManager.javaRosa.Itext.addLanguage($('#fd-new-lang-input').val())
             }
         }
 
@@ -883,8 +883,8 @@ formdesigner.ui = function () {
         function beforeClose(event, ui) {
             //grab the input value and add the new language
             if ($('#fd-remove-lang-input').val() != '') {
-                formdesigner.model.Itext.removeLanguage($('#fd-remove-lang-input').val());
-                formdesigner.currentItextDisplayLanguage = formdesigner.model.Itext.getDefaultLanguage();
+                formdesigner.pluginManager.javaRosa.Itext.removeLanguage($('#fd-remove-lang-input').val());
+                formdesigner.currentItextDisplayLanguage = formdesigner.pluginManager.javaRosa.Itext.getDefaultLanguage();
             }
         }
 
@@ -894,7 +894,7 @@ formdesigner.ui = function () {
         div.empty();
 
 
-        if (formdesigner.model.Itext.getLanguages().length == 1) {
+        if (formdesigner.pluginManager.javaRosa.Itext.getLanguages().length == 1) {
             //When there is only one language in the
             langToBeRemoved = '';
             msg = 'You need to have at least one language in the form.  Please add a new language before removing this one.';
@@ -1587,6 +1587,8 @@ formdesigner.ui = function () {
 //        //Bug: Does not work yet. See ticket: http://manage.dimagi.com/default.asp?31223
 //        SaveButton.message.SAVE = 'Save to Server';
 //        SaveButton.message.SAVED = 'Saved to Server';
+        //
+        formdesigner.pluginManager.call('init');
         controller = formdesigner.controller;
         generate_scaffolding();
         init_toolbar();
@@ -1606,6 +1608,53 @@ formdesigner.ui = function () {
     return that;
 }();
 
+var PluginManager = function (options) {
+    this._methods = options.methods || {};
+    this._plugins = [];
+
+    this.register = function (name, plugin) {
+        this._plugins.push(plugin);
+
+        // set attribute directly on plugin manager for easy access
+        this[name] = plugin;
+    };
+
+    this.call = function (methodName) {
+        var methodArguments = Array.prototype.slice.call(arguments, 1),
+            methodType = this._methods[methodName];
+
+        if (methodType === "return_all") {
+            return _(this._plugins).map(function (plugin) {
+                var fn = plugin[methodName];
+                if (fn) {
+                    return fn.apply(plugin, methodArguments);
+                }
+            });
+        } else if (methodType === "process_sequentially") {
+            // call plugin functions such that they process the first argument
+            // in a pipeline, and the remaining arguments are untouched
+            var retval = methodArguments[0],
+                otherArguments = methodArguments.slice(1);
+            _(this._plugins).each(function (plugin) {
+                var fn = plugin[methodName];
+                if (fn) {
+                    var returned = fn.apply(
+                        plugin, [retval].concat(otherArguments)
+                    );
+                    // guard against functions that modified the referenced
+                    // value but forgot to return the existing reference
+                    if (typeof returned !== "undefined") {
+                        retval = returned;
+                    }
+                }
+            });
+            return retval;
+        } else {
+            throw methodName + " must have its type defined";
+        }
+    };
+};
+
 /**
  *
  * @param opts - {
@@ -1619,6 +1668,18 @@ formdesigner.ui = function () {
  */
 formdesigner.launch = function (opts) {
     formdesigner.util.eventuality(formdesigner);
+
+    formdesigner.pluginManager = new PluginManager({
+        methods: {
+            'init': 'return_all',
+            'beforeParse': 'return_all',
+            'contributeToDataElementSpec': 'process_sequentially',
+            'contributeToBindElementSpec': 'process_sequentially',
+            'contributeToControlElementSpec': 'process_sequentially',
+
+        }
+    });
+    formdesigner.pluginManager.register('javaRosa', new formdesigner.plugins.javaRosa());
 
     if(!opts){
         opts = {};

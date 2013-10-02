@@ -26,15 +26,15 @@ formdesigner.controller = (function () {
         if (formdesigner.opts.langs && formdesigner.opts.langs.length > 0) {
             // override the languages with whatever is passed in
             for (var i = 0; i < formdesigner.opts.langs.length; i++) {
-                formdesigner.model.Itext.addLanguage(formdesigner.opts.langs[i]);
+                formdesigner.pluginManager.javaRosa.Itext.addLanguage(formdesigner.opts.langs[i]);
             }
-            formdesigner.model.Itext.setDefaultLanguage(formdesigner.opts.langs[0]);
-        } else if (formdesigner.model.Itext.languages.length === 0) {
-            formdesigner.model.Itext.addLanguage("en");
+            formdesigner.pluginManager.javaRosa.Itext.setDefaultLanguage(formdesigner.opts.langs[0]);
+        } else if (formdesigner.pluginManager.javaRosa.Itext.languages.length === 0) {
+            formdesigner.pluginManager.javaRosa.Itext.addLanguage("en");
         }
         
         formdesigner.currentItextDisplayLanguage = formdesigner.opts.displayLanguage ||
-                                                   formdesigner.model.Itext.getDefaultLanguage();
+                                                   formdesigner.pluginManager.javaRosa.Itext.getDefaultLanguage();
 
         // fetch language names
         formdesigner.langCodeToName = {};
@@ -121,7 +121,7 @@ formdesigner.controller = (function () {
      * the Itext id's from any Mugs that are found.  Returns
      * a flat list of iIDs.  This list is primarily used
      * for trimming out crufty itext.  See also
-     * formdesigner.model.Itext.removeCruftyItext()
+     * formdesigner.pluginManager.javaRosa.Itext.removeCruftyItext()
      */
     var getAllNonEmptyItextItemsFromMugs = function () {
         
@@ -306,7 +306,7 @@ formdesigner.controller = (function () {
      */
     var removeCruftyItext = function () {
         var validIds = that.getAllNonEmptyItextItemsFromMugs();
-        formdesigner.model.Itext.resetItextList(validIds);
+        formdesigner.pluginManager.javaRosa.Itext.resetItextList(validIds);
     };
     that.removeCruftyItext = removeCruftyItext;
 
@@ -633,7 +633,7 @@ formdesigner.controller = (function () {
 
         // insert into model
         that.insertMugIntoForm(refMug, mug, position);
-        formdesigner.model.Itext.updateForNewMug(mug);
+        formdesigner.pluginManager.javaRosa.Itext.updateForNewMug(mug);
         formdesigner.intentManager.syncMugWithIntent(mug);
 
         formdesigner.ui.jstree("select_node", '#' + mug.ufid);
@@ -770,7 +770,7 @@ formdesigner.controller = (function () {
         // TODO: should this be configurable? 
         var exportCols = ["default", "audio", "image" , "video"];
                 
-        Itext = formdesigner.model.Itext;
+        Itext = formdesigner.pluginManager.javaRosa.Itext;
         for (i = 0; i < rows.length; i++) {
             cells = rows[i].split('\t');
             lang = cells[0];
@@ -798,7 +798,7 @@ formdesigner.controller = (function () {
                 out = '';
         
         that.removeCruftyItext();
-        Itext = formdesigner.model.Itext;
+        Itext = formdesigner.pluginManager.javaRosa.Itext;
         
         /**
          * Cleans Itext so that it fits the csv spec. For now just replaces newlines with ''
@@ -836,9 +836,9 @@ formdesigner.controller = (function () {
 
     that.generateExportXLS = function () {
         
-        var languages = formdesigner.model.Itext.getLanguages();
+        var languages = formdesigner.pluginManager.javaRosa.Itext.getLanguages();
         // deduplicate
-        formdesigner.model.Itext.deduplicateIds();
+        formdesigner.pluginManager.javaRosa.Itext.deduplicateIds();
 
         var itextColumns = {
             "default": "Text",
@@ -867,11 +867,10 @@ formdesigner.controller = (function () {
             "Required"
         ]);
 
-
         var mugToExportRow = function (mug) {
             var row = {},
                 itext = mug.controlElement.labelItextID,
-                defaultLanguage = formdesigner.model.Itext.getDefaultLanguage();
+                defaultLanguage = formdesigner.pluginManager.javaRosa.Itext.getDefaultLanguage();
 
             var defaultOrNothing = function (item, language, form) {
                 return item.hasForm(form) ? item.getForm(form).getValueOrDefault(language) : "";
@@ -1176,7 +1175,7 @@ formdesigner.controller = (function () {
         window.setTimeout(function () { //wait for the spinner to come up.
             try {
                 that.resetFormDesigner();
-                formdesigner.model.Itext.resetItext(); //Clear out any ideas about itext since we'll be loading in that information now.
+                formdesigner.pluginManager.javaRosa.Itext.resetItext(); //Clear out any ideas about itext since we'll be loading in that information now.
                 that.parseXML(formString);
                 that.reloadUI();
             } catch (e) {
@@ -1392,7 +1391,7 @@ formdesigner.controller = (function () {
 
     // CONTROL PARSING FUNCTIONS
     function parseLabel(lEl, mug) {
-        var Itext = formdesigner.model.Itext;
+        var Itext = formdesigner.pluginManager.javaRosa.Itext;
         var $lEl = $(lEl),
             labelVal = formdesigner.util.getXLabelValue($lEl),
             labelRef = getLabelRef($lEl),
@@ -1401,7 +1400,7 @@ formdesigner.controller = (function () {
         cProps.label = labelVal;
         
         var newLabelItext = function (mug) {
-            var item = formdesigner.model.ItextItem({
+            var item = ItextItem({
                 id: mug.getDefaultLabelItextId()
             });
             Itext.addItem(item);
@@ -1430,7 +1429,7 @@ formdesigner.controller = (function () {
     }
 
     function parseHint (hEl, mug) {
-        var Itext = formdesigner.model.Itext;
+        var Itext = formdesigner.pluginManager.javaRosa.Itext;
         var $hEl = $(hEl),
             hintVal = formdesigner.util.getXLabelValue($hEl),
             hintRef = getLabelRef($hEl),
@@ -1688,7 +1687,7 @@ formdesigner.controller = (function () {
     };
 
     function parseControlTree (controlsTree) {
-        var Itext = formdesigner.model.Itext;
+        var Itext = formdesigner.pluginManager.javaRosa.Itext;
 
         function eachFunc(){
             var el = $ ( this ), oldEl,
@@ -1771,7 +1770,7 @@ formdesigner.controller = (function () {
     }
 
     function parseBindList (bindList) {
-        var Itext = formdesigner.model.Itext;
+        var Itext = formdesigner.pluginManager.javaRosa.Itext;
 
         bindList.each(function () {
             var el = $(this),
@@ -1841,64 +1840,6 @@ formdesigner.controller = (function () {
         });
     }
 
-    // ITEXT PARSING FUNCTIONS
-
-    function parseItextBlock (itextBlock) {
-        var Itext = formdesigner.model.Itext;
-
-        function eachLang() {
-            var el = $(this), defaultExternalLang;
-            var lang = el.attr('lang');
-            
-            function eachText() {
-                var textEl = $ (this);
-                var id = textEl.attr('id');
-                var item = Itext.getOrCreateItem(id);
-                
-                function eachValue() {
-                    var valEl = $(this);
-                    var curForm = valEl.attr('form');
-                    if(!curForm) {
-                        curForm = "default";
-                    }
-                    item.getOrCreateForm(curForm).setValue(lang, formdesigner.util.getXLabelValue(valEl));
-                }
-                textEl.children().each(eachValue);
-            }
-
-            if (formdesigner.opts.langs && formdesigner.opts.langs.indexOf(lang) === -1) { //this language does not exist in the list of langs provided in launch args
-                that.addParseWarningMsg("The Following Language will be deleted from the form as it is not listed as a language in CommCareHQ: <b>" + lang + "</b>");
-                return; //the data for this language will be dropped.
-            }
-            Itext.addLanguage(lang);
-            if (el.attr('default') !== undefined) {
-                Itext.setDefaultLanguage(lang);
-            }
-
-            //loop through children
-            el.children().each(eachText)
-        }
-        
-        Itext.clear();
-        if (formdesigner.opts.langs && formdesigner.opts.langs.length > 0) {
-            // override the languages with whatever is passed in
-            for (var i = 0; i < formdesigner.opts.langs.length; i++) {
-                formdesigner.model.Itext.addLanguage(formdesigner.opts.langs[i]);
-            }
-            formdesigner.model.Itext.setDefaultLanguage(formdesigner.opts.langs[0]);
-        }
-        $(itextBlock).children().each(eachLang);
-        if (Itext.getLanguages().length === 0) {
-            // there likely wasn't itext in the form or config. At least
-            // set a default language
-            Itext.addLanguage("en");
-            Itext.setDefaultLanguage("en");
-        }
-        if (!formdesigner.currentItextDisplayLanguage) {
-            formdesigner.currentItextDisplayLanguage = formdesigner.model.Itext.getDefaultLanguage();
-        }
-    }
-
     var _getInstances = function (xml) {
         // return all the instances in the form.
         // if there's more than one, guarantee that the first item returned
@@ -1937,8 +1878,7 @@ formdesigner.controller = (function () {
                 head = xml.find('h\\:head, head'),
                 title = head.children('h\\:title, title'),
                 binds = head.find('bind'),
-                instances = _getInstances(xml),
-                itext = head.find('itext');
+                instances = _getInstances(xml);
 
             var intentTags = [
                 "odkx\\:intent, intent"
@@ -1968,9 +1908,10 @@ formdesigner.controller = (function () {
             if(data.length === 0) {
                 that.addParseErrorMsg('No Data block was found in the form.  Please check that your form is valid!');
             }
-            
+           
             // parse itext first so all the other functions can access it
-            parseItextBlock(itext);
+            formdesigner.pluginManager.call('beforeParse', xml);
+            //parseItextBlock(itext);
             
             parseDataTree (data[0]);
             parseBindList (binds);
