@@ -645,7 +645,7 @@ formdesigner.ui = function () {
                 that.showAddLanguageDialog();
             });
             $langSelector.append(addLangButton);
-            str = '<button class="btn btn-warning" id="fd-lang-disp-remove-lang-button">Remove Langauge</button>';
+            str = '<button class="btn btn-warning" id="fd-lang-disp-remove-lang-button">Remove Language</button>';
             removeLangButton = $(str);
             removeLangButton.button();
             removeLangButton.click(function () {
