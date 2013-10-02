@@ -1388,11 +1388,11 @@ formdesigner.controller = (function () {
         return element.attr("jr:" + reference) || element.attr("jr\\:" + reference);
     };
 
-    var Itext = formdesigner.model.Itext;
 
 
     // CONTROL PARSING FUNCTIONS
     function parseLabel(lEl, mug) {
+        var Itext = formdesigner.model.Itext;
         var $lEl = $(lEl),
             labelVal = formdesigner.util.getXLabelValue($lEl),
             labelRef = getLabelRef($lEl),
@@ -1430,6 +1430,7 @@ formdesigner.controller = (function () {
     }
 
     function parseHint (hEl, mug) {
+        var Itext = formdesigner.model.Itext;
         var $hEl = $(hEl),
             hintVal = formdesigner.util.getXLabelValue($hEl),
             hintRef = getLabelRef($hEl),
@@ -1687,6 +1688,8 @@ formdesigner.controller = (function () {
     };
 
     function parseControlTree (controlsTree) {
+        var Itext = formdesigner.model.Itext;
+
         function eachFunc(){
             var el = $ ( this ), oldEl,
                 path,
@@ -1768,6 +1771,8 @@ formdesigner.controller = (function () {
     }
 
     function parseBindList (bindList) {
+        var Itext = formdesigner.model.Itext;
+
         bindList.each(function () {
             var el = $(this),
                 attrs = {},
@@ -1839,6 +1844,8 @@ formdesigner.controller = (function () {
     // ITEXT PARSING FUNCTIONS
 
     function parseItextBlock (itextBlock) {
+        var Itext = formdesigner.model.Itext;
+
         function eachLang() {
             
             var el = $(this), defaultExternalLang;

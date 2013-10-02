@@ -45,7 +45,7 @@ ItextItem.prototype = {
     },
     addForm: function (name) {
         if (!this.hasForm(name)) {
-            var newForm = new formdesigner.model.ItextForm({name: name});
+            var newForm = new ItextForm({name: name});
             this.forms.push(newForm);
             return newForm;
         }
@@ -83,6 +83,351 @@ ItextItem.prototype = {
                        this.hasForm('short'));
     }
 };
+
+var ItextForm = function (options) {
+    var form = {};
+    
+    form.data = options.data || {};
+    form.name = options.name || "default";
+    
+    form.getValue = function (lang) {
+        return this.data[lang];
+    };
+    
+    form.setValue = function (lang, value) {
+        this.data[lang] = value;
+    };
+    
+    form.getValueOrDefault = function (lang) {
+        // check the actual language first
+        if (this.data[lang]) {
+            return this.data[lang];
+        }
+        var defLang = formdesigner.model.Itext.getDefaultLanguage();
+        // check the default, if necesssary
+        if (lang !== defLang && this.data[defLang]) {
+            return this.data[defLang];
+        }
+        // check arbitrarily for something
+        for (var i in this.data) {
+            if (this.data.hasOwnProperty(i)) {
+                return this.data[i];
+            }
+        }
+        // there wasn't anything
+        return "";
+    };
+    
+    form.isEmpty = function () {
+        for (var lang in this.data) {
+            if (this.data.hasOwnProperty(lang) && this.data[lang]) {
+                return false;
+            }
+        }
+        return true;
+    };
+    
+    return form; 
+};
+
+/**
+ * The itext holder object. Access all Itext through this gate.
+ *
+ * Expected forms of itext:
+ * - default (i.e. no special form)
+ * - long
+ * - short
+ * - image
+ * - audio
+ * - hint
+ *
+ */
+var Itext = function() {
+    var itext = {}; 
+    
+    itext.languages = [];
+    
+    itext.getLanguages = function () {
+        return this.languages;
+    };
+    
+    itext.hasLanguage = function (lang) {
+        return this.languages.indexOf(lang) !== -1;
+    };
+    
+    itext.addLanguage = function (lang) {
+        if (!this.hasLanguage(lang)) {
+            this.languages.push(lang);
+        } 
+    };
+    
+    itext.removeLanguage = function (lang) {
+        if(this.hasLanguage(lang)) {
+            this.languages.splice(this.languages.indexOf(lang), 1);
+        }
+        // if we removed the default, reset it
+        if (this.getDefaultLanguage() === lang) {
+            this.setDefaultLanguage(this.languages.length > 0 ? this.languages[0] : "");
+        }
+    };
+    
+    itext.setDefaultLanguage = function (lang) {
+        this.defaultLanguage = lang;
+    };
+
+    itext.getDefaultLanguage = function () {
+        if (this.defaultLanguage) {
+            return this.defaultLanguage;
+        } else {
+            // dynamically generate default arbitrarily
+            return this.languages.length > 0 ? this.languages[0] : "";
+        }
+        
+        
+    };
+    
+    itext.items = [];
+    
+    itext.getItems = function () {
+        return this.items;
+    };
+    
+    itext.getNonEmptyItems = function () {
+        return _(this.items).filter(function (item) {
+            return !item.isEmpty();
+        });
+    };
+    
+    itext.getNonEmptyItemIds = function () {
+        return this.getNonEmptyItems().map(function (item) {
+            return item.id;
+        });
+    };
+    
+    itext.deduplicateIds = function () {
+        var nonEmpty = this.getNonEmptyItems();
+        var found = [];
+        var counter, item, origId;
+        for (var i = 0; i < nonEmpty.length; i++) {
+            item = nonEmpty[i];
+            origId = item.id;
+            counter = 2;
+            while (found.indexOf(item.id) !== -1) {
+                item.id = origId + counter;
+                counter = counter + 1;
+            }
+            found.push(item.id);
+        }
+    };
+    
+    itext.hasItem = function (item) {
+        return this.items.indexOf(item) !== -1;
+    };
+
+    /**
+     * Add an itext item to the global Itext object.
+     * Item is an ItextItem object.
+     * Does nothing if the item was already in the itext object.
+     */
+    itext.addItem = function (item) {
+        if (!this.hasItem(item)) {
+            this.items.push(item);
+        } 
+    };
+    
+    /*
+     * Create a new blank item and add it to the list.
+     */
+    itext.createItem = function (id) {
+        var item = new ItextItem({
+            id: id,
+            forms: [new ItextForm({
+                        name: "default",
+                    })]
+        });
+        this.addItem(item);
+        return item;
+    };
+    
+    /**
+     * Get the Itext Item by ID.
+     */
+    itext.getItem = function (iID) {
+        // this is O[n] when it could be O[1] with some other
+        // data structure. That would require keeping the ids
+        // in sync in multiple places though.
+        // This could be worked around via careful event handling,
+        // but is not implemented until we see slowness.
+        try {
+            return formdesigner.util.reduceToOne(this.items, function (item) {
+                return item.id === iID;
+            }, "itext id = " + iID);
+        } catch (e) {
+            throw "NoItextItemFound";
+        }
+    };
+    
+    itext.getOrCreateItem = function (id) {
+        try {
+            return this.getItem(id);
+        } catch (err) {
+            return this.createItem(id); 
+        }
+    };
+    
+    itext.removeItem = function (item) {
+        var index = this.items.indexOf(item);
+        if (index !== -1) {
+            this.items.splice(index, 1);
+        } 
+    };
+    
+    /**
+     * Generates a flat list of all unique Itext IDs currently in the
+     * Itext object.
+     */
+    itext.getAllItemIDs = function () {
+        return this.items.map(function (item) {
+            return item.id;
+        });
+    };
+
+    /**
+     * Goes through the Itext data and verifies that
+     * a) a default language is set to something that exists
+     * b) That every iID that exists in the DB has a translation in the default language (causes commcare to fail if not the case)
+     *
+     * if a) fails, will throw an exception
+     * if b) fails, will return a dict of all offending iIDs that need a translation in order to pass validation with
+     * the KEYs being ItextIDs and the values being descriptive error messages.
+     *
+     * if everything passes will return true
+     */
+    itext.validateItext = function () {
+        // TODO: fill this back in
+        
+        var dLang = this.getDefaultLanguage();
+
+        if(!dLang){
+            throw 'No Default Language set! Aborting validation. You should set one!';
+        }
+
+        if(!this.hasLanguage(dLang)){
+            throw 'Default language is set to a language that does not exist in the Itext DB!';
+        }
+
+        return true
+    };
+    
+    itext.clear = function () {
+        delete this.languages;
+        delete this.items;
+        this.languages = [];
+        this.items = [];
+        
+    };
+    
+
+    /**
+     * Blows away all data stored in the Itext object
+     * and resets it to pristine condition (i.e. as if the FD was freshly launched)
+     */
+    itext.resetItext = function (langs) {
+        this.clear();
+        if (langs && langs.length > 0) {
+            for (var i = 0; i < langs.length; i++) {
+                this.addLanguage(langs[i]);
+            }
+        }
+    };
+
+    /**
+     * Takes in a list of Itext Items and resets this object to only
+     * include those items. 
+     *
+     * PERMANENTLY DELETES ALL OTHER ITEXT ITEMS FROM THE MODEL
+     *
+     * For generating a list of useful IDs see:
+     * formdesigner.controller.getAllNonEmptyItextItemsFromMugs()
+     *
+     * @param validIDList
+     */
+    
+    var resetItextList = function (validIDList) {
+        this.items = [];
+        for (var i = 0; i < validIDList.length; i++) {
+            this.items.push(validIDList[i]);
+        }
+    };
+    itext.resetItextList = resetItextList;
+
+    /**
+     * Remove all Itext associated with the given mug
+     * @param mug
+     */
+    itext.removeMugItext = function (mug) {
+        // NOTE: this is not currently used. We clear itext
+        // at form-generation time. This is because shared 
+        // itext makes removal problematic.
+        var labelItext, hintItext, constraintItext;
+        var mug = mug;
+        if (mug){
+            if (mug.controlElement) {
+                //attempt to remove Itext
+                labelItext = mug.controlElement.labelItextID;
+                hintItext = mug.controlElement.hintItextID;
+                if (labelItext) {
+                    this.removeItem(labelItext);
+                }
+                if (hintItext) {
+                    this.removeItem(hintItext);
+                }
+            } 
+            if (mug.bindElement) {
+                constraintItext = mug.bindElement.constraintMsgItextID;
+                if (constraintItext) {
+                    this.removeItem(constraintItext);
+                }
+            }
+        }
+    };
+
+    itext.updateForNewMug = function(mug) {
+        // for new mugs, generate a label
+        return this.updateForMug(mug, mug.getDefaultLabelValue());
+    };
+    
+    itext.updateForExistingMug = function(mug) {
+        // for existing, just use what's there
+        return this.updateForMug(mug, mug.getLabelValue());
+    };
+    
+    itext.updateForMug = function (mug, defaultLabelValue) {
+        // set default itext id/values
+        if (mug.controlElement) {
+            // set label if not there
+            if (!mug.controlElement.labelItextID) {
+                mug.controlElement.labelItextID = mug.getDefaultLabelItext(defaultLabelValue);
+                this.addItem(mug.controlElement.labelItextID);
+            }
+            // set hint if legal and not there
+            if (mug.controlElement.__spec.hintItextID.presence !== "notallowed" &&
+                !mug.controlElement.hintItextID) {
+                mug.controlElement.hintItextID = this.createItem("");
+            }
+        }
+        if (mug.bindElement) {
+            // set constraint msg if legal and not there
+            if (mug.bindElement.__spec.constraintMsgItextID.presence !== "notallowed" &&
+                !mug.bindElement.constraintMsgItextID) {
+                mug.bindElement.constraintMsgItextID = this.createItem("");
+            }
+        }
+    };
+
+    return itext;
+};
+
 
 /**
  * A regular tree (with any amount of leafs per node)
@@ -1498,353 +1843,8 @@ formdesigner.model = (function () {
     }());
     
     // IText
-    that.ItextForm = function (options) {
-        var form = {};
-        
-        form.data = options.data || {};
-        form.name = options.name || "default";
-        
-        form.getValue = function (lang) {
-            return this.data[lang];
-        };
-        
-        form.setValue = function (lang, value) {
-            this.data[lang] = value;
-        };
-        
-        form.getValueOrDefault = function (lang) {
-            // check the actual language first
-            if (this.data[lang]) {
-                return this.data[lang];
-            }
-            var defLang = that.Itext.getDefaultLanguage();
-            // check the default, if necesssary
-            if (lang !== defLang && this.data[defLang]) {
-                return this.data[defLang];
-            }
-            // check arbitrarily for something
-            for (var i in this.data) {
-                if (this.data.hasOwnProperty(i)) {
-                    return this.data[i];
-                }
-            }
-            // there wasn't anything
-            return "";
-        };
-        
-        form.isEmpty = function () {
-            for (var lang in this.data) {
-                if (this.data.hasOwnProperty(lang) && this.data[lang]) {
-                    return false;
-                }
-            }
-            return true;
-        };
-        
-        return form; 
-    };
+    that.Itext = Itext(); 
 
-        /**
-     * The itext holder object. Access all Itext through this gate.
-     *
-     * Expected forms of itext:
-     * - default (i.e. no special form)
-     * - long
-     * - short
-     * - image
-     * - audio
-     * - hint
-     *
-     */
-    that.Itext = (function() {
-        var itext = {}; 
-        
-        itext.languages = [];
-        
-        itext.getLanguages = function () {
-            return this.languages;
-        };
-        
-        itext.hasLanguage = function (lang) {
-            return this.languages.indexOf(lang) !== -1;
-        };
-        
-        itext.addLanguage = function (lang) {
-            if (!this.hasLanguage(lang)) {
-                this.languages.push(lang);
-            } 
-        };
-        
-        itext.removeLanguage = function (lang) {
-            if(this.hasLanguage(lang)) {
-                this.languages.splice(this.languages.indexOf(lang), 1);
-            }
-            // if we removed the default, reset it
-            if (this.getDefaultLanguage() === lang) {
-                this.setDefaultLanguage(this.languages.length > 0 ? this.languages[0] : "");
-            }
-        };
-        
-        itext.setDefaultLanguage = function (lang) {
-            this.defaultLanguage = lang;
-        };
-
-        itext.getDefaultLanguage = function () {
-            if (this.defaultLanguage) {
-                return this.defaultLanguage;
-            } else {
-                // dynamically generate default arbitrarily
-                return this.languages.length > 0 ? this.languages[0] : "";
-            }
-            
-            
-        };
-        
-        itext.items = [];
-        
-        itext.getItems = function () {
-            return this.items;
-        };
-        
-        itext.getNonEmptyItems = function () {
-            return _(this.items).filter(function (item) {
-                return !item.isEmpty();
-            });
-        };
-        
-        itext.getNonEmptyItemIds = function () {
-            return this.getNonEmptyItems().map(function (item) {
-                return item.id;
-            });
-        };
-        
-        itext.deduplicateIds = function () {
-            var nonEmpty = this.getNonEmptyItems();
-            var found = [];
-            var counter, item, origId;
-            for (var i = 0; i < nonEmpty.length; i++) {
-                item = nonEmpty[i];
-                origId = item.id;
-                counter = 2;
-                while (found.indexOf(item.id) !== -1) {
-                    item.id = origId + counter;
-                    counter = counter + 1;
-                }
-                found.push(item.id);
-            }
-        };
-        
-        itext.hasItem = function (item) {
-            return this.items.indexOf(item) !== -1;
-        };
-
-        /**
-         * Add an itext item to the global Itext object.
-         * Item is an ItextItem object.
-         * Does nothing if the item was already in the itext object.
-         */
-        itext.addItem = function (item) {
-            if (!this.hasItem(item)) {
-                this.items.push(item);
-            } 
-        };
-        
-        /*
-         * Create a new blank item and add it to the list.
-         */
-        itext.createItem = function (id) {
-            var item = new ItextItem({
-                id: id,
-                forms: [new that.ItextForm({
-                            name: "default",
-                        })]
-            });
-            this.addItem(item);
-            return item;
-        };
-        
-        /**
-         * Get the Itext Item by ID.
-         */
-        itext.getItem = function (iID) {
-            // this is O[n] when it could be O[1] with some other
-            // data structure. That would require keeping the ids
-            // in sync in multiple places though.
-            // This could be worked around via careful event handling,
-            // but is not implemented until we see slowness.
-            try {
-                return formdesigner.util.reduceToOne(this.items, function (item) {
-                    return item.id === iID;
-                }, "itext id = " + iID);
-            } catch (e) {
-                throw "NoItextItemFound";
-            }
-        };
-        
-        itext.getOrCreateItem = function (id) {
-            try {
-                return this.getItem(id);
-            } catch (err) {
-                return this.createItem(id); 
-            }
-        };
-        
-        itext.removeItem = function (item) {
-            var index = this.items.indexOf(item);
-            if (index !== -1) {
-                this.items.splice(index, 1);
-            } 
-        };
-        
-        /**
-         * Generates a flat list of all unique Itext IDs currently in the
-         * Itext object.
-         */
-        itext.getAllItemIDs = function () {
-            return this.items.map(function (item) {
-                return item.id;
-            });
-        };
-
-        /**
-         * Goes through the Itext data and verifies that
-         * a) a default language is set to something that exists
-         * b) That every iID that exists in the DB has a translation in the default language (causes commcare to fail if not the case)
-         *
-         * if a) fails, will throw an exception
-         * if b) fails, will return a dict of all offending iIDs that need a translation in order to pass validation with
-         * the KEYs being ItextIDs and the values being descriptive error messages.
-         *
-         * if everything passes will return true
-         */
-        itext.validateItext = function () {
-            // TODO: fill this back in
-            
-            var dLang = this.getDefaultLanguage();
-
-            if(!dLang){
-                throw 'No Default Language set! Aborting validation. You should set one!';
-            }
-
-            if(!this.hasLanguage(dLang)){
-                throw 'Default language is set to a language that does not exist in the Itext DB!';
-            }
-
-            return true
-        };
-        
-        itext.clear = function () {
-            delete this.languages;
-            delete this.items;
-            this.languages = [];
-            this.items = [];
-            
-        };
-        
-
-        /**
-         * Blows away all data stored in the Itext object
-         * and resets it to pristine condition (i.e. as if the FD was freshly launched)
-         */
-        itext.resetItext = function (langs) {
-            this.clear();
-            if (langs && langs.length > 0) {
-                for (var i = 0; i < langs.length; i++) {
-                    this.addLanguage(langs[i]);
-                }
-            }
-        };
-
-        /**
-         * Takes in a list of Itext Items and resets this object to only
-         * include those items. 
-         *
-         * PERMANENTLY DELETES ALL OTHER ITEXT ITEMS FROM THE MODEL
-         *
-         * For generating a list of useful IDs see:
-         * formdesigner.controller.getAllNonEmptyItextItemsFromMugs()
-         *
-         * @param validIDList
-         */
-        
-        var resetItextList = function (validIDList) {
-            this.items = [];
-            for (var i = 0; i < validIDList.length; i++) {
-                this.items.push(validIDList[i]);
-            }
-        };
-        itext.resetItextList = resetItextList;
-
-        /**
-         * Remove all Itext associated with the given mug
-         * @param mug
-         */
-        itext.removeMugItext = function (mug) {
-            // NOTE: this is not currently used. We clear itext
-            // at form-generation time. This is because shared 
-            // itext makes removal problematic.
-            var labelItext, hintItext, constraintItext;
-            var mug = mug;
-            if (mug){
-	            if (mug.controlElement) {
-	                //attempt to remove Itext
-	                labelItext = mug.controlElement.labelItextID;
-	                hintItext = mug.controlElement.hintItextID;
-	                if (labelItext) {
-	                    this.removeItem(labelItext);
-	                }
-	                if (hintItext) {
-	                    this.removeItem(hintItext);
-	                }
-	            } 
-	            if (mug.bindElement) {
-	                constraintItext = mug.bindElement.constraintMsgItextID;
-	                if (constraintItext) {
-	                    this.removeItem(constraintItext);
-	                }
-	            }
-	        }
-        };
-
-
-        itext.updateForNewMug = function(mug) {
-            // for new mugs, generate a label
-            return this.updateForMug(mug, mug.getDefaultLabelValue());
-        };
-        
-        itext.updateForExistingMug = function(mug) {
-            // for existing, just use what's there
-            return this.updateForMug(mug, mug.getLabelValue());
-        };
-        
-        itext.updateForMug = function (mug, defaultLabelValue) {
-            // set default itext id/values
-            if (mug.controlElement) {
-                // set label if not there
-                if (!mug.controlElement.labelItextID) {
-		            mug.controlElement.labelItextID = mug.getDefaultLabelItext(defaultLabelValue);
-		            this.addItem(mug.controlElement.labelItextID);
-	            }
-	            // set hint if legal and not there
-	            if (mug.controlElement.__spec.hintItextID.presence !== "notallowed" &&
-	                !mug.controlElement.hintItextID) {
-	                mug.controlElement.hintItextID = this.createItem("");
-	            }
-	        }
-	        if (mug.bindElement) {
-	            // set constraint msg if legal and not there
-	            if (mug.bindElement.__spec.constraintMsgItextID.presence !== "notallowed" &&
-	                !mug.bindElement.constraintMsgItextID) {
-	                mug.bindElement.constraintMsgItextID = this.createItem("");
-	            }
-	        }
-	    };
-        
-        //make event aware
-        formdesigner.util.eventuality(itext);
-
-        return itext;
-    })();
 
     /**
      * Called during a reset.  Resets the state of all
@@ -2518,7 +2518,7 @@ var mugs = (function () {
             formData[formdesigner.model.Itext.getDefaultLanguage()] = defaultValue;
             return new ItextItem({
                 id: this.getDefaultLabelItextId(),
-                forms: [new formdesigner.model.ItextForm({
+                forms: [new ItextForm({
                             name: "default",
                             data: formData
                         })]
