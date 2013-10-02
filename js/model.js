@@ -6,14 +6,6 @@ if (typeof formdesigner === 'undefined') {
     var formdesigner = {};
 }
 
-function stacktrace() {
-  function st2(f) {
-    return !f ? [] :
-        st2(f.caller).concat([f.toString().split('(')[0].substring(9) + '(' + f.arguments.join(',') + ')']);
-  }
-  return st2(arguments.callee.caller);
-}
-
 function ItextItem(options) {
     this.forms = options.forms || [];
     this.id = options.id || "";
