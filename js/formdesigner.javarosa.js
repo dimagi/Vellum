@@ -1299,6 +1299,60 @@ formdesigner.plugins.javaRosa = function (options) {
             formdesigner.currentItextDisplayLanguage = Itext.getDefaultLanguage();
         }
     };
+    
+    this.contributeToModelXML = function (xmlWriter) {
+        var lang, id, langData, val, formData, 
+            form, i, allLangKeys, question;
+
+        // here are the rules that govern itext
+        // 0. iText items which aren't referenced by any questions are 
+        // cleared from the form.
+        // 1. iText nodes for which values in _all_ languages are empty/blank 
+        // will be removed entirely from the form.
+        // 2. iText nodes that have a single value in _one_ language 
+        // but not others, will automatically have that value copied 
+        // into the remaining languages. TBD: there should be a UI to 
+        // disable this feature
+        // 3. iText nodes that have multiple values in multiple languages 
+        // will be properly set as such.
+        // 4. duplicate itext ids will be automatically updated to create
+        // non-duplicates
+
+        var languages = Itext.getLanguages();
+        var allItems = Itext.getNonEmptyItems();
+        var item, forms, form;
+        if (languages.length > 0) {
+            xmlWriter.writeStartElement("itext");
+            for (var i = 0; i < languages.length; i++) {
+                lang = languages[i];
+                xmlWriter.writeStartElement("translation");
+                xmlWriter.writeAttributeStringSafe("lang", lang);
+                if (Itext.getDefaultLanguage() === lang) {
+                    xmlWriter.writeAttributeStringSafe("default", '');
+                }
+                for (var j = 0; j < allItems.length; j++) {
+                    item = allItems[j];
+                    xmlWriter.writeStartElement("text");
+                    xmlWriter.writeAttributeStringSafe("id", item.id);
+                    forms = item.getForms();
+                    for (var k = 0; k < forms.length; k++) {
+                        form = forms[k];
+                        val = form.getValueOrDefault(lang);
+                        xmlWriter.writeStartElement("value");
+                        if(form.name !== "default") {
+                            xmlWriter.writeAttributeStringSafe('form', form.name);
+                        }
+                        xmlWriter.writeString(val);
+                        xmlWriter.writeEndElement();
+                    }
+                    xmlWriter.writeEndElement();
+                }
+                xmlWriter.writeEndElement();
+            }
+            xmlWriter.writeEndElement();
+        }
+    
+    };
 
     this.onMugUpdateOrCreate = function (mug) {
     
@@ -1518,9 +1572,6 @@ formdesigner.plugins.javaRosa = function (options) {
     
     };
 
-    this.contributeToXMLHead = function () {
-    
-    };
 
     this.getAccordions = function () {
     

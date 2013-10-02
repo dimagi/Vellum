@@ -1895,7 +1895,6 @@ formdesigner.controller = (function () {
            
             // parse itext first so all the other functions can access it
             formdesigner.pluginManager.call('beforeParse', xml);
-            //parseItextBlock(itext);
             
             parseDataTree (data[0]);
             parseBindList (binds);

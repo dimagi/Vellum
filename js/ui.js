@@ -1673,6 +1673,7 @@ formdesigner.launch = function (opts) {
         methods: {
             'init': 'return_all',
             'beforeParse': 'return_all',
+            'contributeToModelXML': 'return_all',
             'contributeToDataElementSpec': 'process_sequentially',
             'contributeToBindElementSpec': 'process_sequentially',
             'contributeToControlElementSpec': 'process_sequentially',
