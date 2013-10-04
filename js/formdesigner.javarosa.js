@@ -1329,7 +1329,9 @@ var showItextDialog = function (Itext) {
     $modal.modal('show');
 };
 
-formdesigner = formdesigner || {};
+if (typeof formdesigner === "undefined") {
+    var formdesigner = {};
+}
 formdesigner.plugins = formdesigner.plugins || {};
 
 formdesigner.plugins.javaRosa = function (options) {
