@@ -299,7 +299,8 @@ formdesigner.ui = function () {
     };
 
     that.activateQuestionTypeGroup = function (mug) {
-        var groupSlug = that.QUESTION_TYPE_TO_GROUP[mug.__className]; // todo: fix.  will need to check both instanceof and == to support both changing and new question types
+        var className = mug.__className || mug.prototype.__className,
+            groupSlug = that.QUESTION_TYPE_TO_GROUP[className];
         if (groupSlug) {
             var $questionGroup = $('#' + that.getQuestionTypeGroupID(groupSlug));
             $questionGroup.find('.fd-question-type-related').removeClass('disabled');
