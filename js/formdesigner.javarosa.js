@@ -1628,7 +1628,7 @@ formdesigner.plugins.javaRosa = function (options) {
             widgetOptions: {
                 itextType: "constraintMsg",
                 getItextByMug: function (mug) {
-                    return mug.controlElement.constraintMsgItextID;
+                    return mug.bindElement.constraintMsgItextID;
                 },
                 displayName: "Validation Message"
             },
