@@ -1139,16 +1139,16 @@ formdesigner.model = (function () {
          * one.  It is up to the caller to ensure that the MT
          * ufids and other properties match up as required.
          * Use with caution.
-         * @param oldMT
-         * @param newMT
+         * @param oldMug
+         * @param newMug
          * @param treeType
          *
-         * @return - true if a replacement occurred. False if no match was found for oldMT
+         * @return - true if a replacement occurred. False if no match was found for oldMug
          */
-        var replaceMug = function (oldMT, newMT, treeType){
+        var replaceMug = function (oldMug, newMug, treeType){
             function treeFunc (node) {
-                if(node.getValue() === oldMT){
-                    node.setValue(newMT);
+                if(node.getValue() === oldMug){
+                    node.setValue(newMug);
                     return true;
                 }
             }
@@ -1331,7 +1331,7 @@ formdesigner.model = (function () {
             var ref, mug, expr;
             for (var i = 0; i < found.length; i++) {
                 ref = found[i];
-                mug = formdesigner.controller.getMTFromFormByUFID(ref.mug);
+                mug = formdesigner.controller.getMugFromFormByUFID(ref.mug);
                 expr = that.LogicExpression(mug.getPropertyValue(ref.property));
                 orig = expr.getText();
                 expr.updatePath(from, to);
