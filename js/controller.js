@@ -816,7 +816,7 @@ formdesigner.controller = (function () {
 
                 row["Validation Condition"] = mug.bindElement.constraintAttr;
                 row["Validation Message"] = defaultOrNothing(
-                    mug.controlElement ? mug.controlElement.constraintMsgItextID : null,
+                    mug.bindElement ? mug.bindElement.constraintMsgItextID : null,
                     defaultLanguage, 'default');
             }
 
