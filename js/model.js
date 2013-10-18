@@ -2016,6 +2016,7 @@ var mugs = (function () {
     var Geopoint = BaseMug.$extend({
         typeName: 'GPS',
         icon: 'icon-map-marker',
+        isODKOnly: true,
         __init__: function (options) {
             this.$super(options);
             this.controlElement.tagName = "input";
