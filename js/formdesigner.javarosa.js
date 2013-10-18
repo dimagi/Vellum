@@ -469,9 +469,7 @@ var iTextIDWidget = function (mug, options) {
     };
 
     widget.setValue = function (value) {
-        if (value) {
-            widget.setUIValue(value.id);
-        }
+        widget.setUIValue(value.id);
     };
 
     widget.getValue = function() {
@@ -585,7 +583,7 @@ var iTextIDWidget = function (mug, options) {
             widget.updateValue();
         } else if (!isItextPresent && currentVal) {
             widget.setAutoMode(false);
-            widget.setValue('');
+            widget.setValue({id: ''});
             widget.updateValue();
         }
 
