@@ -1406,7 +1406,8 @@ var MugElement = Class.$extend({
     },
     setAttr: function (attr, val) {
         // todo: replace all direct setting of element properties with this
-        if (this.__spec[attr] && this.__spec[attr].presence !== "notallowed") { 
+
+        if (this.__spec[attr] && attr.indexOf('_') !== 0) { 
             // avoid potential duplicate references (e.g., itext items)
             if (val && typeof val === "object") {
                 val = $.extend(true, {}, val);
@@ -1646,23 +1647,17 @@ var mugs = (function () {
         // whether you can change to or from this question's type in the UI
         isTypeChangeable: true,
         isODKOnly: false,
-        __init__: function (options) {
-            var options = options || {};
+        __init__: function () {
             var self = this;
             this.__spec = this.getSpec();
 
             _(this.__spec).each(function (spec, name) {
                 if (spec) {
-                    var newElement = new MugElement({
+                    self[name] = new MugElement({
                         spec: spec,
                         mug: self,
                         name: name
                     });
-                    var oldElement = options[name];
-                    if (oldElement) {
-                        newElement.setAttrs(oldElement);
-                    }
-                    self[name] = newElement;
                 } else {
                     self[name] = null;
                 }
