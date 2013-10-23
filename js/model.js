@@ -2038,7 +2038,7 @@ var mugs = (function () {
         getControlElementSpec: function () {
             var spec = this.$super();
             // virtual properties used to get widgets
-            spec.controlElement = $.extend(spec.controlElement, {
+            spec.controlElement = $.extend(spec, {
                 androidIntentAppId: {
                     visibility: 'visible',
                     uiType: formdesigner.widgets.androidIntentAppIdWidget
