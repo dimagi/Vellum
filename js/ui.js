@@ -51,139 +51,98 @@ formdesigner.ui = function () {
         }
     };
 
-    that.ODK_ONLY_QUESTION_TYPES = [
-        'stdImage',
-        'stdAudio', 
-        'stdVideo',
-        'stdBarcode', 
-        'stdAndroidIntent'
-    ];
-    
     that.QUESTION_GROUPS = [
         {
-            group: ['stdTextQuestion', 'Text'],  // <default_slug>, <title>
+            group: ["Text", 'Text'],  // key in mugs, <title>
             questions: [
-                'stdTextQuestion',
-                'stdTrigger'
+                "Text",
+                "Trigger"
             ]
         },
         {
-            group: ['stdSelect', 'Multiple Choice'],
+            group: ["Select", 'Multiple Choice'],
             related: [
-                'stdItem'
+                "Item"
             ],
             questions: [
-                'stdSelect',
-                'stdMSelect'
+                "Select",
+                "MSelect"
             ]
         },
         {
-            group: ['stdInt', 'Number'],
+            group: ["Int", 'Number'],
             questions: [
-                'stdInt',
-                'stdPhoneNumber',
-                'stdDouble',
-                'stdLong'
+                "Int",
+                "PhoneNumber",
+                "Double",
+                "Long"
             ]
         },
         {
-            group: ['stdDate', 'Date'],
+            group: ["Date", 'Date'],
             questions: [
-                'stdDate',
-                'stdTime',
-                'stdDateTime'
+                "Date",
+                "Time",
+                "DateTime"
             ]
         },
         {
-            group: ['stdDataBindOnly', 'Hidden Value'],
+            group: ["DataBindOnly", 'Hidden Value'],
             showDropdown: false,
             questions: [
-                'stdDataBindOnly'
+                "DataBindOnly"
             ]
         },
         {
-            group: ['stdGroup', 'Groups'],
+            group: ["Group", 'Groups'],
             questions: [
-                'stdGroup',
-                'stdRepeat',
-                'stdFieldList'
+                "Group",
+                "Repeat",
+                "FieldList"
             ]
         },
         {
-            group: ['stdImage', 'Multimedia Capture'],
+            group: ["Image", 'Multimedia Capture'],
             questions: [
-                'stdImage',
-                'stdAudio',
-                'stdVideo'
+                "Image",
+                "Audio",
+                "Video"
             ]
         },
         {
-            group: ['stdGeopoint', 'Advanced', ''],
+            group: ["Geopoint", 'Advanced', ''],
             textOnly: true,
             questions: [
-                'stdGeopoint',
-                'stdBarcode',
-                'stdSecret',
-                'stdAndroidIntent'
+                "Geopoint",
+                "Barcode",
+                "Secret",
+                "AndroidIntent"
             ]
         }
     ];
-
-    that.getJSTreeTypes = function() {
-        var typeSlugs = $.map(that.QUESTIONS, function (el, i) { return i; }),
-            types = {};
-
-        typeSlugs = _.without(typeSlugs, 'stdDataBindOnly', 'stdItem');
-
-        for (var i = 0, slug; i < typeSlugs.length; slug = typeSlugs[i++]) { 
-            var children;
-            if (slug === "stdGroup" || slug === "stdRepeat") {
-                children = typeSlugs;
-            } else if (slug === 'stdFieldList') {
-                children = _.without(typeSlugs, 'stdGroup', 'stdRepeat', 'stdFieldList');
-            } else if (slug === "stdSelect" || slug === "stdMSelect") {
-                children = ['stdItem'];
-            } else {
-                children = "none";
-            }
-
-            types[slug] = {valid_children: children};
-        }
-        types.stdItem = {valid_children: "none"};
-        types.stdDataBindOnly = {valid_children: "none"};
-
-        return {
-            "max_children" : -1,
-            "valid_children" : typeSlugs.concat(['stdDataBindOnly']),  // valid root node types
-            "types" : types
-        };
-    };
 
     that.getQuestionTypeGroupID = function (slug) {
         return "fd-question-group-" + slug;
     };
 
-    that.QUESTIONS = {};
+    that.QUESTIONS_IN_TOOLBAR = [];
     that.QUESTION_TYPE_TO_GROUP = {};
-    // this is necessary (as opposed to getting it from the mugtype at the same
+    // this is necessary (as opposed to getting it from the mug at the same
     // time as node creation) because jstree types are used to determine whether
-    // it's a valid insertion, so the mugtype can't be found in the form by node
+    // it's a valid insertion, so the mug can't be found in the form by node
     // id at the point in time we might otherwise want to use it. Would be good
-    // to instead store create dummy mugtypes to get their properties / get it
+    // to instead store create dummy mugs to get their properties / get it
     // from the prototype if we were using prototypical inheritance.
-    that.QUESTION_TYPE_TO_ICONS = {};
 
     _.each(that.QUESTION_GROUPS, function (groupData) {
         var groupSlug = groupData.group[0];
 
         var getQuestionData = function (questionType) {
-            var mugType = formdesigner.controller.getMugTypeByQuestionType(
-                    questionType),
-                questionData = [questionType, mugType.typeName, mugType.icon];
-
-            that.QUESTIONS[questionType] = questionData[1];
+            var mug = mugs[questionType],
+                questionData = [questionType, mug.prototype.typeName, mug.prototype.icon];
+            
+            that.QUESTIONS_IN_TOOLBAR.push(questionType);
             that.QUESTION_TYPE_TO_GROUP[questionType] = groupSlug;
-            that.QUESTION_TYPE_TO_ICONS[questionType] = questionData[2];
             return questionData;
         };
         
@@ -193,9 +152,7 @@ formdesigner.ui = function () {
         }
 
         if (typeof groupData.group[2] === 'undefined') {
-            var groupMugType = formdesigner.controller.getMugTypeByQuestionType(
-                groupData.group[0]);
-            groupData.group[2] = groupMugType.icon;
+            groupData.group[2] = mugs[groupData.group[0]].prototype.icon;
         }
     });
 
@@ -253,16 +210,22 @@ formdesigner.ui = function () {
     };
     
     that.addQuestion = function (qType) {
-        var newMug = formdesigner.controller.createQuestion(qType);
-        that.jstree('select_node', '#' + newMug.ufid, true);
-        if (that.ODK_ONLY_QUESTION_TYPES.indexOf(qType) !== -1) { 
-            //it's an ODK media question
-            formdesigner.model.form.updateError(formdesigner.model.FormError({
-                message: 'This question type will ONLY work with Android phones!',
-                level: 'form-warning'
-            }), {updateUI: true});
+        if (that.hasXpathEditorChanged) {
+            that.alertUnsavedChangesInXpathEditor();
+            return null;
+        } else {
+            var newMug = new mugs[qType](); 
+            formdesigner.controller.initQuestion(newMug);
+            that.jstree('select_node', '#' + newMug.ufid, true);
+            if (newMug.isODKOnly) {
+                //it's an ODK media question
+                formdesigner.model.form.updateError(formdesigner.model.FormError({
+                    message: 'This question type will ONLY work with Android phones!',
+                    level: 'form-warning'
+                }), {updateUI: true});
+            }
+            return newMug;
         }
-        return newMug;
     };
 
     that.QuestionTypeButton = function (buttonSpec) {
@@ -275,7 +238,6 @@ formdesigner.ui = function () {
     that.QuestionTypeGroup = function (groupData) {
         var self = this;
         self.groupData = groupData;
-        self.questionTypeTemplate = "fd-question-type-group-template";
         self.showDropdown = true;
         self.textOnly = false;
         self.relatedQuestions = [];
@@ -300,7 +262,7 @@ formdesigner.ui = function () {
         };
 
         self.getFormattedTemplate = function () {
-            var $template = $('#'+self.questionTypeTemplate);
+            var $template = $('#fd-question-type-group-template');
             return _.template($template.text(), {
                 groupID: self.groupID,
                 showDropdown: self.showDropdown,
@@ -336,8 +298,9 @@ formdesigner.ui = function () {
         };
     };
 
-    that.activateQuestionTypeGroup = function (qytpe) {
-        var groupSlug = that.QUESTION_TYPE_TO_GROUP[qytpe];
+    that.activateQuestionTypeGroup = function (mug) {
+        var className = mug.__className || mug.prototype.__className,
+            groupSlug = that.QUESTION_TYPE_TO_GROUP[className];
         if (groupSlug) {
             var $questionGroup = $('#' + that.getQuestionTypeGroupID(groupSlug));
             $questionGroup.find('.fd-question-type-related').removeClass('disabled');
@@ -369,7 +332,7 @@ formdesigner.ui = function () {
 
     }
 
-    that.showVisualValidation = function (mugType) {
+    that.showVisualValidation = function (mug) {
         function setValidationFailedIcon(li, showIcon, message) {
             var exists = ($(li).find('.fd-props-validate').length > 0);
             if (exists && showIcon) {
@@ -384,65 +347,58 @@ formdesigner.ui = function () {
             return li;
         }
 
-        function loopValProps(block, name) {
-            var i, res, msg, input;
-            if (block) {
-                for (i in block) {
-                    if (block.hasOwnProperty(i)) {
-                        res = block[i].result;
-                        msg = block[i].resultMessage;
-                        input = findInputByReference(name, i);
-                        if (res === 'fail') {
-                            setValidationFailedIcon(input.parent(), true, msg);
-                            propsMessage.push(msg);
-                        } else if (res === 'pass') {
-                            setValidationFailedIcon(input.parent(), false, msg);
-                        }
-                    }
-                }
-            }
-        }
 
         function findInputByReference(blockName, elementName) {
+            // todo: make this work (it hasn't in a while)
             return $('#' + blockName + '-' + elementName);
         }
 
-        if (!mugType) {
-            return;
-        }
-        var vObj = mugType.validateMug(),
-                bProps = vObj.bindElement,
-                cProps = vObj.controlElement,
-                dProps = vObj.dataElement,
-                // DRAGONS: this is used in a closure above so 
-                // don't assume it's not touched
-                propsMessage = [],
-                i, itextValidation;
-
         // for now form warnings get reset every time validation gets called.
         formdesigner.model.form.clearErrors('form-warning', {updateUI: true});
-        loopValProps(bProps, 'bindElement');
-        loopValProps(cProps, 'controlElement');
-        loopValProps(dProps, 'dataElement');
-        itextValidation = formdesigner.model.Itext.validateItext();
-        if (itextValidation !== true) {
-            propsMessage.push(JSON.stringify(itextValidation));
-        }
-        if (propsMessage.length > 0) {
-            for (var i = 0; i < propsMessage.length; i++) {
-	            formdesigner.model.form.updateError(formdesigner.model.FormError({
-	                    message: propsMessage[i],
-	                    level: 'form-warning'
-	                }));
-	        }
-	        that.resetMessages(formdesigner.model.form.errors);
-        }
+       
+        var errors = mug.getErrors().concat(_.filter(_.flatten(
+                formdesigner.pluginManager.call('getFormErrors')),
+                _.identity));
+
+        _(errors).each(function (error) {
+            var input = findInputByReference(name, "foo-id");  // todo: make work
+            setValidationFailedIcon(input.parent(), true, error);
+            formdesigner.model.form.updateError(formdesigner.model.FormError({
+                message: error,
+                level: 'form-warning'
+            }));
+        });
+        that.resetMessages(formdesigner.model.form.errors);
     };
 
+    function getWidgetClassAndOptions(propPath, mug) {
+        var propDef = mug.getPropertyDefinition(propPath),
+            propVal = mug.getPropertyValue(propPath);
+
+        if (propDef && propDef.visibility &&
+            propDef.visibility.indexOf('/') !== -1 &&
+                !getWidgetClassAndOptions(propDef.visibility, mug))
+        {
+            return null;
+        }
+
+        if (!propDef || 
+            (!propVal &&
+             (propDef.visibility === "visible_if_present" ||
+              propDef.presence === "notallowed")))
+        {
+            return null;
+        }
+        return {
+            widgetClass: propDef.uiType || formdesigner.widgets.textWidget,
+            options: $.extend(true, {path: propPath}, propDef,
+                              propDef.widgetOptions)
+        };
+    }
     /**
      * Draws the properties to be edited to the screen.
      */
-    that.displayMugProperties = function (mugType) {
+    that.displayMugProperties = function (mug) {
         $('#fd-default-panel').addClass('hide');
         // always hide the xpath editor if necessary
         that.hideXPathEditor();
@@ -454,12 +410,25 @@ formdesigner.ui = function () {
         that.hideQuestionProperties();
 
         var $content = $("#fd-props-content").empty(),
-            questionToolbar = formdesigner.widgets.getToolbarForMug(mugType),
-            sections = formdesigner.widgets.getSectionListForMug(mugType);
+            questionToolbar = formdesigner.widgets.getToolbarForMug(mug),
+            sections = formdesigner.widgets.getSectionListForMug(mug);
 
         $('#fd-props-toolbar').html(questionToolbar);
         for (var i = 0; i < sections.length; i++) {
-            sections[i].getSectionDisplay().appendTo($content);
+            var section = sections[i];
+
+            section.mug = mug;
+            section.properties = _(section.properties)
+                .map(function (property) {
+                    var foo = getWidgetClassAndOptions(property, mug);
+                    return foo;
+                })
+                .filter(_.identity);
+           
+            if (section.properties.length) {
+                formdesigner.widgets.questionSection(mug, section)
+                    .getSectionDisplay().appendTo($content);
+            }
         }
 
         /* attach common event listeners */
@@ -478,29 +447,33 @@ formdesigner.ui = function () {
 
         // update the question tree (only if it's a data node, and only if
         // it has changed)
-        mugType.mug.on('property-changed', function (e) {
+        mug.on('property-changed', function (e) {
             formdesigner.controller.setFormChanged();
 
             if (e.property === 'nodeID' && e.element === 'dataElement') {
-                var node = $('#' + e.mugTypeUfid);
-                if (mugType.typeSlug === "stdDataBindOnly" && e.val &&
-                    e.val !== that.jstree("get_text", node)) 
-                {
-                    that.jstree('rename_node', node, e.val);
+                var node = $('#' + e.mugUfid),
+                    newNameForTree = '[' + e.val +']';
+                if (e.val && (
+                    (mug.__className === "DataBindOnly" && newNameForTree !== that.jstree("get_text", node)) ||
+                    (!(mug.__className === "DataBindOnly") &&
+                        (!mug.controlElement || !mug.controlElement.labelItextID || (mug.controlElement.labelItextID && mug.controlElement.labelItextID.isEmpty()) )
+                        )
+                    )
+                ) {
+                    that.jstree('rename_node', node, newNameForTree);
                 }
             }
-            if (mugType.hasBindElement()) {
-                var bindElement = mugType.mug.properties.bindElement.properties;
-                if (e.property === 'constraintAttr' && mugType.typeSlug !== 'stdDataBindOnly') {
+            if (mug.bindElement) {
+                if (e.property === 'constraintAttr' && !(mug.__className === "DataBindOnly")) {
                     var $constraintItext = $(formdesigner.ui.CONSTRAINT_ITEXT_BLOCK_SELECTOR);
                     if (e.val) {
                         $constraintItext.removeClass('hide');
-                    } else if (!bindElement.constraintMsgItextID.id) {
+                    } else if (!mug.bindElement.constraintMsgItextID.id) {
                         $constraintItext.addClass('hide');
                     }
                 }
 
-                if (e.property === 'constraintMsgItextID' && !e.val.id && !bindElement.constraintAttr) {
+                if (e.property === 'constraintMsgItextID' && !e.val.id && !mug.bindElement.constraintAttr) {
                     $(formdesigner.ui.CONSTRAINT_ITEXT_BLOCK_SELECTOR).addClass('hide');
                 }
             }
@@ -515,7 +488,7 @@ formdesigner.ui = function () {
             $(formdesigner.ui.CONSTRAINT_ITEXT_BLOCK_SELECTOR).addClass('hide');
         }
 
-        that.showVisualValidation(mugType);
+        that.showVisualValidation(mug);
     };
 
     /**
@@ -530,25 +503,37 @@ formdesigner.ui = function () {
         }
 
         var ufid = $(data.rslt.obj[0]).prop('id'),
-            mugType = formdesigner.controller.getMTFromFormByUFID(ufid);
+            mug = formdesigner.controller.getMugFromFormByUFID(ufid);
 
-        that.displayMugProperties(mugType);
+        that.displayMugProperties(mug);
         // First neutralize all the existing buttons.
         that.resetQuestionTypeGroups();
-        that.activateQuestionTypeGroup(mugType.typeSlug);
+        that.activateQuestionTypeGroup(mug);
     };
 
     that.isSelectNodeBlocked = function (e, data) {
-        if (that.isXpathEditorActive) {
+        if (that.hasXpathEditorChanged) {
+            that.alertUnsavedChangesInXpathEditor();
+            return true;
+        }
+        return false;
+    };
+
+    that.alertUnsavedChangesInXpathEditor = function () {
+        if (!that.isUnsavedAlertVisible) {
+            that.isUnsavedAlertVisible = true;
+
             var $modal = formdesigner.ui.generateNewModal("Unsaved Changes in Editor", [], "OK");
             $modal.removeClass('fade');
             $modal.find('.modal-body')
                 .append($('<p />').text("You have UNSAVED changes in the Expression Editor. Please save "+
                                         "changes before switching questions."));
-            $modal.modal('show');
-            return true;
+            $modal
+                .modal('show')
+                .on('hide', function () {
+                    that.isUnsavedAlertVisible = false;
+                });
         }
-        return false;
     };
 
     /**
@@ -588,7 +573,7 @@ formdesigner.ui = function () {
      */
     that.selectLowestQuestionNode = function () {
         that.jstree("deselect_all");
-        var questions = that.getJSTree().children().children().filter("[rel!='stdDataBindOnly']");
+        var questions = that.getJSTree().children().children().filter("[rel!='DataBindOnly']");
         if (questions.length > 0) {
             var newSelectEl = $(questions[questions.length - 1]);
             that.jstree("select_node", newSelectEl, false);
@@ -627,7 +612,7 @@ formdesigner.ui = function () {
             Itext,
             $langSelector,
             fullLangs;
-        Itext = formdesigner.model.Itext;
+        Itext = formdesigner.pluginManager.javaRosa.Itext;
         langs = Itext.getLanguages();
 
         if (langs.length < 2) {
@@ -660,7 +645,7 @@ formdesigner.ui = function () {
                 that.showAddLanguageDialog();
             });
             $langSelector.append(addLangButton);
-            str = '<button class="btn btn-warning" id="fd-lang-disp-remove-lang-button">Remove Langauge</button>';
+            str = '<button class="btn btn-warning" id="fd-lang-disp-remove-lang-button">Remove Language</button>';
             removeLangButton = $(str);
             removeLangButton.button();
             removeLangButton.click(function () {
@@ -673,21 +658,20 @@ formdesigner.ui = function () {
     };
 
     that.changeTreeDisplayLanguage = function (lang) {
-        var itext = formdesigner.model.Itext;
+        var itext = formdesigner.pluginManager.javaRosa.Itext;
         
         formdesigner.currentItextDisplayLanguage = lang;
 
         that.getJSTree().find('li').each(function (i, el) {
             var $el = $(el),
-                mugType = formdesigner.controller.form.getMugTypeByUFID($el.prop('id'));
+                mug = formdesigner.controller.form.getMugByUFID($el.prop('id'));
 
             // don't rename data nodes, they don't have itext
-            if (mugType.hasControlElement()) {
-
+            if (mug.controlElement) {
                 try {
-                    var itextID = mugType.mug.properties.controlElement.properties.labelItextID.id,
+                    var itextID = mug.controlElement.labelItextID.id,
                         text = itext.getItem(itextID).getValue("default", lang);
-                    text = text || formdesigner.util.getMugDisplayName(mugType);
+                    text = text || formdesigner.util.getMugDisplayName(mug);
                     that.jstree('rename_node', $el, text || that.noTextString);
                 } catch (e) {
                     /* This happens immediately after question duplication when
@@ -715,11 +699,33 @@ formdesigner.ui = function () {
             that.makeLanguageSelectorDropdown();
         });
 
-        $('#fd-load-xls-button').stopLink().click(formdesigner.controller.showItextDialog);
-        $('#fd-export-xls-button').stopLink().click(formdesigner.controller.showExportDialog);
-        $('#fd-editsource-button').stopLink().click(formdesigner.controller.showSourceXMLDialog);
-        $('#fd-formproperties-button').stopLink().click(formdesigner.controller.showFormPropertiesDialog);
+        var menuItems = [
+            {
+                name: "Export Form Contents",
+                action: formdesigner.controller.showExportDialog
+            },
+            {
+                name: "Edit Source XML",
+                action: formdesigner.controller.showSourceXMLDialog
+            },
+            {
+                name: "Form Properties",
+                action: formdesigner.controller.showFormPropertiesDialog
+            }
+        ].concat(_.filter(_.flatten(
+                formdesigner.pluginManager.call('getToolsMenuItems')
+            ), _.identity));
 
+        var $toolsMenu = $("#fd-tools-menu");
+        _(menuItems).each(function (menuItem) {
+            var $a = $("<a tabindex='-1' href='#'>" + menuItem.name + "</a>").click(
+                function (e) {
+                    e.preventDefault();
+                    menuItem.action();
+                }
+            );
+            $("<li></li>").append($a).appendTo($toolsMenu);
+        });
     };
 
     var setTreeNodeInvalid = function (uid, msg) {
@@ -730,12 +736,13 @@ formdesigner.ui = function () {
         $($('#' + uid)[0]).find(".fd-tree-valid-alert-icon").remove();
     };
 
-    that.setTreeValidationIcon = function (mugType) {
-        var validationResult = mugType.validateMug();
-        if (validationResult.status !== 'pass') {
-            setTreeNodeInvalid(mugType.ufid, validationResult.message.replace(/"/g, "'"));
+    that.setTreeValidationIcon = function (mug) {
+        var errors = mug.getErrors();
+        if (!errors.length) {
+            setTreeNodeValid(mug.ufid);
         } else {
-            setTreeNodeValid(mugType.ufid);
+            var message = _(errors).pluck("message").join("<p>").replace(/"/g, "'");
+            setTreeNodeInvalid(mug.ufid, message);
         }
     };
 
@@ -750,25 +757,19 @@ formdesigner.ui = function () {
         var form = controller.form,
             cTree = form.controlTree,
             dTree = form.dataTree,
-            invalidMTs, i, invalidMsg, liID;
+            invalidMugs, i;
 
         //clear existing warning icons to start fresh.
         that.getJSTree().find('.fd-tree-valid-alert-icon').remove();
         
-        invalidMTs = form.getInvalidMugTypeUFIDs();
-        for (i in invalidMTs) {
-            if (invalidMTs.hasOwnProperty(i)) {
-                invalidMsg = invalidMTs[i].message.replace(/"/g, "'");
-                //ui tree
-                liID = i;
-                setTreeNodeInvalid(liID, invalidMsg);
-            }
-        }
-
+        _(form.getInvalidMugUFIDs()).each(function (messages, ufid) {
+            var message = messages.join("<p>").replace(/"/g, "'");
+            setTreeNodeInvalid(ufid, message);
+        });
     };
 
-    that.removeMugTypeFromTree = function (mugType) {
-        that.jstree("remove", '#' + mugType.ufid);
+    that.removeMugFromTree = function (mug) {
+        that.jstree("remove", '#' + mug.ufid);
     };
 
     function setup_fancybox() {
@@ -851,7 +852,7 @@ formdesigner.ui = function () {
         function beforeClose(event, ui) {
             //grab the input value and add the new language
             if ($('#fd-new-lang-input').val()) {
-                formdesigner.model.Itext.addLanguage($('#fd-new-lang-input').val())
+                formdesigner.pluginManager.javaRosa.Itext.addLanguage($('#fd-new-lang-input').val())
             }
         }
 
@@ -881,7 +882,7 @@ formdesigner.ui = function () {
             },
             beforeClose: beforeClose,
             close: function (event, ui) {
-                var currentMug = formdesigner.controller.getCurrentlySelectedMugType();
+                var currentMug = formdesigner.controller.getCurrentlySelectedMug();
                 // rerender the side nav so the language list refreshes
                 // this is one way to do this although it might be overkill
                 formdesigner.controller.reloadUI();
@@ -890,7 +891,7 @@ formdesigner.ui = function () {
                     // this is a fickle beast. something in the underlying
                     // spaghetti requires the first call before the second
                     // and requires both of these calls after the reloadUI call
-                    formdesigner.controller.setCurrentlySelectedMugType(currentMug.ufid);
+                    formdesigner.controller.setCurrentlySelectedMug(currentMug.ufid);
                     that.displayMugProperties(currentMug);
                 }
 
@@ -904,8 +905,8 @@ formdesigner.ui = function () {
         function beforeClose(event, ui) {
             //grab the input value and add the new language
             if ($('#fd-remove-lang-input').val() != '') {
-                formdesigner.model.Itext.removeLanguage($('#fd-remove-lang-input').val());
-                formdesigner.currentItextDisplayLanguage = formdesigner.model.Itext.getDefaultLanguage();
+                formdesigner.pluginManager.javaRosa.Itext.removeLanguage($('#fd-remove-lang-input').val());
+                formdesigner.currentItextDisplayLanguage = formdesigner.pluginManager.javaRosa.Itext.getDefaultLanguage();
             }
         }
 
@@ -915,7 +916,7 @@ formdesigner.ui = function () {
         div.empty();
 
 
-        if (formdesigner.model.Itext.getLanguages().length == 1) {
+        if (formdesigner.pluginManager.javaRosa.Itext.getLanguages().length == 1) {
             //When there is only one language in the
             langToBeRemoved = '';
             msg = 'You need to have at least one language in the form.  Please add a new language before removing this one.';
@@ -952,7 +953,7 @@ formdesigner.ui = function () {
             buttons: buttons,
             beforeClose: beforeClose,
             close: function (event, ui) {
-                var currentMug = formdesigner.controller.getCurrentlySelectedMugType();
+                var currentMug = formdesigner.controller.getCurrentlySelectedMug();
                 // rerender the side nav so the language list refreshes
                 // this is one way to do this although it might be overkill
                 formdesigner.controller.reloadUI();
@@ -961,7 +962,7 @@ formdesigner.ui = function () {
                     // this is a fickle beast. something in the underlying
                     // spaghetti requires the first call before the second
                     // and requires both of these calls after the reloadUI call
-                    formdesigner.controller.setCurrentlySelectedMugType(currentMug.ufid);
+                    formdesigner.controller.setCurrentlySelectedMug(currentMug.ufid);
                     that.displayMugProperties(currentMug);
                 }
             }
@@ -1055,12 +1056,12 @@ formdesigner.ui = function () {
             // efficient to just do it based off the currently changing
             // node. Left as a TODO if we have performance problems with
             // this operation, but the current behavior is more correct.
-            var allMugs = formdesigner.controller.getMugTypeList(true);
+            var allMugs = formdesigner.controller.getMugList(true);
             if (formdesigner.currentItextDisplayLanguage === e.language) {
                 allMugs.map(function (mug) {
                     var node = $('#' + mug.ufid),
                         treeName = e.value || formdesigner.util.getMugDisplayName(mug),
-                        it = mug.getItext();
+                        it = mug.controlElement ? mug.controlElement.labelItextID : null;
                     if (it && it.id === e.item.id && e.form === "default") {
                         if (treeName !== that.jstree("get_text", node)) {
                             that.jstree('rename_node', node, treeName);
@@ -1072,11 +1073,11 @@ formdesigner.ui = function () {
 
         formdesigner.controller.on("global-itext-changed", function (e) {
             // update any display values that are affected
-            var allMugs = formdesigner.controller.getMugTypeList(true);
+            var allMugs = formdesigner.controller.getMugList(true);
             var currLang = formdesigner.currentItextDisplayLanguage;
             allMugs.map(function (mug) {
                 var node = $('#' + mug.ufid),
-                    it = mug.getItext();
+                    it = mug.controlElement ? mug.controlElement.labelItextID : null;
                 var treeName = (it) ? it.getValue("default", currLang) : formdesigner.util.getMugDisplayName(mug);
                 treeName = treeName || formdesigner.util.getMugDisplayName(mug);
                 if (treeName !== that.jstree("get_text", node)) {
@@ -1086,11 +1087,11 @@ formdesigner.ui = function () {
         });
 
         formdesigner.controller.on('question-creation', function (e) {
-            that.overrideJSTreeIcon(e.mugType.ufid, e.mugType.typeSlug, e.mugType);
+            that.overrideJSTreeIcon(e.mug.ufid, e.mug);
         });
 
         formdesigner.controller.on('parent-question-type-changed', function (e) {
-            that.overrideJSTreeIcon(e.mugType.ufid, e.mugType.typeSlug, e.mugType);
+            that.overrideJSTreeIcon(e.mug.ufid, e.mug);
         });
     };
 
@@ -1111,10 +1112,7 @@ formdesigner.ui = function () {
          * All the logic to display the XPath Editor widget.
          */
         var expTypes = xpathmodels.XPathExpressionTypeEnum;
-        var questionList = formdesigner.controller.getMugTypeList();
-        var questionChoiceAutoComplete = questionList.map(function (item) {
-            return formdesigner.util.mugToAutoCompleteUIElement(item);
-        });
+        var questionList = formdesigner.controller.getMugList();
 
         var editorPane = $('#fd-xpath-editor');
         var editorContent = $('#fd-xpath-editor-content');
@@ -1183,12 +1181,6 @@ formdesigner.ui = function () {
             return [true, null];
         };
 
-        var markEditorAsActive = function () {
-            if (!formdesigner.ui.isXpathEditorActive) {
-                formdesigner.ui.isXpathEditorActive = true;
-            }
-        };
-
         var tryAddExpression = function(parsedExpression, joiningOp) {
             // trys to add an expression to the UI.
             // if the expression is empty just appends a new div for the expression.
@@ -1241,7 +1233,7 @@ formdesigner.ui = function () {
                 };
 
                 var validateExpression = function(item) {
-                    markEditorAsActive();
+                    formdesigner.ui.hasXpathEditorChanged = true;
 
                     var le = getLeftQuestionInput().val(),
                         re = getRightQuestionInput().val();
@@ -1326,8 +1318,6 @@ formdesigner.ui = function () {
                     return failAndClear();
                 }
             }
-
-
         };
 
         var setUIForExpression = function (xpathstring) {
@@ -1424,7 +1414,7 @@ formdesigner.ui = function () {
             });
 
             $xpathUI.find('#fd-xpath-editor-text').on('change keyup', function (){
-                markEditorAsActive();
+                formdesigner.ui.hasXpathEditorChanged = true;
             });
 
             var saveExpression = function(expression) {
@@ -1473,7 +1463,7 @@ formdesigner.ui = function () {
     };
 
     that.hideXPathEditor = function() {
-        formdesigner.ui.isXpathEditorActive = false;
+        formdesigner.ui.hasXpathEditorChanged = false;
         $('#fd-xpath-editor').hide();
     };
 
@@ -1498,8 +1488,8 @@ formdesigner.ui = function () {
                     "check_move": function (m) {
                         // disallow moving a data node or onto a data node
                         // unless both nodes are data nodes
-                        var refIsData = $(m.r).attr('rel') === 'stdDataBindOnly',
-                            nodeIsData = $(m.o).attr('rel') === 'stdDataBindOnly';
+                        var refIsData = $(m.r).attr('rel') === 'DataBindOnly',
+                            nodeIsData = $(m.o).attr('rel') === 'DataBindOnly';
 
                         if (refIsData + nodeIsData == 1) {
                             return false;
@@ -1514,19 +1504,33 @@ formdesigner.ui = function () {
                     formdesigner.controller.handleTreeDrop(data.o, data.r);
                 }
             },
-            "types": that.getJSTreeTypes(),
+            "types": {
+                "max_children" : -1,
+                // valid root node types
+                "valid_children" : mugs.Group.prototype.validChildTypes.concat(['DataBindOnly']),
+                "types" : (function () {
+                    var types = {};
+                    _(mugs).each(function (Mug, typeName) {
+                        types[typeName] = {
+                            valid_children: 
+                                Mug.prototype.validChildTypes.length ?  Mug.prototype.validChildTypes : "none"
+                        };
+                    });
+                    return types;
+                })()
+            },
             "plugins" : [ "themes", "json_data", "ui", "crrm", "types", "dnd" ]
         }).bind("select_node.jstree", 
             that.handleNodeSelect
         ).bind("move_node.jstree", function (e, data) {
             var controller = formdesigner.controller,
-                mugType = controller.getMTFromFormByUFID($(data.rslt.o).attr('id')),
-                refMugType = controller.getMTFromFormByUFID($(data.rslt.r).attr('id')),
+                mug = controller.getMugFromFormByUFID($(data.rslt.o).attr('id')),
+                refMug = controller.getMugFromFormByUFID($(data.rslt.r).attr('id')),
                 position = data.rslt.p;
 
-            controller.moveMugType(mugType, refMugType, position);
+            controller.moveMug(mug, refMug, position);
 
-            that.displayMugProperties(controller.getCurrentlySelectedMugType());
+            that.displayMugProperties(controller.getCurrentlySelectedMug());
         }).bind("deselect_all.jstree", function (e, data) {
             that.resetQuestionTypeGroups();
         }).bind("deselect_node.jstree", function (e, data) {
@@ -1539,12 +1543,12 @@ formdesigner.ui = function () {
         }).bind('create_node.jstree', function (e, data) {
             that.overrideJSTreeIcon(
                 data.args[2].attr.id,
-                data.args[2].attr.rel
+                data.args[2].metadata.mug
             );
         }).bind('set_type.jstree', function (e, data) {
             that.overrideJSTreeIcon(
                 data.args[1].replace('#', ''),
-                data.args[0]
+                mugs[data.args[0]]
             );
         });
 
@@ -1557,29 +1561,29 @@ formdesigner.ui = function () {
         });
     };
 
-
-
-    that.overrideJSTreeIcon = function (node_id, qtype, mugType) {
+    that.overrideJSTreeIcon = function (node_id, mug) {
         var $questionNode = $('#'+node_id),
             iconClass;
-        if (!mugType) {
-            mugType = formdesigner.controller.getMTFromFormByUFID(node_id);
+        if (!mug) {
+            // todo: check necessity of this
+            mug = formdesigner.controller.getMugFromFormByUFID(node_id);
         }
-        if (!qtype && mugType) {
-            qtype = mugType.typeSlug;
+        try {
+            iconClass = mug.getIcon();
+        } catch (e) {  // we're dealing with a class, not an instance
+            if (e.message.indexOf('__className') === -1 &&
+                e.message.indexOf('getIcon') === -1)
+            {
+                throw e;
+            }
+            iconClass = mug.constructor.prototype.icon;
         }
-        iconClass = that.QUESTION_TYPE_TO_ICONS[qtype];
-        if (mugType) {
-            iconClass = mugType.getIcon() || iconClass;
-        }
-        if (!iconClass) {
-            iconClass = 'icon-circle';
-        }
+        iconClass = iconClass || 'icon-circle';
         if (!$questionNode.find('> a > ins').hasClass(iconClass)) {
             $questionNode.find('> a > ins').attr('class', 'jstree-icon').addClass(iconClass);
         }
         that.resetQuestionTypeGroups();
-        that.activateQuestionTypeGroup(qtype);
+        that.activateQuestionTypeGroup(mug);
     };
 
     that.getJSTree = function () {
@@ -1605,6 +1609,8 @@ formdesigner.ui = function () {
 //        //Bug: Does not work yet. See ticket: http://manage.dimagi.com/default.asp?31223
 //        SaveButton.message.SAVE = 'Save to Server';
 //        SaveButton.message.SAVED = 'Saved to Server';
+        //
+        formdesigner.pluginManager.call('init');
         controller = formdesigner.controller;
         generate_scaffolding();
         init_toolbar();
@@ -1624,6 +1630,53 @@ formdesigner.ui = function () {
     return that;
 }();
 
+var PluginManager = function (options) {
+    this._methods = options.methods || {};
+    this._plugins = [];
+
+    this.register = function (name, plugin) {
+        this._plugins.push(plugin);
+
+        // set attribute directly on plugin manager for easy access
+        this[name] = plugin;
+    };
+
+    this.call = function (methodName) {
+        var methodArguments = Array.prototype.slice.call(arguments, 1),
+            methodType = this._methods[methodName];
+
+        if (methodType === "return_all") {
+            return _(this._plugins).map(function (plugin) {
+                var fn = plugin[methodName];
+                if (fn) {
+                    return fn.apply(plugin, methodArguments);
+                }
+            });
+        } else if (methodType === "process_sequentially") {
+            // call plugin functions such that they process the first argument
+            // in a pipeline, and the remaining arguments are untouched
+            var retval = methodArguments[0],
+                otherArguments = methodArguments.slice(1);
+            _(this._plugins).each(function (plugin) {
+                var fn = plugin[methodName];
+                if (fn) {
+                    var returned = fn.apply(
+                        plugin, [retval].concat(otherArguments)
+                    );
+                    // guard against functions that modified the referenced
+                    // value but forgot to return the existing reference
+                    if (typeof returned !== "undefined") {
+                        retval = returned;
+                    }
+                }
+            });
+            return retval;
+        } else {
+            throw methodName + " must have its type defined";
+        }
+    };
+};
+
 /**
  *
  * @param opts - {
@@ -1637,6 +1690,24 @@ formdesigner.ui = function () {
  */
 formdesigner.launch = function (opts) {
     formdesigner.util.eventuality(formdesigner);
+
+    formdesigner.pluginManager = new PluginManager({
+        methods: {
+            'getToolsMenuItems': 'return_all',
+            'init': 'return_all',
+            'beforeParse': 'return_all',
+            'contributeToModelXML': 'return_all',
+            'contributeToDataElementSpec': 'process_sequentially',
+            'contributeToBindElementSpec': 'process_sequentially',
+            'contributeToControlElementSpec': 'process_sequentially',
+            'contributeToMainProperties': 'process_sequentially',
+            'contributeToLogicProperties': 'process_sequentially',
+            'contributeToAdvancedProperties': 'process_sequentially',
+            'getFormErrors': 'return_all',
+            'preSerialize': 'return_all',
+        }
+    });
+    formdesigner.pluginManager.register('javaRosa', new formdesigner.plugins.javaRosa());
 
     if(!opts){
         opts = {};
