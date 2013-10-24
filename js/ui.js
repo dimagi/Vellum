@@ -1501,7 +1501,8 @@ formdesigner.ui = function () {
             },
             "dnd" : {
                 "drop_finish" : function(data) {
-                    formdesigner.controller.handleTreeDrop(data.o, data.r);
+                    formdesigner.controller.handleTreeDrop(
+                        data.o, data.r, data.e.clientX, data.e.clientY);
                 }
             },
             "types": {

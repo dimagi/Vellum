@@ -1,5 +1,9 @@
 @import "lib/main";
 
+[contentEditable=true]:empty:not(:focus):before{
+    content:attr(data-placeholder);
+}
+
 #formdesigner {
   .itext-lang-group-config {
     margin-right: 45px;

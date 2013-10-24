@@ -25,6 +25,9 @@
   -moz-box-sizing: border-box;
   box-sizing: border-box;
 }
+[contentEditable=true]:empty:not(:focus):before {
+  content: attr(data-placeholder);
+}
 #formdesigner .itext-lang-group-config {
   margin-right: 45px;
   margin-bottom: 20px;
