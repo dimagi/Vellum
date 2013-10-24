@@ -1475,17 +1475,13 @@ formdesigner.controller = (function () {
         }
         
         // create new mug and copy old data to newly generated mug
-        var options = {};
-        if (oldMug) {
-            options = {
-                dataElement: oldMug.dataElement,
-                bindElement: oldMug.bindElement
-            };
-        }
-        mug = new MugClass(options);
+        mug = new MugClass();
 
         if(oldMug) {
             mug.ufid = oldMug.ufid;
+
+            mug.bindElement.setAttrs(oldMug.bindElement || {});
+            mug.dataElement.setAttrs(oldMug.dataElement || {});
 
             //replace in dataTree
             that.form.replaceMug(oldMug, mug, 'data');
