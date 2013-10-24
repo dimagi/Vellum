@@ -2020,13 +2020,48 @@ formdesigner.controller = (function () {
     };
     
     // tree drag and drop stuff, used by xpath
-    var handleTreeDrop = function(source, target) {
+    var handleTreeDrop = function(source, target, x, y) {
         var target = $(target), sourceUid = $(source).attr("id");
-        if (target) {
-            var mug = that.form.getMugByUFID(sourceUid);
-            // the .change fires the validation controls
-            target.val(target.val() + formdesigner.util.mugToXPathReference(mug)).change();
+
+        if (!target) {
+            return;
         }
+        var mug = that.form.getMugByUFID(sourceUid),
+            ref = formdesigner.util.mugToXPathReference(mug);
+
+        // drag to replace
+        if (!target[0].isContentEditable) {
+            target.val(ref);
+        } else {
+            // http://stackoverflow.com/a/10659990 
+            var range,
+                node = $("<span>" + ref + "</span>")[0];
+            // Try the standards-based way first
+            if (document.caretPositionFromPoint) {
+                var pos = document.caretPositionFromPoint(x, y);
+                range = document.createRange();
+                range.setStart(pos.offsetNode, pos.offset);
+                range.collapse();
+                range.insertNode(node);
+            }
+            // Next, the WebKit way
+            else if (document.caretRangeFromPoint) {
+                range = document.caretRangeFromPoint(x, y);
+                range.insertNode(node);
+            }
+            // Finally, the IE way
+            else if (document.body.createTextRange) {
+                range = document.body.createTextRange();
+                range.moveToPoint(x, y);
+                var spanId = "temp_" + ("" + Math.random()).slice(2);
+                range.pasteHTML('<span id="' + spanId + '">&nbsp;</span>');
+                var span = document.getElementById(spanId);
+                span.parentNode.replaceChild(node, span);
+            } 
+        }
+
+        // fire the validation controls
+        target.change();
     };
     that.handleTreeDrop = handleTreeDrop;
     

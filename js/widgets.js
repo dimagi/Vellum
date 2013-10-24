@@ -145,8 +145,68 @@ formdesigner.widgets = (function () {
         return widget;
     };
 
-    that.droppableTextWidget = function (mug, options) {
+    that.droppableMultilineTextWidget = function (mug, options) {
         var widget = that.textWidget(mug, options);
+
+        var content = $("<div contenteditable='true' />")
+            .attr("id", widget.getID())
+            .addClass('input-block-level')
+            .css({
+                '-moz-appearance': 'textfield',
+                '-webkit-appearance': 'textfield',
+            })
+            .on('blur keyup paste copy cut mouseup', function () {
+                widget.updateValue();
+            });
+
+        widget.getControl = function () {
+            return content;
+        };
+
+        widget.valueToHTML = function (value) {
+            if (!value) {
+                return "";
+            }
+            // since <p> without a closing tag is valid HTML and contenteditable
+            // supports this, we can keep this pretty simple.
+            // hack hack hack
+            return "<p style='vertical-align: middle'>" + 
+                value.replace(/\n|&#10;/g, "<p>");
+        
+        };
+
+        widget.HTMLToValue = function (html) {
+            // due to some browser idiosyncracies in contenteditable we do some
+            // handling of different cases where <br>, <p>[</p>], and
+            // <div>[</div>] may get inserted.  A little hacky but whatever.
+            // We can't use content.text() because it doesn't preserve newlines
+            // in any way.
+            var html = content.html();
+
+            // get rid of non-breaking spaces that sometimes show up
+            html = html.replace(/&nbsp;/g, " ");
+            // strip <span> we use to insert dragged references
+            html = html.replace(/<\/?span[^>]*>/g, "");
+            // discard closing tags
+            html = html.replace(/<\/(div|p)>/g, "");
+            // ignore duplicate tags
+            html = html.replace(/((<div>|<p>|<br>)(<div>|<p>|<br>)){1,}/g, "<p>");
+            // discard beginning tag
+            html = html.replace(/^<[^>]+>/, "");
+            // replace tags indicating spaces
+            html = html.replace(/<(div|p|br\/?)[^>]*>/g, "&#10;").trim();
+            // not HTML any more, eh? 
+            return html;
+        };
+
+        widget.setValue = function (value) {
+            // content.html() seems to append, not replace
+            content.html(widget.valueToHTML(value)).change();
+        };
+
+        widget.getValue = function () {
+            return widget.HTMLToValue(content.html());
+        };
 
         widget.getControl().addClass('jstree-drop')
             .attr('placeholder', 'Hint: drag a question here.')
@@ -179,7 +239,7 @@ formdesigner.widgets = (function () {
     };
 
     that.xPathWidget = function (mug, options) {
-        var widget = that.textWidget(mug, options);
+        var widget = that.droppableMultilineTextWidget(mug, options);
         var xPathButton = $('<button />')
             .addClass("xpath-edit-button pull-right")
             .text("Edit")
@@ -192,7 +252,7 @@ formdesigner.widgets = (function () {
                 group:     $(this).data("group"),
                 property:  $(this).data("prop"),
                 xpathType: widget.definition.xpathType,
-                value:     $("#" + $(this).data("inputControlID")).val()
+                value:     widget.getValue().replace(/&#10;/g, "\n")
             });
         });
 

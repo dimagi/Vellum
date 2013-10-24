@@ -2260,7 +2260,7 @@ var mugs = (function () {
                     visibility: 'visible',
                     editable: 'w',
                     presence: 'optional',
-                    uiType: formdesigner.widgets.droppableTextWidget
+                    uiType: formdesigner.widgets.droppableMultilineTextWidget
                 },
                 no_add_remove: {
                     lstring: 'Disallow Repeat Add and Remove?',

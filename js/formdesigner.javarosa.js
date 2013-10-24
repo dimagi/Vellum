@@ -886,7 +886,7 @@ var itextMediaBlock = function (mug, options) {
 
 var itextLabelWidget = function (mug, language, form, options) {
     var Itext = formdesigner.pluginManager.javaRosa.Itext;
-    var widget = formdesigner.widgets.baseWidget(mug);
+    var widget = formdesigner.widgets.droppableMultilineTextWidget(mug, options);
 
     widget.displayName = options.displayName;
     widget.itextType = options.itextType;
@@ -972,32 +972,19 @@ var itextLabelWidget = function (mug, language, form, options) {
         }
     };
 
-    var $input = $("<input />")
-        .attr("id", widget.getID())
-        .attr("type", "text")
-        .addClass('input-block-level itext-widget-input')
-        .on('change keyup', widget.updateValue);
+    widget.getControl()
+        .attr('id', widget.getID())
+        .addClass('itext-widget-input');
 
     widget.mug.on('question-itext-deleted', widget.destroy);
-
-    widget.getControl = function () {
-        return $input;
-    };
 
     widget.toggleDefaultLangSync = function (val) {
         widget.isSyncedWithDefaultLang = !val && !widget.isDefaultLang;
     };
 
-    widget.setValue = function (val) {
-        $input.val(val);
-    };
-
     widget.setPlaceholder = function (val) {
-        $input.attr("placeholder", val);
-    };
-
-    widget.getValue = function () {
-        return $input.val();
+        // need to use attr() instead of data() for css to take effect
+        widget.getControl().attr("data-placeholder", val.trim());
     };
 
     widget.getDefaultValue = function () {
