@@ -6,6 +6,8 @@ formdesigner.windowManager = (function () {
     "use strict";
     var that = {};
 
+    var ACCORDION_HEIGHT = 300;
+
     that.init = function () {
         $(window).resize(that.adjustToWindow);
         $(document).scroll(that.adjustToWindow);
@@ -16,6 +18,11 @@ formdesigner.windowManager = (function () {
             bottom: formdesigner.windowConfig.bottomOffset || 0,
             left: formdesigner.windowConfig.leftOffset || $('#formdesigner').offset().left
         };
+
+        // set initial accordion heights
+        $('.fd-sidebar-accordion').each(function () {
+            $(this).css('height', ACCORDION_HEIGHT + 'px');
+        });
 
         that.adjustToWindow();
     };
@@ -48,8 +55,12 @@ formdesigner.windowManager = (function () {
 
         $formdesigner.find('.fd-content').css('height', panelHeight + 'px');
 
+        $('.fd-content-left').find('.fd-sidebar-accordion').each(function () {
+            treeHeight -= $(this).outerHeight();
+        });
         $formdesigner.find('.fd-content-left')
-            .find('.fd-scrollable').css('height', treeHeight + 'px');
+            .find('.fd-scrollable')
+            .css('height', treeHeight + 'px');
 
         $formdesigner.find('.fd-content-right')
             .css('width', availableHorizSpace - that.geLeftWidth() + 'px')

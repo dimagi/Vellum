@@ -29,7 +29,9 @@
                     <div id="fd-question-tree"></div>
                 </div>
             </div>
+
         </div>
+
         <div class="fd-content fd-content-divider"></div>
         <div class="fd-content fd-content-right">
             <div id="fd-question-properties" class="fd-column">
@@ -459,9 +461,11 @@
                     XPath Expression:
                 </label>
                 <div class="controls">
-                    <textarea id="fd-xpath-editor-text"
-                              rows="20"
-                              class="input-block-level jstree-drop"></textarea>
+                    <div id="fd-xpath-editor-text"
+                        contenteditable="true" class="input-block-level jstree-drop"
+                        style="-moz-appearance: textfield; -webkit-appearance: textfield;">
+                    </div>
+
                     <p class="help-block">Hint: You can drag a question into the box.</p>
                     <p class="help-block">
                         <a target="_blank"
@@ -536,7 +540,8 @@
                 </select>
             </div>
             <div class="span4">
-                <input class="input-block-level right-question xpath-edit-node jstree-drop"
+                <input class="input-block-level right-question xpath-edit-node
+                              jstree-drop fd-drop-replace
                        type="text" placeholder="Hint: drag a question here." />
             </div>
         </div>

@@ -1,3 +1,64 @@
+// HTML escaping from https://github.com/janl/mustache.js/blob/master/mustache.js
+var entityMap = {
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': '&quot;',
+    "'": '&#39;',
+    "/": '&#x2F;'
+};
+var reverseEntityMap = {};
+_(entityMap).each(function (repl, c) {
+    reverseEntityMap[repl] = c;
+});
+function escapeHtml(string) {
+    return String(string).replace(/[&<>"'\/]/g, function (s) {
+      return entityMap[s];
+    });
+}
+function unescapeHtml(string) {
+    return String(string).replace(/&(?:amp|lt|gt|quot|#39|#X2F);/g, function (s) {
+        return reverseEntityMap[s];
+    });
+}
+function valueToEditableContent(value) {
+    if (!value) {
+        // empty contenteditable on firefox has issues with drag and drop insertion
+        // technique
+        return jQuery.browser.mozilla ? "<br>" : "";
+    }
+    // since <p> without a closing tag is valid HTML and contenteditable
+    // supports this, we can keep this pretty simple.
+    // hack hack hack
+    return "<p>" + escapeHtml(value).replace(/\n/g, "<p>");
+}
+function editableContentToValue(html) {
+    // due to some browser idiosyncracies in contenteditable we do some
+    // handling of different cases where <br>, <p>[</p>], and
+    // <div>[</div>] may get inserted.  A little hacky but whatever.
+    // We can't use content.text() because it doesn't preserve newlines
+    // in any way.
+    // get rid of non-breaking spaces that sometimes show up
+    html = html.replace(/&nbsp;/g, " ");
+    // strip <span> we use to insert dragged references
+    html = html.replace(/<\/?span[^>]*>/g, "");
+    // discard closing tags
+    html = html.replace(/<\/(div|p)>/g, "");
+    // discard beginning tag
+    html = html.replace(/^<[^>]+?>/, "");
+    // discard ending tag
+    html = html.replace(/<\/[^>]+?>$/, "");
+    // replace tags indicating newlines
+    html = html.replace(/<(div|p|br\/?)[^>]*>/g, "\n").trim();
+    // disallow multiple consecutive newlines - we get a bunch of
+    // different combinations of different tags that trying to
+    // specifically replace multiple newline-type tags in a row didn't
+    // solve
+    html = html.replace(/(\n\s*){1,}/g, "\n");
+    // not HTML any more, eh? 
+    return unescapeHtml(html);
+}
+
 if (typeof formdesigner === 'undefined') {
     var formdesigner = {};
 }
@@ -23,14 +84,14 @@ formdesigner.widgets = (function () {
 
         widget.getDisplayName = function () {
             // use the display text, or the property name if none found
-            return this.definition.lstring ? this.definition.lstring : this.propName;
+            return widget.definition.lstring ? widget.definition.lstring : widget.propName;
         };
 
         widget.getLabel = function () {
             var displayName = widget.getDisplayName();
             if (displayName) {
                 return $("<label />")
-                    .text(displayName)
+                    .html(displayName)
                     .attr("for", widget.getID());
             } else {
                 return null;
@@ -45,6 +106,7 @@ formdesigner.widgets = (function () {
             throw ("must be overridden");
         };
 
+
         widget.setValue = function (val) {
             // noop
         };
@@ -52,7 +114,7 @@ formdesigner.widgets = (function () {
         widget.getValue = function () {
             // noop
         };
-
+       
         widget.updateValue = function () {
             // When a widget's value changes, do whatever work you need to in 
             // the model/UI to make sure we are in a consistent state.
@@ -110,15 +172,15 @@ formdesigner.widgets = (function () {
         widget.propName = that.getPropertyName(widget.path);
 
         widget.getID = function () {
-            return this.path.split("/").join("-");
+            return widget.path.split("/").join("-");
         };
 
         widget.save = function () {
-            formdesigner.controller.setMugPropertyValue(this.mug,
-	                                                    this.groupName,
-                                                        this.propName,
-                                                        this.getValue(),
-                                                        this.mug);
+            formdesigner.controller.setMugPropertyValue(widget.mug,
+	                                                    widget.groupName,
+                                                        widget.propName,
+                                                        widget.getValue(),
+                                                        widget.mug);
         };
         return widget;
     };
@@ -145,11 +207,35 @@ formdesigner.widgets = (function () {
         return widget;
     };
 
-    that.droppableTextWidget = function (mug, options) {
+    that.droppableMultilineTextWidget = function (mug, options) {
         var widget = that.textWidget(mug, options);
 
+        var content = $("<div contenteditable='true' />")
+            .attr("id", widget.getID())
+            .addClass('input-block-level')
+            .css({
+                '-moz-appearance': 'textfield',
+                '-webkit-appearance': 'textfield',
+            })
+            .on('blur keyup paste copy cut mouseup', function () {
+                widget.updateValue();
+            });
+
+        widget.getControl = function () {
+            return content;
+        };
+
+
+        widget.setValue = function (value) {
+            content.html(valueToEditableContent(value)).change();
+        };
+
+        widget.getValue = function () {
+            return editableContentToValue(content.html());
+        };
+
         widget.getControl().addClass('jstree-drop')
-            .attr('placeholder', 'Hint: drag a question here.')
+            .attr('data-placeholder', 'Hint: drag a question here.')
             .change(widget.updateValue);
 
         return widget;
@@ -179,7 +265,7 @@ formdesigner.widgets = (function () {
     };
 
     that.xPathWidget = function (mug, options) {
-        var widget = that.textWidget(mug, options);
+        var widget = that.droppableMultilineTextWidget(mug, options);
         var xPathButton = $('<button />')
             .addClass("xpath-edit-button pull-right")
             .text("Edit")
@@ -192,7 +278,7 @@ formdesigner.widgets = (function () {
                 group:     $(this).data("group"),
                 property:  $(this).data("prop"),
                 xpathType: widget.definition.xpathType,
-                value:     $("#" + $(this).data("inputControlID")).val()
+                value:     widget.getValue()
             });
         });
 
@@ -201,14 +287,21 @@ formdesigner.widgets = (function () {
             var uiElem = $("<div />").addClass("widget control-group"),
                 $controls = $('<div />').addClass('controls'),
                 $label;
-            $label = this.getLabel();
+            $label = widget.getLabel();
             $label.addClass('control-label');
             uiElem.append($label)
                 .append(xPathButton);
-            $controls.append(this.getControl())
+            $controls.append(widget.getControl())
                 .css('margin-right', '60px');
             uiElem.append($controls);
             return uiElem;
+        };
+       
+        var _save = widget.save;
+        widget.save = function () {
+            formdesigner.pluginManager.call("processXPathExpression",
+                widget.getValue(), widget.mug, widget.definition);
+            _save();
         };
 
         return widget;
@@ -397,7 +490,7 @@ formdesigner.widgets = (function () {
         };
 
         widget.getControl = function () {
-            var control = $("<p />").text(this.currentValue);
+            var control = $("<p />").text(widget.currentValue);
             return control;
         };
 
@@ -428,14 +521,23 @@ formdesigner.widgets = (function () {
 
         section.getSectionDisplay = function () {
             var $sec = section.getBaseTemplate(),
-                $fieldsetContent;
+                $fieldsetContent,
+                isEmpty = true;
             $fieldsetContent = $sec.find('.fd-fieldset-content');
             section.properties.map(function (prop) {
                 var elemWidget = prop.widgetClass(section.mug, prop.options);
                 elemWidget.setValue(elemWidget.currentValue);
-                $fieldsetContent.append(elemWidget.getUIElement());
+                var uiElement = elemWidget.getUIElement();
+                if (uiElement) {
+                    $fieldsetContent.append(uiElement);
+                    isEmpty = false;
+                }
             });
-            return $sec;
+            if (isEmpty) {
+                return false;
+            } else {
+                return $sec;
+            }
         };
 
         return section;
@@ -488,7 +590,7 @@ formdesigner.widgets = (function () {
     };
 
     that.getSectionListForMug = function (mug) {
-        return [
+        var sections = [
             {
                 slug: "main",
                 displayName: "Basic",
@@ -540,6 +642,13 @@ formdesigner.widgets = (function () {
                 }
             }
         ];
+
+        var pluginSections = _.filter(
+            _.flatten(formdesigner.pluginManager.call('getSections', mug)),
+            _.identity);
+
+        Array.prototype.splice.apply(sections, [2, 0].concat(pluginSections));
+        return sections;
     };
 
     that.getMainProperties = function (mug) {

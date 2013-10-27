@@ -426,8 +426,11 @@ formdesigner.ui = function () {
                 .filter(_.identity);
            
             if (section.properties.length) {
-                formdesigner.widgets.questionSection(mug, section)
-                    .getSectionDisplay().appendTo($content);
+                var display = formdesigner.widgets.questionSection(mug, section)
+                    .getSectionDisplay();
+                if (display) {
+                    display.appendTo($content);
+                }
             }
         }
 
@@ -783,14 +786,6 @@ formdesigner.ui = function () {
         });
     }
 
-    function init_form_paste() {
-        var tarea = $("#fd-form-paste-textarea");
-        tarea.change(function() {
-            var parser = new controller.Parser();
-            var out = parser.parse(tarea.val());
-            $("#fd-form-paste-output").val(out);
-        })
-    }
 
     /**
      * Turns the UI on/off. Primarily used by disableUI() and enableUI()
@@ -1163,7 +1158,7 @@ formdesigner.ui = function () {
         var getExpressionFromUI = function () {
             if ($("#xpath-simple").hasClass('hide')) {
                 // advanced
-                return getExpressionInput().val();
+                return editableContentToValue(getExpressionInput().html());
             } else {
                 return getExpressionFromSimpleMode();
             }
@@ -1367,7 +1362,7 @@ formdesigner.ui = function () {
 
         // toggle simple/advanced mode
         var showAdvancedMode = function (text, showNotice) {
-            getExpressionInput().val(text);
+            getExpressionInput().html(valueToEditableContent(text));
             getExpressionPane().empty();
 
             $("#xpath-advanced").removeClass('hide');
@@ -1406,7 +1401,8 @@ formdesigner.ui = function () {
             });
 
             $xpathUI.find('#fd-xpath-show-simple-button').click(function () {
-                showSimpleMode(getExpressionInput().val());
+                showSimpleMode(editableContentToValue(
+                    getExpressionInput().html()));
             });
 
             $xpathUI.find('#fd-add-exp').click(function () {
@@ -1501,7 +1497,11 @@ formdesigner.ui = function () {
             },
             "dnd" : {
                 "drop_finish" : function(data) {
-                    formdesigner.controller.handleTreeDrop(data.o, data.r);
+                    var ufid = $(data.o).attr("id"),
+                        mug = formdesigner.controller.form.getMugByUFID(ufid),
+                        ref = formdesigner.util.mugToXPathReference(mug);
+
+                    formdesigner.controller.handleDrop(ref, data.r, data.e);
                 }
             },
             "types": {
@@ -1610,21 +1610,17 @@ formdesigner.ui = function () {
 //        SaveButton.message.SAVE = 'Save to Server';
 //        SaveButton.message.SAVED = 'Saved to Server';
         //
-        formdesigner.pluginManager.call('init');
         controller = formdesigner.controller;
         generate_scaffolding();
         init_toolbar();
         init_extra_tools();
         formdesigner.multimedia.initControllers();
         that.createJSTree();
-        init_form_paste();
         init_modal_dialogs();
 
         set_event_listeners();
 
         setup_fancybox();
-
-        formdesigner.windowManager.init();
     };
 
     return that;
@@ -1641,12 +1637,22 @@ var PluginManager = function (options) {
         this[name] = plugin;
     };
 
+    // lets a plugin disable itself if conditions warrant, so it doesn't have to
+    // guard all of its methods to be noops
+    function enabled(plugin) {
+        return !plugin.disabled;
+    }
+
     this.call = function (methodName) {
         var methodArguments = Array.prototype.slice.call(arguments, 1),
             methodType = this._methods[methodName];
 
         if (methodType === "return_all") {
             return _(this._plugins).map(function (plugin) {
+                if (!enabled(plugin)) {
+                    return;
+                }
+
                 var fn = plugin[methodName];
                 if (fn) {
                     return fn.apply(plugin, methodArguments);
@@ -1659,6 +1665,10 @@ var PluginManager = function (options) {
                 otherArguments = methodArguments.slice(1);
             _(this._plugins).each(function (plugin) {
                 var fn = plugin[methodName];
+                if (!enabled(plugin)) {
+                    return;
+                }
+
                 if (fn) {
                     var returned = fn.apply(
                         plugin, [retval].concat(otherArguments)
@@ -1689,29 +1699,79 @@ var PluginManager = function (options) {
  *  }
  */
 formdesigner.launch = function (opts) {
+    opts = opts || {};
     formdesigner.util.eventuality(formdesigner);
 
+    // todo: document these
     formdesigner.pluginManager = new PluginManager({
         methods: {
-            'getToolsMenuItems': 'return_all',
+            // init the plugin. this is arbitrarily different than constructing
+            // the plugin.  It's in a state of flux with respect to the order of
+            // various parts of the core that get initiated and the need for
+            // certain parts of certain plugins to happen before or after them.
             'init': 'return_all',
+            'getToolsMenuItems': 'return_all',
+            // get accordions to add below the question tree
+            'getAccordions': 'return_all',
+            // init accordions.  This is also not ideal, but some accordions
+            // need to be attached to the dom before they can be initialized, so
+            // getAccordions isn't sufficient.
+            'initAccordions': 'return_all',
+            // do something with the XML before any parsing happens
             'beforeParse': 'return_all',
+            // do something with the results of parsing after parsing
+            'afterParse': 'return_all',
+            // todo: itext is part of plugin, so add plugin interface for
+            // specifying plugin methods (can wait until we've extracted itext
+            // attributes from main parser :-))
+            // process: take in an unprocessed text value *or* an already
+            // processed value, and (1) update the internal representation of
+            // anything the plugin knows about in the value (2) rewrite the
+            // value to be what will displayed in the input to the user.
+            // serialize: convert displayed value to what goes in the XML
+            'processItextMessage': 'process_sequentially',
+            'serializeItextMessage': 'process_sequentially',
+            'processXPathExpression': 'process_sequentially',
+            'serializeXPathExpression': 'process_sequentially',
+            // get plugin errors for a mug
+            'getErrors': 'return_all',
+            // get hash of values to add to the server POST
+            'getServerPOSTData': 'return_all',
+            // write XML within the head node
+            'contributeToHeadXML': 'return_all',
+            // write XML within the model node
             'contributeToModelXML': 'return_all',
+            // add or remove items in the data element spec of a mug
             'contributeToDataElementSpec': 'process_sequentially',
+            // add or remove items in the bind element spec of a mug
             'contributeToBindElementSpec': 'process_sequentially',
+            // add or remove items in the control element spec of a mug
             'contributeToControlElementSpec': 'process_sequentially',
+            // handle a question ID being changed (update any internal plugin
+            // representation that depends on question IDs)
+            'onQuestionIDChange': 'return_all',
+            // get extra sections for the plugin properties
+            'getSections': 'return_all',
+            // add extra properties for the main properties section
             'contributeToMainProperties': 'process_sequentially',
+            // add extra properties for the logic properties section
             'contributeToLogicProperties': 'process_sequentially',
+            // add extra properties for the advanced properties section
             'contributeToAdvancedProperties': 'process_sequentially',
+            // get plugin errors for the whole form
             'getFormErrors': 'return_all',
+            // do any updates to internal representation necessary before
+            // writing XML
             'preSerialize': 'return_all',
         }
     });
-    formdesigner.pluginManager.register('javaRosa', new formdesigner.plugins.javaRosa());
 
-    if(!opts){
-        opts = {};
-    }
+    _(opts.plugins).each(function (name) {
+        formdesigner.pluginManager.register(
+            name, new formdesigner.plugins[name](opts.pluginOptions[name])
+        );
+    });
+
     formdesigner.rootElement = opts.rootElement || "#formdesigner";
     formdesigner.saveType = opts.saveType || 'full';
 
