@@ -98,7 +98,46 @@ formdesigner.controller = (function () {
                 console.log('There was a parse error:', e);
             }
         });
+        
+        formdesigner.pluginManager.call('init');
+        
+        var extraAccordions = _.filter(
+            _.flatten(formdesigner.pluginManager.call('getAccordions')),
+            _.identity);
+        _(extraAccordions).each(function (accordion) {
+            // yes, this is extremely messy
+            // getting standard bootstrap accordion working and styled and
+            // integrated within the window manager was impenetrable for me, so
+            // just simulating an accordion with a click handler on the heading
+            var $div = $("<div/>").attr('id', accordion.id),
+                $inner = $("<div>v    " + accordion.title + "</div>").attr('id', accordion.id + '_head')
+                    .addClass('fd-head').appendTo($div);
+            accordion.content.appendTo($div).addClass('fd-sidebar-accordion-content');
+            $div.addClass('fd-sidebar-accordion');
 
+            $('.fd-content-left').append($div);
+            
+            $inner.click(function () {
+                var $this = $(this);
+                // yep, all of this is a terrible, terrible hack
+                setTimeout(function () {
+                    if ($this.hasClass('collapsed')) {
+                        $div.css('height', 300);
+                        $inner.html("v    " + $inner.html().slice(5));
+                        $this.removeClass('collapsed');
+                    } else {
+                        $this.addClass('collapsed');
+                        $inner.html("&gt; " + $inner.html().slice(5));
+                        $div.css('height', $inner.outerHeight());
+                    }
+                    formdesigner.windowManager.adjustToWindow();
+                }, 500); // wait for collapse to finish. yep.
+            });
+        });
+
+        formdesigner.pluginManager.call('initAccordions');
+
+        formdesigner.windowManager.init();
     };
     that.initFormDesigner = initFormDesigner;
 
@@ -165,11 +204,9 @@ formdesigner.controller = (function () {
      * @param path - String of path you want
      * @param tree - [OPTIONAL] Type of tree, 'control' or 'data'.  Defaults to 'data'
      */
-    var getMugByPath = function (path, tree) {
-        var recFunc, tokens, targetMug, rootNode;
-        if (!tree) {
+    that.getMugByPath = function (path) {
+        var recFunc, tokens, targetMug, rootNode,
             tree = 'data';
-        }
 
         if(!path) { //no path specified
             return null;
@@ -215,7 +252,6 @@ formdesigner.controller = (function () {
         targetMug = recFunc(rootNode,tokens.slice(1));
         return targetMug;
     };
-    that.getMugByPath = getMugByPath;
     
     var getSingularMugByNodeId = function (nodeId, treeType) {
         if (!treeType) {
@@ -1282,7 +1318,7 @@ formdesigner.controller = (function () {
         };
         
         if (labelRef){
-            labelItext = Itext.getOrCreateItem(labelRef);
+            labelItext = Itext.getOrCreateItem(labelRef, mug);
         } else {
             // if there was a ref attribute but it wasn't formatted like an
             // itext reference, it's likely an error, though not sure what
@@ -1310,11 +1346,11 @@ formdesigner.controller = (function () {
             cProps = mug.controlElement;
 
         if (hintRef) {
-            cProps.hintItextID = Itext.getOrCreateItem(hintRef);
+            cProps.hintItextID = Itext.getOrCreateItem(hintRef, mug);
         } else {
             // couldn't parse the hint as itext.
             // just create an empty placeholder for it
-            cProps.hintItextID = Itext.createItem(""); 
+            cProps.hintItextID = Itext.createItem("", mug); 
         }
         cProps.hintLabel = hintVal;
     }
@@ -1329,11 +1365,11 @@ formdesigner.controller = (function () {
 
     function parseRepeatVals (r_count, r_noaddremove, mug) {
         if (r_count) {
-            mug.controlElement.repeat_count = r_count;
+            mug.controlElement.setAttr('repeat_count', r_count);
         }
 
         if(r_noaddremove) {
-            mug.controlElement.no_add_remove = r_noaddremove;
+            mug.controlElement.setAttr('no_add_remove', r_noaddremove);
         }
     }
 
@@ -1405,11 +1441,9 @@ formdesigner.controller = (function () {
      * Determines what Mug this element should be
      * and creates it.  Also modifies any existing mug that is associated
      * with this element to fit the new type.
-     * @param nodePath
-     * @param controlEl
      */
     function classifyAndCreateMug (nodePath, cEl) {
-        var oldMug = that.getMugByPath(nodePath, 'data'), //check the data node to see if there's a related Mug already present
+        var oldMug = that.getMugByPath(nodePath), //check the data node to see if there's a related Mug already present
             mug, tagName, bindEl, dataEl, dataType, appearance, MugClass, mediaType;
             //flags
             //hasBind = true;
@@ -1536,7 +1570,7 @@ formdesigner.controller = (function () {
             nodeId;
 
         if (path) {
-            return that.getMugByPath(path, 'data');
+            return that.getMugByPath(path);
         } else {
             nodeId = $(el).attr('bind');
 
@@ -1643,17 +1677,32 @@ formdesigner.controller = (function () {
             var el = $(this),
                 attrs = {},
                 mug = new mugs.DataBindOnly(),
-                path, nodeID, bindElement, oldMug;
-            path = el.attr('nodeset');
-            if (!path) {
-               path = el.attr('ref');
-            }
-            nodeID = formdesigner.util.getNodeIDFromPath(path);
+                bindElement, oldMug,
+                path = el.attr('nodeset') || el.attr('ref'),
+                nodeID = formdesigner.util.getNodeIDFromPath(path);
+
             if(el.attr('id')) {
                 attrs.nodeID = el.attr('id');
                 attrs.nodeset = path;
             } else {
                 attrs.nodeID = nodeID;
+            }
+            
+            path = processPath(path,that.form.dataTree.getRootNode().getID());
+            oldMug = that.getMugByPath(path);
+            if(!oldMug && attrs.nodeset) {
+                oldMug = that.form.getMugByIDFromTree(
+                                            formdesigner.util.getNodeIDFromPath(attrs.nodeset),
+                                            'data'
+                )[0];
+            }
+            if(!oldMug){
+                that.addParseWarningMsg("Bind Node [" + path + "] found but has no associated Data node. This bind node will be discarded!");
+//                    throw 'Parse error! Could not find Data Mug associated with this bind!'; //can't have a bind without an associated dataElement.
+                return;
+            } else {
+                mug.ufid = oldMug.ufid;
+                mug.dataElement.setAttrs(oldMug.dataElement);
             }
 
             attrs.dataType = el.attr('type');
@@ -1669,9 +1718,10 @@ formdesigner.controller = (function () {
                 constraintItext = getITextReference(constraintMsg);
 
             if (constraintItext) {
-                attrs.constraintMsgItextID = Itext.getOrCreateItem(constraintItext);
+                attrs.constraintMsgItextID = Itext.getOrCreateItem(
+                    constraintItext, mug);
             } else {
-                attrs.constraintMsgItextID = Itext.createItem("");
+                attrs.constraintMsgItextID = Itext.createItem("", mug);
                 attrs.constraintMsgAttr = constraintMsg;    
             }
                             
@@ -1682,21 +1732,6 @@ formdesigner.controller = (function () {
            
             mug.bindElement.setAttrs(attrs, true);
 
-            path = processPath(path,that.form.dataTree.getRootNode().getID());
-            oldMug = that.getMugByPath(path,'data');
-            if(!oldMug && attrs.nodeset) {
-                oldMug = that.form.getMugByIDFromTree(
-                                            formdesigner.util.getNodeIDFromPath(attrs.nodeset),
-                                            'data'
-                )[0];
-            }
-            if(!oldMug){
-                that.addParseWarningMsg("Bind Node [" + path + "] found but has no associated Data node. This bind node will be discarded!");
-//                    throw 'Parse error! Could not find Data Mug associated with this bind!'; //can't have a bind without an associated dataElement.
-                return;
-            }
-            mug.ufid = oldMug.ufid;
-            mug.dataElement.setAttrs(oldMug.dataElement);
             //mug.dataElement = oldMug.dataElement;
             // clear relevant itext for bind
             // this is ugly, and should be moved somewhere else
@@ -1788,6 +1823,8 @@ formdesigner.controller = (function () {
             that.fire({
                 type: 'parse-finish'
             });
+
+            formdesigner.pluginManager.call('afterParse');
 
         } catch (e) {
             that.fire({
@@ -1893,53 +1930,14 @@ formdesigner.controller = (function () {
     };
     
     that.validateAndSaveXForm = function () {
-        var getUrl = function (saveType) {
-            return saveType === 'patch' ?
-                formdesigner.patchUrl : formdesigner.saveUrl;
-        };
-        var url = getUrl(formdesigner.saveType);
-        if (!url) {
-            formdesigner.ui.setDialogInfo("Error: Cannot send form, no save url specified!",
-            'OK', function () {
-                        $ (this) .dialog("close");
-                    },
-            'Cancel', function () {
-                        $ (this) .dialog("close");
-            });
-        }
-        
         var send = function (formText, saveType) {
             var data;
             saveType = saveType || formdesigner.saveType;
             $('body').ajaxStart(formdesigner.ui.showWaitingDialog);
             $('body').ajaxStop(formdesigner.ui.hideConfirmDialog);
-
-            if (saveType === 'patch') {
-                var dmp = new diff_match_patch();
-                var patch = dmp.patch_toText(
-                    dmp.patch_make(formdesigner.originalXForm, formText)
-                );
-                // abort if diff too long and send full instead
-                if (patch.length > formText.length) {
-                    saveType = 'full';
-                }
-            }
-
-            var url = getUrl(saveType);
-
-            if (saveType === 'patch') {
-                data = {
-                    patch: patch,
-                    sha1: CryptoJS.SHA1(formdesigner.originalXForm).toString()
-                };
-            } else {
-                data = {xform: formText}
-            }
-
-            saveButton.ajax({
+            
+            var options = {
                 type: "POST",
-                url: url,
-                data: data,
                 dataType: 'json',
                 success: function (data) {
                     if (saveType === 'patch') {
@@ -1964,7 +1962,45 @@ formdesigner.controller = (function () {
                     });
                     formdesigner.originalXForm = formText;
                 }
+            };
+
+            if (saveType === 'patch') {
+                var dmp = new diff_match_patch();
+                var patch = dmp.patch_toText(
+                    dmp.patch_make(formdesigner.originalXForm, formText)
+                );
+                // abort if diff too long and send full instead
+                if (patch.length > formText.length) {
+                    saveType = 'full';
+                } else {
+                    data = {
+                        patch: patch,
+                        sha1: CryptoJS.SHA1(formdesigner.originalXForm).toString()
+                    };
+                }
+            } 
+            
+            if (saveType !== 'patch') {
+                data = {xform: formText};
+            }
+
+            var pluginData = _.filter(
+                formdesigner.pluginManager.call("getServerPOSTData"),
+                _.identity);
+
+            _.each(pluginData, function (eachData) {
+                data = _.extend(data, eachData);
             });
+
+            if (saveType === 'patch') {
+                options.contentType = 'application/json';
+                options.data = JSON.stringify(data);
+                options.url = formdesigner.patchUrl;
+            } else {
+                options.data = data;
+                options.url = formdesigner.saveUrl;
+            }
+            saveButton.ajax(options);
         };
         
         var formText = that.form.createXForm();
@@ -2002,17 +2038,50 @@ formdesigner.controller = (function () {
         formdesigner.model.reset();
         formdesigner.ui.reset();
     };
-    
-    // tree drag and drop stuff, used by xpath
-    var handleTreeDrop = function(source, target) {
-        var target = $(target), sourceUid = $(source).attr("id");
-        if (target) {
-            var mug = that.form.getMugByUFID(sourceUid);
-            // the .change fires the validation controls
-            target.val(target.val() + formdesigner.util.mugToXPathReference(mug)).change();
+
+    var dropNum = 0;
+    that.handleDrop = function(value, target, e) {
+        var target = $(target),
+            x = e.clientX,
+            y = e.clientY;
+
+        if (!target[0]) {
+            return;
         }
+        // drag to replace
+        if (!target[0].isContentEditable) {
+            target.val(value);
+        } else {
+            // http://stackoverflow.com/a/10659990 
+            var range,
+                node = $("<span>" + value + "</span>")[0];
+            // Try the standards-based way first
+            if (document.caretPositionFromPoint) {
+                var pos = document.caretPositionFromPoint(x, y);
+                range = document.createRange();
+                range.setStart(pos.offsetNode, pos.offset ? pos.offset : 1);
+                range.collapse();
+                range.insertNode(node);
+            }
+            // Next, the WebKit way
+            else if (document.caretRangeFromPoint) {
+                range = document.caretRangeFromPoint(x, y);
+                range.insertNode(node);
+            }
+            // Finally, the IE way
+            else if (document.body.createTextRange) {
+                range = document.body.createTextRange();
+                range.moveToPoint(x, y);
+                var spanId = "temp_" + ("" + Math.random()).slice(2);
+                range.pasteHTML('<span id="' + spanId + '">&nbsp;</span>');
+                var span = document.getElementById(spanId);
+                span.parentNode.replaceChild(node, span);
+            } 
+        }
+
+        // fire the validation controls
+        target.change();
     };
-    that.handleTreeDrop = handleTreeDrop;
     
     // here is the xpath stuff
     var displayXPathEditor = function(options) {

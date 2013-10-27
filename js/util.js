@@ -419,6 +419,8 @@ formdesigner.util = (function(){
                     var parsed = xpath.parse(currentPath);
                     parsed.steps[parsed.steps.length - 1].name = e.previous;
                     formdesigner.model.LogicManager.updatePath(mug.ufid, parsed.toXPath(), currentPath);
+                    formdesigner.pluginManager.call(
+                        "onQuestionIDChange", mug, e.val, e.previous);
                 } else {
                     var propertyPath = [e.element, e.property].join("/");
 
