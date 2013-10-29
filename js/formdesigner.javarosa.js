@@ -1231,21 +1231,30 @@ var itextMediaWidget = function (mug, language, form, options) {
 
 var parseXLSItext = function (str, Itext) {
     var rows = str.split('\n'),
-            i, j, cells, lang,iID, form, val;
-    
+            i, j, k, cells, lang,iID, form, val;
+
     // TODO: should this be configurable? 
     var exportCols = ["default", "audio", "image" , "video"];
-            
+    var languages = Itext.getLanguages();
+
     for (i = 0; i < rows.length; i++) {
         cells = rows[i].split('\t');
-        lang = cells[0];
-        iID = cells[1];
-        for (j = 2; j < cells.length && j < exportCols.length + 2; j++) {
-            if (cells[j]) {
-                form = exportCols[j - 2];
-                val = cells[j];
-                Itext.getOrCreateItem(iID).getOrCreateForm(form).setValue(lang, val);
+        iID = cells[0];
+
+        for(j = 0; j < exportCols.length; j++) {
+            var form = exportCols[j];
+            for(k = 0; k < languages.length; k++) {
+                if(cells[1 + j + k]) {
+                    lang = languages[k];
+                    val = cells[1 + j + k];
+
+                    var item = Itext.getItem(iID);
+                    if(item.hasForm(form)) {
+                        item.getForm(form).setValue(lang, val);
+                    }
+                }
             }
+
         }
     }
     formdesigner.controller.fire({type: "global-itext-changed"});
@@ -1258,23 +1267,33 @@ var parseXLSItext = function (str, Itext) {
 };
 
 var generateItextXLS = function (Itext) {
-    var idata, row, iID, lang, form, val, out = '';
-   
+
     formdesigner.pluginManager.call('preSerialize');
-    
-    /**
-     * Cleans Itext so that it fits the csv spec. For now just replaces newlines with ''
-     * @param val
-     */
-    
-    function makeRow (language, item, forms) {
-        var values = forms.map(function (form) {
-            return item.hasForm(form) ? item.getForm(form).getValueOrDefault(language) : "";
-        });
-        var row = [language, item.id].concat(values);
-        return formdesigner.util.tabSeparate(row);
+
+    function getItemFormValues(item, languages, form) {
+
+        var ret = [];
+
+        for(var i = 0; i < languages.length; i++) {
+            var language = languages[i];
+            var value = item.hasForm(form) ? item.getForm(form).getValueOrDefault(language) : "";
+
+            ret.push(value);
+        }
+        return ret.join("\t");
     }
-    
+
+    function makeRow (languages, item, forms) {
+
+        var questions = getItemFormValues(item, languages, forms[0]);
+        var audios = getItemFormValues(item, languages, forms[1]);
+        var images = getItemFormValues(item, languages, forms[2]);
+        var videos = getItemFormValues(item, languages, forms[3]);
+
+        var row = [item.id, questions, audios, images, videos]
+        return row.join("\t");
+    }
+
     var ret = [];
     // TODO: should this be configurable? 
     var exportCols = ["default", "audio", "image" , "video"];
@@ -1282,12 +1301,9 @@ var generateItextXLS = function (Itext) {
     var allItems = Itext.getNonEmptyItems();
     var language, item, i, j;
     if (languages.length > 0) {
-        for (i = 0; i < languages.length; i++) {
-            language = languages[i];
-            for (j = 0; j < allItems.length; j++) {
-                item = allItems[j];
-                ret.push(makeRow(language, item, exportCols));
-            }       
+        for(i = 0; i < allItems.length; i++) {
+            item = allItems[i];
+            ret.push(makeRow(languages, item, exportCols));
         }
     }
     return ret.join("\n");
