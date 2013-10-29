@@ -38,15 +38,76 @@ formdesigner.util = (function(){
     that.XPATH_REFERENCES = ["bindElement/relevantAttr",
                              "bindElement/calculateAttr",
                              "bindElement/constraintAttr"];
+
+    // keep questions from showing up in the dropdown list here
+    that.UNCHANGEABLE_QUESTIONS = [
+        "stdItem", 
+        "stdGroup", 
+        "stdRepeat", 
+        "stdDataBindOnly", 
+        "stdTrigger", 
+        "unknown", 
+        "stdAndroidIntent", 
+        "stdFieldList"
+    ];
+
+    // these questions are groups or repeats (or similar types of things).
+    // They don't have any human readable itext
+    that.SPECIAL_GROUP_QUESTIONS = [
+        'stdGroup', 
+        'stdRepeat', 
+        'stdFieldList'
+    ];
     
-    /**
-     * Check if value is a valid XML attribute value (additionally disallow all
-     * ' and ")
-     */
-    that.isValidAttributeValue = function (value) {
-        return (/^[^<&'"]*$/).test(value);
+    that.getQuestionList = function (currentType) {
+        var ret = [];
+        for (var q in formdesigner.ui.QUESTIONS) {
+            if (formdesigner.ui.QUESTIONS.hasOwnProperty(q) && 
+                that.UNCHANGEABLE_QUESTIONS.indexOf(q) === -1 &&
+                q !== currentType) {
+                ret.push({
+                    slug: q,
+                    name: formdesigner.ui.QUESTIONS[q],
+                    icon: formdesigner.ui.QUESTION_TYPE_TO_ICONS[q]
+                });
+            }
+        }
+        return ret;
+    };
+
+    that.HELP_TEXT_FOR_SECTION = {
+        main: {
+            title: "Basic",
+            text: "<p>The <strong>Question ID</strong> is a unique identifier for a question. " +
+                "It does not appear on the phone. It is the name of the question in data exports.</p>" +
+                "<p>The <strong>Label</strong> is text that appears in the application. " +
+                "This text will not appear in data exports.</p> " +
+                "<p>Click through for more info.</p>",
+            link: "https://confluence.dimagi.com/display/commcarepublic/Form+Designer"
+        },
+        logic: {
+            title: "Logic",
+            text: "Use logic to control when questions are asked and what answers are valid. " +
+                "You can add logic to display a question based on a previous answer, to make " +
+                "the question required or ensure the answer is in a valid range.",
+            link: "https://confluence.dimagi.com/display/commcarepublic/Form+Designer"
+        },
+        content: {
+            title: "Media",
+            text: "This will allow you to add images, audio or video media to a question, or other custom content.",
+            link: "https://confluence.dimagi.com/display/commcarepublic/Multimedia+in+CommCare"
+        },
+        advanced: {
+            title: "Advanced",
+            text: "These are advanced settings and are not needed for most applications.  " +
+                "Please only change these if you have a specific need!",
+            link: "https://confluence.dimagi.com/display/commcarepublic/Form+Designer"
+        }
     };
     
+    that.isReadOnly = function (mugType) {
+        return mugType.typeSlug === "unknown";
+    };
     /**
      * Grabs the value between the tags of the element passed in
      * and returns a string of everything inside.
@@ -96,6 +157,52 @@ formdesigner.util = (function(){
         return resStr;
     }
 
+    var dumpFormTreesToConsole = function () {
+        var vObj = [], vOut = [], i, invalidMT = [], mt;
+                console.group("Tree Pretty Print");
+                console.log("Control Tree:"+formdesigner.controller.form.controlTree.printTree());
+                console.log("Data Tree:   "+formdesigner.controller.form.dataTree.printTree());
+                console.log("TREE VALIDATION RESULT",formdesigner.controller.form.controlTree.isTreeValid());
+                invalidMT = formdesigner.controller.form.getInvalidMugTypes();
+
+                console.log("TREE MAP INVALID UFIDS", formdesigner.controller.form.getInvalidMugTypeUFIDs());
+                for (i in invalidMT){
+                    if(invalidMT.hasOwnProperty(i)){
+                        mt = invalidMT[i];
+                        vOut.push(mt);
+                        vOut.push(mt.validateMug());
+                    }
+                }
+                console.log("INVALID MTs,VALIDATION OBJ",vOut);
+                console.groupEnd();
+    };
+    that.dumpFormTreesToConsole = dumpFormTreesToConsole;
+    
+    /*
+     * Copies all properties from one object to another under the following rules:
+     *  - If the property doesn't exist on the destination object it is not copied
+     *
+     * This is used to attempt to copy as much as possible from one mug to 
+     * another while preserving the core structure.
+     * 
+     */
+    that.copySafely = function (from, to, forceOverride, skip) {
+        forceOverride = forceOverride || [];
+        skip = skip || [];
+
+        if (to) {
+            for (var prop in from) {
+                if (from.hasOwnProperty(prop)) {
+                    if (skip.indexOf(prop) === -1 &&
+                        (forceOverride.indexOf(prop) !== -1 || 
+                         (to.hasOwnProperty(prop) && !to[prop]))) {
+                        to[prop] = from[prop];
+                    } 
+                }
+            }
+        }
+    };
+    
     /**
      * From http://stackoverflow.com/questions/4149276/javascript-camelcase-to-regular-form
      * @param myString
@@ -259,16 +366,16 @@ formdesigner.util = (function(){
     }; 
     
     /**
-     * Takes in a reference mug and makes a copy of
+     * Takes in a reference mugType and makes a copy of
      * the object (the copy is returned).
      * @param refMug
      */
-    //var getNewMug = function(refMug){
-        //var newMug = that.clone(refMug);
-        //that.give_ufid(newMug);
-        //return newMug;
-    //};
-    //that.getNewMug = getNewMug;
+    var getNewMugType = function(refMugType){
+        var newMugType = that.clone(refMugType);
+        that.give_ufid(newMugType);
+        return newMugType;
+    };
+    that.getNewMugType = getNewMugType;
 
     //Simple Event Framework
     //Just run your object through this function to make it event aware
@@ -310,6 +417,11 @@ formdesigner.util = (function(){
         };
         return that;
     };
+
+    var capitaliseFirstLetter = function (string) {
+        return string.charAt(0).toUpperCase() + string.slice(1);
+    };
+    that.capitaliseFirstLetter = capitaliseFirstLetter;
 
     that.pluralize = function (noun, n) {
         return noun + (n !== 1 ? 's' : '');
@@ -384,6 +496,35 @@ formdesigner.util = (function(){
     ];
 
     /**
+     * Shortcut func because I'm tired of typing this out all the time.
+     * @param obj
+     */
+    var exists = function(obj){
+        return typeof obj !== 'undefined';
+    };
+    that.exists = exists;
+
+    (function($) {
+              // duck-punching to make attr() return a map
+              var _old = $.fn.attr;
+              $.fn.attr = function() {
+                  var a, aLength, attributes,	map;
+                  if (this[0] && arguments.length === 0) {
+                            map = {};
+                            attributes = this[0].attributes;
+                            aLength = attributes.length;
+                            for (a = 0; a < aLength; a++) {
+                                      map[attributes[a].name] = attributes[a].value;
+                            }
+                            return map;
+                  } else {
+                            return _old.apply(this, arguments);
+                  }
+        }
+    }(jQuery));
+
+
+    /**
      * Bind a number of standard event responses to a mug
      * so that it responds in a pre-determined fashion to default things
      *
@@ -397,23 +538,23 @@ formdesigner.util = (function(){
         mug.on('property-changed',function (e) {
             // bind dataElement.nodeID and bindElement.nodeID together
             if(e.property === 'nodeID'){
-                if(this.dataElement){
-                    this.dataElement.nodeID = e.val;
+                if(this.properties.dataElement){
+                    this.properties.dataElement.properties.nodeID = e.val;
                 }
-                if(this.bindElement){
-                    this.bindElement.nodeID = e.val;
+                if(this.properties.bindElement){
+                    this.properties.bindElement.properties.nodeID = e.val;
                 }
             }
 
             // Update the status of the indicator icons indicating where
             // validation has failed
-            var mug = formdesigner.controller.getMugFromFormByUFID(e.mugUfid);
-            formdesigner.ui.showVisualValidation(mug);
-            formdesigner.ui.setTreeValidationIcon(mug);
+            var MT = formdesigner.controller.getMTFromFormByUFID(e.mugTypeUfid);
+            formdesigner.ui.showVisualValidation(MT);
+            formdesigner.ui.setTreeValidationIcon(MT);
             
             // update the logic properties that reference the mug
             if (e.previous !== e.val) {
-                var mug = formdesigner.controller.getMugFromFormByUFID(e.mugUfid);
+                var mug = formdesigner.controller.getMTFromFormByUFID(e.mugTypeUfid);
                 if (e.property === 'nodeID') {
                     var currentPath = formdesigner.controller.form.dataTree.getAbsolutePath(mug);
                     var parsed = xpath.parse(currentPath);
@@ -421,22 +562,21 @@ formdesigner.util = (function(){
                     formdesigner.model.LogicManager.updatePath(mug.ufid, parsed.toXPath(), currentPath);
                 } else {
                     var propertyPath = [e.element, e.property].join("/");
-
-                    if (mug.getPropertyDefinition(propertyPath).uiType === formdesigner.widgets.xPathWidget) {
+                    if (mug.getPropertyDefinition(propertyPath).uiType === "xpath") {
                         formdesigner.model.LogicManager.updateReferences(mug, propertyPath);
                     }
                 }
             }
 
             // update the itext ids of child items if they weren't manually set
-            if (e.property === "nodeID" && (mug.__className === "Select" || mug.__className === "MSelect")) {
-                var node = formdesigner.controller.form.controlTree.getNodeFromMug(mug),
-                    children = node.getChildrenMugs(),
+            if (e.property === "nodeID" && that.isSelect(MT)) {
+                var node = formdesigner.controller.form.controlTree.getNodeFromMugType(MT),
+                    children = node.getChildrenMugTypes(),
                     mug = this;
             
                 var setNodeID = function (val) {
-                    mug.dataElement.nodeID = val;
-                    mug.bindElement.nodeID = val;
+                    mug.properties.dataElement.properties.nodeID = val;
+                    mug.properties.bindElement.properties.nodeID = val;
                 };
 
                 for (var i = 0; i < children.length; i++) {
@@ -445,7 +585,7 @@ formdesigner.util = (function(){
                     // Temporarily set select's nodeID to old value so we can
                     // test whether the old item's itext id was autogenerated.
                     setNodeID(e.previous);
-                    if (child.controlElement.labelItextID.id === child.getDefaultLabelItextId()) {
+                    if (child.getItext().id === child.getDefaultLabelItextId()) {
                         setNodeID(e.val);
                         child.setItextID(child.getDefaultLabelItextId());
                     } else {
@@ -462,10 +602,10 @@ formdesigner.util = (function(){
      */
     that.setStandardFormEventResponses = function (form) {
         form.on('form-property-changed', function (e) {
-            var mug = formdesigner.controller.getCurrentlySelectedMug();
-            if (mug) {
-                formdesigner.ui.showVisualValidation(mug);
-                formdesigner.ui.setTreeValidationIcon(mug);
+            var MT = formdesigner.controller.getCurrentlySelectedMugType();
+            if (MT) {
+                formdesigner.ui.showVisualValidation(MT);
+                formdesigner.ui.setTreeValidationIcon(MT);
             }
         });
 
@@ -474,19 +614,26 @@ formdesigner.util = (function(){
         });
     };
 
-    that.getMugDisplayName = function (mug) {
-        var itextItem, cEl,dEl,bEl, disp, lang, Itext;
-        if(!mug) {
+    that.getMugDisplayName = function (mugType) {
+        var itextItem, cEl,dEl,bEl, mugProps, disp, lang, Itext;
+        if(!mugType || !mugType.mug) {
             return 'No Name!';
         }
-        if (mug.__className === "ReadOnly") {
+        if (that.isReadOnly(mugType)) {
             return "Unknown (read-only) question type";
         }
 
-        cEl = mug.controlElement;
-        dEl = mug.dataElement;
-        bEl = mug.bindElement;
-        Itext = formdesigner.pluginManager.javaRosa.Itext;
+        mugProps = mugType.mug.properties;
+        if (mugProps.controlElement) {
+            cEl = mugProps.controlElement.properties;
+        }
+        if (mugProps.dataElement) {
+            dEl = mugProps.dataElement.properties;
+        }
+        if (mugProps.bindElement) {
+            bEl = mugProps.bindElement.properties;
+        }
+        Itext = formdesigner.model.Itext;
 
         if(cEl) {
             itextItem = cEl.labelItextID;
@@ -590,14 +737,29 @@ formdesigner.util = (function(){
     that.mugToXPathReference = function (mug) {
         // for choices, return the quoted value.
         // for everything else return the path
-        if (mug.__className === "Item") {
-            return '"' + mug.controlElement.defaultValue + '"';
+        if (mug.typeSlug === "stdItem") {
+            return '"' + mug.mug.properties.controlElement.properties.defaultValue + '"';
         } else {
             // for the currently selected mug, return a "."
-            return (mug.ufid === formdesigner.controller.getCurrentlySelectedMug().ufid) ? "." : formdesigner.controller.form.dataTree.getAbsolutePath(mug);
+            return (mug.ufid === formdesigner.controller.getCurrentlySelectedMugType().ufid) ? "." : formdesigner.controller.form.dataTree.getAbsolutePath(mug);
         }
     };
     
+    that.mugToAutoCompleteUIElement = function (mug) {
+        return {id:   that.mugToXPathReference(mug),
+                uid:  mug.ufid,
+                name: that.getMugDisplayName(mug) };
+    };
+        
+    that.isSelect = function (mug) {
+        return (mug.typeSlug === "stdMSelect" ||
+                mug.typeSlug === "stdSelect");
+    };
+    
+    that.isSelectItem = function (mug) {
+        return (mug.typeSlug === "stdItem");
+    };
+
     /**
      * Parses the required attribute string (expecting either "true()" or "false()" or nothing
      * and returns either true, false or null
@@ -631,6 +793,19 @@ formdesigner.util = (function(){
         }
     };
     
+    /**
+     * Filter a list based on a function
+     */
+    that.filterList = function (list, func) {
+        var ret = [];
+        for (var i = 0; i < list.length; i++) {
+            if (func(list[i])) {
+                ret.push(list[i]);
+            }
+        }
+        return ret;
+    };
+    
     that.getOneOrFail = function (list, infoMsg) {
         if (list.length === 0) {
             throw ("No match for " + infoMsg + " found!");
@@ -641,7 +816,7 @@ formdesigner.util = (function(){
     };
     
     that.reduceToOne = function (list, func, infoMsg) {
-        return that.getOneOrFail(_(list).filter(func), infoMsg);
+        return that.getOneOrFail(that.filterList(list, func), infoMsg);
     };
     return that;
 
