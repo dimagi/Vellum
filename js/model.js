@@ -1407,7 +1407,9 @@ var MugElement = Class.$extend({
     setAttr: function (attr, val) {
         // todo: replace all direct setting of element properties with this
 
-        if (this.__spec[attr] && attr.indexOf('_') !== 0) { 
+        var spec = this.__spec[attr];
+
+        if (spec && spec.presence !== 'notallowed' && attr.indexOf('_') !== 0) { 
             // avoid potential duplicate references (e.g., itext items)
             if (val && typeof val === "object") {
                 val = $.extend(true, {}, val);
