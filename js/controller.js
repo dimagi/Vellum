@@ -553,7 +553,7 @@ formdesigner.controller = (function () {
 
         var oldSkip = formdesigner.ui.skipNodeSelectEvent,
             selected = that.getCurrentlySelectedMug(),
-            parent = that.form.controlTree.getParentMug(selected),
+            parent = selected.parentMug,
             foo = duplicateMug(selected, parent, options),
             duplicate = foo[0],
             pathReplacements = foo[1];
@@ -590,6 +590,14 @@ formdesigner.controller = (function () {
         position = position || 'into';
         var success = false;
 
+        // manually set mug.parentMug before UI insertion so it's accessible to
+        // overrideJSTreeIcon()
+        if (position === 'into') {
+            mug.parentMug = refMug;
+        } else {
+            mug.parentMug = refMug.parentMug;
+        }
+
         /* First try to insert into the currently selected question, then try to
          * insert after it, then after all of its ancestors. */
         while (!success && refMug) {
@@ -600,7 +608,7 @@ formdesigner.controller = (function () {
                 if (position !== 'after') {
                     position = 'after';
                 } else {
-                    refMug = that.form.controlTree.getParentMug(refMug);
+                    refMug = refMug.parentMug;
                 }
             }
         }
@@ -737,7 +745,7 @@ formdesigner.controller = (function () {
 
         // set the 'currently selected mug' to be that of this mug's parent.
         controlTree = that.form.controlTree;
-        parentMug = controlTree.getParentMug(mug);
+        parentMug = mug.parentMug;
         
         // check for control element because we want data nodes to be a flat
         // list at bottom.

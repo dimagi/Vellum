@@ -277,16 +277,6 @@ var Tree = function (tType) {
         return rootNode.getNodeFromMug(mug);
     };
 
-    that.getParentMug = function (mug) {
-        var node = this.getNodeFromMug(mug);
-        if (!node) {
-            return null;
-        }
-        var pNode = that.getParentNode(node),
-            pMug = pNode.getValue();
-        return (pMug === ' ') ? null : pMug;
-    };
-
     /**
      * Removes a node (and all it's children) from the tree (regardless of where it is located in the
      * tree) and returns it.
@@ -351,6 +341,9 @@ var Tree = function (tType) {
             refNodeParent = that.getParentNode(refNode);
             refNodeSiblings = refNodeParent.getChildren();
             refNodeIndex = refNodeSiblings.indexOf(refNode);
+            mug.parentMug = refNodeParent.getValue();
+        } else {
+            mug.parentMug = refMug;
         }
 
         switch (position) {
@@ -1789,7 +1782,7 @@ var mugs = (function () {
                 nodeID = this.dataElement.nodeID;
             } else if (this.__className === "Item") {
                 // if it's a choice, generate based on the parent and value
-                parent = formdesigner.controller.form.controlTree.getParentMug(this);
+                parent = this.parentMug;
                 if (parent) {
                     nodeID = parent.getDefaultItextRoot() + "-" + this.controlElement.defaultValue;
                 }
@@ -2120,8 +2113,7 @@ var mugs = (function () {
         icon: 'icon-circle-blank',
         isTypeChangeable: false,
         getIcon: function () {
-            var parentMug = formdesigner.controller.form.controlTree.getParentMug(this);
-            if (parentMug.__className === "Select") {
+            if (this.parentMug.__className === "Select") {
                 return 'icon-circle-blank';
             } else {
                 return 'icon-check-empty';
