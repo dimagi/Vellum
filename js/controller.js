@@ -471,12 +471,9 @@ formdesigner.controller = (function () {
          */
         function duplicateMug(mug, parentMug, options) {
             // clone mug and give everything new unique IDs
-            var duplicate = new mugs[mug.__className]({
-                bindElement: mug.bindElement,
-                controlElement: mug.controlElement,
-                dataElement: mug.dataElement
-            }),
+            var duplicate = new mugs[mug.__className]();
                 pathReplacements = [];
+            duplicate.copyAttrs(mug);
 
             // ensure consistency            
             formdesigner.util.give_ufid(duplicate);
@@ -675,16 +672,9 @@ formdesigner.controller = (function () {
                 }
             }
             
-            // get new mug and copy relevant data
-            var options = {};
-            var elems = ["dataElement", "bindElement", "controlElement"];
-            _(elems).each(function (elem) {
-                if (mug[elem]) {
-                    options[elem] = mug[elem];
-                }
-            });
-            var newMug = new mugs[questionType](options);
+            var newMug = new mugs[questionType]();
             newMug.ufid = mug.ufid;
+            newMug.copyAttrs(mug);
             
             // magic special cases.  todo: verify
             if (newMug.__className === "Select" || newMug.__className === "MSelect" || 
@@ -1476,12 +1466,9 @@ formdesigner.controller = (function () {
         
         // create new mug and copy old data to newly generated mug
         mug = new MugClass();
-
         if(oldMug) {
+            mug.copyAttrs(oldMug);
             mug.ufid = oldMug.ufid;
-
-            mug.bindElement.setAttrs(oldMug.bindElement || {});
-            mug.dataElement.setAttrs(oldMug.dataElement || {});
 
             //replace in dataTree
             that.form.replaceMug(oldMug, mug, 'data');
