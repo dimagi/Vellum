@@ -1705,6 +1705,17 @@ var mugs = (function () {
                 this
             );
         },
+        copyAttrs: function (sourceMug) {
+            if (this.dataElement && sourceMug.dataElement) {
+                this.dataElement.setAttrs(sourceMug.dataElement);
+            }
+            if (this.bindElement && sourceMug.bindElement) {
+                this.bindElement.setAttrs(sourceMug.bindElement);
+            }
+            if (this.controlElement && sourceMug.controlElement) {
+                this.controlElement.setAttrs(sourceMug.controlElement);
+            }
+        },
         getBindElementID: function () {
             if (this.bindElement) {
                 return this.bindElement.nodeID;
