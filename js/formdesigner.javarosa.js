@@ -430,7 +430,7 @@ var iTextIDWidget = function (mug, options) {
     var widget = formdesigner.widgets.textWidget(mug, options);
 
     widget.isSelectItem = (mug.__className === "Item");
-    widget.parentMug = widget.isSelectItem ? formdesigner.controller.form.controlTree.getParentMug(widget.mug) : null;
+    widget.parentMug = widget.isSelectItem ? widget.mug.parentMug : null;
     widget.langs = formdesigner.pluginManager.javaRosa.Itext.getLanguages();
 
     var $input = widget.getControl();
