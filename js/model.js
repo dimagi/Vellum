@@ -1402,7 +1402,12 @@ var MugElement = Class.$extend({
 
         var spec = this.__spec[attr];
 
-        if (spec && spec.presence !== 'notallowed' && attr.indexOf('_') !== 0) { 
+        // only set attr if spec allows this attr, except if mug is a
+        // DataBindOnly (which all mugs are before the control block has been
+        // parsed) 
+        if (attr.indexOf('_') !== 0 && spec && (spec.presence !== 'notallowed' || 
+                this.__mug.__className === 'DataBindOnly'))
+        {
             // avoid potential duplicate references (e.g., itext items)
             if (val && typeof val === "object") {
                 val = $.extend(true, {}, val);
