@@ -42,6 +42,9 @@ var Tree = function (tType) {
 
         that.setValue = function (val) {
             nodeValue = val;
+            _(that.children).each(function (child) {
+                child.getValue().parentMug = val;
+            });
         };
 
         /**
@@ -1153,6 +1156,7 @@ formdesigner.model = (function () {
                 tree = controlTree;
             }
             result = tree.treeMap(treeFunc);
+            newMug.parentMug = oldMug.parentMug;
             if(result.length > 0){
                 return result[0];
             }else {
