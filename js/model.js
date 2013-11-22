@@ -42,6 +42,9 @@ var Tree = function (tType) {
 
         that.setValue = function (val) {
             nodeValue = val;
+            _(that.children).each(function (child) {
+                child.getValue().parentMug = val;
+            });
         };
 
         /**
@@ -1153,6 +1156,7 @@ formdesigner.model = (function () {
                 tree = controlTree;
             }
             result = tree.treeMap(treeFunc);
+            newMug.parentMug = oldMug.parentMug;
             if(result.length > 0){
                 return result[0];
             }else {
@@ -1402,7 +1406,12 @@ var MugElement = Class.$extend({
 
         var spec = this.__spec[attr];
 
-        if (spec && spec.presence !== 'notallowed' && attr.indexOf('_') !== 0) { 
+        // only set attr if spec allows this attr, except if mug is a
+        // DataBindOnly (which all mugs are before the control block has been
+        // parsed) 
+        if (attr.indexOf('_') !== 0 && spec && (spec.presence !== 'notallowed' || 
+                this.__mug.__className === 'DataBindOnly'))
+        {
             // avoid potential duplicate references (e.g., itext items)
             if (val && typeof val === "object") {
                 val = $.extend(true, {}, val);
@@ -2167,6 +2176,7 @@ var mugs = (function () {
         getBindElementSpec: function () {
             var spec = this.$super();
             spec.dataType.presence = 'notallowed';
+            spec.constraintAttr.presence = 'notallowed';
             return spec;
         },
         getDataElementSpec: function () {
