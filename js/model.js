@@ -2167,6 +2167,7 @@ var mugs = (function () {
         getBindElementSpec: function () {
             var spec = this.$super();
             spec.dataType.presence = 'notallowed';
+            spec.constraintAttr.presence = 'notallowed';
             return spec;
         },
         getDataElementSpec: function () {
