@@ -555,6 +555,8 @@ formdesigner.controller = (function () {
             duplicate = foo[0],
             pathReplacements = foo[1];
 
+        _gaq.push(['_trackEvent', 'Form Builder', 'Copy', foo[0].typeName]);
+
         for (var i = 0; i < pathReplacements.length; i++) {
             var pr = pathReplacements[i];
             formdesigner.model.LogicManager.updatePath(pr.mugId, pr.from, pr.to, 
