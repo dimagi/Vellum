@@ -1,5 +1,9 @@
 @import "lib/main";
 
+[contentEditable=true]:empty:not(:focus):before{
+    content:attr(data-placeholder);
+}
+
 #formdesigner {
   .itext-lang-group-config {
     margin-right: 45px;
@@ -45,6 +49,7 @@
   }
 
   .accordion-toggle {
+    padding: 0px 15px;
     .transition(background .4s ease-in-out);
     &:hover {
       background-color: lighten(@grayLighter, 3);
@@ -55,7 +60,7 @@
   > .fd-help {
     position: absolute;
     right: 15px;
-    top: 7px;
+    top: 0px;
     display: block;
     font-size: @baseFontSize*2;
     padding: 5px;
@@ -68,7 +73,8 @@
   }
 
   .accordion-inner {
-    padding-bottom: @gridGutterWidth;
+    padding-top: 15px;
+    padding-bottom: 0px;
   }
 }
 

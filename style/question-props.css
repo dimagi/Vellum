@@ -25,6 +25,9 @@
   -moz-box-sizing: border-box;
   box-sizing: border-box;
 }
+[contentEditable=true]:empty:not(:focus):before {
+  content: attr(data-placeholder);
+}
 #formdesigner .itext-lang-group-config {
   margin-right: 45px;
   margin-bottom: 20px;
@@ -63,6 +66,7 @@
   margin-bottom: 0;
 }
 .fd-question-fieldset .accordion-toggle {
+  padding: 0px 15px;
   -webkit-transition: background 0.4s ease-in-out;
   -moz-transition: background 0.4s ease-in-out;
   -o-transition: background 0.4s ease-in-out;
@@ -75,7 +79,7 @@
 .fd-question-fieldset > .fd-help {
   position: absolute;
   right: 15px;
-  top: 7px;
+  top: 0px;
   display: block;
   font-size: 28px;
   padding: 5px;
@@ -85,7 +89,8 @@
   color: #46a546;
 }
 .fd-question-fieldset .accordion-inner {
-  padding-bottom: 20px;
+  padding-top: 15px;
+  padding-bottom: 0px;
 }
 .well-vellum {
   margin: 0 0 20px;

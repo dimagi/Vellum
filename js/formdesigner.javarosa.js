@@ -12,7 +12,7 @@ RESERVED_ITEXT_CONTENT_TYPES = [
 ];
 // ITEXT MODELS
 function ItextItem(options) {
-    this.forms = options.forms || [];
+    this.forms = [];
     this.id = options.id || "";
 }
 
@@ -42,7 +42,10 @@ ItextItem.prototype = {
     },
     addForm: function (name) {
         if (!this.hasForm(name)) {
-            var newForm = new ItextForm({name: name});
+            var newForm = new ItextForm({
+                __item: this,
+                name: name
+            });
             this.forms.push(newForm);
             return newForm;
         }
@@ -83,32 +86,36 @@ ItextItem.prototype = {
 
 var ItextForm = function (options) {
     var form = {};
-    
+   
+    form.__item = options.__item;
     form.data = options.data || {};
     form.name = options.name || "default";
-    
+  
     form.getValue = function (lang) {
         return this.data[lang];
     };
-    
     form.setValue = function (lang, value) {
-        this.data[lang] = value;
+        this.data[lang] = formdesigner.pluginManager.call(
+            'processItextMessage', value, this.__item.id, form.name, lang);
+    };
+    form.hasValue = function (lang) {
+        return this.data[lang];
     };
     
     form.getValueOrDefault = function (lang) {
         // check the actual language first
-        if (this.data[lang]) {
-            return this.data[lang];
+        if (this.hasValue(lang)) {
+            return this.getValue(lang);
         }
         var defLang = formdesigner.pluginManager.javaRosa.Itext.getDefaultLanguage();
         // check the default, if necesssary
-        if (lang !== defLang && this.data[defLang]) {
-            return this.data[defLang];
+        if (lang !== defLang && this.hasValue(defLang)) {
+            return this.getValue(defLang);
         }
         // check arbitrarily for something
-        for (var i in this.data) {
-            if (this.data.hasOwnProperty(i)) {
-                return this.data[i];
+        for (var lang in this.data) {
+            if (this.data.hasOwnProperty(lang)) {
+                return this.getValue(lang);
             }
         }
         // there wasn't anything
@@ -233,42 +240,60 @@ var ItextModel = function() {
     /*
      * Create a new blank item and add it to the list.
      */
-    itext.createItem = function (id) {
+    itext.createItem = function (id, mug) {
         var item = new ItextItem({
             id: id,
-            forms: [new ItextForm({
-                        name: "default",
-                    })]
         });
+        item.addForm("default");
+        item.referencingMugs = [];
+        if (mug) {
+            item.referencingMugs.push(mug.ufid);
+        }
         this.addItem(item);
+
         return item;
     };
     
     /**
      * Get the Itext Item by ID.
      */
-    itext.getItem = function (iID) {
+    itext.getItem = function (iID, mug) {
         // this is O[n] when it could be O[1] with some other
         // data structure. That would require keeping the ids
         // in sync in multiple places though.
         // This could be worked around via careful event handling,
         // but is not implemented until we see slowness.
+        var item;
         try {
-            return formdesigner.util.reduceToOne(this.items, function (item) {
+            item = formdesigner.util.reduceToOne(this.items, function (item) {
                 return item.id === iID;
             }, "itext id = " + iID);
         } catch (e) {
             throw "NoItextItemFound";
         }
+        if (mug && item.referencingMugs.indexOf(mug.ufid) === -1) {
+            item.referencingMugs.push(mug.ufid);
+        } 
+        return item;
     };
     
-    itext.getOrCreateItem = function (id) {
+    itext.getOrCreateItem = function (id, mug) {
         try {
-            return this.getItem(id);
+            return this.getItem(id, mug);
         } catch (err) {
-            return this.createItem(id); 
+            return this.createItem(id, mug); 
         }
     };
+
+    // todo: fix (this breaks auto id of constraint message)
+    //itext.getOrCreateUniqueItem = function (id, mug) {
+        //var item = itext.getOrCreateItem(id, mug);
+        //if (item.referencingMugs.length && item.referencingMugs[0] !== mug.ufid) {
+            //item = itext.createItem(id, mug);
+            //itext.removeItem(item);
+        //}
+        //return item;
+    //};
     
     itext.removeItem = function (item) {
         var index = this.items.indexOf(item);
@@ -408,14 +433,14 @@ var ItextModel = function() {
             // set hint if legal and not there
             if (mug.controlElement.__spec.hintItextID.presence !== "notallowed" &&
                 !mug.controlElement.hintItextID) {
-                mug.controlElement.hintItextID = this.createItem("");
+                mug.controlElement.hintItextID = this.createItem("", mug);
             }
         }
         if (mug.bindElement) {
             // set constraint msg if legal and not there
             if (mug.bindElement.__spec.constraintMsgItextID.presence !== "notallowed" &&
                 !mug.bindElement.constraintMsgItextID) {
-                mug.bindElement.constraintMsgItextID = this.createItem("");
+                mug.bindElement.constraintMsgItextID = this.createItem("", mug);
             }
         }
     };
@@ -426,12 +451,13 @@ var ItextModel = function() {
 // ITEXT WIDGETS
 
 var iTextIDWidget = function (mug, options) {
+    var Itext = formdesigner.pluginManager.javaRosa.Itext;
     // a special text widget that holds itext ids
     var widget = formdesigner.widgets.textWidget(mug, options);
 
     widget.isSelectItem = (mug.__className === "Item");
     widget.parentMug = widget.isSelectItem ? widget.mug.parentMug : null;
-    widget.langs = formdesigner.pluginManager.javaRosa.Itext.getLanguages();
+    widget.langs = Itext.getLanguages();
 
     var $input = widget.getControl();
 
@@ -504,7 +530,7 @@ var iTextIDWidget = function (mug, options) {
     widget.getUIElement = function () {
         var $uiElem = _getUIElement(),
             $autoBoxContainer = $('<div />').addClass('pull-right fd-itextID-checkbox-container'),
-            $autoBoxLabel = $("<label />").text("auto?").attr("for", autoBoxId).addClass('checkbox');
+            $autoBoxLabel = $("<label />").text("auto").attr("for", autoBoxId).addClass('checkbox');
 
         $autoBoxLabel.prepend($autoBox);
         $autoBoxContainer.append($autoBoxLabel);
@@ -522,12 +548,15 @@ var iTextIDWidget = function (mug, options) {
         var oldItext = widget.mug.getPropertyValue(this.path);
         var val = widget.getValue();
         if (oldItext.id !== val) {
-            oldItext.id = val;
+            item = oldItext;
+            // todo: fix (see method)
+            //item = Itext.getOrCreateUniqueItem(oldItext.id, mug);
+            item.id = val;
             formdesigner.controller.setMugPropertyValue(
                 widget.mug,
                 widget.groupName,
                 widget.propName,
-                oldItext,
+                item,
                 widget.mug
             );
         }
@@ -886,7 +915,7 @@ var itextMediaBlock = function (mug, options) {
 
 var itextLabelWidget = function (mug, language, form, options) {
     var Itext = formdesigner.pluginManager.javaRosa.Itext;
-    var widget = formdesigner.widgets.baseWidget(mug);
+    var widget = formdesigner.widgets.droppableMultilineTextWidget(mug, options);
 
     widget.displayName = options.displayName;
     widget.itextType = options.itextType;
@@ -915,12 +944,8 @@ var itextLabelWidget = function (mug, language, form, options) {
         return widget.displayName + widget.getLangDesc();
     };
 
-    widget.getIDByLang = function (lang) {
-        return "itext-" + lang + "-" + widget.itextType;
-    };
-
     widget.getID = function () {
-        return widget.getIDByLang(widget.language);
+        return "itext-" + widget.language + "-" + widget.itextType;
     };
 
     widget.init = function (loadDefaults) {
@@ -972,32 +997,19 @@ var itextLabelWidget = function (mug, language, form, options) {
         }
     };
 
-    var $input = $("<input />")
-        .attr("id", widget.getID())
-        .attr("type", "text")
-        .addClass('input-block-level itext-widget-input')
-        .on('change keyup', widget.updateValue);
+    widget.getControl()
+        .attr('id', widget.getID())
+        .addClass('itext-widget-input');
 
     widget.mug.on('question-itext-deleted', widget.destroy);
-
-    widget.getControl = function () {
-        return $input;
-    };
 
     widget.toggleDefaultLangSync = function (val) {
         widget.isSyncedWithDefaultLang = !val && !widget.isDefaultLang;
     };
 
-    widget.setValue = function (val) {
-        $input.val(val);
-    };
-
     widget.setPlaceholder = function (val) {
-        $input.attr("placeholder", val);
-    };
-
-    widget.getValue = function () {
-        return $input.val();
+        // need to use attr() instead of data() for css to take effect
+        widget.getControl().attr("data-placeholder", val.trim());
     };
 
     widget.getDefaultValue = function () {
@@ -1266,7 +1278,6 @@ var generateItextXLS = function (Itext) {
      * Cleans Itext so that it fits the csv spec. For now just replaces newlines with ''
      * @param val
      */
-    
     function makeRow (language, item, forms) {
         var values = forms.map(function (form) {
             return item.hasForm(form) ? item.getForm(form).getValueOrDefault(language) : "";
@@ -1338,6 +1349,13 @@ formdesigner.plugins.javaRosa = function (options) {
     this.Itext = ItextModel();
     var Itext = this.Itext;
 
+    this.processItextMessage = function (val) {
+        return val.replace(/&#10;/g, "\n");
+    };
+    this.serializeItextMessage = function (val) {
+        return val.replace(/\n/g, "&#10;");
+    };
+
     // parse Itext Block and populate itext model
     this.beforeParse = function (xml) {
         var head = xml.find('h\\:head, head'),
@@ -1358,7 +1376,11 @@ formdesigner.plugins.javaRosa = function (options) {
                     if(!curForm) {
                         curForm = "default";
                     }
-                    item.getOrCreateForm(curForm).setValue(lang, formdesigner.util.getXLabelValue(valEl));
+                    item.getOrCreateForm(curForm).setValue(lang, 
+                        formdesigner.pluginManager.call('processItextMessage',
+                            formdesigner.util.getXLabelValue(valEl),
+                            id, curForm, lang)
+                    );
                 }
                 textEl.children().each(eachValue);
             }
@@ -1437,7 +1459,8 @@ formdesigner.plugins.javaRosa = function (options) {
                     forms = item.getForms();
                     for (var k = 0; k < forms.length; k++) {
                         form = forms[k];
-                        val = form.getValueOrDefault(lang);
+                        val = formdesigner.pluginManager.call(
+                            'serializeItextMessage', form.getValueOrDefault(lang));
                         xmlWriter.writeStartElement("value");
                         if(form.name !== "default") {
                             xmlWriter.writeAttributeStringSafe('form', form.name);
@@ -1531,6 +1554,21 @@ formdesigner.plugins.javaRosa = function (options) {
                 return validateItextItem(constraintItext, "Validation Error Message");
             }
         };
+        // virtual property used to define a widget
+        spec.constraintMsgItext = {
+            editable: 'w',
+            visibility: 'bindElement/constraintMsgItextID',
+            presence: 'optional',
+            uiType: itextLabelBlock,
+            widgetOptions: {
+                itextType: "constraintMsg",
+                getItextByMug: function (mug) {
+                    return mug.bindElement.constraintMsgItextID;
+                },
+                displayName: "Validation Message"
+            },
+            lstring: 'Validation Message',
+        };
 
         if (mug.isSpecialGroup) {
             spec.constraintMsgItextID.presence = "notallowed";
@@ -1617,21 +1655,6 @@ formdesigner.plugins.javaRosa = function (options) {
                 displayName: "Hint Message"
             }
         };
-        // virtual property used to define a widget
-        spec.constraintMsgItext = {
-            editable: 'w',
-            visibility: 'bindElement/constraintMsgItextID',
-            presence: 'optional',
-            uiType: itextLabelBlock,
-            widgetOptions: {
-                itextType: "constraintMsg",
-                getItextByMug: function (mug) {
-                    return mug.bindElement.constraintMsgItextID;
-                },
-                displayName: "Validation Message"
-            },
-            lstring: 'Validation Message',
-        };
         // virtual property used to get a widget
         spec.otherItext = {
             editable: 'w',
@@ -1686,7 +1709,7 @@ formdesigner.plugins.javaRosa = function (options) {
     this.contributeToLogicProperties = function (properties) {
         properties.splice(
             1 + properties.indexOf('bindElement/constraintAttr'), 0,
-            'controlElement/constraintMsgItext'
+            'bindElement/constraintMsgItext'
         );
         return properties;
     };

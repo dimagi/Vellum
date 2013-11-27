@@ -44,6 +44,10 @@
 .fd-content-left {
   width: 30%;
 }
+.fd-sidebar-content:not(:first-child) {
+  margin-top: 5px;
+  margin-color: #f4f4f4;
+}
 .fd-content-divider {
   width: 5px;
   margin: 0 1px;
