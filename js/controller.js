@@ -684,13 +684,6 @@ formdesigner.controller = (function () {
             newMug.ufid = mug.ufid;
             newMug.copyAttrs(mug);
             
-            // magic special cases.  todo: verify
-            if (newMug.__className === "Select" || newMug.__className === "MSelect" || 
-                newMug.__className === "Trigger")
-            {
-                newMug.bindElement.dataType = "";
-            }
-            
             // update trees
             that.form.replaceMug(mug, newMug, 'data');
             that.form.replaceMug(mug, newMug, 'control');

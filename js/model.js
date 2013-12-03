@@ -1409,7 +1409,8 @@ var MugElement = Class.$extend({
         // only set attr if spec allows this attr, except if mug is a
         // DataBindOnly (which all mugs are before the control block has been
         // parsed) 
-        if (attr.indexOf('_') !== 0 && spec && (spec.presence !== 'notallowed' || 
+        if (attr.indexOf('_') !== 0 && spec && !spec.immutable && 
+            (spec.presence !== 'notallowed' || 
                 this.__mug.__className === 'DataBindOnly'))
         {
             // avoid potential duplicate references (e.g., itext items)
@@ -1547,8 +1548,10 @@ var mugs = (function () {
             presence: 'optional',
             lstring: 'Bind Node ID'
         },
+        // part of the Mug type definition, so it's immutable
         dataType: {
             editable: 'w',
+            immutable: true,
             visibility: 'visible',
             presence: 'optional',
             values: formdesigner.util.XSD_DATA_TYPES,
@@ -1616,8 +1619,10 @@ var mugs = (function () {
     };
 
     var DEFAULT_CONTROL_ELEMENT_SPEC = {
-        tagName: { //internal use
+        // part of the Mug type definition, so it's immutable
+        tagName: {
             editable: 'r',
+            immutable: true,
             visibility: 'hidden',
             presence: 'required',
             values: formdesigner.util.VALID_CONTROL_TAG_NAMES
