@@ -1401,7 +1401,7 @@ var MugElement = Class.$extend({
         this.__mug = options.mug;
         this.__name = options.name;
     },
-    setAttr: function (attr, val) {
+    setAttr: function (attr, val, overrideImmutable) {
         // todo: replace all direct setting of element properties with this
 
         var spec = this.__spec[attr];
@@ -1409,7 +1409,8 @@ var MugElement = Class.$extend({
         // only set attr if spec allows this attr, except if mug is a
         // DataBindOnly (which all mugs are before the control block has been
         // parsed) 
-        if (attr.indexOf('_') !== 0 && spec && !spec.immutable && 
+        if (attr.indexOf('_') !== 0 && spec && 
+            (overrideImmutable || !spec.immutable) && 
             (spec.presence !== 'notallowed' || 
                 this.__mug.__className === 'DataBindOnly'))
         {
@@ -1420,10 +1421,10 @@ var MugElement = Class.$extend({
             this[attr] = val;
         }
     },
-    setAttrs: function (attrs) {
+    setAttrs: function (attrs, overrideImmutable) {
         var self = this;
         _(attrs).each(function (val, attr) {
-            self.setAttr(attr, val);
+            self.setAttr(attr, val, overrideImmutable);
         });
     },
     getErrors: function () {
@@ -1712,15 +1713,15 @@ var mugs = (function () {
                 this
             );
         },
-        copyAttrs: function (sourceMug) {
+        copyAttrs: function (sourceMug, overrideImmutable) {
             if (this.dataElement && sourceMug.dataElement) {
-                this.dataElement.setAttrs(sourceMug.dataElement);
+                this.dataElement.setAttrs(sourceMug.dataElement, overrideImmutable);
             }
             if (this.bindElement && sourceMug.bindElement) {
-                this.bindElement.setAttrs(sourceMug.bindElement);
+                this.bindElement.setAttrs(sourceMug.bindElement, overrideImmutable);
             }
             if (this.controlElement && sourceMug.controlElement) {
-                this.controlElement.setAttrs(sourceMug.controlElement);
+                this.controlElement.setAttrs(sourceMug.controlElement, overrideImmutable);
             }
         },
         getBindElementID: function () {

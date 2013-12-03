@@ -1680,7 +1680,7 @@ formdesigner.controller = (function () {
             attrs.preload = lookForNamespaced(el, "preload");
             attrs.preloadParams = lookForNamespaced(el, "preloadParams");
            
-            mug.bindElement.setAttrs(attrs);
+            mug.bindElement.setAttrs(attrs, true);
 
             path = processPath(path,that.form.dataTree.getRootNode().getID());
             oldMug = that.getMugByPath(path,'data');
