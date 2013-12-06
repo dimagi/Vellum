@@ -327,7 +327,9 @@ var Tree = function (tType) {
             position = 'after';
         }
 
-        if (!refMug || (!refMug.controlElement && treeType === 'control')) {
+        if (!refMug || refMug === ' ' || 
+            (!refMug.controlElement && treeType === 'control'))
+        {
             refNode = rootNode;
             position = 'into';
         } else {
