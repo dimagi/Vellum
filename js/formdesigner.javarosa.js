@@ -1363,14 +1363,6 @@ formdesigner.plugins.javaRosa = function (options) {
                 textEl.children().each(eachValue);
             }
 
-            if (formdesigner.opts.langs && formdesigner.opts.langs.indexOf(lang) === -1) {
-                formdesigner.controller.addParseWarningMsg(
-                    "The Following Language will be deleted from the form " +
-                    "as it is not listed as a language in CommCareHQ: " +
-                    "<b>" + lang + "</b>"
-                );
-                return;
-            }
             Itext.addLanguage(lang);
             if (el.attr('default') !== undefined) {
                 Itext.setDefaultLanguage(lang);
