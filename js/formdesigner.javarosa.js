@@ -1293,8 +1293,7 @@ var generateItextXLS = function (Itext) {
     // TODO: should this be configurable?
     var exportCols = ["default", "audio", "image" , "video"];
     var languages = Itext.getLanguages();
-    // deduplicate
-    Itext.deduplicateIds();
+
     var allItems = Itext.getNonEmptyItems();
     var language, item, i, j;
     if (languages.length > 0) {
