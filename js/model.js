@@ -325,7 +325,9 @@ var Tree = function (tType) {
             position = 'after';
         }
 
-        if (!refMug || (!refMug.controlElement && treeType === 'control')) {
+        if (!refMug || refMug === ' ' || 
+            (!refMug.controlElement && treeType === 'control'))
+        {
             refNode = rootNode;
             position = 'into';
         } else {
@@ -926,7 +928,7 @@ formdesigner.model = (function () {
                         }
                         
                         label.ref = "jr:itext('" + cProps.labelItextID.id + "')";
-                        isItextOptional = mug.controlElement.labelItextID.presence == 'optional'; //iID is optional so by extension Itext is optional.
+                        isItextOptional = mug.controlElement.__spec.labelItextID.presence == 'optional'; //iID is optional so by extension Itext is optional.
                         if (cProps.labelItextID.isEmpty() && isItextOptional) {
                             label.ref = '';
                         }

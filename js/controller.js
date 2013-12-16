@@ -1310,7 +1310,7 @@ formdesigner.controller = (function () {
         cProps.label = labelVal;
         
         var newLabelItext = function (mug) {
-            var item = ItextItem({
+            var item = new ItextItem({
                 id: mug.getDefaultLabelItextId()
             });
             Itext.addItem(item);
