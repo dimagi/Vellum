@@ -1237,7 +1237,7 @@ var parseXLSItext = function (str, Itext) {
     var exportCols = ["default", "audio", "image" , "video"];
     var languages = Itext.getLanguages();
 
-    for (i = 0; i < rows.length; i++) {
+    for (i = 1; i < rows.length; i++) {
         cells = rows[i].split('\t');
         iID = cells[0];
 
@@ -1289,6 +1289,16 @@ var generateItextXLS = function (Itext) {
         return row.join("\t");
     }
 
+    function makeHeadings(languages, exportCols) {
+        var header_row = ["label"]
+        for(i = 0; i < exportCols.length; i++) {
+            for(j=0; j < languages.length; j++) {
+                header_row.push(exportCols[i] + '-' + languages[j]);
+            }
+        }
+        return header_row.join("\t");
+    }
+
     var ret = [];
     // TODO: should this be configurable?
     var exportCols = ["default", "audio", "image" , "video"];
@@ -1297,6 +1307,7 @@ var generateItextXLS = function (Itext) {
     var allItems = Itext.getNonEmptyItems();
     var language, item, i, j;
     if (languages.length > 0) {
+        ret.push(makeHeadings(languages, exportCols))
         for(i = 0; i < allItems.length; i++) {
             item = allItems[i];
             ret.push(makeRow(languages, item, exportCols));
