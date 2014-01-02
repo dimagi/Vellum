@@ -437,7 +437,7 @@ var iTextIDWidget = function (mug, options) {
 
     // a few little hacks to support auto-update of choices
     widget.getRootId = function () {
-        if (widget.isSelectItem) {
+        if (widget.isSelectItem && widget.parentMug != ' ') {
             return widget.parentMug.getDefaultItextRoot() + "-";
         }
         return "";
