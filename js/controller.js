@@ -15,12 +15,12 @@ formdesigner.controller = (function () {
         });
     that.saveButton = saveButton;
     
-    var initFormDesigner = function () {
+    var initFormDesigner = function (sessionid) {
         xpathmodels.DEBUG_MODE = DEBUG_MODE;
         formdesigner.util.question_counter = 1;
         
         formdesigner.model.init();
-        formdesigner.ui.init();
+        formdesigner.ui.init(sessionid);
         that.setCurrentlySelectedMug(null);
         
         if (formdesigner.opts.langs && formdesigner.opts.langs.length > 0) {
