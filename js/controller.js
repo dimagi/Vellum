@@ -1262,7 +1262,7 @@ formdesigner.controller = (function () {
         // due to the fact that FF and Webkit store namespaced
         // values slightly differently, we have to look in 
         // a couple different places.
-        return element.attr("jr:" + reference) || element.attr("jr\\:" + reference);
+        return element.popAttr("jr:" + reference) || element.popAttr("jr\\:" + reference);
     };
 
 
@@ -1499,8 +1499,9 @@ formdesigner.controller = (function () {
         if(tag === 'repeat'){
             labelEl = $($(cEl).parent().children('label'));
             hintEl = $(cEl).parent().children('hint');
-            repeat_count = $(cEl).attr('jr:count');
-            repeat_noaddremove = formdesigner.util.parseBoolAttributeValue($(cEl).attr('jr:noAddRemove'));
+            repeat_count = $(cEl).popAttr('jr:count');
+            repeat_noaddremove = formdesigner.util.parseBoolAttributeValue(
+                $(cEl).popAttr('jr:noAddRemove'));
 
         } else {
             labelEl = $(cEl).children('label');
@@ -1647,27 +1648,28 @@ formdesigner.controller = (function () {
             var el = $(this),
                 attrs = {},
                 mug = new mugs.DataBindOnly(),
-                path, nodeID, bindElement, oldMug;
-            path = el.attr('nodeset');
+                path = el.popAttr('nodeset'),
+                id = el.popAttr('id'),
+                nodeID, bindElement, oldMug;
             if (!path) {
-               path = el.attr('ref');
+               path = el.popAttr('ref');
             }
             nodeID = formdesigner.util.getNodeIDFromPath(path);
-            if(el.attr('id')) {
-                attrs.nodeID = el.attr('id');
+            if(id) {
+                attrs.nodeID = id;
                 attrs.nodeset = path;
             } else {
                 attrs.nodeID = nodeID;
             }
 
-            attrs.dataType = el.attr('type');
+            attrs.dataType = el.popAttr('type');
             if(attrs.dataType && attrs.dataType.toLowerCase() === 'xsd:integer') {  //normalize this dataType ('int' and 'integer' are both valid).
                 attrs.dataType = 'xsd:int';
             }
-            attrs.appearance = el.attr('appearance');
-            attrs.relevantAttr = el.attr('relevant');
-            attrs.calculateAttr = el.attr('calculate');
-            attrs.constraintAttr = el.attr('constraint');
+            attrs.appearance = el.popAttr('appearance');
+            attrs.relevantAttr = el.popAttr('relevant');
+            attrs.calculateAttr = el.popAttr('calculate');
+            attrs.constraintAttr = el.popAttr('constraint');
 
             var constraintMsg = lookForNamespaced(el, "constraintMsg"),
                 constraintItext = getITextReference(constraintMsg);
@@ -1679,13 +1681,12 @@ formdesigner.controller = (function () {
                 attrs.constraintMsgAttr = constraintMsg;    
             }
                             
-            attrs.requiredAttr = formdesigner.util.parseBoolAttributeValue(el.attr('required'));
+            attrs.requiredAttr = formdesigner.util.parseBoolAttributeValue(
+                el.popAttr('required'));
             
             attrs.preload = lookForNamespaced(el, "preload");
             attrs.preloadParams = lookForNamespaced(el, "preloadParams");
            
-            mug.bindElement.setAttrs(attrs, true);
-
             path = processPath(path,that.form.dataTree.getRootNode().getID());
             oldMug = that.getMugByPath(path,'data');
             if(!oldMug && attrs.nodeset) {
@@ -1700,8 +1701,10 @@ formdesigner.controller = (function () {
                 return;
             }
             mug.ufid = oldMug.ufid;
-            mug.dataElement.setAttrs(oldMug.dataElement);
-            //mug.dataElement = oldMug.dataElement;
+            mug.copyAttrs(oldMug);
+            mug.bindElement.setAttrs(attrs, true);
+            mug.bindElement._rawAttributes = formdesigner.util.getAttributes(el);
+
             // clear relevant itext for bind
             // this is ugly, and should be moved somewhere else
             if (oldMug.bindElement) {

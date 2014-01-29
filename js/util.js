@@ -1,6 +1,18 @@
 /**
  * Just some useful JS tools and idioms
  */
+(function ($) {
+    $.fn.popAttr = function (name) {
+        var val = this.attr(name);
+        try {
+            this.removeAttr(name);
+        } catch (e) {
+            // catch InvalidCharacterError due to \: in attribute name
+        
+        }
+        return val;
+    };
+}(jQuery));
 
 if(typeof Object.create !== 'function') {
     Object.create = function(obj) {
