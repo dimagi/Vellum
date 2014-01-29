@@ -1745,8 +1745,12 @@ formdesigner.controller = (function () {
         that.fire('parse-start');
         try {
             var xmlDoc = $.parseXML(xmlString),
-                xml = $(xmlDoc),
-                head = xml.find('h\\:head, head'),
+                xml = $(xmlDoc);
+            
+            // parse itext first so all the other functions can access it
+            xml = formdesigner.pluginManager.call('beforeParse', xml);
+                
+            var head = xml.find('h\\:head, head'),
                 title = head.children('h\\:title, title'),
                 binds = head.find('bind'),
                 instances = _getInstances(xml);
@@ -1780,8 +1784,6 @@ formdesigner.controller = (function () {
                 that.addParseErrorMsg('No Data block was found in the form.  Please check that your form is valid!');
             }
            
-            // parse itext first so all the other functions can access it
-            formdesigner.pluginManager.call('beforeParse', xml);
             
             parseDataTree (data[0]);
             parseBindList (binds);

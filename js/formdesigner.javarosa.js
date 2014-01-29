@@ -1413,6 +1413,7 @@ formdesigner.plugins.javaRosa = function (options) {
         if (!formdesigner.currentItextDisplayLanguage) {
             formdesigner.currentItextDisplayLanguage = Itext.getDefaultLanguage();
         }
+        return xml;
     };
     
     this.contributeToModelXML = function (xmlWriter) {
