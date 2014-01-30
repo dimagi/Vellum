@@ -1695,7 +1695,7 @@ formdesigner.launch = function (opts) {
         methods: {
             'getToolsMenuItems': 'return_all',
             'init': 'return_all',
-            'beforeParse': 'return_all',
+            'beforeParse': 'process_sequentially',
             'contributeToModelXML': 'return_all',
             'contributeToDataElementSpec': 'process_sequentially',
             'contributeToBindElementSpec': 'process_sequentially',
