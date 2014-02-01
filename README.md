@@ -65,7 +65,7 @@ Contributing
 To install grunt plugins and setup git hooks to run `grunt dist`:
 
 ```
-$ npm install grunt grunt-contrib-uglify grunt-contrib-concat
+$ npm install grunt grunt-contrib-uglify grunt-contrib-concat grunt-githooks
 $ grunt githooks
 ```
 
