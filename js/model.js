@@ -1067,6 +1067,8 @@ formdesigner.model = (function () {
                 xmlWriter.writeEndDocument(); //CLOSE DOCUMENT
                 docString = xmlWriter.flush();
 
+                docString = formdesigner.pluginManager.call("afterSerialize", docString);
+
                 return docString;
             };
             return generateForm();

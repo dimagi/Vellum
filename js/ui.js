@@ -1705,8 +1705,10 @@ formdesigner.launch = function (opts) {
             'contributeToAdvancedProperties': 'process_sequentially',
             'getFormErrors': 'return_all',
             'preSerialize': 'return_all',
+            'afterSerialize': 'process_sequentially'
         }
     });
+    formdesigner.pluginManager.register('ignoreButRetain', new formdesigner.plugins.ignoreButRetain());
     formdesigner.pluginManager.register('javaRosa', new formdesigner.plugins.javaRosa());
 
     if(!opts){

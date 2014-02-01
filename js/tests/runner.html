@@ -13,6 +13,8 @@
     <script type="text/javascript" src="../node_modules/mocha/mocha.js"></script>
     <script type="text/javascript" src="../node_modules/chai/chai.js"></script>
 
+    <script src="utils/equivalent-xml.js"></script>
+
     <!-- Runtime Dependencies -->
     <script type="text/javascript" src="lib/jquery-1.7.1.min.js"></script>
     <script type="text/javascript" src="../lib/underscore-1.5.2.js"></script>
@@ -32,6 +34,7 @@
       mocha.reporter('html');
     </script>
     <script type="text/javascript" src="formdesigner.spec.js"></script>
+    <script src="formdesigner.ignoreButRetain.js"></script>
     <script type="text/javascript">
       if (window.mochaPhantomJS) { mochaPhantomJS.run(); }
       else { mocha.run(); }

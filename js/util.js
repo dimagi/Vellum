@@ -427,10 +427,13 @@ formdesigner.util = (function(){
             if (e.previous !== e.val) {
                 var mug = formdesigner.controller.getMugFromFormByUFID(e.mugUfid);
                 if (e.property === 'nodeID') {
-                    var currentPath = formdesigner.controller.form.dataTree.getAbsolutePath(mug);
-                    var parsed = xpath.parse(currentPath);
+                    var currentPath = formdesigner.controller.form.dataTree.getAbsolutePath(mug),
+                        parsed = xpath.parse(currentPath);
                     parsed.steps[parsed.steps.length - 1].name = e.previous;
-                    formdesigner.model.LogicManager.updatePath(mug.ufid, parsed.toXPath(), currentPath);
+                    var oldPath = parsed.toXPath();
+                    formdesigner.model.LogicManager.updatePath(mug.ufid, oldPath, currentPath);
+                    formdesigner.pluginManager.call('onMugRename', 
+                            e.val, e.previous, currentPath, oldPath);
                 } else {
                     var propertyPath = [e.element, e.property].join("/");
 
