@@ -70,6 +70,7 @@ module.exports = function (grunt) {
                     'js/lib/codemirror/xml.js',
                     'js/lib/classy-1.4.js',
                     'js/formdesigner.javarosa.js',
+                    'js/formdesigner.ignoreButRetain.js',
                     'js/window.js',
                     'js/util.js',
                     'js/multimedia.js',
