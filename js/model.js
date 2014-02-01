@@ -779,6 +779,9 @@ formdesigner.model = (function () {
                                     }
                                 }
                             }
+                            _(mug.bindElement._rawAttributes).each(function (v, k) {
+                                xmlWriter.writeAttributeStringSafe(k, v);
+                            })
                             xmlWriter.writeEndElement();
                         }
                     }
@@ -849,13 +852,6 @@ formdesigner.model = (function () {
                         
                         // Write any custom attributes first
                         for (var k in cProps._rawAttributes) {
-                            if (k === 'jr:count') {
-                                continue;
-                            }
-                            if (k === 'appearance') {
-                                continue;
-                            }
-
                             if (cProps._rawAttributes.hasOwnProperty(k)) {
                                 xmlWriter.writeAttributeStringSafe(k, cProps._rawAttributes[k]);
                             }
@@ -1716,14 +1712,19 @@ var mugs = (function () {
             );
         },
         copyAttrs: function (sourceMug, overrideImmutable) {
+            // Copying _rawAttributes here is a hack.  It should be part of the
+            // property definition system.
             if (this.dataElement && sourceMug.dataElement) {
                 this.dataElement.setAttrs(sourceMug.dataElement, overrideImmutable);
+                this.dataElement._rawAttributes = sourceMug.dataElement._rawAttributes;
             }
             if (this.bindElement && sourceMug.bindElement) {
                 this.bindElement.setAttrs(sourceMug.bindElement, overrideImmutable);
+                this.bindElement._rawAttributes = sourceMug.bindElement._rawAttributes;
             }
             if (this.controlElement && sourceMug.controlElement) {
                 this.controlElement.setAttrs(sourceMug.controlElement, overrideImmutable);
+                this.controlElement._rawAttributes = sourceMug.controlElement._rawAttributes;
             }
         },
         getBindElementID: function () {
