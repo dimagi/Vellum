@@ -58,6 +58,9 @@ $ npm install -d
 $ npm test
 ```
 
+Currently, the tests don't behave correctly under PhantomJS (or in Firefox).
+You can open `js/tests/runner.html` to manually run the tests.
+
 
 Contributing
 ------------
