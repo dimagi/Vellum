@@ -29,7 +29,7 @@ formdesigner.plugins.ignoreButRetain = function () {
 
         var ignoredEls = [];
 
-        xml.find('[ignore="true"]').each(function (i, el) {
+        xml.find('[vellum\\:ignore="true"]').each(function (i, el) {
             ignoredNodes.push(getPathAndPosition(el));
             ignoredEls.push(el);
         });
@@ -77,9 +77,14 @@ formdesigner.plugins.ignoreButRetain = function () {
             }
         });
 
+        var count = 0;
         return xmls.serializeToString(xml[0])
-            // firefox adds xmlns="" when adding fragments to the document
-            .replace(/ xmlns=""/g, '');
+            // firefox adds xmlns="" to fragments when adding them to the
+            // document
+            .replace(/ xmlns=""/g, '')
+            .replace(/ xmlns:vellum="(.+?)"/g, function (match) {
+                return count++ ? '' : match;
+            });
     };
 
     function prependChild(element, child) {

@@ -59,30 +59,30 @@ describe("The Ignore-But-Retain plugin", function() {
 });
 
 var DATA_AND_BIND = '' + 
-'<h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:jr="http://openrosa.org/javarosa">\
+'<h:html xmlns:vellum="http://www.commcarehq.org/vellum" xmlns:h="http://www.w3.org/1999/xhtml" xmlns:jr="http://openrosa.org/javarosa">\
 	<h:head>\
 		<model>\
 			<instance>\
 				<data>\
 					<question1 />\
 					<question9>\
-						<question10 ignore="true" />\
+						<question10 vellum:ignore="true" />\
 						<question11 />\
 					</question9>\
-					<question4 ignore="true" />\
+					<question4 vellum:ignore="true" />\
 				</data>\
 			</instance>\
 			<bind nodeset="/data/question1" type="xsd:string" />\
 			<bind nodeset="/data/question9" />\
-			<bind nodeset="/data/question9/question10" type="xsd:int" ignore="true" />\
+			<bind nodeset="/data/question9/question10" type="xsd:int" vellum:ignore="true" />\
 			<bind nodeset="/data/question9/question11" type="xsd:int" />\
-			<bind nodeset="/data/question4" ignore="true" />\
+			<bind nodeset="/data/question4" vellum:ignore="true" />\
 		</model>\
 	</h:head>\
 </h:html>';
 
 var DATA_AND_BIND_IGNORED = '' + 
-'<h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:jr="http://openrosa.org/javarosa">\
+'<h:html xmlns:vellum="http://www.commcarehq.org/vellum" xmlns:h="http://www.w3.org/1999/xhtml" xmlns:jr="http://openrosa.org/javarosa">\
 	<h:head>\
 		<model>\
 			<instance>\
@@ -101,19 +101,19 @@ var DATA_AND_BIND_IGNORED = '' +
 </h:html>';
 
 var SETVALUES = '' +
-'<h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:jr="http://openrosa.org/javarosa">\
+'<h:html xmlns:vellum="http://www.commcarehq.org/vellum" xmlns:h="http://www.w3.org/1999/xhtml" xmlns:jr="http://openrosa.org/javarosa">\
 	<h:head>\
 		<model>\
             <setvalue event="xforms-revalidate" ref="/data/question1" value="0"/>\
-            <setvalue event="xforms-ready" ref="/data/question1" value="1" ignore="true"/>\
-            <setvalue event="xforms-ready" ref="/data/question2" value="2" ignore="true"/>\
+            <setvalue event="xforms-ready" ref="/data/question1" value="1" vellum:ignore="true"/>\
+            <setvalue event="xforms-ready" ref="/data/question2" value="2" vellum:ignore="true"/>\
             <setvalue event="xforms-ready" ref="/data/question3" value="3"/>\
 		</model>\
 	</h:head>\
 </h:html>';
 
 var SETVALUES_IGNORED = '' +
-'<h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:jr="http://openrosa.org/javarosa">\
+'<h:html xmlns:vellum="http://www.commcarehq.org/vellum" xmlns:h="http://www.w3.org/1999/xhtml" xmlns:jr="http://openrosa.org/javarosa">\
 	<h:head>\
 		<model>\
             <setvalue event="xforms-revalidate" ref="/data/question1" value="0"/>\
@@ -123,21 +123,21 @@ var SETVALUES_IGNORED = '' +
 </h:html>';
 
 var BODY = '' +
-'<h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:jr="http://openrosa.org/javarosa">\
+'<h:html xmlns:vellum="http://www.commcarehq.org/vellum" xmlns:h="http://www.w3.org/1999/xhtml" xmlns:jr="http://openrosa.org/javarosa">\
 	<h:body>\
 		<input ref="/data/question1">\
 			<label ref="jr:itext(\'question1-label\')" />\
 		</input>\
 		<group ref="/data/question9">\
 			<label ref="jr:itext(\'question9-label\')" />\
-			<input ref="/data/question9/question10" ignore="true">\
+			<input ref="/data/question9/question10" vellum:ignore="true">\
 				<label ref="jr:itext(\'question10-label\')" />\
 			</input>\
 			<input ref="/data/question9/question11">\
 				<label ref="jr:itext(\'question11-label\')" />\
 			</input>\
 		</group>\
-		<select1 ref="/data/question4" ignore="true">\
+		<select1 ref="/data/question4" vellum:ignore="true">\
 			<label ref="jr:itext(\'question4-label\')" />\
 			<item>\
 				<label ref="jr:itext(\'question4-item5-label\')" />\
@@ -152,7 +152,7 @@ var BODY = '' +
 </h:html>';
 
 var BODY_IGNORED = '' +
-'<h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:jr="http://openrosa.org/javarosa">\
+'<h:html xmlns:vellum="http://www.commcarehq.org/vellum" xmlns:h="http://www.w3.org/1999/xhtml" xmlns:jr="http://openrosa.org/javarosa">\
 	<h:body>\
 		<input ref="/data/question1">\
 			<label ref="jr:itext(\'question1-label\')" />\
@@ -167,25 +167,25 @@ var BODY_IGNORED = '' +
 </h:html>';
 
 var MULTIPLE_IGNORES = '' + 
-'<h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:jr="http://openrosa.org/javarosa">\
+'<h:html xmlns:vellum="http://www.commcarehq.org/vellum" xmlns:h="http://www.w3.org/1999/xhtml" xmlns:jr="http://openrosa.org/javarosa">\
 	<h:head>\
 		<model>\
 			<instance>\
 				<data>\
 					<question1 />\
-					<question9 ignore="true" />\
-					<question4 ignore="true" />\
+					<question9 vellum:ignore="true" />\
+					<question4 vellum:ignore="true" />\
 				</data>\
 			</instance>\
 			<bind nodeset="/data/question1" type="xsd:string" />\
-			<bind nodeset="/data/question9" ignore="true" />\
-			<bind nodeset="/data/question4" ignore="true" />\
+			<bind nodeset="/data/question9" vellum:ignore="true" />\
+			<bind nodeset="/data/question4" vellum:ignore="true" />\
 		</model>\
 	</h:head>\
 </h:html>';
 
 var MULTIPLE_IGNORES_IGNORED = '' + 
-'<h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:jr="http://openrosa.org/javarosa">\
+'<h:html xmlns:vellum="http://www.commcarehq.org/vellum" xmlns:h="http://www.w3.org/1999/xhtml" xmlns:jr="http://openrosa.org/javarosa">\
 	<h:head>\
 		<model>\
 			<instance>\
@@ -199,24 +199,24 @@ var MULTIPLE_IGNORES_IGNORED = '' +
 </h:html>';
 
 var UNRENAMED = '' +
-'<h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:jr="http://openrosa.org/javarosa">\
+'<h:html xmlns:vellum="http://www.commcarehq.org/vellum" xmlns:h="http://www.w3.org/1999/xhtml" xmlns:jr="http://openrosa.org/javarosa">\
 	<h:head>\
 		<model>\
 			<instance>\
 				<data>\
 					<question1 />\
 					<question9>\
-						<question10 ignore="true" />\
+						<question10 vellum:ignore="true" />\
 						<question11 />\
 					</question9>\
-					<question4 ignore="true" />\
+					<question4 vellum:ignore="true" />\
 				</data>\
 			</instance>\
 			<bind nodeset="/data/question1" type="xsd:string" />\
 			<bind nodeset="/data/question9" />\
-			<bind nodeset="/data/question9/question10" type="xsd:int" ignore="true" />\
+			<bind nodeset="/data/question9/question10" type="xsd:int" vellum:ignore="true" />\
 			<bind nodeset="/data/question9/question11" type="xsd:int" />\
-			<bind nodeset="/data/question4" ignore="true" />\
+			<bind nodeset="/data/question4" vellum:ignore="true" />\
 		</model>\
 	</h:head>\
 	<h:body>\
@@ -225,14 +225,14 @@ var UNRENAMED = '' +
 		</input>\
 		<group ref="/data/question9">\
 			<label ref="jr:itext(\'question9-label\')" />\
-			<input ref="/data/question9/question10" ignore="true">\
+			<input ref="/data/question9/question10" vellum:ignore="true">\
 				<label ref="jr:itext(\'question10-label\')" />\
 			</input>\
 			<input ref="/data/question9/question11">\
 				<label ref="jr:itext(\'question11-label\')" />\
 			</input>\
 		</group>\
-		<select1 ref="/data/question4" ignore="true">\
+		<select1 ref="/data/question4" vellum:ignore="true">\
 			<label ref="jr:itext(\'question4-label\')" />\
 			<item>\
 				<label ref="jr:itext(\'question4-item5-label\')" />\
@@ -247,7 +247,7 @@ var UNRENAMED = '' +
 </h:html>';
 
 var RENAMED_IGNORED = '' +
-'<h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:jr="http://openrosa.org/javarosa">\
+'<h:html xmlns:vellum="http://www.commcarehq.org/vellum" xmlns:h="http://www.w3.org/1999/xhtml" xmlns:jr="http://openrosa.org/javarosa">\
 	<h:head>\
 		<model>\
 			<instance>\
@@ -277,24 +277,24 @@ var RENAMED_IGNORED = '' +
 </h:html>';
 
 var RENAMED = '' +  // renamed question9 -> question9a
-'<h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:jr="http://openrosa.org/javarosa">\
+'<h:html xmlns:vellum="http://www.commcarehq.org/vellum" xmlns:h="http://www.w3.org/1999/xhtml" xmlns:jr="http://openrosa.org/javarosa">\
 	<h:head>\
 		<model>\
 			<instance>\
 				<data>\
 					<question1 />\
 					<question9a>\
-						<question10 ignore="true" />\
+						<question10 vellum:ignore="true" />\
 						<question11 />\
 					</question9a>\
-					<question4 ignore="true" />\
+					<question4 vellum:ignore="true" />\
 				</data>\
 			</instance>\
 			<bind nodeset="/data/question1" type="xsd:string" />\
 			<bind nodeset="/data/question9a" />\
-			<bind nodeset="/data/question9a/question10" type="xsd:int" ignore="true" />\
+			<bind nodeset="/data/question9a/question10" type="xsd:int" vellum:ignore="true" />\
 			<bind nodeset="/data/question9a/question11" type="xsd:int" />\
-			<bind nodeset="/data/question4" ignore="true" />\
+			<bind nodeset="/data/question4" vellum:ignore="true" />\
 		</model>\
 	</h:head>\
 	<h:body>\
@@ -303,14 +303,14 @@ var RENAMED = '' +  // renamed question9 -> question9a
 		</input>\
 		<group ref="/data/question9a">\
 			<label ref="jr:itext(\'question9a-label\')" />\
-			<input ref="/data/question9a/question10" ignore="true">\
+			<input ref="/data/question9a/question10" vellum:ignore="true">\
 				<label ref="jr:itext(\'question10-label\')" />\
 			</input>\
 			<input ref="/data/question9a/question11">\
 				<label ref="jr:itext(\'question11-label\')" />\
 			</input>\
 		</group>\
-		<select1 ref="/data/question4" ignore="true">\
+		<select1 ref="/data/question4" vellum:ignore="true">\
 			<label ref="jr:itext(\'question4-label\')" />\
 			<item>\
 				<label ref="jr:itext(\'question4-item5-label\')" />\
@@ -326,23 +326,23 @@ var RENAMED = '' +  // renamed question9 -> question9a
 
 
 var REFERENCED_UNRENAMED = '' + 
-'<h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:jr="http://openrosa.org/javarosa">\
+'<h:html xmlns:vellum="http://www.commcarehq.org/vellum" xmlns:h="http://www.w3.org/1999/xhtml" xmlns:jr="http://openrosa.org/javarosa">\
 	<h:head>\
 		<model>\
 			<instance>\
 				<data>\
 					<question1 />\
-					<question9 ignore="true" />\
+					<question9 vellum:ignore="true" />\
 				</data>\
 			</instance>\
 			<bind nodeset="/data/question1" type="xsd:string" />\
-			<bind nodeset="/data/question9" calculate="1 + /data/question1" ignore="true"/>\
+			<bind nodeset="/data/question9" calculate="1 + /data/question1" vellum:ignore="true"/>\
 		</model>\
 	</h:head>\
 </h:html>';
 
 var REFERENCED_RENAMED_IGNORED = '' + 
-'<h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:jr="http://openrosa.org/javarosa">\
+'<h:html xmlns:vellum="http://www.commcarehq.org/vellum" xmlns:h="http://www.w3.org/1999/xhtml" xmlns:jr="http://openrosa.org/javarosa">\
 	<h:head>\
 		<model>\
 			<instance>\
@@ -356,17 +356,17 @@ var REFERENCED_RENAMED_IGNORED = '' +
 </h:html>';
 
 var REFERENCED_RENAMED = '' + 
-'<h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:jr="http://openrosa.org/javarosa">\
+'<h:html xmlns:vellum="http://www.commcarehq.org/vellum" xmlns:h="http://www.w3.org/1999/xhtml" xmlns:jr="http://openrosa.org/javarosa">\
 	<h:head>\
 		<model>\
 			<instance>\
 				<data>\
 					<foobar />\
-					<question9 ignore="true" />\
+					<question9 vellum:ignore="true" />\
 				</data>\
 			</instance>\
 			<bind nodeset="/data/foobar" type="xsd:string" />\
-			<bind nodeset="/data/question9" calculate="1 + /data/foobar" ignore="true"/>\
+			<bind nodeset="/data/question9" calculate="1 + /data/foobar" vellum:ignore="true"/>\
 		</model>\
 	</h:head>\
 </h:html>';
