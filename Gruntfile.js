@@ -4,12 +4,14 @@ var exec = require('child_process').exec;
 
 module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-uglify');
+    grunt.loadNpmTasks('grunt-contrib-cssmin');
     grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-githooks');
 
     grunt.registerTask('dist', [
         'concat:css', 
-        'concat:js', 
+        'concat:js',
+        'cssmin',
         'uglify'
     ]);
 
@@ -34,6 +36,13 @@ module.exports = function (grunt) {
             },
             all: {
                 'pre-commit': 'dist git_add_dist'
+            }
+        },
+        cssmin: {
+            combine: {
+                files: {
+                    'dist/vellum.min.css': ['dist/vellum.css']
+                }
             }
         },
         concat: {
