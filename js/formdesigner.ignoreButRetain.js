@@ -29,7 +29,7 @@ formdesigner.plugins.ignoreButRetain = function () {
 
         var ignoredEls = [];
 
-        xml.find('[vellum\\:ignore="true"]').each(function (i, el) {
+        xml.find('[vellum\\:ignore="retain"]').each(function (i, el) {
             ignoredNodes.push(getPathAndPosition(el));
             ignoredEls.push(el);
         });
