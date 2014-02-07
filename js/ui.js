@@ -1604,7 +1604,7 @@ formdesigner.ui = function () {
         return retval;
     };
 
-    that.init = function() {
+    that.init = function (sessionid) {
 //        //Override CCHQ's SaveButton labels:
 //        //Bug: Does not work yet. See ticket: http://manage.dimagi.com/default.asp?31223
 //        SaveButton.message.SAVE = 'Save to Server';
@@ -1615,7 +1615,7 @@ formdesigner.ui = function () {
         generate_scaffolding();
         init_toolbar();
         init_extra_tools();
-        formdesigner.multimedia.initControllers();
+        formdesigner.multimedia.initControllers(sessionid);
         that.createJSTree();
         init_form_paste();
         init_modal_dialogs();
@@ -1749,7 +1749,7 @@ formdesigner.launch = function (opts) {
     ////////////HAVE A NICE DAY//////////////////////////////////////////////////////////////////////////////////
 
     formdesigner.ui.controller = formdesigner.controller;
-    formdesigner.controller.initFormDesigner();
+    formdesigner.controller.initFormDesigner(opts.sessionid);
 
     if(formdesigner.loadMe) {
         formdesigner.controller.loadXForm(formdesigner.loadMe);

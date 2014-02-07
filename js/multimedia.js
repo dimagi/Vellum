@@ -53,7 +53,7 @@ formdesigner.multimedia = (function () {
         video: 'CommCareVideo'
     };
 
-    function MultimediaController (uploaderSlug, mediaTypeSlug) {
+    function MultimediaController (uploaderSlug, mediaTypeSlug, sessionid) {
         var media = this;
         media.uploaderSlug = uploaderSlug;
         media.mediaType = mediaTypeSlug;
@@ -77,7 +77,8 @@ formdesigner.multimedia = (function () {
                 errorsTemplate: $('#fd-template-multimedia-errors').text(),
                 existingFileTemplate: $(that.PREVIEW_TEMPLATES[media.mediaType]).text(),
                 licensingParams: ['shared', 'license', 'author', 'attribution-notes'],
-                uploadParams: {}
+                uploadParams: {},
+                sessionid: sessionid
             });
             media.uploadController.init();
         };
@@ -85,16 +86,16 @@ formdesigner.multimedia = (function () {
 
     that.objectMap = {};
 
-    that.initControllers = function () {
+    that.initControllers = function (sessionid) {
         that.isUploadEnabled = _.isObject(formdesigner.multimediaConfig);
         if (that.isUploadEnabled) {
-            that.imageControl = new MultimediaController('fd_hqimage', 'image');
+            that.imageControl = new MultimediaController('fd_hqimage', 'image', sessionid);
             that.imageControl.initUploadController();
 
-            that.audioControl = new MultimediaController('fd_hqaudio', 'audio');
+            that.audioControl = new MultimediaController('fd_hqaudio', 'audio', sessionid);
             that.audioControl.initUploadController();
 
-            that.videoControl = new MultimediaController('fd_hqvideo', 'video');
+            that.videoControl = new MultimediaController('fd_hqvideo', 'video', sessionid);
             that.videoControl.initUploadController();
 
             that.SLUG_TO_CONTROL = {
