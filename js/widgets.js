@@ -500,7 +500,7 @@ formdesigner.widgets = (function () {
                         "<p>The <strong>Label</strong> is text that appears in the application. " +
                         "This text will not appear in data exports.</p> " +
                         "<p>Click through for more info.</p>",
-                    link: "https://confluence.dimagi.com/display/commcarepublic/Form+Designer"
+                    link: "https://confluence.dimagi.com/display/commcarepublic/Form+Builder"
                 }
             },
             {
@@ -512,7 +512,7 @@ formdesigner.widgets = (function () {
                     text: "Use logic to control when questions are asked and what answers are valid. " +
                         "You can add logic to display a question based on a previous answer, to make " +
                         "the question required or ensure the answer is in a valid range.",
-                    link: "https://confluence.dimagi.com/display/commcarepublic/Form+Designer"
+                    link: "https://confluence.dimagi.com/display/commcarepublic/Common+Logic+and+Calculations"
                 }
             },
             {
@@ -536,7 +536,7 @@ formdesigner.widgets = (function () {
                     title: "Advanced",
                     text: "These are advanced settings and are not needed for most applications.  " +
                         "Please only change these if you have a specific need!",
-                    link: "https://confluence.dimagi.com/display/commcarepublic/Form+Designer"
+                    link: "https://confluence.dimagi.com/display/commcarepublic/Application+Building"
                 }
             }
         ];
