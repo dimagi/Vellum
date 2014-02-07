@@ -1695,7 +1695,7 @@ formdesigner.launch = function (opts) {
         methods: {
             'getToolsMenuItems': 'return_all',
             'init': 'return_all',
-            'beforeParse': 'return_all',
+            'beforeParse': 'process_sequentially',
             'contributeToModelXML': 'return_all',
             'contributeToDataElementSpec': 'process_sequentially',
             'contributeToBindElementSpec': 'process_sequentially',
@@ -1705,8 +1705,10 @@ formdesigner.launch = function (opts) {
             'contributeToAdvancedProperties': 'process_sequentially',
             'getFormErrors': 'return_all',
             'preSerialize': 'return_all',
+            'afterSerialize': 'process_sequentially'
         }
     });
+    formdesigner.pluginManager.register('ignoreButRetain', new formdesigner.plugins.ignoreButRetain());
     formdesigner.pluginManager.register('javaRosa', new formdesigner.plugins.javaRosa());
 
     if(!opts){
