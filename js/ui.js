@@ -1646,12 +1646,16 @@ var PluginManager = function (options) {
             methodType = this._methods[methodName];
 
         if (methodType === "return_all") {
-            return _(this._plugins).map(function (plugin) {
+            var ret = [];
+
+            _(this._plugins).each(function (plugin) {
                 var fn = plugin[methodName];
                 if (fn) {
-                    return fn.apply(plugin, methodArguments);
+                    ret.push(fn.apply(plugin, methodArguments));
                 }
             });
+
+            return ret;
         } else if (methodType === "process_sequentially") {
             // call plugin functions such that they process the first argument
             // in a pipeline, and the remaining arguments are untouched
