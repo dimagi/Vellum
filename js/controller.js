@@ -1683,11 +1683,14 @@ formdesigner.controller = (function () {
                             
             attrs.requiredAttr = formdesigner.util.parseBoolAttributeValue(
                 el.popAttr('required'));
+
             
             attrs.preload = lookForNamespaced(el, "preload");
             attrs.preloadParams = lookForNamespaced(el, "preloadParams");
            
             path = processPath(path,that.form.dataTree.getRootNode().getID());
+            el = formdesigner.pluginManager.call('parseBindElement', el, path);
+
             oldMug = that.getMugByPath(path,'data');
             if(!oldMug && attrs.nodeset) {
                 oldMug = that.form.getMugByIDFromTree(

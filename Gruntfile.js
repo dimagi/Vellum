@@ -80,6 +80,7 @@ module.exports = function (grunt) {
                     'js/lib/classy-1.4.js',
                     'js/formdesigner.javarosa.js',
                     'js/formdesigner.ignoreButRetain.js',
+                    'js/formdesigner.lock.js',
                     'js/window.js',
                     'js/util.js',
                     'js/multimedia.js',
