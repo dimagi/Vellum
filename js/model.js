@@ -1000,6 +1000,7 @@ formdesigner.model = (function () {
                 xmlWriter.writeAttributeStringSafe( "xmlns", "http://www.w3.org/2002/xforms" );
                 xmlWriter.writeAttributeStringSafe( "xmlns:xsd", "http://www.w3.org/2001/XMLSchema" );
                 xmlWriter.writeAttributeStringSafe( "xmlns:jr", "http://openrosa.org/javarosa" );
+                xmlWriter.writeAttributeStringSafe( "xmlns:vellum", "http://commcarehq.org/xforms/vellum" );
             }
 
             var _writeInstanceAttributes = function (writer, instanceMetadata) {
