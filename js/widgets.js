@@ -459,7 +459,7 @@ formdesigner.widgets = (function () {
             var ret = [];
             for (var i = 0; i < questions.length; i++) {
                 var q = mugs[questions[i]];
-                if (q.prototype.isTypeChangeable && mug.prototype !== q.prototype) {
+                if (q.prototype.isTypeChangeable && mug.$class.prototype !== q.prototype) {
                     ret.push({
                         slug: questions[i],
                         name: q.prototype.typeName,
