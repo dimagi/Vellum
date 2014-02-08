@@ -331,6 +331,7 @@ var Tree = function (tType) {
             (!refMug.controlElement && treeType === 'control'))
         {
             refNode = rootNode;
+            refMug = refNode.getValue();
             position = 'into';
         } else {
             refNode = this.getNodeFromMug(refMug);
