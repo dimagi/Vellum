@@ -1703,6 +1703,7 @@ formdesigner.launch = function (opts) {
             'contributeToMainProperties': 'process_sequentially',
             'contributeToLogicProperties': 'process_sequentially',
             'contributeToAdvancedProperties': 'process_sequentially',
+            'onMugRename': 'return_all',
             'getFormErrors': 'return_all',
             'preSerialize': 'return_all',
             'afterSerialize': 'process_sequentially'
