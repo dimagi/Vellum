@@ -182,23 +182,12 @@ var Tree = function (tType) {
             return retList;
         };
 
-
-        //that.toString = function () {
-            //return this.getID();
-        //};
-
-        that.prettyPrint = function () {
-            var arr = [], i;
-            for (i in children) {
-                if (children.hasOwnProperty(i)) {
-                    arr.push(children[i].prettyPrint());
-                }
-            }
-            if (!children || children.length === 0) {
-                return this.getID();
-            } else {
-                return '' + this.getID() + '[' + arr + ']';
-            }
+        that.getStructure = function () {
+            var ret = {};
+            ret[this.getID()] = _.map(children, function (c) {
+                return c.getStructure();
+            });
+            return ret;
         };
 
         /**
@@ -270,6 +259,10 @@ var Tree = function (tType) {
         } else { //regular case
             return this.rootNode.findParentNode(node);
         }
+    };
+
+    that.getStructure = function () {
+        return this.rootNode.getStructure();
     };
 
     /**
@@ -407,12 +400,6 @@ var Tree = function (tType) {
         }
 
         return output;
-    };
-
-    that.printTree = function (toConsole) {
-        var t = rootNode.prettyPrint();
-
-        return t;
     };
 
     /**
