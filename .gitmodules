@@ -1,3 +1,0 @@
-[submodule "src/js/lib/xpath"]
-	path = src/js/lib/xpath
-	url = git://github.com/dimagi/js-xpath.git
