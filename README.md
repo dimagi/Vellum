@@ -41,53 +41,32 @@ Form Options:
 * [form] : "string of the xml form that you wish to load"
 * [formName] : "Default Form Name"
 
-Testing
--------
-
-### Running tests manually
-
-```
-$ python -m SimpleHTTPServer
-$ chromium-browser js/tests/runner.html
-```
-
-### Running tests headlessly (currently broken)
-
-Install PhantomJS from NPM:
-
-```
-$ npm install -g phantomjs
-```
-
-Then:
-
-```
-$ cd js
-$ npm install -d
-$ npm test
-```
-
-Currently, the tests don't behave correctly under PhantomJS (or in Firefox).
-You can open `js/tests/runner.html` to manually run the tests.
-
 
 Contributing
 ------------
 
-To install grunt plugins and setup git hooks to run `grunt dist`:
-
+Install dependencies:
 ```
-$ npm install grunt grunt-contrib-uglify grunt-contrib-cssmin grunt-contrib-concat grunt-githooks
-$ grunt githooks
+$ npm install
 ```
 
-Note: git pre-commit hook integration doesn't seem to work at the moment, so you
-will have to manually run the following before every commit:
-
+Create build artifacts for each commit:
 ```
 $ grunt dist
-$ git add dist
 ```
+
+Run tests in a browser:
+```
+$ python -m SimpleHTTPServer
+$ chromium-browser tests/runner.html
+```
+
+Run tests headlessly (currently broken):
+```
+$ npm install -g phantomjs
+$ npm test
+```
+
 
 To modify Vellum's CSS, you need to have [LESS](http://lesscss.org) installed.
 You each file in `style` is compiled individually and share a common library `style/lib/main.less`
