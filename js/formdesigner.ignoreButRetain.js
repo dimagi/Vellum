@@ -60,11 +60,10 @@ formdesigner.plugins.ignoreButRetain = function () {
             }
 
             var parentNode = xml.find(node.path),
-                appendNode = $.parseXML(node.nodeXML).children[0],
-                target;
+                appendNode = $.parseXML(node.nodeXML).children[0];
 
             if (node.position) {
-                target = parentNode.find(node.position);
+                var target = parentNode.find(node.position);
                 if (target.length) {
                     target.after($(appendNode));
                 } else {

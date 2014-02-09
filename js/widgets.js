@@ -21,6 +21,20 @@ formdesigner.widgets = (function () {
         // it is called in a constructor on the object being constructed
         widget.mug = mug;
 
+        widget.isDisabled = function () {
+            // requires widget.path to be set.  This only happens in
+            // normalWidget.  Need to change widgets that inherit directly from
+            // baseWidget to use the path/property system.
+            if (!widget.path) {
+                return false;
+            }
+            var mugPath = formdesigner.controller.form.dataTree.getAbsolutePath(
+                    widget.mug);
+
+            return _.any(formdesigner.pluginManager.call('isPropertyLocked', 
+                                mugPath, widget.path));
+        };
+
         widget.getDisplayName = function () {
             // use the display text, or the property name if none found
             return this.definition.lstring ? this.definition.lstring : this.propName;
@@ -130,6 +144,9 @@ formdesigner.widgets = (function () {
 	    var input = $("<input />").attr("id", widget.getID()).attr("type", "text").addClass('input-block-level');
 
 	    widget.getControl = function () {
+            if (widget.isDisabled()) {
+                input.prop('disabled', true);
+            }
             return input;
         };
 
@@ -163,6 +180,9 @@ formdesigner.widgets = (function () {
         input.attr("type", "checkbox");
 
         widget.getControl = function () {
+            if (widget.isDisabled()) {
+                input.prop('disabled', true);
+            }
 	        return input;
         };
 
@@ -197,6 +217,9 @@ formdesigner.widgets = (function () {
         });
 
         widget.getUIElement = function () {
+            if (widget.isDisabled()) {
+                xPathButton.prop('disabled', true);
+            }
             // gets the whole widget (label + control)
             var uiElem = $("<div />").addClass("widget control-group"),
                 $controls = $('<div />').addClass('controls'),
@@ -235,6 +258,9 @@ formdesigner.widgets = (function () {
         }
 
         widget.getControl = function () {
+            if (widget.isDisabled()) {
+                input.prop('disabled', true);
+            }
             return input;
         };
 
@@ -264,6 +290,9 @@ formdesigner.widgets = (function () {
         var input = $("<input />").attr("id", widget.getID()).attr("type", "text").attr('placeholder', 'Insert Android Application ID');
 
         widget.getControl = function () {
+            if (widget.isDisabled()) {
+                input.prop('disabled', true);
+            }
             return input;
         };
 
@@ -294,6 +323,9 @@ formdesigner.widgets = (function () {
         widget.kvInput = $('<div class="control-row" />');
 
         widget.getControl = function () {
+            if (widget.isDisabled()) {
+                // todo
+            }
             return widget.kvInput;
         };
 
@@ -442,7 +474,10 @@ formdesigner.widgets = (function () {
     };
 
     that.getToolbarForMug = function (mug) {
-        var $baseToolbar = formdesigner.ui.getTemplateObject('#fd-template-question-toolbar', {});
+        var $baseToolbar = formdesigner.ui.getTemplateObject('#fd-template-question-toolbar', {
+            isDeleteable: _.all(formdesigner.pluginManager.call('isMugRemoveable', 
+                    formdesigner.controller.form.dataTree.getAbsolutePath(mug))) 
+        });
         $baseToolbar.find('#fd-button-remove').click(formdesigner.controller.removeCurrentQuestion);
         $baseToolbar.find('#fd-button-copy').click(function () {
             formdesigner.controller.duplicateCurrentQuestion({itext: 'copy'});
@@ -459,7 +494,7 @@ formdesigner.widgets = (function () {
             var ret = [];
             for (var i = 0; i < questions.length; i++) {
                 var q = mugs[questions[i]];
-                if (q.prototype.isTypeChangeable && mug.prototype !== q.prototype) {
+                if (q.prototype.isTypeChangeable && mug.$class.prototype !== q.prototype) {
                     ret.push({
                         slug: questions[i],
                         name: q.prototype.typeName,
@@ -469,9 +504,13 @@ formdesigner.widgets = (function () {
             }
             return ret;
         };
-        
+        var changeable = formdesigner.pluginManager.call('isMugTypeChangeable', 
+                    formdesigner.controller.form.dataTree.getAbsolutePath(mug));
+
         var $questionTypeChanger = formdesigner.ui.getTemplateObject('#fd-template-question-type-changer', {
+            canChangeType: _.all(changeable),
             currentQuestionIcon: mug.getIcon(),
+            currentTypeName: mug.typeName,
             questions: getQuestionList(mug)
         });
         $questionTypeChanger.find('.change-question').click(function (e) {

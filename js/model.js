@@ -182,23 +182,12 @@ var Tree = function (tType) {
             return retList;
         };
 
-
-        //that.toString = function () {
-            //return this.getID();
-        //};
-
-        that.prettyPrint = function () {
-            var arr = [], i;
-            for (i in children) {
-                if (children.hasOwnProperty(i)) {
-                    arr.push(children[i].prettyPrint());
-                }
-            }
-            if (!children || children.length === 0) {
-                return this.getID();
-            } else {
-                return '' + this.getID() + '[' + arr + ']';
-            }
+        that.getStructure = function () {
+            var ret = {};
+            ret[this.getID()] = _.map(children, function (c) {
+                return c.getStructure();
+            });
+            return ret;
         };
 
         /**
@@ -272,6 +261,10 @@ var Tree = function (tType) {
         }
     };
 
+    that.getStructure = function () {
+        return this.rootNode.getStructure();
+    };
+
     /**
      * Given a mug, finds the node that the mug belongs to (in this tree).
      * Will return null if nothing is found.
@@ -331,6 +324,7 @@ var Tree = function (tType) {
             (!refMug.controlElement && treeType === 'control'))
         {
             refNode = rootNode;
+            refMug = refNode.getValue();
             position = 'into';
         } else {
             refNode = this.getNodeFromMug(refMug);
@@ -406,12 +400,6 @@ var Tree = function (tType) {
         }
 
         return output;
-    };
-
-    that.printTree = function (toConsole) {
-        var t = rootNode.prettyPrint();
-
-        return t;
     };
 
     /**
@@ -1000,6 +988,7 @@ formdesigner.model = (function () {
                 xmlWriter.writeAttributeStringSafe( "xmlns", "http://www.w3.org/2002/xforms" );
                 xmlWriter.writeAttributeStringSafe( "xmlns:xsd", "http://www.w3.org/2001/XMLSchema" );
                 xmlWriter.writeAttributeStringSafe( "xmlns:jr", "http://openrosa.org/javarosa" );
+                xmlWriter.writeAttributeStringSafe( "xmlns:vellum", "http://commcarehq.org/xforms/vellum" );
             }
 
             var _writeInstanceAttributes = function (writer, instanceMetadata) {

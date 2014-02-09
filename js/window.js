@@ -7,6 +7,8 @@ formdesigner.windowManager = (function () {
     var that = {};
 
     that.init = function () {
+        formdesigner.windowConfig = formdesigner.windowConfig || {};
+
         $(window).resize(that.adjustToWindow);
         $(document).scroll(that.adjustToWindow);
 
@@ -21,6 +23,11 @@ formdesigner.windowManager = (function () {
     };
 
     that.adjustToWindow = function () {
+        var $fd = $("#formdesigner");
+        if (!$fd.is(':visible')) {
+            return;
+        }
+
         var availableVertSpace = $(window).height() - that.getCurrentTopOffset(),
             availableHorizSpace,
             position = (that.getCurrentTopOffset() === 0) ? 'fixed' : 'static',
@@ -37,7 +44,7 @@ formdesigner.windowManager = (function () {
             .css('position', position)
             .css('left', that.getCurrentLeftOffset() + 'px');
 
-        availableHorizSpace = $('.hq-content').width();
+        availableHorizSpace = $fd.width();
 
         var availableColumnSpace = availableVertSpace - $('.fd-toolbar').outerHeight(),
             panelHeight, columnHeight, treeHeight, questionPropHeight;

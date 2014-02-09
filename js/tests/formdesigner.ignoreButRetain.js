@@ -4,12 +4,6 @@ describe("The Ignore-But-Retain plugin", function() {
     var plugin = new formdesigner.plugins.ignoreButRetain(),
         xmls = new XMLSerializer();
 
-    var assertXmlEqual = function (str1, str2) {
-        var xml1 = EquivalentXml.xml(str1),
-            xml2 = EquivalentXml.xml(str2);
-        assert(EquivalentXml.isEquivalent(xml1, xml2, {element_order: true}));
-    };
-
     var testXmlPair = function (rawXml, processedXml) {
         var xml = $($.parseXML(rawXml));
         xml = xmls.serializeToString(plugin.beforeParse(xml)[0]);

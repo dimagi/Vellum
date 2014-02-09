@@ -1488,11 +1488,29 @@ formdesigner.ui = function () {
                     "check_move": function (m) {
                         // disallow moving a data node or onto a data node
                         // unless both nodes are data nodes
-                        var refIsData = $(m.r).attr('rel') === 'DataBindOnly',
-                            nodeIsData = $(m.o).attr('rel') === 'DataBindOnly';
+                        var form = formdesigner.controller.form,
+                            source = $(m.o),
+                            target = $(m.r),
+                            position = m.p,
+                            refIsData = target.attr('rel') === 'DataBindOnly',
+                            nodeIsData = source.attr('rel') === 'DataBindOnly';
 
                         if (refIsData + nodeIsData == 1) {
                             return false;
+                        }
+
+                        var sourceMug = form.getMugByUFID(source.attr('id')),
+                            isMoveable = _.all(formdesigner.pluginManager.call(
+                                'isMugPathMoveable', sourceMug));
+
+                        if (!isMoveable) {
+                            var id = target.attr('id'),
+                                targetMug = form.getMugByUFID(id);
+                            if (position === 'inside' || position === 'last') {
+                                return sourceMug.parentMug === targetMug;
+                            } else {
+                                return sourceMug.parentMug === targetMug.parentMug;
+                            }
                         }
 
                         return true;
@@ -1646,12 +1664,16 @@ var PluginManager = function (options) {
             methodType = this._methods[methodName];
 
         if (methodType === "return_all") {
-            return _(this._plugins).map(function (plugin) {
+            var ret = [];
+
+            _(this._plugins).each(function (plugin) {
                 var fn = plugin[methodName];
                 if (fn) {
-                    return fn.apply(plugin, methodArguments);
+                    ret.push(fn.apply(plugin, methodArguments));
                 }
             });
+
+            return ret;
         } else if (methodType === "process_sequentially") {
             // call plugin functions such that they process the first argument
             // in a pipeline, and the remaining arguments are untouched
@@ -1696,6 +1718,7 @@ formdesigner.launch = function (opts) {
             'getToolsMenuItems': 'return_all',
             'init': 'return_all',
             'beforeParse': 'process_sequentially',
+            'parseBindElement': 'process_sequentially',
             'contributeToModelXML': 'return_all',
             'contributeToDataElementSpec': 'process_sequentially',
             'contributeToBindElementSpec': 'process_sequentially',
@@ -1704,12 +1727,17 @@ formdesigner.launch = function (opts) {
             'contributeToLogicProperties': 'process_sequentially',
             'contributeToAdvancedProperties': 'process_sequentially',
             'onMugRename': 'return_all',
+            'isPropertyLocked': 'return_all',
+            'isMugPathMoveable': 'return_all',
+            'isMugRemoveable': 'return_all',
+            'isMugTypeChangeable': 'return_all',
             'getFormErrors': 'return_all',
             'preSerialize': 'return_all',
             'afterSerialize': 'process_sequentially'
         }
     });
     formdesigner.pluginManager.register('ignoreButRetain', new formdesigner.plugins.ignoreButRetain());
+    formdesigner.pluginManager.register('lock', new formdesigner.plugins.lock());
     formdesigner.pluginManager.register('javaRosa', new formdesigner.plugins.javaRosa());
 
     if(!opts){

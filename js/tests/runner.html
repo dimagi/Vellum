@@ -4,40 +4,78 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 
   <head>
-    <title>Vellum Test Results</title>
+    <title>Vellum Test</title>
 
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 
-    <!-- Mocha and test-only dependencies -->
-    <link href="../node_modules/mocha/mocha.css" type="text/css" rel="stylesheet"></link>
-    <script type="text/javascript" src="../node_modules/mocha/mocha.js"></script>
-    <script type="text/javascript" src="../node_modules/chai/chai.js"></script>
-
-    <script src="utils/equivalent-xml.js"></script>
-
     <!-- Runtime Dependencies -->
+    <link href="lib/hqstyle-core.css" type="text/css" rel="stylesheet"></link>
     <script type="text/javascript" src="lib/jquery-1.7.1.min.js"></script>
     <script type="text/javascript" src="../lib/underscore-1.5.2.js"></script>
     <!-- ? --><script type="text/javascript" src="../lib/jquery-ui-1.8.14.custom.min.js"></script>
-    <script type="text/javascript" src="../saveButton.js?version=101"></script>
+
+    <script src="lib/bootstrap.js"></script>
+    <script src="lib/bootstrap-tooltip.js"></script>
+
+    <script src="lib/bootstrap-popover.js"></script>
+    <script src="lib/bootstrap-popout.js"></script>
+    <script src="../saveButton.js"></script>
 
     <!-- Vellum -->
-    <script src="../../dist/vellum.min.js?version=101"></script>
+    <link href="../../dist/vellum.css" type="text/css" rel="stylesheet"></link>
+    <script src="../../dist/vellum.js"></script>
+    
+    <!-- Mocha and test-only dependencies -->
+    <link href="../node_modules/mocha/mocha.css" type="text/css" rel="stylesheet"></link>
+    <script src="../node_modules/mocha/mocha.js"></script>
+    <script src="../node_modules/chai/chai.js"></script>
+    <script src="../node_modules/sinon/pkg/sinon.js"></script>
 
-  </head>
-  <body>
-    <div id="mocha"></div>
+    <script src="utils/equivalent-xml.js"></script>
+    <script src="utils/jquery.simulate.js"></script>
+    <script src="utils.js"></script>
+
+</head>
+<body>
+    <ul class="nav nav-tabs">
+      <li class="active"><a data-toggle='tab' href="#vellum">Vellum</a></li>
+      <li><a data-toggle='tab' href="#vellum_results">Test Results</a></li>
+    </ul>
+     
+    <div class="tab-content">
+        <div class="tab-pane active" id="vellum"><div id="formdesigner"></div></div>
+        <div class="tab-pane" id="vellum_results"><div id="mocha"></div></div>
+    </div>
     
     <!-- Tests and running -->
     <script type="text/javascript">
       mocha.setup('bdd');
       mocha.reporter('html');
+
+
+      formdesigner.launch({
+          rootElement: $("#formdesigner"),
+          staticPrefix: '../../',
+          allowedDataNodeReferences: [
+              "meta/deviceID",
+              "meta/instanceID",
+              "meta/username",
+              "meta/userID",
+              "meta/timeStart",
+              "meta/timeEnd"
+          ],
+          formName: "Untitled Form",
+          langs: ['en'],
+          displayLanguage: 'en'
+      });
     </script>
-    <script type="text/javascript" src="formdesigner.spec.js"></script>
+
     <script src="formdesigner.ignoreButRetain.js"></script>
+    <script src="formdesigner.lock.js"></script>
     <script type="text/javascript">
       if (window.mochaPhantomJS) { mochaPhantomJS.run(); }
       else { mocha.run(); }
     </script>
+
   </body>
 </html>

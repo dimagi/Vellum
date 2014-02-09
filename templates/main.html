@@ -334,18 +334,22 @@
                 <i class="icon-copy"></i> Copy
             </button>
         </div>
+        <% if (isDeleteable) { %>
         <div class="btn-toolbar pull-right">
             <button id="fd-button-remove" type="button" class="btn btn-danger"  tabindex="-1">
                 <i class="icon-trash"></i> Delete
             </button>
         </div>
+        <% } %>
     </div>
 </script>
 
 <script type="text/template" id="fd-template-question-type-changer">
     <div class="btn-group question-type-changer">
+        <% if (canChangeType) { %>
         <a class="btn dropdown-toggle current-question" data-toggle="dropdown" href="#">
-            <i class="<%=currentQuestionIcon%>"></i> <span class="caret"></span>
+            <i class="<%=currentQuestionIcon%>"></i> 
+            <%= currentTypeName %> <span class="caret"></span>
         </a>
         <ul class="dropdown-menu">
             <li class="nav-header">Change Question Type To</li>
@@ -357,6 +361,12 @@
             </li>
             <% }); %>
         </ul>
+        <% } else { %>
+        <a class="btn current-question" href="#">
+            <i class="<%=currentQuestionIcon%>"></i>
+            <%= currentTypeName %>
+        </a>
+        <% } %>
     </div>
 </script>
 
