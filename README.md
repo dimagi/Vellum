@@ -10,8 +10,8 @@ Vellum is an [XForm](http://en.wikipedia.org/wiki/XForms) designer built by
 Setup
 -----
 
-Vellum expects jQuery and Underscore.js to be present.   It also expects
-`SaveButton` from CommCare HQ
+Vellum expects jQuery, Underscore.js, and Twitter Bootstrap (version 2.2.2) to
+be present.   It also expects `SaveButton` from CommCare HQ
 ([link](https://github.com/dimagi/commcare-hq/blob/master/corehq/apps/hqwebapp/static/hqwebapp/js/main.js))
 to be present, or you can use the version included in `js/`, which may be out of
 date.
