@@ -1,7 +1,6 @@
 var fs = require('fs');
 var exec = require('child_process').exec;
 
-
 module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-cssmin');
@@ -48,14 +47,14 @@ module.exports = function (grunt) {
         concat: {
             css: {
                 src: [
-                    'css/chosen.css',
-                    'js/lib/codemirror/codemirror.css',
-                    'css/jquery.fancybox-1.3.4.css',
-                    'style/structure.css',
-                    'style/editor-column.css',
-                    'style/tree-content.css',
-                    'style/question-props.css',
-                    'style/xpath-editor.css'
+                    'src/css/chosen.css',
+                    'src/js/lib/codemirror/codemirror.css',
+                    'src/css/jquery.fancybox-1.3.4.css',
+                    'src/style/structure.css',
+                    'src/style/editor-column.css',
+                    'src/style/tree-content.css',
+                    'src/style/question-props.css',
+                    'src/style/xpath-editor.css'
                 ],
                 dest: 'dist/vellum.css'
             },
@@ -64,30 +63,30 @@ module.exports = function (grunt) {
                     separator: ';'
                 },
                 src: [
-                    'js/lib/xpath/lib/biginteger.js',
-                    'js/lib/xpath/lib/schemeNumber.js',
-                    'js/lib/xpath/models.js',
-                    'js/lib/xpath/xpath.js',
+                    'src/js/lib/xpath/lib/biginteger.js',
+                    'src/js/lib/xpath/lib/schemeNumber.js',
+                    'src/js/lib/xpath/models.js',
+                    'src/js/lib/xpath/xpath.js',
 
-                    'js/lib/jquery.jstree.js',
-                    'js/lib/jquery.fancybox-1.3.4.js',
-                    'js/lib/chosen.jquery.js',
-                    'js/lib/sha1.js',
-                    'js/lib/diff_match_patch.js',
-                    'js/lib/XMLWriter-1.0.0.js',
-                    'js/lib/codemirror/codemirror.js',
-                    'js/lib/codemirror/xml.js',
-                    'js/lib/classy-1.4.js',
-                    'js/formdesigner.javarosa.js',
-                    'js/formdesigner.ignoreButRetain.js',
-                    'js/formdesigner.lock.js',
-                    'js/window.js',
-                    'js/util.js',
-                    'js/multimedia.js',
-                    'js/widgets.js',
-                    'js/model.js',
-                    'js/controller.js',
-                    'js/ui.js'
+                    'src/js/lib/jquery.jstree.js',
+                    'src/js/lib/jquery.fancybox-1.3.4.js',
+                    'src/js/lib/chosen.jquery.js',
+                    'src/js/lib/sha1.js',
+                    'src/js/lib/diff_match_patch.js',
+                    'src/js/lib/XMLWriter-1.0.0.js',
+                    'src/js/lib/codemirror/codemirror.js',
+                    'src/js/lib/codemirror/xml.js',
+                    'src/js/lib/classy-1.4.js',
+                    'src/js/formdesigner.javarosa.js',
+                    'src/js/formdesigner.ignoreButRetain.js',
+                    'src/js/formdesigner.lock.js',
+                    'src/js/window.js',
+                    'src/js/util.js',
+                    'src/js/multimedia.js',
+                    'src/js/widgets.js',
+                    'src/js/model.js',
+                    'src/js/controller.js',
+                    'src/js/ui.js'
                 ],
                 dest: 'dist/vellum.js'
             }
