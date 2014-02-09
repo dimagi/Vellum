@@ -44,6 +44,15 @@ Form Options:
 Testing
 -------
 
+### Running tests manually
+
+```
+$ python -m SimpleHTTPServer
+$ chromium-browser js/tests/runner.html
+```
+
+### Running tests headlessly (currently broken)
+
 Install PhantomJS from NPM:
 
 ```
