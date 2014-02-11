@@ -686,6 +686,13 @@ formdesigner.controller = (function () {
             
             var newMug = new mugs[questionType]();
             newMug.ufid = mug.ufid;
+
+            // hack: force removal of the appearance attribute since this is statically
+            // determined already by the question type
+            if (mug.controlElement && mug.controlElement.appearance) {
+                mug.controlElement.appearance = null;
+            }
+
             newMug.copyAttrs(mug);
             
             // update trees
