@@ -22,7 +22,7 @@ For an example of a minimal setup and usage of Vellum, including all known
 dependencies, see `tests/runner.html`.
 
 For some additional configuration options, see
-`[form_designer.html](https://github.com/dimagi/commcare-hq/blob/master/corehq/apps/app_manager/templates/app_manager/form_designer.html)`
+[`form_designer.html`](https://github.com/dimagi/commcare-hq/blob/master/corehq/apps/app_manager/templates/app_manager/form_designer.html)
 in CommCare HQ.
 
 
