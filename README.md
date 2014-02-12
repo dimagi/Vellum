@@ -1,45 +1,29 @@
 Vellum
 ======
 
-Vellum is an [XForm](http://en.wikipedia.org/wiki/XForms) designer built by
+Vellum is a JavaRosa [XForm](http://en.wikipedia.org/wiki/XForms) designer built by
 [Dimagi][0] for [CommCare HQ][1].
 
  [0]: http://www.dimagi.com
  [1]: http://www.commcarehq.org
 
-Setup
------
-
-Vellum expects jQuery, Underscore.js, and Twitter Bootstrap (version 2.2.2) to
-be present.   It also expects `SaveButton` from CommCare HQ
-([link](https://github.com/dimagi/commcare-hq/blob/master/corehq/apps/hqwebapp/static/hqwebapp/js/main.js))
-to be present, or you can use the version included in `js/`, which may be out of
-date.
-
-All other dependencies are bundled in `dist/vellum.min.js` and
-`dist/vellum.css`.
-
-You'll need to change line 39 in `css/jquery.fancybox-1.3.4.css` to the URL that
-points to fancybox.png, and re-run the grunt tasks.
-
 Usage
 -----
 
-    formdesigner.launch({
-        rootElement: "#formdesigner",
-        staticPrefix: "",
-        langs: ""
-    });
+Vellum depends on jQuery, Underscore.js, and Bootstrap.  Other dependencies are
+bundled and included in `dist/vellum.js` and `dist/vellum.css`, but some
+additional dependencies that are part of [CommCare
+HQ](http://github.com/dimagi/commcare-hq) aren't well-defined yet.
 
-formdesigner.launch causes the formdesigner to initialize itself fully in the
-element specified by rootElement.
+You also need to change line 39 in `css/jquery.fancybox-1.3.4.css` to the URL that
+points to `fancybox.png`.
 
-Form Options:
-* rootElement: "jQuery selector to FD Container",
-* staticPrefix : "url prefix for static resources like css and pngs",
-* saveUrl : "URL that the FD should post saved forms to",
-* [form] : "string of the xml form that you wish to load"
-* [formName] : "Default Form Name"
+For an example of a minimal setup and usage of Vellum, including all known
+dependencies, see `tests/runner.html`.
+
+For some additional configuration options, see
+`[form_designer.html](https://github.com/dimagi/commcare-hq/blob/master/corehq/apps/app_manager/templates/app_manager/form_designer.html)`
+in CommCare HQ.
 
 
 Contributing
@@ -47,6 +31,7 @@ Contributing
 
 Install dependencies:
 ```
+$ npm install napa
 $ npm install
 ```
 
