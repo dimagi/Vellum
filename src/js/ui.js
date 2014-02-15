@@ -1468,7 +1468,6 @@ formdesigner.ui = function () {
     };
 
     that.createJSTree = function () {
-        $.jstree._themes = formdesigner.staticPrefix + "themes/";
         that.questionTree = $('#' + that.QUESTION_TREE_DIV);
         that.questionTree.jstree({
             "json_data" : {
@@ -1538,6 +1537,13 @@ formdesigner.ui = function () {
                 })()
             },
             "plugins" : [ "themes", "json_data", "ui", "crrm", "types", "dnd" ]
+            // We enable the "themes" plugin, but bundle the default theme CSS
+            // (with base64-embedded images) in our CSS build.  The themes
+            // plugin needs to stay enabled because it adds CSS selectors to
+            // themeable items, which it would be hard to adapt the existing
+            // selectors to if they didn't exist.  This would result in the
+            // themes plugin getting a 404 for the CSS file, but we comment that
+            // out.
         }).bind("select_node.jstree", 
             that.handleNodeSelect
         ).bind("move_node.jstree", function (e, data) {
