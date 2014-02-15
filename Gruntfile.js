@@ -46,11 +46,7 @@ module.exports = function (grunt) {
         less: {
             main: {
                 files: {
-                    "src/style/structure.css": "src/style/structure.less",
-                    "src/style/editor-column.css": "src/style/editor-column.less",
-                    "src/style/tree-content.css": "src/style/tree-content.less",
-                    "src/style/question-props.css": "src/style/question-props.less",
-                    "src/style/xpath-editor.css": "src/style/xpath-editor.less"
+                    "src/style/main.css": "src/style/main.less",
                 }
             }
         },
@@ -60,11 +56,7 @@ module.exports = function (grunt) {
                     'src/css/chosen.css',
                     'src/js/lib/codemirror/codemirror.css',
                     'src/css/jquery.fancybox-1.3.4.css',
-                    'src/style/structure.css',
-                    'src/style/editor-column.css',
-                    'src/style/tree-content.css',
-                    'src/style/question-props.css',
-                    'src/style/xpath-editor.css'
+                    'src/style/main.css',
                 ],
                 dest: 'dist/vellum.css'
             },
