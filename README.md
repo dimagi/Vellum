@@ -15,9 +15,6 @@ bundled and included in `dist/vellum.js` and `dist/vellum.css`, but some
 additional dependencies that are part of [CommCare
 HQ](http://github.com/dimagi/commcare-hq) aren't well-defined yet.
 
-You also need to change line 39 in `css/jquery.fancybox-1.3.4.css` to the URL that
-points to `fancybox.png`.
-
 For an example of a minimal setup and usage of Vellum, including all known
 dependencies, see `tests/runner.html`.
 

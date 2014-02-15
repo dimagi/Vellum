@@ -54,7 +54,7 @@ module.exports = function (grunt) {
             css: {
                 src: [
                     'src/js/lib/codemirror/codemirror.css',
-                    'src/css/jquery.fancybox-1.3.4.css',
+                    'src/js/lib/fancybox/jquery.fancybox-1.3.4.css',
                     'src/less/main.css',
                 ],
                 dest: 'dist/vellum.css'
@@ -70,7 +70,7 @@ module.exports = function (grunt) {
                     'node_modules/xpath/xpath.js',
 
                     'src/js/lib/jquery.jstree.js',
-                    'src/js/lib/jquery.fancybox-1.3.4.js',
+                    'src/js/lib/fancybox/jquery.fancybox-1.3.4.js',
                     'src/js/lib/sha1.js',
                     'src/js/lib/diff_match_patch.js',
                     'node_modules/XMLWriter/XMLWriter.js',
