@@ -973,6 +973,7 @@ formdesigner.controller = (function () {
 
             try {
                 codeMirror = CodeMirror.fromTextArea($textarea.get(0));
+                codeMirror.setOption('viewportMargin', Infinity);
                 codeMirror.setOption('lineNumbers', true);
                 codeMirror.setSize('100%', '100%');
             } catch (e) {
