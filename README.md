@@ -43,7 +43,7 @@ $ grunt dist
 Run tests in a browser:
 ```
 $ python -m SimpleHTTPServer
-$ chromium-browser tests/runner.html
+$ chromium-browser http://localhost:8000/tests/runner.html
 ```
 
 Run tests headlessly (currently broken):
