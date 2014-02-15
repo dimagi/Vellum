@@ -3,6 +3,8 @@ node_modules
 npm-debug.log
 *~
 
+src/style/*.css
+
 dist/*.map
 dist/vellum.css
 dist/vellum.js

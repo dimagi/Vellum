@@ -1,13 +1,19 @@
-var fs = require('fs');
-var exec = require('child_process').exec;
+var fs = require('fs'),
+    exec = require('child_process').exec,
+    _ = require('underscore');
 
 module.exports = function (grunt) {
-    grunt.loadNpmTasks('grunt-contrib-uglify');
-    grunt.loadNpmTasks('grunt-contrib-cssmin');
-    grunt.loadNpmTasks('grunt-contrib-concat');
-    grunt.loadNpmTasks('grunt-githooks');
+    _.each([
+        'grunt-contrib-concat',
+        'grunt-contrib-cssmin',
+        'grunt-contrib-less',
+        'grunt-contrib-uglify',
+        'grunt-image-embed',
+        'grunt-githooks'
+    ], grunt.loadNpmTasks);
 
     grunt.registerTask('dist', [
+        'less',
         'concat:css', 
         'concat:js',
         'cssmin',
@@ -37,10 +43,14 @@ module.exports = function (grunt) {
                 'pre-commit': 'dist git_add_dist'
             }
         },
-        cssmin: {
-            combine: {
+        less: {
+            main: {
                 files: {
-                    'dist/vellum.min.css': ['dist/vellum.css']
+                    "src/style/structure.css": "src/style/structure.less",
+                    "src/style/editor-column.css": "src/style/editor-column.less",
+                    "src/style/tree-content.css": "src/style/tree-content.less",
+                    "src/style/question-props.css": "src/style/question-props.less",
+                    "src/style/xpath-editor.css": "src/style/xpath-editor.less"
                 }
             }
         },
@@ -89,6 +99,13 @@ module.exports = function (grunt) {
                     'src/js/ui.js'
                 ],
                 dest: 'dist/vellum.js'
+            }
+        },
+        cssmin: {
+            combine: {
+                files: {
+                    'dist/vellum.min.css': ['dist/vellum.css']
+                }
             }
         },
         uglify: {
