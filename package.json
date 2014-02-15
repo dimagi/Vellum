@@ -17,10 +17,13 @@
         "jquery": "==1.7",
         "requirejs": ">=2.0",
         "xmldom":     ">=0.1.16",
+        "underscore": "~1.5.2",
 
         "XMLWriter": "git://github.com/alexandern/XMLWriter.git#314f56f53bdc3cb76bd12a7db837be6710e0236f"
     },
     "devDependencies": {
+        "napa": "*",
+
         "chai": ">=1.5.0",
         "istanbul": ">=0.1.34",
         "jshint": ">=1.1.0",
@@ -28,11 +31,14 @@
         "mocha-istanbul": ">=0.2.0",
         "sinon": ">=1.6.0",
 
-        "grunt": "~0.4.2",
-        "grunt-contrib-uglify": "~0.3.2",
-        "grunt-contrib-cssmin": "~0.7.0",
-        "grunt-contrib-concat": "~0.3.0",
-        "grunt-githooks": "~0.3.1"
+        "less": "~1.3.3",
+        "grunt": "*",
+        "grunt-contrib-less": "~0.5.2",
+        "grunt-contrib-uglify": "*",
+        "grunt-contrib-cssmin": "*",
+        "grunt-contrib-concat": "*",
+        "grunt-image-embed": "*",
+        "grunt-githooks": "*"
     },
     "main": "dist/vellum.min.js",
     "napa": {
