@@ -46,7 +46,7 @@ module.exports = function (grunt) {
         less: {
             main: {
                 files: {
-                    "src/style/main.css": "src/style/main.less",
+                    "src/less/main.css": "src/less/main.less",
                 }
             }
         },
@@ -56,7 +56,7 @@ module.exports = function (grunt) {
                     'src/css/chosen.css',
                     'src/js/lib/codemirror/codemirror.css',
                     'src/css/jquery.fancybox-1.3.4.css',
-                    'src/style/main.css',
+                    'src/less/main.css',
                 ],
                 dest: 'dist/vellum.css'
             },
