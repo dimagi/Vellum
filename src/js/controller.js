@@ -47,11 +47,6 @@ formdesigner.controller = (function () {
             });
         });
         
-        that.on('question-creation', function () {
-           that.setFormChanged(); //mark the form as 'changed'
-        });
-
-        
         that.on('question-itext-changed', function () {
             that.setFormChanged();
         });
@@ -547,7 +542,7 @@ formdesigner.controller = (function () {
                 if (position !== 'after') {
                     position = 'after';
                 } else {
-                    refMug = refMug.parentMug;
+                    refMug = refMug ? refMug.parentMug : null;
                     if (!refMug) {
                         break;
                     }
@@ -557,8 +552,8 @@ formdesigner.controller = (function () {
 
         if (!success) {
             throw new Error("Can't insert " + mug.__className + " into " + 
-                refMug.__className + " " + 
-                formdesigner.util.getMugDisplayName(refMug) + 
+                (refMug ? refMug.__className : refMug) + " " + 
+                that.form.dataTree.getAbsolutePath(refMug) + 
                 " or any of its ancestors.");
         }
 
@@ -568,12 +563,7 @@ formdesigner.controller = (function () {
         formdesigner.pluginManager.javaRosa.Itext.updateForNewMug(mug);
         formdesigner.intentManager.syncMugWithIntent(mug);
 
-        formdesigner.ui.jstree("select_node", '#' + mug.ufid);
-        
-        this.fire({
-            type: "question-creation",
-            mug: mug
-        });
+        that.setFormChanged();
     };
 
     that.removeCurrentQuestion = function () {
@@ -628,7 +618,7 @@ formdesigner.controller = (function () {
             // select question
             var children = that.getChildren(mug);
             if (children.length > 0) {
-                if (questionType !== "Select" && questionType !== "MSelect") {
+                if (questionType.indexOf("Select") === -1) {
                     throw "you can't change a Multiple/Single Choice question to a non-Choice " +
                           "question if it has Choices. Please remove all Choices " +
                           "and try again.";
@@ -654,10 +644,7 @@ formdesigner.controller = (function () {
             that.form.replaceMug(mug, newMug, 'data');
             that.form.replaceMug(mug, newMug, 'control');
 
-            formdesigner.ui.jstree("set_type", 
-                questionType, 
-                '#' + mug.ufid
-            );
+            formdesigner.ui.jstree("set_type", questionType, '#' + mug.ufid);
 
             mug = newMug;
 
@@ -675,7 +662,7 @@ formdesigner.controller = (function () {
             $currentChanger.after(formdesigner.widgets.getQuestionTypeChanger(mug)).remove();
         }
 
-        if (mug.__className === "Select" || mug.__className === "MSelect") {
+        if (mug.__className.indexOf("Select") !== -1) {
             that.updateMugChildren(mug);
         }
     };
@@ -1244,7 +1231,7 @@ formdesigner.controller = (function () {
             // we should do here for now just populate with the default
             labelItext = newLabelItext(mug);
         }
-        
+       
         cProps.labelItextID = labelItext;
         if (cProps.labelItextID.isEmpty()) {
             //if no default Itext has been set, set it with the default label
@@ -1390,10 +1377,11 @@ formdesigner.controller = (function () {
 
         //broadly categorize
         tagName = tagName.toLowerCase();
+        var hasItemset = $(cEl).children('itemset').length;
         if(tagName === 'select') {
-            MugClass = mugs.MSelect;
+            MugClass = hasItemset ? mugs.MSelectDynamic : mugs.MSelect;
         }else if (tagName === 'select1') {
-            MugClass = mugs.Select;
+            MugClass = hasItemset ? mugs.SelectDynamic : mugs.Select;
         }else if (tagName === 'trigger') {
             MugClass = mugs.Trigger;
         }else if (tagName === 'input') {
@@ -1406,6 +1394,8 @@ formdesigner.controller = (function () {
             }
         }else if (tagName === 'item') {
             MugClass = mugs.Item;
+        }else if (tagName === 'itemset') {
+            MugClass = mugs.Itemset;
         }else if (tagName === 'group') {
             MugClass = mugTypeFromGroup(cEl);
             if (MugClass === mugs.Repeat) {
@@ -1438,39 +1428,48 @@ formdesigner.controller = (function () {
     }
                 
     function populateMug (mug, cEl) {
-        var labelEl, hintEl, repeat_count, repeat_noaddremove;
-        
         if (mug.__className === "ReadOnly") {
             mug.controlElementRaw = cEl;
             return;
         }
         
+        var $cEl = $(cEl),
+            labelEl, hintEl, repeat_count, repeat_noaddremove;
+        
 
         var tag = mug.controlElement.tagName;
         if(tag === 'repeat'){
-            labelEl = $($(cEl).parent().children('label'));
-            hintEl = $(cEl).parent().children('hint');
-            repeat_count = $(cEl).popAttr('jr:count');
+            labelEl = $($cEl.parent().children('label'));
+            hintEl = $cEl.parent().children('hint');
+            repeat_count = $cEl.popAttr('jr:count');
             repeat_noaddremove = formdesigner.util.parseBoolAttributeValue(
-                $(cEl).popAttr('jr:noAddRemove'));
+                $cEl.popAttr('jr:noAddRemove'));
 
         } else {
-            labelEl = $(cEl).children('label');
-            hintEl = $(cEl).children('hint');
+            labelEl = $cEl.children('label');
+            hintEl = $cEl.children('hint');
         }
 
-        if (labelEl.length > 0) {
+        if (labelEl.length > 0 && mug.__className !== 'Itemset') {
             parseLabel(labelEl, mug);
         }
         if (hintEl.length > 0) {
             parseHint (hintEl, mug);
         }
         if (tag === 'item') {
-            parseDefaultValue($(cEl).children('value'),mug);
+            parseDefaultValue($cEl.children('value'),mug);
         }
 
         if (tag === 'repeat') {
             parseRepeatVals(repeat_count, repeat_noaddremove, mug);
+        }
+
+        if (tag === 'itemset') {
+            mug.controlElement.setAttr('itemsetData', {
+                nodeset: $cEl.attr('nodeset'),
+                valueRef: $cEl.children('label').attr('ref'),
+                labelRef: $cEl.children('value').attr('ref')
+            });
         }
 
         formdesigner.intentManager.syncMugWithIntent(mug);
@@ -1722,7 +1721,7 @@ formdesigner.controller = (function () {
 
             var data = $(instances[0]).children();
             if($(xml).find('parsererror').length > 0) {
-                throw 'PARSE ERROR! Message follows:' + $(xml).find('parsererror').find('div').html();
+                throw 'PARSE ERROR!:' + $(xml).find('parsererror').find('div').html();
             }
             
             if(title.length > 0) {
@@ -1740,7 +1739,6 @@ formdesigner.controller = (function () {
             if(data.length === 0) {
                 that.addParseErrorMsg('No Data block was found in the form.  Please check that your form is valid!');
             }
-           
             
             parseDataTree (data[0]);
             parseBindList (binds);

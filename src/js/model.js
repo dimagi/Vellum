@@ -238,9 +238,7 @@ var Tree = function (tType) {
 
             //If we got this far, everything checks out.
             return true;
-
-
-        }
+        };
         that.validateTree = validateTree;
 
         return that;
@@ -456,11 +454,11 @@ var Tree = function (tType) {
             }
         }
         return true;
-    }
+    };
 
     that.getRootNode = function () {
         return rootNode;
-    }
+    };
 
     return that;
 };
@@ -484,7 +482,7 @@ formdesigner.model = (function () {
     var InstanceMetadata = function (attributes, children) {
         var that = {};
         that.attributes = attributes;
-        that.children = children;
+        that.children = children || [];
         return that;
     };
     that.InstanceMetadata = InstanceMetadata;
@@ -827,7 +825,9 @@ formdesigner.model = (function () {
                         } else {
                             xmlWriter.writeStartElement(tagName);
                         }
-                        if (tagName !== 'group' && tagName !== 'repeat') {
+                        if (tagName !== 'group' && tagName !== 'repeat' &&
+                            tagName !== 'itemset')
+                        {
                             createLabel();
                         }
                         
@@ -835,6 +835,17 @@ formdesigner.model = (function () {
                             //do a value tag for an item Mug
                             xmlWriter.writeStartElement('value');
                             xmlWriter.writeString(cProps.defaultValue);
+                            xmlWriter.writeEndElement();
+                        }
+
+                        if (tagName === 'itemset') {
+                            var data = cProps.itemsetData;
+                            xmlWriter.writeAttributeStringSafe('nodeset', data.nodeset);
+                            xmlWriter.writeStartElement('label');
+                            xmlWriter.writeAttributeStringSafe('ref', data.valueRef);
+                            xmlWriter.writeEndElement();
+                            xmlWriter.writeStartElement('value');
+                            xmlWriter.writeAttributeStringSafe('ref', data.labelRef);
                             xmlWriter.writeEndElement();
                         }
                         
@@ -846,7 +857,7 @@ formdesigner.model = (function () {
                         }
                         
                         // Set the nodeset/ref attribute correctly
-                        if (tagName !== 'item') {
+                        if (tagName !== 'item' && tagName !== 'itemset') {
                             var attr, absPath;
                             if (tagName === 'repeat') {
                                 attr = 'nodeset';
@@ -1642,7 +1653,15 @@ var mugs = (function () {
     var BaseMug = Class.$extend({
         // whether you can change to or from this question's type in the UI
         isTypeChangeable: true,
+        limitTypeChangeTo: false,
+        // controls whether delete button shows up - you can still delete a
+        // mug's ancestor even if it's not removeable
+        isRemoveable: true,
+        isCopyable: true,
         isODKOnly: false,
+        // todo: actually don't couple type definitions and state using
+        // inheritance 
+        afterUIInsert: function () {},
         __init__: function () {
             var self = this;
             this.__spec = this.getSpec();
@@ -1875,6 +1894,11 @@ var mugs = (function () {
         },
     });
 
+    // The use of inheritance here is a convenient way to be DRY about shared
+    // properties of mugs.  getXXSpec() methods could simply be replaced with
+    // generating the spec at the time of class definition by explicitly
+    // extending the spec of the super class.  These classes should absolutely
+    // not be used to implement any sort of inheritance-based interface.
     var DataBindOnly = BaseMug.$extend({
         typeName: 'Hidden Value',
         icon: 'icon-vellum-variable',
@@ -2114,17 +2138,20 @@ var mugs = (function () {
         }
     });
 
+    function getSelectChildIcon () {
+        if (this.parentMug.__className === "Select" ||
+            this.parentMug.__className === "SelectDynamic")
+        {
+            return 'icon-circle-blank';
+        } else {
+            return 'icon-check-empty';
+        }
+    }
     var Item = ControlOnly.$extend({
         typeName: 'Choice',
         icon: 'icon-circle-blank',
         isTypeChangeable: false,
-        getIcon: function () {
-            if (this.parentMug.__className === "Select") {
-                return 'icon-circle-blank';
-            } else {
-                return 'icon-check-empty';
-            }
-        },
+        getIcon: getSelectChildIcon,
         __init__: function (options) {
             this.$super(options);
             this.controlElement.tagName = "item";
@@ -2134,17 +2161,59 @@ var mugs = (function () {
             var spec = this.$super();
             spec.defaultValue = {
                 lstring: 'Choice Value',
-                visibility: 'hidden',
+                visibility: 'visible',
                 editable: 'w',
-                presence: 'optional',
+                presence: 'required',
                 validationFunc: validationFuncs.defaultValue
             };
             spec.hintLabel.presence = 'notallowed';
             spec.hintItextID.presence = 'notallowed';
 
-            spec.defaultValue.visibility = 'visible';
-            spec.defaultValue.presence = 'required';
+            return spec;
+        }
+    });
 
+    var Itemset = ControlOnly.$extend({
+        typeName: 'External Data',
+        icon: 'icon-circle-blank',
+        isTypeChangeable: false,
+        // have to delete the parent select
+        isRemoveable: false,
+        isCopyable: false,
+        getIcon: getSelectChildIcon,
+        __init__: function (options) {
+            this.$super(options);
+            this.controlElement.tagName = "itemset";
+            this.controlElement.itemsetData = {};
+            //this.bindElement.dataType = 'xsd:string';
+        },
+        getControlElementSpec: function () {
+            var spec = this.$super();
+            spec.itemsetData = {
+                editable: 'w',
+                presence: 'optional',
+                uiType: formdesigner.widgets.itemsetWidget,
+                validationFunc: function (mug) {
+                    var itemsetData = mug.controlElement.itemsetData;
+                    if (!itemsetData.nodeset) {
+                        return "A data source must be selected.";
+                    }
+                    if (!itemsetData.valueRef) {
+                        return "Choice Value must be specified.";
+                    }
+                    if (!itemsetData.labelRef) {
+                        return "Choice Label must be specified.";
+                    }
+                    return 'pass';
+                }
+            };
+            spec.label.presence = 'notallowed';
+            spec.labelItext.presence = 'notallowed';
+            spec.labelItextID.presence = 'notallowed';
+            spec.hintLabel.presence = 'notallowed';
+            spec.hintItextID.presence = 'notallowed';
+            spec.mediaItext.presence = 'notallowed';
+            spec.otherItext.presence = 'notallowed';
             return spec;
         }
     });
@@ -2169,7 +2238,13 @@ var mugs = (function () {
         }
     });
 
-    var BaseSelect = BaseMug.$extend({});
+    var BaseSelect = BaseMug.$extend({
+        afterUIInsert: function () {
+            var Item = mugs.Item.prototype.__className;
+            formdesigner.ui.addQuestion(Item);
+            formdesigner.ui.addQuestion(Item);
+        }
+    });
 
     var MSelect = BaseSelect.$extend({
         typeName: 'Multiple Answer',
@@ -2192,6 +2267,23 @@ var mugs = (function () {
             this.$super(options);
             this.controlElement.tagName = "select1";
         }
+    });
+
+    function afterDynamicSelectInsert() {
+        var Itemset = mugs.Itemset.prototype.__className;
+        formdesigner.ui.addQuestion(Itemset);
+    }
+
+    var MSelectDynamic = MSelect.$extend({
+        typeName: 'Multiple Answer - Dynamic List',
+        limitTypeChangeTo: ["SelectDynamic"],
+        afterUIInsert: afterDynamicSelectInsert
+    });
+
+    var SelectDynamic = Select.$extend({
+        typeName: 'Single Answer - Dynamic List',
+        limitTypeChangeTo: ["MSelectDynamic"],
+        afterUIInsert: afterDynamicSelectInsert
     });
 
     var Group = BaseMug.$extend({
@@ -2265,7 +2357,8 @@ var mugs = (function () {
             });
         }
     });
-    
+   
+    // todo: ability of plugins to define mug types
     var exportedMugTypes = {
         "AndroidIntent": AndroidIntent,
         "Audio": Audio,
@@ -2280,20 +2373,24 @@ var mugs = (function () {
         "Image": Image,
         "Int": Int,
         "Item": Item,
+        "Itemset": Itemset,
         "Long": Long,
         "MSelect": MSelect,
+        "MSelectDynamic": MSelectDynamic,
         "PhoneNumber": PhoneNumber,
         "ReadOnly": ReadOnly,
         "Repeat": Repeat,
         "Secret": Secret,
         "Select": Select,
+        "SelectDynamic": SelectDynamic,
         "Text": TextQuestion,
         "Time": Time,
         "Trigger": Trigger,
         "Video": Video,
     },
         allTypes = _.keys(exportedMugTypes),
-        innerChildQuestionTypes = _.without(allTypes, 'DataBindOnly', 'Item'),
+        innerChildQuestionTypes = _.without(allTypes, 
+            'DataBindOnly', 'Item', 'Itemset'),
         nonGroupTypes = _.without(innerChildQuestionTypes, 
             'Group', 'Repeat', 'FieldList');
 
@@ -2306,6 +2403,8 @@ var mugs = (function () {
             validChildTypes = nonGroupTypes;
         } else if (name == "Select" || name == "MSelect") {
             validChildTypes = ["Item"];
+        } else if (name === "SelectDynamic" || name === "MSelectDynamic") {
+            validChildTypes = ["Itemset"];
         } else {
             validChildTypes = [];
         }
@@ -2313,6 +2412,12 @@ var mugs = (function () {
         // TODO: figure out how to get isinstance working
         Mug.prototype.__className = name;
         Mug.prototype.validChildTypes = validChildTypes;
+
+        if (name === "SelectDynamic" || name === "MSelectDynamic") {
+            Mug.prototype.maxChildren = 1;
+        } else {
+            Mug.prototype.maxChildren = -1;
+        }
     });
 
     return exportedMugTypes;

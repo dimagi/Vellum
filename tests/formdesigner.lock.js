@@ -1,4 +1,9 @@
 (function () {
+// NOTE: timer mocking here doesn't actually work, it only handles timeouts,
+// doesn't actually implement sleep-like functionality.
+// Need to change things under test to be async if you need to ensure they've
+// finished before testing something.  Use callbacks or
+// https://github.com/cujojs/when.
 
 var assert = chai.assert;
 
@@ -197,11 +202,11 @@ describe("The question locking functionality in the core and UI", function () {
         beforeEach(function () {
             // click question1, so we can mock internal methods, then click on
             // question2, and observe results
-            $("li.jstree-leaf:contains(question1)").find('a').click();
+            clickQuestion('question1');
         });
 
         function clickQuestion2() {
-            $("li.jstree-leaf:contains(question2)").find('a').click();
+            clickQuestion('question2');
         }
 
         it("shows the delete button for deleteable questions", function () {
