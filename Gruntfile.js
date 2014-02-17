@@ -53,7 +53,6 @@ module.exports = function (grunt) {
         concat: {
             css: {
                 src: [
-                    'src/css/chosen.css',
                     'src/js/lib/codemirror/codemirror.css',
                     'src/css/jquery.fancybox-1.3.4.css',
                     'src/less/main.css',
@@ -72,7 +71,6 @@ module.exports = function (grunt) {
 
                     'src/js/lib/jquery.jstree.js',
                     'src/js/lib/jquery.fancybox-1.3.4.js',
-                    'src/js/lib/chosen.jquery.js',
                     'src/js/lib/sha1.js',
                     'src/js/lib/diff_match_patch.js',
                     'node_modules/XMLWriter/XMLWriter.js',

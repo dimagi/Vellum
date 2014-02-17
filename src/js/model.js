@@ -1542,10 +1542,8 @@ var mugs = (function () {
         dataType: {
             editable: 'w',
             immutable: true,
-            visibility: 'visible',
+            visibility: 'hidden',
             presence: 'optional',
-            values: formdesigner.util.XSD_DATA_TYPES,
-            uiType: formdesigner.widgets.selectWidget,
             lstring: 'Data Type'
         },
         relevantAttr: {
@@ -1614,8 +1612,7 @@ var mugs = (function () {
             editable: 'r',
             immutable: true,
             visibility: 'hidden',
-            presence: 'required',
-            values: formdesigner.util.VALID_CONTROL_TAG_NAMES
+            presence: 'required'
         },
         appearance: {
             editable: 'r',
@@ -1951,19 +1948,6 @@ var mugs = (function () {
             this.$super(options);
             this.controlElement.tagName = "secret";
             this.bindElement.dataType = "xsd:string";
-        },
-        getBindElementSpec: function () {
-            var spec = this.$super();
-            spec.dataType.validationFunc = function (m) {
-                var dtype = m.bindElement.dataType;
-                if (formdesigner.util.XSD_DATA_TYPES.indexOf(dtype) !== -1) {
-                    return 'pass';
-                } else {
-                    return 'Password question data type must be a valid XSD Datatype!';
-                }
-            };
-            spec.dataType.lstring = 'Data Type';
-            return spec;
         }
     });
 
