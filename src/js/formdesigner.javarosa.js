@@ -1504,7 +1504,7 @@ formdesigner.plugins.javaRosa = function (options) {
     this.contributeToDataElementSpec = function (spec, mug) {
         spec.keyAttr = {
             editable: 'w',
-            visibility: 'advanced',
+            visibility: 'visible',
             presence: 'optional',
             lstring: 'JR:Preload key value'
         };
@@ -1514,13 +1514,13 @@ formdesigner.plugins.javaRosa = function (options) {
     this.contributeToBindElementSpec = function (spec, mug) {
         spec.preload = {
             editable: 'w',
-            visibility: 'advanced',
+            visibility: 'visible',
             presence: 'optional',
             lstring: "JR Preload"
         };
         spec.preloadParams = {
             editable: 'w',
-            visibility: 'advanced',
+            visibility: 'visible',
             presence: 'optional',
             lstring: "JR Preload Param"
         };
@@ -1529,7 +1529,7 @@ formdesigner.plugins.javaRosa = function (options) {
         spec.constraintMsgAttr.visibility = "visible_if_present";
         spec.constraintMsgItextID = {
             editable: 'w',
-            visibility: 'advanced',
+            visibility: 'visible',
             presence: 'optional',
             lstring: "Validation Error Message ID",
             uiType: iTextIDWidget,
@@ -1575,7 +1575,7 @@ formdesigner.plugins.javaRosa = function (options) {
         };
         spec.labelItextID = {
             editable: 'w',
-            visibility: 'advanced',
+            visibility: 'visible',
             presence: 'optional',
             lstring: "Question Itext ID",
             uiType: iTextIDWidget,
@@ -1605,7 +1605,7 @@ formdesigner.plugins.javaRosa = function (options) {
         };
         spec.hintItextID = {
             editable: 'w',
-            visibility: 'advanced',
+            visibility: 'visible',
             presence: 'optional',
             lstring: "Hint Itext ID",
             uiType: iTextIDWidget,

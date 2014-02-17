@@ -346,8 +346,8 @@
 
 <script type="text/template" id="fd-template-question-type-changer">
     <div class="btn-group question-type-changer">
-        <% if (canChangeType) { %>
-        <a class="btn dropdown-toggle current-question" data-toggle="dropdown" href="#">
+        <a class="btn dropdown-toggle current-question <% if (!canChangeType) { %> disabled <% } %>"
+            data-toggle="dropdown" href="#">
             <i class="<%=currentQuestionIcon%>"></i> 
             <%= currentTypeName %> <span class="caret"></span>
         </a>
@@ -361,12 +361,6 @@
             </li>
             <% }); %>
         </ul>
-        <% } else { %>
-        <a class="btn current-question" href="#">
-            <i class="<%=currentQuestionIcon%>"></i>
-            <%= currentTypeName %>
-        </a>
-        <% } %>
     </div>
 </script>
 
