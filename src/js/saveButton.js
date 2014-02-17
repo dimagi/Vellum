@@ -1,3 +1,5 @@
+// EXTRACTED FROM COMMCAREHQ main.js
+
 var SaveButton = {
     /*
         options: {
@@ -7,15 +9,16 @@ var SaveButton = {
     */
     init: function (options) {
         var button = {
+            disabled: false,
             $save: $('<span/>').text(SaveButton.message.SAVE).click(function () {
                 button.fire('save');
-            }).button(),
+            }).addClass('btn btn-success'),
             $retry: $('<span/>').text(SaveButton.message.RETRY).click(function () {
                 button.fire('save');
-            }).button(),
-            $saving: $('<span/>').text(SaveButton.message.SAVING).button().button('disable'),
-            $saved: $('<span/>').text(SaveButton.message.SAVED).button().button('disable'),
-            ui: $('<div/>').css({textAlign: 'right'}),
+            }).addClass('btn btn-success'),
+            $saving: $('<span/>').text(SaveButton.message.SAVING).prepend('<i class="icon-refresh icon-spin"></i> ').addClass('btn disabled'),
+            $saved: $('<span/>').text(SaveButton.message.SAVED).addClass('btn disabled'),
+            ui: $('<div/>').addClass('pull-right'),
             setStateWhenReady: function (state) {
                 if (this.state === 'saving') {
                     this.nextState = state;
@@ -41,9 +44,11 @@ var SaveButton = {
                 } else if (state === 'retry') {
                     this.ui.append(this.$retry);
                 }
+                this.fire('state:change');
             },
-            ajax: function (options) {
-                var beforeSend = options.beforeSend || function () {},
+            ajaxOptions: function (options) {
+                var options = options || {},
+                    beforeSend = options.beforeSend || function () {},
                     success = options.success || function () {},
                     error = options.error || function () {},
                     that = this;
@@ -62,7 +67,10 @@ var SaveButton = {
                     alert(SaveButton.message.ERROR_SAVING);
                     error.apply(this, arguments);
                 };
-                $.ajax(options);
+                return options;
+            },
+            ajax: function (options) {
+                $.ajax(button.ajaxOptions(options));
             }
         };
         eventize(button);
@@ -70,14 +78,40 @@ var SaveButton = {
         button.on('change', function () {
             this.setStateWhenReady('save');
         });
-        if (options.save) {
-            button.on('save', options.save);
-        }
-        $(window).bind('beforeunload', function () {
-            if (button.state !== 'saved') {
-                return options.unsavedMessage || "";
+        button.on('disable', function () {
+            this.disabled = true;
+            this.$save.addClass('disabled');
+            this.$saving.addClass('disabled');
+            this.$retry.addClass('disabled');
+        });
+        button.on('enable', function () {
+            this.disabled = false;
+            this.$save.removeClass('disabled');
+            this.$saving.removeClass('disabled');
+            this.$retry.removeClass('disabled');
+        });
+        button.on('save', function () {
+            if (button.disabled){
+                return;
+            } else if (options.save) {
+                options.save();
+            } else if (options.saveRequest){
+                var o = button.ajaxOptions();
+                o.beforeSend();
+                options.saveRequest()
+                    .success(o.success)
+                    .error(o.error)
+                ;
             }
         });
+
+        //var beforeunload = function () {
+            //var stillAttached = button.ui.parents()[button.ui.parents().length - 1].tagName.toLowerCase() == 'html';
+            //if (button.state !== 'saved' && stillAttached) {
+                //return options.unsavedMessage || "";
+            //}
+        //};
+        //COMMCAREHQ.bindBeforeUnload(beforeunload);
         return button;
     },
     initForm: function ($form, options) {
@@ -85,7 +119,7 @@ var SaveButton = {
             button = SaveButton.init({
                 unsavedMessage: options.unsavedMessage,
                 save: function () {
-                    this.ajax({
+                    button.ajax({
                         url: url,
                         type: 'POST',
                         dataType: 'json',
@@ -98,12 +132,13 @@ var SaveButton = {
                 button.fire('change');
             };
         $form.find('*').change(fireChange);
+//        $form.on('textchange', 'input, textarea', fireChange);
         $form.find('input, textarea').bind('textchange', fireChange);
         return button;
     },
     message: {
         SAVE: 'Save',
-        SAVING: 'Saving...',
+        SAVING: 'Saving',
         SAVED: 'Saved',
         RETRY: 'Try Again',
         ERROR_SAVING: 'There was an error saving'
