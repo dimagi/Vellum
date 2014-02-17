@@ -363,38 +363,6 @@ formdesigner.util = (function(){
         that.ufid = generate_guid();
     };
 
-    that.XSD_DATA_TYPES = [
-            'xsd:boolean',
-            'xsd:byte',
-            'xsd:date',
-            'xsd:dateTime',
-            'xsd:decimal',
-            'xsd:double',
-            'xsd:float',
-            'xsd:int',
-            'xsd:long',
-            'xsd:short',
-            'xsd:string',
-            'xsd:time',
-            'geopoint',
-            'barcode',
-            'androidintent'
-    ];
-
-    that.VALID_CONTROL_TAG_NAMES = [
-            'input',
-            'phonenumber',
-            '1select',
-            'select',
-            'group',
-            'repeat',
-            'fieldlist',
-            'trigger',
-            'item',
-            'output',
-            'secret'
-    ];
-
     /**
      * Bind a number of standard event responses to a mug
      * so that it responds in a pre-determined fashion to default things

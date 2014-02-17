@@ -237,46 +237,6 @@ formdesigner.widgets = (function () {
         return widget;
     };
 
-
-    that.selectWidget = function (mug, options) {
-        // a select widget
-        var widget = that.normalWidget(mug, options);
-
-        var input = $("<select />").attr("id", widget.getID()).addClass("chzn-select");
-        input.append($('<option value="blank" />'));
-        for (var i in widget.definition.values) {
-            if (widget.definition.values.hasOwnProperty(i)) {
-                var strVal = formdesigner.util.fromCamelToRegularCase(widget.definition.values[i].replace('xsd:','')),
-                    isSelected = '';
-
-                var option = $("<option />").val(widget.definition.values[i]).text(strVal).appendTo(input);
-                if (widget.currentValue === widget.definition.values[i]) {
-                    // TODO: is this necessary?
-                    option.attr("selected", "selected");
-                }
-            }
-        }
-
-        widget.getControl = function () {
-            if (widget.isDisabled()) {
-                input.prop('disabled', true);
-            }
-            return input;
-        };
-
-        widget.setValue = function (value) {
-            input.val(value);
-        };
-
-        widget.getValue = function() {
-            return input.val();
-        };
-
-        input.change(widget.updateValue);
-
-        return widget;
-    };
-
     that.androidIntentAppIdWidget = function (mug) {
         var widget = that.baseWidget(mug);
         widget.definition = {};
