@@ -1519,13 +1519,13 @@ var mugs = (function () {
         },
         dataValue: {
             editable: 'w',
-            visibility: 'advanced',
+            visibility: 'visible',
             presence: 'optional',
             lstring: 'Default Data Value'
         },
         xmlnsAttr: {
             editable: 'w',
-            visibility: 'advanced',
+            visibility: 'visible',
             presence: 'notallowed',
             lstring: "Special Hidden Value XMLNS attribute"
         }
@@ -1534,7 +1534,7 @@ var mugs = (function () {
     var DEFAULT_BIND_ELEMENT_SPEC = {
         nodeID: {
             editable: 'w',
-            visibility: 'advanced',
+            visibility: 'visible',
             presence: 'optional',
             lstring: 'Bind Node ID'
         },
