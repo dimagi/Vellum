@@ -223,10 +223,7 @@ describe("The question locking functionality in the core and UI", function () {
             clickQuestion2();
             var btn = $(".btn.current-question");
             assert(btn.length === 1);
-            btn.click();
-            assert(bool == $("li").filter(function () {
-                return $(this).text() === 'Change Question Type To';
-            }).length);
+            assert.equal(btn.hasClass('disabled'), !bool);
             mock.restore();
         }
         it("shows the type changer for type-changeable questions", function () {
