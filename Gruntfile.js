@@ -14,9 +14,10 @@ module.exports = function (grunt) {
 
     grunt.registerTask('dist', [
         'less',
+        'imageEmbed',
         'concat:css', 
-        'concat:js',
         'cssmin',
+        'concat:js',
         'uglify'
     ]);
 
@@ -46,16 +47,26 @@ module.exports = function (grunt) {
         less: {
             main: {
                 files: {
-                    "src/less/main.css": "src/less/main.less",
+                    "src/less/main.css": "src/less/main.less"
                 }
+            }
+        },
+        imageEmbed: {
+            dist: {
+                src: [
+                    "src/js/lib/jstree/default/style.css",
+                    "src/css/redmond/jquery-ui-1.8.14.custom.css"
+                ],
+                dest: "dist/image-embedded.tmp.css"
             }
         },
         concat: {
             css: {
                 src: [
                     'src/js/lib/codemirror/codemirror.css',
-                    'src/css/jquery.fancybox-1.3.4.css',
-                    'src/less/main.css',
+                    'src/js/lib/fancybox/jquery.fancybox-1.3.4.css',
+                    'dist/image-embedded.tmp.css',
+                    'src/less/main.css'
                 ],
                 dest: 'dist/vellum.css'
             },
@@ -69,8 +80,8 @@ module.exports = function (grunt) {
                     'node_modules/xpath/models.js',
                     'node_modules/xpath/xpath.js',
 
-                    'src/js/lib/jquery.jstree.js',
-                    'src/js/lib/jquery.fancybox-1.3.4.js',
+                    'src/js/lib/jstree/jquery.jstree.js',
+                    'src/js/lib/fancybox/jquery.fancybox-1.3.4.js',
                     'src/js/lib/sha1.js',
                     'src/js/lib/diff_match_patch.js',
                     'node_modules/XMLWriter/XMLWriter.js',
@@ -103,7 +114,8 @@ module.exports = function (grunt) {
                 // the banner is inserted at the top of the output
                 banner: '/*! Vellum <%= grunt.template.today("dd-mm-yyyy") %> \n' +
                         '    Copyright 2009-2014, Dimagi Inc., and individual contributors \n' +
-                        '    See http://github.com/dimagi/Vellum for license */\n',
+                        '    Released under the MIT License \n' +
+                        '    http://github.com/dimagi/Vellum */\n',
                 sourceMap: true,
                 preserveComments: false,
                 mangle: false
@@ -115,4 +127,4 @@ module.exports = function (grunt) {
             }
         }
     });
-}
+};
