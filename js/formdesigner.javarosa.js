@@ -1388,9 +1388,10 @@ formdesigner.plugins.javaRosa = function (options) {
 
             if (formdesigner.opts.langs && formdesigner.opts.langs.indexOf(lang) === -1) {
                 formdesigner.controller.addParseWarningMsg(
-                    "The Following Language will be deleted from the form " +
-                    "as it is not listed as a language in CommCareHQ: " +
-                    "<b>" + lang + "</b>"
+                    "You have languages in your form that are not specified " +
+                    "in the \"Languages\" page of the application builder. " +
+                    "The following languages will be deleted on save " +
+                    "unless you add them to the \"Languages\" page."
                 );
                 return;
             }
