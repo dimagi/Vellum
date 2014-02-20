@@ -207,27 +207,24 @@ describe("The question locking functionality in the core and UI", function () {
         it("shows the delete button for deleteable questions", function () {
             var mock = PluginMock("isMugRemoveable", [true]);
             clickQuestion2();
-            assert($("button:contains(Delete)").length === 1);
             mock.restore();
+            assert($("button:contains(Delete)").length === 1);
         });
         
         it("hides the delete button for non-deletable questions", function () {
             mock = PluginMock("isMugRemoveable", [false]);
             clickQuestion2();
-            assert($("button:contains(Delete)").length === 0);
             mock.restore();
+            assert($("button:contains(Delete)").length === 0);
         });
 
         function testTypeChangeable(bool) {
             var mock = PluginMock("isMugTypeChangeable", [bool]);
             clickQuestion2();
+            mock.restore();
             var btn = $(".btn.current-question");
             assert(btn.length === 1);
-            btn.click();
-            assert(bool == $("li").filter(function () {
-                return $(this).text() === 'Change Question Type To';
-            }).length);
-            mock.restore();
+            assert.equal(btn.hasClass('disabled'), !bool);
         }
         it("shows the type changer for type-changeable questions", function () {
             testTypeChangeable(true);
@@ -239,40 +236,40 @@ describe("The question locking functionality in the core and UI", function () {
         it("disables the checkbox (only) for a locked boolean property", function () {
             var mock = PluginMock('isPropertyLocked', [false]);
             clickQuestion2();
-            assert(false === $("#bindElement-requiredAttr").prop('disabled'));
             mock.restore();
+            assert(false === $("#bindElement-requiredAttr").prop('disabled'));
 
             mock = PluginMock('isPropertyLocked', [true]);
             clickQuestion2();
+            mock.restore();
             var $r = $("#bindElement-requiredAttr");
             assert(true === $r.prop('disabled'));
             var val = $r.prop('checked');
             $r.click();
             assert(val === $r.prop('checked'));
-            mock.restore();
         });
 
         it("disables the text input (only) for a locked text property", function () {
             var mock = PluginMock('isPropertyLocked', [false]);
             clickQuestion2();
-            assert(false === $("#dataElement-nodeID").prop('disabled'));
             mock.restore();
+            assert(false === $("#dataElement-nodeID").prop('disabled'));
 
             mock = PluginMock("isPropertyLocked", [true]);
             clickQuestion2();
-            assert(true === $("#dataElement-nodeID").prop('disabled'));
             mock.restore();
+            assert(true === $("#dataElement-nodeID").prop('disabled'));
         });
 
         function testEditButton(bool) {
             var mock = PluginMock('isPropertyLocked', [bool]);
             clickQuestion2();
+            mock.restore();
             var $but = $("label[for='bindElement-relevantAttr']").next('.xpath-edit-button');
             assert($but.length === 1);
             assert.equal(bool, $but.prop('disabled'));
             $but.click();
             assert((!bool) === $('#fd-xpath-editor').is(':visible'), "hjkl" + bool);
-            mock.restore();
         }
         it("enables the edit button for non-locked logic properties", function () {
             testEditButton(false);

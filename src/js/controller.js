@@ -555,7 +555,7 @@ formdesigner.controller = (function () {
             duplicate = foo[0],
             pathReplacements = foo[1];
 
-        if (_gaq) {
+        if (typeof _gaq !== "undefined") {
            _gaq.push(['_trackEvent', 'Form Builder', 'Copy', foo[0].typeName]);
         }
 
