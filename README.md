@@ -54,18 +54,20 @@ $ npm test
 
 ### Submitting changes
 
-Changes should be in the form of pull requests to `develop`.
+New features and old features that you touch should come with unit tests.  If
+you don't know how to unit test a feature, ask.
 
-A new release is initiated by branching `develop` off to `release`, and creating
-a pull request from `release` into `master`.
+Changes should be in the form of pull requests to develop.
 
-`master` always contains the latest stable version.
+A new release is initiated by branching develop off to release, and creating
+a pull request from release into master.
+
+master always contains the latest stable version.
 
 These branches are automatically deployed for testing:
 
 * [master](http://vellum-master.herokuapp.com)
 * [release](http://vellum-release.herokuapp.com)
-  tested.
 * [develop](http://vellum-develop.herokuapp.com)
 
 
