@@ -76,6 +76,7 @@
     <script src="formdesigner.lock.js"></script>
     <script>
         function runTests() {
+            $("#run-tests").addClass('disabled');
             if (window.mochaPhantomJS) { 
                 mochaPhantomJS.run(); 
             } else { 

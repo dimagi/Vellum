@@ -7,6 +7,7 @@ Vellum is a JavaRosa [XForm](http://en.wikipedia.org/wiki/XForms) designer built
  [0]: http://www.dimagi.com
  [1]: http://www.commcarehq.org
 
+
 Usage
 -----
 
@@ -26,6 +27,8 @@ in CommCare HQ.
 Contributing
 ------------
 
+### Setup
+
 Install dependencies:
 ```
 $ npm install napa
@@ -40,7 +43,7 @@ $ grunt dist
 Run tests in a browser:
 ```
 $ python -m SimpleHTTPServer
-$ chromium-browser http://localhost:8000/tests/runner.html
+$ chromium-browser http://localhost:8000/tests/
 ```
 
 Run tests headlessly (currently broken):
@@ -49,11 +52,22 @@ $ npm install -g phantomjs
 $ npm test
 ```
 
-Demo
-----
+### Submitting changes
 
-`develop` is automatically deployed to
-[vellum-develop.herokuapp.com](http://vellum-develop.herokuapp.com).
+Changes should be in the form of pull requests to `develop`.
+
+A new release is initiated by branching `develop` off to `release`, and creating
+a pull request from `release` into `master`.
+
+`master` always contains the latest stable version.
+
+These branches are automatically deployed for testing:
+
+* [master](http://vellum-master.herokuapp.com)
+* [release](http://vellum-release.herokuapp.com)
+  tested.
+* [develop](http://vellum-develop.herokuapp.com)
+
 
 Event Tracking
 --------------
