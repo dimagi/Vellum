@@ -16,7 +16,7 @@ additional dependencies that are part of [CommCare
 HQ](http://github.com/dimagi/commcare-hq) aren't well-defined yet.
 
 For an example of a minimal setup and usage of Vellum, including all known
-dependencies, see `tests/runner.html`.
+dependencies, see `tests/index.html`.
 
 For some additional configuration options, see
 [`form_designer.html`](https://github.com/dimagi/commcare-hq/blob/master/corehq/apps/app_manager/templates/app_manager/form_designer.html)
@@ -48,6 +48,12 @@ Run tests headlessly (currently broken):
 $ npm install -g phantomjs
 $ npm test
 ```
+
+Demo
+----
+
+`develop` is automatically deployed to
+[vellum-develop.herokuapp.com](http://vellum-develop.herokuapp.com).
 
 Event Tracking
 --------------

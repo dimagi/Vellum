@@ -22,8 +22,8 @@
     <script src="../src/js/saveButton.js"></script>
 
     <!-- Vellum -->
-    <link href="../dist/vellum.css" type="text/css" rel="stylesheet"></link>
-    <script src="../dist/vellum.js"></script>
+    <link href="../dist/vellum.min.css" type="text/css" rel="stylesheet"></link>
+    <script src="../dist/vellum.min.js"></script>
     
     <!-- Mocha and test-only dependencies -->
     <link href="../node_modules/mocha/mocha.css" type="text/css" rel="stylesheet"></link>
@@ -40,8 +40,10 @@
     <ul class="nav nav-tabs">
       <li class="active"><a data-toggle='tab' href="#vellum">Vellum</a></li>
       <li><a data-toggle='tab' href="#vellum_results">Test Results</a></li>
+
+      <button id="run-tests" class="btn pull-right">Run Tests</button>
     </ul>
-     
+
     <div class="tab-content">
         <div class="tab-pane active" id="vellum"><div id="formdesigner"></div></div>
         <div class="tab-pane" id="vellum_results"><div id="mocha"></div></div>
@@ -72,9 +74,20 @@
 
     <script src="formdesigner.ignoreButRetain.js"></script>
     <script src="formdesigner.lock.js"></script>
-    <script type="text/javascript">
-      if (window.mochaPhantomJS) { mochaPhantomJS.run(); }
-      else { mocha.run(); }
+    <script>
+        function runTests() {
+            if (window.mochaPhantomJS) { 
+                mochaPhantomJS.run(); 
+            } else { 
+                mocha.run()
+            };
+        }
+
+        $("#run-tests").click(runTests);
+
+        if (window.mochaPhantomJS) {
+            $("#run-tests").click();
+        }
     </script>
 
   </body>
