@@ -2034,26 +2034,16 @@ formdesigner.controller = (function () {
     };
     that.handleTreeDrop = handleTreeDrop;
     
-    // here is the xpath stuff
-    var displayXPathEditor = function(options) {
+    that.displayXPathEditor = function(options) {
         formdesigner.ui.hideQuestionProperties();
-        formdesigner.ui.hideTools();
+        var done = options.done;
+        options.done = function (val) {
+            done(val);
+            formdesigner.ui.displayMugProperties(that.getCurrentlySelectedMug());
+        };
         formdesigner.ui.showXPathEditor(options);
     };
-    that.displayXPathEditor = displayXPathEditor;
-    
-    var doneXPathEditor = function(options) {
-        var mug = that.getCurrentlySelectedMug();
-        if (!options.cancel) {
-            that.setMugPropertyValue(mug, options.group, options.property, options.value, mug) 
-        }
-        formdesigner.ui.hideXPathEditor();
-        formdesigner.ui.showTools();
-        formdesigner.ui.displayMugProperties(mug);
-    };
-    that.doneXPathEditor = doneXPathEditor;
-    
-    //make controller event capable
+
     formdesigner.util.eventuality(that);
 
     return that;
