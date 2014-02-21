@@ -98,13 +98,12 @@ formdesigner.widgets = (function () {
         widget.getUIElement = function () {
             // gets the whole widget (label + control)
             var uiElem = $("<div />").addClass("widget control-group"),
-                $controls, $label;
-
+                $controls = $('<div class="controls" />'),
+                $label;
             $label = widget.getLabel();
             $label.addClass('control-label');
             uiElem.append($label);
 
-            $controls = $('<div class="controls" />');
             $controls.append(widget.getControl());
             uiElem.append($controls);
 
@@ -206,7 +205,8 @@ formdesigner.widgets = (function () {
             .text("Edit")
             .stopLink()
             .addClass('btn')
-            .attr('type', 'button');
+            .attr('type', 'button')
+            .prop('disabled', !!widget.isDisabled());
 
         xPathButton.click(function () {
             formdesigner.controller.displayXPathEditor({
@@ -221,21 +221,11 @@ formdesigner.widgets = (function () {
             });
         });
 
+        var _getUIElement = widget.getUIElement;
         widget.getUIElement = function () {
-            if (widget.isDisabled()) {
-                xPathButton.prop('disabled', true);
-            }
-            // gets the whole widget (label + control)
-            var uiElem = $("<div />").addClass("widget control-group"),
-                $controls = $('<div />').addClass('controls'),
-                $label;
-            $label = this.getLabel();
-            $label.addClass('control-label');
-            uiElem.append($label)
-                .append(xPathButton);
-            $controls.append(this.getControl())
-                .css('margin-right', '60px');
-            uiElem.append($controls);
+            var uiElem = _getUIElement.call(widget);
+            uiElem.find('label').after(xPathButton);
+            uiElem.find('.controls').css('margin-right', '60px');
             return uiElem;
         };
 
