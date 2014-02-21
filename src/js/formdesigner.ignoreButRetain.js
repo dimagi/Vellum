@@ -21,7 +21,7 @@
 formdesigner.plugins = formdesigner.plugins || {};
 
 formdesigner.plugins.ignoreButRetain = function () {
-    var ignoredNodes,
+    var ignoredNodes = [],
         xmls = new XMLSerializer();
 
     this.beforeParse = function (xml) {
