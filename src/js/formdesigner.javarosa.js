@@ -1209,6 +1209,10 @@ var itextMediaWidget = function (mug, language, form, options) {
     };
 
     widget.updateMultimediaBlockUI = function () {
+        if (!formdesigner.multimedia.isUploadEnabled) {
+            return;
+        }
+
         $('#' + widget.getPreviewID()).html(widget.getPreviewUI())
             .find('.existing-media').tooltip();
 
