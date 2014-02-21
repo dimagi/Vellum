@@ -120,7 +120,7 @@ formdesigner.widgets = (function () {
     };
 
     that.textWidget = function (mug, options) {
-        var widget = that.normalWidget(mug, options)
+        var widget = that.normalWidget(mug, options),
             input = widget.input;
 	    input.attr("type", "text").addClass('input-block-level');
 
