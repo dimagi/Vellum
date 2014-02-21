@@ -200,19 +200,24 @@ formdesigner.widgets = (function () {
 
     that.xPathWidget = function (mug, options) {
         var widget = that.textWidget(mug, options);
+
         var xPathButton = $('<button />')
             .addClass("xpath-edit-button pull-right")
             .text("Edit")
             .stopLink()
             .addClass('btn')
             .attr('type', 'button');
-        xPathButton.data("group", widget.groupName).data("prop", widget.propName).data("inputControlID", widget.getID());
+
         xPathButton.click(function () {
             formdesigner.controller.displayXPathEditor({
-                group:     $(this).data("group"),
-                property:  $(this).data("prop"),
+                value: mug.getPropertyValue(options.path),
                 xpathType: widget.definition.xpathType,
-                value:     $("#" + $(this).data("inputControlID")).val()
+                done: function (val) {
+                    if (val !== false) {
+                        formdesigner.controller.setMugPropertyValue(
+                            mug, widget.groupName, widget.propName, val);
+                    }
+                }
             });
         });
 

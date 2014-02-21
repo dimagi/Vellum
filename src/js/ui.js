@@ -400,9 +400,6 @@ formdesigner.ui = function () {
      */
     that.displayMugProperties = function (mug) {
         $('#fd-default-panel').addClass('hide');
-        // always hide the xpath editor if necessary
-        that.hideXPathEditor();
-        that.showTools();
 
         /* update display */
         $('#fd-question-properties').animate({}, 200);
@@ -1099,20 +1096,11 @@ formdesigner.ui = function () {
         $("#fd-question-properties").hide();
     };
 
-    that.hideTools = function() {
-        $("#fd-extra-tools").hide();
-    };
-    that.showTools = function() {
-        $("#fd-extra-tools").show();
-    };
-
-
     that.showXPathEditor = function (options) {
         /**
          * All the logic to display the XPath Editor widget.
          */
         var expTypes = xpathmodels.XPathExpressionTypeEnum;
-        var questionList = formdesigner.controller.getMugList();
 
         var editorPane = $('#fd-xpath-editor');
         var editorContent = $('#fd-xpath-editor-content');
@@ -1341,8 +1329,6 @@ formdesigner.ui = function () {
         };
 
         var updateXPathEditor = function(options) {
-            // set data properties for callbacks and such
-            editorPane.data("group", options.group).data("property", options.property);
             // clear validation text
             getValidationSummary()
                 .text("")
@@ -1399,7 +1385,7 @@ formdesigner.ui = function () {
                     ["True when ANY of the expressions are true.", expTypes.OR]
                 ]
             });
-            editorContent.append($xpathUI);
+            editorContent.empty().append($xpathUI);
 
             $xpathUI.find('#fd-xpath-show-advanced-button').click(function () {
                 showAdvancedMode(getExpressionFromSimpleMode());
@@ -1417,27 +1403,23 @@ formdesigner.ui = function () {
                 formdesigner.ui.hasXpathEditorChanged = true;
             });
 
-            var saveExpression = function(expression) {
-
-                formdesigner.controller.doneXPathEditor({
-                    group:    $('#fd-xpath-editor').data("group"),
-                    property: $('#fd-xpath-editor').data("property"),
-                    value:    expression
-                });
-                formdesigner.controller.form.fire('form-property-changed');
+            var done = function (val) {
+                formdesigner.ui.hideXPathEditor();
+                options.done(val);
             };
 
             $xpathUI.find('#fd-xpath-save-button').click(function() {
                 var uiExpression  = getExpressionFromUI();
                 getExpressionInput().val(uiExpression);
-                var results = validate(uiExpression);
-                if (results[0]) {
-                    saveExpression(uiExpression);
-                } else if (uiExpression.match('instance\\(')) {
-                    saveExpression(uiExpression);
-                    alert("This expression is too complex for us to verify; specifically, it makes use of the " +
-                        "'instance' construct. Please be aware that if you use this construct you're " +
-                        "on your own in verifying that your expression is correct.");
+                var results = validate(uiExpression),
+                    hasInstance = uiExpression.match('instance\\(');
+                if (results[0] || hasInstance) {
+                    if (hasInstance) {
+                        alert("This expression is too complex for us to verify; specifically, it makes use of the " +
+                            "'instance' construct. Please be aware that if you use this construct you're " +
+                            "on your own in verifying that your expression is correct.");
+                    }
+                    done(uiExpression);
                 } else {
                     getValidationSummary()
                         .html(formdesigner.ui.getTemplateObject('#fd-template-xpath-validation-errors', {
@@ -1448,16 +1430,11 @@ formdesigner.ui = function () {
             });
 
             $xpathUI.find('#fd-xpath-cancel-button').click(function () {
-                formdesigner.controller.doneXPathEditor({
-                    cancel:   true
-                });
+                done(false);
             });
         };
 
-        if (editorContent.children().length === 0) {
-            initXPathEditor();
-        }
-
+        initXPathEditor();
         updateXPathEditor(options);
         editorPane.show();
     };
