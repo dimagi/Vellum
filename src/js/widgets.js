@@ -14,12 +14,13 @@ formdesigner.widgets = (function () {
         return path.split("/")[1];
     };
 
-    that.baseWidget = function(mug) {
+    that.baseWidget = function(mug, id) {
         // set properties shared by all widgets
         var widget = {};
         // this shared method provides fake inheritance, assuming
         // it is called in a constructor on the object being constructed
         widget.mug = mug;
+        widget.id = id;
 
         widget.isDisabled = function () {
             // requires widget.path to be set.  This only happens in
@@ -40,22 +41,7 @@ formdesigner.widgets = (function () {
             return this.definition.lstring ? this.definition.lstring : this.propName;
         };
 
-        widget.getLabel = function () {
-            var displayName = widget.getDisplayName();
-            if (displayName) {
-                return $("<label />")
-                    .text(displayName)
-                    .attr("for", widget.getID());
-            } else {
-                return null;
-            }
-        };
-
         widget.getControl = function () {
-            throw ("must be overridden");
-        };
-
-        widget.getID = function () {
             throw ("must be overridden");
         };
 
@@ -96,35 +82,31 @@ formdesigner.widgets = (function () {
         };
 
         widget.getUIElement = function () {
-            // gets the whole widget (label + control)
-            var uiElem = $("<div />").addClass("widget control-group"),
-                $controls, $label;
-
-            $label = widget.getLabel();
-            $label.addClass('control-label');
-            uiElem.append($label);
-
-            $controls = $('<div class="controls" />');
-            $controls.append(widget.getControl());
-            uiElem.append($controls);
-
-            return uiElem;
+            return getUIElement(widget.getControl(), widget.getDisplayName(),
+                                !!widget.isDisabled());
         };
 
         return widget;
     };
 
     that.normalWidget = function(mug, options) {
-        var widget = that.baseWidget(mug),
-            path = options.path;
+        var path = options.path,
+            inputID = path.split("/").join("-"),
+            disabled = options.disabled || false,
+            widget = that.baseWidget(mug, inputID);
+
         widget.path = path;
         widget.definition = mug.getPropertyDefinition(path);
         widget.currentValue = mug.getPropertyValue(path);
         widget.groupName = that.getGroupName(widget.path);
         widget.propName = that.getPropertyName(widget.path);
 
-        widget.getID = function () {
-            return this.path.split("/").join("-");
+        widget.input = $("<input />")
+            .attr("id", inputID)
+            .prop('disabled', disabled);
+
+        widget.getControl = function () {
+            return widget.input; 
         };
 
         widget.save = function () {
@@ -138,17 +120,9 @@ formdesigner.widgets = (function () {
     };
 
     that.textWidget = function (mug, options) {
-        // a text widget
-        var widget = that.normalWidget(mug, options);
-
-	    var input = $("<input />").attr("id", widget.getID()).attr("type", "text").addClass('input-block-level');
-
-	    widget.getControl = function () {
-            if (widget.isDisabled()) {
-                input.prop('disabled', true);
-            }
-            return input;
-        };
+        var widget = that.normalWidget(mug, options)
+            input = widget.input;
+	    input.attr("type", "text").addClass('input-block-level');
 
         widget.setValue = function (value) {
             input.val(value);
@@ -164,8 +138,7 @@ formdesigner.widgets = (function () {
 
     that.droppableTextWidget = function (mug, options) {
         var widget = that.textWidget(mug, options);
-
-        widget.getControl().addClass('jstree-drop')
+        widget.input.addClass('jstree-drop')
             .attr('placeholder', 'Hint: drag a question here.')
             .change(widget.updateValue);
 
@@ -173,18 +146,9 @@ formdesigner.widgets = (function () {
     };
 
     that.checkboxWidget = function (mug, options) {
-
-        var widget = that.normalWidget(mug, options);
-
-        var input = $("<input />").attr("id", widget.getID());
+        var widget = that.normalWidget(mug, options),
+            input = widget.input;
         input.attr("type", "checkbox");
-
-        widget.getControl = function () {
-            if (widget.isDisabled()) {
-                input.prop('disabled', true);
-            }
-	        return input;
-        };
 
         widget.setValue = function (value) {
             input.prop("checked", value);
@@ -201,58 +165,34 @@ formdesigner.widgets = (function () {
     that.xPathWidget = function (mug, options) {
         var widget = that.textWidget(mug, options);
 
-        var xPathButton = $('<button />')
-            .addClass("xpath-edit-button pull-right")
-            .text("Edit")
-            .stopLink()
-            .addClass('btn')
-            .attr('type', 'button');
-
-        xPathButton.click(function () {
-            formdesigner.controller.displayXPathEditor({
-                value: mug.getPropertyValue(options.path),
-                xpathType: widget.definition.xpathType,
-                done: function (val) {
-                    if (val !== false) {
-                        formdesigner.controller.setMugPropertyValue(
-                            mug, widget.groupName, widget.propName, val);
-                    }
-                }
-            });
-        });
-
         widget.getUIElement = function () {
-            if (widget.isDisabled()) {
-                xPathButton.prop('disabled', true);
-            }
-            // gets the whole widget (label + control)
-            var uiElem = $("<div />").addClass("widget control-group"),
-                $controls = $('<div />').addClass('controls'),
-                $label;
-            $label = this.getLabel();
-            $label.addClass('control-label');
-            uiElem.append($label)
-                .append(xPathButton);
-            $controls.append(this.getControl())
-                .css('margin-right', '60px');
-            uiElem.append($controls);
-            return uiElem;
+            var elem = getUIElement(
+                widget.getControl(), widget.getDisplayName(), !!widget.isDisabled());
+            return getUIElementWithEditButton(elem, function () {
+                formdesigner.controller.displayXPathEditor({
+                    value: mug.getPropertyValue(options.path),
+                    xpathType: widget.definition.xpathType,
+                    done: function (val) {
+                        if (val !== false) {
+                            formdesigner.controller.setMugPropertyValue(
+                                mug, widget.groupName, widget.propName, val);
+                        }
+                    }
+                });
+            }, !!widget.isDisabled());
         };
 
         return widget;
     };
 
     that.androidIntentAppIdWidget = function (mug) {
-        var widget = that.baseWidget(mug);
+        var widget = that.baseWidget(mug, "intent-app-id");
+
         widget.definition = {};
         widget.currentValue = (mug.intentTag) ? mug.intentTag.path: "";
         widget.propName = "Intent ID";
-
-        widget.getID = function () {
-            return "intent-app-id";
-        };
-
-        var input = $("<input />").attr("id", widget.getID()).attr("type", "text").attr('placeholder', 'Insert Android Application ID');
+        
+        var input = $("<input />").attr("id", widget.id).attr("type", "text").attr('placeholder', 'Insert Android Application ID');
 
         widget.getControl = function () {
             if (widget.isDisabled()) {
@@ -275,17 +215,15 @@ formdesigner.widgets = (function () {
         };
 
         input.bind("change keyup", widget.updateValue);
-
         return widget;
-
     };
 
-    that.baseKeyValueWidget = function (mug) {
-        var widget = that.baseWidget(mug);
+    that.baseKeyValueWidget = function (mug, id) {
+        var widget = that.baseWidget(mug, id);
         widget.definition = {};
 
         // todo make a style for this when vellum gets a facelift
-        widget.kvInput = $('<div class="control-row" />');
+        widget.kvInput = $('<div class="control-row" />').attr('id', id);
 
         widget.getControl = function () {
             if (widget.isDisabled()) {
@@ -346,13 +284,9 @@ formdesigner.widgets = (function () {
     };
 
     that.androidIntentExtraWidget = function (mug) {
-        var widget = that.baseKeyValueWidget(mug);
+        var widget = that.baseKeyValueWidget(mug, "intent-extra");
         widget.currentValue = (mug.intentTag) ? mug.intentTag.extra : {};
         widget.propName = "Extra";
-
-        widget.getID = function () {
-            return "intent-extra";
-        };
 
         widget.save = function () {
             if (widget.mug.intentTag) {
@@ -365,13 +299,9 @@ formdesigner.widgets = (function () {
     };
 
     that.androidIntentResponseWidget = function (mug) {
-        var widget = that.baseKeyValueWidget(mug);
+        var widget = that.baseKeyValueWidget(mug, "intent-response");
         widget.currentValue = (mug.intentTag) ? mug.intentTag.response : {};
         widget.propName = "Response";
-
-        widget.getID = function () {
-            return "intent-response";
-        };
 
         widget.save = function () {
             if (widget.mug.intentTag) {
@@ -384,14 +314,10 @@ formdesigner.widgets = (function () {
     };
     
     that.readOnlyControlWidget = function (mug) {
-        var widget = that.baseWidget(mug);
+        var widget = that.baseWidget(mug, "readonly-control");
         widget.definition = {};
         widget.currentValue = $('<div>').append(mug.controlElementRaw).clone().html();
         widget.propName = "Raw XML: ";
-
-        widget.getID = function () {
-            return "readonly-control";
-        };
 
         widget.getControl = function () {
             var control = $("<p />").text(this.currentValue);
@@ -400,6 +326,46 @@ formdesigner.widgets = (function () {
 
         return widget;
     };
+    
+    function getUIElementWithEditButton($uiElem, editFn) {
+        var input = $uiElem.find('input'),
+            isDisabled = input ? input.prop('disabled') : false;
+
+        var button = $('<button />')
+            .addClass("fd-edit-button pull-right")
+            .text("Edit")
+            .stopLink()
+            .addClass('btn')
+            .attr('type', 'button')
+            .prop('disabled', isDisabled)
+            .click(editFn);
+
+        $uiElem.find('label').after(button);
+        $uiElem.find('.controls').css('margin-right', '60px');
+        return $uiElem;
+    }
+    
+    function getUIElement($input, labelText) {
+        var uiElem = $("<div />").addClass("widget control-group"),
+            $controls = $('<div class="controls" />'),
+            $label = getLabel(labelText, $input.attr('id'));
+        $label.addClass('control-label');
+        uiElem.append($label);
+
+        $controls.append($input);
+        uiElem.append($controls);
+        return uiElem;
+    }
+
+    function getLabel(text, forId) {
+        var $label = $("<label />")
+            .text(text);
+        if (forId) {
+            $label.attr("for", forId);
+        }
+        return $label;
+    }
+
 
     that.questionSection = function (mug, options) {
         var section = {};

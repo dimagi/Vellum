@@ -265,7 +265,7 @@ describe("The question locking functionality in the core and UI", function () {
             var mock = PluginMock('isPropertyLocked', [bool]);
             clickQuestion2();
             mock.restore();
-            var $but = $("label[for='bindElement-relevantAttr']").next('.xpath-edit-button');
+            var $but = $("label[for='bindElement-relevantAttr']").next(':contains(Edit)');
             assert($but.length === 1);
             assert.equal(bool, $but.prop('disabled'));
             $but.click();

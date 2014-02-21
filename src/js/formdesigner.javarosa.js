@@ -427,13 +427,12 @@ var ItextModel = function() {
 
 var iTextIDWidget = function (mug, options) {
     // a special text widget that holds itext ids
-    var widget = formdesigner.widgets.textWidget(mug, options);
+    var widget = formdesigner.widgets.textWidget(mug, options),
+        $input = widget.input;
 
     widget.isSelectItem = (mug.__className === "Item");
     widget.parentMug = widget.isSelectItem ? widget.mug.parentMug : null;
     widget.langs = formdesigner.pluginManager.javaRosa.Itext.getLanguages();
-
-    var $input = widget.getControl();
 
     // a few little hacks to support auto-update of choices
     widget.getRootId = function () {
@@ -477,7 +476,7 @@ var iTextIDWidget = function (mug, options) {
     };
 
     // auto checkbox
-    var autoBoxId = widget.getID() + "-auto-itext";
+    var autoBoxId = widget.id + "-auto-itext";
     var $autoBox = $("<input />").attr("type", "checkbox").attr("id", autoBoxId);
 
     $autoBox.change(function () {
@@ -547,7 +546,7 @@ var iTextIDWidget = function (mug, options) {
         }
     });
 
-    widget.getControl().keyup(function () {
+    widget.input.keyup(function () {
         // turn off auto-mode if the id is ever manually overridden
         var newVal = $(this).val();
         if (newVal !== widget.autoGenerateId(widget.getNodeId())) {
@@ -885,9 +884,28 @@ var itextMediaBlock = function (mug, options) {
 };
 
 var itextLabelWidget = function (mug, language, form, options) {
-    var Itext = formdesigner.pluginManager.javaRosa.Itext;
-    var widget = formdesigner.widgets.baseWidget(mug);
+    var Itext = formdesigner.pluginManager.javaRosa.Itext,
+        id = "itext-" + language + "-" + options.itextType;
+    if (options.idSuffix) {
+        id = id + options.idSuffix;
+    }
 
+    var widget = formdesigner.widgets.baseWidget(mug, id);
+    var $input = $("<input />")
+        .attr("id", widget.id)
+        .attr("type", "text")
+         .addClass('input-block-level itext-widget-input')
+         .on('change keyup', function () {
+             widget.updateValue;
+         });
+ 
+    widget.getControl = function () {
+        return $input;
+    };
+
+    widget.mug.on('question-itext-deleted', widget.destroy);
+
+    
     widget.displayName = options.displayName;
     widget.itextType = options.itextType;
     widget.form = form || "default";
@@ -913,14 +931,6 @@ var itextLabelWidget = function (mug, language, form, options) {
 
     widget.getDisplayName = function () {
         return widget.displayName + widget.getLangDesc();
-    };
-
-    widget.getIDByLang = function (lang) {
-        return "itext-" + lang + "-" + widget.itextType;
-    };
-
-    widget.getID = function () {
-        return widget.getIDByLang(widget.language);
     };
 
     widget.init = function (loadDefaults) {
@@ -972,17 +982,11 @@ var itextLabelWidget = function (mug, language, form, options) {
         }
     };
 
-    var $input = $("<input />")
-        .attr("id", widget.getID())
-        .attr("type", "text")
+    $input.attr("type", "text")
         .addClass('input-block-level itext-widget-input')
         .on('change keyup', widget.updateValue);
 
     widget.mug.on('question-itext-deleted', widget.destroy);
-
-    widget.getControl = function () {
-        return $input;
-    };
 
     widget.toggleDefaultLangSync = function (val) {
         widget.isSyncedWithDefaultLang = !val && !widget.isDefaultLang;
@@ -1073,17 +1077,13 @@ var itextLabelWidget = function (mug, language, form, options) {
 };
 
 var itextFormWidget = function (mug, language, form, options) {
+    options = options || {};
+    options.idSuffix = "-" + form;
     var widget = itextLabelWidget(mug, language, form, options);
 
     widget.getDisplayName = function () {
         return form + widget.getLangDesc();
     };
-
-    var _getID = widget.getID;
-    widget.getID = function () {
-        return _getID() + "-" + form;
-    };
-
     return widget;
 };
 
@@ -1140,11 +1140,11 @@ var itextMediaWidget = function (mug, language, form, options) {
     };
 
     widget.getPreviewID = function () {
-        return  widget.getID() + '-preview-block';
+        return  widget.id + '-preview-block';
     };
 
     widget.getUploadID = function () {
-        return widget.getID() + '-upload-block';
+        return widget.id + '-upload-block';
     };
 
     var $uiElem = $('<div />'),
@@ -1209,6 +1209,10 @@ var itextMediaWidget = function (mug, language, form, options) {
     };
 
     widget.updateMultimediaBlockUI = function () {
+        if (!formdesigner.multimedia.isUploadEnabled) {
+            return;
+        }
+
         $('#' + widget.getPreviewID()).html(widget.getPreviewUI())
             .find('.existing-media').tooltip();
 
