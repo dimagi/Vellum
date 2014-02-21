@@ -17,7 +17,7 @@
 formdesigner.plugins = formdesigner.plugins || {};
 
 formdesigner.plugins.lock = function () {
-    var locks;
+    var locks = {};
 
     this.beforeParse = function (xml) {
         locks = {};
