@@ -38,7 +38,6 @@
         "grunt-contrib-cssmin": "*",
         "grunt-contrib-concat": "*",
         "grunt-image-embed": "*",
-        "grunt-githooks": "*"
     },
     "main": "dist/vellum.min.js",
     "napa": {

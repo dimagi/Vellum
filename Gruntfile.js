@@ -9,7 +9,6 @@ module.exports = function (grunt) {
         'grunt-contrib-less',
         'grunt-contrib-uglify',
         'grunt-image-embed',
-        'grunt-githooks'
     ], grunt.loadNpmTasks);
 
     grunt.registerTask('dist', [
@@ -21,29 +20,7 @@ module.exports = function (grunt) {
         'uglify'
     ]);
 
-    grunt.registerTask('git_add_dist', "Git add modified dist files",
-        function () {
-            exec("git add dist");
-        }
-    );
-
-    var dest;
-    if (fs.lstatSync('.git').isDirectory()) {
-        dest = '.git/hooks';
-    } else {
-        // hardcoded CommCare HQ submodule path
-        dest = '../../.git/modules/submodules/formdesigner/.git/hooks';
-    }
-
     grunt.initConfig({
-        githooks: {
-            options: {
-                dest: dest
-            },
-            all: {
-                'pre-commit': 'dist git_add_dist'
-            }
-        },
         less: {
             main: {
                 files: {
