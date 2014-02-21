@@ -690,7 +690,11 @@ formdesigner.controller = (function () {
             // hack: force removal of the appearance attribute since this is statically
             // determined already by the question type
             if (mug.controlElement && mug.controlElement.appearance) {
-                mug.controlElement.appearance = null;
+                delete mug.controlElement.appearance;
+            }
+            // and do the same thing for the 'mediatype' property as well
+            if (mug.controlElement && mug.controlElement.mediaType) {
+                delete mug.controlElement.mediaType;
             }
 
             newMug.copyAttrs(mug);
