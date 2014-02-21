@@ -37,7 +37,7 @@
         "grunt-contrib-uglify": "*",
         "grunt-contrib-cssmin": "*",
         "grunt-contrib-concat": "*",
-        "grunt-image-embed": "*",
+        "grunt-image-embed": "*"
     },
     "main": "dist/vellum.min.js",
     "napa": {
