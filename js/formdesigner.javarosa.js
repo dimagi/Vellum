@@ -1386,6 +1386,15 @@ formdesigner.plugins.javaRosa = function (options) {
                 textEl.children().each(eachValue);
             }
 
+            if (formdesigner.opts.langs && formdesigner.opts.langs.indexOf(lang) === -1) {
+                formdesigner.controller.addParseWarningMsg(
+                    "You have languages in your form that are not specified " +
+                    "in the \"Languages\" page of the application builder. " +
+                    "The following languages will be deleted on save " +
+                    "unless you add them to the \"Languages\" page."
+                );
+                return;
+            }
             Itext.addLanguage(lang);
             if (el.attr('default') !== undefined) {
                 Itext.setDefaultLanguage(lang);
