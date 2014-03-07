@@ -196,6 +196,15 @@ formdesigner.widgets = (function () {
             });
         });
 
+        var super_getValue = widget.getValue;
+        widget.getValue = function() {
+            var val = super_getValue()
+            if (val.trim() === "") {
+                return "";
+            }
+            return val;
+        };
+
         widget.getUIElement = function () {
             // gets the whole widget (label + control)
             var uiElem = $("<div />").addClass("widget control-group"),
