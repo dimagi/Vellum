@@ -54,9 +54,6 @@ $ npm test
 
 ### Submitting changes
 
-New features and old features that you touch should come with unit tests.  If
-you don't know how to unit test a feature, ask.
-
 Changes should be in the form of pull requests to develop.
 
 A new release is initiated by branching develop off to release, and creating
@@ -64,14 +61,24 @@ a pull request from release into master.
 
 master always contains the latest stable version.
 
-These branches are automatically deployed for testing:
-
-* [master](http://vellum-master.herokuapp.com)
-* [release](http://vellum-release.herokuapp.com)
-* [develop](http://vellum-develop.herokuapp.com)
+[master](http://vellum-master.herokuapp.com),
+[release](http://vellum-release.herokuapp.com), and
+[develop](http://vellum-develop.herokuapp.com) are automatically deployed for
+testing.
 
 
 Event Tracking
 --------------
 
 If you have Google Analytics installed, Vellum will track events.
+
+
+Changelog
+---------
+
+### 1.5.0
+
+- Added Ignore-but-retain and question locking plugins 
+- Fixed ability to Ctrl-F within source XML editor
+- Added testing infrastructure
+- Added Grunt build to generate JS and CSS
