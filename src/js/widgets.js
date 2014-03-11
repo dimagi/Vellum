@@ -354,13 +354,14 @@ formdesigner.widgets = (function () {
         return $uiElem;
     }
     
-    function getUIElement($input, labelText) {
+    function getUIElement($input, labelText, isDisabled) {
         var uiElem = $("<div />").addClass("widget control-group"),
             $controls = $('<div class="controls" />'),
             $label = getLabel(labelText, $input.attr('id'));
         $label.addClass('control-label');
         uiElem.append($label);
 
+        $input.prop('disabled', !!isDisabled);
         $controls.append($input);
         uiElem.append($controls);
         return uiElem;
