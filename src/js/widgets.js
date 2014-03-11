@@ -165,6 +165,15 @@ formdesigner.widgets = (function () {
     that.xPathWidget = function (mug, options) {
         var widget = that.textWidget(mug, options);
 
+        var super_getValue = widget.getValue;
+        widget.getValue = function() {
+            var val = super_getValue()
+            if (val.trim() === "") {
+                return "";
+            }
+            return val;
+        };
+
         widget.getUIElement = function () {
             var elem = getUIElement(
                 widget.getControl(), widget.getDisplayName(), !!widget.isDisabled());
