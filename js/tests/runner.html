@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+
+  <head>
+    <title>Vellum Test Results</title>
+
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+    <!-- Mocha and test-only dependencies -->
+    <link href="../node_modules/mocha/mocha.css" type="text/css" rel="stylesheet"></link>
+    <script type="text/javascript" src="../node_modules/mocha/mocha.js"></script>
+    <script type="text/javascript" src="../node_modules/chai/chai.js"></script>
+
+    <!-- Runtime Dependencies -->
+    <script type="text/javascript" src="../lib/jquery-1.6.1.js"></script>
+    <script type="text/javascript" src="../lib/jquery-ui-1.8.14.custom.min.js"></script>
+    <script type="text/javascript" src="../lib/jquery.jstree.js"></script>
+    <script type="text/javascript" src="../lib/jquery.fancybox-1.3.4.pack.js"></script>
+    <script type="text/javascript" src="../lib/chosen.jquery.min.js"></script>
+    <script type="text/javascript" src="../lib/jquery-ui-timepicker-addon.js"></script>
+    
+    <script src="../lib/codemirror/codemirror.js"></script>
+    <script src="../lib/codemirror/xml.js"></script>
+
+    <script type="text/javascript" src="../lib/underscore-1.5.2.js"></script>
+    
+    <script type="text/javascript" src="../lib/xpath/lib/biginteger.js"></script>
+    <script type="text/javascript" src="../lib/xpath/lib/schemeNumber.js"></script>
+    <script type="text/javascript" src="../lib/xpath/models.js"></script>
+    <script type="text/javascript" src="../lib/xpath/xpath.js"></script>
+    
+    <script type="text/javascript" src="../lib/XMLWriter-1.0.0.js"></script>
+    <script src="../lib/classy-1.4.js"></script>
+
+    <!-- Pieces of Vellum -->
+    <script src="../formdesigner.javarosa.js?version=101"></script>
+    <script src="../window.js?version=101"></script>
+    <script src="../multimedia.js?version=101'"></script>
+    <script src="../widgets.js?version=101"></script>
+    <script type="text/javascript" src="../saveButton.js?version=101"></script>
+    <script type="text/javascript" src="../util.js?version=101"></script>
+    <script type="text/javascript" src="../model.js?version=101"></script>
+    <script type="text/javascript" src="../controller.js?version=101"></script>
+    <script type="text/javascript" src="../ui.js?version=101"></script>
+
+  </head>
+  <body>
+    <div id="mocha"></div>
+    
+    <!-- Tests and running -->
+    <script type="text/javascript">
+      mocha.setup('bdd');
+      mocha.reporter('html');
+    </script>
+    <script type="text/javascript" src="formdesigner.spec.js"></script>
+    <script type="text/javascript">
+      if (window.mochaPhantomJS) { mochaPhantomJS.run(); }
+      else { mocha.run(); }
+    </script>
+  </body>
+</html>
