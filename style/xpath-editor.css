@@ -1,0 +1,70 @@
+.clearfix {
+  *zoom: 1;
+}
+.clearfix:before,
+.clearfix:after {
+  display: table;
+  content: "";
+  line-height: 0;
+}
+.clearfix:after {
+  clear: both;
+}
+.hide-text {
+  font: 0/0 a;
+  color: transparent;
+  text-shadow: none;
+  background-color: transparent;
+  border: 0;
+}
+.input-block-level {
+  display: block;
+  width: 100%;
+  min-height: 30px;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+#fd-xpath-editor-content {
+  padding: 20px;
+}
+#fd-xpath-editor .xpath-expression-group .validation-result-container {
+  width: 34px;
+  margin-top: -1px;
+  margin-right: 5px;
+}
+#fd-xpath-editor .xpath-expression-group .validation-result-container .validation-results {
+  padding: 5px 10px;
+  margin-bottom: 0;
+}
+#fd-xpath-editor .xpath-expression-group .xpath-expression-row {
+  margin-right: 80px;
+}
+#fd-xpath-editor .fd-xpath-editor-container fieldset {
+  position: relative;
+}
+#fd-xpath-editor .xpath-mode-toggle {
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+#fd-xpath-editor-expressions {
+  background-color: #f4f4f4;
+  padding: 10px;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+  margin-bottom: 10px;
+}
+#fd-xpath-editor-expressions .control-group:last-child {
+  margin-bottom: 0;
+}
+.fieldset-condensed .control-label {
+  width: 90px;
+}
+.fieldset-condensed .controls {
+  margin-left: 100px;
+}
+.form-horizontal .form-actions-condensed {
+  padding-left: 100px;
+}

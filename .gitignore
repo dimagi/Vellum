@@ -1,12 +1,2 @@
 /js/node_modules
-node_modules
-npm-debug.log
 *~
-
-src/less/*.css
-
-dist/*.map
-dist/*.tmp.css
-dist/vellum.css
-dist/vellum.js
-
