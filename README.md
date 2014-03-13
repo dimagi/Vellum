@@ -1,90 +1,84 @@
 Vellum
 ======
 
-Vellum is an [XForm](http://en.wikipedia.org/wiki/XForms) designer built by
+Vellum is a JavaRosa [XForm](http://en.wikipedia.org/wiki/XForms) designer built by
 [Dimagi][0] for [CommCare HQ][1].
 
  [0]: http://www.dimagi.com
  [1]: http://www.commcarehq.org
 
-Setup
------
-
-Vellum expects jQuery and Underscore.js to be present.   It also expects
-`SaveButton` from CommCare HQ
-([link](https://github.com/dimagi/commcare-hq/blob/master/corehq/apps/hqwebapp/static/hqwebapp/js/main.js))
-to be present, or you can use the version included in `js/`, which may be out of
-date.
-
-All other dependencies are bundled in `dist/vellum.min.js` and
-`dist/vellum.css`.
-
-You'll need to change line 39 in `css/jquery.fancybox-1.3.4.css` to the URL that
-points to fancybox.png, and re-run the grunt tasks.
 
 Usage
 -----
 
-    formdesigner.launch({
-        rootElement: "#formdesigner",
-        staticPrefix: "",
-        langs: ""
-    });
+Vellum depends on jQuery, Underscore.js, and Bootstrap.  Other dependencies are
+bundled and included in `dist/vellum.js` and `dist/vellum.css`, but some
+additional dependencies that are part of [CommCare
+HQ](http://github.com/dimagi/commcare-hq) aren't well-defined yet.
 
-formdesigner.launch causes the formdesigner to initialize itself fully in the
-element specified by rootElement.
+For an example of a minimal setup and usage of Vellum, including all known
+dependencies, see `tests/index.html`.
 
-Form Options:
-* rootElement: "jQuery selector to FD Container",
-* staticPrefix : "url prefix for static resources like css and pngs",
-* saveUrl : "URL that the FD should post saved forms to",
-* [form] : "string of the xml form that you wish to load"
-* [formName] : "Default Form Name"
-
-Testing
--------
-
-Install PhantomJS from NPM:
-
-```
-$ npm install -g phantomjs
-```
-
-Then:
-
-```
-$ cd js
-$ npm install -d
-$ npm test
-```
-
-Currently, the tests don't behave correctly under PhantomJS (or in Firefox).
-You can open `js/tests/runner.html` to manually run the tests.
+For some additional configuration options, see
+[`form_designer.html`](https://github.com/dimagi/commcare-hq/blob/master/corehq/apps/app_manager/templates/app_manager/form_designer.html)
+in CommCare HQ.
 
 
 Contributing
 ------------
 
-To install grunt plugins and setup git hooks to run `grunt dist`:
+### Setup
 
+Install dependencies:
 ```
-$ npm install grunt grunt-contrib-uglify grunt-contrib-cssmin grunt-contrib-concat grunt-githooks
-$ grunt githooks
+$ npm install napa
+$ npm install
 ```
 
-Note: git pre-commit hook integration doesn't seem to work at the moment, so you
-will have to manually run the following before every commit:
-
+Create build artifacts for each commit:
 ```
 $ grunt dist
-$ git add dist
 ```
 
-To modify Vellum's CSS, you need to have [LESS](http://lesscss.org) installed.
-You each file in `style` is compiled individually and share a common library `style/lib/main.less`
-with useful mixins and variables borrowed from [Twitter Bootstrap](http://getbootstrap.com).
+Run tests in a browser:
+```
+$ python -m SimpleHTTPServer
+$ chromium-browser http://localhost:8000/tests/
+```
+
+Run tests headlessly (currently broken):
+```
+$ npm install -g phantomjs
+$ npm test
+```
+
+### Submitting changes
+
+Changes should be in the form of pull requests to develop.
+
+A new release is initiated by branching develop off to release, and creating
+a pull request from release into master.
+
+master always contains the latest stable version.
+
+[master](http://vellum-master.herokuapp.com),
+[release](http://vellum-release.herokuapp.com), and
+[develop](http://vellum-develop.herokuapp.com) are automatically deployed for
+testing.
+
 
 Event Tracking
 --------------
 
 If you have Google Analytics installed, Vellum will track events.
+
+
+Changelog
+---------
+
+### 1.5.0
+
+- Added Ignore-but-retain and question locking plugins 
+- Fixed ability to Ctrl-F within source XML editor
+- Added testing infrastructure
+- Added Grunt build to generate JS and CSS
