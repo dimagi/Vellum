@@ -531,7 +531,7 @@ formdesigner.controller = (function () {
             // put data nodes at the end
             refMug = null;
             position = 'last';
-        } else if (!refMug.controlElement) {
+        } else if (refMug && !refMug.controlElement) {
             // don't insert a regular node inside the data node range
             refMug = that.getLowestNonDataNodeMug();
             position = 'after';
