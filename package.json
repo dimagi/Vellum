@@ -48,6 +48,6 @@
     },
     "scripts": {
         "install": "napa",
-        "test": "mocha-phantomjs tests/runner.html"
+        "test": "mocha-phantomjs tests/index.html"
     }
 }
