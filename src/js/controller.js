@@ -345,7 +345,6 @@ formdesigner.controller = (function () {
         var treeFunc, dataNodeList;
         that.setCurrentlySelectedMug(null);
 
-        formdesigner.ui.skipNodeSelectEvent = true;
         treeFunc = function (node) {
             var mug;
             if(node.isRootNode) {
@@ -366,7 +365,6 @@ formdesigner.controller = (function () {
             that.loadMugIntoUI(dataNodeList[i]);
         }
         formdesigner.ui.setAllTreeValidationIcons();
-        formdesigner.ui.skipNodeSelectEvent = false;
         formdesigner.ui.selectSomethingOrResetUI(true);
         that.fire('fd-reload-ui');
 
@@ -396,59 +394,30 @@ formdesigner.controller = (function () {
         return  that.form.dataTree.treeMap(treeFunc);
     };
 
-    /**
-     * Create a new node from mug relative to the currently selected node.
-     *
-     * @param mug - Mug to insert into tree
-     * @param position (optional)
-     * @return  - node object on success or false on failure (when you attempt
-     *   invalid nesting with respect to node types)
-     */
-    that.createQuestionInUITree = function (mug, position) {
-        var objectData, insertPosition;
-
-        if (mug.controlElement) {
-            insertPosition = position || "into";
-        } else {
-            // data node
-            
-            formdesigner.ui.jstree("deselect_all");
-            insertPosition = "last";
-        }
-
-        objectData = {
-            data: formdesigner.util.getMugDisplayName(mug),
-            metadata: {
-                mug: mug,
-                mugUfid: mug.ufid,
-                dataID: mug.getDataElementID(),
-                bindID: mug.getBindElementID()
-            },
-            attr: {
-                id: mug.ufid,
-                rel: mug.__className
-            },
-            state: mug.isSpecialGroup ? 'open' : undefined
-        };
-
-        var oldSelected = that.getCurrentlySelectedMug();
-
+    that.createQuestionInUITree = function (mug, refMug, position) {
         var result = formdesigner.ui.jstree("create",
-            null,
-            insertPosition,
-            objectData,
+            refMug ? "#" + refMug.ufid : formdesigner.ui.questionTree.attr('id'),
+            position,
+            {
+                data: formdesigner.util.getMugDisplayName(mug),
+                metadata: {
+                    mug: mug,
+                    mugUfid: mug.ufid,
+                    dataID: mug.getDataElementID(),
+                    bindID: mug.getBindElementID()
+                },
+                attr: {
+                    id: mug.ufid,
+                    rel: mug.__className
+                },
+                state: mug.isSpecialGroup ? 'open' : undefined
+            },
             null, // callback
             true  // skip_rename
         );
 
         // jstree.create returns the tree root if types prevent creation
-        var success = result && result[0].id !== formdesigner.ui.QUESTION_TREE_DIV;  
-
-        if (success && oldSelected) {
-            formdesigner.ui.jstree("select_node", '#' + oldSelected.ufid);
-        }
-
-        return success;
+        return result && result[0].id !== formdesigner.ui.QUESTION_TREE_DIV;  
     };
 
     that.duplicateCurrentQuestion = function (options) {
@@ -501,20 +470,11 @@ formdesigner.controller = (function () {
                 duplicate.controlElement.defaultValue = newItemValue;
             }
            
-            formdesigner.ui.skipNodeSelectEvent = options.itext !== "copy";
             // insert mugtype into data and UI trees
             if (depth > 0) {
-                if (parentMug) {
-                    formdesigner.ui.jstree("select_node", '#' + parentMug.ufid);
-                }
-
-                that.initQuestion(duplicate, parentMug);
+                that.initQuestion(duplicate, parentMug, 'into');
             } else {
-                formdesigner.ui.jstree("select_node", '#' + mug.ufid);
                 that.initQuestion(duplicate, mug, 'after');
-                formdesigner.ui
-                    .jstree("deselect_all")
-                    .jstree("select_node", '#' + duplicate.ufid);
             }
 
             formdesigner.model.LogicManager.updateAllReferences(duplicate);
@@ -523,7 +483,6 @@ formdesigner.controller = (function () {
                 formdesigner.ui.displayMugProperties(duplicate);
                 that.unlinkCurrentQuestionItext();
             }
-            formdesigner.ui.skipNodeSelectEvent = true;
 
             var children = that.getChildren(mug);
             depth++;
@@ -532,12 +491,6 @@ formdesigner.controller = (function () {
                     duplicateMug(children[i], duplicate, options)[1]);
             }
             depth--;
-
-            if (parentMug) {
-                formdesigner.ui
-                    .jstree("deselect_all")
-                    .jstree("select_node", '#' + parentMug.ufid);
-            }
 
             pathReplacements.push({
                 mugId: mug.ufid,
@@ -548,8 +501,7 @@ formdesigner.controller = (function () {
             return [duplicate, pathReplacements];
         }
 
-        var oldSkip = formdesigner.ui.skipNodeSelectEvent,
-            selected = that.getCurrentlySelectedMug(),
+        var selected = that.getCurrentlySelectedMug(),
             parent = selected.parentMug,
             foo = duplicateMug(selected, parent, options),
             duplicate = foo[0],
@@ -564,71 +516,58 @@ formdesigner.controller = (function () {
             formdesigner.model.LogicManager.updatePath(pr.mugId, pr.from, pr.to, 
                 that.form.dataTree.getAbsolutePath(duplicate));
         }
-        formdesigner.ui.skipNodeSelectEvent = false;
 
         formdesigner.ui
             .jstree("deselect_all")
             .jstree("select_node", '#' + duplicate.ufid);
 
-        formdesigner.ui.skipNodeSelectEvent = oldSkip;
-
         that.form.fire({type: "form-property-changed"});
     };
 
     that.initQuestion = function (mug, refMug, position) {
-        formdesigner.util.setStandardMugEventResponses(mug);
-        refMug = refMug || that.getCurrentlySelectedMug();
-        
-        /* If a data node is currently selected, select the lowest question node
-         * so we never insert a non-data node after the beginning of the data
-         * nodes at the bottom. */
-        if (refMug && !refMug.controlElement) {
-            var lowest = formdesigner.ui.selectLowestQuestionNode();
-            refMug = that.getMugFromFormByUFID($(lowest).prop('id'));
-            position = 'after';
-        }
-     
-        position = position || 'into';
         var success = false;
 
-        // manually set mug.parentMug before UI insertion so it's accessible to
-        // overrideJSTreeIcon()
-        if (position === 'into') {
-            mug.parentMug = refMug;
-        } else {
-            mug.parentMug = refMug.parentMug;
+        if (!mug.controlElement) {
+            // put data nodes at the end
+            refMug = null;
+            position = 'last';
+        } else if (refMug && !refMug.controlElement) {
+            // don't insert a regular node inside the data node range
+            refMug = that.getLowestNonDataNodeMug();
+            position = 'after';
         }
 
         /* First try to insert into the currently selected question, then try to
          * insert after it, then after all of its ancestors. */
-        while (!success && refMug) {
-            formdesigner.ui.jstree("select_node", '#' + refMug.ufid);
-            success = that.createQuestionInUITree(mug, position);
+        while (!success) {
+            // manually set mug.parentMug before attempting UI insertion so it's
+            // accessible to overrideJSTreeIcon()
+            mug.parentMug = (!refMug || position === 'into' || position === 'last') ? 
+                    refMug : refMug.parentMug;
 
+            success = that.createQuestionInUITree(mug, refMug, position);
             if (!success) {
                 if (position !== 'after') {
                     position = 'after';
                 } else {
                     refMug = refMug.parentMug;
+                    if (!refMug) {
+                        break;
+                    }
                 }
             }
         }
 
-        /* If that failed (the only case should be when trying to insert a data
-         * node), insert after the last non-data node. */
         if (!success) {
-            formdesigner.ui.selectLowestQuestionNode();
-            refMug = that.getCurrentlySelectedMug();
-            position = 'after';
-            success = that.createQuestionInUITree(mug, position);
-        }
-
-        if (!success) {
-            return false;
+            throw new Error("Can't insert " + mug.__className + " into " + 
+                refMug.__className + " " + 
+                formdesigner.util.getMugDisplayName(refMug) + 
+                " or any of its ancestors.");
         }
 
         // insert into model
         that.insertMugIntoForm(refMug, mug, position);
+        formdesigner.util.setStandardMugEventResponses(mug);
         formdesigner.pluginManager.javaRosa.Itext.updateForNewMug(mug);
         formdesigner.intentManager.syncMugWithIntent(mug);
 
@@ -638,12 +577,27 @@ formdesigner.controller = (function () {
             type: "question-creation",
             mug: mug
         });
-
-        return mug;
     };
 
     that.removeCurrentQuestion = function () {
         that.removeMugFromForm(that.getCurrentlySelectedMug());
+    };
+    
+    /**
+     * Select the lowest top-level non-data node
+     *
+     * @return jquery object for the lowest node if there are any question
+     *         nodes, otherwise false
+     */
+    that.getLowestNonDataNodeMug = function () {
+        var questions = formdesigner.ui.getJSTree().children().children()
+                .filter("[rel!='DataBindOnly']");
+        if (questions.length > 0) {
+            return that.getMugFromFormByUFID(
+                $(questions[questions.length - 1]).attr('id'));
+        } else {
+            return null;
+        }
     };
 
     that.unlinkCurrentQuestionItext = function () {
@@ -739,20 +693,11 @@ formdesigner.controller = (function () {
     };
 
     that.loadMugIntoUI = function (mug) {
-        var controlTree, parentMug;
-
-        // set the 'currently selected mug' to be that of this mug's parent.
-        controlTree = that.form.controlTree;
-        parentMug = mug.parentMug;
-        
         // check for control element because we want data nodes to be a flat
         // list at bottom.
-        if (parentMug && mug.controlElement) {
-            formdesigner.ui.jstree('select_node', '#'+parentMug.ufid, true);
-        } else {
-            formdesigner.ui.jstree('deselect_all');
-        }
-        that.createQuestionInUITree(mug);
+        var refMug = mug.parentMug && mug.controlElement
+                ? mug.parentMug : null;
+        that.createQuestionInUITree(mug, refMug, 'into');
     };
 
     that.generateExportXLS = function () {
