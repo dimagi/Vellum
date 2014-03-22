@@ -424,83 +424,6 @@ formdesigner.controller = (function () {
         options = options || {};
         options.itext = options.itext || "link";
 
-        var depth = 0;
-
-        /**
-         * Copy a Mug and its descendants and insert them after the original
-         * Mug. Returns an array with two values:
-         *  1. The duplicate Mug.
-         *  2. An array of path replacements that should be executed on logic references.
-         *
-         * @param mug - the mugtype in the original tree to duplicate
-         * @param parentMug - the mugtype in the duplicate tree to insert into
-         * @param options {
-         *          itext: 'link' (default) or 'copy'
-         *        }
-         */
-        function duplicateMug(mug, parentMug, options) {
-            // clone mug and give everything new unique IDs
-            var duplicate = new mugs[mug.__className]();
-                pathReplacements = [];
-            duplicate.copyAttrs(mug);
-
-            // ensure consistency            
-            formdesigner.util.give_ufid(duplicate);
-            // clear existing event handlers for the source question
-            formdesigner.util.eventuality(duplicate);
-            formdesigner.util.setStandardMugEventResponses(duplicate);
-
-            if (mug.bindElement && mug.bindElement.nodeID) {
-                var newQuestionID = formdesigner.util.generate_question_id(
-                    mug.bindElement.nodeID
-                ); 
-                duplicate.bindElement.nodeID = newQuestionID;
-
-                if (mug.dataElement) {
-                    duplicate.dataElement.nodeID = newQuestionID;
-                }
-            }
-            
-            if (depth === 0 && mug.controlElement && 
-                mug.controlElement.defaultValue)
-            {
-                var newItemValue = formdesigner.util.generate_question_id(
-                    mug.controlElement.defaultValue
-                );
-                duplicate.controlElement.defaultValue = newItemValue;
-            }
-           
-            // insert mugtype into data and UI trees
-            if (depth > 0) {
-                that.initQuestion(duplicate, parentMug, 'into');
-            } else {
-                that.initQuestion(duplicate, mug, 'after');
-            }
-
-            formdesigner.model.LogicManager.updateAllReferences(duplicate);
-
-            if (options.itext === "copy") {
-                formdesigner.ui.displayMugProperties(duplicate);
-                that.unlinkCurrentQuestionItext();
-            }
-
-            var children = that.getChildren(mug);
-            depth++;
-            for (var i = 0; i < children.length; i++) {
-                pathReplacements = pathReplacements.concat(
-                    duplicateMug(children[i], duplicate, options)[1]);
-            }
-            depth--;
-
-            pathReplacements.push({
-                mugId: mug.ufid,
-                from: that.form.dataTree.getAbsolutePath(mug),
-                to: that.form.dataTree.getAbsolutePath(duplicate)
-            });
-
-            return [duplicate, pathReplacements];
-        }
-
         var selected = that.getCurrentlySelectedMug(),
             parent = selected.parentMug,
             foo = duplicateMug(selected, parent, options),
@@ -523,6 +446,80 @@ formdesigner.controller = (function () {
 
         that.form.fire({type: "form-property-changed"});
     };
+        
+    /**
+     * Copy a Mug and its descendants and insert them after the original
+     * Mug. Returns an array with two values:
+     *  1. The duplicate Mug.
+     *  2. An array of path replacements that should be executed on logic references.
+     *
+     * @param mug - the mugtype in the original tree to duplicate
+     * @param parentMug - the mugtype in the duplicate tree to insert into
+     * @param options {
+     *          itext: 'link' (default) or 'copy'
+     *        }
+     */
+    function duplicateMug(mug, parentMug, options, depth) {
+        depth = depth || 0;
+        // clone mug and give everything new unique IDs
+        var duplicate = new mugs[mug.__className]();
+        duplicate.copyAttrs(mug);
+
+        // ensure consistency            
+        formdesigner.util.give_ufid(duplicate);
+        // clear existing event handlers for the source question
+        formdesigner.util.eventuality(duplicate);
+        formdesigner.util.setStandardMugEventResponses(duplicate);
+
+        if (mug.bindElement && mug.bindElement.nodeID) {
+            var newQuestionID = formdesigner.util.generate_question_id(
+                mug.bindElement.nodeID
+            ); 
+            duplicate.bindElement.nodeID = newQuestionID;
+
+            if (mug.dataElement) {
+                duplicate.dataElement.nodeID = newQuestionID;
+            }
+        }
+        
+        if (depth === 0 && mug.controlElement && 
+            mug.controlElement.defaultValue)
+        {
+            var newItemValue = formdesigner.util.generate_question_id(
+                mug.controlElement.defaultValue
+            );
+            duplicate.controlElement.defaultValue = newItemValue;
+        }
+       
+        // insert mugtype into data and UI trees
+        if (depth > 0) {
+            that.initQuestion(duplicate, parentMug, 'into');
+        } else {
+            that.initQuestion(duplicate, mug, 'after');
+        }
+
+        formdesigner.model.LogicManager.updateAllReferences(duplicate);
+
+        if (options.itext === "copy") {
+            formdesigner.ui.displayMugProperties(duplicate);
+            that.unlinkCurrentQuestionItext();
+        }
+
+        var children = that.getChildren(mug),
+            pathReplacements = [];
+        for (var i = 0; i < children.length; i++) {
+            pathReplacements = pathReplacements.concat(
+                duplicateMug(children[i], duplicate, options, depth + 1)[1]);
+        }
+
+        pathReplacements.push({
+            mugId: mug.ufid,
+            from: that.form.dataTree.getAbsolutePath(mug),
+            to: that.form.dataTree.getAbsolutePath(duplicate)
+        });
+
+        return [duplicate, pathReplacements];
+    }
 
     that.initQuestion = function (mug, refMug, position) {
         var success = false;
