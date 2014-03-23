@@ -13,7 +13,7 @@ describe("The Dynamic Itemset functionality", function () {
             clock = sinon.useFakeTimers();
             c.loadXForm(TEST_XML_1);
             clock.tick(500);
-            assertXmlEqual(c.form.createXForm(), TEST_XML_1);
+            assertXmlEqual(c.form.writeXML(), TEST_XML_1);
         });
 
         it("preserves XML with itemsets in <select1>s", function () {
@@ -21,7 +21,7 @@ describe("The Dynamic Itemset functionality", function () {
             clock.tick(0);
             c.loadXForm(newXml);
             clock.tick(500);
-            assertXmlEqual(c.form.createXForm(), newXml);
+            assertXmlEqual(c.form.writeXML(), newXml);
         });
     });
 
@@ -36,7 +36,7 @@ describe("The Dynamic Itemset functionality", function () {
             $("#data_source").val("somefixture");
             $("#value_ref, #label_ref, #filter_condition").val("dummy").change();
 
-            var xml = c.form.createXForm();
+            var xml = c.form.writeXML();
             assert(xml.indexOf(
                     '<instance src="jr://fixture/some-fixture" id="somefixture" />'
                 ) !== -1 ||
@@ -55,7 +55,7 @@ describe("The Dynamic Itemset functionality", function () {
             $("#value_ref").val("dummy").change();
 
             assertXmlEqual(INNER_FILTERS_XML.replace('case_name', 'dummy'),
-               c.form.createXForm());
+               c.form.writeXML());
         });
 
         it("doesn't preserve inner filters if you change the data source", function () {
@@ -75,7 +75,7 @@ describe("The Dynamic Itemset functionality", function () {
             $("#label_ref").val(labelRef).change();
             $("#filter_condition").val(filter).change();
 
-            assertXmlNotEqual(INNER_FILTERS_XML, c.form.createXForm());
+            assertXmlNotEqual(INNER_FILTERS_XML, c.form.writeXML());
         });
         
         it("hides the copy button for itemsets", function () {
@@ -99,7 +99,7 @@ describe("The Dynamic Itemset functionality", function () {
             var $but = $("button:contains(Copy)");
             $but.click();
 
-            assert.equal(4, (c.form.createXForm().match(/itemset/g) || []).length);
+            assert.equal(4, (c.form.writeXML().match(/itemset/g) || []).length);
         });
 
     });

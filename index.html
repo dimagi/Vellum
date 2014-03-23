@@ -1,5 +1,33 @@
-<html>
-    <head>
-        <meta http-equiv="refresh" content="0; url=tests/" />
-    </head>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <title>Vellum Test</title>
+
+    <!-- Mocha and test-only dependencies -->
+    <link href="node_modules/mocha/mocha.css" type="text/css" rel="stylesheet"></link>
+    <script src="node_modules/mocha/mocha.js"></script>
+    <script src="bower_components/chai/chai.js"></script>
+    <script src="bower_components/sinonjs/sinon.js"></script>
+
+    <script src="bower_components/equivalent-xml-js/src/equivalent-xml.js"></script>
+    <script src="bower_components/jquery.ui/tests/jquery.simulate.js"></script>
+    <script src="tests/utils.js"></script>
+
+
+    <!-- Runtime Dependencies -->
+    <link href="tests/lib/hqstyle-core.css" type="text/css" rel="stylesheet"></link>
+    <!--<script src="../src/js/saveButton.js"></script>-->
+    
+    <script data-main="tests/main" src="bower_components/requirejs/require.js"></script>
+  </head>
+
+  <body>
+
+    <div id="matrix">
+    </div>
+    
+    <!-- Tests and running -->
+    <script src="tests/formdesigner.ignoreButRetain.js"></script>
+    <script src="tests/formdesigner.lock.js"></script>
+    <script src="tests/itemset.js"></script>
+  </body>
 </html>

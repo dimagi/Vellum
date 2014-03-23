@@ -25,7 +25,7 @@ describe("The Lock plugin", function() {
     });
 
     it("preserves XML with vellum:lock attributes", function () {
-        var xml = c.form.createXForm();
+        var xml = c.form.writeXML();
         assertXmlEqual(TEST_XML, xml);
     });
 

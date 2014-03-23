@@ -1,0 +1,18 @@
+<fieldset class="accordion-group fd-question-fieldset">
+    <legend class="accordion-heading">
+        <% if (help) { %>
+        <a href="<%=help.link%>" target="_blank" class="fd-help pull-right"
+                data-title="<%=help.title%>"
+                data-content="<%=help.text%>"
+                data-placement="left">
+        </a>
+        <% } %>
+        <a class="accordion-toggle<% if (isCollapsed) { %> collapsed<% } %>" href="#<%=fieldsetId%>" data-toggle="collapse">
+            <i class="icon-double-angle-down"></i>
+            <%=fieldsetTitle%>
+        </a>
+    </legend>
+    <div id="<%=fieldsetId%>" class="accordion-body collapse<% if (!isCollapsed) { %> in<% } %>" >
+        <div class="accordion-inner fd-fieldset-content"></div>
+    </div>
+</fieldset>

@@ -1,0 +1,12 @@
+<div class="well well-small form form-inline clearfix">
+    <% pairs[""] = ""; %>
+    <% _.each(pairs, function (v, k) { %>
+        <div class="fd-kv-pair control-row clearfix" style="margin-bottom: 5px;">
+            <div class="span3"><input class="fd-kv-key input-block-level" type="text" value="<%=k%>" placeholder="key" /></div>
+            <div class="span1" style="text-align:center;">&rarr;</div>
+            <div class="span7"><input class="fd-kv-val input-block-level" type="text" value="<%=v%>" placeholder="value" /></div>
+            <div class="span1"><a href="#" class="btn fd-kv-remove-pair btn-small btn-danger<% if (k =='') { %> hide<% } %>"><i class="icon-remove"></i></a></div>
+        </div>
+    <% }); %>
+    <a href="#" class="btn fd-kv-add-pair hide"><i class="icon-plus"></i> Add Key&rarr;Value Pair</a>
+</div>

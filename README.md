@@ -11,34 +11,68 @@ Vellum is a JavaRosa [XForm](http://en.wikipedia.org/wiki/XForms) designer built
 Usage
 -----
 
-Vellum depends on jQuery, Underscore.js, and Bootstrap.  Other dependencies are
-bundled and included in `dist/vellum.js` and `dist/vellum.css`, but some
-additional dependencies that are part of [CommCare
-HQ](http://github.com/dimagi/commcare-hq) aren't well-defined yet.
+### Setup
 
-For an example of a minimal setup and usage of Vellum, including all known
-dependencies, see `tests/index.html`.
+Install dependencies:
+```
+$ npm install -g bower requirejs
+$ npm install
+```
 
-For some additional configuration options, see
-[`form_designer.html`](https://github.com/dimagi/commcare-hq/blob/master/corehq/apps/app_manager/templates/app_manager/form_designer.html)
-in CommCare HQ.
+There are three ways to load Vellum, depending on whether you want asychronous
+module loading, and whether jQuery, jQueryUI, and Bootstrap are already loaded
+on the page.
+
+Asynchronous, will use existing jQuery, jQueryUI, Boostrap (V2) plugins if present:
+```html
+<script src="bower_components/requirejs/require.js"></script>
+<script>
+    require.config({
+        baseUrl: '/path/to/vellum/src'
+    });
+</script>
+```
+
+Bundled with all dependencies:
+```
+$ grunt dist
+```
+
+```html
+<script src="dist/main.min.js"></script>
+<script>
+</script>
+```
+
+Bundled with all dependencies except jQuery, jQuery UI, and Bootstrap plugins,
+expects them already to be loaded:
+```
+$ grunt dist-min
+```
+
+```html
+<script src="dist/main.no-jquery.min.js"></script>
+<script>
+</script>
+```
+
+Finally, for all three:
+```javascript
+require(["main"], function ($) {
+    $("#formdesigner").vellum(options)
+});
+```
+
+
+### Options
+
+Todo
 
 
 Contributing
 ------------
 
-### Setup
-
-Install dependencies:
-```
-$ npm install -g bower
-$ npm install
-```
-
-Create build artifacts for each commit:
-```
-$ grunt dist
-```
+### Tests
 
 Run tests in a browser:
 ```
@@ -65,20 +99,3 @@ master always contains the latest stable version.
 [release](http://vellum-release.herokuapp.com), and
 [develop](http://vellum-develop.herokuapp.com) are automatically deployed for
 testing.
-
-
-Event Tracking
---------------
-
-If you have Google Analytics installed, Vellum will track events.
-
-
-Changelog
----------
-
-### 1.5.0
-
-- Added Ignore-but-retain and question locking plugins 
-- Fixed ability to Ctrl-F within source XML editor
-- Added testing infrastructure
-- Added Grunt build to generate JS and CSS

@@ -2,29 +2,11 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-
   <head>
     <title>Vellum Test</title>
-
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-
-    <!-- Runtime Dependencies -->
-    <link href="lib/hqstyle-core.css" type="text/css" rel="stylesheet"></link>
-    <script type="text/javascript" src="lib/jquery-1.7.1.min.js"></script>
-    <script type="text/javascript" src="../src/js/lib/underscore-1.5.2.js"></script>
-    <!-- needed for buttons in Edit Source XML confirm dialog with validaiton errors
-        and possibly other things -->
-    <script src="../src/js/lib/jquery-ui-1.8.14.custom.min.js"></script>
-    <link href="../src/css/redmond/jquery-ui-1.8.14.custom.css" type="text/css" rel="stylesheet"></link>
-
-    <script src="lib/bootstrap.js"></script>
-    <script src="lib/bootstrap-popout.js"></script>
-    <script src="../src/js/saveButton.js"></script>
-
-    <!-- Vellum -->
-    <link href="../dist/vellum.min.css" type="text/css" rel="stylesheet"></link>
-    <script src="../dist/vellum.min.js"></script>
     
+
     <!-- Mocha and test-only dependencies -->
     <link href="../node_modules/mocha/mocha.css" type="text/css" rel="stylesheet"></link>
     <script src="../node_modules/mocha/mocha.js"></script>
@@ -35,7 +17,20 @@
     <script src="../bower_components/jquery.ui/tests/jquery.simulate.js"></script>
     <script src="utils.js"></script>
 
+
+    <!-- Runtime Dependencies -->
+    <link href="lib/hqstyle-core.css" type="text/css" rel="stylesheet"></link>
+    <!--<script src="../src/js/saveButton.js"></script>-->
+    
+    <!-- Vellum -->
+    <script src="../bower_components/requirejs/require.js"></script>
+    <script>
+        require.config({
+            baseUrl: '../src'
+        });
+    </script>
 </head>
+
 <body>
     <ul class="nav nav-tabs">
       <li class="active"><a data-toggle='tab' href="#vellum">Vellum</a></li>
@@ -122,43 +117,45 @@
             }
         ];
 
-        formdesigner.launch({
-            rootElement: $("#formdesigner"),
-            staticPrefix: '../src/',
-            allowedDataNodeReferences: [
-                "meta/deviceID",
-                "meta/instanceID",
-                "meta/username",
-                "meta/userID",
-                "meta/timeStart",
-                "meta/timeEnd"
-            ],
-            formName: "Untitled Form",
-            langs: ['en'],
-            displayLanguage: 'en',
-            externalInstances: TEST_INSTANCE_CONFIG
+        require(["main"], function ($) {
+            $("#formdesigner").vellum({
+                core: {
+                    formName: "Untitled Form",
+                    allowedDataNodeReferences: [
+                        "meta/deviceID",
+                        "meta/instanceID",
+                        "meta/username",
+                        "meta/userID",
+                        "meta/timeStart",
+                        "meta/timeEnd"
+                    ],
+                    externalInstances: TEST_INSTANCE_CONFIG,
+                },
+                javaRosa: {
+                    langs: ['en', 'hin'],
+                    displayLanguage: 'en'
+                },
+            });
+
+            function runTests() {
+                $("#run-tests").addClass('disabled').attr('disabled', true);
+                if (window.mochaPhantomJS) { 
+                    mochaPhantomJS.run(); 
+                } else { 
+                    mocha.run()
+                };
+            }
+
+            $("#run-tests").click(runTests);
+
+            if (window.mochaPhantomJS) {
+                $("#run-tests").click();
+            }
         });
     </script>
 
     <script src="formdesigner.ignoreButRetain.js"></script>
     <script src="formdesigner.lock.js"></script>
     <script src="itemset.js"></script>
-    <script>
-        function runTests() {
-            $("#run-tests").addClass('disabled').attr('disabled', true);
-            if (window.mochaPhantomJS) { 
-                mochaPhantomJS.run(); 
-            } else { 
-                mocha.run()
-            };
-        }
-
-        $("#run-tests").click(runTests);
-
-        if (window.mochaPhantomJS) {
-            $("#run-tests").click();
-        }
-    </script>
-
   </body>
 </html>

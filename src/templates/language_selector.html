@@ -1,0 +1,10 @@
+<div class="fd-lang-display-selector form form-inline">
+    <label for="fd-lang-display-select">Current Language: </label>
+    <select id="fd-lang-display-select" class="input-medium">
+        <% _.each(languages, function(language) { %>
+        <option value="<%=language.code%>"<% if (language.selected) { %> selected="selected"<% } %>>
+            <%=language.name%><% if (language.name !== language.code) { %> (<%=language.code%>) <% } %>
+        </option>
+        <% }); %>
+    </select>
+</div>

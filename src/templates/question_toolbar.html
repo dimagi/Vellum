@@ -1,0 +1,16 @@
+<div class="fd-question-toolbar-container clearfix">
+    <% if (isCopyable) { %>
+    <div class="btn-toolbar pull-left">
+        <button id="fd-button-copy" type="button" class="btn" tabindex="-1">
+            <i class="icon-copy"></i> Copy
+        </button>
+    </div>
+    <% } %>
+    <% if (isDeleteable) { %>
+    <div class="btn-toolbar pull-right">
+        <button id="fd-button-remove" type="button" class="btn btn-danger"  tabindex="-1">
+            <i class="icon-trash"></i> Delete
+        </button>
+    </div>
+    <% } %>
+</div>

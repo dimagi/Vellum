@@ -1,0 +1,28 @@
+<div class="control-group xpath-expression-group">
+    <button type="button" class="btn btn-danger xpath-delete-expression pull-right"><i class="icon-remove"></i></button>
+    <div class="validation-result-container pull-right">
+        <p class="validation-results alert alert-success hide">
+            <i class="icon-ok"></i>
+        </p>
+        <p class="validation-results alert alert-error hide">
+            <i class="icon-warning-sign"></i>
+        </p>
+    </div>
+    <div class="control-row xpath-expression-row">
+        <div class="span4">
+            <input class="input-block-level left-question xpath-edit-node jstree-drop"
+                   type="text" placeholder="Hint: drag a question here." />
+        </div>
+        <div class="span4">
+            <select class="input-block-level op-select">
+                <% _.each(operationOpts, function (opt) { %>
+                <option value="<%=opt[1]%>"><%=opt[0]%></option>
+                <% }); %>
+            </select>
+        </div>
+        <div class="span4">
+            <input class="input-block-level right-question xpath-edit-node jstree-drop"
+                   type="text" placeholder="Hint: drag a question here." />
+        </div>
+    </div>
+</div>

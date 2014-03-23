@@ -21,18 +21,24 @@
         "tests"
     ],
     "dependencies": {
+        "almond": "~0.2.9", 
         "underscore": "~1.5.2",
         "jquery": "==1.7",
         "jquery.ui": "1.8.16", 
+        "requirejs": "~2.1.11",
+        "requirejs-text": "~2.0.12",
+        "require-less": "*",
+        "require-css": "*",
+        "requirejs-tpl": "jfparadis/requirejs-tpl",
 
-        "XMLWriter": "alexandern/XMLWriter#314f56f53bdc3cb76bd12a7db837be6710e0236f",
+        "langcodes": "dimagi/langcodes",
+        "XMLWriter": "dimagi/XMLWriter",
         "classy": "mitsuhiko/classy#1.4",
         "xpath": "dimagi/js-xpath",
         "bootstrap-better-typeahead": "ptnplanet/Bootstrap-Better-Typeahead"
     },
     "devDependencies": {
-        "equivalent-xml-js": "theozaurus/equivalent-xml-js",
-        "less.js": "~1.3.3",
+        "equivalent-xml-js": "mwhite/equivalent-xml-js",
         "sinonjs": ">=1.6.0",
         "when": "~2.8.0",
         "chai": ">=1.5.0"

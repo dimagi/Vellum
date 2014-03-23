@@ -1,0 +1,18 @@
+<div id="fd-modal-generic" class="modal hide fade">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+        <h3><%=modalTitle%></h3>
+    </div>
+    <div class="modal-body form form-horizontal">
+    </div>
+    <div class="modal-footer">
+        <% _.each(modalButtons, function (button) { %>
+        <button id="<%=button.id%>"
+                class="btn <%=button.cssClasses%>"
+                <% _.each(button.attributes, function (attrib, val) { %><%=attrib%>="<%=val%>"<% }); %>>
+            <%=button.title%>
+        </button>
+        <% }); %>
+        <button class="btn default-close-button" data-dismiss="modal" aria-hidden="true"><%=closeButtonTitle%></button>
+    </div>
+</div>
