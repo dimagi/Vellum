@@ -1,0 +1,40 @@
+{
+    "name": "Vellum",
+    "authors": [
+        "Dimagi <dev@dimagi.com>",
+        "Mike White <m@mwhite.info>"
+    ],
+    "description": "A JavaRosa XForms designer",
+    "moduleType": [
+        "amd"
+    ],
+    "keywords": [
+        "XForms"
+    ],
+    "license": "MIT",
+    "private": true,
+    "ignore": [
+        "**/.*",
+        "node_modules",
+        "bower_components",
+        "test",
+        "tests"
+    ],
+    "dependencies": {
+        "underscore": "~1.5.2",
+        "jquery": "==1.7",
+        "jquery.ui": "1.8.16", 
+
+        "XMLWriter": "alexandern/XMLWriter#314f56f53bdc3cb76bd12a7db837be6710e0236f",
+        "classy": "mitsuhiko/classy#1.4",
+        "xpath": "dimagi/js-xpath",
+        "bootstrap-better-typeahead": "ptnplanet/Bootstrap-Better-Typeahead"
+    },
+    "devDependencies": {
+        "equivalent-xml-js": "theozaurus/equivalent-xml-js",
+        "less.js": "~1.3.3",
+        "sinonjs": ">=1.6.0",
+        "when": "~2.8.0",
+        "chai": ">=1.5.0"
+    }
+}

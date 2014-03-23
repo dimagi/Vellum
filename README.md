@@ -31,7 +31,7 @@ Contributing
 
 Install dependencies:
 ```
-$ npm install napa
+$ npm install -g bower
 $ npm install
 ```
 

@@ -54,17 +54,17 @@ module.exports = function (grunt) {
                     separator: ';'
                 },
                 src: [
-                    'node_modules/xpath/lib/biginteger.js',
-                    'node_modules/xpath/lib/schemeNumber.js',
-                    'node_modules/xpath/models.js',
-                    'node_modules/xpath/xpath.js',
+                    'bower_components/xpath/lib/biginteger.js',
+                    'bower_components/xpath/lib/schemeNumber.js',
+                    'bower_components/xpath/models.js',
+                    'bower_components/xpath/xpath.js',
 
                     'src/js/lib/jstree/jquery.jstree.js',
-                    'node_modules/bootstrap-better-typeahead/js/bootstrap-better-typeahead.js',
+                    'bower_components/bootstrap-better-typeahead/js/bootstrap-better-typeahead.js',
                     'src/js/lib/fancybox/jquery.fancybox-1.3.4.js',
                     'src/js/lib/sha1.js',
                     'src/js/lib/diff_match_patch.js',
-                    'node_modules/XMLWriter/XMLWriter.js',
+                    'bower_components/XMLWriter/XMLWriter.js',
                     'src/js/lib/codemirror/codemirror.js',
                     'src/js/lib/codemirror/xml.js',
                     'node_modules/classy/classy.js',

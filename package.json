@@ -1,8 +1,11 @@
 {
     "name": "Vellum",
     "version": "0.0.1",
-    "description": "Form designer for CommCareHQ",
-    "author": "Dimagi <dev@dimagi.com>",
+    "description": "A JavaRosa XForms designer",
+    "authors": [
+        "Dimagi <dev@dimagi.com>",
+        "Mike White <m@mwhite.info>"
+    ],
     "license": "MIT",
     "homepage": "https://github.com/dimagi/Vellum",
     "keywords": [
@@ -14,7 +17,6 @@
     },
     "dependencies": {
         "amdefine": ">=0.0",
-        "jquery": "==1.7",
         "requirejs": ">=2.0",
         "xmldom":     ">=0.1.16",
         "underscore": "~1.5.2",
@@ -22,17 +24,12 @@
         "XMLWriter": "git://github.com/dimagi/XMLWriter#7ad98f2fc39dc1484893a523cc546fd8cf0d4de3"
     },
     "devDependencies": {
-        "napa": "*",
-
-        "when": "~2.8.0",
-        "chai": ">=1.5.0",
         "istanbul": ">=0.1.34",
         "jshint": ">=1.1.0",
         "mocha": ">=1.9.0",
         "mocha-istanbul": ">=0.2.0",
-        "sinon": ">=1.6.0",
 
-        "less": "~1.3.3",
+        "underscore": "~1.5.2",
         "grunt": "*",
         "grunt-contrib-less": "~0.5.2",
         "grunt-contrib-uglify": "*",
@@ -41,15 +38,8 @@
         "grunt-image-embed": "*"
     },
     "main": "dist/vellum.min.js",
-    "napa": {
-        "classy": "mitsuhiko/classy#1.4",
-        "xpath": "dimagi/js-xpath" ,
-        "equivalent-xml-js": "theozaurus/equivalent-xml-js",
-        "jquery-ui": "jquery/jquery-ui",
-        "bootstrap-better-typeahead": "ptnplanet/Bootstrap-Better-Typeahead"
-    },
     "scripts": {
-        "install": "napa",
+        "install": "bower install",
         "test": "mocha-phantomjs tests/index.html"
     }
 }
