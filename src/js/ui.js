@@ -1050,14 +1050,6 @@ formdesigner.ui = function () {
                 }
             });
         });
-
-        formdesigner.controller.on('question-creation', function (e) {
-            that.overrideJSTreeIcon(e.mug.ufid, e.mug);
-        });
-
-        formdesigner.controller.on('parent-question-type-changed', function (e) {
-            that.overrideJSTreeIcon(e.mug.ufid, e.mug);
-        });
     };
 
     that.hideQuestionProperties = function() {

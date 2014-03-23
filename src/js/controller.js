@@ -682,10 +682,7 @@ formdesigner.controller = (function () {
 
     that.updateMugChildren = function (parentMug) {
         _.each(that.getChildren(parentMug), function (childMug) {
-            that.fire({
-                type: "parent-question-type-changed",
-                mug: childMug
-            });
+            formdesigner.ui.overrideJSTreeIcon(childMug.ufid, childMug);
         });
     };
 
