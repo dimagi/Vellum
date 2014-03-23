@@ -215,10 +215,10 @@ formdesigner.ui = function () {
             return null;
         } else {
             var newMug = new mugs[qType](); 
-            formdesigner.controller.initQuestion(
-                newMug, formdesigner.controller.getCurrentlySelectedMug(), 'into');
+            formdesigner.controller.initQuestion(newMug);
             that.jstree('select_node', '#' + newMug.ufid, true);
             if (newMug.isODKOnly) {
+                //it's an ODK media question
                 formdesigner.model.form.updateError(formdesigner.model.FormError({
                     message: 'This question type will ONLY work with Android phones!',
                     level: 'form-warning'
@@ -488,7 +488,17 @@ formdesigner.ui = function () {
         that.showVisualValidation(mug);
     };
 
+    /**
+     * Handler for node_select events.
+     *
+     * Set that.skipNodeSelectEvent to true to disable during form loading,
+     * recursive question duplication, etc.
+     */
     that.handleNodeSelect = function (e, data) {
+        if (that.skipNodeSelectEvent) {
+            return;
+        }
+
         var ufid = $(data.rslt.obj[0]).prop('id'),
             mug = formdesigner.controller.getMugFromFormByUFID(ufid);
 
@@ -552,7 +562,26 @@ formdesigner.ui = function () {
         return true;
     };
 
+    /**
+     * Select the lowest top-level non-data node
+     *
+     * @return jquery object for the lowest node if there are any question
+     *         nodes, otherwise false
+     */
+    that.selectLowestQuestionNode = function () {
+        that.jstree("deselect_all");
+        var questions = that.getJSTree().children().children().filter("[rel!='DataBindOnly']");
+        if (questions.length > 0) {
+            var newSelectEl = $(questions[questions.length - 1]);
+            that.jstree("select_node", newSelectEl, false);
+            return newSelectEl;
+        } else {
+            return false;
+        }
+    };
+
     that.questionTree = null;
+
 
     /**
      *
@@ -862,8 +891,11 @@ formdesigner.ui = function () {
                     formdesigner.controller.setCurrentlySelectedMug(currentMug.ufid);
                     that.displayMugProperties(currentMug);
                 }
+
             }
-        });
+
+        })
+
     };
 
     var removeLanguageDialog = function () {
@@ -1520,8 +1552,6 @@ formdesigner.ui = function () {
                 mugs[data.args[0]]
             );
         });
-
-
 
         $("#fd-expand-all").click(function() {
             that.questionTree.jstree("open_all");

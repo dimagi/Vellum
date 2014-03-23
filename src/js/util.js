@@ -270,6 +270,18 @@ formdesigner.util = (function(){
         return attrMap;
     }; 
     
+    /**
+     * Takes in a reference mug and makes a copy of
+     * the object (the copy is returned).
+     * @param refMug
+     */
+    //var getNewMug = function(refMug){
+        //var newMug = that.clone(refMug);
+        //that.give_ufid(newMug);
+        //return newMug;
+    //};
+    //that.getNewMug = getNewMug;
+
     //Simple Event Framework
     //Just run your object through this function to make it event aware
     //Taken from 'JavaScript: The Good Parts'
