@@ -21,6 +21,8 @@
 formdesigner.plugins = formdesigner.plugins || {};
 
 formdesigner.plugins.ignoreButRetain = function () {
+    // initial state must be initialized outside of beforeParse to handle new
+    // form case
     var ignoredNodes = [],
         xmls = new XMLSerializer();
 

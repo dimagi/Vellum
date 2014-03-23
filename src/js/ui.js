@@ -63,10 +63,14 @@ formdesigner.ui = function () {
             group: ["Select", 'Multiple Choice'],
             related: [
                 "Item"
+                // an Itemset is added automatically when you add a new dynamic
+                // select
             ],
             questions: [
                 "Select",
-                "MSelect"
+                "MSelect",
+                "SelectDynamic",
+                "MSelectDynamic"
             ]
         },
         {
@@ -218,6 +222,8 @@ formdesigner.ui = function () {
             formdesigner.controller.initQuestion(
                 newMug, formdesigner.controller.getCurrentlySelectedMug(), 'into');
             that.jstree('select_node', '#' + newMug.ufid, true);
+            newMug.afterUIInsert();
+            that.jstree('select_node', '#' + newMug.ufid, true);
             if (newMug.isODKOnly) {
                 formdesigner.model.form.updateError(formdesigner.model.FormError({
                     message: 'This question type will ONLY work with Android phones!',
@@ -301,7 +307,7 @@ formdesigner.ui = function () {
     that.activateQuestionTypeGroup = function (mug) {
         var className = mug.__className || mug.prototype.__className,
             groupSlug = that.QUESTION_TYPE_TO_GROUP[className];
-        if (groupSlug) {
+        if (groupSlug && className !== 'MSelectDynamic' && className !== 'SelectDynamic') {
             var $questionGroup = $('#' + that.getQuestionTypeGroupID(groupSlug));
             $questionGroup.find('.fd-question-type-related').removeClass('disabled');
         }
@@ -1050,14 +1056,6 @@ formdesigner.ui = function () {
                 }
             });
         });
-
-        formdesigner.controller.on('question-creation', function (e) {
-            that.overrideJSTreeIcon(e.mug.ufid, e.mug);
-        });
-
-        formdesigner.controller.on('parent-question-type-changed', function (e) {
-            that.overrideJSTreeIcon(e.mug.ufid, e.mug);
-        });
     };
 
     that.hideQuestionProperties = function() {
@@ -1474,6 +1472,7 @@ formdesigner.ui = function () {
                     var types = {};
                     _(mugs).each(function (Mug, typeName) {
                         types[typeName] = {
+                            max_children: Mug.prototype.maxChildren,
                             valid_children: 
                                 Mug.prototype.validChildTypes.length ?  Mug.prototype.validChildTypes : "none"
                         };
@@ -1709,6 +1708,7 @@ formdesigner.launch = function (opts) {
     formdesigner.patchUrl = opts.patchUrl;
 
     formdesigner.allowedDataNodeReferences = opts.allowedDataNodeReferences || [];
+    formdesigner.externalInstances = formdesigner.processInstancesConfig(opts.externalInstances || []);
 
     formdesigner.multimediaConfig = opts.multimediaConfig;
 
@@ -1753,5 +1753,37 @@ formdesigner.launch = function (opts) {
 
 formdesigner.rootElement = '';
 
+formdesigner.processInstancesConfig = function (instances) {
+    // set instance id, can be overridden at parse time if an instance with a
+    // different ID has the expected src URI.  Also add an index to each subset
+    // type which can be used as a key to reference that subset.
+    var mapped = {};
+    _.each(instances, function (instance) {
+        formdesigner.addInstance(mapped, instance);
+    });
+    return mapped;
+};
 
+formdesigner.addInstance = function (instancesMap, instance) {
+    instance.defaultId = instance.defaultId || convertToId(instance.sourceUri);
+    instance.id = instance.defaultId;
+    _.each(instance.levels, function (level) {
+        var i = 1,
+            mappedSubsets = {};
+        _.each(level.subsets, function (subset) {
+            subset.id = i++;
+            mappedSubsets[subset.id] = subset;
+        });
+        level.subsets = mappedSubsets;
+    });
+    instancesMap[instance.id] = instance;
+    return instance;
+};
+
+function convertToId(str) {
+    return str
+        .toLowerCase()
+        .replace(/ /g,'_')
+        .replace(/[^\w-]+/g,'');
+}
 

@@ -14,6 +14,10 @@
     };
 }(jQuery));
 
+RegExp.escape = function(s) {
+    return s.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+};
+
 if(typeof Object.create !== 'function') {
     Object.create = function(obj) {
         var Blank_Function = function(){};
@@ -452,6 +456,9 @@ formdesigner.util = (function(){
         }
         if (mug.__className === "ReadOnly") {
             return "Unknown (read-only) question type";
+        }
+        if (mug.__className === "Itemset") {
+            return "External Data";
         }
 
         cEl = mug.controlElement;
