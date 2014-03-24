@@ -41,7 +41,7 @@ formdesigner.ui = function () {
         },
         "parse-warning": {
             cssClass: "",
-            title: "Parse Warning",
+            title: "Warning",
             icon: "icon-warning-sign"
         },
         "form-warning": {
