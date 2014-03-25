@@ -1687,6 +1687,9 @@ var mugs = (function () {
             formdesigner.util.give_ufid(this);
             formdesigner.util.eventuality(this);
         },
+        populate: function (xmlNode) {
+            // load extra state from xml node
+        },
         getSpec: function () {
             return {
                 dataElement: this.getDataElementSpec(),
@@ -2190,6 +2193,26 @@ var mugs = (function () {
             var spec = this.$super();
             spec.dataValue.presence = 'optional';
             return spec;
+        },
+        getControlElementSpec: function () {
+            var spec = this.$super();
+            spec.controlElement = $.extend(spec, {
+                appearanceControl: {
+                    lstring: 'Show OK checkbox',
+                    editable: 'w',
+                    visibility: 'visible',
+                    presence: 'optional',
+                    uiType: formdesigner.widgets.checkboxWidget
+                }
+            });
+            return spec;
+        },
+        populate: function (xmlNode) {
+            var appearance = xmlNode.attr('appearance');
+            this.controlElement.appearanceControl = appearance !== "minimal";
+        },
+        getAppearanceAttribute: function () {
+            return (this.controlElement && this.controlElement.appearanceControl) ? null : 'minimal';
         }
     });
 
