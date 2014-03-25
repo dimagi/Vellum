@@ -556,6 +556,7 @@ formdesigner.widgets = (function () {
             "dataElement/nodeID",
             "controlElement/defaultValue",
             "controlElement/label",
+            "controlElement/appearanceControl",
             "controlElement/readOnlyControl",
             "controlElement/androidIntentAppId",
             "controlElement/androidIntentExtra",
