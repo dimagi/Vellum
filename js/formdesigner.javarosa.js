@@ -972,9 +972,9 @@ var itextLabelWidget = function (mug, language, form, options) {
         }
     };
 
-    var $input = $("<input />")
+    var $input = $("<textarea></textarea>")
         .attr("id", widget.getID())
-        .attr("type", "text")
+        .attr("rows", "2")
         .addClass('input-block-level itext-widget-input')
         .on('change keyup', widget.updateValue);
 
