@@ -1993,7 +1993,7 @@ formdesigner.controller = (function () {
             var theScaryWarning = "It looks like your form is not valid XML. This can " +
                 "often happen if you use a reserved character in one of your questions. " +
                 "Characters to look out for are <, >, and &. You can still save, but " +
-                "Vellum will NOT LOAD THIS FORM again until you fix the XML by hand. " +
+                "Form Builder will NOT LOAD THIS FORM again until you fix the XML by hand. " +
                 "What would you like to do?";
             formdesigner.ui.setDialogInfo(theScaryWarning,
                 'Fix the problem (recommended)', function () {
