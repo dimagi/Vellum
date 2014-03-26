@@ -1482,11 +1482,11 @@ formdesigner.controller = (function () {
         
         // create new mug and copy old data to newly generated mug
         mug = new MugClass();
-        if(oldMug) {
+        if (oldMug) {
             mug.copyAttrs(oldMug);
             mug.ufid = oldMug.ufid;
 
-            //replace in dataTree
+            // replace in data tree
             that.form.replaceMug(oldMug, mug, 'data');
         }
 
@@ -1584,7 +1584,7 @@ formdesigner.controller = (function () {
                 isRepeat;
 
             isRepeat = isRepeatTest(el);
-            //do the repeat switch thing
+            // do the repeat switch thing
             if(isRepeat) {
                 oldEl = el;
                 el = $(el.children('repeat')[0]);
@@ -1614,7 +1614,6 @@ formdesigner.controller = (function () {
             }
             populateMug(mug,el);
             that.form.controlTree.insertMug(mug, 'into', parentMug);
-
             if (mug.__className !== "ReadOnly") {
                 tagName = mug.controlElement.tagName.toLowerCase();
                 if(couldHaveChildren.indexOf(tagName) !== -1) {
@@ -1803,7 +1802,6 @@ formdesigner.controller = (function () {
             that.fire({
                 type: 'parse-finish'
             });
-
         } catch (e) {
             that.fire({
               type: 'parse-error',
@@ -1923,7 +1921,7 @@ formdesigner.controller = (function () {
             });
         }
         
-        var send = function (formText, saveType) {
+        var send = function (formText, saveType, callback) {
             var data;
             saveType = saveType || formdesigner.saveType;
             $('body').ajaxStart(formdesigner.ui.showWaitingDialog);
@@ -1963,12 +1961,13 @@ formdesigner.controller = (function () {
 //                            var diffHtml = dmp.diff_prettyHtml(
 //                                dmp.diff_main(formdesigner.originalXForm, data.xform)
 //                            );
-                            send(formText, 'full');
+                            send(formText, 'full', callback);
                             return;
                         } else {
                             if (CryptoJS.SHA1(formText).toString() !== data.sha1) {
                                 console.error("sha1's didn't match");
-                                send(formText, 'full');
+                                send(formText, 'full', callback);
+                                return;
                             }
                         }
                     }
@@ -1978,10 +1977,31 @@ formdesigner.controller = (function () {
                         response: data
                     });
                     formdesigner.originalXForm = formText;
+                    if (callback) {
+                        callback();
+                    }
                 }
             });
         };
-        
+        // presave form validation
+        var renamed = that.form.normalizeQuestionIds();
+        var callback;
+        if (renamed.length > 0) {
+            callback = function () {
+                // show the person what renaming has happened
+                var message = 'The following question IDs are duplicates and have been automatically renamed as follows:<br> ' +
+                    _.map(renamed, function (array) {
+                        var from = array[0];
+                        var to = array[1];
+                        return from + ' --> ' + to;
+                    }).join('<br>');
+                var $modal = formdesigner.ui.generateNewModal("Questions were renamed", [], "OK");
+                $modal.find('.modal-body').append($('<p>' + message + '</p>'));
+                $modal.modal('show');
+                formdesigner.ui.displayMugProperties(renamed[0][2]);
+
+            };
+        }
         var formText = that.form.createXForm();
         var parsed = false;
         try {
@@ -2001,13 +2021,14 @@ formdesigner.controller = (function () {
                 },
                 'Save Anyways', function () {
                     $(this).dialog("close");
-                    send(formText)
+                    send(formText, undefined, callback)
                 },
                 'Form Validation Error');
             formdesigner.ui.showConfirmDialog();
         }
         if (parsed) {
-            send(formText);
+            send(formText, undefined, callback);
+
         }
     };
 

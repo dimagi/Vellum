@@ -1002,8 +1002,9 @@ formdesigner.ui = function () {
     var setDialogInfo = that.setDialogInfo = function (message, confButName, confFunction, 
                                                        cancelButName, cancelButFunction, title) {
         title = title || "";
-        var buttons = {}, opt,
-                dial = $('#fd-dialog-confirm'), contentStr;
+        var buttons = {},
+            dial = $('#fd-dialog-confirm'),
+            contentStr;
         buttons[confButName] = confFunction;
         buttons[cancelButName] = cancelButFunction;
 
