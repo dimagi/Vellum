@@ -693,6 +693,7 @@ formdesigner.model = (function () {
                                 isClear = false;
                                 mug.dataElement.nodeID = origNodeId + counter;
                                 nodeId = mug.dataElement.nodeID;
+                                counter += 1;
                                 break;
                             }
                         }
