@@ -2057,9 +2057,8 @@ var mugs = (function () {
             this.bindElement.dataType = "intent";
         },
         getControlElementSpec: function () {
-            var spec = this.$super();
             // virtual properties used to get widgets
-            spec.controlElement = $.extend(spec, {
+            return $.extend({}, this.$super(), {
                 androidIntentAppId: {
                     visibility: 'visible',
                     uiType: formdesigner.widgets.androidIntentAppIdWidget
@@ -2073,8 +2072,6 @@ var mugs = (function () {
                     uiType: formdesigner.widgets.androidIntentResponseWidget
                 }
             });
-
-            return spec;
         },
         // todo: move to spec system
         getAppearanceAttribute: function () {
@@ -2195,8 +2192,7 @@ var mugs = (function () {
             return spec;
         },
         getControlElementSpec: function () {
-            var spec = this.$super();
-            spec.controlElement = $.extend(spec, {
+            return $.extend({}, this.$super(), {
                 appearanceControl: {
                     lstring: 'Show OK checkbox',
                     editable: 'w',
@@ -2205,7 +2201,6 @@ var mugs = (function () {
                     uiType: formdesigner.widgets.checkboxWidget
                 }
             });
-            return spec;
         },
         populate: function (xmlNode) {
             var appearance = xmlNode.attr('appearance');
