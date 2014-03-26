@@ -1112,7 +1112,6 @@ formdesigner.ui = function () {
          * All the logic to display the XPath Editor widget.
          */
         var expTypes = xpathmodels.XPathExpressionTypeEnum;
-        var questionList = formdesigner.controller.getMugList();
 
         var editorPane = $('#fd-xpath-editor');
         var editorContent = $('#fd-xpath-editor-content');
@@ -1125,9 +1124,6 @@ formdesigner.ui = function () {
         };
         var getExpressionPane = function () {
             return $("#fd-xpath-editor-expressions");
-        };
-        var getExpressionList = function () {
-            return getExpressionPane().children();
         };
         var getTopLevelJoinSelect = function () {
             return $(editorPane.find("#top-level-join-select")[0]);
@@ -1191,9 +1187,6 @@ formdesigner.ui = function () {
                 console.log("trying to add", parsedExpression.toString());
             }
 
-            var isPath = function (subElement) {
-                return (subElement instanceof xpathmodels.XPathPathExpr);
-            };
             var isJoiningOp = function (subElement) {
                 // something that joins expressions
                 return (subElement instanceof xpathmodels.XPathBoolExpr);
@@ -1203,12 +1196,6 @@ formdesigner.ui = function () {
                 // something that can be put into an expression
                 return (subElement instanceof xpathmodels.XPathCmpExpr ||
                         subElement instanceof xpathmodels.XPathEqExpr);
-            };
-
-            var isSupportedBaseType = function (subelement) {
-                // something that can be stuck in a base string
-                // currently everything is supported.
-                return true;
             };
 
             var newExpressionUIElement = function (expOp) {
