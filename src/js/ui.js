@@ -41,7 +41,7 @@ formdesigner.ui = function () {
         },
         "parse-warning": {
             cssClass: "",
-            title: "Parse Warning",
+            title: "Warning",
             icon: "icon-warning-sign"
         },
         "form-warning": {
@@ -999,8 +999,9 @@ formdesigner.ui = function () {
     var setDialogInfo = that.setDialogInfo = function (message, confButName, confFunction, 
                                                        cancelButName, cancelButFunction, title) {
         title = title || "";
-        var buttons = {}, opt,
-                dial = $('#fd-dialog-confirm'), contentStr;
+        var buttons = {},
+            dial = $('#fd-dialog-confirm'),
+            contentStr;
         buttons[confButName] = confFunction;
         buttons[cancelButName] = cancelButFunction;
 
@@ -1114,9 +1115,6 @@ formdesigner.ui = function () {
         var getExpressionPane = function () {
             return $("#fd-xpath-editor-expressions");
         };
-        var getExpressionList = function () {
-            return getExpressionPane().children();
-        };
         var getTopLevelJoinSelect = function () {
             return $(editorPane.find("#top-level-join-select")[0]);
         };
@@ -1179,9 +1177,6 @@ formdesigner.ui = function () {
                 console.log("trying to add", parsedExpression.toString());
             }
 
-            var isPath = function (subElement) {
-                return (subElement instanceof xpathmodels.XPathPathExpr);
-            };
             var isJoiningOp = function (subElement) {
                 // something that joins expressions
                 return (subElement instanceof xpathmodels.XPathBoolExpr);
@@ -1191,12 +1186,6 @@ formdesigner.ui = function () {
                 // something that can be put into an expression
                 return (subElement instanceof xpathmodels.XPathCmpExpr ||
                         subElement instanceof xpathmodels.XPathEqExpr);
-            };
-
-            var isSupportedBaseType = function (subelement) {
-                // something that can be stuck in a base string
-                // currently everything is supported.
-                return true;
             };
 
             var newExpressionUIElement = function (expOp) {

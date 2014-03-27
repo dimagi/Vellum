@@ -312,7 +312,6 @@ var Tree = function (tType) {
      */
     that.insertMug = function (mug, position, refMug) {
         var refNode, refNodeSiblings, refNodeIndex, refNodeParent, node;
-
         if (position !== null && typeof position !== 'string') {
             throw "position argument must be a string or null! Can be 'after', 'before' or 'into'";
         }
@@ -329,12 +328,11 @@ var Tree = function (tType) {
             refNode = this.getNodeFromMug(refMug);
         }
 
-        //remove it from tree if it already exists
+        // remove it from tree if it already exists
         node = removeNodeFromTree(this.getNodeFromMug(mug)); 
         if (!node) {
             node = new Node(null, mug);
         }
-
         if (position !== 'into') {
             refNodeParent = that.getParentNode(refNode);
             refNodeSiblings = refNodeParent.getChildren();
@@ -383,7 +381,7 @@ var Tree = function (tType) {
         var node = this.getNodeFromMug(mug),
             output, nodeParent;
         if (!node) {
-            //                console.log('Cant find path of Mug that is not present in the Tree!');
+            // console.log('Cant find path of Mug that is not present in the Tree!');
             return null;
         }
         nodeParent = this.getParentNode(node);
@@ -663,6 +661,43 @@ formdesigner.model = (function () {
             }
         };
 
+        that.normalizeQuestionIds = function () {
+            var mugs = formdesigner.controller.getMugList();
+            var questions_by_id = {};
+            var renamed = [];
+            _.each(mugs, function (mug) {
+                var origNodeId = mug.dataElement.nodeID;
+                var nodeId = mug.dataElement.nodeID;
+                var counter = 1;
+                var isClear = false;
+                while (!isClear) {
+                    isClear = true;
+                    if (nodeId in questions_by_id) {
+                        var thisPath = that.dataTree.getAbsolutePath(mug);
+                        for (var i = 0; i < questions_by_id[nodeId].length; i++) {
+                            var otherMug = questions_by_id[nodeId][i];
+                            var otherPath = that.dataTree.getAbsolutePath(otherMug);
+                            if (thisPath === otherPath) {
+                                isClear = false;
+                                mug.dataElement.nodeID = origNodeId + counter;
+                                nodeId = mug.dataElement.nodeID;
+                                counter += 1;
+                                break;
+                            }
+                        }
+                        if (isClear) {
+                            questions_by_id[nodeId].push(mug);
+                        }
+                    } else {
+                        questions_by_id[nodeId] = [mug];
+                    }
+                }
+                if (nodeId !== origNodeId) {
+                    renamed.push([origNodeId, nodeId, mug]);
+                }
+            });
+            return renamed;
+        };
         /**
          * Generates an XML Xform and returns it as a string.
          */
@@ -1145,7 +1180,7 @@ formdesigner.model = (function () {
             }
             result = tree.treeMap(treeFunc);
             newMug.parentMug = oldMug.parentMug;
-            if(result.length > 0){
+            if(result.length > 0) {
                 return result[0];
             }else {
                 return false;
@@ -1153,7 +1188,7 @@ formdesigner.model = (function () {
         };
         that.replaceMug = replaceMug;
         
-        //make the object event aware
+        // make the object event aware
         formdesigner.util.eventuality(that);
         return that;
     };
