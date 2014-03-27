@@ -460,9 +460,7 @@ var iTextIDWidget = function (mug, options) {
         return widget.getRootId() + nodeId + "-" + widget.getItextType();
     };
 
-    widget.setUIValue = function (val) {
-        $input.val(val);
-    };
+    widget.setUIValue = widget.setValue;
 
     widget.updateAutoId = function () {
         widget.setUIValue(widget.autoGenerateId(widget.getNodeId()));
