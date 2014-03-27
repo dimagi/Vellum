@@ -134,6 +134,9 @@ formdesigner.widgets = (function () {
         };
 
         widget.setValue = function (value) {
+            if (value !== undefined) {
+                value = value.replace(new RegExp(String.fromCharCode(10), 'g'), '&#10;');
+            }
             input.val(value);
         };
 

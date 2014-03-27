@@ -460,9 +460,7 @@ var iTextIDWidget = function (mug, options) {
         return widget.getRootId() + nodeId + "-" + widget.getItextType();
     };
 
-    widget.setUIValue = function (val) {
-        $input.val(val);
-    };
+    widget.setUIValue = widget.setValue;
 
     widget.updateAutoId = function () {
         widget.setUIValue(widget.autoGenerateId(widget.getNodeId()));
@@ -972,9 +970,9 @@ var itextLabelWidget = function (mug, language, form, options) {
         }
     };
 
-    var $input = $("<input />")
+    var $input = $("<textarea></textarea>")
         .attr("id", widget.getID())
-        .attr("type", "text")
+        .attr("rows", "2")
         .addClass('input-block-level itext-widget-input')
         .on('change keyup', widget.updateValue);
 

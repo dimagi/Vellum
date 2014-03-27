@@ -90,9 +90,6 @@ formdesigner.util = (function(){
         resStr = xmls.serializeToString(resEl);
         resStr = resStr.replace(getStartTag(resStr),'').replace(getEndTag(resStr),'');
         
-        // XMLSerializer unescapes escaped carriage returns
-        resStr = resStr.replace(new RegExp(String.fromCharCode(10), 'g'), '&#10;');
-
         return resStr;
     }
 
