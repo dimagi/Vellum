@@ -666,8 +666,11 @@ formdesigner.model = (function () {
             var questions_by_id = {};
             var renamed = [];
             _.each(mugs, function (mug) {
+                if (!mug.dataElement) {
+                    return;
+                }
                 var origNodeId = mug.dataElement.nodeID;
-                var nodeId = mug.dataElement.nodeID;
+                var nodeId = origNodeId;
                 var counter = 1;
                 var isClear = false;
                 while (!isClear) {
@@ -1705,6 +1708,9 @@ var mugs = (function () {
             formdesigner.util.give_ufid(this);
             formdesigner.util.eventuality(this);
         },
+        populate: function (xmlNode) {
+            // load extra state from xml node
+        },
         getSpec: function () {
             return {
                 dataElement: this.getDataElementSpec(),
@@ -2064,9 +2070,8 @@ var mugs = (function () {
             this.bindElement.dataType = "intent";
         },
         getControlElementSpec: function () {
-            var spec = this.$super();
             // virtual properties used to get widgets
-            spec.controlElement = $.extend(spec, {
+            return $.extend({}, this.$super(), {
                 androidIntentAppId: {
                     visibility: 'visible',
                     uiType: formdesigner.widgets.androidIntentAppIdWidget
@@ -2080,8 +2085,6 @@ var mugs = (function () {
                     uiType: formdesigner.widgets.androidIntentResponseWidget
                 }
             });
-
-            return spec;
         },
         // todo: move to spec system
         getAppearanceAttribute: function () {
@@ -2200,6 +2203,25 @@ var mugs = (function () {
             var spec = this.$super();
             spec.dataValue.presence = 'optional';
             return spec;
+        },
+        getControlElementSpec: function () {
+            return $.extend({}, this.$super(), {
+                appearanceControl: {
+                    lstring: 'Add confirmation checkbox',
+                    title: 'Add a confirmation message and checkbox below the label. Available on Android only.',
+                    editable: 'w',
+                    visibility: 'visible',
+                    presence: 'optional',
+                    uiType: formdesigner.widgets.checkboxWidget
+                }
+            });
+        },
+        populate: function (xmlNode) {
+            var appearance = xmlNode.attr('appearance');
+            this.controlElement.appearanceControl = appearance !== "minimal";
+        },
+        getAppearanceAttribute: function () {
+            return (this.controlElement && this.controlElement.appearanceControl) ? null : 'minimal';
         }
     });
 

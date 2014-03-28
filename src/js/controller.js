@@ -1501,6 +1501,7 @@ formdesigner.controller = (function () {
     function populateMug (mug, cEl) {
         var labelEl, hintEl, repeat_count, repeat_noaddremove;
         
+        mug.populate(cEl);
         if (mug.__className === "ReadOnly") {
             mug.controlElementRaw = cEl;
             return;
