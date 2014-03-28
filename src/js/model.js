@@ -666,8 +666,11 @@ formdesigner.model = (function () {
             var questions_by_id = {};
             var renamed = [];
             _.each(mugs, function (mug) {
+                if (!mug.dataElement) {
+                    return;
+                }
                 var origNodeId = mug.dataElement.nodeID;
-                var nodeId = mug.dataElement.nodeID;
+                var nodeId = origNodeId;
                 var counter = 1;
                 var isClear = false;
                 while (!isClear) {
