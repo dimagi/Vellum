@@ -26,11 +26,16 @@ formdesigner.widgets = (function () {
             return this.definition.lstring ? this.definition.lstring : this.propName;
         };
 
+        widget.getTitle = function () {
+            return this.definition && this.definition.title ? this.definition.title : "";
+        }
+
         widget.getLabel = function () {
             var displayName = widget.getDisplayName();
             if (displayName) {
                 return $("<label />")
                     .text(displayName)
+                    .attr("title", widget.getTitle())
                     .attr("for", widget.getID());
             } else {
                 return null;
@@ -559,6 +564,7 @@ formdesigner.widgets = (function () {
             "dataElement/nodeID",
             "controlElement/defaultValue",
             "controlElement/label",
+            "controlElement/appearanceControl",
             "controlElement/readOnlyControl",
             "controlElement/androidIntentAppId",
             "controlElement/androidIntentExtra",
