@@ -459,9 +459,7 @@ var iTextIDWidget = function (mug, options) {
         return widget.getRootId() + nodeId + "-" + widget.getItextType();
     };
 
-    widget.setUIValue = function (val) {
-        $input.val(val);
-    };
+    widget.setUIValue = widget.setValue;
 
     widget.updateAutoId = function () {
         widget.setUIValue(widget.autoGenerateId(widget.getNodeId()));
@@ -891,14 +889,15 @@ var itextLabelWidget = function (mug, language, form, options) {
     }
 
     var widget = formdesigner.widgets.baseWidget(mug, id);
-    var $input = $("<input />")
+    var $input = $("<textarea></textarea>")
         .attr("id", widget.id)
         .attr("type", "text")
-         .addClass('input-block-level itext-widget-input')
-         .on('change keyup', function () {
-             widget.updateValue;
-         });
- 
+        .attr("rows", "2")
+        .addClass('input-block-level itext-widget-input')
+        .on('change keyup', function () {
+            widget.updateValue;
+        });
+
     widget.getControl = function () {
         return $input;
     };
@@ -981,10 +980,6 @@ var itextLabelWidget = function (mug, language, form, options) {
             widget.fireChangeEvents();
         }
     };
-
-    $input.attr("type", "text")
-        .addClass('input-block-level itext-widget-input')
-        .on('change keyup', widget.updateValue);
 
     widget.mug.on('question-itext-deleted', widget.destroy);
 

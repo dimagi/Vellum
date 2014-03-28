@@ -125,6 +125,9 @@ formdesigner.widgets = (function () {
 	    input.attr("type", "text").addClass('input-block-level');
 
         widget.setValue = function (value) {
+            if (value !== undefined) {
+                value = value.replace(new RegExp(String.fromCharCode(10), 'g'), '&#10;');
+            }
             input.val(value);
         };
 
