@@ -1130,6 +1130,17 @@ formdesigner.ui = function () {
             return $(editorPane.find("#top-level-join-select")[0]);
         };
 
+        var toExpression = function (op, left, right) {
+            if (op.val() == "selected") {
+                return "selected(" + left.val() + ", " + right.val() + ")";
+            }
+            // make sure we wrap the vals in parens in case they were necessary
+            // todo, construct manually, and validate individual parts.
+            return "(" + left.val() + ") "
+                + xpathmodels.expressionTypeEnumToXPathLiteral(op.val())
+                + " (" + right.val() + ")";
+        };
+
         var getExpressionFromSimpleMode = function () {
             // basic
             var pane = getExpressionPane();
@@ -1143,9 +1154,7 @@ formdesigner.ui = function () {
                     return;
                 }
                 var op = $($(this).find(".op-select")[0]);
-                // make sure we wrap the vals in parens in case they were necessary
-                // todo, construct manually, and validate individual parts.
-                var exprPath = "(" + left.val() + ") " + xpathmodels.expressionTypeEnumToXPathLiteral(op.val()) + " (" + right.val() + ")";
+                var exprPath = toExpression(op, left, right);
                 expressionParts.push(exprPath);
             });
             var preparsed = expressionParts.join(" " + joinType + " ");
@@ -1196,7 +1205,11 @@ formdesigner.ui = function () {
             var isExpressionOp = function (subElement) {
                 // something that can be put into an expression
                 return (subElement instanceof xpathmodels.XPathCmpExpr ||
-                        subElement instanceof xpathmodels.XPathEqExpr);
+                        subElement instanceof xpathmodels.XPathEqExpr ||
+                        (
+                            subElement instanceof xpathmodels.XPathFuncExpr &&
+                            subElement.id === "selected"
+                        ));
             };
 
             var newExpressionUIElement = function (expOp) {
@@ -1208,7 +1221,8 @@ formdesigner.ui = function () {
                         ["is less than", expTypes.LT],
                         ["is less than or equal to", expTypes.LTE],
                         ["is greater than", expTypes.GT],
-                        ["is greater than or equal to", expTypes.GTE]
+                        ["is greater than or equal to", expTypes.GTE],
+                        ["has selected value", "selected"]
                     ]
                 });
 
@@ -1250,6 +1264,13 @@ formdesigner.ui = function () {
                     // populate
                     if (DEBUG_MODE) {
                         console.log("populating", expOp.toString());
+                    }
+                    if (expOp.id === "selected") {
+                        expOp = {
+                            type: "selected",
+                            left: expOp.args[0],
+                            right: expOp.args[1]
+                        }
                     }
                     populateQuestionInputBox(getLeftQuestionInput(), expOp.left);
                     $expUI.find('.op-select').val(xpathmodels.expressionTypeEnumToXPathLiteral(expOp.type));
