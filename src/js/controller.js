@@ -2102,8 +2102,8 @@ formdesigner.intentManager = (function () {
                 _.each(store, function (ref, key) {
                     if (key) {
                         xmlWriter.writeStartElement(innerTag);
-                        xmlWriter.writeAttributeStringSafe("key", key);
-                        xmlWriter.writeAttributeStringSafe("ref", ref);
+                        xmlWriter.writeAttributeString("key", key);
+                        xmlWriter.writeAttributeString("ref", ref);
                         xmlWriter.writeEndElement();
                     }
                 });
@@ -2112,9 +2112,9 @@ formdesigner.intentManager = (function () {
 
         self.writeXML = function (xmlWriter, currentNodeID) {
             xmlWriter.writeStartElement('odkx:intent');
-            xmlWriter.writeAttributeStringSafe("xmlns:odkx", self.xmlns);
-            xmlWriter.writeAttributeStringSafe("id", currentNodeID || self.initialNodeID);
-            xmlWriter.writeAttributeStringSafe("class", self.path);
+            xmlWriter.writeAttributeString("xmlns:odkx", self.xmlns);
+            xmlWriter.writeAttributeString("id", currentNodeID || self.initialNodeID);
+            xmlWriter.writeAttributeString("class", self.path);
             self._writeInnerTagXML(xmlWriter, 'extra', self.extra);
             self._writeInnerTagXML(xmlWriter, 'response', self.response);
             xmlWriter.writeEndElement('odkx:intent');
