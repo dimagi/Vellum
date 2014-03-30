@@ -723,7 +723,7 @@ formdesigner.model = (function () {
                         // Write any custom attributes first
 	                    for (var k in mug.dataElement._rawAttributes) {
 	                        if (mug.dataElement._rawAttributes.hasOwnProperty(k)) {
-	                            xmlWriter.writeAttributeStringSafe(k, mug.dataElement._rawAttributes[k]);
+	                            xmlWriter.writeAttributeString(k, mug.dataElement._rawAttributes[k]);
 	                        }
 	                    }
 	                    
@@ -733,14 +733,14 @@ formdesigner.model = (function () {
 	                    }
 	                    if (mug.dataElement.keyAttr){
 	                        keyAttr = mug.dataElement.keyAttr;
-	                        xmlWriter.writeAttributeStringSafe("key", keyAttr);
+	                        xmlWriter.writeAttributeString("key", keyAttr);
 	                    }
 	                    if (mug.dataElement.xmlnsAttr){
 	                        extraXMLNS = mug.dataElement.xmlnsAttr;
-	                        xmlWriter.writeAttributeStringSafe("xmlns", extraXMLNS);
+	                        xmlWriter.writeAttributeString("xmlns", extraXMLNS);
 	                    }
 	                    if (mug.__className === "Repeat"){
-	                        xmlWriter.writeAttributeStringSafe("jr:template","");
+	                        xmlWriter.writeAttributeString("jr:template","");
 	                    }
                     }
                 }
@@ -792,20 +792,20 @@ formdesigner.model = (function () {
                             for (j in attrs) {
                                 if (attrs.hasOwnProperty(j) && attrs[j]) {
                                     if (j === "constraintMsg"){
-                                        xmlWriter.writeAttributeStringSafe("jr:constraintMsg",attrs[j]); //write it
+                                        xmlWriter.writeAttributeString("jr:constraintMsg",attrs[j]); //write it
                                     } else if (j === "constraintMsgItextID") {
-                                        xmlWriter.writeAttributeStringSafe("jr:constraintMsg",  "jr:itext('" + attrs[j] + "')")
+                                        xmlWriter.writeAttributeString("jr:constraintMsg",  "jr:itext('" + attrs[j] + "')")
                                     } else if (j === "preload") {
-                                        xmlWriter.writeAttributeStringSafe("jr:preload", attrs[j]);
+                                        xmlWriter.writeAttributeString("jr:preload", attrs[j]);
                                     } else if (j === "preloadParams") {
-                                        xmlWriter.writeAttributeStringSafe("jr:preloadParams", attrs[j]);
+                                        xmlWriter.writeAttributeString("jr:preloadParams", attrs[j]);
                                     } else {
-                                        xmlWriter.writeAttributeStringSafe(j,attrs[j]);
+                                        xmlWriter.writeAttributeString(j,attrs[j]);
                                     }
                                 }
                             }
                             _(mug.bindElement._rawAttributes).each(function (v, k) {
-                                xmlWriter.writeAttributeStringSafe(k, v);
+                                xmlWriter.writeAttributeString(k, v);
                             })
                             xmlWriter.writeEndElement();
                         }
@@ -845,7 +845,7 @@ formdesigner.model = (function () {
                             if (elLabel.ref || elLabel.defText) {
                                 xmlWriter.writeStartElement('label');
                                 if (elLabel.ref) {
-                                    xmlWriter.writeAttributeStringSafe('ref',elLabel.ref);
+                                    xmlWriter.writeAttributeString('ref',elLabel.ref);
                                 }
                                 if (elLabel.defText) {
                                     xmlWriter.writeString(elLabel.defText);
@@ -878,7 +878,7 @@ formdesigner.model = (function () {
                         // Write any custom attributes first
                         for (var k in cProps._rawAttributes) {
                             if (cProps._rawAttributes.hasOwnProperty(k)) {
-                                xmlWriter.writeAttributeStringSafe(k, cProps._rawAttributes[k]);
+                                xmlWriter.writeAttributeString(k, cProps._rawAttributes[k]);
                             }
                         }
                         
@@ -891,7 +891,7 @@ formdesigner.model = (function () {
                                 attr = 'ref';
                             }
                             absPath = formdesigner.controller.form.dataTree.getAbsolutePath(mug);
-                            xmlWriter.writeAttributeStringSafe(attr, absPath);
+                            xmlWriter.writeAttributeString(attr, absPath);
                         }
                         
                         // Set other relevant attributes
@@ -904,22 +904,22 @@ formdesigner.model = (function () {
                             r_noaddrem = formdesigner.util.createXPathBoolFromJS(r_noaddrem);
 
                             if (r_count) {
-                                xmlWriter.writeAttributeStringSafe("jr:count",r_count);
+                                xmlWriter.writeAttributeString("jr:count",r_count);
                             }
 
                             if (r_noaddrem) {
-                                xmlWriter.writeAttributeStringSafe("jr:noAddRemove", r_noaddrem);
+                                xmlWriter.writeAttributeString("jr:noAddRemove", r_noaddrem);
                             }
                         } else if (isODKMedia) {
                             var mediaType = cProps.mediaType;
                             if (mediaType) {
-                                xmlWriter.writeAttributeStringSafe("mediatype", mediaType);
+                                xmlWriter.writeAttributeString("mediatype", mediaType);
                             }
                         }
 
                         var appearanceAttr = mug.getAppearanceAttribute();
                         if (appearanceAttr) {
-                            xmlWriter.writeAttributeStringSafe("appearance", appearanceAttr);
+                            xmlWriter.writeAttributeString("appearance", appearanceAttr);
                         }
                         
                         // Do hint label
@@ -931,7 +931,7 @@ formdesigner.model = (function () {
                                 }
                                 if(cProps.hintItextID.id){
                                     var ref = "jr:itext('" + cProps.hintItextID.id + "')";
-                                    xmlWriter.writeAttributeStringSafe('ref',ref);
+                                    xmlWriter.writeAttributeString('ref',ref);
                                 }
                                 xmlWriter.writeEndElement();
                             }
@@ -1012,26 +1012,26 @@ formdesigner.model = (function () {
                     formName = "New Form";
                 }
 
-                xmlWriter.writeAttributeStringSafe("xmlns:jrm",jrm);
-                xmlWriter.writeAttributeStringSafe("xmlns", uuid);
-                xmlWriter.writeAttributeStringSafe("uiVersion", uiVersion);
-                xmlWriter.writeAttributeStringSafe("version", version);
-                xmlWriter.writeAttributeStringSafe("name", formName);
+                xmlWriter.writeAttributeString("xmlns:jrm",jrm);
+                xmlWriter.writeAttributeString("xmlns", uuid);
+                xmlWriter.writeAttributeString("uiVersion", uiVersion);
+                xmlWriter.writeAttributeString("version", version);
+                xmlWriter.writeAttributeString("name", formName);
             };
 
             function html_tag_boilerplate () {
-                xmlWriter.writeAttributeStringSafe( "xmlns:h", "http://www.w3.org/1999/xhtml" );
-                xmlWriter.writeAttributeStringSafe( "xmlns:orx", "http://openrosa.org/jr/xforms" );
-                xmlWriter.writeAttributeStringSafe( "xmlns", "http://www.w3.org/2002/xforms" );
-                xmlWriter.writeAttributeStringSafe( "xmlns:xsd", "http://www.w3.org/2001/XMLSchema" );
-                xmlWriter.writeAttributeStringSafe( "xmlns:jr", "http://openrosa.org/javarosa" );
-                xmlWriter.writeAttributeStringSafe( "xmlns:vellum", "http://commcarehq.org/xforms/vellum" );
+                xmlWriter.writeAttributeString( "xmlns:h", "http://www.w3.org/1999/xhtml" );
+                xmlWriter.writeAttributeString( "xmlns:orx", "http://openrosa.org/jr/xforms" );
+                xmlWriter.writeAttributeString( "xmlns", "http://www.w3.org/2002/xforms" );
+                xmlWriter.writeAttributeString( "xmlns:xsd", "http://www.w3.org/2001/XMLSchema" );
+                xmlWriter.writeAttributeString( "xmlns:jr", "http://openrosa.org/javarosa" );
+                xmlWriter.writeAttributeString( "xmlns:vellum", "http://commcarehq.org/xforms/vellum" );
             }
 
             var _writeInstanceAttributes = function (writer, instanceMetadata) {
                 for (var attrId in instanceMetadata.attributes) {
                     if (instanceMetadata.attributes.hasOwnProperty(attrId)) {
-                        writer.writeAttributeStringSafe(attrId, instanceMetadata.attributes[attrId]);
+                        writer.writeAttributeString(attrId, instanceMetadata.attributes[attrId]);
                     }
                 }
             };
