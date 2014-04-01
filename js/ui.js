@@ -1107,13 +1107,50 @@ formdesigner.ui = function () {
         $("#fd-extra-tools").show();
     };
 
+    // Handlers for the simple expression editor
+    var simpleExpressions = {};
+    var operationOpts = [];
+    var expTypes = xpathmodels.XPathExpressionTypeEnum;
+    var BinOpHandler = {
+        toString: function(op, left, right) {
+            // make sure we wrap the vals in parens in case they were necessary
+            // todo, construct manually, and validate individual parts.
+            return "(" + left + ") "
+                + xpathmodels.expressionTypeEnumToXPathLiteral(op)
+                + " (" + right + ")";
+        },
+        typeLeftRight: function(expOp) {
+            return expOp;
+        }
+    }
+    var FunctionHandler = {
+        toString: function(op, left, right) {
+            return op + "(" + left + ", " + right + ")";
+        },
+        typeLeftRight: function(expOp) {
+            return {
+                type: expOp.id,
+                left: expOp.args[0],
+                right: expOp.args[1]
+            };
+        }
+    };
+    function addOp(expr, value, label) {
+        simpleExpressions[value] = expr;
+        operationOpts.push([label, value]);
+    }
+    addOp(BinOpHandler, expTypes.EQ, "is equal to");
+    addOp(BinOpHandler, expTypes.NEQ, "is not equal to");
+    addOp(BinOpHandler, expTypes.LT, "is less than");
+    addOp(BinOpHandler, expTypes.LTE, "is less than or equal to");
+    addOp(BinOpHandler, expTypes.GT, "is greater than");
+    addOp(BinOpHandler, expTypes.GTE, "is greater than or equal to");
+    addOp(FunctionHandler, "selected", "has selected value");
 
     that.showXPathEditor = function (options) {
         /**
          * All the logic to display the XPath Editor widget.
          */
-        var expTypes = xpathmodels.XPathExpressionTypeEnum;
-
         var editorPane = $('#fd-xpath-editor');
         var editorContent = $('#fd-xpath-editor-content');
 
@@ -1130,31 +1167,20 @@ formdesigner.ui = function () {
             return $(editorPane.find("#top-level-join-select")[0]);
         };
 
-        var toExpression = function (op, left, right) {
-            if (op.val() == "selected") {
-                return "selected(" + left.val() + ", " + right.val() + ")";
-            }
-            // make sure we wrap the vals in parens in case they were necessary
-            // todo, construct manually, and validate individual parts.
-            return "(" + left.val() + ") "
-                + xpathmodels.expressionTypeEnumToXPathLiteral(op.val())
-                + " (" + right.val() + ")";
-        };
-
         var getExpressionFromSimpleMode = function () {
             // basic
             var pane = getExpressionPane();
             var expressionParts = [];
             var joinType = getTopLevelJoinSelect().val();
             pane.children().each(function() {
-                var left = $($(this).find(".left-question")[0]);
-                var right = $($(this).find(".right-question")[0]);
+                var left = $($(this).find(".left-question")[0]).val();
+                var right = $($(this).find(".right-question")[0]).val();
                 // ignore empty expressions
-                if (left.val() === "" && right.val() === "") {
+                if (left === "" && right === "") {
                     return;
                 }
-                var op = $($(this).find(".op-select")[0]);
-                var exprPath = toExpression(op, left, right);
+                var op = $($(this).find(".op-select")[0]).val();
+                var exprPath = simpleExpressions[op].toString(op, left, right);
                 expressionParts.push(exprPath);
             });
             var preparsed = expressionParts.join(" " + joinType + " ");
@@ -1206,24 +1232,13 @@ formdesigner.ui = function () {
                 // something that can be put into an expression
                 return (subElement instanceof xpathmodels.XPathCmpExpr ||
                         subElement instanceof xpathmodels.XPathEqExpr ||
-                        (
-                            subElement instanceof xpathmodels.XPathFuncExpr &&
-                            subElement.id === "selected"
-                        ));
+                        simpleExpressions.hasOwnProperty(subElement.id));
             };
 
             var newExpressionUIElement = function (expOp) {
 
                 var $expUI = formdesigner.ui.getTemplateObject('#fd-template-xpath-expression', {
-                    operationOpts: [
-                        ["is equal to", expTypes.EQ],
-                        ["is not equal to", expTypes.NEQ],
-                        ["is less than", expTypes.LT],
-                        ["is less than or equal to", expTypes.LTE],
-                        ["is greater than", expTypes.GT],
-                        ["is greater than or equal to", expTypes.GTE],
-                        ["has selected value", "selected"]
-                    ]
+                    operationOpts: operationOpts
                 });
 
                 var getLeftQuestionInput = function () {
@@ -1265,12 +1280,12 @@ formdesigner.ui = function () {
                     if (DEBUG_MODE) {
                         console.log("populating", expOp.toString());
                     }
-                    if (expOp.id === "selected") {
-                        expOp = {
-                            type: "selected",
-                            left: expOp.args[0],
-                            right: expOp.args[1]
-                        }
+                    if (simpleExpressions.hasOwnProperty(expOp.id)) {
+                        // comparison and equality operators DO NOT have an "id"
+                        // property, so they will not get here. It doesn't
+                        // matter though since already fulfill the necessary
+                        // "type/left/right" interface.
+                        expOp = simpleExpressions[expOp.id].typeLeftRight(expOp);
                     }
                     populateQuestionInputBox(getLeftQuestionInput(), expOp.left);
                     $expUI.find('.op-select').val(xpathmodels.expressionTypeEnumToXPathLiteral(expOp.type));
