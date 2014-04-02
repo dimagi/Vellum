@@ -1128,6 +1128,7 @@ formdesigner.ui = function () {
             return op + "(" + left + ", " + right + ")";
         },
         typeLeftRight: function(expOp) {
+            if (expOp.args.length != 2) return false;
             return {
                 type: expOp.id,
                 left: expOp.args[0],
@@ -1286,6 +1287,7 @@ formdesigner.ui = function () {
                         // matter though since already fulfill the necessary
                         // "type/left/right" interface.
                         expOp = simpleExpressions[expOp.id].typeLeftRight(expOp);
+                        if (!expOp) return false;
                     }
                     populateQuestionInputBox(getLeftQuestionInput(), expOp.left);
                     $expUI.find('.op-select').val(xpathmodels.expressionTypeEnumToXPathLiteral(expOp.type));
@@ -1316,7 +1318,11 @@ formdesigner.ui = function () {
                 if (isExpressionOp(parsedExpression)) {
                     // if it's an expression op stick it in.
                     // no need to join, so this is good.
-                    return newExpressionUIElement(parsedExpression).appendTo(expressionPane);
+                    var expressionUIElem = newExpressionUIElement(parsedExpression);
+                    if (!expressionUIElem) {
+                        return failAndClear();
+                    }
+                    return expressionUIElem.appendTo(expressionPane);
                 } else if (isJoiningOp(parsedExpression)) {
                     // if it's a joining op the first element has to be
                     // an expression and the second must be a valid op
