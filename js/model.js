@@ -2272,7 +2272,8 @@ var mugs = (function () {
         __init__: function (options) {
             this.$super(options);
             this.controlElement.tagName = "select1";
-        }
+        },
+        defaultOperator: null
     });
 
     var Group = BaseMug.$extend({

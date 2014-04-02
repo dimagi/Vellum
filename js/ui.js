@@ -1536,7 +1536,8 @@ formdesigner.ui = function () {
                     var sourceUid = $(data.o).attr("id");
                     var mug = formdesigner.controller.form.getMugByUFID(sourceUid);
                     var ops = $(data.r).closest(".xpath-expression-row").find(".op-select");
-                    if (mug && ops && mug.defaultOperator !== undefined) {
+                    if (mug && ops && !(mug.defaultOperator === undefined ||
+                                        mug.defaultOperator === null)) {
                         ops.val(mug.defaultOperator);
                     }
                 }
