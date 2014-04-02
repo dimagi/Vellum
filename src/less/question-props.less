@@ -42,6 +42,21 @@
 
   .accordion-heading {
     margin-bottom: 0;
+
+    > .fd-help {
+      position: absolute;
+      right: 15px;
+      top: 7px;
+      display: block;
+      font-size: @baseFontSize*2;
+      padding: 5px;
+
+
+      &:hover {
+        text-decoration: none;
+        color: @green;
+      }
+    }
   }
 
   .accordion-toggle {
@@ -49,21 +64,6 @@
     &:hover {
       background-color: lighten(@grayLighter, 3);
       text-decoration: none;
-    }
-  }
-
-  > .fd-help {
-    position: absolute;
-    right: 15px;
-    top: 7px;
-    display: block;
-    font-size: @baseFontSize*2;
-    padding: 5px;
-
-
-    &:hover {
-      text-decoration: none;
-      color: @green;
     }
   }
 
