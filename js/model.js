@@ -2263,6 +2263,7 @@ var mugs = (function () {
             spec.dataType.visibility = "hidden";
             return spec;
         },
+        defaultOperator: "selected"
     });
 
     var Select = MSelect.$extend({
