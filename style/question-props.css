@@ -80,7 +80,7 @@
   font-size: 28px;
   padding: 5px;
 }
-.fd-question-fieldset > .fd-help:hover {
+.fd-question-fieldset > .accordion-heading > .fd-help:hover {
   text-decoration: none;
   color: #46a546;
 }
