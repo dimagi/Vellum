@@ -41,7 +41,7 @@ formdesigner.ui = function () {
         },
         "parse-warning": {
             cssClass: "",
-            title: "Parse Warning",
+            title: "Warning",
             icon: "icon-warning-sign"
         },
         "form-warning": {
@@ -219,12 +219,12 @@ formdesigner.ui = function () {
             return null;
         } else {
             var newMug = new mugs[qType](); 
-            formdesigner.controller.initQuestion(
-                newMug, formdesigner.controller.getCurrentlySelectedMug(), 'into');
+            formdesigner.controller.initQuestion(newMug);
             that.jstree('select_node', '#' + newMug.ufid, true);
             newMug.afterUIInsert();
             that.jstree('select_node', '#' + newMug.ufid, true);
             if (newMug.isODKOnly) {
+                //it's an ODK media question
                 formdesigner.model.form.updateError(formdesigner.model.FormError({
                     message: 'This question type will ONLY work with Android phones!',
                     level: 'form-warning'
@@ -494,7 +494,17 @@ formdesigner.ui = function () {
         that.showVisualValidation(mug);
     };
 
+    /**
+     * Handler for node_select events.
+     *
+     * Set that.skipNodeSelectEvent to true to disable during form loading,
+     * recursive question duplication, etc.
+     */
     that.handleNodeSelect = function (e, data) {
+        if (that.skipNodeSelectEvent) {
+            return;
+        }
+
         var ufid = $(data.rslt.obj[0]).prop('id'),
             mug = formdesigner.controller.getMugFromFormByUFID(ufid);
 
@@ -558,7 +568,26 @@ formdesigner.ui = function () {
         return true;
     };
 
+    /**
+     * Select the lowest top-level non-data node
+     *
+     * @return jquery object for the lowest node if there are any question
+     *         nodes, otherwise false
+     */
+    that.selectLowestQuestionNode = function () {
+        that.jstree("deselect_all");
+        var questions = that.getJSTree().children().children().filter("[rel!='DataBindOnly']");
+        if (questions.length > 0) {
+            var newSelectEl = $(questions[questions.length - 1]);
+            that.jstree("select_node", newSelectEl, false);
+            return newSelectEl;
+        } else {
+            return false;
+        }
+    };
+
     that.questionTree = null;
+
 
     /**
      *
@@ -868,8 +897,11 @@ formdesigner.ui = function () {
                     formdesigner.controller.setCurrentlySelectedMug(currentMug.ufid);
                     that.displayMugProperties(currentMug);
                 }
+
             }
-        });
+
+        })
+
     };
 
     var removeLanguageDialog = function () {
@@ -973,8 +1005,9 @@ formdesigner.ui = function () {
     var setDialogInfo = that.setDialogInfo = function (message, confButName, confFunction, 
                                                        cancelButName, cancelButFunction, title) {
         title = title || "";
-        var buttons = {}, opt,
-                dial = $('#fd-dialog-confirm'), contentStr;
+        var buttons = {},
+            dial = $('#fd-dialog-confirm'),
+            contentStr;
         buttons[confButName] = confFunction;
         buttons[cancelButName] = cancelButFunction;
 
@@ -1080,9 +1113,6 @@ formdesigner.ui = function () {
         var getExpressionPane = function () {
             return $("#fd-xpath-editor-expressions");
         };
-        var getExpressionList = function () {
-            return getExpressionPane().children();
-        };
         var getTopLevelJoinSelect = function () {
             return $(editorPane.find("#top-level-join-select")[0]);
         };
@@ -1145,9 +1175,6 @@ formdesigner.ui = function () {
                 console.log("trying to add", parsedExpression.toString());
             }
 
-            var isPath = function (subElement) {
-                return (subElement instanceof xpathmodels.XPathPathExpr);
-            };
             var isJoiningOp = function (subElement) {
                 // something that joins expressions
                 return (subElement instanceof xpathmodels.XPathBoolExpr);
@@ -1157,12 +1184,6 @@ formdesigner.ui = function () {
                 // something that can be put into an expression
                 return (subElement instanceof xpathmodels.XPathCmpExpr ||
                         subElement instanceof xpathmodels.XPathEqExpr);
-            };
-
-            var isSupportedBaseType = function (subelement) {
-                // something that can be stuck in a base string
-                // currently everything is supported.
-                return true;
             };
 
             var newExpressionUIElement = function (expOp) {
@@ -1519,8 +1540,6 @@ formdesigner.ui = function () {
                 mugs[data.args[0]]
             );
         });
-
-
 
         $("#fd-expand-all").click(function() {
             that.questionTree.jstree("open_all");

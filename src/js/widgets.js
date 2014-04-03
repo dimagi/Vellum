@@ -41,6 +41,22 @@ formdesigner.widgets = (function () {
             return this.definition.lstring ? this.definition.lstring : this.propName;
         };
 
+        widget.getTitle = function () {
+            return this.definition && this.definition.title ? this.definition.title : "";
+        }
+
+        widget.getLabel = function () {
+            var displayName = widget.getDisplayName();
+            if (displayName) {
+                return $("<label />")
+                    .text(displayName)
+                    .attr("title", widget.getTitle())
+                    .attr("for", widget.getID());
+            } else {
+                return null;
+            }
+        };
+
         widget.getControl = function () {
             throw ("must be overridden");
         };
@@ -125,6 +141,9 @@ formdesigner.widgets = (function () {
 	    input.attr("type", "text").addClass('input-block-level');
 
         widget.setValue = function (value) {
+            if (value !== undefined) {
+                value = value.replace(new RegExp(String.fromCharCode(10), 'g'), '&#10;');
+            }
             input.val(value);
         };
 
@@ -425,7 +444,9 @@ formdesigner.widgets = (function () {
         $baseToolbar.find('#fd-button-copy').click(function () {
             formdesigner.controller.duplicateCurrentQuestion({itext: 'copy'});
         });
-        $baseToolbar.find('.btn-toolbar.pull-left').prepend(this.getQuestionTypeChanger(mug));
+        if (mug.__className !== "Item") {
+            $baseToolbar.find('.btn-toolbar.pull-left').prepend(this.getQuestionTypeChanger(mug));
+        }
         return $baseToolbar;
     };
 
@@ -539,6 +560,7 @@ formdesigner.widgets = (function () {
             "dataElement/nodeID",
             "controlElement/defaultValue",
             "controlElement/label",
+            "controlElement/appearanceControl",
             "controlElement/readOnlyControl",
             "controlElement/androidIntentAppId",
             "controlElement/androidIntentExtra",

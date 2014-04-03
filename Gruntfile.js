@@ -39,6 +39,7 @@ module.exports = function (grunt) {
         },
         concat: {
             css: {
+                nonull: true,
                 src: [
                     'src/js/lib/codemirror/codemirror.css',
                     'src/js/lib/fancybox/jquery.fancybox-1.3.4.css',
@@ -48,6 +49,7 @@ module.exports = function (grunt) {
                 dest: 'dist/vellum.css'
             },
             js: {
+                nonull: true,
                 options: {
                     separator: ';'
                 },
@@ -65,7 +67,7 @@ module.exports = function (grunt) {
                     'node_modules/XMLWriter/XMLWriter.js',
                     'src/js/lib/codemirror/codemirror.js',
                     'src/js/lib/codemirror/xml.js',
-                    'node_modules/classy/classy-1.4/classy.js',
+                    'node_modules/classy/classy.js',
                     'src/js/formdesigner.javarosa.js',
                     'src/js/formdesigner.ignoreButRetain.js',
                     'src/js/formdesigner.lock.js',

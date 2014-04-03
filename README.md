@@ -76,11 +76,6 @@ If you have Google Analytics installed, Vellum will track events.
 Changelog
 ---------
 
-### 1.5.1
-
-- Fixed bug in 1.5.0
-- Made UI loading faster
-
 ### 1.5.0
 
 - Added Ignore-but-retain and question locking plugins 

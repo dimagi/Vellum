@@ -106,9 +106,6 @@ formdesigner.util = (function(){
         resStr = xmls.serializeToString(resEl);
         resStr = resStr.replace(getStartTag(resStr),'').replace(getEndTag(resStr),'');
         
-        // XMLSerializer unescapes escaped carriage returns
-        resStr = resStr.replace(new RegExp(String.fromCharCode(10), 'g'), '&#10;');
-
         return resStr;
     }
 
@@ -274,6 +271,18 @@ formdesigner.util = (function(){
         return attrMap;
     }; 
     
+    /**
+     * Takes in a reference mug and makes a copy of
+     * the object (the copy is returned).
+     * @param refMug
+     */
+    //var getNewMug = function(refMug){
+        //var newMug = that.clone(refMug);
+        //that.give_ufid(newMug);
+        //return newMug;
+    //};
+    //that.getNewMug = getNewMug;
+
     //Simple Event Framework
     //Just run your object through this function to make it event aware
     //Taken from 'JavaScript: The Good Parts'
@@ -512,44 +521,6 @@ formdesigner.util = (function(){
         return elementNameRegex.test(name);
     };
 
-    
-    /*
-     * Assumes we're in a quoted string, and replaces special characters
-     * so that they don't break xml
-     * 
-     */
-    that.escapeQuotedXML = function (text, options) {
-        // force to string
-        text = "" + text; 
-        
-        if (!text) {
-            return "";
-        }
-        
-        // special case this because we want the default to be true
-        var escapeQuotes = (options && options.hasOwnProperty("escapeQuotes")) ? options.escapeQuotes : true;
-        
-        // have to do these first
-        if (options && options.escapeAmpersands) {
-            text = text.replace(/&/,'&amp;');
-        }
-        // these are required
-        text = text.replace(/</g,'&lt;');
-        text = text.replace(/>/g,'&gt;');
-        // these are optional
-        if (options && options.escapeApostrophes) {
-            text = text.replace(/'/g, "&apos;");
-        }
-        if (escapeQuotes) {
-            text = text.replace(/"/g,'&quot;');
-        }
-        return text;
-    };
-    
-    // monkey patch the xmlwriter for convenience
-    XMLWriter.prototype.writeAttributeStringSafe = function (name, value, options) {
-        return this.writeAttributeString(name, that.escapeQuotedXML(value, options));
-    }; 
     
     /**
      * Turns a list of strings into a single tab separated straing.

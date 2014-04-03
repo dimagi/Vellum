@@ -310,7 +310,6 @@ var Tree = function (tType) {
      */
     that.insertMug = function (mug, position, refMug) {
         var refNode, refNodeSiblings, refNodeIndex, refNodeParent, node;
-
         if (position !== null && typeof position !== 'string') {
             throw "position argument must be a string or null! Can be 'after', 'before' or 'into'";
         }
@@ -322,18 +321,16 @@ var Tree = function (tType) {
             (!refMug.controlElement && treeType === 'control'))
         {
             refNode = rootNode;
-            refMug = rootNode.getValue();
             position = 'into';
         } else {
             refNode = this.getNodeFromMug(refMug);
         }
 
-        //remove it from tree if it already exists
+        // remove it from tree if it already exists
         node = removeNodeFromTree(this.getNodeFromMug(mug)); 
         if (!node) {
             node = new Node(null, mug);
         }
-
         if (position !== 'into') {
             refNodeParent = that.getParentNode(refNode);
             refNodeSiblings = refNodeParent.getChildren();
@@ -382,7 +379,7 @@ var Tree = function (tType) {
         var node = this.getNodeFromMug(mug),
             output, nodeParent;
         if (!node) {
-            //                console.log('Cant find path of Mug that is not present in the Tree!');
+            // console.log('Cant find path of Mug that is not present in the Tree!');
             return null;
         }
         nodeParent = this.getParentNode(node);
@@ -662,6 +659,46 @@ formdesigner.model = (function () {
             }
         };
 
+        that.normalizeQuestionIds = function () {
+            var mugs = formdesigner.controller.getMugList();
+            var questions_by_id = {};
+            var renamed = [];
+            _.each(mugs, function (mug) {
+                if (!mug.dataElement) {
+                    return;
+                }
+                var origNodeId = mug.dataElement.nodeID;
+                var nodeId = origNodeId;
+                var counter = 1;
+                var isClear = false;
+                while (!isClear) {
+                    isClear = true;
+                    if (nodeId in questions_by_id) {
+                        var thisPath = that.dataTree.getAbsolutePath(mug);
+                        for (var i = 0; i < questions_by_id[nodeId].length; i++) {
+                            var otherMug = questions_by_id[nodeId][i];
+                            var otherPath = that.dataTree.getAbsolutePath(otherMug);
+                            if (thisPath === otherPath) {
+                                isClear = false;
+                                mug.dataElement.nodeID = origNodeId + counter;
+                                nodeId = mug.dataElement.nodeID;
+                                counter += 1;
+                                break;
+                            }
+                        }
+                        if (isClear) {
+                            questions_by_id[nodeId].push(mug);
+                        }
+                    } else {
+                        questions_by_id[nodeId] = [mug];
+                    }
+                }
+                if (nodeId !== origNodeId) {
+                    renamed.push([origNodeId, nodeId, mug]);
+                }
+            });
+            return renamed;
+        };
         /**
          * Generates an XML Xform and returns it as a string.
          */
@@ -684,7 +721,7 @@ formdesigner.model = (function () {
                         // Write any custom attributes first
 	                    for (var k in mug.dataElement._rawAttributes) {
 	                        if (mug.dataElement._rawAttributes.hasOwnProperty(k)) {
-	                            xmlWriter.writeAttributeStringSafe(k, mug.dataElement._rawAttributes[k]);
+	                            xmlWriter.writeAttributeString(k, mug.dataElement._rawAttributes[k]);
 	                        }
 	                    }
 	                    
@@ -694,14 +731,14 @@ formdesigner.model = (function () {
 	                    }
 	                    if (mug.dataElement.keyAttr){
 	                        keyAttr = mug.dataElement.keyAttr;
-	                        xmlWriter.writeAttributeStringSafe("key", keyAttr);
+	                        xmlWriter.writeAttributeString("key", keyAttr);
 	                    }
 	                    if (mug.dataElement.xmlnsAttr){
 	                        extraXMLNS = mug.dataElement.xmlnsAttr;
-	                        xmlWriter.writeAttributeStringSafe("xmlns", extraXMLNS);
+	                        xmlWriter.writeAttributeString("xmlns", extraXMLNS);
 	                    }
 	                    if (mug.__className === "Repeat"){
-	                        xmlWriter.writeAttributeStringSafe("jr:template","");
+	                        xmlWriter.writeAttributeString("jr:template","");
 	                    }
                     }
                 }
@@ -753,20 +790,20 @@ formdesigner.model = (function () {
                             for (j in attrs) {
                                 if (attrs.hasOwnProperty(j) && attrs[j]) {
                                     if (j === "constraintMsg"){
-                                        xmlWriter.writeAttributeStringSafe("jr:constraintMsg",attrs[j]); //write it
+                                        xmlWriter.writeAttributeString("jr:constraintMsg",attrs[j]); //write it
                                     } else if (j === "constraintMsgItextID") {
-                                        xmlWriter.writeAttributeStringSafe("jr:constraintMsg",  "jr:itext('" + attrs[j] + "')")
+                                        xmlWriter.writeAttributeString("jr:constraintMsg",  "jr:itext('" + attrs[j] + "')")
                                     } else if (j === "preload") {
-                                        xmlWriter.writeAttributeStringSafe("jr:preload", attrs[j]);
+                                        xmlWriter.writeAttributeString("jr:preload", attrs[j]);
                                     } else if (j === "preloadParams") {
-                                        xmlWriter.writeAttributeStringSafe("jr:preloadParams", attrs[j]);
+                                        xmlWriter.writeAttributeString("jr:preloadParams", attrs[j]);
                                     } else {
-                                        xmlWriter.writeAttributeStringSafe(j,attrs[j]);
+                                        xmlWriter.writeAttributeString(j,attrs[j]);
                                     }
                                 }
                             }
                             _(mug.bindElement._rawAttributes).each(function (v, k) {
-                                xmlWriter.writeAttributeStringSafe(k, v);
+                                xmlWriter.writeAttributeString(k, v);
                             })
                             xmlWriter.writeEndElement();
                         }
@@ -806,7 +843,7 @@ formdesigner.model = (function () {
                             if (elLabel.ref || elLabel.defText) {
                                 xmlWriter.writeStartElement('label');
                                 if (elLabel.ref) {
-                                    xmlWriter.writeAttributeStringSafe('ref',elLabel.ref);
+                                    xmlWriter.writeAttributeString('ref',elLabel.ref);
                                 }
                                 if (elLabel.defText) {
                                     xmlWriter.writeString(elLabel.defText);
@@ -840,19 +877,19 @@ formdesigner.model = (function () {
 
                         if (tagName === 'itemset') {
                             var data = cProps.itemsetData;
-                            xmlWriter.writeAttributeStringSafe('nodeset', data.nodeset);
+                            xmlWriter.writeAttributeString('nodeset', data.nodeset);
                             xmlWriter.writeStartElement('label');
-                            xmlWriter.writeAttributeStringSafe('ref', data.valueRef);
+                            xmlWriter.writeAttributeString('ref', data.valueRef);
                             xmlWriter.writeEndElement();
                             xmlWriter.writeStartElement('value');
-                            xmlWriter.writeAttributeStringSafe('ref', data.labelRef);
+                            xmlWriter.writeAttributeString('ref', data.labelRef);
                             xmlWriter.writeEndElement();
                         }
                         
                         // Write any custom attributes first
                         for (var k in cProps._rawAttributes) {
                             if (cProps._rawAttributes.hasOwnProperty(k)) {
-                                xmlWriter.writeAttributeStringSafe(k, cProps._rawAttributes[k]);
+                                xmlWriter.writeAttributeString(k, cProps._rawAttributes[k]);
                             }
                         }
                         
@@ -865,7 +902,7 @@ formdesigner.model = (function () {
                                 attr = 'ref';
                             }
                             absPath = formdesigner.controller.form.dataTree.getAbsolutePath(mug);
-                            xmlWriter.writeAttributeStringSafe(attr, absPath);
+                            xmlWriter.writeAttributeString(attr, absPath);
                         }
                         
                         // Set other relevant attributes
@@ -878,22 +915,22 @@ formdesigner.model = (function () {
                             r_noaddrem = formdesigner.util.createXPathBoolFromJS(r_noaddrem);
 
                             if (r_count) {
-                                xmlWriter.writeAttributeStringSafe("jr:count",r_count);
+                                xmlWriter.writeAttributeString("jr:count",r_count);
                             }
 
                             if (r_noaddrem) {
-                                xmlWriter.writeAttributeStringSafe("jr:noAddRemove", r_noaddrem);
+                                xmlWriter.writeAttributeString("jr:noAddRemove", r_noaddrem);
                             }
                         } else if (isODKMedia) {
                             var mediaType = cProps.mediaType;
                             if (mediaType) {
-                                xmlWriter.writeAttributeStringSafe("mediatype", mediaType);
+                                xmlWriter.writeAttributeString("mediatype", mediaType);
                             }
                         }
 
                         var appearanceAttr = mug.getAppearanceAttribute();
                         if (appearanceAttr) {
-                            xmlWriter.writeAttributeStringSafe("appearance", appearanceAttr);
+                            xmlWriter.writeAttributeString("appearance", appearanceAttr);
                         }
                         
                         // Do hint label
@@ -905,7 +942,7 @@ formdesigner.model = (function () {
                                 }
                                 if(cProps.hintItextID.id){
                                     var ref = "jr:itext('" + cProps.hintItextID.id + "')";
-                                    xmlWriter.writeAttributeStringSafe('ref',ref);
+                                    xmlWriter.writeAttributeString('ref',ref);
                                 }
                                 xmlWriter.writeEndElement();
                             }
@@ -973,12 +1010,12 @@ formdesigner.model = (function () {
 
                 uiVersion = formdesigner.formUIVersion; //gets set at parse time/by UI
                 if(!uiVersion) {
-                    uiVersion = 1;
+                    uiVersion = "1";
                 }
 
                 version = formdesigner.formVersion; //gets set at parse time/by UI
                 if(!version) {
-                    version = 1;
+                    version = "1";
                 }
 
                 formName = formdesigner.controller.form.formName; //gets set at parse time/by UI
@@ -986,26 +1023,26 @@ formdesigner.model = (function () {
                     formName = "New Form";
                 }
 
-                xmlWriter.writeAttributeStringSafe("xmlns:jrm",jrm);
-                xmlWriter.writeAttributeStringSafe("xmlns", uuid);
-                xmlWriter.writeAttributeStringSafe("uiVersion", uiVersion);
-                xmlWriter.writeAttributeStringSafe("version", version);
-                xmlWriter.writeAttributeStringSafe("name", formName);
+                xmlWriter.writeAttributeString("xmlns:jrm",jrm);
+                xmlWriter.writeAttributeString("xmlns", uuid);
+                xmlWriter.writeAttributeString("uiVersion", uiVersion);
+                xmlWriter.writeAttributeString("version", version);
+                xmlWriter.writeAttributeString("name", formName);
             };
 
             function html_tag_boilerplate () {
-                xmlWriter.writeAttributeStringSafe( "xmlns:h", "http://www.w3.org/1999/xhtml" );
-                xmlWriter.writeAttributeStringSafe( "xmlns:orx", "http://openrosa.org/jr/xforms" );
-                xmlWriter.writeAttributeStringSafe( "xmlns", "http://www.w3.org/2002/xforms" );
-                xmlWriter.writeAttributeStringSafe( "xmlns:xsd", "http://www.w3.org/2001/XMLSchema" );
-                xmlWriter.writeAttributeStringSafe( "xmlns:jr", "http://openrosa.org/javarosa" );
-                xmlWriter.writeAttributeStringSafe( "xmlns:vellum", "http://commcarehq.org/xforms/vellum" );
+                xmlWriter.writeAttributeString( "xmlns:h", "http://www.w3.org/1999/xhtml" );
+                xmlWriter.writeAttributeString( "xmlns:orx", "http://openrosa.org/jr/xforms" );
+                xmlWriter.writeAttributeString( "xmlns", "http://www.w3.org/2002/xforms" );
+                xmlWriter.writeAttributeString( "xmlns:xsd", "http://www.w3.org/2001/XMLSchema" );
+                xmlWriter.writeAttributeString( "xmlns:jr", "http://openrosa.org/javarosa" );
+                xmlWriter.writeAttributeString( "xmlns:vellum", "http://commcarehq.org/xforms/vellum" );
             }
 
             var _writeInstanceAttributes = function (writer, instanceMetadata) {
                 for (var attrId in instanceMetadata.attributes) {
                     if (instanceMetadata.attributes.hasOwnProperty(attrId)) {
-                        writer.writeAttributeStringSafe(attrId, instanceMetadata.attributes[attrId]);
+                        writer.writeAttributeString(attrId, instanceMetadata.attributes[attrId]);
                     }
                 }
             };
@@ -1157,7 +1194,7 @@ formdesigner.model = (function () {
             }
             result = tree.treeMap(treeFunc);
             newMug.parentMug = oldMug.parentMug;
-            if(result.length > 0){
+            if(result.length > 0) {
                 return result[0];
             }else {
                 return false;
@@ -1165,7 +1202,7 @@ formdesigner.model = (function () {
         };
         that.replaceMug = replaceMug;
         
-        //make the object event aware
+        // make the object event aware
         formdesigner.util.eventuality(that);
         return that;
     };
@@ -1690,6 +1727,9 @@ var mugs = (function () {
             formdesigner.util.give_ufid(this);
             formdesigner.util.eventuality(this);
         },
+        populate: function (xmlNode) {
+            // load extra state from xml node
+        },
         getSpec: function () {
             return {
                 dataElement: this.getDataElementSpec(),
@@ -2054,9 +2094,8 @@ var mugs = (function () {
             this.bindElement.dataType = "intent";
         },
         getControlElementSpec: function () {
-            var spec = this.$super();
             // virtual properties used to get widgets
-            spec.controlElement = $.extend(spec, {
+            return $.extend({}, this.$super(), {
                 androidIntentAppId: {
                     visibility: 'visible',
                     uiType: formdesigner.widgets.androidIntentAppIdWidget
@@ -2070,8 +2109,6 @@ var mugs = (function () {
                     uiType: formdesigner.widgets.androidIntentResponseWidget
                 }
             });
-
-            return spec;
         },
         // todo: move to spec system
         getAppearanceAttribute: function () {
@@ -2235,6 +2272,25 @@ var mugs = (function () {
             var spec = this.$super();
             spec.dataValue.presence = 'optional';
             return spec;
+        },
+        getControlElementSpec: function () {
+            return $.extend({}, this.$super(), {
+                appearanceControl: {
+                    lstring: 'Add confirmation checkbox',
+                    title: 'Add a confirmation message and checkbox below the label. Available on Android only.',
+                    editable: 'w',
+                    visibility: 'visible',
+                    presence: 'optional',
+                    uiType: formdesigner.widgets.checkboxWidget
+                }
+            });
+        },
+        populate: function (xmlNode) {
+            var appearance = xmlNode.attr('appearance');
+            this.controlElement.appearanceControl = appearance !== "minimal";
+        },
+        getAppearanceAttribute: function () {
+            return (this.controlElement && this.controlElement.appearanceControl) ? null : 'minimal';
         }
     });
 
