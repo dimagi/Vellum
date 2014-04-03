@@ -366,14 +366,14 @@
 
 <script type="text/template" id="fd-template-question-fieldset">
     <fieldset class="accordion-group fd-question-fieldset">
-        <% if (help) { %>
-        <a href="<%=help.link%>" target="_blank" class="fd-help pull-right"
-                data-title="<%=help.title%>"
-                data-content="<%=help.text%>"
-                data-placement="left">
-        </a>
-        <% } %>
         <legend class="accordion-heading">
+            <% if (help) { %>
+            <a href="<%=help.link%>" target="_blank" class="fd-help pull-right"
+                    data-title="<%=help.title%>"
+                    data-content="<%=help.text%>"
+                    data-placement="left">
+            </a>
+            <% } %>
             <a class="accordion-toggle<% if (isCollapsed) { %> collapsed<% } %>" href="#<%=fieldsetId%>" data-toggle="collapse">
                 <i class="icon-double-angle-down"></i>
                 <%=fieldsetTitle%>
