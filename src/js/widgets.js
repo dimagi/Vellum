@@ -442,7 +442,9 @@ formdesigner.widgets = (function () {
         $baseToolbar.find('#fd-button-copy').click(function () {
             formdesigner.controller.duplicateCurrentQuestion({itext: 'copy'});
         });
-        $baseToolbar.find('.btn-toolbar.pull-left').prepend(this.getQuestionTypeChanger(mug));
+        if (mug.__className !== "Item") {
+            $baseToolbar.find('.btn-toolbar.pull-left').prepend(this.getQuestionTypeChanger(mug));
+        }
         return $baseToolbar;
     };
 

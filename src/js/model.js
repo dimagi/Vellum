@@ -999,12 +999,12 @@ formdesigner.model = (function () {
 
                 uiVersion = formdesigner.formUIVersion; //gets set at parse time/by UI
                 if(!uiVersion) {
-                    uiVersion = 1;
+                    uiVersion = "1";
                 }
 
                 version = formdesigner.formVersion; //gets set at parse time/by UI
                 if(!version) {
-                    version = 1;
+                    version = "1";
                 }
 
                 formName = formdesigner.controller.form.formName; //gets set at parse time/by UI
