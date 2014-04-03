@@ -901,9 +901,6 @@ var itextLabelWidget = function (mug, language, form, options) {
         return $input;
     };
 
-    widget.mug.on('question-itext-deleted', widget.destroy);
-
-    
     widget.displayName = options.displayName;
     widget.itextType = options.itextType;
     widget.form = form || "default";
