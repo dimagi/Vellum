@@ -2040,14 +2040,22 @@ formdesigner.controller = (function () {
         formdesigner.ui.reset();
     };
 
-    function shouldWarnOnCircularRef() {
-        // return true if target is display condition or calculate field (of hidden value)
+    function circularReferenceCheck(mug, path) {
         var group = $('#fd-xpath-editor').data("group");
         var property = $('#fd-xpath-editor').data("property");
-        return group === "bindElement" && (
+        if (path === "." && group === "bindElement" && (
             property === "relevantAttr" ||
-            property == "calculateAttr"
-        );
+            property === "calculateAttr"
+        )) {
+            var fieldName = mug.bindElement.__spec[property].lstring;
+            that.form.updateError(formdesigner.model.FormError({
+                level: "form-warning",
+                message: "The " + fieldName + " for a question "
+                    + "is not allowed to reference the question itself. "
+                    + "Please remove the period from the " + fieldName
+                    + " or your form will have errors."
+            }), {updateUI: true});
+        }
     }
 
     // tree drag and drop stuff, used by xpath
@@ -2056,12 +2064,7 @@ formdesigner.controller = (function () {
         if (target) {
             var mug = that.form.getMugByUFID(sourceUid);
             var path = formdesigner.util.mugToXPathReference(mug);
-            if (path === "." && shouldWarnOnCircularRef()) {
-                that.form.updateError(formdesigner.model.FormError({
-                    level: "form-warning",
-                    message: "Formula for field references itself"
-                }), {updateUI: true});
-            }
+            circularReferenceCheck(mug, path);
             // the .change fires the validation controls
             target.val(target.val() + path).change();
         }
