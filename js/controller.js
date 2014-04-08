@@ -2043,8 +2043,7 @@ formdesigner.controller = (function () {
     function circularReferenceCheck(mug, path) {
         var group = $('#fd-xpath-editor').data("group");
         var property = $('#fd-xpath-editor').data("property");
-        if ((path === "." || path === form.dataTree.getAbsolutePath(mug)) &&
-            group === "bindElement" &&
+        if (path === "." && group === "bindElement" &&
             (property === "relevantAttr" || property === "calculateAttr")) {
 
             var fieldName = mug.bindElement.__spec[property].lstring;
