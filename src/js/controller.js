@@ -2048,14 +2048,33 @@ formdesigner.controller = (function () {
         formdesigner.model.reset();
         formdesigner.ui.reset();
     };
-    
+
+    function circularReferenceCheck(mug, path) {
+        var group = $('#fd-xpath-editor').data("group");
+        var property = $('#fd-xpath-editor').data("property");
+        if (path === "." && group === "bindElement" &&
+            (property === "relevantAttr" || property === "calculateAttr")) {
+
+            var fieldName = mug.bindElement.__spec[property].lstring;
+            that.form.updateError(formdesigner.model.FormError({
+                level: "form-warning",
+                message: "The " + fieldName + " for a question "
+                    + "is not allowed to reference the question itself. "
+                    + "Please remove the period from the " + fieldName
+                    + " or your form will have errors."
+            }), {updateUI: true});
+        }
+    }
+
     // tree drag and drop stuff, used by xpath
     var handleTreeDrop = function(source, target) {
         var target = $(target), sourceUid = $(source).attr("id");
         if (target) {
             var mug = that.form.getMugByUFID(sourceUid);
+            var path = formdesigner.util.mugToXPathReference(mug);
+            circularReferenceCheck(mug, path);
             // the .change fires the validation controls
-            target.val(target.val() + formdesigner.util.mugToXPathReference(mug)).change();
+            target.val(target.val() + path).change();
         }
     };
     that.handleTreeDrop = handleTreeDrop;
