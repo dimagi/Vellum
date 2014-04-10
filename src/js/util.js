@@ -609,3 +609,10 @@ $.fn.fdHelp = function () {
         });
     return this;
 };
+
+
+var trackShowAdvancedMode = function() {
+    if (typeof _gaq !== "undefined") {
+        _gaq.push(['_trackEvent', 'Form Builder', 'Edit Expression', 'Show Advanced Mode']);
+    }
+};
