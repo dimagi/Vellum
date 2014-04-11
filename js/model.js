@@ -1294,26 +1294,21 @@ formdesigner.model = (function () {
                 // currently we don't do anything with relative paths
                 return p.initial_context === xpathmodels.XPathInitialContextEnum.ROOT;
             });
-            var errorKey = mug.ufid + "-" + property + "-" + "badpath",
-                errors = false;
+            var error = that.FormError({
+                level: "parse-warning",
+                key: mug.ufid + "-" + property + "-badpath",
+                message: []
+            });
 
             this.all = this.all.concat(paths.map(function (path) {
                 var pathString = path.pathWithoutPredicates(),
-                    pathWithoutRoot = pathString.substring(1 + pathString.indexOf('/', 1))
+                    pathWithoutRoot = pathString.substring(1 + pathString.indexOf('/', 1)),
                     refMug = formdesigner.controller.getMugByPath(pathString);
 
                 if (!refMug && formdesigner.allowedDataNodeReferences.indexOf(pathWithoutRoot) == -1) {
-                    errors = true;
-                    formdesigner.controller.form.updateError(that.FormError({
-                        level: "parse-warning",
-                        key: errorKey,
-                        message: "The question '" + mug.bindElement.nodeID + 
-                            "' references an unknown question " + path.toXPath() + 
-                            " in its " + mug.getPropertyDefinition(property).lstring + "."
-                                                    
-                    }), {
-                        updateUI: true
-                    });
+                    error.message.push("The question '" + mug.bindElement.nodeID + 
+                        "' references an unknown question " + path.toXPath() + 
+                        " in its " + mug.getPropertyDefinition(property).lstring + ".");
                 }
                 return {
                     mug: mug.ufid, 
@@ -1324,8 +1319,10 @@ formdesigner.model = (function () {
                 };      
             }))
            
-            if (!errors) {
-                formdesigner.controller.form.clearError(that.FormError({key: errorKey}), {updateUI: true});
+            if (error.message.length > 0) {
+                formdesigner.controller.form.updateError(error, {updateUI: true})
+            } else {
+                formdesigner.controller.form.clearError(error, {updateUI: true});
             }        
 
         };
