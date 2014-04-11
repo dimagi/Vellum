@@ -175,8 +175,7 @@ formdesigner.ui = function () {
         }
 
         $(MESSAGES_DIV)
-            .empty()
-            .html(_.template($('#fd-template-alert-global').text(), {
+            .append(_.template($('#fd-template-alert-global').text(), {
                 messageType: that.MESSAGE_TYPES[errorObj.level],
                 messages: messages
             }))
