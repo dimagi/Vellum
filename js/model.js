@@ -1284,37 +1284,40 @@ formdesigner.model = (function () {
         
         logic.clearReferences = function (mug, property) {
             this.all = this.all.filter(function (elem) { 
-                return elem.mug != mug.ufid || elem.property != property;
+                return !(elem.mug === mug.ufid && elem.property === property);
             });
         };
         
         logic.addReferences = function (mug, property) {
+            // get absolute paths from mug property's value
             var expr = that.LogicExpression(mug.getPropertyValue(property));
             var paths = expr.getPaths().filter(function (p) {
                 // currently we don't do anything with relative paths
                 return p.initial_context === xpathmodels.XPathInitialContextEnum.ROOT;
             });
+
             var error = that.FormError({
                 level: "parse-warning",
                 key: mug.ufid + "-" + property + "-badpath",
                 message: []
             });
 
+            // append item for each mug referenced (by absolute path) in mug's property value
             this.all = this.all.concat(paths.map(function (path) {
                 var pathString = path.pathWithoutPredicates(),
                     pathWithoutRoot = pathString.substring(1 + pathString.indexOf('/', 1)),
                     refMug = formdesigner.controller.getMugByPath(pathString);
 
-                if (!refMug && formdesigner.allowedDataNodeReferences.indexOf(pathWithoutRoot) == -1) {
+                if (!refMug && formdesigner.allowedDataNodeReferences.indexOf(pathWithoutRoot) === -1) {
                     error.message.push("The question '" + mug.bindElement.nodeID + 
                         "' references an unknown question " + path.toXPath() + 
                         " in its " + mug.getPropertyDefinition(property).lstring + ".");
                 }
                 return {
-                    mug: mug.ufid, 
-                    ref: refMug ? refMug.ufid : "",
+                    mug: mug.ufid, // mug with property value referencing refMug
+                    ref: refMug ? refMug.ufid : "", // referenced mug
                     property: property,
-                    path: path.toXPath(),
+                    path: path.toXPath(), // path to refMug
                     sourcePath: formdesigner.controller.form.dataTree.getAbsolutePath(mug)
                 };      
             }))
@@ -1357,17 +1360,41 @@ formdesigner.model = (function () {
         logic.updatePath = function (mugId, from, to, subtree) {
             if (from === to) { return; }
 
+            var data = {};
+            data[mugId] = [from, to];
+            logic.updatePaths(data, subtree);
+        };
+
+        /**
+         * Update references nodes with theirs new paths. Used when a node,
+         * which may have sub-nodes, is moved or duplicated.
+         *
+         * @param data - an object with the following structure:
+         *        { "<mug ufid>": ["/old/path", "/new/path"], ... }
+         * @param subtree - (optional) only replace references from nodes
+         *        beginning with this path (no trailing /)
+         */
+        logic.updatePaths = function (data, subtree) {
             var found = this.all.filter(function (elem) {
-                return elem.ref === mugId && 
+                return data.hasOwnProperty(elem.ref) &&
                     (!subtree || elem.sourcePath === subtree || elem.sourcePath.indexOf(subtree + '/') === 0);
             });
-            var ref, mug, expr;
+            var ref, mug, expr, pkey, mugId, seen = {};
             for (var i = 0; i < found.length; i++) {
                 ref = found[i];
+                pkey = ref.mug + " " + ref.property;
+                if (seen.hasOwnProperty(pkey)) {
+                    continue;
+                }
+                seen[pkey] = null;
                 mug = formdesigner.controller.getMugFromFormByUFID(ref.mug);
                 expr = that.LogicExpression(mug.getPropertyValue(ref.property));
                 orig = expr.getText();
-                expr.updatePath(from, to);
+                for (mugId in data) {
+                    if (data.hasOwnProperty(mugId)) {
+                        expr.updatePath(data[mugId][0], data[mugId][1]);
+                    }
+                }
                 if (orig !== expr.getText()) {
                     formdesigner.controller.setMugPropertyValue(mug, ref.property.split("/")[0], 
                                                                 ref.property.split("/")[1], expr.getText(), mug);

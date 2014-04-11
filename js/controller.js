@@ -1822,9 +1822,19 @@ formdesigner.controller = (function () {
      * @param refMug
      */
     that.moveMug = function (mug, refMug, position) {
+        function recursivelyGetChildren(mug) {
+            var children = that.getChildren(mug), i;
+            for (i = children.length - 1; i >= 0; i--) {
+                children = children.concat(recursivelyGetChildren(children[i]))
+            }
+            return children;
+        }
         var dataTree = that.form.dataTree, 
             controlTree = that.form.controlTree, 
-            preMovePath = dataTree.getAbsolutePath(mug);
+            mugs = recursivelyGetChildren(mug).concat([mug]),
+            preMovePaths = mugs.map(function(mug) {
+                return dataTree.getAbsolutePath(mug);
+            });
 
         if (mug.dataElement) {
             dataTree.insertMug(mug, position, refMug);
@@ -1833,10 +1843,12 @@ formdesigner.controller = (function () {
             controlTree.insertMug(mug, position, refMug);
         }
 
-        formdesigner.model.LogicManager.updatePath(mug.ufid, 
-            preMovePath, 
-            dataTree.getAbsolutePath(mug)
-        );
+        var updates = {};
+        for (var i = 0; i < mugs.length; i++) {
+            updates[mugs[i].ufid] = [preMovePaths[i], dataTree.getAbsolutePath(mugs[i])];
+        }
+
+        formdesigner.model.LogicManager.updatePaths(updates);
 
         //fire a form-property-changed event to sync up with the 'save to server' button disabled state
         that.form.fire({
