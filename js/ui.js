@@ -1107,13 +1107,51 @@ formdesigner.ui = function () {
         $("#fd-extra-tools").show();
     };
 
+    // Handlers for the simple expression editor
+    var simpleExpressions = {};
+    var operationOpts = [];
+    var expTypes = xpathmodels.XPathExpressionTypeEnum;
+    var BinOpHandler = {
+        toString: function(op, left, right) {
+            // make sure we wrap the vals in parens in case they were necessary
+            // todo, construct manually, and validate individual parts.
+            return "(" + left + ") "
+                + xpathmodels.expressionTypeEnumToXPathLiteral(op)
+                + " (" + right + ")";
+        },
+        typeLeftRight: function(expOp) {
+            return expOp;
+        }
+    }
+    var FunctionHandler = {
+        toString: function(op, left, right) {
+            return op + "(" + left + ", " + right + ")";
+        },
+        typeLeftRight: function(expOp) {
+            if (expOp.args.length != 2) return false;
+            return {
+                type: expOp.id,
+                left: expOp.args[0],
+                right: expOp.args[1]
+            };
+        }
+    };
+    function addOp(expr, value, label) {
+        simpleExpressions[value] = expr;
+        operationOpts.push([label, value]);
+    }
+    addOp(BinOpHandler, expTypes.EQ, "is equal to");
+    addOp(BinOpHandler, expTypes.NEQ, "is not equal to");
+    addOp(BinOpHandler, expTypes.LT, "is less than");
+    addOp(BinOpHandler, expTypes.LTE, "is less than or equal to");
+    addOp(BinOpHandler, expTypes.GT, "is greater than");
+    addOp(BinOpHandler, expTypes.GTE, "is greater than or equal to");
+    addOp(FunctionHandler, "selected", "has selected value");
 
     that.showXPathEditor = function (options) {
         /**
          * All the logic to display the XPath Editor widget.
          */
-        var expTypes = xpathmodels.XPathExpressionTypeEnum;
-
         var editorPane = $('#fd-xpath-editor');
         var editorContent = $('#fd-xpath-editor-content');
 
@@ -1136,16 +1174,14 @@ formdesigner.ui = function () {
             var expressionParts = [];
             var joinType = getTopLevelJoinSelect().val();
             pane.children().each(function() {
-                var left = $($(this).find(".left-question")[0]);
-                var right = $($(this).find(".right-question")[0]);
+                var left = $($(this).find(".left-question")[0]).val();
+                var right = $($(this).find(".right-question")[0]).val();
                 // ignore empty expressions
-                if (left.val() === "" && right.val() === "") {
+                if (left === "" && right === "") {
                     return;
                 }
-                var op = $($(this).find(".op-select")[0]);
-                // make sure we wrap the vals in parens in case they were necessary
-                // todo, construct manually, and validate individual parts.
-                var exprPath = "(" + left.val() + ") " + xpathmodels.expressionTypeEnumToXPathLiteral(op.val()) + " (" + right.val() + ")";
+                var op = $($(this).find(".op-select")[0]).val();
+                var exprPath = simpleExpressions[op].toString(op, left, right);
                 expressionParts.push(exprPath);
             });
             var preparsed = expressionParts.join(" " + joinType + " ");
@@ -1196,20 +1232,14 @@ formdesigner.ui = function () {
             var isExpressionOp = function (subElement) {
                 // something that can be put into an expression
                 return (subElement instanceof xpathmodels.XPathCmpExpr ||
-                        subElement instanceof xpathmodels.XPathEqExpr);
+                        subElement instanceof xpathmodels.XPathEqExpr ||
+                        simpleExpressions.hasOwnProperty(subElement.id));
             };
 
             var newExpressionUIElement = function (expOp) {
 
                 var $expUI = formdesigner.ui.getTemplateObject('#fd-template-xpath-expression', {
-                    operationOpts: [
-                        ["is equal to", expTypes.EQ],
-                        ["is not equal to", expTypes.NEQ],
-                        ["is less than", expTypes.LT],
-                        ["is less than or equal to", expTypes.LTE],
-                        ["is greater than", expTypes.GT],
-                        ["is greater than or equal to", expTypes.GTE]
-                    ]
+                    operationOpts: operationOpts
                 });
 
                 var getLeftQuestionInput = function () {
@@ -1251,6 +1281,14 @@ formdesigner.ui = function () {
                     if (DEBUG_MODE) {
                         console.log("populating", expOp.toString());
                     }
+                    if (simpleExpressions.hasOwnProperty(expOp.id)) {
+                        // comparison and equality operators DO NOT have an "id"
+                        // property, so they will not get here. It doesn't
+                        // matter though since already fulfill the necessary
+                        // "type/left/right" interface.
+                        expOp = simpleExpressions[expOp.id].typeLeftRight(expOp);
+                        if (!expOp) return false;
+                    }
                     populateQuestionInputBox(getLeftQuestionInput(), expOp.left);
                     $expUI.find('.op-select').val(xpathmodels.expressionTypeEnumToXPathLiteral(expOp.type));
                     // the population of the left can affect the right,
@@ -1280,7 +1318,11 @@ formdesigner.ui = function () {
                 if (isExpressionOp(parsedExpression)) {
                     // if it's an expression op stick it in.
                     // no need to join, so this is good.
-                    return newExpressionUIElement(parsedExpression).appendTo(expressionPane);
+                    var expressionUIElem = newExpressionUIElement(parsedExpression);
+                    if (!expressionUIElem) {
+                        return failAndClear();
+                    }
+                    return expressionUIElem.appendTo(expressionPane);
                 } else if (isJoiningOp(parsedExpression)) {
                     // if it's a joining op the first element has to be
                     // an expression and the second must be a valid op
@@ -1490,6 +1532,14 @@ formdesigner.ui = function () {
             "dnd" : {
                 "drop_finish" : function(data) {
                     formdesigner.controller.handleTreeDrop(data.o, data.r);
+
+                    var sourceUid = $(data.o).attr("id");
+                    var mug = formdesigner.controller.form.getMugByUFID(sourceUid);
+                    var ops = $(data.r).closest(".xpath-expression-row").find(".op-select");
+                    if (mug && ops && !(mug.defaultOperator === undefined ||
+                                        mug.defaultOperator === null)) {
+                        ops.val(mug.defaultOperator);
+                    }
                 }
             },
             "types": {
