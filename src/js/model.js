@@ -2239,6 +2239,7 @@ var mugs = (function () {
             spec.dataType.visibility = "hidden";
             return spec;
         },
+        defaultOperator: "selected"
     });
 
     var Select = MSelect.$extend({
@@ -2247,7 +2248,8 @@ var mugs = (function () {
         __init__: function (options) {
             this.$super(options);
             this.controlElement.tagName = "select1";
-        }
+        },
+        defaultOperator: null
     });
 
     var Group = BaseMug.$extend({
