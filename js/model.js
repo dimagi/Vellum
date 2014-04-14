@@ -1366,7 +1366,7 @@ formdesigner.model = (function () {
         };
 
         /**
-         * Update references nodes with theirs new paths. Used when a node,
+         * Update referenced nodes with their new paths. Used when a node,
          * which may have sub-nodes, is moved or duplicated.
          *
          * @param data - an object with the following structure:
