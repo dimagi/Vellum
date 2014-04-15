@@ -496,7 +496,6 @@ formdesigner.widgets = (function () {
                 formdesigner.controller.changeQuestionType(mug, $(this).data('qtype'));
             } catch (err) {
                 alert("Sorry, you can't do that because: " + err);
-                input.val(mug.__className);
             }
             e.preventDefault();
         });
