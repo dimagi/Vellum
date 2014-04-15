@@ -1606,15 +1606,10 @@ formdesigner.ui = function () {
             // todo: check necessity of this
             mug = formdesigner.controller.getMugFromFormByUFID(node_id);
         }
-        try {
-            iconClass = mug.getIcon();
-        } catch (e) {  // we're dealing with a class, not an instance
-            if (e.message.indexOf('__className') === -1 &&
-                e.message.indexOf('getIcon') === -1)
-            {
-                throw e;
-            }
+        if (typeof mug.getIcon === 'undefined') {
             iconClass = mug.constructor.prototype.icon;
+        } else {
+            iconClass = mug.getIcon();
         }
         iconClass = iconClass || 'icon-circle';
         if (!$questionNode.find('> a > ins').hasClass(iconClass)) {
