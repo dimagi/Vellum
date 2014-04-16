@@ -934,7 +934,6 @@ formdesigner.controller = (function () {
             var $modal,
                 $updateForm,
                 $textarea,
-                codeMirror,
                 modalHeaderHeight,
                 modalFooterHeight,
                 modalHeight,
@@ -975,29 +974,13 @@ formdesigner.controller = (function () {
                 $textarea.val(formdesigner.loadMe);
             }
 
-            try {
-                codeMirror = CodeMirror.fromTextArea($textarea.get(0));
-                codeMirror.setOption('lineNumbers', true);
-                codeMirror.setSize('100%', '100%');
-            } catch (e) {
-                // pass
-            }
-
             $modal.find('#fd-update-source-button').click(function () {
-                if (codeMirror) {
-                    codeMirror.save();
-                }
                 that.loadXForm($textarea.val());
                 that.form.fire('form-property-changed');
                 $modal.modal('hide');
             });
 
             $modal.modal('show');
-            $modal.on('shown', function () {
-                if (codeMirror) {
-                    codeMirror.refresh();
-                }
-            });
         }
 
         // There are validation errors but user continues anyway
