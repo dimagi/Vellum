@@ -533,6 +533,31 @@ formdesigner.ui = function () {
         }
     };
 
+    that.cloudCareConfirmDialogue = function (cloudCareUrl) {
+        var $isUnsavedForm = formdesigner.controller.saveButton.state !== "saved";
+        if (!$isUnsavedForm) {
+            window.open(cloudCareUrl, "_blank");
+            return;
+        }
+
+        var $buttonAttributes = {
+            onClick: "window.open('" + cloudCareUrl + "')",
+            target: "_blank"
+        };
+        var $modal = formdesigner.ui.generateNewModal("Unsaved Changes in Form", [
+            {
+                id: "fd-cloudcare-confirm",
+                title: "Try last saved",
+                cssClasses: "btn btn-warning",
+                attributes: formdesigner.util.invert($buttonAttributes)// underscoreJS iterator swaps key-values
+            }
+        ]);
+        $modal.find('.modal-body')
+            .append($('<p />').text("You have UNSAVED changes in the Form. Cloudcare will not include these changes. "+
+                                    "To see latest changes in Cloudcare, please save changes."));
+        $modal.modal('show');
+    }
+    
     /**
      * Try to select any node in the UI tree, otherwise hide the question
      * properties window. Used after initial load, question deletion, etc.

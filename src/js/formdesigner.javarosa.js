@@ -1741,7 +1741,7 @@ formdesigner.plugins.javaRosa = function (options) {
     };
 
     this.getToolsMenuItems = function () {
-        return [
+        var $tools =  [
             {
                 name: "Edit Bulk Translations",
                 action: function () {
@@ -1749,6 +1749,17 @@ formdesigner.plugins.javaRosa = function (options) {
                 }
             }
         ];
+        if (formdesigner.opts.cloudCareUrl) {
+            $tools.push(
+                {
+                    name: "Try in Cloudcare",
+                    action: function () {   
+                        formdesigner.ui.cloudCareConfirmDialogue(formdesigner.opts.cloudCareUrl);
+                    } 
+                }
+            );
+        }
+        return $tools;
     };
 
     this.getFormErrors = function () {

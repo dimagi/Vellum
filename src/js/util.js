@@ -218,6 +218,17 @@ formdesigner.util = (function(){
         throw new Error("Unable to copy obj! Its type isn't supported.");
     }
     that.clone = clone;
+    
+    function invert(obj) {   
+      var new_obj = {}; 
+      for (var prop in obj) {
+        if(obj.hasOwnProperty(prop)) {
+          new_obj[obj[prop]] = prop;
+        }
+      } 
+      return new_obj;
+    };
+    that.invert = invert;
 
     that.question_counter = 1;
     /**
