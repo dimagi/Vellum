@@ -1810,9 +1810,19 @@ formdesigner.controller = (function () {
      * @param refMug
      */
     that.moveMug = function (mug, refMug, position) {
+        function recursivelyGetChildren(mug) {
+            var children = that.getChildren(mug), i;
+            for (i = children.length - 1; i >= 0; i--) {
+                children = children.concat(recursivelyGetChildren(children[i]))
+            }
+            return children;
+        }
         var dataTree = that.form.dataTree, 
             controlTree = that.form.controlTree, 
-            preMovePath = dataTree.getAbsolutePath(mug);
+            mugs = recursivelyGetChildren(mug).concat([mug]),
+            preMovePaths = mugs.map(function(mug) {
+                return dataTree.getAbsolutePath(mug);
+            });
 
         if (mug.dataElement) {
             dataTree.insertMug(mug, position, refMug);
@@ -1821,10 +1831,12 @@ formdesigner.controller = (function () {
             controlTree.insertMug(mug, position, refMug);
         }
 
-        formdesigner.model.LogicManager.updatePath(mug.ufid, 
-            preMovePath, 
-            dataTree.getAbsolutePath(mug)
-        );
+        var updates = {};
+        for (var i = 0; i < mugs.length; i++) {
+            updates[mugs[i].ufid] = [preMovePaths[i], dataTree.getAbsolutePath(mugs[i])];
+        }
+
+        formdesigner.model.LogicManager.updatePaths(updates);
 
         //fire a form-property-changed event to sync up with the 'save to server' button disabled state
         that.form.fire({
@@ -2027,14 +2039,33 @@ formdesigner.controller = (function () {
         formdesigner.model.reset();
         formdesigner.ui.reset();
     };
-    
+
+    function circularReferenceCheck(mug, path) {
+        var group = $('#fd-xpath-editor').data("group");
+        var property = $('#fd-xpath-editor').data("property");
+        if (path === "." && group === "bindElement" &&
+            (property === "relevantAttr" || property === "calculateAttr")) {
+
+            var fieldName = mug.bindElement.__spec[property].lstring;
+            that.form.updateError(formdesigner.model.FormError({
+                level: "form-warning",
+                message: "The " + fieldName + " for a question "
+                    + "is not allowed to reference the question itself. "
+                    + "Please remove the period from the " + fieldName
+                    + " or your form will have errors."
+            }), {updateUI: true});
+        }
+    }
+
     // tree drag and drop stuff, used by xpath
     var handleTreeDrop = function(source, target) {
         var target = $(target), sourceUid = $(source).attr("id");
         if (target) {
             var mug = that.form.getMugByUFID(sourceUid);
+            var path = formdesigner.util.mugToXPathReference(mug);
+            circularReferenceCheck(mug, path);
             // the .change fires the validation controls
-            target.val(target.val() + formdesigner.util.mugToXPathReference(mug)).change();
+            target.val(target.val() + path).change();
         }
     };
     that.handleTreeDrop = handleTreeDrop;

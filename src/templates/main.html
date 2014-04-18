@@ -422,14 +422,14 @@
 
 <script type="text/template" id="fd-template-question-fieldset">
     <fieldset class="accordion-group fd-question-fieldset">
-        <% if (help) { %>
-        <a href="<%=help.link%>" target="_blank" class="fd-help pull-right"
-                data-title="<%=help.title%>"
-                data-content="<%=help.text%>"
-                data-placement="left">
-        </a>
-        <% } %>
         <legend class="accordion-heading">
+            <% if (help) { %>
+            <a href="<%=help.link%>" target="_blank" class="fd-help pull-right"
+                    data-title="<%=help.title%>"
+                    data-content="<%=help.text%>"
+                    data-placement="left">
+            </a>
+            <% } %>
             <a class="accordion-toggle<% if (isCollapsed) { %> collapsed<% } %>" href="#<%=fieldsetId%>" data-toggle="collapse">
                 <i class="icon-double-angle-down"></i>
                 <%=fieldsetTitle%>
@@ -506,10 +506,12 @@
     <div class="fd-xpath-editor-container form form-horizontal">
 
         <fieldset id="xpath-advanced" class="hide">
-            <legend><i class="icon-cog"></i> Edit Expression (Advanced) </legend>
-            <button type="button" class="btn btn-primary pull-right xpath-mode-toggle" id="fd-xpath-show-simple-button">
-                Show Simple Mode
-            </button>
+            <legend>
+                <i class="icon-cog"></i> Edit Expression (Advanced)
+                <button type="button" class="btn btn-primary pull-right xpath-mode-toggle" id="fd-xpath-show-simple-button">
+                    Show Simple Mode
+                </button>
+            </legend>
             <div class="alert hide" id="xpath-advanced-notice">
                 <p>Sorry, your logic is too complicated for our logic builder.</p>
                 <p>You can only edit this logic in Advanced Mode.</p>
@@ -534,10 +536,14 @@
         </fieldset>
 
         <fieldset id="xpath-simple" class="hide fieldset-condensed">
-            <legend>Edit Expression</legend>
-            <button type="button" class="btn btn-inverse pull-right xpath-mode-toggle" id="fd-xpath-show-advanced-button">
-                <i class="icon-cog"></i> Show Advanced Mode
-            </button>
+            <legend>
+                Edit Expression
+                <button type="button" class="btn btn-inverse pull-right xpath-mode-toggle" id="fd-xpath-show-advanced-button"
+                    onclick="trackShowAdvancedMode();">
+                    <i class="icon-cog"></i> Show Advanced Mode
+                </button>
+            </legend>
+
             <div class="control-group">
                 <label class="control-label">Result is:</label>
                 <div class="controls">
