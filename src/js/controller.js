@@ -47,11 +47,6 @@ formdesigner.controller = (function () {
             });
         });
         
-        that.on('question-creation', function () {
-           that.setFormChanged(); //mark the form as 'changed'
-        });
-
-        
         that.on('question-itext-changed', function () {
             that.setFormChanged();
         });
@@ -345,6 +340,7 @@ formdesigner.controller = (function () {
         var treeFunc, dataNodeList;
         that.setCurrentlySelectedMug(null);
 
+        formdesigner.ui.skipNodeSelectEvent = true;
         treeFunc = function (node) {
             var mug;
             if(node.isRootNode) {
@@ -365,6 +361,7 @@ formdesigner.controller = (function () {
             that.loadMugIntoUI(dataNodeList[i]);
         }
         formdesigner.ui.setAllTreeValidationIcons();
+        formdesigner.ui.skipNodeSelectEvent = false;
         formdesigner.ui.selectSomethingOrResetUI(true);
         that.fire('fd-reload-ui');
 
@@ -394,112 +391,64 @@ formdesigner.controller = (function () {
         return  that.form.dataTree.treeMap(treeFunc);
     };
 
-    that.createQuestionInUITree = function (mug, refMug, position) {
-        var result = formdesigner.ui.jstree("create",
-            refMug ? "#" + refMug.ufid : formdesigner.ui.questionTree.attr('id'),
-            position,
-            {
-                data: formdesigner.util.getMugDisplayName(mug),
-                metadata: {
-                    mug: mug,
-                    mugUfid: mug.ufid,
-                    dataID: mug.getDataElementID(),
-                    bindID: mug.getBindElementID()
-                },
-                attr: {
-                    id: mug.ufid,
-                    rel: mug.__className
-                },
-                state: mug.isSpecialGroup ? 'open' : undefined
+    /**
+     * Create a new node from mug relative to the currently selected node.
+     *
+     * @param mug - Mug to insert into tree
+     * @param position (optional)
+     * @return  - node object on success or false on failure (when you attempt
+     *   invalid nesting with respect to node types)
+     */
+    that.createQuestionInUITree = function (mug, position) {
+        var objectData, insertPosition;
+
+        if (mug.controlElement) {
+            insertPosition = position || "into";
+        } else {
+            // data node
+            
+            formdesigner.ui.jstree("deselect_all");
+            insertPosition = "last";
+        }
+
+        objectData = {
+            data: formdesigner.util.getMugDisplayName(mug),
+            metadata: {
+                mug: mug,
+                mugUfid: mug.ufid,
+                dataID: mug.getDataElementID(),
+                bindID: mug.getBindElementID()
             },
+            attr: {
+                id: mug.ufid,
+                rel: mug.__className
+            },
+            state: mug.isSpecialGroup ? 'open' : undefined
+        };
+
+        var oldSelected = that.getCurrentlySelectedMug();
+
+        var result = formdesigner.ui.jstree("create",
+            null,
+            insertPosition,
+            objectData,
             null, // callback
             true  // skip_rename
         );
 
         // jstree.create returns the tree root if types prevent creation
-        return result && result[0].id !== formdesigner.ui.QUESTION_TREE_DIV;  
+        var success = result && result[0].id !== formdesigner.ui.QUESTION_TREE_DIV;  
+
+        if (success && oldSelected) {
+            formdesigner.ui.jstree("select_node", '#' + oldSelected.ufid);
+        }
+
+        return success;
     };
 
     that.duplicateCurrentQuestion = function (options) {
         options = options || {};
         options.itext = options.itext || "link";
-
-        var depth = 0;
-
-        /**
-         * Copy a Mug and its descendants and insert them after the original
-         * Mug. Returns an array with two values:
-         *  1. The duplicate Mug.
-         *  2. An array of path replacements that should be executed on logic references.
-         *
-         * @param mug - the mugtype in the original tree to duplicate
-         * @param parentMug - the mugtype in the duplicate tree to insert into
-         * @param options {
-         *          itext: 'link' (default) or 'copy'
-         *        }
-         */
-        function duplicateMug(mug, parentMug, options) {
-            // clone mug and give everything new unique IDs
-            var duplicate = new mugs[mug.__className]();
-                pathReplacements = [];
-            duplicate.copyAttrs(mug);
-
-            // ensure consistency            
-            formdesigner.util.give_ufid(duplicate);
-            // clear existing event handlers for the source question
-            formdesigner.util.eventuality(duplicate);
-            formdesigner.util.setStandardMugEventResponses(duplicate);
-
-            if (mug.bindElement && mug.bindElement.nodeID) {
-                var newQuestionID = formdesigner.util.generate_question_id(
-                    mug.bindElement.nodeID
-                ); 
-                duplicate.bindElement.nodeID = newQuestionID;
-
-                if (mug.dataElement) {
-                    duplicate.dataElement.nodeID = newQuestionID;
-                }
-            }
-            
-            if (depth === 0 && mug.controlElement && 
-                mug.controlElement.defaultValue)
-            {
-                var newItemValue = formdesigner.util.generate_question_id(
-                    mug.controlElement.defaultValue
-                );
-                duplicate.controlElement.defaultValue = newItemValue;
-            }
-           
-            // insert mugtype into data and UI trees
-            if (depth > 0) {
-                that.initQuestion(duplicate, parentMug, 'into');
-            } else {
-                that.initQuestion(duplicate, mug, 'after');
-            }
-
-            formdesigner.model.LogicManager.updateAllReferences(duplicate);
-
-            if (options.itext === "copy") {
-                formdesigner.ui.displayMugProperties(duplicate);
-                that.unlinkCurrentQuestionItext();
-            }
-
-            var children = that.getChildren(mug);
-            depth++;
-            for (var i = 0; i < children.length; i++) {
-                pathReplacements = pathReplacements.concat(
-                    duplicateMug(children[i], duplicate, options)[1]);
-            }
-            depth--;
-
-            pathReplacements.push({
-                mugId: mug.ufid,
-                from: that.form.dataTree.getAbsolutePath(mug),
-                to: that.form.dataTree.getAbsolutePath(duplicate)
-            });
-
-            return [duplicate, pathReplacements];
-        }
 
         var selected = that.getCurrentlySelectedMug(),
             parent = selected.parentMug,
@@ -516,41 +465,127 @@ formdesigner.controller = (function () {
             formdesigner.model.LogicManager.updatePath(pr.mugId, pr.from, pr.to, 
                 that.form.dataTree.getAbsolutePath(duplicate));
         }
+        var oldSkip = formdesigner.ui.skipNodeSelectEvent;
+        formdesigner.ui.skipNodeSelectEvent = false;
 
         formdesigner.ui
             .jstree("deselect_all")
             .jstree("select_node", '#' + duplicate.ufid);
 
+        formdesigner.ui.skipNodeSelectEvent = oldSkip;
+
         that.form.fire({type: "form-property-changed"});
     };
+        
+    /**
+     * Copy a Mug and its descendants and insert them after the original
+     * Mug. Returns an array with two values:
+     *  1. The duplicate Mug.
+     *  2. An array of path replacements that should be executed on logic references.
+     *
+     * @param mug - the mugtype in the original tree to duplicate
+     * @param parentMug - the mugtype in the duplicate tree to insert into
+     * @param options {
+     *          itext: 'link' (default) or 'copy'
+     *        }
+     */
+    function duplicateMug(mug, parentMug, options, depth) {
+        depth = depth || 0;
+        // clone mug and give everything new unique IDs
+        var duplicate = new mugs[mug.__className]();
+        duplicate.copyAttrs(mug);
+
+        // ensure consistency            
+        formdesigner.util.give_ufid(duplicate);
+        // clear existing event handlers for the source question
+        formdesigner.util.eventuality(duplicate);
+        formdesigner.util.setStandardMugEventResponses(duplicate);
+
+        if (mug.bindElement && mug.bindElement.nodeID) {
+            var newQuestionID = formdesigner.util.generate_question_id(
+                mug.bindElement.nodeID
+            ); 
+            duplicate.bindElement.nodeID = newQuestionID;
+
+            if (mug.dataElement) {
+                duplicate.dataElement.nodeID = newQuestionID;
+            }
+        }
+        
+        if (depth === 0 && mug.controlElement && 
+            mug.controlElement.defaultValue)
+        {
+            var newItemValue = formdesigner.util.generate_question_id(
+                mug.controlElement.defaultValue
+            );
+            duplicate.controlElement.defaultValue = newItemValue;
+        }
+       
+        // insert mugtype into data and UI trees
+        if (depth > 0) {
+            that.initQuestion(duplicate, parentMug, 'into');
+        } else {
+            that.initQuestion(duplicate, mug, 'after');
+        }
+
+        formdesigner.model.LogicManager.updateAllReferences(duplicate);
+
+        if (options.itext === "copy") {
+            formdesigner.ui.displayMugProperties(duplicate);
+            that.unlinkCurrentQuestionItext();
+        }
+
+        var children = that.getChildren(mug),
+            pathReplacements = [];
+        for (var i = 0; i < children.length; i++) {
+            pathReplacements = pathReplacements.concat(
+                duplicateMug(children[i], duplicate, options, depth + 1)[1]);
+        }
+
+        pathReplacements.push({
+            mugId: mug.ufid,
+            from: that.form.dataTree.getAbsolutePath(mug),
+            to: that.form.dataTree.getAbsolutePath(duplicate)
+        });
+
+        return [duplicate, pathReplacements];
+    }
 
     that.initQuestion = function (mug, refMug, position) {
+        formdesigner.util.setStandardMugEventResponses(mug);
+        refMug = refMug || that.getCurrentlySelectedMug();
+        
+        /* If a data node is currently selected, select the lowest question node
+         * so we never insert a non-data node after the beginning of the data
+         * nodes at the bottom. */
+        if (refMug && !refMug.controlElement) {
+            var lowest = formdesigner.ui.selectLowestQuestionNode();
+            refMug = that.getMugFromFormByUFID($(lowest).prop('id'));
+            position = 'after';
+        }
+     
+        position = position || 'into';
         var success = false;
 
-        if (!mug.controlElement) {
-            // put data nodes at the end
-            refMug = null;
-            position = 'last';
-        } else if (refMug && !refMug.controlElement) {
-            // don't insert a regular node inside the data node range
-            refMug = that.getLowestNonDataNodeMug();
-            position = 'after';
+        // manually set mug.parentMug before UI insertion so it's accessible to
+        // overrideJSTreeIcon()
+        if (position === 'into') {
+            mug.parentMug = refMug;
+        } else {
+            mug.parentMug = refMug.parentMug;
         }
 
         /* First try to insert into the currently selected question, then try to
          * insert after it, then after all of its ancestors. */
-        while (!success) {
-            // manually set mug.parentMug before attempting UI insertion so it's
-            // accessible to overrideJSTreeIcon()
-            mug.parentMug = (!refMug || position === 'into' || position === 'last') ? 
-                    refMug : refMug.parentMug;
+        while (!success && refMug) {
+            formdesigner.ui.jstree("select_node", '#' + refMug.ufid);
+            success = that.createQuestionInUITree(mug, position);
 
-            success = that.createQuestionInUITree(mug, refMug, position);
             if (!success) {
                 if (position !== 'after') {
                     position = 'after';
                 } else {
-                    refMug = refMug.parentMug;
+                    refMug = refMug ? refMug.parentMug : null;
                     if (!refMug) {
                         break;
                     }
@@ -558,46 +593,32 @@ formdesigner.controller = (function () {
             }
         }
 
+        /* If that failed (the only case should be when trying to insert a data
+         * node), insert after the last non-data node. */
+        if (!success) {
+            formdesigner.ui.selectLowestQuestionNode();
+            refMug = that.getCurrentlySelectedMug();
+            position = 'after';
+            success = that.createQuestionInUITree(mug, position);
+        }
+
         if (!success) {
             throw new Error("Can't insert " + mug.__className + " into " + 
-                refMug.__className + " " + 
-                formdesigner.util.getMugDisplayName(refMug) + 
+                (refMug ? refMug.__className : refMug) + " " + 
+                that.form.dataTree.getAbsolutePath(refMug) + 
                 " or any of its ancestors.");
         }
 
         // insert into model
         that.insertMugIntoForm(refMug, mug, position);
-        formdesigner.util.setStandardMugEventResponses(mug);
         formdesigner.pluginManager.javaRosa.Itext.updateForNewMug(mug);
         formdesigner.intentManager.syncMugWithIntent(mug);
 
-        formdesigner.ui.jstree("select_node", '#' + mug.ufid);
-        
-        this.fire({
-            type: "question-creation",
-            mug: mug
-        });
+        that.setFormChanged();
     };
 
     that.removeCurrentQuestion = function () {
         that.removeMugFromForm(that.getCurrentlySelectedMug());
-    };
-    
-    /**
-     * Select the lowest top-level non-data node
-     *
-     * @return jquery object for the lowest node if there are any question
-     *         nodes, otherwise false
-     */
-    that.getLowestNonDataNodeMug = function () {
-        var questions = formdesigner.ui.getJSTree().children().children()
-                .filter("[rel!='DataBindOnly']");
-        if (questions.length > 0) {
-            return that.getMugFromFormByUFID(
-                $(questions[questions.length - 1]).attr('id'));
-        } else {
-            return null;
-        }
     };
 
     that.unlinkCurrentQuestionItext = function () {
@@ -631,7 +652,7 @@ formdesigner.controller = (function () {
             // select question
             var children = that.getChildren(mug);
             if (children.length > 0) {
-                if (questionType !== "Select" && questionType !== "MSelect") {
+                if (questionType.indexOf("Select") === -1) {
                     throw "you can't change a Multiple/Single Choice question to a non-Choice " +
                           "question if it has Choices. Please remove all Choices " +
                           "and try again.";
@@ -657,10 +678,7 @@ formdesigner.controller = (function () {
             that.form.replaceMug(mug, newMug, 'data');
             that.form.replaceMug(mug, newMug, 'control');
 
-            formdesigner.ui.jstree("set_type", 
-                questionType, 
-                '#' + mug.ufid
-            );
+            formdesigner.ui.jstree("set_type", questionType, '#' + mug.ufid);
 
             mug = newMug;
 
@@ -678,26 +696,32 @@ formdesigner.controller = (function () {
             $currentChanger.after(formdesigner.widgets.getQuestionTypeChanger(mug)).remove();
         }
 
-        if (mug.__className === "Select" || mug.__className === "MSelect") {
+        if (mug.__className.indexOf("Select") !== -1) {
             that.updateMugChildren(mug);
         }
     };
 
     that.updateMugChildren = function (parentMug) {
         _.each(that.getChildren(parentMug), function (childMug) {
-            that.fire({
-                type: "parent-question-type-changed",
-                mug: childMug
-            });
+            formdesigner.ui.overrideJSTreeIcon(childMug.ufid, childMug);
         });
     };
 
     that.loadMugIntoUI = function (mug) {
+        var controlTree, parentMug;
+
+        // set the 'currently selected mug' to be that of this mug's parent.
+        controlTree = that.form.controlTree;
+        parentMug = mug.parentMug;
+        
         // check for control element because we want data nodes to be a flat
         // list at bottom.
-        var refMug = mug.parentMug && mug.controlElement
-                ? mug.parentMug : null;
-        that.createQuestionInUITree(mug, refMug, 'into');
+        if (parentMug && mug.controlElement) {
+            formdesigner.ui.jstree('select_node', '#'+parentMug.ufid, true);
+        } else {
+            formdesigner.ui.jstree('deselect_all');
+        }
+        that.createQuestionInUITree(mug);
     };
 
     that.generateExportXLS = function () {
@@ -1250,7 +1274,7 @@ formdesigner.controller = (function () {
             // we should do here for now just populate with the default
             labelItext = newLabelItext(mug);
         }
-        
+       
         cProps.labelItextID = labelItext;
         if (cProps.labelItextID.isEmpty()) {
             //if no default Itext has been set, set it with the default label
@@ -1396,10 +1420,11 @@ formdesigner.controller = (function () {
 
         //broadly categorize
         tagName = tagName.toLowerCase();
+        var hasItemset = $(cEl).children('itemset').length;
         if(tagName === 'select') {
-            MugClass = mugs.MSelect;
+            MugClass = hasItemset ? mugs.MSelectDynamic : mugs.MSelect;
         }else if (tagName === 'select1') {
-            MugClass = mugs.Select;
+            MugClass = hasItemset ? mugs.SelectDynamic : mugs.Select;
         }else if (tagName === 'trigger') {
             MugClass = mugs.Trigger;
         }else if (tagName === 'input') {
@@ -1412,6 +1437,8 @@ formdesigner.controller = (function () {
             }
         }else if (tagName === 'item') {
             MugClass = mugs.Item;
+        }else if (tagName === 'itemset') {
+            MugClass = mugs.Itemset;
         }else if (tagName === 'group') {
             MugClass = mugTypeFromGroup(cEl);
             if (MugClass === mugs.Repeat) {
@@ -1428,11 +1455,11 @@ formdesigner.controller = (function () {
         
         // create new mug and copy old data to newly generated mug
         mug = new MugClass();
-        if(oldMug) {
+        if (oldMug) {
             mug.copyAttrs(oldMug);
             mug.ufid = oldMug.ufid;
 
-            //replace in dataTree
+            // replace in data tree
             that.form.replaceMug(oldMug, mug, 'data');
         }
 
@@ -1444,39 +1471,48 @@ formdesigner.controller = (function () {
     }
                 
     function populateMug (mug, cEl) {
-        var labelEl, hintEl, repeat_count, repeat_noaddremove;
-        
         if (mug.__className === "ReadOnly") {
             mug.controlElementRaw = cEl;
             return;
         }
         
+        var $cEl = $(cEl),
+            labelEl, hintEl, repeat_count, repeat_noaddremove;
+        
 
         var tag = mug.controlElement.tagName;
         if(tag === 'repeat'){
-            labelEl = $($(cEl).parent().children('label'));
-            hintEl = $(cEl).parent().children('hint');
-            repeat_count = $(cEl).popAttr('jr:count');
+            labelEl = $($cEl.parent().children('label'));
+            hintEl = $cEl.parent().children('hint');
+            repeat_count = $cEl.popAttr('jr:count');
             repeat_noaddremove = formdesigner.util.parseBoolAttributeValue(
-                $(cEl).popAttr('jr:noAddRemove'));
+                $cEl.popAttr('jr:noAddRemove'));
 
         } else {
-            labelEl = $(cEl).children('label');
-            hintEl = $(cEl).children('hint');
+            labelEl = $cEl.children('label');
+            hintEl = $cEl.children('hint');
         }
 
-        if (labelEl.length > 0) {
+        if (labelEl.length > 0 && mug.__className !== 'Itemset') {
             parseLabel(labelEl, mug);
         }
         if (hintEl.length > 0) {
             parseHint (hintEl, mug);
         }
         if (tag === 'item') {
-            parseDefaultValue($(cEl).children('value'),mug);
+            parseDefaultValue($cEl.children('value'),mug);
         }
 
         if (tag === 'repeat') {
             parseRepeatVals(repeat_count, repeat_noaddremove, mug);
+        }
+
+        if (tag === 'itemset') {
+            mug.controlElement.setAttr('itemsetData', {
+                nodeset: $cEl.attr('nodeset'),
+                valueRef: $cEl.children('label').attr('ref'),
+                labelRef: $cEl.children('value').attr('ref')
+            });
         }
 
         formdesigner.intentManager.syncMugWithIntent(mug);
@@ -1531,7 +1567,7 @@ formdesigner.controller = (function () {
                 isRepeat;
 
             isRepeat = isRepeatTest(el);
-            //do the repeat switch thing
+            // do the repeat switch thing
             if(isRepeat) {
                 oldEl = el;
                 el = $(el.children('repeat')[0]);
@@ -1561,7 +1597,6 @@ formdesigner.controller = (function () {
             }
             populateMug(mug,el);
             that.form.controlTree.insertMug(mug, 'into', parentMug);
-
             if (mug.__className !== "ReadOnly") {
                 tagName = mug.controlElement.tagName.toLowerCase();
                 if(couldHaveChildren.indexOf(tagName) !== -1) {
@@ -1728,7 +1763,7 @@ formdesigner.controller = (function () {
 
             var data = $(instances[0]).children();
             if($(xml).find('parsererror').length > 0) {
-                throw 'PARSE ERROR! Message follows:' + $(xml).find('parsererror').find('div').html();
+                throw 'PARSE ERROR!:' + $(xml).find('parsererror').find('div').html();
             }
             
             if(title.length > 0) {
@@ -1746,7 +1781,6 @@ formdesigner.controller = (function () {
             if(data.length === 0) {
                 that.addParseErrorMsg('No Data block was found in the form.  Please check that your form is valid!');
             }
-           
             
             parseDataTree (data[0]);
             parseBindList (binds);
@@ -1757,7 +1791,6 @@ formdesigner.controller = (function () {
             that.fire({
                 type: 'parse-finish'
             });
-
         } catch (e) {
             that.fire({
               type: 'parse-error',
@@ -1777,9 +1810,19 @@ formdesigner.controller = (function () {
      * @param refMug
      */
     that.moveMug = function (mug, refMug, position) {
+        function recursivelyGetChildren(mug) {
+            var children = that.getChildren(mug), i;
+            for (i = children.length - 1; i >= 0; i--) {
+                children = children.concat(recursivelyGetChildren(children[i]))
+            }
+            return children;
+        }
         var dataTree = that.form.dataTree, 
             controlTree = that.form.controlTree, 
-            preMovePath = dataTree.getAbsolutePath(mug);
+            mugs = recursivelyGetChildren(mug).concat([mug]),
+            preMovePaths = mugs.map(function(mug) {
+                return dataTree.getAbsolutePath(mug);
+            });
 
         if (mug.dataElement) {
             dataTree.insertMug(mug, position, refMug);
@@ -1788,10 +1831,12 @@ formdesigner.controller = (function () {
             controlTree.insertMug(mug, position, refMug);
         }
 
-        formdesigner.model.LogicManager.updatePath(mug.ufid, 
-            preMovePath, 
-            dataTree.getAbsolutePath(mug)
-        );
+        var updates = {};
+        for (var i = 0; i < mugs.length; i++) {
+            updates[mugs[i].ufid] = [preMovePaths[i], dataTree.getAbsolutePath(mugs[i])];
+        }
+
+        formdesigner.model.LogicManager.updatePaths(updates);
 
         //fire a form-property-changed event to sync up with the 'save to server' button disabled state
         that.form.fire({
@@ -1877,7 +1922,7 @@ formdesigner.controller = (function () {
             });
         }
         
-        var send = function (formText, saveType) {
+        var send = function (formText, saveType, callback) {
             var data;
             saveType = saveType || formdesigner.saveType;
             $('body').ajaxStart(formdesigner.ui.showWaitingDialog);
@@ -1917,12 +1962,13 @@ formdesigner.controller = (function () {
 //                            var diffHtml = dmp.diff_prettyHtml(
 //                                dmp.diff_main(formdesigner.originalXForm, data.xform)
 //                            );
-                            send(formText, 'full');
+                            send(formText, 'full', callback);
                             return;
                         } else {
                             if (CryptoJS.SHA1(formText).toString() !== data.sha1) {
                                 console.error("sha1's didn't match");
-                                send(formText, 'full');
+                                send(formText, 'full', callback);
+                                return;
                             }
                         }
                     }
@@ -1932,10 +1978,31 @@ formdesigner.controller = (function () {
                         response: data
                     });
                     formdesigner.originalXForm = formText;
+                    if (callback) {
+                        callback();
+                    }
                 }
             });
         };
-        
+        // presave form validation
+        var renamed = that.form.normalizeQuestionIds();
+        var callback;
+        if (renamed.length > 0) {
+            callback = function () {
+                // show the person what renaming has happened
+                var message = 'The following question IDs are duplicates and have been automatically renamed as follows:<br> ' +
+                    _.map(renamed, function (array) {
+                        var from = array[0];
+                        var to = array[1];
+                        return from + ' --> ' + to;
+                    }).join('<br>');
+                var $modal = formdesigner.ui.generateNewModal("Questions were renamed", [], "OK");
+                $modal.find('.modal-body').append($('<p>' + message + '</p>'));
+                $modal.modal('show');
+                formdesigner.ui.displayMugProperties(renamed[0][2]);
+
+            };
+        }
         var formText = that.form.createXForm();
         var parsed = false;
         try {
@@ -1947,7 +2014,7 @@ formdesigner.controller = (function () {
             var theScaryWarning = "It looks like your form is not valid XML. This can " +
                 "often happen if you use a reserved character in one of your questions. " +
                 "Characters to look out for are <, >, and &. You can still save, but " +
-                "Vellum will NOT LOAD THIS FORM again until you fix the XML by hand. " +
+                "Form Builder will NOT LOAD THIS FORM again until you fix the XML by hand. " +
                 "What would you like to do?";
             formdesigner.ui.setDialogInfo(theScaryWarning,
                 'Fix the problem (recommended)', function () {
@@ -1955,13 +2022,14 @@ formdesigner.controller = (function () {
                 },
                 'Save Anyways', function () {
                     $(this).dialog("close");
-                    send(formText)
+                    send(formText, undefined, callback)
                 },
                 'Form Validation Error');
             formdesigner.ui.showConfirmDialog();
         }
         if (parsed) {
-            send(formText);
+            send(formText, undefined, callback);
+
         }
     };
 
@@ -1971,14 +2039,33 @@ formdesigner.controller = (function () {
         formdesigner.model.reset();
         formdesigner.ui.reset();
     };
-    
+
+    function circularReferenceCheck(mug, path) {
+        var group = $('#fd-xpath-editor').data("group");
+        var property = $('#fd-xpath-editor').data("property");
+        if (path === "." && group === "bindElement" &&
+            (property === "relevantAttr" || property === "calculateAttr")) {
+
+            var fieldName = mug.bindElement.__spec[property].lstring;
+            that.form.updateError(formdesigner.model.FormError({
+                level: "form-warning",
+                message: "The " + fieldName + " for a question "
+                    + "is not allowed to reference the question itself. "
+                    + "Please remove the period from the " + fieldName
+                    + " or your form will have errors."
+            }), {updateUI: true});
+        }
+    }
+
     // tree drag and drop stuff, used by xpath
     var handleTreeDrop = function(source, target) {
         var target = $(target), sourceUid = $(source).attr("id");
         if (target) {
             var mug = that.form.getMugByUFID(sourceUid);
+            var path = formdesigner.util.mugToXPathReference(mug);
+            circularReferenceCheck(mug, path);
             // the .change fires the validation controls
-            target.val(target.val() + formdesigner.util.mugToXPathReference(mug)).change();
+            target.val(target.val() + path).change();
         }
     };
     that.handleTreeDrop = handleTreeDrop;
@@ -2025,8 +2112,8 @@ formdesigner.intentManager = (function () {
                 _.each(store, function (ref, key) {
                     if (key) {
                         xmlWriter.writeStartElement(innerTag);
-                        xmlWriter.writeAttributeStringSafe("key", key);
-                        xmlWriter.writeAttributeStringSafe("ref", ref);
+                        xmlWriter.writeAttributeString("key", key);
+                        xmlWriter.writeAttributeString("ref", ref);
                         xmlWriter.writeEndElement();
                     }
                 });
@@ -2035,9 +2122,9 @@ formdesigner.intentManager = (function () {
 
         self.writeXML = function (xmlWriter, currentNodeID) {
             xmlWriter.writeStartElement('odkx:intent');
-            xmlWriter.writeAttributeStringSafe("xmlns:odkx", self.xmlns);
-            xmlWriter.writeAttributeStringSafe("id", currentNodeID || self.initialNodeID);
-            xmlWriter.writeAttributeStringSafe("class", self.path);
+            xmlWriter.writeAttributeString("xmlns:odkx", self.xmlns);
+            xmlWriter.writeAttributeString("id", currentNodeID || self.initialNodeID);
+            xmlWriter.writeAttributeString("class", self.path);
             self._writeInnerTagXML(xmlWriter, 'extra', self.extra);
             self._writeInnerTagXML(xmlWriter, 'response', self.response);
             xmlWriter.writeEndElement('odkx:intent');

@@ -41,6 +41,22 @@ formdesigner.widgets = (function () {
             return this.definition.lstring ? this.definition.lstring : this.propName;
         };
 
+        widget.getTitle = function () {
+            return this.definition && this.definition.title ? this.definition.title : "";
+        }
+
+        widget.getLabel = function () {
+            var displayName = widget.getDisplayName();
+            if (displayName) {
+                return $("<label />")
+                    .text(displayName)
+                    .attr("title", widget.getTitle())
+                    .attr("for", widget.getID());
+            } else {
+                return null;
+            }
+        };
+
         widget.getControl = function () {
             throw ("must be overridden");
         };
@@ -82,7 +98,7 @@ formdesigner.widgets = (function () {
         };
 
         widget.getUIElement = function () {
-            return getUIElement(widget.getControl(), widget.getDisplayName(),
+            return that.util.getUIElement(widget.getControl(), widget.getDisplayName(),
                                 !!widget.isDisabled());
         };
 
@@ -125,6 +141,9 @@ formdesigner.widgets = (function () {
 	    input.attr("type", "text").addClass('input-block-level');
 
         widget.setValue = function (value) {
+            if (value !== undefined) {
+                value = value.replace(new RegExp(String.fromCharCode(10), 'g'), '&#10;');
+            }
             input.val(value);
         };
 
@@ -175,9 +194,9 @@ formdesigner.widgets = (function () {
         };
 
         widget.getUIElement = function () {
-            var elem = getUIElement(
+            var elem = that.util.getUIElement(
                 widget.getControl(), widget.getDisplayName(), !!widget.isDisabled());
-            return getUIElementWithEditButton(elem, function () {
+            return that.util.getUIElementWithEditButton(elem, function () {
                 formdesigner.controller.displayXPathEditor({
                     value: mug.getPropertyValue(options.path),
                     xpathType: widget.definition.xpathType,
@@ -188,6 +207,9 @@ formdesigner.widgets = (function () {
                         }
                     }
                 });
+                if (typeof _gaq !== "undefined") {
+                    _gaq.push(['_trackEvent', 'Form Builder', 'Logic', options.lstring]);
+                }
             }, !!widget.isDisabled());
         };
 
@@ -335,8 +357,9 @@ formdesigner.widgets = (function () {
 
         return widget;
     };
-    
-    function getUIElementWithEditButton($uiElem, editFn) {
+   
+    that.util = {};
+    that.util.getUIElementWithEditButton = function($uiElem, editFn) {
         var input = $uiElem.find('input'),
             isDisabled = input ? input.prop('disabled') : false;
 
@@ -352,9 +375,9 @@ formdesigner.widgets = (function () {
         $uiElem.find('label').after(button);
         $uiElem.find('.controls').css('margin-right', '60px');
         return $uiElem;
-    }
+    };
     
-    function getUIElement($input, labelText, isDisabled) {
+    that.util.getUIElement = function($input, labelText, isDisabled) {
         var uiElem = $("<div />").addClass("widget control-group"),
             $controls = $('<div class="controls" />'),
             $label = getLabel(labelText, $input.attr('id'));
@@ -365,7 +388,7 @@ formdesigner.widgets = (function () {
         $controls.append($input);
         uiElem.append($controls);
         return uiElem;
-    }
+    };
 
     function getLabel(text, forId) {
         var $label = $("<label />")
@@ -417,19 +440,23 @@ formdesigner.widgets = (function () {
     that.getToolbarForMug = function (mug) {
         var $baseToolbar = formdesigner.ui.getTemplateObject('#fd-template-question-toolbar', {
             isDeleteable: _.all(formdesigner.pluginManager.call('isMugRemoveable', 
-                    formdesigner.controller.form.dataTree.getAbsolutePath(mug))) 
+                    formdesigner.controller.form.dataTree.getAbsolutePath(mug))) && mug.isRemoveable,
+            isCopyable: mug.isCopyable
         });
         $baseToolbar.find('#fd-button-remove').click(formdesigner.controller.removeCurrentQuestion);
         $baseToolbar.find('#fd-button-copy').click(function () {
             formdesigner.controller.duplicateCurrentQuestion({itext: 'copy'});
         });
-        $baseToolbar.find('.btn-toolbar.pull-left').prepend(this.getQuestionTypeChanger(mug));
+        if (mug.__className !== "Item") {
+            $baseToolbar.find('.btn-toolbar.pull-left').prepend(this.getQuestionTypeChanger(mug));
+        }
         return $baseToolbar;
     };
 
     that.getQuestionTypeChanger = function (mug) {
         var getQuestionList = function (mug) {
-            var questions = formdesigner.ui.QUESTIONS_IN_TOOLBAR;
+            var questions = mug.limitTypeChangeTo || 
+                formdesigner.ui.QUESTIONS_IN_TOOLBAR;
             var ret = [];
             for (var i = 0; i < questions.length; i++) {
                 var q = mugs[questions[i]];
@@ -457,7 +484,6 @@ formdesigner.widgets = (function () {
                 formdesigner.controller.changeQuestionType(mug, $(this).data('qtype'));
             } catch (err) {
                 alert("Sorry, you can't do that because: " + err);
-                input.val(mug.__className);
             }
             e.preventDefault();
         });
@@ -479,6 +505,17 @@ formdesigner.widgets = (function () {
                         "This text will not appear in data exports.</p> " +
                         "<p>Click through for more info.</p>",
                     link: "https://confluence.dimagi.com/display/commcarepublic/Form+Builder"
+                }
+            },
+            {
+                slug: "data_source",
+                displayName: "Data Source",
+                properties: that.getDataSourceProperties(mug),
+                help: {
+                    title: "Data Source",
+                    text: "You can configure an external data source like a " +
+                        "case list or lookup table to use as the choices for " +
+                        "a multiple choice question."
                 }
             },
             {
@@ -525,11 +562,18 @@ formdesigner.widgets = (function () {
             "dataElement/nodeID",
             "controlElement/defaultValue",
             "controlElement/label",
+            "controlElement/appearanceControl",
             "controlElement/readOnlyControl",
             "controlElement/androidIntentAppId",
             "controlElement/androidIntentExtra",
             "controlElement/androidIntentResponse"
         ]);
+    };
+
+    that.getDataSourceProperties = function (mug) {
+        return [
+            "controlElement/itemsetData"
+        ];
     };
 
     that.getMediaProperties = function (mug) {

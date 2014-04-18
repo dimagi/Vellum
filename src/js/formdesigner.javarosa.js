@@ -401,7 +401,9 @@ var ItextModel = function() {
         // set default itext id/values
         if (mug.controlElement) {
             // set label if not there
-            if (!mug.controlElement.labelItextID) {
+            if (!mug.controlElement.labelItextID && 
+                mug.controlElement.__spec.labelItextID.presence !== "notallowed")
+            {
                 mug.controlElement.labelItextID = mug.getDefaultLabelItext(defaultLabelValue);
                 this.addItem(mug.controlElement.labelItextID);
             }
@@ -459,9 +461,7 @@ var iTextIDWidget = function (mug, options) {
         return widget.getRootId() + nodeId + "-" + widget.getItextType();
     };
 
-    widget.setUIValue = function (val) {
-        $input.val(val);
-    };
+    widget.setUIValue = widget.setValue;
 
     widget.updateAutoId = function () {
         widget.setUIValue(widget.autoGenerateId(widget.getNodeId()));
@@ -891,21 +891,18 @@ var itextLabelWidget = function (mug, language, form, options) {
     }
 
     var widget = formdesigner.widgets.baseWidget(mug, id);
-    var $input = $("<input />")
+    var $input = $("<textarea></textarea>")
         .attr("id", widget.id)
-        .attr("type", "text")
-         .addClass('input-block-level itext-widget-input')
-         .on('change keyup', function () {
-             widget.updateValue;
-         });
+        .attr("rows", "2")
+        .addClass('input-block-level itext-widget-input')
+        .on('change keyup', function () {
+            widget.updateValue();
+        });
  
     widget.getControl = function () {
         return $input;
     };
 
-    widget.mug.on('question-itext-deleted', widget.destroy);
-
-    
     widget.displayName = options.displayName;
     widget.itextType = options.itextType;
     widget.form = form || "default";
@@ -981,10 +978,6 @@ var itextLabelWidget = function (mug, language, form, options) {
             widget.fireChangeEvents();
         }
     };
-
-    $input.attr("type", "text")
-        .addClass('input-block-level itext-widget-input')
-        .on('change keyup', widget.updateValue);
 
     widget.mug.on('question-itext-deleted', widget.destroy);
 
@@ -1456,21 +1449,21 @@ formdesigner.plugins.javaRosa = function (options) {
             for (var i = 0; i < languages.length; i++) {
                 lang = languages[i];
                 xmlWriter.writeStartElement("translation");
-                xmlWriter.writeAttributeStringSafe("lang", lang);
+                xmlWriter.writeAttributeString("lang", lang);
                 if (Itext.getDefaultLanguage() === lang) {
-                    xmlWriter.writeAttributeStringSafe("default", '');
+                    xmlWriter.writeAttributeString("default", '');
                 }
                 for (var j = 0; j < allItems.length; j++) {
                     item = allItems[j];
                     xmlWriter.writeStartElement("text");
-                    xmlWriter.writeAttributeStringSafe("id", item.id);
+                    xmlWriter.writeAttributeString("id", item.id);
                     forms = item.getForms();
                     for (var k = 0; k < forms.length; k++) {
                         form = forms[k];
                         val = form.getValueOrDefault(lang);
                         xmlWriter.writeStartElement("value");
                         if(form.name !== "default") {
-                            xmlWriter.writeAttributeStringSafe('form', form.name);
+                            xmlWriter.writeAttributeString('form', form.name);
                         }
                         xmlWriter.writeString(val);
                         xmlWriter.writeEndElement();

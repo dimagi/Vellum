@@ -238,9 +238,7 @@ var Tree = function (tType) {
 
             //If we got this far, everything checks out.
             return true;
-
-
-        }
+        };
         that.validateTree = validateTree;
 
         return that;
@@ -312,7 +310,6 @@ var Tree = function (tType) {
      */
     that.insertMug = function (mug, position, refMug) {
         var refNode, refNodeSiblings, refNodeIndex, refNodeParent, node;
-
         if (position !== null && typeof position !== 'string') {
             throw "position argument must be a string or null! Can be 'after', 'before' or 'into'";
         }
@@ -324,18 +321,16 @@ var Tree = function (tType) {
             (!refMug.controlElement && treeType === 'control'))
         {
             refNode = rootNode;
-            refMug = rootNode.getValue();
             position = 'into';
         } else {
             refNode = this.getNodeFromMug(refMug);
         }
 
-        //remove it from tree if it already exists
+        // remove it from tree if it already exists
         node = removeNodeFromTree(this.getNodeFromMug(mug)); 
         if (!node) {
             node = new Node(null, mug);
         }
-
         if (position !== 'into') {
             refNodeParent = that.getParentNode(refNode);
             refNodeSiblings = refNodeParent.getChildren();
@@ -384,7 +379,7 @@ var Tree = function (tType) {
         var node = this.getNodeFromMug(mug),
             output, nodeParent;
         if (!node) {
-            //                console.log('Cant find path of Mug that is not present in the Tree!');
+            // console.log('Cant find path of Mug that is not present in the Tree!');
             return null;
         }
         nodeParent = this.getParentNode(node);
@@ -456,11 +451,11 @@ var Tree = function (tType) {
             }
         }
         return true;
-    }
+    };
 
     that.getRootNode = function () {
         return rootNode;
-    }
+    };
 
     return that;
 };
@@ -484,7 +479,7 @@ formdesigner.model = (function () {
     var InstanceMetadata = function (attributes, children) {
         var that = {};
         that.attributes = attributes;
-        that.children = children;
+        that.children = children || [];
         return that;
     };
     that.InstanceMetadata = InstanceMetadata;
@@ -664,6 +659,46 @@ formdesigner.model = (function () {
             }
         };
 
+        that.normalizeQuestionIds = function () {
+            var mugs = formdesigner.controller.getMugList();
+            var questions_by_id = {};
+            var renamed = [];
+            _.each(mugs, function (mug) {
+                if (!mug.dataElement) {
+                    return;
+                }
+                var origNodeId = mug.dataElement.nodeID;
+                var nodeId = origNodeId;
+                var counter = 1;
+                var isClear = false;
+                while (!isClear) {
+                    isClear = true;
+                    if (nodeId in questions_by_id) {
+                        var thisPath = that.dataTree.getAbsolutePath(mug);
+                        for (var i = 0; i < questions_by_id[nodeId].length; i++) {
+                            var otherMug = questions_by_id[nodeId][i];
+                            var otherPath = that.dataTree.getAbsolutePath(otherMug);
+                            if (thisPath === otherPath) {
+                                isClear = false;
+                                mug.dataElement.nodeID = origNodeId + counter;
+                                nodeId = mug.dataElement.nodeID;
+                                counter += 1;
+                                break;
+                            }
+                        }
+                        if (isClear) {
+                            questions_by_id[nodeId].push(mug);
+                        }
+                    } else {
+                        questions_by_id[nodeId] = [mug];
+                    }
+                }
+                if (nodeId !== origNodeId) {
+                    renamed.push([origNodeId, nodeId, mug]);
+                }
+            });
+            return renamed;
+        };
         /**
          * Generates an XML Xform and returns it as a string.
          */
@@ -686,7 +721,7 @@ formdesigner.model = (function () {
                         // Write any custom attributes first
 	                    for (var k in mug.dataElement._rawAttributes) {
 	                        if (mug.dataElement._rawAttributes.hasOwnProperty(k)) {
-	                            xmlWriter.writeAttributeStringSafe(k, mug.dataElement._rawAttributes[k]);
+	                            xmlWriter.writeAttributeString(k, mug.dataElement._rawAttributes[k]);
 	                        }
 	                    }
 	                    
@@ -696,14 +731,14 @@ formdesigner.model = (function () {
 	                    }
 	                    if (mug.dataElement.keyAttr){
 	                        keyAttr = mug.dataElement.keyAttr;
-	                        xmlWriter.writeAttributeStringSafe("key", keyAttr);
+	                        xmlWriter.writeAttributeString("key", keyAttr);
 	                    }
 	                    if (mug.dataElement.xmlnsAttr){
 	                        extraXMLNS = mug.dataElement.xmlnsAttr;
-	                        xmlWriter.writeAttributeStringSafe("xmlns", extraXMLNS);
+	                        xmlWriter.writeAttributeString("xmlns", extraXMLNS);
 	                    }
 	                    if (mug.__className === "Repeat"){
-	                        xmlWriter.writeAttributeStringSafe("jr:template","");
+	                        xmlWriter.writeAttributeString("jr:template","");
 	                    }
                     }
                 }
@@ -755,20 +790,20 @@ formdesigner.model = (function () {
                             for (j in attrs) {
                                 if (attrs.hasOwnProperty(j) && attrs[j]) {
                                     if (j === "constraintMsg"){
-                                        xmlWriter.writeAttributeStringSafe("jr:constraintMsg",attrs[j]); //write it
+                                        xmlWriter.writeAttributeString("jr:constraintMsg",attrs[j]); //write it
                                     } else if (j === "constraintMsgItextID") {
-                                        xmlWriter.writeAttributeStringSafe("jr:constraintMsg",  "jr:itext('" + attrs[j] + "')")
+                                        xmlWriter.writeAttributeString("jr:constraintMsg",  "jr:itext('" + attrs[j] + "')")
                                     } else if (j === "preload") {
-                                        xmlWriter.writeAttributeStringSafe("jr:preload", attrs[j]);
+                                        xmlWriter.writeAttributeString("jr:preload", attrs[j]);
                                     } else if (j === "preloadParams") {
-                                        xmlWriter.writeAttributeStringSafe("jr:preloadParams", attrs[j]);
+                                        xmlWriter.writeAttributeString("jr:preloadParams", attrs[j]);
                                     } else {
-                                        xmlWriter.writeAttributeStringSafe(j,attrs[j]);
+                                        xmlWriter.writeAttributeString(j,attrs[j]);
                                     }
                                 }
                             }
                             _(mug.bindElement._rawAttributes).each(function (v, k) {
-                                xmlWriter.writeAttributeStringSafe(k, v);
+                                xmlWriter.writeAttributeString(k, v);
                             })
                             xmlWriter.writeEndElement();
                         }
@@ -808,7 +843,7 @@ formdesigner.model = (function () {
                             if (elLabel.ref || elLabel.defText) {
                                 xmlWriter.writeStartElement('label');
                                 if (elLabel.ref) {
-                                    xmlWriter.writeAttributeStringSafe('ref',elLabel.ref);
+                                    xmlWriter.writeAttributeString('ref',elLabel.ref);
                                 }
                                 if (elLabel.defText) {
                                     xmlWriter.writeString(elLabel.defText);
@@ -827,7 +862,9 @@ formdesigner.model = (function () {
                         } else {
                             xmlWriter.writeStartElement(tagName);
                         }
-                        if (tagName !== 'group' && tagName !== 'repeat') {
+                        if (tagName !== 'group' && tagName !== 'repeat' &&
+                            tagName !== 'itemset')
+                        {
                             createLabel();
                         }
                         
@@ -837,16 +874,27 @@ formdesigner.model = (function () {
                             xmlWriter.writeString(cProps.defaultValue);
                             xmlWriter.writeEndElement();
                         }
+
+                        if (tagName === 'itemset') {
+                            var data = cProps.itemsetData;
+                            xmlWriter.writeAttributeString('nodeset', data.nodeset);
+                            xmlWriter.writeStartElement('label');
+                            xmlWriter.writeAttributeString('ref', data.valueRef);
+                            xmlWriter.writeEndElement();
+                            xmlWriter.writeStartElement('value');
+                            xmlWriter.writeAttributeString('ref', data.labelRef);
+                            xmlWriter.writeEndElement();
+                        }
                         
                         // Write any custom attributes first
                         for (var k in cProps._rawAttributes) {
                             if (cProps._rawAttributes.hasOwnProperty(k)) {
-                                xmlWriter.writeAttributeStringSafe(k, cProps._rawAttributes[k]);
+                                xmlWriter.writeAttributeString(k, cProps._rawAttributes[k]);
                             }
                         }
                         
                         // Set the nodeset/ref attribute correctly
-                        if (tagName !== 'item') {
+                        if (tagName !== 'item' && tagName !== 'itemset') {
                             var attr, absPath;
                             if (tagName === 'repeat') {
                                 attr = 'nodeset';
@@ -854,7 +902,7 @@ formdesigner.model = (function () {
                                 attr = 'ref';
                             }
                             absPath = formdesigner.controller.form.dataTree.getAbsolutePath(mug);
-                            xmlWriter.writeAttributeStringSafe(attr, absPath);
+                            xmlWriter.writeAttributeString(attr, absPath);
                         }
                         
                         // Set other relevant attributes
@@ -867,22 +915,22 @@ formdesigner.model = (function () {
                             r_noaddrem = formdesigner.util.createXPathBoolFromJS(r_noaddrem);
 
                             if (r_count) {
-                                xmlWriter.writeAttributeStringSafe("jr:count",r_count);
+                                xmlWriter.writeAttributeString("jr:count",r_count);
                             }
 
                             if (r_noaddrem) {
-                                xmlWriter.writeAttributeStringSafe("jr:noAddRemove", r_noaddrem);
+                                xmlWriter.writeAttributeString("jr:noAddRemove", r_noaddrem);
                             }
                         } else if (isODKMedia) {
                             var mediaType = cProps.mediaType;
                             if (mediaType) {
-                                xmlWriter.writeAttributeStringSafe("mediatype", mediaType);
+                                xmlWriter.writeAttributeString("mediatype", mediaType);
                             }
                         }
 
                         var appearanceAttr = mug.getAppearanceAttribute();
                         if (appearanceAttr) {
-                            xmlWriter.writeAttributeStringSafe("appearance", appearanceAttr);
+                            xmlWriter.writeAttributeString("appearance", appearanceAttr);
                         }
                         
                         // Do hint label
@@ -894,7 +942,7 @@ formdesigner.model = (function () {
                                 }
                                 if(cProps.hintItextID.id){
                                     var ref = "jr:itext('" + cProps.hintItextID.id + "')";
-                                    xmlWriter.writeAttributeStringSafe('ref',ref);
+                                    xmlWriter.writeAttributeString('ref',ref);
                                 }
                                 xmlWriter.writeEndElement();
                             }
@@ -962,12 +1010,12 @@ formdesigner.model = (function () {
 
                 uiVersion = formdesigner.formUIVersion; //gets set at parse time/by UI
                 if(!uiVersion) {
-                    uiVersion = 1;
+                    uiVersion = "1";
                 }
 
                 version = formdesigner.formVersion; //gets set at parse time/by UI
                 if(!version) {
-                    version = 1;
+                    version = "1";
                 }
 
                 formName = formdesigner.controller.form.formName; //gets set at parse time/by UI
@@ -975,26 +1023,26 @@ formdesigner.model = (function () {
                     formName = "New Form";
                 }
 
-                xmlWriter.writeAttributeStringSafe("xmlns:jrm",jrm);
-                xmlWriter.writeAttributeStringSafe("xmlns", uuid);
-                xmlWriter.writeAttributeStringSafe("uiVersion", uiVersion);
-                xmlWriter.writeAttributeStringSafe("version", version);
-                xmlWriter.writeAttributeStringSafe("name", formName);
+                xmlWriter.writeAttributeString("xmlns:jrm",jrm);
+                xmlWriter.writeAttributeString("xmlns", uuid);
+                xmlWriter.writeAttributeString("uiVersion", uiVersion);
+                xmlWriter.writeAttributeString("version", version);
+                xmlWriter.writeAttributeString("name", formName);
             };
 
             function html_tag_boilerplate () {
-                xmlWriter.writeAttributeStringSafe( "xmlns:h", "http://www.w3.org/1999/xhtml" );
-                xmlWriter.writeAttributeStringSafe( "xmlns:orx", "http://openrosa.org/jr/xforms" );
-                xmlWriter.writeAttributeStringSafe( "xmlns", "http://www.w3.org/2002/xforms" );
-                xmlWriter.writeAttributeStringSafe( "xmlns:xsd", "http://www.w3.org/2001/XMLSchema" );
-                xmlWriter.writeAttributeStringSafe( "xmlns:jr", "http://openrosa.org/javarosa" );
-                xmlWriter.writeAttributeStringSafe( "xmlns:vellum", "http://commcarehq.org/xforms/vellum" );
+                xmlWriter.writeAttributeString( "xmlns:h", "http://www.w3.org/1999/xhtml" );
+                xmlWriter.writeAttributeString( "xmlns:orx", "http://openrosa.org/jr/xforms" );
+                xmlWriter.writeAttributeString( "xmlns", "http://www.w3.org/2002/xforms" );
+                xmlWriter.writeAttributeString( "xmlns:xsd", "http://www.w3.org/2001/XMLSchema" );
+                xmlWriter.writeAttributeString( "xmlns:jr", "http://openrosa.org/javarosa" );
+                xmlWriter.writeAttributeString( "xmlns:vellum", "http://commcarehq.org/xforms/vellum" );
             }
 
             var _writeInstanceAttributes = function (writer, instanceMetadata) {
                 for (var attrId in instanceMetadata.attributes) {
                     if (instanceMetadata.attributes.hasOwnProperty(attrId)) {
-                        writer.writeAttributeStringSafe(attrId, instanceMetadata.attributes[attrId]);
+                        writer.writeAttributeString(attrId, instanceMetadata.attributes[attrId]);
                     }
                 }
             };
@@ -1146,7 +1194,7 @@ formdesigner.model = (function () {
             }
             result = tree.treeMap(treeFunc);
             newMug.parentMug = oldMug.parentMug;
-            if(result.length > 0){
+            if(result.length > 0) {
                 return result[0];
             }else {
                 return false;
@@ -1154,7 +1202,7 @@ formdesigner.model = (function () {
         };
         that.replaceMug = replaceMug;
         
-        //make the object event aware
+        // make the object event aware
         formdesigner.util.eventuality(that);
         return that;
     };
@@ -1234,48 +1282,48 @@ formdesigner.model = (function () {
         
         logic.clearReferences = function (mug, property) {
             this.all = this.all.filter(function (elem) { 
-                return elem.mug != mug.ufid || elem.property != property;
+                return !(elem.mug === mug.ufid && elem.property === property);
             });
         };
         
         logic.addReferences = function (mug, property) {
+            // get absolute paths from mug property's value
             var expr = that.LogicExpression(mug.getPropertyValue(property));
             var paths = expr.getPaths().filter(function (p) {
                 // currently we don't do anything with relative paths
                 return p.initial_context === xpathmodels.XPathInitialContextEnum.ROOT;
             });
-            var errorKey = mug.ufid + "-" + property + "-" + "badpath",
-                errors = false;
 
+            var error = that.FormError({
+                level: "parse-warning",
+                key: mug.ufid + "-" + property + "-badpath",
+                message: []
+            });
+
+            // append item for each mug referenced (by absolute path) in mug's property value
             this.all = this.all.concat(paths.map(function (path) {
                 var pathString = path.pathWithoutPredicates(),
-                    pathWithoutRoot = pathString.substring(1 + pathString.indexOf('/', 1))
+                    pathWithoutRoot = pathString.substring(1 + pathString.indexOf('/', 1)),
                     refMug = formdesigner.controller.getMugByPath(pathString);
 
-                if (!refMug && formdesigner.allowedDataNodeReferences.indexOf(pathWithoutRoot) == -1) {
-                    errors = true;
-                    formdesigner.controller.form.updateError(that.FormError({
-                        level: "parse-warning",
-                        key: errorKey,
-                        message: "The question '" + mug.bindElement.nodeID + 
-                            "' references an unknown question " + path.toXPath() + 
-                            " in its " + mug.getPropertyDefinition(property).lstring + "."
-                                                    
-                    }), {
-                        updateUI: true
-                    });
+                if (!refMug && formdesigner.allowedDataNodeReferences.indexOf(pathWithoutRoot) === -1) {
+                    error.message.push("The question '" + mug.bindElement.nodeID + 
+                        "' references an unknown question " + path.toXPath() + 
+                        " in its " + mug.getPropertyDefinition(property).lstring + ".");
                 }
                 return {
-                    mug: mug.ufid, 
-                    ref: refMug ? refMug.ufid : "",
+                    mug: mug.ufid, // mug with property value referencing refMug
+                    ref: refMug ? refMug.ufid : "", // referenced mug
                     property: property,
-                    path: path.toXPath(),
+                    path: path.toXPath(), // path to refMug
                     sourcePath: formdesigner.controller.form.dataTree.getAbsolutePath(mug)
                 };      
             }))
            
-            if (!errors) {
-                formdesigner.controller.form.clearError(that.FormError({key: errorKey}), {updateUI: true});
+            if (error.message.length > 0) {
+                formdesigner.controller.form.updateError(error, {updateUI: true})
+            } else {
+                formdesigner.controller.form.clearError(error, {updateUI: true});
             }        
 
         };
@@ -1310,17 +1358,41 @@ formdesigner.model = (function () {
         logic.updatePath = function (mugId, from, to, subtree) {
             if (from === to) { return; }
 
+            var data = {};
+            data[mugId] = [from, to];
+            logic.updatePaths(data, subtree);
+        };
+
+        /**
+         * Update referenced nodes with their new paths. Used when a node,
+         * which may have sub-nodes, is moved or duplicated.
+         *
+         * @param data - an object with the following structure:
+         *        { "<mug ufid>": ["/old/path", "/new/path"], ... }
+         * @param subtree - (optional) only replace references from nodes
+         *        beginning with this path (no trailing /)
+         */
+        logic.updatePaths = function (data, subtree) {
             var found = this.all.filter(function (elem) {
-                return elem.ref === mugId && 
+                return data.hasOwnProperty(elem.ref) &&
                     (!subtree || elem.sourcePath === subtree || elem.sourcePath.indexOf(subtree + '/') === 0);
             });
-            var ref, mug, expr;
+            var ref, mug, expr, pkey, mugId, seen = {};
             for (var i = 0; i < found.length; i++) {
                 ref = found[i];
+                pkey = ref.mug + " " + ref.property;
+                if (seen.hasOwnProperty(pkey)) {
+                    continue;
+                }
+                seen[pkey] = null;
                 mug = formdesigner.controller.getMugFromFormByUFID(ref.mug);
                 expr = that.LogicExpression(mug.getPropertyValue(ref.property));
                 orig = expr.getText();
-                expr.updatePath(from, to);
+                for (mugId in data) {
+                    if (data.hasOwnProperty(mugId)) {
+                        expr.updatePath(data[mugId][0], data[mugId][1]);
+                    }
+                }
                 if (orig !== expr.getText()) {
                     formdesigner.controller.setMugPropertyValue(mug, ref.property.split("/")[0], 
                                                                 ref.property.split("/")[1], expr.getText(), mug);
@@ -1642,7 +1714,15 @@ var mugs = (function () {
     var BaseMug = Class.$extend({
         // whether you can change to or from this question's type in the UI
         isTypeChangeable: true,
+        limitTypeChangeTo: false,
+        // controls whether delete button shows up - you can still delete a
+        // mug's ancestor even if it's not removeable
+        isRemoveable: true,
+        isCopyable: true,
         isODKOnly: false,
+        // todo: actually don't couple type definitions and state using
+        // inheritance 
+        afterUIInsert: function () {},
         __init__: function () {
             var self = this;
             this.__spec = this.getSpec();
@@ -1670,6 +1750,9 @@ var mugs = (function () {
 
             formdesigner.util.give_ufid(this);
             formdesigner.util.eventuality(this);
+        },
+        populate: function (xmlNode) {
+            // load extra state from xml node
         },
         getSpec: function () {
             return {
@@ -1875,6 +1958,11 @@ var mugs = (function () {
         },
     });
 
+    // The use of inheritance here is a convenient way to be DRY about shared
+    // properties of mugs.  getXXSpec() methods could simply be replaced with
+    // generating the spec at the time of class definition by explicitly
+    // extending the spec of the super class.  These classes should absolutely
+    // not be used to implement any sort of inheritance-based interface.
     var DataBindOnly = BaseMug.$extend({
         typeName: 'Hidden Value',
         icon: 'icon-vellum-variable',
@@ -2030,9 +2118,8 @@ var mugs = (function () {
             this.bindElement.dataType = "intent";
         },
         getControlElementSpec: function () {
-            var spec = this.$super();
             // virtual properties used to get widgets
-            spec.controlElement = $.extend(spec, {
+            return $.extend({}, this.$super(), {
                 androidIntentAppId: {
                     visibility: 'visible',
                     uiType: formdesigner.widgets.androidIntentAppIdWidget
@@ -2046,8 +2133,6 @@ var mugs = (function () {
                     uiType: formdesigner.widgets.androidIntentResponseWidget
                 }
             });
-
-            return spec;
         },
         // todo: move to spec system
         getAppearanceAttribute: function () {
@@ -2114,17 +2199,20 @@ var mugs = (function () {
         }
     });
 
+    function getSelectChildIcon () {
+        if (this.parentMug.__className === "Select" ||
+            this.parentMug.__className === "SelectDynamic")
+        {
+            return 'icon-circle-blank';
+        } else {
+            return 'icon-check-empty';
+        }
+    }
     var Item = ControlOnly.$extend({
         typeName: 'Choice',
         icon: 'icon-circle-blank',
         isTypeChangeable: false,
-        getIcon: function () {
-            if (this.parentMug.__className === "Select") {
-                return 'icon-circle-blank';
-            } else {
-                return 'icon-check-empty';
-            }
-        },
+        getIcon: getSelectChildIcon,
         __init__: function (options) {
             this.$super(options);
             this.controlElement.tagName = "item";
@@ -2134,17 +2222,59 @@ var mugs = (function () {
             var spec = this.$super();
             spec.defaultValue = {
                 lstring: 'Choice Value',
-                visibility: 'hidden',
+                visibility: 'visible',
                 editable: 'w',
-                presence: 'optional',
+                presence: 'required',
                 validationFunc: validationFuncs.defaultValue
             };
             spec.hintLabel.presence = 'notallowed';
             spec.hintItextID.presence = 'notallowed';
 
-            spec.defaultValue.visibility = 'visible';
-            spec.defaultValue.presence = 'required';
+            return spec;
+        }
+    });
 
+    var Itemset = ControlOnly.$extend({
+        typeName: 'External Data',
+        icon: 'icon-circle-blank',
+        isTypeChangeable: false,
+        // have to delete the parent select
+        isRemoveable: false,
+        isCopyable: false,
+        getIcon: getSelectChildIcon,
+        __init__: function (options) {
+            this.$super(options);
+            this.controlElement.tagName = "itemset";
+            this.controlElement.itemsetData = {};
+            //this.bindElement.dataType = 'xsd:string';
+        },
+        getControlElementSpec: function () {
+            var spec = this.$super();
+            spec.itemsetData = {
+                editable: 'w',
+                presence: 'optional',
+                uiType: formdesigner.widgets.itemsetWidget,
+                validationFunc: function (mug) {
+                    var itemsetData = mug.controlElement.itemsetData;
+                    if (!itemsetData.nodeset) {
+                        return "A data source must be selected.";
+                    }
+                    if (!itemsetData.valueRef) {
+                        return "Choice Value must be specified.";
+                    }
+                    if (!itemsetData.labelRef) {
+                        return "Choice Label must be specified.";
+                    }
+                    return 'pass';
+                }
+            };
+            spec.label.presence = 'notallowed';
+            spec.labelItext.presence = 'notallowed';
+            spec.labelItextID.presence = 'notallowed';
+            spec.hintLabel.presence = 'notallowed';
+            spec.hintItextID.presence = 'notallowed';
+            spec.mediaItext.presence = 'notallowed';
+            spec.otherItext.presence = 'notallowed';
             return spec;
         }
     });
@@ -2166,10 +2296,35 @@ var mugs = (function () {
             var spec = this.$super();
             spec.dataValue.presence = 'optional';
             return spec;
+        },
+        getControlElementSpec: function () {
+            return $.extend({}, this.$super(), {
+                appearanceControl: {
+                    lstring: 'Add confirmation checkbox',
+                    title: 'Add a confirmation message and checkbox below the label. Available on Android only.',
+                    editable: 'w',
+                    visibility: 'visible',
+                    presence: 'optional',
+                    uiType: formdesigner.widgets.checkboxWidget
+                }
+            });
+        },
+        populate: function (xmlNode) {
+            var appearance = xmlNode.attr('appearance');
+            this.controlElement.appearanceControl = appearance !== "minimal";
+        },
+        getAppearanceAttribute: function () {
+            return (this.controlElement && this.controlElement.appearanceControl) ? null : 'minimal';
         }
     });
 
-    var BaseSelect = BaseMug.$extend({});
+    var BaseSelect = BaseMug.$extend({
+        afterUIInsert: function () {
+            var Item = mugs.Item.prototype.__className;
+            formdesigner.ui.addQuestion(Item);
+            formdesigner.ui.addQuestion(Item);
+        }
+    });
 
     var MSelect = BaseSelect.$extend({
         typeName: 'Multiple Answer',
@@ -2183,6 +2338,7 @@ var mugs = (function () {
             spec.dataType.visibility = "hidden";
             return spec;
         },
+        defaultOperator: "selected"
     });
 
     var Select = MSelect.$extend({
@@ -2191,7 +2347,25 @@ var mugs = (function () {
         __init__: function (options) {
             this.$super(options);
             this.controlElement.tagName = "select1";
-        }
+        },
+        defaultOperator: null
+    });
+
+    function afterDynamicSelectInsert() {
+        var Itemset = mugs.Itemset.prototype.__className;
+        formdesigner.ui.addQuestion(Itemset);
+    }
+
+    var MSelectDynamic = MSelect.$extend({
+        typeName: 'Multiple Answer - Dynamic List',
+        limitTypeChangeTo: ["SelectDynamic"],
+        afterUIInsert: afterDynamicSelectInsert
+    });
+
+    var SelectDynamic = Select.$extend({
+        typeName: 'Single Answer - Dynamic List',
+        limitTypeChangeTo: ["MSelectDynamic"],
+        afterUIInsert: afterDynamicSelectInsert
     });
 
     var Group = BaseMug.$extend({
@@ -2265,7 +2439,8 @@ var mugs = (function () {
             });
         }
     });
-    
+   
+    // todo: ability of plugins to define mug types
     var exportedMugTypes = {
         "AndroidIntent": AndroidIntent,
         "Audio": Audio,
@@ -2280,20 +2455,24 @@ var mugs = (function () {
         "Image": Image,
         "Int": Int,
         "Item": Item,
+        "Itemset": Itemset,
         "Long": Long,
         "MSelect": MSelect,
+        "MSelectDynamic": MSelectDynamic,
         "PhoneNumber": PhoneNumber,
         "ReadOnly": ReadOnly,
         "Repeat": Repeat,
         "Secret": Secret,
         "Select": Select,
+        "SelectDynamic": SelectDynamic,
         "Text": TextQuestion,
         "Time": Time,
         "Trigger": Trigger,
         "Video": Video,
     },
         allTypes = _.keys(exportedMugTypes),
-        innerChildQuestionTypes = _.without(allTypes, 'DataBindOnly', 'Item'),
+        innerChildQuestionTypes = _.without(allTypes, 
+            'DataBindOnly', 'Item', 'Itemset'),
         nonGroupTypes = _.without(innerChildQuestionTypes, 
             'Group', 'Repeat', 'FieldList');
 
@@ -2306,6 +2485,8 @@ var mugs = (function () {
             validChildTypes = nonGroupTypes;
         } else if (name == "Select" || name == "MSelect") {
             validChildTypes = ["Item"];
+        } else if (name === "SelectDynamic" || name === "MSelectDynamic") {
+            validChildTypes = ["Itemset"];
         } else {
             validChildTypes = [];
         }
@@ -2313,6 +2494,12 @@ var mugs = (function () {
         // TODO: figure out how to get isinstance working
         Mug.prototype.__className = name;
         Mug.prototype.validChildTypes = validChildTypes;
+
+        if (name === "SelectDynamic" || name === "MSelectDynamic") {
+            Mug.prototype.maxChildren = 1;
+        } else {
+            Mug.prototype.maxChildren = -1;
+        }
     });
 
     return exportedMugTypes;

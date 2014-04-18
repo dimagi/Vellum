@@ -41,7 +41,7 @@ formdesigner.ui = function () {
         },
         "parse-warning": {
             cssClass: "",
-            title: "Parse Warning",
+            title: "Warning",
             icon: "icon-warning-sign"
         },
         "form-warning": {
@@ -63,10 +63,14 @@ formdesigner.ui = function () {
             group: ["Select", 'Multiple Choice'],
             related: [
                 "Item"
+                // an Itemset is added automatically when you add a new dynamic
+                // select
             ],
             questions: [
                 "Select",
-                "MSelect"
+                "MSelect",
+                "SelectDynamic",
+                "MSelectDynamic"
             ]
         },
         {
@@ -175,8 +179,7 @@ formdesigner.ui = function () {
         }
 
         $(MESSAGES_DIV)
-            .empty()
-            .html(_.template($('#fd-template-alert-global').text(), {
+            .append(_.template($('#fd-template-alert-global').text(), {
                 messageType: that.MESSAGE_TYPES[errorObj.level],
                 messages: messages
             }))
@@ -215,10 +218,12 @@ formdesigner.ui = function () {
             return null;
         } else {
             var newMug = new mugs[qType](); 
-            formdesigner.controller.initQuestion(
-                newMug, formdesigner.controller.getCurrentlySelectedMug(), 'into');
+            formdesigner.controller.initQuestion(newMug);
+            that.jstree('select_node', '#' + newMug.ufid, true);
+            newMug.afterUIInsert();
             that.jstree('select_node', '#' + newMug.ufid, true);
             if (newMug.isODKOnly) {
+                //it's an ODK media question
                 formdesigner.model.form.updateError(formdesigner.model.FormError({
                     message: 'This question type will ONLY work with Android phones!',
                     level: 'form-warning'
@@ -301,7 +306,7 @@ formdesigner.ui = function () {
     that.activateQuestionTypeGroup = function (mug) {
         var className = mug.__className || mug.prototype.__className,
             groupSlug = that.QUESTION_TYPE_TO_GROUP[className];
-        if (groupSlug) {
+        if (groupSlug && className !== 'MSelectDynamic' && className !== 'SelectDynamic') {
             var $questionGroup = $('#' + that.getQuestionTypeGroupID(groupSlug));
             $questionGroup.find('.fd-question-type-related').removeClass('disabled');
         }
@@ -404,6 +409,7 @@ formdesigner.ui = function () {
         /* update display */
         $('#fd-question-properties').animate({}, 200);
 
+        that.showContent();
         that.hideQuestionProperties();
 
         var $content = $("#fd-props-content").empty(),
@@ -488,7 +494,17 @@ formdesigner.ui = function () {
         that.showVisualValidation(mug);
     };
 
+    /**
+     * Handler for node_select events.
+     *
+     * Set that.skipNodeSelectEvent to true to disable during form loading,
+     * recursive question duplication, etc.
+     */
     that.handleNodeSelect = function (e, data) {
+        if (that.skipNodeSelectEvent) {
+            return;
+        }
+
         var ufid = $(data.rslt.obj[0]).prop('id'),
             mug = formdesigner.controller.getMugFromFormByUFID(ufid);
 
@@ -543,7 +559,7 @@ formdesigner.ui = function () {
                 return true;
             } else {
                 // otherwise clear the Question Edit UI pane
-                that.hideQuestionProperties();
+                that.hideContent();
                 that.jstree('deselect_all');
                 return false;
             }
@@ -552,7 +568,26 @@ formdesigner.ui = function () {
         return true;
     };
 
+    /**
+     * Select the lowest top-level non-data node
+     *
+     * @return jquery object for the lowest node if there are any question
+     *         nodes, otherwise false
+     */
+    that.selectLowestQuestionNode = function () {
+        that.jstree("deselect_all");
+        var questions = that.getJSTree().children().children().filter("[rel!='DataBindOnly']");
+        if (questions.length > 0) {
+            var newSelectEl = $(questions[questions.length - 1]);
+            that.jstree("select_node", newSelectEl, false);
+            return newSelectEl;
+        } else {
+            return false;
+        }
+    };
+
     that.questionTree = null;
+
 
     /**
      *
@@ -862,8 +897,11 @@ formdesigner.ui = function () {
                     formdesigner.controller.setCurrentlySelectedMug(currentMug.ufid);
                     that.displayMugProperties(currentMug);
                 }
+
             }
-        });
+
+        })
+
     };
 
     var removeLanguageDialog = function () {
@@ -967,8 +1005,9 @@ formdesigner.ui = function () {
     var setDialogInfo = that.setDialogInfo = function (message, confButName, confFunction, 
                                                        cancelButName, cancelButFunction, title) {
         title = title || "";
-        var buttons = {}, opt,
-                dial = $('#fd-dialog-confirm'), contentStr;
+        var buttons = {},
+            dial = $('#fd-dialog-confirm'),
+            contentStr;
         buttons[confButName] = confFunction;
         buttons[cancelButName] = cancelButFunction;
 
@@ -1050,26 +1089,65 @@ formdesigner.ui = function () {
                 }
             });
         });
-
-        formdesigner.controller.on('question-creation', function (e) {
-            that.overrideJSTreeIcon(e.mug.ufid, e.mug);
-        });
-
-        formdesigner.controller.on('parent-question-type-changed', function (e) {
-            that.overrideJSTreeIcon(e.mug.ufid, e.mug);
-        });
     };
 
     that.hideQuestionProperties = function() {
         $("#fd-question-properties").hide();
     };
 
+    that.showContent = function () {
+        $(".fd-content-right").show();
+    };
+
+    that.hideContent = function () {
+        $(".fd-content-right").hide();
+    };
+
+    // Handlers for the simple expression editor
+    var simpleExpressions = {};
+    var operationOpts = [];
+    var expTypes = xpathmodels.XPathExpressionTypeEnum;
+    var BinOpHandler = {
+        toString: function(op, left, right) {
+            // make sure we wrap the vals in parens in case they were necessary
+            // todo, construct manually, and validate individual parts.
+            return "(" + left + ") "
+                + xpathmodels.expressionTypeEnumToXPathLiteral(op)
+                + " (" + right + ")";
+        },
+        typeLeftRight: function(expOp) {
+            return expOp;
+        }
+    }
+    var FunctionHandler = {
+        toString: function(op, left, right) {
+            return op + "(" + left + ", " + right + ")";
+        },
+        typeLeftRight: function(expOp) {
+            if (expOp.args.length != 2) return false;
+            return {
+                type: expOp.id,
+                left: expOp.args[0],
+                right: expOp.args[1]
+            };
+        }
+    };
+    function addOp(expr, value, label) {
+        simpleExpressions[value] = expr;
+        operationOpts.push([label, value]);
+    }
+    addOp(BinOpHandler, expTypes.EQ, "is equal to");
+    addOp(BinOpHandler, expTypes.NEQ, "is not equal to");
+    addOp(BinOpHandler, expTypes.LT, "is less than");
+    addOp(BinOpHandler, expTypes.LTE, "is less than or equal to");
+    addOp(BinOpHandler, expTypes.GT, "is greater than");
+    addOp(BinOpHandler, expTypes.GTE, "is greater than or equal to");
+    addOp(FunctionHandler, "selected", "has selected value");
+
     that.showXPathEditor = function (options) {
         /**
          * All the logic to display the XPath Editor widget.
          */
-        var expTypes = xpathmodels.XPathExpressionTypeEnum;
-
         var editorPane = $('#fd-xpath-editor');
         var editorContent = $('#fd-xpath-editor-content');
 
@@ -1082,9 +1160,6 @@ formdesigner.ui = function () {
         var getExpressionPane = function () {
             return $("#fd-xpath-editor-expressions");
         };
-        var getExpressionList = function () {
-            return getExpressionPane().children();
-        };
         var getTopLevelJoinSelect = function () {
             return $(editorPane.find("#top-level-join-select")[0]);
         };
@@ -1095,16 +1170,14 @@ formdesigner.ui = function () {
             var expressionParts = [];
             var joinType = getTopLevelJoinSelect().val();
             pane.children().each(function() {
-                var left = $($(this).find(".left-question")[0]);
-                var right = $($(this).find(".right-question")[0]);
+                var left = $($(this).find(".left-question")[0]).val();
+                var right = $($(this).find(".right-question")[0]).val();
                 // ignore empty expressions
-                if (left.val() === "" && right.val() === "") {
+                if (left === "" && right === "") {
                     return;
                 }
-                var op = $($(this).find(".op-select")[0]);
-                // make sure we wrap the vals in parens in case they were necessary
-                // todo, construct manually, and validate individual parts.
-                var exprPath = "(" + left.val() + ") " + xpathmodels.expressionTypeEnumToXPathLiteral(op.val()) + " (" + right.val() + ")";
+                var op = $($(this).find(".op-select")[0]).val();
+                var exprPath = simpleExpressions[op].toString(op, left, right);
                 expressionParts.push(exprPath);
             });
             var preparsed = expressionParts.join(" " + joinType + " ");
@@ -1147,9 +1220,6 @@ formdesigner.ui = function () {
                 console.log("trying to add", parsedExpression.toString());
             }
 
-            var isPath = function (subElement) {
-                return (subElement instanceof xpathmodels.XPathPathExpr);
-            };
             var isJoiningOp = function (subElement) {
                 // something that joins expressions
                 return (subElement instanceof xpathmodels.XPathBoolExpr);
@@ -1158,26 +1228,14 @@ formdesigner.ui = function () {
             var isExpressionOp = function (subElement) {
                 // something that can be put into an expression
                 return (subElement instanceof xpathmodels.XPathCmpExpr ||
-                        subElement instanceof xpathmodels.XPathEqExpr);
-            };
-
-            var isSupportedBaseType = function (subelement) {
-                // something that can be stuck in a base string
-                // currently everything is supported.
-                return true;
+                        subElement instanceof xpathmodels.XPathEqExpr ||
+                        simpleExpressions.hasOwnProperty(subElement.id));
             };
 
             var newExpressionUIElement = function (expOp) {
 
                 var $expUI = formdesigner.ui.getTemplateObject('#fd-template-xpath-expression', {
-                    operationOpts: [
-                        ["is equal to", expTypes.EQ],
-                        ["is not equal to", expTypes.NEQ],
-                        ["is less than", expTypes.LT],
-                        ["is less than or equal to", expTypes.LTE],
-                        ["is greater than", expTypes.GT],
-                        ["is greater than or equal to", expTypes.GTE]
-                    ]
+                    operationOpts: operationOpts
                 });
 
                 var getLeftQuestionInput = function () {
@@ -1219,6 +1277,14 @@ formdesigner.ui = function () {
                     if (DEBUG_MODE) {
                         console.log("populating", expOp.toString());
                     }
+                    if (simpleExpressions.hasOwnProperty(expOp.id)) {
+                        // comparison and equality operators DO NOT have an "id"
+                        // property, so they will not get here. It doesn't
+                        // matter though since already fulfill the necessary
+                        // "type/left/right" interface.
+                        expOp = simpleExpressions[expOp.id].typeLeftRight(expOp);
+                        if (!expOp) return false;
+                    }
                     populateQuestionInputBox(getLeftQuestionInput(), expOp.left);
                     $expUI.find('.op-select').val(xpathmodels.expressionTypeEnumToXPathLiteral(expOp.type));
                     // the population of the left can affect the right,
@@ -1248,7 +1314,11 @@ formdesigner.ui = function () {
                 if (isExpressionOp(parsedExpression)) {
                     // if it's an expression op stick it in.
                     // no need to join, so this is good.
-                    return newExpressionUIElement(parsedExpression).appendTo(expressionPane);
+                    var expressionUIElem = newExpressionUIElement(parsedExpression);
+                    if (!expressionUIElem) {
+                        return failAndClear();
+                    }
+                    return expressionUIElem.appendTo(expressionPane);
                 } else if (isJoiningOp(parsedExpression)) {
                     // if it's a joining op the first element has to be
                     // an expression and the second must be a valid op
@@ -1464,6 +1534,14 @@ formdesigner.ui = function () {
             "dnd" : {
                 "drop_finish" : function(data) {
                     formdesigner.controller.handleTreeDrop(data.o, data.r);
+
+                    var sourceUid = $(data.o).attr("id");
+                    var mug = formdesigner.controller.form.getMugByUFID(sourceUid);
+                    var ops = $(data.r).closest(".xpath-expression-row").find(".op-select");
+                    if (mug && ops && !(mug.defaultOperator === undefined ||
+                                        mug.defaultOperator === null)) {
+                        ops.val(mug.defaultOperator);
+                    }
                 }
             },
             "types": {
@@ -1474,6 +1552,7 @@ formdesigner.ui = function () {
                     var types = {};
                     _(mugs).each(function (Mug, typeName) {
                         types[typeName] = {
+                            max_children: Mug.prototype.maxChildren,
                             valid_children: 
                                 Mug.prototype.validChildTypes.length ?  Mug.prototype.validChildTypes : "none"
                         };
@@ -1521,8 +1600,6 @@ formdesigner.ui = function () {
             );
         });
 
-
-
         $("#fd-expand-all").click(function() {
             that.questionTree.jstree("open_all");
         });
@@ -1539,15 +1616,10 @@ formdesigner.ui = function () {
             // todo: check necessity of this
             mug = formdesigner.controller.getMugFromFormByUFID(node_id);
         }
-        try {
-            iconClass = mug.getIcon();
-        } catch (e) {  // we're dealing with a class, not an instance
-            if (e.message.indexOf('__className') === -1 &&
-                e.message.indexOf('getIcon') === -1)
-            {
-                throw e;
-            }
+        if (typeof mug.getIcon === 'undefined') {
             iconClass = mug.constructor.prototype.icon;
+        } else {
+            iconClass = mug.getIcon();
         }
         iconClass = iconClass || 'icon-circle';
         if (!$questionNode.find('> a > ins').hasClass(iconClass)) {
@@ -1709,6 +1781,7 @@ formdesigner.launch = function (opts) {
     formdesigner.patchUrl = opts.patchUrl;
 
     formdesigner.allowedDataNodeReferences = opts.allowedDataNodeReferences || [];
+    formdesigner.externalInstances = formdesigner.processInstancesConfig(opts.externalInstances || []);
 
     formdesigner.multimediaConfig = opts.multimediaConfig;
 
@@ -1753,5 +1826,37 @@ formdesigner.launch = function (opts) {
 
 formdesigner.rootElement = '';
 
+formdesigner.processInstancesConfig = function (instances) {
+    // set instance id, can be overridden at parse time if an instance with a
+    // different ID has the expected src URI.  Also add an index to each subset
+    // type which can be used as a key to reference that subset.
+    var mapped = {};
+    _.each(instances, function (instance) {
+        formdesigner.addInstance(mapped, instance);
+    });
+    return mapped;
+};
 
+formdesigner.addInstance = function (instancesMap, instance) {
+    instance.defaultId = instance.defaultId || convertToId(instance.sourceUri);
+    instance.id = instance.defaultId;
+    _.each(instance.levels, function (level) {
+        var i = 1,
+            mappedSubsets = {};
+        _.each(level.subsets, function (subset) {
+            subset.id = i++;
+            mappedSubsets[subset.id] = subset;
+        });
+        level.subsets = mappedSubsets;
+    });
+    instancesMap[instance.id] = instance;
+    return instance;
+};
+
+function convertToId(str) {
+    return str
+        .toLowerCase()
+        .replace(/ /g,'_')
+        .replace(/[^\w-]+/g,'');
+}
 

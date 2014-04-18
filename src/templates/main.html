@@ -106,6 +106,60 @@
     </div>
 </script>
 
+<script type="text/template" id="fd-template-external-data-source">
+    <select id="data_source">
+        <option value="<%= NONE %>">Choose a Data Source...</option>
+        <% _.each(options, function (option) { %>
+        <option value="<%= option.value %>">
+            <%= option.name %>
+        </option>
+        <% }); %>
+        <option value="<%= CUSTOM %>">Custom...</option>
+    </select>
+</script>
+
+<script type="text/template" id="fd-template-source-level">
+    <select>
+        <% _.each(options, function (option) { %>
+        <option value="<%= option %>">
+            <%= option %>
+        </option>
+        <% }); %>
+    </select>
+</script>
+
+<script type="text/template" id="fd-template-custom-data-source">
+    <div id="data_source_modal" class="modal hide fade">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h3>Add Custom Data Source</h3>
+      </div>
+      <div class="modal-body">
+          <div id="source_error" class="alert alert-error hide">
+              Invalid values. Please try again or cancel.
+          </div>
+          <form class="form-horizontal">
+              <div class="control-group">
+                  <label class="control-label" for="source_uri">Source URI</label>
+                  <div class="controls">
+                      <input type="text" id="source_uri" placeholder="jr://path/to/instance">
+                  </div>
+              </div>
+              <div class="control-group">
+                  <label class="control-label" for="node_levels">Level name hierarchy</label>
+                  <div class="controls">
+                      <input type="text" id="node_levels" placeholder="root/level1/level2/leaf">
+                  </div>
+              </div>
+          </form>
+      </div>
+      <div class="modal-footer">
+        <a id="data_source_cancel" href="#" class="btn">Cancel</a>
+        <a id="data_source_save" href="#" class="btn btn-primary">Save</a>
+      </div>
+    </div>
+</script>
+
 
 <script type="text/template" id="fd-template-multimedia-modal">
     <div class="modal hide fade" id="<%= modalId %>">
@@ -329,11 +383,13 @@
 
 <script type="text/template" id="fd-template-question-toolbar">
     <div class="fd-question-toolbar-container clearfix">
+        <% if (isCopyable) { %>
         <div class="btn-toolbar pull-left">
             <button id="fd-button-copy" type="button" class="btn" tabindex="-1">
                 <i class="icon-copy"></i> Copy
             </button>
         </div>
+        <% } %>
         <% if (isDeleteable) { %>
         <div class="btn-toolbar pull-right">
             <button id="fd-button-remove" type="button" class="btn btn-danger"  tabindex="-1">
@@ -366,14 +422,14 @@
 
 <script type="text/template" id="fd-template-question-fieldset">
     <fieldset class="accordion-group fd-question-fieldset">
-        <% if (help) { %>
-        <a href="<%=help.link%>" target="_blank" class="fd-help pull-right"
-                data-title="<%=help.title%>"
-                data-content="<%=help.text%>"
-                data-placement="left">
-        </a>
-        <% } %>
         <legend class="accordion-heading">
+            <% if (help) { %>
+            <a href="<%=help.link%>" target="_blank" class="fd-help pull-right"
+                    data-title="<%=help.title%>"
+                    data-content="<%=help.text%>"
+                    data-placement="left">
+            </a>
+            <% } %>
             <a class="accordion-toggle<% if (isCollapsed) { %> collapsed<% } %>" href="#<%=fieldsetId%>" data-toggle="collapse">
                 <i class="icon-double-angle-down"></i>
                 <%=fieldsetTitle%>
@@ -450,10 +506,12 @@
     <div class="fd-xpath-editor-container form form-horizontal">
 
         <fieldset id="xpath-advanced" class="hide">
-            <legend><i class="icon-cog"></i> Edit Expression (Advanced) </legend>
-            <button type="button" class="btn btn-primary pull-right xpath-mode-toggle" id="fd-xpath-show-simple-button">
-                Show Simple Mode
-            </button>
+            <legend>
+                <i class="icon-cog"></i> Edit Expression (Advanced)
+                <button type="button" class="btn btn-primary pull-right xpath-mode-toggle" id="fd-xpath-show-simple-button">
+                    Show Simple Mode
+                </button>
+            </legend>
             <div class="alert hide" id="xpath-advanced-notice">
                 <p>Sorry, your logic is too complicated for our logic builder.</p>
                 <p>You can only edit this logic in Advanced Mode.</p>
@@ -464,7 +522,7 @@
                 </label>
                 <div class="controls">
                     <textarea id="fd-xpath-editor-text"
-                              rows="20"
+                              rows="5"
                               class="input-block-level jstree-drop"></textarea>
                     <p class="help-block">Hint: You can drag a question into the box.</p>
                     <p class="help-block">
@@ -478,10 +536,14 @@
         </fieldset>
 
         <fieldset id="xpath-simple" class="hide fieldset-condensed">
-            <legend>Edit Expression</legend>
-            <button type="button" class="btn btn-inverse pull-right xpath-mode-toggle" id="fd-xpath-show-advanced-button">
-                <i class="icon-cog"></i> Show Advanced Mode
-            </button>
+            <legend>
+                Edit Expression
+                <button type="button" class="btn btn-inverse pull-right xpath-mode-toggle" id="fd-xpath-show-advanced-button"
+                    onclick="trackShowAdvancedMode();">
+                    <i class="icon-cog"></i> Show Advanced Mode
+                </button>
+            </legend>
+
             <div class="control-group">
                 <label class="control-label">Result is:</label>
                 <div class="controls">

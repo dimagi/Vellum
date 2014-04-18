@@ -2,7 +2,8 @@ language: node_js
 node_js: 0.10
 before_script:
  - phantomjs --version
- - npm install -g mocha-phantomjs bower
- - cd js
+ - npm install -g mocha-phantomjs
+ - npm install napa
  - npm install
-script: npm test
+script: 
+ - npm test

@@ -51,29 +51,98 @@
     
     <!-- Tests and running -->
     <script type="text/javascript">
-      mocha.setup('bdd');
-      mocha.reporter('html');
+        mocha.setup('bdd');
+        mocha.reporter('html');
 
+        var TEST_INSTANCE_CONFIG = [
+            {
+                name: "All Cases",
+                sourceUri: "jr://instance/casedb",
+                defaultId: "casedb",
+                rootNodeName: "casedb",
+                levels: [
+                    {
+                        nodeName: "case",
+                        properties: [
+                            {
+                                id: 'case_name'
+                            },
+                            {
+                                id: '@case_id'
+                            }
+                        ],
+                        subsets: [
+                            {
+                                name: "mother Cases",
+                                selector: "@case_type='mother'",
+                                properties: [
+                                    {
+                                        id: 'edd' 
+                                    }
+                                ]
+                            },
+                            {
+                                name: "child Cases",
+                                selector: "@case_type = 'child'",
+                                properties: [
+                                    {
+                                        id: 'dob'
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ],
+            },
+            {
+                name: "Some Fixture",
+                sourceUri: "jr://fixture/some-fixture",
+                defaultId: "somefixture",
+                rootNodeName: "foos",
+                levels: [
+                    {
+                        nodeName: "foo",
+                        subsets: [
+                            {
+                                name: "woos",
+                                selector: "@foo_type=\"woo\""
+                            }
+                        ]
+                    },
+                    {
+                        nodeName: "bar",
+                        subsets: [
+                            {
+                                name: "eggs",
+                                selector: "@bar_type='eggs'"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ];
 
-      formdesigner.launch({
-          rootElement: $("#formdesigner"),
-          staticPrefix: '../src/',
-          allowedDataNodeReferences: [
-              "meta/deviceID",
-              "meta/instanceID",
-              "meta/username",
-              "meta/userID",
-              "meta/timeStart",
-              "meta/timeEnd"
-          ],
-          formName: "Untitled Form",
-          langs: ['en'],
-          displayLanguage: 'en'
-      });
+        formdesigner.launch({
+            rootElement: $("#formdesigner"),
+            staticPrefix: '../src/',
+            allowedDataNodeReferences: [
+                "meta/deviceID",
+                "meta/instanceID",
+                "meta/username",
+                "meta/userID",
+                "meta/timeStart",
+                "meta/timeEnd"
+            ],
+            formName: "Untitled Form",
+            langs: ['en'],
+            displayLanguage: 'en',
+            externalInstances: TEST_INSTANCE_CONFIG
+        });
     </script>
 
     <script src="formdesigner.ignoreButRetain.js"></script>
     <script src="formdesigner.lock.js"></script>
+    <script src="itemset.js"></script>
     <script>
         function runTests() {
             $("#run-tests").addClass('disabled').attr('disabled', true);
