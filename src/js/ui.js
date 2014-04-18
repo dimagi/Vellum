@@ -409,6 +409,7 @@ formdesigner.ui = function () {
         /* update display */
         $('#fd-question-properties').animate({}, 200);
 
+        that.showContent();
         that.hideQuestionProperties();
 
         var $content = $("#fd-props-content").empty(),
@@ -558,7 +559,7 @@ formdesigner.ui = function () {
                 return true;
             } else {
                 // otherwise clear the Question Edit UI pane
-                that.hideQuestionProperties();
+                that.hideContent();
                 that.jstree('deselect_all');
                 return false;
             }
@@ -1092,6 +1093,14 @@ formdesigner.ui = function () {
 
     that.hideQuestionProperties = function() {
         $("#fd-question-properties").hide();
+    };
+
+    that.showContent = function () {
+        $(".fd-content-right").show();
+    };
+
+    that.hideContent = function () {
+        $(".fd-content-right").hide();
     };
 
     // Handlers for the simple expression editor
