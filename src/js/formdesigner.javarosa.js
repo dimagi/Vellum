@@ -894,7 +894,7 @@ var itextLabelWidget = function (mug, language, form, options) {
         .attr("rows", "2")
         .addClass('input-block-level itext-widget-input')
         .on('change keyup', function () {
-            widget.updateValue;
+            widget.updateValue();
         });
  
     widget.getControl = function () {
