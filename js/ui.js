@@ -166,30 +166,30 @@ formdesigner.ui = function () {
         });
     };
     
-    that.showMessage = function (errorObj) {
-        var messages = errorObj.message;
-        // TODO: I don't like this array business, should be refactored away to the callers.
-        if (typeof messages === "string" || !(messages instanceof Array)) {
-            //msg is a string or not-an-array (so try turn it into a string)
-            messages = ['' + messages];
+    that.resetMessages = function (errors) {
+        function asArray(value) {
+            // TODO: I don't like this array business, should be refactored away to the callers.
+            if (typeof value === "string" || !(value instanceof Array)) {
+                // value is a string or not-an-array (so try turn it into a string)
+                value = ['' + value];
+            }
+            return value;
         }
 
-        $(MESSAGES_DIV)
-            .append(_.template($('#fd-template-alert-global').text(), {
-                messageType: that.MESSAGE_TYPES[errorObj.level],
-                messages: messages
-            }))
-            .find('.alert').removeClass('hide').addClass('in');
-    };
-    
-    that.clearMessages = function () {
-        $(MESSAGES_DIV).empty();
-    };
-    
-    that.resetMessages = function (errors) {
-        that.clearMessages();
-        for (var i = 0; i < errors.length; i++) {
-            that.showMessage(errors[i]);
+        var error, messages_div = $(MESSAGES_DIV);
+        messages_div.empty();
+        if (errors.length > 0) {
+            // Show message(s) from the last error only because multiple errors
+            // fill up the screen and thus impede usability.
+            // TODO ideally the other errors would be accessible in some way.
+            // Maybe hidden by default with a clickable indicator to show them?
+            error = errors[errors.length - 1];
+            messages_div
+                .html(_.template($('#fd-template-alert-global').text(), {
+                    messageType: that.MESSAGE_TYPES[error.level],
+                    messages: asArray(error.message)
+                }))
+                .find('.alert').removeClass('hide').addClass('in');
         }
     };
 
