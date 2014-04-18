@@ -207,6 +207,9 @@ formdesigner.widgets = (function () {
                         }
                     }
                 });
+                if (typeof _gaq !== "undefined") {
+                    _gaq.push(['_trackEvent', 'Form Builder', 'Logic', options.lstring]);
+                }
             }, !!widget.isDisabled());
         };
 
@@ -478,7 +481,6 @@ formdesigner.widgets = (function () {
                 formdesigner.controller.changeQuestionType(mug, $(this).data('qtype'));
             } catch (err) {
                 alert("Sorry, you can't do that because: " + err);
-                input.val(mug.__className);
             }
             e.preventDefault();
         });
