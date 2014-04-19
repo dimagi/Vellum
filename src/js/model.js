@@ -879,10 +879,10 @@ formdesigner.model = (function () {
                             var data = cProps.itemsetData;
                             xmlWriter.writeAttributeString('nodeset', data.nodeset);
                             xmlWriter.writeStartElement('label');
-                            xmlWriter.writeAttributeString('ref', data.valueRef);
+                            xmlWriter.writeAttributeString('ref', data.labelRef);
                             xmlWriter.writeEndElement();
                             xmlWriter.writeStartElement('value');
-                            xmlWriter.writeAttributeString('ref', data.labelRef);
+                            xmlWriter.writeAttributeString('ref', data.valueRef);
                             xmlWriter.writeEndElement();
                         }
                         

@@ -1510,8 +1510,8 @@ formdesigner.controller = (function () {
         if (tag === 'itemset') {
             mug.controlElement.setAttr('itemsetData', {
                 nodeset: $cEl.attr('nodeset'),
-                valueRef: $cEl.children('label').attr('ref'),
-                labelRef: $cEl.children('value').attr('ref')
+                labelRef: $cEl.children('label').attr('ref'),
+                valueRef: $cEl.children('value').attr('ref')
             });
         }
 
