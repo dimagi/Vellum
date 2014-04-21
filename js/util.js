@@ -547,22 +547,38 @@ formdesigner.util = (function(){
         
         // special case this because we want the default to be true
         var escapeQuotes = (options && options.hasOwnProperty("escapeQuotes")) ? options.escapeQuotes : true;
-        
+        var matchChars = '<>\n\r\t';
+        var escapes = {
+            // these are required
+            '<': '&lt;',
+            '>': '&gt;',
+
+            // preserve whitespace in serialize/parse round-trip
+            '\t': '&#9;',
+            '\n': '&#10;',
+            '\r': '&#13;',
+
+            // optional
+            "'": "&apos;",
+            '"': '&quot;'
+        };
+
         // have to do these first
         if (options && options.escapeAmpersands) {
             text = text.replace(/&/,'&amp;');
         }
-        // these are required
-        text = text.replace(/</g,'&lt;');
-        text = text.replace(/>/g,'&gt;');
         // these are optional
         if (options && options.escapeApostrophes) {
-            text = text.replace(/'/g, "&apos;");
+            matchChars = matchChars + "'";
         }
         if (escapeQuotes) {
-            text = text.replace(/"/g,'&quot;');
+            matchChars = matchChars + '"';
         }
-        return text;
+
+        return text.replace(
+            new RegExp("[" + matchChars + "]", "g"),
+            function (c) { return escapes[c]; }
+        );
     };
     
     // monkey patch the xmlwriter for convenience
