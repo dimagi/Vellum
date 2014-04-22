@@ -541,7 +541,7 @@ formdesigner.ui = function () {
         }
 
         var $buttonAttributes = {
-            onClick: "window.open('" + cloudCareUrl + "')",
+            onClick: "window.open('" + cloudCareUrl + "');$('#fd-cloudcare-confirm').parent().parent().modal('hide')",
             target: "_blank"
         };
         var $modal = formdesigner.ui.generateNewModal("Unsaved Changes in Form", [
@@ -552,6 +552,7 @@ formdesigner.ui = function () {
                 attributes: formdesigner.util.invert($buttonAttributes)// underscoreJS iterator swaps key-values
             }
         ]);
+        $modal.removeClass('fade');
         $modal.find('.modal-body')
             .append($('<p />').text("You have UNSAVED changes in the Form. Cloudcare will not include these changes. "+
                                     "To see latest changes in Cloudcare, please save changes."));
@@ -749,6 +750,12 @@ formdesigner.ui = function () {
             $("<li></li>").append($a).appendTo($toolsMenu);
         });
     };
+
+    var attachCloudCareButton = function () { console.log("hello");
+        $("#cloudcare-preview-url").click( function(action) { 
+            formdesigner.ui.cloudCareConfirmDialogue(formdesigner.opts.cloudCareUrl); 
+        });
+    }
 
     var setTreeNodeInvalid = function (uid, msg) {
         $($('#' + uid)[0]).append('<div class="ui-icon ui-icon-alert fd-tree-valid-alert-icon" title="' + msg + '"></div>')
@@ -1694,6 +1701,7 @@ formdesigner.ui = function () {
         setup_fancybox();
 
         formdesigner.windowManager.init();
+        attachCloudCareButton();
     };
 
     return that;
