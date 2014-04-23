@@ -533,7 +533,7 @@ formdesigner.ui = function () {
         }
     };
 
-    that.cloudCareConfirmDialogue = function (cloudCareUrl) {
+    that.showCloudCareConfirmDialog = function (cloudCareUrl) {
         var $isUnsavedForm = formdesigner.controller.saveButton.state !== "saved";
         if (!$isUnsavedForm) {
             window.open(cloudCareUrl, "_blank");
@@ -554,7 +554,7 @@ formdesigner.ui = function () {
         ]);
         $modal.removeClass('fade');
         $modal.find('.modal-body')
-            .append($('<p />').text("You have UNSAVED changes in the Form. Cloudcare will not include these changes. "+
+            .append($('<p />').text("Cloudcare will show last saved Form. "+
                                     "To see latest changes in Cloudcare, please save changes."));
         $modal.modal('show');
     }
@@ -751,10 +751,15 @@ formdesigner.ui = function () {
         });
     };
 
-    var attachCloudCareButton = function () { console.log("hello");
-        $("#cloudcare-preview-url").click( function(action) { 
-            formdesigner.ui.cloudCareConfirmDialogue(formdesigner.opts.cloudCareUrl); 
-        });
+    var attachCloudCareButton = function () {
+        if (formdesigner.opts.cloudCareUrl) {
+            var $cloudCareButton = '<button id="cloudcare-preview-url" target="_blank" class="btn">' +
+                + '<i class="icon-play"></i>Try in CloudCare</button>';
+            $("#fd-save-button").before($cloudCareButton);
+            $("#cloudcare-preview-url").click( function(action) { 
+                formdesigner.ui.showCloudCareConfirmDialog(formdesigner.opts.cloudCareUrl); 
+            });
+        }
     }
 
     var setTreeNodeInvalid = function (uid, msg) {

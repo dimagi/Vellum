@@ -1754,7 +1754,7 @@ formdesigner.plugins.javaRosa = function (options) {
                 {
                     name: "Try in Cloudcare",
                     action: function () {   
-                        formdesigner.ui.cloudCareConfirmDialogue(formdesigner.opts.cloudCareUrl);
+                        formdesigner.ui.showCloudCareConfirmDialog(formdesigner.opts.cloudCareUrl);
                     } 
                 }
             );
