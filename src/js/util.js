@@ -336,19 +336,19 @@ formdesigner.util = (function(){
         var CHARS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
         var uuid = [], r, i;
 
-		// rfc4122 requires these characters
-		uuid[8] = uuid[13] = uuid[18] = uuid[23] = '-';
-		uuid[14] = '4';
+        // rfc4122 requires these characters
+        uuid[8] = uuid[13] = uuid[18] = uuid[23] = '-';
+        uuid[14] = '4';
 
-		// Fill in random data.  At i==19 set the high bits of clock sequence as
-		// per rfc4122, sec. 4.1.5
-		for (i = 0; i < 36; i++) {
-			if (!uuid[i]) {
-				r = Math.floor((Math.random()*16));
-				uuid[i] = CHARS[(i == 19) ? (r & 0x3) | 0x8 : r & 0xf];
-			}
-		}
-		return uuid.toString().replace(/,/g,'');
+        // Fill in random data.  At i==19 set the high bits of clock sequence as
+        // per rfc4122, sec. 4.1.5
+        for (i = 0; i < 36; i++) {
+            if (!uuid[i]) {
+                r = Math.floor((Math.random()*16));
+                uuid[i] = CHARS[(i == 19) ? (r & 0x3) | 0x8 : r & 0xf];
+            }
+        }
+        return uuid.toString().replace(/,/g,'');
     };
 
     /**
@@ -514,6 +514,37 @@ formdesigner.util = (function(){
         return elementNameRegex.test(name);
     };
 
+    var ESCAPE_CHARS = {
+        // the usual suspects
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+
+        // escape whitespace so it is preserved in serialize/parse round-trip
+        '\t': '&#9;',
+        '\n': '&#10;',
+        '\r': '&#13;'
+    };
+
+    /**
+     * Escape whitespace (other than spaces) in attribute values in addition
+     * to other characters that must be escaped.
+     *
+     * The parseXML converts all unescaped whitespace chars to spaces in
+     * addition to converting character entities to their equivalent characters.
+     * See http://www.w3.org/TR/REC-xml/#AVNormalize
+     */
+    that.escapeAttributeValue = function (text) {
+        return text.replace(/[&<>\n\r\t"]/g, function (c) { return ESCAPE_CHARS[c]; });
+    };
+
+    // monkey patch the xmlwriter for convenience
+    XMLWriter.prototype.writeAttributeString = function (name, value) {
+        if (this.active) {
+            this.active.a[name] = that.escapeAttributeValue(value);
+        }
+    };
     
     /**
      * Turns a list of strings into a single tab separated straing.
