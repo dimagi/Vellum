@@ -2118,7 +2118,7 @@ var mugs = (function () {
 
     var Barcode = BaseMug.$extend({
         typeName: 'Barcode Scan',
-        icon: 'icon-vellum-android-intent',
+        icon: 'icon-barcode',
         isODKOnly: true,
         __init__: function (options) {
             this.$super(options);
