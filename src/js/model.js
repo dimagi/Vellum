@@ -815,7 +815,7 @@ formdesigner.model = (function () {
                     var mug = node.getValue();
                         
                     if (mug.__className === "ReadOnly") {
-                        xmlWriter.writeString($('<div>').append(mug.controlElementRaw).clone().html());
+                        xmlWriter.writeXML($('<div>').append(mug.controlElementRaw).clone().html());
                         return;
                     }
                     var cProps = mug.controlElement,
@@ -1033,7 +1033,7 @@ formdesigner.model = (function () {
                 if (manualChildren && instanceMetadata.children) {
                     // seriously, this is what you have to do
                     // HT: http://stackoverflow.com/questions/652763/jquery-object-to-string
-                    writer.writeString($('<div>').append(instanceMetadata.children).clone().html());
+                    writer.writeXML($('<div>').append(instanceMetadata.children).clone().html());
                 }
                 writer.writeEndElement(); 
             };

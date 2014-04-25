@@ -1460,7 +1460,7 @@ formdesigner.plugins.javaRosa = function (options) {
                         if(form.name !== "default") {
                             xmlWriter.writeAttributeString('form', form.name);
                         }
-                        xmlWriter.writeString(val);
+                        xmlWriter.writeXML($('<div>').append(val).clone().html());
                         xmlWriter.writeEndElement();
                     }
                     xmlWriter.writeEndElement();

@@ -19,7 +19,7 @@
         "xmldom":     ">=0.1.16",
         "underscore": "~1.5.2",
 
-        "XMLWriter": "git://github.com/alexandern/XMLWriter.git#314f56f53bdc3cb76bd12a7db837be6710e0236f"
+        "XMLWriter": "git://github.com/dimagi/XMLWriter#7ad98f2fc39dc1484893a523cc546fd8cf0d4de3"
     },
     "devDependencies": {
         "napa": "*",
