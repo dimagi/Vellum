@@ -514,38 +514,6 @@ formdesigner.util = (function(){
         return elementNameRegex.test(name);
     };
 
-    var ESCAPE_CHARS = {
-        // the usual suspects
-        '&': '&amp;',
-        '<': '&lt;',
-        '>': '&gt;',
-        '"': '&quot;',
-
-        // escape whitespace so it is preserved in serialize/parse round-trip
-        '\t': '&#9;',
-        '\n': '&#10;',
-        '\r': '&#13;'
-    };
-
-    /**
-     * Escape whitespace (other than spaces) in attribute values in addition
-     * to other characters that must be escaped.
-     *
-     * The parseXML converts all unescaped whitespace chars to spaces in
-     * addition to converting character entities to their equivalent characters.
-     * See http://www.w3.org/TR/REC-xml/#AVNormalize
-     */
-    that.escapeAttributeValue = function (text) {
-        return text.replace(/[&<>\n\r\t"]/g, function (c) { return ESCAPE_CHARS[c]; });
-    };
-
-    // monkey patch the xmlwriter for convenience
-    XMLWriter.prototype.writeAttributeString = function (name, value) {
-        if (this.active) {
-            this.active.a[name] = that.escapeAttributeValue(value);
-        }
-    };
-    
     /**
      * Turns a list of strings into a single tab separated straing.
      * Replaces newlines with ' ' so they don't affect the spacing.

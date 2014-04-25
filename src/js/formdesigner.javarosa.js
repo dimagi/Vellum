@@ -1422,9 +1422,6 @@ formdesigner.plugins.javaRosa = function (options) {
     };
     
     this.contributeToModelXML = function (xmlWriter) {
-        var lang, id, langData, val, formData, 
-            form, i, allLangKeys, question;
-
         // here are the rules that govern itext
         // 0. iText items which aren't referenced by any questions are 
         // cleared from the form.
@@ -1441,10 +1438,10 @@ formdesigner.plugins.javaRosa = function (options) {
 
         var languages = Itext.getLanguages();
         var allItems = Itext.getNonEmptyItems();
-        var item, forms, form;
+        var item, forms, form, lang, val, i;
         if (languages.length > 0) {
             xmlWriter.writeStartElement("itext");
-            for (var i = 0; i < languages.length; i++) {
+            for (i = 0; i < languages.length; i++) {
                 lang = languages[i];
                 xmlWriter.writeStartElement("translation");
                 xmlWriter.writeAttributeString("lang", lang);
@@ -1463,7 +1460,7 @@ formdesigner.plugins.javaRosa = function (options) {
                         if(form.name !== "default") {
                             xmlWriter.writeAttributeString('form', form.name);
                         }
-                        xmlWriter.writeString(val);
+                        xmlWriter.writeXML($('<div>').append(val).clone().html());
                         xmlWriter.writeEndElement();
                     }
                     xmlWriter.writeEndElement();
