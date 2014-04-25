@@ -755,31 +755,22 @@ formdesigner.model = (function () {
 
             var createBindList = function () {
                 var bList = formdesigner.controller.form.getBindList(),
-                    mug,
-                        //vars populated by populateVariables()
-                        bEl,cons,consMsg,nodeset,type,relevant,required,calc,preld,preldParams,
-                    i, attrs, j;
-
-
+                    mug, i, attrs, j;
 
                 function populateVariables (mug){
-                    bEl = mug.bindElement;
-                    if (bEl) {
-                        return {
-                            nodeset: dataTree.getAbsolutePath(mug),
-                            type: bEl.dataType,
-                            constraint: bEl.constraintAttr,
-                            constraintMsg: bEl.constraintMsgAttr,
-                            constraintMsgItextID: bEl.constraintMsgItextID ? 
-                                bEl.constraintMsgItextID.id : undefined,
-                            relevant: bEl.relevantAttr,
-                            required: formdesigner.util.createXPathBoolFromJS(bEl.requiredAttr),
-                            calculate: bEl.calculateAttr,
-                            preload: bEl.preload,
-                            preloadParams: bEl.preloadParams
-                        }
-                    } else {
-                        return null;
+                    var bEl = mug.bindElement;
+                    return {
+                        nodeset: dataTree.getAbsolutePath(mug),
+                        type: bEl.dataType,
+                        constraint: bEl.constraintAttr,
+                        constraintMsg: bEl.constraintMsgAttr,
+                        constraintMsgItextID: bEl.constraintMsgItextID ?
+                            bEl.constraintMsgItextID.id : undefined,
+                        relevant: bEl.relevantAttr,
+                        required: formdesigner.util.createXPathBoolFromJS(bEl.requiredAttr),
+                        calculate: bEl.calculateAttr,
+                        preload: bEl.preload,
+                        preloadParams: bEl.preloadParams
                     }
                 }
 
