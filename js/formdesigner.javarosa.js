@@ -1200,7 +1200,21 @@ var itextMediaWidget = function (mug, language, form, options) {
         return $uiElem;
     };
 
+    var _updateValue = widget.updateValue;
+    widget.updateValue = function () {
+        _updateValue();
+        var val = widget.getValue();
+        // needed to fix issue with downloading media on the mobile phones, when URLs contain whitespaces.
+        if (val.indexOf(' ') !== -1) {
+            val = val.replace(/\s+$/g, '');
+            widget.setValue(val.replace(/\s/g, '_'));
+        }
+    };
+
     widget.updateReference = function () {
+        if (widget.getValue().indexOf(' ') !== -1) {
+            widget.updateValue()
+        }
         var currentPath = widget.getValue();
         $uiElem.attr('data-hqmediapath', currentPath);
         widget.mediaRef.updateRef(currentPath);

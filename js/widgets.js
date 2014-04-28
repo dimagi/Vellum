@@ -65,7 +65,7 @@ formdesigner.widgets = (function () {
             var isID = (['nodeID', 'defaultValue'].indexOf(widget.propName) !== -1),
                 val = widget.getValue();
 
-            if (isID && val.indexOf(' ') !== -1) { 
+            if (isID && val.indexOf(' ') !== -1) {
                 // attempt to sanitize nodeID and choice values
                 // TODO, still may allow some bad values
                 widget.setValue(val.replace(/\s/g, '_'));
