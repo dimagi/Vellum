@@ -758,19 +758,22 @@ formdesigner.model = (function () {
                     mug, i, attrs, j;
 
                 function populateVariables (mug){
-                    var bEl = mug.bindElement;
+                    var constraintMsg, bEl = mug.bindElement;
+                    if (bEl.constraintMsgItextID && !bEl.constraintMsgItextID.isEmpty()) {
+                        constraintMsg = "jr:itext('" + bEl.constraintMsgItextID.id + "')";
+                    } else {
+                        constraintMsg = bEl.constraintMsgAttr;
+                    }
                     return {
                         nodeset: dataTree.getAbsolutePath(mug),
                         type: bEl.dataType,
                         constraint: bEl.constraintAttr,
-                        constraintMsg: bEl.constraintMsgAttr,
-                        constraintMsgItextID: bEl.constraintMsgItextID ?
-                            bEl.constraintMsgItextID.id : undefined,
+                        "jr:constraintMsg": constraintMsg,
                         relevant: bEl.relevantAttr,
                         required: formdesigner.util.createXPathBoolFromJS(bEl.requiredAttr),
                         calculate: bEl.calculateAttr,
-                        preload: bEl.preload,
-                        preloadParams: bEl.preloadParams
+                        "jr:preload": bEl.preload,
+                        "jr:preloadParams": bEl.preloadParams
                     }
                 }
 
@@ -782,21 +785,13 @@ formdesigner.model = (function () {
                             xmlWriter.writeStartElement('bind');
                             for (j in attrs) {
                                 if (attrs.hasOwnProperty(j) && attrs[j]) {
-                                    if (j === "constraintMsg"){
-                                        xmlWriter.writeAttributeString("jr:constraintMsg",attrs[j]); //write it
-                                    } else if (j === "constraintMsgItextID") {
-                                        xmlWriter.writeAttributeString("jr:constraintMsg",  "jr:itext('" + attrs[j] + "')")
-                                    } else if (j === "preload") {
-                                        xmlWriter.writeAttributeString("jr:preload", attrs[j]);
-                                    } else if (j === "preloadParams") {
-                                        xmlWriter.writeAttributeString("jr:preloadParams", attrs[j]);
-                                    } else {
-                                        xmlWriter.writeAttributeString(j,attrs[j]);
-                                    }
+                                    xmlWriter.writeAttributeString(j, attrs[j]);
                                 }
                             }
                             _(mug.bindElement._rawAttributes).each(function (v, k) {
-                                xmlWriter.writeAttributeString(k, v);
+                                if (!attrs.hasOwnProperty(k)) {
+                                    xmlWriter.writeAttributeString(k, v);
+                                }
                             })
                             xmlWriter.writeEndElement();
                         }
@@ -1637,7 +1632,7 @@ var mugs = (function () {
                 var hasConstraintMsg = (bindBlock.constraintMsgAttr || 
                                         (bindBlock.constraintMsgItextID && bindBlock.constraintMsgItextID.id));
                 if (hasConstraintMsg && !hasConstraint) {
-                    return 'ERROR: You cannot have a Validation Error Message with no Validation COndition!';
+                    return 'ERROR: You cannot have a Validation Error Message with no Validation Condition!';
                 } else {
                     return 'pass';
                 }
