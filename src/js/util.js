@@ -340,19 +340,19 @@ formdesigner.util = (function(){
         var CHARS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
         var uuid = [], r, i;
 
-		// rfc4122 requires these characters
-		uuid[8] = uuid[13] = uuid[18] = uuid[23] = '-';
-		uuid[14] = '4';
+        // rfc4122 requires these characters
+        uuid[8] = uuid[13] = uuid[18] = uuid[23] = '-';
+        uuid[14] = '4';
 
-		// Fill in random data.  At i==19 set the high bits of clock sequence as
-		// per rfc4122, sec. 4.1.5
-		for (i = 0; i < 36; i++) {
-			if (!uuid[i]) {
-				r = Math.floor((Math.random()*16));
-				uuid[i] = CHARS[(i == 19) ? (r & 0x3) | 0x8 : r & 0xf];
-			}
-		}
-		return uuid.toString().replace(/,/g,'');
+        // Fill in random data.  At i==19 set the high bits of clock sequence as
+        // per rfc4122, sec. 4.1.5
+        for (i = 0; i < 36; i++) {
+            if (!uuid[i]) {
+                r = Math.floor((Math.random()*16));
+                uuid[i] = CHARS[(i == 19) ? (r & 0x3) | 0x8 : r & 0xf];
+            }
+        }
+        return uuid.toString().replace(/,/g,'');
     };
 
     /**
@@ -521,7 +521,6 @@ formdesigner.util = (function(){
         return elementNameRegex.test(name);
     };
 
-    
     /**
      * Turns a list of strings into a single tab separated straing.
      * Replaces newlines with ' ' so they don't affect the spacing.

@@ -753,31 +753,22 @@ formdesigner.model = (function () {
 
             var createBindList = function () {
                 var bList = formdesigner.controller.form.getBindList(),
-                    mug,
-                        //vars populated by populateVariables()
-                        bEl,cons,consMsg,nodeset,type,relevant,required,calc,preld,preldParams,
-                    i, attrs, j;
-
-
+                    mug, i, attrs, j;
 
                 function populateVariables (mug){
-                    bEl = mug.bindElement;
-                    if (bEl) {
-                        return {
-                            nodeset: dataTree.getAbsolutePath(mug),
-                            type: bEl.dataType,
-                            constraint: bEl.constraintAttr,
-                            constraintMsg: bEl.constraintMsgAttr,
-                            constraintMsgItextID: bEl.constraintMsgItextID ? 
-                                bEl.constraintMsgItextID.id : undefined,
-                            relevant: bEl.relevantAttr,
-                            required: formdesigner.util.createXPathBoolFromJS(bEl.requiredAttr),
-                            calculate: bEl.calculateAttr,
-                            preload: bEl.preload,
-                            preloadParams: bEl.preloadParams
-                        }
-                    } else {
-                        return null;
+                    var bEl = mug.bindElement;
+                    return {
+                        nodeset: dataTree.getAbsolutePath(mug),
+                        type: bEl.dataType,
+                        constraint: bEl.constraintAttr,
+                        constraintMsg: bEl.constraintMsgAttr,
+                        constraintMsgItextID: bEl.constraintMsgItextID ?
+                            bEl.constraintMsgItextID.id : undefined,
+                        relevant: bEl.relevantAttr,
+                        required: formdesigner.util.createXPathBoolFromJS(bEl.requiredAttr),
+                        calculate: bEl.calculateAttr,
+                        preload: bEl.preload,
+                        preloadParams: bEl.preloadParams
                     }
                 }
 
@@ -822,7 +813,7 @@ formdesigner.model = (function () {
                     var mug = node.getValue();
                         
                     if (mug.__className === "ReadOnly") {
-                        xmlWriter.writeString($('<div>').append(mug.controlElementRaw).clone().html());
+                        xmlWriter.writeXML($('<div>').append(mug.controlElementRaw).clone().html());
                         return;
                     }
                     var cProps = mug.controlElement,
@@ -1053,7 +1044,7 @@ formdesigner.model = (function () {
                 if (manualChildren && instanceMetadata.children) {
                     // seriously, this is what you have to do
                     // HT: http://stackoverflow.com/questions/652763/jquery-object-to-string
-                    writer.writeString($('<div>').append(instanceMetadata.children).clone().html());
+                    writer.writeXML($('<div>').append(instanceMetadata.children).clone().html());
                 }
                 writer.writeEndElement(); 
             };
@@ -2142,7 +2133,7 @@ var mugs = (function () {
 
     var Barcode = BaseMug.$extend({
         typeName: 'Barcode Scan',
-        icon: 'icon-vellum-android-intent',
+        icon: 'icon-barcode',
         isODKOnly: true,
         __init__: function (options) {
             this.$super(options);
