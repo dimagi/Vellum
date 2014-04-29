@@ -60,6 +60,7 @@ module.exports = function (grunt) {
                     'node_modules/xpath/xpath.js',
 
                     'src/js/lib/jstree/jquery.jstree.js',
+                    'node_modules/bootstrap-better-typeahead/js/bootstrap-better-typeahead.js',
                     'src/js/lib/fancybox/jquery.fancybox-1.3.4.js',
                     'src/js/lib/sha1.js',
                     'src/js/lib/diff_match_patch.js',
@@ -76,7 +77,8 @@ module.exports = function (grunt) {
                     'src/js/widgets.js',
                     'src/js/model.js',
                     'src/js/controller.js',
-                    'src/js/ui.js'
+                    'src/js/ui.js',
+                    'src/js/itemset.js'
                 ],
                 dest: 'dist/vellum.js'
             }

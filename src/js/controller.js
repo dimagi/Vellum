@@ -47,11 +47,6 @@ formdesigner.controller = (function () {
             });
         });
         
-        that.on('question-creation', function () {
-           that.setFormChanged(); //mark the form as 'changed'
-        });
-
-        
         that.on('question-itext-changed', function () {
             that.setFormChanged();
         });
@@ -455,101 +450,7 @@ formdesigner.controller = (function () {
         options = options || {};
         options.itext = options.itext || "link";
 
-        var depth = 0;
-
-        /**
-         * Copy a Mug and its descendants and insert them after the original
-         * Mug. Returns an array with two values:
-         *  1. The duplicate Mug.
-         *  2. An array of path replacements that should be executed on logic references.
-         *
-         * @param mug - the mugtype in the original tree to duplicate
-         * @param parentMug - the mugtype in the duplicate tree to insert into
-         * @param options {
-         *          itext: 'link' (default) or 'copy'
-         *        }
-         */
-        function duplicateMug(mug, parentMug, options) {
-            // clone mug and give everything new unique IDs
-            var duplicate = new mugs[mug.__className]();
-                pathReplacements = [];
-            duplicate.copyAttrs(mug);
-
-            // ensure consistency            
-            formdesigner.util.give_ufid(duplicate);
-            // clear existing event handlers for the source question
-            formdesigner.util.eventuality(duplicate);
-            formdesigner.util.setStandardMugEventResponses(duplicate);
-
-            if (mug.bindElement && mug.bindElement.nodeID) {
-                var newQuestionID = formdesigner.util.generate_question_id(
-                    mug.bindElement.nodeID
-                ); 
-                duplicate.bindElement.nodeID = newQuestionID;
-
-                if (mug.dataElement) {
-                    duplicate.dataElement.nodeID = newQuestionID;
-                }
-            }
-            
-            if (depth === 0 && mug.controlElement && 
-                mug.controlElement.defaultValue)
-            {
-                var newItemValue = formdesigner.util.generate_question_id(
-                    mug.controlElement.defaultValue
-                );
-                duplicate.controlElement.defaultValue = newItemValue;
-            }
-           
-            formdesigner.ui.skipNodeSelectEvent = options.itext !== "copy";
-            // insert mugtype into data and UI trees
-            if (depth > 0) {
-                if (parentMug) {
-                    formdesigner.ui.jstree("select_node", '#' + parentMug.ufid);
-                }
-
-                that.initQuestion(duplicate, parentMug);
-            } else {
-                formdesigner.ui.jstree("select_node", '#' + mug.ufid);
-                that.initQuestion(duplicate, mug, 'after');
-                formdesigner.ui
-                    .jstree("deselect_all")
-                    .jstree("select_node", '#' + duplicate.ufid);
-            }
-
-            formdesigner.model.LogicManager.updateAllReferences(duplicate);
-
-            if (options.itext === "copy") {
-                formdesigner.ui.displayMugProperties(duplicate);
-                that.unlinkCurrentQuestionItext();
-            }
-            formdesigner.ui.skipNodeSelectEvent = true;
-
-            var children = that.getChildren(mug);
-            depth++;
-            for (var i = 0; i < children.length; i++) {
-                pathReplacements = pathReplacements.concat(
-                    duplicateMug(children[i], duplicate, options)[1]);
-            }
-            depth--;
-
-            if (parentMug) {
-                formdesigner.ui
-                    .jstree("deselect_all")
-                    .jstree("select_node", '#' + parentMug.ufid);
-            }
-
-            pathReplacements.push({
-                mugId: mug.ufid,
-                from: that.form.dataTree.getAbsolutePath(mug),
-                to: that.form.dataTree.getAbsolutePath(duplicate)
-            });
-
-            return [duplicate, pathReplacements];
-        }
-
-        var oldSkip = formdesigner.ui.skipNodeSelectEvent,
-            selected = that.getCurrentlySelectedMug(),
+        var selected = that.getCurrentlySelectedMug(),
             parent = selected.parentMug,
             foo = duplicateMug(selected, parent, options),
             duplicate = foo[0],
@@ -564,6 +465,7 @@ formdesigner.controller = (function () {
             formdesigner.model.LogicManager.updatePath(pr.mugId, pr.from, pr.to, 
                 that.form.dataTree.getAbsolutePath(duplicate));
         }
+        var oldSkip = formdesigner.ui.skipNodeSelectEvent;
         formdesigner.ui.skipNodeSelectEvent = false;
 
         formdesigner.ui
@@ -574,6 +476,80 @@ formdesigner.controller = (function () {
 
         that.form.fire({type: "form-property-changed"});
     };
+        
+    /**
+     * Copy a Mug and its descendants and insert them after the original
+     * Mug. Returns an array with two values:
+     *  1. The duplicate Mug.
+     *  2. An array of path replacements that should be executed on logic references.
+     *
+     * @param mug - the mugtype in the original tree to duplicate
+     * @param parentMug - the mugtype in the duplicate tree to insert into
+     * @param options {
+     *          itext: 'link' (default) or 'copy'
+     *        }
+     */
+    function duplicateMug(mug, parentMug, options, depth) {
+        depth = depth || 0;
+        // clone mug and give everything new unique IDs
+        var duplicate = new mugs[mug.__className]();
+        duplicate.copyAttrs(mug);
+
+        // ensure consistency            
+        formdesigner.util.give_ufid(duplicate);
+        // clear existing event handlers for the source question
+        formdesigner.util.eventuality(duplicate);
+        formdesigner.util.setStandardMugEventResponses(duplicate);
+
+        if (mug.bindElement && mug.bindElement.nodeID) {
+            var newQuestionID = formdesigner.util.generate_question_id(
+                mug.bindElement.nodeID
+            ); 
+            duplicate.bindElement.nodeID = newQuestionID;
+
+            if (mug.dataElement) {
+                duplicate.dataElement.nodeID = newQuestionID;
+            }
+        }
+        
+        if (depth === 0 && mug.controlElement && 
+            mug.controlElement.defaultValue)
+        {
+            var newItemValue = formdesigner.util.generate_question_id(
+                mug.controlElement.defaultValue
+            );
+            duplicate.controlElement.defaultValue = newItemValue;
+        }
+       
+        // insert mugtype into data and UI trees
+        if (depth > 0) {
+            that.initQuestion(duplicate, parentMug, 'into');
+        } else {
+            that.initQuestion(duplicate, mug, 'after');
+        }
+
+        formdesigner.model.LogicManager.updateAllReferences(duplicate);
+
+        if (options.itext === "copy") {
+            formdesigner.ui.displayMugProperties(duplicate);
+            that.unlinkCurrentQuestionItext();
+        }
+
+        var children = that.getChildren(mug),
+            pathReplacements = [];
+        for (var i = 0; i < children.length; i++) {
+            pathReplacements = pathReplacements.concat(
+                duplicateMug(children[i], duplicate, options, depth + 1)[1]);
+        }
+
+        pathReplacements.push({
+            mugId: mug.ufid,
+            from: that.form.dataTree.getAbsolutePath(mug),
+            to: that.form.dataTree.getAbsolutePath(duplicate)
+        });
+
+        return [duplicate, pathReplacements];
+    }
 
     that.initQuestion = function (mug, refMug, position) {
         formdesigner.util.setStandardMugEventResponses(mug);
@@ -609,7 +585,10 @@ formdesigner.controller = (function () {
                 if (position !== 'after') {
                     position = 'after';
                 } else {
-                    refMug = refMug.parentMug;
+                    refMug = refMug ? refMug.parentMug : null;
+                    if (!refMug) {
+                        break;
+                    }
                 }
             }
         }
@@ -624,7 +603,10 @@ formdesigner.controller = (function () {
         }
 
         if (!success) {
-            return false;
+            throw new Error("Can't insert " + mug.__className + " into " + 
+                (refMug ? refMug.__className : refMug) + " " + 
+                that.form.dataTree.getAbsolutePath(refMug) + 
+                " or any of its ancestors.");
         }
 
         // insert into model
@@ -632,14 +614,7 @@ formdesigner.controller = (function () {
         formdesigner.pluginManager.javaRosa.Itext.updateForNewMug(mug);
         formdesigner.intentManager.syncMugWithIntent(mug);
 
-        formdesigner.ui.jstree("select_node", '#' + mug.ufid);
-        
-        this.fire({
-            type: "question-creation",
-            mug: mug
-        });
-
-        return mug;
+        that.setFormChanged();
     };
 
     that.removeCurrentQuestion = function () {
@@ -677,7 +652,7 @@ formdesigner.controller = (function () {
             // select question
             var children = that.getChildren(mug);
             if (children.length > 0) {
-                if (questionType !== "Select" && questionType !== "MSelect") {
+                if (questionType.indexOf("Select") === -1) {
                     throw "you can't change a Multiple/Single Choice question to a non-Choice " +
                           "question if it has Choices. Please remove all Choices " +
                           "and try again.";
@@ -703,10 +678,7 @@ formdesigner.controller = (function () {
             that.form.replaceMug(mug, newMug, 'data');
             that.form.replaceMug(mug, newMug, 'control');
 
-            formdesigner.ui.jstree("set_type", 
-                questionType, 
-                '#' + mug.ufid
-            );
+            formdesigner.ui.jstree("set_type", questionType, '#' + mug.ufid);
 
             mug = newMug;
 
@@ -724,17 +696,14 @@ formdesigner.controller = (function () {
             $currentChanger.after(formdesigner.widgets.getQuestionTypeChanger(mug)).remove();
         }
 
-        if (mug.__className === "Select" || mug.__className === "MSelect") {
+        if (mug.__className.indexOf("Select") !== -1) {
             that.updateMugChildren(mug);
         }
     };
 
     that.updateMugChildren = function (parentMug) {
         _.each(that.getChildren(parentMug), function (childMug) {
-            that.fire({
-                type: "parent-question-type-changed",
-                mug: childMug
-            });
+            formdesigner.ui.overrideJSTreeIcon(childMug.ufid, childMug);
         });
     };
 
@@ -1305,7 +1274,7 @@ formdesigner.controller = (function () {
             // we should do here for now just populate with the default
             labelItext = newLabelItext(mug);
         }
-        
+       
         cProps.labelItextID = labelItext;
         if (cProps.labelItextID.isEmpty()) {
             //if no default Itext has been set, set it with the default label
@@ -1451,10 +1420,11 @@ formdesigner.controller = (function () {
 
         //broadly categorize
         tagName = tagName.toLowerCase();
+        var hasItemset = $(cEl).children('itemset').length;
         if(tagName === 'select') {
-            MugClass = mugs.MSelect;
+            MugClass = hasItemset ? mugs.MSelectDynamic : mugs.MSelect;
         }else if (tagName === 'select1') {
-            MugClass = mugs.Select;
+            MugClass = hasItemset ? mugs.SelectDynamic : mugs.Select;
         }else if (tagName === 'trigger') {
             MugClass = mugs.Trigger;
         }else if (tagName === 'input') {
@@ -1467,6 +1437,8 @@ formdesigner.controller = (function () {
             }
         }else if (tagName === 'item') {
             MugClass = mugs.Item;
+        }else if (tagName === 'itemset') {
+            MugClass = mugs.Itemset;
         }else if (tagName === 'group') {
             MugClass = mugTypeFromGroup(cEl);
             if (MugClass === mugs.Repeat) {
@@ -1499,40 +1471,48 @@ formdesigner.controller = (function () {
     }
                 
     function populateMug (mug, cEl) {
-        var labelEl, hintEl, repeat_count, repeat_noaddremove;
-        
-        mug.populate(cEl);
         if (mug.__className === "ReadOnly") {
             mug.controlElementRaw = cEl;
             return;
         }
         
+        var $cEl = $(cEl),
+            labelEl, hintEl, repeat_count, repeat_noaddremove;
+        
 
         var tag = mug.controlElement.tagName;
         if(tag === 'repeat'){
-            labelEl = $($(cEl).parent().children('label'));
-            hintEl = $(cEl).parent().children('hint');
-            repeat_count = $(cEl).popAttr('jr:count');
+            labelEl = $($cEl.parent().children('label'));
+            hintEl = $cEl.parent().children('hint');
+            repeat_count = $cEl.popAttr('jr:count');
             repeat_noaddremove = formdesigner.util.parseBoolAttributeValue(
-                $(cEl).popAttr('jr:noAddRemove'));
+                $cEl.popAttr('jr:noAddRemove'));
 
         } else {
-            labelEl = $(cEl).children('label');
-            hintEl = $(cEl).children('hint');
+            labelEl = $cEl.children('label');
+            hintEl = $cEl.children('hint');
         }
 
-        if (labelEl.length > 0) {
+        if (labelEl.length > 0 && mug.__className !== 'Itemset') {
             parseLabel(labelEl, mug);
         }
         if (hintEl.length > 0) {
             parseHint (hintEl, mug);
         }
         if (tag === 'item') {
-            parseDefaultValue($(cEl).children('value'),mug);
+            parseDefaultValue($cEl.children('value'),mug);
         }
 
         if (tag === 'repeat') {
             parseRepeatVals(repeat_count, repeat_noaddremove, mug);
+        }
+
+        if (tag === 'itemset') {
+            mug.controlElement.setAttr('itemsetData', {
+                nodeset: $cEl.attr('nodeset'),
+                labelRef: $cEl.children('label').attr('ref'),
+                valueRef: $cEl.children('value').attr('ref')
+            });
         }
 
         formdesigner.intentManager.syncMugWithIntent(mug);
@@ -1783,7 +1763,7 @@ formdesigner.controller = (function () {
 
             var data = $(instances[0]).children();
             if($(xml).find('parsererror').length > 0) {
-                throw 'PARSE ERROR! Message follows:' + $(xml).find('parsererror').find('div').html();
+                throw 'PARSE ERROR!:' + $(xml).find('parsererror').find('div').html();
             }
             
             if(title.length > 0) {
@@ -1801,7 +1781,6 @@ formdesigner.controller = (function () {
             if(data.length === 0) {
                 that.addParseErrorMsg('No Data block was found in the form.  Please check that your form is valid!');
             }
-           
             
             parseDataTree (data[0]);
             parseBindList (binds);

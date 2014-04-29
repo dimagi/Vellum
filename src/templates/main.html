@@ -106,6 +106,60 @@
     </div>
 </script>
 
+<script type="text/template" id="fd-template-external-data-source">
+    <select id="data_source">
+        <option value="<%= NONE %>">Choose a Data Source...</option>
+        <% _.each(options, function (option) { %>
+        <option value="<%= option.value %>">
+            <%= option.name %>
+        </option>
+        <% }); %>
+        <option value="<%= CUSTOM %>">Custom...</option>
+    </select>
+</script>
+
+<script type="text/template" id="fd-template-source-level">
+    <select>
+        <% _.each(options, function (option) { %>
+        <option value="<%= option %>">
+            <%= option %>
+        </option>
+        <% }); %>
+    </select>
+</script>
+
+<script type="text/template" id="fd-template-custom-data-source">
+    <div id="data_source_modal" class="modal hide fade">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h3>Add Custom Data Source</h3>
+      </div>
+      <div class="modal-body">
+          <div id="source_error" class="alert alert-error hide">
+              Invalid values. Please try again or cancel.
+          </div>
+          <form class="form-horizontal">
+              <div class="control-group">
+                  <label class="control-label" for="source_uri">Source URI</label>
+                  <div class="controls">
+                      <input type="text" id="source_uri" placeholder="jr://path/to/instance">
+                  </div>
+              </div>
+              <div class="control-group">
+                  <label class="control-label" for="node_levels">Level name hierarchy</label>
+                  <div class="controls">
+                      <input type="text" id="node_levels" placeholder="root/level1/level2/leaf">
+                  </div>
+              </div>
+          </form>
+      </div>
+      <div class="modal-footer">
+        <a id="data_source_cancel" href="#" class="btn">Cancel</a>
+        <a id="data_source_save" href="#" class="btn btn-primary">Save</a>
+      </div>
+    </div>
+</script>
+
 
 <script type="text/template" id="fd-template-multimedia-modal">
     <div class="modal hide fade" id="<%= modalId %>">
@@ -329,11 +383,13 @@
 
 <script type="text/template" id="fd-template-question-toolbar">
     <div class="fd-question-toolbar-container clearfix">
+        <% if (isCopyable) { %>
         <div class="btn-toolbar pull-left">
             <button id="fd-button-copy" type="button" class="btn" tabindex="-1">
                 <i class="icon-copy"></i> Copy
             </button>
         </div>
+        <% } %>
         <% if (isDeleteable) { %>
         <div class="btn-toolbar pull-right">
             <button id="fd-button-remove" type="button" class="btn btn-danger"  tabindex="-1">

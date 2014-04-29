@@ -401,7 +401,9 @@ var ItextModel = function() {
         // set default itext id/values
         if (mug.controlElement) {
             // set label if not there
-            if (!mug.controlElement.labelItextID) {
+            if (!mug.controlElement.labelItextID && 
+                mug.controlElement.__spec.labelItextID.presence !== "notallowed")
+            {
                 mug.controlElement.labelItextID = mug.getDefaultLabelItext(defaultLabelValue);
                 this.addItem(mug.controlElement.labelItextID);
             }
