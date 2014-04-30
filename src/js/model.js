@@ -2199,7 +2199,6 @@ var mugs = (function () {
     var Trigger = BaseMug.$extend({
         typeName: 'Label',
         icon: 'icon-tag',
-        isTypeChangeable: false,
         __init__: function (options) {
             this.$super(options);
             this.controlElement.tagName = "trigger";
