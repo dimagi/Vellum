@@ -346,20 +346,24 @@
 
 <script type="text/template" id="fd-template-question-type-changer">
     <div class="btn-group question-type-changer">
-        <a class="btn dropdown-toggle current-question <% if (!canChangeType) { %> disabled <% } %>"
+        <a class="btn dropdown-toggle current-question"
             data-toggle="dropdown" href="#">
             <i class="<%=currentQuestionIcon%>"></i> 
             <%= currentTypeName %> <span class="caret"></span>
         </a>
         <ul class="dropdown-menu">
-            <li class="nav-header">Change Question Type To</li>
-            <% _.each(questions, function(question) { %>
-            <li>
-                <a href="#" class="change-question" data-qtype="<%=question.slug%>">
-                    <i class="<%=question.icon%>"></i> <%=question.name%>
-                </a>
-            </li>
-            <% }); %>
+            <% if (questions.length === 0) { %>
+                <li class="nav-header">Cannot Change Question Type</li>
+            <% } else { %>
+                <li class="nav-header">Change Question Type To</li>
+                <% _.each(questions, function(question) { %>
+                <li>
+                    <a href="#" class="change-question" data-qtype="<%=question.slug%>">
+                        <i class="<%=question.icon%>"></i> <%=question.name%>
+                    </a>
+                </li>
+                <% }); %>
+            <% } %>
         </ul>
     </div>
 </script>
