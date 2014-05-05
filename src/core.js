@@ -230,10 +230,6 @@ define([
         mugs.setSpec(this.getMugSpec());
         var _this = this,
             bindBeforeUnload = this.opts().core.bindBeforeUnload;
-        // opts.allowLanguageEdits = !(opts["langs"] && opts["langs"].length > 0
-        // && opts["langs"][0] !== "");
-        // opts.langs = opts.allowLanguageEdits ? null : opts.langs;  //clean up
-        // so it's definitely an array with something or null.
         this.data.core.saveButton = SaveButton.init({
             save: function() {
                 if (!_this.currentMugHasUnsavedChanges()) {
@@ -1790,113 +1786,5 @@ define([
             $(window).bind('beforeunload', handler);
         }
     }, fn);
-
- /*  currently never run
--        var closeDialog = function (event, ui) {
--            var currentMug = that.getCurrentlySelectedMug();
--            // rerender the side nav so the language list refreshes
--            // this is one way to do this although it might be overkill
--            that.reloadTree();
--            if (currentMug) {
--                // also rerender the mug page to update the inner UI.
--                // this is a fickle beast. something in the underlying
--                // spaghetti requires the first call before the second
--                // and requires both of these calls after the reloadTree call
--                that.jstree('select_node', '#' + currentMug.ufid);
--                that.displayMugProperties(currentMug);
--            }
--        };
--    var newLang = null;
--    var addLanguageDialog = function() {
--        function beforeClose(event, ui) {
--            //grab the input value and add the new language
--            if ($('#fd-new-lang-input').val()) {
--                that.form.data.javaRosa.Itext.addLanguage($('#fd-new-lang-input').val());
--            }
--        }
--
--        var div = $("#fd-dialog-confirm"),input,contStr;
--
--        div.dialog("destroy");
--        div.empty();
--
--
--        contStr = '<p> <span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>' +
--                '<span class="fd-message">Enter name of new Language</span> ' +
--                '<div id="fd-new-lang-div"><input id="fd-new-lang-input" /></div>' +
--                '</p>';
--        div.append(contStr);
--
--        div.dialog({
--            autoOpen: false,
--            modal: true,
--            buttons: {
--                "Create": function () {
--                    $(this).dialog("close");
--                },
--                "Cancel": function () {
--                    $('#fd-new-lang-input').val('');
--                    $(this).dialog("close");
--                }
--            },
--            beforeClose: beforeClose,
--            close: closeDialog
--        });
--    };
--
--    var removeLanguageDialog = function () {
--        function beforeClose(event, ui) {
--            //grab the input value and add the new language
--            if ($('#fd-remove-lang-input').val() != '') {
-           that.form.data.javaRosa.Itext.removeLanguage($('#fd-remove-lang-input').val());
--                that.data.ui.currentItextDisplayLanguage = that.form.data.javaRosa.Itext.getDefaultLanguage();
--            }
--        }
--
--        var div = $("#fd-dialog-confirm"),input,contStr, langToBeRemoved, buttons, msg;
--
--        div.dialog("destroy");
--        div.empty();
--
--
--        if (that.form.data.javaRosa.Itext.getLanguages().length == 1) {
--            //When there is only one language in the
--            langToBeRemoved = '';
--            msg = 'You need to have at least one language in the form.  Please add a new language before removing this one.';
--        } else {
--            langToBeRemoved = that.data.ui.currentItextDisplayLanguage;
--            msg = 'Are you sure you want to permanently remove this language?';
--        }
--
--        contStr = '<p> <span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>' +
--                '<span class="fd-message">' + msg + '</span> ' +
--                '<div id="fd-new-lang-div"><input id="fd-remove-lang-input" type="hidden"/></div>' +
--                '</p>';
--
--        div.append(contStr);
--
--        // We use the following hidden input box as a flag to determine what to do in the beforeClose() func above.
--        $('#fd-remove-lang-input').val(langToBeRemoved);
--
--        buttons = {};
--        buttons["Cancel"] = function () {
--            $('#fd-remove-lang-input').val('');
--            $(this).dialog("close");
--        };
--
--        if (langToBeRemoved != '') {
--            buttons["Yes"] = function () {
--                $(this).dialog("close");
--            };
--        }
--
--        div.dialog({
--            autoOpen: false,
--            modal: true,
--            buttons: buttons,
--            beforeClose: beforeClose,
--            close: closeDialog
--        });
--    }; */
 
 });
