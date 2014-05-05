@@ -1,4 +1,11 @@
-/dist
+/bower_components
+/dist/*.map
+/dist/*.tmp.css
+/dist/vellum.css
+/dist/vellum.js
 /js/node_modules
 /node_modules
+/src/less/*.css
+
+npm-debug.log
 *~
