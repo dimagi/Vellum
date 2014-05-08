@@ -445,9 +445,7 @@ formdesigner.widgets = (function () {
         $baseToolbar.find('#fd-button-copy').click(function () {
             formdesigner.controller.duplicateCurrentQuestion({itext: 'copy'});
         });
-        if (mug.__className !== "Item") {
-            $baseToolbar.find('.btn-toolbar.pull-left').prepend(this.getQuestionTypeChanger(mug));
-        }
+        $baseToolbar.find('.btn-toolbar.pull-left').prepend(this.getQuestionTypeChanger(mug));
         return $baseToolbar;
     };
 
@@ -455,6 +453,9 @@ formdesigner.widgets = (function () {
         var getQuestionList = function (mug) {
             var questions = formdesigner.ui.QUESTIONS_IN_TOOLBAR;
             var ret = [];
+            if (!_.all(changeable) || !mug.isTypeChangeable) {
+                return ret;
+            }
             for (var i = 0; i < questions.length; i++) {
                 var q = mugs[questions[i]];
                 if (q.prototype.isTypeChangeable && mug.$class.prototype !== q.prototype) {
@@ -471,7 +472,6 @@ formdesigner.widgets = (function () {
                     formdesigner.controller.form.dataTree.getAbsolutePath(mug));
 
         var $questionTypeChanger = formdesigner.ui.getTemplateObject('#fd-template-question-type-changer', {
-            canChangeType: _.all(changeable) && mug.isTypeChangeable,
             currentQuestionIcon: mug.getIcon(),
             currentTypeName: mug.typeName,
             questions: getQuestionList(mug)
