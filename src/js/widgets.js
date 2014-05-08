@@ -41,17 +41,35 @@ formdesigner.widgets = (function () {
             return this.definition.lstring ? this.definition.lstring : this.propName;
         };
 
-        widget.getTitle = function () {
-            return this.definition && this.definition.title ? this.definition.title : "";
+        widget.getHelp = function () {
+            if (this.definition && this.definition.help) {
+                return {
+                    text: this.definition.help,
+                    url: this.definition.helpURL
+                };
+            }
+            return null;
         }
 
         widget.getLabel = function (forId) {
             var displayName = widget.getDisplayName(),
-                $label = $("<label />")
-                    .text(displayName)
-                    .attr("title", widget.getTitle())
+                $label = $("<label />").text(displayName),
+                help = widget.getHelp();
             if (forId) {
-                $label.attr("for", forId)
+                $label.attr("for", forId);
+            }
+            if (help) {
+                var $help = $("<a />").attr({
+                    "href": (help.url || "#"),
+                    "class": "fd-help",
+                    "target": "_blank",
+                    "data-title": displayName,
+                    "data-content": help.text
+                });
+                if (!help.url) {
+                    $help.click(function (e) { e.preventDefault(); });
+                }
+                $label.append($help);
             }
             return $label;
         };

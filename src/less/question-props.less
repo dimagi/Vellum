@@ -43,19 +43,6 @@
   .accordion-heading {
     margin-bottom: 0;
 
-    > .fd-help {
-      right: 15px;
-      top: 7px;
-      display: block;
-      font-size: @baseFontSize*2;
-      padding: 5px;
-
-
-      &:hover {
-        text-decoration: none;
-        color: @green;
-      }
-    }
   }
 
   .accordion-toggle {
@@ -68,6 +55,20 @@
 
   .accordion-inner {
     padding-bottom: @gridGutterWidth;
+  }
+
+  .fd-help {
+    right: 15px;
+    top: 7px;
+    display: block;
+    font-size: @baseFontSize*1.5;
+    padding: 5px;
+
+    &:hover {
+      text-decoration: none;
+      font-size: @baseFontSize*2;
+      color: @green;
+    }
   }
 }
 

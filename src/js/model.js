@@ -2217,7 +2217,7 @@ var mugs = (function () {
             return $.extend({}, this.$super(), {
                 appearanceControl: {
                     lstring: 'Add confirmation checkbox',
-                    title: 'Add a confirmation message and checkbox below the label. Available on Android only.',
+                    help: 'Add a confirmation message and checkbox below the label. Available on Android only.',
                     editable: 'w',
                     visibility: 'visible',
                     presence: 'optional',
