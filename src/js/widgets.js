@@ -45,16 +45,15 @@ formdesigner.widgets = (function () {
             return this.definition && this.definition.title ? this.definition.title : "";
         }
 
-        widget.getLabel = function () {
-            var displayName = widget.getDisplayName();
-            if (displayName) {
-                return $("<label />")
+        widget.getLabel = function (forId) {
+            var displayName = widget.getDisplayName(),
+                $label = $("<label />")
                     .text(displayName)
                     .attr("title", widget.getTitle())
-                    .attr("for", widget.getID());
-            } else {
-                return null;
+            if (forId) {
+                $label.attr("for", forId)
             }
+            return $label;
         };
 
         widget.getControl = function () {
@@ -98,8 +97,7 @@ formdesigner.widgets = (function () {
         };
 
         widget.getUIElement = function () {
-            return getUIElement(widget.getControl(), widget.getDisplayName(),
-                                !!widget.isDisabled());
+            return getUIElement(widget);
         };
 
         return widget;
@@ -194,9 +192,7 @@ formdesigner.widgets = (function () {
         };
 
         widget.getUIElement = function () {
-            var elem = getUIElement(
-                widget.getControl(), widget.getDisplayName(), !!widget.isDisabled());
-            return getUIElementWithEditButton(elem, function () {
+            return getUIElementWithEditButton(widget, function () {
                 formdesigner.controller.displayXPathEditor({
                     value: mug.getPropertyValue(options.path),
                     xpathType: widget.definition.xpathType,
@@ -358,8 +354,9 @@ formdesigner.widgets = (function () {
         return widget;
     };
     
-    function getUIElementWithEditButton($uiElem, editFn) {
-        var input = $uiElem.find('input'),
+    function getUIElementWithEditButton(widget, editFn) {
+        var $uiElem = getUIElement(widget),
+            input = $uiElem.find('input'),
             isDisabled = input ? input.prop('disabled') : false;
 
         var button = $('<button />')
@@ -376,26 +373,18 @@ formdesigner.widgets = (function () {
         return $uiElem;
     }
     
-    function getUIElement($input, labelText, isDisabled) {
+    function getUIElement(widget) {
         var uiElem = $("<div />").addClass("widget control-group"),
             $controls = $('<div class="controls" />'),
-            $label = getLabel(labelText, $input.attr('id'));
+            $input = widget.getControl(),
+            $label = widget.getLabel($input.attr("id"));
         $label.addClass('control-label');
         uiElem.append($label);
 
-        $input.prop('disabled', !!isDisabled);
+        $input.prop('disabled', !!widget.isDisabled());
         $controls.append($input);
         uiElem.append($controls);
         return uiElem;
-    }
-
-    function getLabel(text, forId) {
-        var $label = $("<label />")
-            .text(text);
-        if (forId) {
-            $label.attr("for", forId);
-        }
-        return $label;
     }
 
 
