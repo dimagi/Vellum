@@ -10,8 +10,6 @@ define([
     var corePlugins = [
         'core',
         'ignore',
-        'itemset',
-        // todo: make optional (will benefit code quality)
         'javaRosa',
         'lock',
         'uploader',

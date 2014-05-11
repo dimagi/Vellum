@@ -9,6 +9,16 @@ define([
     util,
     $
 ) {
+    $.fn.popAttr = function (name) {
+        var val = this.attr(name);
+        try {
+            this.removeAttr(name);
+        } catch (e) {
+            // catch InvalidCharacterError due to \: in attribute name
+        }
+        return val;
+    };
+
     var mugTypes = mugs.mugTypes;
     function parseXForm(xmlString, formOpts, vellum) {
         var Form = form_.Form,
@@ -148,7 +158,7 @@ define([
         };
 
         if(root.children().length === 0) {
-            that.parseErrors.push(
+            form.parseErrors.push(
                 'Data block has no children elements! Please make sure your form is a valid JavaRosa XForm!'
             );
         }

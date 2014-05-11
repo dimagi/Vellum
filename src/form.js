@@ -43,53 +43,62 @@ define([
         return that;
     };
 
-    var Form = function (opts, vellum) {
-        var that = {
-            externalInstances: {}
-        },
-            dataTree, controlTree;
+    function convertToId(str) {
+        return str
+            .toLowerCase()
+            .replace(/ /g,'_')
+            .replace(/[^\w-]+/g,'');
+    }
 
-        var logicManager = new logic.LogicManager(that, {
+    function Form (opts, vellum) {
+        var _this = this;
+        this.externalInstances = {};
+
+        this._logicManager = new logic.LogicManager(this, {
                 allowedDataNodeReferences: opts.allowedDataNodeReferences
-            }),
-            fireChange = function (mug) {
-                that.fire({
-                    type: 'change',
-                    mug: mug
-                });
-            };
+            });
 
         // Some things in the mug methods depend on the UI.  These should
         // eventually be refactored out.
-        that.vellum = vellum;
-        that.intentManager = intents.IntentManager(that);
+        this.vellum = vellum;
+        this.intentManager = intents.IntentManager(this);
 
-        that.formName = 'New Form';
-        that.dataTree = dataTree = new Tree('data', 'data');
-        that.dataTree.on('change', function (e) {
-            fireChange(e.mug);
+        this.formName = 'New Form';
+        this.dataTree = new Tree('data', 'data');
+        this.dataTree.on('change', function (e) {
+            _this.fireChange(e.mug);
         });
-        that.controlTree = controlTree = new Tree('data', 'control');
-        that.controlTree.on('change', function (e) {
-            fireChange(e.mug);
+        this.controlTree = new Tree('data', 'control');
+        this.controlTree.on('change', function (e) {
+            _this.fireChange(e.mug);
         });
-        that.instanceMetadata = [InstanceMetadata({})];
-        that.errors = [];
+        this.instanceMetadata = [InstanceMetadata({})];
+        this.errors = [];
+        
+        this.processInstancesConfig(opts.externalInstances);
+        this.question_counter = 1;
         
         //make the object event aware
-        util.eventuality(that);
-        
-        that.processInstancesConfig = function (instances) {
+        util.eventuality(this);
+    }
+    Form.prototype = {
+        fireChange: function (mug) {
+            this.fire({
+                type: 'change',
+                mug: mug
+            });
+        },
+        processInstancesConfig: function (instances) {
+            var _this = this;
             // set instance id, can be overridden at parse time if an instance with a
             // different ID has the expected src URI.  Also add an index to each subset
             // type which can be used as a key to reference that subset.
-            that.externalInstances = {};
+            this.externalInstances = {};
             _.each(instances, function (instance) {
-                that.addInstance(instance);
+                _this.addInstance(instance);
             });
-        };
-
-        that.addInstance = function (instance) {
+        },
+        addInstance: function (instance) {
             instance.defaultId = instance.defaultId || convertToId(instance.sourceUri);
             instance.id = instance.defaultId;
             _.each(instance.levels, function (level) {
@@ -101,40 +110,27 @@ define([
                 });
                 level.subsets = mappedSubsets;
             });
-            that.externalInstances[instance.id] = instance;
+            this.externalInstances[instance.id] = instance;
             return instance;
-        };
-
-        that.processInstancesConfig(opts.externalInstances);
-
-        function convertToId(str) {
-            return str
-                .toLowerCase()
-                .replace(/ /g,'_')
-                .replace(/[^\w-]+/g,'');
-        }
-
-        that.setFormID = function (id) {
-            that.dataTree.setRootID(id);
-            that.controlTree.setRootID(id);
-        };
-
-        that.setAttr = function (slug, val) {
-            that[slug] = val;
-            that.fire({
+        },
+        setFormID: function (id) {
+            this.dataTree.setRootID(id);
+            this.controlTree.setRootID(id);
+        },
+        setAttr: function (slug, val) {
+            this[slug] = val;
+            this.fire({
                 type: 'change'
             });
-        };
-
-        that.createXML = function () {
-            return writer.createXForm(that);
-        };
-
+        },
+        createXML: function () {
+            return writer.createXForm(this);
+        },
         /**
          * Loops through the data and the control trees and picks out all the
          * unique bind elements.  Returns a list of Mugs
          */
-        that.getBindList = function(){
+        getBindList: function(){
             var bList = [],
                 dataTree,controlTree,dBindList,cBindList,i,
                 getBind = function(node){ //the function we will pass to treeMap
@@ -171,13 +167,12 @@ define([
                 }
             }
             return bList;
-        };
-
+        },
         /**
          * Goes through and grabs all of the data nodes (i.e. nodes that are only data nodes (possibly with a bind) without any
          * kind of control.  Returns a flat list of these nodes (list items are mugs).
          */
-        that.getDataNodeList = function () {
+        getDataNodeList: function () {
             return this.dataTree.treeMap(function(node){
                 if (!node.getValue() || node.isRootNode) {
                     return null;
@@ -190,15 +185,14 @@ define([
                     return mug;
                 }
             });
-        };
-        
+        },
         /**
          * Walks through both internal trees (data and control) and grabs
          * all mugs that are not (1)Choices.  Returns
          * a flat list of unique mugs.  This list is primarily fo the
          * autocomplete skip logic wizard.
          */
-        that.getMugList = function (includeSelectItems) {
+        getMugList: function (includeSelectItems) {
             var cTree, dTree, treeFunc, cList, dList, mergeList;
 
             treeFunc = function (node) {
@@ -218,22 +212,8 @@ define([
             dList = this.dataTree.treeMap(treeFunc);
 
             return util.mergeArray(cList, dList); //strip dupes and merge
-        };
-
-        /**
-         * Searches through BOTH trees and returns
-         * a mug if found (null if nothing found)
-         */
-        that.getMugByUFID = function (ufid) {
-            var mug = dataTree.getMugFromUFID(ufid);
-            if(!mug) {
-                mug = controlTree.getMugFromUFID(ufid);
-            }
-
-            return mug;
-        };
-
-        that.getInvalidMugs = function () {
+        },
+        getInvalidMugs: function () {
             var mugListC, mugListD, result, controlTree, dataTree,
                 mapFunc = function (node) {
                     if (node.isRootNode) {
@@ -256,14 +236,13 @@ define([
             result = util.mergeArray(mugListC, mugListD);
 
             return result;
-        };
-
+        },
         /**
          * Goes through both trees and picks out all the invalid
          * Mugs and returns a dictionary with the mug.ufid as the key
          * and the validation object as the value
          */
-        that.getInvalidMugUFIDs = function () {
+        getInvalidMugUFIDs: function () {
             var badMugs = this.getInvalidMugs(), result = {}, i;
             for (i in badMugs){
                 if(badMugs.hasOwnProperty(i)){
@@ -271,87 +250,78 @@ define([
                 }
             }
             return result;
-        };
-    
-
-        that.addInstanceIfNotExists = function (attrs) {
-            var hasInstance = _.any(that.instanceMetadata, function (m) {
+        },
+        addInstanceIfNotExists: function (attrs) {
+            var hasInstance = _.any(this.instanceMetadata, function (m) {
                 return m.attributes.src == attrs.src;
             });
             if (!hasInstance) {
-                that.instanceMetadata.push(InstanceMetadata({
+                this.instanceMetadata.push(InstanceMetadata({
                     src: attrs.src,
                     id: attrs.id
                 }));
             }
-        };
-        
-        that.updateError = function (errObj, options) {
+        },
+        updateError: function (errObj, options) {
             errObj = FormError(errObj);
             options = options || {};
             if (!errObj.key) {
-                that.errors.push(errObj);
+                this.errors.push(errObj);
             }
             else {
                 var removed = null;
-                for (var i = 0; i < that.errors.length; i++) {
-                    if (errObj.isMatch(that.errors[i])) {
-                        removed = that.errors.splice(i, 1, errObj);
+                for (var i = 0; i < this.errors.length; i++) {
+                    if (errObj.isMatch(this.errors[i])) {
+                        removed = this.errors.splice(i, 1, errObj);
                     }
                 }
                 if (!removed) {
-                    that.errors.push(errObj);
+                    this.errors.push(errObj);
                 }
             }
-            that.fire({
+            this.fire({
                 type: 'error-change',
-                errors: that.errors
+                errors: this.errors
             });
-        };
-        
-        that.clearErrors = function (type, options) {
+        },
+        clearErrors: function (type, options) {
             options = options || {};
-            for (var i = 0; i < that.errors.length; i++) {
-                that.errors = that.errors.filter(function (err) {
+            for (var i = 0; i < this.errors.length; i++) {
+                this.errors = this.errors.filter(function (err) {
                     return err.level !== type;
                 });
             }
-            that.fire({
+            this.fire({
                 type: 'error-change',
-                errors: that.errors
+                errors: this.errors
             });
-        };
-        
-        
-        that.clearError = function (errObj, options) {
+        },
+        clearError: function (errObj, options) {
             options = options || {};
             var removed = null;
-            for (var i = 0; i < that.errors.length; i++) {
-                if (errObj.isMatch(that.errors[i])) {
-                    removed = that.errors.splice(i, 1);
+            for (var i = 0; i < this.errors.length; i++) {
+                if (errObj.isMatch(this.errors[i])) {
+                    removed = this.errors.splice(i, 1);
                     break;
                 }
             }
             if (removed) {
-                that.fire({
+                this.fire({
                     type: 'error-change',
-                    errors: that.errors
+                    errors: this.errors
                 });
             }
-        };
-        
-
+        },
         /**
          * Goes through all mugs (in data and control tree)
          * to determine if all mugs are Valid and ok for form creation.
          */
-        that.isFormValid = function () {
+        isFormValid: function () {
             return this.dataTree.isTreeValid() && this.controlTree.isTreeValid();
-        };
-
+        },
         /**
          * Searches through the dataTree for a mug
-         * that matches the given nodeID (e.g. mug.dataElement.nodeID)
+         * this matches the given nodeID (e.g. mug.dataElement.nodeID)
          *
          * WARNING:
          * Some Mugs (such as for example 'Items' or 'Triggers' or certain 'Group's may not have
@@ -359,7 +329,7 @@ define([
          * in such cases... other methods need to be used as this method will not find a match.
          * @param nodeID
          */
-        that.getMugsByNodeID = function (nodeID) {
+        getMugsByNodeID: function (nodeID) {
             var mapFunc = function (node) {
                 if(node.isRootNode){
                     return;
@@ -380,12 +350,10 @@ define([
                     return mug;
                 }
             };
-
             return dataTree.treeMap(mapFunc);
-        };
-
-        that.getMugChildByNodeID = function (mug, nodeID) {
-            var mugs = that.getMugsByNodeID(nodeID),
+        },
+        getMugChildByNodeID: function (mug, nodeID) {
+            var mugs = this.getMugsByNodeID(nodeID),
                 siblingMugs = _.filter(mugs, function (m) {
                     return m.parentMug === mug;
                 });
@@ -394,27 +362,24 @@ define([
             } else {
                 return null;
             }
-        };
-        
-        that.insertMug = function (refMug, newMug, position) {
+        },
+        insertMug: function (refMug, newMug, position) {
             if (newMug.dataElement && !newMug.controlElement) {
                 // data node, stick it at the end of the form by default
-                that.dataTree.insertMug(newMug, 'after', null);
+                this.dataTree.insertMug(newMug, 'after', null);
                 return;
             }
             
             position = position || "into";
 
             if (newMug.dataElement) {
-                that.dataTree.insertMug(newMug, position, refMug);
+                this.dataTree.insertMug(newMug, position, refMug);
             }
 
             if (newMug.controlElement) {
-                that.controlTree.insertMug(newMug, position, refMug);
+                this.controlTree.insertMug(newMug, position, refMug);
             }
-        };
-        
-
+        },
         /**
          * Replace a Mug that already exists in a tree with a new
          * one.  It is up to the caller to ensure that the MT
@@ -426,7 +391,7 @@ define([
          *
          * @return - true if a replacement occurred. False if no match was found for oldMug
          */
-        that.replaceMug = function (oldMug, newMug, treeType){
+        replaceMug: function (oldMug, newMug, treeType){
             var tree = treeType === 'data' ? dataTree : controlTree;
             tree.treeMap(function (node) {
                 if(node.getValue() === oldMug){
@@ -434,23 +399,22 @@ define([
                 }
             });
             newMug.parentMug = oldMug.parentMug;
-        };
-        
+        },
         /**
          * Move a mug from its current place (in both the Data and Control trees) to
          * the position specified by the arguments,
          */
-        that.moveMug = function (mug, refMug, position) {
-            var mugs = getDescendants(mug).concat([mug]),
+        moveMug: function (mug, refMug, position) {
+            var mugs = this.getDescendants(mug).concat([mug]),
                 preMovePaths = mugs.map(function(mug) {
-                    return that.dataTree.getAbsolutePath(mug);
+                    return this.dataTree.getAbsolutePath(mug);
                 });
 
             if (mug.dataElement) {
-                that.dataTree.insertMug(mug, position, refMug);
+                this.dataTree.insertMug(mug, position, refMug);
             }
             if (mug.controlElement) {
-                that.controlTree.insertMug(mug, position, refMug);
+                this.controlTree.insertMug(mug, position, refMug);
             }
             
             var updates = {};
@@ -458,34 +422,29 @@ define([
                 updates[mugs[i].ufid] = [preMovePaths[i], dataTree.getAbsolutePath(mugs[i])];
             }
 
-            logicManager.updatePaths(updates);
-            that.fire({
+            this._logicManager.updatePaths(updates);
+            this.fire({
                 type: 'question-move',
                 mug: mug
             });
-            fireChange(mug);
-        };
-
-        function getDescendants(mug) {
-            var desc = that.getChildren(mug), i;
+            this.fireChange(mug);
+        },
+        getDescendants: function (mug) {
+            var desc = this.getChildren(mug), i;
             for (i = desc.length - 1; i >= 0; i--) {
                 desc = desc.concat(getDescendants(desc[i]));
             }
             return desc;
-        }
-
-        
-
+        },
         // core interface methods
-        that.handleMugRename = function (mug, val, previous, currentPath, oldPath) {
-            logicManager.updatePath(mug.ufid, oldPath, currentPath);
-        };
-        
-        that.changeQuestionType = function (mug, questionType) {
+        handleMugRename: function (mug, val, previous, currentPath, oldPath) {
+            this._logicManager.updatePath(mug.ufid, oldPath, currentPath);
+        },
+        changeQuestionType: function (mug, questionType) {
             // check preconditions - if this is a select question with
             // choices, you're only allowed to change it to another
             // select question
-            var children = that.getChildren(mug);
+            var children = this.getChildren(mug);
             if (children.length > 0 && (
                     questionType.indexOf("Select") === -1 || 
                     questionType.indexOf("Dynamic") !== -1)) 
@@ -495,7 +454,7 @@ define([
                           "and try again.";
             }
             
-            var newMug = new mugTypes[questionType](that);
+            var newMug = new mugTypes[questionType](this);
             newMug.ufid = mug.ufid;
 
             // hack: force removal of the appearance attribute since this is statically
@@ -509,41 +468,39 @@ define([
             }
 
             // update trees
-            that.replaceMug(mug, newMug, 'data');
-            that.replaceMug(mug, newMug, 'control');
+            this.replaceMug(mug, newMug, 'data');
+            this.replaceMug(mug, newMug, 'control');
 
             newMug.copyAttrs(mug);
             
             if (newMug.__className.indexOf("Select") !== -1) {
-                _.each(that.getChildren(newMug), function (childMug) {
-                    that.fire({
+                _.each(this.getChildren(newMug), function (childMug) {
+                    this.fire({
                         type: 'parent-question-type-change',
                         childMug: childMug
                     });
                 });
             }
 
-            that.fire({
+            this.fire({
                 type: 'question-type-change',
                 qType: questionType,
                 mug: newMug
             });
-            fireChange(newMug);
+            this.fireChange(newMug);
 
             return newMug;
-        };
-        
-        that.getChildren = function (mug) {
-            var node = that.controlTree.getNodeFromMug(mug),
+        },
+        getChildren: function (mug) {
+            var node = this.controlTree.getNodeFromMug(mug),
                 children = node ? node.getChildren() : [];  // handles data node
             return children.map(function (item) { return item.getValue();});
-        };
-        
-        that.duplicateMug = function (mug, options) {
+        },
+        duplicateMug: function (mug, options) {
             options = options || {};
             options.itext = options.itext || "link";
 
-            var foo = _duplicateMug(mug, mug.parentMug, options),
+            var foo = this._duplicateMug(mug, mug.parentMug, options),
                 duplicate = foo[0],
                 pathReplacements = foo[1];
 
@@ -553,13 +510,11 @@ define([
 
             for (var i = 0; i < pathReplacements.length; i++) {
                 var pr = pathReplacements[i];
-                logicManager.updatePath(pr.mugId, pr.from, pr.to, 
-                    that.getAbsolutePath(duplicate));
+                this._logicManager.updatePath(pr.mugId, pr.from, pr.to, 
+                    this.getAbsolutePath(duplicate));
             }
-
             return duplicate;
-        };
-            
+        },
         /**
          * Copy a Mug and its descendants and insert them after the original
          * Mug. Returns an array with two values:
@@ -568,14 +523,14 @@ define([
          *
          * @param mug - the mugtype in the original tree to duplicate
          * @param parentMug - the mugtype in the duplicate tree to insert into
-         * @param options {
+         * @param options 
          *          itext: 'link' (default) or 'copy'
-         *        }
+         *        
          */
-        function _duplicateMug(mug, parentMug, options, depth) {
+        _duplicateMug: function (mug, parentMug, options, depth) {
             depth = depth || 0;
             // clone mug and give everything new unique IDs
-            var duplicate = new mugTypes[mug.__className](that);
+            var duplicate = new mugTypes[mug.__className](this);
             duplicate.copyAttrs(mug);
 
             // ensure consistency            
@@ -584,7 +539,7 @@ define([
             util.eventuality(duplicate);
 
             if (mug.bindElement && mug.bindElement.nodeID) {
-                var newQuestionID = that.generate_question_id(
+                var newQuestionID = this.generate_question_id(
                     mug.bindElement.nodeID
                 ); 
                 duplicate.bindElement.nodeID = newQuestionID;
@@ -597,7 +552,7 @@ define([
             if (depth === 0 && mug.controlElement && 
                 mug.controlElement.defaultValue)
             {
-                var newItemValue = that.generate_question_id(
+                var newItemValue = this.generate_question_id(
                     mug.controlElement.defaultValue
                 );
                 duplicate.controlElement.defaultValue = newItemValue;
@@ -605,38 +560,36 @@ define([
          
             // insert mugtype into data and UI trees
             if (depth > 0) {
-                that.insertQuestion(duplicate, parentMug, 'into', true);
+                this.insertQuestion(duplicate, parentMug, 'into', true);
             } else {
-                that.insertQuestion(duplicate, mug, 'after', true);
+                this.insertQuestion(duplicate, mug, 'after', true);
             }
 
-            logicManager.updateAllReferences(duplicate);
+            this._logicManager.updateAllReferences(duplicate);
 
             if (options.itext === "copy") {
                 duplicate.unlinkItext();
             }
 
-            var children = that.getChildren(mug),
+            var children = this.getChildren(mug),
                 pathReplacements = [];
             for (var i = 0; i < children.length; i++) {
                 pathReplacements = pathReplacements.concat(
-                    _duplicateMug(children[i], duplicate, options, depth + 1)[1]);
+                    this._duplicateMug(children[i], duplicate, options, depth + 1)[1]);
             }
 
             pathReplacements.push({
                 mugId: mug.ufid,
-                from: that.getAbsolutePath(mug),
-                to: that.getAbsolutePath(duplicate)
+                from: this.getAbsolutePath(mug),
+                to: this.getAbsolutePath(duplicate)
             });
 
             return [duplicate, pathReplacements];
-        }
-
-        that.updateAllLogicReferences = function (mug) {
-            logicManager.updateAllReferences(mug);
-        };
-
-        that.handleMugPropertyChange = function (mug, e) {
+        },
+        updateAllLogicReferences: function (mug) {
+            this._logicManager.updateAllReferences(mug);
+        },
+        handleMugPropertyChange: function (mug, e) {
             // bind dataElement.nodeID and bindElement.nodeID together
             if(e.property === 'nodeID'){
                 if(mug.dataElement){
@@ -658,7 +611,7 @@ define([
                 var propertyPath = [e.element, e.property].join("/");
 
                 if (mug.getPropertyDefinition(propertyPath).widget === widgets.xPath) {
-                    that.updateAllLogicReferences(mug, propertyPath);
+                    this.updateAllLogicReferences(mug, propertyPath);
                 }
             }
 
@@ -696,7 +649,7 @@ define([
                         (!mug.controlElement || !mug.controlElement.labelItextID || 
                          (mug.controlElement.labelItextID && mug.controlElement.labelItextID.isEmpty()) ))
                 ) {
-                    that.fire({
+                    this.fire({
                         type: 'question-text-change',
                         mugUfid: e.mugUfid,
                         text: newNameForTree
@@ -704,35 +657,33 @@ define([
                 }
             }
 
-            that.fire({
+            this.fire({
                 type: 'mug-property-change',
                 mug: mug,
                 e: e
             });
 
 
-            fireChange(mug);
-        };
-
-        that.createQuestion = function (refMug, position, newMugType, isInternal) {
-            var mug = new mugTypes[newMugType](that);
-            that.insertQuestion(mug, refMug, position, isInternal);
+            this.fireChange(mug);
+        },
+        createQuestion: function (refMug, position, newMugType, isInternal) {
+            var mug = new mugTypes[newMugType](this);
+            this.insertQuestion(mug, refMug, position, isInternal);
             if (mug.isODKOnly) {
-                that.updateError({
+                this.updateError({
                     message: 'This question type will ONLY work with Android phones!',
                     level: 'form-warning'
                 });
             }
-        };
-        
-        that.insertQuestion = function (mug, refMug, position, isInternal) {
-            refMug = refMug || that.dataTree.getRootNode().getValue();
-            that.insertMug(refMug, mug, position);
+        },
+        insertQuestion: function (mug, refMug, position, isInternal) {
+            refMug = refMug || this.dataTree.getRootNode().getValue();
+            this.insertMug(refMug, mug, position);
             // todo: abstraction barrier
-            that.vellum.data.javaRosa.Itext.updateForNewMug(mug);
-            that.intentManager.syncMugWithIntent(mug);
+            this.vellum.data.javaRosa.Itext.updateForNewMug(mug);
+            this.intentManager.syncMugWithIntent(mug);
 
-            that.fire({
+            this.fire({
                 type: 'question-create',
                 mug: mug,
                 refMug: refMug,
@@ -740,22 +691,19 @@ define([
                 isInternal: isInternal
             });
             if (!isInternal) {
-                mug.afterInsert(that, mug);
+                mug.afterInsert(this, mug);
             }
-        };
-       
-        that.getAbsolutePath = function (mug) {
-            return that.dataTree.getAbsolutePath(mug);
-        };
-
-        that.getMugByUFID = function (ufid) {
-            return (that.dataTree.getMugFromUFID(ufid) ||
-                    that.controlTree.getMugFromUFID(ufid));
-        };
-        
-        that.getMugByPath = function (path) {
+        },
+        getAbsolutePath: function (mug) {
+            return this.dataTree.getAbsolutePath(mug);
+        },
+        getMugByUFID: function (ufid) {
+            return (this.dataTree.getMugFromUFID(ufid) ||
+                    this.controlTree.getMugFromUFID(ufid));
+        },
+        getMugByPath: function (path) {
             var recFunc, tokens, targetMug,
-                rootNode = that.dataTree.getRootNode();
+                rootNode = this.dataTree.getRootNode();
             if(!path) { //no path specified
                 return null;
             }
@@ -777,7 +725,7 @@ define([
                     }
                 }
 
-                //if we got here that means 'path not found'
+                //if we got here this means 'path not found'
                 return null;
             };
 
@@ -786,16 +734,14 @@ define([
                 return null; //empty path string === 'path not found'
             }
 
-
             if(rootNode.getID() !== tokens[0]) {
                 return null; //path not found
             }
 
             targetMug = recFunc(rootNode,tokens.slice(1));
             return targetMug;
-        };
-        
-        that.getSingularMugByNodeId = function (nodeId, treeType) {
+        },
+        getSingularMugByNodeId: function (nodeId, treeType) {
             if(!nodeId) { //no path specified
                 return null;
             }
@@ -805,39 +751,35 @@ define([
                 return (mt && mt.mug && mt.mug.getBindElementID() === nodeId) ? mt : null;
             };
             
-            var matchList = that.datatree.treeMap(nodeMatches)
+            var matchList = this.datatree.treeMap(nodeMatches)
                     .filter(function (m) { return m !== null; });
             if (matchList.length !== 1) {
                 throw "Expected one result for node " + nodeId + " but found " + matchList.length;
             }
             return matchList[0];
-        };
-        
-
-        that.removeMugFromForm = function (mug) {
-            that._removeMugFromForm(mug, false);
-        };
-        
-        that._removeMugFromForm = function(mug, isInternal) {
-            var fromTree = that.controlTree.getNodeFromMug(mug);
+        },
+        removeMugFromForm: function (mug) {
+            this._removeMugFromForm(mug, false);
+        },
+        _removeMugFromForm: function(mug, isInternal) {
+            var fromTree = this.controlTree.getNodeFromMug(mug);
             if (fromTree) {
-                var children = that.controlTree.getNodeFromMug(mug).getChildrenMugs();
+                var children = this.controlTree.getNodeFromMug(mug).getChildrenMugs();
                 for (var i = 0; i < children.length; i++) {
-                    that._removeMugFromForm(children[i], true);
+                    this._removeMugFromForm(children[i], true);
                 }
             }
             
-            that.dataTree.removeMug(mug);
-            that.controlTree.removeMug(mug);
-            that.fire({
+            this.dataTree.removeMug(mug);
+            this.controlTree.removeMug(mug);
+            this.fire({
                 type: 'remove-question',
                 mug: mug,
                 isInternal: isInternal
             });
-        };
-
-        that.questionIdCount = function (qId) {
-            var allMugs = that.getMugList(),
+        },
+        questionIdCount: function (qId) {
+            var allMugs = this.getMugList(),
                 count = 0;
             for (var i = 0; i < allMugs.length; i++) {
                 var mug = allMugs[i];
@@ -847,13 +789,13 @@ define([
             }
 
             return count;
-        };
+        },
 
         /**
          * Generates a unique question ID (unique in this form) and
          * returns it as a string.
          */
-        that.generate_question_id = function (question_id) {
+        generate_question_id: function (question_id) {
             if (question_id) {
                 var match = /^copy-(\d+)-of-(.+)$/.exec(question_id) ;
                 if (match) {
@@ -861,34 +803,29 @@ define([
                 }
                 for (var i = 1;; i++) {
                     var new_id = "copy-" + i + "-of-" + question_id;
-                    if (!that.questionIdCount(new_id)) {
+                    if (!this.questionIdCount(new_id)) {
                         return new_id; 
                     }
                 }
             } else {
-                return make_label('question');
+                return this._make_label('question');
             }
-        };
-        that.question_counter = 1;
-        
-        that.generate_item_label = function () {
-            return make_label('item');
-        };
+        },
+        generate_item_label: function () {
+            return this._make_label('item');
+        },
         /**
          * Private method for constructing unique questionIDs, labels for items, etc
          */
-        var make_label = function (prefixStr) {
-            var ret = prefixStr + that.question_counter;
-            that.question_counter += 1;
+        _make_label: function (prefixStr) {
+            var ret = prefixStr + this.question_counter;
+            this.question_counter += 1;
             return ret;
-        };
-
-        that.getExportTSV = function () {
-            that.vellum.beforeSerialize();
-            return exporter.generateExportTSV(that);
-        };
-        
-        return that;
+        },
+        getExportTSV: function () {
+            this.vellum.beforeSerialize();
+            return exporter.generateExportTSV(this);
+        }
     };
 
     return {

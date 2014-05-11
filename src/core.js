@@ -394,12 +394,12 @@ define([
         var _this = this;
         // There are validation errors but user continues anyway
         function onContinue () {
-            _this.hideConfirmDialog();
+            _this._hideConfirmDialog();
             _this.showSourceInModal(done);
         }
 
         function onAbort () {
-            _this.hideConfirmDialog();
+            _this._hideConfirmDialog();
         }
 
         var msg = "There are validation errors in the form.  Do you want to continue anyway? WARNING:" +
@@ -978,12 +978,12 @@ define([
 
                 _this.setDialogInfo(msg, 
                     'ok', function() {
-                        _this.hideConfirmDialog();
+                        _this._hideConfirmDialog();
                     }, 
                     'cancel', function(){
-                        _this.hideConfirmDialog();
+                        _this._hideConfirmDialog();
                     });
-                this._showConfirmDialog();
+                _this._showConfirmDialog();
                 
                 _this.data.core.formLoadingFailed = true;
                 _this.data.core.failedLoadXML = formString;
@@ -999,10 +999,10 @@ define([
                     "entire form into the " + '<a href="' + validator_url +
                     '" target="_blank">Form Validator</a>';
 
-                _this.data.core.form.updateError({
-                    message: msg,
-                    level: "error"
-                });
+                //_this.data.core.form.updateError({
+                    //message: msg,
+                    //level: "error"
+                //});
                 $.fancybox.hideActivity();
                 throw e;
             }
@@ -1506,7 +1506,7 @@ define([
             _this.showWaitingDialog();
         });
         $(document).ajaxStop(function () {
-            _this.hideConfirmDialog();
+            _this._hideConfirmDialog();
         });
 
         if (saveType === 'patch') {
@@ -1547,7 +1547,7 @@ define([
                         _this.send(formText, 'full');
                     }
                 }
-                _this.hideConfirmDialog();
+                _this._hideConfirmDialog();
                 _this.data.core.lastSavedXForm = formText;
             }
         });

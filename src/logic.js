@@ -7,25 +7,23 @@ define([
     xpath,
     xpathmodels
 ) {
-
-    // Logic expressions
-    var LogicExpression = function (exprText) {
-        var expr = {};
-        expr._text = exprText || "";
+    function LogicExpression (exprText) {
+        this._text = exprText || "";
         
-        expr.valid = false;
+        this.valid = false;
         if (exprText) {
             try {
-                expr.parsed = xpath.parse(exprText);
-                expr.valid = true;
+                this.parsed = xpath.parse(exprText);
+                this.valid = true;
             } catch (err) {
                 // nothing to do
             }
         } else {
-            expr.empty = true;
+            this.empty = true;
         }
-        
-        expr.getPaths = function () {
+    }
+    LogicExpression.prototype = {
+        getPaths: function () {
             var paths = [];
             if (this.parsed) {
                 var queue = [this.parsed], 
@@ -42,9 +40,8 @@ define([
                 }
             }
             return paths;
-        };
-        
-        expr.updatePath = function (from, to) {
+        },
+        updatePath: function (from, to) {
             var paths = this.getPaths(),
                 path;
             
@@ -63,32 +60,29 @@ define([
                     replacePathInfo(xpath.parse(to), path);
                 }
             }
-        };
-        
-        expr.getText = function () {
+        },
+        getText: function () {
             if (this.valid) {
                 return this.parsed.toXPath();
             } else {
                 return this._text;
             }
-        };
-        return expr;
+        }
     };
 
-    var LogicManager = function (form, opts) {
-        var logic = {};
-        
-        logic.all = [];
-        
-        logic.clearReferences = function (mug, property) {
+    function LogicManager (form, opts) {
+        this.all = [];
+    }
+
+    LogicManager.prototype = {
+        clearReferences: function (mug, property) {
             this.all = this.all.filter(function (elem) { 
                 return elem.mug != mug.ufid || elem.property != property;
             });
-        };
-        
-        logic.addReferences = function (mug, property) {
+        },
+        addReferences: function (mug, property) {
             // get absolute paths from mug property's value
-            var expr = LogicExpression(mug.getPropertyValue(property));
+            var expr = new LogicExpression(mug.getPropertyValue(property));
             var paths = expr.getPaths().filter(function (p) {
                 // currently we don't do anything with relative paths
                 return p.initial_context === xpathmodels.XPathInitialContextEnum.ROOT;
@@ -98,7 +92,6 @@ define([
                 key: mug.ufid + "-" + property + "-badpath",
                 message: []
             };
-
 
             // append item for each mug referenced (by absolute path) in mug's
             // property value
@@ -127,24 +120,20 @@ define([
             } else {
                 form.clearError(error, {updateUI: true}); 
             }        
-
-        };
-        
-        logic.updateReferences = function (mug, property) {
+        },
+        updateReferences: function (mug, property) {
             this.clearReferences(mug, property);
             this.addReferences(mug, property);
-        };
-
-        logic.updateAllReferences = function (mug, clear) {
+        },
+        updateAllReferences: function (mug, clear) {
             if (mug.bindElement) {
                 for (var i = 0; i < util.XPATH_REFERENCES.length; i++) {
                     var property = util.XPATH_REFERENCES[i];
-                    logic.clearReferences(mug, property);
-                    logic.addReferences(mug, property);
+                    this.clearReferences(mug, property);
+                    this.addReferences(mug, property);
                 }
             }
-        };
-       
+        },
         /**
          * Update references to a node with its new path. Used when a node is
          * moved or duplicated (with subtree).
@@ -155,15 +144,14 @@ define([
          * @param subtree - (optional) only replace references from nodes
          *        beginning with this path (no trailing /)
          */
-        logic.updatePath = function (mugId, from, to, subtree) {
+        updatePath: function (mugId, from, to, subtree) {
             if (from === to) { return; }
 
             var data = {};
             data[mugId] = [from, to];
 
-            logic.updatePaths(data, subtree);
-        };
-
+            this.updatePaths(data, subtree);
+        },
         /**
          * Update references nodes with theirs new paths. Used when a node,
          * which may have sub-nodes, is moved or duplicated.
@@ -173,7 +161,7 @@ define([
          * @param subtree - (optional) only replace references from nodes
          *        beginning with this path (no trailing /)
          */
-        logic.updatePaths = function (data, subtree) {
+        updatePaths: function (data, subtree) {
             var found = this.all.filter(function (elem) {
                 return data.hasOwnProperty(elem.ref) && 
                     (!subtree || elem.sourcePath === subtree || elem.sourcePath.indexOf(subtree + '/') === 0);
@@ -187,7 +175,7 @@ define([
                 }
                 seen[pkey] = null;
                 mug = form.getMugByUFID(ref.mug);
-                expr = LogicExpression(mug.getPropertyValue(ref.property));
+                expr = new LogicExpression(mug.getPropertyValue(ref.property));
                 orig = expr.getText();
                 for (mugId in data) {
                     if (data.hasOwnProperty(mugId)) {
@@ -200,13 +188,10 @@ define([
                         expr.getText(), mug);
                 } 
             }
-        };
-
-        logic.reset = function () {
+        },
+        reset: function () {
             this.all = [];
-        };
-        
-        return logic;
+        }
     };
 
     return {

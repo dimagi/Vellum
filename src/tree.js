@@ -27,25 +27,20 @@ define([
             _(this.children).each(function (child) {
                 child.getValue().parentMug = val;
             });
-        };
-
+        },
         /**
          * DOES NOT CHECK TO SEE IF NODE IS IN TREE ALREADY!
          * Adds child to END of children!
          */
-        that.addChild = function (node) {
-            if (!children) {
-                children = [];
-            }
-            children.push(node);
-        };
-
+        addChild: function (node) {
+            this.children.push(node);
+        },
         /**
          * Insert child at the given index (0 means first)
          * if index > children.length, will insert at end.
          * -ve index will result in child being added to first of children list.
          */
-        that.insertChild = function (node, index) {
+        insertChild: function (node, index) {
             if (node === null) {
                 return null;
             }
@@ -54,112 +49,106 @@ define([
                 index = 0;
             }
 
-            children.splice(index, 0, node);
-        };
-
+            this.children.splice(index, 0, node);
+        },
         /**
          * Given a mug, finds the node that the mug belongs to.
          * if it is not the current node, will recursively look through 
          * children node (depth first search)
          */
-        that.getNodeFromValue = function (value) {
-            if (value === null) {
+        getNodeFromValue: function (valueOrFn) {
+            if (valueOrFn === null) {
                 return null;
             }
-            var valueIsFn = _.isFunction(value),
+            var valueIsFn = _.isFunction(valueOrFn),
                 retVal,
                 thisVal = this.getValue();
 
-            if ((!valueIsFn && thisVal === value) ||
-                (valueIsFn && value(thisVal)))
+            if ((!valueIsFn && thisVal === valueOrFn) ||
+                (valueIsFn && valueOrFn(thisVal)))
             {
                 return this;
             } else {
-                for (var i = 0; i < children.length; i++) {
-                    retVal = children[i].getNodeFromValue(value);
+                for (var i = 0; i < this.children.length; i++) {
+                    retVal = this.children[i].getNodeFromValue(valueOrFn);
                     if (retVal) {
                         return retVal;
                     }
                 }
             }
             return null; //we haven't found what we're looking for
-        };
-        that.getNodeFromMug = that.getNodeFromValue;
-
-        that.getMugFromUFID = function (ufid) {
-            var node = that.getNodeFromValue(function (value) {
+        },
+        getNodeFromMug: function (mug) {
+            return this.getNodeFromValue(mug);
+        },
+        getMugFromUFID: function (ufid) {
+            var node = this.getNodeFromValue(function (value) {
                 return value && value.ufid === ufid;
             });
             
             return node ? node.getValue() : null;
-        };
-
-        that.removeChild = function (node) {
-            var childIdx = children.indexOf(node);
+        },
+        removeChild: function (node) {
+            var childIdx = this.children.indexOf(node);
             if (childIdx !== -1) { //if arg node is a member of the children list
-                children.splice(childIdx, 1); //remove it
+                this.children.splice(childIdx, 1); //remove it
             }
 
             return node;
-        };
-
+        },
         /**
          * Finds the parentNode of the specified node (recursively going through the tree/children of this node)
          * Returns the parent if found, else null.
          */
-        that.findParentNode = function (node) {
+        findParentNode: function (node) {
             var i, parent = null;
             if (!this.children || this.children.length === 0) {
                 return null;
             }
-            if (children.indexOf(node) !== -1) {
+            if (this.children.indexOf(node) !== -1) {
                 return this;
             }
 
-            for (i in children) {
-                if (children.hasOwnProperty(i)) {
-                    parent = children[i].findParentNode(node);
+            for (i in this.children) {
+                if (this.children.hasOwnProperty(i)) {
+                    parent = this.children[i].findParentNode(node);
                     if (parent !== null) {
                         return parent;
                     }
                 }
             }
             return parent;
-        };
-
+        },
         /**
          * An ID used during prettyPrinting of the Node. (a human readable value for the node)
          */
-        that.getID = function () {
+        getID: function () {
             var id;
             if (this.isRootNode) {
                 return this.rootNodeId;
             }
             return this.getValue().getNodeID();
-        };
-
+        },
         /**
          * Get all children MUG TYPES of this node (not recursive, only the top level).
          * Return a list of Mug objects, or empty list for no children.
          */
-        that.getChildrenMugs = function () {
+        getChildrenMugs: function () {
             var i, retList = [];
-            for (i in children) {
-                if (children.hasOwnProperty(i)) {
-                    retList.push(children[i].getValue());
+            for (i in this.children) {
+                if (this.children.hasOwnProperty(i)) {
+                    retList.push(this.children[i].getValue());
                 }
             }
             return retList;
-        };
-
-        that.getStructure = function () {
+        },
+        getStructure: function () {
             var ret = {};
-            ret[this.getID()] = _.map(children, function (c) {
+            ret[this.getID()] = _.map(this.children, function (c) {
                 return c.getStructure();
             });
             return ret;
-        };
-
+        },
         /**
          * calls the given function on each node (the node
          * is given as the only argument to the given function)
@@ -168,7 +157,7 @@ define([
          * @param nodeFunc
          * @param store
          */
-        that.treeMap = function (nodeFunc, store, afterChildFunc) {
+        treeMap: function (nodeFunc, store, afterChildFunc) {
             var result, child;
             result = nodeFunc(this); //call on self
             if(result){
@@ -183,12 +172,11 @@ define([
                 afterChildFunc(this, result);
             }
             return store; //return the results
-        };
-
+        },
         /**
          * See docs @ Tree.validateTree()
          */
-        var validateTree = function () {
+        validateTree: function () {
             var validationErrors, thisMug, i, childResult;
             if(!this.getValue()){
                 throw 'Tree contains node with no values!';
@@ -208,10 +196,7 @@ define([
 
             //If we got this far, everything checks out.
             return true;
-        };
-        that.validateTree = validateTree;
-
-        return that;
+        }
     };
 
     /**
@@ -219,48 +204,36 @@ define([
      * @param treeType - is this a DataElement tree or a controlElement tree (use
      * 'data' or 'control' for this argument, respectively)
      */
-    var Tree = function (rootId, treeType) {
-        var that = {},
-            rootNode;
+    function Tree(rootId, treeType) {
+        util.eventuality(this);
 
-        util.eventuality(that);
+        this.rootNode = new Node(null, null);
+        this.rootNode.isRootNode = true;
+        this.setRootID(rootId);
+        this.treeType = treeType || 'data';
+    }
 
-        treeType = treeType || 'data';
-
-        that.setRootID = function (id) {
-            rootNode.rootNodeId = id;
-        };
-
-        var init = function (type) {
-            rootNode = new Node(null, null);
-            rootNode.isRootNode = true;
-            that.setRootID(rootId);
-            treeType = type || 'data';
-        }(treeType);
-
-        that.rootNode = rootNode;
-
-
-        that.getParentNode = function (node) {
+    Tree.prototype = {
+        setRootID: function (id) {
+            this.rootNode.rootNodeId = id;
+        },
+        getParentNode: function (node) {
             if (this.rootNode === node) { //special case:
                 return this.rootNode;
             } else { //regular case
                 return this.rootNode.findParentNode(node);
             }
-        };
-
-        that.getStructure = function () {
+        },
+        getStructure: function () {
             return this.rootNode.getStructure();
-        };
-
+        },
         /**
          * Given a mug, finds the node that the mug belongs to (in this tree).
          * Will return null if nothing is found.
          */
-        that.getNodeFromMug = function (mug) {
-            return rootNode.getNodeFromMug(mug);
-        };
-
+        getNodeFromMug: function (mug) {
+            return this.rootNode.getNodeFromMug(mug);
+        },
         /**
          * Removes a node (and all it's children) from the tree (regardless of where it is located in the
          * tree) and returns it.
@@ -268,25 +241,24 @@ define([
          * If no such node is found in the tree (or node is null/undefined)
          * null is returned.
          */
-        var removeNodeFromTree = function (node) {
+        _removeNodeFromTree: function (node) {
             if (!node) {
                 return null;
             }
-            if (!that.getNodeFromMug(node.getValue())) {
+            if (!this.getNodeFromMug(node.getValue())) {
                 return null;
             } //node not in tree
-            var parent = that.getParentNode(node);
+            var parent = this.getParentNode(node);
             if (parent) {
                 parent.removeChild(node);
-                that.fire({
+                this.fire({
                     type: 'change'
                 });
                 return node;
             } else {
                 return null;
             }
-        };
-
+        },
         /**
          * Insert a Mug as a child to the node containing parentMug.
          *
@@ -301,7 +273,7 @@ define([
          *
          * If an invalid move is specified, no operation will occur.
          */
-        that.insertMug = function (mug, position, refMug) {
+        insertMug: function (mug, position, refMug) {
             var refNode, refNodeSiblings, refNodeIndex, refNodeParent, node;
 
             if (position !== null && typeof position !== 'string') {
@@ -311,23 +283,23 @@ define([
                 position = 'after';
             }
 
-            if (!refMug || (!refMug.controlElement && treeType === 'control'))
+            if (!refMug || (!refMug.controlElement && this.treeType === 'control'))
             {
-                refNode = rootNode;
-                refMug = rootNode.getValue();
+                refNode = this.rootNode;
+                refMug = this.rootNode.getValue();
                 position = 'into';
             } else {
                 refNode = this.getNodeFromMug(refMug);
             }
 
             //remove it from tree if it already exists
-            node = removeNodeFromTree(this.getNodeFromMug(mug)); 
+            node = this._removeNodeFromTree(this.getNodeFromMug(mug)); 
             if (!node) {
                 node = new Node(null, mug);
             }
 
             if (position !== 'into') {
-                refNodeParent = that.getParentNode(refNode);
+                refNodeParent = this.getParentNode(refNode);
                 refNodeSiblings = refNodeParent.getChildren();
                 refNodeIndex = refNodeSiblings.indexOf(refNode);
                 mug.parentMug = refNodeParent.getValue();
@@ -354,19 +326,11 @@ define([
                 default:
                     throw "in insertMug() position argument MUST be null, 'before', 'after', 'into', 'first' or 'last'.  Argument was: " + position;
             }
-            that.fire({
+            this.fire({
                 type: 'change',
                 mug: mug
             });
-        };
-
-        /**
-         * Returns a list of nodes that are in the top level of this tree (i.e. not the abstract rootNode but it's children)
-         */
-        var getAllNodes = function () {
-            return rootNode.getChildren();
-        };
-
+        },
         /**
          * returns the absolute path, in the form of a string separated by slashes ('/nodeID/otherNodeID/finalNodeID'),
          * the nodeID's are those given by the Mugs (i.e. the node value objects) according to whether this tree is a
@@ -374,7 +338,7 @@ define([
          *
          * @param nodeOrmug - can be a tree Node or a mug that is a member of this tree (via a Node)
          */
-        that.getAbsolutePath = function (mug) {
+        getAbsolutePath: function (mug) {
             var node = this.getNodeFromMug(mug),
                 output, nodeParent;
             if (!node) {
@@ -394,39 +358,36 @@ define([
             }
 
             return output;
-        };
-
+        },
         /**
          * Removes the specified Mug from the tree. If it isn't in the tree
          * does nothing.  Does nothing if null is specified
          *
          * If the Mug is successfully removed, returns that Mug.
          */
-        that.removeMug = function (mug) {
+        removeMug: function (mug) {
             var node = this.getNodeFromMug(mug);
             if (!mug || !node) {
                 return;
             }
-            removeNodeFromTree(node);
+            this._removeNodeFromTree(node);
             return node;
-        };
-
+        },
         /**
          * Given a UFID searches through the tree for the corresponding Mug and returns it.
          * @param ufid of a mug
          */
-        that.getMugFromUFID = function (ufid) {
-            return rootNode.getMugFromUFID(ufid);
-        };
+        getMugFromUFID: function (ufid) {
+            return this.rootNode.getMugFromUFID(ufid);
+        },
 
         /**
          * Returns all the children Mugs (as a list) of the
          * root node in the tree.
          */
-        that.getRootChildren = function () {
-            return rootNode.getChildrenMugs();
-        };
-
+        getRootChildren: function () {
+            return this.rootNode.getChildrenMugs();
+        },
         /**
          * Performs the given func on each
          * node of the tree (the Node is given as the only argument to the function)
@@ -434,12 +395,11 @@ define([
          * @param func - a function called on each node, the node is the only argument
          * @param afterChildFunc - a function called after the above function is called on each child of the current node.
          */
-        that.treeMap = function (func, afterChildFunc) {
-            return rootNode.treeMap(func, [], afterChildFunc);
-        };
-
-        that.isTreeValid = function() {
-            var rChildren = rootNode.getChildren(),
+        treeMap: function (func, afterChildFunc) {
+            return this.rootNode.treeMap(func, [], afterChildFunc);
+        },
+        isTreeValid: function() {
+            var rChildren = this.rootNode.getChildren(),
             i, retVal;
             for (i in rChildren){
                 if(rChildren.hasOwnProperty(i)){
@@ -450,13 +410,10 @@ define([
                 }
             }
             return true;
-        };
-
-        that.getRootNode = function () {
-            return rootNode;
-        };
-
-        return that;
+        },
+        getRootNode: function () {
+            return this.rootNode;
+        }
     };
 
     return Tree;

@@ -119,34 +119,30 @@ define([
         }
     };
 
-    // todo: change this to use a prototype like ItextItem in case it affects
-    // memory usage for very large forms
-    var ItextForm = function (options) {
-        var form = {},
-            itextModel = options.itextModel;
-        
-        form.data = options.data || {};
-        form.name = options.name || "default";
-        
-        form.getValue = function (lang) {
+    function ItextForm (options) {
+        this.itextModel = options.itextModel;
+        this.data = options.data || {};
+        this.name = options.name || "default";
+    }
+
+    ItextForm.prototype = {
+        getValue: function (lang) {
             return this.data[lang];
-        };
-        
-        form.setValue = function (lang, value) {
+        },
+        setValue: function (lang, value) {
             if (this.data[lang] !== value) {
-                itextModel.fire({
+                this.itextModel.fire({
                     type: 'change'
                 });
             }
             this.data[lang] = value;
-        };
-        
-        form.getValueOrDefault = function (lang) {
+        },
+        getValueOrDefault: function (lang) {
             // check the actual language first
             if (this.data[lang]) {
                 return this.data[lang];
             }
-            var defLang = itextModel.getDefaultLanguage();
+            var defLang = this.itextModel.getDefaultLanguage();
             // check the default, if necesssary
             if (lang !== defLang && this.data[defLang]) {
                 return this.data[defLang];
@@ -159,18 +155,15 @@ define([
             }
             // there wasn't anything
             return "";
-        };
-        
-        form.isEmpty = function () {
+        },
+        isEmpty: function () {
             for (var lang in this.data) {
                 if (this.data.hasOwnProperty(lang) && this.data[lang]) {
                     return false;
                 }
             }
             return true;
-        };
-        
-        return form; 
+        }
     };
 
     /**
@@ -185,31 +178,29 @@ define([
      * - hint
      *
      */
-    var ItextModel = function() {
-        var itext = {}; 
-        util.eventuality(itext);
+    function ItextModel () {
+        util.eventuality(this);
         
-        itext.languages = [];
-        itext.items = [];
-        
-        itext.getLanguages = function () {
+        this.languages = [];
+        this.items = [];
+    };
+
+    ItextModel.prototype = {
+        getLanguages: function () {
             return this.languages;
-        };
-        
-        itext.hasLanguage = function (lang) {
+        },
+        hasLanguage: function (lang) {
             return this.languages.indexOf(lang) !== -1;
-        };
-        
-        itext.addLanguage = function (lang) {
+        },
+        addLanguage: function (lang) {
             if (!this.hasLanguage(lang)) {
                 this.languages.push(lang);
                 this.fire({
                     type: 'change'
                 });
             } 
-        };
-        
-        itext.removeLanguage = function (lang) {
+        },
+        removeLanguage: function (lang) {
             if(this.hasLanguage(lang)) {
                 this.languages.splice(this.languages.indexOf(lang), 1);
                 this.fire({
@@ -220,43 +211,36 @@ define([
             if (this.getDefaultLanguage() === lang) {
                 this.setDefaultLanguage(this.languages.length > 0 ? this.languages[0] : "");
             }
-        };
-        
-        itext.setDefaultLanguage = function (lang) {
+        },
+        setDefaultLanguage: function (lang) {
             if (lang !== this.defaultLanguage) {
                 this.fire({
                     type: 'change'
                 });
             }
             this.defaultLanguage = lang;
-        };
-
-        itext.getDefaultLanguage = function () {
+        },
+        getDefaultLanguage: function () {
             if (this.defaultLanguage) {
                 return this.defaultLanguage;
             } else {
                 return this.languages.length > 0 ? this.languages[0] : "";
             }
-        };
-        
-        
-        itext.getItems = function () {
+        },
+        getItems: function () {
             return this.items;
-        };
-        
-        itext.getNonEmptyItems = function () {
+        },
+        getNonEmptyItems: function () {
             return _(this.items).filter(function (item) {
                 return !item.isEmpty();
             });
-        };
-        
-        itext.getNonEmptyItemIds = function () {
+        },
+        getNonEmptyItemIds: function () {
             return this.getNonEmptyItems().map(function (item) {
                 return item.id;
             });
-        };
-        
-        itext.deduplicateIds = function () {
+        },
+        deduplicateIds: function () {
             var nonEmpty = this.getNonEmptyItems();
             var found = [];
             var counter, item, origId,
@@ -273,34 +257,31 @@ define([
                 found.push(item.id);
             }
             if (changed) {
-                itext.fire({
+                this.fire({
                     type: 'change'
                 });
             }
-        };
-        
-        itext.hasItem = function (item) {
+        },
+        hasItem: function (item) {
             return this.items.indexOf(item) !== -1;
-        };
-
+        },
         /**
          * Add an itext item to the global Itext object.
          * Item is an ItextItem object.
          * Does nothing if the item was already in the itext object.
          */
-        itext.addItem = function (item) {
+        addItem: function (item) {
             if (!this.hasItem(item)) {
                 this.items.push(item);
                 this.fire({
                     type: 'change'
                 });
             } 
-        };
-        
+        },
         /*
          * Create a new blank item and add it to the list.
          */
-        itext.createItem = function (id) {
+        createItem: function (id) {
             var item = new ItextItem({
                 id: id,
                 itextModel: this,
@@ -314,12 +295,11 @@ define([
                 type: 'change'
             });
             return item;
-        };
-        
+        },
         /**
          * Get the Itext Item by ID.
          */
-        itext.getItem = function (iID) {
+        getItem: function (iID) {
             // this is O[n] when it could be O[1] with some other
             // data structure. That would require keeping the ids
             // in sync in multiple places though.
@@ -332,17 +312,15 @@ define([
             } catch (e) {
                 throw "NoItextItemFound";
             }
-        };
-        
-        itext.getOrCreateItem = function (id) {
+        },
+        getOrCreateItem: function (id) {
             try {
                 return this.getItem(id);
             } catch (err) {
                 return this.createItem(id); 
             }
-        };
-        
-        itext.removeItem = function (item) {
+        },
+        removeItem: function (item) {
             var index = this.items.indexOf(item);
             if (index !== -1) {
                 this.items.splice(index, 1);
@@ -350,18 +328,16 @@ define([
                     type: 'change'
                 });
             } 
-        };
-        
+        },
         /**
          * Generates a flat list of all unique Itext IDs currently in the
          * Itext object.
          */
-        itext.getAllItemIDs = function () {
+        getAllItemIDs: function () {
             return this.items.map(function (item) {
                 return item.id;
             });
-        };
-
+        },
         /**
          * Goes through the Itext data and verifies that
          * a) a default language is set to something that exists
@@ -373,7 +349,7 @@ define([
          *
          * if everything passes will return true
          */
-        itext.validateItext = function () {
+        validateItext: function () {
             var dLang = this.getDefaultLanguage();
 
             if(!dLang){
@@ -385,13 +361,12 @@ define([
             }
 
             return true;
-        };
-        
+        },
         /**
          * Remove all Itext associated with the given mug
          * @param mug
          */
-        itext.removeMugItext = function (mug) {
+        removeMugItext: function (mug) {
             // NOTE: this is not currently used. We clear itext
             // at form-generation time. This is because shared 
             // itext makes removal problematic.
@@ -415,19 +390,16 @@ define([
                     }
                 }
             }
-        };
-
-        itext.updateForNewMug = function(mug) {
+        },
+        updateForNewMug: function(mug) {
             // for new mugs, generate a label
             return this.updateForMug(mug, mug.getDefaultLabelValue());
-        };
-        
-        itext.updateForExistingMug = function(mug) {
+        },
+        updateForExistingMug: function(mug) {
             // for existing, just use what's there
             return this.updateForMug(mug, mug.getLabelValue());
-        };
-        
-        itext.updateForMug = function (mug, defaultLabelValue) {
+        },
+        updateForMug: function (mug, defaultLabelValue) {
             // set default itext id/values
             if (mug.controlElement) {
                 // set label if not there
@@ -450,9 +422,7 @@ define([
                     mug.bindElement.constraintMsgItextID = this.createItem("");
                 }
             }
-        };
-
-        return itext;
+        }
     };
 
     /**
@@ -1333,7 +1303,7 @@ define([
             var _this = this,
                 langs = this.opts().javaRosa.langs;
 
-            this.data.javaRosa.Itext = Itext = ItextModel();
+            this.data.javaRosa.Itext = Itext = new ItextModel();
 
             function eachLang() {
                 var el = $(this), defaultExternalLang;

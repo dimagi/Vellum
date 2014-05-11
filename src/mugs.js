@@ -608,7 +608,7 @@ define([
                     nodeID = this.dataElement.nodeID;
                 }
             }
-            return nodeID || cEl.defaultValue;
+            return nodeID || this.controlElement.defaultValue;
         },
         getAbsolutePath: function () {
             return this.form.getAbsolutePath(this);

@@ -30,8 +30,6 @@ define([
         return this;
     };
 
-
-
     var that = {};
 
     that.langCodeToName = {};
