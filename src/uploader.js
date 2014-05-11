@@ -66,33 +66,6 @@ define([
         video: 'fd_hqvideo'
     };
 
-    
-    function initUploadController(options) {
-        var $uploaderModal = $(multimedia_modal({
-            mediaType: options.mediaType,
-            modalId: options.uploaderSlug
-        }));
-        $('#fd-multimedia-modal-container').append($uploaderModal);
-        var uploadController = new HQMediaFileUploadController(
-            options.uploaderSlug, 
-            options.mediaType, 
-            {
-                fileFilters: SUPPORTED_EXTENSIONS[options.mediaType],
-                uploadURL: options.uploadUrl,
-                swfURL: options.swfUrl,
-                isMultiFileUpload: false,
-                queueTemplate: multimedia_queue,
-                errorsTemplate: multimedia_errors,
-                existingFileTemplate: PREVIEW_TEMPLATES[options.mediaType],
-                licensingParams: ['shared', 'license', 'author', 'attribution-notes'],
-                uploadParams: {},
-                sessionid: options.sessionid
-            }
-        );
-        uploadController.init();
-        return uploadController;
-    }
-
     // These functions were extracted out when separating the uploader code from
     // the JavaRosa Itext media widget code.  They could easily be made part of
     // the plugin interface in order to avoid passing around objectMap and
@@ -138,15 +111,9 @@ define([
             ICONS = widget.mug.form.vellum.data.javaRosa.ICONS;
 
         widget.getUIElement = function () {
-            var previewID = widget.id + '-preview-block',
-                uploadID = widget.id + '-upload-block';
             $uiElem = _getParentUIElement();
             var $controlBlock = $uiElem.find('.controls'),
-                $previewContainer = $('<div />')
-                    .attr('id', previewID)
-                    .addClass('fd-mm-preview-container'),
                 $uploadContainer = $('<div />')
-                    .attr('id', uploadID)
                     .addClass('fd-mm-upload-container');
             $controlBlock.empty()
                 .addClass('control-row').data('form', widget.form);
@@ -165,21 +132,21 @@ define([
             $uploadContainer.find('.fd-mm-path-show').click(function (e) {
                 var $showBtn = $(this);
                 $showBtn.addClass('hide');
-                $('#' + uploadID).find('.fd-mm-path').removeClass('hide');
+                $uploadContainer.find('.fd-mm-path').removeClass('hide');
                 e.preventDefault();
             });
 
             $uploadContainer.find('.fd-mm-path-hide').click(function (e) {
                 var $hideBtn = $(this);
                 $hideBtn.parent().addClass('hide');
-                $('#' + uploadID).find('.fd-mm-path-show').removeClass('hide');
+                $uploadContainer.find('.fd-mm-path-show').removeClass('hide');
                 e.preventDefault();
             });
             $input.bind("change keyup", function () {
-                updateMultimediaBlockUI(widget, $uiElem, objectMap);
+                widget.updateMultimediaBlockUI(objectMap);
             });
             $uiElem.on('mediaUploadComplete', function (event, data) {
-                handleUploadComplete(widget, event, data, $uiElem, objectMap);
+                widget.handleUploadComplete(event, data, objectMap);
             });
 
             $controlBlock.append($uploadContainer);
@@ -248,23 +215,7 @@ define([
         return $uploadBtn;
     };
     
-    var handleUploadComplete = function (widget, event, data, $uiElem, objectMap) {
-        if (data.ref && data.ref.path) {
-            objectMap[data.ref.path] = data.ref;
-        }
-        updateMultimediaBlockUI(widget, $uiElem, objectMap);
-    };
     
-    var updateMultimediaBlockUI = function (widget, $uiElem, objectMap) {
-        $('#' + getPreviewID(widget)).html(getPreviewUI(widget, objectMap))
-            .find('.existing-media').tooltip();
-
-        $uiElem.find('.fd-mm-upload-trigger')
-            .empty()
-            .append(getUploadButtonUI(widget, objectMap));
-
-        widget.updateReference();
-    };
     
     return $.vellum.plugin("uploader", {
         objectMap: false,
@@ -290,21 +241,21 @@ define([
             }
 
             this.data.uploader.uploadControls = {
-                'image': initUploadController({
+                'image': this.initUploadController({
                     uploaderSlug: 'fd_hqimage', 
                     mediaType: 'image',
                     sessionid: sessionid,
                     uploadUrl: uploadUrls.image,
                     swfUrl: swfUrl
                 }),
-                'audio': initUploadController({
+                'audio': this.initUploadController({
                     uploaderSlug: 'fd_hqaudio',
                     mediaType: 'audio',
                     sessionid: sessionid,
                     uploadUrl: uploadUrls.audio,
                     swfUrl: swfUrl
                 }),
-                'video': initUploadController({
+                'video': this.initUploadController({
                     uploaderSlug: 'fd_hqvideo',
                     mediaType: 'video',
                     sessionid: sessionid,

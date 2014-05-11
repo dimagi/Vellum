@@ -51,9 +51,10 @@ define([
         defaults: {},
         _fn: {},
         _initFns: {},
-        _instance: function (options) {
+        _instance: function ($f, options) {
             options = $.extend(true, {}, $.vellum.defaults, options);
 
+            this.$f = $f;
             this.data = {};
             this.opts = function () { 
                 return $.extend(true, {}, options); 

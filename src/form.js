@@ -49,7 +49,7 @@ define([
         },
             dataTree, controlTree;
 
-        var logicManager = logic.LogicManager(that, {
+        var logicManager = new logic.LogicManager(that, {
                 allowedDataNodeReferences: opts.allowedDataNodeReferences
             }),
             fireChange = function (mug) {

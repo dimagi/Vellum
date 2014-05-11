@@ -105,7 +105,7 @@ define([
         widget.id = inputID;
 
         widget.input = $("<input />")
-            .attr("id", inputID)
+            .attr("name", inputID)
             .prop('disabled', disabled);
 
         widget.getControl = function () {
@@ -125,6 +125,9 @@ define([
         input.attr("type", "text").addClass('input-block-level');
 
         widget.setValue = function (value) {
+            // Why is this here?  Is it because the browser XML parser converts
+            // escape codes to their values?  If so, this should be done where
+            // it's called at parse time, not in the UI.
             if (value !== undefined) {
                 value = value.replace(
                     new RegExp(String.fromCharCode(10), 'g'), '&#10;');
@@ -207,7 +210,7 @@ define([
         widget.definition = {};
 
         // todo make a style for this when vellum gets a facelift
-        widget.kvInput = $('<div class="control-row" />').attr('id', id);
+        widget.kvInput = $('<div class="control-row" />').attr('name', id);
 
         widget.getControl = function () {
             if (widget.isDisabled()) {
@@ -303,7 +306,7 @@ define([
     var getUIElement = function($input, labelText, isDisabled) {
         var uiElem = $("<div />").addClass("widget control-group"),
             $controls = $('<div class="controls" />'),
-            $label = getLabel(labelText, $input.attr('id'));
+            $label = $("<label />").text(labelText);
         $label.addClass('control-label');
         uiElem.append($label);
 
@@ -313,14 +316,6 @@ define([
         return uiElem;
     };
 
-    function getLabel(text, forId) {
-        var $label = $("<label />")
-            .text(text);
-        if (forId) {
-            $label.attr("for", forId);
-        }
-        return $label;
-    }
 
     return {
         base: base,

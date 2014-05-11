@@ -1,27 +1,15 @@
 define([
-    'tpl!./templates/modal_content',
     'text!langCodes',
     'XMLWriter',
     'jquery',
     'jquery.bootstrap-popout'
 ], function (
-    modal_content,
     langCodes,
     XMLWriter,
     $
 ) {
     RegExp.escape = function(s) {
         return s.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
-    };
-    
-    $.fn.popAttr = function (name) {
-        var val = this.attr(name);
-        try {
-            this.removeAttr(name);
-        } catch (e) {
-            // catch InvalidCharacterError due to \: in attribute name
-        }
-        return val;
     };
     
     $.fn.stopLink = function() {
@@ -56,17 +44,6 @@ define([
         "bindElement/calculateAttr",
         "bindElement/constraintAttr"
     ];
-    
-    that.generateNewModal = function (modalTitle, modalButtons, closeButtonTitle) {
-        var $modalContainer = $('#fd-modal-generic-container'),
-            $modal = $(modal_content({
-                modalTitle: modalTitle,
-                modalButtons: modalButtons || [],
-                closeButtonTitle: closeButtonTitle || "Close"
-            }));
-        $modalContainer.html($modal);
-        return $modal;
-    };
 
     that.getTemplateObject = function (selector, params) {
         return $(_.template($(selector).text(), params));

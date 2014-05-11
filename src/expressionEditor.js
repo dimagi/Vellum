@@ -57,24 +57,23 @@ define([
     addOp(BinOpHandler, expTypes.GTE, "is greater than or equal to");
     addOp(FunctionHandler, "selected", "has selected value");
 
-    function showXPathEditor(options) {
+    function showXPathEditor($div, options) {
         var that = {};
         util.eventuality(that);
 
-        var editorPane = $('#fd-xpath-editor');
-        var editorContent = $('#fd-xpath-editor-content');
+        var editorContent = $div;
 
         var getExpressionInput = function () {
-            return $("#fd-xpath-editor-text");
+            return $div.find(".fd-xpath-editor-text");
         };
         var getValidationSummary = function () {
-            return $("#fd-xpath-validation-summary");
+            return $div.find(".fd-xpath-validation-summary");
         };
         var getExpressionPane = function () {
-            return $("#fd-xpath-editor-expressions");
+            return $div.find(".fd-xpath-editor-expressions");
         };
         var getTopLevelJoinSelect = function () {
-            return $(editorPane.find("#top-level-join-select")[0]);
+            return $(editorContent.find(".top-level-join-select")[0]);
         };
 
         var getExpressionFromSimpleMode = function () {
@@ -103,7 +102,7 @@ define([
         };
 
         var getExpressionFromUI = function () {
-            if ($("#xpath-simple").hasClass('hide')) {
+            if ($div.find(".xpath-simple").hasClass('hide')) {
                 // advanced
                 return getExpressionInput().val();
             } else {
@@ -295,13 +294,13 @@ define([
             if (options.xpathType === "bool") {
                 showSimpleMode(options.value);
                 if (!options.value) {
-                    $('#fd-add-exp').click();
+                    $div.find('.fd-add-exp').click();
                 }
             } else {
                 showAdvancedMode(options.value);
             }
 
-            $("#fd-xpath-editor-text").val(options.value);
+            $div.find(".fd-xpath-editor-text").val(options.value);
         };
 
         // toggle simple/advanced mode
@@ -309,19 +308,19 @@ define([
             getExpressionInput().val(text);
             getExpressionPane().empty();
 
-            $("#xpath-advanced").removeClass('hide');
-            $("#xpath-simple").addClass('hide');
-            $('#fd-xpath-actions').removeClass('form-actions-condensed');
+            $div.find(".xpath-advanced").removeClass('hide');
+            $div.find(".xpath-simple").addClass('hide');
+            $div.find('.fd-xpath-actions').removeClass('form-actions-condensed');
             if (showNotice) {
-                $("#xpath-advanced-notice").removeClass('hide');
+                $div.find(".xpath-advanced-notice").removeClass('hide');
             } else {
-                $("#xpath-advanced-notice").addClass('hide');
+                $div.find(".xpath-advanced-notice").addClass('hide');
             }
         };
         var showSimpleMode = function (text) {
-            $("#xpath-simple").removeClass('hide');
-            $('#fd-xpath-actions').addClass('form-actions-condensed');
-            $("#xpath-advanced").addClass('hide');
+            $div.find(".xpath-simple").removeClass('hide');
+            $div.find('.fd-xpath-actions').addClass('form-actions-condensed');
+            $div.find(".xpath-advanced").addClass('hide');
 
             getExpressionPane().empty();
             // this sometimes sends us back to advanced mode (if we couldn't parse)
@@ -340,7 +339,7 @@ define([
             }));
             editorContent.empty().append($xpathUI);
 
-            $xpathUI.find('#fd-xpath-show-advanced-button').click(function () {
+            $xpathUI.find('.fd-xpath-show-advanced-button').click(function () {
                 if (window._gaq) {
                     _gaq.push(['_trackEvent', 'Form Builder', 
                                'Edit Expression', 'Show Advanced Mode']);
@@ -350,26 +349,26 @@ define([
 
             });
 
-            $xpathUI.find('#fd-xpath-show-simple-button').click(function () {
+            $xpathUI.find('.fd-xpath-show-simple-button').click(function () {
                 showSimpleMode(getExpressionInput().val());
             });
 
-            $xpathUI.find('#fd-add-exp').click(function () {
+            $xpathUI.find('.fd-add-exp').click(function () {
                 tryAddExpression();
             });
 
-            $xpathUI.find('#fd-xpath-editor-text').on('change keyup', function (){
+            $xpathUI.find('.fd-xpath-editor-text').on('change keyup', function (){
                 that.fire({
                     type: 'change'
                 });
             });
 
             var done = function (val) {
-                $('#fd-xpath-editor').hide();
+                $div.find('.fd-xpath-editor').hide();
                 options.done(val);
             };
 
-            $xpathUI.find('#fd-xpath-save-button').click(function() {
+            $xpathUI.find('.fd-xpath-save-button').click(function() {
                 var uiExpression  = getExpressionFromUI();
                 getExpressionInput().val(uiExpression);
                 var results = validate(uiExpression),
@@ -390,14 +389,13 @@ define([
                 }
             });
 
-            $xpathUI.find('#fd-xpath-cancel-button').click(function () {
+            $xpathUI.find('.fd-xpath-cancel-button').click(function () {
                 done(false);
             });
         };
 
         initXPathEditor();
         updateXPathEditor(options);
-        editorPane.show();
 
         return that;
     }

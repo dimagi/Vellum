@@ -15,7 +15,6 @@ define([
     './widgets',
     './parser',
     './expressionEditor',
-    './util',
     'save-button',
     'underscore',
     'codemirror',
@@ -43,7 +42,6 @@ define([
     widgets,
     parser,
     expressionEditor,
-    util,
     SaveButton,
     _,
     CodeMirror,
@@ -52,9 +50,7 @@ define([
     xpathmodels,
     $
 ) {
-    var noTextString = '[no text]',
-        DEBUG_MODE = false,
-        MESSAGES_DIV = '#fd-messages',
+    var DEBUG_MODE = false,
         mugTypes = mugs.mugTypes;
     
     xpathmodels.DEBUG_MODE = DEBUG_MODE;
@@ -180,7 +176,7 @@ define([
         }
     });
 
-    var getQuestionTypeGroupID = function (slug) {
+    var getQuestionTypeGroupClass = function (slug) {
         return "fd-question-group-" + slug;
     };
     
@@ -194,10 +190,10 @@ define([
         
     var QuestionTypeGroup = function (groupData, vellum) {
         var defaultQuestion = convertButtonSpec(groupData.group),
-            groupID = getQuestionTypeGroupID(defaultQuestion.slug);
+            groupClass = getQuestionTypeGroupClass(defaultQuestion.slug);
 
         var $questionGroup = $(question_type_group({
-            groupID: groupID,
+            groupClass: groupClass,
             showDropdown: groupData.showDropdown || true,
             textOnly: groupData.textOnly,
             relatedQuestions: _.map(groupData.related || [], convertButtonSpec),
@@ -251,8 +247,8 @@ define([
 
         this.data.core.lastSavedXForm = this.opts().core.form;
 
-        var root = $("#formdesigner");
-        root.empty().append(main_template);
+        this.$f.addClass('formdesigner');
+        this.$f.empty().append(main_template);
 
         this._init_toolbar();
         this._init_extra_tools();
@@ -267,16 +263,15 @@ define([
         
     fn._init_toolbar = function () {
         var _this = this,
-            toolbar = $(".fd-toolbar");
-
-        var $questionGroupContainer = $('#fd-container-question-type-group');
+            $questionGroupContainer = this.$f.find(
+                '.fd-container-question-type-group');
 
         _.each(QUESTION_GROUPS, function (groupData) {
             var questionGroup = new QuestionTypeGroup(groupData, _this);
             $questionGroupContainer.append(questionGroup);
         });
 
-        var $saveButtonContainer = $('#fd-save-button');
+        var $saveButtonContainer = this.$f.find('.fd-save-button');
         this.data.core.saveButton.ui.appendTo($saveButtonContainer);
     };
 
@@ -284,7 +279,7 @@ define([
         var _this = this,
             menuItems = this.getToolsMenuItems();
 
-        var $toolsMenu = $("#fd-tools-menu");
+        var $toolsMenu = this.$f.find('.fd-tools-menu');
         $toolsMenu.empty();
         _(menuItems).each(function (menuItem) {
             var $a = $("<a tabindex='-1' href='#'>" + menuItem.name + "</a>").click(
@@ -294,7 +289,7 @@ define([
                         return;
                     }
 
-                    menuItem.action(_this.data.core.form, function () {
+                    menuItem.action(function () {
                         _this.refreshVisibleData();
                     });
                 }
@@ -302,11 +297,11 @@ define([
             $("<li></li>").append($a).appendTo($toolsMenu);
         });
 
-        $("#fd-expand-all").click(function() {
+        this.$f.find('.fd-expand-all').click(function() {
             _this.data.core.$tree.jstree("open_all");
         });
 
-        $("#fd-collapse-all").click(function() {
+        this.$f.find('.fd-collapse-all').click(function() {
             _this.data.core.$tree.jstree("close_all");
         });
     };
@@ -316,20 +311,20 @@ define([
         return [
             {
                 name: "Export Form Contents",
-                action: function () {
-                    _this.showExportDialog();
+                action: function (done) {
+                    _this.showExportDialog(done);
                 }
             },
             {
                 name: "Edit Source XML",
-                action: function () {
-                    _this.showSourceXMLDialog();
+                action: function (done) {
+                    _this.showSourceXMLDialog(done);
                 }
             },
             {
                 name: "Form Properties",
-                action: function () {
-                    _this.showFormPropertiesDialog();
+                action: function (done) {
+                    _this.showFormPropertiesDialog(done);
                 }
             }
         ];
@@ -342,7 +337,7 @@ define([
             allMugs = this.data.core.form.getMugList(true),
             currLang = this.data.core.currentItextDisplayLanguage;
         allMugs.map(function (mug) {
-            var node = $('#' + mug.ufid),
+            var node = _this.$f.find('#' + mug.ufid),
                 it = mug.controlElement ? mug.controlElement.labelItextID : null;
             var treeName = (it) ? it.getValue("default", currLang) : _this.getMugDisplayName(mug);
             treeName = treeName || _this.getMugDisplayName(mug);
@@ -363,12 +358,12 @@ define([
             this.data.javaRosa.Itext.getDefaultLanguage());
     };
 
-    var showConfirmDialog = function () {
-        $("#fd-dialog-confirm").dialog("open");
+    fn._showConfirmDialog = function () {
+        this.$f.find('.fd-dialog-confirm').dialog("open");
     };
 
-    var hideConfirmDialog = function () {
-        $("#fd-dialog-confirm").dialog("close");
+    fn._hideConfirmDialog = function () {
+        this.$f.find('.fd-dialog-confirm').dialog("close");
     };
 
     /**
@@ -383,32 +378,32 @@ define([
                                  cancelButName, cancelButFunction, title) {
         title = title || "";
         var buttons = {}, opt,
-                dial = $('#fd-dialog-confirm'), contentStr;
+            $dial = this.$f.find('.fd-dialog-confirm'), contentStr;
         buttons[confButName] = confFunction;
         buttons[cancelButName] = cancelButFunction;
 
-        dial.empty();
+        $dial.empty();
         contentStr = '<p>' +
                 '<span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>' +
                 '<span class="fd-message">These items will be permanently deleted and cannot be recovered. Are you sure?</span></p>';
-        dial.append(contentStr);
+        $dial.append(contentStr);
         if (!message || typeof(message) !== "string") {
             message = "";
         }
-        $('#fd-dialog-confirm .fd-message').text(message);
-        $("#fd-dialog-confirm").dialog("option", {buttons: buttons, "title": title});
+        $dial.find('.fd-message').text(message);
+        $dial.dialog("option", {buttons: buttons, "title": title});
     };
 
-    fn.showSourceXMLDialog = function (done, form) {
+    fn.showSourceXMLDialog = function (done) {
         var _this = this;
         // There are validation errors but user continues anyway
         function onContinue () {
-            hideConfirmDialog();
-            _this.showSourceInModal();
+            _this.hideConfirmDialog();
+            _this.showSourceInModal(done);
         }
 
         function onAbort () {
-            hideConfirmDialog();
+            _this.hideConfirmDialog();
         }
 
         var msg = "There are validation errors in the form.  Do you want to continue anyway? WARNING:" +
@@ -416,22 +411,27 @@ define([
 
         this.setDialogInfo(msg, 'Continue', onContinue, 'Abort', onAbort);
         if (!this.data.core.form.isFormValid()) {
-            showConfirmDialog();
+            this._showConfirmDialog();
         } else {
-            this.showSourceInModal();
+            this.showSourceInModal(done);
         }
     };
 
-    fn.showSourceInModal = function () {
+    fn.showSourceInModal = function (done) {
         var _this = this,
             $modal, $updateForm, $textarea, codeMirror, modalHeaderHeight,
             modalFooterHeight, modalHeight, modalBodyHeight;
 
-        $modal = util.generateNewModal("Edit Form's Source XML", [
+        $modal = this.generateNewModal("Edit Form's Source XML", [
             {
-                id: 'fd-update-source-button',
                 title: "Update Source",
-                cssClasses: "btn-primary"
+                cssClasses: "btn-primary",
+                action: function () {
+                    codeMirror.save();
+                    _this._loadXFormOrError($textarea.val());
+                    $modal.modal('hide');
+                    done();
+                }
             }
         ]);
         $updateForm = $(edit_source({
@@ -462,36 +462,22 @@ define([
             $textarea.val(this.data.core.failedLoadXML);
         }
 
-        try {
-            codeMirror = CodeMirror.fromTextArea($textarea.get(0));
-            codeMirror.setOption('viewportMargin', Infinity);
-            codeMirror.setOption('lineNumbers', true);
-            codeMirror.setSize('100%', '100%');
-        } catch (e) {
-            // pass
-        }
-
-        $modal.find('#fd-update-source-button').click(function () {
-            if (codeMirror) {
-                codeMirror.save();
-            }
-            _this._loadXFormOrError($textarea.val());
-            $modal.modal('hide');
-        });
+        codeMirror = CodeMirror.fromTextArea($textarea.get(0));
+        codeMirror.setOption('viewportMargin', Infinity);
+        codeMirror.setOption('lineNumbers', true);
+        codeMirror.setSize('100%', '100%');
 
         $modal.modal('show');
         $modal.on('shown', function () {
-            if (codeMirror) {
-                codeMirror.refresh();
-            }
+            codeMirror.refresh();
         });
     };
 
-    fn.showExportDialog = function(done, form) {
+    fn.showExportDialog = function(done) {
         var $modal,
             $exportForm;
 
-        $modal = util.generateNewModal("Export Form Contents", []);
+        $modal = this.generateNewModal("Export Form Contents", []);
         $exportForm = $(edit_source({
             description: "Copy and paste this content into a spreadsheet program like Excel " +
                          "to easily share your form with others."
@@ -507,7 +493,7 @@ define([
         // moved over just for display purposes, apparently the original
         // wasn't working perfectly, so this is a todo
         var _this = this,
-            $modal = util.generateNewModal("Edit Form Properties", []),
+            $modal = this.generateNewModal("Edit Form Properties", []),
             $modalBody = $modal.find('.modal-body'),
             formProperties = [
                 {
@@ -531,17 +517,17 @@ define([
 
         _.each(formProperties, function (prop) {
             var $propertyInput = $(control_group_stdInput({
-                label: prop.label,
-                controlId: 'fd-form-prop-' + prop.slug + '-input'
+                label: prop.label
             }));
             $modalBody.append($propertyInput);
             $propertyInput.find('input')
                 .val(_this.data.core.form[prop.slug])
                 .on('keyup', function () {
-                    var currentVal = $(this).val();
+                    var $this = $(this),
+                        currentVal = $this.val();
                     if (typeof prop.cleanValue === 'function') {
                         currentVal = prop.cleanValue(currentVal);
-                        $(this).val(currentVal);
+                        $this.val(currentVal);
                     }
                     _this.data.core.form.setAttr(prop.slug, currentVal);
                 });
@@ -549,16 +535,34 @@ define([
 
         $modal.modal('show');
     };
+    
+    fn.generateNewModal = function (title, buttons, closeButtonTitle) {
+        buttons.reverse();
+
+        var $modalContainer = this.$f.find('.fd-modal-generic-container'),
+            $modal = $(modal_content({
+                title: title,
+                closeButtonTitle: closeButtonTitle || "Close"
+            }));
+
+        _.each(buttons, function (button) {
+            button.action = button.action || function () {};
+            $modal.find('.modal-footer').prepend(
+                $(modal_button(button)).click(button.action));
+        });
+        $modalContainer.html($modal);
+        return $modal;
+    };
 
     fn._init_modal_dialogs = function () {
-        $("#fd-dialog-confirm").dialog({
+        this.$f.find('.fd-dialog-confirm').dialog({
             resizable: false,
             modal: true,
             buttons: {
                 "Confirm": function() {
                     $(this).dialog("close");
                 },
-                Cancel: function() {
+                "Cancel": function() {
                     $(this).dialog("close");
                 }
             },
@@ -573,15 +577,12 @@ define([
             hideOnContentClick: false,
             enableEscapeButton: false,
             showCloseButton : true,
-            onClosed: function() {
-            }
+            onClosed: function() {}
         });
     };
         
-
-        
     fn._resetMessages = function (errors) {
-        var error, messages_div = $(MESSAGES_DIV);
+        var error, messages_div = this.$f.find('.fd-messages');
         messages_div.empty();
 
         function asArray(value) {
@@ -649,14 +650,14 @@ define([
             ['DataBindOnly']);
 
         var _this = this;
-        this.data.core.$tree = $tree = $('#fd-question-tree');
+        this.data.core.$tree = $tree = this.$f.find('.fd-question-tree');
         $tree.jstree({
             "json_data" : {
                 "data" : []
             },
             "core": {
                 strings: {
-                    new_node: noTextString
+                    new_node: this.opts().core.noTextString
                 }
             },
             "ui" : {
@@ -802,31 +803,34 @@ define([
         });
     };
 
-    var setTreeNodeInvalid = function (uid, msg) {
-        $($('#' + uid)[0]).append('<div class="ui-icon ui-icon-alert fd-tree-valid-alert-icon" title="' + msg + '"></div>');
+    fn.setTreeNodeInvalid = function (uid, msg) {
+        this.$f.find('#' + uid).append(
+            '<div class="ui-icon ui-icon-alert fd-tree-valid-alert-icon"' +
+            ' title="' + msg + '"></div>');
     };
 
-    var setTreeNodeValid = function (uid) {
-        $($('#' + uid)[0]).find(".fd-tree-valid-alert-icon").remove();
+    fn.setTreeNodeValid = function (uid) {
+        this.$f.find('#' + uid).find(".fd-tree-valid-alert-icon").remove();
     };
 
     fn.setTreeValidationIcon = function (mug) {
         var errors = mug.getErrors();
         if (!errors.length) {
-            setTreeNodeValid(mug.ufid);
+            this.setTreeNodeValid(mug.ufid);
         } else {
             var message = _(errors).pluck("message").join("<p>").replace(/"/g, "'");
-            setTreeNodeInvalid(mug.ufid, message);
+            this.setTreeNodeInvalid(mug.ufid, message);
         }
     };
 
     fn.setAllTreeValidationIcons = function () {
+        var _this = this;
         //clear existing warning icons to start fresh.
         this.data.core.$tree.find('.fd-tree-valid-alert-icon').remove();
         
         _(this.data.core.form.getInvalidMugUFIDs()).each(function (messages, ufid) {
             var message = messages.join("<p>").replace(/"/g, "'");
-            setTreeNodeInvalid(ufid, message);
+            _this.setTreeNodeInvalid(ufid, message);
         });
     };
 
@@ -890,14 +894,14 @@ define([
         var className = mug.__className || mug.prototype.__className,
             groupSlug = QUESTION_TYPE_TO_GROUP[className];
         if (groupSlug && className !== 'MSelectDynamic' && className !== 'SelectDynamic') {
-            var $questionGroup = $('#' + getQuestionTypeGroupID(groupSlug));
-            $questionGroup.find('.fd-question-type-related').removeClass('disabled');
+            this.$f
+                .find('.' + getQuestionTypeGroupClass(groupSlug))
+                .find('.fd-question-type-related').removeClass('disabled');
         }
     };
 
     fn.resetQuestionTypeGroups = function () {
-        var $questionGroupContainer = $('#fd-container-question-type-group');
-        $questionGroupContainer.find('.fd-question-type-related')
+        this.$f.find('.fd-container-question-type-group .fd-question-type-related')
             .addClass('disabled');
     };
 
@@ -956,7 +960,7 @@ define([
                     //re-enable all buttons and inputs in case they were disabled before.
                     _this.enableUI();
                 } else {
-                    $('#fd-default-panel').removeClass('hide');
+                    _this.$f.find('.fd-default-panel').removeClass('hide');
                 }
                 $.fancybox.hideActivity();
             } catch (e) {
@@ -968,21 +972,22 @@ define([
                 }
 
                 // this button doesn't seem to actually exist
-                var showSourceButton = $('#fd-editsource-button');
+                // todo: fix
+                //var showSourceButton = $('#fd-editsource-button');
                 //disable all buttons and inputs
                 _this.disableUI();
                 //enable the view source button so the form can be tweaked by
                 //hand.
-                showSourceButton.button('enable');
+                //showSourceButton.button('enable');
 
                 _this.setDialogInfo(msg, 
                     'ok', function() {
-                        hideConfirmDialog();
+                        _this.hideConfirmDialog();
                     }, 
                     'cancel', function(){
-                        hideConfirmDialog();
+                        _this.hideConfirmDialog();
                     });
-                showConfirmDialog();
+                this._showConfirmDialog();
                 
                 _this.data.core.formLoadingFailed = true;
                 _this.data.core.failedLoadXML = formString;
@@ -1009,38 +1014,21 @@ define([
     };
 
     fn.disableUI = function () {
-        flipUI(false);
+        this.flipUI(false);
     };
 
     fn.enableUI = function () {
-        flipUI(true);
+        this.flipUI(true);
     };
 
-    function flipUI(state) {
-        //var butState;
-        //we need a button State variable since it uses different syntax for disabling
-        //(compared to input widgets)
-        //if (state) {
-            //butState = 'enable';
-        //} else {
-            //butState = 'disable';
-        //}
-        // TODO: in making fd-save-button controlled by saveButton, do we need to do anything explicit here?
-//        $('#fd-save-button').button(butState);
-
-        /*
-        $('#fd-lang-disp-add-lang-button').button(butState);
-        $('#fd-lang-disp-remove-lang-button').button(butState);
-        */
-
-        //other stuff
+    fn.flipUI = function (state) {
+        var $props = this.$f.find('.fd-question-properties');
         if (state) {
-            $('#fd-question-properties').show();
+            $props.show();
         } else {
-            $('#fd-question-properties').hide();
+            $props.hide();
         }
-
-    }
+    };
         
     fn.loadXML = function (formXML) {
         var _this = this;
@@ -1052,9 +1040,10 @@ define([
 
         form.on('question-type-change', function (e) {
             _this.jstree("set_type", e.qType, '#' + e.mug.ufid);
+            
             // update question type changer
-            var $currentChanger = $('#fd-question-changer');
-            $currentChanger.after(_this.getQuestionTypeChanger(e.mug))
+            _this.$f.find('.fd-question-changer')
+                .after(_this.getQuestionTypeChanger(e.mug))
                 .remove();
         }).on('parent-question-type-change', function (e) {
             _this.overrideJSTreeIcon(e.childMug);
@@ -1087,6 +1076,8 @@ define([
             var mug = e.mug;
             e = e.e;
 
+            // todo: why is this here? 126038032.  Switch to use property
+            // visibility attribute.
             if (mug.bindElement) {
                 if (e.property === 'constraintAttr' && 
                     (mug.__className !== "DataBindOnly")) 
@@ -1104,7 +1095,7 @@ define([
     };
 
     fn.toggleConstraintItextBlock = function (bool) {
-        var $constraintItext = $('#itext-block-constraintMsg');
+        var $constraintItext = $('[name="itext-block-constraintMsg"]');
         
         if (bool) {
             $constraintItext.removeClass('hide');
@@ -1259,19 +1250,19 @@ define([
     };
     
     fn.displayMugProperties = function (mug) {
-        $('#fd-default-panel').addClass('hide');
+        var $props = this.$f.find('.fd-question-properties');
+        this.$f.find('.fd-default-panel').addClass('hide');
 
         /* update display */
-        $('#fd-question-properties').animate({}, 200);
+        $props.animate({}, 200);
 
         this.showContent();
         this.hideQuestionProperties();
 
-        var $content = $("#fd-props-content").empty(),
-            questionToolbar = this.getToolbarForMug(mug),
+        var $content = this.$f.find(".fd-props-content").empty(),
             sections = this.getSections(mug);
 
-        $('#fd-props-toolbar').html(questionToolbar);
+        this.$f.find('.fd-props-toolbar').html(this.getMugToolbar(mug));
         for (var i = 0; i < sections.length; i++) {
             var section = sections[i];
 
@@ -1288,10 +1279,11 @@ define([
             }
         }
 
-        $("#fd-question-properties").show();
-        $('.fd-help').fdHelp();
+        $props.show();
+        this.$f.find('.fd-help').fdHelp();
 
-        var $validationCondition = $('#bindElement-constraintAttr');
+        // todo: why is this here? 126038032 
+        var $validationCondition = $('[name="bindElement-constraintAttr"]');
         if ($validationCondition && !$validationCondition.val()) {
             this.toggleConstraintItextBlock(false);
         }
@@ -1300,15 +1292,15 @@ define([
     };
         
     fn.hideQuestionProperties = function() {
-        $("#fd-question-properties").hide();
+        this.$f.find('.fd-question-properties').hide();
     };
 
     fn.showContent = function () {
-        $(".fd-content-right").show();
+        this.$f.find('.fd-content-right').show();
     };
 
     fn.hideContent = function () {
-        $(".fd-content-right").hide();
+        this.$f.find('.fd-content-right').hide();
     };
 
     fn.displayXPathEditor = function(options) {
@@ -1322,7 +1314,8 @@ define([
             _this.data.core.hasXPathEditorChanged = false;
             _this.displayMugProperties(_this.getCurrentlySelectedMug());
         };
-        var editor = expressionEditor.showXPathEditor(options);
+        var editor = expressionEditor.showXPathEditor(
+            this.$f.find('.xpath-editor-content'), options);
         editor.on('change', function () {
             _this.data.core.hasXPathEditorChanged = true;
         });
@@ -1334,7 +1327,7 @@ define([
         var _this = this;
         this.data.core.isAlertVisible = true;
 
-        var $modal = util.generateNewModal(title, [], "OK");
+        var $modal = this.generateNewModal(title, [], "OK");
         $modal.removeClass('fade');
         $modal.find('.modal-body')
             .append($('<p />').text(message));
@@ -1348,23 +1341,22 @@ define([
     fn.showVisualValidation = function (mug) {
         var _this = this;
         function setValidationFailedIcon(li, showIcon, message) {
-            var exists = ($(li).find('.fd-props-validate').length > 0);
+            var $li = $(li),
+                exists = ($li.find('.fd-props-validate').length > 0);
             if (exists && showIcon) {
-                $(li).find('.fd-props-validate').attr("title", message).addClass("ui-icon");
+                $li.find('.fd-props-validate').attr("title", message).addClass("ui-icon");
             } else if (exists && !showIcon) {
-                $(li).find('.fd-props-validate').removeClass('ui-icon').attr("title", "");
+                $li.find('.fd-props-validate').removeClass('ui-icon').attr("title", "");
             } else if (!exists && showIcon) {
                 var icon = $('<span class="fd-props-validate ui-icon ui-icon-alert"></span>');
                 icon.attr('title', message);
-                li.append(icon);
+                $li.append(icon);
             }
-            return li;
         }
-
 
         function findInputByReference(blockName, elementName) {
             // todo: make this work (it hasn't in a while)
-            return $('#' + blockName + '-' + elementName);
+            //return $('#' + blockName + '-' + elementName);
         }
 
         // for now form warnings get reset every time validation gets called.
@@ -1373,8 +1365,8 @@ define([
         var errors = this.getVisibleErrors(mug);
 
         _(errors).each(function (error) {
-            var input = findInputByReference(name, "foo-id");  // todo: make work
-            setValidationFailedIcon(input.parent(), true, error);
+            //var input = findInputByReference(name, "foo-id");  // todo: make work
+            //setValidationFailedIcon(input.parent(), true, error);
             _this.data.core.form.updateError({
                 message: error,
                 level: 'form-warning'
@@ -1390,11 +1382,11 @@ define([
     fn.getSectionDisplay = function (mug, options) {
         var _this = this,
             $sec = $(question_fieldset({
-            fieldsetId: "fd-question-edit-" + options.slug || "anon",
-            fieldsetTitle: options.displayName,
-            isCollapsed: !!options.isCollapsed,
-            help: options.help || {}
-        })),
+                fieldsetClass: "fd-question-edit-" + options.slug || "anon",
+                fieldsetTitle: options.displayName,
+                isCollapsed: !!options.isCollapsed,
+                help: options.help || {}
+            })),
             $fieldsetContent = $sec.find('.fd-fieldset-content');
         options.properties.map(function (prop) {
             var elemWidget = prop.widget(mug, $.extend(prop.options, {
@@ -1409,18 +1401,18 @@ define([
         return $sec;
     };
         
-    fn.getToolbarForMug = function (mug) {
+    fn.getMugToolbar = function (mug) {
         var _this = this;
         var $baseToolbar = $(question_toolbar({
             isDeleteable: this.isMugRemoveable(mug,
                     this.data.core.form.getAbsolutePath(mug)),
             isCopyable: mug.isCopyable
         }));
-        $baseToolbar.find('#fd-button-remove').click(function () {
+        $baseToolbar.find('.fd-button-remove').click(function () {
             var mug = _this.getCurrentlySelectedMug();
             _this.data.core.form.removeMugFromForm(mug);
         });
-        $baseToolbar.find('#fd-button-copy').click(function () {
+        $baseToolbar.find('.fd-button-copy').click(function () {
             if (_this.currentMugHasUnsavedChanges()) {
                 return;
             }
@@ -1472,7 +1464,7 @@ define([
             }
             e.preventDefault();
         });
-        $questionTypeChanger.attr('id', 'fd-question-changer');
+        $questionTypeChanger.addClass('fd-question-changer');
         return $questionTypeChanger;
     };
 
@@ -1502,7 +1494,7 @@ define([
                     _this.send(formText);
                 },
                 'Form Validation Error');
-            showConfirmDialog();
+            this._showConfirmDialog();
         }
     };
         
@@ -1514,11 +1506,11 @@ define([
 
         var url = saveType === 'patch' ?  opts.patchUrl : opts.saveUrl;
 
-        $('body').ajaxStart(function () {
-            this.showWaitingDialog();
+        $(document).ajaxStart(function () {
+            _this.showWaitingDialog();
         });
-        $('body').ajaxStop(function () {
-            hideConfirmDialog();
+        $(document).ajaxStop(function () {
+            _this.hideConfirmDialog();
         });
 
         if (saveType === 'patch') {
@@ -1559,14 +1551,14 @@ define([
                         _this.send(formText, 'full');
                     }
                 }
-                hideConfirmDialog();
+                _this.hideConfirmDialog();
                 _this.data.core.lastSavedXForm = formText;
             }
         });
     };
 
     fn.showWaitingDialog = function (msg) {
-        var dial = $('#fd-dialog-confirm'), contentStr;
+        var dial = this.$f.find('.fd-dialog-confirm'), contentStr;
         if (!msg || typeof msg !== 'string') {
             msg = 'Saving form to server...';
         }
@@ -1578,6 +1570,7 @@ define([
             buttons : {},
             closeOnEscape: false,
             open: function(event) {
+                // where in the DOM are these?
                 $(".ui-dialog-titlebar-close").hide();
             },
             close: function(event) {
@@ -1586,13 +1579,12 @@ define([
             title: "Processing..."
         });
         contentStr = '<p><span class="fd-message">' + msg + 
-            '</span><div id="fd-form-saving-anim"></div></p>';
+            '</span><div class="fd-form-saving-anim"></div></p>';
         dial.append(contentStr);
-        $('#fd-form-saving-anim').append(
-            '<img src="' + this.opts().core.staticPrefix + 
-            'images/ajax-loader.gif" id="fd-form-saving-img"/>');
+        dial.find('.fd-form-saving-anim').append(
+            '<span class="fd-form-saving-img"></span>');
 
-        showConfirmDialog();
+        this._showConfirmDialog();
     };
 
     fn.getSections = function (mug) {
@@ -1793,6 +1785,7 @@ define([
         staticPrefix: "",
         allowedDataNodeReferences: [],
         externalInstances: [],
+        noTextString: '[no text]',
         bindBeforeUnload: function (handler) {
             $(window).bind('beforeunload', handler);
         }

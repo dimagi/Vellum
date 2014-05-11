@@ -1,6 +1,6 @@
 @import "lib/main";
 
-#fd-ui-container {
+.fd-ui-container {
   top: 0;
   width: 100%;
 }
@@ -53,14 +53,15 @@
   width: 100%;
 }
 
-#fd-form-saving-img {
+.fd-form-saving-img {
   display: block;
   margin-left: auto;
   margin-right: auto;
+  background-image: url('../images/ajax-loader.gif');
 }
 
 .fd-toolbar {
-  #fd-container-question-type-group {
+  .fd-container-question-type-group {
     display: inline-block;
     vertical-align: middle;
   }
@@ -117,14 +118,14 @@
   font-size: @baseFontSize*1.1 !important;
 }
 
-#fd-form-actions {
+.fd-form-actions {
   padding-right: @gridGutterWidth;
   > div {
     display: inline-block;
   }
 }
 
-#fd-save-button {
+.fd-save-button {
   > .pull-right {
     float: none; // HACK HACK HACK The javascript from main.js is causing issues.
   }
@@ -151,7 +152,7 @@
   }
 }
 
-#fd-messages {
+.fd-messages {
   .alert {
     .box-shadow(0px 0px 10px rgba(0, 0, 0, 0.4));
     margin: @gridGutterWidth;

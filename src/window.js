@@ -17,22 +17,22 @@ define([
             $(document).scroll(adjustToWindow);
 
             this.data.windowManager.offset = {
-                top: opts.topOffset || $('#formdesigner').offset().top-1,
+                top: opts.topOffset || this.$f.offset().top-1,
                 bottom: opts.bottomOffset || 0,
-                left: opts.leftOffset || $('#formdesigner').offset().left
+                left: opts.leftOffset || this.$f.offset().left
             };
 
             this.adjustToWindow();
         },
         adjustToWindow: function () {
-            if (!$("#formdesigner").is(':visible')) {
+            if (!this.$f.is(':visible')) {
                 return;
             }
 
             var availableVertSpace = $(window).height() - this.getCurrentTopOffset(),
             availableHorizSpace,
             position = (this.getCurrentTopOffset() === 0) ? 'fixed' : 'static',
-            $fdc = $('#fd-ui-container');
+            $fdc = this.$f.find('.fd-ui-container');
 
             // so that the document doesn't have to resize for the footer.
             $fdc.parent().css('height', availableVertSpace + 'px');
@@ -62,11 +62,12 @@ define([
             .css('width', availableHorizSpace - this.getLeftWidth() + 'px')
             .find('.fd-scrollable.full').css('height', columnHeight + 'px');
 
-            $fdc.find('#fd-props-scrollable')
-            .css('height', columnHeight - $('#fd-props-toolbar').outerHeight(true) + 'px');
+            $fdc.find('.fd-props-scrollable')
+            .css('height', columnHeight - $fdc.find('.fd-props-toolbar').outerHeight(true) + 'px');
         },
         getLeftWidth: function () {
-            return $('.fd-content-left').outerWidth() + $('.fd-content-divider').outerWidth(true) + 2;
+            return 2 + this.$f.find('.fd-content-left').outerWidth() + 
+               this.$f.find('.fd-content-divider').outerWidth(true);
         },
         getCurrentTopOffset: function () {
             var scrollPosition = $(window).scrollTop(),

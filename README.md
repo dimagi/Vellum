@@ -72,6 +72,10 @@ Todo
 Contributing
 ------------
 
+### Coding style
+
+Follow the [Airbnb JavaScript Style Guide](https://github.com/airbnb/javascript).
+
 ### Tests
 
 Run tests in a browser:

@@ -43,7 +43,8 @@ define([
             externalInstances = mug.form.externalInstances,
             itemsetData = mug.controlElement.itemsetData,
             getUIElement = widgets.util.getUIElement,
-            getUIElementWithEditButton = widgets.util.getUIElementWithEditButton;
+            getUIElementWithEditButton = widgets.util.getUIElementWithEditButton,
+            $nodeset;
 
         widget.getUIElement = function () {
             var valueRef = getUIElement(
@@ -66,7 +67,7 @@ define([
                     }
                 );
 
-            var $nodeset = $("<div id='nodeset_container'></div>"
+            $nodeset = $("<div></div>"
                     ).append(valueRef).append(labelRef).append(condition);
             return $("<div></div>").append(source).append($nodeset);
         };
@@ -142,7 +143,7 @@ define([
         // This is just a dummy select that gets inserted in getUIElement() and then
         // immediately replaced via populateSourceSelect() when setValue() is
         // called, and thereafter whenever a new custom source is added.
-        var $sourceSelect = $("<select id='data_source'></select>"),
+        var $sourceSelect = $("<select name='data_source'></select>"),
             // this stores the previous source id for when you select custom but
             // then cancel out of it
             oldSourceVal;
@@ -155,7 +156,8 @@ define([
                 handleSourceChange($(this).val());
                 updateValue();
             });
-            $('#data_source').replaceWith($sourceSelect);
+            mug.form.vellum.$f.find('[name="data_source"]')
+                .replaceWith($sourceSelect);
             oldSourceVal = NONE;
         }
 
@@ -173,7 +175,7 @@ define([
         });
 
         var $filterInput = $(
-            "<input type='text' class='input-block-level' id='filter_condition'/>"
+            "<input type='text' class='input-block-level'/>"
         ).on('change keyup', updateValue);
        
         function handleSourceChange(val) {
@@ -181,7 +183,7 @@ define([
                 return;
             }
 
-            var $stuff = $("#nodeset_container").find("input, button");
+            var $stuff = $nodeset.find("input, button");
             if (val === CUSTOM) {
                 showCustomModal();
             } else {
@@ -210,14 +212,14 @@ define([
 
         function showCustomModal() {
             var $modal = $(custom_data_source());
-            $modal.find('#data_source_cancel').click(function () {
+            $modal.find('.data_source_cancel').click(function () {
                 $sourceSelect.val(oldSourceVal);
                 $modal.modal('hide');
                 $modal.remove();
             });
-            $modal.find('#data_source_save').click(function () {
-                var sourceUri = $.trim($modal.find('#source_uri').val()),
-                    nodeLevels = $.trim($modal.find('#node_levels').val());
+            $modal.find('.data_source_save').click(function () {
+                var sourceUri = $.trim($modal.find('[name="source_uri"]').val()),
+                    nodeLevels = $.trim($modal.find('[name="node_levels"]').val());
                 nodeLevels = nodeLevels ? nodeLevels.split('/') : null;
                 var nodeLevelsValid = nodeLevels && _.all(nodeLevels, function (l) {
                     return l.match(/^[a-z0-9]+$/i);
@@ -235,7 +237,7 @@ define([
 
                     $modal.modal('hide');
                 } else {
-                    $modal.find("#source_error").removeClass('hide');
+                    $modal.find(".source_error").removeClass('hide');
                 }
             });
             $("body").append($modal);

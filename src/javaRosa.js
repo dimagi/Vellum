@@ -478,7 +478,7 @@ define([
                 'controlElement/labelItextID',
                 'controlElement/hintItextID', 
                 'bindElement/constraintMsgItextID'
-            ] ; 
+            ]; 
         
             var val;            
             for (var i = 0; i < thingsToGet.length; i++) {
@@ -532,8 +532,7 @@ define([
         };
 
         // auto checkbox
-        var autoBoxId = widget.id + "-auto-itext";
-        var $autoBox = $("<input />").attr("type", "checkbox").attr("id", autoBoxId);
+        var $autoBox = $("<input />").attr("type", "checkbox");
 
         $autoBox.change(function () {
             if ($(this).prop('checked')) {
@@ -559,7 +558,7 @@ define([
         widget.getUIElement = function () {
             var $uiElem = _getUIElement(),
                 $autoBoxContainer = $('<div />').addClass('pull-right fd-itextID-checkbox-container'),
-                $autoBoxLabel = $("<label />").text("auto?").attr("for", autoBoxId).addClass('checkbox');
+                $autoBoxLabel = $("<label />").text("auto?").addClass('checkbox');
 
             $autoBoxLabel.prepend($autoBox);
             $autoBoxContainer.append($autoBoxLabel);
@@ -570,7 +569,6 @@ define([
 
             return $uiElem;
         };
-
 
         widget.save = function () {
             // override save to call out to rename itext
@@ -631,6 +629,8 @@ define([
 
         };
 
+        // todo: wouldn't this add an extra handler every time a mug is
+        // displayed?
         widget.mug.on('update-question-itextid', function (e) {
             if (e.itextType === widget.getItextType()) {
                 widget.handleItextLabelChange(e);
@@ -662,24 +662,17 @@ define([
             // none
         };
 
-        block.getID = function () {
-            return "itext-block-" + block.itextType;
-        };
-
         var $blockUI = $("<div />")
-            .attr('id', block.getID())
-            .addClass('itext-block-container');
-        block.getContainerElement = function () {
-            return $blockUI;
-        };
+            .addClass('itext-block-container')
+            .addClass("itext-block-" + block.itextType);
 
-        block.getFormGroupID = function (form) {
+        block.getFormGroupClass = function (form) {
             return 'itext-block-' + block.itextType + '-group-' + form;
         };
 
         block.getFormGroupContainer = function (form) {
             return $("<div />")
-                .attr('id', block.getFormGroupID(form))
+                .addClass(block.getFormGroupClass(form))
                 .addClass('itext-lang-group');
         };
 
@@ -733,7 +726,7 @@ define([
             return $formGroup;
         };
 
-        block.getAddFormButtonID = function (form) {
+        block.getAddFormButtonClass = function (form) {
             return 'itext-block-' + block.itextType + '-add-form-' + form;
         };
 
@@ -742,7 +735,7 @@ define([
             _.each(block.forms, function (form) {
                 var $btn = $('<div />');
                 $btn.text(form)
-                    .attr('id', block.getAddFormButtonID(form))
+                    .addClass(block.getAddFormButtonClass(form))
                     .addClass('btn itext-option').click(function () {
                         block.addItext(form);
                     });
@@ -769,17 +762,15 @@ define([
                     .text("custom...")
                     .addClass('btn')
                     .attr('type', 'button'),
-                newItextBtnId = 'fd-new-itext-button',
-                newItextInputId = 'fd-new-itext-input';
+                newItextBtnClass = 'fd-new-itext-button';
 
             $customButton.click(function () {
                 var $modal, $newItemForm, $newItemInput;
-
-                $modal = util.generateNewModal("New Content Type", [
+                $modal = mug.form.vellum.generateNewModal("New Content Type", [
                     {
                         id: newItextBtnId,
                         title: "Add",
-                        cssClasses: "disabled",
+                        cssClasses: newItextBtnClass + " disabled ",
                         attributes: {
                             disabled: "disabled"
                         }
@@ -787,17 +778,17 @@ define([
                 ]);
 
                 $newItemForm = $(control_group({
-                    controlId: newItextInputId,
                     label: "Content Type"
                 }));
 
-                $newItemInput = $("<input />").attr("type", "text").attr("id", newItextInputId);
+                $newItemInput = $("<input />").attr("type", "text");
                 $newItemInput.keyup(function () {
                     var currentValue = $(this).val(),
-                        $addButton = $('#' + newItextBtnId);
-                    if (!currentValue
-                        || RESERVED_ITEXT_CONTENT_TYPES.indexOf(currentValue) != -1
-                        || block.activeForms.indexOf(currentValue) != -1) {
+                        $addButton = mug.form.vellum.$f.find('.' + newItextBtnClass);
+                    if (!currentValue || 
+                        RESERVED_ITEXT_CONTENT_TYPES.indexOf(currentValue) != -1 || 
+                        block.activeForms.indexOf(currentValue) != -1) 
+                    {
                         $addButton
                             .addClass('disabled')
                             .removeClass('btn-primary')
@@ -814,7 +805,7 @@ define([
                 $modal
                     .find('.modal-body')
                     .append($newItemForm);
-                $('#' + newItextBtnId).click(function () {
+                mug.form.vellum.$f.find('.' + newItextBtnClass).click(function () {
                     var newItemType = $newItemInput.val();
                     if (newItemType) {
                         block.addItext($newItemInput.val());
@@ -842,7 +833,7 @@ define([
             var $deleteButton = $(button_remove);
             $deleteButton.addClass('pull-right')
                 .click(function () {
-                    var $formGroup = $('#' + block.getFormGroupID(form));
+                    var $formGroup = $('.' + block.getFormGroupClass(form));
                     block.deleteItextForm(form);
                     block.mug.fire({
                         type: 'question-itext-deleted',
@@ -850,18 +841,19 @@ define([
                     });
                     $formGroup.remove();
                     $(this).remove();
-                    $('#' + block.getAddFormButtonID(form)).removeClass('disabled');
+                    $('.' + block.getAddFormButtonClass(form))
+                        .removeClass('disabled');
                 });
             return $deleteButton;
         };
 
         block.addItext = function (form) {
-            if (block.activeForms.indexOf(form) != -1) {
+            if (block.activeForms.indexOf(form) !== -1) {
                 return;
             }
             block.activeForms.push(form);
 
-            $('#' + block.getAddFormButtonID(form)).addClass('disabled');
+            $('.' + block.getAddFormButtonClass(form)).addClass('disabled');
             var $groupContainer = block.getFormGroupContainer(form);
             _.each(block.languages, function (lang) {
                 var itextWidget = block.itextWidget(block.mug, lang, form, options);
@@ -879,7 +871,6 @@ define([
 
             var $addFormControls = $(control_group({
                 label: block.displayName,
-                controlId: null
             }));
             $addFormControls.addClass('new-itext-control-group').find('.controls').append(block.getAddFormButtons());
             $blockUI.prepend($addFormControls);
@@ -910,6 +901,7 @@ define([
     var itextLabelWidget = function (mug, language, form, options) {
         var vellum = mug.form.vellum,
             Itext = vellum.data.javaRosa.Itext,
+            // todo: id->class
             id = "itext-" + language + "-" + options.itextType;
         if (options.idSuffix) {
             id = id + options.idSuffix;
@@ -918,7 +910,7 @@ define([
 
         var widget = widgets.base(mug, options);
         var $input = $("<textarea></textarea>")
-            .attr("id", widget.id)
+            .attr("name", widget.id)
             .attr("rows", "2")
              .addClass('input-block-level itext-widget-input')
              .on('change keyup', function () {
@@ -1092,7 +1084,6 @@ define([
         widget.setItextFormValue = function (value) {
             var itextItem = widget.getItextItem();
             if (itextItem) {
-
                 if (widget.isDefaultLang) {
                     widget.mug.fire({
                         type: 'defaultLanguage-itext-changed',
@@ -1181,39 +1172,6 @@ define([
         }
     };
 
-    var showItextDialog = function (form, done) {
-        var $modal,
-            $updateForm,
-            $textarea;
-
-        $modal = util.generateNewModal("Edit Bulk Translations", [
-            {
-                id: 'fd-update-translations-button',
-                title: "Update Translations",
-                cssClasses: "btn-primary"
-            }
-        ]);
-        $updateForm = $(edit_source({
-            description: "Copy these translations into a spreadsheet program " + 
-            "like Excel. You can edit them there and then paste them back " +
-            "here when you're done. These will update the translations used in " +
-            "your form. Press 'Update Translations' to save changes, or 'Close' " +
-            "to cancel."
-        }));
-        $modal.find('.modal-body').html($updateForm);
-
-        // display current values
-        $textarea = $updateForm.find('textarea');
-        $textarea.val(generateItextXLS(form.vellum, form.vellum.data.javaRosa.Itext));
-
-        $modal.find('#fd-update-translations-button').click(function () {
-            parseXLSItext($textarea.val(), form.data.javaRosa.Itext);
-            $modal.modal('hide');
-            done();
-        });
-
-        $modal.modal('show');
-    };
 
     var generateItextXLS = function (vellum, Itext) {
         // todo: fix abstraction barrier
@@ -1327,27 +1285,7 @@ define([
 
             langList.val(this.data.core.currentItextDisplayLanguage);
 
-            /* currently never run
-            if (that.opts().ui.allowLanguageEdits) {
-                str = '<button class="btn btn-primary" id="fd-lang-disp-add-lang-button">Add Language</button>';
-                addLangButton = $(str);
-                addLangButton.button();
-                addLangButton.click(function () {
-                    that.addLanguageDialog();
-                    showConfirmDialog();
-                });
-                $langSelector.append(addLangButton);
-                str = '<button class="btn btn-warning" id="fd-lang-disp-remove-lang-button">Remove Language</button>';
-                removeLangButton = $(str);
-                removeLangButton.button();
-                removeLangButton.click(function () {
-                    that.removeLanguageDialog();
-                    showConfirmDialog();
-                });
-                $langSelector.append(removeLangButton);
-            } */
-
-            $('#fd-question-tree-lang').html($langSelector);
+            this.$f.find('.fd-question-tree-lang').html($langSelector);
         },
         _changeTreeDisplayLanguage: function (lang) {
             var _this = this,
@@ -1370,7 +1308,8 @@ define([
                         var itextID = mug.controlElement.labelItextID.id,
                             text = itext.getItem(itextID).getValue("default", lang);
                         text = text || _this.getMugDisplayName(mug);
-                        _this.jstree('rename_node', $el, text || noTextString);
+                        _this.jstree('rename_node', $el, text ||
+                                _this.opts().core.noTextString);
                     } catch (e) {
                         /* This happens immediately after question duplication when
                          * we try to rename the duplicated node in the UI tree. The
@@ -1754,14 +1693,46 @@ define([
             return ret;
         },
         getToolsMenuItems: function () {
+            var _this = this;
             return this.__callOld().concat([
                 {
                     name: "Edit Bulk Translations",
-                    action: function (form) {
-                        showItextDialog(form);
+                    action: function (done) {
+                        _this.showItextDialog(done);
                     }
                 }
             ]);
+        },
+        showItextDialog: function (done) {
+            var form = this.data.core.form,
+                $modal, $updateForm, $textarea,
+                Itext = this.data.javaRosa.Itext;
+
+            $modal = this.generateNewModal("Edit Bulk Translations", [
+                {
+                    title: "Update Translations",
+                    cssClasses: "btn-primary",
+                    action: function (done) {
+                        parseXLSItext($textarea.val(), Itext);
+                        $modal.modal('hide');
+                        done();
+                    }
+                }
+            ]);
+            $updateForm = $(edit_source({
+                description: "Copy these translations into a spreadsheet program " + 
+                "like Excel. You can edit them there and then paste them back " +
+                "here when you're done. These will update the translations used in " +
+                "your form. Press 'Update Translations' to save changes, or 'Close' " +
+                "to cancel."
+            }));
+            $modal.find('.modal-body').html($updateForm);
+
+            // display current values
+            $textarea = $updateForm.find('textarea');
+            $textarea.val(generateItextXLS(this, Itext));
+
+            $modal.modal('show');
         },
         getVisibleErrors: function () {
             var ret = this.__callOld(),

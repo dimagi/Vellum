@@ -139,7 +139,10 @@ define([
         widget.currentValue = (mug.intentTag) ? mug.intentTag.getAttr('path') : "";
         widget.propName = "Intent ID";
         
-        var input = $("<input />").attr("id", widget.id).attr("type", "text").attr('placeholder', 'Insert Android Application ID');
+        var input = $("<input />")
+            .attr("name", widget.id)
+            .attr("type", "text")
+            .attr('placeholder', 'Insert Android Application ID');
 
         widget.getControl = function () {
             if (widget.isDisabled()) {

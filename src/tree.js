@@ -10,25 +10,21 @@ define([
      * @param children - optional
      * @param value - that value object that this node should contain (should be a Mug)
      */
-    var Node = function (children, value) {
-        var that = {}, isRootNode = false, 
-            nodeValue = value;
-        that.value = value;
+    function Node(children, value) {
+        this.value = value;
+        this.children = children || [];
+    }
 
-        children = children || [];
-        that.children = children;
-
-        that.getChildren = function () {
-            return children;
-        };
-
-        that.getValue = function () {
-            return nodeValue;
-        };
-
-        that.setValue = function (val) {
-            nodeValue = val;
-            _(that.children).each(function (child) {
+    Node.prototype = {
+        getChildren: function () {
+            return this.children;
+        },
+        getValue: function () {
+            return this.value;
+        },
+        setValue: function (val) {
+            this.value = val;
+            _(this.children).each(function (child) {
                 child.getValue().parentMug = val;
             });
         };
@@ -113,7 +109,7 @@ define([
          */
         that.findParentNode = function (node) {
             var i, parent = null;
-            if (!children || children.length === 0) {
+            if (!this.children || this.children.length === 0) {
                 return null;
             }
             if (children.indexOf(node) !== -1) {
