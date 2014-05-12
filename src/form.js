@@ -297,6 +297,7 @@ define([
             });
         },
         clearError: function (errObj, options) {
+            errObj = FormError(errObj);
             options = options || {};
             var removed = null;
             for (var i = 0; i < this.errors.length; i++) {
@@ -350,7 +351,7 @@ define([
                     return mug;
                 }
             };
-            return dataTree.treeMap(mapFunc);
+            return this.dataTree.treeMap(mapFunc);
         },
         getMugChildByNodeID: function (mug, nodeID) {
             var mugs = this.getMugsByNodeID(nodeID),
@@ -364,14 +365,6 @@ define([
             }
         },
         insertMug: function (refMug, newMug, position) {
-            if (newMug.dataElement && !newMug.controlElement) {
-                // data node, stick it at the end of the form by default
-                this.dataTree.insertMug(newMug, 'after', null);
-                return;
-            }
-            
-            position = position || "into";
-
             if (newMug.dataElement) {
                 this.dataTree.insertMug(newMug, position, refMug);
             }
@@ -392,7 +385,7 @@ define([
          * @return - true if a replacement occurred. False if no match was found for oldMug
          */
         replaceMug: function (oldMug, newMug, treeType){
-            var tree = treeType === 'data' ? dataTree : controlTree;
+            var tree = treeType === 'data' ? this.dataTree : this.controlTree;
             tree.treeMap(function (node) {
                 if(node.getValue() === oldMug){
                     node.setValue(newMug);
@@ -419,7 +412,10 @@ define([
             
             var updates = {};
             for (var i = 0; i < mugs.length; i++) {
-                updates[mugs[i].ufid] = [preMovePaths[i], dataTree.getAbsolutePath(mugs[i])];
+                updates[mugs[i].ufid] = [
+                    preMovePaths[i], 
+                    this.dataTree.getAbsolutePath(mugs[i])
+                ];
             }
 
             this._logicManager.updatePaths(updates);
@@ -432,7 +428,7 @@ define([
         getDescendants: function (mug) {
             var desc = this.getChildren(mug), i;
             for (i = desc.length - 1; i >= 0; i--) {
-                desc = desc.concat(getDescendants(desc[i]));
+                desc = desc.concat(this.getDescendants(desc[i]));
             }
             return desc;
         },
@@ -602,11 +598,11 @@ define([
             
             // update the logic properties that reference the mug
             if (e.property === 'nodeID') {
-                var currentPath = mug.form.getAbsolutePath(mug),
+                var currentPath = this.getAbsolutePath(mug),
                     parsed = xpath.parse(currentPath);
                 parsed.steps[parsed.steps.length - 1].name = e.previous;
                 var oldPath = parsed.toXPath();
-                mug.form.handleMugRename(mug, e.val, e.previous, currentPath, oldPath);
+                this.handleMugRename(mug, e.val, e.previous, currentPath, oldPath);
             } else {
                 var propertyPath = [e.element, e.property].join("/");
 
@@ -619,7 +615,7 @@ define([
             if (e.property === "nodeID" && 
                 (mug.__className === "Select" || mug.__className === "MSelect")) 
             {
-                var node = mug.form.controlTree.getNodeFromMug(mug),
+                var node = this.controlTree.getNodeFromMug(mug),
                     children = node.getChildrenMugs();
             
                 var setNodeID = function (val) {

@@ -58,7 +58,7 @@ define([
          */
         getNodeFromValue: function (valueOrFn) {
             if (valueOrFn === null) {
-                return null;
+                return this.rootNode;
             }
             var valueIsFn = _.isFunction(valueOrFn),
                 retVal,
@@ -274,23 +274,8 @@ define([
          * If an invalid move is specified, no operation will occur.
          */
         insertMug: function (mug, position, refMug) {
-            var refNode, refNodeSiblings, refNodeIndex, refNodeParent, node;
-
-            if (position !== null && typeof position !== 'string') {
-                throw "position argument must be a string or null! Can be 'after', 'before' or 'into'";
-            }
-            if (!position) {
-                position = 'after';
-            }
-
-            if (!refMug || (!refMug.controlElement && this.treeType === 'control'))
-            {
-                refNode = this.rootNode;
-                refMug = this.rootNode.getValue();
-                position = 'into';
-            } else {
-                refNode = this.getNodeFromMug(refMug);
-            }
+            var refNode = refMug ? this.getNodeFromMug(refMug) : this.rootNode,
+                refNodeSiblings, refNodeIndex, refNodeParent, node;
 
             //remove it from tree if it already exists
             node = this._removeNodeFromTree(this.getNodeFromMug(mug)); 
@@ -298,13 +283,14 @@ define([
                 node = new Node(null, mug);
             }
 
-            if (position !== 'into') {
-                refNodeParent = this.getParentNode(refNode);
-                refNodeSiblings = refNodeParent.getChildren();
-                refNodeIndex = refNodeSiblings.indexOf(refNode);
-                mug.parentMug = refNodeParent.getValue();
-            } else {
+            refNodeParent = this.getParentNode(refNode);
+            refNodeSiblings = refNodeParent.getChildren();
+            refNodeIndex = refNodeSiblings.indexOf(refNode);
+
+            if (['into', 'first', 'last'].indexOf(position) !== -1) {
                 mug.parentMug = refMug;
+            } else {
+                mug.parentMug = refNodeParent.getValue();
             }
 
             switch (position) {
@@ -342,6 +328,7 @@ define([
             var node = this.getNodeFromMug(mug),
                 output, nodeParent;
             if (!node) {
+                // todo: throw exception instead
                 //                console.log('Cant find path of Mug that is not present in the Tree!');
                 return null;
             }

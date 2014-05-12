@@ -355,11 +355,11 @@ define([
     };
 
     fn._showConfirmDialog = function () {
-        this.$f.find('.fd-dialog-confirm').dialog("open");
+        $('.fd-dialog-confirm').dialog("open");
     };
 
     fn._hideConfirmDialog = function () {
-        this.$f.find('.fd-dialog-confirm').dialog("close");
+        $('.fd-dialog-confirm').dialog("close");
     };
 
     /**
@@ -374,7 +374,7 @@ define([
                                  cancelButName, cancelButFunction, title) {
         title = title || "";
         var buttons = {}, opt,
-            $dial = this.$f.find('.fd-dialog-confirm'), contentStr;
+            $dial = $('.fd-dialog-confirm'), contentStr;
         buttons[confButName] = confFunction;
         buttons[cancelButName] = cancelButFunction;
 
@@ -392,7 +392,7 @@ define([
 
     fn.showSourceXMLDialog = function (done) {
         var _this = this;
-        // There are validation errors but user continues anyway
+        
         function onContinue () {
             _this._hideConfirmDialog();
             _this.showSourceInModal(done);
@@ -401,12 +401,13 @@ define([
         function onAbort () {
             _this._hideConfirmDialog();
         }
-
-        var msg = "There are validation errors in the form.  Do you want to continue anyway? WARNING:" +
-                  "The form will not be valid and likely not perform correctly on your device!";
-
-        this.setDialogInfo(msg, 'Continue', onContinue, 'Abort', onAbort);
+        // todo: should this also show up for saving? Did it at some point in
+        // the past?
         if (!this.data.core.form.isFormValid()) {
+
+            var msg = "There are validation errors in the form.  Do you want to continue anyway? WARNING:" +
+                      "The form will not be valid and likely not perform correctly on your device!";
+            this.setDialogInfo(msg, 'Continue', onContinue, 'Abort', onAbort);
             this._showConfirmDialog();
         } else {
             this.showSourceInModal(done);
@@ -1091,7 +1092,7 @@ define([
     };
 
     fn.toggleConstraintItextBlock = function (bool) {
-        var $constraintItext = $('[name="itext-block-constraintMsg"]');
+        var $constraintItext = $('.itext-block-constraintMsg');
         
         if (bool) {
             $constraintItext.removeClass('hide');
@@ -1175,17 +1176,16 @@ define([
         var position = 'into';
         if (qType === 'DataBindOnly') {
             // put data nodes at the end
-            refMug = null;
-            position = 'last';
+            return [null, 'last'];
         } else if (refMug && !refMug.controlElement) {
             // don't insert a regular node inside the data node range
             refMug = this.getLowestNonDataNodeMug();
-            position = 'after';
+            position = refMug ? 'after' : 'first';
         }
 
         while (true) {
             var r = refMug;
-            if (position !== 'into' && position !== 'last') {
+            if (refMug && position !== 'into' && position !== 'last') {
                 r = refMug.parentMug;
             }
             var childTypes = r && typeData[r.__className].valid_children;
@@ -1219,9 +1219,8 @@ define([
     };
     
     fn.createQuestion = function (mug, refMug, position) {
-        var rootId = this.data.core.$tree.attr('id');
         var result = this.jstree("create",
-            refMug ? "#" + refMug.ufid : rootId,
+            refMug ? "#" + refMug.ufid : this.data.core.$tree,
             position,
             {
                 data: this.getMugDisplayName(mug),
@@ -1242,7 +1241,12 @@ define([
         );
 
         // jstree.create returns the tree root if types prevent creation
-        return result && result[0].id !== rootId;  
+        if (result[0] === this.data.core.$tree) {
+            throw new Error(
+                "Can't insert " + mug.__className + " into " + refMug.__className +
+                " (position: " + position + ")");
+        }
+        return result;  
     };
     
     fn.displayMugProperties = function (mug) {
