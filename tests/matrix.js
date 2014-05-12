@@ -81,8 +81,8 @@ define([
             lastSavedForm = null;
         $appendToContainer.append($harness);
 
-        vellumOptions.saveUrl = function (xml) {
-            lastSavedForm = xml;
+        vellumOptions.core.saveUrl = function (data) {
+            lastSavedForm = data.xform;
         };
 
         $harness.find('.run-tests').click(function () {
