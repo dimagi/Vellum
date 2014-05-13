@@ -1,0 +1,22 @@
+<fieldset class="accordion-group fd-question-fieldset">
+    <legend class="accordion-heading">
+        <% if (help) { %>
+        <a href="<%=help.link%>" target="_blank" class="fd-help pull-right"
+                data-title="<%=help.title%>"
+                data-content="<%=help.text%>"
+                data-placement="left">
+        </a>
+        <% } %>
+        <a class="accordion-toggle<% if (isCollapsed) { %> collapsed<% } %>" href="#<%=fieldsetClass%>" data-toggle="collapse">
+            <i class="icon-double-angle-down"></i>
+            <%=fieldsetTitle%>
+        </a>
+    </legend>
+    <!-- todo: don't require passing a unique ID to this template or an
+    interface that exposes it (i.e., allow passing a non-unique id and then
+    append it to a random one, or something -->
+    <div id="<%=fieldsetClass%>" class="accordion-body collapse<% if
+        (!isCollapsed) { %> in<% } %>" >
+        <div class="accordion-inner fd-fieldset-content"></div>
+    </div>
+</fieldset>

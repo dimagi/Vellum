@@ -1,0 +1,57 @@
+@import "lib/main";
+
+.fd-xpath-editor-content {
+  padding: @gridGutterWidth;
+}
+
+
+.fd-xpath-editor {
+  .xpath-expression-group {
+    .validation-result-container {
+      width: 34px;
+      margin-top: -1px;
+      margin-right: 5px;
+
+      .validation-results {
+        padding: 5px 10px;
+        margin-bottom: 0;
+      }
+    }
+    .xpath-expression-row {
+      margin-right: 80px;
+    }
+  }
+
+  .fd-xpath-editor-container fieldset{
+    position: relative;
+  }
+
+  .xpath-mode-toggle {
+    right: 0;
+    top: 0;
+  }
+}
+
+.fd-xpath-editor-expressions {
+  background-color: @navbarBackground;
+  padding: @gridGutterWidth/2;
+  .border-radius(5px);
+  margin-bottom: @gridGutterWidth/2;
+
+  .control-group:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.fieldset-condensed {
+  .control-label {
+    width: 90px;
+  }
+  .controls {
+    margin-left: 100px;
+  }
+}
+
+.form-horizontal .form-actions-condensed {
+  padding-left: 100px;
+}

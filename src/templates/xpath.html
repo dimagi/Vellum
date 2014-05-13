@@ -1,0 +1,74 @@
+<div class="fd-xpath-editor-container form form-horizontal">
+
+    <fieldset class="xpath-advanced hide">
+        <legend>
+            <i class="icon-cog"></i> Edit Expression (Advanced)
+            <button type="button" class="btn btn-primary fd-xpath-show-simple-button pull-right xpath-mode-toggle">
+                Show Simple Mode
+            </button>
+        </legend>
+        <div class="alert xpath-advanced-notice hide">
+            <p>Sorry, your logic is too complicated for our logic builder.</p>
+            <p>You can only edit this logic in Advanced Mode.</p>
+        </div>
+        <div class="control-group">
+            <label class="control-label">
+                XPath Expression:
+            </label>
+            <div class="controls">
+                <textarea rows="5"
+                          class="input-block-level fd-xpath-editor-text jstree-drop"></textarea>
+                <p class="help-block">Hint: You can drag a question into the box.</p>
+                <p class="help-block">
+                    <a target="_blank"
+                       href="https://help.commcarehq.org/display/commcarepublic/Common+Logic+and+Calculations">
+                        <i class="icon-info-sign"></i> Guide to Common Logic and Calculations
+                    </a>
+                </p>
+            </div>
+        </div>
+    </fieldset>
+
+    <fieldset class="xpath-simple hide fieldset-condensed">
+        <legend>
+            Edit Expression
+            <button type="button" class="btn btn-inverse pull-right xpath-mode-toggle fd-xpath-show-advanced-button">
+                <i class="icon-cog"></i> Show Advanced Mode
+            </button>
+        </legend>
+        <div class="control-group">
+            <label class="control-label">Result is:</label>
+            <div class="controls">
+                <select class="input-block-level top-level-join-select">
+                    <% _.each(topLevelJoinOpts, function (opt) { %>
+                    <option value="<%=opt[1]%>"><%=opt[0]%></option>
+                    <% }); %>
+                </select>
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label">Expression:</label>
+            <div class="controls">
+                <div class="fd-xpath-editor-expressions"></div>
+                <p class="help-block pull-right">
+                    <a target="_blank"
+                       href="https://help.commcarehq.org/display/commcarepublic/Common+Logic+and+Calculations">
+                        <i class="icon-info-sign"></i> Guide to Common Logic and Calculations
+                    </a>
+                </p>
+                <p>
+                    <button type="button" class="btn fd-add-exp">
+                        <i class="icon-plus"></i> Add Expression
+                    </button>
+                </p>
+            </div>
+        </div>
+    </fieldset>
+
+    <div class="fd-xpath-validation-summary hide"></div>
+
+    <div class="form-actions form-actions-condensed fd-xpath-actions">
+        <button type="button" class="btn btn-primary fd-xpath-save-button">Save</button>
+        <button type="button" class="btn fd-xpath-cancel-button">Cancel</button>
+    </div>
+</div>

@@ -1,0 +1,10 @@
+<div class="alert alert-error">
+    <h4><i class="icon-warning-sign"></i> Validation Failed</h4>
+    <p>Please fix all errors before leaving this page:</p>
+    <%=errors%>
+    <ul>
+    <% _.each(errors, function (error) { %>
+        <li><%=error%></li>
+    <% }); %>
+    </ul>
+</div>

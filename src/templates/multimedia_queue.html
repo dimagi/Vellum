@@ -1,0 +1,23 @@
+<div id="<%= unique_id %>" style="clear: both;">
+    <div class="alert alert-success" style="margin-bottom: 2px; margin-top: 10px;">
+        <i class="icon-ok"></i> <%= file_name %> <strong>[<%= file_size %> MB]</strong>
+    </div>
+    <div class="hqm-progress">
+        <div class="progress progress-striped active" style="margin-bottom: 5px;">
+            <div class="bar" style="width: 0%;"></div>
+        </div>
+        <p class="text-success hqm-begin">
+            Ready to upload. Click <strong>Begin Upload</strong> below to start.
+        </p>
+        <p class="text-error hqm-error hide">
+            <span class="label label-important">There were errors.</span>
+        </p>
+        <a href="#" class="btn btn-inverse btn-mini pull-right hqm-remove">
+            <i class="icon-remove"></i> Select another file
+        </a>
+        <a href="#" class="btn btn-danger btn-mini pull-right hqm-cancel hide">
+            <i class="icon-remove"></i> Cancel Upload
+        </a>
+    </div>
+    <div class="hqm-status"></div>
+</div>
