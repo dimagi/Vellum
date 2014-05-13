@@ -352,16 +352,17 @@ define([
         isRemoveable: true,
         isCopyable: true,
         isODKOnly: false,
+        maxChildren: -1,
         // todo: actually don't couple type definitions and state using
         // inheritance 
         afterInsert: function (form, mug) {},
-        __init__: function (form) {
+        __init__: function (form, baseSpec) {
             var _this = this;
             // todo: it would be good to encapsulate the testing whether
             // elements and properties in a spec are functions parameterized on
             // mug, and executing them, in a single function, rather than below
             // and in the MugElement constructor
-            this.__spec = this.processSpec(copyAndProcessSpec(globalSpec, this));
+            this.__spec = this.processSpec(copyAndProcessSpec(baseSpec, this));
             this.form = form;
 
             _(this.__spec).each(function (spec, name) {
@@ -725,8 +726,8 @@ define([
     var TextQuestion = BaseMug.$extend({
         typeName: "Text",
         icon: "icon-vellum-text",
-        __init__: function (options) {
-            this.$super(options);
+        __init__: function (form, baseSpec) {
+            this.$super(form, baseSpec);
             this.controlElement.tagName = "input";
             this.bindElement.dataType = "xsd:string";
         }
@@ -735,8 +736,8 @@ define([
     var PhoneNumber = TextQuestion.$extend({
         typeName: 'Phone Number or Numeric ID',
         icon: 'icon-signal',
-        __init__: function (options) {
-            this.$super(options);
+        __init__: function (form, baseSpec) {
+            this.$super(form, baseSpec);
             this.controlElement.appearance = "numeric";
         }
     });
@@ -744,8 +745,8 @@ define([
     var Secret = BaseMug.$extend({
         typeName: 'Password',
         icon: 'icon-key',
-        __init__: function (options) {
-            this.$super(options);
+        __init__: function (form, baseSpec) {
+            this.$super(form, baseSpec);
             this.controlElement.tagName = "secret";
             this.bindElement.dataType = "xsd:string";
         }
@@ -754,8 +755,8 @@ define([
     var Int = BaseMug.$extend({
         typeName: 'Integer',
         icon: 'icon-vellum-numeric',
-        __init__: function (options) {
-            this.$super(options);
+        __init__: function (form, baseSpec) {
+            this.$super(form, baseSpec);
             this.controlElement.tagName = "input";
             this.bindElement.dataType = "xsd:int";
         }
@@ -765,8 +766,8 @@ define([
         typeName: 'Audio Capture',
         icon: 'icon-vellum-audio-capture',
         isODKOnly: true,
-        __init__: function (options) {
-            this.$super(options);
+        __init__: function (form, baseSpec) {
+            this.$super(form, baseSpec);
             this.controlElement.tagName = "upload";
             this.controlElement.mediaType = "audio/*"; /* */
             this.bindElement.dataType = "binary";
@@ -786,8 +787,8 @@ define([
         typeName: 'Image Capture',
         icon: 'icon-camera',
         isODKOnly: true,
-        __init__: function (options) {
-            this.$super(options);
+        __init__: function (form, baseSpec) {
+            this.$super(form, baseSpec);
             this.controlElement.tagName = "upload";
             this.controlElement.mediaType = "image/*"; /* */
             this.bindElement.dataType = "binary";
@@ -798,8 +799,8 @@ define([
         typeName: 'Video Capture',
         icon: 'icon-facetime-video',
         isODKOnly: true,
-        __init__: function (options) {
-            this.$super(options);
+        __init__: function (form, baseSpec) {
+            this.$super(form, baseSpec);
             this.controlElement.tagName = "upload";
             this.controlElement.mediaType = "video/*"; /* */
             this.bindElement.dataType = "binary";
@@ -810,8 +811,8 @@ define([
         typeName: 'GPS',
         icon: 'icon-map-marker',
         isODKOnly: true,
-        __init__: function (options) {
-            this.$super(options);
+        __init__: function (form, baseSpec) {
+            this.$super(form, baseSpec);
             this.controlElement.tagName = "input";
             this.bindElement.dataType = "geopoint";
         }
@@ -823,8 +824,8 @@ define([
         isODKOnly: true,
         isTypeChangeable: false,
         intentTag: null,
-        __init__: function (options) {
-            this.$super(options);
+        __init__: function (form, baseSpec) {
+            this.$super(form, baseSpec);
             this.controlElement.tagName = "input";
             this.bindElement.dataType = "intent";
         },
@@ -855,8 +856,8 @@ define([
         typeName: 'Barcode Scan',
         icon: 'icon-barcode',
         isODKOnly: true,
-        __init__: function (options) {
-            this.$super(options);
+        __init__: function (form, baseSpec) {
+            this.$super(form, baseSpec);
             this.controlElement.tagName = "input";
             this.bindElement.dataType = "barcode";
         }
@@ -865,8 +866,8 @@ define([
     var Date = BaseMug.$extend({
         typeName: 'Date',
         icon: 'icon-calendar',
-        __init__: function (options) {
-            this.$super(options);
+        __init__: function (form, baseSpec) {
+            this.$super(form, baseSpec);
             this.controlElement.tagName = "input";
             this.bindElement.dataType = "xsd:date";
         }
@@ -875,8 +876,8 @@ define([
     var DateTime = BaseMug.$extend({
         typeName: 'Date and Time',
         icon: 'icon-vellum-datetime',
-        __init__: function (options) {
-            this.$super(options);
+        __init__: function (form, baseSpec) {
+            this.$super(form, baseSpec);
             this.controlElement.tagName = "input";
             this.bindElement.dataType = "xsd:dateTime";
         }
@@ -885,8 +886,8 @@ define([
     var Time = BaseMug.$extend({
         typeName: 'Time',
         icon: 'icon-time',
-        __init__: function (options) {
-            this.$super(options);
+        __init__: function (form, baseSpec) {
+            this.$super(form, baseSpec);
             this.controlElement.tagName = "input";
             this.bindElement.dataType = "xsd:time";
         }
@@ -895,8 +896,8 @@ define([
     var Long = Int.$extend({
         typeName: 'Long',
         icon: 'icon-vellum-long',
-        __init__: function (options) {
-            this.$super(options);
+        __init__: function (form, baseSpec) {
+            this.$super(form, baseSpec);
             this.bindElement.dataType = "xsd:long";
         }
     });
@@ -904,28 +905,25 @@ define([
     var Double = Int.$extend({
         typeName: 'Decimal',
         icon: 'icon-vellum-decimal',
-        __init__: function (options) {
-            this.$super(options);
+        __init__: function (form, baseSpec) {
+            this.$super(form, baseSpec);
             this.bindElement.dataType = "xsd:double";
         }
     });
 
-    function getSelectChildIcon () {
-        if (this.parentMug.__className === "Select" ||
-            this.parentMug.__className === "SelectDynamic")
-        {
-            return 'icon-circle-blank';
-        } else {
-            return 'icon-check-empty';
-        }
-    }
     var Item = BaseMug.$extend({
         typeName: 'Choice',
         icon: 'icon-circle-blank',
         isTypeChangeable: false,
-        getIcon: getSelectChildIcon,
-        __init__: function (options) {
-            this.$super(options);
+        getIcon: function () {
+            if (this.parentMug.__className === "Select") {
+                return 'icon-circle-blank';
+            } else {
+                return 'icon-check-empty';
+            }
+        },
+        __init__: function (form, baseSpec) {
+            this.$super(form, baseSpec);
             this.controlElement.tagName = "item";
             this.controlElement.defaultValue = this.form.generate_item_label();
         },
@@ -946,61 +944,11 @@ define([
         }
     });
 
-    var Itemset = BaseMug.$extend({
-        typeName: 'External Data',
-        icon: 'icon-circle-blank',
-        isTypeChangeable: false,
-        // have to delete the parent select
-        isRemoveable: false,
-        isCopyable: false,
-        getIcon: getSelectChildIcon,
-        __init__: function (options) {
-            this.$super(options);
-            this.controlElement.tagName = "itemset";
-            this.controlElement.itemsetData = new BoundPropertyMap(this.form, {
-                // avoids serialization error
-                nodeset: ''
-            });
-            //this.bindElement.dataType = 'xsd:string';
-        },
-        processSpec: function (spec) {
-            var c = spec.controlElement;
-            delete spec.dataElement;
-            delete spec.bindElement;
-            c.itemsetData = {
-                editable: 'w',
-                presence: 'optional',
-                widget: widgets.itemset,
-                validationFunc: function (mug) {
-                    var itemsetData = mug.controlElement.itemsetData;
-                    if (!itemsetData.getAttr('nodeset')) {
-                        return "A data source must be selected.";
-                    }
-                    if (!itemsetData.getAttr('valueRef')) {
-                        return "Choice Value must be specified.";
-                    }
-                    if (!itemsetData.getAttr('labelRef')) {
-                        return "Choice Label must be specified.";
-                    }
-                    return 'pass';
-                }
-            };
-            c.label.presence = 'notallowed';
-            c.labelItext.presence = 'notallowed';
-            c.labelItextID.presence = 'notallowed';
-            c.hintLabel.presence = 'notallowed';
-            c.hintItextID.presence = 'notallowed';
-            c.mediaItext.presence = 'notallowed';
-            c.otherItext.presence = 'notallowed';
-            return spec;
-        }
-    });
-
     var Trigger = BaseMug.$extend({
         typeName: 'Label',
         icon: 'icon-tag',
-        __init__: function (options) {
-            this.$super(options);
+        __init__: function (form, baseSpec) {
+            this.$super(form, baseSpec);
             this.controlElement.tagName = "trigger";
             this.controlElement.showOKCheckbox = false;
         },
@@ -1024,6 +972,7 @@ define([
     });
 
     var BaseSelect = BaseMug.$extend({
+        validChildTypes: ["Item"],
         afterInsert: function (form, mug) {
             var item = Item.prototype.__className;
             form.createQuestion(mug, 'into', item, true);
@@ -1034,8 +983,8 @@ define([
     var MSelect = BaseSelect.$extend({
         typeName: 'Multiple Answer',
         icon: 'icon-vellum-multi-select',
-        __init__: function (options) {
-            this.$super(options);
+        __init__: function (form, baseSpec) {
+            this.$super(form, baseSpec);
             this.controlElement.tagName = "select";
         },
         processSpec: function (spec) {
@@ -1048,28 +997,11 @@ define([
     var Select = MSelect.$extend({
         typeName: 'Single Answer',
         icon: 'icon-vellum-single-select',
-        __init__: function (options) {
-            this.$super(options);
+        __init__: function (form, baseSpec) {
+            this.$super(form, baseSpec);
             this.controlElement.tagName = "select1";
         },
         defaultOperator: null
-    });
-
-    function afterDynamicSelectInsert(form, mug) {
-        var itemset = Itemset.prototype.__className;
-        form.createQuestion(mug, 'into', itemset, true);
-    }
-
-    var MSelectDynamic = MSelect.$extend({
-        typeName: 'Multiple Answer - Dynamic List',
-        limitTypeChangeTo: ["SelectDynamic"],
-        afterInsert: afterDynamicSelectInsert
-    });
-
-    var SelectDynamic = Select.$extend({
-        typeName: 'Single Answer - Dynamic List',
-        limitTypeChangeTo: ["MSelectDynamic"],
-        afterInsert: afterDynamicSelectInsert
     });
 
     var Group = BaseMug.$extend({
@@ -1077,8 +1009,8 @@ define([
         icon: 'icon-folder-open',
         isSpecialGroup: true,
         isTypeChangeable: false,
-        __init__: function (options) {
-            this.$super(options);
+        __init__: function (form, baseSpec) {
+            this.$super(form, baseSpec);
             this.controlElement.tagName = "group";
         },
         processSpec: function (spec) {
@@ -1099,8 +1031,8 @@ define([
         icon: 'icon-reorder',
         isSpecialGroup: true,
         isTypeChangeable: false,
-        __init__: function (options) {
-            this.$super(options);
+        __init__: function (form, baseSpec) {
+            this.$super(form, baseSpec);
             this.controlElement.tagName = "group";
             this.setAppearanceAttribute('field-list');
         },
@@ -1111,8 +1043,8 @@ define([
         icon: 'icon-retweet',
         isSpecialGroup: true,
         isTypeChangeable: false,
-        __init__: function (options) {
-            this.$super(options);
+        __init__: function (form, baseSpec) {
+            this.$super(form, baseSpec);
             this.controlElement.tagName = "repeat";
         },
         processSpec: function (spec) {
@@ -1136,82 +1068,103 @@ define([
         }
     });
    
-    // todo: ability of plugins to define mug types
-    var exportedMugTypes = {
-        "AndroidIntent": AndroidIntent,
-        "Audio": Audio,
-        "Barcode": Barcode,
-        "DataBindOnly": DataBindOnly,
-        "Date": Date,
-        "DateTime": DateTime,
-        "Double": Double,
-        "FieldList": FieldList,
-        "Geopoint": Geopoint,
-        "Group": Group,
-        "Image": Image,
-        "Int": Int,
-        "Item": Item,
-        "Itemset": Itemset,
-        "Long": Long,
-        "MSelect": MSelect,
-        "MSelectDynamic": MSelectDynamic,
-        "PhoneNumber": PhoneNumber,
-        "ReadOnly": ReadOnly,
-        "Repeat": Repeat,
-        "Secret": Secret,
-        "Select": Select,
-        "SelectDynamic": SelectDynamic,
-        "Text": TextQuestion,
-        "Time": Time,
-        "Trigger": Trigger,
-        "Video": Video,
-    },
-        allTypes = _.keys(exportedMugTypes),
-        innerChildQuestionTypes = _.without(allTypes, 
-            'DataBindOnly', 'Item', 'Itemset'),
-        nonGroupTypes = _.without(innerChildQuestionTypes, 
-            'Group', 'Repeat', 'FieldList');
 
-    _(exportedMugTypes).each(function (Mug, name) {
-        // had issues with trying to do instanceof involving Mug, so using name
-        var validChildTypes;
-        if (name == "Group" || name == "Repeat") {
-            validChildTypes = innerChildQuestionTypes;
-        } else if (name == "FieldList") {
-            validChildTypes = nonGroupTypes;
-        } else if (name == "Select" || name == "MSelect") {
-            validChildTypes = ["Item"];
-        } else if (name === "SelectDynamic" || name === "MSelectDynamic") {
-            validChildTypes = ["Itemset"];
-        } else {
-            validChildTypes = [];
+    function MugTypesManager(baseSpec, mugTypes) {
+        var _this = this;
+        this.spec = baseSpec;
+        this.auxiliaryTypes = mugTypes.auxiliary || {};
+        this.normalTypes = mugTypes.normal || {};
+
+        this.allTypes = $.extend({}, this.auxiliaryTypes, this.normalTypes);
+
+        var allTypeNames = _.keys(this.allTypes),
+            innerChildTypeNames = _.without.apply(_, 
+                  [allTypeNames, 'DataBindOnly'].concat(
+                      _.keys(this.auxiliaryTypes))),
+            nonGroupTypeNames = _.without(innerChildTypeNames,
+                'Group', 'Repeat', 'FieldList');
+
+        _.each(this.auxiliaryTypes, function (type) {
+            type.prototype.validChildTypes = [];
+        });
+
+        _.each(this.normalTypes, function (Mug, name) {
+            // had issues with trying to do instanceof involving Mug, so using name
+            var validChildTypes;
+            if (name === "Group" || name === "Repeat") {
+                validChildTypes = innerChildTypeNames;
+            } else if (name === "FieldList") {
+                validChildTypes = nonGroupTypeNames;
+            } else {
+                validChildTypes = [];
+            }
+
+            // TODO: figure out how to get isinstance working
+            if (!Mug.prototype.validChildTypes) {
+                Mug.prototype.validChildTypes = validChildTypes;
+            }
+        });
+
+        _.each(this.allTypes, function (Mug, name) {
+            Mug.prototype.__className = name;
+
+            // set on this for easy access
+            _this[name] = Mug;
+        });
+    }
+    MugTypesManager.prototype = {
+        make: function () {
+            var args = Array.prototype.slice.call(arguments),
+                MugType = this.allTypes[args[0]],
+                mugArgs = args.slice(1).concat([this.spec]);
+            return applyToConstructor(MugType, mugArgs);
         }
+    };
 
-        // TODO: figure out how to get isinstance working
-        Mug.prototype.__className = name;
-        Mug.prototype.validChildTypes = validChildTypes;
+    function applyToConstructor(ctor, args) {
+        var new_obj = Object.create(ctor.prototype);
+        var ctor_ret = ctor.apply(new_obj, args);
 
-        if (name === "SelectDynamic" || name === "MSelectDynamic") {
-            Mug.prototype.maxChildren = 1;
-        } else {
-            Mug.prototype.maxChildren = -1;
-        }
-    });
-
-    var globalSpec;
-
-    // set the global spec which is used in the BaseMug constructor once it has
-    // been constructed, once, by the calling module.
-    function setSpec(s) {
-        globalSpec = s;
+        // Some constructors return a value; make sure to use it!
+        return ctor_ret !== undefined ? ctor_ret: new_obj;
     }
 
     return {
-        mugTypes: exportedMugTypes,
+        BaseMug: BaseMug,
+        baseMugTypes: {
+            normal: {
+                "AndroidIntent": AndroidIntent,
+                "Audio": Audio,
+                "Barcode": Barcode,
+                "DataBindOnly": DataBindOnly,
+                "Date": Date,
+                "DateTime": DateTime,
+                "Double": Double,
+                "FieldList": FieldList,
+                "Geopoint": Geopoint,
+                "Group": Group,
+                "Image": Image,
+                "Int": Int,
+                "Long": Long,
+                "MSelect": MSelect,
+                "PhoneNumber": PhoneNumber,
+                "ReadOnly": ReadOnly,
+                "Repeat": Repeat,
+                "Secret": Secret,
+                "Select": Select,
+                "Text": TextQuestion,
+                "Time": Time,
+                "Trigger": Trigger,
+                "Video": Video
+            },
+            auxiliary: {
+                "Item": Item
+            }
+        },
+        MugTypesManager: MugTypesManager,
         baseDataSpecs: baseDataSpecs,
         baseBindSpecs: baseBindSpecs,
         baseControlSpecs: baseControlSpecs,
-        BoundPropertyMap: BoundPropertyMap,
-        setSpec: setSpec
+        BoundPropertyMap: BoundPropertyMap
     };
 });

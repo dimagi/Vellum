@@ -50,9 +50,7 @@ define([
     xpathmodels,
     $
 ) {
-    var DEBUG_MODE = false,
-        mugTypes = mugs.mugTypes;
-    
+    var DEBUG_MODE = false;
     xpathmodels.DEBUG_MODE = DEBUG_MODE;
 
     var MESSAGE_TYPES = {
@@ -72,109 +70,7 @@ define([
             icon: "icon-info-sign"
         }
     };
-    var QUESTION_GROUPS = [
-        {
-            group: ["Text", 'Text'],  // key in mugTypes, <title>
-            questions: [
-                "Text",
-                "Trigger"
-            ]
-        },
-        {
-            group: ["Select", 'Multiple Choice'],
-            related: [
-                "Item"
-                // an Itemset is added automatically when you add a new dynamic
-                // select
-            ],
-            questions: [
-                "Select",
-                "MSelect",
-                "SelectDynamic",
-                "MSelectDynamic"
-            ]
-        },
-        {
-            group: ["Int", 'Number'],
-            questions: [
-                "Int",
-                "PhoneNumber",
-                "Double",
-                "Long"
-            ]
-        },
-        {
-            group: ["Date", 'Date'],
-            questions: [
-                "Date",
-                "Time",
-                "DateTime"
-            ]
-        },
-        {
-            group: ["DataBindOnly", 'Hidden Value'],
-            showDropdown: false,
-            questions: [
-                "DataBindOnly"
-            ]
-        },
-        {
-            group: ["Group", 'Groups'],
-            questions: [
-                "Group",
-                "Repeat",
-                "FieldList"
-            ]
-        },
-        {
-            group: ["Image", 'Multimedia Capture'],
-            questions: [
-                "Image",
-                "Audio",
-                "Video"
-            ]
-        },
-        {
-            group: ["Geopoint", 'Advanced', ''],
-            textOnly: true,
-            questions: [
-                "Geopoint",
-                "Barcode",
-                "Secret",
-                "AndroidIntent"
-            ]
-        }
-    ];
 
-    var QUESTIONS_IN_TOOLBAR = [];
-    var QUESTION_TYPE_TO_GROUP = {};
-    // this is necessary (as opposed to getting it from the mug at the same
-    // time as node creation) because jstree types are used to determine whether
-    // it's a valid insertion, so the mug can't be found in the form by node
-    // id at the point in time we might otherwise want to use it. Would be good
-    // to instead store create dummy mugs to get their properties / get it
-    // from the prototype if we were using prototypical inheritance.
-    _.each(QUESTION_GROUPS, function (groupData) {
-        var groupSlug = groupData.group[0];
-
-        var getQuestionData = function (questionType) {
-            var mug = mugTypes[questionType],
-                questionData = [questionType, mug.prototype.typeName, mug.prototype.icon];
-            
-            QUESTIONS_IN_TOOLBAR.push(questionType);
-            QUESTION_TYPE_TO_GROUP[questionType] = groupSlug;
-            return questionData;
-        };
-        
-        groupData.questions = _.map(groupData.questions, getQuestionData);
-        if (groupData.related && groupData.related.length) {
-            groupData.related = _.map(groupData.related, getQuestionData);
-        }
-
-        if (typeof groupData.group[2] === 'undefined') {
-            groupData.group[2] = mugTypes[groupData.group[0]].prototype.icon;
-        }
-    });
 
     var getQuestionTypeGroupClass = function (slug) {
         return "fd-question-group-" + slug;
@@ -227,7 +123,9 @@ define([
     var fn = {};
 
     fn.init = function () {
-        mugs.setSpec(this.getMugSpec());
+        this.data.core.mugTypes = new mugs.MugTypesManager(
+            this.getMugSpec(), this.getMugTypes());
+
         var _this = this,
             bindBeforeUnload = this.opts().core.bindBeforeUnload;
         this.data.core.saveButton = SaveButton.init({
@@ -256,19 +154,125 @@ define([
     fn.postInit = function () {
         this._loadXFormOrError(this.opts().core.form);
     };
+
+    fn.getMugTypes = function () {
+        return mugs.baseMugTypes;
+    };
         
     fn._init_toolbar = function () {
         var _this = this,
             $questionGroupContainer = this.$f.find(
                 '.fd-container-question-type-group');
 
-        _.each(QUESTION_GROUPS, function (groupData) {
-            var questionGroup = new QuestionTypeGroup(groupData, _this);
-            $questionGroupContainer.append(questionGroup);
+        this.data.core.QUESTIONS_IN_TOOLBAR = [];
+        this.data.core.QUESTION_TYPE_TO_GROUP = {};
+
+        _.each(this._getQuestionGroups(), function (groupData) {
+            var groupSlug = groupData.group[0];
+
+            var getQuestionData = function (questionType) {
+                var Mug = _this.data.core.mugTypes[questionType],
+                    questionData = [
+                        questionType, 
+                        Mug.prototype.typeName, 
+                        Mug.prototype.icon];
+
+                _this.data.core.QUESTIONS_IN_TOOLBAR.push(questionType);
+                _this.data.core.QUESTION_TYPE_TO_GROUP[questionType] = groupSlug;
+                return questionData;
+            };
+
+            groupData.questions = _.map(groupData.questions, getQuestionData);
+            if (groupData.related && groupData.related.length) {
+                groupData.related = _.map(groupData.related, getQuestionData);
+            }
+
+            groupData.group[2] = groupData.group[2] || 
+                _this.data.core.mugTypes[groupData.group[0]].prototype.icon;
+            $questionGroupContainer.append(
+                new QuestionTypeGroup(groupData, _this));
         });
 
         var $saveButtonContainer = this.$f.find('.fd-save-button');
         this.data.core.saveButton.ui.appendTo($saveButtonContainer);
+    };
+
+    fn._getQuestionGroups = function () {
+        return [
+            {
+                group: ["Text", 'Text'],  // key in mugTypes, <title>
+                questions: [
+                    "Text",
+                    "Trigger"
+                ]
+            },
+            {
+                group: ["Select", 'Multiple Choice'],
+                related: [
+                    "Item"
+                    // an Itemset is added automatically when you add a new dynamic
+                    // select
+                ],
+                questions: this.getSelectQuestions()
+            },
+            {
+                group: ["Int", 'Number'],
+                questions: [
+                    "Int",
+                    "PhoneNumber",
+                    "Double",
+                    "Long"
+                ]
+            },
+            {
+                group: ["Date", 'Date'],
+                questions: [
+                    "Date",
+                    "Time",
+                    "DateTime"
+                ]
+            },
+            {
+                group: ["DataBindOnly", 'Hidden Value'],
+                showDropdown: false,
+                questions: [
+                    "DataBindOnly"
+                ]
+            },
+            {
+                group: ["Group", 'Groups'],
+                questions: [
+                    "Group",
+                    "Repeat",
+                    "FieldList"
+                ]
+            },
+            {
+                group: ["Image", 'Multimedia Capture'],
+                questions: [
+                    "Image",
+                    "Audio",
+                    "Video"
+                ]
+            },
+            {
+                group: ["Geopoint", 'Advanced', ''],
+                textOnly: true,
+                questions: [
+                    "Geopoint",
+                    "Barcode",
+                    "Secret",
+                    "AndroidIntent"
+                ]
+            }
+        ];
+    };
+
+    fn.getSelectQuestions = function () {
+        return [
+            "Select",
+            "MSelect"
+        ];
     };
 
     fn._init_extra_tools = function () {
@@ -635,7 +639,7 @@ define([
     // separate from the rest of the UI code.
     fn._createJSTree = function () {
         typeData = {};
-        _(mugTypes).each(function (Mug, typeName) {
+        _(this.data.core.mugTypes.allTypes).each(function (Mug, typeName) {
             typeData[typeName] = {
                 max_children: Mug.prototype.maxChildren,
                 valid_children: 
@@ -643,8 +647,8 @@ define([
                     Mug.prototype.validChildTypes : "none"
             };
         });
-        validRootChildren = mugTypes.Group.prototype.validChildTypes.concat(
-            ['DataBindOnly']);
+        validRootChildren = this.data.core.mugTypes.Group.prototype
+            .validChildTypes.concat(['DataBindOnly']);
 
         var _this = this;
         this.data.core.$tree = $tree = this.$f.find('.fd-question-tree');
@@ -889,7 +893,7 @@ define([
         this.resetQuestionTypeGroups();
 
         var className = mug.__className || mug.prototype.__className,
-            groupSlug = QUESTION_TYPE_TO_GROUP[className];
+            groupSlug = this.data.core.QUESTION_TYPE_TO_GROUP[className];
         if (groupSlug && className !== 'MSelectDynamic' && className !== 'SelectDynamic') {
             this.$f
                 .find('.' + getQuestionTypeGroupClass(groupSlug))
@@ -1030,6 +1034,7 @@ define([
     fn.loadXML = function (formXML) {
         var _this = this;
         this.data.core.form = form = parser.parseXForm(formXML, {
+            mugTypes: this.data.core.mugTypes,
             allowedDataNodeReferences: this.opts().core.allowedDataNodeReferences, 
             externalInstances: this.opts().core.externalInstances
         }, this);
@@ -1433,11 +1438,11 @@ define([
     fn.getQuestionTypeChanger = function (mug) {
         var _this = this;
         var getQuestionList = function (mug) {
-            var questions = mug.limitTypeChangeTo || QUESTIONS_IN_TOOLBAR,
+            var questions = mug.limitTypeChangeTo || _this.data.core.QUESTIONS_IN_TOOLBAR,
                 ret = [];
 
             for (var i = 0; i < questions.length; i++) {
-                var q = mugTypes[questions[i]];
+                var q = _this.data.core.mugTypes[questions[i]];
                 if (q.prototype.isTypeChangeable && mug.$class.prototype !== q.prototype) {
                     ret.push({
                         slug: questions[i],

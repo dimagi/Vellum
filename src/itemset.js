@@ -22,6 +22,7 @@ define([
     'underscore',
     './widgets',
     './form',
+    './mugs',
     './util',
     'jquery',
     './core',
@@ -32,11 +33,109 @@ define([
     _,
     widgets,
     form,
+    mugs,
     util,
     $
 ) {
-    var NONE = "NONE",
+    var mugTypes = mugs.baseMugTypes.normal,
+        NONE = "NONE",
         CUSTOM = "CUSTOM";
+
+    var Itemset = mugs.BaseMug.$extend({
+        typeName: 'External Data',
+        icon: 'icon-circle-blank',
+        isTypeChangeable: false,
+        // have to delete the parent select
+        isRemoveable: false,
+        isCopyable: false,
+        getIcon: function () {
+            if (this.parentMug.__className === "SelectDynamic") {
+                return 'icon-circle-blank';
+            } else {
+                return 'icon-check-empty';
+            }
+        },
+        __init__: function (form, baseSpec) {
+            this.$super(form, baseSpec);
+            this.controlElement.tagName = "itemset";
+            this.controlElement.itemsetData = new mugs.BoundPropertyMap(this.form, {
+                // avoids serialization error
+                nodeset: ''
+            });
+            //this.bindElement.dataType = 'xsd:string';
+        },
+        processSpec: function (spec) {
+            var c = spec.controlElement;
+            delete spec.dataElement;
+            delete spec.bindElement;
+            c.itemsetData = {
+                editable: 'w',
+                presence: 'optional',
+                widget: widgets.itemset,
+                validationFunc: function (mug) {
+                    var itemsetData = mug.controlElement.itemsetData;
+                    if (!itemsetData.getAttr('nodeset')) {
+                        return "A data source must be selected.";
+                    }
+                    if (!itemsetData.getAttr('valueRef')) {
+                        return "Choice Value must be specified.";
+                    }
+                    if (!itemsetData.getAttr('labelRef')) {
+                        return "Choice Label must be specified.";
+                    }
+                    return 'pass';
+                }
+            };
+            c.label.presence = 'notallowed';
+            c.labelItext.presence = 'notallowed';
+            c.labelItextID.presence = 'notallowed';
+            c.hintLabel.presence = 'notallowed';
+            c.hintItextID.presence = 'notallowed';
+            c.mediaItext.presence = 'notallowed';
+            c.otherItext.presence = 'notallowed';
+            return spec;
+        }
+    });
+
+    function afterDynamicSelectInsert(form, mug) {
+        var itemset = Itemset.prototype.__className;
+        form.createQuestion(mug, 'into', itemset, true);
+    }
+
+    var MSelectDynamic = mugTypes.MSelect.$extend({
+        typeName: 'Multiple Answer - Dynamic List',
+        limitTypeChangeTo: ["SelectDynamic"],
+        validChildTypes: ["Itemset"],
+        maxChildren: 1,
+        afterInsert: afterDynamicSelectInsert,
+    });
+
+    var SelectDynamic = mugTypes.Select.$extend({
+        typeName: 'Single Answer - Dynamic List',
+        limitTypeChangeTo: ["MSelectDynamic"],
+        validChildTypes: ["Itemset"],
+        maxChildren: 1,
+        afterInsert: afterDynamicSelectInsert
+    });
+
+
+    $.vellum.plugin("itemset", {}, {
+        getSelectQuestions: function () {
+            return this.__callOld().concat([
+                "SelectDynamic",
+                "MSelectDynamic"
+            ]);
+        },
+        getMugTypes: function () {
+            var types = this.__callOld();
+            types.auxiliary.Itemset = Itemset;
+            types.normal = $.extend(types.normal, {
+                "MSelectDynamic": MSelectDynamic,
+                "SelectDynamic": SelectDynamic
+            });
+            return types;
+        }
+    });
 
     widgets.itemset = function (mug, options) {
         var widget = widgets.normal(mug, options),

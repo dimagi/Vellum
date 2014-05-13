@@ -1,6 +1,5 @@
 define([
     './tree',
-    './mugs',
     './logic',
     './intentManager',
     './writer',
@@ -9,7 +8,6 @@ define([
     './util'
 ], function (
     Tree,
-    mugs,
     logic,
     intents,
     writer,
@@ -17,7 +15,6 @@ define([
     exporter,
     util
 ) {
-    var mugTypes = mugs.mugTypes;
     var FormError = function (options) {
         var that = {};
         that.message = options.message;
@@ -50,7 +47,7 @@ define([
             .replace(/[^\w-]+/g,'');
     }
 
-    function Form (opts, vellum) {
+    function Form (opts, vellum, mugTypes) {
         var _this = this;
         this.externalInstances = {};
 
@@ -61,6 +58,7 @@ define([
         // Some things in the mug methods depend on the UI.  These should
         // eventually be refactored out.
         this.vellum = vellum;
+        this.mugTypes = mugTypes;
         this.intentManager = intents.IntentManager(this);
 
         this.formName = 'New Form';
@@ -450,7 +448,7 @@ define([
                           "and try again.";
             }
             
-            var newMug = new mugTypes[questionType](this);
+            var newMug = this.mugTypes.make(questionType, this);
             newMug.ufid = mug.ufid;
 
             // hack: force removal of the appearance attribute since this is statically
@@ -526,7 +524,7 @@ define([
         _duplicateMug: function (mug, parentMug, options, depth) {
             depth = depth || 0;
             // clone mug and give everything new unique IDs
-            var duplicate = new mugTypes[mug.__className](this);
+            var duplicate = this.mugTypes.make(mug.__className, this);
             duplicate.copyAttrs(mug);
 
             // ensure consistency            
@@ -663,7 +661,7 @@ define([
             this.fireChange(mug);
         },
         createQuestion: function (refMug, position, newMugType, isInternal) {
-            var mug = new mugTypes[newMugType](this);
+            var mug = this.mugTypes.make(newMugType, this);
             this.insertQuestion(mug, refMug, position, isInternal);
             if (mug.isODKOnly) {
                 this.updateError({

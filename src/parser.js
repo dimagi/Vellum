@@ -19,11 +19,10 @@ define([
         return val;
     };
 
-    var mugTypes = mugs.mugTypes;
     function parseXForm(xmlString, formOpts, vellum) {
         var Form = form_.Form,
             InstanceMetadata = form_.InstanceMetadata,
-            form = new Form(formOpts, vellum);
+            form = new Form(formOpts, vellum, formOpts.mugTypes);
         form.parseErrors = [];
         form.parseWarnings = [];
 
@@ -114,7 +113,7 @@ define([
             var nodeID, nodeVal, mug, parentMug, extraXMLNS, keyAttr,mType,parentNodeName,rootNodeName,dataTree;
             
             nodeID = el.nodeName;
-            mug = new mugTypes.DataBindOnly(form);
+            mug = form.mugTypes.make('DataBindOnly', form);
             parentNodeName = $(el).parent()[0].nodeName;
             rootNodeName = $(dataEl)[0].nodeName;
             dataTree = form.dataTree;
@@ -294,44 +293,44 @@ define([
 
     function mugTypeFromInput (dataType, appearance) {
         if (!dataType) { 
-            return mugTypes.Text; 
+            return 'Text'; 
         }
         if(dataType === 'long') {
-            return mugTypes.Long;
+            return 'Long';
         }else if(dataType === 'int') {
-            return mugTypes.Int;
+            return 'Int';
         }else if(dataType === 'double') {
-            return mugTypes.Double;
+            return 'Double';
         }else if(dataType === 'geopoint') {
-            return mugTypes.Geopoint;
+            return 'Geopoint';
         }else if(dataType === 'barcode') {
-            return mugTypes.Barcode;
+            return 'Barcode';
         }else if(dataType === 'intent') {
-            return mugTypes.AndroidIntent;
+            return 'AndroidIntent';
         }else if(dataType === 'string') {
             if (appearance === "numeric") {
-                return mugTypes.PhoneNumber;
+                return 'PhoneNumber';
             } else {
-                return mugTypes.Text;
+                return 'Text';
             }
         }else if(dataType === 'date') {
-            return mugTypes.Date;
+            return 'Date';
         }else if(dataType === 'datetime') {
-            return mugTypes.DateTime;
+            return 'DateTime';
         }else if(dataType === 'time') {
-            return mugTypes.Time;
+            return 'Time';
         }else {
-            return mugTypes.Text;
+            return 'Text';
         }
     }
 
     function mugTypeFromGroup (cEl) {
         if ($(cEl).attr('appearance') === 'field-list') {
-            return mugTypes.FieldList;
+            return 'FieldList';
         } else if ($(cEl).children('repeat').length > 0) {
-            return mugTypes.Repeat;
+            return 'Repeat';
         } else {
-            return mugTypes.Group;
+            return 'Group';
         }
     }
 
@@ -343,13 +342,13 @@ define([
         }
         if (mediaType === 'video/*') {
             /* fix buggy eclipse syntax highlighter (because of above string) */ 
-            return mugTypes.Video;
+            return 'Video';
         } else if (mediaType === 'image/*') {
             /* fix buggy eclipse syntax highlighter (because of above string) */ 
-            return mugTypes.Image;
+            return 'Image';
         } else if (mediaType === 'audio/*') {
             /* fix buggy eclipse syntax highlighter (because of above string) */ 
-            return mugTypes.Audio;
+            return 'Audio';
         } else {
             throw 'Unrecognized upload question type for Element: ' + nodePath + '!';
         }
@@ -387,39 +386,39 @@ define([
         tagName = tagName.toLowerCase();
         var hasItemset = $(cEl).children('itemset').length;
         if(tagName === 'select') {
-            MugClass = hasItemset ? mugTypes.MSelectDynamic : mugTypes.MSelect;
+            MugClass = hasItemset ? 'MSelectDynamic' : 'MSelect';
         }else if (tagName === 'select1') {
-            MugClass = hasItemset ? mugTypes.SelectDynamic : mugTypes.Select;
+            MugClass = hasItemset ? 'SelectDynamic' : 'Select';
         }else if (tagName === 'trigger') {
-            MugClass = mugTypes.Trigger;
+            MugClass = 'Trigger';
         }else if (tagName === 'input') {
             if (cEl.attr('readonly') === 'true()') {
-                MugClass = mugTypes.Trigger;
+                MugClass = 'Trigger';
                 cEl.removeAttr('readonly');
                 //delete bindEl.dataType;
             } else {
                 MugClass = mugTypeFromInput(dataType, appearance);
             }
         }else if (tagName === 'item') {
-            MugClass = mugTypes.Item;
+            MugClass = 'Item';
         }else if (tagName === 'itemset') {
-            MugClass = mugTypes.Itemset;
+            MugClass = 'Itemset';
         }else if (tagName === 'group') {
             MugClass = mugTypeFromGroup(cEl);
-            if (MugClass === mugTypes.Repeat) {
+            if (MugClass === 'Repeat') {
                 tagName = 'repeat';
             }
         }else if (tagName === 'secret') {
-            MugClass = mugTypes.Secret;
+            MugClass = 'Secret';
         }else if (tagName === 'upload') {
             MugClass = mugTypeFromUpload(mediaType, nodePath);
         } else {
             // unknown question type
-            MugClass = mugTypes.ReadOnly;
+            MugClass = 'ReadOnly';
         }
         
         // create new mug and copy old data to newly generated mug
-        mug = new MugClass(form);
+        mug = form.mugTypes.make(MugClass, form);
         if(oldMug) {
             mug.copyAttrs(oldMug);
             mug.ufid = oldMug.ufid;
@@ -612,7 +611,7 @@ define([
         bindList.each(function () {
             var el = $(this),
                 attrs = {},
-                mug = new mugTypes.DataBindOnly(form),
+                mug = form.mugTypes.make('DataBindOnly', form),
                 path = el.popAttr('nodeset'),
                 id = el.popAttr('id'),
                 nodeID, bindElement, oldMug;
