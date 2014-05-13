@@ -2,7 +2,6 @@ define([
     'tpl!./templates/xpath_validation_errors',
     'tpl!./templates/xpath_expression',
     'tpl!./templates/xpath',
-    './util',
     'jquery',
     'xpath',
     'xpathmodels',
@@ -11,7 +10,6 @@ define([
     xpath_validation_errors,
     xpath_expression,
     xpath_tpl,
-    util,
     $,
     xpath,
     xpathmodels
@@ -58,8 +56,8 @@ define([
     addOp(FunctionHandler, "selected", "has selected value");
 
     function showXPathEditor($div, options) {
+        console.error($div, options);
         var that = {};
-        util.eventuality(that);
 
         var editorContent = $div;
 
@@ -159,9 +157,7 @@ define([
                 };
 
                 var validateExpression = function(item) {
-                    that.fire({
-                        type: 'change'
-                    });
+                    options.change();
 
                     var le = getLeftQuestionInput().val(),
                         re = getRightQuestionInput().val();
@@ -358,9 +354,7 @@ define([
             });
 
             $xpathUI.find('.fd-xpath-editor-text').on('change keyup', function (){
-                that.fire({
-                    type: 'change'
-                });
+                options.change();
             });
 
             var done = function (val) {
@@ -396,8 +390,6 @@ define([
 
         initXPathEditor();
         updateXPathEditor(options);
-
-        return that;
     }
 
     return {

@@ -438,7 +438,8 @@ define([
             // check preconditions - if this is a select question with
             // choices, you're only allowed to change it to another
             // select question
-            var children = this.getChildren(mug);
+            var _this = this,
+                children = this.getChildren(mug);
             if (children.length > 0 && (
                     questionType.indexOf("Select") === -1 || 
                     questionType.indexOf("Dynamic") !== -1)) 
@@ -469,7 +470,7 @@ define([
             
             if (newMug.__className.indexOf("Select") !== -1) {
                 _.each(this.getChildren(newMug), function (childMug) {
-                    this.fire({
+                    _this.fire({
                         type: 'parent-question-type-change',
                         childMug: childMug
                     });

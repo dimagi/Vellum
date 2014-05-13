@@ -1309,7 +1309,9 @@ define([
     };
 
     fn.displayXPathEditor = function(options) {
-        var _this = this;
+        var _this = this
+            $editor = this.$f.find('.fd-xpath-editor');
+
         options.DEBUG_MODE = DEBUG_MODE;
         this.hideQuestionProperties();
 
@@ -1317,13 +1319,16 @@ define([
         options.done = function (val) {
             done(val);
             _this.data.core.hasXPathEditorChanged = false;
+            $editor.hide();
             _this.displayMugProperties(_this.getCurrentlySelectedMug());
         };
-        var editor = expressionEditor.showXPathEditor(
-            this.$f.find('.xpath-editor-content'), options);
-        editor.on('change', function () {
+        options.change = function () {
             _this.data.core.hasXPathEditorChanged = true;
-        });
+        };
+        $editor.show();
+
+        expressionEditor.showXPathEditor(
+            this.$f.find('.fd-xpath-editor-content'), options);
     };
 
     fn.alert = function (title, message) {
