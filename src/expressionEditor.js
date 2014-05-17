@@ -5,7 +5,7 @@ define([
     'jquery',
     'xpath',
     'xpathmodels',
-    'less!./less-style/xpath-editor'
+    'less!/src/less-style/xpath-editor'
 ], function (
     xpath_validation_errors,
     xpath_expression,

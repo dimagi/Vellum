@@ -26,7 +26,7 @@ define([
     'jquery.jstree',
     'jquery.fancybox',  // only thing we use fancybox for is its spinner, no actual display of anything
     'jquery-ui',  // should only be needed for buttons in Edit Source XML
-    'less!./less-style/main'
+    'less!/src/less-style/main'
 ], function (
     main_template,
     question_type_group,

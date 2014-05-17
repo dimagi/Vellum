@@ -34,20 +34,19 @@
 //}
 
 require.config({
-    baseUrl: '../',
+    baseUrl: './',
     map: {
         '*': {
             'less': 'bower_components/require-less/less',
-            'css': 'bower_components/require-css/css'
+            'css': 'bower_components/require-css/css',
+            'text': 'bower_components/requirejs-text/text',
+            'tpl': 'bower_components/requirejs-tpl/tpl'
         }
     },
     less: {
         logLevel: 1
     },
     paths: {
-        'text': 'bower_components/requirejs-text/text',
-        'tpl': 'bower_components/requirejs-tpl/tpl',
-
         'classy': 'bower_components/classy/classy',
         'codemirror': 'lib/codemirror/xml',
         'codemirrorBase': 'lib/codemirror/codemirror',
@@ -161,13 +160,14 @@ require.config({
     }
 });
 define([
-    './core',
-    './ignoreButRetain',
-    './itemset',
-    './javaRosa',
-    './lock',
-    './uploader',
-    './window'
-], function () {
+    './src/core',
+    './src/ignoreButRetain',
+    './src/itemset',
+    './src/javaRosa',
+    './src/lock',
+    './src/uploader',
+    './src/window'
+], function ($) {
+    return $;
     // adds $.vellum as a side-effect
 });

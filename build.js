@@ -1,7 +1,7 @@
 ({
     baseUrl: '.',
-    mainConfigFile: 'src/main.js',
-    name: 'src/main',
+    mainConfigFile: 'main.js',
+    name: 'main',
     out: 'dist/main-built.js',
     optimize: 'none'
 })
