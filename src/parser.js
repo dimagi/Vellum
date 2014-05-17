@@ -1,7 +1,7 @@
 define([
-    'vellum/form',
-    'vellum/mugs',
-    'vellum/util',
+    './form',
+    './mugs',
+    './util',
     'jquery'
 ], function (
     form_,

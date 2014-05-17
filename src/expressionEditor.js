@@ -1,11 +1,11 @@
 define([
-    'tpl!vellum/templates/xpath_validation_errors',
-    'tpl!vellum/templates/xpath_expression',
-    'tpl!vellum/templates/xpath',
+    'tpl!./templates/xpath_validation_errors',
+    'tpl!./templates/xpath_expression',
+    'tpl!./templates/xpath',
     'jquery',
     'xpath',
     'xpathmodels',
-    'less!vellum/less-style/xpath-editor'
+    'less!/src/less-style/xpath-editor'
 ], function (
     xpath_validation_errors,
     xpath_expression,

@@ -1,6 +1,6 @@
 define([
     'jquery',
-    'vellum/core'
+    './core'
 ], function (
     $
 ) {

@@ -1,5 +1,5 @@
 define([
-    'tpl!vellum/templates/widget_control_keyvalue',
+    'tpl!./templates/widget_control_keyvalue',
     'underscore',
     'jquery'
 ], function (

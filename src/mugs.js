@@ -1,6 +1,6 @@
 define([
-    'vellum/widgets',
-    'vellum/util',
+    './widgets',
+    './util',
     'classy',
     'underscore',
 ], function (

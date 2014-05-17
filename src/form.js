@@ -1,11 +1,11 @@
 define([
-    'vellum/tree',
-    'vellum/logic',
-    'vellum/intentManager',
-    'vellum/writer',
-    'vellum/widgets',
-    'vellum/exporter',
-    'vellum/util'
+    './tree',
+    './logic',
+    './intentManager',
+    './writer',
+    './widgets',
+    './exporter',
+    './util'
 ], function (
     Tree,
     logic,

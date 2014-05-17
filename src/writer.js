@@ -1,5 +1,5 @@
 define([
-    'vellum/util',
+    './util',
     'XMLWriter'
 ], function (
     util,

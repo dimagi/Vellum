@@ -5,16 +5,16 @@
  * Also adds specs for the JavaRosa preload attributes.
  */
 define([
-    'tpl!vellum/templates/edit_source',
-    'tpl!vellum/templates/language_selector',
-    'tpl!vellum/templates/control_group',
-    'text!vellum/templates/button_remove.html',
-    'vellum/uploader',
-    'vellum/widgets',
-    'vellum/util',
+    'tpl!./templates/edit_source',
+    'tpl!./templates/language_selector',
+    'tpl!./templates/control_group',
+    'text!./templates/button_remove.html',
+    './uploader',
+    './widgets',
+    './util',
     'underscore',
     'jquery',
-    'vellum/core',
+    './core',
 ], function (
     edit_source,
     language_selector,
