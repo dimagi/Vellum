@@ -1,20 +1,20 @@
 // the UI/ViewModel
 
 define([
-    'text!./templates/main.html',
-    'tpl!./templates/question_type_group',
-    'tpl!./templates/edit_source',
-    'tpl!./templates/control_group_stdInput',
-    'tpl!./templates/question_fieldset',
-    'tpl!./templates/question_type_changer',
-    'tpl!./templates/question_toolbar',
-    'tpl!./templates/alert_global',
-    'tpl!./templates/modal_content',
-    'tpl!./templates/modal_button',
-    './mugs',
-    './widgets',
-    './parser',
-    './expressionEditor',
+    'text!vellum/templates/main.html',
+    'tpl!vellum/templates/question_type_group',
+    'tpl!vellum/templates/edit_source',
+    'tpl!vellum/templates/control_group_stdInput',
+    'tpl!vellum/templates/question_fieldset',
+    'tpl!vellum/templates/question_type_changer',
+    'tpl!vellum/templates/question_toolbar',
+    'tpl!vellum/templates/alert_global',
+    'tpl!vellum/templates/modal_content',
+    'tpl!vellum/templates/modal_button',
+    'vellum/mugs',
+    'vellum/widgets',
+    'vellum/parser',
+    'vellum/expressionEditor',
     'save-button',
     'underscore',
     'codemirror',
@@ -22,11 +22,11 @@ define([
     'CryptoJS',
     'xpathmodels',
     'jquery',
-    './base',
+    'vellum/base',
     'jquery.jstree',
     'jquery.fancybox',  // only thing we use fancybox for is its spinner, no actual display of anything
     'jquery-ui',  // should only be needed for buttons in Edit Source XML
-    'less!/src/less-style/main'
+    'less!vellum/less-style/main'
 ], function (
     main_template,
     question_type_group,

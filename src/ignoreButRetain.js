@@ -21,7 +21,7 @@
 define([
     'underscore',
     'jquery',
-    './core'
+    'vellum/core'
 ], function (
     _,
     $

@@ -34,7 +34,7 @@
 //}
 
 require.config({
-    baseUrl: './',
+    baseUrl: '.',
     map: {
         '*': {
             'less': 'bower_components/require-less/less',
@@ -47,6 +47,8 @@ require.config({
         logLevel: 1
     },
     paths: {
+        'vellum': 'src',
+
         'classy': 'bower_components/classy/classy',
         'codemirror': 'lib/codemirror/xml',
         'codemirrorBase': 'lib/codemirror/codemirror',
@@ -159,6 +161,7 @@ require.config({
         }
     }
 });
+
 define([
     './src/core',
     './src/ignoreButRetain',

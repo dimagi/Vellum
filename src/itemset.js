@@ -17,15 +17,15 @@
 // It would be nice to convert the instance definition storage to use
 // first-class abstractions rather than simple hashes.
 define([
-    'tpl!./templates/external_data_source', 
-    'tpl!./templates/custom_data_source',
+    'tpl!vellum/templates/external_data_source', 
+    'tpl!vellum/templates/custom_data_source',
     'underscore',
-    './widgets',
-    './form',
-    './mugs',
-    './util',
+    'vellum/widgets',
+    'vellum/form',
+    'vellum/mugs',
+    'vellum/util',
     'jquery',
-    './core',
+    'vellum/core',
     'jquery.bootstrap-better-typeahead',
 ], function (
     external_data_source,

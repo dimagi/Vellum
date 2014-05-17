@@ -1,5 +1,5 @@
 define([
-    './util',
+    'vellum/util',
     'xpath',
     'xpathmodels'
 ], function (
