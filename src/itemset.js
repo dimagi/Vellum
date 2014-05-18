@@ -17,25 +17,33 @@
 // It would be nice to convert the instance definition storage to use
 // first-class abstractions rather than simple hashes.
 define([
+    'require',
+    'underscore',
+    'jquery',
+    'jquery.bootstrap-better-typeahead',
+], function (
+    require,
+    _,
+    $
+) {
+
+    var deferred = new $.Deferred();
+
+require([
     'tpl!./templates/external_data_source', 
     'tpl!./templates/custom_data_source',
-    'underscore',
-    './widgets',
-    './form',
-    './mugs',
-    './util',
-    'jquery',
-    './core',
-    'jquery.bootstrap-better-typeahead',
+    'promise!./widgets',
+    'promise!./form',
+    'promise!./mugs',
+    'promise!./util',
+    'promise!./core',
 ], function (
     external_data_source,
     custom_data_source,
-    _,
     widgets,
     form,
     mugs,
-    util,
-    $
+    util
 ) {
     var mugTypes = mugs.baseMugTypes.normal,
         NONE = "NONE",
@@ -591,4 +599,10 @@ define([
             }
         }
     }
+
+    deferred.resolve();
+});
+
+    return deferred;
+
 });

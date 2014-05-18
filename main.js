@@ -39,6 +39,7 @@ require.config({
         '*': {
             'less': 'bower_components/require-less/less',
             'css': 'bower_components/require-css/css',
+            'promise': 'bower_components/requirejs-promise/requirejs-promise',
             'text': 'bower_components/requirejs-text/text',
             'tpl': 'bower_components/requirejs-tpl/tpl'
         }
@@ -160,13 +161,14 @@ require.config({
     }
 });
 define([
-    './src/core',
-    './src/ignoreButRetain',
-    './src/itemset',
-    './src/javaRosa',
-    './src/lock',
-    './src/uploader',
-    './src/window'
+    'jquery',
+    'promise!./src/core',
+    'promise!./src/ignoreButRetain',
+    'promise!./src/itemset',
+    'promise!./src/javaRosa',
+    'promise!./src/lock',
+    'promise!./src/uploader',
+    'promise!./src/window'
 ], function ($) {
     return $;
     // adds $.vellum as a side-effect

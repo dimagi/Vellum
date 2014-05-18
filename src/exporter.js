@@ -1,9 +1,7 @@
 define([
     './util'
-
 ], function (
     util
-
 ) {
     // todo: abstract out IText stuff into part of the plugin interface
     var generateExportTSV = function (form) {

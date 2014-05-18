@@ -1,6 +1,33 @@
 // the UI/ViewModel
 
 define([
+    'require',
+    'save-button',
+    'underscore',
+    'xpathmodels',
+    'jquery',
+    'jquery.jstree',
+    'jquery.fancybox',  // only thing we use fancybox for is its spinner, no actual display of anything
+    'jquery-ui'  // used for buttons in Edit Source XML, and dialogs
+], function (
+    require,
+    SaveButton,
+    _,
+    xpathmodels,
+    $
+) {
+
+    var deferred = new $.Deferred();
+
+// UNDENT
+
+// We have to use scoped require for relative dependencies within a package used
+// within an app, otherwise RequireJS attempts to resolve relative
+// dependencies relative to the baseUrl of the app, not the package.
+// See https://groups.google.com/forum/#!topic/requirejs/ziKi6qWc9vw
+// This in turn necessitates using a promise via 
+// https://github.com/jokeyrhyme/requirejs-promise
+require([
     'text!./templates/main.html',
     'tpl!./templates/question_type_group',
     'tpl!./templates/edit_source',
@@ -11,21 +38,10 @@ define([
     'tpl!./templates/alert_global',
     'tpl!./templates/modal_content',
     'tpl!./templates/modal_button',
-    './mugs',
-    './widgets',
-    './parser',
-    './expressionEditor',
-    'save-button',
-    'underscore',
-    'codemirror',
-    'diff-match-patch',
-    'CryptoJS',
-    'xpathmodels',
-    'jquery',
-    './base',
-    'jquery.jstree',
-    'jquery.fancybox',  // only thing we use fancybox for is its spinner, no actual display of anything
-    'jquery-ui',  // should only be needed for buttons in Edit Source XML
+    'promise!./mugs',
+    'promise!./widgets',
+    'promise!./parser',
+    'promise!./base',
     'less!/src/less-style/main'
 ], function (
     main_template,
@@ -40,16 +56,30 @@ define([
     modal_button,
     mugs,
     widgets,
-    parser,
-    expressionEditor,
-    SaveButton,
-    _,
-    CodeMirror,
-    diff_match_patch,
-    CryptoJS,
-    xpathmodels,
-    $
+    parser
 ) {
+    
+    // Load these modules in the background after all runtime dependencies have
+    // been resolved, since they're not needed initially.  If the user manages
+    // to activate one of the functions that depend on these variables before
+    // the requests have finished, then there would be an error.  Could protect
+    // against that by requiring in each place they're used, but it seems
+    // unlikely for most.
+    var CodeMirror,
+        diff_match_patch,
+        CryptoJS;
+    
+    require([
+        'codemirror',
+        'diff-match-patch',
+        'CryptoJS',
+        'promise!./expressionEditor',
+    ], function (a, b, c) {
+        CodeMirror = a;
+        diff_match_patch = b;
+        CryptoJS = c;
+    });
+
     var DEBUG_MODE = false;
     xpathmodels.DEBUG_MODE = DEBUG_MODE;
 
@@ -1309,7 +1339,7 @@ define([
     };
 
     fn.displayXPathEditor = function(options) {
-        var _this = this
+        var _this = this,
             $editor = this.$f.find('.fd-xpath-editor');
 
         options.DEBUG_MODE = DEBUG_MODE;
@@ -1327,8 +1357,10 @@ define([
         };
         $editor.show();
 
-        expressionEditor.showXPathEditor(
-            this.$f.find('.fd-xpath-editor-content'), options);
+        require(['promise!./expressionEditor'], function (expressionEditor) {
+            expressionEditor.showXPathEditor(
+                _this.$f.find('.fd-xpath-editor-content'), options);
+        });
     };
 
     fn.alert = function (title, message) {
@@ -1787,7 +1819,7 @@ define([
     
     };
 
-    return $.vellum.plugin("core", {
+    $.vellum.plugin("core", {
         form: null,
         patchUrl: false,
         saveUrl: false,
@@ -1800,5 +1832,10 @@ define([
             $(window).bind('beforeunload', handler);
         }
     }, fn);
+    
+    deferred.resolve();
+});
 
+// END UNDENT
+    return deferred;
 });

@@ -5,16 +5,25 @@
  * Also adds specs for the JavaRosa preload attributes.
  */
 define([
+    'require',
+    'underscore',
+    'jquery'
+], function (
+    require,
+    _,
+    $
+) {
+    var deferred = new $.Deferred();
+
+require([
     'tpl!./templates/edit_source',
     'tpl!./templates/language_selector',
     'tpl!./templates/control_group',
     'text!./templates/button_remove.html',
-    './uploader',
-    './widgets',
-    './util',
-    'underscore',
-    'jquery',
-    './core',
+    'promise!./uploader',
+    'promise!./widgets',
+    'promise!./util',
+    'promise!./core',
 ], function (
     edit_source,
     language_selector,
@@ -22,9 +31,7 @@ define([
     button_remove,
     uploader,
     widgets,
-    util,
-    _,
-    $
+    util
 ) {
     var SUPPORTED_MEDIA_TYPES = ['image', 'audio', 'video'],
         DEFAULT_EXTENSIONS = {
@@ -1713,4 +1720,10 @@ define([
             return ret;
         }
     });
+
+    deferred.resolve();
+});
+
+    return deferred;
+
 });

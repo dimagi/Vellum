@@ -19,13 +19,18 @@
  * https://docs.google.com/document/d/12see6m3Lr6nVVgjfstS3oS6Vc1UT7l4bqYNRtDB-GXQ/
  */
 define([
+    'require',
     'underscore',
-    'jquery',
-    './core'
+    'jquery'
 ], function (
+    require,
     _,
     $
 ) {
+    var deferred = new $.Deferred();
+
+require(['promise!./core'], function () {
+
     function prependChild(element, child) {
         if (element.firstElementChild) {
             $(element).prepend($(child));
@@ -100,7 +105,7 @@ define([
 
     var xmls = new XMLSerializer();
 
-    return $.vellum.plugin("ignore", {}, {
+    $.vellum.plugin("ignore", {}, {
         loadXML: function (xmlStr) {
             this.data.ignore.ignoredNodes = [];
             if (!xmlStr) {
@@ -209,4 +214,11 @@ define([
             });
         }
     });
+
+    deferred.resolve();
+
+});
+
+    return deferred;
+
 });

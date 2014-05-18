@@ -1,20 +1,28 @@
 define([
+    'require',
     './tree',
     './logic',
     './intentManager',
-    './writer',
     './widgets',
-    './exporter',
     './util'
 ], function (
+    require,
     Tree,
     logic,
     intents,
-    writer,
     widgets,
-    exporter,
     util
 ) {
+    // Load these dependencies in the background after all other run-time
+    // dependencies have been resolved, since they shouldn't be necessary
+    // initially.
+    var writer,
+        exporter;
+    require(['promise!./writer', 'promise!./exporter'], function (w, e) {
+        writer = w;
+        exporter = e;
+    });
+
     var FormError = function (options) {
         var that = {};
         that.message = options.message;

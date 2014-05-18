@@ -1,18 +1,26 @@
 define([
-    'tpl!./templates/xpath_validation_errors',
-    'tpl!./templates/xpath_expression',
-    'tpl!./templates/xpath',
+    'require',
     'jquery',
     'xpath',
     'xpathmodels',
+], function (
+    require,
+    $,
+    xpath,
+    xpathmodels
+) {
+
+    var deferred = new $.Deferred();
+
+require([
+    'tpl!./templates/xpath_validation_errors',
+    'tpl!./templates/xpath_expression',
+    'tpl!./templates/xpath',
     'less!/src/less-style/xpath-editor'
 ], function (
     xpath_validation_errors,
     xpath_expression,
-    xpath_tpl,
-    $,
-    xpath,
-    xpathmodels
+    xpath_tpl
 ) {
     // Handlers for the simple expression editor
     var simpleExpressions = {};
@@ -392,7 +400,10 @@ define([
         updateXPathEditor(options);
     }
 
-    return {
+    deferred.resolve({
         showXPathEditor: showXPathEditor
-    };
+    });
+});
+
+    return deferred;
 });

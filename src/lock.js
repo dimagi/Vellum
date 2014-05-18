@@ -15,12 +15,17 @@
  * https://docs.google.com/document/d/1g4o3_OQfAYHjHdw7m7WcIAIRTomRV48yRQayL31jvIc
  */
 define([
-    'jquery',
-    './core'
+    'require',
+    'jquery'
 ], function (
+    require,
     $
 ) {
-    return $.vellum.plugin("lock", {}, {
+
+    var deferred = new $.Deferred();
+
+require(['promise!./core'], function () {
+    $.vellum.plugin("lock", {}, {
         loadXML: function (xml) {
             this.__callOld();
             this.data.lock.locks = {};
@@ -61,4 +66,10 @@ define([
             return this.__callOld() && this.data.lock.locks[mugPath] !== 'value';
         }
     });
+
+    deferred.resolve();
+});
+
+    return deferred;
+
 });

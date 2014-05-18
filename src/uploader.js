@@ -1,4 +1,20 @@
 define([
+    'require',
+    'underscore',
+    'file-uploader',
+    'jquery',
+], function (
+    require,
+    _,
+    HQMediaFileUploadController,
+    $
+) {
+    "use strict";
+
+    var deferred = new $.Deferred();
+
+require([
+    'promise!./util',
     'tpl!./templates/multimedia_modal',
     'tpl!./templates/multimedia_upload_trigger',
     'text!./templates/multimedia_queue.html',
@@ -8,12 +24,9 @@ define([
     'tpl!./templates/multimedia_existing_video',
     'tpl!./templates/multimedia_nomedia',
     'text!./templates/multimedia_block.html',
-    './util',
-    'underscore',
-    'file-uploader',
-    'jquery',
-    './core'
+    'promise!./core'
 ], function (
+    util,
     multimedia_modal,
     multimedia_upload_trigger,
     multimedia_queue,
@@ -22,13 +35,8 @@ define([
     multimedia_existing_audio,
     multimedia_existing_video,
     multimedia_nomedia,
-    multimedia_block,
-    util,
-    _,
-    HQMediaFileUploadController,
-    $
+    multimedia_block
 ) {
-    "use strict";
 
     var SUPPORTED_EXTENSIONS = {
         image: [
@@ -215,9 +223,7 @@ define([
         return $uploadBtn;
     };
     
-    
-    
-    return $.vellum.plugin("uploader", {
+    $.vellum.plugin("uploader", {
         objectMap: false,
         swfUrl: "lib/MediaUploader/flashuploader.swf",
         sessionid: false,
@@ -300,4 +306,10 @@ define([
             return uploadController;
         }
     });
+
+    deferred.resolve();
+});
+
+    return deferred;
+
 });

@@ -1,11 +1,9 @@
 define([
     'text!langCodes',
-    'XMLWriter',
     'jquery',
     'jquery.bootstrap-popout'
 ], function (
     langCodes,
-    XMLWriter,
     $
 ) {
     RegExp.escape = function(s) {
@@ -309,7 +307,6 @@ define([
         return that.getOneOrFail(_(list).filter(func), infoMsg);
     };
     return that;
-
 });
 
 

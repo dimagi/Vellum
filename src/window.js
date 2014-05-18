@@ -1,10 +1,15 @@
 define([
-    'jquery',
-    './core'
+    'require',
+    'jquery'
 ], function (
+    require,
     $
 ) {
-    return $.vellum.plugin('windowManager', {
+    var deferred = new $.Deferred();
+
+require(['promise!./core'], function () {
+    
+    $.vellum.plugin('windowManager', {
         minHeight: 200,
         bottomOffset: 0
     }, {
@@ -86,4 +91,10 @@ define([
             return Math.min(offsetLeft - scrollLeft, offsetLeft);
         }
     });
+
+    deferred.resolve();
+});
+
+    return deferred;
+
 });
