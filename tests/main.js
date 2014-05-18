@@ -71,64 +71,59 @@ var TEST_INSTANCE_CONFIG = [
 ];
 
 require.config({
+    baseUrl: '../',
     packages: [
         {
             name: 'jquery.vellum',
             location: '..',
             main: 'main'
-            //main: '../dist/main-built'
         },
         {
             name: 'vellum-matrix',
             location: 'tests',
             main: 'matrix'
         }
-    ],
-    paths: {
-        'jquery': '../bower_components/jquery/jquery',
-        
-        'text': '../bower_components/requirejs-text/text',
-        'tpl': '../bower_components/requirejs-tpl/tpl',
-        'underscore': '../bower_components/underscore/underscore'
-    },
-    shim: {
-        'underscore': {
-            exports: '_'
-        }
-    }
+    ]
 });
 
 require([
-    './matrix',
-    'jquery'
-], function (
-    matrix,
-    $
-) {
-    matrix.makeMatrix($('#matrix'), ['itemset'], {
-        core: {
-            formName: "Untitled Form",
-            allowedDataNodeReferences: [
-                "meta/deviceID",
-                "meta/instanceID",
-                "meta/username",
-                "meta/userID",
-                "meta/timeStart",
-                "meta/timeEnd"
-            ],
-            externalInstances: TEST_INSTANCE_CONFIG,
-        },
-        javaRosa: {
-            langs: ['en', 'hin'],
-            displayLanguage: 'en'
-        },
-        uploader: {
-            uploadUrls: {
-                image: 'foo',
-                audio: 'foo',
-                video: 'foo'
+    'jquery.vellum/require-config'
+], function () {
+
+    require([
+        'vellum-matrix',
+        'jquery',
+    ], function (
+        matrix,
+        $
+    ) {
+        var $div = $('<div></div>').appendTo($("body"));
+
+        matrix.makeMatrix($div, ['itemset'], {
+            core: {
+                formName: "Untitled Form",
+                allowedDataNodeReferences: [
+                    "meta/deviceID",
+                    "meta/instanceID",
+                    "meta/username",
+                    "meta/userID",
+                    "meta/timeStart",
+                    "meta/timeEnd"
+                ],
+                externalInstances: TEST_INSTANCE_CONFIG,
             },
-            objectMap: {}  // todo
-        }
+            javaRosa: {
+                langs: ['en', 'hin'],
+                displayLanguage: 'en'
+            },
+            uploader: {
+                uploadUrls: {
+                    image: 'foo',
+                    audio: 'foo',
+                    video: 'foo'
+                },
+                objectMap: {}  // todo
+            }
+        });
     });
 });
