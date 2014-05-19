@@ -1,10 +1,12 @@
 define([
     'require',
+    'module',
     'underscore',
     'file-uploader',
     'jquery',
 ], function (
     require,
+    module,
     _,
     HQMediaFileUploadController,
     $
@@ -222,10 +224,14 @@ require([
         });
         return $uploadBtn;
     };
-    
+
+    // get absolute path to current file, suitable to be loaded by swfobject.
+    var pieces = module.uri.split('/'),
+        base = pieces.slice(0, pieces.length - 1).join('/') + '/';
+   
     $.vellum.plugin("uploader", {
         objectMap: false,
-        swfUrl: "lib/MediaUploader/flashuploader.swf",
+        swfUrl: base + "../lib/MediaUploader/flashuploader.swf",
         sessionid: false,
         uploadUrls: {
             image: false,
@@ -236,7 +242,8 @@ require([
         init: function () {
             var opts = this.opts().uploader,
                 uploadUrls = opts.uploadUrls,
-                uploadEnabled = opts.objectMap && opts.swfUrl && opts.uploadUrls,
+                uploadEnabled = opts.objectMap && opts.swfUrl && 
+                    opts.uploadUrls && opts.uploadUrls.image,
                 sessionid = opts.sessionid,
                 swfUrl = opts.swfUrl;
 

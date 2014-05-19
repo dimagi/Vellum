@@ -42,7 +42,7 @@ require([
     'promise!./widgets',
     'promise!./parser',
     'promise!./base',
-    'less!/src/less-style/main'
+    'less!./less-style/main'
 ], function (
     main_template,
     question_type_group,

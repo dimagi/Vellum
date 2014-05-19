@@ -16,7 +16,7 @@ require([
     'tpl!./templates/xpath_validation_errors',
     'tpl!./templates/xpath_expression',
     'tpl!./templates/xpath',
-    'less!/src/less-style/xpath-editor'
+    'less!./less-style/xpath-editor'
 ], function (
     xpath_validation_errors,
     xpath_expression,

@@ -4,66 +4,73 @@ define(['module'], function (module) {
         var pieces = module.uri.split('/'),
             baseUrl = pieces.slice(0, pieces.length - 1).join('/') + '/';
 
-        config.map = config.map || {};
-        config.paths = config.paths || {};
-
-        for (var j in config.paths) {
-            config.paths[j] = baseUrl + config.paths[j];
-        }
-
-        for (var k in config.map) {
-            for (var l in config.map[k]) {
-                config.map[k][l] = baseUrl + config.map[k][l];
+        if (config.paths) {
+            for (var j in config.paths) {
+                config.paths[j] = baseUrl + config.paths[j];
             }
         }
+
+        if (config.map) {
+            for (var k in config.map) {
+                for (var l in config.map[k]) {
+                    config.map[k][l] = baseUrl + config.map[k][l];
+                }
+            }
+        }
+
+        if (config.shim) {
+            for (var k in config.shim) {
+                var deps = config.shim[k].deps;
+                if (!deps) continue;
+                for (var i = 0; i < deps.length; i++) {
+                    deps[i] = deps[i].replace('!', '!' + baseUrl);
+                }
+            }
+        }
+
+        if (config.packages) {
+            for (var i = 0; i < config.packages.length; i++) {
+                config.packages[i].location = baseUrl + config.packages[i].location;
+            }
+        
+        }
+
         requirejs.config(config);
     }
 
-    // If jQuery, underscore, or Bootstrap were loaded before requirejs, make
-    // requirejs use the existing instance. 
-    // http://www.manuel-strehl.de/dev/load_jquery_before_requirejs.en.html
-    //if (window.jQuery) {
-        //define('jquery', [], function() {
-            //return jQuery;
-        //});
-        //if (jQuery.fn.typeahead) {
-            //define('jquery.bootstrap', [], function () {
-                //return $;
-            //});
-        //}
-        //if (jQuery.fn.popout) {
-            //define('jquery.popout', [], function () {
-            
-            //});
-        //}
-
-        //if (jQuery.fn.datepicker) {
-            //define('jquery-ui', [], function () {
-                //return $;
-            //});
-        //}
-    //}
-
-    //var gte15 = function (versionStr) {
-        //return parseFloat(versionStr.split('.').slice(0, 2).join('.')) >= 1.5;
-    //};
-
-    //if (window._ && gte15(_.VERSION)) {
-        //define('underscore', [], function () {
-            //return _;
-        //});
-    //}
-
     requireConfigRelative({
-        map: {
-            '*': {
-                'less': 'bower_components/require-less/less',
-                'css': 'bower_components/require-css/css',
-                'promise': 'bower_components/requirejs-promise/requirejs-promise',
-                'text': 'bower_components/requirejs-text/text',
-                'tpl': 'bower_components/requirejs-tpl/tpl'
+        // For some reason when using the map config as suggested by some of the
+        // plugins' documentation, and only when including vellum in another
+        // app, it tries to get requirejs-promise instead of
+        // requirejs-promise.js, so using packages instead.  This might be a bug
+        // that should be reported.
+        packages: [
+            {
+                name: 'less',
+                location: 'bower_components/require-less/',
+                main: 'less.js'
+            },
+            {
+                name: 'promise',
+                location: 'bower_components/requirejs-promise/',
+                main: 'requirejs-promise.js'
+            },
+            {
+                name: 'css',
+                location: 'bower_components/require-css/',
+                main: 'css.js'
+            },
+            {
+                name: 'text',
+                location: 'bower_components/requirejs-text/',
+                main: 'text.js'
+            },
+            {
+                name: 'tpl',
+                location: 'bower_components/requirejs-tpl',
+                main: 'tpl.js'
             }
-        },
+        ],
         less: {
             logLevel: 1
         },
@@ -180,5 +187,40 @@ define(['module'], function (module) {
             }
         }
     });
+    
+    // If jQuery, underscore, or Bootstrap were loaded before requirejs, make
+    // requirejs use the existing instance. 
+    // http://www.manuel-strehl.de/dev/load_jquery_before_requirejs.en.html
+    //if (window.jQuery) {
+        //define('jquery', [], function() {
+            //return jQuery;
+        //});
+        //if (jQuery.fn.typeahead) {
+            //define('jquery.bootstrap', [], function () {
+                //return $;
+            //});
+        //}
+        //if (jQuery.fn.popout) {
+            //define('jquery.popout', [], function () {
+            
+            //});
+        //}
+
+        //if (jQuery.fn.datepicker) {
+            //define('jquery-ui', [], function () {
+                //return $;
+            //});
+        //}
+    //}
+
+    //var gte15 = function (versionStr) {
+        //return parseFloat(versionStr.split('.').slice(0, 2).join('.')) >= 1.5;
+    //};
+
+    //if (window._ && gte15(_.VERSION)) {
+        //define('underscore', [], function () {
+            //return _;
+        //});
+    //}
 
 })

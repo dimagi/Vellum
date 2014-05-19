@@ -97,9 +97,7 @@ require([
         matrix,
         $
     ) {
-        var $div = $('<div></div>').appendTo($("body"));
-
-        matrix.makeMatrix($div, ['itemset'], {
+        matrix.makeMatrix($("#matrix_container"), ['itemset'], {
             core: {
                 formName: "Untitled Form",
                 allowedDataNodeReferences: [

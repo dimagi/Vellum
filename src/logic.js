@@ -71,6 +71,10 @@ define([
     };
 
     function LogicManager (form, opts) {
+        opts.allowedDataNodeReferences = opts.allowedDataNodeReferences || {};
+
+        this.opts = opts;
+        this.form = form;
         this.all = [];
     }
 
@@ -82,25 +86,27 @@ define([
         },
         addReferences: function (mug, property) {
             // get absolute paths from mug property's value
-            var expr = new LogicExpression(mug.getPropertyValue(property));
-            var paths = expr.getPaths().filter(function (p) {
-                // currently we don't do anything with relative paths
-                return p.initial_context === xpathmodels.XPathInitialContextEnum.ROOT;
-            });
-            var error = {
-                level: "parse-warning",
-                key: mug.ufid + "-" + property + "-badpath",
-                message: []
-            };
+            var _this = this,
+                expr = new LogicExpression(mug.getPropertyValue(property)),
+                paths = expr.getPaths().filter(function (p) {
+                    // currently we don't do anything with relative paths
+                    return p.initial_context ===
+                        xpathmodels.XPathInitialContextEnum.ROOT; 
+                }),
+                error = {
+                    level: "parse-warning",
+                    key: mug.ufid + "-" + property + "-badpath",
+                    message: []
+                };
 
             // append item for each mug referenced (by absolute path) in mug's
             // property value
             this.all = this.all.concat(paths.map(function (path) {
                 var pathString = path.pathWithoutPredicates(),
                     pathWithoutRoot = pathString.substring(1 + pathString.indexOf('/', 1)),
-                    refMug = form.getMugByPath(pathString);
+                    refMug = _this.form.getMugByPath(pathString);
 
-                if (!refMug && opts.allowedDataNodeReferences.indexOf(pathWithoutRoot) === -1) {
+                if (!refMug && this.opts.allowedDataNodeReferences.indexOf(pathWithoutRoot) === -1) {
                     error.message.push("The question '" + mug.bindElement.nodeID + 
                         "' references an unknown question " + path.toXPath() + 
                         " in its " + mug.getPropertyDefinition(property).lstring + ".");
@@ -111,14 +117,14 @@ define([
                     ref: refMug ? refMug.ufid : "", // referenced Mug
                     property: property,
                     path: path.toXPath(), // path to refMug
-                    sourcePath: form.getAbsolutePath(mug)
+                    sourcePath: _this.form.getAbsolutePath(mug)
                 };      
             }));
             
             if (error.message.length > 0) {
-                form.updateError(error, {updateUI: true});
+                _this.form.updateError(error, {updateUI: true});
             } else {
-                form.clearError(error, {updateUI: true}); 
+                _this.form.clearError(error, {updateUI: true}); 
             }        
         },
         updateReferences: function (mug, property) {
@@ -174,7 +180,7 @@ define([
                     continue;
                 }
                 seen[pkey] = null;
-                mug = form.getMugByUFID(ref.mug);
+                mug = this.form.getMugByUFID(ref.mug);
                 expr = new LogicExpression(mug.getPropertyValue(ref.property));
                 orig = expr.getText();
                 for (mugId in data) {

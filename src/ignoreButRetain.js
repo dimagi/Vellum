@@ -112,12 +112,13 @@ require(['promise!./core'], function () {
                 this.__callOld();
                 return;
             }
-            var ignoredEls = [],
+            var _this = this,
+                ignoredEls = [],
                 xmlDoc = $.parseXML(xmlStr),
                 xml = $(xmlDoc);
 
             xml.find('[vellum\\:ignore="retain"]').each(function (i, el) {
-                ignoredNodes.push(getPathAndPosition(el));
+                _this.data.ignore.ignoredNodes.push(getPathAndPosition(el));
                 ignoredEls.push(el);
             });
 
