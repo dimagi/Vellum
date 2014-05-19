@@ -191,36 +191,29 @@ define(['module'], function (module) {
     // If jQuery, underscore, or Bootstrap were loaded before requirejs, make
     // requirejs use the existing instance. 
     // http://www.manuel-strehl.de/dev/load_jquery_before_requirejs.en.html
-    //if (window.jQuery) {
-        //define('jquery', [], function() {
-            //return jQuery;
-        //});
-        //if (jQuery.fn.typeahead) {
-            //define('jquery.bootstrap', [], function () {
-                //return $;
-            //});
-        //}
-        //if (jQuery.fn.popout) {
-            //define('jquery.popout', [], function () {
-            
-            //});
-        //}
+    if (window.jQuery) {
+        define('jquery', [], function() {
+            return jQuery;
+        });
+        if (jQuery.fn.typeahead) {
+            define('jquery.bootstrap', [], function () {});
+        }
+        if (jQuery.fn.popout) {
+            define('jquery.popout', [], function () {});
+        }
 
-        //if (jQuery.fn.datepicker) {
-            //define('jquery-ui', [], function () {
-                //return $;
-            //});
-        //}
-    //}
+        if (jQuery.fn.datepicker) {
+            define('jquery-ui', [], function () {});
+        }
+    }
 
-    //var gte15 = function (versionStr) {
-        //return parseFloat(versionStr.split('.').slice(0, 2).join('.')) >= 1.5;
-    //};
+    var gte15 = function (versionStr) {
+        return parseFloat(versionStr.split('.').slice(0, 2).join('.')) >= 1.5;
+    };
 
-    //if (window._ && gte15(_.VERSION)) {
-        //define('underscore', [], function () {
-            //return _;
-        //});
-    //}
-
-})
+    if (window._ && gte15(_.VERSION)) {
+        define('underscore', [], function () {
+            return _;
+        });
+    }
+});
