@@ -15,7 +15,7 @@ Usage
 
 Install dependencies:
 ```
-$ npm install -g bower requirejs
+$ npm install -g bower requirejs less
 $ npm install
 ```
 
