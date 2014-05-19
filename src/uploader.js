@@ -2,13 +2,11 @@ define([
     'require',
     'module',
     'underscore',
-    'file-uploader',
     'jquery',
 ], function (
     require,
     module,
     _,
-    HQMediaFileUploadController,
     $
 ) {
     "use strict";
@@ -94,7 +92,8 @@ require([
         };
 
         ref.updateController = function () {
-            var uploadController = uploadControls[ref.mediaType];
+            // see note about poor man's promise below
+            var uploadController = uploadControls[ref.mediaType].value;
             uploadController.resetUploader();
             uploadController.currentReference = ref;
             uploadController.uploadParams = {
@@ -293,23 +292,37 @@ require([
                 modalId: options.uploaderSlug
             }));
             this.$f.find('.fd-multimedia-modal-container').append($uploaderModal);
-            var uploadController = new HQMediaFileUploadController(
-                options.uploaderSlug, 
-                options.mediaType, 
-                {
-                    fileFilters: SUPPORTED_EXTENSIONS[options.mediaType],
-                    uploadURL: options.uploadUrl,
-                    swfURL: options.swfUrl,
-                    isMultiFileUpload: false,
-                    queueTemplate: multimedia_queue,
-                    errorsTemplate: multimedia_errors,
-                    existingFileTemplate: PREVIEW_TEMPLATES[options.mediaType],
-                    licensingParams: ['shared', 'license', 'author', 'attribution-notes'],
-                    uploadParams: {},
-                    sessionid: options.sessionid
-                }
-            );
-            uploadController.init();
+
+            // Load the uploader and its dependencies in the background after
+            // core dependencies are already loaded, since it's not necessary at
+            // page load.
+            // uploadControls is referenced in the initWidget call path, but
+            // never actually used until the upload button is clicked.  We use
+            // an object here as a poor man's promise.
+            // Feel free to undo this if it's not worth it.
+          
+            var uploadController = {value: null};
+
+            require(['file-uploader'], function (HQMediaFileUploadController) {
+                uploadController.value = new HQMediaFileUploadController(
+                    options.uploaderSlug, 
+                    options.mediaType, 
+                    {
+                        fileFilters: SUPPORTED_EXTENSIONS[options.mediaType],
+                        uploadURL: options.uploadUrl,
+                        swfURL: options.swfUrl,
+                        isMultiFileUpload: false,
+                        queueTemplate: multimedia_queue,
+                        errorsTemplate: multimedia_errors,
+                        existingFileTemplate: PREVIEW_TEMPLATES[options.mediaType],
+                        licensingParams: [
+                            'shared', 'license', 'author', 'attribution-notes'],
+                        uploadParams: {},
+                        sessionid: options.sessionid
+                    }
+                );
+                uploadController.value.init();
+            });
             return uploadController;
         }
     });
