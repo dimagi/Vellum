@@ -1,7 +1,9 @@
 ({
     baseUrl: '.',
-    mainConfigFile: 'main.js',
-    name: 'main',
-    out: 'dist/main-built.js',
-    optimize: 'none'
+    mainConfigFile: 'require-config.js',
+    dir: 'dist',
+    skipDirOptimize: true,
+    optimize: 'none',
+    // Everything to do with CSS is handled by the require-css plugin
+    optimizeCss: 'none'
 })

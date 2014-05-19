@@ -11,58 +11,45 @@ Vellum is a JavaRosa [XForm](http://en.wikipedia.org/wiki/XForms) designer built
 Usage
 -----
 
-### Setup
+Here's how to load everything asynchronously.  Instructions for built bundles
+forthcoming.
 
 Install dependencies:
 ```
-$ npm install -g bower requirejs
+$ npm install -g bower requirejs less csso
 $ npm install
 ```
 
-There are three ways to load Vellum, depending on whether you want asychronous
-module loading, and whether jQuery, jQueryUI, and Bootstrap are already loaded
-on the page.
-
-Asynchronous, will use existing jQuery, jQueryUI, Boostrap (V2) plugins if present:
 ```html
+<link rel="stylesheet" href="path/to/bootstrap.css"></link>
+
+<!-- If these global dependencies are already present, then the existing
+     instances will be used.  Otherwise, included versions will be loaded. -->
+<script src="underscore.js"></script>
+<script src="jquery.js"></script>
+<script src="jquery-ui.js"></script>
+<script src="bootstrap.js"></script>
+
 <script src="bower_components/requirejs/require.js"></script>
 <script>
     require.config({
-        baseUrl: '/path/to/vellum/src'
+        packages: [
+            { 
+                name: 'jquery.vellum',
+                location: '/path/to/vellum-repo',
+                main: 'main.js'
+            }
+        ]
+    });
+
+    // load paths config for dependencies of vellum, including jquery
+    require(["jquery.vellum/require-config"], function () {
+        require(["jquery", "jquery.vellum"], function ($) {
+            $("#some_div").vellum(OPTIONS);
+        });
     });
 </script>
 ```
-
-Bundled with all dependencies:
-```
-$ grunt dist
-```
-
-```html
-<script src="dist/main.min.js"></script>
-<script>
-</script>
-```
-
-Bundled with all dependencies except jQuery, jQuery UI, and Bootstrap plugins,
-expects them already to be loaded:
-```
-$ grunt dist-min
-```
-
-```html
-<script src="dist/main.no-jquery.min.js"></script>
-<script>
-</script>
-```
-
-Finally, for all three:
-```javascript
-require(["main"], function ($) {
-    $("#formdesigner").vellum(options)
-});
-```
-
 
 ### Options
 

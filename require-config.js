@@ -1,8 +1,10 @@
 define(['module'], function (module) {
+    var pieces = module.uri.split('/'),
+        baseUrl = pieces.slice(0, pieces.length - 1).join('/') + '/';
 
-    function requireConfigRelative(config) {
-        var pieces = module.uri.split('/'),
-            baseUrl = pieces.slice(0, pieces.length - 1).join('/') + '/';
+    // Prepends baseUrl to appropriate paths in the config, based on the
+    // location of this file.
+    function makeRelative(config) {
 
         if (config.paths) {
             for (var j in config.paths) {
@@ -35,10 +37,41 @@ define(['module'], function (module) {
         
         }
 
-        requirejs.config(config);
+        return config;
     }
 
-    requireConfigRelative({
+    function duplicateModulesAsBundles(config) {
+        if (!config.modules) {
+            return config;
+        }
+
+        // Don't use bundles if running locally.
+        if (true || window && window.location.href.indexOf('localhost') !== -1) {
+            return config;
+        } else {
+            config.baseUrl = (config.baseUrl || baseUrl) + 'dist/';
+        }
+
+        config.bundles = {};
+
+        for (var i = 0; i < config.modules.length; i++) {
+            var module = config.modules[i];
+
+            config.bundles[module.name] = module.include;
+        }
+
+        return config;
+    }
+
+    // Trick r.js' AST parser.  HACK.
+    var oldConfig = requirejs.config;
+    requirejs.config = function (config) {
+        config = duplicateModulesAsBundles(makeRelative(config));
+        //console.log(config);
+        oldConfig.call(requirejs, config);
+    };
+
+    requirejs.config({
         // For some reason when using the map config as suggested by some of the
         // plugins' documentation, and only when including vellum in another
         // app, it tries to get requirejs-promise instead of
@@ -47,22 +80,22 @@ define(['module'], function (module) {
         packages: [
             {
                 name: 'less',
-                location: 'bower_components/require-less/',
+                location: 'bower_components/require-less',
                 main: 'less.js'
             },
             {
                 name: 'promise',
-                location: 'bower_components/requirejs-promise/',
+                location: 'bower_components/requirejs-promise',
                 main: 'requirejs-promise.js'
             },
             {
                 name: 'css',
-                location: 'bower_components/require-css/',
+                location: 'bower_components/require-css',
                 main: 'css.js'
             },
             {
                 name: 'text',
-                location: 'bower_components/requirejs-text/',
+                location: 'bower_components/requirejs-text',
                 main: 'text.js'
             },
             {
@@ -185,8 +218,92 @@ define(['module'], function (module) {
             'biginteger': {
                 exports: 'BigInteger'
             }
-        }
+        },
+        /** 
+         * An attempt to solve the eternal optimization problem of how to bundle
+         * components and dependencies together so they will load the fastest for
+         * the most users, given variables such as
+         *   - the overhead of an HTTP request
+         *   - the browser cache
+         *   - the rate of changes to files
+         *
+         * Although in this use-case it's a one-to-one mapping, since RequireJS
+         * parses rather than loads require-config.js, there is no way to
+         * automatically handle it ourselves.
+         *
+         * This is a configuration for the optimizer that's meaningless for the
+         * asynchronous loader, but we put it here because we generate the
+         * 'bundles' config that is used by the asynchronous loader from it, and
+         * it's not possible to represent all of this information using bundles.
+         */
+        modules: [
+            // Global dependencies that may be already loaded on the page.  If any
+            // aren't, then a single file containing them all will be requested
+            // once.
+            {
+                create: true,
+                name: 'global-deps',
+                include: [
+                    'jquery',
+                    'jquery-ui',
+                    'jquery.bootstrap',
+                    'underscore'
+                ]
+            },
+            // Components (and their dependencies) that can be requested
+            // asynchronously after Vellum has already finished loading, because
+            // they're not necessary for initial operation.
+            {
+                create: true,
+                name: 'deferred-components',
+                include: [
+                    // core
+                    'codemirror',
+                    'diff-match-patch',
+                    'CryptoJS',
+                    'promise!src/expressionEditor',
+
+                    // uploader
+                    'file-uploader',
+
+                    // form
+                    'promise!src/writer',
+                    'promise!src/exporter'
+                ],
+                exclude: [
+                    'global-deps',
+                    // required by things other than the expression editor, ensure
+                    // that it's not bundled here, otherwise separate bundles is
+                    // useless
+                    'xpath'
+                ]
+            },
+            // Local dependencies that don't change often, except for new ones being
+            // added.
+            {
+                create: true,
+                name: 'local-deps',
+                include: [
+                    'classy',
+                    'jquery.jstree',
+                    'jquery.fancybox',
+                    'jquery.bootstrap-popout',
+                    'jquery.bootstrap-better-typeahead',
+                    'save-button',
+                ],
+                exclude: ['global-deps', 'deferred-components']
+            },
+            // Everything else.
+            {
+                create: true,
+                name: 'main-built',
+                include: ['main'],
+                exclude: ['global-deps', 'deferred-components', 'local-deps']
+            }
+        ]
     });
+
+    requirejs.config = oldConfig;
     
     // If jQuery, underscore, or Bootstrap were loaded before requirejs, make
     // requirejs use the existing instance. 
