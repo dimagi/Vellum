@@ -160,9 +160,9 @@ require([
             bindBeforeUnload = this.opts().core.bindBeforeUnload;
         this.data.core.saveButton = SaveButton.init({
             save: function() {
-                if (!_this.currentMugHasUnsavedChanges()) {
+                _this.ensureCurrentMugIsSaved(function () {
                     _this.validateAndSaveXForm();
-                }
+                });
             },
             unsavedMessage: 'Are you sure you want to exit? All unsaved changes will be lost!'
         });
@@ -315,12 +315,10 @@ require([
             var $a = $("<a tabindex='-1' href='#'>" + menuItem.name + "</a>").click(
                 function (e) {
                     e.preventDefault();
-                    if (_this.currentMugHasUnsavedChanges()) {
-                        return;
-                    }
-
-                    menuItem.action(function () {
-                        _this.refreshVisibleData();
+                    _this.ensureCurrentMugIsSaved(function () {
+                        menuItem.action(function () {
+                            _this.refreshVisibleData();
+                        });
                     });
                 }
             );
@@ -568,16 +566,25 @@ require([
     };
     
     fn.generateNewModal = function (title, buttons, closeButtonTitle) {
+        if (typeof closeButtonTitle === "undefined") {
+            closeButtonTitle = "Close";
+        }
         buttons.reverse();
+        buttons = _.map(buttons, function (button) {
+            button.cssClasses = button.cssClasses || "";
+            return button;
+        });
 
         var $modalContainer = this.$f.find('.fd-modal-generic-container'),
             $modal = $(modal_content({
                 title: title,
-                closeButtonTitle: closeButtonTitle || "Close"
+                closeButtonTitle: closeButtonTitle
             }));
 
         _.each(buttons, function (button) {
-            button.action = button.action || function () {};
+            button.action = button.action || function () {
+                $modal.modal('hide');
+            };
             $modal.find('.modal-footer').prepend(
                 $(modal_button(button)).click(button.action));
         });
@@ -792,12 +799,12 @@ require([
                 return false;
             };
 
-            if (data.func === 'select_node' && _this.currentMugHasUnsavedChanges()) {
+            if (data.func === 'select_node' && !_this.ensureCurrentMugIsSaved()) {
                 return stop();
             }
 
             if (data.func === 'move_node' && data.args[0].jquery) {
-                if (_this.currentMugHasUnsavedChanges()) {
+                if (!_this.ensureCurrentMugIsSaved()) {
                     return stop();
                 }
                 var form = _this.data.core.form,
@@ -817,11 +824,10 @@ require([
                     var nodeID = mug.dataElement.nodeID,
                         childMug = form.getMugChildByNodeID(parentMug, nodeID);
                     if (childMug && childMug !== mug) {
+                        // setup state for alert
                         _this.setUnsavedDuplicateNodeId(nodeID, true);
                         // trigger alert
-                        _this.currentMugHasUnsavedChanges(function () {
-                            _this.setUnsavedDuplicateNodeId(false);
-                        });
+                        _this.ensureCurrentMugIsSaved();
                         return stop();
                     }
                 }
@@ -941,34 +947,73 @@ require([
         this.data.core.duplicateIsForMove = forMove;
     };
 
-    fn.currentMugHasUnsavedChanges = function (callback) {
-        var duplicate = this.data.core.unsavedDuplicateNodeId,
-            duplicateIsForMove = this.data.core.duplicateIsForMove,
-            ret = false;
+    // Attempt to guard against doing actions when there are unsaved or invalid
+    // pending changes. In the case of an invalid duplicate ID, it tries to call
+    // 'callback' after the user automatically fixes the invalid state, if they
+    // choose, but in any case returns false immediately if the current mug is
+    // not saved, for use when this is called in response to a JSTree event that
+    // needs to immediately be decided whether to stop propagation of.
+    fn.ensureCurrentMugIsSaved = function (callback) {
+        callback = callback || function () {};
+
+        var _this = this,
+            mug = this.getCurrentlySelectedMug(),
+            duplicate = this.data.core.unsavedDuplicateNodeId,
+            duplicateIsForMove = this.data.core.duplicateIsForMove;
 
         if (this.data.core.hasXPathEditorChanged) {
             this.alert(
                 "Unsaved Changes in Editor",
                 "You have UNSAVED changes in the Expression Editor. Please save "+
                 "changes before continuing.");
-            ret = true;
+            return false;
         } else if (duplicate) {
-            var verb = duplicateIsForMove ? 'would be' : 'is';
+            var verb = duplicateIsForMove ? 'would be' : 'is',
+                newQuestionId = this.data.core.form.generate_question_id(duplicate);
+
             this.alert(
                 "Duplicate Question ID",
                 "'" + duplicate + "' " + verb + " the same Question ID as another question " +
                 "belonging to the same parent question. Please change '" + duplicate +
-                "' to a unique Question ID before continuing.");
-            ret = true;
-        }
-
-        if (callback) {
+                "' to a unique Question ID before continuing.", 
+                [
+                    {
+                        title: "Fix Manually",
+                        action: function () {
+                            // Since we just changed state to trigger this
+                            // message when calling ensureCurrentMugIsSaved()
+                            // when attempting a move, reset the state.  It will
+                            // be changed again if the same move is attempted.
+                            if (duplicateIsForMove) {
+                                _this.setUnsavedDuplicateNodeId(false);
+                            }
+                            _this.data.core.$modal.modal('hide');
+                        }
+                    },
+                    {
+                        title: "Automatically rename to '" + newQuestionId + "'",
+                        cssClasses: 'btn-primary',
+                        action: function () {
+                            // Need to use this method because it handles
+                            // automatically changing dataElement and
+                            // bindElement's nodeID properties together.  Should
+                            // just have one.
+                            mug.setPropertyValue(
+                                'dataElement', 'nodeID', newQuestionId);
+                            _this.setUnsavedDuplicateNodeId(false);
+                            _this.data.core.$modal.modal('hide');
+                            _this.refreshVisibleData();
+                            callback();
+                        } 
+                    }
+                
+                ]);
+            return false;
+        } else {
             callback();
+            return true;
         }
-
-        return ret;
     };
-
 
     fn._loadXFormOrError = function (formString) {
         var _this = this;
@@ -1108,8 +1153,17 @@ require([
             var mug = e.mug;
             e = e.e;
 
+            // The nodeID property for the current question (hopefully! if the
+            // model gets more complicated then this might not always be true)
+            // successfully changed, so it wasn't caught as a duplicate, so
+            // remove any existing duplicate warning state.
+            if (e.property === 'nodeID') {
+                _this.setUnsavedDuplicateNodeId(false);
+            }
+
             // todo: why is this here? 126038032.  Switch to use property
-            // visibility attribute.
+            // visibility attribute, add support in UI for whatever behavior is
+            // necessary if it doesn't already exist.
             if (mug.bindElement) {
                 if (e.property === 'constraintAttr' && 
                     (mug.__className !== "DataBindOnly")) 
@@ -1196,12 +1250,12 @@ require([
     };
         
     fn._addQuestion = function (qType) {
-        if (this.currentMugHasUnsavedChanges()) {
-            return;
-        }
-        var foo = this.getInsertTargetAndPosition(
-            this.getCurrentlySelectedMug(), qType);
-        this.data.core.form.createQuestion(foo[0], foo[1], qType);
+        var _this = this;
+        this.ensureCurrentMugIsSaved(function () {
+            var foo = _this.getInsertTargetAndPosition(
+                _this.getCurrentlySelectedMug(), qType);
+            _this.data.core.form.createQuestion(foo[0], foo[1], qType);
+        });
     };
 
     // Test ability to insert a new mug of type `qType` into refMug, then after
@@ -1363,13 +1417,22 @@ require([
         });
     };
 
-    fn.alert = function (title, message) {
+    fn.alert = function (title, message, buttons) {
+        buttons = buttons || [];
         if (this.data.core.isAlertVisible) return;
 
         var _this = this;
         this.data.core.isAlertVisible = true;
 
-        var $modal = this.generateNewModal(title, [], "OK");
+        var $modal = this.generateNewModal(
+            title, buttons, buttons.length ? false : "OK");
+
+        // store a reference to $modal on this so modal button actions can
+        // reference it in order to hide it at the right point in time.  This is
+        // a bit of a hack but any alternative is probably a lot more
+        // complicated.
+        this.data.core.$modal = $modal;
+
         $modal.removeClass('fade');
         $modal.find('.modal-body')
             .append($('<p />').text(message));
@@ -1455,16 +1518,14 @@ require([
             _this.data.core.form.removeMugFromForm(mug);
         });
         $baseToolbar.find('.fd-button-copy').click(function () {
-            if (_this.currentMugHasUnsavedChanges()) {
-                return;
-            }
+            _this.ensureCurrentMugIsSaved(function () {
+                var duplicate = _this.data.core.form.duplicateMug(
+                    _this.getCurrentlySelectedMug(),
+                    {itext: 'copy'});
 
-            var duplicate = _this.data.core.form.duplicateMug(
-                _this.getCurrentlySelectedMug(),
-                {itext: 'copy'});
-
-            _this.jstree("deselect_all")
-                .jstree("select_node", '#' + duplicate.ufid);
+                _this.jstree("deselect_all")
+                    .jstree("select_node", '#' + duplicate.ufid);
+            });
         });
         $baseToolbar.find('.btn-toolbar.pull-left')
             .prepend(this.getQuestionTypeChanger(mug));

@@ -6,6 +6,8 @@
     <div class="modal-body form form-horizontal">
     </div>
     <div class="modal-footer">
-        <button class="btn default-close-button" data-dismiss="modal" aria-hidden="true"><%=closeButtonTitle%></button>
+        <% if (closeButtonTitle) { %>
+        <button class="btn" data-dismiss="modal" aria-hidden="true"><%=closeButtonTitle%></button>
+        <% } %>
     </div>
 </div>

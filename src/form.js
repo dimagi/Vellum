@@ -404,9 +404,10 @@ define([
          * the position specified by the arguments,
          */
         moveMug: function (mug, refMug, position) {
-            var mugs = this.getDescendants(mug).concat([mug]),
+            var _this = this,
+                mugs = this.getDescendants(mug).concat([mug]),
                 preMovePaths = mugs.map(function(mug) {
-                    return this.dataTree.getAbsolutePath(mug);
+                    return _this.dataTree.getAbsolutePath(mug);
                 });
 
             if (mug.dataElement) {
