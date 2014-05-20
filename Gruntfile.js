@@ -9,7 +9,7 @@ module.exports = function (grunt) {
         exec: {
             dist: {
                 cmd: function () {
-                    return 'r.js -o build.js';
+                    return 'rm -rf dist && r.js -o build.js && rm -rf dist/.git';
                 }
             }
         }
