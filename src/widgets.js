@@ -54,6 +54,16 @@ define([
             // noop
         };
 
+        widget.getHelp = function () {
+            if (this.definition && this.definition.help) {
+                return {
+                    text: this.definition.help,
+                    url: this.definition.helpURL
+                };
+            }
+            return null;
+        };
+
         widget.updateValue = function () {
             // When a widget's value changes, do whatever work you need to in 
             // the model/UI to make sure we are in a consistent state.
@@ -84,7 +94,7 @@ define([
 
         widget.getUIElement = function () {
             return getUIElement(widget.getControl(), widget.getDisplayName(),
-                                !!widget.isDisabled());
+                                !!widget.isDisabled(), widget.getHelp());
         };
 
         return widget;
@@ -183,7 +193,11 @@ define([
 
         widget.getUIElement = function () {
             var elem = getUIElement(
-                widget.getControl(), widget.getDisplayName(), !!widget.isDisabled());
+                widget.getControl(),
+                widget.getDisplayName(),
+                !!widget.isDisabled(),
+                widget.getHelp()
+            );
             return getUIElementWithEditButton(elem, function () {
                 widget.options.displayXPathEditor({
                     value: mug.getPropertyValue(options.path),
@@ -303,11 +317,24 @@ define([
         return $uiElem;
     };
     
-    var getUIElement = function($input, labelText, isDisabled) {
+    var getUIElement = function($input, labelText, isDisabled, help) {
         var uiElem = $("<div />").addClass("widget control-group"),
             $controls = $('<div class="controls" />'),
             $label = $("<label />").text(labelText);
         $label.addClass('control-label');
+        if (help) {
+            var $help = $("<a />").attr({
+                "href": (help.url || "#"),
+                "class": "fd-help",
+                "target": "_blank",
+                "data-title": labelText,
+                "data-content": help.text
+            });
+            if (!help.url) {
+                $help.click(function (e) { e.preventDefault(); });
+            }
+            $label.append($help);
+        }
         uiElem.append($label);
 
         $input.prop('disabled', !!isDisabled);

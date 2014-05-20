@@ -1422,7 +1422,7 @@ require([
                             }
                             // HACK replace &nbsp; with space because it is not a valid XML entity
                             xmlWriter.writeXML(
-                                 $('<div>').append(val).clone().html().replace("&nbsp;", " "));
+                                $('<div>').append(val).clone().html().replace("&nbsp;", " "));
                             xmlWriter.writeEndElement();
                         }
                         xmlWriter.writeEndElement();
