@@ -2,16 +2,26 @@ define(['module'], function (module) {
     var pieces = module.uri.split('/'),
         baseUrl = pieces.slice(0, pieces.length - 1).join('/') + '/';
 
+    function duplicateModulesAsBundles(config) {
+        if (!config.modules) {
+            return config;
+        }
+        config.bundles = {};
+        for (var i = 0; i < config.modules.length; i++) {
+            var module = config.modules[i];
+            config.bundles[module.name] = module.include;
+        }
+        return config;
+    }
+
     // Prepends baseUrl to appropriate paths in the config, based on the
     // location of this file.
     function makeRelative(config) {
-
         if (config.paths) {
             for (var j in config.paths) {
                 config.paths[j] = baseUrl + config.paths[j];
             }
         }
-
         if (config.map) {
             for (var k in config.map) {
                 for (var l in config.map[k]) {
@@ -19,7 +29,6 @@ define(['module'], function (module) {
                 }
             }
         }
-
         if (config.shim) {
             for (var k in config.shim) {
                 var deps = config.shim[k].deps;
@@ -29,45 +38,36 @@ define(['module'], function (module) {
                 }
             }
         }
-
         if (config.packages) {
             for (var i = 0; i < config.packages.length; i++) {
                 config.packages[i].location = baseUrl + config.packages[i].location;
             }
-        
         }
-
-        return config;
-    }
-
-    function duplicateModulesAsBundles(config) {
-        if (!config.modules) {
-            return config;
+        if (config.bundles) {
+            var bundles = {};
+            for (var k in config.bundles) {
+                bundles[baseUrl + k] = config.bundles[k];
+            }
+            config.bundles = bundles;
         }
-
-        // Don't use bundles if running locally.
-        if (true || window && window.location.href.indexOf('localhost') !== -1) {
-            return config;
-        } else {
-            config.baseUrl = (config.baseUrl || baseUrl) + 'dist/';
-        }
-
-        config.bundles = {};
-
-        for (var i = 0; i < config.modules.length; i++) {
-            var module = config.modules[i];
-
-            config.bundles[module.name] = module.include;
-        }
-
         return config;
     }
 
     // Trick r.js' AST parser.  HACK.
     var oldConfig = requirejs.config;
     requirejs.config = function (config) {
-        config = duplicateModulesAsBundles(makeRelative(config));
-        //console.log(config);
+        var isDist = baseUrl.indexOf('/dist/') !== -1;
+
+        if (isDist) {
+            config = duplicateModulesAsBundles(config);
+        }
+
+        config = makeRelative(config);
+
+        if (isDist) {
+            var baseModuleId = module.id.split('/')[0];
+            config.paths[baseModuleId + '/main'] = baseUrl + 'main-built';
+        } 
         oldConfig.call(requirejs, config);
     };
 
