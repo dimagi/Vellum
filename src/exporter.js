@@ -49,7 +49,7 @@ define([
                 row[columnOrder[i]] = "";
             }
 
-            row["Question"] = mug.getDefaultItextRoot();
+            row["Question"] = form.getAbsolutePath(mug);
             row["Type"] = mug.typeName;
 
             if (mug.controlElement) {

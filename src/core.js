@@ -948,11 +948,12 @@ require([
     };
 
     // Attempt to guard against doing actions when there are unsaved or invalid
-    // pending changes. In the case of an invalid duplicate ID, it tries to call
-    // 'callback' after the user automatically fixes the invalid state, if they
-    // choose, but in any case returns false immediately if the current mug is
-    // not saved, for use when this is called in response to a JSTree event that
-    // needs to immediately be decided whether to stop propagation of.
+    // pending changes. In the case of an invalid duplicate sibling ID, it tries
+    // to call 'callback' after the user automatically fixes the invalid state,
+    // if they choose, but in any case returns false immediately if the current
+    // mug is not saved, for use when this is called in response to a JSTree
+    // event that needs to immediately be decided whether to stop propagation
+    // of.
     fn.ensureCurrentMugIsSaved = function (callback) {
         callback = callback || function () {};
 

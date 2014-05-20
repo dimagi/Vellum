@@ -745,23 +745,6 @@ define([
             targetMug = recFunc(rootNode,tokens.slice(1));
             return targetMug;
         },
-        getSingularMugByNodeId: function (nodeId, treeType) {
-            if(!nodeId) { //no path specified
-                return null;
-            }
-            
-            var nodeMatches = function (node) {
-                var mt = node.getValue();
-                return (mt && mt.mug && mt.mug.getBindElementID() === nodeId) ? mt : null;
-            };
-            
-            var matchList = this.datatree.treeMap(nodeMatches)
-                    .filter(function (m) { return m !== null; });
-            if (matchList.length !== 1) {
-                throw "Expected one result for node " + nodeId + " but found " + matchList.length;
-            }
-            return matchList[0];
-        },
         removeMugFromForm: function (mug) {
             this._removeMugFromForm(mug, false);
         },

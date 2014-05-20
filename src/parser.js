@@ -507,12 +507,15 @@ define([
         if (path) {
             return form.getMugByPath(path);
         } else {
+            // attempt to support sloppy hand-written forms
             nodeId = $(el).attr('bind');
 
             if (nodeId) {
-                try {
-                    return form.getSingularMugByNodeId(nodeId);
-                } catch (err) {
+                var mugs = form.getMugsByNodeId(nodeId);
+                if (mugs.length === 1) {
+                    return mugs[0];
+                } else {
+                    console.error('ambiguous bind? ' + nodeId);
                     // may be fine if this was a parent lookup, 
                     // or will fail hard later if this creates an illegal move
                     return null;

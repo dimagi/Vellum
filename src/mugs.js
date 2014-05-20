@@ -148,9 +148,6 @@ define([
             if (res !== "pass") {
                 return res;
             }
-            if (mug.form.questionIdCount(qId) > 1) {
-                return qId + " is a duplicate ID in the form. Question IDs must be unique.";
-            }
             return "pass";
         }, 
         // todo: fix itext plugin abstraction barrier break here
@@ -578,6 +575,9 @@ define([
                 return;
             }
 
+            // short-circuit the property changing, the UI will alert the user
+            // if they try to switch questions without first entering a valid
+            // value
             if (property === "nodeID") {
                 if (this.form.getMugChildByNodeID(this.parentMug, val)) {
                     this.form.vellum.setUnsavedDuplicateNodeId(val);
