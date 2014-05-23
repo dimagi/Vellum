@@ -1,12 +1,13 @@
 Vellum
 ======
 
-Vellum is a JavaRosa [XForm](http://en.wikipedia.org/wiki/XForms) designer built by
-[Dimagi][0] for [CommCare HQ][1].
+Vellum is a JavaRosa [XForm](http://en.wikipedia.org/wiki/XForms) designer used
+in [CommCare HQ](http://github.com/dimagi/commcare-hq).
 
- [0]: http://www.dimagi.com
- [1]: http://www.commcarehq.org
+![](http://i.imgur.com/Eoi3XE3.png)
 
+Image courtesy of the [ReMIND
+project](https://www.commcarehq.org/exchange/325775003aa58cfcefbc75cfdf132e4d/info/).
 
 Usage
 -----

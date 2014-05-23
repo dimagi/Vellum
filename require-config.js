@@ -69,6 +69,7 @@ define(['module'], function (module) {
             config.paths[baseModuleId + '/main'] = baseUrl + 'main-built';
         } 
         oldConfig.call(requirejs, config);
+        requirejs.config = oldConfig;
     };
 
     requirejs.config({
@@ -303,8 +304,6 @@ define(['module'], function (module) {
         ]
     });
 
-    requirejs.config = oldConfig;
-    
     // If jQuery, underscore, or Bootstrap were loaded before requirejs, make
     // requirejs use the existing instance. 
     // http://www.manuel-strehl.de/dev/load_jquery_before_requirejs.en.html
