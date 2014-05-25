@@ -230,7 +230,7 @@ require([
    
     $.vellum.plugin("uploader", {
         objectMap: false,
-        swfUrl: base + "../lib/MediaUploader/flashuploader.swf",
+        swfUrl: base + "../bower_components/MediaUploader/flashuploader.swf",
         sessionid: false,
         uploadUrls: {
             image: false,

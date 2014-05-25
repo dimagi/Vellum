@@ -134,11 +134,11 @@ define(['module'], function (module) {
 
             'save-button': 'lib/SaveButton',
 
-            'yui-base': 'lib/MediaUploader/yui-base',
-            'yui-uploader': 'lib/MediaUploader/yui-uploader',
+            'yui-base': 'bower_components/MediaUploader/yui-base',
+            'yui-uploader': 'bower_components/MediaUploader/yui-uploader',
 
-            'swfobject': 'lib/MediaUploader/swfobject',
-            'file-uploader': 'lib/MediaUploader/hqmedia.upload_controller',
+            'swfobject': 'bower_components/MediaUploader/swfobject',
+            'file-uploader': 'bower_components/MediaUploader/hqmedia.upload_controller',
         },
         shim: {
             'classy': {
