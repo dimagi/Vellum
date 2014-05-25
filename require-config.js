@@ -16,7 +16,7 @@ define(['module'], function (module) {
 
     // Prepends baseUrl to appropriate paths in the config, based on the
     // location of this file.
-    function makeRelative(config) {
+    function makeAbsolute(config) {
         if (config.paths) {
             for (var j in config.paths) {
                 config.paths[j] = baseUrl + config.paths[j];
@@ -62,7 +62,7 @@ define(['module'], function (module) {
             config = duplicateModulesAsBundles(config);
         }
 
-        config = makeRelative(config);
+        config = makeAbsolute(config);
 
         if (isDist) {
             var baseModuleId = module.id.split('/')[0];
@@ -227,10 +227,6 @@ define(['module'], function (module) {
          *   - the overhead of an HTTP request
          *   - the browser cache
          *   - the rate of changes to files
-         *
-         * Although in this use-case it's a one-to-one mapping, since RequireJS
-         * parses rather than loads require-config.js, there is no way to
-         * automatically handle it ourselves.
          *
          * This is a configuration for the optimizer that's meaningless for the
          * asynchronous loader, but we put it here because we generate the
