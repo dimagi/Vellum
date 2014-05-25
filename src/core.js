@@ -1574,13 +1574,14 @@ require([
 
     fn.validateAndSaveXForm = function () {
         var _this = this,
-            formText = false;
+            formText = false,
+            isValidXML = true;
         formText = this.data.core.form.createXML();
         try {
             // ensure that form is valid XML; throws an error if not
             $.parseXML(formText);
-            this.send(formText);
         } catch (err) {
+            isValidXML = false;
             formText = false;
             // something went wrong parsing, but maybe the user wants to save anyway
             // let's ask them with a scary message encouraging them not to.
@@ -1599,6 +1600,10 @@ require([
                 },
                 'Form Validation Error');
             this._showConfirmDialog();
+        }
+
+        if (isValidXML) {
+            this.send(formText);
         }
     };
         
