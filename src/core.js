@@ -1630,6 +1630,7 @@ require([
             // abort if diff too long and send full instead
             if (patch.length > formText.length && opts.saveUrl) {
                 saveType = 'full';
+                url = opts.saveUrl;
             }
         }
 

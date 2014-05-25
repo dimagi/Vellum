@@ -154,7 +154,7 @@ define(['module'], function (module) {
             'CryptoJS': {
                 exports: 'CryptoJS'
             },
-            'diff-match-path': {
+            'diff-match-patch': {
                 exports: 'diff_match_patch'
             },
 
