@@ -230,7 +230,6 @@ require([
    
     $.vellum.plugin("uploader", {
         objectMap: false,
-        swfUrl: base + "../bower_components/MediaUploader/flashuploader.swf",
         sessionid: false,
         uploadUrls: {
             image: false,
@@ -241,10 +240,10 @@ require([
         init: function () {
             var opts = this.opts().uploader,
                 uploadUrls = opts.uploadUrls,
-                uploadEnabled = opts.objectMap && opts.swfUrl && 
-                    opts.uploadUrls && opts.uploadUrls.image,
+                uploadEnabled = opts.objectMap && opts.uploadUrls && 
+                    opts.uploadUrls.image,
                 sessionid = opts.sessionid,
-                swfUrl = opts.swfUrl;
+                swfUrl = base + "../bower_components/MediaUploader/flashuploader.swf";
 
             this.data.uploader.uploadEnabled = uploadEnabled;
             this.data.uploader.objectMap = opts.objectMap;
