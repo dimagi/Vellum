@@ -595,6 +595,20 @@ define([
                 previous: prev,
                 mugUfid: this.ufid
             });
+
+            // legacy, enables auto itext ID behavior, don't add additional
+            // dependencies on this code.  Some sort of data binding would be
+            // better. 
+            this.fire({
+                type: 'property-changed',
+                property: property,
+                element: element,
+                val: val,
+                previous: prev,
+                mugUfid: this.ufid
+            });
+
+
         },
         getNodeID: function () {
             var nodeID;

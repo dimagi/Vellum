@@ -495,7 +495,7 @@ require([
         };
 
         widget.updateAutoId = function () {
-            widget.setValue(widget.autoGenerateId());
+            widget.setValue({id: widget.autoGenerateId()});
         };
 
         var _setValue = widget.setValue;
@@ -593,7 +593,7 @@ require([
                 }
                 return false;
             })();
-            
+
             if (isItextPresent && !currentVal) {
                 widget.setAutoMode(true);
                 widget.updateAutoId();
