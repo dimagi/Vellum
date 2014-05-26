@@ -21,16 +21,13 @@
 define([
     'require',
     'underscore',
-    'jquery'
+    'jquery',
+    './core'
 ], function (
     require,
     _,
     $
 ) {
-    var deferred = new $.Deferred();
-
-require(['promise!./core'], function () {
-
     function prependChild(element, child) {
         if (element.firstElementChild) {
             $(element).prepend($(child));
@@ -215,11 +212,4 @@ require(['promise!./core'], function () {
             });
         }
     });
-
-    deferred.resolve();
-
-});
-
-    return deferred;
-
 });

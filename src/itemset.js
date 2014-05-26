@@ -20,24 +20,18 @@ define([
     'require',
     'underscore',
     'jquery',
-    'jquery.bootstrap-better-typeahead',
+    'tpl!./templates/external_data_source', 
+    'tpl!./templates/custom_data_source',
+    './widgets',
+    './form',
+    './mugs',
+    './util',
+    './core',
+    'jquery.bootstrap-better-typeahead'
 ], function (
     require,
     _,
-    $
-) {
-
-    var deferred = new $.Deferred();
-
-require([
-    'tpl!./templates/external_data_source', 
-    'tpl!./templates/custom_data_source',
-    'promise!./widgets',
-    'promise!./form',
-    'promise!./mugs',
-    'promise!./util',
-    'promise!./core',
-], function (
+    $,
     external_data_source,
     custom_data_source,
     widgets,
@@ -599,10 +593,4 @@ require([
             }
         }
     }
-
-    deferred.resolve();
-});
-
-    return deferred;
-
 });

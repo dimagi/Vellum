@@ -80,7 +80,7 @@ require.config({
     packages: [
         {
             name: 'jquery.vellum',
-            location: isLocal ? '..' : '../dist',
+            location: isLocal ? '../src' : '../dist',
             main: 'main'
         },
         {
@@ -92,7 +92,7 @@ require.config({
 });
 
 require([
-    'jquery.vellum/require-config'
+    'jquery.vellum'
 ], function () {
 
     require([

@@ -44,7 +44,7 @@ $ npm install
     });
 
     // load paths config for dependencies of vellum, including jquery
-    require(["jquery.vellum/require-config"], function () {
+    require(["jquery.vellum"], function () {
         require(["jquery", "jquery.vellum"], function ($) {
             $("#some_div").vellum(OPTIONS);
         });

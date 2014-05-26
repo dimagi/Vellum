@@ -3,18 +3,7 @@ define([
     'module',
     'underscore',
     'jquery',
-], function (
-    require,
-    module,
-    _,
-    $
-) {
-    "use strict";
-
-    var deferred = new $.Deferred();
-
-require([
-    'promise!./util',
+    './util',
     'tpl!./templates/multimedia_modal',
     'tpl!./templates/multimedia_upload_trigger',
     'text!./templates/multimedia_queue.html',
@@ -24,8 +13,12 @@ require([
     'tpl!./templates/multimedia_existing_video',
     'tpl!./templates/multimedia_nomedia',
     'text!./templates/multimedia_block.html',
-    'promise!./core'
+    './core'
 ], function (
+    require,
+    module,
+    _,
+    $,
     util,
     multimedia_modal,
     multimedia_upload_trigger,
@@ -37,6 +30,7 @@ require([
     multimedia_nomedia,
     multimedia_block
 ) {
+    "use strict";
 
     var SUPPORTED_EXTENSIONS = {
         image: [
@@ -325,10 +319,4 @@ require([
             return uploadController;
         }
     });
-
-    deferred.resolve();
-});
-
-    return deferred;
-
 });

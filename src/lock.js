@@ -16,15 +16,12 @@
  */
 define([
     'require',
-    'jquery'
+    'jquery',
+    './core'
 ], function (
     require,
     $
 ) {
-
-    var deferred = new $.Deferred();
-
-require(['promise!./core'], function () {
     $.vellum.plugin("lock", {}, {
         loadXML: function (xml) {
             this.__callOld();
@@ -66,10 +63,4 @@ require(['promise!./core'], function () {
             return this.__callOld() && this.data.lock.locks[mugPath] !== 'value';
         }
     });
-
-    deferred.resolve();
-});
-
-    return deferred;
-
 });

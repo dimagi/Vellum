@@ -1,16 +1,14 @@
 define([
     'require',
     'jquery',
-    'XMLWriter'
+    'XMLWriter',
+    './util',
 ], function (
     require,
     $,
-    XMLWriter
+    XMLWriter,
+    util
 ) {
-    var deferred = new $.Deferred();
-
-require(['promise!./util'], function (util) {
-
     var createXForm = function (form) {
         var xmlWriter = new XMLWriter( 'UTF-8', '1.0' );
         // todo
@@ -374,11 +372,7 @@ require(['promise!./util'], function (util) {
         form.controlTree.treeMap(mapFunc, afterFunc);
     };
 
-    deferred.resolve({
+    return {
         createXForm: createXForm
-    });
-});
-
-    return deferred;
-
+    };
 });
