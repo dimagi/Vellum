@@ -81,27 +81,22 @@ define(['module'], function (module) {
         packages: [
             {
                 name: 'less',
-                location: 'bower_components/require-less',
+                location: '../bower_components/require-less',
                 main: 'less.js'
             },
             {
-                name: 'promise',
-                location: 'bower_components/requirejs-promise',
-                main: 'requirejs-promise.js'
-            },
-            {
                 name: 'css',
-                location: 'bower_components/require-css',
+                location: '../bower_components/require-css',
                 main: 'css.js'
             },
             {
                 name: 'text',
-                location: 'bower_components/requirejs-text',
+                location: '../bower_components/requirejs-text',
                 main: 'text.js'
             },
             {
                 name: 'tpl',
-                location: 'bower_components/requirejs-tpl',
+                location: '../bower_components/requirejs-tpl',
                 main: 'tpl.js'
             }
         ],
@@ -109,43 +104,43 @@ define(['module'], function (module) {
             logLevel: 1
         },
         paths: {
-            'classy': 'bower_components/classy/classy',
-            'codemirror': 'lib/codemirror/xml',
-            'codemirrorBase': 'lib/codemirror/codemirror',
-            'CryptoJS': 'lib/sha1',
-            'diff-match-patch': 'lib/diff_match_patch',
-            'jquery': 'bower_components/jquery/jquery',
-            'jquery-ui': 'lib/jquery-ui/jquery-ui-1.8.14.custom.min',
-            'jquery.jstree': 'lib/jstree/jquery.jstree',
-            'jquery.fancybox': 'lib/fancybox/jquery.fancybox-1.3.4',
-            'jquery.bootstrap': 'lib/bootstrap',
-            'jquery.bootstrap-popout': 'lib/bootstrap-popout',
-            'jquery.bootstrap-better-typeahead': 'bower_components/bootstrap-better-typeahead/js/bootstrap-better-typeahead',
-            'underscore': 'bower_components/underscore/underscore',
-            'XMLWriter': 'bower_components/XMLWriter/XMLWriter',
+            'classy': '../bower_components/classy/classy',
+            'codemirror': '../lib/codemirror/xml',
+            'codemirrorBase': '../lib/codemirror/codemirror',
+            'CryptoJS': '../lib/sha1',
+            'diff-match-patch': '../lib/diff_match_patch',
+            'jquery': '../bower_components/jquery/jquery',
+            'jquery-ui': '../lib/jquery-ui/jquery-ui-1.8.14.custom.min',
+            'jquery.jstree': '../lib/jstree/jquery.jstree',
+            'jquery.fancybox': '../lib/fancybox/jquery.fancybox-1.3.4',
+            'jquery.bootstrap': '../lib/bootstrap',
+            'jquery.bootstrap-popout': '../lib/bootstrap-popout',
+            'jquery.bootstrap-better-typeahead': '../bower_components/bootstrap-better-typeahead/js/bootstrap-better-typeahead',
+            'underscore': '../bower_components/underscore/underscore',
+            'XMLWriter': '../bower_components/XMLWriter/XMLWriter',
 
             // todo: should convert xpath submodule to AMD
-            'xpath': 'bower_components/xpath/xpath',
-            'xpathmodels': 'bower_components/xpath/models',
-            'scheme-number': 'bower_components/xpath/lib/schemeNumber',
-            'biginteger': 'bower_components/xpath/lib/biginteger',
+            'xpath': '../bower_components/xpath/xpath',
+            'xpathmodels': '../bower_components/xpath/models',
+            'scheme-number': '../bower_components/xpath/lib/schemeNumber',
+            'biginteger': '../bower_components/xpath/lib/biginteger',
 
-            'langCodes': 'bower_components/langcodes/langs.json',
+            'langCodes': '../bower_components/langcodes/langs.json',
 
-            'save-button': 'lib/SaveButton',
+            'save-button': '../lib/SaveButton',
 
-            'yui-base': 'bower_components/MediaUploader/yui-base',
-            'yui-uploader': 'bower_components/MediaUploader/yui-uploader',
+            'yui-base': '../bower_components/MediaUploader/yui-base',
+            'yui-uploader': '../bower_components/MediaUploader/yui-uploader',
 
-            'swfobject': 'bower_components/MediaUploader/swfobject',
-            'file-uploader': 'bower_components/MediaUploader/hqmedia.upload_controller',
+            'swfobject': '../bower_components/MediaUploader/swfobject',
+            'file-uploader': '../bower_components/MediaUploader/hqmedia.upload_controller',
         },
         shim: {
             'classy': {
                 exports: 'Class'
             },
             'codemirror': {
-                deps: ['codemirrorBase', 'css!lib/codemirror/codemirror'],
+                deps: ['codemirrorBase', 'css!../lib/codemirror/codemirror'],
                 exports: 'CodeMirror',
             },
             'codemirrorBase': {
@@ -159,14 +154,14 @@ define(['module'], function (module) {
             },
 
             'jquery-ui': {
-                deps: ['jquery', 'css!lib/jquery-ui/redmond/jquery-ui-1.8.14.custom'],
+                deps: ['jquery', 'css!../lib/jquery-ui/redmond/jquery-ui-1.8.14.custom'],
                 exports: 'jQuery'
             },
             'jquery.jstree': {
-                deps: ['jquery', 'css!lib/jstree/default/style']
+                deps: ['jquery', 'css!../lib/jstree/default/style']
             },
             'jquery.fancybox': {
-                deps: ['jquery', 'css!lib/fancybox/jquery.fancybox-1.3.4']
+                deps: ['jquery', 'css!../lib/fancybox/jquery.fancybox-1.3.4']
             },
             'jquery.bootstrap': {
                 deps: ['jquery']
@@ -258,14 +253,14 @@ define(['module'], function (module) {
                     'codemirror',
                     'diff-match-patch',
                     'CryptoJS',
-                    'promise!src/expressionEditor',
+                    'expressionEditor',
 
                     // uploader
                     'file-uploader',
 
                     // form
-                    'promise!src/writer',
-                    'promise!src/exporter'
+                    'writer',
+                    'exporter'
                 ],
                 exclude: [
                     'global-deps',

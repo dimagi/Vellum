@@ -17,27 +17,19 @@
 // It would be nice to convert the instance definition storage to use
 // first-class abstractions rather than simple hashes.
 define([
-    'require',
     'underscore',
     'jquery',
-    'jquery.bootstrap-better-typeahead',
-], function (
-    require,
-    _,
-    $
-) {
-
-    var deferred = new $.Deferred();
-
-require([
     'tpl!./templates/external_data_source', 
     'tpl!./templates/custom_data_source',
-    'promise!./widgets',
-    'promise!./form',
-    'promise!./mugs',
-    'promise!./util',
-    'promise!./core',
+    './widgets',
+    './form',
+    './mugs',
+    './util',
+    './core',
+    'jquery.bootstrap-better-typeahead'
 ], function (
+    _,
+    $,
     external_data_source,
     custom_data_source,
     widgets,
@@ -599,10 +591,4 @@ require([
             }
         }
     }
-
-    deferred.resolve();
-});
-
-    return deferred;
-
 });

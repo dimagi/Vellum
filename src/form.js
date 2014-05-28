@@ -18,7 +18,7 @@ define([
     // initially.
     var writer,
         exporter;
-    require(['promise!./writer', 'promise!./exporter'], function (w, e) {
+    require(['./writer', './exporter'], function (w, e) {
         writer = w;
         exporter = e;
     });

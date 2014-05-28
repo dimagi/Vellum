@@ -71,7 +71,8 @@ var TEST_INSTANCE_CONFIG = [
 ];
 
 var isLocal = (
-    //false &&    // uncomment this line to use built files locally
+    //false &&    // uncomment this line to always use built files
+    //true ||     // uncomment this line to always use non-built files
     window.location.href.indexOf('localhost') !== -1
 );
 
@@ -80,7 +81,7 @@ require.config({
     packages: [
         {
             name: 'jquery.vellum',
-            location: isLocal ? '..' : '../dist',
+            location: isLocal ? '../src' : '../dist',
             main: 'main'
         },
         {

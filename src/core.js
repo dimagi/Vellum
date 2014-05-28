@@ -6,28 +6,6 @@ define([
     'underscore',
     'xpathmodels',
     'jquery',
-    'jquery.jstree',
-    'jquery.fancybox',  // only thing we use fancybox for is its spinner, no actual display of anything
-    'jquery-ui'  // used for buttons in Edit Source XML, and dialogs
-], function (
-    require,
-    SaveButton,
-    _,
-    xpathmodels,
-    $
-) {
-
-    var deferred = new $.Deferred();
-
-// UNDENT
-
-// We have to use scoped require for relative dependencies within a package used
-// within an app, otherwise RequireJS attempts to resolve relative
-// dependencies relative to the baseUrl of the app, not the package.
-// See https://groups.google.com/forum/#!topic/requirejs/ziKi6qWc9vw
-// This in turn necessitates using a promise via 
-// https://github.com/jokeyrhyme/requirejs-promise
-require([
     'text!./templates/main.html',
     'tpl!./templates/question_type_group',
     'tpl!./templates/edit_source',
@@ -38,12 +16,20 @@ require([
     'tpl!./templates/alert_global',
     'tpl!./templates/modal_content',
     'tpl!./templates/modal_button',
-    'promise!./mugs',
-    'promise!./widgets',
-    'promise!./parser',
-    'promise!./base',
-    'less!./less-style/main'
+    './mugs',
+    './widgets',
+    './parser',
+    './base',
+    'less!./less-style/main',
+    'jquery.jstree',
+    'jquery.fancybox',  // only thing we use fancybox for is its spinner, no actual display of anything
+    'jquery-ui'  // used for buttons in Edit Source XML, and dialogs
 ], function (
+    require,
+    SaveButton,
+    _,
+    xpathmodels,
+    $,
     main_template,
     question_type_group,
     edit_source,
@@ -73,7 +59,7 @@ require([
         'codemirror',
         'diff-match-patch',
         'CryptoJS',
-        'promise!./expressionEditor',
+        './expressionEditor',
     ], function (a, b, c) {
         CodeMirror = a;
         diff_match_patch = b;
@@ -687,7 +673,7 @@ require([
         validRootChildren = this.data.core.mugTypes.Group.prototype
             .validChildTypes.concat(['DataBindOnly']);
 
-        var _this = this;
+        var $tree, _this = this;
         this.data.core.$tree = $tree = this.$f.find('.fd-question-tree');
         $tree.jstree({
             "json_data" : {
@@ -1412,7 +1398,7 @@ require([
         };
         $editor.show();
 
-        require(['promise!./expressionEditor'], function (expressionEditor) {
+        require(['./expressionEditor'], function (expressionEditor) {
             expressionEditor.showXPathEditor(
                 _this.$f.find('.fd-xpath-editor-content'), options);
         });
@@ -1900,10 +1886,4 @@ require([
             $(window).bind('beforeunload', handler);
         }
     }, fn);
-    
-    deferred.resolve();
-});
-
-// END UNDENT
-    return deferred;
 });

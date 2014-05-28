@@ -30,7 +30,6 @@
         "require-less": "*",
         "require-css": "*",
         "requirejs-tpl": "jfparadis/requirejs-tpl",
-        "requirejs-promise": "jokeyrhyme/requirejs-promise",
 
         "langcodes": "dimagi/langcodes",
         "XMLWriter": "dimagi/XMLWriter",

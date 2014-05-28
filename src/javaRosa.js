@@ -5,26 +5,19 @@
  * Also adds specs for the JavaRosa preload attributes.
  */
 define([
-    'require',
     'underscore',
-    'jquery'
-], function (
-    require,
-    _,
-    $
-) {
-    var deferred = new $.Deferred();
-
-require([
+    'jquery',
     'tpl!./templates/edit_source',
     'tpl!./templates/language_selector',
     'tpl!./templates/control_group',
     'text!./templates/button_remove.html',
-    'promise!./uploader',
-    'promise!./widgets',
-    'promise!./util',
-    'promise!./core',
+    './uploader',
+    './widgets',
+    './util',
+    './core'
 ], function (
+    _,
+    $,
     edit_source,
     language_selector,
     control_group,
@@ -1722,10 +1715,4 @@ require([
             return ret;
         }
     });
-
-    deferred.resolve();
-});
-
-    return deferred;
-
 });

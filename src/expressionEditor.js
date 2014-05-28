@@ -3,21 +3,15 @@ define([
     'jquery',
     'xpath',
     'xpathmodels',
-], function (
-    require,
-    $,
-    xpath,
-    xpathmodels
-) {
-
-    var deferred = new $.Deferred();
-
-require([
     'tpl!./templates/xpath_validation_errors',
     'tpl!./templates/xpath_expression',
     'tpl!./templates/xpath',
     'less!./less-style/xpath-editor'
 ], function (
+    require,
+    $,
+    xpath,
+    xpathmodels,
     xpath_validation_errors,
     xpath_expression,
     xpath_tpl
@@ -400,10 +394,7 @@ require([
         updateXPathEditor(options);
     }
 
-    deferred.resolve({
+    return {
         showXPathEditor: showXPathEditor
-    });
-});
-
-    return deferred;
+    };
 });

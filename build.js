@@ -1,6 +1,7 @@
 ({
+    appDir: 'src',
     baseUrl: '.',
-    mainConfigFile: 'require-config.js',
+    mainConfigFile: 'src/require-config.js',
     dir: 'dist',
     skipDirOptimize: true,
     optimize: 'none',
