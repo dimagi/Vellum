@@ -1,3 +1,4 @@
+// NOTE! Duplicated in require-config.js for bundles config.
 define([
     'jquery',
     './core',

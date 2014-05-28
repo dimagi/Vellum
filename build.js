@@ -4,7 +4,7 @@
     mainConfigFile: 'src/require-config.js',
     findNestedDependencies: true,
     // doesn't handle plugin resources
-    removeCombined: true,
+    removeCombined: false,
     dir: 'dist',
     skipDirOptimize: true,
     optimize: 'none',

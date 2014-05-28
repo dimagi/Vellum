@@ -81,7 +81,7 @@ require.config({
     packages: [
         {
             name: 'jquery.vellum',
-            location: '../src',
+            location: isLocal ? '../src' : '../dist',
             main: 'main'
         },
         {
@@ -89,7 +89,12 @@ require.config({
             location: 'tests',
             main: 'matrix'
         }
-    ]
+    ],
+    config: {
+        'jquery.vellum/require-config': {
+            env: isLocal ? 'development' : 'production'
+        }
+    }
 });
 
 require([

@@ -1,15 +1,40 @@
 define(['module'], function (module) {
     var pieces = module.uri.split('/'),
-        baseUrl = pieces.slice(0, pieces.length - 1).join('/') + '/';
+        baseUrl = pieces.slice(0, pieces.length - 1).join('/') + '/',
+        moduleIdPieces = module.id.split('/'),
+        moduleId = moduleIdPieces[0];
 
-    function duplicateModulesAsBundles(config) {
+    // does RequireJS provide an API that would allow us to get this
+    // programmatically?
+    var MAIN_COMPONENTS = [
+        './core',
+        './ignoreButRetain',
+        './itemset',
+        './javaRosa',
+        './lock',
+        './uploader',
+        './window'
+    ];
+
+    // not working correctly for local modules
+    function duplicateModulesAsBundles(config, mainComponents) {
         if (!config.modules) {
             return config;
         }
         config.bundles = {};
         for (var i = 0; i < config.modules.length; i++) {
-            var module = config.modules[i];
-            config.bundles[module.name] = module.include;
+            var module = config.modules[i],
+                include = module.include.slice(0);
+
+            if (include.length === 1 && include[0] === 'main') {
+                include = mainComponents;
+            }
+
+            for (var j = 0; j < include.length; j++) {
+                include[j] = include[j].replace(/^\.\//, baseUrl);
+            }
+
+            config.bundles[module.name] = include;
         }
         return config;
     }
@@ -56,18 +81,13 @@ define(['module'], function (module) {
     // Trick r.js' AST parser.  HACK.
     var oldConfig = requirejs.config;
     requirejs.config = function (config) {
-        var isDist = baseUrl.indexOf('/dist/') !== -1;
-
-        if (isDist) {
-            config = duplicateModulesAsBundles(config);
+        if (module.config().env === 'production') {
+            config = duplicateModulesAsBundles(config, MAIN_COMPONENTS);
         }
 
         config = makeAbsolute(config);
 
-        if (isDist) {
-            var baseModuleId = module.id.split('/')[0];
-            config.paths[baseModuleId + '/main'] = baseUrl + 'main-built';
-        } 
+        //console.log(config);
         oldConfig.call(requirejs, config);
         requirejs.config = oldConfig;
     };
@@ -229,7 +249,8 @@ define(['module'], function (module) {
          * it's not possible to represent all of this information using bundles.
          */
         modules: [
-            // Build dependencies that should be excluded from all built modules
+            // Build-only dependencies that should be excluded from all built
+            // modules
             {
                 create: true,
                 name: 'exclude',
@@ -238,9 +259,9 @@ define(['module'], function (module) {
                     'less/normalize'
                 ]
             },
-            // Global dependencies that may be already loaded on the page.  If any
-            // aren't, then a single file containing them all will be requested
-            // once.
+            // Global dependencies that may be already loaded on the page.  If
+            // any aren't, then a single file containing them all will be
+            // requested once.
             {
                 create: true,
                 name: 'global-deps',
@@ -265,14 +286,14 @@ define(['module'], function (module) {
                     'codemirror',
                     'diff-match-patch',
                     'CryptoJS',
-                    'expressionEditor',
+                    './expressionEditor',
 
                     // uploader
                     'file-uploader',
 
                     // form
-                    'writer',
-                    'exporter'
+                    './writer',
+                    './exporter'
                 ],
                 exclude: [
                     'exclude',
@@ -302,16 +323,19 @@ define(['module'], function (module) {
                     'deferred-components'
                 ]
             },
-            // Everything else.
+            // Everything else except main.
             {
                 create: true,
-                name: 'main-built',
+                name: 'main-components',
                 include: ['main'],
                 exclude: [
                     'exclude',
                     'global-deps', 
                     'deferred-components', 
                     'local-deps'
+                ],
+                excludeShallow: [
+                    'main'
                 ]
             }
         ]
