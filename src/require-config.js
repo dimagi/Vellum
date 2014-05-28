@@ -229,6 +229,15 @@ define(['module'], function (module) {
          * it's not possible to represent all of this information using bundles.
          */
         modules: [
+            // Build dependencies that should be excluded from all built modules
+            {
+                create: true,
+                name: 'exclude',
+                include: [
+                    'css/normalize',
+                    'less/normalize'
+                ]
+            },
             // Global dependencies that may be already loaded on the page.  If any
             // aren't, then a single file containing them all will be requested
             // once.
@@ -240,6 +249,9 @@ define(['module'], function (module) {
                     'jquery-ui',
                     'jquery.bootstrap',
                     'underscore'
+                ],
+                exclude: [
+                    'exclude'
                 ]
             },
             // Components (and their dependencies) that can be requested
@@ -263,6 +275,7 @@ define(['module'], function (module) {
                     'exporter'
                 ],
                 exclude: [
+                    'exclude',
                     'global-deps',
                     // required by things other than the expression editor, ensure
                     // that it's not bundled here, otherwise separate bundles is
@@ -283,14 +296,23 @@ define(['module'], function (module) {
                     'jquery.bootstrap-better-typeahead',
                     'save-button',
                 ],
-                exclude: ['global-deps', 'deferred-components']
+                exclude: [
+                    'exclude',
+                    'global-deps', 
+                    'deferred-components'
+                ]
             },
             // Everything else.
             {
                 create: true,
                 name: 'main-built',
                 include: ['main'],
-                exclude: ['global-deps', 'deferred-components', 'local-deps']
+                exclude: [
+                    'exclude',
+                    'global-deps', 
+                    'deferred-components', 
+                    'local-deps'
+                ]
             }
         ]
     });
