@@ -6,5 +6,10 @@
     skipDirOptimize: true,
     optimize: 'none',
     // Everything to do with CSS is handled by the require-css plugin
-    optimizeCss: 'none'
+    optimizeCss: 'none',
+    inlineText: true,
+    stubModules: ['text', 'tpl'],
+    pragmasOnSave: {
+        excludeTpl: true
+    }
 })
