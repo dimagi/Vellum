@@ -2,6 +2,7 @@
     appDir: 'src',
     baseUrl: '.',
     mainConfigFile: 'src/require-config.js',
+    findNestedDependencies: true,
     dir: 'dist',
     skipDirOptimize: true,
     optimize: 'none',
