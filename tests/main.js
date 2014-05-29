@@ -72,7 +72,7 @@ var TEST_INSTANCE_CONFIG = [
 
 var isLocal = (
     //false &&    // uncomment this line to always use built files
-    //true ||     // uncomment this line to always use non-built files
+    true ||     // uncomment this line to always use non-built files
     window.location.href.indexOf('localhost') !== -1
 );
 

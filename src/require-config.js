@@ -93,6 +93,7 @@ define(['module'], function (module) {
     };
 
     requirejs.config({
+        waitSeconds: 60,
         // For some reason when using the map config as suggested by some of the
         // plugins' documentation, and only when including vellum in another
         // app, it tries to get requirejs-promise instead of
