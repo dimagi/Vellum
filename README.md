@@ -46,16 +46,14 @@ $ npm install
     // load paths config for dependencies of vellum, including jquery
     require(["jquery.vellum/require-config"], function () {
         require(["jquery", "jquery.vellum"], function ($) {
-            $("#some_div").vellum(OPTIONS);
+            $("#some_div").vellum({
+                // OPTIONS
+                // todo
+            });
         });
     });
 </script>
 ```
-
-### Options
-
-Todo
-
 
 Contributing
 ------------
@@ -95,4 +93,5 @@ each Pull Request on Heroku.
 
 The latest master is also deployed to
 [vellum-master.herokuapp.com](http://vellum-master.herokuapp.com) using
-[drone.io](http://drone.io).
+[drone.io](http://drone.io).  See
+[here](https://drone.io/github.com/mwhite/Vellum) for a list of builds.
