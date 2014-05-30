@@ -1648,6 +1648,7 @@ define([
                     }
                 }
                 _this._hideConfirmDialog();
+                _this.opts().core.onFormSave(data);
                 _this.data.core.lastSavedXForm = formText;
             }
         });
@@ -1882,6 +1883,7 @@ define([
         allowedDataNodeReferences: [],
         externalInstances: [],
         noTextString: '[no text]',
+        onFormSave: function (data) {},
         bindBeforeUnload: function (handler) {
             $(window).bind('beforeunload', handler);
         }
