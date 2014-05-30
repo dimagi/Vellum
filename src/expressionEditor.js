@@ -24,9 +24,9 @@ define([
         toString: function(op, left, right) {
             // make sure we wrap the vals in parens in case they were necessary
             // todo, construct manually, and validate individual parts.
-            return "(" + left + ") "
-                + xpathmodels.expressionTypeEnumToXPathLiteral(op)
-                + " (" + right + ")";
+            return "(" + left + ") " + 
+                xpathmodels.expressionTypeEnumToXPathLiteral(op) + 
+                " (" + right + ")";
         },
         typeLeftRight: function(expOp) {
             return expOp;
@@ -37,7 +37,7 @@ define([
             return op + "(" + left + ", " + right + ")";
         },
         typeLeftRight: function(expOp) {
-            if (expOp.args.length != 2) return false;
+            if (expOp.args.length !== 2) return false;
             return {
                 type: expOp.id,
                 left: expOp.args[0],
@@ -235,7 +235,7 @@ define([
                     // if it's a joining op the first element has to be
                     // an expression and the second must be a valid op
                     // isExpressionOp(parsedExpression.right))
-                    if (joiningOp && parsedExpression.type != joiningOp) {
+                    if (joiningOp && parsedExpression.type !== joiningOp) {
                         // we tried to add a joining op that was different from
                         // what we were already working on. Fail.
                         return failAndClear();

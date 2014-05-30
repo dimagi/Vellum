@@ -699,7 +699,7 @@ define([
                             refIsData = target.attr('rel') === 'DataBindOnly',
                             nodeIsData = source.attr('rel') === 'DataBindOnly';
 
-                        if (refIsData + nodeIsData == 1) {
+                        if (Number(refIsData) + Number(nodeIsData) === 1) {
                             return false;
                         }
 
@@ -1203,8 +1203,8 @@ define([
             // check for control element because we want data nodes to be a flat
             // list at bottom.
             var mug = dataNodeList[i],
-                refMug = mug.parentMug && mug.controlElement
-                    ? mug.parentMug : null;
+                refMug = mug.parentMug && mug.controlElement ? 
+                    mug.parentMug : null;
             _this.createQuestion(mug, refMug, 'into');
         }
         this.setAllTreeValidationIcons();
@@ -1326,7 +1326,10 @@ define([
     };
     
     fn.displayMugProperties = function (mug) {
-        var $props = this.$f.find('.fd-question-properties');
+        var $props = this.$f.find('.fd-question-properties'),
+            _getWidgetClassAndOptions = function (property) {
+                return getWidgetClassAndOptions(property, mug);
+            };
         this.$f.find('.fd-default-panel').addClass('hide');
 
         /* update display */
@@ -1344,9 +1347,7 @@ define([
 
             section.mug = mug;
             section.properties = _(section.properties)
-                .map(function (property) {
-                    return getWidgetClassAndOptions(property, mug);
-                })
+                .map(_getWidgetClassAndOptions)
                 .filter(_.identity);
            
             if (section.properties.length) {
@@ -1406,7 +1407,9 @@ define([
 
     fn.alert = function (title, message, buttons) {
         buttons = buttons || [];
-        if (this.data.core.isAlertVisible) return;
+        if (this.data.core.isAlertVisible) {
+            return;
+        }
 
         var _this = this;
         this.data.core.isAlertVisible = true;
@@ -1596,7 +1599,7 @@ define([
     fn.send = function (formText, saveType) {
         var _this = this,
             opts = this.opts().core,
-            data;
+            patch, data;
         saveType = saveType || opts.saveType;
 
         var url = saveType === 'patch' ?  opts.patchUrl : opts.saveUrl;
@@ -1610,7 +1613,7 @@ define([
 
         if (saveType === 'patch') {
             var dmp = new diff_match_patch();
-            var patch = dmp.patch_toText(
+            patch = dmp.patch_toText(
                 dmp.patch_make(this.data.core.lastSavedXForm, formText)
             );
             // abort if diff too long and send full instead

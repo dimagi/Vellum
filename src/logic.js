@@ -81,7 +81,7 @@ define([
     LogicManager.prototype = {
         clearReferences: function (mug, property) {
             this.all = this.all.filter(function (elem) { 
-                return elem.mug != mug.ufid || elem.property != property;
+                return elem.mug !== mug.ufid || elem.property !== property;
             });
         },
         addReferences: function (mug, property) {

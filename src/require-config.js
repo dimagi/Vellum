@@ -42,35 +42,36 @@ define(['module'], function (module) {
     // Prepends baseUrl to appropriate paths in the config, based on the
     // location of this file.
     function makeAbsolute(config) {
+        var j, k, i, l;
         if (config.paths) {
-            for (var j in config.paths) {
+            for (j in config.paths) {
                 config.paths[j] = baseUrl + config.paths[j];
             }
         }
         if (config.map) {
-            for (var k in config.map) {
-                for (var l in config.map[k]) {
+            for (k in config.map) {
+                for (l in config.map[k]) {
                     config.map[k][l] = baseUrl + config.map[k][l];
                 }
             }
         }
         if (config.shim) {
-            for (var k in config.shim) {
+            for (k in config.shim) {
                 var deps = config.shim[k].deps;
                 if (!deps) continue;
-                for (var i = 0; i < deps.length; i++) {
+                for (i = 0; i < deps.length; i++) {
                     deps[i] = deps[i].replace('!', '!' + baseUrl);
                 }
             }
         }
         if (config.packages) {
-            for (var i = 0; i < config.packages.length; i++) {
+            for (i = 0; i < config.packages.length; i++) {
                 config.packages[i].location = baseUrl + config.packages[i].location;
             }
         }
         if (config.bundles) {
             var bundles = {};
-            for (var k in config.bundles) {
+            for (k in config.bundles) {
                 bundles[baseUrl + k] = config.bundles[k];
             }
             config.bundles = bundles;

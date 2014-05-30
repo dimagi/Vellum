@@ -58,11 +58,9 @@ $ npm install
 Contributing
 ------------
 
-### Coding style
+Make Pull Requests to the develop branch.
 
 Follow the [Airbnb JavaScript Style Guide](https://github.com/airbnb/javascript).
-
-### Tests
 
 Run tests in a browser:
 ```

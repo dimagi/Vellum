@@ -1,0 +1,16 @@
+{
+    "browser": true,
+
+    "asi": false,
+    "boss": false,
+    "eqeqeq": true,
+    "evil": false,
+    "forin": false,
+    "immed": true,
+    "latedef": true,
+    "laxbreak": false,
+    "loopfunc": true,
+    "noarg": true,
+
+    "nonew": true
+}

@@ -37,7 +37,8 @@ define([
         var mugToExportRow = function (mug) {
             var row = {},
                 itext = mug.controlElement ? mug.controlElement.labelItextID : null,
-                defaultLanguage = form.vellum.data.javaRosa.Itext.getDefaultLanguage();
+                defaultLanguage = form.vellum.data.javaRosa.Itext.getDefaultLanguage(),
+                i;
 
             var defaultOrNothing = function (item, language, form) {
                 return (item && item.hasForm(form)) ? 
@@ -45,18 +46,18 @@ define([
             };
 
             // initialize all columns to empty string
-            for (var i = 0; i < columnOrder.length; i++) {
+            for (i = 0; i < columnOrder.length; i++) {
                 row[columnOrder[i]] = "";
             }
 
-            row["Question"] = form.getAbsolutePath(mug);
-            row["Type"] = mug.typeName;
+            row.Question = form.getAbsolutePath(mug);
+            row.Type = mug.typeName;
 
             if (mug.controlElement) {
                 for (var type in itextColumns) {
                     var colName = itextColumns[type];
 
-                    for (var i = 0; i < languages.length; i++) {
+                    for (i = 0; i < languages.length; i++) {
                         var key = colName + " (" + languages[i] + ")";
                         row[key] = defaultOrNothing(itext, languages[i], type);
                     }
@@ -66,7 +67,7 @@ define([
             if (mug.bindElement) {
                 row["Display Condition"] = mug.bindElement.relevantAttr;
                 row["Calculate Condition"] = mug.bindElement.calculateAttr;
-                row["Required"] = mug.bindElement.requiredAttr ? 'yes' : 'no';
+                row.Required = mug.bindElement.requiredAttr ? 'yes' : 'no';
 
                 row["Validation Condition"] = mug.bindElement.constraintAttr;
                 row["Validation Message"] = defaultOrNothing(

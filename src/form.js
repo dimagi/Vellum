@@ -259,7 +259,7 @@ define([
         },
         addInstanceIfNotExists: function (attrs) {
             var hasInstance = _.any(this.instanceMetadata, function (m) {
-                return m.attributes.src == attrs.src;
+                return m.attributes.src === attrs.src;
             });
             if (!hasInstance) {
                 this.instanceMetadata.push(InstanceMetadata({
@@ -291,11 +291,12 @@ define([
             });
         },
         clearErrors: function (type, options) {
+            var filterFn = function (err) {
+                return err.level !== type;
+            };
             options = options || {};
             for (var i = 0; i < this.errors.length; i++) {
-                this.errors = this.errors.filter(function (err) {
-                    return err.level !== type;
-                });
+                this.errors = this.errors.filter(filterFn);
             }
             this.fire({
                 type: 'error-change',

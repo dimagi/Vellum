@@ -343,7 +343,8 @@ define([
                 }
                 
                 label.ref = "jr:itext('" + cProps.labelItextID.id + "')";
-                isItextOptional = mug.controlElement.__spec.labelItextID.presence == 'optional'; //iID is optional so by extension Itext is optional.
+                // iID is optional so by extension Itext is optional.
+                isItextOptional = mug.controlElement.__spec.labelItextID.presence === 'optional';
                 if (cProps.labelItextID.isEmpty() && isItextOptional) {
                     label.ref = '';
                 }
