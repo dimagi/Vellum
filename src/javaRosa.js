@@ -11,7 +11,6 @@ define([
     'tpl!./templates/language_selector',
     'tpl!./templates/control_group',
     'text!./templates/button_remove.html',
-    './uploader',
     './widgets',
     './util',
     './core'
@@ -22,7 +21,6 @@ define([
     language_selector,
     control_group,
     button_remove,
-    uploader,
     widgets,
     util
 ) {

@@ -93,3 +93,7 @@ The latest master is also deployed to
 [vellum-master.herokuapp.com](http://vellum-master.herokuapp.com) using
 [drone.io](http://drone.io).  See
 [here](https://drone.io/github.com/mwhite/Vellum) for a list of builds.
+
+![](http://i.imgur.com/JxkpQfL.png)
+
+Dependency graph, minus Underscore, jQuery, and util

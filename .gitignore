@@ -2,5 +2,7 @@
 /node_modules
 /dist/*
 
+deps.png
+
 npm-debug.log
 *~
