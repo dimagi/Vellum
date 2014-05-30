@@ -1655,7 +1655,7 @@ define([
     };
 
     fn.showWaitingDialog = function (msg) {
-        var dial = this.$f.find('.fd-dialog-confirm'), contentStr;
+        var dial = $('.fd-dialog-confirm'), contentStr;
         if (!msg || typeof msg !== 'string') {
             msg = 'Saving form to server...';
         }
@@ -1680,6 +1680,7 @@ define([
         dial.append(contentStr);
         dial.find('.fd-form-saving-anim').append(
             '<span class="fd-form-saving-img"></span>');
+        console.log(dial);
 
         this._showConfirmDialog();
     };
