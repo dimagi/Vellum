@@ -543,7 +543,7 @@ define([
             // clear existing event handlers for the source question
             util.eventuality(duplicate);
 
-            if (mug.bindElement && mug.bindElement.nodeID) {
+            if (depth === 0 && mug.bindElement && mug.bindElement.nodeID) {
                 var newQuestionID = this.generate_question_id(
                     mug.bindElement.nodeID
                 ); 
