@@ -119,8 +119,8 @@ define([
 
     // DATA PARSING FUNCTIONS
     function parseDataTree (form, dataEl) {
-        function parseDataElement (el) {
-            var nodeID, nodeVal, mug, parentMug, extraXMLNS, keyAttr,mType,parentNodeName,rootNodeName,dataTree;
+        function parseDataElement (el, parentMug) {
+            var nodeID, nodeVal, mug, extraXMLNS, keyAttr,mType,parentNodeName,rootNodeName,dataTree;
             
             nodeID = el.nodeName;
             mug = form.mugTypes.make('DataBindOnly', form);
@@ -150,20 +150,17 @@ define([
             // add arbitrary attributes
             mug.dataElement._rawAttributes = getAttributes(el);
             
-            if ( parentNodeName === rootNodeName ) {
-                parentMug = null;
-            }else {
-                parentMug = form.getMugsByNodeID(parentNodeName)[0];
-            }
-
             dataTree.insertMug(mug,'into',parentMug);
+
+            return mug;
         }
         var root = $(dataEl), recFunc;
 
-        recFunc = function () {
-                parseDataElement(this);
-                $(this).children().each(recFunc);
-
+        recFunc = function (parentMug) {
+            var mug = parseDataElement(this, parentMug);
+            $(this).children().each(function () {
+                recFunc.call(this, mug);
+            });
         };
 
         if(root.children().length === 0) {
@@ -171,7 +168,9 @@ define([
                 'Data block has no children elements! Please make sure your form is a valid JavaRosa XForm!'
             );
         }
-        root.children().each(recFunc);
+        root.children().each(function () {
+            recFunc.call(this, null);
+        });
         //try to grab the JavaRosa XForm Attributes in the root data element...
         form.formUuid = root.attr("xmlns");
         form.formJRM = root.attr("xmlns:jrm");
@@ -553,15 +552,12 @@ define([
             nodeId = $(el).attr('bind');
 
             if (nodeId) {
-                var mugs = form.getMugsByNodeID(nodeId);
-                if (mugs.length === 1) {
-                    return mugs[0];
-                } else {
-                    console.error('ambiguous bind? ' + nodeId);
-                    // may be fine if this was a parent lookup, 
-                    // or will fail hard later if this creates an illegal move
-                    return null;
+                var pathToTry = processPath(nodeId),
+                    mug = form.getMugByPath(pathToTry);
+                if (!mug) {
+                    form.parseWarnings.push("Ambiguous bind: " + nodeId);
                 }
+                return mug;
             }
         }
         return null;
@@ -669,13 +665,12 @@ define([
             var el = $(this),
                 attrs = {},
                 mug = form.mugTypes.make('DataBindOnly', form),
-                path = el.popAttr('nodeset'),
+                path = el.popAttr('nodeset') || e.popAttr('ref'),
                 id = el.popAttr('id'),
-                nodeID, bindElement, oldMug;
-            if (!path) {
-               path = el.popAttr('ref');
-            }
-            nodeID = getNodeIDFromPath(path);
+                nodeID = getNodeIDFromPath(path),
+                rootNodeName = form.dataTree.getRootNode().getID(),
+                bindElement, oldMug;
+
             if(id) {
                 attrs.nodeID = id;
                 attrs.nodeset = path;
@@ -707,16 +702,18 @@ define([
             attrs.preload = lookForNamespaced(el, "preload");
             attrs.preloadParams = lookForNamespaced(el, "preloadParams");
            
-            path = processPath(path, form.dataTree.getRootNode().getID());
+            path = processPath(path, rootNodeName);
             form.vellum.parseBindElement(el, path);
 
             oldMug = form.getMugByPath(path);
+            
             if(!oldMug && attrs.nodeset) {
-                oldMug = form.getMugsByNodeID(getNodeIDFromPath(attrs.nodeset))[0];
+                oldMug = form.getMugByPath(processPath(attrs.nodeset, rootNodeName));
             }
             if(!oldMug){
-                that.parseWarnings.push("Bind Node [" + path + "] found but has no associated Data node. This bind node will be discarded!");
-//                    throw 'Parse error! Could not find Data Mug associated with this bind!'; //can't have a bind without an associated dataElement.
+                form.parseWarnings.push(
+                    "Bind Node [" + path + "] found but has no associated " +
+                    "Data node. This bind node will be discarded!");
                 return;
             }
             mug.ufid = oldMug.ufid;

@@ -327,46 +327,15 @@ define([
         isFormValid: function () {
             return this.dataTree.isTreeValid() && this.controlTree.isTreeValid();
         },
-        /**
-         * Searches through the dataTree for a mug
-         * this matches the given nodeID (e.g. mug.dataElement.nodeID)
-         *
-         * WARNING:
-         * Some Mugs (such as for example 'Items' or 'Triggers' or certain 'Group's may not have
-         * any nodeID at all (i.e. no bind element and no data element)
-         * in such cases... other methods need to be used as this method will not find a match.
-         * @param nodeID
-         */
-        getMugsByNodeID: function (nodeID) {
-            var mapFunc = function (node) {
-                if(node.isRootNode){
-                    return;
-                }
-                var mug = node.getValue(),
-                    thisDataNodeID, thisBindNodeID;
-                if (mug.dataElement) {
-                    thisDataNodeID = mug.dataElement.nodeID;
-                }
-                if (mug.bindElement){
-                    thisBindNodeID = mug.bindElement.nodeID;
-                }
-                if (!thisDataNodeID && !thisBindNodeID){
-                    return; //this mug just has no nodeID :/
-                }
-
-                if(thisDataNodeID === nodeID || thisBindNodeID === nodeID){
-                    return mug;
-                }
-            };
-            return this.dataTree.treeMap(mapFunc);
-        },
         getMugChildByNodeID: function (mug, nodeID) {
-            var mugs = this.getMugsByNodeID(nodeID),
-                siblingMugs = _.filter(mugs, function (m) {
-                    return m.parentMug === mug;
+            var parentNode = (mug ? this.dataTree.getNodeFromMug(mug)
+                                  : this.dataTree.rootNode),
+                childMugs = parentNode.getChildrenMugs(),
+                matchingIdMugs = _.filter(childMugs, function (m) {
+                    return m.dataElement.nodeID === nodeID;
                 });
-            if (siblingMugs.length) {
-                return siblingMugs[0];
+            if (matchingIdMugs.length) {
+                return matchingIdMugs[0];
             } else {
                 return null;
             }
