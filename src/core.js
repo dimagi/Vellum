@@ -956,14 +956,14 @@ define([
                 "changes before continuing.");
             return false;
         } else if (duplicate) {
-            var verb = duplicateIsForMove ? 'would be' : 'is',
+            var verb = duplicateIsForMove ? 'would have' : 'has',
                 newQuestionId = this.data.core.form.generate_question_id(duplicate);
 
             this.alert(
                 "Duplicate Question ID",
-                "'" + duplicate + "' " + verb + " the same Question ID as another question " +
-                "belonging to the same parent question. Please change '" + duplicate +
-                "' to a unique Question ID before continuing.", 
+                "'" + duplicate + "' " + verb + " the same Question ID as " +
+                "another question in the same group. Please change '" + 
+                duplicate + "' to a unique Question ID before continuing.",
                 [
                     {
                         title: "Fix Manually",
@@ -1697,7 +1697,7 @@ define([
                 properties: this.getMainProperties(),
                 help: {
                     title: "Basic",
-                    text: "<p>The <strong>Question ID</strong> is a unique identifier for a question. " +
+                    text: "<p>The <strong>Question ID</strong> is an internal identifier for a question. " +
                         "It does not appear on the phone. It is the name of the question in data exports.</p>" +
                         "<p>The <strong>Label</strong> is text that appears in the application. " +
                         "This text will not appear in data exports.</p> " +
