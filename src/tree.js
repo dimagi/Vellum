@@ -81,6 +81,8 @@ define([
         getNodeFromMug: function (mug) {
             return this.getNodeFromValue(mug);
         },
+        // todo: store nodes as a data-attribute in JSTree so this doesn't have
+        // to walk the whole tree
         getMugFromUFID: function (ufid) {
             var node = this.getNodeFromValue(function (value) {
                 return value && value.ufid === ufid;
@@ -234,29 +236,13 @@ define([
         getNodeFromMug: function (mug) {
             return this.rootNode.getNodeFromMug(mug);
         },
-        /**
-         * Removes a node (and all it's children) from the tree (regardless of where it is located in the
-         * tree) and returns it.
-         *
-         * If no such node is found in the tree (or node is null/undefined)
-         * null is returned.
-         */
         _removeNodeFromTree: function (node) {
-            if (!node) {
-                return null;
-            }
-            if (!this.getNodeFromMug(node.getValue())) {
-                return null;
-            } //node not in tree
             var parent = this.getParentNode(node);
             if (parent) {
                 parent.removeChild(node);
                 this.fire({
                     type: 'change'
                 });
-                return node;
-            } else {
-                return null;
             }
         },
         /**
@@ -275,11 +261,12 @@ define([
          */
         insertMug: function (mug, position, refMug) {
             var refNode = refMug ? this.getNodeFromMug(refMug) : this.rootNode,
-                refNodeSiblings, refNodeIndex, refNodeParent, node;
+                node = this.getNodeFromMug(mug),
+                refNodeSiblings, refNodeIndex, refNodeParent;
 
-            //remove it from tree if it already exists
-            node = this._removeNodeFromTree(this.getNodeFromMug(mug)); 
-            if (!node) {
+            if (node) {
+                this._removeNodeFromTree(node); 
+            } else {
                 node = new Node(null, mug);
             }
 
@@ -348,12 +335,7 @@ define([
          * If the Mug is successfully removed, returns that Mug.
          */
         removeMug: function (mug) {
-            var node = this.getNodeFromMug(mug);
-            if (!mug || !node) {
-                return;
-            }
-            this._removeNodeFromTree(node);
-            return node;
+            this._removeNodeFromTree(this.getNodeFromMug(mug));
         },
         /**
          * Given a UFID searches through the tree for the corresponding Mug and returns it.
