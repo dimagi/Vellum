@@ -1248,8 +1248,9 @@ var parseXLSItext = function (str, Itext) {
             }
         }
     }
+    // HACK! this is a super unperformant way to get any escaped newlines to rerender properly
+    formdesigner.controller.loadXForm(formdesigner.controller.form.createXForm());
     formdesigner.controller.fire({type: "global-itext-changed"});
-
     // todo: make this more generic as part of the plugin interface
     var currentMug = formdesigner.controller.getCurrentlySelectedMug();
     if (currentMug) {
@@ -1261,14 +1262,18 @@ var generateItextXLS = function (Itext) {
     formdesigner.pluginManager.call('preSerialize');
     
     function getItemFormValues(item, languages, form) {
-
+        var escapeNewlines = function (text) {
+            if (text !== null) {
+                text = text.replace(/\r?\n/g, "&#10;");
+            }
+            return text;
+        };
         var ret = [];
 
         for(var i = 0; i < languages.length; i++) {
             var language = languages[i];
             var value = item.hasForm(form) ? item.getForm(form).getValueOrDefault(language) : "";
-
-            ret.push(value);
+            ret.push(escapeNewlines(value));
         }
         return ret.join("\t");
     }
