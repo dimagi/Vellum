@@ -365,6 +365,9 @@ define([
             tree.treeMap(function (node) {
                 if(node.getValue() === oldMug){
                     node.setValue(newMug);
+                    // todo: encapsulate this better with same property
+                    // references in Form.insertMug() and Form.getNodeFromMug()
+                    newMug['_node_' + treeType] = node;
                 }
             });
             newMug.parentMug = oldMug.parentMug;

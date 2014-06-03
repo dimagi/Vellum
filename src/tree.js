@@ -51,26 +51,15 @@ define([
 
             this.children.splice(index, 0, node);
         },
-        /**
-         * Given a mug, finds the node that the mug belongs to.
-         * if it is not the current node, will recursively look through 
-         * children node (depth first search)
-         */
-        getNodeFromValue: function (valueOrFn) {
-            if (valueOrFn === null) {
-                return this.rootNode;
-            }
-            var valueIsFn = _.isFunction(valueOrFn),
-                retVal,
-                thisVal = this.getValue();
+        getSingleMatchingNode: function (fn) {
+            var thisVal = this.getValue(),
+                retVal;
 
-            if ((!valueIsFn && thisVal === valueOrFn) ||
-                (valueIsFn && valueOrFn(thisVal)))
-            {
+            if (fn(thisVal)) {
                 return this;
             } else {
                 for (var i = 0; i < this.children.length; i++) {
-                    retVal = this.children[i].getNodeFromValue(valueOrFn);
+                    retVal = this.children[i].getSingleMatchingNode(fn);
                     if (retVal) {
                         return retVal;
                     }
@@ -78,13 +67,10 @@ define([
             }
             return null; //we haven't found what we're looking for
         },
-        getNodeFromMug: function (mug) {
-            return this.getNodeFromValue(mug);
-        },
         // todo: store nodes as a data-attribute in JSTree so this doesn't have
         // to walk the whole tree
         getMugFromUFID: function (ufid) {
-            var node = this.getNodeFromValue(function (value) {
+            var node = this.getSingleMatchingNode(function (value) {
                 return value && value.ufid === ufid;
             });
             
@@ -234,7 +220,8 @@ define([
          * Will return null if nothing is found.
          */
         getNodeFromMug: function (mug) {
-            return this.rootNode.getNodeFromMug(mug);
+            // gets set in insertMug() and Form.replaceMug()
+            return mug['_node_' + this.treeType];
         },
         _removeNodeFromTree: function (node) {
             var parent = this.getParentNode(node);
@@ -268,6 +255,9 @@ define([
                 this._removeNodeFromTree(node); 
             } else {
                 node = new Node(null, mug);
+                // store a reference to node in order to make getNodeFromMug()
+                // lookup fast 
+                mug['_node_' + this.treeType] = node;
             }
 
             refNodeParent = this.getParentNode(refNode);
@@ -308,8 +298,6 @@ define([
             var node = this.getNodeFromMug(mug),
                 output, nodeParent;
             if (!node) {
-                // todo: throw exception instead
-                //                console.log('Cant find path of Mug that is not present in the Tree!');
                 return null;
             }
             nodeParent = this.getParentNode(node);
@@ -323,7 +311,6 @@ define([
                     break;
                 }
                 nodeParent = this.getParentNode(nodeParent);
-
             }
 
             return output;
