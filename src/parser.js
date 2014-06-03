@@ -18,6 +18,16 @@ define([
         }
         return val;
     };
+    
+    function getAttributes (element) {
+        var attributes = $(element)[0].attributes,
+            attrMap = {};
+
+        for (var i = 0; i < attributes.length; i++) {
+            attrMap[attributes[i].nodeName] = attributes[i].nodeValue;
+        }
+        return attrMap;
+    }
 
     function parseXForm(xmlString, formOpts, vellum) {
         var Form = form_.Form,
@@ -58,7 +68,7 @@ define([
         // set all instance metadatas
         form.instanceMetadata = instances.map(function (instance) {
             return InstanceMetadata(
-                util.getAttributes(instance),
+                getAttributes(instance),
                 $(instance).children()
             ); 
         });
@@ -138,7 +148,7 @@ define([
                 mug.dataElement.keyAttr = keyAttr;
             }
             // add arbitrary attributes
-            mug.dataElement._rawAttributes = util.getAttributes(el);
+            mug.dataElement._rawAttributes = getAttributes(el);
             
             if ( parentNodeName === rootNodeName ) {
                 parentMug = null;
@@ -433,6 +443,20 @@ define([
 
         return mug;
     }
+
+    function parseBoolAttributeValue (attrString) {
+        if (!attrString) {
+            return null;
+        }
+        var str = attrString.toLowerCase().replace(/\s/g, '');
+        if (str === 'true()') {
+            return true;
+        } else if (str === 'false()') {
+            return false;
+        } else {
+            return null;
+        }
+    }
                 
     function populateMug (form, mug, cEl) {
         if (mug.__className === "ReadOnly") {
@@ -449,7 +473,7 @@ define([
             labelEl = $($cEl.parent().children('label'));
             hintEl = $cEl.parent().children('hint');
             repeat_count = $cEl.popAttr('jr:count');
-            repeat_noaddremove = util.parseBoolAttributeValue(
+            repeat_noaddremove = parseBoolAttributeValue(
                 $cEl.popAttr('jr:noAddRemove'));
 
         } else {
@@ -489,7 +513,7 @@ define([
         form.intentManager.syncMugWithIntent(mug);
         
         // add any arbitrary attributes that were directly on the control
-        mug.controlElement._rawAttributes = util.getAttributes(cEl);
+        mug.controlElement._rawAttributes = getAttributes(cEl);
     }
                 
     //figures out if this control DOM element is a repeat
@@ -500,8 +524,26 @@ define([
         return $(groupEl).children('repeat').length === 1;
     }
 
+    /**
+     * Figures out what the xpath is of a controlElement
+     * by looking at the ref or nodeset attributes.
+     * @param el - a jquery selector or DOM node of an xforms controlElement.
+     * @return - a string of the ref/nodeset value
+     */
+    function getPathFromControlElement (el) {
+        if(!el){
+            return null;
+        }
+        el = $(el); //make sure it's jquerified
+        var path = el.attr('ref');
+        if(!path){
+            path = el.attr('nodeset');
+        }
+        return path || null;
+    }
+
     var mugFromControlEl = function (form, el) {
-        var path = util.getPathFromControlElement(el),
+        var path = getPathFromControlElement(el),
             nodeId;
 
         if (path) {
@@ -511,7 +553,7 @@ define([
             nodeId = $(el).attr('bind');
 
             if (nodeId) {
-                var mugs = form.getMugsByNodeId(nodeId);
+                var mugs = form.getMugsByNodeID(nodeId);
                 if (mugs.length === 1) {
                     return mugs[0];
                 } else {
@@ -556,7 +598,7 @@ define([
                 parentMug = mugFromControlEl(form, parentNode);
             }
            
-            path = util.getPathFromControlElement(el);
+            path = getPathFromControlElement(el);
             if (!path) {
                 var existingMug = mugFromControlEl(form, el);
                 if (existingMug) {
@@ -608,6 +650,18 @@ define([
         return newPath;
     }
 
+    /**
+     * Given a (nodeset or ref) path, will figure out what the implied NodeID is.
+     * @param path
+     */
+    function getNodeIDFromPath (path) {
+        if (!path) {
+            return null;
+        }
+        var arr = path.split('/');
+        return arr[arr.length-1];
+    }
+
     function parseBindList (form, bindList) {
         var Itext = form.vellum.data.javaRosa.Itext;
 
@@ -621,7 +675,7 @@ define([
             if (!path) {
                path = el.popAttr('ref');
             }
-            nodeID = util.getNodeIDFromPath(path);
+            nodeID = getNodeIDFromPath(path);
             if(id) {
                 attrs.nodeID = id;
                 attrs.nodeset = path;
@@ -648,9 +702,7 @@ define([
                 attrs.constraintMsgAttr = constraintMsg;    
             }
                             
-            attrs.requiredAttr = util.parseBoolAttributeValue(
-                el.popAttr('required'));
-
+            attrs.requiredAttr = parseBoolAttributeValue(el.popAttr('required'));
             
             attrs.preload = lookForNamespaced(el, "preload");
             attrs.preloadParams = lookForNamespaced(el, "preloadParams");
@@ -660,8 +712,7 @@ define([
 
             oldMug = form.getMugByPath(path);
             if(!oldMug && attrs.nodeset) {
-                oldMug = form.getMugsByNodeID(
-                    util.getNodeIDFromPath(attrs.nodeset))[0];
+                oldMug = form.getMugsByNodeID(getNodeIDFromPath(attrs.nodeset))[0];
             }
             if(!oldMug){
                 that.parseWarnings.push("Bind Node [" + path + "] found but has no associated Data node. This bind node will be discarded!");
@@ -671,7 +722,7 @@ define([
             mug.ufid = oldMug.ufid;
             mug.copyAttrs(oldMug);
             mug.bindElement.setAttrs(attrs, true);
-            mug.bindElement._rawAttributes = util.getAttributes(el);
+            mug.bindElement._rawAttributes = getAttributes(el);
 
             // clear relevant itext for bind
             // this is ugly, and should be moved somewhere else
