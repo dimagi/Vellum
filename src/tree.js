@@ -317,14 +317,7 @@ define([
                 mug: mug
             });
         },
-        /**
-         * returns the absolute path, in the form of a string separated by slashes ('/nodeID/otherNodeID/finalNodeID'),
-         * the nodeID's are those given by the Mugs (i.e. the node value objects) according to whether this tree is a
-         * 'data' (DataElement) tree or a 'bind' (BindElement) tree.
-         *
-         * @param nodeOrmug - can be a tree Node or a mug that is a member of this tree (via a Node)
-         */
-        getAbsolutePath: function (mug) {
+        getAbsolutePath: function (mug, excludeRoot) {
             var node = this.getNodeFromMug(mug),
                 output, nodeParent;
             if (!node) {
@@ -336,7 +329,9 @@ define([
             output = '/' + node.getID();
 
             while (nodeParent) {
-                output = '/' + nodeParent.getID() + output;
+                if (!nodeParent.isRootNode || !excludeRoot) {
+                    output = '/' + nodeParent.getID() + output;
+                }
                 if (nodeParent.isRootNode) {
                     break;
                 }

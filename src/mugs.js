@@ -479,25 +479,11 @@ define([
             return !this.getErrors().length;
         },
         getDefaultItextRoot: function () {
-            var nodeID, parent;
-            if (this.bindElement) { //try for the bindElement nodeID
-                nodeID = this.bindElement.nodeID;
-            } else if (this.dataElement) {
-                // if nothing, try the dataElement nodeID
-                nodeID = this.dataElement.nodeID;
-            } else if (this.__className === "Item") {
-                // if it's a choice, generate based on the parent and value
-                parent = this.parentMug;
-                if (parent) {
-                    nodeID = parent.getDefaultItextRoot() + "-" + this.controlElement.defaultValue;
-                }
-            } 
-            if (!nodeID) {
-                // all else failing, make a new one
-                // todo: return null, handle in callers
-                nodeID = this.form.generate_item_label();
+            if (this.__className === "Item") {
+                return this.parentMug.getDefaultItextRoot() + "-" + this.controlElement.defaultValue;
+            } else {
+                return this.form.getAbsolutePath(this, true).slice(1);
             }
-            return nodeID;
         },
         
         getDefaultLabelItextId: function () {

@@ -699,8 +699,8 @@ define([
                 mug.afterInsert(this, mug);
             }
         },
-        getAbsolutePath: function (mug) {
-            return this.dataTree.getAbsolutePath(mug);
+        getAbsolutePath: function (mug, excludeRoot) {
+            return this.dataTree.getAbsolutePath(mug, excludeRoot);
         },
         getMugByUFID: function (ufid) {
             return (this.dataTree.getMugFromUFID(ufid) ||
