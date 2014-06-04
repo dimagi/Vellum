@@ -622,7 +622,7 @@ define([
             if (e.property === 'nodeID' && e.element === 'dataElement') {
                 var newNameForTree = '[' + e.val +']';
                 if (e.val && (
-                    mug.__className !== "DataBindOnly" &&
+                    mug.__className === "DataBindOnly" ||
                         (!mug.controlElement || !mug.controlElement.labelItextID || 
                          (mug.controlElement.labelItextID && mug.controlElement.labelItextID.isEmpty()) ))
                 ) {
