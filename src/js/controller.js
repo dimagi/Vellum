@@ -691,14 +691,15 @@ formdesigner.controller = (function () {
             // determined already by the question type
             if (mug.controlElement && mug.controlElement.appearance) {
                 delete mug.controlElement.appearance;
+                delete mug.controlElement._rawAttributes.appearance;
             }
             // and do the same thing for the 'mediatype' property as well
             if (mug.controlElement && mug.controlElement.mediaType) {
                 delete mug.controlElement.mediaType;
+                delete mug.controlElement._rawAttributes.mediatype;
             }
 
             newMug.copyAttrs(mug);
-            
             // update trees
             that.form.replaceMug(mug, newMug, 'data');
             that.form.replaceMug(mug, newMug, 'control');
