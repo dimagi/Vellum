@@ -736,7 +736,6 @@ define([
                 var $modal, $newItemForm, $newItemInput;
                 $modal = mug.form.vellum.generateNewModal("New Content Type", [
                     {
-                        id: newItextBtnId,
                         title: "Add",
                         cssClasses: newItextBtnClass + " disabled ",
                         attributes: {
