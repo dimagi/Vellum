@@ -1301,7 +1301,8 @@ define([
         // parse Itext Block and populate itext model
         loadXML: function (xmlString) {
             var _this = this,
-                langs = this.opts().javaRosa.langs;
+                langs = this.opts().javaRosa.langs,
+                Itext;
 
             this.data.javaRosa.Itext = Itext = new ItextModel();
 
@@ -1372,6 +1373,10 @@ define([
             this._makeLanguageSelectorDropdown();
 
             this.__callOld();
+            
+            Itext.on('change', function () {
+                _this.data.core.saveButton.fire('change');
+            });
         },
         contributeToModelXML: function (xmlWriter) {
             // here are the rules that govern itext
@@ -1684,7 +1689,7 @@ define([
                 {
                     title: "Update Translations",
                     cssClasses: "btn-primary",
-                    action: function (done) {
+                    action: function () {
                         parseXLSItext($textarea.val(), Itext);
                         $modal.modal('hide');
                         done();
