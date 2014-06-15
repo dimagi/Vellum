@@ -58,7 +58,6 @@ define([
     addOp(FunctionHandler, "selected", "has selected value");
 
     function showXPathEditor($div, options) {
-        console.error($div, options);
         var that = {};
 
         var editorContent = $div;
