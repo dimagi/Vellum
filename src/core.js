@@ -1511,8 +1511,7 @@ define([
         $baseToolbar.find('.fd-button-copy').click(function () {
             _this.ensureCurrentMugIsSaved(function () {
                 var duplicate = _this.data.core.form.duplicateMug(
-                    _this.getCurrentlySelectedMug(),
-                    {itext: 'copy'});
+                    _this.getCurrentlySelectedMug());
 
                 _this.jstree("deselect_all")
                     .jstree("select_node", '#' + duplicate.ufid);

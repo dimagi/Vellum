@@ -473,11 +473,8 @@ define([
                 children = node ? node.getChildren() : [];  // handles data node
             return children.map(function (item) { return item.getValue();});
         },
-        duplicateMug: function (mug, options) {
-            options = options || {};
-            options.itext = options.itext || "link";
-
-            var foo = this._duplicateMug(mug, mug.parentMug, options),
+        duplicateMug: function (mug) {
+            var foo = this._duplicateMug(mug, mug.parentMug),
                 duplicate = foo[0],
                 pathReplacements = foo[1];
 
@@ -500,11 +497,9 @@ define([
          *
          * @param mug - the mugtype in the original tree to duplicate
          * @param parentMug - the mugtype in the duplicate tree to insert into
-         * @param options 
-         *          itext: 'link' (default) or 'copy'
          *        
          */
-        _duplicateMug: function (mug, parentMug, options, depth) {
+        _duplicateMug: function (mug, parentMug, depth) {
             depth = depth || 0;
             // clone mug and give everything new unique IDs
             var duplicate = this.mugTypes.make(mug.__className, this);
@@ -544,15 +539,13 @@ define([
 
             this._logicManager.updateAllReferences(duplicate);
 
-            if (options.itext === "copy") {
-                duplicate.unlinkItext();
-            }
+            duplicate.unlinkItext();
 
             var children = this.getChildren(mug),
                 pathReplacements = [];
             for (var i = 0; i < children.length; i++) {
                 pathReplacements = pathReplacements.concat(
-                    this._duplicateMug(children[i], duplicate, options, depth + 1)[1]);
+                    this._duplicateMug(children[i], duplicate, depth + 1)[1]);
             }
 
             pathReplacements.push({

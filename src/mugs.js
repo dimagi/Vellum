@@ -57,6 +57,7 @@ define([
             }
 
             // avoid potential duplicate references (e.g., itext items)
+            // todo: callers should probably handle this instead
             if (val && typeof val === "object") {
                 if ($.isPlainObject(val)) {
                     val = $.extend(true, {}, val);
@@ -659,15 +660,23 @@ define([
        
             return rootId + nodeId + "-" + itextType;
         },
-        setItextId: function (propertyPath, id) {
-            var oldItext = this.getPropertyValue(propertyPath),
+        setItextId: function (propertyPath, id, unlink) {
+            var itext = this.getPropertyValue(propertyPath),
                 pieces = propertyPath.split('/');
-            if (id !== oldItext.id) {
-                oldItext.id = id;
+
+            if (id !== itext.id) {
+                if (unlink) {
+                    itext = $.extend(true, {}, itext);
+                    this.form.vellum.data.javaRosa.Itext.addItem(itext);
+                }
+
+                itext.id = id;
+                // Is this necessary, since itext is a reference?
+                // It probably triggers handlers.
                 this.setPropertyValue(
                     pieces[0], 
                     pieces[1],
-                    oldItext,
+                    itext,
                     this
                 );
             }
@@ -683,7 +692,7 @@ define([
                 // items don't have a bindElement
                 if (val && val.id) {
                     var id = _this.getItextAutoID(path.split('/')[1]);
-                    _this.setItextId(path, id);
+                    _this.setItextId(path, id, true);
                 }
             });
         }
