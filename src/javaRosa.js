@@ -39,6 +39,7 @@ define([
         this.itextModel = options.itextModel;
     }
     ItextItem.prototype = {
+        // todo: not do this
         clone: function () {
             return this;
         },
