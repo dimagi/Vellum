@@ -94,6 +94,6 @@ The latest master is also deployed to
 [drone.io](http://drone.io).  See
 [here](https://drone.io/github.com/mwhite/Vellum) for a list of builds.
 
-![](http://i.imgur.com/JxkpQfL.png)
+![](deps.png)
 
 Dependency graph, minus Underscore, jQuery, and util
