@@ -359,7 +359,7 @@ define(['module'], function (module) {
             define('jquery.bootstrap', [], function () {});
         }
         if (jQuery.fn.popout) {
-            define('jquery.popout', [], function () {});
+            define('jquery.bootstrap-popout', [], function () {});
         }
 
         if (jQuery.fn.datepicker) {
