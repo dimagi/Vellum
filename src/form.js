@@ -1,10 +1,10 @@
 define([
     'require',
-    './tree',
-    './logic',
-    './intentManager',
-    './widgets',
-    './util'
+    'vellum/tree',
+    'vellum/logic',
+    'vellum/intentManager',
+    'vellum/widgets',
+    'vellum/util'
 ], function (
     require,
     Tree,
@@ -18,7 +18,7 @@ define([
     // initially.
     var writer,
         exporter;
-    require(['./writer', './exporter'], function (w, e) {
+    require(['vellum/writer', 'vellum/exporter'], function (w, e) {
         writer = w;
         exporter = e;
     });

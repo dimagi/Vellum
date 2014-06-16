@@ -1,8 +1,8 @@
 // todo: make this a proper plugin
 
 define([
-    './mugs',
-    './widgets',
+    'vellum/mugs',
+    'vellum/widgets',
     'underscore',
     'jquery'
 ], function (

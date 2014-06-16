@@ -1,15 +1,25 @@
 ({
-    appDir: 'src',
-    baseUrl: '.',
+    appDir: '.',
+    baseUrl: 'src',
     mainConfigFile: 'src/require-config.js',
     findNestedDependencies: true,
     // doesn't handle plugin resources
     removeCombined: true,
-    dir: 'dist',
+    dir: '_build',
     skipDirOptimize: true,
-    optimize: 'none',
+    optimize: 'uglify2',
     // Everything to do with CSS is handled by the require-css plugin
     optimizeCss: 'none',
     inlineText: true,
-    stubModules: ['text', 'tpl', 'css', 'json'],
+    stubModules: [
+        'text', 
+        'tpl', 
+        'css', 
+        'json', 
+        'less'
+    ],
+    pragmasOnSave: {
+        excludeRequireCss: true,
+        excludeTpl: true
+    }
 })

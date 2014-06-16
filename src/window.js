@@ -1,9 +1,7 @@
 define([
-    'require',
     'jquery',
-    './core'
+    'vellum/core'
 ], function (
-    require,
     $
 ) {
     $.vellum.plugin('windowManager', {

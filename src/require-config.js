@@ -2,18 +2,19 @@ define(['module'], function (module) {
     var pieces = module.uri.split('/'),
         baseUrl = pieces.slice(0, pieces.length - 1).join('/') + '/',
         moduleIdPieces = module.id.split('/'),
-        moduleId = moduleIdPieces[0];
+        moduleId = moduleIdPieces[0],
+        isBuilt = module.config().env !== 'development';
 
     // does RequireJS provide an API that would allow us to get this
     // programmatically?
     var MAIN_COMPONENTS = [
-        './core',
-        './ignoreButRetain',
-        './itemset',
-        './javaRosa',
-        './lock',
-        './uploader',
-        './window'
+        'vellum/core',
+        'vellum/ignoreButRetain',
+        'vellum/itemset',
+        'vellum/javaRosa',
+        'vellum/lock',
+        'vellum/uploader',
+        'vellum/window'
     ];
 
     // not working correctly for local modules
@@ -34,7 +35,13 @@ define(['module'], function (module) {
                 include[j] = include[j].replace(/^\.\//, baseUrl);
             }
 
-            config.bundles[module.name] = include;
+            // Need to append '.js' because if module.name ends up being an
+            // absolute URL beginning with /, RequireJS will assume that .js
+            // shouldn't be appended.  Should possibly change RequireJS to
+            // not do that for bundles, or revisit the need to make absolute
+            // URLs (may not be necessary any more with a bunch of changes
+            // afterwards).
+            config.bundles[module.name + '.js'] = include;
         }
         return config;
     }
@@ -82,7 +89,7 @@ define(['module'], function (module) {
     // Trick r.js' AST parser.  HACK.
     var oldConfig = requirejs.config;
     requirejs.config = function (config) {
-        if (module.config().env === 'production') {
+        if (isBuilt) {
             config = duplicateModulesAsBundles(config, MAIN_COMPONENTS);
         }
 
@@ -94,7 +101,6 @@ define(['module'], function (module) {
     };
 
     requirejs.config({
-        waitSeconds: 60,
         // For some reason when using the map config as suggested by some of the
         // plugins' documentation, and only when including vellum in another
         // app, it tries to get requirejs-promise instead of
@@ -131,6 +137,8 @@ define(['module'], function (module) {
             logLevel: 1
         },
         paths: {
+            'vellum': '.',
+
             'classy': '../bower_components/classy/classy',
             'codemirror': '../lib/codemirror/xml',
             'codemirrorBase': '../lib/codemirror/codemirror',
@@ -182,19 +190,23 @@ define(['module'], function (module) {
 
             'jquery-ui': {
                 deps: ['jquery', 'css!../lib/jquery-ui/redmond/jquery-ui-1.8.14.custom'],
-                exports: 'jQuery'
+                exports: '$.fn.autocomplete'
             },
             'jquery.jstree': {
-                deps: ['jquery', 'css!../lib/jstree/default/style']
+                deps: ['jquery', 'css!../lib/jstree/default/style'],
+                exports: '$.fn.jstree'
             },
             'jquery.fancybox': {
-                deps: ['jquery', 'css!../lib/fancybox/jquery.fancybox-1.3.4']
+                deps: ['jquery', 'css!../lib/fancybox/jquery.fancybox-1.3.4'],
+                exports: '$.fn.fancybox'
             },
             'jquery.bootstrap': {
-                deps: ['jquery']
+                deps: ['jquery'],
+                exports: '$.fn.popover'
             },
             'jquery.bootstrap-popout': {
-                deps: ['jquery.bootstrap']
+                deps: ['jquery.bootstrap'],
+                exports: '$.fn.popout'
             },
             'jquery.bootstrap-better-typeahead': {
                 deps: ['jquery.bootstrap']
@@ -269,6 +281,9 @@ define(['module'], function (module) {
             // Global dependencies that may be already loaded on the page.  If
             // any aren't, then a single file containing them all will be
             // requested once.
+            //
+            // If bootstrap is already loaded, and you load this bundle,
+            // you're going to have a bad time.
             {
                 create: true,
                 name: 'global-deps',
@@ -276,7 +291,9 @@ define(['module'], function (module) {
                     'jquery',
                     'jquery-ui',
                     'jquery.bootstrap',
-                    'underscore'
+                   
+                    // shim plugin dependencies don't get automatically included
+                    'css/css!../lib/jquery-ui/redmond/jquery-ui-1.8.14.custom'
                 ],
                 exclude: [
                     'exclude'
@@ -285,49 +302,58 @@ define(['module'], function (module) {
             // Components (and their dependencies) that can be requested
             // asynchronously after Vellum has already finished loading, because
             // they're not necessary for initial operation.
-            {
-                create: true,
-                name: 'deferred-components',
-                include: [
-                    // core
-                    'codemirror',
-                    'diff-match-patch',
-                    'CryptoJS',
-                    './expressionEditor',
 
-                    // uploader
-                    'file-uploader',
+            // At the moment, this bundle doesn't get used as expected.
+            //{
+                //create: true,
+                //name: 'deferred-components',
+                //include: [
+                    //// core
+                    //'codemirror',
+                    //'diff-match-patch',
+                    //'CryptoJS',
+                    //'vellum/expressionEditor',
 
-                    // form
-                    './writer',
-                    './exporter'
-                ],
-                exclude: [
-                    'exclude',
-                    'global-deps',
-                    // required by things other than the expression editor, ensure
-                    // that it's not bundled here, otherwise separate bundles is
-                    // useless
-                    'xpath'
-                ]
-            },
+                    //// uploader
+                    //'file-uploader',
+
+                    //// form
+                    //'vellum/writer',
+                    //'vellum/exporter'
+                //],
+                //exclude: [
+                    //'exclude',
+                    //'global-deps',
+                    //// required by things other than the expression editor, ensure
+                    //// that they're not bundled here, otherwise separate bundles
+                    //// is useless
+                    //'xpath',
+                    //'vellum/util'
+                //]
+            //},
             // Local dependencies that don't change often, except for new ones being
             // added.
             {
                 create: true,
                 name: 'local-deps',
                 include: [
+                    'underscore',
                     'classy',
                     'jquery.jstree',
                     'jquery.fancybox',
                     'jquery.bootstrap-popout',
                     'jquery.bootstrap-better-typeahead',
                     'save-button',
+
+                    // shim plugin dependencies don't automatically get included
+                    'css/css!../lib/codemirror/codemirror',
+                    'css/css!../lib/jstree/default/style',
+                    'css/css!../lib/fancybox/jquery.fancybox-1.3.4',
                 ],
                 exclude: [
                     'exclude',
                     'global-deps', 
-                    'deferred-components'
+                    //'deferred-components'
                 ]
             },
             // Everything else except main.
@@ -338,9 +364,11 @@ define(['module'], function (module) {
                 exclude: [
                     'exclude',
                     'global-deps', 
-                    'deferred-components', 
+                    //'deferred-components', 
                     'local-deps'
                 ],
+                // couldn't get it working with including main itself in the
+                // built file
                 excludeShallow: [
                     'main'
                 ]
@@ -348,8 +376,7 @@ define(['module'], function (module) {
         ]
     });
 
-    // If jQuery, underscore, or Bootstrap were loaded before requirejs, make
-    // requirejs use the existing instance. 
+    // If jQuery was loaded before RequireJS, use the existing instance.
     // http://www.manuel-strehl.de/dev/load_jquery_before_requirejs.en.html
     if (window.jQuery) {
         define('jquery', [], function() {
@@ -365,15 +392,5 @@ define(['module'], function (module) {
         if (jQuery.fn.datepicker) {
             define('jquery-ui', [], function () {});
         }
-    }
-
-    var gte15 = function (versionStr) {
-        return parseFloat(versionStr.split('.').slice(0, 2).join('.')) >= 1.5;
-    };
-
-    if (window._ && gte15(_.VERSION)) {
-        define('underscore', [], function () {
-            return _;
-        });
     }
 });

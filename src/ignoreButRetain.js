@@ -19,12 +19,10 @@
  * https://docs.google.com/document/d/12see6m3Lr6nVVgjfstS3oS6Vc1UT7l4bqYNRtDB-GXQ/
  */
 define([
-    'require',
     'underscore',
     'jquery',
-    './core'
+    'vellum/core'
 ], function (
-    require,
     _,
     $
 ) {

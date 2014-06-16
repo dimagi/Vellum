@@ -1,6 +1,6 @@
 define([
-    'tpl!tests/templates/matrix',
-    'tpl!tests/templates/harness',
+    'test_tpl!tests/templates/matrix',
+    'test_tpl!tests/templates/harness',
     'underscore',
     'jquery',
     'jquery.vellum'

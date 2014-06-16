@@ -19,13 +19,13 @@
 define([
     'underscore',
     'jquery',
-    'tpl!./templates/external_data_source', 
-    'tpl!./templates/custom_data_source',
-    './widgets',
-    './form',
-    './mugs',
-    './util',
-    './core',
+    'tpl!vellum/templates/external_data_source', 
+    'tpl!vellum/templates/custom_data_source',
+    'vellum/widgets',
+    'vellum/form',
+    'vellum/mugs',
+    'vellum/util',
+    'vellum/core',
     'jquery.bootstrap-better-typeahead'
 ], function (
     _,

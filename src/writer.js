@@ -1,10 +1,8 @@
 define([
-    'require',
     'jquery',
     'XMLWriter',
-    './util'
+    'vellum/util'
 ], function (
-    require,
     $,
     XMLWriter,
     util

@@ -1,14 +1,12 @@
 define([
-    'require',
     'jquery',
     'xpath',
     'xpathmodels',
-    'tpl!./templates/xpath_validation_errors',
-    'tpl!./templates/xpath_expression',
-    'tpl!./templates/xpath',
-    'less!./less-style/xpath-editor'
+    'tpl!vellum/templates/xpath_validation_errors',
+    'tpl!vellum/templates/xpath_expression',
+    'tpl!vellum/templates/xpath',
+    'less!vellum/less-style/xpath-editor'
 ], function (
-    require,
     $,
     xpath,
     xpathmodels,

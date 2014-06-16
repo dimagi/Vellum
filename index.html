@@ -2,21 +2,25 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
   <head>
     <title>Vellum Test</title>
+    
+    <link href="tests/lib/hqstyle-core.css" type="text/css" rel="stylesheet"></link>
 
+    <!-- comment out to have RequireJS handle loading of bundled versions -->
+    <!--<script src="bower_components/jquery/jquery.js"></script>-->
+    <!--<script src="lib/jquery-ui/jquery-ui-1.8.14.custom.min.js"></script>-->
+    <!--<link href="lib/jquery-ui/redmond/jquery-ui-1.8.14.custom.css" type="text/css" rel="stylesheet"></link>-->
+    <!--<script src="lib/bootstrap.js"></script>-->
+
+    
     <!-- Mocha and test-only dependencies -->
+    <!-- todo: call from tests/main.js -->
     <link href="node_modules/mocha/mocha.css" type="text/css" rel="stylesheet"></link>
     <script src="node_modules/mocha/mocha.js"></script>
     <script src="bower_components/chai/chai.js"></script>
     <script src="bower_components/sinonjs/sinon.js"></script>
-
     <script src="bower_components/equivalent-xml-js/src/equivalent-xml.js"></script>
     <script src="bower_components/jquery.ui/tests/jquery.simulate.js"></script>
     <script src="tests/utils.js"></script>
-
-
-    <!-- Runtime Dependencies -->
-    <link href="tests/lib/hqstyle-core.css" type="text/css" rel="stylesheet"></link>
-    <!--<script src="../src/js/saveButton.js"></script>-->
     
     <script data-main="tests/main" src="bower_components/requirejs/require.js"></script>
     <script src="bower_components/xrayquire/xrayquire.js"></script>

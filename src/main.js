@@ -1,12 +1,12 @@
 // NOTE! Duplicated in require-config.js for bundles config.
 define([
-    './core',
-    './ignoreButRetain',
-    './itemset',
-    './javaRosa',
-    './lock',
-    './uploader',
-    './window'
+    'vellum/core',
+    'vellum/ignoreButRetain',
+    'vellum/itemset',
+    'vellum/javaRosa',
+    'vellum/lock',
+    'vellum/uploader',
+    'vellum/window'
 ], function () {
     // adds $.vellum as a side-effect
 });

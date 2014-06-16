@@ -1,5 +1,5 @@
 define([
-    './util'
+    'vellum/util'
 ], function (
     util
 ) {

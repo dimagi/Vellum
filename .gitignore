@@ -1,6 +1,8 @@
 /bower_components
 /node_modules
 /dist/*
+/_build
+vellum.tar.gz
 
 npm-debug.log
 *~

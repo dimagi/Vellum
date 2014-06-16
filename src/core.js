@@ -6,21 +6,21 @@ define([
     'underscore',
     'xpathmodels',
     'jquery',
-    'text!./templates/main.html',
-    'tpl!./templates/question_type_group',
-    'tpl!./templates/edit_source',
-    'tpl!./templates/control_group_stdInput',
-    'tpl!./templates/question_fieldset',
-    'tpl!./templates/question_type_changer',
-    'tpl!./templates/question_toolbar',
-    'tpl!./templates/alert_global',
-    'tpl!./templates/modal_content',
-    'tpl!./templates/modal_button',
-    './mugs',
-    './widgets',
-    './parser',
-    './base',
-    'less!./less-style/main',
+    'text!vellum/templates/main.html',
+    'tpl!vellum/templates/question_type_group',
+    'tpl!vellum/templates/edit_source',
+    'tpl!vellum/templates/control_group_stdInput',
+    'tpl!vellum/templates/question_fieldset',
+    'tpl!vellum/templates/question_type_changer',
+    'tpl!vellum/templates/question_toolbar',
+    'tpl!vellum/templates/alert_global',
+    'tpl!vellum/templates/modal_content',
+    'tpl!vellum/templates/modal_button',
+    'vellum/mugs',
+    'vellum/widgets',
+    'vellum/parser',
+    'vellum/base',
+    'less!vellum/less-style/main',
     'jquery.jstree',
     'jquery.bootstrap',
     'jquery.fancybox',  // only thing we use fancybox for is its spinner, no actual display of anything
@@ -60,7 +60,7 @@ define([
         'codemirror',
         'diff-match-patch',
         'CryptoJS',
-        './expressionEditor',
+        'vellum/expressionEditor',
     ], function (a, b, c) {
         CodeMirror = a;
         diff_match_patch = b;
@@ -1400,7 +1400,7 @@ define([
         };
         $editor.show();
 
-        require(['./expressionEditor'], function (expressionEditor) {
+        require(['vellum/expressionEditor'], function (expressionEditor) {
             expressionEditor.showXPathEditor(
                 _this.$f.find('.fd-xpath-editor-content'), options);
         });

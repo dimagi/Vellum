@@ -1,12 +1,35 @@
-all:    clean rjs madge
+all:  tar
 
 clean:
-	rm -rf dist
+
+deps:
+	npm install
 
 madge:
-	madge --format amd src -R src/require-config.js -i deps.png -x "^(css.*|jquery|underscore|require-config|util)$$"
+	PATH=$$(npm bin):$$PATH madge --format amd src -R src/require-config.js -i deps.png -x "^(css.*|jquery|underscore|require-config|util)$$"
 
-rjs:
-	r.js -o build.js
-	rm -rf dist/.git
+rjs:  deps
+	rm -rf _build
+	PATH=$$(npm bin):$$PATH r.js -o build.js
+# r.js removeCombined option doesn't handle plugin resources
+	rm -r _build/src/exclude.js _build/src/templates _build/src/less-style
+	find _build/ -maxdepth 1 -mindepth 1 -not -name src -not -name lib -not -name README.md -not -name bower_components | xargs rm -rf
+# https://github.com/guybedford/require-css/issues/133 
+	cd _build/bower_components && ls . | grep -v MediaUploader | grep -v require-css | xargs rm -r
+# gets removed by removeCombined
+	cp bower_components/require-css/css.js _build/bower_components/require-css/
+
+
+tar:  rjs
+	rm -f vellum.tar.gz
+	cd _build && tar -czf ../vellum.tar.gz *
+
+# make sure build works
+test:  tar
+	PATH=$$(npm bin):$$PATH jshint src/*.js
+	#npm install phantomjs
+	#mocha-phantomjs tests/index.html
+
+
+
 	

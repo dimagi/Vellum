@@ -7,13 +7,13 @@
 define([
     'underscore',
     'jquery',
-    'tpl!./templates/edit_source',
-    'tpl!./templates/language_selector',
-    'tpl!./templates/control_group',
-    'text!./templates/button_remove.html',
-    './widgets',
-    './util',
-    './core'
+    'tpl!vellum/templates/edit_source',
+    'tpl!vellum/templates/language_selector',
+    'tpl!vellum/templates/control_group',
+    'text!vellum/templates/button_remove.html',
+    'vellum/widgets',
+    'vellum/util',
+    'vellum/core'
 ], function (
     _,
     $,
