@@ -1,5 +1,5 @@
 define([
-    'text!langCodes',
+    'json!langCodes',
     'jquery',
     'jquery.bootstrap-popout'
 ], function (
@@ -31,7 +31,7 @@ define([
     var that = {};
 
     that.langCodeToName = {};
-    _.each(JSON.parse(langCodes), function (lang) {
+    _.each(langCodes, function (lang) {
         that.langCodeToName[lang.code] = lang.name;
     });
 

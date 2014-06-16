@@ -120,6 +120,11 @@ define(['module'], function (module) {
                 name: 'tpl',
                 location: '../bower_components/requirejs-tpl',
                 main: 'tpl.js'
+            },
+            {
+                name: 'json',
+                location: '../bower_components/requirejs-plugins/src',
+                main: 'json.js'
             }
         ],
         less: {

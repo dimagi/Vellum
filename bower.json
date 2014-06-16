@@ -27,9 +27,10 @@
         "jquery.ui": "1.8.16", 
         "requirejs": "~2.1.11",
         "requirejs-text": "~2.0.12",
-        "require-less": "*",
-        "require-css": "*",
+        "require-less": "~0.1.2",
+        "require-css": "~0.1.4",
         "requirejs-tpl": "jfparadis/requirejs-tpl",
+        "requirejs-plugins": "~1.0.2",
 
         "langcodes": "dimagi/langcodes",
         "XMLWriter": "dimagi/XMLWriter",
