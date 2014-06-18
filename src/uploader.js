@@ -8,9 +8,9 @@ define([
     'tpl!vellum/templates/multimedia_upload_trigger',
     'text!vellum/templates/multimedia_queue.html',
     'text!vellum/templates/multimedia_errors.html',
-    'tpl!vellum/templates/multimedia_existing_image',
-    'tpl!vellum/templates/multimedia_existing_audio',
-    'tpl!vellum/templates/multimedia_existing_video',
+    'text!vellum/templates/multimedia_existing_image.html',
+    'text!vellum/templates/multimedia_existing_audio.html',
+    'text!vellum/templates/multimedia_existing_video.html',
     'tpl!vellum/templates/multimedia_nomedia',
     'text!vellum/templates/multimedia_block.html',
     'vellum/core'
@@ -83,6 +83,11 @@ define([
 
         ref.isMediaMatched = function () {
             return _.isObject(ref.linkedObj);
+        };
+
+        // gets called by uploadController
+        ref.getUrl = function () {
+            return ref.linkedObj.url;
         };
 
         ref.updateController = function () {
@@ -164,7 +169,7 @@ define([
             if (data.ref && data.ref.path) {
                 objectMap[data.ref.path] = data.ref;
             }
-            widget.updateMultimediaBlockUI($uiElem, objectMap);
+            widget.updateMultimediaBlockUI(objectMap);
         };
         
         widget.updateMultimediaBlockUI = function (objectMap) {
@@ -187,21 +192,21 @@ define([
 
     var getPreviewUI = function (widget, objectMap, ICONS) {
         var currentPath = widget.getValue(),
-            $preview;
+            previewHtml;
         if (!currentPath && !widget.isDefaultLang) {
             currentPath = widget.getItextItem().getValue(widget.form, widget.defaultLang);
         }
         if (currentPath in objectMap) {
             var linkedObject = objectMap[currentPath];
-            $preview = PREVIEW_TEMPLATES[widget.form]({
+            previewHtml = _.template(PREVIEW_TEMPLATES[widget.form])({
                 url: linkedObject.url
             });
         } else {
-            $preview = multimedia_nomedia({
+            previewHtml = multimedia_nomedia({
                 iconClass: ICONS[widget.form]
             });
         }
-        return $preview;
+        return previewHtml;
     };
 
     var getUploadButtonUI = function (widget, objectMap) {
