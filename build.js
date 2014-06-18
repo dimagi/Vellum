@@ -8,6 +8,8 @@
     dir: '_build',
     skipDirOptimize: true,
     optimize: 'uglify2',
+    generateSourceMaps: true,
+    preserveLicenseComments: false,
     // Everything to do with CSS is handled by the require-css plugin
     optimizeCss: 'none',
     inlineText: true,

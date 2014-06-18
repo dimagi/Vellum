@@ -1683,7 +1683,6 @@ define([
         dial.append(contentStr);
         dial.find('.fd-form-saving-anim').append(
             '<span class="fd-form-saving-img"></span>');
-        console.log(dial);
 
         this._showConfirmDialog();
     };
