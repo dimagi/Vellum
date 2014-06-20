@@ -107,7 +107,7 @@ define([
 
         var $questionGroup = $(question_type_group({
             groupClass: groupClass,
-            showDropdown: groupData.showDropdown || true,
+            showDropdown: groupData.questions.length > 1,
             textOnly: groupData.textOnly,
             relatedQuestions: _.map(groupData.related || [], convertButtonSpec),
             defaultQuestion: defaultQuestion,
@@ -251,7 +251,6 @@ define([
             },
             {
                 group: ["DataBindOnly", 'Hidden Value'],
-                showDropdown: false,
                 questions: [
                     "DataBindOnly"
                 ]
