@@ -141,63 +141,20 @@ define([
         return "pass";            
     };
 
-    var validationFuncs = {
-        //should be used to figure out the logic for label, defaultLabel, labelItext, etc properties
-        nodeID: function (mug) {
-            var qId = mug.dataElement.nodeID;
-            var res = validateElementName(qId, "Question ID");
-            if (res !== "pass") {
-                return res;
-            }
-            return "pass";
-        }, 
-        // todo: fix itext plugin abstraction barrier break here
-        label: function (mug) {
-            var controlBlock, hasLabel, hasLabelItextID, missing, hasItext;
-            controlBlock = mug.controlElement;
-            hasLabel = Boolean(controlBlock.label);
-            var itextBlock = controlBlock ? mug.controlElement.labelItextID : null;
-            hasLabelItextID = itextBlock && (typeof itextBlock.id !== "undefined");
-
-            if (hasLabelItextID && !util.isValidAttributeValue(itextBlock.id)) {
-                return itextBlock.id + " is not a valid Itext ID";
-            }
-            hasItext = itextBlock && itextBlock.hasHumanReadableItext();
-            
-            if (hasLabel) {
-                return 'pass';
-            } else if (!hasLabel && !hasItext && (mug.controlElement.__spec.label.presence === 'optional' || 
-                       mug.controlElement.__spec.labelItextID.presence === 'optional')) {
-                //make allowance for questions that have label/labelItextID set to 'optional'
-                return 'pass';
-            } else if (hasLabelItextID && hasItext) {
-                return 'pass';
-            } else if (hasLabelItextID && !hasItext) {
-                missing = 'a display label';
-            } else if (!hasLabel && !hasLabelItextID) {
-                missing = 'a display label ID';
-            } else if (!hasLabel) {
-                missing = 'a display label';
-            } else if (!hasLabelItextID) {
-                missing = 'a display label ID';
-            }
-            return 'Question is missing ' + missing + ' value!';
-        },
-        defaultValue: function (mug) {
-            if (/\s/.test(mug.controlElement.defaultValue)) {
-                return "Whitespace in values is not allowed.";
-            } 
-            return "pass";
-        }
-    };
-
     var baseDataSpecs = {
         nodeID: {
             editable: 'w',
             visibility: 'visible',
             presence: 'required',
             lstring: 'Question ID',
-            validationFunc : validationFuncs.nodeID
+            validationFunc: function (mug) {
+                var qId = mug.dataElement.nodeID;
+                var res = validateElementName(qId, "Question ID");
+                if (res !== "pass") {
+                    return res;
+                }
+                return "pass";
+            }
         },
         dataValue: {
             editable: 'w',
@@ -306,8 +263,39 @@ define([
             editable: 'w',
             visibility: 'visible',
             presence: 'optional',
-            validationFunc : validationFuncs.label,
-            lstring: "Default Label"
+            lstring: "Default Label",
+            // todo: fix itext plugin abstraction barrier break here
+            validationFunc: function (mug) {
+                var controlBlock, hasLabel, hasLabelItextID, missing, hasItext;
+                controlBlock = mug.controlElement;
+                hasLabel = Boolean(controlBlock.label);
+                var itextBlock = controlBlock ? mug.controlElement.labelItextID : null;
+                hasLabelItextID = itextBlock && (typeof itextBlock.id !== "undefined");
+
+                if (hasLabelItextID && !util.isValidAttributeValue(itextBlock.id)) {
+                    return itextBlock.id + " is not a valid Itext ID";
+                }
+                hasItext = itextBlock && itextBlock.hasHumanReadableItext();
+                
+                if (hasLabel) {
+                    return 'pass';
+                } else if (!hasLabel && !hasItext && (mug.controlElement.__spec.label.presence === 'optional' || 
+                           mug.controlElement.__spec.labelItextID.presence === 'optional')) {
+                    //make allowance for questions that have label/labelItextID set to 'optional'
+                    return 'pass';
+                } else if (hasLabelItextID && hasItext) {
+                    return 'pass';
+                } else if (hasLabelItextID && !hasItext) {
+                    missing = 'a display label';
+                } else if (!hasLabel && !hasLabelItextID) {
+                    missing = 'a display label ID';
+                } else if (!hasLabel) {
+                    missing = 'a display label';
+                } else if (!hasLabelItextID) {
+                    missing = 'a display label ID';
+                }
+                return 'Question is missing ' + missing + ' value!';
+            }
         },
         hintLabel: {
             editable: 'w',
@@ -555,8 +543,7 @@ define([
         },
         // legacy (or maybe this is actually useful as a generic thing)
         setPropertyValue: function (element, property, val) {
-            var prev = this[element][property],
-                _this = this;
+            var prev = this[element][property];
 
             if (prev === val) {
                 return;
@@ -945,7 +932,12 @@ define([
                 visibility: 'visible',
                 editable: 'w',
                 presence: 'required',
-                validationFunc: validationFuncs.defaultValue
+                validationFunc: function (mug) {
+                    if (/\s/.test(mug.controlElement.defaultValue)) {
+                        return "Whitespace in values is not allowed.";
+                    }
+                    return "pass";
+                }
             };
             c.hintLabel.presence = 'notallowed';
             c.hintItextID.presence = 'notallowed';
