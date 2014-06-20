@@ -32,7 +32,9 @@ define([
 
     that.langCodeToName = {};
     _.each(langCodes, function (lang) {
-        that.langCodeToName[lang.code] = lang.name;
+        var name = lang.names[0];
+        that.langCodeToName[lang.three] = name;
+        that.langCodeToName[lang.two] = name;
     });
 
     that.XPATH_REFERENCES = [
