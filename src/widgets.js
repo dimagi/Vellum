@@ -64,6 +64,11 @@ define([
             return null;
         };
 
+        widget.handleChange = function () {
+            widget.updateValue();
+            options.afterChange();
+        };
+
         widget.updateValue = function () {
             // When a widget's value changes, do whatever work you need to in 
             // the model/UI to make sure we are in a consistent state.
@@ -150,7 +155,7 @@ define([
         };
 
         input.bind("change keyup", function () {
-            widget.updateValue();
+            widget.handleChange();
         });
         return widget;
     };
@@ -160,7 +165,7 @@ define([
         widget.input.addClass('jstree-drop')
             .attr('placeholder', 'Hint: drag a question here.')
             .change(function () {
-                widget.updateValue();
+                widget.handleChange();
             });
 
         return widget;
@@ -180,7 +185,7 @@ define([
         };
 
         input.change(function () {
-            widget.updateValue();
+            widget.handleChange();
         });
         return widget;
     };
@@ -244,7 +249,7 @@ define([
                 pairs: value
             }));
             widget.kvInput.find('input').bind('change keyup', function () {
-                widget.updateValue();
+                widget.handleChange();
             });
             widget.kvInput.find('.fd-kv-add-pair').click(function (e) {
                 widget.refreshControl();
