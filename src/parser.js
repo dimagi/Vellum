@@ -333,8 +333,8 @@ define([
         }
     }
 
-    function mugTypeFromGroup (cEl) {
-        if ($(cEl).attr('appearance') === 'field-list') {
+    function mugTypeFromGroup (cEl, appearance) {
+        if (appearance === 'field-list') {
             return 'FieldList';
         } else if ($(cEl).children('repeat').length > 0) {
             return 'Repeat';
@@ -370,30 +370,27 @@ define([
      * @param nodePath
      * @param controlEl
      */
-    function classifyAndCreateMug (form, nodePath, cEl) {
-        var oldMug = form.getMugByPath(nodePath), //check the data node to see if there's a related Mug already present
-            mug, tagName, bindEl, dataEl, dataType, appearance, MugClass, mediaType;
+    function classifyAndCreateMug (form, nodePath, cEl, oldEl) {
+        var oldMug = form.getMugByPath(nodePath), 
+            $cEl = oldEl || cEl,
+            mug, tagName, bindEl, dataEl, dataType, 
+            appearance = $cEl.popAttr('appearance'),
+            mediaType = $cEl.popAttr('mediatype') || null,
+            MugClass;
+        mediaType = mediaType ? mediaType.toLowerCase() : mediaType;
 
-        tagName = $(cEl)[0].nodeName;
-        if (oldMug) {
-            bindEl = oldMug.bindElement;
-            if (bindEl) {
-                dataType = bindEl.dataType;
-                appearance = cEl.attr('appearance');
-                mediaType = cEl.attr('mediatype') ? cEl.attr('mediatype') : null;
-                if (dataType) {
-                    dataType = dataType.replace('xsd:',''); //strip out extraneous namespace
-                    dataType = dataType.toLowerCase();
-                }
-                if(mediaType) {
-                    mediaType = mediaType.toLowerCase();
-                }
+        tagName = $cEl[0].nodeName;
+        if (oldMug && oldMug.bindElement) {
+            dataType = oldMug.bindElement.dataType;
+            if (dataType) {
+                dataType = dataType.replace('xsd:',''); //strip out extraneous namespace
+                dataType = dataType.toLowerCase();
             }
         }
 
         //broadly categorize
         tagName = tagName.toLowerCase();
-        var hasItemset = $(cEl).children('itemset').length;
+        var hasItemset = $cEl.children('itemset').length;
         if(tagName === 'select') {
             MugClass = hasItemset ? 'MSelectDynamic' : 'MSelect';
         }else if (tagName === 'select1') {
@@ -401,10 +398,8 @@ define([
         }else if (tagName === 'trigger') {
             MugClass = 'Trigger';
         }else if (tagName === 'input') {
-            if (cEl.attr('readonly') === 'true()') {
+            if ($cEl.popAttr('readonly') === 'true()') {
                 MugClass = 'Trigger';
-                cEl.removeAttr('readonly');
-                //delete bindEl.dataType;
             } else {
                 MugClass = mugTypeFromInput(dataType, appearance);
             }
@@ -413,7 +408,7 @@ define([
         }else if (tagName === 'itemset') {
             MugClass = 'Itemset';
         }else if (tagName === 'group') {
-            MugClass = mugTypeFromGroup(cEl);
+            MugClass = mugTypeFromGroup($cEl, appearance);
             if (MugClass === 'Repeat') {
                 tagName = 'repeat';
             }
@@ -439,6 +434,12 @@ define([
         if (appearance) {
             mug.setAppearanceAttribute(appearance);
         }
+        if (MugClass === "Trigger") {
+            mug.controlElement.setAttr(
+                'showOKCheckbox', appearance !== 'minimal');
+        
+        }
+        populateMug(form, mug, cEl);
 
         return mug;
     }
@@ -464,10 +465,9 @@ define([
         }
         
         var $cEl = $(cEl),
+            tag = mug.controlElement.tagName,
             labelEl, hintEl, repeat_count, repeat_noaddremove;
-        
 
-        var tag = mug.controlElement.tagName;
         if(tag === 'repeat'){
             labelEl = $($cEl.parent().children('label'));
             hintEl = $cEl.parent().children('hint');
@@ -497,17 +497,12 @@ define([
         if (tag === 'itemset') {
             // todo: convert to bound property map
             mug.controlElement.setAttr('itemsetData', new mugs.BoundPropertyMap(form, {
-                nodeset: $cEl.attr('nodeset'),
+                nodeset: $cEl.popAttr('nodeset'),
                 labelRef: $cEl.children('label').attr('ref'),
                 valueRef: $cEl.children('value').attr('ref')
             }));
         }
 
-        if (mug.__className === "Trigger") {
-            mug.controlElement.setAttr(
-                'showOKCheckbox', $cEl.attr('appearance') !== 'minimal');
-        
-        }
 
         form.intentManager.syncMugWithIntent(mug);
         
@@ -601,13 +596,8 @@ define([
                     path = form.getAbsolutePath(existingMug);
                 }
             }
-           
-            if (oldEl) {
-                mug = classifyAndCreateMug(form, path, oldEl);
-            } else {
-                mug = classifyAndCreateMug(form, path, el);
-            }
-            populateMug(form, mug, el);
+          
+            mug = classifyAndCreateMug(form, path, el, oldEl);
             form.controlTree.insertMug(mug, 'into', parentMug);
 
             if (mug.__className !== "ReadOnly") {
