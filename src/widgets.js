@@ -143,7 +143,7 @@ define([
             // Why is this here?  Is it because the browser XML parser converts
             // escape codes to their values?  If so, this should be done where
             // it's called at parse time, not in the UI.
-            if (value !== undefined) {
+            if (value) {
                 value = value.replace(
                     new RegExp(String.fromCharCode(10), 'g'), '&#10;');
             }
