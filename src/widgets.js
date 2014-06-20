@@ -149,7 +149,9 @@ define([
             return input.val();
         };
 
-        input.bind("change keyup", widget.updateValue);
+        input.bind("change keyup", function () {
+            widget.updateValue();
+        });
         return widget;
     };
 
@@ -157,7 +159,9 @@ define([
         var widget = text(mug, options);
         widget.input.addClass('jstree-drop')
             .attr('placeholder', 'Hint: drag a question here.')
-            .change(widget.updateValue);
+            .change(function () {
+                widget.updateValue();
+            });
 
         return widget;
     };
@@ -175,7 +179,9 @@ define([
             return input.prop("checked");
         };
 
-        input.change(widget.updateValue);
+        input.change(function () {
+            widget.updateValue();
+        });
         return widget;
     };
 
@@ -237,7 +243,9 @@ define([
             widget.kvInput.html(widget_control_keyvalue({
                 pairs: value
             }));
-            widget.kvInput.find('input').bind('change keyup', widget.updateValue);
+            widget.kvInput.find('input').bind('change keyup', function () {
+                widget.updateValue();
+            });
             widget.kvInput.find('.fd-kv-add-pair').click(function (e) {
                 widget.refreshControl();
                 e.preventDefault();
