@@ -1153,9 +1153,10 @@ define([
 
             for(var i = 0; i < languages.length; i++) {
                 var language = languages[i];
-                var value = item.hasForm(form) ? item.getForm(form).getValueOrDefault(language) : "";
+                var value = item.hasForm(form) ? (item.getForm(form).getValueOrDefault(language) | "") : "";
 
-                ret.push(value);
+                // escape newlines.  What ever generates a \r ?
+                ret.push(value.replace(/\r?\n/g, "&#10;"));
             }
             return ret.join("\t");
         }
