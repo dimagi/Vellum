@@ -573,10 +573,18 @@ define([
             // update the logic properties that reference the mug
             if (e.property === 'nodeID') {
                 var currentPath = this.getAbsolutePath(mug),
+                    valid, parsed;
+                try {
+                    valid = true;
                     parsed = xpath.parse(currentPath);
-                parsed.steps[parsed.steps.length - 1].name = e.previous;
-                var oldPath = parsed.toXPath();
-                this.handleMugRename(mug, e.val, e.previous, currentPath, oldPath);
+                } catch (err) {
+                    valid = false;
+                }
+                if (valid) {
+                    parsed.steps[parsed.steps.length - 1].name = e.previous;
+                    var oldPath = parsed.toXPath();
+                    this.handleMugRename(mug, e.val, e.previous, currentPath, oldPath);
+                }
             } else {
                 var propertyPath = [e.element, e.property].join("/");
 
