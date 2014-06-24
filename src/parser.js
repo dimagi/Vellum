@@ -623,18 +623,31 @@ define([
         bindList.each(function () {
             var el = $(this),
                 attrs = {},
-                mug = form.mugTypes.make('DataBindOnly', form),
                 path = el.popAttr('nodeset') || e.popAttr('ref'),
                 id = el.popAttr('id'),
                 nodeID = getNodeIDFromPath(path),
-                rootNodeName = form.dataTree.getRootNode().getID(),
-                bindElement, oldMug;
+                rootNodeName = form.dataTree.getRootNode().getID();
 
             if(id) {
                 attrs.nodeID = id;
                 attrs.nodeset = path;
             } else {
                 attrs.nodeID = nodeID;
+            }
+            
+            path = processPath(path, rootNodeName);
+            form.vellum.parseBindElement(el, path);
+
+            var mug = form.getMugByPath(path);
+            
+            if(!mug && attrs.nodeset) {
+                mug = form.getMugByPath(processPath(attrs.nodeset, rootNodeName));
+            }
+            if(!mug){
+                form.parseWarnings.push(
+                    "Bind Node [" + path + "] found but has no associated " +
+                    "Data node. This bind node will be discarded!");
+                return;
             }
 
             attrs.dataType = el.popAttr('type');
@@ -661,31 +674,8 @@ define([
             attrs.preload = lookForNamespaced(el, "preload");
             attrs.preloadParams = lookForNamespaced(el, "preloadParams");
            
-            path = processPath(path, rootNodeName);
-            form.vellum.parseBindElement(el, path);
-
-            oldMug = form.getMugByPath(path);
-            
-            if(!oldMug && attrs.nodeset) {
-                oldMug = form.getMugByPath(processPath(attrs.nodeset, rootNodeName));
-            }
-            if(!oldMug){
-                form.parseWarnings.push(
-                    "Bind Node [" + path + "] found but has no associated " +
-                    "Data node. This bind node will be discarded!");
-                return;
-            }
-            mug.ufid = oldMug.ufid;
-            mug.copyAttrs(oldMug);
             mug.bindElement.setAttrs(attrs, true);
             mug.bindElement._rawAttributes = getAttributes(el);
-
-            // clear relevant itext for bind
-            // this is ugly, and should be moved somewhere else
-            if (oldMug.bindElement) {
-                Itext.removeItem(oldMug.bindElement.constraintMsgItextID);
-            }
-            form.replaceMug(oldMug, mug, 'data');
         });
     }
 
