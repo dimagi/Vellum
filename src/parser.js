@@ -513,39 +513,30 @@ define([
      * @param el - a jquery selector or DOM node of an xforms controlElement.
      * @return - a string of the ref/nodeset value
      */
-    function getPathFromControlElement (el) {
+    function getPathFromControlElement (el, form) {
         if(!el){
             return null;
         }
         el = $(el); //make sure it's jquerified
-        var path = el.attr('ref');
+        var path = el.attr('ref'),
+            nodeId, mug, pathToTry;
         if(!path){
             path = el.attr('nodeset');
         }
-        return path || null;
-    }
-
-    var mugFromControlEl = function (form, el) {
-        var path = getPathFromControlElement(el),
-            nodeId;
-
-        if (path) {
-            return form.getMugByPath(path);
-        } else {
+        if (!path) {
             // attempt to support sloppy hand-written forms
             nodeId = $(el).attr('bind');
-
             if (nodeId) {
-                var pathToTry = processPath(nodeId),
-                    mug = form.getMugByPath(pathToTry);
-                if (!mug) {
+                pathToTry = processPath(nodeId);
+                if (!form.getMugByPath(pathToTry)) {
                     form.parseWarnings.push("Ambiguous bind: " + nodeId);
+                } else {
+                    return pathToTry;
                 }
-                return mug;
             }
         }
-        return null;
-    };
+        return path || nodeId || null;
+    }
 
     function parseControlTree (form, controlsTree) {
         var Itext = form.vellum.data.javaRosa.Itext;
@@ -569,16 +560,11 @@ define([
             }
             
             if (parentNode) {
-                parentMug = mugFromControlEl(form, parentNode);
+                parentMug = form.getMugByPath(
+                    getPathFromControlElement(parentNode, form));
             }
            
-            path = getPathFromControlElement(el);
-            if (!path) {
-                var existingMug = mugFromControlEl(form, el);
-                if (existingMug) {
-                    path = form.getAbsolutePath(existingMug);
-                }
-            }
+            path = getPathFromControlElement(el, form);
           
             mug = classifyAndCreateMug(form, path, el, oldEl);
             form.controlTree.insertMug(mug, 'into', parentMug);
