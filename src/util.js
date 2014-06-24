@@ -177,6 +177,7 @@ define([
         return noun + (n !== 1 ? 's' : '');
     };
 
+    /* jshint bitwise: false */
     that.get_guid = function() {
         // http://stackoverflow.com/questions/105034/how-to-create-a-guid-uuid-in-javascript
         var S4 = function() {
@@ -203,6 +204,7 @@ define([
 		}
 		return uuid.toString().replace(/,/g,'');
     };
+    /* jshint bitwise: true */
 
     that.isValidElementName = function (name) {
         // HT: http://stackoverflow.com/questions/2519845/how-to-check-if-string-is-a-valid-xml-element-name

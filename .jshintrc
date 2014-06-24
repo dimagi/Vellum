@@ -2,6 +2,7 @@
     "browser": true,
 
     "asi": false,
+    "bitwise": true,
     "boss": false,
     "eqeqeq": true,
     "evil": false,
