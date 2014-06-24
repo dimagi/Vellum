@@ -1867,6 +1867,10 @@ define([
     
     };
 
+    fn.parseDataElement = function (form, el, parentMug) {
+        return parser.parseDataElement(form, el, parentMug);
+    };
+
     fn.parseBindElement = function (el, path) {
     
     };

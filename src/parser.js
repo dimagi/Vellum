@@ -18,7 +18,7 @@ define([
         }
         return val;
     };
-    
+   
     function getAttributes (element) {
         var attributes = $(element)[0].attributes,
             attrMap = {};
@@ -115,49 +115,13 @@ define([
 
         return form;
     }
-        
 
     // DATA PARSING FUNCTIONS
     function parseDataTree (form, dataEl) {
-        function parseDataElement (el, parentMug) {
-            var nodeID, nodeVal, mug, extraXMLNS, keyAttr,mType,parentNodeName,rootNodeName,dataTree;
-            
-            nodeID = el.nodeName;
-            mug = form.mugTypes.make('DataBindOnly', form);
-            parentNodeName = $(el).parent()[0].nodeName;
-            rootNodeName = $(dataEl)[0].nodeName;
-            dataTree = form.dataTree;
-
-            if($(el).children().length === 0) {
-                nodeVal = $(el).text();
-            }else {
-                nodeVal = null;
-            }
-
-            extraXMLNS = $(el).attr('xmlns');
-            keyAttr = $(el).attr('key');
-
-            mug.dataElement.nodeID = nodeID;
-            mug.dataElement.dataValue = nodeVal;
-            mug.bindElement.nodeID = nodeID;
-
-            if(extraXMLNS && (extraXMLNS !== form.formUuid)) {
-                mug.dataElement.xmlnsAttr = extraXMLNS;
-            }
-            if(keyAttr) {
-                mug.dataElement.keyAttr = keyAttr;
-            }
-            // add arbitrary attributes
-            mug.dataElement._rawAttributes = getAttributes(el);
-            
-            dataTree.insertMug(mug,'into',parentMug);
-
-            return mug;
-        }
         var root = $(dataEl), recFunc;
 
         recFunc = function (parentMug) {
-            var mug = parseDataElement(this, parentMug);
+            var mug = form.vellum.parseDataElement(form, this, parentMug);
             $(this).children().each(function () {
                 recFunc.call(this, mug);
             });
@@ -194,7 +158,32 @@ define([
         if (!form.formName) {
             that.parseWarnings.push('Form does not have a Name! The default form name will be used');
         }
+    }
 
+    function parseDataElement(form, el, parentMug) {
+        var $el = $(el),
+            nodeID = el.nodeName, 
+            nodeVal = $el.children().length ? null : $el.text(),
+            extraXMLNS = $el.popAttr('xmlns'),
+            keyAttr = $el.popAttr('key'),
+            mug = form.mugTypes.make('DataBindOnly', form);
+        
+        mug.dataElement.nodeID = nodeID;
+        mug.dataElement.dataValue = nodeVal;
+        mug.bindElement.nodeID = nodeID;
+
+        if (extraXMLNS && (extraXMLNS !== form.formUuid)) {
+            mug.dataElement.xmlnsAttr = extraXMLNS;
+        }
+        if (keyAttr) {
+            mug.dataElement.keyAttr = keyAttr;
+        }
+        // add arbitrary attributes
+        mug.dataElement._rawAttributes = getAttributes(el);
+        
+        form.dataTree.insertMug(mug, 'into', parentMug);
+
+        return mug;
     }
             
     /**
@@ -748,6 +737,7 @@ define([
     //};
 
     return {
-        parseXForm: parseXForm
+        parseXForm: parseXForm,
+        parseDataElement: parseDataElement
     };
 });
