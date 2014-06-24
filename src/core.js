@@ -443,7 +443,7 @@ define([
                 cssClasses: "btn-primary",
                 action: function () {
                     codeMirror.save();
-                    _this._loadXFormOrError($textarea.val());
+                    _this._loadXFormOrError($textarea.val(), true);
                     $modal.modal('hide');
                     done();
                 }
@@ -1002,7 +1002,7 @@ define([
         }
     };
 
-    fn._loadXFormOrError = function (formString) {
+    fn._loadXFormOrError = function (formString, updateSaveButton) {
         var _this = this;
 
         $.fancybox.showActivity();
@@ -1022,6 +1022,9 @@ define([
                     _this.reloadTree();
                     //re-enable all buttons and inputs in case they were disabled before.
                     _this.enableUI();
+                    if (updateSaveButton) {
+                        _this.data.core.saveButton.fire('change');
+                    }
                 } else {
                     _this.$f.find('.fd-default-panel').removeClass('hide');
                 }

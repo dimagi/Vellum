@@ -352,13 +352,6 @@ define([
         }
     }
 
-    /**
-     * Determines what Mug this element should be
-     * and creates it.  Also modifies any existing mug that is associated
-     * with this element to fit the new type.
-     * @param nodePath
-     * @param controlEl
-     */
     function classifyAndCreateMug (form, nodePath, cEl, oldEl) {
         var oldMug = form.getMugByPath(nodePath), 
             $cEl = oldEl || cEl,
