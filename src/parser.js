@@ -122,6 +122,9 @@ define([
 
         recFunc = function (parentMug) {
             var mug = form.vellum.parseDataElement(form, this, parentMug);
+            if (mug) {
+                form.dataTree.insertMug(mug, 'into', parentMug);
+            }
             $(this).children().each(function () {
                 recFunc.call(this, mug);
             });
@@ -180,9 +183,6 @@ define([
         }
         // add arbitrary attributes
         mug.dataElement._rawAttributes = getAttributes(el);
-        
-        form.dataTree.insertMug(mug, 'into', parentMug);
-
         return mug;
     }
             
@@ -710,11 +710,6 @@ define([
         }
         return ret;
     };
-
-    // todo: pluginify
-    //that.parseBindElement = function (el, path) {
-    
-    //};
 
     return {
         parseXForm: parseXForm,
