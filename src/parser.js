@@ -500,7 +500,7 @@ define([
     }
                 
     //figures out if this control DOM element is a repeat
-    function isRepeatTest(groupEl) {
+    function isRepeat(groupEl) {
         if($(groupEl)[0].tagName !== 'group') {
             return false;
         }
@@ -551,23 +551,17 @@ define([
         var Itext = form.vellum.data.javaRosa.Itext;
 
         function eachFunc(){
-            var el = $ ( this ), oldEl,
-                path,
-                mug,
-                parentNode,
-                parentMug,
-                tagName,
-                couldHaveChildren = ['repeat', 'group', 'fieldlist', 'select', 'select1'],
-                children,
-                bind,
-                isRepeat;
+            var el = $(this),
+                oldEl;
 
-            isRepeat = isRepeatTest(el);
-            //do the repeat switch thing
-            if(isRepeat) {
+            if (isRepeat(el)) {
                 oldEl = el;
                 el = $(el.children('repeat')[0]);
             }
+
+            var couldHaveChildren = ['repeat', 'group', 'fieldlist', 'select', 'select1'],
+                path, mug, parentNode, parentMug, tagName, children, bind;
+
 
             parentNode = oldEl ? oldEl.parent() : el.parent();
             if($(parentNode)[0].nodeName === 'h:body') {
