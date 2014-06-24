@@ -1871,8 +1871,8 @@ define([
         return parser.parseDataElement(form, el, parentMug);
     };
 
-    fn.parseBindElement = function (el, path) {
-    
+    fn.parseBindElement = function (form, el, path) {
+        return parser.parseBindElement(form, el, path);
     };
 
     fn.contributeToModelXML = function (xmlWriter) {

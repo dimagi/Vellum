@@ -25,7 +25,7 @@ define([
             this.__callOld();
             this.data.lock.locks = {};
         },
-        parseBindElement: function (el, path) {
+        parseBindElement: function (form, el, path) {
             this.__callOld();
             var locked = el.attr('vellum:lock');
             if (locked && locked !== 'none') {

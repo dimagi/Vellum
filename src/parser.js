@@ -618,65 +618,66 @@ define([
     }
 
     function parseBindList (form, bindList) {
-        var Itext = form.vellum.data.javaRosa.Itext;
+        var rootNodeName = form.dataTree.getRootNode().getID();
 
         bindList.each(function () {
             var el = $(this),
-                attrs = {},
-                path = el.popAttr('nodeset') || e.popAttr('ref'),
-                id = el.popAttr('id'),
-                nodeID = getNodeIDFromPath(path),
-                rootNodeName = form.dataTree.getRootNode().getID();
+                path = el.popAttr('nodeset') || el.popAttr('ref');
 
-            if(id) {
-                attrs.nodeID = id;
-                attrs.nodeset = path;
-            } else {
-                attrs.nodeID = nodeID;
-            }
-            
-            path = processPath(path, rootNodeName);
-            form.vellum.parseBindElement(el, path);
-
-            var mug = form.getMugByPath(path);
-            
-            if(!mug && attrs.nodeset) {
-                mug = form.getMugByPath(processPath(attrs.nodeset, rootNodeName));
-            }
-            if(!mug){
-                form.parseWarnings.push(
-                    "Bind Node [" + path + "] found but has no associated " +
-                    "Data node. This bind node will be discarded!");
-                return;
-            }
-
-            attrs.dataType = el.popAttr('type');
-            if(attrs.dataType && attrs.dataType.toLowerCase() === 'xsd:integer') {  //normalize this dataType ('int' and 'integer' are both valid).
-                attrs.dataType = 'xsd:int';
-            }
-            attrs.appearance = el.popAttr('appearance');
-            attrs.relevantAttr = el.popAttr('relevant');
-            attrs.calculateAttr = el.popAttr('calculate');
-            attrs.constraintAttr = el.popAttr('constraint');
-
-            var constraintMsg = lookForNamespaced(el, "constraintMsg"),
-                constraintItext = getITextReference(constraintMsg);
-
-            if (constraintItext) {
-                attrs.constraintMsgItextID = Itext.getOrCreateItem(constraintItext);
-            } else {
-                attrs.constraintMsgItextID = Itext.createItem("");
-                attrs.constraintMsgAttr = constraintMsg;    
-            }
-                            
-            attrs.requiredAttr = parseBoolAttributeValue(el.popAttr('required'));
-            
-            attrs.preload = lookForNamespaced(el, "preload");
-            attrs.preloadParams = lookForNamespaced(el, "preloadParams");
-           
-            mug.bindElement.setAttrs(attrs, true);
-            mug.bindElement._rawAttributes = getAttributes(el);
+            form.vellum.parseBindElement(
+                form, el, processPath(path, rootNodeName));
         });
+    }
+
+    function parseBindElement (form, el, mugPath) {
+        var mug = form.getMugByPath(mugPath),
+            path = el.popAttr('nodeset') || el.popAttr('ref'),
+            id = el.popAttr('id'),
+            nodeID = getNodeIDFromPath(path),
+            Itext = form.vellum.data.javaRosa.Itext;
+        
+        if(!mug){
+            form.parseWarnings.push(
+                "Bind Node [" + path + "] found but has no associated " +
+                "Data node. This bind node will be discarded!");
+            return;
+        }
+
+        var attrs = {
+            appearance: el.popAttr('appearance'),
+            relevantAttr: el.popAttr('relevant'),
+            calculateAttr: el.popAttr('calculate'),
+            constraintAttr: el.popAttr('constraint'),
+            dataType: el.popAttr('type'),
+            requiredAttr: parseBoolAttributeValue(el.popAttr('required')),
+            preload: lookForNamespaced(el, "preload"),
+            preloadParams: lookForNamespaced(el, "preloadParams")
+        };
+
+        if(id) {
+            attrs.nodeID = id;
+            attrs.nodeset = path;
+        } else {
+            attrs.nodeID = nodeID;
+        }
+
+        // normalize this dataType ('int' and 'integer' are both valid).
+        if(attrs.dataType && attrs.dataType.toLowerCase() === 'xsd:integer') { 
+            attrs.dataType = 'xsd:int';
+        }
+
+        var constraintMsg = lookForNamespaced(el, "constraintMsg"),
+            constraintItext = getITextReference(constraintMsg);
+
+        if (constraintItext) {
+            attrs.constraintMsgItextID = Itext.getOrCreateItem(constraintItext);
+        } else {
+            attrs.constraintMsgItextID = Itext.createItem("");
+            attrs.constraintMsgAttr = constraintMsg;    
+        }
+       
+        mug.bindElement.setAttrs(attrs, true);
+        mug.bindElement._rawAttributes = getAttributes(el);
     }
 
     var _getInstances = function (xml) {
@@ -703,6 +704,7 @@ define([
 
     return {
         parseXForm: parseXForm,
-        parseDataElement: parseDataElement
+        parseDataElement: parseDataElement,
+        parseBindElement: parseBindElement
     };
 });
