@@ -117,20 +117,22 @@ define([
         this._form = form;
         this._data = data || {};
     }
-    BoundPropertyMap.prototype.clone = function () {
-        return new BoundPropertyMap(this._form, this._data);
-    };
-    BoundPropertyMap.prototype.setAttr = function (name, val) {
-        this._data[name] = val;
-        this._form.fire({
-            type: 'change'
-        });
-    };
-    BoundPropertyMap.prototype.getAttr = function (name, default_) {
-        if (name in this._data) {
-            return this._data[name];
-        } else {
-            return default_;
+    BoundPropertyMap.prototype = {
+        clone: function () {
+            return new BoundPropertyMap(this._form, this._data);
+        },
+        setAttr: function (name, val) {
+            this._data[name] = val;
+            this._form.fire({
+                type: 'change'
+            });
+        },
+        getAttr: function (name, default_) {
+            if (name in this._data) {
+                return this._data[name];
+            } else {
+                return default_;
+            }
         }
     };
         
