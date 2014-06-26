@@ -413,7 +413,6 @@ define([
         if (MugClass === "Trigger") {
             mug.controlElement.setAttr(
                 'showOKCheckbox', appearance !== 'minimal');
-        
         }
         populateMug(form, mug, cEl);
 
@@ -445,7 +444,7 @@ define([
             labelEl, hintEl, repeat_count, repeat_noaddremove;
 
         if(tag === 'repeat'){
-            labelEl = $($cEl.parent().children('label'));
+            labelEl = $cEl.parent().children('label');
             hintEl = $cEl.parent().children('hint');
             repeat_count = $cEl.popAttr('jr:count');
             repeat_noaddremove = parseBoolAttributeValue(
@@ -528,45 +527,39 @@ define([
     function parseControlTree (form, controlsTree) {
         var Itext = form.vellum.data.javaRosa.Itext;
 
-        function eachFunc(){
-            var el = $(this),
-                oldEl;
+        function eachFunc(el, parentMug){
+            el = $(el);
+            var oldEl, tagName, children, bind;
 
             if (isRepeat(el)) {
                 oldEl = el;
                 el = $(el.children('repeat')[0]);
             }
 
-            var couldHaveChildren = ['repeat', 'group', 'fieldlist', 'select', 'select1'],
-                path, mug, parentNode, parentMug, tagName, children, bind;
+            var mug = classifyAndCreateMug(
+                    form, getPathFromControlElement(el, form), el, oldEl);
 
-
-            parentNode = oldEl ? oldEl.parent() : el.parent();
-            if($(parentNode)[0].nodeName === 'h:body') {
-                parentNode = null;
-            }
-            
-            if (parentNode) {
-                parentMug = form.getMugByPath(
-                    getPathFromControlElement(parentNode, form));
-            }
-           
-            path = getPathFromControlElement(el, form);
-          
-            mug = classifyAndCreateMug(form, path, el, oldEl);
             form.controlTree.insertMug(mug, 'into', parentMug);
 
             if (mug.__className !== "ReadOnly") {
+                var couldHaveChildren = [
+                    'repeat', 'group', 'fieldlist', 'select', 'select1'
+                ];
                 tagName = mug.controlElement.tagName.toLowerCase();
                 if(couldHaveChildren.indexOf(tagName) !== -1) {
-                    children = $(el).children().not('label').not('value').not('hint');
-                    children.each(eachFunc); //recurse down the tree
+                    // recurse
+                    $(el).children().not('label').not('value').not('hint')
+                        .each(function () {
+                            eachFunc(this, mug);
+                        });
                 }
                 // update any remaining itext
                 Itext.updateForExistingMug(mug);
             }
         }
-        controlsTree.each(eachFunc);
+        controlsTree.each(function () {
+            eachFunc(this, null);
+        });
     }
 
     // BIND PARSING FUNCTIONS
