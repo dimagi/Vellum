@@ -182,7 +182,7 @@ define([
                 });
                 nodeset = foo[0];
             } else {
-                nodeset = null;
+                nodeset = '';
             }
             itemsetData.setAttr('nodeset', nodeset);
         }
