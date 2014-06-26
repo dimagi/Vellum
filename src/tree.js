@@ -220,7 +220,7 @@ define([
          * Will return null if nothing is found.
          */
         getNodeFromMug: function (mug) {
-            // gets set in insertMug() and Form.replaceMug()
+            // gets set in insertMug()
             return mug['_node_' + this.treeType];
         },
         _removeNodeFromTree: function (node) {

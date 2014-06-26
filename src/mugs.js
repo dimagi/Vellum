@@ -1,12 +1,12 @@
 define([
+    'jquery',
     'vellum/widgets',
     'vellum/util',
-    'classy',
     'underscore',
 ], function (
+    jquery,
     widgets,
     util,
-    Class,
     underscore
 ) {
     var validateRule = function (ruleKey, ruleValue, testingObj, blockName, mug) {
@@ -34,12 +34,19 @@ define([
         return retBlock;
     };
 
-    var MugElement = Class.$extend({
-        __init__: function (options) {
-            this.__spec = options.spec;
-            this.__mug = options.mug;
-            this.__name = options.name;
-        },
+    function MugElement (options) {
+        this.__spec = options.spec;
+        this.__mug = options.mug;
+        this.__name = options.name;
+
+        var copyFrom = options.copyFromElement;
+        if (copyFrom) {
+            this.setAttrs(copyFrom);
+            // todo: make this part of the property system
+            this._rawAttributes = copyFrom._rawAttributes;
+        }
+    }
+    MugElement.prototype = {
         setAttr: function (attr, val, overrideImmutable) {
             // todo: replace all direct setting of element properties with this
 
@@ -47,7 +54,7 @@ define([
 
             // only set attr if spec allows this attr, except if mug is a
             // DataBindOnly (which all mugs are before the control block has been
-            // parsed) 
+            // parsed). Todo: this DataBindOnly exception is suspect.
             if (!(attr.indexOf('_') !== 0 && spec && 
                   (overrideImmutable || !spec.immutable) && 
                       (spec.presence !== 'notallowed' || 
@@ -109,7 +116,7 @@ define([
             });
             return errors;
         }
-    });
+    };
 
     // a wrapper for object properties that triggers the form change event when
     // sub-properties are changed
@@ -307,7 +314,7 @@ define([
         },
     };
 
-    var copyAndProcessSpec = function (spec, mug) {
+    function copyAndProcessSpec(spec, mugOptions) {
         spec = $.extend(true, {}, spec);
         _.each(spec, function (elementSpec, name) {
             if (elementSpec) {
@@ -315,7 +322,7 @@ define([
                     if (_.isFunction(propertySpec) && name !== 'validationFunc' && 
                         name !== 'widget') 
                     {
-                        var val = propertySpec(mug);
+                        var val = propertySpec(mugOptions);
                         if (val) {
                             elementSpec[name] = val;
                         } else {
@@ -326,71 +333,74 @@ define([
             }
         });
         return spec;
-    };
+    }
+
     /**
-     * A mug is the standard object within a form and represents the combined
-     * Data, Bind and Control elements.
+     * A question, containing data, bind, and control elements.
      */
-    var BaseMug = Class.$extend({
-        // whether you can change to or from this question's type in the UI
-        isTypeChangeable: true,
-        limitTypeChangeTo: false,
-        // controls whether delete button shows up - you can still delete a
-        // mug's ancestor even if it's not removeable
-        isRemoveable: true,
-        isCopyable: true,
-        isODKOnly: false,
-        maxChildren: -1,
-        // todo: actually don't couple type definitions and state using
-        // inheritance 
-        afterInsert: function (form, mug) {},
-        __init__: function (form, baseSpec) {
-            var _this = this;
+    function Mug (options, form, baseSpec, copyFrom) {
+        var _this = this;
+
+        this.form = form;
+        this.baseSpec = baseSpec;
+        this.setOptions(options, copyFrom);
+
+        this.ufid = util.get_guid();
+        util.eventuality(this);
+    }
+    Mug.prototype = {
+        // question-type specific properties, gets merged into when you change
+        // the question type
+        defaultOptions: {
+            // whether you can change to or from this question's type in the UI
+            isTypeChangeable: true,
+            limitTypeChangeTo: false,
+            // controls whether delete button shows up - you can still delete a
+            // mug's ancestor even if it's not removeable
+            isRemoveable: true,
+            isCopyable: true,
+            isODKOnly: false,
+            maxChildren: -1,
+            icon: null,
+            afterInsert: function (form, mug) {},
+            getAppearanceAttribute: function (mug) {
+                return (mug.controlElement && mug.controlElement.appearance) ? 
+                    mug.controlElement.appearance : null;
+            },
+            getIcon: function (mug) {
+                return mug.options.icon;
+            },
+            processSpec: function (spec) {
+                return spec;
+            },
+            init: function (mug, form, baseSpec) {}
+        },
+        // set or change question type
+        setOptions: function (options, copyFrom) {
+            var _this = this,
+                copyFromMug = copyFrom || this;
+
+            this.options = $.extend(true, {}, this.defaultOptions, options);
+
             // todo: it would be good to encapsulate the testing whether
             // elements and properties in a spec are functions parameterized on
             // mug, and executing them, in a single function, rather than below
             // and in the MugElement constructor
-            this.__spec = this.processSpec(copyAndProcessSpec(baseSpec, this));
-            this.form = form;
+            this.__spec = this.options.processSpec(
+                copyAndProcessSpec(this.baseSpec, this.options));
 
             _(this.__spec).each(function (spec, name) {
-                _this[name] = (!spec) ? null : new MugElement({
+                _this[name] = spec ? new MugElement({
                     spec: spec,
                     mug: _this,
+                    // copy properties from existing element
+                    copyFromElement: copyFromMug[name],
                     name: name
-                });
+                }) : null;
             });
 
-            // set question id if it isn't set
-            if (this.dataElement && this.bindElement && 
-                (!this.dataElement.nodeID || !this.bindElement.nodeID))
-            {
-                var nodeID = (this.dataElement.nodeID || this.bindElement.nodeID || 
-                              form.generate_question_id());
-                this.dataElement.nodeID = this.bindElement.nodeID = nodeID;
-            }
-
-            this.ufid = util.get_guid();
-            util.eventuality(this);
-        },
-        copyAttrs: function (sourceMug, overrideImmutable) {
-            // Copying _rawAttributes here is a hack.  It should be part of the
-            // property definition system.
-            if (this.dataElement && sourceMug.dataElement) {
-                this.dataElement.setAttrs(sourceMug.dataElement, overrideImmutable);
-                this.dataElement._rawAttributes = sourceMug.dataElement._rawAttributes;
-            }
-            if (this.bindElement && sourceMug.bindElement) {
-                this.bindElement.setAttrs(sourceMug.bindElement, overrideImmutable);
-                this.bindElement._rawAttributes = sourceMug.bindElement._rawAttributes;
-            }
-            if (this.controlElement && sourceMug.controlElement) {
-                this.controlElement.setAttrs(sourceMug.controlElement, overrideImmutable);
-                this.controlElement._rawAttributes = sourceMug.controlElement._rawAttributes;
-            }
-        },
-        processSpec: function (spec) {
-            return spec;
+            this.options.init(this, this.form, this.baseSpec);
+            this.__className = this.options.__className;
         },
         getBindElementID: function () {
             if (this.bindElement) {
@@ -407,7 +417,7 @@ define([
             }
         },
         getAppearanceAttribute: function () {
-            return (this.controlElement && this.controlElement.appearance) ? (this.controlElement.appearance) : null;
+            return this.options.getAppearanceAttribute(this);
         },
         setAppearanceAttribute: function (attrVal) {
             this.controlElement.appearance = attrVal;
@@ -448,7 +458,7 @@ define([
             return ret;
         },
         getIcon: function () {
-            return this.icon;
+            return this.options.getIcon(this);
         },
         getErrors: function () {
             var _this = this,
@@ -685,14 +695,16 @@ define([
                 }
             });
         }
-    });
+    };
+
+    var defaultOptions = Mug.prototype.defaultOptions;
 
     // The use of inheritance here is a convenient way to be DRY about shared
     // properties of mugs.  getXXSpec() methods could simply be replaced with
     // generating the spec at the time of class definition by explicitly
     // extending the spec of the super class.  These classes should absolutely
     // not be used to implement any sort of inheritance-based interface.
-    var DataBindOnly = BaseMug.$extend({
+    var DataBindOnly = util.extend(defaultOptions, {
         typeName: 'Hidden Value',
         icon: 'icon-vellum-variable',
         isTypeChangeable: false,
@@ -707,7 +719,7 @@ define([
         }
     });
     
-    var ReadOnly = BaseMug.$extend({
+    var ReadOnly = util.extend(defaultOptions, {
         processSpec: function () {
             spec.dataElement = null;
             spec.bindElement = null;
@@ -721,54 +733,50 @@ define([
         }
     });
 
-    var TextQuestion = BaseMug.$extend({
+    var Text = util.extend(defaultOptions, {
         typeName: "Text",
         icon: "icon-vellum-text",
-        __init__: function (form, baseSpec) {
-            this.$super(form, baseSpec);
-            this.controlElement.tagName = "input";
-            this.bindElement.dataType = "xsd:string";
+        init: function (mug, form, baseSpec) {
+            mug.controlElement.tagName = "input";
+            mug.bindElement.dataType = "xsd:string";
         }
     });
 
-    var PhoneNumber = TextQuestion.$extend({
+    var PhoneNumber = util.extend(Text, {
         typeName: 'Phone Number or Numeric ID',
         icon: 'icon-signal',
-        __init__: function (form, baseSpec) {
-            this.$super(form, baseSpec);
-            this.controlElement.appearance = "numeric";
+        init: function (mug, form, baseSpec) {
+            Text.init(mug, form, baseSpec);
+            mug.controlElement.appearance = "numeric";
         }
     });
 
-    var Secret = BaseMug.$extend({
+    var Secret = util.extend(defaultOptions, {
         typeName: 'Password',
         icon: 'icon-key',
-        __init__: function (form, baseSpec) {
-            this.$super(form, baseSpec);
-            this.controlElement.tagName = "secret";
-            this.bindElement.dataType = "xsd:string";
+        init: function (mug, form, baseSpec) {
+            mug.controlElement.tagName = "secret";
+            mug.bindElement.dataType = "xsd:string";
         }
     });
 
-    var Int = BaseMug.$extend({
+    var Int = util.extend(defaultOptions, {
         typeName: 'Integer',
         icon: 'icon-vellum-numeric',
-        __init__: function (form, baseSpec) {
-            this.$super(form, baseSpec);
-            this.controlElement.tagName = "input";
-            this.bindElement.dataType = "xsd:int";
+        init: function (mug, form, baseSpec) {
+            mug.controlElement.tagName = "input";
+            mug.bindElement.dataType = "xsd:int";
         }
     });
 
-    var Audio = BaseMug.$extend({
+    var Audio = util.extend(defaultOptions, {
         typeName: 'Audio Capture',
         icon: 'icon-vellum-audio-capture',
         isODKOnly: true,
-        __init__: function (form, baseSpec) {
-            this.$super(form, baseSpec);
-            this.controlElement.tagName = "upload";
-            this.controlElement.mediaType = "audio/*"; /* */
-            this.bindElement.dataType = "binary";
+        init: function (mug, form, baseSpec) {
+            mug.controlElement.tagName = "upload";
+            mug.controlElement.mediaType = "audio/*"; /* */
+            mug.bindElement.dataType = "binary";
         },
         processSpec: function (spec) {
             spec.controlElement.mediaType = {
@@ -781,51 +789,49 @@ define([
         }
     });
 
-    var Image = Audio.$extend({
+    var Image = util.extend(Audio, {
         typeName: 'Image Capture',
         icon: 'icon-camera',
         isODKOnly: true,
-        __init__: function (form, baseSpec) {
-            this.$super(form, baseSpec);
-            this.controlElement.tagName = "upload";
-            this.controlElement.mediaType = "image/*"; /* */
-            this.bindElement.dataType = "binary";
+        init: function (mug, form, baseSpec) {
+            Audio.init(mug, form, baseSpec);
+            mug.controlElement.tagName = "upload";
+            mug.controlElement.mediaType = "image/*"; /* */
+            mug.bindElement.dataType = "binary";
         }
     });
 
-    var Video = Audio.$extend({
+    var Video = util.extend(Audio, {
         typeName: 'Video Capture',
         icon: 'icon-facetime-video',
         isODKOnly: true,
-        __init__: function (form, baseSpec) {
-            this.$super(form, baseSpec);
-            this.controlElement.tagName = "upload";
-            this.controlElement.mediaType = "video/*"; /* */
-            this.bindElement.dataType = "binary";
+        init: function (mug, form, baseSpec) {
+            Audio.init(mug, form, baseSpec);
+            mug.controlElement.tagName = "upload";
+            mug.controlElement.mediaType = "video/*"; /* */
+            mug.bindElement.dataType = "binary";
         }
     });
 
-    var Geopoint = BaseMug.$extend({
+    var Geopoint = util.extend(defaultOptions, {
         typeName: 'GPS',
         icon: 'icon-map-marker',
         isODKOnly: true,
-        __init__: function (form, baseSpec) {
-            this.$super(form, baseSpec);
-            this.controlElement.tagName = "input";
-            this.bindElement.dataType = "geopoint";
+        init: function (mug, form, baseSpec) {
+            mug.controlElement.tagName = "input";
+            mug.bindElement.dataType = "geopoint";
         }
     });
 
-    var AndroidIntent = BaseMug.$extend({
+    var AndroidIntent = util.extend(defaultOptions, {
         typeName: 'Android App Callout',
         icon: 'icon-vellum-android-intent',
         isODKOnly: true,
         isTypeChangeable: false,
         intentTag: null,
-        __init__: function (form, baseSpec) {
-            this.$super(form, baseSpec);
-            this.controlElement.tagName = "input";
-            this.bindElement.dataType = "intent";
+        init: function (mug, form, baseSpec) {
+            mug.controlElement.tagName = "input";
+            mug.bindElement.dataType = "intent";
         },
         processSpec: function (spec) {
             spec.controlElement = $.extend(spec.controlElement, {
@@ -845,85 +851,80 @@ define([
             return spec;
         },
         // todo: move to spec system
-        getAppearanceAttribute: function () {
-            return 'intent:' + this.dataElement.nodeID;
+        getAppearanceAttribute: function (mug) {
+            return 'intent:' + mug.dataElement.nodeID;
         }
     });
 
-    var Barcode = BaseMug.$extend({
+    var Barcode = util.extend(defaultOptions, {
         typeName: 'Barcode Scan',
         icon: 'icon-barcode',
         isODKOnly: true,
-        __init__: function (form, baseSpec) {
-            this.$super(form, baseSpec);
-            this.controlElement.tagName = "input";
-            this.bindElement.dataType = "barcode";
+        init: function (mug, form, baseSpec) {
+            mug.controlElement.tagName = "input";
+            mug.bindElement.dataType = "barcode";
         }
     });
 
-    var Date = BaseMug.$extend({
+    var Date = util.extend(defaultOptions, {
         typeName: 'Date',
         icon: 'icon-calendar',
-        __init__: function (form, baseSpec) {
-            this.$super(form, baseSpec);
-            this.controlElement.tagName = "input";
-            this.bindElement.dataType = "xsd:date";
+        init: function (mug, form, baseSpec) {
+            mug.controlElement.tagName = "input";
+            mug.bindElement.dataType = "xsd:date";
         }
     });
 
-    var DateTime = BaseMug.$extend({
+    var DateTime = util.extend(defaultOptions, {
         typeName: 'Date and Time',
         icon: 'icon-vellum-datetime',
-        __init__: function (form, baseSpec) {
-            this.$super(form, baseSpec);
-            this.controlElement.tagName = "input";
-            this.bindElement.dataType = "xsd:dateTime";
+        init: function (mug, form, baseSpec) {
+            mug.controlElement.tagName = "input";
+            mug.bindElement.dataType = "xsd:dateTime";
         }
     });
 
-    var Time = BaseMug.$extend({
+    var Time = util.extend(defaultOptions, {
         typeName: 'Time',
         icon: 'icon-time',
-        __init__: function (form, baseSpec) {
-            this.$super(form, baseSpec);
-            this.controlElement.tagName = "input";
-            this.bindElement.dataType = "xsd:time";
+        init: function (mug, form, baseSpec) {
+            mug.controlElement.tagName = "input";
+            mug.bindElement.dataType = "xsd:time";
         }
     });
 
-    var Long = Int.$extend({
+    var Long = util.extend(Int, {
         typeName: 'Long',
         icon: 'icon-vellum-long',
-        __init__: function (form, baseSpec) {
-            this.$super(form, baseSpec);
-            this.bindElement.dataType = "xsd:long";
+        init: function (mug, form, baseSpec) {
+            Int.init(mug, form, baseSpec);
+            mug.bindElement.dataType = "xsd:long";
         }
     });
 
-    var Double = Int.$extend({
+    var Double = util.extend(Int, {
         typeName: 'Decimal',
         icon: 'icon-vellum-decimal',
-        __init__: function (form, baseSpec) {
-            this.$super(form, baseSpec);
-            this.bindElement.dataType = "xsd:double";
+        init: function (mug, form, baseSpec) {
+            Int.init(mug, form, baseSpec);
+            mug.bindElement.dataType = "xsd:double";
         }
     });
 
-    var Item = BaseMug.$extend({
+    var Item = util.extend(defaultOptions, {
         typeName: 'Choice',
         icon: 'icon-circle-blank',
         isTypeChangeable: false,
-        getIcon: function () {
-            if (this.parentMug.__className === "Select") {
+        getIcon: function (mug) {
+            if (mug.parentMug.__className === "Select") {
                 return 'icon-circle-blank';
             } else {
                 return 'icon-check-empty';
             }
         },
-        __init__: function (form, baseSpec) {
-            this.$super(form, baseSpec);
-            this.controlElement.tagName = "item";
-            this.controlElement.defaultValue = this.form.generate_item_label();
+        init: function (mug, form, baseSpec) {
+            mug.controlElement.tagName = "item";
+            mug.controlElement.defaultValue = mug.form.generate_item_label();
         },
         processSpec: function (spec) {
             var c = spec.controlElement;
@@ -947,13 +948,12 @@ define([
         }
     });
 
-    var Trigger = BaseMug.$extend({
+    var Trigger = util.extend(defaultOptions, {
         typeName: 'Label',
         icon: 'icon-tag',
-        __init__: function (form, baseSpec) {
-            this.$super(form, baseSpec);
-            this.controlElement.tagName = "trigger";
-            this.controlElement.showOKCheckbox = false;
+        init: function (mug, form, baseSpec) {
+            mug.controlElement.tagName = "trigger";
+            mug.controlElement.showOKCheckbox = false;
         },
         processSpec: function (spec) {
             spec.bindElement.dataType.presence = 'notallowed';
@@ -970,26 +970,27 @@ define([
 
             return spec;
         },
-        getAppearanceAttribute: function () {
-            return this.controlElement.showOKCheckbox ? null : 'minimal';
+        getAppearanceAttribute: function (mug) {
+            return mug.controlElement.showOKCheckbox ? null : 'minimal';
         }
     });
 
-    var BaseSelect = BaseMug.$extend({
+    var BaseSelect = util.extend(defaultOptions, {
         validChildTypes: ["Item"],
         afterInsert: function (form, mug) {
-            var item = Item.prototype.__className;
+            var item = "Item";
             form.createQuestion(mug, 'into', item, true);
             form.createQuestion(mug, 'into', item, true);
-        }
+        },
+        init: function (mug, form, baseSpec) {}
     });
 
-    var MSelect = BaseSelect.$extend({
+    var MSelect = util.extend(BaseSelect, {
         typeName: 'Multiple Answer',
         icon: 'icon-vellum-multi-select',
-        __init__: function (form, baseSpec) {
-            this.$super(form, baseSpec);
-            this.controlElement.tagName = "select";
+        init: function (mug, form, baseSpec) {
+            BaseSelect.init(mug, form, baseSpec);
+            mug.controlElement.tagName = "select";
         },
         processSpec: function (spec) {
             spec.bindElement.dataType.visibility = "hidden";
@@ -998,24 +999,23 @@ define([
         defaultOperator: "selected"
     });
 
-    var Select = MSelect.$extend({
+    var Select = util.extend(MSelect, {
         typeName: 'Single Answer',
         icon: 'icon-vellum-single-select',
-        __init__: function (form, baseSpec) {
-            this.$super(form, baseSpec);
-            this.controlElement.tagName = "select1";
+        init: function (mug, form, baseSpec) {
+            MSelect.init(mug, form, baseSpec);
+            mug.controlElement.tagName = "select1";
         },
         defaultOperator: null
     });
 
-    var Group = BaseMug.$extend({
+    var Group = util.extend(defaultOptions, {
         typeName: 'Group',
         icon: 'icon-folder-open',
         isSpecialGroup: true,
         isTypeChangeable: false,
-        __init__: function (form, baseSpec) {
-            this.$super(form, baseSpec);
-            this.controlElement.tagName = "group";
+        init: function (mug, form, baseSpec) {
+            mug.controlElement.tagName = "group";
         },
         processSpec: function (spec) {
             spec.controlElement.hintLabel.presence = "notallowed";
@@ -1030,26 +1030,25 @@ define([
     // This is just a group, but appearance = 'field-list' displays it as a list
     // of grouped questions.  It's a separate question type because it can't
     // nest other group types and it has a very different end-user functionality
-    var FieldList = Group.$extend({
+    var FieldList = util.extend(Group, {
         typeName: 'Question List',
         icon: 'icon-reorder',
         isSpecialGroup: true,
         isTypeChangeable: false,
-        __init__: function (form, baseSpec) {
-            this.$super(form, baseSpec);
-            this.controlElement.tagName = "group";
-            this.setAppearanceAttribute('field-list');
+        init: function (mug, form, baseSpec) {
+            Group.init(mug, form, baseSpec);
+            mug.setAppearanceAttribute('field-list');
         },
     });
 
-    var Repeat = Group.$extend({
+    var Repeat = util.extend(Group, {
         typeName: 'Repeat Group',
         icon: 'icon-retweet',
         isSpecialGroup: true,
         isTypeChangeable: false,
-        __init__: function (form, baseSpec) {
-            this.$super(form, baseSpec);
-            this.controlElement.tagName = "repeat";
+        init: function (mug, form, baseSpec) {
+            Group.init(mug, form, baseSpec);
+            mug.controlElement.tagName = "repeat";
         },
         processSpec: function (spec) {
             spec.controlElement = $.extend(spec.controlElement, {}, {
@@ -1072,7 +1071,6 @@ define([
         }
     });
    
-
     function MugTypesManager(baseSpec, mugTypes) {
         var _this = this;
         this.spec = baseSpec;
@@ -1089,7 +1087,7 @@ define([
                 'Group', 'Repeat', 'FieldList');
 
         _.each(this.auxiliaryTypes, function (type) {
-            type.prototype.validChildTypes = [];
+            type.validChildTypes = [];
         });
 
         _.each(this.normalTypes, function (Mug, name) {
@@ -1104,37 +1102,57 @@ define([
             }
 
             // TODO: figure out how to get isinstance working
-            if (!Mug.prototype.validChildTypes) {
-                Mug.prototype.validChildTypes = validChildTypes;
+            if (!Mug.validChildTypes) {
+                Mug.validChildTypes = validChildTypes;
             }
         });
 
         _.each(this.allTypes, function (Mug, name) {
-            Mug.prototype.__className = name;
+            Mug.__className = name;
 
             // set on this for easy access
             _this[name] = Mug;
         });
     }
     MugTypesManager.prototype = {
-        make: function () {
-            var args = Array.prototype.slice.call(arguments),
-                MugType = this.allTypes[args[0]],
-                mugArgs = args.slice(1).concat([this.spec]);
-            return applyToConstructor(MugType, mugArgs);
+        make: function (typeName, form, copyFrom) {
+            var mugType = this.allTypes[typeName];
+            return new Mug(mugType, form, this.spec, copyFrom);
+        },
+        changeType: function (mug, typeName) {
+            var form = mug.form,
+                children = form.getChildren(mug);
+
+            if (children.length && (typeName.indexOf("Select") === -1 || 
+                                    typeName.indexOf("Dynamic") !== -1)) 
+            {
+                throw "you can't change a Multiple/Single Choice question to a non-Choice " +
+                      "question if it has Choices. Please remove all Choices " +
+                      "and try again.";
+            }
+        
+            mug.setOptions(this.allTypes[typeName]);
+
+            if (typeName.indexOf("Select") !== -1) {
+                _.each(children, function (childMug) {
+                    form.fire({
+                        type: 'parent-question-type-change',
+                        childMug: childMug
+                    });
+                });
+            }
+
+            form.fire({
+                type: 'question-type-change',
+                qType: typeName,
+                mug: mug
+            });
+            form.fireChange(mug);
         }
     };
 
-    function applyToConstructor(ctor, args) {
-        var new_obj = Object.create(ctor.prototype);
-        var ctor_ret = ctor.apply(new_obj, args);
-
-        // Some constructors return a value; make sure to use it!
-        return ctor_ret !== undefined ? ctor_ret: new_obj;
-    }
-
     return {
-        BaseMug: BaseMug,
+        Mug: Mug,
         baseMugTypes: {
             normal: {
                 "AndroidIntent": AndroidIntent,
@@ -1156,7 +1174,7 @@ define([
                 "Repeat": Repeat,
                 "Secret": Secret,
                 "Select": Select,
-                "Text": TextQuestion,
+                "Text": Text,
                 "Time": Time,
                 "Trigger": Trigger,
                 "Video": Video

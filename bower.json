@@ -35,7 +35,6 @@
         "langcodes": "dimagi/langcodes",
         "XMLWriter": "dimagi/XMLWriter",
         "MediaUploader": "dimagi/MediaUploader",
-        "classy": "mitsuhiko/classy#1.4",
         "xpath": "dimagi/js-xpath",
         "bootstrap-better-typeahead": "ptnplanet/Bootstrap-Better-Typeahead"
     },

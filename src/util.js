@@ -30,6 +30,13 @@ define([
 
     var that = {};
 
+    // deep extend
+    that.extend = function () {
+        var args = Array.prototype.slice.call(arguments);
+
+        return $.extend.apply(null, [true, {}].concat(args));
+    };
+
     that.langCodeToName = {};
     _.each(langCodes, function (lang) {
         var name = lang.names[0];

@@ -350,29 +350,6 @@ define([
             }
         },
         /**
-         * Replace a Mug that already exists in a tree with a new
-         * one.  It is up to the caller to ensure that the MT
-         * ufids and other properties match up as required.
-         * Use with caution.
-         * @param oldMug
-         * @param newMug
-         * @param treeType
-         *
-         * @return - true if a replacement occurred. False if no match was found for oldMug
-         */
-        replaceMug: function (oldMug, newMug, treeType){
-            var tree = treeType === 'data' ? this.dataTree : this.controlTree;
-            tree.treeMap(function (node) {
-                if(node.getValue() === oldMug){
-                    node.setValue(newMug);
-                    // todo: encapsulate this better with same property
-                    // references in Form.insertMug() and Form.getNodeFromMug()
-                    newMug['_node_' + treeType] = node;
-                }
-            });
-            newMug.parentMug = oldMug.parentMug;
-        },
-        /**
          * Move a mug from its current place (in both the Data and Control trees) to
          * the position specified by the arguments,
          */
@@ -417,56 +394,7 @@ define([
             this._logicManager.updatePath(mug.ufid, oldPath, currentPath);
         },
         changeQuestionType: function (mug, questionType) {
-            // check preconditions - if this is a select question with
-            // choices, you're only allowed to change it to another
-            // select question
-            var _this = this,
-                children = this.getChildren(mug);
-            if (children.length > 0 && (
-                    questionType.indexOf("Select") === -1 || 
-                    questionType.indexOf("Dynamic") !== -1)) 
-            {
-                    throw "you can't change a Multiple/Single Choice question to a non-Choice " +
-                          "question if it has Choices. Please remove all Choices " +
-                          "and try again.";
-            }
-            
-            var newMug = this.mugTypes.make(questionType, this);
-            newMug.ufid = mug.ufid;
-
-            // hack: force removal of the appearance attribute since this is statically
-            // determined already by the question type
-            if (mug.controlElement && mug.controlElement.appearance) {
-                delete mug.controlElement.appearance;
-            }
-            // and do the same thing for the 'mediatype' property as well
-            if (mug.controlElement && mug.controlElement.mediaType) {
-                delete mug.controlElement.mediaType;
-            }
-
-            // update trees
-            this.replaceMug(mug, newMug, 'data');
-            this.replaceMug(mug, newMug, 'control');
-
-            newMug.copyAttrs(mug);
-            
-            if (newMug.__className.indexOf("Select") !== -1) {
-                _.each(this.getChildren(newMug), function (childMug) {
-                    _this.fire({
-                        type: 'parent-question-type-change',
-                        childMug: childMug
-                    });
-                });
-            }
-
-            this.fire({
-                type: 'question-type-change',
-                qType: questionType,
-                mug: newMug
-            });
-            this.fireChange(newMug);
-
-            return newMug;
+            this.mugTypes.changeType(mug, questionType);
         },
         getChildren: function (mug) {
             var node = this.controlTree.getNodeFromMug(mug),
@@ -501,14 +429,7 @@ define([
          */
         _duplicateMug: function (mug, parentMug, depth) {
             depth = depth || 0;
-            // clone mug and give everything new unique IDs
-            var duplicate = this.mugTypes.make(mug.__className, this);
-            duplicate.copyAttrs(mug);
-
-            // ensure consistency            
-            duplicate.ufid = util.get_guid();
-            // clear existing event handlers for the source question
-            util.eventuality(duplicate);
+            var duplicate = this.mugTypes.make(mug.__className, this, mug);
 
             if (depth === 0 && mug.bindElement && mug.bindElement.nodeID) {
                 var newQuestionID = this.generate_question_id(
@@ -530,7 +451,7 @@ define([
                 duplicate.controlElement.defaultValue = newItemValue;
             }
          
-            // insert mugtype into data and UI trees
+            // insert mug into data and UI trees
             if (depth > 0) {
                 this.insertQuestion(duplicate, parentMug, 'into', true);
             } else {
@@ -641,13 +562,16 @@ define([
                 e: e
             });
 
-
             this.fireChange(mug);
         },
         createQuestion: function (refMug, position, newMugType, isInternal) {
             var mug = this.mugTypes.make(newMugType, this);
+            if (mug.dataElement) {
+                mug.dataElement.nodeID = mug.bindElement.nodeID = 
+                    this.generate_question_id();
+            }
             this.insertQuestion(mug, refMug, position, isInternal);
-            if (mug.isODKOnly) {
+            if (mug.options.isODKOnly) {
                 this.updateError({
                     message: 'This question type will ONLY work with Android phones!',
                     level: 'form-warning'
@@ -669,7 +593,7 @@ define([
                 isInternal: isInternal
             });
             if (!isInternal) {
-                mug.afterInsert(this, mug);
+                mug.options.afterInsert(this, mug);
             }
         },
         getAbsolutePath: function (mug, excludeRoot) {

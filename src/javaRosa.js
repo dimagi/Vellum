@@ -1471,7 +1471,7 @@ define([
                 editable: 'w',
                 visibility: 'visible',
                 presence: function (mug) {
-                    return m.isSpecialGroup ? 'notallowed' : 'optional';
+                    return mug.isSpecialGroup ? 'notallowed' : 'optional';
                 },
                 lstring: "Validation Error Message ID",
                 widget: iTextIDWidget,

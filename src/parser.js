@@ -171,9 +171,8 @@ define([
             keyAttr = $el.popAttr('key'),
             mug = form.mugTypes.make('DataBindOnly', form);
         
-        mug.dataElement.nodeID = nodeID;
+        mug.dataElement.nodeID = mug.bindElement.nodeID = nodeID;
         mug.dataElement.dataValue = nodeVal;
-        mug.bindElement.nodeID = nodeID;
 
         if (extraXMLNS && (extraXMLNS !== form.formUuid)) {
             mug.dataElement.xmlnsAttr = extraXMLNS;
@@ -353,22 +352,15 @@ define([
     }
 
     function classifyAndCreateMug (form, nodePath, cEl, oldEl) {
-        var oldMug = form.getMugByPath(nodePath), 
+        var mug = form.getMugByPath(nodePath),
             $cEl = oldEl || cEl,
-            mug, tagName, bindEl, dataEl, dataType, 
+            tagName, bindEl, dataEl, dataType, 
             appearance = $cEl.popAttr('appearance'),
             mediaType = $cEl.popAttr('mediatype') || null,
             MugClass;
         mediaType = mediaType ? mediaType.toLowerCase() : mediaType;
 
         tagName = $cEl[0].nodeName;
-        if (oldMug && oldMug.bindElement) {
-            dataType = oldMug.bindElement.dataType;
-            if (dataType) {
-                dataType = dataType.replace('xsd:',''); //strip out extraneous namespace
-                dataType = dataType.toLowerCase();
-            }
-        }
 
         //broadly categorize
         tagName = tagName.toLowerCase();
@@ -383,6 +375,11 @@ define([
             if ($cEl.popAttr('readonly') === 'true()') {
                 MugClass = 'Trigger';
             } else {
+                dataType = mug && mug.bindElement.dataType;
+                if (dataType) {
+                    dataType = dataType.replace('xsd:',''); //strip out extraneous namespace
+                    dataType = dataType.toLowerCase();
+                }
                 MugClass = mugTypeFromInput(dataType, appearance);
             }
         }else if (tagName === 'item') {
@@ -402,15 +399,12 @@ define([
             // unknown question type
             MugClass = 'ReadOnly';
         }
-        
-        // create new mug and copy old data to newly generated mug
-        mug = form.mugTypes.make(MugClass, form);
-        if(oldMug) {
-            mug.copyAttrs(oldMug);
-            mug.ufid = oldMug.ufid;
 
-            //replace in dataTree
-            form.replaceMug(oldMug, mug, 'data');
+        if (mug) {
+            form.changeQuestionType(mug, MugClass);
+        } else {
+            // items only
+            mug = form.mugTypes.make(MugClass, form);
         }
 
         if (appearance) {

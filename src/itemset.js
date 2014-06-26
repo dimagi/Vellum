@@ -41,24 +41,23 @@ define([
         NONE = "NONE",
         CUSTOM = "CUSTOM";
 
-    var Itemset = mugs.BaseMug.$extend({
+    var Itemset = util.extend(mugs.Mug.prototype.options, {
         typeName: 'External Data',
         icon: 'icon-circle-blank',
         isTypeChangeable: false,
         // have to delete the parent select
         isRemoveable: false,
         isCopyable: false,
-        getIcon: function () {
-            if (this.parentMug.__className === "SelectDynamic") {
+        getIcon: function (mug) {
+            if (mug.parentMug.__className === "SelectDynamic") {
                 return 'icon-circle-blank';
             } else {
                 return 'icon-check-empty';
             }
         },
-        __init__: function (form, baseSpec) {
-            this.$super(form, baseSpec);
-            this.controlElement.tagName = "itemset";
-            this.controlElement.itemsetData = new mugs.BoundPropertyMap(this.form, {
+        init: function (mug, form, baseSpec) {
+            mug.controlElement.tagName = "itemset";
+            mug.controlElement.itemsetData = new mugs.BoundPropertyMap(mug.form, {
                 // avoids serialization error
                 nodeset: ''
             });
@@ -98,26 +97,8 @@ define([
     });
 
     function afterDynamicSelectInsert(form, mug) {
-        var itemset = Itemset.prototype.__className;
-        form.createQuestion(mug, 'into', itemset, true);
+        form.createQuestion(mug, 'into', "Itemset", true);
     }
-
-    var MSelectDynamic = mugTypes.MSelect.$extend({
-        typeName: 'Multiple Answer - Dynamic List',
-        limitTypeChangeTo: ["SelectDynamic"],
-        validChildTypes: ["Itemset"],
-        maxChildren: 1,
-        afterInsert: afterDynamicSelectInsert,
-    });
-
-    var SelectDynamic = mugTypes.Select.$extend({
-        typeName: 'Single Answer - Dynamic List',
-        limitTypeChangeTo: ["MSelectDynamic"],
-        validChildTypes: ["Itemset"],
-        maxChildren: 1,
-        afterInsert: afterDynamicSelectInsert
-    });
-
 
     $.vellum.plugin("itemset", {}, {
         getSelectQuestions: function () {
@@ -130,8 +111,20 @@ define([
             var types = this.__callOld();
             types.auxiliary.Itemset = Itemset;
             types.normal = $.extend(types.normal, {
-                "MSelectDynamic": MSelectDynamic,
-                "SelectDynamic": SelectDynamic
+                "MSelectDynamic": util.extend(mugTypes.MSelect, {
+                    typeName: 'Multiple Answer - Dynamic List',
+                    limitTypeChangeTo: ["SelectDynamic"],
+                    validChildTypes: ["Itemset"],
+                    maxChildren: 1,
+                    afterInsert: afterDynamicSelectInsert,
+                }),
+                "SelectDynamic": util.extend(mugTypes.Select, {
+                    typeName: 'Single Answer - Dynamic List',
+                    limitTypeChangeTo: ["MSelectDynamic"],
+                    validChildTypes: ["Itemset"],
+                    maxChildren: 1,
+                    afterInsert: afterDynamicSelectInsert
+                })
             });
             return types;
         }

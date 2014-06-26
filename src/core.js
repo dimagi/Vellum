@@ -188,11 +188,12 @@ define([
             var groupSlug = groupData.group[0];
 
             var getQuestionData = function (questionType) {
-                var Mug = _this.data.core.mugTypes[questionType],
+                var mugType = _this.data.core.mugTypes[questionType],
                     questionData = [
                         questionType, 
-                        Mug.prototype.typeName, 
-                        Mug.prototype.icon];
+                        mugType.typeName, 
+                        mugType.icon
+                    ];
 
                 _this.data.core.QUESTIONS_IN_TOOLBAR.push(questionType);
                 _this.data.core.QUESTION_TYPE_TO_GROUP[questionType] = groupSlug;
@@ -205,7 +206,7 @@ define([
             }
 
             groupData.group[2] = groupData.group[2] || 
-                _this.data.core.mugTypes[groupData.group[0]].prototype.icon;
+                _this.data.core.mugTypes[groupData.group[0]].icon;
             $questionGroupContainer.append(
                 new QuestionTypeGroup(groupData, _this));
         });
@@ -662,15 +663,14 @@ define([
     // separate from the rest of the UI code.
     fn._createJSTree = function () {
         typeData = {};
-        _(this.data.core.mugTypes.allTypes).each(function (Mug, typeName) {
+        _(this.data.core.mugTypes.allTypes).each(function (type, typeName) {
             typeData[typeName] = {
-                max_children: Mug.prototype.maxChildren,
+                max_children: type.maxChildren,
                 valid_children: 
-                    Mug.prototype.validChildTypes.length ?  
-                    Mug.prototype.validChildTypes : "none"
+                    type.validChildTypes.length ? type.validChildTypes : "none"
             };
         });
-        validRootChildren = this.data.core.mugTypes.Group.prototype
+        validRootChildren = this.data.core.mugTypes.Group
             .validChildTypes.concat(['DataBindOnly']);
 
         var $tree, _this = this;
@@ -767,7 +767,7 @@ define([
                 mug = _this.data.core.form.getMugByUFID(ufid);
 
             _this.displayMugProperties(mug);
-            _this.activateQuestionTypeGroup(mug);
+            _this.activateQuestionTypeGroup(mug.__className);
         }).bind("move_node.jstree", function (e, data) {
             var form = _this.data.core.form,
                 mug = form.getMugByUFID($(data.rslt.o).attr('id')),
@@ -897,8 +897,9 @@ define([
     fn.overrideJSTreeIcon = function (mug) {
         var $questionNode = this.$f.find('#' + mug.ufid),
             iconClass;
-        if (typeof mug.getIcon === 'undefined') {
-            iconClass = mug.constructor.prototype.icon;
+        if (!mug.getIcon) {
+            // mug is the question type definition, not an instance
+            iconClass = mug.icon;
         } else {
             iconClass = mug.getIcon();
         }
@@ -908,14 +909,13 @@ define([
                 .attr('class', 'jstree-icon')
                 .addClass(iconClass);
         }
-        this.activateQuestionTypeGroup(mug);
+        this.activateQuestionTypeGroup(mug.__className || mug.typeName);
     };
 
-    fn.activateQuestionTypeGroup = function (mug) {
+    fn.activateQuestionTypeGroup = function (className) {
         this.resetQuestionTypeGroups();
 
-        var className = mug.__className || mug.prototype.__className,
-            groupSlug = this.data.core.QUESTION_TYPE_TO_GROUP[className];
+        var groupSlug = this.data.core.QUESTION_TYPE_TO_GROUP[className];
         if (groupSlug && className !== 'MSelectDynamic' && className !== 'SelectDynamic') {
             this.$f
                 .find('.' + getQuestionTypeGroupClass(groupSlug))
@@ -1507,7 +1507,7 @@ define([
         var $baseToolbar = $(question_toolbar({
             isDeleteable: this.isMugRemoveable(mug,
                     this.data.core.form.getAbsolutePath(mug)),
-            isCopyable: mug.isCopyable
+            isCopyable: mug.options.isCopyable
         }));
         $baseToolbar.find('.fd-button-remove').click(function () {
             var mug = _this.getCurrentlySelectedMug();
@@ -1531,16 +1531,22 @@ define([
     fn.getQuestionTypeChanger = function (mug) {
         var _this = this;
         var getQuestionList = function (mug) {
-            var questions = mug.limitTypeChangeTo || _this.data.core.QUESTIONS_IN_TOOLBAR,
+            var currentType = mug.__className,
+                questions = (mug.options.limitTypeChangeTo || 
+                     _this.data.core.QUESTIONS_IN_TOOLBAR),
                 ret = [];
 
             for (var i = 0; i < questions.length; i++) {
-                var q = _this.data.core.mugTypes[questions[i]];
-                if (q.prototype.isTypeChangeable && mug.$class.prototype !== q.prototype) {
+                var typeName = questions[i],
+                    q = _this.data.core.mugTypes[typeName];
+                if (q.isTypeChangeable && currentType !== typeName &&
+                    (!q.limitTypeChangeTo || 
+                     q.limitTypeChangeTo.indexOf(currentType) !== -1))
+                {
                     ret.push({
                         slug: questions[i],
-                        name: q.prototype.typeName,
-                        icon: q.prototype.icon
+                        name: q.typeName,
+                        icon: q.icon
                     });
                 }
             }
@@ -1551,7 +1557,7 @@ define([
 
         var $questionTypeChanger = $(question_type_changer({
             currentQuestionIcon: mug.getIcon(),
-            currentTypeName: mug.typeName,
+            currentTypeName: mug.options.typeName,
             questions: changeable ? getQuestionList(mug) : []
         }));
         $questionTypeChanger.find('.change-question').click(function (e) {
@@ -1850,7 +1856,7 @@ define([
     };
 
     fn.isMugRemoveable = function (mug, path) {
-        return mug.isRemoveable;
+        return mug.options.isRemoveable;
     };
 
     fn.isPropertyLocked = function (mugPath, propertyPath) {
@@ -1862,7 +1868,7 @@ define([
     };
 
     fn.isMugTypeChangeable = function (mug, mugPath) {
-        return mug.isTypeChangeable;
+        return mug.options.isTypeChangeable;
     };
 
     fn.beforeSerialize = function () {
