@@ -361,9 +361,13 @@ define([
             }
         });
 
-        var curMug = _this.getCurrentlySelectedMug();
+        this.refreshCurrentMug();
+    };
+
+    fn.refreshCurrentMug = function () {
+        var curMug = this.getCurrentlySelectedMug();
         if (curMug) {
-            _this.displayMugProperties(curMug);
+            this.displayMugProperties(curMug);
         }
     };
 
@@ -384,10 +388,6 @@ define([
     /**
      * Set the values for the Confirm Modal Dialog
      * (box that pops up that has a confirm and cancel button)
-     * @param confButName
-     * @param confFunction
-     * @param cancelButName
-     * @param cancelButFunction
      */
     fn.setDialogInfo = function (message, confButName, confFunction,
                                  cancelButName, cancelButFunction, title) {
@@ -775,8 +775,7 @@ define([
                 position = data.rslt.p;
 
             form.moveMug(mug, refMug, position);
-
-            _this.displayMugProperties(_this.getCurrentlySelectedMug());
+            _this.refreshCurrentMug();
         }).bind("deselect_all.jstree deselect_node.jstree", function (e, data) {
             _this.resetQuestionTypeGroups();
         }).bind('before.jstree', function (e, data) {
@@ -1107,11 +1106,10 @@ define([
 
         form.on('question-type-change', function (e) {
             _this.jstree("set_type", e.qType, '#' + e.mug.ufid);
-            
-            // update question type changer
-            _this.$f.find('.fd-question-changer')
-                .after(_this.getQuestionTypeChanger(e.mug))
-                .remove();
+
+            if (e.mug === _this.getCurrentlySelectedMug()) {
+                _this.refreshCurrentMug();
+            }
         }).on('parent-question-type-change', function (e) {
             _this.overrideJSTreeIcon(e.childMug);
         }).on('question-move', function (e) {
@@ -1395,7 +1393,7 @@ define([
             done(val);
             _this.data.core.hasXPathEditorChanged = false;
             $editor.hide();
-            _this.displayMugProperties(_this.getCurrentlySelectedMug());
+            _this.refreshCurrentMug();
         };
         options.change = function () {
             _this.data.core.hasXPathEditorChanged = true;
