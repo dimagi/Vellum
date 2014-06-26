@@ -351,7 +351,7 @@ define([
         }
     }
 
-    function classifyAndCreateMug (form, nodePath, cEl, oldEl) {
+    function parseControlElement(form, nodePath, cEl, oldEl) {
         var mug = form.getMugByPath(nodePath),
             $cEl = oldEl || cEl,
             tagName, bindEl, dataEl, dataType, 
@@ -532,7 +532,7 @@ define([
                 el = $(el.children('repeat')[0]);
             }
 
-            var mug = classifyAndCreateMug(
+            var mug = form.vellum.parseControlElement(
                     form, getPathFromControlElement(el, form), el, oldEl);
 
             form.controlTree.insertMug(mug, 'into', parentMug);
@@ -684,6 +684,7 @@ define([
     return {
         parseXForm: parseXForm,
         parseDataElement: parseDataElement,
-        parseBindElement: parseBindElement
+        parseBindElement: parseBindElement,
+        parseControlElement: parseControlElement
     };
 });

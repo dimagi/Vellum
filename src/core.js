@@ -1882,6 +1882,10 @@ define([
         return parser.parseBindElement(form, el, path);
     };
 
+    fn.parseControlElement = function (form, path, $el, $parentEl) {
+        return parser.parseControlElement(form, path, $el, $parentEl);
+    };
+
     fn.contributeToModelXML = function (xmlWriter) {
     
     };
