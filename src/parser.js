@@ -414,7 +414,7 @@ define([
             mug.controlElement.setAttr(
                 'showOKCheckbox', appearance !== 'minimal');
         }
-        populateMug(form, mug, cEl);
+        populateMug(form, mug, cEl, oldEl);
 
         return mug;
     }
@@ -433,7 +433,7 @@ define([
         }
     }
                 
-    function populateMug (form, mug, cEl) {
+    function populateMug (form, mug, cEl, $parentEl) {
         if (mug.__className === "ReadOnly") {
             mug.controlElementRaw = cEl;
             return;
@@ -444,12 +444,11 @@ define([
             labelEl, hintEl, repeat_count, repeat_noaddremove;
 
         if(tag === 'repeat'){
-            labelEl = $cEl.parent().children('label');
-            hintEl = $cEl.parent().children('hint');
+            labelEl = $parentEl.children('label');
+            hintEl = $parentEl.children('hint');
             repeat_count = $cEl.popAttr('jr:count');
             repeat_noaddremove = parseBoolAttributeValue(
                 $cEl.popAttr('jr:noAddRemove'));
-
         } else {
             labelEl = $cEl.children('label');
             hintEl = $cEl.children('hint');
@@ -477,9 +476,6 @@ define([
                 valueRef: $cEl.children('value').attr('ref')
             }));
         }
-
-
-        form.intentManager.syncMugWithIntent(mug);
         
         // add any arbitrary attributes that were directly on the control
         mug.controlElement._rawAttributes = getAttributes(cEl);
@@ -541,21 +537,24 @@ define([
 
             form.controlTree.insertMug(mug, 'into', parentMug);
 
-            if (mug.__className !== "ReadOnly") {
-                var couldHaveChildren = [
-                    'repeat', 'group', 'fieldlist', 'select', 'select1'
-                ];
-                tagName = mug.controlElement.tagName.toLowerCase();
-                if(couldHaveChildren.indexOf(tagName) !== -1) {
-                    // recurse
-                    $(el).children().not('label').not('value').not('hint')
-                        .each(function () {
-                            eachFunc(this, mug);
-                        });
-                }
-                // update any remaining itext
-                Itext.updateForExistingMug(mug);
+            if (mug.__className === "ReadOnly") {
+                return;
             }
+            var couldHaveChildren = [
+                'repeat', 'group', 'fieldlist', 'select', 'select1'
+            ];
+            tagName = mug.controlElement.tagName.toLowerCase();
+            if(couldHaveChildren.indexOf(tagName) !== -1) {
+                // recurse
+                $(el).children().not('label').not('value').not('hint')
+                    .each(function () {
+                        eachFunc(this, mug);
+                    });
+            }
+
+            // update any remaining itext
+            Itext.updateForExistingMug(mug);
+            form.intentManager.syncMugWithIntent(mug);
         }
         controlsTree.each(function () {
             eachFunc(this, null);
