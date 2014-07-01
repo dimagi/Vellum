@@ -687,6 +687,10 @@ define([
             this.vellum.data.javaRosa.Itext.updateForNewMug(mug);
             this.intentManager.syncMugWithIntent(mug);
 
+            if (mug.__className === "Item") {
+                this._normalize_select_labelItextIds(mug);
+            }
+
             this.fire({
                 type: 'question-create',
                 mug: mug,
@@ -777,7 +781,10 @@ define([
 
             return count;
         },
-
+        getMugSiblings: function(mug) {
+            var siblings = _.without(this.getChildren(mug.parentMug), mug);
+            return siblings;
+        },
         /**
          * Generates a unique question ID (unique in this form) and
          * returns it as a string.
@@ -800,6 +807,26 @@ define([
         },
         generate_item_label: function () {
             return this._make_label('item');
+        },
+        /**
+         * Private method for normalizing labelItextID ids of Item siblings to prevent duplication
+         */
+        _normalize_select_labelItextIds: function(mug) {
+            var siblings = this.getMugSiblings(mug);
+            var isClear = false;
+            var counter = 1;
+            while(!isClear) {
+                isClear = true;
+                for(var i = 0; i < siblings.length; i++){
+                    var child = siblings[i];
+                    if(mug.controlElement.labelItextID.id === child.controlElement.labelItextID.id) {
+                        isClear = false;
+                        mug.controlElement.labelItextID.id += counter;
+                        counter += 1;
+                        break;
+                    }
+                }
+            }
         },
         /**
          * Private method for constructing unique questionIDs, labels for items, etc
