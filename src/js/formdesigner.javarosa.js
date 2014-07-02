@@ -1467,7 +1467,7 @@ formdesigner.plugins.javaRosa = function (options) {
                         }
                         // HACK replace &nbsp; with space because it is not a valid XML entity
                         xmlWriter.writeXML(
-                            $('<div>').append(val).clone().html().replace("&nbsp;", " "));
+                            $('<div>').append(val).clone().html().replace(/&nbsp;/g, " "));
                         xmlWriter.writeEndElement();
                     }
                     xmlWriter.writeEndElement();
