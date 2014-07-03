@@ -1128,9 +1128,19 @@ define([
                 _this.jstree('select_node', '#' + e.mug.ufid, true);
             }
         }).on('change', function (e) {
-            if (e.mug) {
-                _this.setTreeValidationIcon(e.mug);
+            try {
+                if (e.mug) {
+                    _this.setTreeValidationIcon(e.mug);
+                }
+            } catch (err) {
+                // Some changes can temporarily leave the form in a state where
+                // this will raise an exception (copying a question and you try
+                // to get errors for it before all of its elements have been
+                // populated).
+                // It might be better to add an option for these changes not to
+                // fire a change event.
             }
+
             _this.data.core.saveButton.fire('change');
         }).on('question-text-change', function (e) {
             var $node = $('#' + e.mugUfid);
