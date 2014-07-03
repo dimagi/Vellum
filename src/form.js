@@ -703,8 +703,11 @@ define([
          * Private method for constructing unique questionIDs, labels for items, etc
          */
         _make_label: function (prefixStr) {
-            var ret = prefixStr + this.question_counter;
-            this.question_counter += 1;
+            var ret;
+            do {
+                ret = prefixStr + this.question_counter;
+                this.question_counter += 1;
+            } while (this.questionIdCount(ret));
             return ret;
         },
         getExportTSV: function () {
