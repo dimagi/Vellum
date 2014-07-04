@@ -1309,8 +1309,7 @@ define([
                 data: this.getMugDisplayName(mug),
                 metadata: {
                     mug: mug,
-                    mugUfid: mug.ufid,
-                    dataID: mug.getDataElementID()
+                    mugUfid: mug.ufid
                 },
                 attr: {
                     id: mug.ufid,

@@ -396,13 +396,6 @@ define([
             this.options.init(this, this.form, this.baseSpec);
             this.__className = this.options.__className;
         },
-        getDataElementID: function () {
-            if (this.dataElement) {
-                return this.dataElement.nodeID;
-            } else {
-                return null;
-            }
-        },
         getAppearanceAttribute: function () {
             return this.options.getAppearanceAttribute(this);
         },
