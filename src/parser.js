@@ -171,7 +171,7 @@ define([
             keyAttr = $el.popAttr('key'),
             mug = form.mugTypes.make('DataBindOnly', form);
         
-        mug.dataElement.nodeID = mug.bindElement.nodeID = nodeID;
+        mug.dataElement.nodeID = nodeID;
         mug.dataElement.dataValue = nodeVal;
 
         if (extraXMLNS && (extraXMLNS !== form.formUuid)) {
@@ -626,7 +626,6 @@ define([
             calculateAttr: el.popAttr('calculate'),
             constraintAttr: el.popAttr('constraint'),
             dataType: el.popAttr('type'),
-            nodeID: getNodeIDFromPath(path),
             requiredAttr: parseBoolAttributeValue(el.popAttr('required')),
             preload: lookForNamespaced(el, "preload"),
             preloadParams: lookForNamespaced(el, "preloadParams")

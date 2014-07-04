@@ -180,12 +180,6 @@ define([
     };
 
     var baseBindSpecs = {
-        nodeID: {
-            editable: 'w',
-            visibility: 'visible',
-            presence: 'optional',
-            lstring: 'Bind Node ID'
-        },
         // part of the Mug type definition, so it's immutable
         dataType: {
             editable: 'w',
@@ -402,13 +396,6 @@ define([
             this.options.init(this, this.form, this.baseSpec);
             this.__className = this.options.__className;
         },
-        getBindElementID: function () {
-            if (this.bindElement) {
-                return this.bindElement.nodeID;
-            } else {
-                return null;
-            }
-        },
         getDataElementID: function () {
             if (this.dataElement) {
                 return this.dataElement.nodeID;
@@ -501,8 +488,6 @@ define([
             } 
             else if (this.dataElement) {
                 return this.dataElement.nodeID;
-            } else if (this.bindElement) {
-                return this.bindElement.nodeID;
             } else if (this.__className === "Item") {
                 return this.controlElement.defaultValue;
             } else {
@@ -599,15 +584,8 @@ define([
         getNodeID: function () {
             var nodeID;
 
-            // todo: there is no reason to have two nodeID properties.  remove
-            // bindElement's
-            if(this.bindElement) {
-                nodeID = this.bindElement.nodeID;
-            }
-            if(!nodeID){
-                if(this.dataElement) {
-                    nodeID = this.dataElement.nodeID;
-                }
+            if(this.dataElement) {
+                nodeID = this.dataElement.nodeID;
             }
             return nodeID || this.controlElement.defaultValue;
         },

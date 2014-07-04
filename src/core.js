@@ -980,10 +980,6 @@ define([
                         title: "Automatically rename to '" + newQuestionId + "'",
                         cssClasses: 'btn-primary',
                         action: function () {
-                            // Need to use this method because it handles
-                            // automatically changing dataElement and
-                            // bindElement's nodeID properties together.  Should
-                            // just have one.
                             mug.setPropertyValue(
                                 'dataElement', 'nodeID', newQuestionId);
                             _this.setUnsavedDuplicateNodeId(false);
@@ -1314,8 +1310,7 @@ define([
                 metadata: {
                     mug: mug,
                     mugUfid: mug.ufid,
-                    dataID: mug.getDataElementID(),
-                    bindID: mug.getBindElementID()
+                    dataID: mug.getDataElementID()
                 },
                 attr: {
                     id: mug.ufid,

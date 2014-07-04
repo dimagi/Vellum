@@ -107,7 +107,7 @@ define([
                     refMug = _this.form.getMugByPath(pathString);
 
                 if (!refMug && _this.opts.allowedDataNodeReferences.indexOf(pathWithoutRoot) === -1) {
-                    error.message.push("The question '" + mug.bindElement.nodeID + 
+                    error.message.push("The question '" + mug.dataElement.nodeID + 
                         "' references an unknown question " + path.toXPath() + 
                         " in its " + mug.getPropertyDefinition(property).lstring + ".");
 
