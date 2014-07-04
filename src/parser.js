@@ -611,8 +611,6 @@ define([
     function parseBindElement (form, el, mugPath) {
         var mug = form.getMugByPath(mugPath),
             path = el.popAttr('nodeset') || el.popAttr('ref'),
-            id = el.popAttr('id'),
-            nodeID = getNodeIDFromPath(path),
             Itext = form.vellum.data.javaRosa.Itext;
         
         if(!mug){
@@ -628,17 +626,11 @@ define([
             calculateAttr: el.popAttr('calculate'),
             constraintAttr: el.popAttr('constraint'),
             dataType: el.popAttr('type'),
+            nodeID: getNodeIDFromPath(path),
             requiredAttr: parseBoolAttributeValue(el.popAttr('required')),
             preload: lookForNamespaced(el, "preload"),
             preloadParams: lookForNamespaced(el, "preloadParams")
         };
-
-        if(id) {
-            attrs.nodeID = id;
-            attrs.nodeset = path;
-        } else {
-            attrs.nodeID = nodeID;
-        }
 
         // normalize this dataType ('int' and 'integer' are both valid).
         if(attrs.dataType && attrs.dataType.toLowerCase() === 'xsd:integer') { 
