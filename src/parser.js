@@ -621,7 +621,6 @@ define([
         }
 
         var attrs = {
-            appearance: el.popAttr('appearance'),
             relevantAttr: el.popAttr('relevant'),
             calculateAttr: el.popAttr('calculate'),
             constraintAttr: el.popAttr('constraint'),
