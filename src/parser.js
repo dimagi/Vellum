@@ -167,21 +167,21 @@ define([
         var $el = $(el),
             nodeID = el.nodeName, 
             nodeVal = $el.children().length ? null : $el.text(),
-            extraXMLNS = $el.popAttr('xmlns'),
-            keyAttr = $el.popAttr('key'),
+            extraXMLNS = $el.popAttr('xmlns') || null,
+            keyAttr = $el.popAttr('key') || null,
             mug = form.mugTypes.make('DataBindOnly', form);
         
-        mug.dataElement.nodeID = nodeID;
-        mug.dataElement.dataValue = nodeVal;
+        mug.p.nodeID = nodeID;
+        mug.p.dataValue = nodeVal;
 
         if (extraXMLNS && (extraXMLNS !== form.formUuid)) {
-            mug.dataElement.xmlnsAttr = extraXMLNS;
+            mug.p.xmlnsAttr = extraXMLNS;
         }
         if (keyAttr) {
-            mug.dataElement.keyAttr = keyAttr;
+            mug.p.keyAttr = keyAttr;
         }
         // add arbitrary attributes
-        mug.dataElement._rawAttributes = getAttributes(el);
+        mug.p.rawDataAttributes = getAttributes(el);
         return mug;
     }
             
@@ -211,18 +211,20 @@ define([
         // due to the fact that FF and Webkit store namespaced
         // values slightly differently, we have to look in 
         // a couple different places.
-        return element.popAttr("jr:" + reference) || element.popAttr("jr\\:" + reference);
+        return element.popAttr("jr:" + reference) || 
+            element.popAttr("jr\\:" + reference) || null;
     };
 
     // CONTROL PARSING FUNCTIONS
     function parseLabel(form, lEl, mug) {
-        var Itext = form.vellum.data.javaRosa.Itext;
-        var $lEl = $(lEl),
+        var Itext = form.vellum.data.javaRosa.Itext,
+            $lEl = $(lEl),
             labelVal = util.getXLabelValue($lEl),
             labelRef = getLabelRef($lEl),
-            cProps = mug.controlElement;
-        var labelItext;
-        cProps.label = labelVal;
+            labelItext;
+        if (labelVal) {
+            mug.p.label = labelVal;
+        }
         
         var newLabelItext = function (mug) {
             var item = new form.vellum.data.javaRosa.ItextItem({
@@ -241,50 +243,38 @@ define([
             labelItext = newLabelItext(mug);
         }
        
-        cProps.labelItextID = labelItext;
-        if (cProps.labelItextID.isEmpty()) {
+        if (labelItext.isEmpty()) {
             //if no default Itext has been set, set it with the default label
             if (labelVal) {
-                cProps.labelItextID.setDefaultValue(labelVal);
+                labelItext.setDefaultValue(labelVal);
             } else {
                 // or some sensible deafult
-                cProps.labelItextID.setDefaultValue(mug.getDefaultLabelValue());
+                labelItext.setDefaultValue(mug.getDefaultLabelValue());
             }
         }
+        mug.p.labelItextID = labelItext;
     }
 
     function parseHint (form, hEl, mug) {
         var Itext = form.vellum.data.javaRosa.Itext;
         var $hEl = $(hEl),
             hintVal = util.getXLabelValue($hEl),
-            hintRef = getLabelRef($hEl),
-            cProps = mug.controlElement;
+            hintRef = getLabelRef($hEl);
 
         if (hintRef) {
-            cProps.hintItextID = Itext.getOrCreateItem(hintRef);
+            mug.p.hintItextID = Itext.getOrCreateItem(hintRef);
         } else {
             // couldn't parse the hint as itext.
             // just create an empty placeholder for it
-            cProps.hintItextID = Itext.createItem(""); 
+            mug.p.hintItextID = Itext.createItem(""); 
         }
-        cProps.hintLabel = hintVal;
+        mug.p.hintLabel = hintVal;
     }
 
     function parseDefaultValue (dEl, mug) {
-        var dVal = util.getXLabelValue($(dEl)),
-                cProps = mug.controlElement;
+        var dVal = util.getXLabelValue($(dEl));
         if(dVal){
-            cProps.defaultValue = dVal;
-        }
-    }
-
-    function parseRepeatVals (r_count, r_noaddremove, mug) {
-        if (r_count) {
-            mug.controlElement.repeat_count = r_count;
-        }
-
-        if(r_noaddremove) {
-            mug.controlElement.no_add_remove = r_noaddremove;
+            mug.p.defaultValue = dVal;
         }
     }
 
@@ -375,7 +365,7 @@ define([
             if ($cEl.popAttr('readonly') === 'true()') {
                 MugClass = 'Trigger';
             } else {
-                dataType = mug && mug.bindElement.dataType;
+                dataType = mug && mug.p.dataType;
                 if (dataType) {
                     dataType = dataType.replace('xsd:',''); //strip out extraneous namespace
                     dataType = dataType.toLowerCase();
@@ -411,8 +401,7 @@ define([
             mug.setAppearanceAttribute(appearance);
         }
         if (MugClass === "Trigger") {
-            mug.controlElement.setAttr(
-                'showOKCheckbox', appearance !== 'minimal');
+            mug.p.showOKCheckbox = (appearance !== 'minimal');
         }
         populateMug(form, mug, cEl, oldEl);
 
@@ -435,19 +424,19 @@ define([
                 
     function populateMug (form, mug, cEl, $parentEl) {
         if (mug.__className === "ReadOnly") {
-            mug.controlElementRaw = cEl;
+            mug.p.rawControlXML = cEl;
             return;
         }
         
         var $cEl = $(cEl),
-            tag = mug.controlElement.tagName,
-            labelEl, hintEl, repeat_count, repeat_noaddremove;
+            tag = mug.p.tagName,
+            labelEl, hintEl;
 
         if(tag === 'repeat'){
             labelEl = $parentEl.children('label');
             hintEl = $parentEl.children('hint');
-            repeat_count = $cEl.popAttr('jr:count');
-            repeat_noaddremove = parseBoolAttributeValue(
+            mug.p.repeat_count = $cEl.popAttr('jr:count') || null;
+            mug.p.no_add_remove = parseBoolAttributeValue(
                 $cEl.popAttr('jr:noAddRemove'));
         } else {
             labelEl = $cEl.children('label');
@@ -464,21 +453,16 @@ define([
             parseDefaultValue($cEl.children('value'),mug);
         }
 
-        if (tag === 'repeat') {
-            parseRepeatVals(repeat_count, repeat_noaddremove, mug);
-        }
-
         if (tag === 'itemset') {
-            // todo: convert to bound property map
-            mug.controlElement.setAttr('itemsetData', new mugs.BoundPropertyMap(form, {
+            mug.p.itemsetData = new mugs.BoundPropertyMap(form, {
                 nodeset: $cEl.popAttr('nodeset'),
                 labelRef: $cEl.children('label').attr('ref'),
                 valueRef: $cEl.children('value').attr('ref')
-            }));
+            });
         }
         
         // add any arbitrary attributes that were directly on the control
-        mug.controlElement._rawAttributes = getAttributes(cEl);
+        mug.p.rawControlAttributes = getAttributes(cEl);
     }
                 
     //figures out if this control DOM element is a repeat
@@ -490,9 +474,9 @@ define([
     }
 
     /**
-     * Figures out what the xpath is of a controlElement
+     * Figures out what the xpath is of a control element
      * by looking at the ref or nodeset attributes.
-     * @param el - a jquery selector or DOM node of an xforms controlElement.
+     * @param el - a jquery selector or DOM node of an xforms control element.
      * @return - a string of the ref/nodeset value
      */
     function getPathFromControlElement (el, form) {
@@ -543,7 +527,7 @@ define([
             var couldHaveChildren = [
                 'repeat', 'group', 'fieldlist', 'select', 'select1'
             ];
-            tagName = mug.controlElement.tagName.toLowerCase();
+            tagName = mug.p.tagName.toLowerCase();
             if(couldHaveChildren.indexOf(tagName) !== -1) {
                 // recurse
                 $(el).children().not('label').not('value').not('hint')
@@ -621,10 +605,10 @@ define([
         }
 
         var attrs = {
-            relevantAttr: el.popAttr('relevant'),
-            calculateAttr: el.popAttr('calculate'),
-            constraintAttr: el.popAttr('constraint'),
-            dataType: el.popAttr('type'),
+            relevantAttr: el.popAttr('relevant') || null,
+            calculateAttr: el.popAttr('calculate') || null,
+            constraintAttr: el.popAttr('constraint') || null,
+            dataType: el.popAttr('type') || null,
             requiredAttr: parseBoolAttributeValue(el.popAttr('required')),
             preload: lookForNamespaced(el, "preload"),
             preloadParams: lookForNamespaced(el, "preloadParams")
@@ -644,9 +628,10 @@ define([
             attrs.constraintMsgItextID = Itext.createItem("");
             attrs.constraintMsgAttr = constraintMsg;    
         }
-       
-        mug.bindElement.setAttrs(attrs, true);
-        mug.bindElement._rawAttributes = getAttributes(el);
+
+        attrs.rawBindAttributes = getAttributes(el);
+      
+        mug.p.setAttrs(attrs);
     }
 
     var _getInstances = function (xml) {

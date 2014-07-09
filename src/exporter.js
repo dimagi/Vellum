@@ -36,7 +36,7 @@ define([
 
         var mugToExportRow = function (mug) {
             var row = {},
-                itext = mug.controlElement ? mug.controlElement.labelItextID : null,
+                itext = mug.p.labelItextID,
                 defaultLanguage = form.vellum.data.javaRosa.Itext.getDefaultLanguage(),
                 i;
 
@@ -53,7 +53,7 @@ define([
             row.Question = form.getAbsolutePath(mug);
             row.Type = mug.typeName;
 
-            if (mug.controlElement) {
+            if (!mug.options.isDataOnly) {
                 for (var type in itextColumns) {
                     var colName = itextColumns[type];
 
@@ -64,14 +64,14 @@ define([
                 }
             }
             
-            if (mug.bindElement) {
-                row["Display Condition"] = mug.bindElement.relevantAttr;
-                row["Calculate Condition"] = mug.bindElement.calculateAttr;
-                row.Required = mug.bindElement.requiredAttr ? 'yes' : 'no';
+            if (mug.p.getDefinition('relevantAttr')) {
+                row["Display Condition"] = mug.p.relevantAttr;
+                row["Calculate Condition"] = mug.p.calculateAttr;
+                row.Required = mug.p.requiredAttr ? 'yes' : 'no';
 
-                row["Validation Condition"] = mug.bindElement.constraintAttr;
+                row["Validation Condition"] = mug.p.constraintAttr;
                 row["Validation Message"] = defaultOrNothing(
-                    mug.bindElement ? mug.bindElement.constraintMsgItextID : null,
+                    mug.p.constraintMsgItextID,
                     defaultLanguage, 'default');
             }
 

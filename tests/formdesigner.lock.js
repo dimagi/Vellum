@@ -31,7 +31,7 @@ describe("The Lock plugin", function() {
 
     it("disallows renaming a locked node", function () {
         var locked = function (mugPath) {
-            return plugin.isPropertyLocked(mugPath, 'dataElement/nodeID');
+            return plugin.isPropertyLocked(mugPath, 'nodeID');
         };
         assert(locked('/data/node_locked'));
         assert(locked('/data/value_locked'));
@@ -66,13 +66,13 @@ describe("The Lock plugin", function() {
     it("allows changing only the Itext IDs of a 'value' locked node", function () {
         var locked = plugin.isPropertyLocked;
         assert.isFalse(locked(
-            '/data/value_locked', 'bindElement/constraintMsgItextID'));
-        assert(locked('/data/value_locked', 'bindElement/constraintAttr'));
+            '/data/value_locked', 'constraintMsgItextID'));
+        assert(locked('/data/value_locked', 'constraintAttr'));
     });
 
     it("allows changing any property of a non-locked node", function () {
         var locked = function (mugPath) {
-            return plugin.isPropertyLocked(mugPath, 'bindElement/constraintAttr');
+            return plugin.isPropertyLocked(mugPath, 'constraintAttr');
         };
         assert.isFalse(locked('/data/node_locked'));
         assert.isFalse(locked('/data/none_locked'));
@@ -178,6 +178,10 @@ var PluginMock = function (method, mockFnOrValue) {
     return this;
 };
 
+function getInput(property) {
+    return $("[name='property-" + property + "']");
+}
+
 describe("The question locking functionality in the core and UI", function () {
     var c = formdesigner.controller,
         clock,
@@ -242,12 +246,12 @@ describe("The question locking functionality in the core and UI", function () {
             var mock = PluginMock('isPropertyLocked', [false]);
             clickQuestion2();
             mock.restore();
-            assert(false === $("#bindElement-requiredAttr").prop('disabled'));
+            assert(false === getInput('requiredAttr').prop('disabled'));
 
             mock = PluginMock('isPropertyLocked', [true]);
             clickQuestion2();
             mock.restore();
-            var $r = $("#bindElement-requiredAttr");
+            var $r = getInput('requiredAttr');
             assert(true === $r.prop('disabled'));
             var val = $r.prop('checked');
             $r.click();
@@ -258,19 +262,19 @@ describe("The question locking functionality in the core and UI", function () {
             var mock = PluginMock('isPropertyLocked', [false]);
             clickQuestion2();
             mock.restore();
-            assert(false === $("#dataElement-nodeID").prop('disabled'));
+            assert(false === getInput('nodeID').prop('disabled'));
 
             mock = PluginMock("isPropertyLocked", [true]);
             clickQuestion2();
             mock.restore();
-            assert(true === $("#dataElement-nodeID").prop('disabled'));
+            assert(true === getInput("nodeID").prop('disabled'));
         });
 
         function testEditButton(bool) {
             var mock = PluginMock('isPropertyLocked', [bool]);
             clickQuestion2();
             mock.restore();
-            var $but = $("label[for='bindElement-relevantAttr']").next(':contains(Edit)');
+            var $but = getInput('relevantAttr').parents('.control-group').find('button:contains(Edit)');
             assert($but.length === 1);
             assert.equal(bool, $but.prop('disabled'));
             $but.click();

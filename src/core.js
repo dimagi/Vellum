@@ -353,7 +353,7 @@ define([
             currLang = this.data.core.currentItextDisplayLanguage;
         allMugs.map(function (mug) {
             var node = _this.$f.find('#' + mug.ufid),
-                it = mug.controlElement ? mug.controlElement.labelItextID : null;
+                it = mug.p.labelItextID;
             var treeName = (it) ? it.getValue("default", currLang) : _this.getMugDisplayName(mug);
             treeName = treeName || _this.getMugDisplayName(mug);
             if (treeName !== _this.jstree("get_text", node)) {
@@ -636,17 +636,12 @@ define([
         }
     };
   
-    function warnOnCircularReference(propertyPath, form, mug, path) {
-        var parts = propertyPath.split('/'),
-            group = parts[0],
-            property = parts[1];
-
-        if (path === "." && group === "bindElement" && (
+    function warnOnCircularReference(property, form, mug, path) {
+        if (path === "." && (
             property === "relevantAttr" ||
             property === "calculateAttr"
         )) {
-            var fieldName = mug.getPropertyDefinition(
-                    'bindElement/' + property).lstring;
+            var fieldName = mug.p.getDefinition(property).lstring;
             form.updateError({
                 level: "form-warning",
                 message: "The " + fieldName + " for a question " + 
@@ -743,8 +738,8 @@ define([
                         }
                     }
 
-                    if (mug && ops && mug.defaultOperator) {
-                        ops.val(mug.defaultOperator);
+                    if (mug && ops && mug.options.defaultOperator) {
+                        ops.val(mug.options.defaultOperator);
                     }
                 }
             },
@@ -794,20 +789,20 @@ define([
                 }
                 var form = _this.data.core.form,
                     mug = form.getMugByUFID($(data.args[0]).attr('id')),
+                    nodeID = mug.p.nodeID,
                     refMug = form.getMugByUFID($(data.args[1]).attr('id')),
                     position = data.args[2],
                     parentMug;
 
                 // disallow moving a node if it would have the same ID as a sibling
-                if (mug.dataElement) {
+                if (nodeID) {
                     if (['into', 'first', 'last'].indexOf(position) !== -1) {
                         parentMug = refMug;
                     } else {
                         parentMug = refMug.parentMug;
                     }
 
-                    var nodeID = mug.dataElement.nodeID,
-                        childMug = form.getMugChildByNodeID(parentMug, nodeID);
+                    var childMug = form.getMugChildByNodeID(parentMug, nodeID);
                     if (childMug && childMug !== mug) {
                         // setup state for alert
                         _this.setUnsavedDuplicateNodeId(nodeID, true);
@@ -882,7 +877,7 @@ define([
         // for choices, return the quoted value.
         // for everything else return the path
         if (mug.__className === "Item") {
-            return '"' + mug.controlElement.defaultValue + '"';
+            return '"' + mug.p.defaultValue + '"';
         } else {
             // for the currently selected mug, return a "."
             return (mug.ufid === this.getCurrentlySelectedMug().ufid) ? 
@@ -980,8 +975,7 @@ define([
                         title: "Automatically rename to '" + newQuestionId + "'",
                         cssClasses: 'btn-primary',
                         action: function () {
-                            mug.setPropertyValue(
-                                'dataElement', 'nodeID', newQuestionId);
+                            mug.p.nodeID = newQuestionId;
                             _this.setUnsavedDuplicateNodeId(false);
                             _this.data.core.$modal.modal('hide');
                             _this.refreshVisibleData();
@@ -1158,15 +1152,15 @@ define([
             // todo: why is this here? 126038032.  Switch to use property
             // visibility attribute, add support in UI for whatever behavior is
             // necessary if it doesn't already exist.
-            if (mug.bindElement) {
-                if (e.property === 'constraintAttr' && 
-                    (mug.__className !== "DataBindOnly")) 
+            if (mug.p.getDefinition('constraintAttr')) {
+                if (e.property === 'constraintAttr' && !mug.options.isDataOnly &&
+                    mug.p.constraintMsgItextID.isEmpty()) 
                 {
                     _this.toggleConstraintItextBlock(!!e.val);
                 }
 
                 if (e.property === 'constraintMsgItextID' && !e.val.id && 
-                    !mug.bindElement.constraintAttr)
+                    !mug.p.constraintAttr)
                 {
                     _this.toggleConstraintItextBlock(false);
                 }
@@ -1207,10 +1201,9 @@ define([
         //(at the bottom)
         var dataNodeList = form.getDataNodeList();
         for (var i = 0; i < dataNodeList.length; i++) {
-            // check for control element because we want data nodes to be a flat
-            // list at bottom.
+            // make hidden values a flat list at the bottom.
             var mug = dataNodeList[i],
-                refMug = mug.parentMug && mug.controlElement ? 
+                refMug = (mug.parentMug && !mug.options.isDataOnly) ? 
                     mug.parentMug : null;
             _this.createQuestion(mug, refMug, 'into');
         }
@@ -1260,7 +1253,7 @@ define([
         if (qType === 'DataBindOnly') {
             // put data nodes at the end
             return [null, 'last'];
-        } else if (refMug && !refMug.controlElement) {
+        } else if (refMug && refMug.__className === 'DataBindOnly') {
             // don't insert a regular node inside the data node range
             refMug = this.getLowestNonDataNodeMug();
             position = refMug ? 'after' : 'first';
@@ -1315,7 +1308,7 @@ define([
                     id: mug.ufid,
                     rel: mug.__className
                 },
-                state: mug.isSpecialGroup ? 'open' : undefined
+                state: mug.options.isSpecialGroup ? 'open' : undefined
             },
             null, // callback
             true  // skip_rename
@@ -1365,7 +1358,7 @@ define([
         this.$f.find('.fd-help').fdHelp();
 
         // todo: why is this here? 126038032 
-        var $validationCondition = $('[name="bindElement-constraintAttr"]');
+        var $validationCondition = $('[name="property-constraintAttr"]');
         if ($validationCondition && !$validationCondition.val()) {
             this.toggleConstraintItextBlock(false);
         }
@@ -1768,64 +1761,68 @@ define([
 
     fn.getMainProperties = function () {
         return [
-            "dataElement/nodeID",
-            "controlElement/defaultValue",
-            "controlElement/label",
-            "controlElement/showOKCheckbox",
-            "controlElement/readOnlyControl",
-            "controlElement/androidIntentAppId",
-            "controlElement/androidIntentExtra",
-            "controlElement/androidIntentResponse"
+            "nodeID",
+            "defaultValue",
+            "label",
+            "showOKCheckbox",
+            "readOnlyControl",
+            "androidIntentAppId",
+            "androidIntentExtra",
+            "androidIntentResponse"
         ];
     };
 
     fn.getDataSourceProperties = function () {
         return [
-            "controlElement/itemsetData"
+            "itemsetData"
         ];
     };
 
     fn.getMediaProperties = function () {
         return [
-            "controlElement/mediaItext"
+            "mediaItext"
         ];
     };
 
     fn.getLogicProperties = function () {
         return [
-            "bindElement/calculateAttr",
-            "bindElement/requiredAttr",
-            "bindElement/relevantAttr",
-            "bindElement/constraintAttr",
-            "controlElement/repeat_count",
-            "controlElement/no_add_remove"
+            "calculateAttr",
+            "requiredAttr",
+            "relevantAttr",
+            "constraintAttr",
+            "repeat_count",
+            "no_add_remove"
         ];
     };
 
     fn.getAdvancedProperties = function () {
         return [
-            "dataElement/dataValue",
-            "dataElement/xmlnsAttr",
-            "controlElement/label",
-            "controlElement/hintLabel",
-            "bindElement/constraintMsgAttr",
+            "dataValue",
+            "xmlnsAttr",
+            "label",
+            "hintLabel",
+            "constraintMsgAttr",
         ];
     };
 
         
     function getWidgetClassAndOptions(propPath, mug) {
-        var propDef = mug.getPropertyDefinition(propPath),
-            propVal = mug.getPropertyValue(propPath);
+        var propDef = mug.p.getDefinition(propPath),
+            propVal = mug.p[propPath];
 
-        if (propDef && propDef.visibility &&
-            propDef.visibility.indexOf('/') !== -1 &&
+        // handle properties whose visibility depends on other properties'
+        // visibility (implied visible_if_present on the depending property
+        // takes precedence)
+        if (_.isUndefined(propVal) &&
+            propDef && propDef.visibility &&
+            mug.p.getDefinition(propDef.visibility) &&
                 !getWidgetClassAndOptions(propDef.visibility, mug))
         {
             return null;
         }
 
         if (!propDef || 
-            (!propVal &&
+            (_.isUndefined(propVal) &&
              (propDef.visibility === "visible_if_present" ||
               propDef.presence === "notallowed")))
         {
@@ -1838,23 +1835,7 @@ define([
     }
 
     fn.getMugSpec = function () {
-        return {
-            dataElement: this.getDataElementSpec(),
-            bindElement: this.getBindElementSpec(),
-            controlElement: this.getControlElementSpec()
-        };
-    };
-
-    fn.getDataElementSpec = function () {
-        return mugs.baseDataSpecs;
-    };
-
-    fn.getBindElementSpec = function () {
-        return mugs.baseBindSpecs;
-    };
-
-    fn.getControlElementSpec = function () {
-        return mugs.baseControlSpecs;
+        return mugs.baseSpecs;
     };
 
     fn.isMugRemoveable = function (mug, path) {

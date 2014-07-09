@@ -7,14 +7,6 @@ define([
     _,
     $
 ) {
-    function getGroupName(path) {
-        return path.split("/")[0];
-    }
-
-    function getPropertyName(path) {
-        return path.split("/")[1];
-    }
-
     var base = function(mug, options) {
         // set properties shared by all widgets
         var widget = {};
@@ -39,7 +31,7 @@ define([
 
         widget.getDisplayName = function () {
             // use the display text, or the property name if none found
-            return this.definition.lstring ? this.definition.lstring : this.propName;
+            return this.definition.lstring ? this.definition.lstring : this.path;
         };
 
         widget.getControl = function () {
@@ -73,7 +65,7 @@ define([
             // When a widget's value changes, do whatever work you need to in 
             // the model/UI to make sure we are in a consistent state.
             
-            var isID = (['nodeID', 'defaultValue'].indexOf(widget.propName) !== -1),
+            var isID = (['nodeID', 'defaultValue'].indexOf(widget.path) !== -1),
                 val = widget.getValue();
 
             if (isID && val.indexOf(' ') !== -1) { 
@@ -106,17 +98,14 @@ define([
     };
 
     var normal = function(mug, options) {
-
         var path = options.path,
-            inputID = path.split("/").join("-"),
+            inputID = 'property-' + path,
             disabled = options.disabled || false,
             widget = base(mug, options);
 
         widget.path = path;
-        widget.definition = mug.getPropertyDefinition(path);
-        widget.currentValue = mug.getPropertyValue(path);
-        widget.groupName = getGroupName(widget.path);
-        widget.propName = getPropertyName(widget.path);
+        widget.definition = mug.p.getDefinition(path);
+        widget.currentValue = mug.p[path];
         widget.id = inputID;
 
         widget.input = $("<input />")
@@ -128,8 +117,7 @@ define([
         };
 
         widget.save = function () {
-            this.mug.setPropertyValue(
-                this.groupName, this.propName, this.getValue(), this.mug);
+            this.mug.p[this.path] = this.getValue();
         };
         return widget;
     };
@@ -211,12 +199,11 @@ define([
             );
             return getUIElementWithEditButton(elem, function () {
                 widget.options.displayXPathEditor({
-                    value: mug.getPropertyValue(options.path),
+                    value: mug.p[options.path],
                     xpathType: widget.definition.xpathType,
                     done: function (val) {
                         if (val !== false) {
-                            mug.setPropertyValue(
-                                widget.groupName, widget.propName, val);
+                            mug.p[widget.path] = val;
                         }
                     }
                 });
@@ -301,8 +288,7 @@ define([
         options.id = "readonly-control";
         var widget = base(mug, options);
         widget.definition = {};
-        widget.currentValue = $('<div>').append(mug.controlElementRaw).clone().html();
-        widget.propName = "Raw XML: ";
+        widget.currentValue = $('<div>').append(mug.p.rawControlXML).clone().html();
 
         widget.getControl = function () {
             var control = $("<p />").text(this.currentValue);

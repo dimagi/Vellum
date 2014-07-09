@@ -42,7 +42,7 @@ define([
             }
 
             if ((lock === 'node' || lock === 'value') && 
-                propertyPath === 'dataElement/nodeID') 
+                propertyPath === 'nodeID') 
             {
                 return true;
             } else if (lock === 'value' && propertyPath.indexOf('ItextID') === -1) {

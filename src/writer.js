@@ -9,7 +9,6 @@ define([
 ) {
     var createXForm = function (form) {
         var xmlWriter = new XMLWriter( 'UTF-8', '1.0' );
-        // todo
         form.vellum.beforeSerialize();
         
         xmlWriter.writeStartDocument();
@@ -106,32 +105,33 @@ define([
 
     var createDataBlock = function (form, xmlWriter) {
         function mapFunc (node) {
-            var defaultVal, extraXMLNS, keyAttr,
-                mug = node.getValue();
+            var mug = node.getValue();
 
             xmlWriter.writeStartElement(node.getID());
             
             if (node.isRootNode) {
                 createModelHeader(form, xmlWriter);
             } else {
+                var rawDataAttributes = mug.p.rawDataAttributes;
                 // Write any custom attributes first
-                for (var k in mug.dataElement._rawAttributes) {
-                    if (mug.dataElement._rawAttributes.hasOwnProperty(k)) {
-                        xmlWriter.writeAttributeString(k, mug.dataElement._rawAttributes[k]);
+                for (var k in rawDataAttributes) {
+                    if (rawDataAttributes.hasOwnProperty(k)) {
+                        xmlWriter.writeAttributeString(k, rawDataAttributes[k]);
                     }
                 }
+
+                var dataValue = mug.p.dataValue,
+                    keyAttr = mug.p.keyAttr,
+                    xmlnsAttr = mug.p.xmlnsAttr;
                 
-                if (mug.dataElement.dataValue){
-                    defaultVal = mug.dataElement.dataValue;
-                    xmlWriter.writeString(defaultVal);
+                if (dataValue){
+                    xmlWriter.writeString(dataValue);
                 }
-                if (mug.dataElement.keyAttr){
-                    keyAttr = mug.dataElement.keyAttr;
+                if (keyAttr){
                     xmlWriter.writeAttributeString("key", keyAttr);
                 }
-                if (mug.dataElement.xmlnsAttr){
-                    extraXMLNS = mug.dataElement.xmlnsAttr;
-                    xmlWriter.writeAttributeString("xmlns", extraXMLNS);
+                if (xmlnsAttr){
+                    xmlWriter.writeAttributeString("xmlns", xmlnsAttr);
                 }
                 if (mug.__className === "Repeat"){
                     xmlWriter.writeAttributeString("jr:template","");
@@ -151,23 +151,24 @@ define([
             mug, i, attrs, j;
 
         function populateVariables (mug){
-            var constraintMsg, bEl = mug.bindElement;
-            if (bEl.constraintMsgItextID && !bEl.constraintMsgItextID.isEmpty()) {
-                constraintMsg = "jr:itext('" + bEl.constraintMsgItextID.id + "')";
+            var constraintMsgItextID = mug.p.constraintMsgItextID,
+                constraintMsg;
+            if (constraintMsgItextID && !constraintMsgItextID.isEmpty()) {
+                constraintMsg = "jr:itext('" + constraintMsgItextID.id + "')";
             } else {
-                constraintMsg = bEl.constraintMsgAttr;
+                constraintMsg = mug.p.constraintMsgAttr;
             }
 
             return {
                 nodeset: form.getAbsolutePath(mug),
-                type: bEl.dataType,
-                constraint: bEl.constraintAttr,
+                type: mug.p.dataType,
+                constraint: mug.p.constraintAttr,
                 "jr:constraintMsg": constraintMsg,
-                relevant: bEl.relevantAttr,
-                required: util.createXPathBoolFromJS(bEl.requiredAttr),
-                calculate: bEl.calculateAttr,
-                "jr:preload": bEl.preload,
-                "jr:preloadParams": bEl.preloadParams
+                relevant: mug.p.relevantAttr,
+                required: util.createXPathBoolFromJS(mug.p.requiredAttr),
+                calculate: mug.p.calculateAttr,
+                "jr:preload": mug.p.preload,
+                "jr:preloadParams": mug.p.preloadParams
             };
         }
 
@@ -182,7 +183,7 @@ define([
                             xmlWriter.writeAttributeString(j, attrs[j]);
                         }
                     }
-                    _(mug.bindElement._rawAttributes).each(function (v, k) {
+                    _(mug.p.rawBindAttributes).each(function (v, k) {
                         if (!attrs.hasOwnProperty(k)) {
                             xmlWriter.writeAttributeString(k, v);
                         } 
@@ -203,11 +204,10 @@ define([
             var mug = node.getValue();
                 
             if (mug.__className === "ReadOnly") {
-                xmlWriter.writeXML($('<div>').append(mug.controlElementRaw).clone().html());
+                xmlWriter.writeXML($('<div>').append(mug.p.rawControlXML).clone().html());
                 return;
             }
-            var cProps = mug.controlElement,
-                label, hasItext, isItextOptional;
+            var label, hasItext, isItextOptional;
 
             function createOpenControlTag(tagName, elLabel) {
                 tagName = tagName.toLowerCase();
@@ -245,16 +245,17 @@ define([
                 {
                     createLabel();
                 }
-                
-                if (tagName === 'item' && cProps.defaultValue) {
+               
+                var defaultValue = mug.p.defaultValue;
+                if (tagName === 'item' && defaultValue) {
                     //do a value tag for an item Mug
                     xmlWriter.writeStartElement('value');
-                    xmlWriter.writeString(cProps.defaultValue);
+                    xmlWriter.writeString(defaultValue);
                     xmlWriter.writeEndElement();
                 }
 
                 if (tagName === 'itemset') {
-                    var data = cProps.itemsetData;
+                    var data = mug.p.itemsetData;
                     xmlWriter.writeAttributeString(
                         'nodeset', data.getAttr('nodeset', ''));
                     xmlWriter.writeStartElement('label');
@@ -268,9 +269,10 @@ define([
                 }
                 
                 // Write any custom attributes first
-                for (var k in cProps._rawAttributes) {
-                    if (cProps._rawAttributes.hasOwnProperty(k)) {
-                        xmlWriter.writeAttributeString(k, cProps._rawAttributes[k]);
+                var rawControlAttributes = mug.p.rawControlAttributes;
+                for (var k in rawControlAttributes) {
+                    if (rawControlAttributes.hasOwnProperty(k)) {
+                        xmlWriter.writeAttributeString(k, rawControlAttributes[k]);
                     }
                 }
                 
@@ -289,8 +291,8 @@ define([
                 // Set other relevant attributes
 
                 if (tagName === 'repeat') {
-                    var r_count = cProps.repeat_count,
-                        r_noaddrem = cProps.no_add_remove;
+                    var r_count = mug.p.repeat_count,
+                        r_noaddrem = mug.p.no_add_remove;
 
                     //make r_noaddrem an XPath bool
                     r_noaddrem = util.createXPathBoolFromJS(r_noaddrem);
@@ -303,7 +305,7 @@ define([
                         xmlWriter.writeAttributeString("jr:noAddRemove", r_noaddrem);
                     }
                 } else if (isODKMedia) {
-                    var mediaType = cProps.mediaType;
+                    var mediaType = mug.p.mediaType;
                     if (mediaType) {
                         xmlWriter.writeAttributeString("mediatype", mediaType);
                     }
@@ -316,13 +318,15 @@ define([
                 
                 // Do hint label
                 if( tagName !== 'item' && tagName !== 'repeat'){
-                    if(cProps.hintLabel || (cProps.hintItextID && cProps.hintItextID.id)) {
+                    var hintLabel = mug.p.hintLabel,
+                        hintItextID = mug.p.hintItextID;
+                    if(hintLabel || (hintItextID && hintItextID.id)) {
                         xmlWriter.writeStartElement('hint');
-                        if(cProps.hintLabel){
-                            xmlWriter.writeString(cProps.hintLabel);
+                        if(hintLabel){
+                            xmlWriter.writeString(hintLabel);
                         }
-                        if(cProps.hintItextID.id){
-                            var ref = "jr:itext('" + cProps.hintItextID.id + "')";
+                        if(hintItextID.id){
+                            var ref = "jr:itext('" + hintItextID.id + "')";
                             xmlWriter.writeAttributeString('ref',ref);
                         }
                         xmlWriter.writeEndElement();
@@ -331,24 +335,25 @@ define([
             }
 
             //create the label object (for createOpenControlTag())
-            if (cProps.label) {
+            if (mug.p.label) {
                 label = {};
-                label.defText = cProps.label;
+                label.defText = mug.p.label;
             }
-            if (cProps.labelItextID) {
+            var labelItextID = mug.p.labelItextID;
+            if (labelItextID) {
                 if (!label) {
                     label = {};
                 }
                 
-                label.ref = "jr:itext('" + cProps.labelItextID.id + "')";
+                label.ref = "jr:itext('" + labelItextID.id + "')";
                 // iID is optional so by extension Itext is optional.
-                isItextOptional = mug.controlElement.__spec.labelItextID.presence === 'optional';
-                if (cProps.labelItextID.isEmpty() && isItextOptional) {
+                isItextOptional = mug.spec.labelItextID.presence === 'optional';
+                if (labelItextID.isEmpty() && isItextOptional) {
                     label.ref = '';
                 }
             }
 
-            createOpenControlTag(cProps.tagName, label);
+            createOpenControlTag(mug.p.tagName, label);
         }
 
         function afterFunc(node) {
@@ -360,10 +365,9 @@ define([
                 return;
             }
             
-            var tagName = mug.controlElement.tagName;
             //finish off
             xmlWriter.writeEndElement(); //close control tag.
-            if(tagName === 'repeat'){
+            if(mug.p.tagName === 'repeat'){
                 xmlWriter.writeEndElement(); //special case where we have to close the repeat as well as the group tag.
             }
         }

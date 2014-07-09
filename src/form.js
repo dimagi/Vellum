@@ -143,13 +143,11 @@ define([
                     if(!node.getValue() || node.isRootNode){
                         return null;
                     }
-                    var mug = node.getValue(),
-                        bind;
-                    if(!mug.bindElement){
+                    var mug = node.getValue();
+                    if (!mug.p.getDefinition('relevantAttr')) {
                         return null;
-                    }else{
-                        bind = mug;
-                        return bind;
+                    } else {
+                        return mug;
                     }
                 };
 
@@ -185,7 +183,7 @@ define([
                 }
                 var mug = node.getValue();
 
-                if (mug.controlElement) {
+                if (!mug.options.isDataOnly) {
                     return null;
                 } else {
                     return mug;
@@ -332,7 +330,7 @@ define([
                                   : this.dataTree.rootNode),
                 childMugs = parentNode.getChildrenMugs(),
                 matchingIdMugs = _.filter(childMugs, function (m) {
-                    return m.dataElement.nodeID === nodeID;
+                    return m.p.nodeID === nodeID;
                 });
             if (matchingIdMugs.length) {
                 return matchingIdMugs[0];
@@ -341,11 +339,11 @@ define([
             }
         },
         insertMug: function (refMug, newMug, position) {
-            if (newMug.dataElement) {
+            if (!newMug.options.isControlOnly) {
                 this.dataTree.insertMug(newMug, position, refMug);
             }
 
-            if (newMug.controlElement) {
+            if (!newMug.options.isDataOnly) {
                 this.controlTree.insertMug(newMug, position, refMug);
             }
         },
@@ -360,10 +358,10 @@ define([
                     return _this.dataTree.getAbsolutePath(mug);
                 });
 
-            if (mug.dataElement) {
+            if (!mug.options.isControlOnly) {
                 this.dataTree.insertMug(mug, position, refMug);
             }
-            if (mug.controlElement) {
+            if (!mug.options.isDataOnly) {
                 this.controlTree.insertMug(mug, position, refMug);
             }
             
@@ -389,8 +387,7 @@ define([
             }
             return desc;
         },
-        // core interface methods
-        handleMugRename: function (mug, val, previous, currentPath, oldPath) {
+        handleMugRename: function (mug, currentId, oldId, currentPath, oldPath) {
             this._logicManager.updatePath(mug.ufid, oldPath, currentPath);
         },
         changeQuestionType: function (mug, questionType) {
@@ -431,27 +428,20 @@ define([
             depth = depth || 0;
             var duplicate = this.mugTypes.make(mug.__className, this, mug);
 
-            if (depth === 0 && mug.dataElement && mug.dataElement.nodeID) {
-                var newQuestionID = this.generate_question_id(
-                    mug.dataElement.nodeID
-                ); 
-                duplicate.dataElement.nodeID = newQuestionID;
-            }
-
-            if (depth === 0 && mug.controlElement && 
-                mug.controlElement.defaultValue)
-            {
-                var newItemValue = this.generate_question_id(
-                    mug.controlElement.defaultValue
-                );
-                duplicate.controlElement.defaultValue = newItemValue;
-            }
-         
-            // insert mug into data and UI trees
-            if (depth > 0) {
-                this.insertQuestion(duplicate, parentMug, 'into', true);
-            } else {
+            if (depth === 0) {
+                var nodeID = mug.p.nodeID;
+                if (nodeID) {
+                    var newQuestionID = this.generate_question_id(nodeID); 
+                    duplicate.p.nodeID = newQuestionID;
+                } else {
+                    var newItemValue = this.generate_question_id(
+                        mug.p.defaultValue);
+                    duplicate.defaultValue = newItemValue;
+                }
+                
                 this.insertQuestion(duplicate, mug, 'after', true);
+            } else {
+                this.insertQuestion(duplicate, parentMug, 'into', true);
             }
 
             this._logicManager.updateAllReferences(duplicate);
@@ -477,12 +467,16 @@ define([
             this._logicManager.updateAllReferences(mug);
         },
         handleMugPropertyChange: function (mug, e) {
-            if(e.property === 'nodeID'){
-                if(mug.dataElement){
-                    mug.dataElement.nodeID = e.val;
+            // Short-circuit invalid change and trigger warning in UI
+            if (e.previous && name === "nodeID") {
+                if (this.getMugChildByNodeID(mug.parentMug, e.val)) {
+                    this.vellum.setUnsavedDuplicateNodeId(e.val);
+                    return false;
+                } else {
+                    this.vellum.setUnsavedDuplicateNodeId(false);
                 }
             }
-            
+
             // update the logic properties that reference the mug
             if (e.property === 'nodeID') {
                 var currentPath = this.getAbsolutePath(mug),
@@ -499,10 +493,8 @@ define([
                     this.handleMugRename(mug, e.val, e.previous, currentPath, oldPath);
                 }
             } else {
-                var propertyPath = [e.element, e.property].join("/");
-
-                if (mug.getPropertyDefinition(propertyPath).widget === widgets.xPath) {
-                    this.updateAllLogicReferences(mug, propertyPath);
+                if (mug.p.getDefinition(e.property).widget === widgets.xPath) {
+                    this.updateAllLogicReferences(mug);
                 }
             }
 
@@ -511,33 +503,44 @@ define([
                 (mug.__className === "Select" || mug.__className === "MSelect")) 
             {
                 var node = this.controlTree.getNodeFromMug(mug),
-                    children = node.getChildrenMugs();
+                    // node can be null when the mug hasn't been inserted into
+                    // the tree yet 
+                    children = node ? node.getChildrenMugs() : [];
 
                 for (var i = 0; i < children.length; i++) {
-                    var child = children[i];
+                    // Autogenerate Itext ID, then replace current nodeID with
+                    // previous nodeID to test whether existing Itext ID is
+                    // autogenerated.
+                    var child = children[i],
+                        newItextID = child.getDefaultLabelItextId(),
+                        itextRoot = child.getDefaultItextRoot(),
 
-                    // Temporarily set select's nodeID to old value so we can
-                    // test whether the old item's itext id was autogenerated.
-                    mug.dataElement.nodeID = e.previous;
-                    if (child.controlElement.labelItextID.id === child.getDefaultLabelItextId()) {
-                        mug.dataElement.nodeID = e.val;
+                        oldAutoID = newItextID.replace(
+                            itextRoot,
+                            itextRoot.replace(
+                                // depends on node IDs not having '-', and '-'
+                                // being the separator between the question ID
+                                // and item ID parts of the ID
+                                new RegExp("(^|/)" + e.val + "(/|-)"),
+                                "$1" + e.previous + "$2")),
+                        isAuto = (oldAutoID === child.p.labelItextID.id);
+
+                    if (isAuto) {
                         child.setItextID(child.getDefaultLabelItextId());
-                    } else {
-                        mug.dataElement.nodeID = e.val;
                     }
                 }
             }
 
-            if (e.property === 'nodeID' && e.element === 'dataElement') {
-                var newNameForTree = '[' + e.val +']';
+            if (e.property === 'nodeID') {
+                var newNameForTree = '[' + e.val +']',
+                    labelItextID = mug.p.labelItextID;
                 if (e.val && (
-                    mug.__className === "DataBindOnly" ||
-                        (!mug.controlElement || !mug.controlElement.labelItextID || 
-                         (mug.controlElement.labelItextID && mug.controlElement.labelItextID.isEmpty()) ))
+                    mug.options.isDataOnly || !labelItextID || 
+                    labelItextID.isEmpty()) 
                 ) {
                     this.fire({
                         type: 'question-text-change',
-                        mugUfid: e.mugUfid,
+                        mugUfid: mug.ufid,
                         text: newNameForTree
                     });
                 }
@@ -548,13 +551,25 @@ define([
                 mug: mug,
                 e: e
             });
+           
+            // legacy, enables auto itext ID behavior, don't add
+            // additional dependencies on this code.  Some sort of
+            // data binding would be better. 
+            mug.fire({
+                type: 'property-changed',
+                property: e.property,
+                val: e.val,
+                previous: e.previous,
+            });
 
             this.fireChange(mug);
+
+            return true;
         },
         createQuestion: function (refMug, position, newMugType, isInternal) {
             var mug = this.mugTypes.make(newMugType, this);
-            if (mug.dataElement) {
-                mug.dataElement.nodeID = this.generate_question_id();
+            if (!mug.options.isControlOnly) {
+                mug.p.nodeID = this.generate_question_id();
             }
             this.insertQuestion(mug, refMug, position, isInternal);
             if (mug.options.isODKOnly) {
@@ -654,7 +669,7 @@ define([
                 count = 0;
             for (var i = 0; i < allMugs.length; i++) {
                 var mug = allMugs[i];
-                if (mug.dataElement && qId === mug.dataElement.nodeID) {
+                if (qId === mug.p.nodeID) {
                     count++; 
                 }
             }

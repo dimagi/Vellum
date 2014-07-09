@@ -189,7 +189,7 @@ define([
 
     /**
      * A regular tree (with any amount of leafs per node)
-     * @param treeType - is this a DataElement tree or a controlElement tree (use
+     * @param treeType - is this a data or control tree
      * 'data' or 'control' for this argument, respectively)
      */
     function Tree(rootId, treeType) {

@@ -91,7 +91,7 @@ define([
         that.syncMugWithIntent = function (mug) {
             // called when initializing a mug from a parsed form
             if (mug.__className === "AndroidIntent") {
-                var nodeID = mug.dataElement.nodeID,
+                var nodeID = mug.p.nodeID,
                     tag = that.getParsedIntentTagWithID(nodeID);
                 if (!tag) {
                     var path = (mug.intentTag) ? mug.intentTag.getAttr('path') : null;
@@ -114,7 +114,7 @@ define([
                     if (!mug || node.isRootNode) {
                         return null;
                     }
-                    if (mug.bindElement && mug.bindElement.dataType === 'intent') {
+                    if (mug.p.dataType === 'intent') {
                         return mug;
                     } else {
                         return null;
@@ -124,7 +124,8 @@ define([
             if (intents.length > 0) {
                 xmlWriter.writeComment('Intents inserted by Vellum:');
                 intents.map(function (intentMug) {
-                    intentMug.intentTag.writeXML(xmlWriter, intentMug.dataElement.nodeID);
+                    intentMug.intentTag.writeXML(
+                        xmlWriter, intentMug.p.nodeID);
                 });
             }
         };
@@ -137,7 +138,6 @@ define([
 
         widget.definition = {};
         widget.currentValue = (mug.intentTag) ? mug.intentTag.getAttr('path') : "";
-        widget.propName = "Intent ID";
         
         var input = $("<input />")
             .attr("name", widget.id)
@@ -171,7 +171,6 @@ define([
         options.id = "intent-extra";
         var widget = widgets.baseKeyValue(mug, options);
         widget.currentValue = (mug.intentTag) ? mug.intentTag.getAttr('extra') : {};
-        widget.propName = "Extra";
 
         widget.save = function () {
             if (widget.mug.intentTag) {
@@ -186,7 +185,6 @@ define([
         options.id = "intent-response";
         var widget = widgets.baseKeyValue(mug, options);
         widget.currentValue = (mug.intentTag) ? mug.intentTag.getAttr('response') : {};
-        widget.propName = "Response";
 
         widget.save = function () {
             if (widget.mug.intentTag) {

@@ -87,7 +87,7 @@ define([
         addReferences: function (mug, property) {
             // get absolute paths from mug property's value
             var _this = this,
-                expr = new LogicExpression(mug.getPropertyValue(property)),
+                expr = new LogicExpression(mug.p[property]),
                 paths = expr.getPaths().filter(function (p) {
                     // currently we don't do anything with relative paths
                     return p.initial_context ===
@@ -107,9 +107,9 @@ define([
                     refMug = _this.form.getMugByPath(pathString);
 
                 if (!refMug && _this.opts.allowedDataNodeReferences.indexOf(pathWithoutRoot) === -1) {
-                    error.message.push("The question '" + mug.dataElement.nodeID + 
+                    error.message.push("The question '" + mug.p.nodeID + 
                         "' references an unknown question " + path.toXPath() + 
-                        " in its " + mug.getPropertyDefinition(property).lstring + ".");
+                        " in its " + mug.p.getDefinition(property).lstring + ".");
 
                 }
                 return {
@@ -132,7 +132,8 @@ define([
             this.addReferences(mug, property);
         },
         updateAllReferences: function (mug, clear) {
-            if (mug.bindElement) {
+            // avoid control-only nodes
+            if (mug.p.nodeID) {
                 for (var i = 0; i < util.XPATH_REFERENCES.length; i++) {
                     var property = util.XPATH_REFERENCES[i];
                     this.clearReferences(mug, property);
@@ -181,7 +182,7 @@ define([
                 }
                 seen[pkey] = null;
                 mug = this.form.getMugByUFID(ref.mug);
-                expr = new LogicExpression(mug.getPropertyValue(ref.property));
+                expr = new LogicExpression(mug.p[ref.property]);
                 orig = expr.getText();
                 for (mugId in data) {
                     if (data.hasOwnProperty(mugId)) {
@@ -189,9 +190,7 @@ define([
                     }
                 }
                 if (orig !== expr.getText()) {
-                    mug.setPropertyValue(
-                        ref.property.split("/")[0], ref.property.split("/")[1],
-                        expr.getText(), mug);
+                    mug.p[ref.property] = expr.getText();
                 } 
             }
         },

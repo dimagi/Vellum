@@ -7,9 +7,10 @@ define([
     jquery,
     widgets,
     util,
-    underscore
+    underscore,
+    undefined
 ) {
-    var validateRule = function (ruleKey, ruleValue, testingObj, blockName, mug) {
+    function validateRule(ruleKey, ruleValue, testingObj, mug) {
         var presence = ruleValue.presence,
             retBlock = {
                 result: 'pass'
@@ -17,10 +18,10 @@ define([
 
         if (presence === 'required' && !testingObj) {
             retBlock.result = 'fail';
-            retBlock.resultMessage = '"' + ruleKey + '" value is required in:' + blockName + ', but is NOT present!';
+            retBlock.resultMessage = '"' + ruleKey + '" value is required but is NOT present!';
         } else if (presence === 'notallowed' && testingObj) {
             retBlock.result = 'fail';
-            retBlock.resultMessage = '"' + ruleKey + '" IS NOT ALLOWED IN THIS OBJECT in:' + blockName;
+            retBlock.resultMessage = '"' + ruleKey + '" IS NOT ALLOWED';
         }
 
         if (retBlock.result !== "fail" && ruleValue.validationFunc) {
@@ -32,33 +33,60 @@ define([
         }
 
         return retBlock;
-    };
+    }
 
-    function MugElement (options) {
+    function MugProperties (options) {
+        var _this = this,
+            copyFrom = options.properties;
+        this.__data = {};
         this.__spec = options.spec;
         this.__mug = options.mug;
-        this.__name = options.name;
+        this.change = options.change || function () { return true; };
 
-        var copyFrom = options.copyFromElement;
         if (copyFrom) {
             this.setAttrs(copyFrom);
-            // todo: make this part of the property system
-            this._rawAttributes = copyFrom._rawAttributes;
         }
     }
-    MugElement.prototype = {
-        setAttr: function (attr, val, overrideImmutable) {
-            // todo: replace all direct setting of element properties with this
+    MugProperties.setBaseSpec = function (baseSpec) {
+        _.each(baseSpec, function (spec, name) {
+            Object.defineProperty(MugProperties.prototype, name, {
+                get: function () {
+                    return this._get(name);
+                },
+                set: function (value) {
+                    this._set(name, value);
+                },
+                // Allow properties to be redefined.  This should not be
+                // necessary, but if we don't do this then if vellum.init() is
+                // called a second time (i.e., when reloading Vellum on the test
+                // page), we get an error.  This is an easy and harmless
+                // alternative, but properties should never need to be redefined
+                // otherwise.
+                configurable: true
+            });
+        });
+    };
+    MugProperties.prototype = {
+        getDefinition: function (name) {
+            return this.__spec[name];
+        },
+        getAttrs: function () {
+            return this.__data;
+        },
+        _get: function (attr) {
+            return this.__data[attr];
+        },
+        _set: function (attr, val) {
+            var spec = this.__spec[attr],
+                prev = this.__data[attr];
 
-            var spec = this.__spec[attr];
-
-            // only set attr if spec allows this attr, except if mug is a
-            // DataBindOnly (which all mugs are before the control block has been
-            // parsed). Todo: this DataBindOnly exception is suspect.
-            if (!(attr.indexOf('_') !== 0 && spec && 
-                  (overrideImmutable || !spec.immutable) && 
-                      (spec.presence !== 'notallowed' || 
-                       this.__mug.__className === 'DataBindOnly')))
+            if ((spec.immutable && this.__data[attr]) ||
+                val === prev ||
+                // only set attr if spec allows this attr, except if mug is a
+                // DataBindOnly (which all mugs are before the control block has
+                // been parsed).
+                (spec.presence === 'notallowed' &&
+                 this.__mug.__className !== 'DataBindOnly'))
             {
                 return;
             }
@@ -72,43 +100,43 @@ define([
                     // All non-plain objects must provide a clone method,
                     // otherwise there could be circular references.  It can
                     // simply return the same object if it's safe.
+                    // This is not really fleshed out.
                     val = val.clone();
                 }
             }
-            this[attr] = val;
-            this.__mug.form.fire({
-                type: 'change',
-                mug: this.__mug
+
+            this.__data[attr] = val;
+          
+            var response = this.change(this.__mug, {
+                property: attr,
+                val: val,
+                previous: prev,
             });
+            if (response === false) {
+                this.__data[attr] = prev;
+            }
         },
-        setAttrs: function (attrs, overrideImmutable) {
+        setAttrs: function (attrs) {
             var _this = this;
             _(attrs).each(function (val, attr) {
-                _this.setAttr(attr, val, overrideImmutable);
+                _this[attr] = val;
             });
         },
         getErrors: function () {
             var _this = this,
                 errors = [];
 
-            // get only properties that have been manually set on the instance
-            _(Object.getOwnPropertyNames(this)).each(function (key) {
-                // allow "_propertyName" convention for system properties and $
-                // classy properties
-                if (key.indexOf('_') === 0 || key.indexOf('$') === 0) {
-                    return;
-                }
-
+            _.each(this.__data, function (value, key) {
                 var rule = _this.__spec[key];
 
-                // internal check that should never fail / get displayed to the user
-                if (!rule && _this[key]) {
+                if (!rule && value) {
+                    // this should never happen.  Probably safe to remove.
                     errors.push(
-                        "{element} has property '" + key + 
-                        "' but no rule is present for that property.");
+                        "Property '" + key + "' found " + 
+                        "but no rule is present for that property.");
                     return;
                 } else if (rule) {
-                    var result = validateRule(key, rule, _this[key], _this.__name, _this.__mug);
+                    var result = validateRule(key, rule, value, _this.__mug);
                     if (result.result === 'fail') {
                         errors.push(result.resultMessage);
                     }
@@ -150,318 +178,302 @@ define([
         return "pass";            
     };
 
-    var baseDataSpecs = {
-        nodeID: {
-            editable: 'w',
-            visibility: 'visible',
-            presence: 'required',
-            lstring: 'Question ID',
-            validationFunc: function (mug) {
-                var qId = mug.dataElement.nodeID;
-                var res = validateElementName(qId, "Question ID");
-                if (res !== "pass") {
-                    return res;
-                }
-                return "pass";
-            }
-        },
-        dataValue: {
-            editable: 'w',
-            visibility: 'visible',
-            presence: 'optional',
-            lstring: 'Default Data Value'
-        },
-        xmlnsAttr: {
-            editable: 'w',
-            visibility: 'visible',
-            presence: 'notallowed',
-            lstring: "Special Hidden Value XMLNS attribute"
-        }
-    };
-
-    var baseBindSpecs = {
-        // part of the Mug type definition, so it's immutable
-        dataType: {
-            editable: 'w',
-            immutable: true,
-            visibility: 'hidden',
-            presence: 'optional',
-            lstring: 'Data Type'
-        },
-        relevantAttr: {
-            editable: 'w',
-            visibility: 'visible',
-            presence: 'optional',
-            widget: widgets.xPath,
-            xpathType: "bool",
-            lstring: 'Display Condition'
-        },
-        calculateAttr: {
-            editable: 'w',
-            // only show calculate condition for non-data nodes if it already
-            // exists.  It's a highly discouraged use-case because the user will
-            // think they can edit an input when they really can't, but we
-            // shouldn't break existing forms doing this.
-            visibility: 'visible_if_present',
-            presence: 'optional',
-            widget: widgets.xPath,
-            xpathType: "generic",
-            lstring: 'Calculate Condition'
-        },
-        constraintAttr: {
-            editable: 'w',
-            visibility: 'visible',
-            presence: 'optional',
-            widget: widgets.xPath,
-            xpathType: "bool",
-            lstring: 'Validation Condition'
-        },
-        // non-itext constraint message
-        constraintMsgAttr: {
-            editable: 'w',
-            visibility: 'visible',
-            presence: 'optional',
-            validationFunc : function (mug) {
-                var bindBlock = mug.bindElement;
-                var hasConstraint = (typeof bindBlock.constraintAttr !== 'undefined');
-                var hasConstraintMsg = (bindBlock.constraintMsgAttr || 
-                                        (bindBlock.constraintMsgItextID && bindBlock.constraintMsgItextID.id));
-                if (hasConstraintMsg && !hasConstraint) {
-                    return 'ERROR: You cannot have a Validation Error Message with no Validation Condition!';
-                } else {
-                    return 'pass';
+    var baseSpecs = {
+        databind: {
+            // DATA ELEMENT
+            nodeID: {
+                editable: 'w',
+                visibility: 'visible',
+                presence: 'required',
+                lstring: 'Question ID',
+                validationFunc: function (mug) {
+                    var qId = mug.p.nodeID;
+                    var res = validateElementName(qId, "Question ID");
+                    if (res !== "pass") {
+                        return res;
+                    }
+                    return "pass";
                 }
             },
-            lstring: 'Validation Error Message'
+            dataValue: {
+                editable: 'w',
+                visibility: 'visible',
+                presence: 'optional',
+                lstring: 'Default Data Value'
+            },
+            xmlnsAttr: {
+                editable: 'w',
+                visibility: 'visible',
+                presence: 'notallowed',
+                lstring: "Special Hidden Value XMLNS attribute"
+            },
+            rawDataAttributes: {
+                presence: 'optional',
+                lstring: 'Extra Data Attributes'
+            },
+
+            // BIND ELEMENT
+            dataType: {
+                immutable: true,
+                editable: 'w',
+                visibility: 'hidden',
+                presence: 'optional',
+                lstring: 'Data Type'
+            },
+            relevantAttr: {
+                editable: 'w',
+                visibility: 'visible',
+                presence: 'optional',
+                widget: widgets.xPath,
+                xpathType: "bool",
+                lstring: 'Display Condition'
+            },
+            calculateAttr: {
+                editable: 'w',
+                // only show calculate condition for non-data nodes if it already
+                // exists.  It's a highly discouraged use-case because the user will
+                // think they can edit an input when they really can't, but we
+                // shouldn't break existing forms doing this.
+                visibility: 'visible_if_present',
+                presence: 'optional',
+                widget: widgets.xPath,
+                xpathType: "generic",
+                lstring: 'Calculate Condition'
+            },
+            constraintAttr: {
+                editable: 'w',
+                visibility: 'visible',
+                presence: 'optional',
+                widget: widgets.xPath,
+                xpathType: "bool",
+                lstring: 'Validation Condition'
+            },
+            // non-itext constraint message
+            constraintMsgAttr: {
+                editable: 'w',
+                visibility: 'visible',
+                presence: 'optional',
+                validationFunc : function (mug) {
+                    var hasConstraint = mug.p.constraintAttr,
+                        constraintMsgItextID = mug.p.constraintMsgItextID,
+                        hasConstraintMsg = (mug.p.constraintMsgAttr || 
+                                            (constraintMsgItextID && constraintMsgItextID.id));
+                    if (hasConstraintMsg && !hasConstraint) {
+                        return 'ERROR: You cannot have a Validation Error Message with no Validation Condition!';
+                    } else {
+                        return 'pass';
+                    }
+                },
+                lstring: 'Validation Error Message'
+            },
+            requiredAttr: {
+                editable: 'w',
+                visibility: 'visible',
+                presence: 'optional',
+                lstring: "Is this Question Required?",
+                widget: widgets.checkbox
+            },
+            nodeset: {
+                editable: 'r',
+                visibility: 'hidden',
+                presence: 'optional' //if not present one will be generated... hopefully.
+            },
+            // could use a key-value widget for this in the future
+            rawBindAttributes: {
+                presence: 'optional',
+                lstring: 'Extra Bind Attributes'
+            }
         },
-        requiredAttr: {
-            editable: 'w',
-            visibility: 'visible',
-            presence: 'optional',
-            lstring: "Is this Question Required?",
-            widget: widgets.checkbox
-        },
-        nodeset: {
-            editable: 'r',
-            visibility: 'hidden',
-            presence: 'optional' //if not present one will be generated... hopefully.
+
+        control: {
+            tagName: {
+                immutable: true,
+                editable: 'r',
+                visibility: 'hidden',
+                presence: 'required'
+            },
+            appearance: {
+                editable: 'r',
+                visibility: 'hidden',
+                presence: 'optional',
+                lstring: 'Appearance Attribute'
+            },
+            label: {
+                editable: 'w',
+                visibility: 'visible',
+                presence: 'optional',
+                lstring: "Default Label",
+                // todo: fix itext plugin abstraction barrier break here
+                validationFunc: function (mug) {
+                    var hasLabel, hasLabelItextID, missing, hasItext;
+                    hasLabel = mug.p.label;
+                    var itextBlock = mug.p.labelItextID;
+                    hasLabelItextID = itextBlock && (typeof itextBlock.id !== "undefined");
+
+                    if (hasLabelItextID && !util.isValidAttributeValue(itextBlock.id)) {
+                        return itextBlock.id + " is not a valid Itext ID";
+                    }
+                    hasItext = itextBlock && itextBlock.hasHumanReadableItext();
+                    
+                    if (hasLabel) {
+                        return 'pass';
+                    } else if (!hasLabel && !hasItext && (mug.spec.label.presence === 'optional' || 
+                               mug.spec.labelItextID.presence === 'optional')) {
+                        //make allowance for questions that have label/labelItextID set to 'optional'
+                        return 'pass';
+                    } else if (hasLabelItextID && hasItext) {
+                        return 'pass';
+                    } else if (hasLabelItextID && !hasItext) {
+                        missing = 'a display label';
+                    } else if (!hasLabel && !hasLabelItextID) {
+                        missing = 'a display label ID';
+                    } else if (!hasLabel) {
+                        missing = 'a display label';
+                    } else if (!hasLabelItextID) {
+                        missing = 'a display label ID';
+                    }
+                    return 'Question is missing ' + missing + ' value!';
+                }
+            },
+            hintLabel: {
+                editable: 'w',
+                visibility: 'visible',
+                presence: 'optional',
+                lstring: "Hint Label"
+            },
+            rawControlAttributes: {
+                presence: 'optional',
+                lstring: "Extra Control Attributes"
+            },
+            rawControlXML: {
+                presence: 'optional',
+                lstring: 'Raw XML'
+            }
         }
     };
 
-    var baseControlSpecs = {
-        // part of the Mug type definition, so it's immutable
-        tagName: {
-            editable: 'r',
-            immutable: true,
-            visibility: 'hidden',
-            presence: 'required'
-        },
-        appearance: {
-            editable: 'r',
-            visibility: 'hidden',
-            presence: 'optional',
-            lstring: 'Appearance Attribute'
-        },
-        label: {
-            editable: 'w',
-            visibility: 'visible',
-            presence: 'optional',
-            lstring: "Default Label",
-            // todo: fix itext plugin abstraction barrier break here
-            validationFunc: function (mug) {
-                var controlBlock, hasLabel, hasLabelItextID, missing, hasItext;
-                controlBlock = mug.controlElement;
-                hasLabel = Boolean(controlBlock.label);
-                var itextBlock = controlBlock ? mug.controlElement.labelItextID : null;
-                hasLabelItextID = itextBlock && (typeof itextBlock.id !== "undefined");
+    function copyAndProcessSpec(baseSpec, mugSpec, mugOptions) {
+        baseSpec = $.extend(true, {}, baseSpec);
 
-                if (hasLabelItextID && !util.isValidAttributeValue(itextBlock.id)) {
-                    return itextBlock.id + " is not a valid Itext ID";
-                }
-                hasItext = itextBlock && itextBlock.hasHumanReadableItext();
-                
-                if (hasLabel) {
-                    return 'pass';
-                } else if (!hasLabel && !hasItext && (mug.controlElement.__spec.label.presence === 'optional' || 
-                           mug.controlElement.__spec.labelItextID.presence === 'optional')) {
-                    //make allowance for questions that have label/labelItextID set to 'optional'
-                    return 'pass';
-                } else if (hasLabelItextID && hasItext) {
-                    return 'pass';
-                } else if (hasLabelItextID && !hasItext) {
-                    missing = 'a display label';
-                } else if (!hasLabel && !hasLabelItextID) {
-                    missing = 'a display label ID';
-                } else if (!hasLabel) {
-                    missing = 'a display label';
-                } else if (!hasLabelItextID) {
-                    missing = 'a display label ID';
-                }
-                return 'Question is missing ' + missing + ' value!';
-            }
-        },
-        hintLabel: {
-            editable: 'w',
-            visibility: 'visible',
-            presence: 'optional',
-            lstring: "Hint Label"
-        },
-    };
+        if (mugOptions.isDataOnly) {
+            baseSpec.control = {};
+        } else if (mugOptions.isControlOnly) {
+            baseSpec.databind = {};
+        }
 
-    function copyAndProcessSpec(spec, mugOptions) {
-        spec = $.extend(true, {}, spec);
-        _.each(spec, function (elementSpec, name) {
-            if (elementSpec) {
-                _.each(elementSpec, function (propertySpec, name) {
-                    if (_.isFunction(propertySpec) && name !== 'validationFunc' && 
-                        name !== 'widget') 
-                    {
-                        var val = propertySpec(mugOptions);
-                        if (val) {
-                            elementSpec[name] = val;
-                        } else {
-                            delete elementSpec[name];
-                        }
-                    }
-                });
+        spec = $.extend(true, {}, baseSpec.databind, baseSpec.control, mugSpec);
+
+        _.each(spec, function (propertySpec, name) {
+            if (_.isFunction(propertySpec)) {
+                propertySpec = propertySpec(mugOptions);
             }
+            if (!propertySpec) {
+                delete spec[name];
+                return;
+            }
+            spec[name] = propertySpec;
+
+            _.each(propertySpec, function (value, key) {
+                if (_.isFunction(value) && key !== 'validationFunc' && 
+                    key !== 'widget') 
+                {
+                    propertySpec[key] = value(mugOptions);
+                }
+            });
         });
+
+        
         return spec;
     }
+
+    // question-type specific properties, gets reset when you change the
+    // question type
+    var defaultOptions = {
+        isDataOnly: false,
+        isControlOnly: false,
+        // whether you can change to or from this question's type in the UI
+        isTypeChangeable: true,
+        limitTypeChangeTo: false,
+        // controls whether delete button shows up - you can still delete a
+        // mug's ancestor even if it's not removeable
+        isRemoveable: true,
+        isCopyable: true,
+        isODKOnly: false,
+        maxChildren: -1,
+        icon: null,
+        afterInsert: function (form, mug) {},
+        getAppearanceAttribute: function (mug) {
+            return mug.p.appearance;
+        },
+        getIcon: function (mug) {
+            return mug.options.icon;
+        },
+        init: function (mug, form) {},
+        spec: {}
+    };
 
     /**
      * A question, containing data, bind, and control elements.
      */
-    function Mug (options, form, baseSpec, copyFrom) {
-        var _this = this;
+    function Mug (options, form, baseSpec, copyFromMug) {
+        util.eventuality(this);
 
         this.form = form;
-        this.baseSpec = baseSpec;
-        this.setOptions(options, copyFrom);
-
-        this.ufid = util.get_guid();
-        util.eventuality(this);
+        this._baseSpec = baseSpec;
+        this.setOptionsAndProperties(
+            options, copyFromMug ? copyFromMug.p : null);
     }
     Mug.prototype = {
-        // question-type specific properties, gets merged into when you change
-        // the question type
-        defaultOptions: {
-            // whether you can change to or from this question's type in the UI
-            isTypeChangeable: true,
-            limitTypeChangeTo: false,
-            // controls whether delete button shows up - you can still delete a
-            // mug's ancestor even if it's not removeable
-            isRemoveable: true,
-            isCopyable: true,
-            isODKOnly: false,
-            maxChildren: -1,
-            icon: null,
-            afterInsert: function (form, mug) {},
-            getAppearanceAttribute: function (mug) {
-                return (mug.controlElement && mug.controlElement.appearance) ? 
-                    mug.controlElement.appearance : null;
-            },
-            getIcon: function (mug) {
-                return mug.options.icon;
-            },
-            processSpec: function (spec) {
-                return spec;
-            },
-            init: function (mug, form, baseSpec) {}
-        },
         // set or change question type
-        setOptions: function (options, copyFrom) {
+        setOptionsAndProperties: function (options, properties) {
             var _this = this,
-                copyFromMug = copyFrom || this;
+                spec = util.extend(this._baseSpec);
 
-            this.options = $.extend(true, {}, this.defaultOptions, options);
+            // These could both be calculated once for each type instead of
+            // each instance.
+            this.options = util.extend(defaultOptions, options);
+            this.__className = this.options.__className;
+            this.spec = copyAndProcessSpec(spec, this.options.spec, this.options);
 
-            // todo: it would be good to encapsulate the testing whether
-            // elements and properties in a spec are functions parameterized on
-            // mug, and executing them, in a single function, rather than below
-            // and in the MugElement constructor
-            this.__spec = this.options.processSpec(
-                copyAndProcessSpec(this.baseSpec, this.options));
-
-            _(this.__spec).each(function (spec, name) {
-                _this[name] = spec ? new MugElement({
-                    spec: spec,
-                    mug: _this,
-                    // copy properties from existing element
-                    copyFromElement: copyFromMug[name],
-                    name: name
-                }) : null;
+            // Reset any properties that are part of the question type
+            // definition.
+            _.each(this.spec, function (spec, name) {
+                if (_this.p && spec.immutable) {
+                    delete _this.p[name];
+                }
             });
 
-            this.options.init(this, this.form, this.baseSpec);
-            this.__className = this.options.__className;
+            this.p = new MugProperties({
+                spec: this.spec,
+                mug: this,
+                change: function () {
+                    _this.form.handleMugPropertyChange.apply(
+                        _this.form, arguments);
+                },
+                // copy existing properties
+                properties: properties || (this.p && this.p.getAttrs())
+            });
+
+            this.options.init(this, this.form);
         },
         getAppearanceAttribute: function () {
             return this.options.getAppearanceAttribute(this);
         },
         setAppearanceAttribute: function (attrVal) {
-            this.controlElement.appearance = attrVal;
-        },
-        // get a property definition by a /-delimited string or list index
-        // Returns null if this mug doesn't have a definition for that property.
-        getPropertyDefinition: function (index) {
-            if (!(index instanceof Array)) {
-                index = index.split("/");
-            } 
-            // this will raise a reference error if you give it a bad value
-            var ret = this.__spec[index[0]];
-            for (var i = 1; i < index.length; i++) {
-                if (!ret) {
-                    return null;
-                }
-                ret = ret[index[i]];
-            }
-            return ret;
-        },
-        // get a property value by a /-delimited string or list index
-        // Returns null if this mug doesn't have the element on which the
-        // property is defined.
-        getPropertyValue: function (index) {
-            // get a propery value by a string or list index
-            // assumes strings are split by the "/" character
-            if (!(index instanceof Array)) {
-                index = index.split("/");
-            } 
-            // this will raise a reference error if you give it a bad value
-            var ret = this[index[0]];
-            for (var i = 1; i < index.length; i++) {
-                if (!ret) {
-                    return null;
-                }
-                ret = ret[index[i]];
-            }
-            return ret;
+            this.p.appearance = attrVal;
         },
         getIcon: function () {
             return this.options.getIcon(this);
         },
         getErrors: function () {
-            var _this = this,
-                errors = [];
-
-            _(this.__spec).each(function (spec, name) {
-                if (spec) {
-                    var messages = _(_this[name].getErrors())
-                        .map(function (message) {
-                            return message.replace("{element}", name);
-                        });
-                    errors = errors.concat(messages);
-                }
-            });
-
-            return errors;
+            return this.p.getErrors();
         },
         isValid: function () {
             return !this.getErrors().length;
         },
         getDefaultItextRoot: function () {
             if (this.__className === "Item") {
-                return this.parentMug.getDefaultItextRoot() + "-" + this.controlElement.defaultValue;
+                return this.parentMug.getDefaultItextRoot() + "-" + this.p.defaultValue;
             } else {
                 return this.form.getAbsolutePath(this, true).slice(1);
             }
@@ -476,13 +488,14 @@ define([
          * Gets a default label, auto-generating if necessary
          */
         getDefaultLabelValue: function () {
-            if (this.controlElement && this.controlElement.label) {
-                return this.controlElement.label;
-            } 
-            else if (this.dataElement) {
-                return this.dataElement.nodeID;
+            var label = this.p.label,
+                nodeID = this.p.nodeID;
+            if (label) {
+                return label;
+            } else if (nodeID) {
+                return nodeID;
             } else if (this.__className === "Item") {
-                return this.controlElement.defaultValue;
+                return this.p.defaultValue;
             } else {
                 // fall back to generating an ID
                 // todo: return null, handle in caller
@@ -495,8 +508,9 @@ define([
          * string if not found.
          */
         getLabelValue: function () {
-            if (this.controlElement.label) {
-                return this.controlElement.label;
+            var label = this.p.label;
+            if (label) {
+                return label;
             } else {
                 return "";
             } 
@@ -521,72 +535,23 @@ define([
         
         // Add some useful functions for dealing with itext.
         setItextID: function (val) {
-            if (this.controlElement) {
-                this.controlElement.labelItextID.id = val;
+            var labelItextID = this.p.labelItextID;
+            if (labelItextID) {
+                labelItextID.id = val;
             }
         },
         
         getItext: function () {
-            if (this.controlElement) {
-                return this.controlElement.labelItextID;
-            } 
-        },
-        // legacy (or maybe this is actually useful as a generic thing)
-        setPropertyValue: function (element, property, val) {
-            var prev = this[element][property];
-
-            if (prev === val) {
-                return;
-            }
-
-            // short-circuit the property changing, the UI will alert the user
-            // if they try to switch questions without first entering a valid
-            // value
-            if (property === "nodeID") {
-                if (this.form.getMugChildByNodeID(this.parentMug, val)) {
-                    this.form.vellum.setUnsavedDuplicateNodeId(val);
-                    return;
-                } else {
-                    this.form.vellum.setUnsavedDuplicateNodeId(false);
-                }
-            }
-
-            this[element][property] = val;
-            this.form.handleMugPropertyChange(this, {
-                property: property,
-                element: element,
-                val: val,
-                previous: prev,
-                mugUfid: this.ufid
-            });
-
-            // legacy, enables auto itext ID behavior, don't add additional
-            // dependencies on this code.  Some sort of data binding would be
-            // better. 
-            this.fire({
-                type: 'property-changed',
-                property: property,
-                element: element,
-                val: val,
-                previous: prev,
-                mugUfid: this.ufid
-            });
-
-
+            return this.p.labelItextID;
         },
         getNodeID: function () {
-            var nodeID;
-
-            if(this.dataElement) {
-                nodeID = this.dataElement.nodeID;
-            }
-            return nodeID || this.controlElement.defaultValue;
+            return this.p.nodeID || this.p.defaultValue;
         },
         getAbsolutePath: function () {
             return this.form.getAbsolutePath(this);
         },
         getDisplayName: function (lang) {
-            var itextItem, cEl, disp, Itext;
+            var itextItem, disp, Itext;
             if (this.__className === "ReadOnly") {
                 return "Unknown (read-only) question type";
             }
@@ -594,12 +559,8 @@ define([
                 return "External Data";
             }
 
-            cEl = this.controlElement;
             Itext = this.form.vellum.data.javaRosa.Itext;
-
-            if(cEl) {
-                itextItem = cEl.labelItextID;
-            }
+            itextItem = this.p.labelItextID;
 
             if (!itextItem) {
                 return this.getNodeID();
@@ -624,15 +585,14 @@ define([
                     this.parentMug.getDefaultItextRoot() + "-" :
                     "",
                 nodeId = isSelectItem ?
-                    this.controlElement.defaultValue || "null" :
+                    this.p.defaultValue || "null" :
                     this.getDefaultItextRoot(),
                 itextType = propertyPath.replace("ItextID", "");
        
             return rootId + nodeId + "-" + itextType;
         },
         setItextId: function (propertyPath, id, unlink) {
-            var itext = this.getPropertyValue(propertyPath),
-                pieces = propertyPath.split('/');
+            var itext = this.p[propertyPath];
 
             if (id !== itext.id) {
                 if (unlink) {
@@ -643,100 +603,85 @@ define([
                 itext.id = id;
                 // Is this necessary, since itext is a reference?
                 // It probably triggers handlers.
-                this.setPropertyValue(
-                    pieces[0], 
-                    pieces[1],
-                    itext,
-                    this
-                );
+                this.p[propertyPath] = itext;
             }
         },
         unlinkItext: function () {
             var _this = this;
             _.each([
-                "controlElement/labelItextID",
-                "bindElement/constraintMsgItextID",
-                "controlElement/hintItextID"
+                "labelItextID",
+                "constraintMsgItextID",
+                "hintItextID"
             ], function (path) {
-                var val = _this.getPropertyValue(path);
-                // items don't have a bindElement
+                var val = _this.p[path];
+                // items don't have a constraintMsgItextID
                 if (val && val.id) {
-                    var id = _this.getItextAutoID(path.split('/')[1]);
+                    var id = _this.getItextAutoID(path);
                     _this.setItextId(path, id, true);
                 }
             });
         }
     };
 
-    var defaultOptions = Mug.prototype.defaultOptions;
-
-    // The use of inheritance here is a convenient way to be DRY about shared
-    // properties of mugs.  getXXSpec() methods could simply be replaced with
-    // generating the spec at the time of class definition by explicitly
-    // extending the spec of the super class.  These classes should absolutely
-    // not be used to implement any sort of inheritance-based interface.
     var DataBindOnly = util.extend(defaultOptions, {
+        isDataOnly: true,
         typeName: 'Hidden Value',
         icon: 'icon-vellum-variable',
         isTypeChangeable: false,
-        processSpec: function (spec) {
-            spec.dataElement.xmlnsAttr.presence = "optional";
-            spec.controlElement = null;
-            var b = spec.bindElement;
-            b.requiredAttr.presence = "notallowed";
-            b.constraintAttr.presence = "notallowed";
-            b.calculateAttr.visibility = "visible";
-            return spec;
+        spec: {
+            xmlnsAttr: { presence: "optional" },
+            requiredAttr: { presence: "notallowed" },
+            constraintAttr: { presence : "notallowed" },
+            calculateAttr: { visibility: "visible" }
         }
     });
+
+    var ControlOnly = util.extend(defaultOptions, {
+        typeName: '(Internal)',
+    
+    })
     
     var ReadOnly = util.extend(defaultOptions, {
-        processSpec: function () {
-            spec.dataElement = null;
-            spec.bindElement = null;
-            spec.controlElement = {
-                // virtual property used to get a widget
-                readonlyControl: {
-                    widget: widgets.readOnlyControl
-                }
-            };
-            return spec;
+        spec: {
+            readOnlyControl: {
+                widget: widgets.readOnlyControl
+            }
         }
     });
 
     var Text = util.extend(defaultOptions, {
         typeName: "Text",
         icon: "icon-vellum-text",
-        init: function (mug, form, baseSpec) {
-            mug.controlElement.tagName = "input";
-            mug.bindElement.dataType = "xsd:string";
+        init: function (mug, form) {
+            mug.p.tagName = "input";
+            mug.p.dataType = "xsd:string";
         }
     });
 
     var PhoneNumber = util.extend(Text, {
         typeName: 'Phone Number or Numeric ID',
         icon: 'icon-signal',
-        init: function (mug, form, baseSpec) {
-            Text.init(mug, form, baseSpec);
-            mug.controlElement.appearance = "numeric";
+        init: function (mug, form) {
+            Text.init(mug, form);
+            mug.p.appearance = "numeric";
         }
     });
 
     var Secret = util.extend(defaultOptions, {
         typeName: 'Password',
         icon: 'icon-key',
-        init: function (mug, form, baseSpec) {
-            mug.controlElement.tagName = "secret";
-            mug.bindElement.dataType = "xsd:string";
+        init: function (mug, form) {
+            mug.p.tagName = "secret";
+            mug.p.dataType = "xsd:string";
         }
     });
 
     var Int = util.extend(defaultOptions, {
         typeName: 'Integer',
         icon: 'icon-vellum-numeric',
-        init: function (mug, form, baseSpec) {
-            mug.controlElement.tagName = "input";
-            mug.bindElement.dataType = "xsd:int";
+        init: function (mug, form) {
+            mug.p.tagName = "input";
+            mug.p.dataType = "xsd:int";
         }
     });
 
@@ -744,19 +689,18 @@ define([
         typeName: 'Audio Capture',
         icon: 'icon-vellum-audio-capture',
         isODKOnly: true,
-        init: function (mug, form, baseSpec) {
-            mug.controlElement.tagName = "upload";
-            mug.controlElement.mediaType = "audio/*"; /* */
-            mug.bindElement.dataType = "binary";
+        init: function (mug, form) {
+            mug.p.tagName = "upload";
+            mug.p.mediaType = "audio/*"; /* */
+            mug.p.dataType = "binary";
         },
-        processSpec: function (spec) {
-            spec.controlElement.mediaType = {
+        spec: {
+            mediaType: {
                 lstring: 'Media Type',
                 visibility: 'visible',
                 editable: 'w',
                 presence: 'required'
-            };
-            return spec;
+            }
         }
     });
 
@@ -764,11 +708,10 @@ define([
         typeName: 'Image Capture',
         icon: 'icon-camera',
         isODKOnly: true,
-        init: function (mug, form, baseSpec) {
-            Audio.init(mug, form, baseSpec);
-            mug.controlElement.tagName = "upload";
-            mug.controlElement.mediaType = "image/*"; /* */
-            mug.bindElement.dataType = "binary";
+        init: function (mug, form) {
+            Audio.init(mug, form);
+            mug.p.mediaType = "image/*"; /* */
+            mug.p.dataType = "binary";
         }
     });
 
@@ -776,11 +719,10 @@ define([
         typeName: 'Video Capture',
         icon: 'icon-facetime-video',
         isODKOnly: true,
-        init: function (mug, form, baseSpec) {
-            Audio.init(mug, form, baseSpec);
-            mug.controlElement.tagName = "upload";
-            mug.controlElement.mediaType = "video/*"; /* */
-            mug.bindElement.dataType = "binary";
+        init: function (mug, form) {
+            Audio.init(mug, form);
+            mug.p.mediaType = "video/*"; /* */
+            mug.p.dataType = "binary";
         }
     });
 
@@ -788,9 +730,9 @@ define([
         typeName: 'GPS',
         icon: 'icon-map-marker',
         isODKOnly: true,
-        init: function (mug, form, baseSpec) {
-            mug.controlElement.tagName = "input";
-            mug.bindElement.dataType = "geopoint";
+        init: function (mug, form) {
+            mug.p.tagName = "input";
+            mug.p.dataType = "geopoint";
         }
     });
 
@@ -800,30 +742,30 @@ define([
         isODKOnly: true,
         isTypeChangeable: false,
         intentTag: null,
-        init: function (mug, form, baseSpec) {
-            mug.controlElement.tagName = "input";
-            mug.bindElement.dataType = "intent";
+        init: function (mug, form) {
+            mug.p.tagName = "input";
+            mug.p.dataType = "intent";
         },
-        processSpec: function (spec) {
-            spec.controlElement = $.extend(spec.controlElement, {
-                androidIntentAppId: {
-                    visibility: 'visible',
-                    widget: widgets.androidIntentAppId
-                },
-                androidIntentExtra: {
-                    visibility: 'visible',
-                    widget: widgets.androidIntentExtra
-                },
-                androidIntentResponse: {
-                    visibility: 'visible',
-                    widget: widgets.androidIntentResponse
-                }
-            });
-            return spec;
+        spec: {
+            androidIntentAppId: {
+                lstring: 'Intent ID',
+                visibility: 'visible',
+                widget: widgets.androidIntentAppId
+            },
+            androidIntentExtra: {
+                lstring: 'Extra',
+                visibility: 'visible',
+                widget: widgets.androidIntentExtra
+            },
+            androidIntentResponse: {
+                lstring: 'Response',
+                visibility: 'visible',
+                widget: widgets.androidIntentResponse
+            }
         },
         // todo: move to spec system
         getAppearanceAttribute: function (mug) {
-            return 'intent:' + mug.dataElement.nodeID;
+            return 'intent:' + mug.p.nodeID;
         }
     });
 
@@ -831,58 +773,59 @@ define([
         typeName: 'Barcode Scan',
         icon: 'icon-barcode',
         isODKOnly: true,
-        init: function (mug, form, baseSpec) {
-            mug.controlElement.tagName = "input";
-            mug.bindElement.dataType = "barcode";
+        init: function (mug, form) {
+            mug.p.tagName = "input";
+            mug.p.dataType = "barcode";
         }
     });
 
     var Date = util.extend(defaultOptions, {
         typeName: 'Date',
         icon: 'icon-calendar',
-        init: function (mug, form, baseSpec) {
-            mug.controlElement.tagName = "input";
-            mug.bindElement.dataType = "xsd:date";
+        init: function (mug, form) {
+            mug.p.tagName = "input";
+            mug.p.dataType = "xsd:date";
         }
     });
 
     var DateTime = util.extend(defaultOptions, {
         typeName: 'Date and Time',
         icon: 'icon-vellum-datetime',
-        init: function (mug, form, baseSpec) {
-            mug.controlElement.tagName = "input";
-            mug.bindElement.dataType = "xsd:dateTime";
+        init: function (mug, form) {
+            mug.p.tagName = "input";
+            mug.p.dataType = "xsd:dateTime";
         }
     });
 
     var Time = util.extend(defaultOptions, {
         typeName: 'Time',
         icon: 'icon-time',
-        init: function (mug, form, baseSpec) {
-            mug.controlElement.tagName = "input";
-            mug.bindElement.dataType = "xsd:time";
+        init: function (mug, form) {
+            mug.p.tagName = "input";
+            mug.p.dataType = "xsd:time";
         }
     });
 
     var Long = util.extend(Int, {
         typeName: 'Long',
         icon: 'icon-vellum-long',
-        init: function (mug, form, baseSpec) {
-            Int.init(mug, form, baseSpec);
-            mug.bindElement.dataType = "xsd:long";
+        init: function (mug, form) {
+            Int.init(mug, form);
+            mug.p.dataType = "xsd:long";
         }
     });
 
     var Double = util.extend(Int, {
         typeName: 'Decimal',
         icon: 'icon-vellum-decimal',
-        init: function (mug, form, baseSpec) {
-            Int.init(mug, form, baseSpec);
-            mug.bindElement.dataType = "xsd:double";
+        init: function (mug, form) {
+            Int.init(mug, form);
+            mug.p.dataType = "xsd:double";
         }
     });
 
     var Item = util.extend(defaultOptions, {
+        isControlOnly: true,
         typeName: 'Choice',
         icon: 'icon-circle-blank',
         isTypeChangeable: false,
@@ -893,56 +836,49 @@ define([
                 return 'icon-check-empty';
             }
         },
-        init: function (mug, form, baseSpec) {
-            mug.controlElement.tagName = "item";
-            mug.controlElement.defaultValue = mug.form.generate_item_label();
+        init: function (mug, form) {
+            mug.p.tagName = "item";
+            mug.p.defaultValue = mug.form.generate_item_label();
         },
-        processSpec: function (spec) {
-            var c = spec.controlElement;
-            delete spec.dataElement;
-            delete spec.bindElement;
-            c.defaultValue = {
+        spec: {
+            hintLabel: { presence: 'notallowed' },
+            hintItextID: { presence: 'notallowed' },
+            defaultValue: {
                 lstring: 'Choice Value',
                 visibility: 'visible',
                 editable: 'w',
                 presence: 'required',
                 validationFunc: function (mug) {
-                    if (/\s/.test(mug.controlElement.defaultValue)) {
+                    if (/\s/.test(mug.p.defaultValue)) {
                         return "Whitespace in values is not allowed.";
                     }
                     return "pass";
                 }
-            };
-            c.hintLabel.presence = 'notallowed';
-            c.hintItextID.presence = 'notallowed';
-            return spec;
+            }
         }
     });
 
     var Trigger = util.extend(defaultOptions, {
         typeName: 'Label',
         icon: 'icon-tag',
-        init: function (mug, form, baseSpec) {
-            mug.controlElement.tagName = "trigger";
-            mug.controlElement.showOKCheckbox = false;
+        init: function (mug, form) {
+            mug.p.tagName = "trigger";
+            mug.p.showOKCheckbox = false;
         },
-        processSpec: function (spec) {
-            spec.bindElement.dataType.presence = 'notallowed';
-            spec.dataElement.dataValue.presence = 'optional';
-
-            spec.controlElement.showOKCheckbox = {
+        spec: {
+            dataType: { presence: 'notallowed' },
+            dataValue: { presence: 'optional' },
+            showOKCheckbox: {
                 lstring: 'Add confirmation checkbox',
                 help: 'Add a confirmation message and checkbox below the label. Available on Android only.',
                 editable: 'w',
                 visibility: 'visible',
                 presence: 'optional',
                 widget: widgets.checkbox
-            };
-
-            return spec;
+            }
         },
         getAppearanceAttribute: function (mug) {
-            return mug.controlElement.showOKCheckbox ? null : 'minimal';
+            return mug.p.showOKCheckbox ? null : 'minimal';
         }
     });
 
@@ -953,19 +889,16 @@ define([
             form.createQuestion(mug, 'into', item, true);
             form.createQuestion(mug, 'into', item, true);
         },
-        init: function (mug, form, baseSpec) {}
     });
 
     var MSelect = util.extend(BaseSelect, {
         typeName: 'Multiple Answer',
         icon: 'icon-vellum-multi-select',
-        init: function (mug, form, baseSpec) {
-            BaseSelect.init(mug, form, baseSpec);
-            mug.controlElement.tagName = "select";
+        init: function (mug, form) {
+            mug.p.tagName = "select";
         },
-        processSpec: function (spec) {
-            spec.bindElement.dataType.visibility = "hidden";
-            return spec;
+        spec: {
+            dataType: { visibility: "hidden" }
         },
         defaultOperator: "selected"
     });
@@ -973,9 +906,8 @@ define([
     var Select = util.extend(MSelect, {
         typeName: 'Single Answer',
         icon: 'icon-vellum-single-select',
-        init: function (mug, form, baseSpec) {
-            MSelect.init(mug, form, baseSpec);
-            mug.controlElement.tagName = "select1";
+        init: function (mug, form) {
+            mug.p.tagName = "select1";
         },
         defaultOperator: null
     });
@@ -985,16 +917,16 @@ define([
         icon: 'icon-folder-open',
         isSpecialGroup: true,
         isTypeChangeable: false,
-        init: function (mug, form, baseSpec) {
-            mug.controlElement.tagName = "group";
+        init: function (mug, form) {
+            mug.p.tagName = "group";
         },
-        processSpec: function (spec) {
-            spec.controlElement.hintLabel.presence = "notallowed";
-            spec.bindElement.dataType.presence = "notallowed";
-            spec.bindElement.calculateAttr.presence = "notallowed";
-            spec.bindElement.constraintAttr.presence = "notallowed";
-            spec.dataElement.dataValue.presence = "notallowed";
-            return spec;
+        spec: {
+            hintLabel: { presence: "notallowed" },
+            dataType: { presence: "notallowed" },
+            calculateAttr: { presence: "notallowed" },
+            constraintAttr: { presence: "notallowed" },
+            constraintMsgAttr: { presence: "notallowed" },
+            dataValue: { presence: "notallowed" }
         }
     });
     
@@ -1006,8 +938,8 @@ define([
         icon: 'icon-reorder',
         isSpecialGroup: true,
         isTypeChangeable: false,
-        init: function (mug, form, baseSpec) {
-            Group.init(mug, form, baseSpec);
+        init: function (mug, form) {
+            Group.init(mug, form);
             mug.setAppearanceAttribute('field-list');
         },
     });
@@ -1017,36 +949,43 @@ define([
         icon: 'icon-retweet',
         isSpecialGroup: true,
         isTypeChangeable: false,
-        init: function (mug, form, baseSpec) {
-            Group.init(mug, form, baseSpec);
-            mug.controlElement.tagName = "repeat";
+        init: function (mug, form) {
+            mug.p.tagName = "repeat";
+            mug.p.repeat_count = null;
+            mug.p.no_add_remove = false;
         },
-        processSpec: function (spec) {
-            spec.controlElement = $.extend(spec.controlElement, {}, {
-                repeat_count: {
-                    lstring: 'Repeat Count',
-                    visibility: 'visible',
-                    editable: 'w',
-                    presence: 'optional',
-                    widget: widgets.droppableText
-                },
-                no_add_remove: {
-                    lstring: 'Disallow Repeat Add and Remove?',
-                    visibility: 'visible',
-                    editable: 'w',
-                    presence: 'optional',
-                    widget: widgets.checkbox
-                }
-            });
-            return spec;
+        spec: {
+            repeat_count: {
+                lstring: 'Repeat Count',
+                visibility: 'visible_if_present',
+                editable: 'w',
+                presence: 'optional',
+                widget: widgets.droppableText
+            },
+            no_add_remove: {
+                lstring: 'Disallow Repeat Add and Remove?',
+                visibility: 'visible_if_present',
+                editable: 'w',
+                presence: 'optional',
+                widget: widgets.checkbox
+            }
         }
     });
    
     function MugTypesManager(baseSpec, mugTypes) {
         var _this = this;
-        this.spec = baseSpec;
-        this.auxiliaryTypes = mugTypes.auxiliary || {};
-        this.normalTypes = mugTypes.normal || {};
+
+        this.auxiliaryTypes = mugTypes.auxiliary;
+        this.normalTypes = mugTypes.normal;
+        this.baseSpec = baseSpec;
+
+        MugProperties.setBaseSpec(
+            util.extend.apply(null, 
+                [baseSpec.databind, baseSpec.control].concat(_.filter(
+                    _.pluck(
+                        util.extend(this.normalTypes, this.auxiliaryTypes),
+                        'spec'),
+                    _.identity))));
 
         this.allTypes = $.extend({}, this.auxiliaryTypes, this.normalTypes);
 
@@ -1062,7 +1001,6 @@ define([
         });
 
         _.each(this.normalTypes, function (Mug, name) {
-            // had issues with trying to do instanceof involving Mug, so using name
             var validChildTypes;
             if (name === "Group" || name === "Repeat") {
                 validChildTypes = innerChildTypeNames;
@@ -1072,7 +1010,6 @@ define([
                 validChildTypes = [];
             }
 
-            // TODO: figure out how to get isinstance working
             if (!Mug.validChildTypes) {
                 Mug.validChildTypes = validChildTypes;
             }
@@ -1088,7 +1025,9 @@ define([
     MugTypesManager.prototype = {
         make: function (typeName, form, copyFrom) {
             var mugType = this.allTypes[typeName];
-            return new Mug(mugType, form, this.spec, copyFrom);
+                mug = new Mug(mugType, form, this.baseSpec, copyFrom);
+            mug.ufid = util.get_guid();
+            return mug;
         },
         changeType: function (mug, typeName) {
             var form = mug.form,
@@ -1101,8 +1040,8 @@ define([
                       "question if it has Choices. Please remove all Choices " +
                       "and try again.";
             }
-        
-            mug.setOptions(this.allTypes[typeName]);
+      
+            mug.setOptionsAndProperties(this.allTypes[typeName]);
 
             if (typeName.indexOf("Select") !== -1) {
                 _.each(children, function (childMug) {
@@ -1123,7 +1062,7 @@ define([
     };
 
     return {
-        Mug: Mug,
+        defaultOptions: defaultOptions,
         baseMugTypes: {
             normal: {
                 "AndroidIntent": AndroidIntent,
@@ -1155,9 +1094,7 @@ define([
             }
         },
         MugTypesManager: MugTypesManager,
-        baseDataSpecs: baseDataSpecs,
-        baseBindSpecs: baseBindSpecs,
-        baseControlSpecs: baseControlSpecs,
+        baseSpecs: baseSpecs,
         BoundPropertyMap: BoundPropertyMap
     };
 });

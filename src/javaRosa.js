@@ -371,22 +371,17 @@ define([
             // itext makes removal problematic.
             var labelItext, hintItext, constraintItext;
             if (mug){
-                if (mug.controlElement) {
-                    //attempt to remove Itext
-                    labelItext = mug.controlElement.labelItextID;
-                    hintItext = mug.controlElement.hintItextID;
-                    if (labelItext) {
-                        this.removeItem(labelItext);
-                    }
-                    if (hintItext) {
-                        this.removeItem(hintItext);
-                    }
-                } 
-                if (mug.bindElement) {
-                    constraintItext = mug.bindElement.constraintMsgItextID;
-                    if (constraintItext) {
-                        this.removeItem(constraintItext);
-                    }
+                labelItext = mug.p.labelItextID;
+                hintItext = mug.p.hintItextID;
+                if (labelItext) {
+                    this.removeItem(labelItext);
+                }
+                if (hintItext) {
+                    this.removeItem(hintItext);
+                }
+                constraintItext = mug.p.constraintMsgItextID;
+                if (constraintItext) {
+                    this.removeItem(constraintItext);
                 }
             }
         },
@@ -400,25 +395,26 @@ define([
         },
         updateForMug: function (mug, defaultLabelValue) {
             // set default itext id/values
-            if (mug.controlElement) {
+            if (!mug.options.isDataOnly) {
                 // set label if not there
-                if (!mug.controlElement.labelItextID && 
-                    mug.controlElement.__spec.labelItextID.presence !== "notallowed")
+                if (!mug.p.labelItextID && 
+                    mug.spec.labelItextID.presence !== "notallowed")
                 {
-                    mug.controlElement.labelItextID = mug.getDefaultLabelItext(defaultLabelValue);
-                    this.addItem(mug.controlElement.labelItextID);
+                    var labelItextID = mug.getDefaultLabelItext(defaultLabelValue);
+                    mug.p.labelItextID = labelItextID;
+                    this.addItem(labelItextID);
                 }
                 // set hint if legal and not there
-                if (mug.controlElement.__spec.hintItextID.presence !== "notallowed" &&
-                    !mug.controlElement.hintItextID) {
-                    mug.controlElement.hintItextID = this.createItem("");
+                if (mug.spec.hintItextID.presence !== "notallowed" &&
+                    !mug.p.hintItextID) {
+                    mug.p.hintItextID = this.createItem("");
                 }
             }
-            if (mug.bindElement) {
+            if (!mug.options.isControlOnly) {
                 // set constraint msg if legal and not there
-                if (mug.bindElement.__spec.constraintMsgItextID.presence !== "notallowed" &&
-                    !mug.bindElement.constraintMsgItextID) {
-                    mug.bindElement.constraintMsgItextID = this.createItem("");
+                if (mug.spec.constraintMsgItextID.presence !== "notallowed" &&
+                    !mug.p.constraintMsgItextID) {
+                    mug.p.constraintMsgItextID = this.createItem("");
                 }
             }
         }
@@ -444,15 +440,15 @@ define([
             }
         
             var thingsToGet = [
-                'controlElement/labelItextID',
-                'controlElement/hintItextID', 
-                'bindElement/constraintMsgItextID'
+                'labelItextID',
+                'hintItextID', 
+                'constraintMsgItextID'
             ]; 
         
             var val;            
             for (var i = 0; i < thingsToGet.length; i++) {
                 try {
-                    val = mt.getPropertyValue(thingsToGet[i]);
+                    val = mt.p[thingsToGet[i]];
                     if (val && !val.isEmpty() && ret.indexOf(val) === -1) {
                        // it was there and not present so add it to the list
                        ret.push(val);
@@ -479,11 +475,11 @@ define([
 
         // a few little hacks to support auto-update of choices
         widget.getItextType = function () {
-            return widget.propName.replace("ItextID", "");
+            return widget.path.replace("ItextID", "");
         };
 
         widget.autoGenerateId = function () {
-            return mug.getItextAutoID(widget.propName);
+            return mug.getItextAutoID(widget.path);
         };
 
         widget.updateAutoId = function () {
@@ -1030,7 +1026,7 @@ define([
                 allMugs.map(function (mug) {
                     var treeName = itextItem.getValue(widget.form, widget.language) || 
                             mug.form.vellum.getMugDisplayName(mug),
-                        it = mug.controlElement ? mug.controlElement.labelItextID : null;
+                        it = mug.p.labelItextID;
                     if (it && it.id === itextItem.id && widget.form === "default") {
                         mug.form.fire({
                             type: 'question-text-change',
@@ -1273,28 +1269,28 @@ define([
                 var $el = $(el),
                     mug = form.getMugByUFID($el.prop('id'));
 
-                // don't rename data nodes, they don't have itext
-                if (mug.controlElement) {
-                    try {
-                        var itextID = mug.controlElement.labelItextID.id,
+                try {
+                    var labelItextID = mug.p.labelItextID;
+                    if (labelItextID) {
+                        var itextID = labelItextID.id,
                             text = itext.getItem(itextID).getValue("default", lang);
                         text = text || _this.getMugDisplayName(mug);
                         _this.jstree('rename_node', $el, text ||
                                 _this.opts().core.noTextString);
-                    } catch (e) {
-                        /* This happens immediately after question duplication when
-                         * we try to rename the duplicated node in the UI tree. The
-                         * form XML is correct and the inputs change the appropriate
-                         * strings in the XML and in the UI tree, so we're just
-                         * going to ignore the fact that this internal data
-                         * structure isn't initialized with the default language's
-                         * itext value for this field yet, and simply not rename the
-                         * UI node, which will produce the same behavior. */
-                        // todo: re-examine this comment since there's been a lot of
-                        // refactoring
-                        if (e !== "NoItextItemFound") {
-                            throw e;
-                        }
+                    }
+                } catch (e) {
+                    /* This happens immediately after question duplication when
+                     * we try to rename the duplicated node in the UI tree. The
+                     * form XML is correct and the inputs change the appropriate
+                     * strings in the XML and in the UI tree, so we're just
+                     * going to ignore the fact that this internal data
+                     * structure isn't initialized with the default language's
+                     * itext value for this field yet, and simply not rename the
+                     * UI node, which will produce the same behavior. */
+                    // todo: re-examine this comment since there's been a lot of
+                    // refactoring
+                    if (e !== "NoItextItemFound") {
+                        throw e;
                     }
                 }
             });
@@ -1440,25 +1436,39 @@ define([
             this.data.javaRosa.items = getAllNonEmptyItextItemsFromMugs(
                 this.data.core.form);
         },
-        getDataElementSpec: function () {
-            var spec = this.__callOld();
-            spec.keyAttr = {
+        getMugTypes: function () {
+            var types = this.__callOld(),
+                normal = types.normal;
+
+            normal.Group.spec = util.extend(normal.Group.spec, {
+                constraintMsgItextID: {
+                    presence: 'notallowed'
+                }
+            });
+
+            return types;
+        },
+        getMugSpec: function () {
+            var spec = this.__callOld(),
+                databind = spec.databind,
+                control = spec.control;
+
+            // DATA ELEMENT
+            databind.keyAttr = {
                 editable: 'w',
                 visibility: 'visible',
                 presence: 'optional',
                 lstring: 'JR:Preload key value'
             };
-            return spec;
-        },
-        getBindElementSpec: function () {
-            var spec = this.__callOld();
-            spec.preload = {
+
+            // BIND ELEMENT
+            databind.preload = {
                 editable: 'w',
                 visibility: 'visible',
                 presence: 'optional',
                 lstring: "JR Preload"
             };
-            spec.preloadParams = {
+            databind.preloadParams = {
                 editable: 'w',
                 visibility: 'visible',
                 presence: 'optional',
@@ -1466,53 +1476,68 @@ define([
             };
 
             // hide non-itext constraint message unless it's present
-            spec.constraintMsgAttr.visibility = "visible_if_present";
-            spec.constraintMsgItextID = {
+            databind.constraintMsgAttr.visibility = "visible_if_present";
+            databind.constraintMsgItextID = {
                 editable: 'w',
                 visibility: 'visible',
-                presence: function (mug) {
-                    return mug.isSpecialGroup ? 'notallowed' : 'optional';
+                presence: function (mugOptions) {
+                    return mugOptions.isSpecialGroup ? 'notallowed' : 'optional';
                 },
                 lstring: "Validation Error Message ID",
                 widget: iTextIDWidget,
                 validationFunc: function (mug) {
-                    var bindElement = mug.bindElement;
-                    var constraintItext = bindElement.constraintMsgItextID;
+                    var constraintItext = mug.p.constraintMsgItextID;
                     if (constraintItext && constraintItext.id) {
                         if (!util.isValidAttributeValue(constraintItext.id)) {
                             return constraintItext.id + " is not a valid ID";
                         }
                     }
-                    if (constraintItext && constraintItext.id && !bindElement.constraintAttr) {
+                    if (constraintItext && constraintItext.id && !mug.p.constraintAttr) {
                         return "Can't have a Validation Message ID without a Validation Condition";
                     }
                     return validateItextItem(constraintItext, "Validation Error Message");
                 }
             };
-            return spec;
-        },
-        getControlElementSpec: function () {
-            var spec = this.__callOld();
-            // hide non-itext messages unless present
-            spec.label.visibility = "visible_if_present";
-            spec.hintLabel.visibility = "visible_if_present";
             // virtual property used to define a widget
-            spec.labelItext = {
+            databind.constraintMsgItext = {
                 editable: 'w',
-                visibility: 'controlElement/labelItextID',
+                visibility: 'constraintMsgItextID',
+                presence: 'optional',
+                widget: function (mug, options) {
+                    return itextLabelBlock(mug, $.extend(options, {
+                        itextType: "constraintMsg",
+                        getItextByMug: function (mug) {
+                            return mug.p.constraintMsgItextID;
+                        },
+                        displayName: "Validation Message"
+                    }));
+                },
+                lstring: 'Validation Message'
+            };
+
+            // CONTROL ELEMENT
+            
+            // hide non-itext messages unless present
+            control.label.visibility = "visible_if_present";
+            control.hintLabel.visibility = "visible_if_present";
+            // virtual property used to define a widget
+            control.labelItext = {
+                editable: 'w',
+                visibility: 'labelItextID',
                 presence: 'optional',
                 widget: function (mug, options) {
                     return itextLabelBlock(mug, $.extend(options, {
                         itextType: "label",
                         getItextByMug: function (mug) {
-                            return mug.controlElement.labelItextID;
+                            return mug.p.labelItextID;
                         },
                         displayName: "Label"
                     }));
                 },
                 lstring: "Label"
             };
-            spec.labelItextID = {
+
+            control.labelItextID = {
                 editable: 'w',
                 visibility: 'visible',
                 presence: 'optional',
@@ -1522,54 +1547,53 @@ define([
                         displayName: "Add Other Content",
                         itextType: "label",
                         getItextByMug: function (mug) {
-                            return mug.controlElement.labelItextID;
+                            return mug.p.labelItextID;
                         },
                         forms: ['long', 'short'],
                         isCustomAllowed: true
                     }));
                 },
-                validationFunc : spec.label.validationFunc
+                validationFunc: spec.control.label.validationFunc
             };
             // virtual property used to get a widget
-            spec.hintItext = {
+            control.hintItext = {
                 editable: 'w',
-                visibility: 'controlElement/hintItextID',
+                visibility: 'hintItextID',
                 widget: function (mug, options) {
                     return itextLabelBlock(mug, $.extend(options, {
                         itextType: "hint",
                         getItextByMug: function (mug) {
-                            return mug.controlElement.hintItextID;
+                            return mug.p.hintItextID;
                         },
                         displayName: "Hint Message"
                     }));
                 }
             };
-            spec.hintItextID = {
+            control.hintItextID = {
                 editable: 'w',
                 visibility: 'visible',
-                presence: function (mug) {
-                    return mug.isSpecialGroup ? 'notallowed' : 'optional';
+                presence: function (mugOptions) {
+                    return mugOptions.isSpecialGroup ? 'notallowed' : 'optional';
                 },
                 lstring: "Hint Itext ID",
                 widget: function (mug, options) {
                     return iTextIDWidget(mug, $.extend(options, {
                         itextType: "hint",
                         getItextByMug: function (mug) {
-                            return mug.controlElement.hintItextID;
+                            return mug.p.hintItextID;
                         },
                         displayName: "Hint Message"
                     }));
                 },
                 validationFunc: function (mug) {
-                    var hintItext, itextVal, controlElement;
-                    controlElement = mug.controlElement;
-                    hintItext = controlElement.hintItextID;
+                    var hintItext, itextVal;
+                    hintItext = mug.p.hintItextID;
                     if (hintItext && hintItext.id) {
                         if (!util.isValidAttributeValue(hintItext.id)) {
                             return hintItext.id + " is not a valid ID";
                         }
                     }
-                    if (mug.controlElement.__spec.hintItextID.presence === 'required' &&
+                    if (mug.spec.hintItextID.presence === 'required' &&
                         !hintItext.id) {
                         return 'Hint ID is required but not present in this question!';
                     }
@@ -1577,27 +1601,12 @@ define([
                     return validateItextItem(hintItext, "Hint");
                 }
             };
-            // virtual property used to define a widget
-            spec.constraintMsgItext = {
-                editable: 'w',
-                visibility: 'bindElement/constraintMsgItextID',
-                presence: 'optional',
-                widget: function (mug, options) {
-                    return itextLabelBlock(mug, $.extend(options, {
-                        itextType: "constraintMsg",
-                        getItextByMug: function (mug) {
-                            return mug.bindElement.constraintMsgItextID;
-                        },
-                        displayName: "Validation Message"
-                    }));
-                },
-                lstring: 'Validation Message'
-            };
+
             // virtual property used to get a widget
-            spec.otherItext = function (mug) {
-                return mug.isSpecialGroup ? undefined : {
+            control.otherItext = function (mugOptions) {
+                return mugOptions.isSpecialGroup ? undefined : {
                     editable: 'w',
-                    visibility: 'controlElement/labelItextID',
+                    visibility: 'labelItextID',
                     presence: 'optional',
                     lstring: "Add Other Content",
                     widget: function (mug, options) {
@@ -1605,7 +1614,7 @@ define([
                             displayName: "Add Other Content",
                             itextType: "label",
                             getItextByMug: function (mug) {
-                                return mug.controlElement.labelItextID;
+                                return mug.p.labelItextID;
                             },
                             forms: ['long', 'short'],
                             isCustomAllowed: true
@@ -1614,10 +1623,10 @@ define([
                 };
             };
             // virtual property used to get a widget
-            spec.mediaItext = function (mug) {
-                return mug.isSpecialGroup ? undefined : {
+            control.mediaItext = function (mugOptions) {
+                return mugOptions.isSpecialGroup ? undefined : {
                     editable: 'w',
-                    visibility: 'controlElement/labelItextID',
+                    visibility: 'labelItextID',
                     presence: 'optional',
                     lstring: 'Add Multimedia',
                     widget: function (mug, options) {
@@ -1625,7 +1634,7 @@ define([
                             displayName: "Add Multimedia",
                             itextType: "label",
                             getItextByMug: function (mug) {
-                                return mug.controlElement.labelItextID;
+                                return mug.p.labelItextID;
                             },
                             forms: SUPPORTED_MEDIA_TYPES,
                             formToIcon: ICONS
@@ -1637,35 +1646,30 @@ define([
         },
         getMainProperties: function () {
             var ret = this.__callOld();
-            ret.splice(
-                1 + ret.indexOf('controlElement/label'), 0,
-                'controlElement/labelItext'
-            );
+            ret.splice(1 + ret.indexOf('label'), 0, 'labelItext');
             return ret;
         },
         getLogicProperties: function () {
             var ret = this.__callOld();
             ret.splice(
-                1 + ret.indexOf('bindElement/constraintAttr'), 0,
-                'controlElement/constraintMsgItext'
-            );
+                1 + ret.indexOf('constraintAttr'), 0, 'constraintMsgItext');
             return ret;
         },
         getAdvancedProperties: function () {
             var ret = this.__callOld();
             ret.splice(
-                1 + ret.indexOf('dataElement/xmlnsAttr'), 0,
-                'dataElement/keyAttr',
-                'bindElement/preload',
-                'bindElement/preloadParams'
+                1 + ret.indexOf('xmlnsAttr'), 0,
+                'keyAttr',
+                'preload',
+                'preloadParams'
             );
 
             ret = ret.concat([
-                'controlElement/labelItextID',
-                'bindElement/constraintMsgItextID',
-                'controlElement/hintItextID',
-                'controlElement/hintItext',
-                'controlElement/otherItext'
+                'labelItextID',
+                'constraintMsgItextID',
+                'hintItextID',
+                'hintItext',
+                'otherItext'
             ]);
 
             return ret;

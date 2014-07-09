@@ -41,7 +41,8 @@ define([
         NONE = "NONE",
         CUSTOM = "CUSTOM";
 
-    var Itemset = util.extend(mugs.Mug.prototype.options, {
+    var Itemset = util.extend(mugs.defaultOptions, {
+        isControlOnly: true,
         typeName: 'External Data',
         icon: 'icon-circle-blank',
         isTypeChangeable: false,
@@ -56,23 +57,27 @@ define([
             }
         },
         init: function (mug, form, baseSpec) {
-            mug.controlElement.tagName = "itemset";
-            mug.controlElement.itemsetData = new mugs.BoundPropertyMap(mug.form, {
+            mug.p.tagName = "itemset";
+            mug.p.itemsetData = new mugs.BoundPropertyMap(mug.form, {
                 // avoids serialization error
                 nodeset: ''
             });
-            //this.bindElement.dataType = 'xsd:string';
         },
-        processSpec: function (spec) {
-            var c = spec.controlElement;
-            delete spec.dataElement;
-            delete spec.bindElement;
-            c.itemsetData = {
+        spec: {
+            label: { presence: 'notallowed' },
+            labelItext: { presence: 'notallowed' },
+            labelItextID: { presence: 'notallowed' },
+            hintLabel: { presence: 'notallowed' },
+            hintItextID: { presence: 'notallowed' },
+            mediaItext: { presence: 'notallowed' },
+            otherItext: { presence: 'notallowed' },
+            itemsetData: {
                 editable: 'w',
+                visibility: 'visible_if_present',
                 presence: 'optional',
-                widget: widgets.itemset,
+                widget: itemsetWidget,
                 validationFunc: function (mug) {
-                    var itemsetData = mug.controlElement.itemsetData;
+                    var itemsetData = mug.p.itemsetData;
                     if (!itemsetData.getAttr('nodeset')) {
                         return "A data source must be selected.";
                     }
@@ -84,15 +89,7 @@ define([
                     }
                     return 'pass';
                 }
-            };
-            c.label.presence = 'notallowed';
-            c.labelItext.presence = 'notallowed';
-            c.labelItextID.presence = 'notallowed';
-            c.hintLabel.presence = 'notallowed';
-            c.hintItextID.presence = 'notallowed';
-            c.mediaItext.presence = 'notallowed';
-            c.otherItext.presence = 'notallowed';
-            return spec;
+            }
         }
     });
 
@@ -127,13 +124,18 @@ define([
                 })
             });
             return types;
+        },
+        getMugSpec: function () {
+            var spec = this.__callOld();
+
+            return spec;
         }
     });
 
-    widgets.itemset = function (mug, options) {
+    function itemsetWidget(mug, options) {
         var widget = widgets.normal(mug, options),
             externalInstances = mug.form.externalInstances,
-            itemsetData = mug.controlElement.itemsetData,
+            itemsetData = mug.p.itemsetData,
             getUIElement = widgets.util.getUIElement,
             getUIElementWithEditButton = widgets.util.getUIElementWithEditButton,
             $nodeset;
