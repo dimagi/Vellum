@@ -1805,7 +1805,6 @@ define([
         ];
     };
 
-        
     function getWidgetClassAndOptions(propPath, mug) {
         var propDef = mug.p.getDefinition(propPath),
             propVal = mug.p[propPath];
@@ -1852,6 +1851,10 @@ define([
 
     fn.isMugTypeChangeable = function (mug, mugPath) {
         return mug.options.isTypeChangeable;
+    };
+
+    fn.handleMugRename = function (form, mug, val, previous, currentPath, oldPath) {
+        form.handleMugRename(form, mug, val, previous, currentPath, oldPath);
     };
 
     fn.beforeSerialize = function () {

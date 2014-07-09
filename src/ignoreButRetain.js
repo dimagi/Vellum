@@ -168,7 +168,7 @@ define([
                     return count++ ? '' : match;
                 });
         },
-        handleMugRename: function (mug, newID, oldID, newPath, oldPath) {
+        handleMugRename: function (form, mug, newID, oldID, newPath, oldPath) {
             this.__callOld();
 
             var pathRegex = new RegExp(oldPath, 'g'),
