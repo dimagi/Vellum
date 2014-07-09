@@ -72,7 +72,6 @@ define([
             mediaItext: { presence: 'notallowed' },
             otherItext: { presence: 'notallowed' },
             itemsetData: {
-                editable: 'w',
                 visibility: 'visible_if_present',
                 presence: 'optional',
                 widget: itemsetWidget,

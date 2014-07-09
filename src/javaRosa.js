@@ -1455,7 +1455,6 @@ define([
 
             // DATA ELEMENT
             databind.keyAttr = {
-                editable: 'w',
                 visibility: 'visible',
                 presence: 'optional',
                 lstring: 'JR:Preload key value'
@@ -1463,13 +1462,11 @@ define([
 
             // BIND ELEMENT
             databind.preload = {
-                editable: 'w',
                 visibility: 'visible',
                 presence: 'optional',
                 lstring: "JR Preload"
             };
             databind.preloadParams = {
-                editable: 'w',
                 visibility: 'visible',
                 presence: 'optional',
                 lstring: "JR Preload Param"
@@ -1478,7 +1475,6 @@ define([
             // hide non-itext constraint message unless it's present
             databind.constraintMsgAttr.visibility = "visible_if_present";
             databind.constraintMsgItextID = {
-                editable: 'w',
                 visibility: 'visible',
                 presence: function (mugOptions) {
                     return mugOptions.isSpecialGroup ? 'notallowed' : 'optional';
@@ -1500,7 +1496,6 @@ define([
             };
             // virtual property used to define a widget
             databind.constraintMsgItext = {
-                editable: 'w',
                 visibility: 'constraintMsgItextID',
                 presence: 'optional',
                 widget: function (mug, options) {
@@ -1522,7 +1517,6 @@ define([
             control.hintLabel.visibility = "visible_if_present";
             // virtual property used to define a widget
             control.labelItext = {
-                editable: 'w',
                 visibility: 'labelItextID',
                 presence: 'optional',
                 widget: function (mug, options) {
@@ -1538,7 +1532,6 @@ define([
             };
 
             control.labelItextID = {
-                editable: 'w',
                 visibility: 'visible',
                 presence: 'optional',
                 lstring: "Question Itext ID",
@@ -1557,7 +1550,6 @@ define([
             };
             // virtual property used to get a widget
             control.hintItext = {
-                editable: 'w',
                 visibility: 'hintItextID',
                 widget: function (mug, options) {
                     return itextLabelBlock(mug, $.extend(options, {
@@ -1570,7 +1562,6 @@ define([
                 }
             };
             control.hintItextID = {
-                editable: 'w',
                 visibility: 'visible',
                 presence: function (mugOptions) {
                     return mugOptions.isSpecialGroup ? 'notallowed' : 'optional';
@@ -1605,7 +1596,6 @@ define([
             // virtual property used to get a widget
             control.otherItext = function (mugOptions) {
                 return mugOptions.isSpecialGroup ? undefined : {
-                    editable: 'w',
                     visibility: 'labelItextID',
                     presence: 'optional',
                     lstring: "Add Other Content",
@@ -1625,7 +1615,6 @@ define([
             // virtual property used to get a widget
             control.mediaItext = function (mugOptions) {
                 return mugOptions.isSpecialGroup ? undefined : {
-                    editable: 'w',
                     visibility: 'labelItextID',
                     presence: 'optional',
                     lstring: 'Add Multimedia',

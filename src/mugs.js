@@ -182,7 +182,6 @@ define([
         databind: {
             // DATA ELEMENT
             nodeID: {
-                editable: 'w',
                 visibility: 'visible',
                 presence: 'required',
                 lstring: 'Question ID',
@@ -196,13 +195,11 @@ define([
                 }
             },
             dataValue: {
-                editable: 'w',
                 visibility: 'visible',
                 presence: 'optional',
                 lstring: 'Default Data Value'
             },
             xmlnsAttr: {
-                editable: 'w',
                 visibility: 'visible',
                 presence: 'notallowed',
                 lstring: "Special Hidden Value XMLNS attribute"
@@ -215,13 +212,11 @@ define([
             // BIND ELEMENT
             dataType: {
                 immutable: true,
-                editable: 'w',
                 visibility: 'hidden',
                 presence: 'optional',
                 lstring: 'Data Type'
             },
             relevantAttr: {
-                editable: 'w',
                 visibility: 'visible',
                 presence: 'optional',
                 widget: widgets.xPath,
@@ -229,7 +224,6 @@ define([
                 lstring: 'Display Condition'
             },
             calculateAttr: {
-                editable: 'w',
                 // only show calculate condition for non-data nodes if it already
                 // exists.  It's a highly discouraged use-case because the user will
                 // think they can edit an input when they really can't, but we
@@ -241,7 +235,6 @@ define([
                 lstring: 'Calculate Condition'
             },
             constraintAttr: {
-                editable: 'w',
                 visibility: 'visible',
                 presence: 'optional',
                 widget: widgets.xPath,
@@ -250,7 +243,6 @@ define([
             },
             // non-itext constraint message
             constraintMsgAttr: {
-                editable: 'w',
                 visibility: 'visible',
                 presence: 'optional',
                 validationFunc : function (mug) {
@@ -267,14 +259,12 @@ define([
                 lstring: 'Validation Error Message'
             },
             requiredAttr: {
-                editable: 'w',
                 visibility: 'visible',
                 presence: 'optional',
                 lstring: "Is this Question Required?",
                 widget: widgets.checkbox
             },
             nodeset: {
-                editable: 'r',
                 visibility: 'hidden',
                 presence: 'optional' //if not present one will be generated... hopefully.
             },
@@ -288,18 +278,15 @@ define([
         control: {
             tagName: {
                 immutable: true,
-                editable: 'r',
                 visibility: 'hidden',
                 presence: 'required'
             },
             appearance: {
-                editable: 'r',
                 visibility: 'hidden',
                 presence: 'optional',
                 lstring: 'Appearance Attribute'
             },
             label: {
-                editable: 'w',
                 visibility: 'visible',
                 presence: 'optional',
                 lstring: "Default Label",
@@ -336,7 +323,6 @@ define([
                 }
             },
             hintLabel: {
-                editable: 'w',
                 visibility: 'visible',
                 presence: 'optional',
                 lstring: "Hint Label"
@@ -698,7 +684,6 @@ define([
             mediaType: {
                 lstring: 'Media Type',
                 visibility: 'visible',
-                editable: 'w',
                 presence: 'required'
             }
         }
@@ -846,7 +831,6 @@ define([
             defaultValue: {
                 lstring: 'Choice Value',
                 visibility: 'visible',
-                editable: 'w',
                 presence: 'required',
                 validationFunc: function (mug) {
                     if (/\s/.test(mug.p.defaultValue)) {
@@ -871,7 +855,6 @@ define([
             showOKCheckbox: {
                 lstring: 'Add confirmation checkbox',
                 help: 'Add a confirmation message and checkbox below the label. Available on Android only.',
-                editable: 'w',
                 visibility: 'visible',
                 presence: 'optional',
                 widget: widgets.checkbox
@@ -958,14 +941,12 @@ define([
             repeat_count: {
                 lstring: 'Repeat Count',
                 visibility: 'visible_if_present',
-                editable: 'w',
                 presence: 'optional',
                 widget: widgets.droppableText
             },
             no_add_remove: {
                 lstring: 'Disallow Repeat Add and Remove?',
                 visibility: 'visible_if_present',
-                editable: 'w',
                 presence: 'optional',
                 widget: widgets.checkbox
             }
