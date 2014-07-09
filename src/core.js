@@ -348,17 +348,9 @@ define([
     // should switch to use jstree languages plugin
     fn.refreshVisibleData = function () {
         // update any display values that are affected
-        var _this = this,
-            allMugs = this.data.core.form.getMugList(true),
-            currLang = this.data.core.currentItextDisplayLanguage;
-        allMugs.map(function (mug) {
-            var node = _this.$f.find('#' + mug.ufid),
-                it = mug.p.labelItextID;
-            var treeName = (it) ? it.getValue("default", currLang) : _this.getMugDisplayName(mug);
-            treeName = treeName || _this.getMugDisplayName(mug);
-            if (treeName !== _this.jstree("get_text", node)) {
-                _this.jstree('rename_node', node, treeName);
-            }
+        var _this = this;
+        this.data.core.form.getMugList(true).map(function (mug) {
+            _this.refreshMugName(mug);
         });
 
         this.refreshCurrentMug();
@@ -1132,46 +1124,38 @@ define([
             }
 
             _this.data.core.saveButton.fire('change');
-        }).on('question-text-change', function (e) {
-            var $node = $('#' + e.mugUfid);
-            if (e.text !== _this.jstree("get_text", $node)) {
-                _this.jstree('rename_node', $node, e.text);
-            }
+        }).on('question-label-text-change', function (e) {
+            _this.refreshMugName(e.mug);
+            _this.toggleConstraintItext(e.mug);
         }).on('mug-property-change', function (e) {
-            var mug = e.mug;
-            e = e.e;
-
-            // The nodeID property for the current question (hopefully! if the
-            // model gets more complicated then this might not always be true)
-            // successfully changed, so it wasn't caught as a duplicate, so
-            // remove any existing duplicate warning state.
-            if (e.property === 'nodeID') {
+            // The nodeID property for the current question successfully
+            // changed, so it wasn't caught as a duplicate, so remove any
+            // existing duplicate warning state.
+            if (e.e.property === 'nodeID') {
                 _this.setUnsavedDuplicateNodeId(false);
             }
 
-            // todo: why is this here? 126038032.  Switch to use property
-            // visibility attribute, add support in UI for whatever behavior is
-            // necessary if it doesn't already exist.
-            if (mug.p.getDefinition('constraintAttr')) {
-                if (e.property === 'constraintAttr' && !mug.options.isDataOnly &&
-                    mug.p.constraintMsgItextID.isEmpty()) 
-                {
-                    _this.toggleConstraintItextBlock(!!e.val);
-                }
-
-                if (e.property === 'constraintMsgItextID' && !e.val.id && 
-                    !mug.p.constraintAttr)
-                {
-                    _this.toggleConstraintItextBlock(false);
-                }
-            }
+            _this.refreshMugName(e.mug);
+            _this.toggleConstraintItext(e.mug);
         });
     };
 
-    fn.toggleConstraintItextBlock = function (bool) {
-        var $constraintItext = $('.itext-block-constraintMsg');
+    fn.refreshMugName = function (mug, displayLang) {
+        var $node = $('#' + mug.ufid),
+            name = mug.getDisplayName(this.data.core.currentItextDisplayLanguage);
+        if (name !== this.jstree("get_text", $node)) {
+            this.jstree('rename_node', $node, name);
+        }
+    };
+
+    fn.toggleConstraintItext = function (mug) {
+        // todo: don't handle this one-off in the UI layer
+        var state = (mug.p.constraintMsgItextID && 
+                     (!mug.p.constraintMsgItextID.isEmpty() || 
+                      mug.p.constraintAttr)),
+            $constraintItext = $('.itext-block-constraintMsg');
         
-        if (bool) {
+        if (state) {
             $constraintItext.removeClass('hide');
         } else {
             $constraintItext.addClass('hide');
@@ -1357,12 +1341,7 @@ define([
         $props.show();
         this.$f.find('.fd-help').fdHelp();
 
-        // todo: why is this here? 126038032 
-        var $validationCondition = $('[name="property-constraintAttr"]');
-        if ($validationCondition && !$validationCondition.val()) {
-            this.toggleConstraintItextBlock(false);
-        }
-
+        this.toggleConstraintItext(mug);
         this.showVisualValidation(mug);
     };
         

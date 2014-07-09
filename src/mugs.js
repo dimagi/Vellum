@@ -537,7 +537,11 @@ define([
             return this.form.getAbsolutePath(this);
         },
         getDisplayName: function (lang) {
-            var itextItem, disp, Itext;
+            var itextItem = this.p.labelItextID, 
+                Itext = this.form.vellum.data.javaRosa.Itext,
+                defaultLang = Itext.getDefaultLanguage(),
+                disp;
+
             if (this.__className === "ReadOnly") {
                 return "Unknown (read-only) question type";
             }
@@ -545,13 +549,10 @@ define([
                 return "External Data";
             }
 
-            Itext = this.form.vellum.data.javaRosa.Itext;
-            itextItem = this.p.labelItextID;
-
             if (!itextItem) {
                 return this.getNodeID();
             }
-            lang = this.form.vellum.data.core.currentItextDisplayLanguage || Itext.getDefaultLanguage();
+            lang = lang || defaultLang;
 
             if(!lang) {
                 return 'No Translation Data';
@@ -560,9 +561,14 @@ define([
             disp = itextItem.getValue("default", lang);
             if (disp) {
                 return disp;
+            } else {
+                disp = itextItem.getValue("default", defaultLang);
+            }
+            if (disp) {
+                return disp;
             }
 
-            return this.getNodeID();
+            return '[' + this.getNodeID() + ']';
         },
         // todo: move these into javarosa
         getItextAutoID: function (propertyPath) {

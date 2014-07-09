@@ -1029,8 +1029,8 @@ define([
                         it = mug.p.labelItextID;
                     if (it && it.id === itextItem.id && widget.form === "default") {
                         mug.form.fire({
-                            type: 'question-text-change',
-                            mugUfid: mug.ufid,
+                            type: 'question-label-text-change',
+                            mug: mug,
                             text: treeName
                         });
                     }

@@ -531,21 +531,6 @@ define([
                 }
             }
 
-            if (e.property === 'nodeID') {
-                var newNameForTree = '[' + e.val +']',
-                    labelItextID = mug.p.labelItextID;
-                if (e.val && (
-                    mug.options.isDataOnly || !labelItextID || 
-                    labelItextID.isEmpty()) 
-                ) {
-                    this.fire({
-                        type: 'question-text-change',
-                        mugUfid: mug.ufid,
-                        text: newNameForTree
-                    });
-                }
-            }
-
             this.fire({
                 type: 'mug-property-change',
                 mug: mug,
