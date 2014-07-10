@@ -8,7 +8,7 @@
     "evil": false,
     "forin": false,
     "immed": true,
-    "latedef": true,
+    "latedef": "nofunc",
     "laxbreak": false,
     "loopfunc": true,
     "noarg": true,

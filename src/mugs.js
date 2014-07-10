@@ -627,9 +627,8 @@ define([
     });
 
     var ControlOnly = util.extend(defaultOptions, {
-        typeName: '(Internal)',
-    
-    })
+        typeName: '(Internal)'
+    });
     
     var ReadOnly = util.extend(defaultOptions, {
         spec: {

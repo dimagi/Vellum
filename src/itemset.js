@@ -338,7 +338,7 @@ define([
         }
         
         return widget;
-    };
+    }
     
     function getNodesetAndInstance(externalInstances, origLevels, instanceId,
                                    leafSubsetId, leafFilterCondition) 
