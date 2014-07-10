@@ -217,44 +217,6 @@ define([
 
             return util.mergeArray(cList, dList); //strip dupes and merge
         },
-        getInvalidMugs: function () {
-            var mugListC, mugListD, result, controlTree, dataTree,
-                mapFunc = function (node) {
-                    if (node.isRootNode) {
-                        return;
-                    }
-
-                    var mug = node.getValue();
-
-                    if(!mug.isValid()){
-                        return mug;
-                    }else{
-                        return null;
-                    }
-                };
-
-            dataTree = this.dataTree;
-            controlTree = this.controlTree;
-            mugListC = controlTree.treeMap(mapFunc);
-            mugListD = dataTree.treeMap(mapFunc);
-            result = util.mergeArray(mugListC, mugListD);
-
-            return result;
-        },
-        /**
-         * Goes through both trees and picks out all the invalid
-         * Mugs and returns a dictionary with the mug.ufid as the key
-         * and the validation object as the value
-         */
-        getInvalidMugUFIDs: function () {
-            var badMugs = this.getInvalidMugs(), result = {}, i;
-            for (i in badMugs){
-                if(badMugs.hasOwnProperty(i)){
-                    result[badMugs[i].ufid] = badMugs[i].getErrors();
-                }
-            }
-            return result;
-        },
         addInstanceIfNotExists: function (attrs) {
             var hasInstance = _.any(this.instanceMetadata, function (m) {
                 return m.attributes.src === attrs.src;
@@ -301,29 +263,9 @@ define([
                 errors: this.errors
             });
         },
-        clearError: function (errObj, options) {
-            errObj = FormError(errObj);
-            options = options || {};
-            var removed = null;
-            for (var i = 0; i < this.errors.length; i++) {
-                if (errObj.isMatch(this.errors[i])) {
-                    removed = this.errors.splice(i, 1);
-                    break;
-                }
-            }
-            if (removed) {
-                this.fire({
-                    type: 'error-change',
-                    errors: this.errors
-                });
-            }
-        },
-        /**
-         * Goes through all mugs (in data and control tree)
-         * to determine if all mugs are Valid and ok for form creation.
-         */
-        isFormValid: function () {
-            return this.dataTree.isTreeValid() && this.controlTree.isTreeValid();
+        isFormValid: function (validateMug) {
+            return this.dataTree.isTreeValid(validateMug) && 
+                this.controlTree.isTreeValid(validateMug);
         },
         getMugChildByNodeID: function (mug, nodeID) {
             var parentNode = (mug ? this.dataTree.getNodeFromMug(mug)

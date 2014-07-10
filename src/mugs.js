@@ -464,12 +464,10 @@ define([
                 return this.form.getAbsolutePath(this, true).slice(1);
             }
         },
-        
         getDefaultLabelItextId: function () {
             // Default Itext ID
             return this.getDefaultItextRoot() + "-label";
         },
-        
         /*
          * Gets a default label, auto-generating if necessary
          */

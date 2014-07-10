@@ -161,21 +161,18 @@ define([
             }
             return store; //return the results
         },
-        /**
-         * See docs @ Tree.validateTree()
-         */
-        validateTree: function () {
+        validateTree: function (validateValue) {
             var validationErrors, thisMug, i, childResult;
             if(!this.getValue()){
                 throw 'Tree contains node with no values!';
             }
-            if (!this.getValue().isValid()) {
+            if (!validateValue(this.getValue())) {
                 return false;
             }
 
             for (i in this.getChildren()) {
                 if (this.getChildren().hasOwnProperty(i)) {
-                    childResult = this.getChildren()[i].validateTree();
+                    childResult = this.getChildren()[i].validateTree(validateValue);
                     if(!childResult){
                         return false;
                     }
@@ -349,12 +346,12 @@ define([
         treeMap: function (func, afterChildFunc) {
             return this.rootNode.treeMap(func, [], afterChildFunc);
         },
-        isTreeValid: function() {
+        isTreeValid: function(validateValue) {
             var rChildren = this.rootNode.getChildren(),
             i, retVal;
             for (i in rChildren){
                 if(rChildren.hasOwnProperty(i)){
-                    retVal = rChildren[i].validateTree();
+                    retVal = rChildren[i].validateTree(validateValue);
                     if(!retVal){
                         return false;
                     }

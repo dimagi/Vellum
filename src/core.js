@@ -412,9 +412,12 @@ define([
         function onAbort () {
             _this._hideConfirmDialog();
         }
+        function validateMug(mug) {
+            return !_this.getErrors(mug).length;
+        }
         // todo: should this also show up for saving? Did it at some point in
         // the past?
-        if (!this.data.core.form.isFormValid()) {
+        if (!this.data.core.form.isFormValid(validateMug)) {
 
             var msg = "There are validation errors in the form.  Do you want to continue anyway? WARNING:" +
                       "The form will not be valid and likely not perform correctly on your device!";
@@ -813,34 +816,26 @@ define([
     };
 
     fn.setTreeNodeInvalid = function (uid, msg) {
-        this.$f.find('#' + uid).append(
+        msg = msg.replace(/"/g, "'");
+        var $node = this.$f.find('#' + uid + ' > a');
+        this.setTreeNodeValid(uid);
+        $node.after(
             '<div class="ui-icon ui-icon-alert fd-tree-valid-alert-icon"' +
             ' title="' + msg + '"></div>');
     };
 
     fn.setTreeNodeValid = function (uid) {
-        this.$f.find('#' + uid).find(".fd-tree-valid-alert-icon").remove();
+        this.$f.find('#' + uid + ' > a')
+            .siblings(".fd-tree-valid-alert-icon").remove();
     };
 
     fn.setTreeValidationIcon = function (mug) {
-        var errors = mug.getErrors();
+        var errors = this.getErrors(mug);
         if (!errors.length) {
             this.setTreeNodeValid(mug.ufid);
         } else {
-            var message = _(errors).pluck("message").join("<p>").replace(/"/g, "'");
-            this.setTreeNodeInvalid(mug.ufid, message);
+            this.setTreeNodeInvalid(mug.ufid, errors.join("<p>"));
         }
-    };
-
-    fn.setAllTreeValidationIcons = function () {
-        var _this = this;
-        //clear existing warning icons to start fresh.
-        this.data.core.$tree.find('.fd-tree-valid-alert-icon').remove();
-        
-        _(this.data.core.form.getInvalidMugUFIDs()).each(function (messages, ufid) {
-            var message = messages.join("<p>").replace(/"/g, "'");
-            _this.setTreeNodeInvalid(ufid, message);
-        });
     };
 
     fn.jstree = function () {
@@ -1180,6 +1175,7 @@ define([
             }
             var mug = node.getValue();
             _this.createQuestion(mug, mug.parentMug, 'into');
+            _this.setTreeValidationIcon(mug);
         });
         //get list of pure data nodes and throw them in the Question UI tree
         //(at the bottom)
@@ -1191,7 +1187,6 @@ define([
                     mug.parentMug : null;
             _this.createQuestion(mug, refMug, 'into');
         }
-        this.setAllTreeValidationIcons();
         this.selectSomethingOrHideProperties(true);
 
         // restore original jstree behavior
@@ -1412,19 +1407,19 @@ define([
 
     fn.showVisualValidation = function (mug) {
         var _this = this;
-        function setValidationFailedIcon(li, showIcon, message) {
-            var $li = $(li),
-                exists = ($li.find('.fd-props-validate').length > 0);
-            if (exists && showIcon) {
-                $li.find('.fd-props-validate').attr("title", message).addClass("ui-icon");
-            } else if (exists && !showIcon) {
-                $li.find('.fd-props-validate').removeClass('ui-icon').attr("title", "");
-            } else if (!exists && showIcon) {
-                var icon = $('<span class="fd-props-validate ui-icon ui-icon-alert"></span>');
-                icon.attr('title', message);
-                $li.append(icon);
-            }
-        }
+        //function setValidationFailedIcon(li, showIcon, message) {
+            //var $li = $(li),
+                //exists = ($li.find('.fd-props-validate').length > 0);
+            //if (exists && showIcon) {
+                //$li.find('.fd-props-validate').attr("title", message).addClass("ui-icon");
+            //} else if (exists && !showIcon) {
+                //$li.find('.fd-props-validate').removeClass('ui-icon').attr("title", "");
+            //} else if (!exists && showIcon) {
+                //var icon = $('<span class="fd-props-validate ui-icon ui-icon-alert"></span>');
+                //icon.attr('title', message);
+                //$li.append(icon);
+            //}
+        //}
 
         function findInputByReference(blockName, elementName) {
             // todo: make this work (it hasn't in a while)
@@ -1433,22 +1428,21 @@ define([
 
         // for now form warnings get reset every time validation gets called.
         this.data.core.form.clearErrors('form-warning');
-       
-        var errors = this.getVisibleErrors(mug);
-
-        _(errors).each(function (error) {
-            //var input = findInputByReference(name, "foo-id");  // todo: make work
-            //setValidationFailedIcon(input.parent(), true, error);
-            _this.data.core.form.updateError({
-                message: error,
-                level: 'form-warning'
-            });
-        });
-        this._resetMessages(this.data.core.form.errors);
+      
+        this._resetMessages(
+            this.data.core.form.errors.concat(
+                _.map(this.getErrors(mug), function (error) {
+                    return {
+                        message: error,
+                        level: "form-warning",
+                    };
+                })));
+        this.setTreeValidationIcon(mug);
     };
 
-    fn.getVisibleErrors = function (mug) {
-        return mug.getErrors();
+    fn.getErrors = function (mug) {
+        return mug.getErrors().concat(
+            this.data.core.form._logicManager.getErrors(mug));
     };
 
     fn.getSectionDisplay = function (mug, options) {

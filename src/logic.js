@@ -1,11 +1,13 @@
 define([
     'vellum/util',
     'xpath',
-    'xpathmodels'
+    'xpathmodels',
+    'underscore'
 ], function (
     util,
     xpath,
-    xpathmodels
+    xpathmodels,
+    _
 ) {
     function LogicExpression (exprText) {
         this._text = exprText || "";
@@ -76,9 +78,14 @@ define([
         this.opts = opts;
         this.form = form;
         this.all = [];
+        this.errors = {};
     }
 
     LogicManager.prototype = {
+        getErrors: function (mug) {
+            return _.pluck(
+                _.values(this.errors[mug.ufid] || {}), 'message');
+        },
         clearReferences: function (mug, property) {
             this.all = this.all.filter(function (elem) { 
                 return elem.mug !== mug.ufid || elem.property !== property;
@@ -94,7 +101,7 @@ define([
                         xpathmodels.XPathInitialContextEnum.ROOT; 
                 }),
                 error = {
-                    level: "parse-warning",
+                    level: "form-warning",
                     key: mug.ufid + "-" + property + "-badpath",
                     message: []
                 };
@@ -120,11 +127,16 @@ define([
                     sourcePath: _this.form.getAbsolutePath(mug)
                 };      
             }));
-            
+           
             if (error.message.length > 0) {
-                _this.form.updateError(error, {updateUI: true});
+                if (!this.errors[mug.ufid]) {
+                    this.errors[mug.ufid] = {};
+                }
+                this.errors[mug.ufid][property] = error;
             } else {
-                _this.form.clearError(error, {updateUI: true}); 
+                if (this.errors[mug.ufid]) {
+                    delete this.errors[mug.ufid][property];
+                }
             }        
         },
         updateReferences: function (mug, property) {
