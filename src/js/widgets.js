@@ -207,8 +207,8 @@ formdesigner.widgets = (function () {
                         }
                     }
                 });
-                if (typeof _gaq !== "undefined") {
-                    _gaq.push(['_trackEvent', 'Form Builder', 'Logic', options.lstring]);
+                if (typeof ga !== "undefined") {
+                    ga('send', 'event', 'Form Builder', 'Logic', options.lstring);
                 }
             }, !!widget.isDisabled());
         };
