@@ -338,30 +338,6 @@ define([
             });
         },
         /**
-         * Goes through the Itext data and verifies that
-         * a) a default language is set to something that exists
-         * b) That every iID that exists in the DB has a translation in the default language (causes commcare to fail if not the case)
-         *
-         * if a) fails, will throw an exception
-         * if b) fails, will return a dict of all offending iIDs that need a translation in order to pass validation with
-         * the KEYs being ItextIDs and the values being descriptive error messages.
-         *
-         * if everything passes will return true
-         */
-        validateItext: function () {
-            var dLang = this.getDefaultLanguage();
-
-            if(!dLang){
-                throw 'No Default Language set! Aborting validation. You should set one!';
-            }
-
-            if(!this.hasLanguage(dLang)){
-                throw 'Default language is set to a language that does not exist in the Itext DB!';
-            }
-
-            return true;
-        },
-        /**
          * Remove all Itext associated with the given mug
          * @param mug
          */
@@ -1704,14 +1680,6 @@ define([
             $textarea.val(generateItextXLS(this, Itext));
 
             $modal.modal('show');
-        },
-        getVisibleErrors: function () {
-            var ret = this.__callOld(),
-                itextValidation = this.data.javaRosa.Itext.validateItext();
-            if (itextValidation !== true) {
-                ret.push(itextValidation);
-            }
-            return ret;
         }
     });
 });
