@@ -239,13 +239,10 @@ define([
             mug.p.label = labelVal;
         }
         
-        var newLabelItext = function (mug) {
-            var item = new form.vellum.data.javaRosa.ItextItem({
-                id: mug.getDefaultLabelItextId()
-            });
-            Itext.addItem(item);
-            return item;
-        };
+        function newLabelItext(mug) {
+            return form.vellum.data.javaRosa.Itext.createItem(
+                mug.getDefaultLabelItextId());
+        }
         
         if (labelRef){
             labelItext = Itext.getOrCreateItem(labelRef);
