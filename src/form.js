@@ -458,7 +458,7 @@ define([
                 } else {
                     var newItemValue = this.generate_question_id(
                         mug.p.defaultValue);
-                    duplicate.defaultValue = newItemValue;
+                    duplicate.p.defaultValue = newItemValue;
                 }
                 
                 this.insertQuestion(duplicate, mug, 'after', true);

@@ -36,16 +36,10 @@ define([
     }
 
     function MugProperties (options) {
-        var _this = this,
-            copyFrom = options.properties;
         this.__data = {};
         this.__spec = options.spec;
         this.__mug = options.mug;
         this.change = options.change || function () { return true; };
-
-        if (copyFrom) {
-            this.setAttrs(copyFrom);
-        }
     }
     MugProperties.setBaseSpec = function (baseSpec) {
         _.each(baseSpec, function (spec, name) {
@@ -408,13 +402,14 @@ define([
         this.form = form;
         this._baseSpec = baseSpec;
         this.setOptionsAndProperties(
-            options, copyFromMug ? copyFromMug.p : null);
+            options, copyFromMug ? copyFromMug.p.getAttrs() : null);
     }
     Mug.prototype = {
         // set or change question type
         setOptionsAndProperties: function (options, properties) {
             var _this = this,
-                spec = util.extend(this._baseSpec);
+                spec = util.extend(this._baseSpec),
+                currentAttrs = properties || (this.p && this.p.getAttrs()) || {};
 
             // These could both be calculated once for each type instead of
             // each instance.
@@ -433,13 +428,9 @@ define([
             this.p = new MugProperties({
                 spec: this.spec,
                 mug: this,
-                change: function () {
-                    _this.form.handleMugPropertyChange.apply(
-                        _this.form, arguments);
-                },
-                // copy existing properties
-                properties: properties || (this.p && this.p.getAttrs())
+                change: _this.form.handleMugPropertyChange.bind(_this.form),
             });
+            this.p.setAttrs(currentAttrs);
 
             this.options.init(this, this.form);
         },
