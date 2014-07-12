@@ -39,8 +39,7 @@
         "bootstrap-better-typeahead": "ptnplanet/Bootstrap-Better-Typeahead"
     },
     "devDependencies": {
-        "DOM-shim": "Raynos/DOM-shim",
-
+        "blanket": "*",
         "equivalent-xml-js": "mwhite/equivalent-xml-js",
         "sinonjs": ">=1.6.0",
         "when": "~2.8.0",

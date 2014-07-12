@@ -1,6 +1,6 @@
 /bower_components
 /node_modules
-/dist/*
+/_copy
 /_build
 vellum.tar.gz
 
