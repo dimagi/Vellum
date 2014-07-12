@@ -1,6 +1,10 @@
 all:  tar
 
-clean:
+rjs: deps _rjs
+
+tar: rjs _tar
+
+test: tar _test
 
 deps:
 	npm install
@@ -8,7 +12,7 @@ deps:
 madge:
 	PATH=$$(npm bin):$$PATH madge --format amd src -R src/require-config.js -i deps.png -x "^(css.*|jquery|underscore|require-config|util)$$"
 
-rjs:  deps
+_rjs:
 	rm -rf _build
 	PATH=$$(npm bin):$$PATH r.js -o build.js
 # r.js removeCombined option doesn't handle plugin resources
@@ -20,16 +24,9 @@ rjs:  deps
 	cp bower_components/require-css/css.js _build/bower_components/require-css/
 
 
-tar:  rjs
+_tar:
 	rm -f vellum.tar.gz
 	cd _build && tar -czf ../vellum.tar.gz *
 
-# make sure build works
-test:  tar
-	PATH=$$(npm bin):$$PATH jshint src/*.js
-	#npm install phantomjs
-	#mocha-phantomjs tests/index.html
-
-
-
-	
+_test:
+	npm test

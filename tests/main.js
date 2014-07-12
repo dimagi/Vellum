@@ -1,8 +1,16 @@
 mocha.setup('bdd');
 mocha.reporter('html');
 
+// PhantomJS doesn't support bind yet
+Function.prototype.bind = Function.prototype.bind || function (thisp) {
+  var fn = this;
+  return function () {
+    return fn.apply(thisp, arguments);
+  };
+};
 
-var useBuilt = !window.mochaPhantomJS && 
+var baseUrl = window.mochaPhantomJS ? './' : '../',
+    useBuilt = !window.mochaPhantomJS && 
         window.location.href.indexOf('localhost') === -1,
     search = window.location.search;
 
@@ -13,11 +21,11 @@ if (search.indexOf('built') !== -1) {
 }
 
 require.config({
-    baseUrl: '../',
+    baseUrl: baseUrl,
     packages: [
         {
             name: 'jquery.vellum',
-            location: useBuilt ? '../_build/src' : '../src',
+            location: useBuilt ? baseUrl + '_build/src' : 'src',
             main: 'main'
         },
         {
@@ -42,16 +50,11 @@ require([
     require.config({
         // handle potential slow free heroku dynos
         waitSeconds: 60,
-        map: {
-            '*': {
-                'test_tpl': '../bower_components/requirejs-tpl/tpl'
-            }
-        },
         paths: {
-            'chai': '../bower_components/chai/chai',
-            'sinon': '../bower_components/sinonjs/sinon',
+            'chai': 'bower_components/chai/chai',
+            'sinon': 'bower_components/sinonjs/sinon',
 
-            'equivalent-xml': '../bower_components/equivalent-xml-js/src/equivalent-xml'
+            'equivalent-xml': 'bower_components/equivalent-xml-js/src/equivalent-xml'
         },
         shim: {
             'equivalent-xml': {
@@ -101,14 +104,18 @@ require([
                 }
             });
 
-        $('#run-tests').click(function () {
-            $('#mocha').empty();
+        function runTests() {
             if (window.mochaPhantomJS) {
                 mochaPhantomJS.run();
             } else {
                 mocha.run();
             }
-        });
+        }
+        $('#run-tests').click(runTests);
+
+        if (window.mochaPhantomJS) {
+            runTests();
+        }
 
         $('#load-saved').click(function () {
             $('#vellum').empty().vellum(vellumOptions);

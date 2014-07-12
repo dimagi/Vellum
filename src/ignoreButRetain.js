@@ -145,7 +145,7 @@ define([
 
                 var parentNode = xml.find(node.path),
                     firstChild = parentNode.children().first(),
-                    appendNode = $.parseXML(node.nodeXML).children[0];
+                    appendNode = $.parseXML(node.nodeXML).childNodes[0];
 
                 if (node.position) {
                     var target = parentNode.find(node.position);
