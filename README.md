@@ -2,6 +2,7 @@ Vellum
 ======
 
 [![Build Status](https://travis-ci.org/mwhite/Vellum.svg?branch=master)](https://travis-ci.org/mwhite/Vellum)
+[![Build Status](https://drone.io/github.com/mwhite/Vellum/status.png)](https://drone.io/github.com/mwhite/Vellum/latest)
 
 Vellum is a JavaRosa [XForm](http://en.wikipedia.org/wiki/XForms) designer used
 in [CommCare HQ](http://github.com/dimagi/commcare-hq).
