@@ -4,10 +4,22 @@
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
     <title>Vellum Test</title>
     
-    <link href="node_modules/mocha/mocha.css" type="text/css" rel="stylesheet"></link>
-
     <link href="tests/lib/hqstyle-core.css" type="text/css" rel="stylesheet"></link>
+
+    <!-- comment out to have RequireJS handle loading of bundled versions -->
+    <script src="bower_components/jquery/jquery.js"></script>
+    <script src="lib/jquery-ui/jquery-ui-1.8.14.custom.min.js"></script>
     <link href="lib/jquery-ui/redmond/jquery-ui-1.8.14.custom.css" type="text/css" rel="stylesheet"></link>
+    <script src="lib/bootstrap.js"></script>
+
+    
+    <!-- Mocha and test-only dependencies -->
+    <!-- todo: call from tests/main.js -->
+    <link href="node_modules/mocha/mocha.css" type="text/css" rel="stylesheet"></link>
+    <script src="node_modules/mocha/mocha.js"></script>
+
+    <script data-main="tests/main" src="bower_components/requirejs/require.js"></script>
+    <script src="bower_components/xrayquire/xrayquire.js"></script>
 
     <style>
       .sidebar button {
@@ -22,10 +34,6 @@
 
       .tab-content {
         margin-top: 2em;
-      }
-
-      #mocha {
-        margin-top: 0;
       }
 
     </style>
@@ -50,39 +58,18 @@
                   </li>
                   <li>
                     <a data-toggle='tab' href='#results'><h3>Test Results</h3></a>
-                  </li>
-                  <li>
-                    <a data-toggle='tab' href='#coverage'><h3>Coverage</h3></a>
-                  </li>
-                </ul>
+                  </ul>
 
-                <div class="tab-content">
-                  <div class="tab-pane active" id="test">
-                    <div id='vellum'></div>
+                  <div class="tab-content">
+                    <div class="tab-pane active" id="test">
+                      <div id='vellum'></div>
+                    </div>
+                    <div class="tab-pane" id="results">
+                      <div id="mocha"></div>
+                    </div>
                   </div>
-                  <div class="tab-pane" id="results">
-                    <div id="mocha"></div>
-                  </div>
-                  <div class="tab-pane" id="coverage">
-                    <div id="blanket-main"></div>
-                  </div>
-                </div>
               </div>
           </div>
       </div>
-
-      <!-- comment out to have RequireJS handle loading of bundled versions -->
-      <script src="bower_components/jquery/jquery.js"></script>
-      <script src="lib/jquery-ui/jquery-ui-1.8.14.custom.min.js"></script>
-      <script src="lib/bootstrap.js"></script>
-
-      <script src="node_modules/mocha/mocha.js"></script>
-
-      <script src="bower_components/requirejs/require.js"
-        data-cover data-main="tests/main">
-      </script>
-
-      <script src="bower_components/blanket/dist/qunit/blanket.js"></script>
-      <script type="text/javascript" src="bower_components/blanket/src/adapters/mocha-blanket.js"></script>
   </body>
 </html>

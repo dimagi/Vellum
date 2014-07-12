@@ -1,5 +1,3 @@
-BIN = node_modules/.bin
-
 all:  tar
 
 rjs: deps _rjs
@@ -12,11 +10,11 @@ deps:
 	npm install
 
 madge:
-	$(BIN)/madge --format amd src -R src/require-config.js -i deps.png -x "^(css.*|jquery|underscore|require-config|util)$$"
+	PATH=$$(npm bin):$$PATH madge --format amd src -R src/require-config.js -i deps.png -x "^(css.*|jquery|underscore|require-config|util)$$"
 
 _rjs:
 	rm -rf _build
-	$(BIN)/r.js -o build.js
+	PATH=$$(npm bin):$$PATH r.js -o build.js
 # r.js removeCombined option doesn't handle plugin resources
 	rm -r _build/src/exclude.js _build/src/templates _build/src/less-style
 	find _build/ -maxdepth 1 -mindepth 1 -not -name src -not -name lib -not -name README.md -not -name bower_components | xargs rm -rf
@@ -31,5 +29,4 @@ _tar:
 	cd _build && tar -czf ../vellum.tar.gz *
 
 _test:
-	#npm test
-	$(BIN)/jshint src/*.js
+	npm test

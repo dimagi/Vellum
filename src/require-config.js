@@ -14,8 +14,7 @@ define(['module'], function (module) {
         'vellum/javaRosa',
         'vellum/lock',
         'vellum/uploader',
-        'vellum/window',
-        'vellum/polyfills'
+        'vellum/window'
     ];
 
     // not working correctly for local modules

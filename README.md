@@ -93,7 +93,7 @@ behavior.
 
 Run tests headlessly:
 ```
-$ make test
+$ npm test
 ```
 
 Make dependency graph image:

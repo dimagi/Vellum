@@ -1,6 +1,14 @@
 mocha.setup('bdd');
 mocha.reporter('html');
 
+// PhantomJS doesn't support bind yet
+Function.prototype.bind = Function.prototype.bind || function (thisp) {
+  var fn = this;
+  return function () {
+    return fn.apply(thisp, arguments);
+  };
+};
+
 var baseUrl = window.mochaPhantomJS ? './' : '../',
     useBuilt = !window.mochaPhantomJS && 
         window.location.href.indexOf('localhost') === -1,
@@ -86,8 +94,6 @@ require([
         var lastSavedForm = null;
 
         function runTests() {
-            $("#mocha").empty();
-
             if (window.mochaPhantomJS) {
                 mochaPhantomJS.run();
             } else {
