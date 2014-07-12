@@ -997,7 +997,7 @@ define([
             // efficient to just do it based off the currently changing
             // node. Left as a TODO if we have performance problems with
             // this operation, but the current behavior is more correct.
-            var allMugs = mug.form.getMugList(true);
+            var allMugs = mug.form.getMugList();
             if (vellum.data.core.currentItextDisplayLanguage === widget.language) {
                 allMugs.map(function (mug) {
                     var treeName = itextItem.getValue(widget.form, widget.language) || 

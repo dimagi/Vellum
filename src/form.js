@@ -276,7 +276,7 @@ define([
          * a flat list of unique mugs.  This list is primarily fo the
          * autocomplete skip logic wizard.
          */
-        getMugList: function (includeSelectItems) {
+        getMugList: function () {
             var cTree, dTree, treeFunc, cList, dList, mergeList;
 
             treeFunc = function (node) {
@@ -284,12 +284,7 @@ define([
                     return;
                 }
 
-                var mug = node.getValue();
-                if(mug.__className === "Item" && !includeSelectItems) { //skip Choices
-                    return;
-                }
-
-                return mug;
+                return node.getValue();
             };
 
             cList = this.controlTree.treeMap(treeFunc);
@@ -676,7 +671,7 @@ define([
                 count = 0;
             for (var i = 0; i < allMugs.length; i++) {
                 var mug = allMugs[i];
-                if (qId === mug.p.nodeID) {
+                if (qId === mug.p.nodeID || qId === mug.p.defaultValue) {
                     count++; 
                 }
             }

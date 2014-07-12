@@ -94,7 +94,7 @@ define([
         parseControlTree(form, controls);
 
         // wire the event handlers for all the mugs in the tree
-        var allMugs = form.getMugList(true);
+        var allMugs = form.getMugList();
 
         var i;
         // update parse error and warn information in the model/UI

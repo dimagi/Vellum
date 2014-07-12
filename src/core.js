@@ -339,7 +339,7 @@ define([
     fn.refreshVisibleData = function () {
         // update any display values that are affected
         var _this = this;
-        this.data.core.form.getMugList(true).map(function (mug) {
+        this.data.core.form.getMugList().map(function (mug) {
             _this.refreshMugName(mug);
         });
 

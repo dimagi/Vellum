@@ -89,7 +89,7 @@ define([
      
         var headers = [util.tabSeparate(columnOrder)],
             rows = headers.concat(
-                form.getMugList(true).map(mugToExportRow));
+                form.getMugList().map(mugToExportRow));
 
         return rows.join("\n");
     };
