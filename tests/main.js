@@ -44,7 +44,6 @@ require([
         waitSeconds: 60,
         paths: {
             'chai': 'bower_components/chai/chai',
-            'sinon': 'bower_components/sinonjs/sinon',
 
             'equivalent-xml': 'bower_components/equivalent-xml-js/src/equivalent-xml'
         },
@@ -52,9 +51,6 @@ require([
             'equivalent-xml': {
                 deps: ['underscore'],
                 exports: 'EquivalentXml'
-            },
-            'sinon': {
-                exports: 'sinon'
             }
         }
     });
@@ -87,14 +83,7 @@ require([
         $,
         options
     ) {
-        var lastSavedForm = null,
-            vellumOptions = $.extend(true, {}, options.options, {
-                core: {
-                    saveUrl: function (data) {
-                        lastSavedForm = data.xform;
-                    }
-                }
-            });
+        var lastSavedForm = null;
 
         function runTests() {
             $("#mocha").empty();
@@ -107,17 +96,29 @@ require([
         }
         $('#run-tests').click(runTests);
 
-        if (window.mochaPhantomJS) {
-            runTests();
-        }
+        // ensure the normal first test instance is fully loaded before
+        // destroying it for tests
+        setTimeout(function () {
+            if (window.mochaPhantomJS) {
+                runTests();
+            }
+        }, 1000);
 
         $('#load-saved').click(function () {
-            $('#vellum').empty().vellum(vellumOptions);
+            $('#vellum').empty().vellum($.extend(true, {}, options.options, {
+                core: {
+                    saveUrl: function (data) {
+                        lastSavedForm = data.xform;
+                    },
+                    form: lastSavedForm
+                }
+            }));
 
             // trigger vellum resizing
             setTimeout(function () {
                 $(document).scroll();
             }, 500);
         }).click();
+
     });
 });

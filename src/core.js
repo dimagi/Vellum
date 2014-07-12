@@ -159,7 +159,10 @@ define([
     };
 
     fn.postInit = function () {
-        this.loadXFormOrError(this.opts().core.form);
+        var _this = this;
+        this.loadXFormOrError(this.opts().core.form, function () {
+            setTimeout(_this.opts().core.onReady, 0);
+        });
     };
 
     fn.getMugTypes = function () {
@@ -429,9 +432,10 @@ define([
                 cssClasses: "btn-primary",
                 action: function () {
                     codeMirror.save();
-                    _this.loadXFormOrError($textarea.val(), true);
-                    $modal.modal('hide');
-                    done();
+                    _this.loadXFormOrError($textarea.val(), function () {
+                        $modal.modal('hide');
+                        done();
+                    }, true);
                 }
             }
         ]);
@@ -968,7 +972,8 @@ define([
         }
     };
 
-    fn.loadXFormOrError = function (formString, updateSaveButton) {
+    fn.loadXFormOrError = function (formString, done, updateSaveButton) {
+        done = done || function () {};
         var _this = this;
 
         $.fancybox.showActivity();
@@ -1042,6 +1047,7 @@ define([
                 $.fancybox.hideActivity();
                 throw e;
             }
+            done();
         }, 500);
     };
 
@@ -1864,6 +1870,7 @@ define([
         allowedDataNodeReferences: [],
         externalInstances: [],
         noTextString: '[no text]',
+        onReady: function () {},
         onFormSave: function (data) {},
         bindBeforeUnload: function (handler) {
             $(window).bind('beforeunload', handler);

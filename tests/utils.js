@@ -10,8 +10,7 @@ define([
     EquivalentXml,
     $
 ) {
-    var assert = chai.assert,
-        $vellum;
+    var assert = chai.assert;
     
     function xmlEqual(str1, str2) {
         var xml1 = EquivalentXml.xml(str1),
@@ -26,19 +25,19 @@ define([
 
 
     return {
-        before: function (opts, done) {
+        before: function (opts) {
             opts = opts || {};
-            vellum_options = $.extend(true, {}, options.options, opts);
+            var vellum_options = $.extend(true, {}, options.options, opts);
             // $.extend merges arrays :(
             if (opts.javaRosa && opts.javaRosa.langs) {
                 vellum_options.javaRosa.langs = opts.javaRosa.langs;
             }
-            $vellum = $("#vellum").empty().vellum(vellum_options);
-            setTimeout(done, 1000);
+            $("#vellum").empty().vellum(vellum_options);
         },
         // call a method on the active instance
         call: function () {
-            var args = Array.prototype.slice.call(arguments);
+            var args = Array.prototype.slice.call(arguments),
+                $vellum = $("#vellum");
             return $vellum.vellum.apply($vellum, args);
         },
         assertXmlEqual: function (str1, str2) {
@@ -57,9 +56,10 @@ define([
             // todo: change to use explicit .text() filtering, not :contains()
             var $q = $("li[rel] > a:contains('" + displayName + "')");
            
-            if ($q.length !== 1) {
-                throw Error("Couldn't find question '" + displayName + "'");
-            
+            if ($q.length === 0) {
+                throw Error("No question '" + displayName + "' found");
+            } else if ($q.length > 1) {
+                throw Error("Too many questions '" + displayName + "' found");
             }
             $q.click();
         }

@@ -5,7 +5,8 @@ define([
     'underscore'
 ], function (
     $,
-    _
+    _,
+    undefined
 ) {
     var corePlugins = [
         'core',
@@ -24,7 +25,8 @@ define([
 
         if (isMethodCall) {
             this.each(function () {
-                var instance = instances[$.data(this, "vellum_instance_id")];
+                var instanceId = $.data(this, "vellum_instance_id"),
+                    instance = instances[instanceId];
                 retVal = instance[options].apply(instance, args);
             });
             return retVal;
@@ -35,8 +37,11 @@ define([
             this.each(function () {
                 options.plugins = _.uniq(corePlugins.concat(options.plugins || []));
                 var instance = new $.vellum._instance($(this), options),
-                    instanceId = parseInt(instances.push({}), 10) - 1;
-
+                    instanceId = $.data(this, "vellum_instance_id");
+                if (instanceId === undefined) {
+                    instances.push({});
+                    instanceId = instances.length - 1;
+                }
                 $.data(this, "vellum_instance_id", instanceId);
 
                 _.each(options.plugins, function (p) {

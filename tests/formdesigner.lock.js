@@ -1,11 +1,9 @@
 require([
     'chai',
-    'sinon',
     'tests/utils',
     'jquery'
 ], function (
     chai,
-    sinon,
     util,
     $
 ) {
@@ -82,13 +80,13 @@ require([
     </h:html>';
 
     function beforeFn(done) {
-        util.before({javaRosa: {langs: ['en']}}, function () {
-            clock = sinon.useFakeTimers();
-            call('loadXFormOrError', TEST_XML);
-            // ensure that form has loaded
-            clock.tick(500);
-            clock.restore();
-            done();
+        util.before({
+            javaRosa: {langs: ['en']},
+            core: {
+                onReady: function () {
+                    call('loadXFormOrError', TEST_XML, done);
+                }
+            }
         });
     }
 
@@ -240,7 +238,7 @@ require([
             function testEditButton(bool) {
                 clickQuestion(bool ? "value_locked" : "normal");
                 var $but = getInput('relevantAttr').parents('.control-group').find('button:contains(Edit)');
-                assert($but.length === 1);
+                assert.equal(1, $but.length);
                 assert.equal(bool, $but.prop('disabled'));
             }
             it("enables the edit button for non-locked logic properties", function () {

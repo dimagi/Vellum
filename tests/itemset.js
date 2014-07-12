@@ -2,7 +2,6 @@ require([
     'tests/options',
     'tests/utils',
     'chai',
-    'sinon',
     'jquery',
     'vellum/itemset',
     'vellum/form'
@@ -10,7 +9,6 @@ require([
     options,
     util,
     chai,
-    sinon,
     $,
     itemset,
     form
@@ -23,108 +21,99 @@ require([
 
     describe("The Dynamic Itemset functionality", function () {
         function beforeFn(done) {
-            util.before({javaRosa: {langs: ['en']}}, done);
+            util.before({
+                javaRosa: {langs: ['en']},
+                core: {onReady: done}
+            });
         }
 
         describe("The itemset parsing and serializing", function () {
             beforeEach(beforeFn);
-            it("preserves XML with itemsets in <select>s", function () {
+            it("preserves XML with itemsets in <select>s", function (done) {
                 assert(TEST_XML_1.indexOf('select1') !== -1);
-                clock = sinon.useFakeTimers();
-                call('loadXFormOrError', TEST_XML_1);
-                clock.tick(500);
-                clock.restore();
-                util.assertXmlEqual(call('createXML'), TEST_XML_1);
+                call('loadXFormOrError', TEST_XML_1, function () {
+                    util.assertXmlEqual(call('createXML'), TEST_XML_1);
+                    done();
+                });
             });
 
-            it("preserves XML with itemsets in <select1>s", function () {
+            it("preserves XML with itemsets in <select1>s", function (done) {
                 var newXml = TEST_XML_1.replace(/select1/g, 'select');
-                clock = sinon.useFakeTimers();
-                call('loadXFormOrError', newXml);
-                clock.tick(500);
-                clock.restore();
-                util.assertXmlEqual(call('createXML'), newXml);
+                call('loadXFormOrError', newXml, function () {
+                    util.assertXmlEqual(call('createXML'), newXml);
+                    done();
+                });
             });
         });
 
         describe("The itemset UI", function () {
             beforeEach(beforeFn);
-            it("adds a new instance node to the form when necessary", function () {
-                clock = sinon.useFakeTimers();
-                call('loadXFormOrError', TEST_XML_1);
-                clock.tick(500);
-                clock.restore();
+            it("adds a new instance node to the form when necessary", function (done) {
+                call('loadXFormOrError', TEST_XML_1, function () {
+                    clickQuestion("External Data");
+                    $("[name='data_source']").val("somefixture");
+                    $("[name='value_ref'], [name='label_ref'], [name='filter_condition']")
+                        .val("dummy").change();
 
-                clickQuestion("External Data");
-                $("[name='data_source']").val("somefixture");
-                $("[name='value_ref'], [name='label_ref'], [name='filter_condition']")
-                    .val("dummy").change();
-
-                var xml = call('createXML');
-                assert(xml.indexOf(
-                        '<instance src="jr://fixture/some-fixture" id="somefixture" />'
-                    ) !== -1 ||
-                    xml.indexOf(
-                        '<instance id="somefixture" src="jr://fixture/some-fixture" />'
-                    ));
+                    var xml = call('createXML');
+                    assert(xml.indexOf(
+                            '<instance src="jr://fixture/some-fixture" id="somefixture" />'
+                        ) !== -1 ||
+                        xml.indexOf(
+                            '<instance id="somefixture" src="jr://fixture/some-fixture" />'
+                        ));
+                    done();
+                });
             });
 
-            it("preserves inner filters if you never change the data source", function () {
-                clock = sinon.useFakeTimers();
-                call('loadXFormOrError', INNER_FILTERS_XML);
-                clock.tick(500);
-                clock.restore();
+            it("preserves inner filters if you never change the data source", function (done) {
+                call('loadXFormOrError', INNER_FILTERS_XML, function () {
+                    clickQuestion("External Data");
+                    $("[name='label_ref']").val("dummy").change();
 
-                clickQuestion("External Data");
-                $("[name='label_ref']").val("dummy").change();
-
-                util.assertXmlEqual(INNER_FILTERS_XML.replace('case_name', 'dummy'),
-                   call('createXML'));
+                    util.assertXmlEqual(INNER_FILTERS_XML.replace('case_name', 'dummy'),
+                       call('createXML'));
+                    done();
+                });
             });
 
-            it("doesn't preserve inner filters if you change the data source", function () {
-                clock = sinon.useFakeTimers();
-                call('loadXFormOrError', INNER_FILTERS_XML);
-                clock.tick(500);
-                clock.restore();
+            it("doesn't preserve inner filters if you change the data source", function (done) {
+                call('loadXFormOrError', INNER_FILTERS_XML, function () {
 
-                clickQuestion("External Data");
-                var origSource = $("[name='data_source']").val(),
-                    valueRef = $("[name='value_ref']").val(),
-                    labelRef = $("[name='label_ref']").val(),
-                    filter = $("[name='filter_condition']").val();
-                $("[name='data_source']").val("casedb").change()
-                    .val(origSource).change();
-                $("[name='value_ref']").val(valueRef).change();
-                $("[name='label_ref']").val(labelRef).change();
-                $("[name='filter_condition']").val(filter).change();
+                    clickQuestion("External Data");
+                    var origSource = $("[name='data_source']").val(),
+                        valueRef = $("[name='value_ref']").val(),
+                        labelRef = $("[name='label_ref']").val(),
+                        filter = $("[name='filter_condition']").val();
+                    $("[name='data_source']").val("casedb").change()
+                        .val(origSource).change();
+                    $("[name='value_ref']").val(valueRef).change();
+                    $("[name='label_ref']").val(labelRef).change();
+                    $("[name='filter_condition']").val(filter).change();
 
-                util.assertXmlNotEqual(INNER_FILTERS_XML, call('createXML'));
+                    util.assertXmlNotEqual(INNER_FILTERS_XML, call('createXML'));
+                    done();
+                });
             });
             
-            it("hides the copy button for itemsets", function () {
-                clock = sinon.useFakeTimers();
-                call('loadXFormOrError', TEST_XML_1);
-                clock.tick(500);
-                clock.restore();
-
-                clickQuestion("External Data");
-                clock.tick(0);
-                var $but = $("button:contains(Copy)");
-                assert($but.length === 0);
+            it("hides the copy button for itemsets", function (done) {
+                call('loadXFormOrError', TEST_XML_1, function () {
+                    clickQuestion("External Data");
+                    var $but = $("button:contains(Copy)");
+                    assert($but.length === 0);
+                    done();
+                });
             });
 
-            it("allows copying a select with an itemset", function () {
-                clock = sinon.useFakeTimers();
-                call('loadXFormOrError', TEST_XML_1);
-                clock.tick(500);
-                clock.restore();
+            it("allows copying a select with an itemset", function (done) {
+                call('loadXFormOrError', TEST_XML_1, function () {
+                    clickQuestion("question1");
+                    var $but = $("button:contains(Copy)");
+                    $but.click();
 
-                clickQuestion("question1");
-                var $but = $("button:contains(Copy)");
-                $but.click();
-
-                assert.equal(4, (call('createXML').match(/itemset/g) || []).length);
+                    assert.equal(4, (call('createXML').match(/itemset/g) || []).length);
+                    done();
+                });
             });
         });
 

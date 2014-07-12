@@ -13,7 +13,10 @@ define([
 
     describe("The Ignore-But-Retain plugin", function() {
         before(function (done) {
-            util.before({javaRosa: {langs: ['en']}}, done);
+            util.before({
+                javaRosa: {langs: ['en']},
+                core: {onReady: done}
+            });
         });
 
         var xmls = new XMLSerializer();
