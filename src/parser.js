@@ -9,6 +9,8 @@ define([
     util,
     $
 ) {
+    var DEFAULT_FORM_ID = 'data';
+
     $.fn.popAttr = function (name) {
         var val = this.attr(name);
         try {
@@ -57,6 +59,12 @@ define([
             form.intentManager.parseIntentTagsFromHead(foundTags);
         });
 
+        xml.find('setvalue').each(function () {
+            var $this = $(this);
+            form.addSetValue(
+                $this.attr('event'), $this.attr('ref'), $this.attr('value'));
+        });
+
         if($(xml).find('parsererror').length > 0) {
             throw 'PARSE ERROR!:' + $(xml).find('parsererror').find('div').html();
         }
@@ -78,7 +86,7 @@ define([
             form.parseErrors.push(
                 'No Data block was found in the form.  Please check that your form is valid!');
         }
-        
+       
         parseDataTree(form, data[0]);
         parseBindList(form, binds);
 
@@ -144,22 +152,27 @@ define([
         form.formUIVersion = root.attr("uiVersion");
         form.formVersion = root.attr("version");
         form.formName = root.attr("name");
-        form.setFormID($(root)[0].tagName);
+
+        if (root[0]) {
+            form.setFormID(root[0].tagName);
+        } else {
+            form.setFormID(DEFAULT_FORM_ID);
+        }
         
         if (!form.formUuid) {
-            that.parseWarnings.push('Form does not have a unique xform XMLNS (in data block). Will be added automatically');
+            form.parseWarnings.push('Form does not have a unique xform XMLNS (in data block). Will be added automatically');
         }
         if (!form.formJRM) {
-            that.parseWarnings.push('Form JRM namespace attribute was not found in data block. One will be added automatically');
+            form.parseWarnings.push('Form JRM namespace attribute was not found in data block. One will be added automatically');
         }
         if (!form.formUIVersion) {
-            that.parseWarnings.push('Form does not have a UIVersion attribute, one will be generated automatically');
+            form.parseWarnings.push('Form does not have a UIVersion attribute, one will be generated automatically');
         }
         if (!form.formVersion) {
-            that.parseWarnings.push('Form does not have a Version attribute (in the data block), one will be added automatically');
+            form.parseWarnings.push('Form does not have a Version attribute (in the data block), one will be added automatically');
         }
         if (!form.formName) {
-            that.parseWarnings.push('Form does not have a Name! The default form name will be used');
+            form.parseWarnings.push('Form does not have a Name! The default form name will be used');
         }
     }
 
@@ -403,7 +416,7 @@ define([
         if (MugClass === "Trigger") {
             mug.p.showOKCheckbox = (appearance !== 'minimal');
         }
-        populateMug(form, mug, cEl, oldEl);
+        populateMug(form, nodePath, mug, cEl, oldEl);
 
         return mug;
     }
@@ -422,7 +435,7 @@ define([
         }
     }
                 
-    function populateMug (form, mug, cEl, $parentEl) {
+    function populateMug (form, nodePath, mug, cEl, $parentEl) {
         if (mug.__className === "ReadOnly") {
             mug.p.rawControlXML = cEl;
             return;
@@ -455,7 +468,7 @@ define([
 
         if (tag === 'itemset') {
             mug.p.itemsetData = new mugs.BoundPropertyMap(form, {
-                nodeset: $cEl.popAttr('nodeset'),
+                nodeset: nodePath,
                 labelRef: $cEl.children('label').attr('ref'),
                 valueRef: $cEl.children('value').attr('ref')
             });
@@ -484,14 +497,14 @@ define([
             return null;
         }
         el = $(el); //make sure it's jquerified
-        var path = el.attr('ref'),
+        var path = el.popAttr('ref'),
             nodeId, mug, pathToTry;
         if(!path){
-            path = el.attr('nodeset');
+            path = el.popAttr('nodeset');
         }
         if (!path) {
             // attempt to support sloppy hand-written forms
-            nodeId = $(el).attr('bind');
+            nodeId = el.popAttr('bind');
             if (nodeId) {
                 pathToTry = processPath(nodeId);
                 if (!form.getMugByPath(pathToTry)) {

@@ -1,18 +1,19 @@
-// todo: make this a proper plugin
-
 // Knockout might help make some of the binding here more maintainable.
 // Hopefully its not too hard to follow.
 
 // I chose to use regex parsing of nodeset filter conditions because it was fast
 // and I knew it would work, but we might want to switch to using the XPath
 // JISON parser if it can handle parsing nodesets with filter conditions in a
-// way that lets us testing equality minus whitespace, quotes, etc.
-// For instance, it prevents you from referencing instances with filter
-// conditions of their own in a filter condition.
+// way that lets us test equality minus whitespace, quotes, etc.  For instance,
+// it currently prevents you from referencing instances with filter conditions
+// of their own in a filter condition.
 
 // I chose not to use the property/widget framework for each individual widget
 // because it seemed like the interactions between the different properties
 // would require a lot of complicated code to make it work with that framework.
+// It might be a good idea to flesh out the BoundPropertyMap thing using ES5
+// properties and then have some sort of formal system for mapping model objects
+// with nested properties to UI objects with nested properties.
 
 // It would be nice to convert the instance definition storage to use
 // first-class abstractions rather than simple hashes.
@@ -38,6 +39,7 @@ define([
     util
 ) {
     var mugTypes = mugs.baseMugTypes.normal,
+        normalizeXPathExpr = form.normalizeXPathExpr,
         NONE = "NONE",
         CUSTOM = "CUSTOM";
 
@@ -254,8 +256,8 @@ define([
             oldSourceVal = NONE;
         }
 
-        var $valueRefSelect = $("<input type='text' class='input-block-level'>"),
-            $labelRefSelect = $("<input type='text' class='input-block-level'>");
+        var $valueRefSelect = $("<input type='text' name='value_ref' class='input-block-level'>"),
+            $labelRefSelect = $("<input type='text' name='label_ref' class='input-block-level'>");
 
         _.each([$valueRefSelect, $labelRefSelect], function ($select) {
             $select.typeahead({minLength: 0, items: Infinity})
@@ -268,7 +270,7 @@ define([
         });
 
         var $filterInput = $(
-            "<input type='text' class='input-block-level'/>"
+            "<input type='text' name='filter_condition' class='input-block-level'/>"
         ).on('change keyup', updateValue);
        
         function handleSourceChange(val) {
@@ -319,12 +321,13 @@ define([
                 }) && nodeLevels.length > 1;
 
                 if (sourceUri && nodeLevelsValid) {
-                    var instance = mug.form.addInstance({
+                    var instance = form.processInstance({
                         sourceUri: sourceUri,
                         levels: _.map(nodeLevels, function (l) {
                             return {nodeName: l};
                         })
                     });
+                    mug.form.addInstance(instance);
                     populateSourceSelect();
                     $sourceSelect.val(instance.id).change();
 
@@ -346,9 +349,11 @@ define([
         leafFilterCondition = $.trim(leafFilterCondition);
 
         var instance = externalInstances[instanceId],
-            nodeset = "instance('" + instanceId + "')/" + instance.rootNodeName;
+            nodeset = "instance('" + instanceId + "')/" + instance.rootNodeName,
+            butLastLevels = instance.levels.slice(0, instance.levels.length - 1),
+            leafLevel = instance.levels[instance.levels.length - 1];
 
-        _.each(instance.levels, function (level, i) {
+        _.each(butLastLevels, function (level, i) {
             nodeset += '/' + level.nodeName;
             if (origLevels && origLevels[i]) {
                 var origLevel = origLevels[i];
@@ -361,9 +366,11 @@ define([
             }
         });
 
+        nodeset += '/' + leafLevel.nodeName;
         if (leafSubsetId) {
             var subsets = instance.levels[instance.levels.length - 1].subsets,
                 subset = subsets[leafSubsetId];
+
             nodeset += "[" + subset.selector + "]";
         }
 
@@ -520,69 +527,8 @@ define([
         return $.extend({}, instanceProps, subsetProps);
     }
 
-
-    // Parsing the instance selectors using the XPath models and comparing the
-    // parsed expressions might be a better approach that these hacky functions.
-    function normalizeXPathExpr(str) {
-        return normalizeToSingleQuotes(removeSpaces(str));
-    }
-
-    // remove spaces around = and []
-    function removeSpaces(str) {
-        return str.replace(/\s*([=\[\]])\s*/g, function (match, p1) {
-            return p1;
-        });
-    }
-
-    // Change any top-level double quotes to single quotes. (Assumes no
-    // top-level escaped double quotes).  This may not correctly handle escaped
-    // quotes within a quote.  Moving on.
-    function normalizeToSingleQuotes(str) {
-        var ret = '',
-            inAQuote = false;
-
-        eachCharByQuotedStatus(str,
-            function (c) {
-                ret += c;
-            },
-            function (c) {
-                if (c === '"') {
-                    c = "'";
-                }
-                ret += c;
-            });
-        return ret;
-    }
-
-    // abstracted this because I was using it for two things before
-    function eachCharByQuotedStatus(str, quoted, unquoted) {
-        var prevIsBackslash = false,
-            inSingleQuote = false,
-            inDoubleQuote = false;
-
-        for (var i=0, l=str.length; i < l; i++) {
-            var c = str[i],
-                inQuote = inSingleQuote || inDoubleQuote;
-          
-            if (!prevIsBackslash && ((inSingleQuote && c === "'") ||
-                                     (inDoubleQuote && c === '"'))) {
-                inQuote = false;
-            }
-            (inQuote ? quoted : unquoted)(c);
-
-            if (!prevIsBackslash) {
-                if (c === "'" && !inDoubleQuote) {
-                    inSingleQuote = !inSingleQuote;
-                } else if (c === '"' && !inSingleQuote) {
-                    inDoubleQuote = !inDoubleQuote;
-                }
-            }
-
-            if (c === '\\') {
-                prevIsBackslash = !prevIsBackslash;
-            } else {
-                prevIsBackslash = false;
-            }
-        }
-    }
+    // for testing
+    return {
+        getSourceData: getSourceData
+    };
 });

@@ -375,6 +375,7 @@ define([
     // question-type specific properties, gets reset when you change the
     // question type
     var defaultOptions = {
+        typeName: "Base",
         isDataOnly: false,
         isControlOnly: false,
         // whether you can change to or from this question's type in the UI

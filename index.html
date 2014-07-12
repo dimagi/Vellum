@@ -16,34 +16,59 @@
     <!-- todo: call from tests/main.js -->
     <link href="node_modules/mocha/mocha.css" type="text/css" rel="stylesheet"></link>
     <script src="node_modules/mocha/mocha.js"></script>
-    <script src="bower_components/chai/chai.js"></script>
-    <script src="bower_components/sinonjs/sinon.js"></script>
-    <script src="bower_components/equivalent-xml-js/src/equivalent-xml.js"></script>
-    <script src="bower_components/jquery.ui/tests/jquery.simulate.js"></script>
-    <script src="tests/utils.js"></script>
     
     <script data-main="tests/main" src="bower_components/requirejs/require.js"></script>
     <script src="bower_components/xrayquire/xrayquire.js"></script>
+
+    <style>
+      .sidebar button {
+        width: 100%;
+        margin-top: 2em;
+      }
+
+      /* emulate vertical spacing from HQ */
+      .nav-tabs {
+        margin-top: 2em;
+      }
+
+      .tab-content {
+        margin-top: 2em;
+      }
+
+    </style>
   </head>
 
   <body>
-
       <div class="container-fluid">
           <div class="row-fluid">
-              <div class="span2">
-                  Todo here: plugin checkboxes instead of tabs for plugin
-                  matrix, editable options, list of test forms to load
-              </div>
+            <div class="span2 sidebar">
+                <button class="btn" id="run-tests">
+                  <h4>Run tests</h4>
+                </button>
+                <button class="btn" id="load-saved">
+                  <h4>Reload using last saved form</h4>
+                </button>
+            </div>
+
               <div class="span10">
-                  <div id="matrix_container">
+                <ul class="nav nav-tabs">
+                  <li class="active">
+                    <a data-toggle='tab' href='#test'><h3>Vellum</h3></a>
+                  </li>
+                  <li>
+                    <a data-toggle='tab' href='#results'><h3>Test Results</h3></a>
+                  </ul>
+
+                  <div class="tab-content">
+                    <div class="tab-pane active" id="test">
+                      <div id='vellum'></div>
+                    </div>
+                    <div class="tab-pane" id="results">
+                      <div id="mocha"></div>
+                    </div>
                   </div>
               </div>
           </div>
       </div>
-    
-    <!-- Tests and running -->
-    <script src="tests/formdesigner.ignoreButRetain.js"></script>
-    <script src="tests/formdesigner.lock.js"></script>
-    <script src="tests/itemset.js"></script>
   </body>
 </html>

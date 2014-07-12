@@ -61,8 +61,9 @@ define([
     }
 
     function getPreviousSiblingSelector(node) {
-        if (node.previousElementSibling) {
-            return getNodeIdentifierSelector(node.previousElementSibling);
+        var previousSibling = node.previousElementSibling;
+        if (previousSibling && previousSibling.tagName !== 'label') {
+            return getNodeIdentifierSelector(previousSibling);
         } else {
             return false;
         }
@@ -125,7 +126,7 @@ define([
            
             this.__callOld(xmls.serializeToString(xml[0]));
         },
-        writeXML: function () {
+        createXML: function () {
             var xmlStr = this.__callOld(),
                 ignoredNodes = this.data.ignore.ignoredNodes;
             if (!ignoredNodes.length) {
@@ -143,6 +144,7 @@ define([
                 }
 
                 var parentNode = xml.find(node.path),
+                    firstChild = parentNode.children().first(),
                     appendNode = $.parseXML(node.nodeXML).children[0];
 
                 if (node.position) {
@@ -154,8 +156,12 @@ define([
                         // beginning
                         prependChild(parentNode[0], appendNode);
                     }
-                } else {
+                } else if (firstChild[0].tagName !== 'label') {
                     prependChild(parentNode[0], appendNode);
+                } else {
+                    // make sure to insert after the <label> at the beginning of
+                    // a group, not before
+                    firstChild.after(appendNode);
                 }
             });
 

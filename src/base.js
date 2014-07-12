@@ -14,35 +14,52 @@ define([
         'lock',
         'uploader',
         'windowManager'
-    ];
+    ],
+        instances = [];
     
     $.fn.vellum = function (options) {
-        // Instantiate an instance for each element in the jquery object set
-        // passed.  In practice, it's unlikely that you'd ever want to
-        // instantiate multiple instances with the same options.
-        this.each(function () {
-            options.plugins = _.uniq(corePlugins.concat(options.plugins || []));
-            var instance = new $.vellum._instance($(this), options);
+        var isMethodCall = typeof options === 'string',
+            args = Array.prototype.slice.call(arguments, 1),
+            retVal;
 
-            _.each(options.plugins, function (p) {
-                instance.data[p] = {};
+        if (isMethodCall) {
+            this.each(function () {
+                var instance = instances[$.data(this, "vellum_instance_id")];
+                retVal = instance[options].apply(instance, args);
             });
+            return retVal;
+        } else {
+            // Instantiate an instance for each element in the jquery object set
+            // passed.  In practice, it's unlikely that you'd ever want to
+            // instantiate multiple instances at once.
+            this.each(function () {
+                options.plugins = _.uniq(corePlugins.concat(options.plugins || []));
+                var instance = new $.vellum._instance($(this), options),
+                    instanceId = parseInt(instances.push({}), 10) - 1;
 
-            var context = $.extend({}, instance, $.vellum._fn);
-            // init core
-            $.vellum._fn.init.apply(context);
+                $.data(this, "vellum_instance_id", instanceId);
 
-            _.each(options.plugins, function (p) {
-                var initFn = $.vellum._initFns[p];
-                if (initFn) {
-                    initFn.apply(context);
-                }
+                _.each(options.plugins, function (p) {
+                    instance.data[p] = {};
+                });
+
+                var context = $.extend({}, instance, $.vellum._fn);
+                instances[instanceId] = context;
+                // init core
+                $.vellum._fn.init.apply(context);
+
+                _.each(options.plugins, function (p) {
+                    var initFn = $.vellum._initFns[p];
+                    if (initFn) {
+                        initFn.apply(context);
+                    }
+                });
+
+                // do final initialization that requires all plugins to be loaded
+                $.vellum._fn.postInit.apply(context);
             });
-
-            // do final initialization that requires all plugins to be loaded
-            $.vellum._fn.postInit.apply(context);
-        });
-        return this;
+            return this;
+        }
     };
 
     $.vellum = {
@@ -57,6 +74,10 @@ define([
             this.opts = function () { 
                 return $.extend(true, {}, options); 
             };
+
+            this.getData = function () {
+                return this.data;
+            }.bind(this);
         },
         plugin: function (pluginName, defaults, fns) {
             $.vellum.defaults[pluginName] = defaults;

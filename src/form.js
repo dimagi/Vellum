@@ -41,6 +41,94 @@ define([
         return that;
     };
     
+    function processInstance(instance) {
+        instance.defaultId = instance.defaultId || convertToId(instance.sourceUri);
+        instance.id = instance.defaultId;
+        _.each(instance.levels, function (level) {
+            var i = 1,
+                mappedSubsets = {};
+            _.each(level.subsets, function (subset) {
+                subset.id = i++;
+                subset.selector = normalizeXPathExpr(subset.selector);
+                mappedSubsets[subset.id] = subset;
+            });
+            level.subsets = mappedSubsets;
+        });
+        return instance;
+    }
+    
+    // Parsing the instance selectors using the XPath models and comparing the
+    // parsed expressions might be a better approach that these hacky functions.
+    function normalizeXPathExpr(str) {
+        return normalizeToSingleQuotes(removeSpaces(str));
+    }
+
+    // remove spaces around = and []
+    function removeSpaces(str) {
+        return str.replace(/\s*([=\[\]])\s*/g, function (match, p1) {
+            return p1;
+        });
+    }
+
+    // Change any top-level double quotes to single quotes. (Assumes no
+    // top-level escaped double quotes).  This may not correctly handle escaped
+    // quotes within a quote.  Moving on.
+    function normalizeToSingleQuotes(str) {
+        var ret = '',
+            inAQuote = false;
+
+        eachCharByQuotedStatus(str,
+            function (c) {
+                ret += c;
+            },
+            function (c) {
+                if (c === '"') {
+                    c = "'";
+                }
+                ret += c;
+            });
+        return ret;
+    }
+
+    // abstracted this because I was using it for two things before
+    function eachCharByQuotedStatus(str, quoted, unquoted) {
+        var prevIsBackslash = false,
+            inSingleQuote = false,
+            inDoubleQuote = false;
+
+        for (var i=0, l=str.length; i < l; i++) {
+            var c = str[i],
+                inQuote = inSingleQuote || inDoubleQuote;
+          
+            if (!prevIsBackslash && ((inSingleQuote && c === "'") ||
+                                     (inDoubleQuote && c === '"'))) {
+                inQuote = false;
+            }
+            (inQuote ? quoted : unquoted)(c);
+
+            if (!prevIsBackslash) {
+                if (c === "'" && !inDoubleQuote) {
+                    inSingleQuote = !inSingleQuote;
+                } else if (c === '"' && !inSingleQuote) {
+                    inDoubleQuote = !inDoubleQuote;
+                }
+            }
+
+            if (c === '\\') {
+                prevIsBackslash = !prevIsBackslash;
+            } else {
+                prevIsBackslash = false;
+            }
+        }
+    }
+    
+    function convertToId(str) {
+        return str
+            .toLowerCase()
+            .replace(/ /g,'_')
+            .replace(/[^\w-]+/g,'');
+    }
+    
     var InstanceMetadata = function (attributes, children) {
         var that = {};
         that.attributes = attributes;
@@ -48,23 +136,17 @@ define([
         return that;
     };
 
-    function convertToId(str) {
-        return str
-            .toLowerCase()
-            .replace(/ /g,'_')
-            .replace(/[^\w-]+/g,'');
-    }
-
     function Form (opts, vellum, mugTypes) {
         var _this = this;
-        this.externalInstances = {};
+
+        this.setValues = [];
 
         this._logicManager = new logic.LogicManager(this, {
                 allowedDataNodeReferences: opts.allowedDataNodeReferences
             });
 
-        // Some things in the mug methods depend on the UI.  These should
-        // eventually be refactored out.
+        // Some things in the form and mug methods depend on the UI.  These
+        // should eventually be factored out.
         this.vellum = vellum;
         this.mugTypes = mugTypes;
         this.intentManager = intents.IntentManager(this);
@@ -81,12 +163,14 @@ define([
         this.instanceMetadata = [InstanceMetadata({})];
         this.errors = [];
         
-        this.processInstancesConfig(opts.externalInstances);
+        this.externalInstances = _.indexBy(
+            _.map(opts.externalInstances || [], processInstance), 'id');
         this.question_counter = 1;
         
         //make the object event aware
         util.eventuality(this);
     }
+
     Form.prototype = {
         fireChange: function (mug) {
             this.fire({
@@ -94,30 +178,26 @@ define([
                 mug: mug
             });
         },
-        processInstancesConfig: function (instances) {
-            var _this = this;
-            // set instance id, can be overridden at parse time if an instance with a
-            // different ID has the expected src URI.  Also add an index to each subset
-            // type which can be used as a key to reference that subset.
-            this.externalInstances = {};
-            _.each(instances, function (instance) {
-                _this.addInstance(instance);
-            });
-        },
         addInstance: function (instance) {
-            instance.defaultId = instance.defaultId || convertToId(instance.sourceUri);
-            instance.id = instance.defaultId;
-            _.each(instance.levels, function (level) {
-                var i = 1,
-                    mappedSubsets = {};
-                _.each(level.subsets, function (subset) {
-                    subset.id = i++;
-                    mappedSubsets[subset.id] = subset;
-                });
-                level.subsets = mappedSubsets;
-            });
             this.externalInstances[instance.id] = instance;
-            return instance;
+        },
+        // todo: update references on rename
+        addSetValue: function (event, ref, value) {
+            var existing = _.filter(this.setValues, function (setValue) {
+                return setValue.event === event && setValue.ref === ref;
+            });
+            if (existing[0]) {
+                existing.value = value;
+            } else {
+                this.setValues.push({
+                    event: event,
+                    ref: ref,
+                    value: value
+                });
+            }
+        },
+        getSetValues: function () {
+            return this.setValues;
         },
         setFormID: function (id) {
             this.dataTree.setRootID(id);
@@ -645,7 +725,9 @@ define([
     };
 
     return {
-        "Form": Form,
-        "InstanceMetadata": InstanceMetadata
+        Form: Form,
+        processInstance: processInstance,
+        normalizeXPathExpr: normalizeXPathExpr,
+        InstanceMetadata: InstanceMetadata
     };
 });

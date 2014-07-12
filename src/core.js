@@ -47,25 +47,15 @@ define([
 ) {
     
     // Load these modules in the background after all runtime dependencies have
-    // been resolved, since they're not needed initially.  If the user manages
-    // to activate one of the functions that depend on these variables before
-    // the requests have finished, then there would be an error.  Could protect
-    // against that by requiring in each place they're used, but it seems
-    // unlikely for most.
-    var CodeMirror,
-        diff_match_patch,
-        CryptoJS;
-    
-    require([
-        'codemirror',
-        'diff-match-patch',
-        'CryptoJS',
-        'vellum/expressionEditor',
-    ], function (a, b, c) {
-        CodeMirror = a;
-        diff_match_patch = b;
-        CryptoJS = c;
-    });
+    // been resolved, since they're not needed initially.
+    setTimeout(function () {
+        require([
+            'codemirror',
+            'diff-match-patch',
+            'CryptoJS',
+            'vellum/expressionEditor',
+        ], function () {});
+    }, 0);
 
     var DEBUG_MODE = false;
     xpathmodels.DEBUG_MODE = DEBUG_MODE;
@@ -169,7 +159,7 @@ define([
     };
 
     fn.postInit = function () {
-        this._loadXFormOrError(this.opts().core.form);
+        this.loadXFormOrError(this.opts().core.form);
     };
 
     fn.getMugTypes = function () {
@@ -439,7 +429,7 @@ define([
                 cssClasses: "btn-primary",
                 action: function () {
                     codeMirror.save();
-                    _this._loadXFormOrError($textarea.val(), true);
+                    _this.loadXFormOrError($textarea.val(), true);
                     $modal.modal('hide');
                     done();
                 }
@@ -468,12 +458,12 @@ define([
 
         // populate text
         if(!this.data.core.formLoadingFailed){
-            $textarea.val(this.data.core.form.createXML());
+            $textarea.val(this.createXML());
         } else {
             $textarea.val(this.data.core.failedLoadXML);
         }
 
-        codeMirror = CodeMirror.fromTextArea($textarea.get(0));
+        codeMirror = require('codemirror').fromTextArea($textarea.get(0));
         codeMirror.setOption('viewportMargin', Infinity);
         codeMirror.setOption('lineNumbers', true);
         codeMirror.setSize('100%', '100%');
@@ -978,7 +968,7 @@ define([
         }
     };
 
-    fn._loadXFormOrError = function (formString, updateSaveButton) {
+    fn.loadXFormOrError = function (formString, updateSaveButton) {
         var _this = this;
 
         $.fancybox.showActivity();
@@ -1301,6 +1291,10 @@ define([
         }
         return result;  
     };
+
+    fn.getMugByPath = function (path) {
+        return this.data.core.form.getMugByPath(path);
+    };
     
     fn.displayMugProperties = function (mug) {
         var $props = this.$f.find('.fd-question-properties'),
@@ -1540,11 +1534,15 @@ define([
         return $questionTypeChanger;
     };
 
+    fn.createXML = function () {
+        return this.data.core.form.createXML();
+    };
+
     fn.validateAndSaveXForm = function () {
         var _this = this,
-            formText = false,
+            formText = this.createXML(),
             isValidXML = true;
-        formText = this.data.core.form.createXML();
+
         try {
             // ensure that form is valid XML; throws an error if not
             $.parseXML(formText);
@@ -1576,7 +1574,8 @@ define([
     };
         
     fn.send = function (formText, saveType) {
-        var _this = this,
+        var CryptoJS = require('CryptoJS'),
+            _this = this,
             opts = this.opts().core,
             patch, data;
         saveType = saveType || opts.saveType;
@@ -1591,7 +1590,8 @@ define([
         });
 
         if (saveType === 'patch') {
-            var dmp = new diff_match_patch();
+            var diff_match_patch = require('diff-match-patch'),
+                dmp = new diff_match_patch();
             patch = dmp.patch_toText(
                 dmp.patch_make(this.data.core.lastSavedXForm, formText)
             );

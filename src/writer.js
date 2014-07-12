@@ -1,9 +1,11 @@
 define([
     'jquery',
+    'underscore',
     'XMLWriter',
     'vellum/util'
 ], function (
     $,
+    _,
     XMLWriter,
     util
 ) {
@@ -33,6 +35,14 @@ define([
         }
         
         createBindList(form, xmlWriter);
+        
+        _.each(form.getSetValues(), function (setValue) {
+            xmlWriter.writeStartElement('setvalue');
+            xmlWriter.writeAttributeString('event', setValue.event);
+            xmlWriter.writeAttributeString('ref', setValue.ref);
+            xmlWriter.writeAttributeString('value', setValue.value);
+            xmlWriter.writeEndElement();
+        });
 
         form.vellum.contributeToModelXML(xmlWriter);
         
