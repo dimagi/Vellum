@@ -1196,6 +1196,11 @@ define([
             this.data.javaRosa.ItextForm = ItextForm;
             this.data.javaRosa.ICONS = ICONS;
         },
+        handleNewMug: function (mug) {
+            var ret = this.__callOld();
+            this.data.javaRosa.Itext.updateForNewMug(mug);
+            return ret;
+        },
         _makeLanguageSelectorDropdown: function () {
             var _this = this,
                 addLangButton,
@@ -1350,6 +1355,10 @@ define([
             Itext.on('change', function () {
                 _this.data.core.saveButton.fire('change');
             });
+        },
+        handleMugParseFinish: function (mug) {
+            this.__callOld();
+            this.data.javaRosa.Itext.updateForExistingMug(mug);
         },
         contributeToModelXML: function (xmlWriter) {
             // here are the rules that govern itext

@@ -2,14 +2,12 @@ define([
     'require',
     'vellum/tree',
     'vellum/logic',
-    'vellum/intentManager',
     'vellum/widgets',
     'vellum/util'
 ], function (
     require,
     Tree,
     logic,
-    intents,
     widgets,
     util
 ) {
@@ -149,7 +147,6 @@ define([
         // should eventually be factored out.
         this.vellum = vellum;
         this.mugTypes = mugTypes;
-        this.intentManager = intents.IntentManager(this);
 
         this.formName = 'New Form';
         this.dataTree = new Tree('data', 'data');
@@ -585,8 +582,6 @@ define([
             refMug = refMug || this.dataTree.getRootNode().getValue();
             this.insertMug(refMug, mug, position);
             // todo: abstraction barrier
-            this.vellum.data.javaRosa.Itext.updateForNewMug(mug);
-            this.intentManager.syncMugWithIntent(mug);
 
             this.fire({
                 type: 'question-create',

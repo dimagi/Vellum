@@ -48,7 +48,7 @@ define([
         
         xmlWriter.writeEndElement(); //CLOSE MODEL
 
-        form.intentManager.writeIntentXML(xmlWriter, form.dataTree);
+        form.vellum.contributeToHeadXML(xmlWriter, form);
 
         xmlWriter.writeEndElement(); //CLOSE HEAD
 

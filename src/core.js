@@ -1096,7 +1096,7 @@ define([
         }).on('error-change', function (e) {
             _this._resetMessages(e.errors);
         }).on('question-create', function (e) {
-            _this.createQuestion(e.mug, e.refMug, e.position);
+            _this.handleNewMug(e.mug, e.refMug, e.position);
             if (!e.isInternal) {
                 _this.jstree('select_node', '#' + e.mug.ufid, true);
             }
@@ -1268,6 +1268,10 @@ define([
             return null;
         }
     };
+
+    fn.handleNewMug = function (mug, refMug, position) {
+        this.createQuestion(mug, refMug, position);
+    };
     
     fn.createQuestion = function (mug, refMug, position) {
         var result = this.jstree("create",
@@ -1296,6 +1300,10 @@ define([
                 " (position: " + position + ")");
         }
         return result;  
+    };
+
+    fn.handleMugParseFinish = function (mug) {
+    
     };
 
     fn.getMugByPath = function (path) {
@@ -1744,10 +1752,7 @@ define([
             "defaultValue",
             "label",
             "showOKCheckbox",
-            "readOnlyControl",
-            "androidIntentAppId",
-            "androidIntentExtra",
-            "androidIntentResponse"
+            "readOnlyControl"
         ];
     };
 
@@ -1836,10 +1841,7 @@ define([
         form.handleMugRename(form, mug, val, previous, currentPath, oldPath);
     };
 
-    fn.beforeSerialize = function () {
-        // gets extended in plugins
-    
-    };
+    fn.beforeSerialize = function () {};
 
     fn.parseDataElement = function (form, el, parentMug) {
         return parser.parseDataElement(form, el, parentMug);
@@ -1853,13 +1855,11 @@ define([
         return parser.parseControlElement(form, path, $el, $parentEl);
     };
 
-    fn.contributeToModelXML = function (xmlWriter) {
-    
-    };
+    fn.contributeToModelXML = function (xmlWriter) {};
 
-    fn.initWidget = function (widget) {
-    
-    };
+    fn.contributeToHeadXML = function (xmlWriter, form) {}; 
+
+    fn.initWidget = function (widget) {};
 
     $.vellum.plugin("core", {
         form: null,

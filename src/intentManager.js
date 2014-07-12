@@ -1,13 +1,14 @@
-// todo: make this a proper plugin
-
 define([
     'vellum/mugs',
     'vellum/widgets',
+    'vellum/util',
     'underscore',
-    'jquery'
+    'jquery',
+    'vellum/core'
 ], function (
     mugs,
     widgets,
+    util,
     _,
     $
 ) {
@@ -22,9 +23,9 @@ define([
         });
     }
     function ODKXIntentTag(form, data) {
-        mugs.BoundPropertyMap.call(this, form, data);
+        util.BoundPropertyMap.call(this, form, data);
     }
-    ODKXIntentTag.prototype = Object.create(mugs.BoundPropertyMap.prototype);
+    ODKXIntentTag.prototype = Object.create(util.BoundPropertyMap.prototype);
     ODKXIntentTag.prototype.clone = function () {
         return new ODKXIntentTag(this._form, this._data);
     };
@@ -58,7 +59,7 @@ define([
         xmlWriter.writeEndElement('odkx:intent');
     };
 
-    var IntentManager = function (form) {
+    var intentManager = function () {
         var that = {};
         that.unmappedIntentTags = {};
 
@@ -68,7 +69,7 @@ define([
                 $tag = $(tagXML);
 
                 tagId = $tag.attr('id');
-                newTag = makeODKXIntentTag(form, tagId, $tag.attr('class'));
+                newTag = makeODKXIntentTag(null, tagId, $tag.attr('class'));
 
                 xmlns = $tag.attr('xmlns:odkx');
                 newTag.setAttr('xmlns', xmlns || newTag.getAttr('xmlns'));
@@ -95,9 +96,10 @@ define([
                     tag = that.getParsedIntentTagWithID(nodeID);
                 if (!tag) {
                     var path = (mug.intentTag) ? mug.intentTag.getAttr('path') : null;
-                    tag = makeODKXIntentTag(form, nodeID, path);
+                    tag = makeODKXIntentTag(mug.form, nodeID, path);
                 }
                 mug.intentTag = tag;
+                mug.intentTag._form = mug.form;
                 delete that.unmappedIntentTags[tag.getAttr('initialNodeID')];
             }
         };
@@ -132,11 +134,11 @@ define([
         return that;
     };
     
-    widgets.androidIntentAppId = function (mug, options) {
+    function androidIntentAppId(mug, options) {
         options.id = "intent-app-id";
         var widget = widgets.base(mug, options);
 
-        widget.definition = {};
+        widget.definition = mug.p.getDefinition('androidIntentAppId');
         widget.currentValue = (mug.intentTag) ? mug.intentTag.getAttr('path') : "";
         
         var input = $("<input />")
@@ -165,12 +167,13 @@ define([
 
         input.bind("change keyup", widget.updateValue);
         return widget;
-    };
+    }
 
-    widgets.androidIntentExtra = function (mug, options) {
+    function androidIntentExtra(mug, options) {
         options.id = "intent-extra";
         var widget = widgets.baseKeyValue(mug, options);
         widget.currentValue = (mug.intentTag) ? mug.intentTag.getAttr('extra') : {};
+        widget.definition = mug.p.getDefinition('androidIntentExtra');
 
         widget.save = function () {
             if (widget.mug.intentTag) {
@@ -179,12 +182,13 @@ define([
         };
 
         return widget;
-    };
+    }
 
-    widgets.androidIntentResponse = function (mug, options) {
+    function androidIntentResponse(mug, options) {
         options.id = "intent-response";
         var widget = widgets.baseKeyValue(mug, options);
         widget.currentValue = (mug.intentTag) ? mug.intentTag.getAttr('response') : {};
+        widget.definition = mug.p.getDefinition('androidIntentResponse');
 
         widget.save = function () {
             if (widget.mug.intentTag) {
@@ -193,10 +197,75 @@ define([
         };
 
         return widget;
-    };
+    }
+    
+    var AndroidIntent = util.extend(mugs.defaultOptions, {
+        typeName: 'Android App Callout',
+        icon: 'icon-vellum-android-intent',
+        isODKOnly: true,
+        isTypeChangeable: false,
+        intentTag: null,
+        init: function (mug, form) {
+            mug.p.tagName = "input";
+            mug.p.dataType = "intent";
+        },
+        spec: {
+            androidIntentAppId: {
+                lstring: 'Intent ID',
+                visibility: 'visible',
+                widget: androidIntentAppId
+            },
+            androidIntentExtra: {
+                lstring: 'Extra',
+                visibility: 'visible',
+                widget: androidIntentExtra
+            },
+            androidIntentResponse: {
+                lstring: 'Response',
+                visibility: 'visible',
+                widget: androidIntentResponse
+            }
+        },
+        // todo: move to spec system
+        getAppearanceAttribute: function (mug) {
+            return 'intent:' + mug.p.nodeID;
+        }
+    });
 
+    $.vellum.plugin("intents", {}, {
+        loadXML: function (xml) {
+            var manager = intentManager(null);
+            this.data.intents.manager = manager;
+            this.data.intents.manager.parseIntentTagsFromHead(
+                $(xml).find('h\\:head, head')
+                    .children("odkx\\:intent, intent"));
 
-    return {
-        IntentManager: IntentManager
-    };
+            this.__callOld();
+        },
+        contributeToHeadXML: function (xmlWriter, form) {
+            this.__callOld();
+            this.data.intents.manager.writeIntentXML(xmlWriter, form.dataTree);
+        },
+        handleNewMug: function (mug) {
+            var ret = this.__callOld();
+            this.data.intents.manager.syncMugWithIntent(mug);
+            return ret;
+        },
+        handleMugParseFinish: function (mug) {
+            this.__callOld();
+            this.data.intents.manager.syncMugWithIntent(mug);
+        },
+        getMugTypes: function () {
+            var types = this.__callOld();
+            types.normal.AndroidIntent = AndroidIntent;
+            return types;
+        },
+        getMainProperties: function () {
+            return this.__callOld().concat([
+                "androidIntentAppId",
+                "androidIntentExtra",
+                "androidIntentResponse"
+            ]);
+        }
+    });
 });

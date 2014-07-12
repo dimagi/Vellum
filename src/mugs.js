@@ -140,31 +140,6 @@ define([
         }
     };
 
-    // a wrapper for object properties that triggers the form change event when
-    // sub-properties are changed
-    function BoundPropertyMap(form, data) {
-        this._form = form;
-        this._data = data || {};
-    }
-    BoundPropertyMap.prototype = {
-        clone: function () {
-            return new BoundPropertyMap(this._form, this._data);
-        },
-        setAttr: function (name, val) {
-            this._data[name] = val;
-            this._form.fire({
-                type: 'change'
-            });
-        },
-        getAttr: function (name, default_) {
-            if (name in this._data) {
-                return this._data[name];
-            } else {
-                return default_;
-            }
-        }
-    };
-        
     var validateElementName = function (value, displayName) {
         if (!util.isValidElementName(value)) {
             return value + " is not a legal " + displayName + ". Must start with a letter and contain only letters, numbers, and '-' or '_' characters.";
@@ -716,39 +691,6 @@ define([
         }
     });
 
-    var AndroidIntent = util.extend(defaultOptions, {
-        typeName: 'Android App Callout',
-        icon: 'icon-vellum-android-intent',
-        isODKOnly: true,
-        isTypeChangeable: false,
-        intentTag: null,
-        init: function (mug, form) {
-            mug.p.tagName = "input";
-            mug.p.dataType = "intent";
-        },
-        spec: {
-            androidIntentAppId: {
-                lstring: 'Intent ID',
-                visibility: 'visible',
-                widget: widgets.androidIntentAppId
-            },
-            androidIntentExtra: {
-                lstring: 'Extra',
-                visibility: 'visible',
-                widget: widgets.androidIntentExtra
-            },
-            androidIntentResponse: {
-                lstring: 'Response',
-                visibility: 'visible',
-                widget: widgets.androidIntentResponse
-            }
-        },
-        // todo: move to spec system
-        getAppearanceAttribute: function (mug) {
-            return 'intent:' + mug.p.nodeID;
-        }
-    });
-
     var Barcode = util.extend(defaultOptions, {
         typeName: 'Barcode Scan',
         icon: 'icon-barcode',
@@ -1041,7 +983,6 @@ define([
         defaultOptions: defaultOptions,
         baseMugTypes: {
             normal: {
-                "AndroidIntent": AndroidIntent,
                 "Audio": Audio,
                 "Barcode": Barcode,
                 "DataBindOnly": DataBindOnly,
@@ -1070,7 +1011,6 @@ define([
             }
         },
         MugTypesManager: MugTypesManager,
-        baseSpecs: baseSpecs,
-        BoundPropertyMap: BoundPropertyMap
+        baseSpecs: baseSpecs
     };
 });

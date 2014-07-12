@@ -11,6 +11,7 @@ define([
     var corePlugins = [
         'core',
         'ignore',
+        'intents',
         'javaRosa',
         'lock',
         'uploader',

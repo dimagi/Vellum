@@ -2,6 +2,7 @@
 define([
     'vellum/core',
     'vellum/ignoreButRetain',
+    'vellum/intentManager',
     'vellum/itemset',
     'vellum/javaRosa',
     'vellum/lock',

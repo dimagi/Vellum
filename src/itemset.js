@@ -60,7 +60,7 @@ define([
         },
         init: function (mug, form, baseSpec) {
             mug.p.tagName = "itemset";
-            mug.p.itemsetData = new mugs.BoundPropertyMap(mug.form, {
+            mug.p.itemsetData = new util.BoundPropertyMap(mug.form, {
                 // avoids serialization error
                 nodeset: ''
             });

@@ -1,11 +1,9 @@
 define([
     'vellum/form',
-    'vellum/mugs',
     'vellum/util',
     'jquery'
 ], function (
     form_,
-    mugs,
     util,
     $
 ) {
@@ -48,16 +46,7 @@ define([
             title = head.children('h\\:title, title'),
             binds = head.find('bind'),
             instances = _getInstances(xml),
-            data = $(instances[0]).children(),
-            intentTags = [
-                "odkx\\:intent, intent"
-            ];
-
-
-        intentTags.map(function (tag) {
-            var foundTags = head.children(tag);
-            form.intentManager.parseIntentTagsFromHead(foundTags);
-        });
+            data = $(instances[0]).children();
 
         xml.find('setvalue').each(function () {
             var $this = $(this);
@@ -464,7 +453,7 @@ define([
         }
 
         if (tag === 'itemset') {
-            mug.p.itemsetData = new mugs.BoundPropertyMap(form, {
+            mug.p.itemsetData = new util.BoundPropertyMap(form, {
                 nodeset: nodePath,
                 labelRef: $cEl.children('label').attr('ref'),
                 valueRef: $cEl.children('value').attr('ref')
@@ -545,10 +534,7 @@ define([
                         eachFunc(this, mug);
                     });
             }
-
-            // update any remaining itext
-            Itext.updateForExistingMug(mug);
-            form.intentManager.syncMugWithIntent(mug);
+            form.vellum.handleMugParseFinish(mug);
         }
         controlsTree.each(function () {
             eachFunc(this, null);
