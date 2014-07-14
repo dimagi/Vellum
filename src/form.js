@@ -1,11 +1,13 @@
 define([
     'require',
+    'underscore',
     'vellum/tree',
     'vellum/logic',
     'vellum/widgets',
     'vellum/util'
 ], function (
     require,
+    _,
     Tree,
     logic,
     widgets,
@@ -570,6 +572,10 @@ define([
             if (!mug.options.isControlOnly) {
                 mug.p.nodeID = this.generate_question_id();
             }
+            if (mug.__className === "Item") {
+                mug.p.defaultValue = this.generate_item_label(refMug);
+            
+            }
             this.insertQuestion(mug, refMug, position, isInternal);
             if (mug.options.isODKOnly) {
                 this.updateError({
@@ -694,8 +700,16 @@ define([
                 return this._make_label('question');
             }
         },
-        generate_item_label: function () {
-            return this._make_label('item');
+        generate_item_label: function (parentMug) {
+            var items = this.getChildren(parentMug),
+                i = items.length + 1,
+                ret;
+            do {
+                ret = 'item' + i++;
+            } while (_.any(items, function (i) {
+                return i.p.defaultValue === ret;
+            }));
+            return ret;
         },
         /**
          * Private method for constructing unique questionIDs, labels for items, etc

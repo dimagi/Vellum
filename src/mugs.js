@@ -447,11 +447,7 @@ define([
                 return nodeID;
             } else if (this.__className === "Item") {
                 return this.p.defaultValue;
-            } else {
-                // fall back to generating an ID
-                // todo: return null, handle in caller
-                return this.form.generate_item_label();
-            } 
+            }
         },
         
         /*
@@ -758,7 +754,6 @@ define([
         },
         init: function (mug, form) {
             mug.p.tagName = "item";
-            mug.p.defaultValue = mug.form.generate_item_label();
         },
         spec: {
             hintLabel: { presence: 'notallowed' },
