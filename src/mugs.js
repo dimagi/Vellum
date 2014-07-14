@@ -666,7 +666,6 @@ define([
         init: function (mug, form) {
             Audio.init(mug, form);
             mug.p.mediaType = "image/*"; /* */
-            mug.p.dataType = "binary";
         }
     });
 
@@ -677,7 +676,6 @@ define([
         init: function (mug, form) {
             Audio.init(mug, form);
             mug.p.mediaType = "video/*"; /* */
-            mug.p.dataType = "binary";
         }
     });
 
@@ -732,7 +730,7 @@ define([
         typeName: 'Long',
         icon: 'icon-vellum-long',
         init: function (mug, form) {
-            Int.init(mug, form);
+            mug.p.tagName = "input";
             mug.p.dataType = "xsd:long";
         }
     });
@@ -741,7 +739,7 @@ define([
         typeName: 'Decimal',
         icon: 'icon-vellum-decimal',
         init: function (mug, form) {
-            Int.init(mug, form);
+            mug.p.tagName = "input";
             mug.p.dataType = "xsd:double";
         }
     });
