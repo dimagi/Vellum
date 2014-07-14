@@ -15,7 +15,8 @@ require([
 
     var assert = chai.assert,
         clickQuestion = util.clickQuestion,
-        call = util.call;
+        call = util.call,
+        getInput = util.getInput;
     
     var TEST_XML = '' + 
     '<?xml version="1.0" encoding="UTF-8" ?>\
@@ -184,9 +185,6 @@ require([
         //}
     //};
 
-    function getInput(property) {
-        return $("[name='property-" + property + "']");
-    }
 
     describe("The question locking functionality in the core and UI", function () {
         before(beforeFn);

@@ -1,8 +1,15 @@
 require([
+    'chai',
+    'jquery',
     'tests/utils'
 ], function (
+    chai,
+    $,
     util
 ) {
+    var call = util.call,
+        clickQuestion = util.clickQuestion,
+        assert = chai.assert;
 
     describe("Vellum", function () {
         it("preserves all question types and attributes", function (done) {
@@ -11,6 +18,181 @@ require([
                     form: TEST_XML,
                     onReady: function () {
                         util.assertXmlEqual(util.call('createXML'), TEST_XML);
+                        done();
+                    }
+                }
+            });
+        });
+
+        it("adds all question types and attributes", function (done) {
+            // this also tests
+            // - that clicking add question buttons when other questions are
+            //   selected adds questions correctly
+            // - that a data node is added at the end, and adding a question
+            //   when a data node is selected adds to the end of the non-data
+            //   nodes
+            // - adding standard and other itext
+            // - changing itext label and updating question tree
+            // - adding itext for multiple languages
+            // - automatically creating Itext IDs for constraint and hint
+            //   messages
+            // - automatic adding of choices when you add a select
+            // - automatic generation of media paths for regular questions and choices
+            var prevId,
+                addQuestion = function (qType, nodeId, attrs, refId) {
+                    attrs = attrs || {};
+                    if (nodeId) {
+                        attrs.nodeID = nodeId;
+                    }
+                    if (prevId) {
+                        clickQuestion(prevId);
+                    }
+                    prevId = nodeId || attrs.defaultValue;
+                    call('addQuestion', qType);
+                    $("[name='property-nodeID']").val(nodeId).change();
+                    $("[name='itext-en-label']").val(nodeId).change();
+                    _.each(attrs || {}, function (val, name) {
+                        var input = util.getInput(name);
+                        assert.equal(1, input.length);
+                        
+                        if (input.attr('type') === 'checkbox') {
+                            input.prop('checked', val).change();
+                        } else {
+                            input.val(val).change();
+                        }
+                    });
+                },
+                XMLNS = $($.parseXML(TEST_XML)).find('data').attr('xmlns');
+
+            util.before({
+                core: {
+                    form: null,
+                    onReady: function () {
+                        _.each([
+                            ['Text', 'question1', {
+                                keyAttr: 'jr preload key value',
+                                dataValue: 'default data value',
+                                constraintAttr: '/data/question20 = 2',
+                                relevantAttr: '/data/question20',
+                                requiredAttr: true,
+                                preload: "jr preload",
+                                preloadParams: "jr preload param"
+                            }],
+                            ['Trigger', 'question2', {showOKCheckbox: false}],
+                            ['Trigger', 'question30', {showOKCheckbox: true}],
+                            ['Select', 'question3'],
+                            ['MSelect', 'question6'],
+                            ['Int', 'question13'],
+                            ['PhoneNumber', 'question14'],
+                            ['Double', 'question15'],
+                            ['Long', 'question16'],
+                            ['Date', 'question17'],
+                            ['Time', 'question18'],
+                            ['DateTime', 'question19'],
+                            ['Group', 'question21'],
+                            ['Repeat', 'question31', {
+                                requiredAttr: true,
+                                no_add_remove: true, 
+                                repeat_count: 2
+                            }],
+                            // get out of the repeat
+                            ['DataBindOnly', 'question20'],
+                            // insert before first data node
+                            ['Repeat', 'question22', {
+                                no_add_remove: false
+                            }],
+                            ['FieldList', 'question23'],
+                            ['Image', 'question24'],
+                            ['Audio', 'question25'],
+                            ['Video', 'question26'],
+                            ['Geopoint', 'question27'],
+                            ['Secret', 'question28'],
+                            ['AndroidIntent', 'question7'],
+                            ['DataBindOnly', 'question32', {
+                                calculateAttr: '1 + 2'
+                            }]
+                        ], function (q) {
+                            addQuestion.apply(null, q);
+                        });
+
+                        function addAllForms() {
+                            $(".btn:contains(image)").click();
+                            $(".btn:contains(audio)").click();
+                            $(".btn:contains(video)").click();
+                            $(".btn:contains(long)").click();
+                            $(".btn:contains(short)").click();
+                            $(".btn:contains(custom)").click();
+                            $(".fd-modal-generic-container").find("input")
+                                .val("custom");
+                            $(".fd-modal-generic-container").find(".btn:contains(Add)").click();
+                        }
+
+                        clickQuestion("question1");
+                        addAllForms();
+                        $("[name='itext-en-label']")
+                            .val('question1 en label').change();
+                        $("[name='itext-hin-label']")
+                            .val('question1 hin label').change();
+                        $("[name='itext-en-constraintMsg']")
+                            .val('question1 en validation').change();
+                        $("[name='itext-hin-constraintMsg']")
+                            .val('question1 hin validation').change();
+                        $("[name='itext-en-hint']")
+                            .val('question1 hint en').change();
+                        $("[name='itext-hin-hint']")
+                            .val('question1 hin hint').change();
+                        $("[name='itext-en-label-long']")
+                            .val("question1 en long").change();
+                        $("[name='itext-hin-label-long']")
+                            .val("question1 hin long").change();
+                        $("[name='itext-en-label-short']")
+                            .val("question1 en short").change();
+                        $("[name='itext-hin-label-short']")
+                            .val("question1 hin short").change();
+                        $("[name='itext-en-label-custom']")
+                            .val("question1 en custom").change();
+                        $("[name='itext-hin-label-custom']")
+                            .val("question1 hin custom").change();
+
+                        clickQuestion("question3", "item1");
+                        addAllForms();
+                        $("[name='itext-en-label-long']")
+                            .val("item1 long en").change();
+                        $("[name='itext-hin-label-long']")
+                            .val("item1 long hin").change();
+                        $("[name='itext-en-label-short']")
+                            .val("item1 short en").change();
+                        $("[name='itext-hin-label-short']")
+                            .val("item1 short hin").change();
+                        $("[name='itext-en-label-custom']")
+                            .val("item1 custom en").change();
+                        $("[name='itext-hin-label-custom']")
+                            .val("item1 custom hin").change();
+
+                        clickQuestion("question7");
+                        $("[name='intent-app-id']").val("app_id").change();
+                        $("[name='intent-extra'] .fd-kv-key").val('key1').change();
+                        $("[name='intent-extra'] .fd-kv-val").val('value1').change();
+                        $("[name='intent-response'] .fd-kv-key").val('key2').change();
+                        $("[name='intent-response'] .fd-kv-val").val('value2').change();
+                        util.assertXmlEqual(
+                            TEST_XML.replace('foo="bar"', '')
+                                .replace('spam="eggs"', '')
+                                .replace('foo="baz"', '')
+                                .replace(/<unrecognized>.+<\/unrecognized>/, '')
+                                .replace('non-itext label', '')
+                                .replace('non-itext hint', '')
+                                .replace(/<instance[^>]+?casedb[^>]+?><\/instance>/, '')
+                                .replace(/<setvalue[^>]+?>/, ''),
+                            call('createXML')
+                                .replace(/data([^>]+)xmlns="(.+?)"/, 
+                                         'data$1xmlns="' + XMLNS + '"')
+                        );
+                        
+                        // should have updated question tree
+                        clickQuestion("question1 en label");
+
+                        
                         done();
                     }
                 }
@@ -30,11 +212,8 @@ var TEST_XML = '' +
 					<question2 />\
 					<question30 />\
 					<question3 />\
-                    <question3a />\
                     <!-- arbitrary data attributes -->\
 					<question6 foo="bar" />\
-					<question9 />\
-					<question11 />\
 					<question13 />\
 					<question14 />\
 					<question15 />\
@@ -44,20 +223,19 @@ var TEST_XML = '' +
 					<question19 />\
 					<question21>\
 						<question31 jr:template="" />\
-						<question22 jr:template="">\
-							<question23>\
-								<question24 />\
-								<question25 />\
-								<question26 />\
-								<question27 />\
-								<question28 />\
-                                <question7 />\
-							</question23>\
-						</question22>\
 					</question21>\
+                    <question22 jr:template="">\
+                        <question23>\
+                            <question24 />\
+                            <question25 />\
+                            <question26 />\
+                            <question27 />\
+                            <question28 />\
+                            <question7 />\
+                        </question23>\
+                    </question22>\
 					<question20 />\
 					<question32 />\
-                    <question_foo />\
 				</data>\
 			</instance>\
 			<instance src="jr://instance/casedb" id="casedb"></instance>\
@@ -65,31 +243,27 @@ var TEST_XML = '' +
 			<bind nodeset="/data/question2" />\
 			<bind nodeset="/data/question30" />\
 			<bind nodeset="/data/question3" />\
-            <bind nodeset="/data/question3a" />\
             <!-- arbitrary bind attributes -->\
 			<bind nodeset="/data/question6" spam="eggs" />\
-			<bind nodeset="/data/question9" />\
-			<bind nodeset="/data/question11" />\
 			<bind nodeset="/data/question13" type="xsd:int" />\
 			<bind nodeset="/data/question14" type="xsd:string" />\
-			<bind nodeset="/data/question15" type="xsd:int" />\
-			<bind nodeset="/data/question16" type="xsd:int" />\
+			<bind nodeset="/data/question15" type="xsd:double" />\
+			<bind nodeset="/data/question16" type="xsd:long" />\
 			<bind nodeset="/data/question17" type="xsd:date" />\
 			<bind nodeset="/data/question18" type="xsd:time" />\
 			<bind nodeset="/data/question19" type="xsd:dateTime" />\
 			<bind nodeset="/data/question21" />\
-			<bind nodeset="/data/question21/question31" relevant="true()" />\
-			<bind nodeset="/data/question21/question22" />\
-			<bind nodeset="/data/question21/question22/question23" />\
-			<bind nodeset="/data/question21/question22/question23/question24" type="binary" />\
-			<bind nodeset="/data/question21/question22/question23/question25" type="binary" />\
-			<bind nodeset="/data/question21/question22/question23/question26" type="binary" />\
-			<bind nodeset="/data/question21/question22/question23/question27" type="geopoint" />\
-			<bind nodeset="/data/question21/question22/question23/question28" type="xsd:string" />\
-			<bind nodeset="/data/question21/question22/question23/question7" type="intent" />\
+			<bind nodeset="/data/question21/question31" required="true()" />\
+			<bind nodeset="/data/question22" />\
+			<bind nodeset="/data/question22/question23" />\
+			<bind nodeset="/data/question22/question23/question24" type="binary" />\
+			<bind nodeset="/data/question22/question23/question25" type="binary" />\
+			<bind nodeset="/data/question22/question23/question26" type="binary" />\
+			<bind nodeset="/data/question22/question23/question27" type="geopoint" />\
+			<bind nodeset="/data/question22/question23/question28" type="xsd:string" />\
+			<bind nodeset="/data/question22/question23/question7" type="intent" />\
 			<bind nodeset="/data/question20" />\
 			<bind nodeset="/data/question32" calculate="1 + 2" />\
-            <bind nodeset="/data/question_foo" />\
             <!-- setvalues -->\
             <setvalue event="xforms-ready" ref="/data/question1" value="2" />\
 			<itext>\
@@ -112,35 +286,32 @@ var TEST_XML = '' +
 					<text id="question2-label">\
 						<value>question2</value>\
 					</text>\
+					<text id="question30-label">\
+						<value>question30</value>\
+					</text>\
 					<text id="question3-label">\
 						<value>question3</value>\
 					</text>\
-					<text id="question3-item4-label">\
-						<value>item4</value>\
-						<value form="image">jr://file/commcare/image/data/question3-item4.png</value>\
-						<value form="audio">jr://file/commcare/audio/data/question3-item4.mp3</value>\
-						<value form="video">jr://file/commcare/video/data/question3-item4.3gp</value>\
-						<value form="long">long en</value>\
-						<value form="short">short en</value>\
-						<value form="custom">custom en</value>\
+					<text id="question3-item1-label">\
+						<value>item1</value>\
+						<value form="image">jr://file/commcare/image/data/question3-item1.png</value>\
+						<value form="audio">jr://file/commcare/audio/data/question3-item1.mp3</value>\
+						<value form="video">jr://file/commcare/video/data/question3-item1.3gp</value>\
+						<value form="long">item1 long en</value>\
+						<value form="short">item1 short en</value>\
+						<value form="custom">item1 custom en</value>\
 					</text>\
-					<text id="question3-item5-label">\
-						<value>item5</value>\
+					<text id="question3-item2-label">\
+						<value>item2</value>\
 					</text>\
 					<text id="question6-label">\
 						<value>question6</value>\
 					</text>\
-					<text id="question6-item7-label">\
-						<value>item7</value>\
+					<text id="question6-item1-label">\
+						<value>item1</value>\
 					</text>\
-					<text id="question6-item8-label">\
-						<value>item8</value>\
-					</text>\
-					<text id="question9-label">\
-						<value>question9</value>\
-					</text>\
-					<text id="question11-label">\
-						<value>question11</value>\
+					<text id="question6-item2-label">\
+						<value>item2</value>\
 					</text>\
 					<text id="question13-label">\
 						<value>question13</value>\
@@ -166,37 +337,31 @@ var TEST_XML = '' +
 					<text id="question21-label">\
 						<value>question21</value>\
 					</text>\
-					<text id="question21/question22-label">\
-						<value>question22</value>\
-					</text>\
-					<text id="question21/question22/question23-label">\
-						<value>question23</value>\
-					</text>\
-					<text id="question21/question22/question23/question24-label">\
-						<value>question24</value>\
-					</text>\
-					<text id="question21/question22/question23/question25-label">\
-						<value>question25</value>\
-					</text>\
-					<text id="question21/question22/question23/question26-label">\
-						<value>question26</value>\
-					</text>\
-					<text id="question21/question22/question23/question27-label">\
-						<value>question27</value>\
-					</text>\
-					<text id="question21/question22/question23/question28-label">\
-						<value>question28</value>\
-					</text>\
-					<text id="question21/question22/question23/question29-label">\
-						<value>question29</value>\
-					</text>\
-					<text id="question30-label">\
-						<value>question30</value>\
-					</text>\
-					<text id="question21/question22/question31-label">\
+					<text id="question21/question31-label">\
 						<value>question31</value>\
 					</text>\
-                    <text id="question21/question22/question23/question7-label">\
+					<text id="question22-label">\
+						<value>question22</value>\
+					</text>\
+					<text id="question22/question23-label">\
+						<value>question23</value>\
+					</text>\
+					<text id="question22/question23/question24-label">\
+						<value>question24</value>\
+					</text>\
+					<text id="question22/question23/question25-label">\
+						<value>question25</value>\
+					</text>\
+					<text id="question22/question23/question26-label">\
+						<value>question26</value>\
+					</text>\
+					<text id="question22/question23/question27-label">\
+						<value>question27</value>\
+					</text>\
+					<text id="question22/question23/question28-label">\
+						<value>question28</value>\
+					</text>\
+                    <text id="question22/question23/question7-label">\
 						<value>question7</value>\
 					</text>\
 				</translation>\
@@ -211,7 +376,7 @@ var TEST_XML = '' +
 						<value form="custom">question1 hin custom</value>\
 					</text>\
 					<text id="question1-hint">\
-						<value>question1 hint hin</value>\
+						<value>question1 hin hint</value>\
 					</text>\
 					<text id="question1-constraintMsg">\
 						<value>question1 hin validation</value>\
@@ -219,35 +384,32 @@ var TEST_XML = '' +
 					<text id="question2-label">\
 						<value>question2</value>\
 					</text>\
+					<text id="question30-label">\
+						<value>question30</value>\
+					</text>\
 					<text id="question3-label">\
 						<value>question3</value>\
 					</text>\
-					<text id="question3-item4-label">\
-						<value>item4</value>\
-						<value form="image">jr://file/commcare/image/data/question3-item4.png</value>\
-						<value form="audio">jr://file/commcare/audio/data/question3-item4.mp3</value>\
-						<value form="video">jr://file/commcare/video/data/question3-item4.3gp</value>\
-						<value form="long">long hin</value>\
-						<value form="short">short hin</value>\
-						<value form="custom">custom hin</value>\
+					<text id="question3-item1-label">\
+						<value>item1</value>\
+						<value form="image">jr://file/commcare/image/data/question3-item1.png</value>\
+						<value form="audio">jr://file/commcare/audio/data/question3-item1.mp3</value>\
+						<value form="video">jr://file/commcare/video/data/question3-item1.3gp</value>\
+						<value form="long">item1 long hin</value>\
+						<value form="short">item1 short hin</value>\
+						<value form="custom">item1 custom hin</value>\
 					</text>\
-					<text id="question3-item5-label">\
-						<value>item5</value>\
+					<text id="question3-item2-label">\
+						<value>item2</value>\
 					</text>\
 					<text id="question6-label">\
 						<value>question6</value>\
 					</text>\
-					<text id="question6-item7-label">\
-						<value>item7</value>\
+					<text id="question6-item1-label">\
+						<value>item1</value>\
 					</text>\
-					<text id="question6-item8-label">\
-						<value>item8</value>\
-					</text>\
-					<text id="question9-label">\
-						<value>question9</value>\
-					</text>\
-					<text id="question11-label">\
-						<value>question11</value>\
+					<text id="question6-item2-label">\
+						<value>item2</value>\
 					</text>\
 					<text id="question13-label">\
 						<value>question13</value>\
@@ -273,36 +435,31 @@ var TEST_XML = '' +
 					<text id="question21-label">\
 						<value>question21</value>\
 					</text>\
-					<text id="question21/question22-label">\
+                    <text id="question21/question31-label">\
+                        <value>question31</value>\
+                    </text>\
+					<text id="question22-label">\
 						<value>question22</value>\
 					</text>\
-					<text id="question21/question22/question23-label">\
+					<text id="question22/question23-label">\
 						<value>question23</value>\
 					</text>\
-					<text id="question21/question22/question23/question24-label">\
+					<text id="question22/question23/question24-label">\
 						<value>question24</value>\
 					</text>\
-					<text id="question21/question22/question23/question25-label">\
+					<text id="question22/question23/question25-label">\
 						<value>question25</value>\
 					</text>\
-					<text id="question21/question22/question23/question26-label">\
+					<text id="question22/question23/question26-label">\
 						<value>question26</value>\
 					</text>\
-					<text id="question21/question22/question23/question27-label">\
+					<text id="question22/question23/question27-label">\
 						<value>question27</value>\
 					</text>\
-					<text id="question21/question22/question23/question28-label">\
+					<text id="question22/question23/question28-label">\
 						<value>question28</value>\
 					</text>\
-					<text id="question21/question22/question23/question29-label">\
-						<value>question29</value>\
-					</text>\
-					<text id="question30-label">\
-						<value>question30</value>\
-					</text>\
-                    <text id="question21/question22/question31-label">						                    <value>question31</value>\
-                    </text>\
-                    <text id="question21/question22/question23/question7-label">\
+                    <text id="question22/question23/question7-label">\
 						<value>question7</value>\
 					</text>\
 				</translation>\
@@ -310,9 +467,8 @@ var TEST_XML = '' +
 		</model>\
         &lt;!-- Intents inserted by Vellum: --&gt;\
 		<odkx:intent xmlns:odkx="http://opendatakit.org/xforms" id="question7" class="app_id">\
-			<extra key="key1" ref="key2" />\
-			<extra key="a" ref="b" />\
-			<response key="c" ref="d" />\
+			<extra key="key1" ref="value1" />\
+			<response key="key2" ref="value2" />\
 		</odkx:intent>\
 	</h:head>\
 	<h:body>\
@@ -329,41 +485,25 @@ var TEST_XML = '' +
 		<select1 ref="/data/question3">\
 			<label ref="jr:itext(\'question3-label\')" />\
 			<item>\
-				<label ref="jr:itext(\'question3-item4-label\')" />\
-				<value>item4</value>\
+				<label ref="jr:itext(\'question3-item1-label\')" />\
+				<value>item1</value>\
 			</item>\
 			<item>\
-				<label ref="jr:itext(\'question3-item5-label\')" />\
-				<value>item5</value>\
+				<label ref="jr:itext(\'question3-item2-label\')" />\
+				<value>item2</value>\
 			</item>\
 		</select1>\
-        <select1 ref="/data/question3a">\
-        </select1>\
         <!-- arbitrary control attributes -->\
 		<select ref="/data/question6" foo="baz">\
 			<label ref="jr:itext(\'question6-label\')" />\
 			<item>\
-				<label ref="jr:itext(\'question6-item7-label\')" />\
-				<value>item7</value>\
+				<label ref="jr:itext(\'question6-item1-label\')" />\
+				<value>item1</value>\
 			</item>\
 			<item>\
-				<label ref="jr:itext(\'question6-item8-label\')" />\
-				<value>item8</value>\
+				<label ref="jr:itext(\'question6-item2-label\')" />\
+				<value>item2</value>\
 			</item>\
-		</select>\
-		<select1 ref="/data/question9">\
-			<label ref="jr:itext(\'question9-label\')" />\
-			<itemset nodeset="instance(\'casedb\')/casedb/case">\
-				<label ref="case_name" />\
-				<value ref="@case_id" />\
-			</itemset>\
-		</select1>\
-		<select ref="/data/question11">\
-			<label ref="jr:itext(\'question11-label\')" />\
-			<itemset nodeset="instance(\'casedb\')/casedb/case[@case_type=\'mother\']">\
-				<label ref="edd" />\
-				<value ref="@case_id" />\
-			</itemset>\
 		</select>\
 		<input ref="/data/question13">\
 			<label ref="jr:itext(\'question13-label\')" />\
@@ -389,36 +529,36 @@ var TEST_XML = '' +
 		<group ref="/data/question21">\
 			<label ref="jr:itext(\'question21-label\')" />\
 			<group>\
-				<label ref="jr:itext(\'question21/question22/question31-label\')" />\
+				<label ref="jr:itext(\'question21/question31-label\')" />\
 				<repeat jr:noAddRemove="true()"  nodeset="/data/question21/question31" jr:count="2" />\
 			</group>\
-			<group>\
-				<label ref="jr:itext(\'question21/question22-label\')" />\
-				<repeat jr:noAddRemove="false()" nodeset="/data/question21/question22">\
-					<group ref="/data/question21/question22/question23" appearance="field-list">\
-						<label ref="jr:itext(\'question21/question22/question23-label\')" />\
-						<upload ref="/data/question21/question22/question23/question24" mediatype="image/*">\
-							<label ref="jr:itext(\'question21/question22/question23/question24-label\')" />\
-						</upload>\
-						<upload ref="/data/question21/question22/question23/question25" mediatype="audio/*">\
-							<label ref="jr:itext(\'question21/question22/question23/question25-label\')" />\
-						</upload>\
-						<upload ref="/data/question21/question22/question23/question26" mediatype="video/*">\
-							<label ref="jr:itext(\'question21/question22/question23/question26-label\')" />\
-						</upload>\
-						<input ref="/data/question21/question22/question23/question27">\
-							<label ref="jr:itext(\'question21/question22/question23/question27-label\')" />\
-						</input>\
-						<secret ref="/data/question21/question22/question23/question28">\
-							<label ref="jr:itext(\'question21/question22/question23/question28-label\')" />\
-						</secret>\
-                        <input ref="/data/question21/question22/question23/question7" appearance="intent:question7">\
-							<label ref="jr:itext(\'question21/question22/question23/question7-label\')" />\
-						</input>\
-					</group>\
-				</repeat>\
-			</group>\
 		</group>\
+        <group>\
+            <label ref="jr:itext(\'question22-label\')" />\
+            <repeat jr:noAddRemove="false()" nodeset="/data/question22">\
+                <group ref="/data/question22/question23" appearance="field-list">\
+                    <label ref="jr:itext(\'question22/question23-label\')" />\
+                    <upload ref="/data/question22/question23/question24" mediatype="image/*">\
+                        <label ref="jr:itext(\'question22/question23/question24-label\')" />\
+                    </upload>\
+                    <upload ref="/data/question22/question23/question25" mediatype="audio/*">\
+                        <label ref="jr:itext(\'question22/question23/question25-label\')" />\
+                    </upload>\
+                    <upload ref="/data/question22/question23/question26" mediatype="video/*">\
+                        <label ref="jr:itext(\'question22/question23/question26-label\')" />\
+                    </upload>\
+                    <input ref="/data/question22/question23/question27">\
+                        <label ref="jr:itext(\'question22/question23/question27-label\')" />\
+                    </input>\
+                    <secret ref="/data/question22/question23/question28">\
+                        <label ref="jr:itext(\'question22/question23/question28-label\')" />\
+                    </secret>\
+                    <input ref="/data/question22/question23/question7" appearance="intent:question7">\
+                        <label ref="jr:itext(\'question22/question23/question7-label\')" />\
+                    </input>\
+                </group>\
+            </repeat>\
+        </group>\
         <unrecognized>\
             <raw control="xml" />\
         </unrecognized>\

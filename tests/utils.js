@@ -40,6 +40,9 @@ define([
                 $vellum = $("#vellum");
             return $vellum.vellum.apply($vellum, args);
         },
+        getInput: function (property) {
+            return $("[name='property-" + property + "']");
+        },
         assertXmlEqual: function (str1, str2) {
             assert(xmlEqual(str1, str2),
                 "Expected \n\n" + formatXml(str1) + 
@@ -52,16 +55,36 @@ define([
         },
         // might need to convert this to use a deferred, see
         // https://github.com/mwhite/Vellum/commit/423360cd520f27d5fe3b0657984d2e023bf72fb8#diff-74a635be9be46d0f8b20784f5117bb0cR9
-        clickQuestion: function(displayName) {
-            // todo: change to use explicit .text() filtering, not :contains()
-            var $q = $("li[rel] > a:contains('" + displayName + "')");
-           
-            if ($q.length === 0) {
-                throw Error("No question '" + displayName + "' found");
-            } else if ($q.length > 1) {
-                throw Error("Too many questions '" + displayName + "' found");
+        clickQuestion: function() {
+            var questionDisplayNamesPath = Array.prototype.slice.call(arguments),
+                $current = $(".jstree");
+
+            // try path
+            _.map(questionDisplayNamesPath, function (name) {
+                $current = $current.hasClass('jstree') ? 
+                    $current.children('ul') : $current.next('ul');
+                $current = $current.children("li[rel]")
+                    .children("a:contains('" + name + "')");
+                $current = $(_.filter($current, function (c) {
+                    return $.trim($(c).text()) === name;
+                }));
+            });
+
+            // if that didn't work, try global
+            if (!$current.length && questionDisplayNamesPath.length === 1) {
+                var name = questionDisplayNamesPath[0];
+                $current = $("li[rel] > a:contains('" + name + "')");
+                $current = $(_.filter($current, function (c) {
+                    return $.trim($(c).text()) === name;
+                }));
             }
-            $q.click();
+
+            if (!$current.length || $current.hasClass('jstree')) {
+                throw Error("No question " + questionDisplayNamesPath + " found");
+            } else if ($current.length > 1) {
+                throw Error("Too many questions " + questionDisplayNamesPath + " found");
+            }
+            $($current[0]).click();
         }
     };
 });

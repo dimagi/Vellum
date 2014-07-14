@@ -106,7 +106,7 @@ define([
 
         $questionGroup.find('.fd-question-type').click(function (event) {
             if (!$(this).hasClass('disabled')) {
-                vellum._addQuestion($(this).data('qtype'));
+                vellum.addQuestion($(this).data('qtype'));
             }
             event.preventDefault();
         });
@@ -1211,7 +1211,7 @@ define([
         return true;
     };
         
-    fn._addQuestion = function (qType) {
+    fn.addQuestion = function (qType) {
         var _this = this;
         this.ensureCurrentMugIsSaved(function () {
             var foo = _this.getInsertTargetAndPosition(
