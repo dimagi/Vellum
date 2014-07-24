@@ -21,7 +21,7 @@ require([
 
     describe("The Dynamic Itemset functionality", function () {
         function beforeFn(done) {
-            util.before({
+            util.init({
                 javaRosa: {langs: ['en']},
                 core: {onReady: done}
             });

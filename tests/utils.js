@@ -25,7 +25,8 @@ define([
 
 
     return {
-        before: function (opts) {
+        // initialize/reset active vellum instance
+        init: function (opts) {
             opts = opts || {};
             var vellum_options = $.extend(true, {}, options.options, opts);
             // $.extend merges arrays :(

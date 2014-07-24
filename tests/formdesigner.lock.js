@@ -81,7 +81,7 @@ require([
     </h:html>';
 
     function beforeFn(done) {
-        util.before({
+        util.init({
             javaRosa: {langs: ['en']},
             core: {
                 onReady: function () {

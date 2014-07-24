@@ -13,7 +13,7 @@ define([
 
     describe("The Ignore-But-Retain plugin", function() {
         before(function (done) {
-            util.before({
+            util.init({
                 javaRosa: {langs: ['en']},
                 core: {onReady: done}
             });

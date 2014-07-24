@@ -13,7 +13,7 @@ require([
 
     describe("Vellum", function () {
         it("preserves all question types and attributes", function (done) {
-            util.before({
+            util.init({
                 core: {
                     form: TEST_XML,
                     onReady: function () {
@@ -64,7 +64,7 @@ require([
                 },
                 XMLNS = $($.parseXML(TEST_XML)).find('data').attr('xmlns');
 
-            util.before({
+            util.init({
                 core: {
                     form: null,
                     onReady: function () {
