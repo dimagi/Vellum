@@ -602,7 +602,13 @@ define([
 
         var attrs = {
             relevantAttr: el.popAttr('relevant') || null,
-            calculateAttr: el.popAttr('calculate') || null,
+
+            // HACK null -> visible_if_present -> visible (present)
+            // However, changing the visible_if_present logic elsewhere to
+            // treat null the same as undefined causes other visible_if_present
+            // properties (repeat_count) to break (tests fail).
+            calculateAttr: el.popAttr('calculate') || undefined,
+
             constraintAttr: el.popAttr('constraint') || null,
             dataType: el.popAttr('type') || null,
             requiredAttr: parseBoolAttributeValue(el.popAttr('required')),

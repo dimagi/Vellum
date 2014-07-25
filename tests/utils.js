@@ -23,6 +23,9 @@ define([
         return new XMLSerializer().serializeToString($.parseXML(str));
     }
 
+    function getInput(property) {
+        return $("[name='property-" + property + "']");
+    }
 
     return {
         // initialize/reset active vellum instance
@@ -41,8 +44,15 @@ define([
                 $vellum = $("#vellum");
             return $vellum.vellum.apply($vellum, args);
         },
-        getInput: function (property) {
-            return $("[name='property-" + property + "']");
+        getInput: getInput,
+        assertInputCount: function (name_or_inputs, num, name) {
+            if (_.isString(name_or_inputs)) {
+                name = " for " + (name ? name + " " : "") + name_or_inputs;
+                name_or_inputs = getInput(name_or_inputs);
+            } else {
+                name = name ? " for " + name : "";
+            }
+            assert.equal(name_or_inputs.length, num, "wrong number of inputs" + name);
         },
         assertXmlEqual: function (str1, str2) {
             assert(xmlEqual(str1, str2),

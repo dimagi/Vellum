@@ -9,20 +9,98 @@ require([
 ) {
     var call = util.call,
         clickQuestion = util.clickQuestion,
-        assert = chai.assert;
+        assert = chai.assert,
+        questionTypes = [
+            ['Text', 'question1', {
+                keyAttr: 'jr preload key value',
+                dataValue: 'default data value',
+                constraintAttr: '/data/question20 = 2',
+                relevantAttr: '/data/question20',
+                requiredAttr: true,
+                preload: "jr preload",
+                preloadParams: "jr preload param"
+            }],
+            ['Trigger', 'question2', {showOKCheckbox: false}],
+            ['Trigger', 'question30', {showOKCheckbox: true}],
+            ['Select', 'question3'],
+            ['MSelect', 'question6'],
+            ['Int', 'question13'],
+            ['PhoneNumber', 'question14'],
+            ['Double', 'question15'],
+            ['Long', 'question16'],
+            ['Date', 'question17'],
+            ['Time', 'question18'],
+            ['DateTime', 'question19'],
+            ['Group', 'question21'],
+            ['Repeat', 'question31', {
+                requiredAttr: true,
+                no_add_remove: true, 
+                repeat_count: 2
+            }],
+            // get out of the repeat
+            ['DataBindOnly', 'question20'],
+            // insert before first data node
+            ['Repeat', 'question22', {
+                no_add_remove: false
+            }],
+            ['FieldList', 'question23'],
+            ['Image', 'question24'],
+            ['Audio', 'question25'],
+            ['Video', 'question26'],
+            ['Geopoint', 'question27'],
+            ['Secret', 'question28'],
+            ['AndroidIntent', 'question7'],
+            ['DataBindOnly', 'question32', {
+                calculateAttr: '1 + 2'
+            }]
+        ];
 
     describe("Vellum", function () {
-        it("preserves all question types and attributes", function (done) {
-            util.init({
-                core: {
-                    form: TEST_XML,
-                    onReady: function () {
-                        util.assertXmlEqual(util.call('createXML'), TEST_XML);
-                        done();
+        describe("load XML", function () {
+            before(function (done) {
+                util.init({
+                    core: {
+                        form: TEST_XML,
+                        onReady: function () {
+                            done();
+                        }
                     }
-                }
+                });
+            });
+
+            it("preserves all question types and attributes", function () {
+                util.assertXmlEqual(util.call('createXML'), TEST_XML);
+            });
+
+            _.each(questionTypes, function(q, index) {
+                var qType = q[0],
+                    nodeId = q[1],
+                    attrs = q[2] || {};
+                it("displays inputs for " + qType + "[" + nodeId + "]", function() {
+                    if (index > 0) {
+                        clickQuestion(nodeId);
+                    }
+                    assert.equal(call("getCurrentlySelectedMug").p.nodeID, nodeId);
+
+                    _.each(attrs, function (val, name) {
+                        util.assertInputCount(name, 1, nodeId);
+                    });
+
+                    // visible_if_present
+                    if (qType === "DataBindOnly") {
+                        util.assertInputCount("calculateAttr", 1, nodeId);
+                    } else {
+                        // TODO test visible_if_present -> visible for non-DataBindOnly type(s)
+                        util.assertInputCount("calculateAttr", 0, nodeId);
+                    }
+                    // TODO test Repeat repeat_count and no_add_remove,
+                    // which are visible_if_present (should they be?)
+
+                    // TODO check notallowed properties?
+                });
             });
         });
+
 
         it("adds all question types and attributes", function (done) {
             // this also tests
@@ -38,23 +116,20 @@ require([
             //   messages
             // - automatic adding of choices when you add a select
             // - automatic generation of media paths for regular questions and choices
-            var prevId,
-                addQuestion = function (qType, nodeId, attrs, refId) {
+            var addQuestion = function (qType, nodeId, attrs, refId) {
                     attrs = attrs || {};
                     if (nodeId) {
                         attrs.nodeID = nodeId;
                     }
-                    if (prevId) {
-                        clickQuestion(prevId);
+                    if (this.prevId) {
+                        clickQuestion(this.prevId);
                     }
-                    prevId = nodeId || attrs.defaultValue;
                     call('addQuestion', qType);
                     $("[name='property-nodeID']").val(nodeId).change();
                     $("[name='itext-en-label']").val(nodeId).change();
-                    _.each(attrs || {}, function (val, name) {
+                    _.each(attrs, function (val, name) {
                         var input = util.getInput(name);
-                        assert.equal(1, input.length);
-                        
+                        util.assertInputCount(input, 1, nodeId + " " + name);
                         if (input.attr('type') === 'checkbox') {
                             input.prop('checked', val).change();
                         } else {
@@ -68,51 +143,9 @@ require([
                 core: {
                     form: null,
                     onReady: function () {
-                        _.each([
-                            ['Text', 'question1', {
-                                keyAttr: 'jr preload key value',
-                                dataValue: 'default data value',
-                                constraintAttr: '/data/question20 = 2',
-                                relevantAttr: '/data/question20',
-                                requiredAttr: true,
-                                preload: "jr preload",
-                                preloadParams: "jr preload param"
-                            }],
-                            ['Trigger', 'question2', {showOKCheckbox: false}],
-                            ['Trigger', 'question30', {showOKCheckbox: true}],
-                            ['Select', 'question3'],
-                            ['MSelect', 'question6'],
-                            ['Int', 'question13'],
-                            ['PhoneNumber', 'question14'],
-                            ['Double', 'question15'],
-                            ['Long', 'question16'],
-                            ['Date', 'question17'],
-                            ['Time', 'question18'],
-                            ['DateTime', 'question19'],
-                            ['Group', 'question21'],
-                            ['Repeat', 'question31', {
-                                requiredAttr: true,
-                                no_add_remove: true, 
-                                repeat_count: 2
-                            }],
-                            // get out of the repeat
-                            ['DataBindOnly', 'question20'],
-                            // insert before first data node
-                            ['Repeat', 'question22', {
-                                no_add_remove: false
-                            }],
-                            ['FieldList', 'question23'],
-                            ['Image', 'question24'],
-                            ['Audio', 'question25'],
-                            ['Video', 'question26'],
-                            ['Geopoint', 'question27'],
-                            ['Secret', 'question28'],
-                            ['AndroidIntent', 'question7'],
-                            ['DataBindOnly', 'question32', {
-                                calculateAttr: '1 + 2'
-                            }]
-                        ], function (q) {
-                            addQuestion.apply(null, q);
+                        _.each(questionTypes, function (q, i) {
+                            var obj = {prevId: (i > 0 ? questionTypes[i - 1][1] : null)};
+                            addQuestion.apply(obj, q);
                         });
 
                         function addAllForms() {
