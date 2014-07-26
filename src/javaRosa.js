@@ -909,13 +909,9 @@ define([
 
                 defaultLangValue = itextItem.getValue(widget.form, widget.defaultLang);
                 currentLangValue = itextItem.getValue(widget.form, widget.language);
-                if (!widget.isDefaultLang) {
-                    widget.setPlaceholder(defaultLangValue);
-                }
 
-                if (!widget.isDefaultLang && 
-                    (defaultLangValue === currentLangValue) || !currentLangValue) 
-                {
+                if (!widget.isDefaultLang && !currentLangValue) {
+                    widget.setPlaceholder(defaultLangValue);
                     widget.setValue("");
                 } else {
                     widget.setValue(currentLangValue);
