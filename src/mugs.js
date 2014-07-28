@@ -74,7 +74,8 @@ define([
             var spec = this.__spec[attr],
                 prev = this.__data[attr];
 
-            if ((spec.immutable && this.__data[attr]) ||
+            if (!spec ||
+                (spec.immutable && this.__data[attr]) ||
                 val === prev ||
                 // only set attr if spec allows this attr, except if mug is a
                 // DataBindOnly (which all mugs are before the control block has
