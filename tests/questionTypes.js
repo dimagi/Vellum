@@ -269,37 +269,21 @@ require([
         });
 
         it("question type change survives save + load", function (done) {
-            var savedForm = null;
             function test() {
                 addQuestion.call({}, "Text", "question");
                 var mug = call("getCurrentlySelectedMug");
-                // change question type and save
+
+                // change question type
                 $(".fd-question-changer .change-question[data-qtype=Trigger]").click();
-                $(".fd-save-button .btn-success").click();
 
-                // mug.p.dataType not updated on change question type?
-
-                // reload
-                util.init({
-                    core: {
-                        form: savedForm,
-                        onReady: function () {
-                            // verify type change
-                            mug = call("getMugByPath", "/data/question");
-                            assert.equal(mug.__className, "Trigger");
-                            done();
-                        }
-                    }
+                util.onSaveAndLoad(function () {
+                    // verify type change
+                    mug = call("getMugByPath", "/data/question");
+                    assert.equal(mug.__className, "Trigger");
+                    done();
                 });
             }
-            util.init({
-                core: {
-                    saveUrl: function (data) {
-                        savedForm = data.xform;
-                    },
-                    onReady: test
-                }
-            });
+            util.init({core: {onReady: test}});
         });
     });
 
