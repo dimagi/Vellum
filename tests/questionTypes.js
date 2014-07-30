@@ -119,8 +119,6 @@ require([
             //   messages
             // - automatic adding of choices when you add a select
             // - automatic generation of media paths for regular questions and choices
-            var XMLNS = $($.parseXML(TEST_XML)).find('data').attr('xmlns');
-
             util.init({
                 core: {
                     form: null,
@@ -191,17 +189,17 @@ require([
                         $("[name='intent-response'] .fd-kv-key").val('key2').change();
                         $("[name='intent-response'] .fd-kv-val").val('value2').change();
                         util.assertXmlEqual(
-                            TEST_XML.replace('foo="bar"', '')
+                            call('createXML'),
+                            util.xmlines(TEST_XML
+                                .replace('foo="bar"', '')
                                 .replace('spam="eggs"', '')
                                 .replace('foo="baz"', '')
                                 .replace(/<unrecognized>.+<\/unrecognized>/, '')
                                 .replace('non-itext label', '')
                                 .replace('non-itext hint', '')
                                 .replace(/<instance[^>]+?casedb[^>]+?><\/instance>/, '')
-                                .replace(/<setvalue[^>]+?>/, ''),
-                            call('createXML')
-                                .replace(/data([^>]+)xmlns="(.+?)"/, 
-                                         'data$1xmlns="' + XMLNS + '"')
+                                .replace(/<setvalue[^>]+?>/, '')),
+                            {normalize_xmlns: true}
                         );
                         
                         // should have updated question tree

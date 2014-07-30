@@ -115,15 +115,24 @@ define([
         },
         getInput: getInput,
         assertInputCount: assertInputCount,
-        assertXmlEqual: function (str1, str2) {
-            assert(xmlEqual(str1, str2),
-                "Expected \n\n" + formatXml(str1) + 
-                    "\n\n to be equivalent to \n\n" + formatXml(str2));
+        assertXmlEqual: function (actual, expected, opts) {
+            opts = opts || {};
+            if (opts.normalize_xmlns) {
+                var xmlns = $($.parseXML(expected)).find('data').attr('xmlns');
+                actual = actual.replace(/(data[^>]+xmlns=")(.+?)"/,
+                                        '$1' + xmlns + '"');
+            }
+            assert(xmlEqual(actual, expected),
+                "Expected \n\n" + formatXml(actual) + 
+                    "\n\n to be equivalent to \n\n" + formatXml(expected));
         },
         assertXmlNotEqual: function (str1, str2) {
             assert.isFalse(xmlEqual(str1, str2),
                 "Expected \n\n" + formatXml(str1) + 
                     "\n\n not to be equivalent to \n\n" + formatXml(str2));
+        },
+        xmlines: function(xml) {
+            return xml.replace(/>(\s\s+)</g, ">\n$1<");
         },
         addQuestion: function (qType, nodeId, attrs, refId) {
             attrs = attrs || {};
