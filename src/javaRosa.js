@@ -33,15 +33,21 @@ define([
     var RESERVED_ITEXT_CONTENT_TYPES = [
         'default', 'short', 'long', 'audio', 'video', 'image'
     ];
+
     function ItextItem(options) {
         this.forms = options.forms || [];
         this.id = options.id || "";
         this.itextModel = options.itextModel;
     }
     ItextItem.prototype = {
-        // todo: not do this
         clone: function () {
-            return this;
+            var item = new ItextItem({
+                forms: _.map(this.forms, function (f) { return f.clone(); }),
+                id: this.id,
+                itextModel: this.itextModel
+            });
+            this.itextModel.addItem(item);
+            return item;
         },
         getForms: function () {
             return this.forms;
@@ -123,8 +129,14 @@ define([
         this.data = options.data || {};
         this.name = options.name || "default";
     }
-
     ItextForm.prototype = {
+        clone: function () {
+            return new ItextForm({
+                itextModel: this.itextModel,
+                data: _.clone(this.data),
+                name: this.name
+            });
+        },
         getValue: function (lang) {
             return this.data[lang];
         },
@@ -183,7 +195,6 @@ define([
         this.languages = [];
         this.items = [];
     }
-
     ItextModel.prototype = {
         getLanguages: function () {
             return this.languages;
@@ -290,9 +301,6 @@ define([
                 })]
             });
             this.addItem(item);
-            this.fire({
-                type: 'change'
-            });
             return item;
         },
         /**
@@ -376,9 +384,8 @@ define([
                 if (!mug.p.labelItextID && 
                     mug.spec.labelItextID.presence !== "notallowed")
                 {
-                    var labelItextID = mug.getDefaultLabelItext(defaultLabelValue);
+                    var labelItextID = this.getDefaultLabelItext(mug, defaultLabelValue);
                     mug.p.labelItextID = labelItextID;
-                    this.addItem(labelItextID);
                 }
                 // set hint if legal and not there
                 if (mug.spec.hintItextID.presence !== "notallowed" &&
@@ -393,6 +400,23 @@ define([
                     mug.p.constraintMsgItextID = this.createItem("");
                 }
             }
+        },
+        getDefaultLabelItext: function (mug, defaultValue) {
+            var item,
+                formData = {},
+                defaultLang = this.getDefaultLanguage();
+            formData[defaultLang] = defaultValue;
+            item = new ItextItem({
+                id: mug.getDefaultLabelItextId(),
+                forms: [new ItextForm({
+                            name: "default",
+                            data: formData,
+                            itextModel: this
+                        })],
+                itextModel: this
+            });
+            this.addItem(item);
+            return item;
         }
     };
 

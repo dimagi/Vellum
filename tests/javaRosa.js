@@ -65,6 +65,21 @@ require([
                 done();
             }}});
         });
+
+        it("itext changes do not bleed back after copy", function (done) {
+            util.init({core: {onReady: function () {
+                var mug = util.addQuestion("Text", "question");
+                    dup = mug.form.duplicateMug(mug);
+                dup.p.labelItextID.setDefaultValue("q2");
+
+                util.saveAndReload(function () {
+                    // verify type change
+                    var mug = call("getMugByPath", "/data/question");
+                    assert.equal(mug.p.labelItextID.defaultValue(), "question");
+                    done();
+                });
+            }}});
+        });
     });
 
     /*jshint multistr: true */

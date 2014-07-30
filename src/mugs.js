@@ -91,20 +91,6 @@ define([
                 return;
             }
 
-            // avoid potential duplicate references (e.g., itext items)
-            // todo: callers should probably handle this instead
-            if (val && typeof val === "object") {
-                if ($.isPlainObject(val)) {
-                    val = $.extend(true, {}, val);
-                } else {
-                    // All non-plain objects must provide a clone method,
-                    // otherwise there could be circular references.  It can
-                    // simply return the same object if it's safe.
-                    // This is not really fleshed out.
-                    val = val.clone();
-                }
-            }
-
             this.__data[attr] = val;
           
             var response = this.change(this.__mug, {
@@ -378,12 +364,30 @@ define([
      * A question, containing data, bind, and control elements.
      */
     function Mug (options, form, baseSpec, copyFromMug) {
+        var properties = null;
         util.eventuality(this);
+
+        if (copyFromMug) {
+            properties = _.object(_.map(copyFromMug.p.getAttrs(), function (val, key) {
+                if (val && typeof val === "object") {
+                    // avoid potential duplicate references (e.g., itext items)
+                    if ($.isPlainObject(val)) {
+                        val = _.clone(val);
+                    } else {
+                        // All non-plain objects must provide a clone method,
+                        // otherwise there could be circular references.  It can
+                        // simply return the same object if it's safe.
+                        // This is not really fleshed out.
+                        val = val.clone();
+                    }
+                }
+                return [key, val];
+            }));
+        }
 
         this.form = form;
         this._baseSpec = baseSpec;
-        this.setOptionsAndProperties(
-            options, copyFromMug ? copyFromMug.p.getAttrs() : null);
+        this.setOptionsAndProperties(options, properties);
     }
     Mug.prototype = {
         // set or change question type
@@ -466,23 +470,6 @@ define([
             } else {
                 return "";
             } 
-        },
-        
-        getDefaultLabelItext: function (defaultValue) {
-            var formData = {},
-                Itext = this.form.vellum.data.javaRosa.Itext,
-                defaultLang = Itext.getDefaultLanguage();
-            formData[defaultLang] = defaultValue;
-            // todo: plugin abstraction barrier
-            return new this.form.vellum.data.javaRosa.ItextItem({
-                id: this.getDefaultLabelItextId(),
-                forms: [new this.form.vellum.data.javaRosa.ItextForm({
-                            name: "default",
-                            data: formData,
-                            itextModel: Itext
-                        })],
-                itextModel: Itext
-            });
         },
         
         // Add some useful functions for dealing with itext.
