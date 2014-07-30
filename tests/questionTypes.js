@@ -7,30 +7,9 @@ require([
     $,
     util
 ) {
-    function addQuestion(qType, nodeId, attrs, refId) {
-        attrs = attrs || {};
-        if (nodeId) {
-            attrs.nodeID = nodeId;
-        }
-        if (this.prevId) {
-            clickQuestion(this.prevId);
-        }
-        call('addQuestion', qType);
-        $("[name='property-nodeID']").val(nodeId).change();
-        $("[name='itext-en-label']").val(nodeId).change();
-        _.each(attrs, function (val, name) {
-            var input = util.getInput(name);
-            util.assertInputCount(input, 1, nodeId + " " + name);
-            if (input.attr('type') === 'checkbox') {
-                input.prop('checked', val).change();
-            } else {
-                input.val(val).change();
-            }
-        });
-    }
-
     var call = util.call,
         clickQuestion = util.clickQuestion,
+        addQuestion = util.addQuestion,
         assert = chai.assert,
         questionTypes = [
             ['Text', 'question1', {
@@ -258,7 +237,7 @@ require([
                 var from = change[0], to = change[1];
                 it(from + " to " + to, function () {
                     var nodeId = (from + "_to_" + to).toLowerCase();
-                    addQuestion.call({}, from, nodeId);
+                    addQuestion(from, nodeId);
                     var mug = call("getMugByPath", "/data/" + nodeId);
                     assert.equal(mug.p.nodeID, nodeId, "got wrong mug before changing type");
                     assert.equal(mug.__className, from, "wrong mug type");
@@ -271,7 +250,7 @@ require([
 
         it("question type change survives save + load", function (done) {
             function test() {
-                addQuestion.call({}, "Text", "question");
+                addQuestion("Text", "question");
                 var mug = call("getMugByPath", "/data/question");
 
                 call("changeMugType", mug, "Trigger");
