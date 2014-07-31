@@ -65,7 +65,7 @@ define([
             return this.__spec[name];
         },
         getAttrs: function () {
-            return this.__data;
+            return $.extend(true, {}, this.__data);
         },
         _get: function (attr) {
             return this.__data[attr];
@@ -73,6 +73,13 @@ define([
         _set: function (attr, val) {
             var spec = this.__spec[attr],
                 prev = this.__data[attr];
+
+            // Should never happen.  Can probably remove once type-defining
+            // attributes are specified abstractly.
+            if (spec && spec.immutable && this.__data[attr]) {
+                throw new Error(
+                    "Tried to set immutable property with existing value.");
+            }
 
             if (!spec || val === prev ||
                 // only set attr if spec allows this attr, except if mug is a
@@ -394,8 +401,8 @@ define([
             // Reset any properties that are part of the question type
             // definition.
             _.each(this.spec, function (spec, name) {
-                if (_this.p && spec.immutable) {
-                    delete _this.p[name];
+                if (spec.immutable) {
+                    delete currentAttrs[name];
                 }
             });
 
@@ -404,9 +411,8 @@ define([
                 mug: this,
                 change: _this.form.handleMugPropertyChange.bind(_this.form),
             });
-            this.p.setAttrs(currentAttrs);
-
             this.options.init(this, this.form);
+            this.p.setAttrs(currentAttrs);
         },
         getAppearanceAttribute: function () {
             return this.options.getAppearanceAttribute(this);
