@@ -276,7 +276,7 @@ require([
 
                 call("changeMugType", mug, "Trigger");
 
-                util.onSaveAndLoad(function () {
+                util.saveAndReload(function () {
                     // verify type change
                     mug = call("getMugByPath", "/data/question");
                     assert.equal(mug.__className, "Trigger");

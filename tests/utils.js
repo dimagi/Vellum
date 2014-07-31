@@ -48,23 +48,19 @@ define([
         };
         $("#vellum").empty().vellum(vellum_options);
     }
+        
+    // call a method on the active instance
+    function call () {
+        var args = Array.prototype.slice.call(arguments),
+            $vellum = $("#vellum");
+        return $vellum.vellum.apply($vellum, args);
+    }
 
     return {
         init: init,
-        onSaveAndLoad: function(callback) {
-            var oldSaveCount = saveCount;
-            // save
-            $(".fd-save-button .btn-success").click();
-            assert.operator(saveCount, ">", oldSaveCount,
-                            "Form not saved on save button click!");
-            // reload
-            init({core: {form: savedForm, onReady: callback}});
-        },
-        // call a method on the active instance
-        call: function () {
-            var args = Array.prototype.slice.call(arguments),
-                $vellum = $("#vellum");
-            return $vellum.vellum.apply($vellum, args);
+        call: call,
+        saveAndReload: function(callback) {
+            call("loadXFormOrError", call("createXML"), callback);
         },
         getInput: getInput,
         assertInputCount: function (nameOrInputs, num, name) {

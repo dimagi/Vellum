@@ -21,7 +21,7 @@ require([
                     form: TEST_XML_1, 
                     onReady: function () {
                         $("textarea[name=itext-en-constraintMsg]").val("").change();
-                        util.onSaveAndLoad(function () {
+                        util.saveAndReload(function () {
                             // there should be no errors on load
                             // todo: this should inspect the model, not UI
                             var errors = $(".alert-block");
