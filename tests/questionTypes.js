@@ -124,6 +124,9 @@ require([
         });
 
         it("adds all question types and attributes", function (done) {
+            // This test takes way too long and needs to be broken up into
+            // smaller subtests. LONG timeout is to prevent timeout on travis.
+            this.timeout(10000)
             // this also tests
             // - that clicking add question buttons when other questions are
             //   selected adds questions correctly
