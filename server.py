@@ -4,6 +4,7 @@ Modification of SimpleHTTPServer that doesn't redirect for urls with ?query
 
 import SimpleHTTPServer
 import SocketServer
+import sys
 
 PORT = 8000
 
@@ -24,6 +25,14 @@ class MyTCPServer(SocketServer.ThreadingTCPServer):
     allow_reuse_address = True
 
 if __name__ == '__main__':
+    if any(arg in sys.argv for arg in ["-h", "--help"]):
+        print("USAGE: {} [PORT]".format(sys.argv[0]))
+        sys.exit()
+    if len(sys.argv) > 1:
+        try:
+            PORT = int(sys.argv[-1])
+        except ValueError:
+            sys.stderr.write("unknown port: {}\n".format(sys.argv[-1]))
     httpd = MyTCPServer(('localhost', PORT), CustomHandler)
     httpd.allow_reuse_address = True
     print "Serving at port", PORT

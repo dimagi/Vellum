@@ -1,0 +1,23 @@
+#! /bin/bash
+
+# stop on error
+set -e
+
+if [[ "$1" == "--help" ]]; then
+    echo "USAGE: $0 [TEST_GREP] [mocha-phantomjs-options]"
+    exit
+fi
+
+qs=""
+if [[ "$1" != "" ]]; then
+    qs="?grep=$1"
+    shift
+fi
+
+./node_modules/.bin/mocha-phantomjs -s loadImages=false "index.html$qs" "$@" \
+    | grep -v "Error loading resource file:///"
+test ${PIPESTATUS[0]} -eq 0 # stop on mocha-phantomjs non-zero exit status
+# NOTE there may be edge cases where grep exits with non-zero causing this
+# script to exit prematurely
+
+./node_modules/.bin/jshint src/*.js

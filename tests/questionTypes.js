@@ -7,6 +7,28 @@ require([
     $,
     util
 ) {
+    function addQuestion(qType, nodeId, attrs, refId) {
+        attrs = attrs || {};
+        if (nodeId) {
+            attrs.nodeID = nodeId;
+        }
+        if (this.prevId) {
+            clickQuestion(this.prevId);
+        }
+        call('addQuestion', qType);
+        $("[name='property-nodeID']").val(nodeId).change();
+        $("[name='itext-en-label']").val(nodeId).change();
+        _.each(attrs, function (val, name) {
+            var input = util.getInput(name);
+            util.assertInputCount(input, 1, nodeId + " " + name);
+            if (input.attr('type') === 'checkbox') {
+                input.prop('checked', val).change();
+            } else {
+                input.val(val).change();
+            }
+        });
+    }
+
     var call = util.call,
         clickQuestion = util.clickQuestion,
         assert = chai.assert,
@@ -101,8 +123,10 @@ require([
             });
         });
 
-
         it("adds all question types and attributes", function (done) {
+            // This test takes way too long and needs to be broken up into
+            // smaller subtests. LONG timeout is to prevent timeout on travis.
+            this.timeout(10000)
             // this also tests
             // - that clicking add question buttons when other questions are
             //   selected adds questions correctly
@@ -116,28 +140,7 @@ require([
             //   messages
             // - automatic adding of choices when you add a select
             // - automatic generation of media paths for regular questions and choices
-            var addQuestion = function (qType, nodeId, attrs, refId) {
-                    attrs = attrs || {};
-                    if (nodeId) {
-                        attrs.nodeID = nodeId;
-                    }
-                    if (this.prevId) {
-                        clickQuestion(this.prevId);
-                    }
-                    call('addQuestion', qType);
-                    $("[name='property-nodeID']").val(nodeId).change();
-                    $("[name='itext-en-label']").val(nodeId).change();
-                    _.each(attrs, function (val, name) {
-                        var input = util.getInput(name);
-                        util.assertInputCount(input, 1, nodeId + " " + name);
-                        if (input.attr('type') === 'checkbox') {
-                            input.prop('checked', val).change();
-                        } else {
-                            input.val(val).change();
-                        }
-                    });
-                },
-                XMLNS = $($.parseXML(TEST_XML)).find('data').attr('xmlns');
+            var XMLNS = $($.parseXML(TEST_XML)).find('data').attr('xmlns');
 
             util.init({
                 core: {
@@ -231,8 +234,63 @@ require([
                 }
             });
         });
+
+        describe("can change", function() {
+            var changes = [
+                ["Text", "Trigger"],
+                ["Trigger", "Select"],
+                ["Image", "Select"],
+                ["Audio", "Select"],
+                ["Video", "Select"]
+            ];
+
+            before(function (done) {
+                util.init({
+                    core: {
+                        onReady: function () {
+                            done();
+                        }
+                    }
+                });
+            });
+
+            _.each(changes, function (change) {
+                var from = change[0], to = change[1];
+                it(from + " to " + to, function () {
+                    var nodeId = (from + "_to_" + to).toLowerCase();
+                    addQuestion.call({}, from, nodeId);
+                    var mug = call("getCurrentlySelectedMug");
+                    assert.equal(mug.p.nodeID, nodeId, "got wrong mug before changing type");
+                    assert.equal(mug.__className, from, "wrong mug type");
+                    // change type
+                    $(".fd-question-changer .change-question[data-qtype=" + to + "]").click();
+                    // verify change
+                    mug = call("getMugByPath", "/data/" + nodeId);
+                    assert.equal(mug.__className, to);
+                });
+            });
+        });
+
+        it("question type change survives save + load", function (done) {
+            function test() {
+                addQuestion.call({}, "Text", "question");
+                var mug = call("getCurrentlySelectedMug");
+
+                // change question type
+                $(".fd-question-changer .change-question[data-qtype=Trigger]").click();
+
+                util.onSaveAndLoad(function () {
+                    // verify type change
+                    mug = call("getMugByPath", "/data/question");
+                    assert.equal(mug.__className, "Trigger");
+                    done();
+                });
+            }
+            util.init({core: {onReady: test}});
+        });
     });
 
+/*jshint multistr: true */
 var TEST_XML = '' +
 '<?xml version="1.0" encoding="UTF-8" ?>\
 <h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:orx="http://openrosa.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa" xmlns:vellum="http://commcarehq.org/xforms/vellum">\
@@ -597,6 +655,6 @@ var TEST_XML = '' +
         </unrecognized>\
 	</h:body>\
 </h:html>\
-                        '
+                        ';
 
 });

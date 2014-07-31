@@ -1838,7 +1838,7 @@ define([
     };
 
     fn.handleMugRename = function (form, mug, val, previous, currentPath, oldPath) {
-        form.handleMugRename(form, mug, val, previous, currentPath, oldPath);
+        form.handleMugRename(mug, val, previous, currentPath, oldPath);
     };
 
     fn.beforeSerialize = function () {};
