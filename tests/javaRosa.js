@@ -17,15 +17,19 @@ require([
         it("should not show itext errors when there is text in any language", function (done) {
             util.init({
                 javaRosa: {langs: ['en', 'hin']},
-                core: {form: TEST_XML_1, onReady: function () {
-                    $("textarea[name=itext-en-constraintMsg]").val("").change();
-                    util.onSaveAndLoad(function () {
-                        // there should be no errors on load
-                        var errors = $(".alert-block");
-                        assert.equal(errors.length, 0, errors.text());
-                        done();
-                    });
-                }}
+                core: {
+                    form: TEST_XML_1, 
+                    onReady: function () {
+                        $("textarea[name=itext-en-constraintMsg]").val("").change();
+                        util.onSaveAndLoad(function () {
+                            // there should be no errors on load
+                            // todo: this should inspect the model, not UI
+                            var errors = $(".alert-block");
+                            assert.equal(errors.length, 0, errors.text());
+                            done();
+                        });
+                    }
+                }
             });
         });
     });
@@ -60,14 +64,8 @@ require([
                         <text id="question1-label">\
                             <value>question1</value>\
                         </text>\
-                        <text id="question1-constraintMsg">\
-                            <value>xyz</value>\
-                        </text>\
                     </translation>\
                     <translation lang="hin">\
-                        <text id="question1-label">\
-                            <value>question1</value>\
-                        </text>\
                         <text id="question1-constraintMsg">\
                             <value>xyz</value>\
                         </text>\

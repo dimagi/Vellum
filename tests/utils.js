@@ -10,7 +10,9 @@ define([
     EquivalentXml,
     $
 ) {
-    var savedForm = null, saveCount = 0, assert = chai.assert;
+    var assert = chai.assert,
+        savedForm = null,
+        saveCount = 0;
     
     function xmlEqual(str1, str2) {
         var xml1 = EquivalentXml.xml(str1),
@@ -37,24 +39,13 @@ define([
         if (opts.javaRosa && opts.javaRosa.langs) {
             vellum_options.javaRosa.langs = opts.javaRosa.langs;
         }
-        if (!opts.core) {
-            vellum_options.core = {saveUrl: function (data) {
-                savedForm = data.xform;
-                saveCount++;
-            }};
-        } else if (!opts.core.saveUrl) {
-            vellum_options.core.saveUrl = function (data) {
-                savedForm = data.xform;
-                saveCount++;
-            };
-        } else {
-            var originalSaveUrl = vellum_options.core.saveUrl;
-            vellum_options.core.saveUrl = function (data) {
-                savedForm = data.xform;
-                saveCount++;
-                originalSaveUrl(data);
-            };
-        }
+        vellum_options.core = vellum_options.core || {};
+        var originalSaveUrl = vellum_options.core.saveUrl || function () {};
+        vellum_options.core.saveUrl = function (data) {
+            savedForm = data.xform;
+            saveCount++;
+            originalSaveUrl(data);
+        };
         $("#vellum").empty().vellum(vellum_options);
     }
 
@@ -76,14 +67,14 @@ define([
             return $vellum.vellum.apply($vellum, args);
         },
         getInput: getInput,
-        assertInputCount: function (name_or_inputs, num, name) {
-            if (_.isString(name_or_inputs)) {
-                name = " for " + (name ? name + " " : "") + name_or_inputs;
-                name_or_inputs = getInput(name_or_inputs);
+        assertInputCount: function (nameOrInputs, num, name) {
+            if (_.isString(nameOrInputs)) {
+                name = " for " + (name ? name + " " : "") + nameOrInputs;
+                nameOrInputs = getInput(nameOrInputs);
             } else {
                 name = name ? " for " + name : "";
             }
-            assert.equal(name_or_inputs.length, num, "wrong number of inputs" + name);
+            assert.equal(nameOrInputs.length, num, "wrong number of inputs" + name);
         },
         assertXmlEqual: function (str1, str2) {
             assert(xmlEqual(str1, str2),
