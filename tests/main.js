@@ -84,7 +84,9 @@ require([
         'jquery.vellum',
 
         // register tests on global mocha instance as side-effect
+        'tests/logic',
         'tests/questionTypes',
+        'tests/javaRosa',
         'tests/formdesigner.ignoreButRetain',
         'tests/formdesigner.lock',
         'tests/itemset'

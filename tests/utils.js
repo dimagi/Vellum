@@ -10,7 +10,7 @@ define([
     EquivalentXml,
     $
 ) {
-    var assert = chai.assert;
+    var savedForm = null, saveCount = 0, assert = chai.assert;
     
     function xmlEqual(str1, str2) {
         var xml1 = EquivalentXml.xml(str1),
@@ -27,16 +27,47 @@ define([
         return $("[name='property-" + property + "']");
     }
 
+    // initialize/reset active vellum instance
+    function init(opts) {
+        function onSave(data) {
+        }
+        opts = opts || {};
+        var vellum_options = $.extend(true, {}, options.options, opts);
+        // $.extend merges arrays :(
+        if (opts.javaRosa && opts.javaRosa.langs) {
+            vellum_options.javaRosa.langs = opts.javaRosa.langs;
+        }
+        if (!opts.core) {
+            vellum_options.core = {saveUrl: function (data) {
+                savedForm = data.xform;
+                saveCount++;
+            }};
+        } else if (!opts.core.saveUrl) {
+            vellum_options.core.saveUrl = function (data) {
+                savedForm = data.xform;
+                saveCount++;
+            };
+        } else {
+            var originalSaveUrl = vellum_options.core.saveUrl;
+            vellum_options.core.saveUrl = function (data) {
+                savedForm = data.xform;
+                saveCount++;
+                originalSaveUrl(data);
+            };
+        }
+        $("#vellum").empty().vellum(vellum_options);
+    }
+
     return {
-        // initialize/reset active vellum instance
-        init: function (opts) {
-            opts = opts || {};
-            var vellum_options = $.extend(true, {}, options.options, opts);
-            // $.extend merges arrays :(
-            if (opts.javaRosa && opts.javaRosa.langs) {
-                vellum_options.javaRosa.langs = opts.javaRosa.langs;
-            }
-            $("#vellum").empty().vellum(vellum_options);
+        init: init,
+        onSaveAndLoad: function(callback) {
+            var oldSaveCount = saveCount;
+            // save
+            $(".fd-save-button .btn-success").click();
+            assert.operator(saveCount, ">", oldSaveCount,
+                            "Form not saved on save button click!");
+            // reload
+            init({core: {form: savedForm, onReady: callback}});
         },
         // call a method on the active instance
         call: function () {

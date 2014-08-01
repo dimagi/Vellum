@@ -216,14 +216,14 @@ define([
                 sourceId = foo.instanceId,
                 leafLevel = foo.levels[foo.levels.length - 1];
 
-            if (leafLevel.subsetId !== false) {
+            if (leafLevel && leafLevel.subsetId !== false) {
                 sourceId += ":" + leafLevel.subsetId;
             }
 
             $sourceSelect.val(sourceId);
             handleSourceChange(sourceId);
             origLevels = foo.levels;
-            if (leafLevel.condition) {
+            if (leafLevel && leafLevel.condition) {
                 $filterInput.val(leafLevel.condition);
             }
             if (valueRef) {

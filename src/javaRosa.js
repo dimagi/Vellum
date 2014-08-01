@@ -148,7 +148,7 @@ define([
             }
             // check arbitrarily for something
             for (var i in this.data) {
-                if (this.data.hasOwnProperty(i)) {
+                if (this.data.hasOwnProperty(i) && this.data[i]) {
                     return this.data[i];
                 }
             }
