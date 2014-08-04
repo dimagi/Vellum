@@ -8,17 +8,63 @@ define([
     _,
     undefined
 ) {
+    // The order of plugins in this list is important: it controls the order in
+    // which plugin methods are called. Core is at the center, each plugin is a
+    // layer on top of the next. A method call starts at the last plugin in the
+    // list that defines the method and continues toward the core (assuming each
+    // plugin method calls `this.__callOld()`)
     var corePlugins = [
-        'core',
-        'ignore',
-        'intents',
-        'javaRosa',
-        'lock',
-        'uploader',
-        'windowManager'
-    ],
+            'core',
+            'intents',
+            'javaRosa',
+            'lock',
+            'ignore',
+            'uploader',
+            'windowManager'
+        ],
         instances = [];
-    
+
+    function bindPluginMethod(pluginName, fn, fnName) {
+        // this is not how jstree does it, and a bit hacky, but it makes
+        // defining plugins simpler
+        if (fnName === 'init' && pluginName !== 'core') {
+            return;
+        }
+
+        // call private methods normally
+        if (fnName.indexOf('_') === 0) {
+            if (this[fnName] !== undefined) {
+                throw ("private plugin method " + pluginName + "." + fnName +
+                       " would overwrite existing: " + this[fnName]);
+            }
+            // this could be a problem if two plugins have a private
+            // method with the same name, easily fixed
+            this[fnName] = fn;
+            return;
+        }
+
+        fn.plugin = pluginName;
+        fn.old = this[fnName];
+        this[fnName] = function () {
+            var func = fn,
+                args = Array.prototype.slice.call(arguments);
+
+            // call function with a __callOld() method added to
+            // `this` that calls the next copy of this method in the
+            // plugin stack
+            return func.apply(
+                $.extend({}, this, {
+                    __callOld: function () {
+                        return func.old.apply(this, (arguments.length ?
+                            Array.prototype.slice.call(arguments) : args));
+                    }
+                }), 
+                args);
+        };
+        this[fnName].old = fn.old;
+        this[fnName].plugin = pluginName;
+    }
+
     $.fn.vellum = function (options) {
         var isMethodCall = typeof options === 'string',
             args = Array.prototype.slice.call(arguments, 1),
@@ -36,33 +82,13 @@ define([
             // passed.  In practice, it's unlikely that you'd ever want to
             // instantiate multiple instances at once.
             this.each(function () {
-                options.plugins = _.uniq(corePlugins.concat(options.plugins || []));
-                var instance = new $.vellum._instance($(this), options),
-                    instanceId = $.data(this, "vellum_instance_id");
+                var instanceId = $.data(this, "vellum_instance_id");
                 if (instanceId === undefined) {
                     instances.push({});
                     instanceId = instances.length - 1;
                 }
                 $.data(this, "vellum_instance_id", instanceId);
-
-                _.each(options.plugins, function (p) {
-                    instance.data[p] = {};
-                });
-
-                var context = $.extend({}, instance, $.vellum._fn);
-                instances[instanceId] = context;
-                // init core
-                $.vellum._fn.init.apply(context);
-
-                _.each(options.plugins, function (p) {
-                    var initFn = $.vellum._initFns[p];
-                    if (initFn) {
-                        initFn.apply(context);
-                    }
-                });
-
-                // do final initialization that requires all plugins to be loaded
-                $.vellum._fn.postInit.apply(context);
+                instances[instanceId] = new $.vellum._instance($(this), options);
             });
             return this;
         }
@@ -70,72 +96,53 @@ define([
 
     $.vellum = {
         defaults: {},
+        _plugins: {},
         _fn: {},
-        _initFns: {},
         _instance: function ($f, options) {
+            options.plugins = _.uniq(corePlugins.concat(options.plugins || []));
             options = $.extend(true, {}, $.vellum.defaults, options);
 
+            var instance = this;
             this.$f = $f;
             this.data = {};
             this.opts = function () { 
-                return $.extend(true, {}, options); 
+                return $.extend(true, {}, options);
             };
 
             this.getData = function () {
                 return this.data;
             }.bind(this);
+
+            _.each(options.plugins, function (pluginName, i) {
+                instance.data[pluginName] = {};
+                var fns = $.vellum._plugins[pluginName];
+                if (fns) {
+                    _.each(fns, function (fn, fnName) {
+                        if (i === 0) {
+                            // bind root plugin (usually "core") methods
+                            // directly to instance to make debugging easier
+                            // and method calls have less overhead.
+                            instance[fnName] = fn;
+                        } else {
+                            bindPluginMethod.call(instance, pluginName, fn, fnName);
+                        }
+                    });
+                }
+            });
+
+            _.each(options.plugins, function (p) {
+                var initFn = $.vellum._plugins[p].init;
+                if (initFn) {
+                    initFn.apply(instance);
+                }
+            });
+
+            // do final initialization that requires all plugins to be loaded
+            instance.postInit();
         },
         plugin: function (pluginName, defaults, fns) {
             $.vellum.defaults[pluginName] = defaults;
-
-            _.each(fns, function (fn, fnName) {
-                // this is not how jstree does it, and a bit hacky, but it makes
-                // defining plugins simpler
-                if (fnName === 'init' && pluginName !== 'core') {
-                    $.vellum._initFns[pluginName] = fn;
-                    return;
-                }
-
-                fn.plugin = pluginName;
-                fn.old = $.vellum._fn[fnName];
-                $.vellum._fn[fnName] = function () {
-                    var func = fn,
-                        args = Array.prototype.slice.call(arguments),
-                        plugins = this.opts().plugins;
-
-                    // check if function belongs to an enabled plugin for this
-                    // instance
-                    do {
-                        if (func && func.plugin && 
-                            _.contains(plugins, func.plugin)) {
-                            break;
-                        }
-                        func = func.old;
-                    } while (func);
-                    if (!func) { return; }
-
-                    // call private methods normally
-                    if (fnName.indexOf('_') === 0) {
-                        // this could be a problem if two plugins have a private
-                        // method with the same name, easily fixed
-                        return func.apply(this, args);
-                    }
-
-                    // call function with a __callOld() method added to
-                    // `this` that calls the next copy of this method in the
-                    // plugin stack
-                    return func.apply(
-                        $.extend({}, this, {
-                            __callOld: function (replaceArguments) {
-                                return func.old.apply(this, (replaceArguments ?
-                                    Array.prototype.slice.call(arguments) : args));
-                            }
-                        }), 
-                        args);
-                };
-                $.vellum._fn[fnName].old = fn.old;
-                $.vellum._fn[fnName].plugin = pluginName;
-            });
+            $.vellum._plugins[pluginName] = fns;
             return $;
         }
     };
