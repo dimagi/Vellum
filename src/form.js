@@ -406,7 +406,7 @@ define([
         handleMugRename: function (mug, currentId, oldId, currentPath, oldPath) {
             this._logicManager.updatePath(mug.ufid, oldPath, currentPath);
         },
-        changeQuestionType: function (mug, questionType) {
+        changeMugType: function (mug, questionType) {
             this.mugTypes.changeType(mug, questionType);
         },
         getChildren: function (mug) {

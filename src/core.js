@@ -1538,7 +1538,7 @@ define([
         }));
         $questionTypeChanger.find('.change-question').click(function (e) {
             try {
-                _this.data.core.form.changeQuestionType(mug, $(this).data('qtype'));
+                _this.changeMugType(mug, $(this).data('qtype'));
             } catch (err) {
                 alert("Sorry, " + err);
             }
@@ -1546,6 +1546,10 @@ define([
         });
         $questionTypeChanger.addClass('fd-question-changer');
         return $questionTypeChanger;
+    };
+
+    fn.changeMugType = function (mug, type) {
+        this.data.core.form.changeMugType(mug, type);
     };
 
     fn.createXML = function () {

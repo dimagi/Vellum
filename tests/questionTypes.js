@@ -126,7 +126,7 @@ require([
         it("adds all question types and attributes", function (done) {
             // This test takes way too long and needs to be broken up into
             // smaller subtests. LONG timeout is to prevent timeout on travis.
-            this.timeout(10000)
+            this.timeout(10000);
             // this also tests
             // - that clicking add question buttons when other questions are
             //   selected adds questions correctly
@@ -259,12 +259,10 @@ require([
                 it(from + " to " + to, function () {
                     var nodeId = (from + "_to_" + to).toLowerCase();
                     addQuestion.call({}, from, nodeId);
-                    var mug = call("getCurrentlySelectedMug");
+                    var mug = call("getMugByPath", "/data/" + nodeId);
                     assert.equal(mug.p.nodeID, nodeId, "got wrong mug before changing type");
                     assert.equal(mug.__className, from, "wrong mug type");
-                    // change type
-                    $(".fd-question-changer .change-question[data-qtype=" + to + "]").click();
-                    // verify change
+                    call("changeMugType", mug, to);
                     mug = call("getMugByPath", "/data/" + nodeId);
                     assert.equal(mug.__className, to);
                 });
@@ -274,12 +272,11 @@ require([
         it("question type change survives save + load", function (done) {
             function test() {
                 addQuestion.call({}, "Text", "question");
-                var mug = call("getCurrentlySelectedMug");
+                var mug = call("getMugByPath", "/data/question");
 
-                // change question type
-                $(".fd-question-changer .change-question[data-qtype=Trigger]").click();
+                call("changeMugType", mug, "Trigger");
 
-                util.onSaveAndLoad(function () {
+                util.saveAndReload(function () {
                     // verify type change
                     mug = call("getMugByPath", "/data/question");
                     assert.equal(mug.__className, "Trigger");

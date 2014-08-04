@@ -390,7 +390,7 @@ define([
         }
 
         if (mug) {
-            form.changeQuestionType(mug, MugClass);
+            form.changeMugType(mug, MugClass);
         } else {
             // items only
             mug = form.mugTypes.make(MugClass, form);
