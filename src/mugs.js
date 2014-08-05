@@ -65,7 +65,7 @@ define([
             return this.__spec[name];
         },
         getAttrs: function () {
-            return $.extend(true, {}, this.__data);
+            return _.clone(this.__data);
         },
         _get: function (attr) {
             return this.__data[attr];
