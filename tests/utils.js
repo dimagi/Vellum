@@ -49,6 +49,9 @@ define([
         if (opts.javaRosa && opts.javaRosa.langs) {
             vellum_options.javaRosa.langs = opts.javaRosa.langs;
         }
+        if (opts.plugins) {
+            vellum_options.plugins = opts.plugins;
+        }
         vellum_options.core = vellum_options.core || {};
         var originalSaveUrl = vellum_options.core.saveUrl || function () {};
         vellum_options.core.saveUrl = function (data) {
@@ -61,13 +64,6 @@ define([
         
     // call a method on the active instance
     function call () {
-        var args = Array.prototype.slice.call(arguments),
-            $vellum = $("#vellum");
-        return $vellum.vellum.apply($vellum, args);
-    }
-
-    // call a method on the active instance
-    function call() {
         var args = Array.prototype.slice.call(arguments),
             $vellum = $("#vellum");
         return $vellum.vellum.apply($vellum, args);
@@ -108,6 +104,7 @@ define([
     }
 
     return {
+        options: options,
         init: init,
         call: call,
         saveAndReload: function(callback) {

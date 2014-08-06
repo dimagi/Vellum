@@ -160,8 +160,13 @@ define([
 
     fn.postInit = function () {
         var _this = this;
+        function onReady () {
+            // Allow onReady to access vellum instance (mostly for tests)
+            _this.opts().core.onReady.apply(_this);
+        }
+        parser.init(this);
         this.loadXFormOrError(this.opts().core.form, function () {
-            setTimeout(_this.opts().core.onReady, 0);
+            setTimeout(onReady, 0);
         });
     };
 
@@ -1069,7 +1074,7 @@ define([
     };
         
     fn.loadXML = function (formXML) {
-        var _this = this;
+        var form, _this = this;
         this.data.core.form = form = parser.parseXForm(formXML, {
             mugTypes: this.data.core.mugTypes,
             allowedDataNodeReferences: this.opts().core.allowedDataNodeReferences, 

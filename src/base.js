@@ -113,6 +113,10 @@ define([
                 return this.data;
             }.bind(this);
 
+            this.isPluginEnabled = function (name) {
+                return options.plugins.indexOf(name) !== -1;
+            };
+
             _.each(options.plugins, function (pluginName, i) {
                 instance.data[pluginName] = {};
                 var fns = $.vellum._plugins[pluginName];
