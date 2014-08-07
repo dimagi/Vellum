@@ -131,7 +131,7 @@ define([
         xmlines: function(xml) {
             return xml.replace(/>(\s\s+)</g, ">\n$1<");
         },
-        addQuestion: function (qType, nodeId, attrs, refId) {
+        addQuestion: function (qType, nodeId, attrs) {
             attrs = attrs || {};
             if (nodeId) {
                 attrs.nodeID = nodeId;

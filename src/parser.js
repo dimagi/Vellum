@@ -422,9 +422,9 @@ define([
         return mug;
     }
 
-    function parseBoolAttributeValue (attrString) {
+    function parseBoolAttributeValue (attrString, undefined) {
         if (!attrString) {
-            return null;
+            return undefined;
         }
         var str = attrString.toLowerCase().replace(/\s/g, '');
         if (str === 'true()') {
@@ -432,7 +432,7 @@ define([
         } else if (str === 'false()') {
             return false;
         } else {
-            return null;
+            return undefined;
         }
     }
                 
@@ -622,16 +622,10 @@ define([
         }
 
         var attrs = {
-            relevantAttr: el.popAttr('relevant') || null,
-
-            // HACK null -> visible_if_present -> visible (present)
-            // However, changing the visible_if_present logic elsewhere to
-            // treat null the same as undefined causes other visible_if_present
-            // properties (repeat_count) to break (tests fail).
-            calculateAttr: el.popAttr('calculate') || undefined,
-
-            constraintAttr: el.popAttr('constraint') || null,
-            dataType: el.popAttr('type') || null,
+            relevantAttr: el.popAttr('relevant'),
+            calculateAttr: el.popAttr('calculate'),
+            constraintAttr: el.popAttr('constraint'),
+            dataType: el.popAttr('type'),
             requiredAttr: parseBoolAttributeValue(el.popAttr('required')),
             preload: lookForNamespaced(el, "preload"),
             preloadParams: lookForNamespaced(el, "preloadParams")

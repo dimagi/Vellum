@@ -12,52 +12,145 @@ require([
         addQuestion = util.addQuestion,
         assert = chai.assert,
         questionTypes = [
-            ['Text', 'question1', {
-                keyAttr: 'jr preload key value',
-                dataValue: 'default data value',
-                constraintAttr: '/data/question20 = 2',
-                relevantAttr: '/data/question20',
-                requiredAttr: true,
-                preload: "jr preload",
-                preloadParams: "jr preload param"
-            }],
-            ['Trigger', 'question2', {showOKCheckbox: false}],
-            ['Trigger', 'question30', {showOKCheckbox: true}],
-            ['Select', 'question3'],
-            ['MSelect', 'question6'],
-            ['Int', 'question13'],
-            ['PhoneNumber', 'question14'],
-            ['Double', 'question15'],
-            ['Long', 'question16'],
-            ['Date', 'question17'],
-            ['Time', 'question18'],
-            ['DateTime', 'question19'],
-            ['Group', 'question21'],
-            ['Repeat', 'question31', {
-                requiredAttr: true,
-                no_add_remove: true, 
-                repeat_count: 2
-            }],
-            // get out of the repeat
-            ['DataBindOnly', 'question20'],
-            // insert before first data node
-            ['Repeat', 'question22', {
-                no_add_remove: false
-            }],
-            ['FieldList', 'question23'],
-            ['Image', 'question24'],
-            ['Audio', 'question25'],
-            ['Video', 'question26'],
-            ['Geopoint', 'question27'],
-            ['Secret', 'question28'],
-            ['AndroidIntent', 'question7'],
-            ['DataBindOnly', 'question32', {
-                calculateAttr: '1 + 2'
-            }]
+            //{
+            //    type: "QuestionType", // required
+            //    nodeId: "questionN", // required
+            //    attrs: { // optional
+            //        // Any key here implies the same key inputs with a value of 1
+            //        "attrName": value
+            //    },
+            //    inputs { // optional: add tests to check input counts
+            //        "inputName": inputCount
+            //    }
+            //}
+            {
+                type: 'Text',
+                nodeId: 'question1',
+                attrs: {
+                    keyAttr: 'jr preload key value',
+                    dataValue: 'default data value',
+                    constraintAttr: '/data/question20 = 2',
+                    relevantAttr: '/data/question20',
+                    requiredAttr: true,
+                    preload: "jr preload",
+                    preloadParams: "jr preload param"
+                },
+                inputs: {
+                    calculateAttr: 0
+                    //showOKCheckbox: 0
+                }
+            }, {
+                type: 'Trigger',
+                nodeId: 'question2',
+                attrs: {showOKCheckbox: false},
+                inputs: {
+                    // TODO add more input counts for each question type
+                    calculateAttr: 0,
+                    constraintAttr: 1,
+                    requiredAttr: 1,
+                    relevantAttr: 1
+                }
+            }, {
+                type: 'Trigger',
+                nodeId: 'question30',
+                attrs: {showOKCheckbox: true}
+            }, {
+                type: 'Select',
+                nodeId: 'question3',
+                inputs: {
+                    // TODO add more input counts for each question type
+                    calculateAttr: 0,
+                    constraintAttr: 1,
+                    requiredAttr: 1,
+                    relevantAttr: 1
+                }
+            }, {
+                type: 'MSelect',
+                nodeId: 'question6'
+            }, {
+                type: 'Int',
+                nodeId: 'question13'
+            }, {
+                type: 'PhoneNumber',
+                nodeId: 'question14'
+            }, {
+                type: 'Double',
+                nodeId: 'question15'
+            }, {
+                type: 'Long',
+                nodeId: 'question16'
+            }, {
+                type: 'Date',
+                nodeId: 'question17'
+            }, {
+                type: 'Time',
+                nodeId: 'question18'
+            }, {
+                type: 'DateTime',
+                nodeId: 'question19'
+            }, {
+                type: 'Group',
+                nodeId: 'question21'
+            }, { // get out of the repeat
+                type: 'Repeat',
+                nodeId: 'question31',
+                attrs: {
+                    requiredAttr: true,
+                    no_add_remove: true, 
+                    repeat_count: 2
+                }
+            }, { // insert before first data node
+                type: 'DataBindOnly',
+                nodeId: 'question20',
+                inputs: {
+                    calculateAttr: 1,
+                    constraintAttr: 0,
+                    requiredAttr: 0,
+                }
+            }, { // insert before first data node
+                type: 'Repeat',
+                nodeId: 'question22',
+                attrs: {
+                    no_add_remove: false
+                }
+            }, {
+                type: 'FieldList',
+                nodeId: 'question23'
+            }, {
+                type: 'Image',
+                nodeId: 'question24'
+            }, {
+                type: 'Audio',
+                nodeId: 'question25'
+            }, {
+                type: 'Video',
+                nodeId: 'question26'
+            }, {
+                type: 'Geopoint',
+                nodeId: 'question27'
+            }, {
+                type: 'Secret',
+                nodeId: 'question28'
+            }, {
+                type: 'AndroidIntent',
+                nodeId: 'question7'
+            }, {
+                type: 'DataBindOnly',
+                nodeId: 'question32',
+                attrs: {
+                    calculateAttr: '1 + 2'
+                },
+                inputs: {
+                    calculateAttr: 1,
+                    constraintAttr: 0,
+                    requiredAttr: 0,
+                    relevantAttr: 1
+                }
+            }
         ];
 
     describe("Vellum", function () {
-        describe("load XML", function () {
+        describe("on load XML", function () {
             before(function (done) {
                 util.init({
                     core: {
@@ -73,31 +166,37 @@ require([
                 util.assertXmlEqual(util.call('createXML'), TEST_XML);
             });
 
-            _.each(questionTypes, function(q, index) {
-                var qType = q[0],
-                    nodeId = q[1],
-                    attrs = q[2] || {};
-                it("displays inputs for " + qType + "[" + nodeId + "]", function() {
-                    if (index > 0) {
-                        clickQuestion(nodeId);
-                    }
-                    assert.equal(call("getCurrentlySelectedMug").p.nodeID, nodeId);
 
-                    _.each(attrs, function (val, name) {
-                        util.assertInputCount(name, 1, nodeId);
+            _.each(questionTypes, function(q, index) {
+                var nodeId = q.nodeId;
+                describe("with " + q.type + "[" + nodeId + "]", function () {
+                    before(function (done) {
+                        if (index > 0) {
+                            clickQuestion(nodeId);
+                        }
+                        done();
                     });
 
-                    // visible_if_present
-                    if (qType === "DataBindOnly") {
-                        util.assertInputCount("calculateAttr", 1, nodeId);
-                    } else {
-                        // TODO test visible_if_present -> visible for non-DataBindOnly type(s)
-                        util.assertInputCount("calculateAttr", 0, nodeId);
-                    }
-                    // TODO test Repeat repeat_count and no_add_remove,
-                    // which are visible_if_present (should they be?)
+                    it("should be selected when clicked", function() {
+                        assert.equal(call("getCurrentlySelectedMug").p.nodeID, nodeId);
+                    });
 
-                    // TODO check notallowed properties?
+                    _.each(q.attrs || {}, function (val, name) {
+                        it("should show 1 input for " + name, function() {
+                            util.assertInputCount(name, 1, nodeId);
+                        });
+                    });
+
+                    _.each(q.inputs || {}, function (num, name) {
+                        if (q.attrs && q.attrs.hasOwnProperty(name)) {
+                            assert.equal(num, 1,
+                                "test configuration conflict for " + name);
+                        } else {
+                            it("should show " + num + " inputs for " + name, function() {
+                                util.assertInputCount(name, num, nodeId);
+                            });
+                        }
+                    });
                 });
             });
         });
@@ -125,7 +224,7 @@ require([
                     onReady: function () {
                         _.each(questionTypes, function (q, i) {
                             var obj = {prevId: (i > 0 ? questionTypes[i - 1][1] : null)};
-                            addQuestion.apply(obj, q);
+                            addQuestion.call(obj, q.type, q.nodeId, q.attrs);
                         });
 
                         function addAllForms() {
