@@ -42,7 +42,7 @@ define([
         it("handles an ignore node's reference node being renamed", function () {
             call('loadXML', UNRENAMED);
             call('getMugByPath', '/data/question9').p.nodeID = 'question9a';
-            assertXmlEqual(RENAMED, call('createXML'));
+            assertXmlEqual(util.xmlines(RENAMED), call('createXML'));
         });
 
         it("handles a node being renamed that's referenced in an ignore node's XML", function () {
@@ -244,13 +244,13 @@ define([
                         <text id="question9-label">\
                             <value>question9</value>\
                         </text>\
-                        <text id="question10-label">\
+                        <text id="question10-label" vellum:ignore="retain">\
                             <value>question10</value>\
                         </text>\
                         <text id="question11-label">\
                             <value>question11</value>\
                         </text>\
-                        <text id="question4-label">\
+                        <text id="question4-label" vellum:ignore="retain">\
                             <value>question4</value>\
                         </text>\
                     </translation>\
@@ -307,19 +307,19 @@ define([
                 <bind nodeset="/data/question4" vellum:ignore="retain" />\
                 <itext>\
                     <translation lang="en" default="">\
+                        <text id="question10-label" vellum:ignore="retain">\
+                            <value>question10</value>\
+                        </text>\
                         <text id="question1-label">\
                             <value>question1</value>\
                         </text>\
                         <text id="question9-label">\
                             <value>question9</value>\
                         </text>\
-                        <text id="question10-label">\
-                            <value>question10</value>\
-                        </text>\
                         <text id="question11-label">\
                             <value>question11</value>\
                         </text>\
-                        <text id="question4-label">\
+                        <text id="question4-label" vellum:ignore="retain">\
                             <value>question4</value>\
                         </text>\
                     </translation>\

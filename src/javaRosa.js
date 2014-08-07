@@ -1435,11 +1435,12 @@ define([
         },
         beforeSerialize: function () {
             this.__callOld();
-            this.data.javaRosa.Itext.deduplicateIds();
 
             // remove crufty itext that isn't linked to anything in the form
-            this.data.javaRosa.items = getAllNonEmptyItextItemsFromMugs(
+            this.data.javaRosa.Itext.items = getAllNonEmptyItextItemsFromMugs(
                 this.data.core.form);
+
+            this.data.javaRosa.Itext.deduplicateIds();
         },
         getMugTypes: function () {
             var types = this.__callOld(),
