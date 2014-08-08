@@ -133,24 +133,26 @@ define([
         },
         addQuestion: function (qType, nodeId, attrs) {
             attrs = attrs || {};
-            if (nodeId) {
-                attrs.nodeID = nodeId;
-            }
             if (this.prevId) {
                 clickQuestion(this.prevId);
             }
-            call('addQuestion', qType);
-            $("[name='property-nodeID']").val(nodeId).change();
-            $("[name='itext-en-label']").val(nodeId).change();
-            _.each(attrs, function (val, name) {
-                var input = getInput(name);
-                assertInputCount(input, 1, nodeId + " " + name);
-                if (input.attr('type') === 'checkbox') {
-                    input.prop('checked', val).change();
-                } else {
-                    input.val(val).change();
+            var mug = call('addQuestion', qType);
+            if (nodeId) {
+                assert(_.isUndefined(attrs.nodeID),
+                       "unexpected attribute for " + qType + "[" + nodeId + "]");
+                if (mug.p.labelItextID) {
+                    mug.p.labelItextID.setDefaultValue(nodeId);
                 }
+                // HACK set nodeID after label itext so tree node gets renamed
+                mug.p.nodeID = nodeId;
+            }
+            _.each(attrs, function (val, name) {
+                if (!_.isBoolean(val)) {
+                    val = String(val)
+                }
+                mug.p[name] = val;
             });
+            return mug;
         },
         clickQuestion: clickQuestion
     };

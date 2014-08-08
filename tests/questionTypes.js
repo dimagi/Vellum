@@ -223,7 +223,7 @@ require([
                     form: null,
                     onReady: function () {
                         _.each(questionTypes, function (q, i) {
-                            var obj = {prevId: (i > 0 ? questionTypes[i - 1][1] : null)};
+                            var obj = {prevId: (i > 0 ? questionTypes[i - 1].nodeId : null)};
                             addQuestion.call(obj, q.type, q.nodeId, q.attrs);
                         });
 

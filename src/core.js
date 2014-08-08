@@ -1217,12 +1217,16 @@ define([
     };
         
     fn.addQuestion = function (qType) {
-        var _this = this;
+        var _this = this,
+            mug;
         this.ensureCurrentMugIsSaved(function () {
             var foo = _this.getInsertTargetAndPosition(
                 _this.getCurrentlySelectedMug(), qType);
-            _this.data.core.form.createQuestion(foo[0], foo[1], qType);
+            mug = _this.data.core.form.createQuestion(foo[0], foo[1], qType);
         });
+        // the returned value will be `undefined` if ensureCurrentMugIsSaved
+        // had to defer for user feedback
+        return mug;
     };
 
     // Test ability to insert a new mug of type `qType` into refMug, then after
