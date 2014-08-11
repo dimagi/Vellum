@@ -927,7 +927,7 @@ define([
     }
     MugTypesManager.prototype = {
         make: function (typeName, form, copyFrom) {
-            var mugType = this.allTypes[typeName];
+            var mugType = this.allTypes[typeName],
                 mug = new Mug(mugType, form, this.baseSpec, copyFrom);
             mug.ufid = util.get_guid();
             return mug;
