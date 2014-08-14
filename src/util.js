@@ -1,9 +1,11 @@
 define([
     'json!langCodes',
+    'underscore',
     'jquery',
     'jquery.bootstrap-popout'
 ], function (
     langCodes,
+    _,
     $
 ) {
     RegExp.escape = function(s) {

@@ -2,12 +2,14 @@ define([
     './options',
     'chai',
     'equivalent-xml',
+    'underscore',
     'jquery',
     'jquery.vellum'
 ], function (
     options,
     chai,
     EquivalentXml,
+    _,
     $
 ) {
     var assert = chai.assert,

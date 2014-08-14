@@ -1,11 +1,13 @@
 require([
     'chai',
     'jquery',
+    'underscore',
     'tests/utils',
     'vellum/parser'
 ], function (
     chai,
     $,
+    _,
     util,
     parser
 ) {

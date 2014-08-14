@@ -1,10 +1,12 @@
 require([
     'chai',
     'jquery',
+    'underscore',
     'tests/utils'
 ], function (
     chai,
     $,
+    _,
     util
 ) {
     var call = util.call,
