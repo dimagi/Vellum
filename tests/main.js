@@ -79,6 +79,7 @@ require(['jquery', 'jquery.vellum'], function ($) {
                 'json': 'error'
             }
         });
+        $('head').append('<link rel="stylesheet" type="text/css" href="_build/style.css">');
     }
 
     require([

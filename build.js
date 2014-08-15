@@ -9,15 +9,16 @@
     skipDirOptimize: true,
     optimize: 'uglify2',
     preserveLicenseComments: false,
-    // Everything to do with CSS is handled by the require-css plugin
-    optimizeCss: 'none',
+    // Separate CSS because relative URLs (images) within the CSS do not load
+    // properly in a production environment.
+    // https://github.com/guybedford/require-css/issues/139
+    separateCSS: true,
+    //optimizeCss: 'none',
     inlineText: true,
     stubModules: [
-        'text', 
-        'tpl', 
-        'css', 
-        'json', 
-        'less'
+        'text',
+        'tpl',
+        'json'
     ],
     pragmasOnSave: {
         excludeRequireCss: true,
@@ -45,7 +46,9 @@
             create: true,
             name: 'exclude',
             include: [
+                'css/css',
                 'css/normalize',
+                'less/less',
                 'less/normalize'
             ]
         },
@@ -117,9 +120,12 @@
                 'save-button',
 
                 // shim plugin dependencies don't automatically get included
+                // NOTE less! and css! cannot be combined in the same module
+                // https://github.com/guybedford/require-less/issues/48
                 'css/css!../lib/codemirror/codemirror',
                 'css/css!../lib/jstree/default/style',
                 'css/css!../lib/fancybox/jquery.fancybox-1.3.4',
+                'css/css!yui-combo'
             ],
             exclude: [
                 'exclude',

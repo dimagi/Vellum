@@ -24,6 +24,7 @@ require.config({
             'css/css!../lib/codemirror/codemirror',
             'css/css!../lib/jstree/default/style',
             'css/css!../lib/fancybox/jquery.fancybox-1.3.4',
+            'css/css!yui-combo'
         ],
         'main-components': [
             'vellum/core',
@@ -38,6 +39,10 @@ require.config({
         ]
     }
 });
+
+// stubs (stubModules build option puts them in exclude.js, which is removed)
+define('css/css', {});
+define('less/less', {});
 
 define([
     'jquery',
