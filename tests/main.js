@@ -9,41 +9,44 @@ Function.prototype.bind = Function.prototype.bind || function (thisp) {
   };
 };
 
-var baseUrl = window.mochaPhantomJS ? './' : '../',
-    useBuilt = !window.mochaPhantomJS && 
-        window.location.href.indexOf('localhost') === -1,
-    search = window.location.search;
+(function () { // begin local scope
+
+var useBuilt, baseUrl, testBase, search = window.location.search;
 
 if (search.indexOf('built') !== -1) {
     useBuilt = true;
 } else if (search.indexOf('async') !== -1) {
     useBuilt = false;
+} else {
+    useBuilt = !window.mochaPhantomJS &&
+               window.location.href.indexOf('localhost') === -1;
 }
+if (useBuilt) {
+    baseUrl = '_build/src';
+    testBase = "../../";
+} else {
+    baseUrl = 'src';
+    testBase = "../";
+}
+console.log("loading Vellum from " + baseUrl);
+
+// comment these to use built versions
+define("jquery", [testBase + 'bower_components/jquery/jquery'], function () { return window.jQuery; });
+define("jquery-ui", ["jquery", testBase + 'lib/jquery-ui/jquery-ui-1.8.14.custom.min'], function () {});
+define("jquery.bootstrap", ["jquery", testBase + 'lib/bootstrap'], function () {});
 
 require.config({
     baseUrl: baseUrl,
-    packages: [
-        {
-            name: 'jquery.vellum',
-            location: useBuilt ? baseUrl + '_build/src' : 'src',
-            main: 'main'
-        },
-        {
-            name: 'vellum-matrix',
-            location: 'tests',
-            main: 'matrix'
-        }
-    ],
-    config: {
-        'jquery.vellum/require-config': {
-            env: useBuilt ? 'production' : 'development'
-        }
+    paths: {
+        "jquery.vellum": "main",
+        "tests": testBase + "tests"
     }
 });
 
-require([
-    'jquery.vellum/require-config',
-], function () {
+// load jquery.vellum before loading tests because some tests depend on
+// jquery.vellum components and would try to load them at the wrong path
+// (this is only important when using the built version)
+require(['jquery', 'jquery.vellum'], function ($) {
     // define our own paths for test dependencies that are also dependencies of
     // vellum that get excluded from the built version of vellum, to ensure that
     // the built version is tested correctly
@@ -51,9 +54,9 @@ require([
         // handle potential slow free heroku dynos
         waitSeconds: 60,
         paths: {
-            'chai': 'bower_components/chai/chai',
+            'chai': testBase + 'bower_components/chai/chai',
 
-            'equivalent-xml': 'bower_components/equivalent-xml-js/src/equivalent-xml'
+            'equivalent-xml': testBase + 'bower_components/equivalent-xml-js/src/equivalent-xml'
         },
         shim: {
             'equivalent-xml': {
@@ -79,9 +82,7 @@ require([
     }
 
     require([
-        'jquery',
         'tests/options',
-        'jquery.vellum',
 
         // register tests on global mocha instance as side-effect
         'tests/logic',
@@ -92,7 +93,6 @@ require([
         'tests/formdesigner.lock',
         'tests/itemset'
     ], function (
-        $,
         options
     ) {
         var lastSavedForm = null;
@@ -132,3 +132,5 @@ require([
 
     });
 });
+
+})(); // end local scope
