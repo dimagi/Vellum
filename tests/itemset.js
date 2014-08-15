@@ -1,3 +1,4 @@
+/*jshint multistr: true */
 require([
     'tests/options',
     'tests/utils',

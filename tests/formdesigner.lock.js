@@ -1,3 +1,4 @@
+/*jshint multistr: true */
 require([
     'chai',
     'tests/utils',
@@ -249,7 +250,7 @@ require([
         });
 
         return;
-        // todo
+        /* todo 
         describe("The move locking", function () {
             beforeEach(beforeFn);
 
@@ -308,6 +309,6 @@ require([
                     ]
                 });
             });
-        });
+        }); */
     });
 });

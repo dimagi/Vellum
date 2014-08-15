@@ -150,7 +150,7 @@ define([
             }
             _.each(attrs, function (val, name) {
                 if (!_.isBoolean(val)) {
-                    val = String(val)
+                    val = String(val);
                 }
                 mug.p[name] = val;
             });
