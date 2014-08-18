@@ -308,11 +308,11 @@ define([
                     r_noaddrem = util.createXPathBoolFromJS(r_noaddrem);
 
                     if (r_count) {
-                        xmlWriter.writeAttributeString("jr:count",r_count);
+                        xmlWriter.writeAttributeString("jr:count", String(r_count));
                     }
 
                     if (r_noaddrem) {
-                        xmlWriter.writeAttributeString("jr:noAddRemove", r_noaddrem);
+                        xmlWriter.writeAttributeString("jr:noAddRemove", String(r_noaddrem));
                     }
                 } else if (isODKMedia) {
                     var mediaType = mug.p.mediaType;

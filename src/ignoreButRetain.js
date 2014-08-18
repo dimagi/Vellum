@@ -73,6 +73,7 @@ define([
         var $node = $(node),
             nodeset = $node.attr('nodeset'),
             ref = $node.attr('ref'),
+            id = $node.attr('id'),
             tagName = $node.prop('tagName').toLowerCase();
 
         if (tagName === 'setvalue') {
@@ -82,6 +83,8 @@ define([
             return '[nodeset="' + nodeset + '"]';
         } else if (ref) {
             return '[ref="' + ref + '"]';
+        } else if (id) {
+            return '[id="' + id + '"]';
         } else {
             // escape ':' in namespaced selector for jQuery selector usage
             return node.nodeName.replace(":", "\\:");

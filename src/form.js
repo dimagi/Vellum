@@ -484,14 +484,18 @@ define([
         },
         handleMugPropertyChange: function (mug, e) {
             // Short-circuit invalid change and trigger warning in UI
-            if (e.previous && name === "nodeID") {
-                if (this.getMugChildByNodeID(mug.parentMug, e.val)) {
-                    this.vellum.setUnsavedDuplicateNodeId(e.val);
-                    return false;
-                } else {
-                    this.vellum.setUnsavedDuplicateNodeId(false);
-                }
-            }
+            // TODO revisit this and figure out the right thing to do here.
+            // Currently tests fail (example: Vellum adds all question types
+            // and attributes) when `name` (global variable reference and likely
+            // a bug) is changed to `e.property`.
+//            if (e.previous && name === "nodeID") {
+//                if (this.getMugChildByNodeID(mug.parentMug, e.val)) {
+//                    this.vellum.setUnsavedDuplicateNodeId(e.val);
+//                    return false;
+//                } else {
+//                    this.vellum.setUnsavedDuplicateNodeId(false);
+//                }
+//            }
 
             // update the logic properties that reference the mug
             if (e.property === 'nodeID') {
@@ -583,6 +587,7 @@ define([
                     level: 'form-warning'
                 });
             }
+            return mug;
         },
         insertQuestion: function (mug, refMug, position, isInternal) {
             refMug = refMug || this.dataTree.getRootNode().getValue();

@@ -85,6 +85,7 @@ require([
 
         // register tests on global mocha instance as side-effect
         'tests/logic',
+        'tests/parser',
         'tests/questionTypes',
         'tests/javaRosa',
         'tests/formdesigner.ignoreButRetain',

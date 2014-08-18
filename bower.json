@@ -34,7 +34,7 @@
 
         "langcodes": "dimagi/langcodes",
         "XMLWriter": "dimagi/XMLWriter",
-        "MediaUploader": "dimagi/MediaUploader",
+        "MediaUploader": "dimagi/MediaUploader#master",
         "xpath": "dimagi/js-xpath",
         "bootstrap-better-typeahead": "ptnplanet/Bootstrap-Better-Typeahead"
     },

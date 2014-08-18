@@ -160,8 +160,13 @@ define([
 
     fn.postInit = function () {
         var _this = this;
+        function onReady () {
+            // Allow onReady to access vellum instance (mostly for tests)
+            _this.opts().core.onReady.apply(_this);
+        }
+        parser.init(this);
         this.loadXFormOrError(this.opts().core.form, function () {
-            setTimeout(_this.opts().core.onReady, 0);
+            setTimeout(onReady, 0);
         });
     };
 
@@ -1069,7 +1074,7 @@ define([
     };
         
     fn.loadXML = function (formXML) {
-        var _this = this;
+        var form, _this = this;
         this.data.core.form = form = parser.parseXForm(formXML, {
             mugTypes: this.data.core.mugTypes,
             allowedDataNodeReferences: this.opts().core.allowedDataNodeReferences, 
@@ -1212,12 +1217,16 @@ define([
     };
         
     fn.addQuestion = function (qType) {
-        var _this = this;
+        var _this = this,
+            mug;
         this.ensureCurrentMugIsSaved(function () {
             var foo = _this.getInsertTargetAndPosition(
                 _this.getCurrentlySelectedMug(), qType);
-            _this.data.core.form.createQuestion(foo[0], foo[1], qType);
+            mug = _this.data.core.form.createQuestion(foo[0], foo[1], qType);
         });
+        // the returned value will be `undefined` if ensureCurrentMugIsSaved
+        // had to defer for user feedback
+        return mug;
     };
 
     // Test ability to insert a new mug of type `qType` into refMug, then after

@@ -7,14 +7,27 @@ define([
     util,
     $
 ) {
-    var DEFAULT_FORM_ID = 'data';
+    var DEFAULT_FORM_ID = 'data',
+        itemsetEnabled;
+
+    function init (instance) {
+        itemsetEnabled = instance.isPluginEnabled("itemset");
+    }
 
     $.fn.popAttr = function (name) {
-        var val = this.attr(name);
+        var removed = false,
+            val = this.attr(name);
         try {
             this.removeAttr(name);
+            removed = true;
         } catch (e) {
             // catch InvalidCharacterError due to \: in attribute name
+        }
+        if (removed && !_.isUndefined(val)) {
+            if (!this[0].poppedAttributes) {
+                this[0].poppedAttributes = {};
+            }
+            this[0].poppedAttributes[name] = val;
         }
         return val;
     };
@@ -353,10 +366,12 @@ define([
 
         //broadly categorize
         tagName = tagName.toLowerCase();
-        var hasItemset = $cEl.children('itemset').length;
+        var hasItemset;
         if(tagName === 'select') {
+            hasItemset = itemsetEnabled && $cEl.children('itemset').length;
             MugClass = hasItemset ? 'MSelectDynamic' : 'MSelect';
         }else if (tagName === 'select1') {
+            hasItemset = itemsetEnabled && $cEl.children('itemset').length;
             MugClass = hasItemset ? 'SelectDynamic' : 'Select';
         }else if (tagName === 'trigger') {
             MugClass = 'Trigger';
@@ -373,7 +388,7 @@ define([
             }
         }else if (tagName === 'item') {
             MugClass = 'Item';
-        }else if (tagName === 'itemset') {
+        }else if (tagName === 'itemset' && itemsetEnabled) {
             MugClass = 'Itemset';
         }else if (tagName === 'group') {
             MugClass = mugTypeFromGroup($cEl, appearance);
@@ -407,9 +422,9 @@ define([
         return mug;
     }
 
-    function parseBoolAttributeValue (attrString) {
+    function parseBoolAttributeValue (attrString, undefined) {
         if (!attrString) {
-            return null;
+            return undefined;
         }
         var str = attrString.toLowerCase().replace(/\s/g, '');
         if (str === 'true()') {
@@ -417,18 +432,24 @@ define([
         } else if (str === 'false()') {
             return false;
         } else {
-            return null;
+            return undefined;
         }
     }
                 
     function populateMug (form, nodePath, mug, cEl, $parentEl) {
+        var $cEl = $(cEl);
         if (mug.__className === "ReadOnly") {
-            mug.p.rawControlXML = cEl;
+            if ($cEl.length === 1 && $cEl[0].poppedAttributes) {
+                // restore attributes removed during parsing
+                _.each($cEl[0].poppedAttributes, function (val, key) {
+                    $cEl.attr(key, val);
+                });
+            }
+            mug.p.rawControlXML = $cEl;
             return;
         }
         
-        var $cEl = $(cEl),
-            tag = mug.p.tagName,
+        var tag = mug.p.tagName,
             labelEl, hintEl;
 
         if(tag === 'repeat'){
@@ -452,7 +473,7 @@ define([
             parseDefaultValue($cEl.children('value'),mug);
         }
 
-        if (tag === 'itemset') {
+        if (tag === 'itemset' && itemsetEnabled) {
             mug.p.itemsetData = new util.BoundPropertyMap(form, {
                 nodeset: nodePath,
                 labelRef: $cEl.children('label').attr('ref'),
@@ -601,16 +622,10 @@ define([
         }
 
         var attrs = {
-            relevantAttr: el.popAttr('relevant') || null,
-
-            // HACK null -> visible_if_present -> visible (present)
-            // However, changing the visible_if_present logic elsewhere to
-            // treat null the same as undefined causes other visible_if_present
-            // properties (repeat_count) to break (tests fail).
-            calculateAttr: el.popAttr('calculate') || undefined,
-
-            constraintAttr: el.popAttr('constraint') || null,
-            dataType: el.popAttr('type') || null,
+            relevantAttr: el.popAttr('relevant'),
+            calculateAttr: el.popAttr('calculate'),
+            constraintAttr: el.popAttr('constraint'),
+            dataType: el.popAttr('type'),
             requiredAttr: parseBoolAttributeValue(el.popAttr('required')),
             preload: lookForNamespaced(el, "preload"),
             preloadParams: lookForNamespaced(el, "preloadParams")
@@ -659,6 +674,7 @@ define([
     };
 
     return {
+        init: init,
         parseXForm: parseXForm,
         parseDataElement: parseDataElement,
         parseBindElement: parseBindElement,
