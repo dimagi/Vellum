@@ -272,7 +272,7 @@ define([
         /**
          * Walks through both internal trees (data and control) and grabs
          * all mugs that are not (1)Choices.  Returns
-         * a flat list of unique mugs.  This list is primarily fo the
+         * a flat list of unique mugs.  This list is primarily for the
          * autocomplete skip logic wizard.
          */
         getMugList: function () {
@@ -681,7 +681,6 @@ define([
                     count++; 
                 }
             }
-
             return count;
         },
 

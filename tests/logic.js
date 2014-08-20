@@ -1,13 +1,12 @@
+/*jshint multistr: true */
 require([
     'chai',
     'jquery',
-    'tests/utils',
-    'vellum/javaRosa'
+    'tests/utils'
 ], function (
     chai,
     $,
-    util,
-    jr
+    util
 ) {
     var assert = chai.assert,
         call = util.call;
@@ -29,7 +28,6 @@ require([
         });
     });
 
-    /*jshint multistr: true */
     var TEST_XML_1 = '' + 
     '<?xml version="1.0" encoding="UTF-8" ?>\
     <h:html xmlns:h="http://www.w3.org/1999/xhtml"\
