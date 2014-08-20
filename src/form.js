@@ -341,18 +341,12 @@ define([
             return this.dataTree.isTreeValid(validateMug) && 
                 this.controlTree.isTreeValid(validateMug);
         },
-        getMugChildByNodeID: function (mug, nodeID) {
+        getMugChildrenByNodeID: function (mug, nodeID) {
             var parentNode = (mug ? this.dataTree.getNodeFromMug(mug)
-                                  : this.dataTree.rootNode),
-                childMugs = parentNode.getChildrenMugs(),
-                matchingIdMugs = _.filter(childMugs, function (m) {
-                    return m.p.nodeID === nodeID;
-                });
-            if (matchingIdMugs.length) {
-                return matchingIdMugs[0];
-            } else {
-                return null;
-            }
+                                  : this.dataTree.rootNode);
+            return _.filter(parentNode.getChildrenMugs(), function (m) {
+                return m.p.nodeID === nodeID;
+            });
         },
         insertMug: function (refMug, newMug, position) {
             if (!newMug.options.isControlOnly) {
@@ -483,22 +477,22 @@ define([
             this._logicManager.updateAllReferences(mug);
         },
         handleMugPropertyChange: function (mug, e) {
-            // Short-circuit invalid change and trigger warning in UI
-            // TODO revisit this and figure out the right thing to do here.
-            // Currently tests fail (example: Vellum adds all question types
-            // and attributes) when `name` (global variable reference and likely
-            // a bug) is changed to `e.property`.
-//            if (e.previous && name === "nodeID") {
-//                if (this.getMugChildByNodeID(mug.parentMug, e.val)) {
-//                    this.vellum.setUnsavedDuplicateNodeId(e.val);
-//                    return false;
-//                } else {
-//                    this.vellum.setUnsavedDuplicateNodeId(false);
-//                }
-//            }
-
             // update the logic properties that reference the mug
             if (e.property === 'nodeID') {
+                // Short-circuit invalid change and trigger warning in UI
+                if (e.previous) { // optimization for initialization
+                    // getMugChildrenByNodeID returns the mug we are testing
+                    // as well as any other mugs that have the same nodeID
+                    // because MugProperties._set sets the property, calls the
+                    // change handler, then resets to previous value if the
+                    // change handler returns false.
+                    if (this.getMugChildrenByNodeID(mug.parentMug, e.val).length > 1) {
+                        this.vellum.setUnsavedDuplicateNodeId(e.val);
+                        return false;
+                    } else {
+                        this.vellum.setUnsavedDuplicateNodeId(false);
+                    }
+                }
                 var currentPath = this.getAbsolutePath(mug),
                     valid, parsed;
                 try {
