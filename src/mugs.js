@@ -74,13 +74,6 @@ define([
             var spec = this.__spec[attr],
                 prev = this.__data[attr];
 
-            // Should never happen.  Can probably remove once type-defining
-            // attributes are specified abstractly.
-            if (spec && spec.immutable && this.__data[attr]) {
-                throw new Error(
-                    "Tried to set immutable property with existing value.");
-            }
-
             if (!spec || val === prev ||
                 // only set attr if spec allows this attr, except if mug is a
                 // DataBindOnly (which all mugs are before the control block has
@@ -89,6 +82,13 @@ define([
                  this.__mug.__className !== 'DataBindOnly'))
             {
                 return;
+            }
+
+            // Should never happen.  Can probably remove once type-defining
+            // attributes are specified abstractly.
+            if (spec.immutable && !_.isUndefined(prev)) {
+                throw new Error(
+                    "Tried to set immutable property with existing value.");
             }
 
             this.__data[attr] = val;
