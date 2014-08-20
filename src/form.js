@@ -583,7 +583,9 @@ define([
             this.insertQuestion(mug, refMug, position, isInternal);
             if (mug.options.isODKOnly) {
                 this.updateError({
-                    message: 'This question type will ONLY work with Android phones!',
+                    message: 'Image capture works on Android devices and ' +
+                        'some feature phones; please test your specific ' +
+                        'model to ensure that this question type is supported',
                     level: 'form-warning'
                 });
             }
