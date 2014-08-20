@@ -219,7 +219,7 @@ formdesigner.ui = function () {
             if (newMug.isODKOnly) {
                 //it's an ODK media question
                 formdesigner.model.form.updateError(formdesigner.model.FormError({
-                    message: 'This question type will ONLY work with Android phones!',
+                    message: 'Image capture works on Android devices and some feature phones; please test your specific model to ensure that this question type is supported',
                     level: 'form-warning'
                 }), {updateUI: true});
             }
