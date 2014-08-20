@@ -40,6 +40,7 @@
      * NOTE bundles.js may need to be updated if modules are changed
      */
     modules: [
+        // begin buildmain.py delimiter
         // Build-only dependencies that should be excluded from all built
         // modules
         {
@@ -129,7 +130,7 @@
             ],
             exclude: [
                 'exclude',
-                'global-deps', 
+                'global-deps'
                 //'deferred-components'
             ]
         },
@@ -145,5 +146,6 @@
                 'local-deps'
             ]
         }
+        // end buildmain.py delimiter
     ]
 })

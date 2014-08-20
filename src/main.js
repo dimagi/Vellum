@@ -175,7 +175,7 @@ if (window.jQuery) {
 }
 
 define([
-    // NOTE bundles.js may need to be updated if this list is changed
+    // begin buildmain.py delimiter
     'vellum/core',
     'vellum/ignoreButRetain',
     'vellum/intentManager',
@@ -185,6 +185,7 @@ define([
     'vellum/uploader',
     'vellum/window',
     'vellum/polyfills'
+    // end buildmain.py delimiter
 ], function () {
     // adds $.vellum as a side-effect
 });

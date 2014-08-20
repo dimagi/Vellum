@@ -27,7 +27,7 @@ _rjs:
 	# for some reason relative image paths are wrong, so move it up one level
 	mv _build/src/global-deps.css _build/global-deps.css
 # TODO auto-generate this file from build.js
-	cp bundles.js _build/src/main.js
+	python buildmain.py > _build/src/main.js
 
 
 _tar:
