@@ -99,7 +99,7 @@ define([
         _plugins: {},
         _fn: {},
         _instance: function ($f, options) {
-            options.plugins = _.uniq(corePlugins.concat(options.plugins || []));
+            options.plugins = _.union(corePlugins, options.plugins || []);
             options = $.extend(true, {}, $.vellum.defaults, options);
 
             var instance = this;
