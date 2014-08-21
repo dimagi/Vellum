@@ -24,8 +24,8 @@ _rjs:
 	# TODO do we need a blank line between the files? doesn't seem like it after initial test
 	cat _build/src/local-deps.css _build/src/main-components.css > _build/style.css
 	rm _build/src/local-deps.css _build/src/main-components.css
-	# for some reason relative image paths are wrong, so move it up one level
-	mv _build/src/global-deps.css _build/global-deps.css
+	# for some reason relative image paths are wrong, so move stuff around
+	mv _build/src/global-deps.css _build/src/images _build/
 # TODO auto-generate this file from build.js
 	python buildmain.py > _build/src/main.js
 
