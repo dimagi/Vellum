@@ -73,9 +73,27 @@ require([
                 dup.p.labelItextID.setDefaultValue("q2");
 
                 util.saveAndReload(function () {
-                    // verify type change
                     var mug = call("getMugByPath", "/data/question");
                     assert.equal(mug.p.labelItextID.defaultValue(), "question");
+                    done();
+                });
+            }}});
+        });
+
+        it("itext changes do not bleed back from copy of copy", function (done) {
+            util.init({core: {onReady: function () {
+                var mug = util.addQuestion("Text", "question");
+                    dup = mug.form.duplicateMug(mug);
+                    cpy = mug.form.duplicateMug(dup);
+                cpy.p.labelItextID.setDefaultValue("copy");
+
+                util.saveAndReload(function () {
+                    var mug = call("getMugByPath", "/data/question"),
+                        dup = call("getMugByPath", "/data/copy-1-of-question"),
+                        cpy = call("getMugByPath", "/data/copy-2-of-question");
+                    assert.equal(mug.p.labelItextID.defaultValue(), "question");
+                    assert.equal(dup.p.labelItextID.defaultValue(), "question");
+                    assert.equal(cpy.p.labelItextID.defaultValue(), "copy");
                     done();
                 });
             }}});
