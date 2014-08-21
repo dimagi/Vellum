@@ -1137,7 +1137,7 @@ define([
             // The nodeID property for the current question successfully
             // changed, so it wasn't caught as a duplicate, so remove any
             // existing duplicate warning state.
-            if (e.e.property === 'nodeID') {
+            if (e.property === 'nodeID') {
                 _this.setUnsavedDuplicateNodeId(false);
             }
 

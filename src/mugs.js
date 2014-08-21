@@ -39,7 +39,7 @@ define([
         this.__data = {};
         this.__spec = options.spec;
         this.__mug = options.mug;
-        this.change = options.change || function () { return true; };
+        this.shouldChange = options.shouldChange || function () { return function () {}; };
     }
     MugProperties.setBaseSpec = function (baseSpec) {
         _.each(baseSpec, function (spec, name) {
@@ -91,15 +91,10 @@ define([
                     "Tried to set immutable property with existing value.");
             }
 
-            this.__data[attr] = val;
-          
-            var response = this.change(this.__mug, {
-                property: attr,
-                val: val,
-                previous: prev,
-            });
-            if (response === false) {
-                this.__data[attr] = prev;
+            var callback = this.shouldChange(this.__mug, attr, val, prev);
+            if (callback) {
+                this.__data[attr] = val;
+                callback();
             }
         },
         setAttrs: function (attrs) {
@@ -413,7 +408,7 @@ define([
             this.p = new MugProperties({
                 spec: this.spec,
                 mug: this,
-                change: _this.form.handleMugPropertyChange.bind(_this.form),
+                shouldChange: _this.form.shouldMugPropertyChange.bind(_this.form),
             });
             this.options.init(this, this.form);
             this.p.setAttrs(currentAttrs);
