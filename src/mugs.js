@@ -541,7 +541,7 @@ define([
 
             if (id !== itext.id) {
                 if (unlink) {
-                    itext = $.extend(true, {}, itext);
+                    itext = itext.clone();
                     this.form.vellum.data.javaRosa.Itext.addItem(itext);
                 }
 
