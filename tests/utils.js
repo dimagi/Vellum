@@ -28,7 +28,7 @@ define([
     }
 
     function getInput(property) {
-        return $("[name='property-" + property + "']");
+        return call("getCurrentMugInput", property);
     }
 
     function assertInputCount(nameOrInputs, num, name) {

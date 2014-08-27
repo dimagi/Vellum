@@ -39,7 +39,7 @@ define([
         this.__data = {};
         this.__spec = options.spec;
         this.__mug = options.mug;
-        this.change = options.change || function () { return true; };
+        this.shouldChange = options.shouldChange || function () { return function () {}; };
     }
     MugProperties.setBaseSpec = function (baseSpec) {
         _.each(baseSpec, function (spec, name) {
@@ -74,13 +74,6 @@ define([
             var spec = this.__spec[attr],
                 prev = this.__data[attr];
 
-            // Should never happen.  Can probably remove once type-defining
-            // attributes are specified abstractly.
-            if (spec && spec.immutable && this.__data[attr]) {
-                throw new Error(
-                    "Tried to set immutable property with existing value.");
-            }
-
             if (!spec || val === prev ||
                 // only set attr if spec allows this attr, except if mug is a
                 // DataBindOnly (which all mugs are before the control block has
@@ -91,15 +84,17 @@ define([
                 return;
             }
 
-            this.__data[attr] = val;
-          
-            var response = this.change(this.__mug, {
-                property: attr,
-                val: val,
-                previous: prev,
-            });
-            if (response === false) {
-                this.__data[attr] = prev;
+            // Should never happen.  Can probably remove once type-defining
+            // attributes are specified abstractly.
+            if (spec.immutable && !_.isUndefined(prev)) {
+                throw new Error(
+                    "Tried to set immutable property with existing value.");
+            }
+
+            var callback = this.shouldChange(this.__mug, attr, val, prev);
+            if (callback) {
+                this.__data[attr] = val;
+                callback();
             }
         },
         setAttrs: function (attrs) {
@@ -413,7 +408,7 @@ define([
             this.p = new MugProperties({
                 spec: this.spec,
                 mug: this,
-                change: _this.form.handleMugPropertyChange.bind(_this.form),
+                shouldChange: _this.form.shouldMugPropertyChange.bind(_this.form),
             });
             this.options.init(this, this.form);
             this.p.setAttrs(currentAttrs);

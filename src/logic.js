@@ -139,10 +139,6 @@ define([
                 }
             }        
         },
-        updateReferences: function (mug, property) {
-            this.clearReferences(mug, property);
-            this.addReferences(mug, property);
-        },
         updateAllReferences: function (mug, clear) {
             // avoid control-only nodes
             if (mug.p.nodeID) {

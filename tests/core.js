@@ -1,63 +1,50 @@
+/*jshint multistr: true */
 require([
     'chai',
     'jquery',
-    'underscore',
-    'tests/utils',
-    'vellum/parser'
+    'tests/utils'
 ], function (
     chai,
     $,
-    _,
-    util,
-    parser
+    util
 ) {
     var assert = chai.assert,
         call = util.call,
-        plugins = util.options.options.plugins || [],
-        pluginsWithItemset = _.union(plugins, ["itemset"]),
-        pluginsWithoutItemset = _(plugins).without("itemset");
+        pluginsWithoutItemset = _(util.options.options.plugins || []).without("itemset");
 
-    describe("The parser", function () {
-        it("can detect when the itemset plugin is enabled", function (done) {
+    describe("Vellum core", function () {
+        it("should not allow adding questions with matching paths", function (done) {
             util.init({
-                plugins: pluginsWithItemset,
                 core: {
                     onReady: function () {
-                        assert(this.isPluginEnabled("itemset"),
-                               "itemset plugin should be enabled");
+                        var mug = util.addQuestion("Text", "question1"),
+                            dup = util.addQuestion("Text", "question2");
+                        dup.p.nodeID = "question1";
+
+                        // TODO fix tight coupling of this functionality with UI
+                        // HACK prevent modal alert in UI
+                        this.data.core.isAlertVisible = true;
+
+                        assert(!this.ensureCurrentMugIsSaved(),
+                               "save should fail with duplicate question ID");
+
+                        this.data.core.isAlertVisible = false;
                         done();
                     }
                 }
             });
         });
 
-        it("can detect when the itemset plugin is disabled", function (done) {
+        it("should allow mug rename with itemset in form when the itemset plugin is disabled", function (done) {
             util.init({
                 plugins: pluginsWithoutItemset,
                 core: {
-                    onReady: function () {
-                        assert(!this.isPluginEnabled("itemset"),
-                               "itemset plugin should be disabled");
-                        done();
-                    }
-                }
-            });
-        });
-
-        it("should gracefully handle itemset when the itemset plugin is disabled", function (done) {
-            util.init({
-                plugins: pluginsWithoutItemset,
-                core: {
-                    form: TEST_XML_1, 
+                    form: TEST_XML_1,
                     onReady: function () {
                         var mug = call("getMugByPath", "/data/state");
-                        assert.equal(mug.__className, "Select");
-                        var xml = call("createXML"),
-                            doc = $($.parseXML(xml)),
-                            instance = '<instance id="states" src="jr://fixture/item-list:state"></instance>';
-                        assert.operator(xml.indexOf(instance), ">", -1);
-                        assert.equal(doc.find('itemset').attr('nodeset'),
-                                     "instance('states')/state_list/state");
+                            itemset = mug.form.getChildren(mug)[0];
+                        assert.equal(mug.form.getAbsolutePath(itemset, true), null);
+                        mug.p.nodeID = "stat"; // this change triggers the bug
                         done();
                     }
                 }
@@ -65,8 +52,7 @@ require([
         });
     });
 
-    /*jshint multistr: true */
-    var TEST_XML_1 = '' + 
+    var TEST_XML_1 = '' +
     '<?xml version="1.0" encoding="UTF-8" ?>\
     <h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:orx="http://openrosa.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa" xmlns:vellum="http://commcarehq.org/xforms/vellum">\
         <h:head>\

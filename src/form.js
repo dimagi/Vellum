@@ -272,7 +272,7 @@ define([
         /**
          * Walks through both internal trees (data and control) and grabs
          * all mugs that are not (1)Choices.  Returns
-         * a flat list of unique mugs.  This list is primarily fo the
+         * a flat list of unique mugs.  This list is primarily for the
          * autocomplete skip logic wizard.
          */
         getMugList: function () {
@@ -341,18 +341,12 @@ define([
             return this.dataTree.isTreeValid(validateMug) && 
                 this.controlTree.isTreeValid(validateMug);
         },
-        getMugChildByNodeID: function (mug, nodeID) {
+        getMugChildrenByNodeID: function (mug, nodeID) {
             var parentNode = (mug ? this.dataTree.getNodeFromMug(mug)
-                                  : this.dataTree.rootNode),
-                childMugs = parentNode.getChildrenMugs(),
-                matchingIdMugs = _.filter(childMugs, function (m) {
-                    return m.p.nodeID === nodeID;
-                });
-            if (matchingIdMugs.length) {
-                return matchingIdMugs[0];
-            } else {
-                return null;
-            }
+                                  : this.dataTree.rootNode);
+            return _.filter(parentNode.getChildrenMugs(), function (m) {
+                return m.p.nodeID === nodeID;
+            });
         },
         insertMug: function (refMug, newMug, position) {
             if (!newMug.options.isControlOnly) {
@@ -482,22 +476,49 @@ define([
         updateAllLogicReferences: function (mug) {
             this._logicManager.updateAllReferences(mug);
         },
-        handleMugPropertyChange: function (mug, e) {
-            // Short-circuit invalid change and trigger warning in UI
-            // TODO revisit this and figure out the right thing to do here.
-            // Currently tests fail (example: Vellum adds all question types
-            // and attributes) when `name` (global variable reference and likely
-            // a bug) is changed to `e.property`.
-//            if (e.previous && name === "nodeID") {
-//                if (this.getMugChildByNodeID(mug.parentMug, e.val)) {
-//                    this.vellum.setUnsavedDuplicateNodeId(e.val);
-//                    return false;
-//                } else {
-//                    this.vellum.setUnsavedDuplicateNodeId(false);
-//                }
-//            }
-
+        /**
+         * Determine if a mug property should change
+         *
+         * This method must be called before the property value has changed.
+         *
+         * Returns a function that should be called after the property has
+         * changed; null if the property should not change.
+         */
+        shouldMugPropertyChange: function (mug, property, value, previous) {
             // update the logic properties that reference the mug
+            if (property === 'nodeID' && previous &&
+                this.getMugChildrenByNodeID(mug.parentMug, value).length > 0)
+            {
+                // Short-circuit invalid change and trigger warning in UI
+                this.vellum.setUnsavedDuplicateNodeId(value);
+                return null;
+            }
+
+            return function () {
+                var event = {
+                    type: 'mug-property-change',
+                    mug: mug,
+                    property: property,
+                    val: value,
+                    previous: previous
+                };
+                this.handleMugPropertyChange(mug, event);
+                this.fire(event);
+
+                // legacy, enables auto itext ID behavior, don't add
+                // additional dependencies on this code.  Some sort of
+                // data binding would be better.
+                mug.fire({
+                    type: 'property-changed',
+                    property: property,
+                    val: value,
+                    previous: previous
+                });
+
+                this.fireChange(mug);
+            }.bind(this);
+        },
+        handleMugPropertyChange: function (mug, e) {
             if (e.property === 'nodeID') {
                 var currentPath = this.getAbsolutePath(mug),
                     valid, parsed;
@@ -512,64 +533,43 @@ define([
                     var oldPath = parsed.toXPath();
                     this.vellum.handleMugRename(this, mug, e.val, e.previous, currentPath, oldPath);
                 }
+
+                // update the itext ids of child items if they weren't manually set
+                if (mug.__className === "Select" || mug.__className === "MSelect") {
+                    var node = this.controlTree.getNodeFromMug(mug),
+                        // node can be null when the mug hasn't been inserted into
+                        // the tree yet
+                        children = node ? node.getChildrenMugs() : [];
+
+                    for (var i = 0; i < children.length; i++) {
+                        // Autogenerate Itext ID, then replace current nodeID with
+                        // previous nodeID to test whether existing Itext ID is
+                        // autogenerated.
+                        var child = children[i];
+                        if (child.__className === "ReadOnly") continue;
+                        var newItextID = child.getDefaultLabelItextId(),
+                            itextRoot = child.getDefaultItextRoot(),
+
+                            oldAutoID = newItextID.replace(
+                                itextRoot,
+                                itextRoot.replace(
+                                    // depends on node IDs not having '-', and '-'
+                                    // being the separator between the question ID
+                                    // and item ID parts of the ID
+                                    new RegExp("(^|/)" + e.val + "(/|-)"),
+                                    "$1" + e.previous + "$2")),
+                            isAuto = (oldAutoID === child.p.labelItextID.id);
+
+                        if (isAuto) {
+                            child.setItextID(child.getDefaultLabelItextId());
+                        }
+                    }
+                }
             } else {
                 if (mug.p.getDefinition(e.property).widget === widgets.xPath) {
                     this.updateAllLogicReferences(mug);
                 }
             }
-
-            // update the itext ids of child items if they weren't manually set
-            if (e.property === "nodeID" && 
-                (mug.__className === "Select" || mug.__className === "MSelect")) 
-            {
-                var node = this.controlTree.getNodeFromMug(mug),
-                    // node can be null when the mug hasn't been inserted into
-                    // the tree yet 
-                    children = node ? node.getChildrenMugs() : [];
-
-                for (var i = 0; i < children.length; i++) {
-                    // Autogenerate Itext ID, then replace current nodeID with
-                    // previous nodeID to test whether existing Itext ID is
-                    // autogenerated.
-                    var child = children[i],
-                        newItextID = child.getDefaultLabelItextId(),
-                        itextRoot = child.getDefaultItextRoot(),
-
-                        oldAutoID = newItextID.replace(
-                            itextRoot,
-                            itextRoot.replace(
-                                // depends on node IDs not having '-', and '-'
-                                // being the separator between the question ID
-                                // and item ID parts of the ID
-                                new RegExp("(^|/)" + e.val + "(/|-)"),
-                                "$1" + e.previous + "$2")),
-                        isAuto = (oldAutoID === child.p.labelItextID.id);
-
-                    if (isAuto) {
-                        child.setItextID(child.getDefaultLabelItextId());
-                    }
-                }
-            }
-
-            this.fire({
-                type: 'mug-property-change',
-                mug: mug,
-                e: e
-            });
-           
-            // legacy, enables auto itext ID behavior, don't add
-            // additional dependencies on this code.  Some sort of
-            // data binding would be better. 
-            mug.fire({
-                type: 'property-changed',
-                property: e.property,
-                val: e.val,
-                previous: e.previous,
-            });
-
-            this.fireChange(mug);
-
-            return true;
         },
         createQuestion: function (refMug, position, newMugType, isInternal) {
             var mug = this.mugTypes.make(newMugType, this);
@@ -583,7 +583,9 @@ define([
             this.insertQuestion(mug, refMug, position, isInternal);
             if (mug.options.isODKOnly) {
                 this.updateError({
-                    message: 'This question type will ONLY work with Android phones!',
+                    message: 'Image capture works on Android devices and ' +
+                        'some feature phones; please test your specific ' +
+                        'model to ensure that this question type is supported',
                     level: 'form-warning'
                 });
             }
@@ -681,7 +683,6 @@ define([
                     count++; 
                 }
             }
-
             return count;
         },
 

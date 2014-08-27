@@ -20,11 +20,13 @@ require([
     // see note about controlling time in formdesigner.lock.js
     var assert = chai.assert,
         call = util.call,
-        clickQuestion = util.clickQuestion;
+        clickQuestion = util.clickQuestion,
+        plugins = _.union(util.options.options.plugins || [], ["itemset"]);
 
     describe("The Dynamic Itemset functionality", function () {
         function beforeFn(done) {
             util.init({
+                plugins: plugins,
                 javaRosa: {langs: ['en']},
                 core: {onReady: done}
             });

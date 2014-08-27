@@ -86,6 +86,7 @@ require(['jquery', 'jquery.vellum'], function ($) {
         'tests/options',
 
         // register tests on global mocha instance as side-effect
+        'tests/core',
         'tests/logic',
         'tests/parser',
         'tests/questionTypes',
