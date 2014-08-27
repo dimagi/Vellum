@@ -1,11 +1,13 @@
 define([
     'vellum/form',
     'vellum/util',
-    'jquery'
+    'jquery',
+    'underscore'
 ], function (
     form_,
     util,
-    $
+    $,
+    _
 ) {
     var DEFAULT_FORM_ID = 'data',
         itemsetEnabled;

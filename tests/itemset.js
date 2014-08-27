@@ -1,8 +1,10 @@
+/*jshint multistr: true */
 require([
     'tests/options',
     'tests/utils',
     'chai',
     'jquery',
+    'underscore',
     'vellum/itemset',
     'vellum/form'
 ], function (
@@ -10,6 +12,7 @@ require([
     util,
     chai,
     $,
+    _,
     itemset,
     form
 ) {

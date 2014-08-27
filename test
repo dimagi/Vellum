@@ -20,4 +20,4 @@ test ${PIPESTATUS[0]} -eq 0 # stop on mocha-phantomjs non-zero exit status
 # NOTE there may be edge cases where grep exits with non-zero causing this
 # script to exit prematurely
 
-./node_modules/.bin/jshint src/*.js
+./node_modules/.bin/jshint src/*.js tests/*.js

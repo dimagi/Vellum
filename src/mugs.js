@@ -7,7 +7,7 @@ define([
     jquery,
     widgets,
     util,
-    underscore,
+    _,
     undefined
 ) {
     function validateRule(ruleKey, ruleValue, testingObj, mug) {
