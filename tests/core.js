@@ -41,7 +41,7 @@ require([
                 core: {
                     form: TEST_XML_1,
                     onReady: function () {
-                        var mug = call("getMugByPath", "/data/state");
+                        var mug = call("getMugByPath", "/data/state"),
                             itemset = mug.form.getChildren(mug)[0];
                         assert.equal(mug.form.getAbsolutePath(itemset, true), null);
                         mug.p.nodeID = "stat"; // this change triggers the bug
@@ -49,6 +49,18 @@ require([
                     }
                 }
             });
+        });
+
+        it("should update child references on group rename", function (done) {
+            util.init({core: { form: TEST_XML_2, onReady: function () {
+                var group = call("getMugByPath", "/data/group"),
+                    q1 = call("getMugByPath", "/data/group/question1"),
+                    q2 = call("getMugByPath", "/data/question2");
+                group.p.nodeID = "g8";
+                assert.equal(q1.form.getAbsolutePath(q1), "/data/g8/question1");
+                assert.equal(q2.p.relevantAttr, "/data/g8/question1 = 'valley girl'");
+                done();
+            }}});
         });
     });
 
@@ -84,6 +96,51 @@ require([
                   <value ref="id"></value>\
                 </itemset>\
             </select1>\
+        </h:body>\
+    </h:html>';
+
+    var TEST_XML_2 = '' +
+    '<?xml version="1.0" encoding="UTF-8" ?>\
+    <h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:orx="http://openrosa.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa" xmlns:vellum="http://commcarehq.org/xforms/vellum">\
+        <h:head>\
+            <h:title>Untitled Form</h:title>\
+            <model>\
+                <instance>\
+                    <data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/35276137-89A8-4DB1-8605-17E5B92D058C" uiVersion="1" version="1" name="Untitled Form">\
+                        <group>\
+                            <question1 />\
+                        </group>\
+                        <question2 />\
+                    </data>\
+                </instance>\
+                <bind nodeset="/data/group" />\
+                <bind nodeset="/data/group/question1" type="xsd:string" />\
+                <bind nodeset="/data/question2" type="xsd:string" relevant="/data/group/question1 = \'valley girl\'" />\
+                <itext>\
+                    <translation lang="en" default="">\
+                        <text id="group-label">\
+                            <value>group</value>\
+                        </text>\
+                        <text id="group/question1-label">\
+                            <value>question1</value>\
+                        </text>\
+                        <text id="question2-label">\
+                            <value>question2</value>\
+                        </text>\
+                    </translation>\
+                </itext>\
+            </model>\
+        </h:head>\
+        <h:body>\
+            <group ref="/data/group">\
+                <label ref="jr:itext(\'group-label\')" />\
+                <input ref="/data/group/question1">\
+                    <label ref="jr:itext(\'group/question1-label\')" />\
+                </input>\
+            </group>\
+            <input ref="/data/question2">\
+                <label ref="jr:itext(\'question2-label\')" />\
+            </input>\
         </h:body>\
     </h:html>';
 });

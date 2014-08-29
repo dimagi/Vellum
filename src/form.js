@@ -377,10 +377,12 @@ define([
             
             var updates = {};
             for (var i = 0; i < mugs.length; i++) {
-                updates[mugs[i].ufid] = [
-                    preMovePaths[i], 
-                    this.dataTree.getAbsolutePath(mugs[i])
-                ];
+                if (preMovePaths[i]) {
+                    updates[mugs[i].ufid] = [
+                        preMovePaths[i],
+                        this.dataTree.getAbsolutePath(mugs[i])
+                    ];
+                }
             }
 
             this._logicManager.updatePaths(updates);
@@ -399,6 +401,32 @@ define([
         },
         handleMugRename: function (mug, currentId, oldId, currentPath, oldPath) {
             this._logicManager.updatePath(mug.ufid, oldPath, currentPath);
+            this.mugWasRenamed(mug, oldId);
+        },
+        /**
+         * Update references to mug and its children after it is renamed.
+         */
+        mugWasRenamed: function(mug, oldName) {
+            function preMovePath(postPath) {
+                if (postPath === mugPath) {
+                    return prevMugPath;
+                }
+                return postPath.replace(postRegExp, prevMugPath + "/");
+            }
+            var tree = this.dataTree,
+                newName = mug.p.nodeID,
+                mugPath = tree.getAbsolutePath(mug),
+                mugs = this.getDescendants(mug).concat([mug]),
+                postMovePaths = _(mugs).map(function(mug) { return tree.getAbsolutePath(mug); }),
+                prevMugPath = mugPath.replace(new RegExp("/" + RegExp.escape(newName) + "$"), "/" + oldName),
+                postRegExp = new RegExp("^" + RegExp.escape(mugPath) + "/"),
+                updates = {};
+            for (var i = 0; i < mugs.length; i++) {
+                if (postMovePaths[i]) {
+                    updates[mugs[i].ufid] = [preMovePath(postMovePaths[i]), postMovePaths[i]];
+                }
+            }
+            this._logicManager.updatePaths(updates);
         },
         changeMugType: function (mug, questionType) {
             this.mugTypes.changeType(mug, questionType);
@@ -521,10 +549,13 @@ define([
         handleMugPropertyChange: function (mug, e) {
             if (e.property === 'nodeID') {
                 var currentPath = this.getAbsolutePath(mug),
-                    valid, parsed;
+                    valid = true,
+                    parsed;
                 try {
-                    valid = true;
                     parsed = xpath.parse(currentPath);
+                    if (_.isUndefined(parsed.steps)) {
+                        valid = false;
+                    }
                 } catch (err) {
                     valid = false;
                 }
