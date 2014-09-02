@@ -1110,7 +1110,7 @@ define([
 
     var parseXLSItext = function (str, Itext) {
         var rows = str.split('\n'),
-            i, j, k, cells, lang,iID, form, val;
+            i, j, k, cells, lang, iID, val;
 
         // TODO: should this be configurable?
         var exportCols = ["default", "audio", "image" , "video"];
@@ -1180,7 +1180,7 @@ define([
         var languages = Itext.getLanguages();
 
         var allItems = Itext.getNonEmptyItems();
-        var language, item, i, j;
+        var item, i, j;
         if (languages.length > 0) {
             ret.push(makeHeadings(languages, exportCols));
             for(i = 0; i < allItems.length; i++) {
@@ -1191,8 +1191,6 @@ define([
         return ret.join("\n");
     };
 
-    var xmls = new XMLSerializer();
-            
     function validateItextItem(itextItem, name) {
         if (itextItem) {
             var val = itextItem.defaultValue();
@@ -1223,12 +1221,9 @@ define([
         },
         _makeLanguageSelectorDropdown: function () {
             var _this = this,
-                addLangButton,
-                removeLangButton,
                 langList,
                 langs = this.data.javaRosa.Itext.getLanguages(),
-                str,
-                Itext,
+                fullLangs,
                 $langSelector;
 
             if (langs.length < 2) {
@@ -1305,7 +1300,7 @@ define([
             this.data.javaRosa.Itext = Itext = new ItextModel();
 
             function eachLang() {
-                var el = $(this), defaultExternalLang;
+                var el = $(this);
                 var lang = el.attr('lang');
                 
                 function eachText() {
@@ -1583,7 +1578,7 @@ define([
                     }));
                 },
                 validationFunc: function (mug) {
-                    var hintItext, itextVal;
+                    var hintItext;
                     hintItext = mug.p.hintItextID;
                     if (hintItext && hintItext.id) {
                         if (!util.isValidAttributeValue(hintItext.id)) {
@@ -1681,8 +1676,7 @@ define([
             ]);
         },
         showItextDialog: function (done) {
-            var form = this.data.core.form,
-                $modal, $updateForm, $textarea,
+            var $modal, $updateForm, $textarea,
                 Itext = this.data.javaRosa.Itext;
 
             $modal = this.generateNewModal("Edit Bulk Translations", [

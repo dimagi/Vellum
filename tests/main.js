@@ -1,3 +1,4 @@
+/* global console, mocha, mochaPhantomJS */
 mocha.setup('bdd');
 mocha.reporter('html');
 

@@ -11,8 +11,7 @@ require([
     jr
 ) {
     var assert = chai.assert,
-        call = util.call,
-        clickQuestion = util.clickQuestion;
+        call = util.call;
 
     describe("The javaRosa plugin with multiple languages", function () {
         it("should not show itext errors when there is text in any language", function (done) {
@@ -87,7 +86,7 @@ require([
 
         it("itext changes do not bleed back after copy", function (done) {
             util.init({core: {onReady: function () {
-                var mug = util.addQuestion("Text", "question");
+                var mug = util.addQuestion("Text", "question"),
                     dup = mug.form.duplicateMug(mug);
                 dup.p.labelItextID.setDefaultValue("q2");
 
@@ -101,8 +100,8 @@ require([
 
         it("itext changes do not bleed back from copy of copy", function (done) {
             util.init({core: {onReady: function () {
-                var mug = util.addQuestion("Text", "question");
-                    dup = mug.form.duplicateMug(mug);
+                var mug = util.addQuestion("Text", "question"),
+                    dup = mug.form.duplicateMug(mug),
                     cpy = mug.form.duplicateMug(dup);
                 cpy.p.labelItextID.setDefaultValue("copy");
 

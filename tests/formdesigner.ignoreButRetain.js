@@ -8,8 +8,7 @@ define([
     chai,
     $
 ) {
-    var assert = chai.assert,
-        assertXmlEqual = util.assertXmlEqual,
+    var assertXmlEqual = util.assertXmlEqual,
         call = util.call;
 
     describe("The Ignore-But-Retain plugin", function() {
@@ -19,8 +18,6 @@ define([
                 core: {onReady: done}
             });
         });
-
-        var xmls = new XMLSerializer();
 
         var testXmlPair = function (rawXml, processedXml) {
             call('loadXML', rawXml);

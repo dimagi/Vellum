@@ -1,5 +1,6 @@
 define([
     'jquery',
+    'vellum/debugutil',
     'xpath',
     'xpathmodels',
     'tpl!vellum/templates/xpath_validation_errors',
@@ -8,6 +9,7 @@ define([
     'less!vellum/less-style/xpath-editor'
 ], function (
     $,
+    debug,
     xpath,
     xpathmodels,
     xpath_validation_errors,
@@ -56,8 +58,6 @@ define([
     addOp(FunctionHandler, "selected", "has selected value");
 
     function showXPathEditor($div, options) {
-        var that = {};
-
         var editorContent = $div;
 
         var getExpressionInput = function () {
@@ -126,7 +126,7 @@ define([
             // expressions.
             // returns the expression if it succeeds, otherwise false.
             if (parsedExpression && options.DEBUG_MODE) {
-                console.log("trying to add", parsedExpression.toString());
+                debug.log("trying to add", parsedExpression.toString());
             }
 
             var isJoiningOp = function (subElement) {
@@ -184,7 +184,7 @@ define([
                 if (expOp) {
                     // populate
                     if (options.DEBUG_MODE) {
-                        console.log("populating", expOp.toString());
+                        debug.log("populating", expOp.toString());
                     }
                     if (simpleExpressions.hasOwnProperty(expOp.id)) {
                         // comparison and equality operators DO NOT have an "id"
@@ -206,7 +206,7 @@ define([
             var failAndClear = function () {
                 getExpressionPane().empty();
                 if (options.DEBUG_MODE) {
-                    console.log("fail", parsedExpression);
+                    debug.log("fail", parsedExpression);
                 }
                 return false;
             };
@@ -257,7 +257,7 @@ define([
 
         var setUIForExpression = function (xpathstring) {
             if (options.DEBUG_MODE) {
-                console.log("setting ui for", xpathstring);
+                debug.log("setting ui for", xpathstring);
             }
             var results = validate(xpathstring);
             if (results[0]) {
@@ -336,8 +336,8 @@ define([
 
             $xpathUI.find('.fd-xpath-show-advanced-button').click(function () {
                 if (window._gaq) {
-                    _gaq.push(['_trackEvent', 'Form Builder', 
-                               'Edit Expression', 'Show Advanced Mode']);
+                    window._gaq.push(['_trackEvent', 'Form Builder', 
+                                      'Edit Expression', 'Show Advanced Mode']);
                 }
 
                 showAdvancedMode(getExpressionFromSimpleMode());
@@ -368,9 +368,12 @@ define([
                     hasInstance = uiExpression.match('instance\\(');
                 if (results[0] || hasInstance) {
                     if (hasInstance) {
-                        alert("This expression is too complex for us to verify; specifically, it makes use of the " +
-                            "'instance' construct. Please be aware that if you use this construct you're " +
-                            "on your own in verifying that your expression is correct.");
+                        window.alert(
+                            "This expression is too complex for us to verify; " +
+                            "specifically, it makes use of the 'instance' " +
+                            "construct. Please be aware that if you use this " +
+                            "construct you're on your own in verifying that " +
+                            "your expression is correct.");
                     }
                     done(uiExpression);
                 } else {

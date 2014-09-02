@@ -43,8 +43,6 @@ define([
 
     // initialize/reset active vellum instance
     function init(opts) {
-        function onSave(data) {
-        }
         opts = opts || {};
         var vellum_options = $.extend(true, {}, options.options, opts);
         // $.extend merges arrays :(

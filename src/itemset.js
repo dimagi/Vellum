@@ -519,13 +519,13 @@ define([
         return str.substring(1, str.length - 1);
     }
 
-    function getAvailableProperties(instanceDefs, instanceId, subsetId) {
-        var instanceDef = instanceDefs[instanceId] || {},
-            instanceProps = instanceDef.properties || {},
-            subsetDef = instanceDef.subset || {},
-            subsetProps = subsetDef.properties || {};
-        return $.extend({}, instanceProps, subsetProps);
-    }
+//    function getAvailableProperties(instanceDefs, instanceId, subsetId) {
+//        var instanceDef = instanceDefs[instanceId] || {},
+//            instanceProps = instanceDef.properties || {},
+//            subsetDef = instanceDef.subset || {},
+//            subsetProps = subsetDef.properties || {};
+//        return $.extend({}, instanceProps, subsetProps);
+//    }
 
     // for testing
     return {
