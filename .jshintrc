@@ -12,6 +12,8 @@
     "laxbreak": false,
     "loopfunc": true,
     "noarg": true,
-
-    "nonew": true
+    "nonew": true /* ,
+    "undef": true,
+    "unused": true,
+    "predef": ["define"] */
 }
