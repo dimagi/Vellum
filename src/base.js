@@ -47,19 +47,18 @@ define([
         fn.old = this[fnName];
         this[fnName] = function () {
             var func = fn,
-                args = Array.prototype.slice.call(arguments);
+                args = Array.prototype.slice.call(arguments),
+                old = this.__callOld;
 
-            // call function with a __callOld() method added to
-            // `this` that calls the next copy of this method in the
-            // plugin stack
-            return func.apply(
-                $.extend({}, this, {
-                    __callOld: function () {
-                        return func.old.apply(this, (arguments.length ?
-                            Array.prototype.slice.call(arguments) : args));
-                    }
-                }), 
-                args);
+            this.__callOld = function () {
+                return func.old.apply(this, (arguments.length ?
+                    Array.prototype.slice.call(arguments) : args));
+            };
+            try {
+                return func.apply(this, args);
+            } finally {
+                this.__callOld = old;
+            }
         };
         this[fnName].old = fn.old;
         this[fnName].plugin = pluginName;

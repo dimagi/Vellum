@@ -1001,7 +1001,10 @@ define([
                 _this.jstree("delete_node", el);
             });
             try {
+                // a place for plugins to put parse warnings
+                _this.data.core.parseWarnings = [];
                 _this.loadXML(formString);
+                delete _this.data.core.parseWarnings;
 
                 if (formString) {
                     _this._resetMessages(_this.data.core.form.errors);
@@ -1089,7 +1092,7 @@ define([
             mugTypes: this.data.core.mugTypes,
             allowedDataNodeReferences: this.opts().core.allowedDataNodeReferences, 
             externalInstances: this.opts().core.externalInstances
-        }, this);
+        }, this, _this.data.core.parseWarnings);
         form.formName = this.opts().core.formName || form.formName;
 
         form.on('question-type-change', function (e) {

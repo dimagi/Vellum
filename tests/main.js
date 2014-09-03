@@ -85,6 +85,10 @@ require(['jquery', 'jquery.vellum'], function ($) {
     require([
         'tests/options',
 
+        // tests for profiling load times
+        // (disabled by default because they take a long time)
+        //'tests/profiling',
+
         // register tests on global mocha instance as side-effect
         'tests/core',
         'tests/logic',

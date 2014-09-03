@@ -44,12 +44,12 @@ define([
         return attrMap;
     }
 
-    function parseXForm(xmlString, formOpts, vellum) {
+    function parseXForm(xmlString, formOpts, vellum, warnings) {
         var Form = form_.Form,
             InstanceMetadata = form_.InstanceMetadata,
             form = new Form(formOpts, vellum, formOpts.mugTypes);
         form.parseErrors = [];
-        form.parseWarnings = [];
+        form.parseWarnings = warnings;
 
         if (!xmlString) {
             return form;
