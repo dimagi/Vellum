@@ -630,20 +630,56 @@ define([
         }
     };
   
-    function warnOnCircularReference(property, form, mug, path) {
+    function warnOnCircularReference(property, form, mug, path, refName) {
         if (path === "." && (
             property === "relevantAttr" ||
-            property === "calculateAttr"
+            property === "calculateAttr" ||
+            property === "label"
         )) {
             var fieldName = mug.p.getDefinition(property).lstring;
             form.updateError({
                 level: "form-warning",
                 message: "The " + fieldName + " for a question " + 
                     "is not allowed to reference the question itself. " + 
-                    "Please remove the period from the " + fieldName + 
+                    "Please remove the " + refName + " from the " + fieldName +
                     " or your form will have errors."
             }, {updateUI: true});
         }
+    }
+
+    function getCaretPosition (ctrl) {
+        var pos = 0;
+        if (ctrl.createTextRange) {
+            ctrl.focus ();
+            var sel = document.selection.createRange ();
+            sel.moveStart ('character', -ctrl.value.length);
+            pos = sel.text.length;
+        } else if (typeof ctrl.selectionStart !== 'undefined') {
+            pos = ctrl.selectionStart;
+        }
+        return pos;
+    }
+
+    function setCaretPosition(ctrl, pos){
+        if (ctrl.setSelectionRange) {
+            ctrl.focus();
+            ctrl.setSelectionRange(pos,pos);
+        } else if (ctrl.createTextRange) {
+            var range = ctrl.createTextRange();
+            range.collapse(true);
+            range.moveEnd('character', pos);
+            range.moveStart('character', pos);
+            range.select();
+        }
+    }
+
+    function insertTextAtCursor(ctrl, text) {
+        var pos = getCaretPosition(ctrl);
+        var front = (ctrl.value).substring(0, pos);
+        var back = (ctrl.value).substring(pos, ctrl.value.length);
+        ctrl.value = front + text + back;
+        pos = pos + text.length;
+        setCaretPosition(ctrl, pos);
     }
 
     var validRootChildren,
@@ -718,21 +754,35 @@ define([
                         mug = _this.data.core.form.getMugByUFID(sourceUid),
                         ops = target.closest(".xpath-expression-row").find(".op-select");
 
+                    var inItext = target && target.attr('name').lastIndexOf('itext', 0) === 0;
                     if (target) {
                         var path = _this.mugToXPathReference(mug);
-                        // the .change fires the validation controls
-                        target.val(target.val() + path).change();
-
-                        if (_this.data.core.currentlyEditedProperty) {
+                        if (inItext) {
+                            target[0].addEventListener("click", getCaretPositionFromCursor, false);
+                            var output = '<output value="' + path + '" />';
+                            insertTextAtCursor(target[0], output);
                             warnOnCircularReference(
-                                _this.data.core.currentlyEditedProperty,
+                                'label',
                                 _this.data.core.form,
                                 mug,
-                                path);
+                                path,
+                                "output value");
+                        } else {
+                            // the .change fires the validation controls
+                            target.val(target.val() + path).change();
+
+                            if (_this.data.core.currentlyEditedProperty) {
+                                warnOnCircularReference(
+                                    _this.data.core.currentlyEditedProperty,
+                                    _this.data.core.form,
+                                    mug,
+                                    path,
+                                    "period");
+                            }
                         }
                     }
 
-                    if (mug && ops && mug.options.defaultOperator) {
+                    if (!inItext && mug && ops && mug.options.defaultOperator) {
                         ops.val(mug.options.defaultOperator);
                     }
                 }

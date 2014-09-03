@@ -876,7 +876,7 @@ define([
         var $input = $("<textarea></textarea>")
             .attr("name", widget.id)
             .attr("rows", "2")
-             .addClass('input-block-level itext-widget-input')
+             .addClass('input-block-level itext-widget-input jstree-drop')
              .on('change keyup', function () {
                  widget.updateValue();
              });
