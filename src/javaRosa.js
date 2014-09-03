@@ -1327,7 +1327,7 @@ define([
 
                 if (langs && langs.indexOf(lang) === -1) {
                     // todo: plugins!
-                    _this.data.core.form.parseWarnings.push(
+                    _this.data.core.parseWarnings.push(
                         "You have languages in your form that are not specified " +
                         "in the \"Languages\" page of the application builder. " +
                         "The following language will be deleted on save " +
