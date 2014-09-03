@@ -295,15 +295,16 @@ define([
     };
 
     function copyAndProcessSpec(baseSpec, mugSpec, mugOptions) {
-        baseSpec = $.extend(true, {}, baseSpec);
+        var control = baseSpec.control,
+            databind = baseSpec.databind;
 
         if (mugOptions.isDataOnly) {
-            baseSpec.control = {};
+            control = {};
         } else if (mugOptions.isControlOnly) {
-            baseSpec.databind = {};
+            databind = {};
         }
 
-        spec = $.extend(true, {}, baseSpec.databind, baseSpec.control, mugSpec);
+        var spec = $.extend(true, {}, databind, control, mugSpec);
 
         _.each(spec, function (propertySpec, name) {
             if (_.isFunction(propertySpec)) {
@@ -388,14 +389,13 @@ define([
         // set or change question type
         setOptionsAndProperties: function (options, properties) {
             var _this = this,
-                spec = util.extend(this._baseSpec),
                 currentAttrs = properties || (this.p && this.p.getAttrs()) || {};
 
             // These could both be calculated once for each type instead of
             // each instance.
             this.options = util.extend(defaultOptions, options);
             this.__className = this.options.__className;
-            this.spec = copyAndProcessSpec(spec, this.options.spec, this.options);
+            this.spec = copyAndProcessSpec(this._baseSpec, this.options.spec, this.options);
 
             // Reset any properties that are part of the question type
             // definition.
