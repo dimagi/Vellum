@@ -5,7 +5,7 @@ set -e
 export PATH=`npm bin`:$PATH
 
 if [[ "$1" == "--help" ]]; then
-    echo "USAGE: $0 [TEST_GREP] [mocha-phantomjs-options]"
+    echo "USAGE: $0 [TEST_GREP] [--no-jshint] [mocha-phantomjs-options]"
     exit
 fi
 
@@ -15,10 +15,18 @@ if [[ "$1" != "" ]]; then
     shift
 fi
 
+run_jshint="true"
+if [[ "$1" == "--no-jshint" ]]; then
+    run_jshint="false"
+    shift
+fi
+
 mocha-phantomjs -s loadImages=false "index.html$qs" "$@" \
     | grep -v "Error loading resource file:///"
 test ${PIPESTATUS[0]} -eq 0 # stop on mocha-phantomjs non-zero exit status
 # NOTE there may be edge cases where grep exits with non-zero causing this
 # script to exit prematurely
 
-jshint src/*.js tests/*.js
+if [[ "$run_jshint" == "true" ]]; then
+    jshint src/*.js tests/*.js
+fi
