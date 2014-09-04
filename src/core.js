@@ -647,6 +647,18 @@ define([
         }
     }
 
+    function warnOnNonOutputableValue(form, mug, path) {
+        if (!mug.options.canOutputValue) {
+            var typeName = mug.options.typeName;
+            form.updateError({
+                level: "form-warning",
+                message: typeName + " nodes can not be used in an output value. " +
+                    "Please remove the output value for '" + path +
+                    "' or your form will have errors."
+            }, {updateUI: true});
+        }
+    }
+
     function getCaretPosition (ctrl) {
         var pos = 0;
         if (ctrl.createTextRange) {
@@ -680,6 +692,52 @@ define([
         ctrl.value = front + text + back;
         pos = pos + text.length;
         setCaretPosition(ctrl, pos);
+    }
+
+    function getOutputRef(path, dateFormat) {
+        if (dateFormat) {
+            return '<output value="format-date(date(' + path + '), \'' + dateFormat + '\')"/>'
+        } else {
+            return '<output value="' + path + '" />'
+        }
+    }
+
+    function insertOutputRef(form, mug, target, path, dateFormat) {
+        var output = getOutputRef(path, dateFormat);
+        insertTextAtCursor(target[0], output);
+        warnOnCircularReference('label', form, mug, path, "output value");
+        warnOnNonOutputableValue(form, mug, path);
+    }
+
+    function handleOutputRefDrop(mug, target, path, form) {
+        var mugType = mug.options.typeName;
+        var formatOptions = null;
+        if (mugType === 'Date') {
+            formatOptions = {
+                "": "No Formatting",
+                "%d/%n/%y": "DD/MM/YY e.g. 04/01/14",
+                "%a, %b %e, %Y": "DDD, MMM DD, YYYY e.g. Sun, Jan 1, 2014"
+            }
+        }
+        if (formatOptions) {
+            var menuHtml = '<ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">' +
+                '<li><strong>Date Format Options</strong></li>';
+            _(formatOptions).each(function(label, format) {
+                menuHtml += '<li><a tabindex="-1" href="#" data-format="' + format + '">' + label + '</a></li>';
+            });
+            menuHtml += '</ul>'
+
+            var menu = $(menuHtml);
+            $('body').append(menu);
+            menu.find('li a').click(function () {
+                insertOutputRef(form, mug, target, path, $(this).data('format'));
+                menu.remove();
+            });
+            var e = window.event;
+            menu.css({'top':e.clientY,'left':e.clientX}).show();
+        } else {
+            insertOutputRef(form, mug, target, path)
+        }
     }
 
     var validRootChildren,
@@ -758,15 +816,7 @@ define([
                     if (target) {
                         var path = _this.mugToXPathReference(mug);
                         if (inItext) {
-                            target[0].addEventListener("click", getCaretPositionFromCursor, false);
-                            var output = '<output value="' + path + '" />';
-                            insertTextAtCursor(target[0], output);
-                            warnOnCircularReference(
-                                'label',
-                                _this.data.core.form,
-                                mug,
-                                path,
-                                "output value");
+                            handleOutputRefDrop(mug, target, path, _this.data.core.form)
                         } else {
                             // the .change fires the validation controls
                             target.val(target.val() + path).change();

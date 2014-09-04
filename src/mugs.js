@@ -343,6 +343,7 @@ define([
         isRemoveable: true,
         isCopyable: true,
         isODKOnly: false,
+        canOutputValue: true,
         maxChildren: -1,
         icon: null,
         afterInsert: function (form, mug) {},
@@ -609,6 +610,7 @@ define([
     var Secret = util.extend(defaultOptions, {
         typeName: 'Password',
         icon: 'icon-key',
+        canOutputValue: false,
         init: function (mug, form) {
             mug.p.tagName = "secret";
             mug.p.dataType = "xsd:string";
@@ -628,6 +630,7 @@ define([
         typeName: 'Audio Capture',
         icon: 'icon-vellum-audio-capture',
         isODKOnly: true,
+        canOutputValue: false,
         init: function (mug, form) {
             mug.p.tagName = "upload";
             mug.p.mediaType = "audio/*"; /* */
@@ -646,6 +649,7 @@ define([
         typeName: 'Image Capture',
         icon: 'icon-camera',
         isODKOnly: true,
+        canOutputValue: false,
         init: function (mug, form) {
             Audio.init(mug, form);
             mug.p.mediaType = "image/*"; /* */
@@ -656,6 +660,7 @@ define([
         typeName: 'Video Capture',
         icon: 'icon-facetime-video',
         isODKOnly: true,
+        canOutputValue: false,
         init: function (mug, form) {
             Audio.init(mug, form);
             mug.p.mediaType = "video/*"; /* */
@@ -732,6 +737,7 @@ define([
         typeName: 'Choice',
         icon: 'icon-circle-blank',
         isTypeChangeable: false,
+        canOutputValue: false,
         getIcon: function (mug) {
             if (mug.parentMug.__className === "Select") {
                 return 'icon-circle-blank';
@@ -817,6 +823,7 @@ define([
         icon: 'icon-folder-open',
         isSpecialGroup: true,
         isTypeChangeable: false,
+        canOutputValue: false,
         init: function (mug, form) {
             mug.p.tagName = "group";
         },
@@ -838,6 +845,7 @@ define([
         icon: 'icon-reorder',
         isSpecialGroup: true,
         isTypeChangeable: false,
+        canOutputValue: false,
         init: function (mug, form) {
             Group.init(mug, form);
             mug.setAppearanceAttribute('field-list');
@@ -849,6 +857,7 @@ define([
         icon: 'icon-retweet',
         isSpecialGroup: true,
         isTypeChangeable: false,
+        canOutputValue: false,
         init: function (mug, form) {
             mug.p.tagName = "repeat";
             mug.p.repeat_count = null;
