@@ -111,7 +111,6 @@ define([
          * An ID used during prettyPrinting of the Node. (a human readable value for the node)
          */
         getID: function () {
-            var id;
             if (this.isRootNode) {
                 return this.rootNodeId;
             }
@@ -162,7 +161,7 @@ define([
             return store; //return the results
         },
         validateTree: function (validateValue) {
-            var validationErrors, thisMug, i, childResult;
+            var i, childResult;
             if(!this.getValue()){
                 throw 'Tree contains node with no values!';
             }

@@ -1,3 +1,4 @@
+/* global requirejs */
 requirejs.config({
     // For some reason when using the map config as suggested by some of the
     // plugins' documentation, and only when including vellum in another
@@ -160,16 +161,16 @@ requirejs.config({
 // http://www.manuel-strehl.de/dev/load_jquery_before_requirejs.en.html
 if (window.jQuery) {
     define('jquery', [], function() {
-        return jQuery;
+        return window.jQuery;
     });
-    if (jQuery.fn.typeahead) {
+    if (window.jQuery.fn.typeahead) {
         define('jquery.bootstrap', [], function () {});
     }
-    if (jQuery.fn.popout) {
+    if (window.jQuery.fn.popout) {
         define('jquery.bootstrap-popout', [], function () {});
     }
 
-    if (jQuery.fn.datepicker) {
+    if (window.jQuery.fn.datepicker) {
         define('jquery-ui', [], function () {});
     }
 }

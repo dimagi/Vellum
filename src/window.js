@@ -47,7 +47,7 @@ define([
             availableHorizSpace = $fdc.width();
 
             var availableColumnSpace = availableVertSpace - $('.fd-toolbar').outerHeight(),
-            panelHeight, columnHeight, treeHeight, questionPropHeight;
+            panelHeight, columnHeight, treeHeight;
 
             panelHeight = Math.max(availableColumnSpace - 5, this.opts().windowManager.minHeight);
             columnHeight = panelHeight - $('.fd-head').outerHeight();
