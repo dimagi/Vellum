@@ -153,7 +153,7 @@ define([
                 if (node.position) {
                     var target = parentNode.find(node.position);
                     if (target.length) {
-                        target.after($(appendNode));
+                        target.first().after($(appendNode));
                     } else {
                         // sibling node of ignored node got deleted, insert at
                         // beginning

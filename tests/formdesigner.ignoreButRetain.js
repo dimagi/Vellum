@@ -36,6 +36,11 @@ define([
             }
         );
 
+        it("does not insert multiple copies of ignored nodes", function () {
+            call('loadXML', MUTLI_MATCH);
+            assertXmlEqual(call('createXML'), MUTLI_MATCH);
+        });
+
         it("handles multiple ignore nodes in a row", function () {
             testXmlPair(MULTIPLE_IGNORES, MULTIPLE_IGNORES_IGNORED);
         });
@@ -171,6 +176,28 @@ define([
             </group>\
         </h:body>\
     </h:html>';
+
+    var MUTLI_MATCH = util.xmlines('' +
+    '<?xml version="1.0" encoding="UTF-8"?>\
+    <h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:orx="http://openrosa.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa" xmlns:vellum="http://commcarehq.org/xforms/vellum">\
+        <h:head>\
+            <h:title>Untitled Form</h:title>\
+            <model>\
+                <instance>\
+                    <data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/398C9010-61DC-42D3-8A85-B857AC3A9CA0" uiVersion="1" version="1" name="Untitled Form">\
+                        <question1 />\
+                    </data>\
+                </instance>\
+                <bind nodeset="/data/question1" type="xsd:string" />\
+                <bind nodeset="/data/question1" vellum:ignore="retain" />\
+                <bind nodeset="/data/question1" vellum:ignore="retain" />\
+                <itext>\
+                    <translation lang="en" default=""/>\
+                </itext>\
+            </model>\
+        </h:head>\
+        <h:body></h:body>\
+    </h:html>');
 
     var MULTIPLE_IGNORES = '' + 
     '<?xml version="1.0" encoding="UTF-8"?>\
