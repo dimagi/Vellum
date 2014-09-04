@@ -880,10 +880,70 @@ define([
              .on('change keyup', function () {
                  widget.updateValue();
              });
-     
+
         widget.getControl = function () {
             return $input;
         };
+
+        // TODO: duplicated in core.js
+        function getCaretPosition (ctrl) {
+            var pos = 0;
+            if (ctrl.createTextRange) {
+                ctrl.focus ();
+                var sel = document.selection.createRange();
+                sel.moveStart ('character', -ctrl.value.length);
+                pos = sel.text.length;
+            } else if (typeof ctrl.selectionStart !== 'undefined') {
+                pos = ctrl.selectionStart;
+            }
+            return pos;
+        }
+
+        // TODO: duplicated in core.js
+        function setCaretPosition(ctrl, pos){
+            if (ctrl.setSelectionRange) {
+                ctrl.focus();
+                ctrl.setSelectionRange(pos,pos);
+            } else if (ctrl.createTextRange) {
+                var range = ctrl.createTextRange();
+                range.collapse(true);
+                range.moveEnd('character', pos);
+                range.moveStart('character', pos);
+                range.select();
+            }
+        }
+
+        $input.keydown(function (e) {
+            // deletion of entire output ref in one go
+            if (e && e.keyCode === 8 || e.keyCode === 46) {
+                var control = widget.getControl()[0];
+                var pos = getCaretPosition(control),
+                    val = widget.getValue();
+
+                var outputBegin = '<output',
+                    outputEnd = '/>',
+                    start, end = null;
+                if (e.keyCode == 8) {
+                    var char = val.substr(pos - 2, 2);
+                    if (char === outputEnd) {
+                        var start = val.lastIndexOf(outputBegin, pos),
+                            end = pos;
+                    }
+                } else if (e.keyCode == 46) {
+                    var char = val.substr(pos, outputBegin.length);
+                    if (char === outputBegin) {
+                        var end = val.indexOf(outputEnd, pos) + 2,
+                            start = pos;
+                    }
+                }
+                if (start || end && start !== -1 && end !== 1) {  // i.e. end = -1 + 2
+                    var noRef = val.slice(0, start) + val.slice(end, val.length);
+                    widget.setValue(noRef);
+                    setCaretPosition(control, start);
+                    e.preventDefault();
+                }
+            }
+        });
 
         widget.displayName = options.displayName;
         widget.itextType = options.itextType;

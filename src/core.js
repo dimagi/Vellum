@@ -659,6 +659,7 @@ define([
         }
     }
 
+    // TODO: duplicated in javaRosa.js
     function getCaretPosition (ctrl) {
         var pos = 0;
         if (ctrl.createTextRange) {
@@ -672,6 +673,7 @@ define([
         return pos;
     }
 
+    // TODO: duplicated in javaRosa.js
     function setCaretPosition(ctrl, pos){
         if (ctrl.setSelectionRange) {
             ctrl.focus();
