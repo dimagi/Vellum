@@ -144,10 +144,12 @@ define([
                     // tag, apparently.  But only when it's the terminal node in a
                     // selector. Also behaves differently in FF and Chrome.
                     node.path = "h\\:html > body, h\\:html > h\\:body";
+                } else if (node.path === "h\\:html > h\\:head") {
+                    // same as above?
+                    node.path = "h\\:html > head, h\\:html > h\\:head";
                 }
 
                 var parentNode = xml.find(node.path),
-                    firstChild = parentNode.children().first(),
                     appendNode = $.parseXML(node.nodeXML).childNodes[0];
 
                 if (node.position) {
@@ -159,12 +161,15 @@ define([
                         // beginning
                         prependChild(parentNode[0], appendNode);
                     }
-                } else if (firstChild[0].tagName !== 'label') {
-                    prependChild(parentNode[0], appendNode);
                 } else {
-                    // make sure to insert after the <label> at the beginning of
-                    // a group, not before
-                    firstChild.after(appendNode);
+                    var firstChild = parentNode.children().first();
+                    if (firstChild[0].tagName !== 'label') {
+                        prependChild(parentNode[0], appendNode);
+                    } else {
+                        // make sure to insert after the <label> at the beginning of
+                        // a group, not before
+                        firstChild.after(appendNode);
+                    }
                 }
             });
 
