@@ -519,6 +519,9 @@ define([
         return str.substring(1, str.length - 1);
     }
 
+// This unused function triggers an error in jshint causing the test runner to
+// fail. It seems like it might have some value, so keeping it around until I
+// can either use it or figure out that it does not have enough value to keep.
 //    function getAvailableProperties(instanceDefs, instanceId, subsetId) {
 //        var instanceDef = instanceDefs[instanceId] || {},
 //            instanceProps = instanceDef.properties || {},
