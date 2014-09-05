@@ -698,9 +698,9 @@ define([
 
     function getOutputRef(path, dateFormat) {
         if (dateFormat) {
-            return '<output value="format-date(date(' + path + '), \'' + dateFormat + '\')"/>'
+            return '<output value="format-date(date(' + path + '), \'' + dateFormat + '\')"/>';
         } else {
-            return '<output value="' + path + '" />'
+            return '<output value="' + path + '" />';
         }
     }
 
@@ -719,7 +719,7 @@ define([
                 "": "No Formatting",
                 "%d/%n/%y": "DD/MM/YY e.g. 04/01/14",
                 "%a, %b %e, %Y": "DDD, MMM DD, YYYY e.g. Sun, Jan 1, 2014"
-            }
+            };
         }
         if (formatOptions) {
             var menuHtml = '<ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">' +
@@ -727,7 +727,7 @@ define([
             _(formatOptions).each(function(label, format) {
                 menuHtml += '<li><a tabindex="-1" href="#" data-format="' + format + '">' + label + '</a></li>';
             });
-            menuHtml += '</ul>'
+            menuHtml += '</ul>';
 
             var menu = $(menuHtml);
             $('body').append(menu);
@@ -738,7 +738,7 @@ define([
             var e = window.event;
             menu.css({'top':e.clientY,'left':e.clientX}).show();
         } else {
-            insertOutputRef(form, mug, target, path)
+            insertOutputRef(form, mug, target, path);
         }
     }
 
@@ -818,7 +818,7 @@ define([
                     if (target) {
                         var path = _this.mugToXPathReference(mug);
                         if (inItext) {
-                            handleOutputRefDrop(mug, target, path, _this.data.core.form)
+                            handleOutputRefDrop(mug, target, path, _this.data.core.form);
                         } else {
                             // the .change fires the validation controls
                             target.val(target.val() + path).change();

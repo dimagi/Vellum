@@ -922,21 +922,22 @@ define([
 
                 var outputBegin = '<output',
                     outputEnd = '/>',
-                    start, end = null;
-                if (e.keyCode == 8) {
-                    var char = val.substr(pos - 2, 2);
-                    if (char === outputEnd) {
-                        var start = val.lastIndexOf(outputBegin, pos),
-                            end = pos;
+                    start, end, match = null;
+                if (e.keyCode === 8) {
+                    match = val.substr(pos - 2, 2);
+                    if (match === outputEnd) {
+                        start = val.lastIndexOf(outputBegin, pos);
+                        end = pos;
                     }
-                } else if (e.keyCode == 46) {
-                    var char = val.substr(pos, outputBegin.length);
-                    if (char === outputBegin) {
-                        var end = val.indexOf(outputEnd, pos) + 2,
-                            start = pos;
+                } else if (e.keyCode === 46) {
+                    match = val.substr(pos, outputBegin.length);
+                    if (match === outputBegin) {
+                        end = val.indexOf(outputEnd, pos);
+                        end = end === -1 ? end : end + 2;
+                        start = pos;
                     }
                 }
-                if (start || end && start !== -1 && end !== 1) {  // i.e. end = -1 + 2
+                if (start || end && start !== -1 && end !== -1) {
                     var noRef = val.slice(0, start) + val.slice(end, val.length);
                     widget.setValue(noRef);
                     setCaretPosition(control, start);
