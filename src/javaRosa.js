@@ -128,12 +128,17 @@ define([
         this.itextModel = options.itextModel;
         this.data = options.data || {};
         this.name = options.name || "default";
+        this.outputRefs = options.outputRefs || {};
+        if (!options.outputRefs && this.data) {
+            this.extractOutputRefs();
+        }
     }
     ItextForm.prototype = {
         clone: function () {
             return new ItextForm({
                 itextModel: this.itextModel,
                 data: _.clone(this.data),
+                outputRefs: _.clone(this.outputRefs),
                 name: this.name
             });
         },
@@ -147,6 +152,7 @@ define([
                 });
             }
             this.data[lang] = value;
+            this.updateOutputRefs(lang);
         },
         getValueOrDefault: function (lang) {
             // check the actual language first
@@ -174,6 +180,25 @@ define([
                 }
             }
             return true;
+        },
+        extractOutputRefs: function () {
+            for (var lang in this.data) {
+                if (this.data.hasOwnProperty(lang) && this.data[lang]) {
+                    this.updateOutputRefs(lang);
+                }
+            }
+        },
+        updateOutputRefs: function (lang) {
+            var outputRe = /<output (ref|value)=".*?"\s*\/>/gim;
+            var refs = [];
+            if (this.data.hasOwnProperty(lang) && this.data[lang]) {
+                refs = this.data[lang].match(outputRe);
+                if (refs) {
+                    this.outputRefs[lang] = refs;
+                } else {
+                    delete this.outputRefs[lang];
+                }
+            }
         }
     };
 
@@ -1374,6 +1399,42 @@ define([
         handleMugParseFinish: function (mug) {
             this.__callOld();
             this.data.javaRosa.Itext.updateForExistingMug(mug);
+        },
+        handleMugRename: function (form, mug, newID, oldID, newPath, oldPath) {
+            this.__callOld();
+            var _this = this,
+                itext = this.data.javaRosa.Itext,
+                outputRe,
+                oldPathRe,
+                newRefs,
+                newRef,
+                change;
+            _(itext.getItems()).each(function (item) {
+                change = false;
+                _(item.forms).each(function (itForm) {
+                    _(itForm.outputRefs).each(function (refs, lang) {
+                        newRefs = [];
+                        _(refs).each(function (ref){
+                            if (ref.indexOf(oldPath) !== -1) {
+                                oldPathRe = new RegExp(oldPath + '(?![a-zA-Z0-9_/])', 'mg');
+                                newRef = ref.replace(oldPathRe, newPath);
+                                newRefs.push(newRef);
+                                outputRe = new RegExp($.ui.autocomplete.escapeRegex(ref), 'mg');
+                                itForm.data[lang] = itForm.data[lang].replace(outputRe, newRef);
+                                change = true;
+                            }
+                        });
+                        itForm.outputRefs[lang] = newRefs;
+                    });
+                });
+                if (change) {
+                    form.fire({
+                        type: 'question-label-text-change',
+                        mug: _this.data.core.form.getMugByItextID(item.id),
+                        text: item.getValue('default', itext.getDefaultLanguage())
+                    });
+                }
+            });
         },
         contributeToModelXML: function (xmlWriter) {
             // here are the rules that govern itext
