@@ -1297,7 +1297,7 @@ define([
             });
         },
         // parse Itext Block and populate itext model
-        loadXML: function (xmlString) {
+        loadXML: function (xml) {
             var _this = this,
                 langs = this.opts().javaRosa.langs,
                 Itext;
@@ -1354,11 +1354,8 @@ define([
                 Itext.setDefaultLanguage(langs[0]);
             }
 
-            var xmlDoc;
-            if (xmlString) {
-                xmlDoc = $.parseXML(xmlString);
-                var xml = $(xmlDoc),
-                    head = xml.find('h\\:head, head'),
+            if (xml) {
+                var head = xml.find('h\\:head, head'),
                     itextBlock = head.find('itext');
             
                 $(itextBlock).children().each(eachLang);

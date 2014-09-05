@@ -24,7 +24,7 @@ define([
 
     function formatXml(str) {
         // doesn't work?
-        return new XMLSerializer().serializeToString($.parseXML(str));
+        return str; //new XMLSerializer().serializeToString($.parseXML(str));
     }
 
     function getInput(property) {

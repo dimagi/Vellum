@@ -236,9 +236,10 @@ define([
         loadXML: function (xml) {
             var manager = intentManager(null);
             this.data.intents.manager = manager;
-            this.data.intents.manager.parseIntentTagsFromHead(
-                $(xml).find('h\\:head, head')
-                    .children("odkx\\:intent, intent"));
+            if (xml) {
+                this.data.intents.manager.parseIntentTagsFromHead(
+                    xml.find('h\\:head, head').children("odkx\\:intent, intent"));
+            }
 
             this.__callOld();
         },

@@ -44,20 +44,18 @@ define([
         return attrMap;
     }
 
-    function parseXForm(xmlString, formOpts, vellum, warnings) {
+    function parseXForm(xml, formOpts, vellum, warnings) {
         var Form = form_.Form,
             InstanceMetadata = form_.InstanceMetadata,
             form = new Form(formOpts, vellum, formOpts.mugTypes);
         form.parseErrors = [];
         form.parseWarnings = warnings;
 
-        if (!xmlString) {
+        if (!xml) {
             return form;
         }
 
-        var xmlDoc = $.parseXML(xmlString),
-            xml = $(xmlDoc),
-            head = xml.find('h\\:head, head'),
+        var head = xml.find('h\\:head, head'),
             title = head.children('h\\:title, title'),
             binds = head.find('bind'),
             instances = _getInstances(xml),
@@ -69,7 +67,7 @@ define([
                 $this.attr('event'), $this.attr('ref'), $this.attr('value'));
         });
 
-        if($(xml).find('parsererror').length > 0) {
+        if(xml.find('parsererror').length > 0) {
             throw 'PARSE ERROR!:' + $(xml).find('parsererror').find('div').html();
         }
         

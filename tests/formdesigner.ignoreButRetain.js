@@ -20,10 +20,14 @@ define([
             });
         });
 
+        function get$(xmlString) {
+            return $($.parseXML(xmlString));
+        }
+
         var xmls = new XMLSerializer();
 
         var testXmlPair = function (rawXml, processedXml) {
-            call('loadXML', rawXml);
+            call('loadXML', get$(rawXml));
             assertXmlEqual(rawXml, call('createXML'));
 
             call('getData').ignore.ignoredNodes = [];
@@ -37,13 +41,20 @@ define([
         );
 
         it("does not insert multiple copies of ignored nodes", function () {
-            call('loadXML', MUTLI_MATCH);
+            call('loadXML', get$(MUTLI_MATCH));
             assertXmlEqual(call('createXML'), MUTLI_MATCH);
+        });
+
+        it("preserves newlines in attributes", function () {
+            call('loadXML', get$(NEWLINE_IN_ATTR));
+            var mug = call("getMugByPath", "/data/question1");
+            assert.equal(mug.p.calculateAttr, 'concat("Line 1","\nLine 2")');
+            assertXmlEqual(call('createXML'), NEWLINE_IN_ATTR);
         });
 
         it("can ignore elements in <head>", function () {
             // fixes TypeError: 'undefined' is not an object (evaluating 'element.firstElementChild')
-            call('loadXML', IGNORE_IN_HEAD);
+            call('loadXML', get$(IGNORE_IN_HEAD));
             assertXmlEqual(call('createXML'), IGNORE_IN_HEAD);
         });
 
@@ -52,13 +63,13 @@ define([
         });
 
         it("handles an ignore node's reference node being renamed", function () {
-            call('loadXML', UNRENAMED);
+            call('loadXML', get$(UNRENAMED));
             call('getMugByPath', '/data/question9').p.nodeID = 'question9a';
             assertXmlEqual(util.xmlines(RENAMED), call('createXML'));
         });
 
         it("handles a node being renamed that's referenced in an ignore node's XML", function () {
-            call('loadXML', REFERENCED_UNRENAMED);
+            call('loadXML', get$(REFERENCED_UNRENAMED));
             call('getMugByPath', '/data/question1').p.nodeID = 'foobar';
             assertXmlEqual(REFERENCED_RENAMED, call('createXML'));
         });
@@ -182,6 +193,27 @@ define([
             </group>\
         </h:body>\
     </h:html>';
+
+    var NEWLINE_IN_ATTR = util.xmlines('' +
+    '<?xml version="1.0" encoding="UTF-8"?>\
+    <h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:orx="http://openrosa.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa" xmlns:vellum="http://commcarehq.org/xforms/vellum">\
+        <h:head>\
+            <h:title>Untitled Form</h:title>\
+            <model>\
+                <instance>\
+                    <data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/398C9010-61DC-42D3-8A85-B857AC3A9CA0" uiVersion="1" version="1" name="Untitled Form">\
+                        <question1 />\
+                        <question2 vellum:ignore="retain" />\
+                    </data>\
+                </instance>\
+                <bind nodeset="/data/question1" calculate="concat(&quot;Line 1&quot;,&quot;&#10;Line 2&quot;)" />\
+                <itext>\
+                    <translation lang="en" default=""/>\
+                </itext>\
+            </model>\
+        </h:head>\
+        <h:body></h:body>\
+    </h:html>');
 
     var MUTLI_MATCH = util.xmlines('' +
     '<?xml version="1.0" encoding="UTF-8"?>\

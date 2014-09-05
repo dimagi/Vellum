@@ -1003,7 +1003,8 @@ define([
             try {
                 // a place for plugins to put parse warnings
                 _this.data.core.parseWarnings = [];
-                _this.loadXML(formString);
+                var xml = formString ? $($.parseXML(formString)) : null;
+                _this.loadXML(xml);
                 delete _this.data.core.parseWarnings;
 
                 if (formString) {
@@ -1086,9 +1087,9 @@ define([
         }
     };
         
-    fn.loadXML = function (formXML) {
+    fn.loadXML = function (xml) {
         var form, _this = this;
-        this.data.core.form = form = parser.parseXForm(formXML, {
+        this.data.core.form = form = parser.parseXForm(xml, {
             mugTypes: this.data.core.mugTypes,
             allowedDataNodeReferences: this.opts().core.allowedDataNodeReferences, 
             externalInstances: this.opts().core.externalInstances
