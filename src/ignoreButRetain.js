@@ -114,9 +114,16 @@ define([
             var _this = this,
                 ignoredEls = [],
                 xmlDoc = $.parseXML(xmlStr),
-                xml = $(xmlDoc);
+                xml = $(xmlDoc),
+                ignores = xml.find('[vellum\\:ignore="retain"]');
 
-            xml.find('[vellum\\:ignore="retain"]').each(function (i, el) {
+            if (ignores.length === 0) {
+                // skip serialize
+                this.__callOld();
+                return;
+            }
+
+            ignores.each(function (i, el) {
                 _this.data.ignore.ignoredNodes.push(getPathAndPosition(el));
                 ignoredEls.push(el);
             });
