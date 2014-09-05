@@ -876,10 +876,14 @@ define([
         var $input = $("<textarea></textarea>")
             .attr("name", widget.id)
             .attr("rows", "2")
-             .addClass('input-block-level itext-widget-input jstree-drop')
+             .addClass('input-block-level itext-widget-input')
              .on('change keyup', function () {
                  widget.updateValue();
              });
+
+        if (options.path === 'labelItext') {
+            $input.addClass('jstree-drop');
+        }
 
         widget.getControl = function () {
             return $input;
@@ -913,38 +917,40 @@ define([
             }
         }
 
-        $input.keydown(function (e) {
-            // deletion of entire output ref in one go
-            if (e && e.keyCode === 8 || e.keyCode === 46) {
-                var control = widget.getControl()[0];
-                var pos = getCaretPosition(control),
-                    val = widget.getValue();
+        if (options.path === 'labelItext') {
+            $input.keydown(function (e) {
+                // deletion of entire output ref in one go
+                if (e && e.keyCode === 8 || e.keyCode === 46) {
+                    var control = widget.getControl()[0];
+                    var pos = getCaretPosition(control),
+                        val = widget.getValue();
 
-                var outputBegin = '<output',
-                    outputEnd = '/>',
-                    start, end, match = null;
-                if (e.keyCode === 8) {
-                    match = val.substr(pos - 2, 2);
-                    if (match === outputEnd) {
-                        start = val.lastIndexOf(outputBegin, pos);
-                        end = pos;
+                    var outputBegin = '<output',
+                        outputEnd = '/>',
+                        start, end, match = null;
+                    if (e.keyCode === 8) {
+                        match = val.substr(pos - 2, 2);
+                        if (match === outputEnd) {
+                            start = val.lastIndexOf(outputBegin, pos);
+                            end = pos;
+                        }
+                    } else if (e.keyCode === 46) {
+                        match = val.substr(pos, outputBegin.length);
+                        if (match === outputBegin) {
+                            end = val.indexOf(outputEnd, pos);
+                            end = end === -1 ? end : end + 2;
+                            start = pos;
+                        }
                     }
-                } else if (e.keyCode === 46) {
-                    match = val.substr(pos, outputBegin.length);
-                    if (match === outputBegin) {
-                        end = val.indexOf(outputEnd, pos);
-                        end = end === -1 ? end : end + 2;
-                        start = pos;
+                    if (start || end && start !== -1 && end !== -1) {
+                        var noRef = val.slice(0, start) + val.slice(end, val.length);
+                        widget.setValue(noRef);
+                        setCaretPosition(control, start);
+                        e.preventDefault();
                     }
                 }
-                if (start || end && start !== -1 && end !== -1) {
-                    var noRef = val.slice(0, start) + val.slice(end, val.length);
-                    widget.setValue(noRef);
-                    setCaretPosition(control, start);
-                    e.preventDefault();
-                }
-            }
-        });
+            });
+        }
 
         widget.displayName = options.displayName;
         widget.itextType = options.itextType;
