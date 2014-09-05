@@ -1,3 +1,4 @@
+/*jshint multistr: true */
 require([
     'chai',
     'jquery',
@@ -63,9 +64,21 @@ require([
                 }
             });
         });
+
+        it("should not drop newlines in calculate conditions", function (done) {
+            util.init({
+                core: {
+                    form: TEST_XML_2,
+                    onReady: function () {
+                        var mug = call("getMugByPath", "/data/question1");
+                        assert.equal(mug.p.calculateAttr, 'concat("Line 1","\nLine 2")');
+                        done();
+                    }
+                }
+            });
+        });
     });
 
-    /*jshint multistr: true */
     var TEST_XML_1 = '' + 
     '<?xml version="1.0" encoding="UTF-8" ?>\
     <h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:orx="http://openrosa.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa" xmlns:vellum="http://commcarehq.org/xforms/vellum">\
@@ -100,4 +113,24 @@ require([
             </select1>\
         </h:body>\
     </h:html>';
+
+    var TEST_XML_2 = util.xmlines('' +
+    '<?xml version="1.0" encoding="UTF-8"?>\
+    <h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:orx="http://openrosa.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa" xmlns:vellum="http://commcarehq.org/xforms/vellum">\
+        <h:head>\
+            <h:title>Untitled Form</h:title>\
+            <model>\
+                <instance>\
+                    <data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/398C9010-61DC-42D3-8A85-B857AC3A9CA0" uiVersion="1" version="1" name="Untitled Form">\
+                        <question1 />\
+                    </data>\
+                </instance>\
+                <bind nodeset="/data/question1" calculate="concat(&quot;Line 1&quot;,&quot;&#10;Line 2&quot;)" />\
+                <itext>\
+                    <translation lang="en" default=""/>\
+                </itext>\
+            </model>\
+        </h:head>\
+        <h:body></h:body>\
+    </h:html>');
 });
