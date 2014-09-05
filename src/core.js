@@ -687,11 +687,12 @@ define([
         }
     }
 
-    function insertTextAtCursor(ctrl, text) {
+    function insertTextAtCursor(jqctrl, text) {
+        var ctrl = jqctrl[0];
         var pos = getCaretPosition(ctrl);
         var front = (ctrl.value).substring(0, pos);
         var back = (ctrl.value).substring(pos, ctrl.value.length);
-        ctrl.value = front + text + back;
+        jqctrl.val(front + text + back).change();
         pos = pos + text.length;
         setCaretPosition(ctrl, pos);
     }
@@ -706,7 +707,7 @@ define([
 
     function insertOutputRef(form, mug, target, path, dateFormat) {
         var output = getOutputRef(path, dateFormat);
-        insertTextAtCursor(target[0], output);
+        insertTextAtCursor(target, output);
         warnOnCircularReference('label', form, mug, path, "output value");
         warnOnNonOutputableValue(form, mug, path);
     }
