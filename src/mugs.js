@@ -1,13 +1,13 @@
 define([
     'jquery',
-    'vellum/widgets',
-    'vellum/util',
     'underscore',
+    'vellum/widgets',
+    'vellum/util'
 ], function (
-    jquery,
+    $,
+    _,
     widgets,
     util,
-    _,
     undefined
 ) {
     function validateRule(ruleKey, ruleValue, testingObj, mug) {
@@ -576,9 +576,9 @@ define([
         }
     });
 
-    var ControlOnly = util.extend(defaultOptions, {
-        typeName: '(Internal)'
-    });
+//    var ControlOnly = util.extend(defaultOptions, {
+//        typeName: '(Internal)'
+//    });
     
     var ReadOnly = util.extend(defaultOptions, {
         spec: {

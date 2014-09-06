@@ -1,6 +1,7 @@
 define([
     'require',
     'underscore',
+    'xpath',
     'vellum/tree',
     'vellum/logic',
     'vellum/widgets',
@@ -8,6 +9,7 @@ define([
 ], function (
     require,
     _,
+    xpath,
     Tree,
     logic,
     widgets,
@@ -74,9 +76,7 @@ define([
     // top-level escaped double quotes).  This may not correctly handle escaped
     // quotes within a quote.  Moving on.
     function normalizeToSingleQuotes(str) {
-        var ret = '',
-            inAQuote = false;
-
+        var ret = '';
         eachCharByQuotedStatus(str,
             function (c) {
                 ret += c;
@@ -276,7 +276,7 @@ define([
          * autocomplete skip logic wizard.
          */
         getMugList: function () {
-            var cTree, dTree, treeFunc, cList, dList, mergeList;
+            var treeFunc, cList, dList;
 
             treeFunc = function (node) {
                 if(node.isRootNode) {
@@ -377,10 +377,12 @@ define([
             
             var updates = {};
             for (var i = 0; i < mugs.length; i++) {
-                updates[mugs[i].ufid] = [
-                    preMovePaths[i], 
-                    this.dataTree.getAbsolutePath(mugs[i])
-                ];
+                if (preMovePaths[i]) {
+                    updates[mugs[i].ufid] = [
+                        preMovePaths[i],
+                        this.dataTree.getAbsolutePath(mugs[i])
+                    ];
+                }
             }
 
             this._logicManager.updatePaths(updates);
@@ -399,6 +401,32 @@ define([
         },
         handleMugRename: function (mug, currentId, oldId, currentPath, oldPath) {
             this._logicManager.updatePath(mug.ufid, oldPath, currentPath);
+            this.mugWasRenamed(mug, oldId);
+        },
+        /**
+         * Update references to mug and its children after it is renamed.
+         */
+        mugWasRenamed: function(mug, oldName) {
+            function preMovePath(postPath) {
+                if (postPath === mugPath) {
+                    return prevMugPath;
+                }
+                return postPath.replace(postRegExp, prevMugPath + "/");
+            }
+            var tree = this.dataTree,
+                newName = mug.p.nodeID,
+                mugPath = tree.getAbsolutePath(mug),
+                mugs = this.getDescendants(mug).concat([mug]),
+                postMovePaths = _(mugs).map(function(mug) { return tree.getAbsolutePath(mug); }),
+                prevMugPath = mugPath.replace(new RegExp("/" + RegExp.escape(newName) + "$"), "/" + oldName),
+                postRegExp = new RegExp("^" + RegExp.escape(mugPath) + "/"),
+                updates = {};
+            for (var i = 0; i < mugs.length; i++) {
+                if (postMovePaths[i]) {
+                    updates[mugs[i].ufid] = [preMovePath(postMovePaths[i]), postMovePaths[i]];
+                }
+            }
+            this._logicManager.updatePaths(updates);
         },
         changeMugType: function (mug, questionType) {
             this.mugTypes.changeType(mug, questionType);
@@ -413,8 +441,8 @@ define([
                 duplicate = foo[0],
                 pathReplacements = foo[1];
 
-            if (typeof _gaq !== "undefined") {
-               _gaq.push(['_trackEvent', 'Form Builder', 'Copy', duplicate.options.typeName]);
+            if (typeof window._gaq !== "undefined") {
+               window._gaq.push(['_trackEvent', 'Form Builder', 'Copy', duplicate.options.typeName]);
             }
 
             for (var i = 0; i < pathReplacements.length; i++) {
@@ -521,10 +549,13 @@ define([
         handleMugPropertyChange: function (mug, e) {
             if (e.property === 'nodeID') {
                 var currentPath = this.getAbsolutePath(mug),
-                    valid, parsed;
+                    valid = true,
+                    parsed;
                 try {
-                    valid = true;
                     parsed = xpath.parse(currentPath);
+                    if (_.isUndefined(parsed.steps)) {
+                        valid = false;
+                    }
                 } catch (err) {
                     valid = false;
                 }

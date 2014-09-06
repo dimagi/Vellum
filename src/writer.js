@@ -64,7 +64,7 @@ define([
     };
 
     var createModelHeader = function (form, xmlWriter) {
-        var uuid, uiVersion, version, formName, jrm;
+        var uuid, jrm;
         //assume we're currently pointed at the opening date block tag
         //e.g. <model><instance><data> <--- we're at <data> now.
 
@@ -217,7 +217,7 @@ define([
                 xmlWriter.writeXML($('<div>').append(mug.p.rawControlXML).clone().html());
                 return;
             }
-            var label, hasItext, isItextOptional;
+            var label, isItextOptional;
 
             function createOpenControlTag(tagName, elLabel) {
                 tagName = tagName.toLowerCase();

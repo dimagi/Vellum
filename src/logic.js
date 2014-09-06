@@ -181,7 +181,7 @@ define([
                 return data.hasOwnProperty(elem.ref) && 
                     (!subtree || elem.sourcePath === subtree || elem.sourcePath.indexOf(subtree + '/') === 0);
             });
-            var ref, mug, expr, pkey, mugId, seen = {};
+            var ref, mug, expr, pkey, mugId, orig, seen = {};
             for (var i = 0; i < found.length; i++) {
                 ref = found[i];
                 pkey = ref.mug + " " + ref.property;

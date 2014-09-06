@@ -28,5 +28,7 @@ test ${PIPESTATUS[0]} -eq 0 # stop on mocha-phantomjs non-zero exit status
 # script to exit prematurely
 
 if [[ "$run_jshint" == "true" ]]; then
-    jshint src/*.js tests/*.js
+    jshint src/*.js
+    jshint --config tests/.jshintrc tests/*.js
+    echo "jshint passed"
 fi

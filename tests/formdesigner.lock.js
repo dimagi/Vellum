@@ -154,19 +154,6 @@ require([
     });
 
 
-    // from jquery.simulate
-    function findCenter( elem ) {
-        var offset,
-            document = $( elem.ownerDocument );
-        elem = $( elem );
-        offset = elem.offset();
-
-        return {
-            x: offset.left + elem.outerWidth() / 2 - document.scrollLeft(),
-            y: offset.top + elem.outerHeight() / 2 - document.scrollTop()
-        };
-    }
-
     // hack to make jstree drag and drop testing work. FML.
     //var _simulateEvent = $.simulate.prototype.simulateEvent,
         //currentEl;
@@ -253,6 +240,19 @@ require([
         /* todo 
         describe("The move locking", function () {
             beforeEach(beforeFn);
+
+            // from jquery.simulate
+            function findCenter( elem ) {
+                var offset,
+                    document = $( elem.ownerDocument );
+                elem = $( elem );
+                offset = elem.offset();
+
+                return {
+                    x: offset.left + elem.outerWidth() / 2 - document.scrollLeft(),
+                    y: offset.top + elem.outerHeight() / 2 - document.scrollTop()
+                };
+            }
 
             function doDrag(source, target) {
                 var $source = $("li[rel]:contains(" + source + ")").find('a'),

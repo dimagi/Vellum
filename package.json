@@ -33,6 +33,6 @@
     "main": "src/main.js",
     "scripts": {
         "install": "bower install",
-        "test": "mocha-phantomjs 'index.html?built' && jshint src/*.js tests/*.js"
+        "test": "mocha-phantomjs 'index.html?built' && jshint src/*.js && jshint -c tests/.jshintrc tests/*.js"
     }
 }
