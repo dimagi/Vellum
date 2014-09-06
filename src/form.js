@@ -442,7 +442,7 @@ define([
                 pathReplacements = foo[1];
 
             if (typeof window._gaq !== "undefined") {
-               window._gaq.push(['_trackEvent', 'Form Builder', 'Copy', foo[0].typeName]);
+               window._gaq.push(['_trackEvent', 'Form Builder', 'Copy', duplicate.options.typeName]);
             }
 
             for (var i = 0; i < pathReplacements.length; i++) {
