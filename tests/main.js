@@ -54,8 +54,8 @@ require(['jquery', 'jquery.vellum'], function ($) {
         // handle potential slow free heroku dynos
         waitSeconds: 60,
         paths: {
+            'static': testBase + 'tests/static',
             'chai': testBase + 'bower_components/chai/chai',
-
             'equivalent-xml': testBase + 'bower_components/equivalent-xml-js/src/equivalent-xml'
         },
         shim: {
