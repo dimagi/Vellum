@@ -94,6 +94,7 @@ require(['jquery', 'jquery.vellum'], function ($) {
         'tests/logic',
         'tests/parser',
         'tests/questionTypes',
+        'tests/exporter',
         'tests/javaRosa',
         'tests/formdesigner.ignoreButRetain',
         'tests/formdesigner.lock',

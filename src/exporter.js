@@ -51,7 +51,7 @@ define([
             }
 
             row.Question = form.getAbsolutePath(mug);
-            row.Type = mug.typeName;
+            row.Type = mug.options.typeName;
 
             if (!mug.options.isDataOnly) {
                 for (var type in itextColumns) {
