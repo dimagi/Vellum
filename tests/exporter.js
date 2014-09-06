@@ -15,10 +15,7 @@ require([
     ALL_QUESTIONS_TSV
 ) {
     var assert = chai.assert,
-        call = util.call,
-        plugins = util.options.options.plugins || [],
-        pluginsWithItemset = _.union(plugins, ["itemset"]),
-        pluginsWithoutItemset = _(plugins).without("itemset");
+        call = util.call;
 
     describe("The exporter", function () {
         beforeEach(function (done) {
