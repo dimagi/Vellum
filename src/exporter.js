@@ -43,6 +43,8 @@ define([
             var defaultOrNothing = function (item, language, form) {
                 return (item && item.hasForm(form)) ? 
                     item.getForm(form).getValueOrDefault(language) : "";
+                // TODO see newline treatment in javaRosa.js TSV logic
+                //return value.replace(/\r?\n/g, "&#10;");
             };
 
             // initialize all columns to empty string

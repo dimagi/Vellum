@@ -895,6 +895,7 @@ define([
                 .attr('class', 'jstree-icon')
                 .addClass(iconClass);
         }
+        // TODO fix possible bug: mug.typeName -> mug.options.typeName
         this.activateQuestionTypeGroup(mug.__className || mug.typeName);
     };
 
