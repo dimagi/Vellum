@@ -641,13 +641,6 @@ define([
         getAbsolutePath: function (mug, excludeRoot) {
             return this.dataTree.getAbsolutePath(mug, excludeRoot);
         },
-        getMugByItextID: function (itextID) {
-            var node = this.dataTree.rootNode.getSingleMatchingNode(function (value) {
-                return value && value.getItext().id === itextID;
-            });
-
-            return node ? node.getValue() : null;
-        },
         getMugByUFID: function (ufid) {
             return (this.dataTree.getMugFromUFID(ufid) ||
                     this.controlTree.getMugFromUFID(ufid));

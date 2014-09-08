@@ -1394,6 +1394,13 @@ define([
             this.__callOld();
             this.data.javaRosa.Itext.updateForExistingMug(mug);
         },
+        getMugByItextID: function (itextID) {
+            var node = this.data.core.form.dataTree.rootNode.getSingleMatchingNode(function (value) {
+                return value && value.getItext().id === itextID;
+            });
+
+            return node ? node.getValue() : null;
+        },
         handleMugRename: function (form, mug, newID, oldID, newPath, oldPath) {
             this.__callOld();
 
@@ -1430,7 +1437,7 @@ define([
                 if (change) {
                     form.fire({
                         type: 'question-label-text-change',
-                        mug: _this.data.core.form.getMugByItextID(item.id),
+                        mug: _this.getMugByItextID(item.id),
                         text: item.getValue('default', itext.getDefaultLanguage())
                     });
                 }
