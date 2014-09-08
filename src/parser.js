@@ -2,12 +2,16 @@ define([
     'vellum/form',
     'vellum/util',
     'jquery',
-    'underscore'
+    'underscore',
+    'xpath',
+    'xpathmodels'
 ], function (
     form_,
     util,
     $,
-    _
+    _,
+    xpath,
+    xpathmodels
 ) {
     var DEFAULT_FORM_ID = 'data',
         itemsetEnabled;
@@ -358,7 +362,7 @@ define([
     function parseControlElement(form, nodePath, cEl, oldEl) {
         var mug = form.getMugByPath(nodePath),
             $cEl = oldEl || cEl,
-            tagName, bindEl, dataEl, dataType, 
+            tagName, dataType, 
             appearance = $cEl.popAttr('appearance'),
             mediaType = $cEl.popAttr('mediatype') || null,
             MugClass;
@@ -507,7 +511,7 @@ define([
         }
         el = $(el); //make sure it's jquerified
         var path = el.popAttr('ref'),
-            nodeId, mug, pathToTry;
+            nodeId, pathToTry;
         if(!path){
             path = el.popAttr('nodeset');
         }
@@ -527,11 +531,9 @@ define([
     }
 
     function parseControlTree (form, controlsTree) {
-        var Itext = form.vellum.data.javaRosa.Itext;
-
         function eachFunc(el, parentMug){
             el = $(el);
-            var oldEl, tagName, children, bind;
+            var oldEl, tagName;
 
             if (isRepeat(el)) {
                 oldEl = el;
@@ -585,18 +587,6 @@ define([
         }
         newPath = parsed.toXPath();
         return newPath;
-    }
-
-    /**
-     * Given a (nodeset or ref) path, will figure out what the implied NodeID is.
-     * @param path
-     */
-    function getNodeIDFromPath (path) {
-        if (!path) {
-            return null;
-        }
-        var arr = path.split('/');
-        return arr[arr.length-1];
     }
 
     function parseBindList (form, bindList) {

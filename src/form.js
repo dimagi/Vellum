@@ -1,6 +1,7 @@
 define([
     'require',
     'underscore',
+    'xpath',
     'vellum/tree',
     'vellum/logic',
     'vellum/widgets',
@@ -8,6 +9,7 @@ define([
 ], function (
     require,
     _,
+    xpath,
     Tree,
     logic,
     widgets,
@@ -74,9 +76,7 @@ define([
     // top-level escaped double quotes).  This may not correctly handle escaped
     // quotes within a quote.  Moving on.
     function normalizeToSingleQuotes(str) {
-        var ret = '',
-            inAQuote = false;
-
+        var ret = '';
         eachCharByQuotedStatus(str,
             function (c) {
                 ret += c;
@@ -276,7 +276,7 @@ define([
          * autocomplete skip logic wizard.
          */
         getMugList: function () {
-            var cTree, dTree, treeFunc, cList, dList, mergeList;
+            var treeFunc, cList, dList;
 
             treeFunc = function (node) {
                 if(node.isRootNode) {
@@ -441,8 +441,8 @@ define([
                 duplicate = foo[0],
                 pathReplacements = foo[1];
 
-            if (typeof _gaq !== "undefined") {
-               _gaq.push(['_trackEvent', 'Form Builder', 'Copy', foo[0].typeName]);
+            if (typeof window._gaq !== "undefined") {
+               window._gaq.push(['_trackEvent', 'Form Builder', 'Copy', duplicate.options.typeName]);
             }
 
             for (var i = 0; i < pathReplacements.length; i++) {

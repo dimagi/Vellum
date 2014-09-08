@@ -8,8 +8,7 @@ define([
     chai,
     $
 ) {
-    var assert = chai.assert,
-        assertXmlEqual = util.assertXmlEqual,
+    var assertXmlEqual = util.assertXmlEqual,
         call = util.call;
 
     describe("The Ignore-But-Retain plugin", function() {
@@ -19,8 +18,6 @@ define([
                 core: {onReady: done}
             });
         });
-
-        var xmls = new XMLSerializer();
 
         var testXmlPair = function (rawXml, processedXml) {
             call('loadXML', rawXml);
@@ -35,6 +32,22 @@ define([
                 testXmlPair(COMMON, COMMON_IGNORED);
             }
         );
+
+        it("can insert ignored element into empty parent", function () {
+            call('loadXML', EMPTY_PARENT);
+            assertXmlEqual(call('createXML'), EMPTY_PARENT);
+        });
+
+        it("does not insert multiple copies of ignored nodes", function () {
+            call('loadXML', MUTLI_MATCH);
+            assertXmlEqual(call('createXML'), MUTLI_MATCH);
+        });
+
+        it("can ignore elements in <head>", function () {
+            // fixes TypeError: 'undefined' is not an object (evaluating 'element.firstElementChild')
+            call('loadXML', IGNORE_IN_HEAD);
+            assertXmlEqual(call('createXML'), IGNORE_IN_HEAD);
+        });
 
         it("handles multiple ignore nodes in a row", function () {
             testXmlPair(MULTIPLE_IGNORES, MULTIPLE_IGNORES_IGNORED);
@@ -171,6 +184,74 @@ define([
             </group>\
         </h:body>\
     </h:html>';
+
+    var EMPTY_PARENT = util.xmlines('' +
+    '<?xml version="1.0" encoding="UTF-8"?>\
+    <h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:orx="http://openrosa.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa" xmlns:vellum="http://commcarehq.org/xforms/vellum">\
+        <h:head>\
+            <h:title>Untitled Form</h:title>\
+            <model>\
+                <instance>\
+                    <data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/398C9010-61DC-42D3-8A85-B857AC3A9CA0" uiVersion="1" version="1" name="Untitled Form">\
+                        <question1 />\
+                        <case>\
+                            <update vellum:ignore="retain" />\
+                        </case>\
+                    </data>\
+                </instance>\
+                <bind nodeset="/data/question1" type="xsd:string" />\
+                <bind nodeset="/data/case"/>\
+                <itext>\
+                    <translation lang="en" default=""/>\
+                </itext>\
+            </model>\
+        </h:head>\
+        <h:body></h:body>\
+    </h:html>');
+
+    var MUTLI_MATCH = util.xmlines('' +
+    '<?xml version="1.0" encoding="UTF-8"?>\
+    <h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:orx="http://openrosa.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa" xmlns:vellum="http://commcarehq.org/xforms/vellum">\
+        <h:head>\
+            <h:title>Untitled Form</h:title>\
+            <model>\
+                <instance>\
+                    <data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/398C9010-61DC-42D3-8A85-B857AC3A9CA0" uiVersion="1" version="1" name="Untitled Form">\
+                        <question1 />\
+                    </data>\
+                </instance>\
+                <bind nodeset="/data/question1" type="xsd:string" />\
+                <bind nodeset="/data/question1" vellum:ignore="retain" />\
+                <bind nodeset="/data/question1" vellum:ignore="retain" />\
+                <itext>\
+                    <translation lang="en" default=""/>\
+                </itext>\
+            </model>\
+        </h:head>\
+        <h:body></h:body>\
+    </h:html>');
+
+    var IGNORE_IN_HEAD = util.xmlines('' +
+    '<?xml version="1.0" encoding="UTF-8"?>\
+    <h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:orx="http://openrosa.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa" xmlns:vellum="http://commcarehq.org/xforms/vellum">\
+        <h:head>\
+            <h:title>Untitled Form</h:title>\
+            <model>\
+                <instance>\
+                    <data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/398C9010-61DC-42D3-8A85-B857AC3A9CA0" uiVersion="1" version="1" name="Untitled Form">\
+                        <question1 />\
+                    </data>\
+                </instance>\
+                <bind nodeset="/data/question1" type="xsd:string" />\
+                <itext>\
+                    <translation lang="en" default=""/>\
+                </itext>\
+            </model>\
+    		<odkx:intent vellum:ignore="retain" xmlns:odkx="http://opendatakit.org/xforms" id="search" class="com.biometrac.core.PIPE">\
+    		</odkx:intent>\
+        </h:head>\
+        <h:body></h:body>\
+    </h:html>');
 
     var MULTIPLE_IGNORES = '' + 
     '<?xml version="1.0" encoding="UTF-8"?>\

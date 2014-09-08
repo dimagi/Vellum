@@ -2,10 +2,12 @@
 require([
     'chai',
     'jquery',
+    'underscore',
     'tests/utils'
 ], function (
     chai,
     $,
+    _,
     util
 ) {
     var assert = chai.assert,
@@ -17,8 +19,9 @@ require([
             util.init({
                 core: {
                     onReady: function () {
-                        var mug = util.addQuestion("Text", "question1"),
-                            dup = util.addQuestion("Text", "question2");
+                        var dup;
+                        util.addQuestion("Text", "question1");
+                        dup = util.addQuestion("Text", "question2");
                         dup.p.nodeID = "question1";
 
                         // TODO fix tight coupling of this functionality with UI

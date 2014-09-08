@@ -20,6 +20,7 @@ define([
     'vellum/widgets',
     'vellum/parser',
     'vellum/util',
+    'vellum/debugutil',
     'vellum/base',
     'less!vellum/less-style/main',
     'jquery.jstree',
@@ -45,7 +46,8 @@ define([
     mugs,
     widgets,
     parser,
-    util
+    util,
+    debug
 ) {
     
     // Load these modules in the background after all runtime dependencies have
@@ -384,7 +386,7 @@ define([
     fn.setDialogInfo = function (message, confButName, confFunction,
                                  cancelButName, cancelButFunction, title) {
         title = title || "";
-        var buttons = {}, opt,
+        var buttons = {},
             $dial = $('.fd-dialog-confirm'), contentStr;
         buttons[confButName] = confFunction;
         buttons[cancelButName] = cancelButFunction;
@@ -903,6 +905,7 @@ define([
                 .attr('class', 'jstree-icon')
                 .addClass(iconClass);
         }
+        // TODO fix possible bug: mug.typeName -> mug.options.typeName
         this.activateQuestionTypeGroup(mug.__className || mug.typeName);
     };
 
@@ -1333,7 +1336,6 @@ define([
     };
 
     fn.handleMugParseFinish = function (mug) {
-    
     };
 
     fn.getMugByPath = function (path) {
@@ -1354,7 +1356,7 @@ define([
         this.hideQuestionProperties();
 
         var $content = this.$f.find(".fd-props-content").empty(),
-            sections = this.getSections(mug);
+            sections = this.getSections();
 
         this.$f.find('.fd-props-toolbar').html(this.getMugToolbar(mug));
         for (var i = 0; i < sections.length; i++) {
@@ -1444,7 +1446,6 @@ define([
     };
 
     fn.showVisualValidation = function (mug) {
-        var _this = this;
         //function setValidationFailedIcon(li, showIcon, message) {
             //var $li = $(li),
                 //exists = ($li.find('.fd-props-validate').length > 0);
@@ -1459,10 +1460,10 @@ define([
             //}
         //}
 
-        function findInputByReference(blockName, elementName) {
+        //function findInputByReference(blockName, elementName) {
             // todo: make this work (it hasn't in a while)
             //return $('#' + blockName + '-' + elementName);
-        }
+        //}
 
         // for now form warnings get reset every time validation gets called.
         this.data.core.form.clearErrors('form-warning');
@@ -1570,7 +1571,7 @@ define([
             try {
                 _this.changeMugType(mug, $(this).data('qtype'));
             } catch (err) {
-                alert("Sorry, " + err);
+                window.alert("Sorry, " + err);
             }
             e.preventDefault();
         });
@@ -1673,7 +1674,7 @@ define([
 //                            );
                         _this.send(formText, 'full');
                     } else if (CryptoJS.SHA1(formText).toString() !== data.sha1) {
-                        console.error("sha1's didn't match");
+                        debug.error("sha1's didn't match");
                         _this.send(formText, 'full');
                     }
                 }
@@ -1714,7 +1715,7 @@ define([
         this._showConfirmDialog();
     };
 
-    fn.getSections = function (mug) {
+    fn.getSections = function () {
         return [
             {
                 slug: "main",
