@@ -1281,7 +1281,7 @@ define([
 
     function insertOutputRef(form, mug, target, path, dateFormat) {
         var output = getOutputRef(path, dateFormat);
-        util.insertTextAtCursor(target, output);
+        util.insertTextAtCursor(target, output, true);
         warnOnCircularReference('label', form, mug, path);
         warnOnNonOutputableValue(form, mug, path);
     }

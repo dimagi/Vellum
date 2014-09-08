@@ -301,27 +301,31 @@ define([
         return pos;
     };
 
-    that.setCaretPosition = function (ctrl, pos){
+    that.setCaretPosition = function (ctrl, start, end){
+        if (end === null || end === undefined) {
+            end = start;
+        }
         if (ctrl.setSelectionRange) {
             ctrl.focus();
-            ctrl.setSelectionRange(pos,pos);
+            ctrl.setSelectionRange(start, end);
         } else if (ctrl.createTextRange) {
             var range = ctrl.createTextRange();
             range.collapse(true);
-            range.moveEnd('character', pos);
-            range.moveStart('character', pos);
+            range.moveStart('character', start);
+            range.moveEnd('character', end);
             range.select();
         }
     };
 
-    that.insertTextAtCursor = function (jqctrl, text) {
+    that.insertTextAtCursor = function (jqctrl, text, select) {
         var ctrl = jqctrl[0],
             pos = that.getCaretPosition(ctrl),
             front = ctrl.value.substring(0, pos),
-            back = ctrl.value.substring(pos, ctrl.value.length);
+            back = ctrl.value.substring(pos, ctrl.value.length),
+            start = select ? pos : pos + text.length;
         jqctrl.val(front + text + back).change();
         pos = pos + text.length;
-        that.setCaretPosition(ctrl, pos);
+        that.setCaretPosition(ctrl, start, pos);
     };
         
     return that;
