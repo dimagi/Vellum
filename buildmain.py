@@ -19,7 +19,8 @@ def main():
     main_components = json.loads(clean_json("[%s]" % main_components_js))
     bundles["main-components"] = main_components
     print(MAIN_JS_TEMPLATE % {
-        "bundles": json.dumps(bundles, indent=4).replace("\n", "\n    "),
+        "bundles": json.dumps(bundles, indent=4, sort_keys=True)
+                       .replace("\n", "\n    "),
         "main_components": main_components_js
     })
 
