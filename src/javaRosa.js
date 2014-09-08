@@ -889,40 +889,12 @@ define([
             return $input;
         };
 
-        // TODO: duplicated in core.js
-        function getCaretPosition (ctrl) {
-            var pos = 0;
-            if (ctrl.createTextRange) {
-                ctrl.focus ();
-                var sel = document.selection.createRange();
-                sel.moveStart ('character', -ctrl.value.length);
-                pos = sel.text.length;
-            } else if (typeof ctrl.selectionStart !== 'undefined') {
-                pos = ctrl.selectionStart;
-            }
-            return pos;
-        }
-
-        // TODO: duplicated in core.js
-        function setCaretPosition(ctrl, pos){
-            if (ctrl.setSelectionRange) {
-                ctrl.focus();
-                ctrl.setSelectionRange(pos,pos);
-            } else if (ctrl.createTextRange) {
-                var range = ctrl.createTextRange();
-                range.collapse(true);
-                range.moveEnd('character', pos);
-                range.moveStart('character', pos);
-                range.select();
-            }
-        }
-
         if (options.path === 'labelItext') {
             $input.keydown(function (e) {
                 // deletion of entire output ref in one go
                 if (e && e.keyCode === 8 || e.keyCode === 46) {
                     var control = widget.getControl()[0];
-                    var pos = getCaretPosition(control),
+                    var pos = util.getCaretPosition(control),
                         val = widget.getValue();
 
                     var outputBegin = '<output',
@@ -945,7 +917,7 @@ define([
                     if (start || end && start !== -1 && end !== -1) {
                         var noRef = val.slice(0, start) + val.slice(end, val.length);
                         widget.setValue(noRef);
-                        setCaretPosition(control, start);
+                        util.setCaretPosition(control, start);
                         e.preventDefault();
                     }
                 }

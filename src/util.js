@@ -287,6 +287,42 @@ define([
             }
         }
     };
+
+    that.getCaretPosition = function (ctrl) {
+        var pos = 0;
+        if (ctrl.createTextRange) {
+            ctrl.focus ();
+            var sel = document.selection.createRange ();
+            sel.moveStart ('character', -ctrl.value.length);
+            pos = sel.text.length;
+        } else if (typeof ctrl.selectionStart !== 'undefined') {
+            pos = ctrl.selectionStart;
+        }
+        return pos;
+    };
+
+    that.setCaretPosition = function (ctrl, pos){
+        if (ctrl.setSelectionRange) {
+            ctrl.focus();
+            ctrl.setSelectionRange(pos,pos);
+        } else if (ctrl.createTextRange) {
+            var range = ctrl.createTextRange();
+            range.collapse(true);
+            range.moveEnd('character', pos);
+            range.moveStart('character', pos);
+            range.select();
+        }
+    };
+
+    that.insertTextAtCursor = function (jqctrl, text) {
+        var ctrl = jqctrl[0],
+            pos = that.getCaretPosition(ctrl),
+            front = ctrl.value.substring(0, pos),
+            back = ctrl.value.substring(pos, ctrl.value.length);
+        jqctrl.val(front + text + back).change();
+        pos = pos + text.length;
+        that.setCaretPosition(ctrl, pos);
+    };
         
     return that;
 });

@@ -19,6 +19,7 @@ define([
     'vellum/mugs',
     'vellum/widgets',
     'vellum/parser',
+    'vellum/util',
     'vellum/base',
     'less!vellum/less-style/main',
     'jquery.jstree',
@@ -43,7 +44,8 @@ define([
     modal_button,
     mugs,
     widgets,
-    parser
+    parser,
+    util
 ) {
     
     // Load these modules in the background after all runtime dependencies have
@@ -659,44 +661,6 @@ define([
         }
     }
 
-    // TODO: duplicated in javaRosa.js
-    function getCaretPosition (ctrl) {
-        var pos = 0;
-        if (ctrl.createTextRange) {
-            ctrl.focus ();
-            var sel = document.selection.createRange ();
-            sel.moveStart ('character', -ctrl.value.length);
-            pos = sel.text.length;
-        } else if (typeof ctrl.selectionStart !== 'undefined') {
-            pos = ctrl.selectionStart;
-        }
-        return pos;
-    }
-
-    // TODO: duplicated in javaRosa.js
-    function setCaretPosition(ctrl, pos){
-        if (ctrl.setSelectionRange) {
-            ctrl.focus();
-            ctrl.setSelectionRange(pos,pos);
-        } else if (ctrl.createTextRange) {
-            var range = ctrl.createTextRange();
-            range.collapse(true);
-            range.moveEnd('character', pos);
-            range.moveStart('character', pos);
-            range.select();
-        }
-    }
-
-    function insertTextAtCursor(jqctrl, text) {
-        var ctrl = jqctrl[0];
-        var pos = getCaretPosition(ctrl);
-        var front = (ctrl.value).substring(0, pos);
-        var back = (ctrl.value).substring(pos, ctrl.value.length);
-        jqctrl.val(front + text + back).change();
-        pos = pos + text.length;
-        setCaretPosition(ctrl, pos);
-    }
-
     function getOutputRef(path, dateFormat) {
         if (dateFormat) {
             return '<output value="format-date(date(' + path + '), \'' + dateFormat + '\')"/>';
@@ -707,7 +671,7 @@ define([
 
     function insertOutputRef(form, mug, target, path, dateFormat) {
         var output = getOutputRef(path, dateFormat);
-        insertTextAtCursor(target, output);
+        util.insertTextAtCursor(target, output);
         warnOnCircularReference('label', form, mug, path, "output value");
         warnOnNonOutputableValue(form, mug, path);
     }
@@ -737,7 +701,7 @@ define([
                 menu.remove();
             });
             var e = window.event;
-            menu.css({'top':e.clientY,'left':e.clientX}).show();
+            menu.css({'top': e.clientY, 'left': e.clientX}).show();
         } else {
             insertOutputRef(form, mug, target, path);
         }
