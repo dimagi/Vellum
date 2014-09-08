@@ -170,7 +170,7 @@ define([
                     }
                 } else {
                     var firstChild = parentNode.children().first();
-                    if (firstChild[0].tagName !== 'label') {
+                    if (firstChild.length === 0 || firstChild[0].tagName !== 'label') {
                         prependChild(parentNode[0], appendNode);
                     } else {
                         // make sure to insert after the <label> at the beginning of
