@@ -632,80 +632,44 @@ define([
         }
     };
   
-    function warnOnCircularReference(property, form, mug, path, refName) {
+    function warnOnCircularReference(property, form, mug, path) {
         if (path === "." && (
             property === "relevantAttr" ||
-            property === "calculateAttr" ||
-            property === "label"
+            property === "calculateAttr"
         )) {
             var fieldName = mug.p.getDefinition(property).lstring;
             form.updateError({
                 level: "form-warning",
                 message: "The " + fieldName + " for a question " + 
                     "is not allowed to reference the question itself. " + 
-                    "Please remove the " + refName + " from the " + fieldName +
+                    "Please remove the period from the " + fieldName +
                     " or your form will have errors."
             }, {updateUI: true});
         }
     }
 
-    function warnOnNonOutputableValue(form, mug, path) {
-        if (!mug.options.canOutputValue) {
-            var typeName = mug.options.typeName;
-            form.updateError({
-                level: "form-warning",
-                message: typeName + " nodes can not be used in an output value. " +
-                    "Please remove the output value for '" + path +
-                    "' or your form will have errors."
-            }, {updateUI: true});
-        }
-    }
+    fn.handleDropFinish = function(target, sourceUid, mug) {
+        var _this = this,
+            ops = target.closest(".xpath-expression-row").find(".op-select");
 
-    function getOutputRef(path, dateFormat) {
-        if (dateFormat) {
-            return '<output value="format-date(date(' + path + '), \'' + dateFormat + '\')"/>';
-        } else {
-            return '<output value="' + path + '" />';
-        }
-    }
+        if (target) {
+            var path = _this.mugToXPathReference(mug);
+            // the .change fires the validation controls
+            target.val(target.val() + path).change();
 
-    function insertOutputRef(form, mug, target, path, dateFormat) {
-        var output = getOutputRef(path, dateFormat);
-        util.insertTextAtCursor(target, output);
-        warnOnCircularReference('label', form, mug, path, "output value");
-        warnOnNonOutputableValue(form, mug, path);
-    }
-
-    function handleOutputRefDrop(mug, target, path, form) {
-        var mugType = mug.options.typeName;
-        var formatOptions = null;
-        if (mugType === 'Date') {
-            formatOptions = {
-                "": "No Formatting",
-                "%d/%n/%y": "DD/MM/YY e.g. 04/01/14",
-                "%a, %b %e, %Y": "DDD, MMM DD, YYYY e.g. Sun, Jan 1, 2014"
-            };
+            if (_this.data.core.currentlyEditedProperty) {
+                warnOnCircularReference(
+                    _this.data.core.currentlyEditedProperty,
+                    _this.data.core.form,
+                    mug,
+                    path);
+            }
         }
-        if (formatOptions) {
-            var menuHtml = '<ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">' +
-                '<li><strong>Date Format Options</strong></li>';
-            _(formatOptions).each(function(label, format) {
-                menuHtml += '<li><a tabindex="-1" href="#" data-format="' + format + '">' + label + '</a></li>';
-            });
-            menuHtml += '</ul>';
 
-            var menu = $(menuHtml);
-            $('body').append(menu);
-            menu.find('li a').click(function () {
-                insertOutputRef(form, mug, target, path, $(this).data('format'));
-                menu.remove();
-            });
-            var e = window.event;
-            menu.css({'top': e.clientY, 'left': e.clientX}).show();
-        } else {
-            insertOutputRef(form, mug, target, path);
+        if (mug && ops && mug.options.defaultOperator) {
+            ops.val(mug.options.defaultOperator);
         }
-    }
+    };
 
     var validRootChildren,
         typeData;
@@ -776,32 +740,9 @@ define([
                 "drop_finish" : function(data) {
                     var target = $(data.r),
                         sourceUid = $(data.o).attr('id'),
-                        mug = _this.data.core.form.getMugByUFID(sourceUid),
-                        ops = target.closest(".xpath-expression-row").find(".op-select");
+                        mug = _this.data.core.form.getMugByUFID(sourceUid);
 
-                    var inItext = target && target.attr('name').lastIndexOf('itext', 0) === 0;
-                    if (target) {
-                        var path = _this.mugToXPathReference(mug);
-                        if (inItext) {
-                            handleOutputRefDrop(mug, target, path, _this.data.core.form);
-                        } else {
-                            // the .change fires the validation controls
-                            target.val(target.val() + path).change();
-
-                            if (_this.data.core.currentlyEditedProperty) {
-                                warnOnCircularReference(
-                                    _this.data.core.currentlyEditedProperty,
-                                    _this.data.core.form,
-                                    mug,
-                                    path,
-                                    "period");
-                            }
-                        }
-                    }
-
-                    if (!inItext && mug && ops && mug.options.defaultOperator) {
-                        ops.val(mug.options.defaultOperator);
-                    }
+                    _this.handleDropFinish(target, sourceUid, mug);
                 }
             },
             "types": {

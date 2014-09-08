@@ -1245,6 +1245,46 @@ define([
         return "pass";
     }
 
+    function warnOnCircularReference(property, form, mug, path) {
+        if (path === ".") {
+            var fieldName = mug.p.getDefinition(property).lstring;
+            form.updateError({
+                level: "form-warning",
+                message: "The " + fieldName + " for a question " +
+                    "is not allowed to reference the question itself. " +
+                    "Please remove the output value from the " + fieldName +
+                    " or your form will have errors."
+            }, {updateUI: true});
+        }
+    }
+
+    function warnOnNonOutputableValue(form, mug, path) {
+        if (!mug.options.canOutputValue) {
+            var typeName = mug.options.typeName;
+            form.updateError({
+                level: "form-warning",
+                message: typeName + " nodes can not be used in an output value. " +
+                    "Please remove the output value for '" + path +
+                    "' or your form will have errors."
+            }, {updateUI: true});
+        }
+    }
+
+    function getOutputRef(path, dateFormat) {
+        if (dateFormat) {
+            return '<output value="format-date(date(' + path + '), \'' + dateFormat + '\')"/>';
+        } else {
+            return '<output value="' + path + '" />';
+        }
+    }
+
+    function insertOutputRef(form, mug, target, path, dateFormat) {
+        var output = getOutputRef(path, dateFormat);
+        util.insertTextAtCursor(target, output);
+        warnOnCircularReference('label', form, mug, path);
+        warnOnNonOutputableValue(form, mug, path);
+    }
+
     $.vellum.plugin("javaRosa", {
         langs: ['en'],
         displayLanguage: 'en'
@@ -1254,6 +1294,42 @@ define([
             this.data.javaRosa.ItextItem = ItextItem;
             this.data.javaRosa.ItextForm = ItextForm;
             this.data.javaRosa.ICONS = ICONS;
+        },
+        handleDropFinish: function(target, sourceUid, mug) {
+            var inItext = target &&
+                target.attr('name') &&
+                target.attr('name').lastIndexOf('itext', 0) === 0;
+            if (inItext) {
+                var path = this.mugToXPathReference(mug),
+                    mugType = mug.options.typeName,
+                    form = this.data.core.form;
+                if (mugType === 'Date') {
+                    var formatOptions = {
+                        "": "No Formatting",
+                        "%d/%n/%y": "DD/MM/YY e.g. 04/01/14",
+                        "%a, %b %e, %Y": "DDD, MMM DD, YYYY e.g. Sun, Jan 1, 2014"
+                    };
+                    var menuHtml = '<ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">' +
+                        '<li><strong>Date Format Options</strong></li>';
+                    _(formatOptions).each(function(label, format) {
+                        menuHtml += '<li><a tabindex="-1" href="#" data-format="' + format + '">' + label + '</a></li>';
+                    });
+                    menuHtml += '</ul>';
+
+                    var menu = $(menuHtml);
+                    $('body').append(menu);
+                    menu.find('li a').click(function () {
+                        insertOutputRef(form, mug, target, path, $(this).data('format'));
+                        menu.remove();
+                    });
+                    var e = window.event;
+                    menu.css({'top': e.clientY, 'left': e.clientX}).show();
+                } else {
+                    insertOutputRef(form, mug, target, path);
+                }
+            } else {
+                this.__callOld();
+            }
         },
         handleNewMug: function (mug) {
             var ret = this.__callOld();
