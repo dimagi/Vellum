@@ -3,12 +3,14 @@ require([
     'chai',
     'jquery',
     'tests/utils',
-    'vellum/javaRosa'
+    'vellum/javaRosa',
+    'vellum/util'
 ], function (
     chai,
     $,
     util,
-    jr
+    jr,
+    vellum_util
 ) {
     var assert = chai.assert,
         call = util.call,
@@ -115,6 +117,61 @@ require([
                     assert.equal(cpy.p.labelItextID.defaultValue(), "copy");
                     done();
                 });
+            }}});
+        });
+
+        it("drag question into label makes output ref in correct position", function (done) {
+            util.init({core: {onReady: function () {
+                var mug1 = util.addQuestion("Text", "question1"),
+                    mug2 = util.addQuestion("Text", "question2");
+
+                var target = $("[name='itext-en-label']"),
+                    sourceUid = mug1.ufid;
+                vellum_util.setCaretPosition(target[0], 4);
+                call("handleDropFinish", target, sourceUid, mug1);
+                var val = mug2.p.labelItextID.getValue('default', 'en');
+                assert.equal(val, 'ques<output value="/data/question1" />tion2');
+                done();
+            }}});
+        });
+
+        it("output ref deleted with single backspace", function (done) {
+            util.init({core: {onReady: function () {
+                var mug = util.addQuestion("Text", "question1");
+
+                var target = $("[name='itext-en-label']");
+                target.val('question1 <output value="/data/question2" /> end').change();
+                vellum_util.setCaretPosition(target[0], 44);
+
+                target.trigger({
+                    type: "keydown",
+                    which: 8,
+                    ctrlKey: false
+                });
+                target.change();
+                var val = mug.p.labelItextID.getValue('default', 'en');
+                assert.equal(val, 'question1  end');
+                done();
+            }}});
+        });
+
+        it("output ref deleted with single delete keypress", function (done) {
+            util.init({core: {onReady: function () {
+                var mug = util.addQuestion("Text", "question1");
+
+                var target = $("[name='itext-en-label']");
+                target.val('question1 <output value="/data/question2" /> end').change();
+                vellum_util.setCaretPosition(target[0], 10);
+
+                target.trigger({
+                    type: "keydown",
+                    which: 46,
+                    ctrlKey: false
+                });
+                target.change();
+                var val = mug.p.labelItextID.getValue('default', 'en');
+                assert.equal(val, 'question1  end');
+                done();
             }}});
         });
     });

@@ -892,21 +892,22 @@ define([
         if (options.path === 'labelItext') {
             $input.keydown(function (e) {
                 // deletion of entire output ref in one go
-                if (e && e.keyCode === 8 || e.keyCode === 46) {
-                    var control = widget.getControl()[0];
-                    var pos = util.getCaretPosition(control),
-                        val = widget.getValue();
-
-                    var outputBegin = '<output',
+                if (e && e.which === 8 || e.which === 46) {
+                    var control = widget.getControl()[0],
+                        pos = util.getCaretPosition(control),
+                        val = widget.getValue(),
+                        outputBegin = '<output',
                         outputEnd = '/>',
-                        start, end, match = null;
-                    if (e.keyCode === 8) {
+                        start,
+                        end,
+                        match;
+                    if (e.which === 8) {
                         match = val.substr(pos - 2, 2);
                         if (match === outputEnd) {
                             start = val.lastIndexOf(outputBegin, pos);
                             end = pos;
                         }
-                    } else if (e.keyCode === 46) {
+                    } else if (e.which === 46) {
                         match = val.substr(pos, outputBegin.length);
                         if (match === outputBegin) {
                             end = val.indexOf(outputEnd, pos);
@@ -1299,6 +1300,7 @@ define([
             var inItext = target &&
                 target.attr('name') &&
                 target.attr('name').lastIndexOf('itext', 0) === 0;
+
             if (inItext) {
                 var path = this.mugToXPathReference(mug),
                     mugType = mug.options.typeName,
