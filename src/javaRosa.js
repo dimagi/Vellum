@@ -174,6 +174,25 @@ define([
                 }
             }
             return true;
+        },
+        getOutputRefExpressions: function () {
+            var allRefs = {},
+                langRefs,
+                outputRe,
+                match;
+            for (var lang in this.data) {
+                if (this.data.hasOwnProperty(lang) && this.data[lang]) {
+                    outputRe = /(?:<output (?:value|ref)=")(.*?)(?:"\s*\/>)/gim;
+                    langRefs = [];
+                    match = outputRe.exec(this.data[lang]);
+                    while (match !== null) {
+                        langRefs.push(match[1]);
+                        match = outputRe.exec(this.data[lang]);
+                    }
+                    allRefs[lang] = langRefs;
+                }
+            }
+            return allRefs;
         }
     };
 
@@ -1491,6 +1510,48 @@ define([
         handleMugParseFinish: function (mug) {
             this.__callOld();
             this.data.javaRosa.Itext.updateForExistingMug(mug);
+        },
+        handleMugRename: function (form, mug, newID, oldID, newPath, oldPath) {
+            this.__callOld();
+
+            function getOutputRef(expression, returnRegex) {
+                if (returnRegex) {
+                    expression = $.ui.autocomplete.escapeRegex(expression);
+                    return '<output\\s*(ref|value)="' + expression + '"\\s*/>';
+                } else {
+                    return '<output value="' + expression + '" />';
+                }
+            }
+
+            var _this = this,
+                itext = this.data.javaRosa.Itext,
+                outputRe,
+                oldPathRe,
+                newRef,
+                change;
+            _(itext.getItems()).each(function (item) {
+                change = false;
+                _(item.forms).each(function (itForm) {
+                    _(itForm.getOutputRefExpressions()).each(function (refs, lang) {
+                        _(refs).each(function (ref){
+                            oldPathRe = new RegExp(oldPath + '(?![a-zA-Z0-9_/])', 'mg');
+                            if (ref.match(oldPathRe)) {
+                                newRef = ref.replace(oldPathRe, newPath);
+                                outputRe = new RegExp(getOutputRef(ref, true), 'mg');
+                                itForm.data[lang] = itForm.data[lang].replace(outputRe, getOutputRef(newRef));
+                                change = true;
+                            }
+                        });
+                    });
+                });
+                if (change) {
+                    form.fire({
+                        type: 'question-label-text-change',
+                        mug: _this.data.core.form.getMugByItextID(item.id),
+                        text: item.getValue('default', itext.getDefaultLanguage())
+                    });
+                }
+            });
         },
         contributeToModelXML: function (xmlWriter) {
             // here are the rules that govern itext
