@@ -88,7 +88,10 @@ require([
             util.init({core: {onReady: function () {
                 util.addQuestion("Text", "question1");
                 util.addQuestion("Text", "question2");
-                $("[name='itext-en-label']").val('<output value="/data/question1" /> asdf ' +
+                $("[name='itext-en-label']").val('<output value="/data/question1" />' +
+                    '<output value="/data/question1"/>' +
+                    '<output value="/data/question1"></output>' +
+                    '<output value="/data/question1" ></output>' +
                     '<output value="if(/data/question1 = \'\', \'\', format-date(date(/data/question1), \'%a%b%c\'))" />').change();
                 util.clickQuestion("question1");
                 $("[name='property-nodeID']").val('first_question').change();
@@ -340,7 +343,7 @@ require([
                             <value>question1</value>\
                         </text>\
                         <text id="question2-label">\
-                            <value><output value="/data/first_question" /> asdf <output value="if(/data/first_question = \'\', \'\', format-date(date(/data/first_question), \'%a%b%c\'))" /></value>\
+                            <value><output value="/data/first_question" /><output value="/data/first_question" /><output value="/data/first_question" /><output value="/data/first_question" /><output value="if(/data/first_question = \'\', \'\', format-date(date(/data/first_question), \'%a%b%c\'))" /></value>\
                         </text>\
                     </translation>\
                     <translation lang="hin">\
@@ -348,7 +351,7 @@ require([
                             <value>question1</value>\
                         </text>\
                         <text id="question2-label">\
-                            <value><output value="/data/first_question" /> asdf <output value="if(/data/first_question = \'\', \'\', format-date(date(/data/first_question), \'%a%b%c\'))" /></value>\
+                            <value><output value="/data/first_question" /><output value="/data/first_question" /><output value="/data/first_question" /><output value="/data/first_question" /><output value="if(/data/first_question = \'\', \'\', format-date(date(/data/first_question), \'%a%b%c\'))" /></value>\
                         </text>\
                     </translation>\
                 </itext>\
