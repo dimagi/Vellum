@@ -1244,19 +1244,6 @@ define([
         return "pass";
     }
 
-    function warnOnCircularReference(property, form, mug, path) {
-        if (path === ".") {
-            var fieldName = mug.p.getDefinition(property).lstring;
-            form.updateError({
-                level: "form-warning",
-                message: "The " + fieldName + " for a question " +
-                    "is not allowed to reference the question itself. " +
-                    "Please remove the output value from the " + fieldName +
-                    " or your form will have errors."
-            }, {updateUI: true});
-        }
-    }
-
     function warnOnNonOutputableValue(form, mug, path) {
         if (!mug.options.canOutputValue) {
             var typeName = mug.options.typeName;
@@ -1277,13 +1264,6 @@ define([
         }
     }
 
-    function insertOutputRef(form, mug, target, path, dateFormat) {
-        var output = getOutputRef(path, dateFormat);
-        util.insertTextAtCursor(target, output, true);
-        warnOnCircularReference('label', form, mug, path);
-        warnOnNonOutputableValue(form, mug, path);
-    }
-
     $.vellum.plugin("javaRosa", {
         langs: ['en'],
         displayLanguage: 'en'
@@ -1294,15 +1274,22 @@ define([
             this.data.javaRosa.ItextForm = ItextForm;
             this.data.javaRosa.ICONS = ICONS;
         },
-        handleDropFinish: function(target, sourceUid, mug) {
+        insertOutputRef: function (mug, target, path, dateFormat) {
+            var output = getOutputRef(path, dateFormat),
+                form = this.data.core.form;
+            util.insertTextAtCursor(target, output, true);
+            this.warnOnCircularReference('label', form, mug, path, 'output value');
+            warnOnNonOutputableValue(form, mug, path);
+        },
+        handleDropFinish: function (target, sourceUid, mug) {
             var inItext = target &&
                 target.attr('name') &&
-                target.attr('name').lastIndexOf('itext', 0) === 0;
+                target.attr('name').lastIndexOf('itext-', 0) === 0,
+                _this = this;
 
             if (inItext) {
                 var path = this.mugToXPathReference(mug),
-                    mugType = mug.options.typeName,
-                    form = this.data.core.form;
+                    mugType = mug.options.typeName;
                 if (mugType === 'Date') {
                     var formatOptions = {
                         "": "No Formatting",
@@ -1319,16 +1306,16 @@ define([
                     var menu = $(menuHtml);
                     $('body').append(menu);
                     menu.find('li a').click(function () {
-                        insertOutputRef(form, mug, target, path, $(this).data('format'));
+                        _this.insertOutputRef(mug, target, path, $(this).data('format'));
                         menu.remove();
                     });
                     var e = window.event;
                     menu.css({'top': e.clientY, 'left': e.clientX}).show();
                 } else {
-                    insertOutputRef(form, mug, target, path);
+                    _this.insertOutputRef(mug, target, path);
                 }
             } else {
-                this.__callOld();
+                _this.__callOld();
             }
         },
         handleNewMug: function (mug) {

@@ -634,21 +634,22 @@ define([
         }
     };
   
-    function warnOnCircularReference(property, form, mug, path) {
+    fn.warnOnCircularReference = function(property, form, mug, path, refName) {
         if (path === "." && (
             property === "relevantAttr" ||
-            property === "calculateAttr"
+            property === "calculateAttr" ||
+            property === "label"
         )) {
             var fieldName = mug.p.getDefinition(property).lstring;
             form.updateError({
                 level: "form-warning",
                 message: "The " + fieldName + " for a question " + 
                     "is not allowed to reference the question itself. " + 
-                    "Please remove the period from the " + fieldName +
+                    "Please remove the " + refName + " from the " + fieldName +
                     " or your form will have errors."
             }, {updateUI: true});
         }
-    }
+    };
 
     fn.handleDropFinish = function(target, sourceUid, mug) {
         var _this = this,
@@ -660,11 +661,12 @@ define([
             target.val(target.val() + path).change();
 
             if (_this.data.core.currentlyEditedProperty) {
-                warnOnCircularReference(
+                _this.warnOnCircularReference(
                     _this.data.core.currentlyEditedProperty,
                     _this.data.core.form,
                     mug,
-                    path);
+                    path,
+                    'period');
             }
         }
 
