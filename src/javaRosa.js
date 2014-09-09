@@ -182,7 +182,7 @@ define([
                 match;
             for (var lang in this.data) {
                 if (this.data.hasOwnProperty(lang) && this.data[lang]) {
-                    outputRe = /(?:<output (?:value|ref)=")(.*?)(?:"\s*\/?>(?:<\/output>)?)/gim;
+                    outputRe = /(?:<output (?:value|ref)=")(.*?)(?:"\s*(?:\/>|<\/output>))/gim;
                     langRefs = [];
                     match = outputRe.exec(this.data[lang]);
                     while (match !== null) {
@@ -1407,7 +1407,7 @@ define([
             function getOutputRef(expression, returnRegex) {
                 if (returnRegex) {
                     expression = RegExp.escape(expression);
-                    return '<output\\s*(ref|value)="' + expression + '"\\s*\/?>(<\/output>)?';
+                    return '<output\\s*(ref|value)="' + expression + '"\\s*(\/>|<\/output>)';
                 } else {
                     return '<output value="' + expression + '" />';
                 }
