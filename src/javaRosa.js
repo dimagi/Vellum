@@ -1394,7 +1394,7 @@ define([
             this.__callOld();
             this.data.javaRosa.Itext.updateForExistingMug(mug);
         },
-        getMugByItextID: function (itextID) {
+        getMugByLabelItextID: function (itextID) {
             var node = this.data.core.form.dataTree.rootNode.getSingleMatchingNode(function (value) {
                 return value && value.getItext().id === itextID;
             });
@@ -1437,7 +1437,7 @@ define([
                 if (change) {
                     form.fire({
                         type: 'question-label-text-change',
-                        mug: _this.getMugByItextID(item.id),
+                        mug: _this.getMugByLabelItextID(item.id),
                         text: item.getValue('default', itext.getDefaultLanguage())
                     });
                 }
