@@ -20,50 +20,38 @@
         width: 100%;
         margin-top: 2em;
       }
-
-      /* emulate vertical spacing from HQ */
-      .nav-tabs {
-        margin-top: 2em;
+      .nav-list {
+        padding-left: 0;
       }
-
-      .tab-content {
-        margin-top: 2em;
-      }
-
     </style>
   </head>
 
   <body>
-      <div class="container-fluid">
-          <div class="row-fluid">
-            <div class="span2 sidebar">
-                <button class="btn" id="run-tests">
-                  <h4>Run tests</h4>
-                </button>
-                <button class="btn" id="load-saved">
-                  <h4>Reload using last saved form</h4>
-                </button>
+    <div class="container-fluid">
+      <div class="row-fluid">
+        <div class="span2 sidebar">
+          <ul class="nav nav-list">
+            <li class="active"><a data-toggle='tab' href='#test'><h4>Vellum</h4></a></li>
+            <li><a data-toggle='tab' href='#results'><h4>Test Results</h4></a></li>
+          </ul>
+          <button class="btn" id="run-tests">
+            <h4>Run tests</h4>
+          </button>
+          <button class="btn" id="load-saved">
+            <h4>Reload using last saved form</h4>
+          </button>
+        </div>
+        <div class="span10">
+          <div class="tab-content">
+            <div class="tab-pane active" id="test">
+              <div id='vellum'></div>
             </div>
-
-              <div class="span10">
-                <ul class="nav nav-tabs">
-                  <li class="active">
-                    <a data-toggle='tab' href='#test'><h3>Vellum</h3></a>
-                  </li>
-                  <li>
-                    <a data-toggle='tab' href='#results'><h3>Test Results</h3></a>
-                  </ul>
-
-                  <div class="tab-content">
-                    <div class="tab-pane active" id="test">
-                      <div id='vellum'></div>
-                    </div>
-                    <div class="tab-pane" id="results">
-                      <div id="mocha"></div>
-                    </div>
-                  </div>
-              </div>
+            <div class="tab-pane" id="results">
+              <div id="mocha"></div>
+            </div>
           </div>
+        </div>
       </div>
+    </div>
   </body>
 </html>

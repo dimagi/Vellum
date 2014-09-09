@@ -109,7 +109,17 @@ require(['jquery', 'jquery.vellum'], function ($) {
             if (window.mochaPhantomJS) {
                 mochaPhantomJS.run();
             } else {
+                $(".sidebar #mocha-stats").remove();
                 mocha.run();
+                // move progress indicator into sidebar
+                $("#mocha-stats").css({
+                    "margin-top": "3em",
+                    position: "relative",
+                    left: 0,
+                    top: 0
+                }).appendTo(".sidebar");
+                $("#mocha-stats li").css({display: "block"});
+                $("#mocha-stats li.progress").css({height: "40px"});
             }
         }
         $('#run-tests').click(runTests);
