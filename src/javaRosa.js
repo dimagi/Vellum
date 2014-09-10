@@ -128,6 +128,7 @@ define([
         this.itextModel = options.itextModel;
         this.data = options.data || {};
         this.name = options.name || "default";
+        this.outputExpressions = null;
     }
     ItextForm.prototype = {
         clone: function () {
@@ -147,6 +148,7 @@ define([
                 });
             }
             this.data[lang] = value;
+            this.outputExpressions = null;
         },
         getValueOrDefault: function (lang) {
             // check the actual language first
@@ -176,6 +178,12 @@ define([
             return true;
         },
         getOutputRefExpressions: function () {
+            if (this.outputExpressions === null) {
+                this.updateOutputRefExpressions();
+            }
+            return this.outputExpressions;
+        },
+        updateOutputRefExpressions: function () {
             var allRefs = {},
                 langRefs,
                 outputRe,
@@ -192,7 +200,7 @@ define([
                     allRefs[lang] = langRefs;
                 }
             }
-            return allRefs;
+            this.outputExpressions = allRefs;
         }
     };
 
