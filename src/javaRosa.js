@@ -1540,7 +1540,7 @@ define([
                             if (ref.match(oldPathRe)) {
                                 newRef = ref.replace(oldPathRe, newPath);
                                 outputRe = new RegExp(getOutputRef(ref, true), 'mg');
-                                itForm.data[lang] = itForm.data[lang].replace(outputRe, getOutputRef(newRef));
+                                itForm.setValue(lang, itForm.data[lang].replace(outputRe, getOutputRef(newRef)));
                                 change = true;
                             }
                         });
