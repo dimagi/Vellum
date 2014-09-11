@@ -1053,7 +1053,7 @@ define([
                 // ok to hard code this because it's public
                 var validator_url = "https://www.commcarehq.org/formtranslate/";
                 
-                msg = "We're sorry, Vellum cannot load your form.  You " +
+                msg = "We're sorry. The form builder cannot load your form.  You " +
                     "can edit your form directly by clicking the \"Edit Source" +
                     "XML\" button or go back to download your form. <br>" +
                     "It is likely that your form contains errors.  You can " + 
