@@ -880,10 +880,50 @@ define([
              .on('change keyup', function () {
                  widget.updateValue();
              });
-     
+
+        if (options.path === 'labelItext') {
+            $input.addClass('jstree-drop');
+        }
+
         widget.getControl = function () {
             return $input;
         };
+
+        if (options.path === 'labelItext') {
+            $input.keydown(function (e) {
+                // deletion of entire output ref in one go
+                if (e && e.which === 8 || e.which === 46) {
+                    var control = widget.getControl()[0],
+                        pos = util.getCaretPosition(control),
+                        val = widget.getValue(),
+                        outputBegin = '<output',
+                        outputEnd = '/>',
+                        start,
+                        end,
+                        match;
+                    if (e.which === 8) {
+                        match = val.substr(pos - 2, 2);
+                        if (match === outputEnd) {
+                            start = val.lastIndexOf(outputBegin, pos);
+                            end = pos;
+                        }
+                    } else if (e.which === 46) {
+                        match = val.substr(pos, outputBegin.length);
+                        if (match === outputBegin) {
+                            end = val.indexOf(outputEnd, pos);
+                            end = end === -1 ? end : end + 2;
+                            start = pos;
+                        }
+                    }
+                    if (start || end && start !== -1 && end !== -1) {
+                        var noRef = val.slice(0, start) + val.slice(end, val.length);
+                        widget.setValue(noRef);
+                        util.setCaretPosition(control, start);
+                        e.preventDefault();
+                    }
+                }
+            });
+        }
 
         widget.displayName = options.displayName;
         widget.itextType = options.itextType;
@@ -1204,6 +1244,26 @@ define([
         return "pass";
     }
 
+    function warnOnNonOutputableValue(form, mug, path) {
+        if (!mug.options.canOutputValue) {
+            var typeName = mug.options.typeName;
+            form.updateError({
+                level: "form-warning",
+                message: typeName + " nodes can not be used in an output value. " +
+                    "Please remove the output value for '" + path +
+                    "' or your form will have errors."
+            }, {updateUI: true});
+        }
+    }
+
+    function getOutputRef(path, dateFormat) {
+        if (dateFormat) {
+            return '<output value="format-date(date(' + path + '), \'' + dateFormat + '\')"/>';
+        } else {
+            return '<output value="' + path + '" />';
+        }
+    }
+
     $.vellum.plugin("javaRosa", {
         langs: ['en'],
         displayLanguage: 'en'
@@ -1213,6 +1273,50 @@ define([
             this.data.javaRosa.ItextItem = ItextItem;
             this.data.javaRosa.ItextForm = ItextForm;
             this.data.javaRosa.ICONS = ICONS;
+        },
+        insertOutputRef: function (mug, target, path, dateFormat) {
+            var output = getOutputRef(path, dateFormat),
+                form = this.data.core.form;
+            util.insertTextAtCursor(target, output, true);
+            this.warnOnCircularReference('label', form, mug, path, 'output value');
+            warnOnNonOutputableValue(form, mug, path);
+        },
+        handleDropFinish: function (target, sourceUid, mug) {
+            var inItext = target &&
+                target.attr('name') &&
+                target.attr('name').lastIndexOf('itext-', 0) === 0,
+                _this = this;
+
+            if (inItext) {
+                var path = this.mugToXPathReference(mug),
+                    mugType = mug.options.typeName;
+                if (mugType === 'Date') {
+                    var formatOptions = {
+                        "": "No Formatting",
+                        "%d/%n/%y": "DD/MM/YY e.g. 04/01/14",
+                        "%a, %b %e, %Y": "DDD, MMM DD, YYYY e.g. Sun, Jan 1, 2014"
+                    };
+                    var menuHtml = '<ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">' +
+                        '<li><strong>Date Format Options</strong></li>';
+                    _(formatOptions).each(function(label, format) {
+                        menuHtml += '<li><a tabindex="-1" href="#" data-format="' + format + '">' + label + '</a></li>';
+                    });
+                    menuHtml += '</ul>';
+
+                    var menu = $(menuHtml);
+                    $('body').append(menu);
+                    menu.find('li a').click(function () {
+                        _this.insertOutputRef(mug, target, path, $(this).data('format'));
+                        menu.remove();
+                    });
+                    var e = window.event;
+                    menu.css({'top': e.clientY, 'left': e.clientX}).show();
+                } else {
+                    _this.insertOutputRef(mug, target, path);
+                }
+            } else {
+                _this.__callOld();
+            }
         },
         handleNewMug: function (mug) {
             var ret = this.__callOld();

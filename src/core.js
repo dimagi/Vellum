@@ -19,6 +19,7 @@ define([
     'vellum/mugs',
     'vellum/widgets',
     'vellum/parser',
+    'vellum/util',
     'vellum/debugutil',
     'vellum/base',
     'less!vellum/less-style/main',
@@ -45,6 +46,7 @@ define([
     mugs,
     widgets,
     parser,
+    util,
     debug
 ) {
     
@@ -632,21 +634,46 @@ define([
         }
     };
   
-    function warnOnCircularReference(property, form, mug, path) {
+    fn.warnOnCircularReference = function(property, form, mug, path, refName) {
         if (path === "." && (
             property === "relevantAttr" ||
-            property === "calculateAttr"
+            property === "calculateAttr" ||
+            property === "label"
         )) {
             var fieldName = mug.p.getDefinition(property).lstring;
             form.updateError({
                 level: "form-warning",
                 message: "The " + fieldName + " for a question " + 
                     "is not allowed to reference the question itself. " + 
-                    "Please remove the period from the " + fieldName + 
+                    "Please remove the " + refName + " from the " + fieldName +
                     " or your form will have errors."
             }, {updateUI: true});
         }
-    }
+    };
+
+    fn.handleDropFinish = function(target, sourceUid, mug) {
+        var _this = this,
+            ops = target.closest(".xpath-expression-row").find(".op-select");
+
+        if (target) {
+            var path = _this.mugToXPathReference(mug);
+            // the .change fires the validation controls
+            target.val(target.val() + path).change();
+
+            if (_this.data.core.currentlyEditedProperty) {
+                _this.warnOnCircularReference(
+                    _this.data.core.currentlyEditedProperty,
+                    _this.data.core.form,
+                    mug,
+                    path,
+                    'period');
+            }
+        }
+
+        if (mug && ops && mug.options.defaultOperator) {
+            ops.val(mug.options.defaultOperator);
+        }
+    };
 
     var validRootChildren,
         typeData;
@@ -717,26 +744,9 @@ define([
                 "drop_finish" : function(data) {
                     var target = $(data.r),
                         sourceUid = $(data.o).attr('id'),
-                        mug = _this.data.core.form.getMugByUFID(sourceUid),
-                        ops = target.closest(".xpath-expression-row").find(".op-select");
+                        mug = _this.data.core.form.getMugByUFID(sourceUid);
 
-                    if (target) {
-                        var path = _this.mugToXPathReference(mug);
-                        // the .change fires the validation controls
-                        target.val(target.val() + path).change();
-
-                        if (_this.data.core.currentlyEditedProperty) {
-                            warnOnCircularReference(
-                                _this.data.core.currentlyEditedProperty,
-                                _this.data.core.form,
-                                mug,
-                                path);
-                        }
-                    }
-
-                    if (mug && ops && mug.options.defaultOperator) {
-                        ops.val(mug.options.defaultOperator);
-                    }
+                    _this.handleDropFinish(target, sourceUid, mug);
                 }
             },
             "types": {

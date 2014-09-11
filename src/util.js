@@ -287,6 +287,46 @@ define([
             }
         }
     };
+
+    that.getCaretPosition = function (ctrl) {
+        var pos = 0;
+        if (ctrl.createTextRange) {
+            ctrl.focus ();
+            var sel = document.selection.createRange ();
+            sel.moveStart ('character', -ctrl.value.length);
+            pos = sel.text.length;
+        } else if (typeof ctrl.selectionStart !== 'undefined') {
+            pos = ctrl.selectionStart;
+        }
+        return pos;
+    };
+
+    that.setCaretPosition = function (ctrl, start, end){
+        if (end === null || end === undefined) {
+            end = start;
+        }
+        if (ctrl.setSelectionRange) {
+            ctrl.focus();
+            ctrl.setSelectionRange(start, end);
+        } else if (ctrl.createTextRange) {
+            var range = ctrl.createTextRange();
+            range.collapse(true);
+            range.moveStart('character', start);
+            range.moveEnd('character', end);
+            range.select();
+        }
+    };
+
+    that.insertTextAtCursor = function (jqctrl, text, select) {
+        var ctrl = jqctrl[0],
+            pos = that.getCaretPosition(ctrl),
+            front = ctrl.value.substring(0, pos),
+            back = ctrl.value.substring(pos, ctrl.value.length),
+            start = select ? pos : pos + text.length;
+        jqctrl.val(front + text + back).change();
+        pos = pos + text.length;
+        that.setCaretPosition(ctrl, start, pos);
+    };
         
     return that;
 });
