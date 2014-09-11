@@ -128,6 +128,7 @@ define([
         this.itextModel = options.itextModel;
         this.data = options.data || {};
         this.name = options.name || "default";
+        this.outputExpressions = null;
     }
     ItextForm.prototype = {
         clone: function () {
@@ -147,6 +148,7 @@ define([
                 });
             }
             this.data[lang] = value;
+            this.outputExpressions = null;
         },
         getValueOrDefault: function (lang) {
             // check the actual language first
@@ -174,6 +176,31 @@ define([
                 }
             }
             return true;
+        },
+        getOutputRefExpressions: function () {
+            if (this.outputExpressions === null) {
+                this.updateOutputRefExpressions();
+            }
+            return this.outputExpressions;
+        },
+        updateOutputRefExpressions: function () {
+            var allRefs = {},
+                langRefs,
+                outputRe,
+                match;
+            for (var lang in this.data) {
+                if (this.data.hasOwnProperty(lang) && this.data[lang]) {
+                    outputRe = /(?:<output (?:value|ref)=")(.*?)(?:"\s*(?:\/|><\/output)>)/gim;
+                    langRefs = [];
+                    match = outputRe.exec(this.data[lang]);
+                    while (match !== null) {
+                        langRefs.push(match[1]);
+                        match = outputRe.exec(this.data[lang]);
+                    }
+                    allRefs[lang] = langRefs;
+                }
+            }
+            this.outputExpressions = allRefs;
         }
     };
 
@@ -1478,6 +1505,55 @@ define([
         handleMugParseFinish: function (mug) {
             this.__callOld();
             this.data.javaRosa.Itext.updateForExistingMug(mug);
+        },
+        getMugByLabelItextID: function (itextID) {
+            var node = this.data.core.form.dataTree.rootNode.getSingleMatchingNode(function (value) {
+                return value && value.getItext().id === itextID;
+            });
+
+            return node ? node.getValue() : null;
+        },
+        handleMugRename: function (form, mug, newID, oldID, newPath, oldPath) {
+            this.__callOld();
+
+            function getOutputRef(expression, returnRegex) {
+                if (returnRegex) {
+                    expression = RegExp.escape(expression);
+                    return '<output\\s*(ref|value)="' + expression + '"\\s*(\/|><\/output)>';
+                } else {
+                    return '<output value="' + expression + '" />';
+                }
+            }
+
+            var _this = this,
+                itext = this.data.javaRosa.Itext,
+                outputRe,
+                oldPathRe,
+                newRef,
+                change;
+            _(itext.getItems()).each(function (item) {
+                change = false;
+                _(item.forms).each(function (itForm) {
+                    _(itForm.getOutputRefExpressions()).each(function (refs, lang) {
+                        _(refs).each(function (ref){
+                            oldPathRe = new RegExp(oldPath + '(?![a-zA-Z0-9_/])', 'mg');
+                            if (ref.match(oldPathRe)) {
+                                newRef = ref.replace(oldPathRe, newPath);
+                                outputRe = new RegExp(getOutputRef(ref, true), 'mg');
+                                itForm.data[lang] = itForm.data[lang].replace(outputRe, getOutputRef(newRef));
+                                change = true;
+                            }
+                        });
+                    });
+                });
+                if (change) {
+                    form.fire({
+                        type: 'question-label-text-change',
+                        mug: _this.getMugByLabelItextID(item.id),
+                        text: item.getValue('default', itext.getDefaultLanguage())
+                    });
+                }
+            });
         },
         contributeToModelXML: function (xmlWriter) {
             // here are the rules that govern itext
