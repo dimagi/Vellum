@@ -359,9 +359,9 @@ define([
         }
     }
 
-    function parseControlElement(form, nodePath, cEl, oldEl) {
+    function parseControlElement(form, nodePath, cEl, $groupEl, parentMug) {
         var mug = form.getMugByPath(nodePath),
-            $cEl = oldEl || cEl,
+            $cEl = $groupEl || cEl,
             tagName, dataType, 
             appearance = $cEl.popAttr('appearance'),
             mediaType = $cEl.popAttr('mediatype') || null,
@@ -416,6 +416,7 @@ define([
             // items only
             mug = form.mugTypes.make(MugClass, form);
         }
+        mug.parentMug = parentMug;
 
         if (appearance) {
             mug.setAppearanceAttribute(appearance);
@@ -423,7 +424,7 @@ define([
         if (MugClass === "Trigger") {
             mug.p.showOKCheckbox = (appearance !== 'minimal');
         }
-        populateMug(form, nodePath, mug, cEl, oldEl);
+        populateMug(form, nodePath, mug, cEl, $groupEl);
 
         return mug;
     }
@@ -442,7 +443,7 @@ define([
         }
     }
                 
-    function populateMug (form, nodePath, mug, cEl, $parentEl) {
+    function populateMug (form, nodePath, mug, cEl, $groupEl) {
         var $cEl = $(cEl);
         if (mug.__className === "ReadOnly") {
             if ($cEl.length === 1 && $cEl[0].poppedAttributes) {
@@ -459,8 +460,8 @@ define([
             labelEl, hintEl;
 
         if(tag === 'repeat'){
-            labelEl = $parentEl.children('label');
-            hintEl = $parentEl.children('hint');
+            labelEl = $groupEl.children('label');
+            hintEl = $groupEl.children('hint');
             mug.p.repeat_count = $cEl.popAttr('jr:count') || null;
             mug.p.no_add_remove = parseBoolAttributeValue(
                 $cEl.popAttr('jr:noAddRemove'));
@@ -533,15 +534,16 @@ define([
     function parseControlTree (form, controlsTree) {
         function eachFunc(el, parentMug){
             el = $(el);
-            var oldEl, tagName;
+            var groupEl, tagName;
 
             if (isRepeat(el)) {
-                oldEl = el;
+                groupEl = el;
                 el = $(el.children('repeat')[0]);
             }
 
-            var mug = form.vellum.parseControlElement(
-                    form, getPathFromControlElement(el, form), el, oldEl);
+            var path = getPathFromControlElement(el, form),
+                mug = form.vellum.parseControlElement(
+                    form, path, el, groupEl, parentMug);
 
             form.controlTree.insertMug(mug, 'into', parentMug);
 
