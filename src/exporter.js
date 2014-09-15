@@ -52,7 +52,12 @@ define([
                 row[columnOrder[i]] = "";
             }
 
-            row.Question = form.getAbsolutePath(mug);
+            if (mug.p.tagName !== "item") {
+                row.Question = form.getAbsolutePath(mug, true);
+            } else {
+                row.Question = form.getAbsolutePath(mug.parentMug, true) +
+                                "-" + mug.p.defaultValue;
+            }
             row.Type = mug.options.typeName;
 
             if (!mug.options.isDataOnly) {
