@@ -4,13 +4,15 @@ require([
     'jquery',
     'underscore',
     'tests/utils',
-    'vellum/parser'
+    'vellum/parser',
+    'text!static/parser/other_item.xml'
 ], function (
     chai,
     $,
     _,
     util,
-    parser
+    parser,
+    other_item_xml
 ) {
     var assert = chai.assert,
         call = util.call,
@@ -72,6 +74,21 @@ require([
                     onReady: function () {
                         var mug = call("getMugByPath", "/data/question1");
                         assert.equal(mug.p.calculateAttr, 'concat("Line 1","\nLine 2")');
+                        done();
+                    }
+                }
+            });
+        });
+
+        it("should load select item without itext", function (done) {
+            util.init({
+                core: {
+                    form: other_item_xml,
+                    onReady: function () {
+                        var mug = call("getMugByPath", "/ClassroomObservationV3/Q0003"),
+                            // HACK how to reference items in select?
+                            item = mug._node_control.children[1].value;
+                        assert.equal(item.p.defaultValue, 'other');
                         done();
                     }
                 }

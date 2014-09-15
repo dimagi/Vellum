@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:orx="http://openrosa.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa" xmlns:vellum="http://commcarehq.org/xforms/vellum">
+  <h:head>
+    <h:title>Untitled Form</h:title>
+    <model>
+      <itext>
+        <translation lang="en" default="">
+          <text id="/ClassroomObservationV3/Q0003:label">
+            <value>Places</value>
+          </text>
+          <text id="/ClassroomObservationV3/Q0003/1:label">
+            <value>Central</value>
+          </text>
+        </translation>
+      </itext>
+      <instance>
+        <ClassroomObservationV3 xmlns="http://openrosa.org/formdesigner/a530b6d48dc56c027fdb579c0b0f251e9273c701" id="class_observationv3">
+          <Q0003/>
+        </ClassroomObservationV3>
+      </instance>
+      <bind nodeset="/ClassroomObservationV3/Q0003" required="true()" type="select1" />
+    </model>
+  </h:head>
+  <h:body>
+    <select1 ref="/ClassroomObservationV3/Q0003">
+      <label ref="jr:itext('/ClassroomObservationV3/Q0003:label')" />
+      <item>
+        <label ref="jr:itext('/ClassroomObservationV3/Q0003/1:label')"/>
+        <value>1</value>
+      </item>
+      <item>
+        <label>Other</label>
+        <value>other</value>
+      </item>
+    </select1>
+  </h:body>
+</h:html>
