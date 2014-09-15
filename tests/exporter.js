@@ -5,14 +5,18 @@ require([
     'underscore',
     'tests/utils',
     'text!static/all_question_types.xml',
-    'text!static/all_question_types.tsv'
+    'text!static/all_question_types.tsv',
+    'text!static/exporter/item-id.xml',
+    'text!static/exporter/item-id.tsv'
 ], function (
     chai,
     $,
     _,
     util,
     ALL_QUESTIONS_XML,
-    ALL_QUESTIONS_TSV
+    ALL_QUESTIONS_TSV,
+    item_id_xml,
+    item_id_tsv
 ) {
     var assert = chai.assert,
         call = util.call;
@@ -31,6 +35,11 @@ require([
         it("should include question type in TSV", function () {
             call("loadXML", ALL_QUESTIONS_XML);
             assert.equal(call("getData").core.form.getExportTSV(), ALL_QUESTIONS_TSV);
+        });
+
+        it("should include item values in TSV", function () {
+            call("loadXML", item_id_xml);
+            assert.equal(call("getData").core.form.getExportTSV(), item_id_tsv);
         });
     });
 

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:orx="http://openrosa.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa" xmlns:vellum="http://commcarehq.org/xforms/vellum">
+	<h:head>
+		<h:title>Untitled Form</h:title>
+		<model>
+			<instance>
+				<data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/A65D7357-3B8A-427E-8D11-356A8BA32173" uiVersion="1" version="1" name="Untitled Form">
+					<group>
+						<question1 />
+					</group>
+				</data>
+			</instance>
+			<bind nodeset="/data/group" />
+			<bind nodeset="/data/group/question1" />
+			<itext>
+				<translation lang="en" default="">
+					<text id="group-label">
+						<value>group</value>
+					</text>
+					<text id="question1-label">
+						<value>question1</value>
+					</text>
+					<text id="question1-1x-label">
+						<value>item1</value>
+					</text>
+					<text id="question1-2x-label">
+						<value>item2</value>
+					</text>
+				</translation>
+			</itext>
+		</model>
+	</h:head>
+	<h:body>
+		<group ref="/data/group">
+			<label ref="jr:itext('group-label')" />
+			<select1 ref="/data/group/question1">
+				<label ref="jr:itext('question1-label')" />
+				<item>
+					<label ref="jr:itext('question1-1x-label')" />
+					<value>1x</value>
+				</item>
+				<item>
+					<label ref="jr:itext('question1-2x-label')" />
+					<value>2x</value>
+				</item>
+			</select1>
+		</group>
+	</h:body>
+</h:html>
