@@ -1,30 +1,30 @@
 Question	Type	Text (en)	Text (hin)	Audio (en)	Audio (hin)	Image (en)	Image (hin)	Display Condition	Validation Condition	Validation Message	Calculate Condition	Required
-/data/question1	Text	question1 en label	question1 hin label	jr://file/commcare/audio/data/question1.mp3	jr://file/commcare/audio/data/question1.mp3	jr://file/commcare/image/data/question1.png	jr://file/commcare/image/data/question1.png	/data/question20	/data/question20 = 2	question1 en validation		yes
-/data/question2	Label	question2	question2									no
-/data/question30	Label	question30	question30									no
-/data/question3	Single Answer	question3	question3									no
-	Choice	item1	item1	jr://file/commcare/audio/data/question3-item1.mp3	jr://file/commcare/audio/data/question3-item1.mp3	jr://file/commcare/image/data/question3-item1.png	jr://file/commcare/image/data/question3-item1.png					
-	Choice	item2	item2									
-/data/question6	Multiple Answer	question6	question6									no
-	Choice	item1	item1									
-	Choice	item2	item2									
-/data/question13	Integer	question13	question13									no
-/data/question14	Phone Number or Numeric ID	question14	question14									no
-/data/question15	Decimal	question15	question15									no
-/data/question16	Long	question16	question16									no
-/data/question17	Date	question17	question17									no
-/data/question18	Time	question18	question18									no
-/data/question19	Date and Time	question19	question19									no
-/data/question21	Group	question21	question21									no
-/data/question21/question31	Repeat Group	question31	question31									yes
-/data/question22	Repeat Group	question22	question22									no
-/data/question22/question23	Question List	question23	question23									no
-/data/question22/question23/question24	Image Capture	question24	question24									no
-/data/question22/question23/question25	Audio Capture	question25	question25									no
-/data/question22/question23/question26	Video Capture	question26	question26									no
-/data/question22/question23/question27	GPS	question27	question27									no
-/data/question22/question23/question28	Password	question28	question28									no
-/data/question22/question23/question7	Android App Callout	question7	question7									no
+/question1	Text	question1 en label	question1 hin label	jr://file/commcare/audio/data/question1.mp3	jr://file/commcare/audio/data/question1.mp3	jr://file/commcare/image/data/question1.png	jr://file/commcare/image/data/question1.png	/data/question20	/data/question20 = 2	question1 en validation		yes
+/question2	Label	question2	question2									no
+/question30	Label	question30	question30									no
+/question3	Single Answer	question3	question3									no
+/question3-item1	Choice	item1	item1	jr://file/commcare/audio/data/question3-item1.mp3	jr://file/commcare/audio/data/question3-item1.mp3	jr://file/commcare/image/data/question3-item1.png	jr://file/commcare/image/data/question3-item1.png					
+/question3-item2	Choice	item2	item2									
+/question6	Multiple Answer	question6	question6									no
+/question6-item1	Choice	item1	item1									
+/question6-item2	Choice	item2	item2									
+/question13	Integer	question13	question13									no
+/question14	Phone Number or Numeric ID	question14	question14									no
+/question15	Decimal	question15	question15									no
+/question16	Long	question16	question16									no
+/question17	Date	question17	question17									no
+/question18	Time	question18	question18									no
+/question19	Date and Time	question19	question19									no
+/question21	Group	question21	question21									no
+/question21/question31	Repeat Group	question31	question31									yes
+/question22	Repeat Group	question22	question22									no
+/question22/question23	Question List	question23	question23									no
+/question22/question23/question24	Image Capture	question24	question24									no
+/question22/question23/question25	Audio Capture	question25	question25									no
+/question22/question23/question26	Video Capture	question26	question26									no
+/question22/question23/question27	GPS	question27	question27									no
+/question22/question23/question28	Password	question28	question28									no
+/question22/question23/question7	Android App Callout	question7	question7									no
 	Base											no
-/data/question20	Hidden Value											no
-/data/question32	Hidden Value										1 + 2	no
+/question20	Hidden Value											no
+/question32	Hidden Value										1 + 2	no
