@@ -1527,16 +1527,23 @@ define([
 
             var _this = this,
                 itext = this.data.javaRosa.Itext,
-                outputRe,
                 oldPathRe,
+                outputRe,
                 newRef,
                 change;
+
+            if (mug.options.isSpecialGroup) {
+                oldPathRe = new RegExp(oldPath + '/', 'mg');
+                newPath = newPath + '/';
+            } else {
+                oldPathRe = new RegExp(oldPath + '(?![a-zA-Z0-9_/])', 'mg');
+            }
+
             _(itext.getItems()).each(function (item) {
                 change = false;
                 _(item.forms).each(function (itForm) {
                     _(itForm.getOutputRefExpressions()).each(function (refs, lang) {
                         _(refs).each(function (ref){
-                            oldPathRe = new RegExp(oldPath + '(?![a-zA-Z0-9_/])', 'mg');
                             if (ref.match(oldPathRe)) {
                                 newRef = ref.replace(oldPathRe, newPath);
                                 outputRe = new RegExp(getOutputRef(ref, true), 'mg');

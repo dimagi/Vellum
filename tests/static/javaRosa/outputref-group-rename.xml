@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:orx="http://openrosa.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa" xmlns:vellum="http://commcarehq.org/xforms/vellum">
+	<h:head>
+		<h:title>Untitled Form</h:title>
+		<model>
+			<instance>
+				<data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/F8FD5842-815C-4DE5-9E27-BB623064695F" uiVersion="1" version="1" name="Untitled Form">
+					<question1 />
+					<question2>
+						<question3 />
+					</question2>
+				</data>
+			</instance>
+			<bind nodeset="/data/question1" type="xsd:string" />
+			<bind nodeset="/data/question2" />
+			<bind nodeset="/data/question2/question3" type="xsd:string" />
+			<itext>
+				<translation lang="en" default="">
+					<text id="question1-label">
+						<value>question1 <output value="/data/question2/question3"></output></value>
+					</text>
+					<text id="question2-label">
+						<value>group</value>
+					</text>
+					<text id="question2/question3-label">
+						<value>question3</value>
+					</text>
+				</translation>
+				<translation lang="hin">
+					<text id="question1-label">
+						<value>question1 <output value="/data/question2/question3"></output></value>
+					</text>
+					<text id="question2-label">
+						<value>group</value>
+					</text>
+					<text id="question2/question3-label">
+						<value>question3</value>
+					</text>
+				</translation>
+			</itext>
+		</model>
+	</h:head>
+	<h:body>
+		<input ref="/data/question1">
+			<label ref="jr:itext('question1-label')" />
+		</input>
+		<group ref="/data/question2">
+			<label ref="jr:itext('question2-label')" />
+			<input ref="/data/question2/question3">
+				<label ref="jr:itext('question2/question3-label')" />
+			</input>
+		</group>
+	</h:body>
+</h:html>

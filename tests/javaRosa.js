@@ -4,13 +4,15 @@ require([
     'jquery',
     'tests/utils',
     'vellum/javaRosa',
-    'vellum/util'
+    'vellum/util',
+    'text!static/javaRosa/outputref-group-rename.xml'
 ], function (
     chai,
     $,
     util,
     jr,
-    vellum_util
+    vellum_util,
+    outputref_group_rename_xml
 ) {
     var assert = chai.assert,
         call = util.call;
@@ -215,6 +217,28 @@ require([
                 assert.equal(val, 'question1  end');
                 done();
             }}});
+        });
+
+        it("should update output ref on group rename", function (done) {
+            util.init({
+                javaRosa: {langs: ['en', 'hin']},
+                core: {
+                    form: outputref_group_rename_xml,
+                    onReady: function () {
+                        var group = util.call("getMugByPath", "/data/question2"),
+                            q1 = util.call("getMugByPath", "/data/question1"),
+                            itext = q1.p.labelItextID;
+
+                        assert(itext.getValue('default', 'en').indexOf('"/data/question2/question3"') > 0,
+                            '"/data/question2/question3" not in ' + itext.getValue('default', 'en'));
+                        group.p.nodeID = "group";
+                        assert(itext.getValue('default', 'en').indexOf('"/data/group/question3"') > 0,
+                            '"/data/group/question3" not in ' + itext.getValue('default', 'en'));
+
+                        done();
+                    }
+                }
+            });
         });
     });
 
