@@ -1213,6 +1213,7 @@ define([
                 refMug = (mug.parentMug && !mug.options.isDataOnly) ? 
                     mug.parentMug : null;
             _this.createQuestion(mug, refMug, 'into');
+            _this.setTreeValidationIcon(mug);
         }
         this.selectSomethingOrHideProperties(true);
 

@@ -3,12 +3,14 @@ require([
     'chai',
     'jquery',
     'underscore',
-    'tests/utils'
+    'tests/utils',
+    'text!static/core/invalid-questions.xml'
 ], function (
     chai,
     $,
     _,
-    util
+    util,
+    INVALID_QUESTIONS_XML
 ) {
     var assert = chai.assert,
         call = util.call,
@@ -62,6 +64,18 @@ require([
                 group.p.nodeID = "g8";
                 assert.equal(q1.form.getAbsolutePath(q1), "/data/g8/question1");
                 assert.equal(q2.p.relevantAttr, "/data/g8/question1 = 'valley girl'");
+                done();
+            }}});
+        });
+
+        it("should show warning icons on invalid questions", function (done) {
+            util.init({core: { form: INVALID_QUESTIONS_XML, onReady: function () {
+                var q0 = call("getMugByPath", "/data/q0"),
+                    q1 = call("getMugByPath", "/data/q1"),
+                    h1 = call("getMugByPath", "/data/h1");
+                assert(util.isTreeNodeValid(q0), "q0 is invalid: sanity check failed");
+                assert(!util.isTreeNodeValid(q1), "q1 should not be valid");
+                assert(!util.isTreeNodeValid(h1), "h1 should not be valid");
                 done();
             }}});
         });
