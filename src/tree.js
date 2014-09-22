@@ -145,20 +145,22 @@ define([
          * @param store
          */
         treeMap: function (nodeFunc, store, afterChildFunc) {
-            var result, child;
-            result = nodeFunc(this); //call on self
-            if(result){
+            var result = nodeFunc(this), // call on self
+                children = this.getChildren(),
+                child;
+            if(result) {
                 store.push(result);
             }
-            for(child in this.getChildren()){
-                if(this.getChildren().hasOwnProperty(child)){
-                    this.getChildren()[child].treeMap(nodeFunc, store, afterChildFunc); //have each children also perform the func
+            for(child in children) {
+                if(children.hasOwnProperty(child)){
+                    // have each children also perform the func
+                    children[child].treeMap(nodeFunc, store, afterChildFunc);
                 }
             }
-            if(afterChildFunc){
+            if(afterChildFunc) {
                 afterChildFunc(this, result);
             }
-            return store; //return the results
+            return store;
         },
         validateTree: function (validateValue) {
             var i, childResult;

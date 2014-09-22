@@ -154,6 +154,10 @@ define([
             });
             return mug;
         },
-        clickQuestion: clickQuestion
+        clickQuestion: clickQuestion,
+        isTreeNodeValid: function (mug) {
+            var $node = $("#vellum").find('#' + mug.ufid + ' > a');
+            return $node.siblings(".fd-tree-valid-alert-icon").length === 0;
+        }
     };
 });
