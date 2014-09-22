@@ -252,8 +252,9 @@ define([
             return bList;
         },
         /**
-         * Goes through and grabs all of the data nodes (i.e. nodes that are only data nodes (possibly with a bind) without any
-         * kind of control.  Returns a flat list of these nodes (list items are mugs).
+         * Goes through and grabs all of the data nodes (i.e. nodes that are
+         * only data nodes, possibly with a bind) without any kind of control.
+         * Returns a flat list of these nodes (list items are mugs).
          */
         getDataNodeList: function () {
             return this.dataTree.treeMap(function(node){
