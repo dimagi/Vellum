@@ -207,8 +207,8 @@ define([
                         }
                     }
                 });
-                if (window._gaq) {
-                    window._gaq.push(['_trackEvent', 'Form Builder', 'Logic', options.lstring]);
+                if (typeof window.ga !== "undefined") {
+                    window.ga('send', 'event', 'Form Builder', 'Logic', options.lstring);
                 }
             }, !!widget.isDisabled());
         };
