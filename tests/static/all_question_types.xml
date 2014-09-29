@@ -332,7 +332,7 @@
 		</group>
         <group>
             <label ref="jr:itext('question22-label')" />
-            <repeat jr:noAddRemove="false()" nodeset="/data/question22">
+            <repeat nodeset="/data/question22">
                 <group ref="/data/question22/question23" appearance="field-list">
                     <label ref="jr:itext('question22/question23-label')" />
                     <upload ref="/data/question22/question23/question24" mediatype="image/*">

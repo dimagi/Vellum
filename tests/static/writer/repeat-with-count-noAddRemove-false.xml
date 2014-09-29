@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:orx="http://openrosa.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa" xmlns:vellum="http://commcarehq.org/xforms/vellum">
+	<h:head>
+		<h:title>Untitled Form</h:title>
+		<model>
+			<instance>
+				<data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/145B4E0A-2CE5-48A2-B0E0-8D1585CFCA47" uiVersion="1" version="1" name="Untitled Form">
+					<group jr:template="">
+						<question2 />
+					</group>
+				</data>
+			</instance>
+			<bind nodeset="/data/group" />
+			<bind nodeset="/data/group/question2" type="xsd:string" />
+			<itext>
+				<translation lang="en" default="">
+					<text id="group-label">
+						<value>group</value>
+					</text>
+					<text id="group/question2-label">
+						<value>question2</value>
+					</text>
+				</translation>
+				<translation lang="hin">
+					<text id="group-label">
+						<value>group</value>
+					</text>
+					<text id="group/question2-label">
+						<value>question2</value>
+					</text>
+				</translation>
+			</itext>
+		</model>
+	</h:head>
+	<h:body>
+		<group>
+			<label ref="jr:itext('group-label')" />
+			<repeat nodeset="/data/group" jr:count="3" jr:noAddRemove="false()">
+				<input ref="/data/group/question2">
+					<label ref="jr:itext('group/question2-label')" />
+				</input>
+			</repeat>
+		</group>
+	</h:body>
+</h:html>

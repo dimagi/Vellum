@@ -857,7 +857,6 @@ define([
         init: function (mug, form) {
             mug.p.tagName = "repeat";
             mug.p.repeat_count = null;
-            mug.p.no_add_remove = false;
         },
         spec: {
             repeat_count: {
@@ -865,12 +864,6 @@ define([
                 visibility: 'visible_if_present',
                 presence: 'optional',
                 widget: widgets.droppableText
-            },
-            no_add_remove: {
-                lstring: 'Disallow Repeat Add and Remove?',
-                visibility: 'visible_if_present',
-                presence: 'optional',
-                widget: widgets.checkbox
             }
         }
     });
