@@ -609,8 +609,8 @@ define([
                 mug.p.nodeID = this.generate_question_id();
             }
             if (mug.__className === "Item") {
-                mug.p.defaultValue = this.generate_item_label(refMug);
-            
+                var parent = refMug.__className === "Item" ? refMug.parentMug : refMug;
+                mug.p.defaultValue = this.generate_item_label(parent);
             }
             this.insertQuestion(mug, refMug, position, isInternal);
             if (mug.options.isODKOnly) {
