@@ -463,8 +463,6 @@ define([
             labelEl = $groupEl.children('label');
             hintEl = $groupEl.children('hint');
             mug.p.repeat_count = $cEl.popAttr('jr:count') || null;
-            mug.p.no_add_remove = parseBoolAttributeValue(
-                $cEl.popAttr('jr:noAddRemove'));
         } else {
             labelEl = $cEl.children('label');
             hintEl = $cEl.children('hint');

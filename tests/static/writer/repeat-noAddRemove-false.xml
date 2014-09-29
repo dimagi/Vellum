@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:orx="http://openrosa.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa" xmlns:vellum="http://commcarehq.org/xforms/vellum">
+	<h:head>
+		<h:title>Untitled Form</h:title>
+		<model>
+			<instance>
+				<data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/05E42EAF-BBD2-4BE1-9B58-45C09C1DA524" uiVersion="1" version="1" name="Untitled Form">
+					<group jr:template="" />
+				</data>
+			</instance>
+			<bind nodeset="/data/group" />
+			<itext>
+				<translation lang="en" default="">
+					<text id="group-label">
+						<value>group</value>
+					</text>
+				</translation>
+				<translation lang="hin">
+					<text id="group-label">
+						<value>group</value>
+					</text>
+				</translation>
+			</itext>
+		</model>
+	</h:head>
+	<h:body>
+		<group>
+			<label ref="jr:itext('group-label')" />
+			<repeat nodeset="/data/group" jr:noAddRemove="false()" />
+		</group>
+	</h:body>
+</h:html>

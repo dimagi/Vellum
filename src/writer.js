@@ -279,9 +279,13 @@ define([
                 }
                 
                 // Write any custom attributes first
+                // HACK skip legacy attributes that should not be preserved
+                var skip = (tagName === "repeat") ?
+                    function (k) { return k.toLowerCase() === "jr:noaddremove"; } :
+                    function (k) { return false; };
                 var rawControlAttributes = mug.p.rawControlAttributes;
                 for (var k in rawControlAttributes) {
-                    if (rawControlAttributes.hasOwnProperty(k)) {
+                    if (rawControlAttributes.hasOwnProperty(k) && !skip(k)) {
                         xmlWriter.writeAttributeString(k, rawControlAttributes[k]);
                     }
                 }
@@ -301,18 +305,10 @@ define([
                 // Set other relevant attributes
 
                 if (tagName === 'repeat') {
-                    var r_count = mug.p.repeat_count,
-                        r_noaddrem = mug.p.no_add_remove;
-
-                    //make r_noaddrem an XPath bool
-                    r_noaddrem = util.createXPathBoolFromJS(r_noaddrem);
-
+                    var r_count = mug.p.repeat_count;
                     if (r_count) {
                         xmlWriter.writeAttributeString("jr:count", String(r_count));
-                    }
-
-                    if (r_noaddrem) {
-                        xmlWriter.writeAttributeString("jr:noAddRemove", String(r_noaddrem));
+                        xmlWriter.writeAttributeString("jr:noAddRemove", "true()");
                     }
                 } else if (isODKMedia) {
                     var mediaType = mug.p.mediaType;

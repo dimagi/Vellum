@@ -484,6 +484,7 @@ define([
         $modal.modal('show');
         $modal.on('shown', function () {
             codeMirror.refresh();
+            codeMirror.focus();
         });
     };
 
@@ -1812,8 +1813,7 @@ define([
             "requiredAttr",
             "relevantAttr",
             "constraintAttr",
-            "repeat_count",
-            "no_add_remove"
+            "repeat_count"
         ];
     };
 

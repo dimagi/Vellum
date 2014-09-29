@@ -100,7 +100,6 @@ require([
                 nodeId: 'question31',
                 attrs: {
                     requiredAttr: true,
-                    no_add_remove: true, 
                     repeat_count: 2
                 }
             }, { // insert before first data node
@@ -113,10 +112,7 @@ require([
                 }
             }, { // insert before first data node
                 type: 'Repeat',
-                nodeId: 'question22',
-                attrs: {
-                    no_add_remove: false
-                }
+                nodeId: 'question22'
             }, {
                 type: 'FieldList',
                 nodeId: 'question23'
