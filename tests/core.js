@@ -4,13 +4,15 @@ require([
     'jquery',
     'underscore',
     'tests/utils',
-    'text!static/core/invalid-questions.xml'
+    'text!static/core/invalid-questions.xml',
+    'text!static/core/increment-item.xml'
 ], function (
     chai,
     $,
     _,
     util,
-    INVALID_QUESTIONS_XML
+    INVALID_QUESTIONS_XML,
+    INCREMENT_ITEM_XML
 ) {
     var assert = chai.assert,
         call = util.call,
@@ -76,6 +78,24 @@ require([
                 assert(util.isTreeNodeValid(q0), "q0 is invalid: sanity check failed");
                 assert(!util.isTreeNodeValid(q1), "q1 should not be valid");
                 assert(!util.isTreeNodeValid(h1), "h1 should not be valid");
+                done();
+            }}});
+        });
+
+        it("should increment item value on insert new select item as child of select", function (done) {
+            util.init({core: { form: INCREMENT_ITEM_XML, onReady: function () {
+                util.clickQuestion("question1");
+                var item = util.addQuestion("Item");
+                assert.equal(item.p.defaultValue, "item3");
+                done();
+            }}});
+        });
+
+        it("should increment item value on insert new select item after sibling item", function (done) {
+            util.init({core: { form: INCREMENT_ITEM_XML, onReady: function () {
+                util.clickQuestion("item1");
+                var item = util.addQuestion("Item");
+                assert.equal(item.p.defaultValue, "item3");
                 done();
             }}});
         });
