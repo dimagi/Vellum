@@ -70,6 +70,7 @@ define(function () {
     
     var OPTIONS = {
         core: {
+            loadDelay: 0,
             formName: "Untitled Form",
             allowedDataNodeReferences: [
                 "meta/deviceID",
