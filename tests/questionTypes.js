@@ -317,7 +317,8 @@ require([
                 ["Trigger", "Select"],
                 ["Image", "Select"],
                 ["Audio", "Select"],
-                ["Video", "Select"]
+                ["Video", "Select"],
+                ["PhoneNumber", "Text"]
             ];
 
             before(function (done) {
@@ -339,6 +340,10 @@ require([
                     assert.equal(mug.p.nodeID, nodeId, "got wrong mug before changing type");
                     assert.equal(mug.__className, from, "wrong mug type");
                     call("changeMugType", mug, to);
+                    mug = call("getMugByPath", "/data/" + nodeId);
+                    assert.equal(mug.__className, to);
+
+                    call("loadXML", call("createXML"));
                     mug = call("getMugByPath", "/data/" + nodeId);
                     assert.equal(mug.__className, to);
                 });

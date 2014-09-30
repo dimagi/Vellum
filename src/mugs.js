@@ -238,6 +238,7 @@ define([
                 presence: 'required'
             },
             appearance: {
+                immutable: true,
                 visibility: 'hidden',
                 presence: 'optional',
                 lstring: 'Appearance Attribute'
