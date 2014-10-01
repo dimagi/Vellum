@@ -238,6 +238,7 @@ define([
                 presence: 'required'
             },
             appearance: {
+                immutable: true,
                 visibility: 'hidden',
                 presence: 'optional',
                 lstring: 'Appearance Attribute'
@@ -416,9 +417,6 @@ define([
         },
         getAppearanceAttribute: function () {
             return this.options.getAppearanceAttribute(this);
-        },
-        setAppearanceAttribute: function (attrVal) {
-            this.p.appearance = attrVal;
         },
         getIcon: function () {
             return this.options.getIcon(this);
@@ -844,7 +842,7 @@ define([
         canOutputValue: false,
         init: function (mug, form) {
             Group.init(mug, form);
-            mug.setAppearanceAttribute('field-list');
+            mug.p.appearance = 'field-list';
         },
     });
 

@@ -419,7 +419,7 @@ define([
         mug.parentMug = parentMug;
 
         if (appearance) {
-            mug.setAppearanceAttribute(appearance);
+            mug.p.appearance = appearance;
         }
         if (MugClass === "Trigger") {
             mug.p.showOKCheckbox = (appearance !== 'minimal');
