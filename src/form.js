@@ -687,7 +687,19 @@ define([
             return targetMug;
         },
         removeMugFromForm: function (mug) {
+            function breakReferences(mug) {
+                if (!seen.hasOwnProperty(mug.ufid)) {
+                    seen[mug.ufid] = null;
+                    _this._logicManager.updateAllReferences(mug);
+                    _this.vellum.setTreeValidationIcon(mug);
+                }
+            }
+            var _this = this,
+                seen = {},
+                mugs = this.getDescendants(mug).concat([mug]),
+                ufids = _.object(_(mugs).map(function(mug) { return [mug.ufid, null]; }));
             this._removeMugFromForm(mug, false);
+            this._logicManager.forEachReferencingProperty(ufids, breakReferences);
         },
         _removeMugFromForm: function(mug, isInternal) {
             var fromTree = this.controlTree.getNodeFromMug(mug);

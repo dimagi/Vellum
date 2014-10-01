@@ -139,7 +139,7 @@ define([
                 }
             }        
         },
-        updateAllReferences: function (mug, clear) {
+        updateAllReferences: function (mug) {
             // avoid control-only nodes
             if (mug.p.nodeID) {
                 for (var i = 0; i < util.XPATH_REFERENCES.length; i++) {
@@ -177,30 +177,50 @@ define([
          *        beginning with this path (no trailing /)
          */
         updatePaths: function (data, subtree) {
-            var found = this.all.filter(function (elem) {
-                return data.hasOwnProperty(elem.ref) && 
-                    (!subtree || elem.sourcePath === subtree || elem.sourcePath.indexOf(subtree + '/') === 0);
-            });
-            var ref, mug, expr, pkey, mugId, orig, seen = {};
-            for (var i = 0; i < found.length; i++) {
-                ref = found[i];
-                pkey = ref.mug + " " + ref.property;
+            var seen = {};
+            function updatePath(mug, property, paths) {
+                var pkey = mug.ufid + " " + property + " " + paths[0];
                 if (seen.hasOwnProperty(pkey)) {
-                    continue;
+                    return;
                 }
                 seen[pkey] = null;
-                mug = this.form.getMugByUFID(ref.mug);
-                expr = new LogicExpression(mug.p[ref.property]);
-                orig = expr.getText();
-                for (mugId in data) {
-                    if (data.hasOwnProperty(mugId)) {
-                        expr.updatePath(data[mugId][0], data[mugId][1]);
-                    }
-                }
+                var expr = new LogicExpression(mug.p[property]),
+                    orig = expr.getText();
+                expr.updatePath(paths[0], paths[1]);
                 if (orig !== expr.getText()) {
-                    mug.p[ref.property] = expr.getText();
-                } 
+                    mug.p[property] = expr.getText();
+                }
             }
+            this.forEachReferencingProperty(data, updatePath, subtree);
+        },
+        /**
+         * Call function for each expression property that references a mug
+         * identified by one of the given ufids
+         *
+         * @param ufids - a mapping (object) keyed by mug ufids.
+         *        Example: {"mug-ufid": <someValue>, ...}
+         * @param func - a function to be called for each expression property that
+         *        references one of the mugs. The function is called with
+         *        three arguments: (mug, property, mapValue)
+         *        - mug: the mug with an expression property referencing the mug
+         *          identified one of the given ufids ("mug-ufid").
+         *        - property: the name of the expression property.
+         *        - mapValue: the value from ufids (<someValue>).
+         * @param subtree - (optional) only visit references from nodes
+         *        beginning with this path (no trailing /)
+         */
+        forEachReferencingProperty: function(ufids, func, subtree) {
+            var _this = this;
+            _(this.all).each(function (elem) {
+                if (ufids.hasOwnProperty(elem.ref) &&
+                    (!subtree ||
+                     elem.sourcePath === subtree ||
+                     elem.sourcePath.indexOf(subtree + '/') === 0))
+                {
+                    var mug = _this.form.getMugByUFID(elem.mug);
+                    func(mug, elem.property, ufids[elem.ref]);
+                }
+            });
         },
         reset: function () {
             this.all = [];
