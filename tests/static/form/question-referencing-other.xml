@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:orx="http://openrosa.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa" xmlns:vellum="http://commcarehq.org/xforms/vellum">
+	<h:head>
+		<h:title>Untitled Form</h:title>
+		<model>
+			<instance>
+				<data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/B0006B1B-5417-453A-9997-4F7D7B54B3B8" uiVersion="1" version="1" name="Untitled Form">
+					<blue />
+					<green />
+					<black />
+				</data>
+			</instance>
+			<bind nodeset="/data/blue" type="xsd:string" />
+			<bind nodeset="/data/green" type="xsd:string" />
+			<bind nodeset="/data/black" type="xsd:string" relevant="/data/blue = 'abc'" />
+			<itext>
+				<translation lang="en" default="">
+					<text id="blue-label">
+						<value>blue</value>
+					</text>
+					<text id="green-label">
+						<value>green</value>
+					</text>
+					<text id="black-label">
+						<value>black</value>
+					</text>
+				</translation>
+			</itext>
+		</model>
+	</h:head>
+	<h:body>
+		<input ref="/data/blue">
+			<label ref="jr:itext('blue-label')" />
+		</input>
+		<input ref="/data/green">
+			<label ref="jr:itext('green-label')" />
+		</input>
+		<input ref="/data/black">
+			<label ref="jr:itext('black-label')" />
+		</input>
+	</h:body>
+</h:html>

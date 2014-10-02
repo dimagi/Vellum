@@ -428,6 +428,7 @@ define([
                 }
             }
             this._logicManager.updatePaths(updates);
+            this.fixBrokenReferences(mug);
         },
         changeMugType: function (mug, questionType) {
             this.mugTypes.changeType(mug, questionType);
@@ -514,6 +515,10 @@ define([
          * changed; null if the property should not change.
          */
         shouldMugPropertyChange: function (mug, property, value, previous) {
+            if (this.isLoadingXForm) {
+                // skip property change handlers during loading phase
+                return function () {};
+            }
             // update the logic properties that reference the mug
             if (property === 'nodeID' && previous &&
                 this.getMugChildrenByNodeID(mug.parentMug, value).length > 0)
@@ -613,6 +618,10 @@ define([
                 mug.p.defaultValue = this.generate_item_label(parent);
             }
             this.insertQuestion(mug, refMug, position, isInternal);
+            // should we fix broken references when nodeID is auto-generated?
+            //if (!mug.options.isControlOnly && !this.isLoadingXForm) {
+            //    this.fixBrokenReferences(mug);
+            //}
             if (mug.options.isODKOnly) {
                 this.updateError({
                     message: 'Image capture works on Android devices and ' +
@@ -638,6 +647,14 @@ define([
             if (!isInternal) {
                 mug.options.afterInsert(this, mug);
             }
+        },
+        fixBrokenReferences: function (mug) {
+            function updateReferences(mug) {
+                _this._logicManager.updateAllReferences(mug);
+                _this.vellum.setTreeValidationIcon(mug);
+            }
+            var _this = this;
+            this._logicManager.forEachBrokenReference(updateReferences);
         },
         getAbsolutePath: function (mug, excludeRoot) {
             return this.dataTree.getAbsolutePath(mug, excludeRoot);
@@ -687,7 +704,19 @@ define([
             return targetMug;
         },
         removeMugFromForm: function (mug) {
+            function breakReferences(mug) {
+                if (!seen.hasOwnProperty(mug.ufid)) {
+                    seen[mug.ufid] = null;
+                    _this._logicManager.updateAllReferences(mug);
+                    _this.vellum.setTreeValidationIcon(mug);
+                }
+            }
+            var _this = this,
+                seen = {},
+                mugs = this.getDescendants(mug).concat([mug]),
+                ufids = _.object(_(mugs).map(function(mug) { return [mug.ufid, null]; }));
             this._removeMugFromForm(mug, false);
+            this._logicManager.forEachReferencingProperty(ufids, breakReferences);
         },
         _removeMugFromForm: function(mug, isInternal) {
             var fromTree = this.controlTree.getNodeFromMug(mug);

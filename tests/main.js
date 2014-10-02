@@ -14,14 +14,9 @@ Function.prototype.bind = Function.prototype.bind || function (thisp) {
 
 var useBuilt, baseUrl, testBase, search = window.location.search;
 
-if (search.indexOf('built') !== -1) {
-    useBuilt = true;
-} else if (search.indexOf('async') !== -1) {
-    useBuilt = false;
-} else {
-    useBuilt = !window.mochaPhantomJS &&
-               window.location.href.indexOf('localhost') === -1;
-}
+// use built version if query string contains "built" parameter
+useBuilt = !!search.match(/[?&]?built(=[^&]*)?(&|$)/);
+
 if (useBuilt) {
     baseUrl = '_build/src';
     testBase = "../../";
@@ -92,6 +87,7 @@ require(['jquery', 'jquery.vellum'], function ($) {
 
         // register tests on global mocha instance as side-effect
         'tests/core',
+        'tests/form',
         'tests/logic',
         'tests/parser',
         'tests/questionTypes',
