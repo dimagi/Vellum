@@ -42,6 +42,7 @@
         "equivalent-xml-js": "mwhite/equivalent-xml-js#master",
         "when": "~2.8.0",
         "chai": ">=1.5.0",
-        "xrayquire": "requirejs/xrayquire"
+        "xrayquire": "requirejs/xrayquire",
+        "jsdiff": "kpdecker/jsdiff"
     }
 }
