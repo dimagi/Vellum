@@ -54,8 +54,10 @@ define([
             form = new Form(formOpts, vellum, formOpts.mugTypes);
         form.parseErrors = [];
         form.parseWarnings = warnings;
+        form.isLoadingXForm = true; // disable mug nodeId change logic
 
         if (!xmlString) {
+            form.isLoadingXForm = false;
             return form;
         }
 
@@ -129,6 +131,7 @@ define([
             form.updateAllLogicReferences(mug);
         });
 
+        form.isLoadingXForm = false;
         return form;
     }
 

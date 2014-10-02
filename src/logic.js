@@ -194,6 +194,19 @@ define([
             this.forEachReferencingProperty(data, updatePath, subtree);
         },
         /**
+         * Call a function for each mug with broken references
+         *
+         * The function is called with one argument: the mug with broken
+         * references.
+         */
+        forEachBrokenReference: function(func) {
+            _.each(this.errors, function (errorsByProperty, ufid) {
+                if (_.find(errorsByProperty, function(error) { return error; })) {
+                    func(this.form.getMugByUFID(ufid));
+                }
+            }, this);
+        },
+        /**
          * Call function for each expression property that references a mug
          * identified by one of the given ufids
          *

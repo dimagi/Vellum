@@ -35,5 +35,18 @@ define([
             });
         });
 
+        it("should remove warnings when broken reference is fixed", function (done) {
+            call('loadXFormOrError', QUESTION_REFERENCING_OTHER_XML, function () {
+                var blue = call("getMugByPath", "/data/blue"),
+                    black = call("getMugByPath", "/data/black");
+                blue.form.removeMugFromForm(blue);
+                assert(!util.isTreeNodeValid(black), "black should not be valid");
+                blue = util.addQuestion("Text", "blue");
+                assert(util.isTreeNodeValid(black),
+                       "black should be valid after blue is added");
+                done();
+            });
+        });
+
     });
 });
