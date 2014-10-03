@@ -624,8 +624,8 @@ define([
             //}
             if (mug.options.isODKOnly) {
                 this.updateError({
-                    message: 'Image capture works on Android devices and ' +
-                        'some feature phones; please test your specific ' +
+                    message: mug.options.typeName + ' works on Android devices ' +
+                        'and some feature phones; please test your specific ' +
                         'model to ensure that this question type is supported',
                     level: 'form-warning'
                 });
