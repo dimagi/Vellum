@@ -70,8 +70,10 @@ require([
                 $("[name='itext-hin-label']").val('question1 hin label').change();
                 $("[name='itext-en-constraintMsg']").val('question1 en validation').change();
                 $("[name='itext-hin-constraintMsg']").val('question1 hin validation').change();
-                $("[name='itext-en-hint']").val('question1 hint en').change();
+                $("[name='itext-en-hint']").val('question1 en hint').change();
                 $("[name='itext-hin-hint']").val('question1 hin hint').change();
+                $("[name='itext-en-help']").val('question1 en help').change();
+                $("[name='itext-hin-help']").val('question1 hin help').change();
                 $("[name='itext-en-label-long']").val("question1 en long").change();
                 $("[name='itext-hin-label-long']").val("question1 hin long").change();
                 $("[name='itext-en-label-short']").val("question1 en short").change();
@@ -318,7 +320,13 @@ require([
                             <value form="custom">question1 en custom</value>\
                         </text>\
                         <text id="question1-hint">\
-                            <value>question1 hint en</value>\
+                            <value>question1 en hint</value>\
+                        </text>\
+                        <text id="question1-help">\
+                            <value>question1 en help</value>\
+                            <value form="image">jr://file/commcare/image/help/data/question1.png</value>\
+                            <value form="audio">jr://file/commcare/audio/help/data/question1.mp3</value>\
+                            <value form="video">jr://file/commcare/video/help/data/question1.3gp</value>\
                         </text>\
                         <text id="question1-constraintMsg">\
                             <value>question1 en validation</value>\
@@ -337,6 +345,12 @@ require([
                         <text id="question1-hint">\
                             <value>question1 hin hint</value>\
                         </text>\
+                        <text id="question1-help">\
+                            <value>question1 hin help</value>\
+                            <value form="image">jr://file/commcare/image/help/data/question1.png</value>\
+                            <value form="audio">jr://file/commcare/audio/help/data/question1.mp3</value>\
+                            <value form="video">jr://file/commcare/video/help/data/question1.3gp</value>\
+                        </text>\
                         <text id="question1-constraintMsg">\
                             <value>question1 hin validation</value>\
                         </text>\
@@ -348,6 +362,7 @@ require([
             <input ref="/data/question1">\
                 <label ref="jr:itext(\'question1-label\')"/>\
                 <hint ref="jr:itext(\'question1-hint\')"/>\
+                <help ref="jr:itext(\'question1-help\')"/>\
             </input>\
         </h:body>\
     </h:html>';
