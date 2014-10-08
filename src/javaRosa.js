@@ -889,7 +889,11 @@ define([
             return _.intersection(block.activeForms, block.forms);
         };
 
-        block.itextWidget = itextMediaWidget;
+        // this used to be the form ID instead of 'data'.  Since
+        // only hand-made forms will ever end up with a different
+        // ID (the ability to set it in the UI has been broken for
+        // a while), it seemed ok to make it just 'data'
+        block.itextWidget = itextMediaWidget('/data/');
 
         return block;
     };
@@ -901,7 +905,7 @@ define([
             return _.intersection(block.activeForms, block.forms);
         };
 
-        block.itextWidget = itextHelpMediaWidget;
+        block.itextWidget = itextMediaWidget('/help/data/');
 
         return block;
     };
@@ -1167,55 +1171,28 @@ define([
         video: 'icon-facetime-video'
     };
 
-    var itextMediaWidget = function (mug, language, form, options) {
-        var widget = itextFormWidget(mug, language, form, options);
+    var itextMediaWidget = function (url_type) {
+        return function (mug, language, form, options) {
+            var widget = itextFormWidget(mug, language, form, options);
 
+            widget.getDefaultValue = function () {
+                if (SUPPORTED_MEDIA_TYPES.indexOf(form) !== -1) {
+                    // default formats
+                    // image: jr://file/commcare/image/form_id/question_id.png
+                    // audio: jr://file/commcare/audio/form_id/question_id.mp3
+                    var extension = DEFAULT_EXTENSIONS[form];
+                    return "jr://file/commcare/" + form + url_type +
+                           widget.mug.getDefaultItextRoot() + "." + extension;
+                }
+                return null;
+            };
 
-        widget.getDefaultValue = function () {
-            if (SUPPORTED_MEDIA_TYPES.indexOf(form) !== -1) {
-                // default formats
-                // image: jr://file/commcare/image/form_id/question_id.png
-                // audio: jr://file/commcare/audio/form_id/question_id.mp3
-                var extension = DEFAULT_EXTENSIONS[form];
-                return "jr://file/commcare/" + form + "/data/" +
-                    // this used to be the form ID instead of 'data'.  Since
-                    // only hand-made forms will ever end up with a different
-                    // ID (the ability to set it in the UI has been broken for
-                    // a while), it seemed ok to make it just 'data'
-                       widget.mug.getDefaultItextRoot() + "." + extension;
-            }
-            return null;
+            widget.mug.form.vellum.initWidget(widget);
+
+            return widget;
         };
-
-        widget.mug.form.vellum.initWidget(widget);
-
-        return widget;
     };
     
-    var itextHelpMediaWidget = function (mug, language, form, options) {
-        var widget = itextFormWidget(mug, language, form, options);
-
-        widget.getDefaultValue = function () {
-            if (SUPPORTED_MEDIA_TYPES.indexOf(form) !== -1) {
-                // default formats
-                // image: jr://file/commcare/image/form_id/question_id.png
-                // audio: jr://file/commcare/audio/form_id/question_id.mp3
-                var extension = DEFAULT_EXTENSIONS[form];
-                return "jr://file/commcare/" + form + "/help/data/" +
-                    // this used to be the form ID instead of 'data'.  Since
-                    // only hand-made forms will ever end up with a different
-                    // ID (the ability to set it in the UI has been broken for
-                    // a while), it seemed ok to make it just 'data'
-                       widget.mug.getDefaultItextRoot() + "." + extension;
-            }
-            return null;
-        };
-
-        widget.mug.form.vellum.initWidget(widget);
-
-        return widget;
-    };
-
     var parseXLSItext = function (str, Itext) {
         var rows = str.split('\n'),
             i, j, k, cells, lang, iID, val;
