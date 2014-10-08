@@ -1883,7 +1883,7 @@ define([
             // virtual property used to get a widget
             control.helpMediaIText = function (mugOptions) {
                 return mugOptions.isSpecialGroup ? undefined : {
-                    visibility: 'visible',
+                    visibility: 'helpItextID',
                     presence: 'optional',
                     lstring: 'Add Help Media',
                     widget: function (mug, options) {

@@ -75,7 +75,13 @@
 						<value form="custom">question1 en custom</value>
 					</text>
 					<text id="question1-hint">
-						<value>question1 hint en</value>
+						<value>question1 en hint</value>
+					</text>
+					<text id="question1-help">
+						<value>question1 en help</value>
+						<value form="image">jr://file/commcare/image/help/data/question1.png</value>
+						<value form="audio">jr://file/commcare/audio/help/data/question1.mp3</value>
+						<value form="video">jr://file/commcare/video/help/data/question1.3gp</value>
 					</text>
 					<text id="question1-constraintMsg">
 						<value>question1 en validation</value>
@@ -175,6 +181,12 @@
 					<text id="question1-hint">
 						<value>question1 hin hint</value>
 					</text>
+					<text id="question1-help">
+						<value>question1 hin help</value>
+						<value form="image">jr://file/commcare/image/help/data/question1.png</value>
+						<value form="audio">jr://file/commcare/audio/help/data/question1.mp3</value>
+						<value form="video">jr://file/commcare/video/help/data/question1.3gp</value>
+					</text>
 					<text id="question1-constraintMsg">
 						<value>question1 hin validation</value>
 					</text>
@@ -272,6 +284,7 @@
 		<input ref="/data/question1">
 			<label ref="jr:itext('question1-label')">non-itext label</label>
 			<hint ref="jr:itext('question1-hint')">non-itext hint</hint>
+			<help ref="jr:itext('question1-help')" />
 		</input>
 		<trigger ref="/data/question2" appearance="minimal">
 			<label ref="jr:itext('question2-label')" />

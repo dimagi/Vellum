@@ -250,9 +250,13 @@ require([
                         $("[name='itext-hin-constraintMsg']")
                             .val('question1 hin validation').change();
                         $("[name='itext-en-hint']")
-                            .val('question1 hint en').change();
+                            .val('question1 en hint').change();
                         $("[name='itext-hin-hint']")
                             .val('question1 hin hint').change();
+                        $("[name='itext-en-help']")
+                            .val('question1 en help').change();
+                        $("[name='itext-hin-help']")
+                            .val('question1 hin help').change();
                         $("[name='itext-en-label-long']")
                             .val("question1 en long").change();
                         $("[name='itext-hin-label-long']")
