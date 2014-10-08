@@ -894,6 +894,18 @@ define([
         return block;
     };
 
+    var itextMediaHelpBlock = function (mug, options) {
+        var block = itextConfigurableBlock(mug, options);
+
+        block.getForms = function () {
+            return _.intersection(block.activeForms, block.forms);
+        };
+
+        block.itextWidget = itextHelpMediaWidget;
+
+        return block;
+    };
+
     var itextLabelWidget = function (mug, language, form, options) {
         var vellum = mug.form.vellum,
             Itext = vellum.data.javaRosa.Itext,
@@ -1166,6 +1178,30 @@ define([
                 // audio: jr://file/commcare/audio/form_id/question_id.mp3
                 var extension = DEFAULT_EXTENSIONS[form];
                 return "jr://file/commcare/" + form + "/data/" +
+                    // this used to be the form ID instead of 'data'.  Since
+                    // only hand-made forms will ever end up with a different
+                    // ID (the ability to set it in the UI has been broken for
+                    // a while), it seemed ok to make it just 'data'
+                       widget.mug.getDefaultItextRoot() + "." + extension;
+            }
+            return null;
+        };
+
+        widget.mug.form.vellum.initWidget(widget);
+
+        return widget;
+    };
+    
+    var itextHelpMediaWidget = function (mug, language, form, options) {
+        var widget = itextFormWidget(mug, language, form, options);
+
+        widget.getDefaultValue = function () {
+            if (SUPPORTED_MEDIA_TYPES.indexOf(form) !== -1) {
+                // default formats
+                // image: jr://file/commcare/image/form_id/question_id.png
+                // audio: jr://file/commcare/audio/form_id/question_id.mp3
+                var extension = DEFAULT_EXTENSIONS[form];
+                return "jr://file/commcare/" + form + "/help/data/" +
                     // this used to be the form ID instead of 'data'.  Since
                     // only hand-made forms will ever end up with a different
                     // ID (the ability to set it in the UI has been broken for
@@ -1867,6 +1903,25 @@ define([
                     }
                 };
             };
+            // virtual property used to get a widget
+            control.helpMediaIText = function (mugOptions) {
+                return mugOptions.isSpecialGroup ? undefined : {
+                    visibility: 'visible',
+                    presence: 'optional',
+                    lstring: 'Add Help Media',
+                    widget: function (mug, options) {
+                        return itextMediaHelpBlock(mug, $.extend(options, {
+                            displayName: "Add Help Media",
+                            itextType: "help",
+                            getItextByMug: function (mug) {
+                                return mug.p.helpItextID;
+                            },
+                            forms: SUPPORTED_MEDIA_TYPES,
+                            formToIcon: ICONS
+                        }));
+                    }
+                };
+            };
             return spec;
         },
         getMainProperties: function () {
@@ -1896,6 +1951,7 @@ define([
                 'hintItext',
                 'helpItextID',
                 'helpItext',
+                'helpMediaIText',
                 'otherItext'
             ]);
 
