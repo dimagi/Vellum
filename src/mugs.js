@@ -885,7 +885,7 @@ define([
 
         var allTypeNames = _.keys(this.allTypes),
             innerChildTypeNames = _.without.apply(_, 
-                  [allTypeNames, 'DataBindOnly'].concat(
+                  [allTypeNames].concat(
                       _.keys(this.auxiliaryTypes))),
             nonGroupTypeNames = _.without(innerChildTypeNames,
                 'Group', 'Repeat', 'FieldList');
