@@ -6,7 +6,9 @@ require([
     'tests/utils',
     'text!static/core/group-rename.xml',
     'text!static/core/invalid-questions.xml',
-    'text!static/core/increment-item.xml'
+    'text!static/core/increment-item.xml',
+    'text!static/core/hidden-value-in-repeat.xml',
+    'text!static/core/insert-questions.xml'
 ], function (
     chai,
     $,
@@ -14,7 +16,9 @@ require([
     util,
     GROUP_RENAME_XML,
     INVALID_QUESTIONS_XML,
-    INCREMENT_ITEM_XML
+    INCREMENT_ITEM_XML,
+    HIDDEN_VALUE_IN_REPEAT_XML,
+    INSERT_QUESTIONS_XML
 ) {
     var assert = chai.assert,
         call = util.call,
@@ -102,6 +106,125 @@ require([
                 done();
             }}});
         });
+
+        it("should add hidden value in repeat group", function (done) {
+            util.init({core: {onReady: function () {
+                util.addQuestion("Repeat", "repeat");
+                util.addQuestion.bind({prevId: "repeat"})("Text", "text");
+                util.addQuestion.bind({prevId: "repeat"})("DataBindOnly", "hidden");
+                util.assertXmlEqual(
+                            call('createXML'),
+                            HIDDEN_VALUE_IN_REPEAT_XML,
+                            {normalize_xmlns: true});
+                done();
+            }}});
+        });
+
+        it("should load hidden value in repeat group", function (done) {
+            util.init({core: {form: HIDDEN_VALUE_IN_REPEAT_XML, onReady: function () {
+                util.assertJSTreeState(
+                    "repeat",
+                    "  text",
+                    "  hidden"
+                );
+                done();
+            }}});
+        });
+
+        it("should add hidden value at end of group", function (done) {
+            util.init({core: {form: INSERT_QUESTIONS_XML, onReady: function () {
+                util.addQuestion.bind({prevId: "hidden1"})("DataBindOnly", "hiddenA");
+                util.addQuestion.bind({prevId: "hidden2"})("DataBindOnly", "hiddenB");
+                util.assertJSTreeState(
+                    "text1",
+                    "text2",
+                    "group",
+                    "  text3",
+                    "  text4",
+                    "  hidden2",
+                    "  hiddenB",
+                    "text5",
+                    "hidden1",
+                    "hiddenA"
+                );
+                done();
+            }}});
+        });
+
+        it("should add hidden value near end of group", function (done) {
+            util.init({core: {form: INSERT_QUESTIONS_XML, onReady: function () {
+                util.addQuestion.bind({prevId: "text1"})("DataBindOnly", "hiddenA");
+                util.addQuestion.bind({prevId: "text3"})("DataBindOnly", "hiddenB");
+                util.assertJSTreeState(
+                    "text1",
+                    "text2",
+                    "group",
+                    "  text3",
+                    "  text4",
+                    "  hiddenB",
+                    "  hidden2",
+                    "text5",
+                    "hiddenA",
+                    "hidden1"
+                );
+                done();
+            }}});
+        });
+
+        it("should add question after selected question", function (done) {
+            util.init({core: {form: INSERT_QUESTIONS_XML, onReady: function () {
+                util.addQuestion.bind({prevId: "text1"})("Text", "textA");
+                util.addQuestion.bind({prevId: "text3"})("Text", "textB");
+                util.assertJSTreeState(
+                    "text1",
+                    "textA",
+                    "text2",
+                    "group",
+                    "  text3",
+                    "  textB",
+                    "  text4",
+                    "  hidden2",
+                    "text5",
+                    "hidden1"
+                );
+                done();
+            }}});
+        });
+
+        it("should add question before hidden value", function (done) {
+            util.init({core: {form: INSERT_QUESTIONS_XML, onReady: function () {
+                util.addQuestion.bind({prevId: "hidden1"})("Text", "textA");
+                util.addQuestion.bind({prevId: "hidden2"})("Text", "textB");
+                util.assertJSTreeState(
+                    "text1",
+                    "text2",
+                    "group",
+                    "  text3",
+                    "  text4",
+                    "  textB",
+                    "  hidden2",
+                    "text5",
+                    "textA",
+                    "hidden1"
+                );
+                done();
+            }}});
+        });
+
+        it("should add question before sole hidden value", function (done) {
+            util.init({core: {onReady: function () {
+                util.addQuestion("DataBindOnly", "hidden");
+                util.addQuestion.bind({prevId: "hidden"})("Text", "text");
+                util.assertJSTreeState(
+                    "text",
+                    "hidden"
+                );
+                done();
+            }}});
+        });
+
+        //it("should load hidden value at end of group", function (done) { assert(false); });
+
     });
 
     var TEST_XML_1 = '' +
