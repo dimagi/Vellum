@@ -292,6 +292,20 @@ define([
         mug.p.hintLabel = hintVal;
     }
 
+    function parseHelp (form, hEl, mug) {
+        var Itext = form.vellum.data.javaRosa.Itext;
+        var $hEl = $(hEl),
+            helpRef = getLabelRef($hEl);
+
+        if (helpRef) {
+            mug.p.helpItextID = Itext.getOrCreateItem(helpRef);
+        } else {
+            // couldn't parse the help as itext.
+            // just create an empty placeholder for it
+            mug.p.helpItextID = Itext.createItem("");
+        }
+    }
+
     function parseDefaultValue (dEl, mug) {
         var dVal = util.getXLabelValue($(dEl));
         if(dVal){
@@ -460,15 +474,17 @@ define([
         }
         
         var tag = mug.p.tagName,
-            labelEl, hintEl;
+            labelEl, hintEl, helpEl;
 
         if(tag === 'repeat'){
             labelEl = $groupEl.children('label');
             hintEl = $groupEl.children('hint');
+            helpEl = $groupEl.children('help');
             mug.p.repeat_count = $cEl.popAttr('jr:count') || null;
         } else {
             labelEl = $cEl.children('label');
             hintEl = $cEl.children('hint');
+            helpEl = $cEl.children('help');
         }
 
         if (labelEl.length > 0 && mug.__className !== 'Itemset') {
@@ -476,6 +492,9 @@ define([
         }
         if (hintEl.length > 0) {
             parseHint (form, hintEl, mug);
+        }
+        if (helpEl.length > 0) {
+            parseHelp (form, helpEl, mug);
         }
         if (tag === 'item') {
             parseDefaultValue($cEl.children('value'),mug);

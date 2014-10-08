@@ -419,6 +419,10 @@ define([
                     !mug.p.hintItextID) {
                     mug.p.hintItextID = this.createItem("");
                 }
+                if (mug.spec.helpItextID.presence !== "notallowed" &&
+                    !mug.p.helpItextID) {
+                    mug.p.helpItextID = this.createItem("");
+                }
             }
             if (!mug.options.isControlOnly) {
                 // set constraint msg if legal and not there
@@ -469,6 +473,7 @@ define([
             var thingsToGet = [
                 'labelItextID',
                 'hintItextID', 
+                'helpItextID',
                 'constraintMsgItextID'
             ]; 
         
@@ -1780,6 +1785,49 @@ define([
                     return validateItextItem(hintItext, "Hint");
                 }
             };
+            control.helpItext = {
+                visibility: 'helpItextID',
+                widget: function (mug, options) {
+                    return itextLabelBlock(mug, $.extend(options, {
+                        itextType: "help",
+                        getItextByMug: function (mug) {
+                            return mug.p.helpItextID;
+                        },
+                        displayName: "Help Message"
+                    }));
+                }
+            };
+            control.helpItextID = {
+                visibility: 'visible',
+                presence: function (mugOptions) {
+                    return mugOptions.isSpecialGroup ? 'notallowed' : 'optional';
+                },
+                lstring: "Help Itext ID",
+                widget: function (mug, options) {
+                    return iTextIDWidget(mug, $.extend(options, {
+                        itextType: "help",
+                        getItextByMug: function (mug) {
+                            return mug.p.helpItextID;
+                        },
+                        displayName: "Help Message"
+                    }));
+                },
+                validationFunc: function (mug) {
+                    var helpItext;
+                    helpItext = mug.p.helpItextID;
+                    if (helpItext && helpItext.id) {
+                        if (!util.isValidAttributeValue(helpItext.id)) {
+                            return helpItext.id + " is not a valid ID";
+                        }
+                    }
+                    if (mug.spec.helpItextID.presence === 'required' &&
+                        !helpItext.id) {
+                        return 'Help ID is required but not present in this question!';
+                    }
+                    
+                    return validateItextItem(helpItext, "Help");
+                }
+            };
 
             // virtual property used to get a widget
             control.otherItext = function (mugOptions) {
@@ -1846,6 +1894,8 @@ define([
                 'constraintMsgItextID',
                 'hintItextID',
                 'hintItext',
+                'helpItextID',
+                'helpItext',
                 'otherItext'
             ]);
 

@@ -338,6 +338,19 @@ define([
                         xmlWriter.writeEndElement();
                     }
                 }
+
+                // Do help text
+                if( tagName !== 'item' && tagName !== 'repeat'){
+                    var helpItextID = mug.p.helpItextID;
+                    if(helpItextID && helpItextID.id) {
+                        xmlWriter.writeStartElement('help');
+                        if(helpItextID.id){
+                            var helpRef = "jr:itext('" + helpItextID.id + "')";
+                            xmlWriter.writeAttributeString('ref',helpRef);
+                        }
+                        xmlWriter.writeEndElement();
+                    }
+                }
             }
 
             //create the label object (for createOpenControlTag())
