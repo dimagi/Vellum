@@ -318,6 +318,34 @@ define([
             return output;
         },
         /**
+         * Get the mug adjacent to mug in its parent's children
+         *
+         * @param mug
+         * @param position - Either 'before' or 'after'.
+         * @returns The adjacent mug; `null` if the given mug is at the
+         *          beginning (for 'before') or end (for 'after') of its
+         *          parent's children.
+         * @throws An error if the mug is not found in the tree or if the
+         *         given mug is not found among its children.
+         */
+        getAdjacentMug: function (mug, position) {
+            var node = this.getNodeFromMug(mug),
+                children, index;
+            if (!node) {
+                throw "mug not found in " + this.treeType + " tree";
+            }
+            children = this.getParentNode(node).getChildrenMugs();
+            index = children.indexOf(mug);
+            if (index === -1) {
+                throw "mug not found in its parent's children";
+            }
+            if (position === 'before') {
+                return index - 1 >= 0 ? children[index - 1] : null;
+            } else {
+                return index + 1 < children.length ? children[index + 1] : null;
+            }
+        },
+        /**
          * Removes the specified Mug from the tree. If it isn't in the tree
          * does nothing.  Does nothing if null is specified
          *

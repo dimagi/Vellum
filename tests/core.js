@@ -223,7 +223,142 @@ require([
             }}});
         });
 
-        //it("should load hidden value at end of group", function (done) { assert(false); });
+        describe("drag+drop should", function () {
+            var mugs;
+            before(function (done) {
+                util.init({core: {form: INSERT_QUESTIONS_XML, onReady: function () {
+                    mugs = {
+                        text1: call("getMugByPath", "/data/text1"),
+                        text2: call("getMugByPath", "/data/text2"),
+                        group: call("getMugByPath", "/data/group"),
+                        text3: call("getMugByPath", "/data/group/text3"),
+                        text4: call("getMugByPath", "/data/group/text4"),
+                        hidden2: call("getMugByPath", "/data/group/hidden2"),
+                        text5: call("getMugByPath", "/data/text5"),
+                        hidden1: call("getMugByPath", "/data/hidden1")
+                    };
+                    done();
+                }}});
+            });
+
+            var data = [
+                    ["text1", "before", "text1", false],
+                    ["text1", "after", "text1", false],
+                    ["text1", "into", "text1", false],
+
+                    ["text1", "before", "text2", true],
+                    ["text1", "after", "text2", true],
+                    ["text1", "into", "text2", true],
+
+                    ["text1", "before", "group", true],
+                    ["text1", "after", "group", true],
+                    ["text1", "into", "group", true],
+
+                    ["text1", "before", "text3", true],
+                    ["text1", "after", "text3", true],
+                    ["text1", "into", "text3", true],
+
+                    ["text1", "before", "text4", true],
+                    ["text1", "after", "text4", true],
+                    ["text1", "into", "text4", true],
+
+                    ["text1", "before", "hidden2", true],
+                    ["text1", "after", "hidden2", false],
+                    ["text1", "into", "hidden2", false],
+
+                    ["text1", "before", "text5", true],
+                    ["text1", "after", "text5", true],
+                    ["text1", "into", "text5", true],
+
+                    ["text1", "before", "hidden1", true],
+                    ["text1", "after", "hidden1", false],
+                    ["text1", "into", "hidden1", false],
+
+
+                    ["hidden1", "before", "text1", false],
+                    ["hidden1", "after", "text1", false],
+                    ["hidden1", "into", "text1", false],
+
+                    ["hidden1", "before", "text2", false],
+                    ["hidden1", "after", "text2", false],
+                    ["hidden1", "into", "text2", false],
+
+                    ["hidden1", "before", "group", false],
+                    ["hidden1", "after", "group", false],
+                    ["hidden1", "into", "group", true],
+
+                    ["hidden1", "before", "text3", false],
+                    ["hidden1", "after", "text3", false],
+                    ["hidden1", "into", "text3", false],
+
+                    ["hidden1", "before", "text4", false],
+                    ["hidden1", "after", "text4", true],
+                    ["hidden1", "into", "text4", false],
+
+                    ["hidden1", "before", "hidden2", true],
+                    ["hidden1", "after", "hidden2", true],
+                    ["hidden1", "into", "hidden2", true],
+
+                    ["hidden1", "before", "text5", false],
+                    ["hidden1", "after", "text5", true],
+                    ["hidden1", "into", "text5", false],
+
+                    ["hidden1", "before", "hidden1", false],
+                    ["hidden1", "after", "hidden1", false],
+                    ["hidden1", "into", "hidden1", false],
+
+
+                    ["hidden2", "before", "text1", false],
+                    ["hidden2", "after", "text1", false],
+                    ["hidden2", "into", "text1", false],
+
+                    ["hidden2", "before", "text2", false],
+                    ["hidden2", "after", "text2", false],
+                    ["hidden2", "into", "text2", false],
+
+                    ["hidden2", "before", "group", false],
+                    ["hidden2", "after", "group", false],
+                    ["hidden2", "into", "group", true], // should this be allowed?
+
+                    ["hidden2", "before", "text3", false],
+                    ["hidden2", "after", "text3", false],
+                    ["hidden2", "into", "text3", false],
+
+                    ["hidden2", "before", "text4", false],
+                    ["hidden2", "after", "text4", true],
+                    ["hidden2", "into", "text4", false],
+
+                    ["hidden2", "before", "hidden2", false],
+                    ["hidden2", "after", "hidden2", false],
+                    ["hidden2", "into", "hidden2", false],
+
+                    ["hidden2", "before", "text5", false],
+                    ["hidden2", "after", "text5", true],
+                    ["hidden2", "into", "text5", false],
+
+                    ["hidden2", "before", "hidden1", true],
+                    ["hidden2", "after", "hidden1", true],
+                    ["hidden2", "into", "hidden1", true]
+                ];
+
+            _(data).each(function (test) {
+                var should = test[3],
+                    prefix = should ? "allow move " : "prevent move ",
+                    qsrc = test[0],
+                    qdst = test[2],
+                    position = test[1];
+                it(prefix + qsrc + " " + position + " " + qdst, function () {
+                    var src = mugs[qsrc],
+                        dst = mugs[qdst],
+                        result = call("checkMove",
+                                        src.ufid, src.__className,
+                                        dst.ufid, dst.__className,
+                                        position);
+                    assert((should ? result : !result),
+                           ["move", qsrc, position, qdst, "->", result].join(" "));
+                });
+            });
+        });
 
     });
 

@@ -708,34 +708,15 @@ define([
                 "move": {
                     "always_copy": false,
                     "check_move": function (m) {
-                        // disallow moving a data node or onto a data node
-                        // unless both nodes are data nodes
                         var source = $(m.o),
                             target = $(m.r),
-                            position = m.p,
-                            refIsData = target.attr('rel') === 'DataBindOnly',
-                            nodeIsData = source.attr('rel') === 'DataBindOnly';
-
-                        if (Number(refIsData) + Number(nodeIsData) === 1) {
-                            return false;
-                        }
-
-                        var form = _this.data.core.form,
-                            sourceMug = form.getMugByUFID(source.attr('id')),
-                            isMoveable = _this.isMugPathMoveable(
-                                sourceMug.getAbsolutePath());
-
-                        if (!isMoveable) {
-                            var id = target.attr('id'),
-                                targetMug = form.getMugByUFID(id);
-                            if (position === 'into' || position === 'last') {
-                                return sourceMug.parentMug === targetMug;
-                            } else {
-                                return sourceMug.parentMug === targetMug.parentMug;
-                            }
-                        }
-
-                        return true;
+                            position = m.p;
+                        return _this.checkMove(
+                                        source.attr('id'),
+                                        source.attr('rel'),
+                                        target.attr('id'),
+                                        target.attr('rel'),
+                                        position);
                     }
                 }
             },
@@ -823,6 +804,57 @@ define([
             var mug = _this.data.core.form.getMugByUFID(data.args[1].substring(1));
             _this.overrideJSTreeIcon(mug);
         });
+    };
+
+    fn.checkMove = function (srcId, srcType, dstId, dstType, position) {
+        var srcIsData = srcType === 'DataBindOnly',
+            dstIsData = dstType === 'DataBindOnly';
+
+        if (srcId === dstId) {
+            return false;
+        }
+
+        if (position === 'into') { // is 'last' or 'first' possible?
+            if (srcType === dstType) {
+                // allow insert 'into' same type (becomes 'after' if 'into' now allowed)
+                return true;
+            }
+
+            var valid_children = typeData[dstType].valid_children;
+            if (valid_children.indexOf(srcType) !== -1) {
+                return true;
+            }
+        }
+
+        var form = this.data.core.form,
+            sourceMug = form.getMugByUFID(srcId),
+            targetMug = form.getMugByUFID(dstId),
+            locked = !this.isMugPathMoveable(sourceMug.getAbsolutePath());
+
+        if (srcIsData ? !dstIsData : dstIsData) { // srcIsData XOR dstIsData
+            if (position === 'after' || position === 'before') {
+                // allow move if between control and data-only
+                var mug = form.getAdjacentMug(targetMug, position);
+                if (srcIsData) {
+                    return (!mug && position === 'after') ||     // end of group
+                           (mug && mug.__className === srcType); // next is data (position cannot be 'before')
+                } else {
+                    return (!mug && position === 'before') ||    // beginning of group
+                           (mug && mug.__className === srcType); // next is not data (position cannot be 'after')
+                }
+            }
+            return false;
+        }
+
+        if (locked) {
+            if (position === 'into' || position === 'last' || position === 'first') {
+                return sourceMug.parentMug === targetMug;
+            } else {
+                return sourceMug.parentMug === targetMug.parentMug;
+            }
+        }
+
+        return true;
     };
 
     fn.setTreeNodeInvalid = function (uid, msg) {
