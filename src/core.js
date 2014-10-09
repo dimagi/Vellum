@@ -1295,19 +1295,19 @@ define([
                 // value or refMug (whichever comes first); insert after that
                 for (i = siblings.length - 1; i > -1; i--) {
                     mug = siblings[i];
-                    if (mug === refMug || mug.__className !== "DataBindOnly") {
+                    if (mug === refMug || !mug.options.isDataOnly) {
                         refMug = mug;
                         break;
                     }
                 }
-            } else if (refMug.__className === "DataBindOnly") {
+            } else if (refMug.options.isDataOnly) {
                 // iterate backward through siblings until finding non-hidden-
                 // value and insert after that
                 refMug = parent;
                 position = "first";
                 for (i = siblings.length - 1; i > -1; i--) {
                     mug = siblings[i];
-                    if (mug.__className !== "DataBindOnly") {
+                    if (!mug.options.isDataOnly) {
                         refMug = mug;
                         position = "after";
                         break;
@@ -1324,7 +1324,7 @@ define([
                 position = "first";
                 for (i = siblings.length - 1; i > -1; i--) {
                     mug = siblings[i];
-                    if (mug.__className !== "DataBindOnly") {
+                    if (!mug.options.isDataOnly) {
                         position = "after";
                         refMug = mug;
                         break;
