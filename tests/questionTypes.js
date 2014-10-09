@@ -17,6 +17,7 @@ require([
         assert = chai.assert,
         questionTypes = [
             //{
+            //    clickBeforeAdd: "questionX", // optional click this node before adding question
             //    type: "QuestionType", // required
             //    nodeId: "questionN", // required
             //    attrs: { // optional
@@ -93,16 +94,6 @@ require([
                 type: 'DateTime',
                 nodeId: 'question19'
             }, {
-                type: 'Group',
-                nodeId: 'question21'
-            }, { // get out of the repeat
-                type: 'Repeat',
-                nodeId: 'question31',
-                attrs: {
-                    requiredAttr: true,
-                    repeat_count: 2
-                }
-            }, { // insert before first data node
                 type: 'DataBindOnly',
                 nodeId: 'question20',
                 inputs: {
@@ -110,7 +101,7 @@ require([
                     constraintAttr: 0,
                     requiredAttr: 0,
                 }
-            }, { // insert before first data node
+            }, {
                 type: 'Repeat',
                 nodeId: 'question22'
             }, {
@@ -135,6 +126,18 @@ require([
                 type: 'AndroidIntent',
                 nodeId: 'question7'
             }, {
+                clickBeforeAdd: "question19", // insert before question22
+                type: 'Group',
+                nodeId: 'question21'
+            }, {
+                type: 'Repeat',
+                nodeId: 'question31',
+                attrs: {
+                    requiredAttr: true,
+                    repeat_count: 2
+                }
+            }, {
+                clickBeforeAdd: "question20", // insert after question20
                 type: 'DataBindOnly',
                 nodeId: 'question32',
                 attrs: {
@@ -223,7 +226,9 @@ require([
                     form: null,
                     onReady: function () {
                         _.each(questionTypes, function (q, i) {
-                            var obj = {prevId: (i > 0 ? questionTypes[i - 1].nodeId : null)};
+                            var prevId = q.clickBeforeAdd ||
+                                         (i > 0 ? questionTypes[i - 1].nodeId : null),
+                                obj = {prevId: prevId};
                             addQuestion.call(obj, q.type, q.nodeId, q.attrs);
                         });
 
@@ -290,9 +295,9 @@ require([
                         util.assertXmlEqual(
                             call('createXML'),
                             TEST_XML
-                                .replace('foo="bar"', '')
-                                .replace('spam="eggs"', '')
-                                .replace('foo="baz"', '')
+                                .replace(' foo="bar"', '')
+                                .replace(' spam="eggs"', '')
+                                .replace(' foo="baz"', '')
                                 .replace(/<unrecognized>[\s\S]+<\/unrecognized>/, '')
                                 .replace('non-itext label', '')
                                 .replace('non-itext hint', '')
