@@ -393,6 +393,12 @@ define([
             });
             this.fireChange(mug);
         },
+        getAdjacentMug: function (mug, position) {
+            if (!mug.options.isControlOnly) {
+                return this.dataTree.getAdjacentMug(mug, position);
+            }
+            return this.controlTree.getAdjacentMug(mug, position);
+        },
         getDescendants: function (mug) {
             var desc = this.getChildren(mug), i;
             for (i = desc.length - 1; i >= 0; i--) {
