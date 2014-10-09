@@ -728,7 +728,7 @@ define([
                         if (!isMoveable) {
                             var id = target.attr('id'),
                                 targetMug = form.getMugByUFID(id);
-                            if (position === 'inside' || position === 'last') {
+                            if (position === 'into' || position === 'last') {
                                 return sourceMug.parentMug === targetMug;
                             } else {
                                 return sourceMug.parentMug === targetMug.parentMug;
@@ -1205,8 +1205,7 @@ define([
             _this.createQuestion(mug, mug.parentMug, 'into');
             _this.setTreeValidationIcon(mug);
         });
-        //get list of pure data nodes and throw them in the Question UI tree
-        //(at the bottom)
+        // get list of pure data nodes and throw them in the Question UI tree
         var dataNodeList = form.getDataNodeList();
         for (var i = 0; i < dataNodeList.length; i++) {
             // put hidden values at the end of their respective groups.
@@ -1263,7 +1262,7 @@ define([
      * non-hidden-value questions will be inserted before any hidden values.
      */
     fn.getInsertTargetAndPosition = function (refMug, qType) {
-        // Valid positions: before, after, first, last, inside (same as last)
+        // Valid positions: before, after, first, last, into (same as last)
         var i, mug, parent, siblings, childTypes, position = 'last';
 
         // find insertion point without considering hidden values
@@ -1340,7 +1339,7 @@ define([
     /**
      * Get an array of children of the given mug in the JSTree (UI)
      *
-     * @param mug - the mug whose children should be retrieved. Get top-level
+     * @param mug - The mug whose children should be retrieved. Get top-level
      *              mugs when null or not provided.
      */
     fn.getJSTreeChildMugs = function (mug) {
@@ -1363,6 +1362,11 @@ define([
     fn.createQuestion = function (mug, refMug, position) {
         var result = this.jstree("create",
             refMug ? "#" + refMug.ufid : this.data.core.$tree,
+            // NOTE 'into' is not a supported position in JSTree, but by a
+            // happy accident it turns out to be synonymous with 'last' which
+            // corresponds with the convention for 'into' in our tree.js'.
+            // WARNING 'into' should not be confused with 'inside', which
+            // is synonymous with 'first' in JSTree.
             position,
             {
                 data: this.getMugDisplayName(mug),

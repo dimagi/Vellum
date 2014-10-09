@@ -235,12 +235,14 @@ define([
          *
          * Will MOVE the mug to the new location in the tree if it is already present!
          * @param mug - the Mug to be inserted into the Tree
-         * @param position - position relative to the refMug. Can be 'null', 'before', 'after' or 'into'
+         * @param position - position relative to the refMug.
+         *                   Can be null, 'before', 'after', 'first', 'last'
+         *                   or 'into' (synonym for 'last')
          * @param refMug - reference Mug.
          *
-         * if refMug is null, will default to the last child of the root node.
-         * if position is null, will default to 'after'.  If 'into' is specified, mug will be inserted
-         * as a ('after') child of the refMug.
+         * If refMug is null, will default to the last child of the root node.
+         * If position is null, will default to 'after'.  If 'into' is
+         * specified, mug will be inserted as last child of the refMug.
          *
          * If an invalid move is specified, no operation will occur.
          */
@@ -262,7 +264,7 @@ define([
             refNodeSiblings = refNodeParent.getChildren();
             refNodeIndex = refNodeSiblings.indexOf(refNode);
 
-            if (['into', 'first', 'last'].indexOf(position) !== -1) {
+            if (['into', 'first', 'last', 'inside'].indexOf(position) !== -1) {
                 mug.parentMug = refMug;
             } else {
                 mug.parentMug = refNodeParent.getValue();
@@ -270,22 +272,24 @@ define([
 
             switch (position) {
                 case 'before':
+                case 'inside': // for compatibility with JSTree
                     refNodeParent.insertChild(node, refNodeIndex);
                 break;
+                case null:
                 case 'after':
                     refNodeParent.insertChild(node, refNodeIndex + 1);
                 break;
-                case 'into':
+                case 'into': // not officially supported by, but happens to work in JSTree
+                case 'last':
                     refNode.addChild(node);
                 break;
                 case 'first':
                     refNode.insertChild(node, 0);
                 break;
-                case 'last':
-                    refNode.insertChild(node, refNodeSiblings.length + 1);
-                break;
                 default:
-                    throw "in insertMug() position argument MUST be null, 'before', 'after', 'into', 'first' or 'last'.  Argument was: " + position;
+                    throw "in insertMug() position argument MUST be null, " +
+                          "'before', 'after', 'into', 'first' or 'last'. " +
+                          "Argument was: " + position;
             }
             this.fire({
                 type: 'change',
