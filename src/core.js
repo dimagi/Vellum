@@ -1009,9 +1009,6 @@ define([
             //universal flag for indicating that there's something wrong enough
             //with the form that vellum can't deal.
             _this.data.core.formLoadingFailed = false;
-            _this.data.core.$tree.children().children().each(function (i, el) {
-                _this.jstree("delete_node", el);
-            });
             try {
                 // a place for plugins to put parse warnings
                 _this.data.core.parseWarnings = [];
@@ -1019,8 +1016,6 @@ define([
                 delete _this.data.core.parseWarnings;
 
                 if (formString) {
-                    _this._resetMessages(_this.data.core.form.errors);
-                    _this.reloadTree();
                     //re-enable all buttons and inputs in case they were disabled before.
                     _this.enableUI();
                     if (updateSaveButton) {
@@ -1100,6 +1095,9 @@ define([
         
     fn.loadXML = function (formXML) {
         var form, _this = this;
+        _this.data.core.$tree.children().children().each(function (i, el) {
+            _this.jstree("delete_node", el);
+        });
         this.data.core.form = form = parser.parseXForm(formXML, {
             mugTypes: this.data.core.mugTypes,
             allowedDataNodeReferences: this.opts().core.allowedDataNodeReferences, 
@@ -1159,6 +1157,10 @@ define([
             _this.refreshMugName(e.mug);
             _this.toggleConstraintItext(e.mug);
         });
+        if (formXML) {
+            _this._resetMessages(_this.data.core.form.errors);
+            _this.reloadTree();
+        }
     };
 
     fn.refreshMugName = function (mug, displayLang) {
