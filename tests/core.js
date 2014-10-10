@@ -227,9 +227,11 @@ require([
             var mugs;
             before(function (done) {
                 util.init({core: {form: INSERT_QUESTIONS_XML, onReady: function () {
+                    util.addQuestion.bind({prevId: "text2"})("Repeat", "repeat");
                     mugs = {
                         text1: call("getMugByPath", "/data/text1"),
                         text2: call("getMugByPath", "/data/text2"),
+                        repeat: call("getMugByPath", "/data/repeat"),
                         group: call("getMugByPath", "/data/group"),
                         text3: call("getMugByPath", "/data/group/text3"),
                         text4: call("getMugByPath", "/data/group/text4"),
@@ -242,103 +244,127 @@ require([
             });
 
             var data = [
-                    ["text1", "before", "text1", false],
-                    ["text1", "after", "text1", false],
-                    ["text1", "into", "text1", false],
+                    ["text1", "before", "text1", true],
+                    ["text1", "inside", "text1", true],
+                    ["text1", "after", "text1", true],
+                    ["text1", "into", "text1", true], // should be same as 'inside'
 
                     ["text1", "before", "text2", true],
+                    ["text1", "inside", "text2", true],
                     ["text1", "after", "text2", true],
-                    ["text1", "into", "text2", true],
 
+                    ["text1", "before", "repeat", true],
+                    ["text1", "inside", "repeat", true],
+                    ["text1", "after", "repeat", true],
+
+                    ["text1", "first", "group", true],
                     ["text1", "before", "group", true],
+                    ["text1", "inside", "group", false], // inside -> last -> illegal after hidden2
                     ["text1", "after", "group", true],
-                    ["text1", "into", "group", true],
+                    ["text1", "last", "group", false], // should be same as 'inside'
+                    ["text1", "into", "group", false], // should be same as 'inside'
 
                     ["text1", "before", "text3", true],
+                    ["text1", "inside", "text3", true],
                     ["text1", "after", "text3", true],
-                    ["text1", "into", "text3", true],
 
                     ["text1", "before", "text4", true],
+                    ["text1", "inside", "text4", true],
                     ["text1", "after", "text4", true],
-                    ["text1", "into", "text4", true],
 
                     ["text1", "before", "hidden2", true],
+                    ["text1", "inside", "hidden2", false],
                     ["text1", "after", "hidden2", false],
-                    ["text1", "into", "hidden2", false],
+                    ["text1", "into", "hidden2", false], // should be same as 'inside'
 
                     ["text1", "before", "text5", true],
+                    ["text1", "inside", "text5", true],
                     ["text1", "after", "text5", true],
-                    ["text1", "into", "text5", true],
 
                     ["text1", "before", "hidden1", true],
+                    ["text1", "inside", "hidden1", false],
                     ["text1", "after", "hidden1", false],
-                    ["text1", "into", "hidden1", false],
 
 
                     ["hidden1", "before", "text1", false],
+                    ["hidden1", "inside", "text1", false],
                     ["hidden1", "after", "text1", false],
-                    ["hidden1", "into", "text1", false],
+                    ["hidden1", "into", "text1", false], // should be same as 'inside'
 
                     ["hidden1", "before", "text2", false],
+                    ["hidden1", "inside", "text2", false],
                     ["hidden1", "after", "text2", false],
-                    ["hidden1", "into", "text2", false],
 
+                    ["hidden1", "first", "repeat", true],
+                    ["hidden1", "before", "repeat", false],
+                    ["hidden1", "inside", "repeat", true],
+                    ["hidden1", "after", "repeat", false],
+                    ["hidden1", "into", "repeat", true], // should be same as 'inside'
+                    ["hidden1", "last", "repeat", true], // should be same as 'inside'
+
+                    ["hidden1", "first", "group", false],
                     ["hidden1", "before", "group", false],
+                    ["hidden1", "inside", "group", true],
                     ["hidden1", "after", "group", false],
-                    ["hidden1", "into", "group", true],
+                    ["hidden1", "into", "group", true], // should be same as 'inside'
+                    ["hidden1", "last", "group", true], // should be same as 'inside'
 
                     ["hidden1", "before", "text3", false],
+                    ["hidden1", "inside", "text3", false],
                     ["hidden1", "after", "text3", false],
-                    ["hidden1", "into", "text3", false],
 
                     ["hidden1", "before", "text4", false],
+                    ["hidden1", "inside", "text4", false],
                     ["hidden1", "after", "text4", true],
-                    ["hidden1", "into", "text4", false],
 
                     ["hidden1", "before", "hidden2", true],
+                    ["hidden1", "inside", "hidden2", true],
                     ["hidden1", "after", "hidden2", true],
-                    ["hidden1", "into", "hidden2", true],
 
                     ["hidden1", "before", "text5", false],
+                    ["hidden1", "inside", "text5", false],
                     ["hidden1", "after", "text5", true],
-                    ["hidden1", "into", "text5", false],
 
-                    ["hidden1", "before", "hidden1", false],
-                    ["hidden1", "after", "hidden1", false],
-                    ["hidden1", "into", "hidden1", false],
+                    ["hidden1", "before", "hidden1", true],
+                    ["hidden1", "inside", "hidden1", true],
+                    ["hidden1", "after", "hidden1", true],
 
 
                     ["hidden2", "before", "text1", false],
+                    ["hidden2", "inside", "text1", false],
                     ["hidden2", "after", "text1", false],
-                    ["hidden2", "into", "text1", false],
 
                     ["hidden2", "before", "text2", false],
+                    ["hidden2", "inside", "text2", false],
                     ["hidden2", "after", "text2", false],
-                    ["hidden2", "into", "text2", false],
+
+                    ["hidden2", "before", "repeat", false],
+                    ["hidden2", "inside", "repeat", true],
+                    ["hidden2", "after", "repeat", false],
 
                     ["hidden2", "before", "group", false],
+                    ["hidden2", "inside", "group", true],
                     ["hidden2", "after", "group", false],
-                    ["hidden2", "into", "group", true], // should this be allowed?
 
                     ["hidden2", "before", "text3", false],
+                    ["hidden2", "inside", "text3", false],
                     ["hidden2", "after", "text3", false],
-                    ["hidden2", "into", "text3", false],
 
                     ["hidden2", "before", "text4", false],
+                    ["hidden2", "inside", "text4", false],
                     ["hidden2", "after", "text4", true],
-                    ["hidden2", "into", "text4", false],
 
-                    ["hidden2", "before", "hidden2", false],
-                    ["hidden2", "after", "hidden2", false],
-                    ["hidden2", "into", "hidden2", false],
+                    ["hidden2", "before", "hidden2", true],
+                    ["hidden2", "inside", "hidden2", true],
+                    ["hidden2", "after", "hidden2", true],
 
                     ["hidden2", "before", "text5", false],
+                    ["hidden2", "inside", "text5", false],
                     ["hidden2", "after", "text5", true],
-                    ["hidden2", "into", "text5", false],
 
                     ["hidden2", "before", "hidden1", true],
-                    ["hidden2", "after", "hidden1", true],
-                    ["hidden2", "into", "hidden1", true]
+                    ["hidden2", "inside", "hidden1", true],
+                    ["hidden2", "after", "hidden1", true]
                 ];
 
             _(data).each(function (test) {

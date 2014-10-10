@@ -373,6 +373,11 @@ define([
                 this.dataTree.insertMug(mug, position, refMug);
             }
             if (!mug.options.isDataOnly) {
+                if (refMug && refMug.options.isDataOnly) {
+                    // 'after' child => 'into' parent
+                    refMug = refMug.parentMug;
+                    position = 'into';
+                }
                 this.controlTree.insertMug(mug, position, refMug);
             }
             
@@ -439,8 +444,11 @@ define([
         changeMugType: function (mug, questionType) {
             this.mugTypes.changeType(mug, questionType);
         },
-        getChildren: function (mug) {
-            var node = this.controlTree.getNodeFromMug(mug),
+        getChildren: function (mug, tree) {
+            if (!tree) {
+                tree = 'controlTree';
+            }
+            var node = this[tree].getNodeFromMug(mug),
                 children = node ? node.getChildren() : [];  // handles data node
             return children.map(function (item) { return item.getValue();});
         },
