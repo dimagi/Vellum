@@ -782,7 +782,7 @@ define([
 
                 // disallow moving a node if it would have the same ID as a sibling
                 if (nodeID) {
-                    if (['into', 'first', 'last'].indexOf(position) !== -1) {
+                    if (['inside', 'into', 'first', 'last'].indexOf(position) !== -1) {
                         parentMug = refMug;
                     } else {
                         parentMug = refMug.parentMug;
@@ -807,29 +807,36 @@ define([
     };
 
     fn.checkMove = function (srcId, srcType, dstId, dstType, position) {
-        var srcIsData = srcType === 'DataBindOnly',
-            dstIsData = dstType === 'DataBindOnly';
+        var form = this.data.core.form,
+            srcIsData = srcType === 'DataBindOnly',
+            dstIsData = dstType === 'DataBindOnly',
+            targetMug = form.getMugByUFID(dstId),
+            len, children;
+        if (position === 'inside') { position = 'into'; } // normalize for Vellum
 
-        if (srcId === dstId) {
-            return false;
-        }
-
-        if (position === 'into') { // is 'last' or 'first' possible?
-            if (srcType === dstType) {
-                // allow insert 'into' same type (becomes 'after' if 'into' now allowed)
-                return true;
-            }
-
+        if (position === 'into' || position === 'last' || position === 'first') {
             var valid_children = typeData[dstType].valid_children;
             if (valid_children.indexOf(srcType) !== -1) {
+                if (!srcIsData && position !== 'first') {
+                    // do not allow non-data-only 'into'/'last' in group with data-only
+                    // (illegal position: non-data-only after data-only)
+                    children = form.getChildren(targetMug, 'dataTree');
+                    len = children.length;
+                    if (len && children[len - 1].options.isDataOnly) {
+                        return false;
+                    }
+                } else if (srcIsData && position === 'first') {
+                    // do not allow data-only as 'first' in group with data-only
+                    // (illegal position: data-only before non-data-only)
+                    children = form.getChildren(targetMug, 'dataTree');
+                    len = children.length;
+                    if (len && !children[0].options.isDataOnly) {
+                        return false;
+                    }
+                }
                 return true;
             }
         }
-
-        var form = this.data.core.form,
-            sourceMug = form.getMugByUFID(srcId),
-            targetMug = form.getMugByUFID(dstId),
-            locked = !this.isMugPathMoveable(sourceMug.getAbsolutePath());
 
         if (srcIsData ? !dstIsData : dstIsData) { // srcIsData XOR dstIsData
             if (position === 'after' || position === 'before') {
@@ -837,14 +844,17 @@ define([
                 var mug = form.getAdjacentMug(targetMug, position);
                 if (srcIsData) {
                     return (!mug && position === 'after') ||     // end of group
-                           (mug && mug.__className === srcType); // next is data (position cannot be 'before')
+                           (mug && mug.__className === srcType); // next is data (position is not 'before')
                 } else {
                     return (!mug && position === 'before') ||    // beginning of group
-                           (mug && mug.__className === srcType); // next is not data (position cannot be 'after')
+                           (mug && mug.__className === srcType); // prev is not data (position is not 'after')
                 }
             }
             return false;
         }
+
+        var sourceMug = form.getMugByUFID(srcId),
+            locked = !this.isMugPathMoveable(sourceMug.getAbsolutePath());
 
         if (locked) {
             if (position === 'into' || position === 'last' || position === 'first') {
@@ -1396,9 +1406,9 @@ define([
             refMug ? "#" + refMug.ufid : this.data.core.$tree,
             // NOTE 'into' is not a supported position in JSTree, but by a
             // happy accident it turns out to be synonymous with 'last' which
-            // corresponds with the convention for 'into' in our tree.js'.
+            // corresponds with the convention for 'into' in our tree.js.
             // WARNING 'into' should not be confused with 'inside', which
-            // is synonymous with 'first' in JSTree.
+            // can be synonymous with 'first' in JSTree.
             position,
             {
                 data: this.getMugDisplayName(mug),

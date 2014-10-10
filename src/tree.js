@@ -326,7 +326,7 @@ define([
          *          beginning (for 'before') or end (for 'after') of its
          *          parent's children.
          * @throws An error if the mug is not found in the tree or if the
-         *         given mug is not found among its children.
+         *         given mug is not found among its parent's children.
          */
         getAdjacentMug: function (mug, position) {
             var node = this.getNodeFromMug(mug),
