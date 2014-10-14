@@ -318,32 +318,43 @@ define([
             return output;
         },
         /**
-         * Get the mug adjacent to mug in its parent's children
+         * Find a sibling of refMug matching a predicate
          *
-         * @param mug
-         * @param position - Either 'before' or 'after'.
-         * @returns The adjacent mug; `null` if the given mug is at the
-         *          beginning (for 'before') or end (for 'after') of its
-         *          parent's children.
-         * @throws An error if the mug is not found in the tree or if the
-         *         given mug is not found among its parent's children.
+         * @param refMug
+         * @param direction - Either 'before' or 'after'; the direction to
+         *                    search from refMug among its siblings.
+         * @param predicate - A function used to determine if any of refMug's
+         *                    siblings are a suitable.
+         * @returns The first sibling of refMug in the given direction matching
+         *          predicate.
+         * @throws An error if refMug is not found in the tree or if refMug
+         *         is not found among its parent's children.
          */
-        getAdjacentMug: function (mug, position) {
-            var node = this.getNodeFromMug(mug),
-                children, index;
+        findSibling: function (refMug, direction, predicate) {
+            var node = this.getNodeFromMug(refMug),
+                children, start, i;
             if (!node) {
                 throw "mug not found in " + this.treeType + " tree";
             }
             children = this.getParentNode(node).getChildrenMugs();
-            index = children.indexOf(mug);
-            if (index === -1) {
+            start = children.indexOf(refMug);
+            if (start === -1) {
                 throw "mug not found in its parent's children";
             }
-            if (position === 'before') {
-                return index - 1 >= 0 ? children[index - 1] : null;
+            if (direction === 'before') {
+                for (i = start - 1; i >= 0; i--) {
+                    if (predicate(children[i])) {
+                        return children[i];
+                    }
+                }
             } else {
-                return index + 1 < children.length ? children[index + 1] : null;
+                for (i = start + 1; i < children.length; i++) {
+                    if (predicate(children[i])) {
+                        return children[i];
+                    }
+                }
             }
+            return null;
         },
         /**
          * Removes the specified Mug from the tree. If it isn't in the tree

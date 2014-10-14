@@ -102,6 +102,19 @@ require([
                     requiredAttr: 0,
                 }
             }, {
+                type: 'DataBindOnly',
+                nodeId: 'question32',
+                attrs: {
+                    calculateAttr: '1 + 2'
+                },
+                inputs: {
+                    calculateAttr: 1,
+                    constraintAttr: 0,
+                    requiredAttr: 0,
+                    relevantAttr: 1
+                }
+            }, {
+                clickBeforeAdd: "question19", // insert after question20
                 type: 'Repeat',
                 nodeId: 'question22'
             }, {
@@ -135,19 +148,6 @@ require([
                 attrs: {
                     requiredAttr: true,
                     repeat_count: 2
-                }
-            }, {
-                clickBeforeAdd: "question20", // insert after question20
-                type: 'DataBindOnly',
-                nodeId: 'question32',
-                attrs: {
-                    calculateAttr: '1 + 2'
-                },
-                inputs: {
-                    calculateAttr: 1,
-                    constraintAttr: 0,
-                    requiredAttr: 0,
-                    relevantAttr: 1
                 }
             }
         ];

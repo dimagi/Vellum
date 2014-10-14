@@ -8,6 +8,7 @@ require([
     'text!static/core/invalid-questions.xml',
     'text!static/core/increment-item.xml',
     'text!static/core/hidden-value-in-repeat.xml',
+    'text!static/core/hidden-among-questions.xml',
     'text!static/core/insert-questions.xml'
 ], function (
     chai,
@@ -18,6 +19,7 @@ require([
     INVALID_QUESTIONS_XML,
     INCREMENT_ITEM_XML,
     HIDDEN_VALUE_IN_REPEAT_XML,
+    HIDDEN_AMONG_QUESTIONS_XML,
     INSERT_QUESTIONS_XML
 ) {
     var assert = chai.assert,
@@ -131,6 +133,32 @@ require([
             }}});
         });
 
+        it("should load hidden values interspersed with other questions", function (done) {
+            util.init({core: {form: HIDDEN_AMONG_QUESTIONS_XML, onReady: function () {
+                util.assertJSTreeState(
+                    "hidden1",
+                    "select1",
+                    "  item1",
+                    "  item2",
+                    "hidden2",
+                    "select2",
+                    "  item1",
+                    "  item2",
+                    "hidden3",
+                    "group",
+                    "  hidden4",
+                    "  text3",
+                    "  hidden5",
+                    "  text4",
+                    "  hidden6",
+                    "hidden7",
+                    "text5",
+                    "hidden8"
+                );
+                done();
+            }}});
+        });
+
         it("should add hidden value at end of group", function (done) {
             util.init({core: {form: INSERT_QUESTIONS_XML, onReady: function () {
                 util.addQuestion.bind({prevId: "hidden1"})("DataBindOnly", "hiddenA");
@@ -151,20 +179,20 @@ require([
             }}});
         });
 
-        it("should add hidden value near end of group", function (done) {
+        it("should add hidden value among other questions", function (done) {
             util.init({core: {form: INSERT_QUESTIONS_XML, onReady: function () {
                 util.addQuestion.bind({prevId: "text1"})("DataBindOnly", "hiddenA");
                 util.addQuestion.bind({prevId: "text3"})("DataBindOnly", "hiddenB");
                 util.assertJSTreeState(
                     "text1",
+                    "hiddenA",
                     "text2",
                     "group",
                     "  text3",
-                    "  text4",
                     "  hiddenB",
+                    "  text4",
                     "  hidden2",
                     "text5",
-                    "hiddenA",
                     "hidden1"
                 );
                 done();
@@ -191,7 +219,7 @@ require([
             }}});
         });
 
-        it("should add question before hidden value", function (done) {
+        it("should add question after hidden value", function (done) {
             util.init({core: {form: INSERT_QUESTIONS_XML, onReady: function () {
                 util.addQuestion.bind({prevId: "hidden1"})("Text", "textA");
                 util.addQuestion.bind({prevId: "hidden2"})("Text", "textB");
@@ -201,23 +229,23 @@ require([
                     "group",
                     "  text3",
                     "  text4",
-                    "  textB",
                     "  hidden2",
+                    "  textB",
                     "text5",
-                    "textA",
-                    "hidden1"
+                    "hidden1",
+                    "textA"
                 );
                 done();
             }}});
         });
 
-        it("should add question before sole hidden value", function (done) {
+        it("should add question after sole hidden value", function (done) {
             util.init({core: {onReady: function () {
                 util.addQuestion("DataBindOnly", "hidden");
                 util.addQuestion.bind({prevId: "hidden"})("Text", "text");
                 util.assertJSTreeState(
-                    "text",
-                    "hidden"
+                    "hidden",
+                    "text"
                 );
                 done();
             }}});
@@ -259,10 +287,10 @@ require([
 
                     ["text1", "first", "group", true],
                     ["text1", "before", "group", true],
-                    ["text1", "inside", "group", false], // inside -> last -> illegal after hidden2
+                    ["text1", "inside", "group", true],
                     ["text1", "after", "group", true],
-                    ["text1", "last", "group", false], // should be same as 'inside'
-                    ["text1", "into", "group", false], // should be same as 'inside'
+                    ["text1", "last", "group", true], // should be same as 'inside'
+                    ["text1", "into", "group", true], // should be same as 'inside'
 
                     ["text1", "before", "text3", true],
                     ["text1", "inside", "text3", true],
@@ -273,56 +301,56 @@ require([
                     ["text1", "after", "text4", true],
 
                     ["text1", "before", "hidden2", true],
-                    ["text1", "inside", "hidden2", false],
-                    ["text1", "after", "hidden2", false],
-                    ["text1", "into", "hidden2", false], // should be same as 'inside'
+                    ["text1", "inside", "hidden2", true],
+                    ["text1", "after", "hidden2", true],
+                    ["text1", "into", "hidden2", true], // should be same as 'inside'
 
                     ["text1", "before", "text5", true],
                     ["text1", "inside", "text5", true],
                     ["text1", "after", "text5", true],
 
                     ["text1", "before", "hidden1", true],
-                    ["text1", "inside", "hidden1", false],
-                    ["text1", "after", "hidden1", false],
+                    ["text1", "inside", "hidden1", true],
+                    ["text1", "after", "hidden1", true],
 
 
-                    ["hidden1", "before", "text1", false],
-                    ["hidden1", "inside", "text1", false],
-                    ["hidden1", "after", "text1", false],
-                    ["hidden1", "into", "text1", false], // should be same as 'inside'
+                    ["hidden1", "before", "text1", true],
+                    ["hidden1", "inside", "text1", true],
+                    ["hidden1", "after", "text1", true],
+                    ["hidden1", "into", "text1", true], // should be same as 'inside'
 
-                    ["hidden1", "before", "text2", false],
-                    ["hidden1", "inside", "text2", false],
-                    ["hidden1", "after", "text2", false],
+                    ["hidden1", "before", "text2", true],
+                    ["hidden1", "inside", "text2", true],
+                    ["hidden1", "after", "text2", true],
 
                     ["hidden1", "first", "repeat", true],
-                    ["hidden1", "before", "repeat", false],
+                    ["hidden1", "before", "repeat", true],
                     ["hidden1", "inside", "repeat", true],
-                    ["hidden1", "after", "repeat", false],
+                    ["hidden1", "after", "repeat", true],
                     ["hidden1", "into", "repeat", true], // should be same as 'inside'
                     ["hidden1", "last", "repeat", true], // should be same as 'inside'
 
-                    ["hidden1", "first", "group", false],
-                    ["hidden1", "before", "group", false],
+                    ["hidden1", "first", "group", true],
+                    ["hidden1", "before", "group", true],
                     ["hidden1", "inside", "group", true],
-                    ["hidden1", "after", "group", false],
+                    ["hidden1", "after", "group", true],
                     ["hidden1", "into", "group", true], // should be same as 'inside'
                     ["hidden1", "last", "group", true], // should be same as 'inside'
 
-                    ["hidden1", "before", "text3", false],
-                    ["hidden1", "inside", "text3", false],
-                    ["hidden1", "after", "text3", false],
+                    ["hidden1", "before", "text3", true],
+                    ["hidden1", "inside", "text3", true],
+                    ["hidden1", "after", "text3", true],
 
-                    ["hidden1", "before", "text4", false],
-                    ["hidden1", "inside", "text4", false],
+                    ["hidden1", "before", "text4", true],
+                    ["hidden1", "inside", "text4", true],
                     ["hidden1", "after", "text4", true],
 
                     ["hidden1", "before", "hidden2", true],
                     ["hidden1", "inside", "hidden2", true],
                     ["hidden1", "after", "hidden2", true],
 
-                    ["hidden1", "before", "text5", false],
-                    ["hidden1", "inside", "text5", false],
+                    ["hidden1", "before", "text5", true],
+                    ["hidden1", "inside", "text5", true],
                     ["hidden1", "after", "text5", true],
 
                     ["hidden1", "before", "hidden1", true],
@@ -330,36 +358,36 @@ require([
                     ["hidden1", "after", "hidden1", true],
 
 
-                    ["hidden2", "before", "text1", false],
-                    ["hidden2", "inside", "text1", false],
-                    ["hidden2", "after", "text1", false],
+                    ["hidden2", "before", "text1", true],
+                    ["hidden2", "inside", "text1", true],
+                    ["hidden2", "after", "text1", true],
 
-                    ["hidden2", "before", "text2", false],
-                    ["hidden2", "inside", "text2", false],
-                    ["hidden2", "after", "text2", false],
+                    ["hidden2", "before", "text2", true],
+                    ["hidden2", "inside", "text2", true],
+                    ["hidden2", "after", "text2", true],
 
-                    ["hidden2", "before", "repeat", false],
+                    ["hidden2", "before", "repeat", true],
                     ["hidden2", "inside", "repeat", true],
-                    ["hidden2", "after", "repeat", false],
+                    ["hidden2", "after", "repeat", true],
 
-                    ["hidden2", "before", "group", false],
+                    ["hidden2", "before", "group", true],
                     ["hidden2", "inside", "group", true],
-                    ["hidden2", "after", "group", false],
+                    ["hidden2", "after", "group", true],
 
-                    ["hidden2", "before", "text3", false],
-                    ["hidden2", "inside", "text3", false],
-                    ["hidden2", "after", "text3", false],
+                    ["hidden2", "before", "text3", true],
+                    ["hidden2", "inside", "text3", true],
+                    ["hidden2", "after", "text3", true],
 
-                    ["hidden2", "before", "text4", false],
-                    ["hidden2", "inside", "text4", false],
+                    ["hidden2", "before", "text4", true],
+                    ["hidden2", "inside", "text4", true],
                     ["hidden2", "after", "text4", true],
 
                     ["hidden2", "before", "hidden2", true],
                     ["hidden2", "inside", "hidden2", true],
                     ["hidden2", "after", "hidden2", true],
 
-                    ["hidden2", "before", "text5", false],
-                    ["hidden2", "inside", "text5", false],
+                    ["hidden2", "before", "text5", true],
+                    ["hidden2", "inside", "text5", true],
                     ["hidden2", "after", "text5", true],
 
                     ["hidden2", "before", "hidden1", true],
