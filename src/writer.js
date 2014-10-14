@@ -322,8 +322,8 @@ define([
                     xmlWriter.writeAttributeString("appearance", appearanceAttr);
                 }
                 
-                // Do hint label
                 if( tagName !== 'item' && tagName !== 'repeat'){
+                    // Do hint label
                     var hintLabel = mug.p.hintLabel,
                         hintItextID = mug.p.hintItextID;
                     if(hintLabel || (hintItextID && hintItextID.id)) {
@@ -337,10 +337,8 @@ define([
                         }
                         xmlWriter.writeEndElement();
                     }
-                }
 
-                // Do help text
-                if( tagName !== 'item' && tagName !== 'repeat'){
+                    // Do help text
                     var helpItextID = mug.p.helpItextID;
                     if(helpItextID && helpItextID.id) {
                         xmlWriter.writeStartElement('help');
