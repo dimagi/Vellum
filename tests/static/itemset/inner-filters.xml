@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:orx="http://openrosa.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa" xmlns:vellum="http://commcarehq.org/xforms/vellum">
+	<h:head>
+		<h:title>Untitled Form</h:title>
+		<model>
+			<instance>
+				<data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/4BE1309B-ABCF-4184-8175-9E381F3E0DD7" uiVersion="1" version="1" name="Untitled Form">
+					<question2 />
+				</data>
+			</instance>
+			<instance id="somefixture" src="jr://fixture/some-fixture" />
+			<bind nodeset="/data/question2" />
+			<itext>
+				<translation lang="en" default="">
+					<text id="question2-label">
+						<value>question2</value>
+					</text>
+				</translation>
+			</itext>
+		</model>
+	</h:head>
+	<h:body>
+		<select1 ref="/data/question2">
+			<label ref="jr:itext('question2-label')" />
+			<itemset nodeset="instance('somefixture')/foos/foo[@foo_type='woo'][1=2]/bar[@bar_type='eggs']">
+				<label ref="case_name" />
+				<value ref="@case_id" />
+			</itemset>
+		</select1>
+	</h:body>
+</h:html>

@@ -121,6 +121,15 @@ define([
         return $vellum.vellum.apply($vellum, args);
     }
 
+    // load XML syncronously
+    function loadXML(value) {
+        var xml, data = call("getData");
+        data.core.parseWarnings = [];
+        xml = call("loadXML", value);
+        delete data.core.parseWarnings;
+        return xml;
+    }
+
     // might need to convert this to use a deferred, see
     // https://github.com/mwhite/Vellum/commit/423360cd520f27d5fe3b0657984d2e023bf72fb8#diff-74a635be9be46d0f8b20784f5117bb0cR9
     function clickQuestion() {
@@ -159,6 +168,7 @@ define([
         options: options,
         init: init,
         call: call,
+        loadXML: loadXML,
         saveAndReload: function(callback) {
             call("loadXFormOrError", call("createXML"), callback);
         },
