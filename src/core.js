@@ -685,12 +685,10 @@ define([
         _(this.data.core.mugTypes.allTypes).each(function (type, typeName) {
             typeData[typeName] = {
                 max_children: type.maxChildren,
-                valid_children: 
-                    type.validChildTypes.length ? type.validChildTypes : "none"
+                valid_children: type.validChildTypes
             };
         });
-        validRootChildren = this.data.core.mugTypes.Group
-            .validChildTypes.concat(['DataBindOnly']);
+        validRootChildren = this.data.core.mugTypes.Group.validChildTypes;
 
         var $tree, _this = this;
         this.data.core.$tree = $tree = this.$f.find('.fd-question-tree');
@@ -710,34 +708,15 @@ define([
                 "move": {
                     "always_copy": false,
                     "check_move": function (m) {
-                        // disallow moving a data node or onto a data node
-                        // unless both nodes are data nodes
                         var source = $(m.o),
                             target = $(m.r),
-                            position = m.p,
-                            refIsData = target.attr('rel') === 'DataBindOnly',
-                            nodeIsData = source.attr('rel') === 'DataBindOnly';
-
-                        if (Number(refIsData) + Number(nodeIsData) === 1) {
-                            return false;
-                        }
-
-                        var form = _this.data.core.form,
-                            sourceMug = form.getMugByUFID(source.attr('id')),
-                            isMoveable = _this.isMugPathMoveable(
-                                sourceMug.getAbsolutePath());
-
-                        if (!isMoveable) {
-                            var id = target.attr('id'),
-                                targetMug = form.getMugByUFID(id);
-                            if (position === 'inside' || position === 'last') {
-                                return sourceMug.parentMug === targetMug;
-                            } else {
-                                return sourceMug.parentMug === targetMug.parentMug;
-                            }
-                        }
-
-                        return true;
+                            position = m.p;
+                        return _this.checkMove(
+                                        source.attr('id'),
+                                        source.attr('rel'),
+                                        target.attr('id'),
+                                        target.attr('rel'),
+                                        position);
                     }
                 }
             },
@@ -803,7 +782,7 @@ define([
 
                 // disallow moving a node if it would have the same ID as a sibling
                 if (nodeID) {
-                    if (['into', 'first', 'last'].indexOf(position) !== -1) {
+                    if (['inside', 'into', 'first', 'last'].indexOf(position) !== -1) {
                         parentMug = refMug;
                     } else {
                         parentMug = refMug.parentMug;
@@ -825,6 +804,67 @@ define([
             var mug = _this.data.core.form.getMugByUFID(data.args[1].substring(1));
             _this.overrideJSTreeIcon(mug);
         });
+    };
+
+    fn.checkMove = function (srcId, srcType, dstId, dstType, position) {
+        var form = this.data.core.form,
+            srcIsData = srcType === 'DataBindOnly',
+            dstIsData = dstType === 'DataBindOnly',
+            targetMug = form.getMugByUFID(dstId),
+            len, children;
+        if (position === 'inside') { position = 'into'; } // normalize for Vellum
+
+        if (position === 'into' || position === 'last' || position === 'first') {
+            var valid_children = typeData[dstType].valid_children;
+            if (valid_children.indexOf(srcType) !== -1) {
+                if (!srcIsData && position !== 'first') {
+                    // do not allow non-data-only 'into'/'last' in group with data-only
+                    // (illegal position: non-data-only after data-only)
+                    children = form.getChildren(targetMug, 'dataTree');
+                    len = children.length;
+                    if (len && children[len - 1].options.isDataOnly) {
+                        return false;
+                    }
+                } else if (srcIsData && position === 'first') {
+                    // do not allow data-only as 'first' in group with data-only
+                    // (illegal position: data-only before non-data-only)
+                    children = form.getChildren(targetMug, 'dataTree');
+                    len = children.length;
+                    if (len && !children[0].options.isDataOnly) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+        }
+
+        if (srcIsData ? !dstIsData : dstIsData) { // srcIsData XOR dstIsData
+            if (position === 'after' || position === 'before') {
+                // allow move if between control and data-only
+                var mug = form.getAdjacentMug(targetMug, position);
+                if (srcIsData) {
+                    return (!mug && position === 'after') ||     // end of group
+                           (mug && mug.__className === srcType); // next is data (position is not 'before')
+                } else {
+                    return (!mug && position === 'before') ||    // beginning of group
+                           (mug && mug.__className === srcType); // prev is not data (position is not 'after')
+                }
+            }
+            return false;
+        }
+
+        var sourceMug = form.getMugByUFID(srcId),
+            locked = !this.isMugPathMoveable(sourceMug.getAbsolutePath());
+
+        if (locked) {
+            if (position === 'into' || position === 'last' || position === 'first') {
+                return sourceMug.parentMug === targetMug;
+            } else {
+                return sourceMug.parentMug === targetMug.parentMug;
+            }
+        }
+
+        return true;
     };
 
     fn.setTreeNodeInvalid = function (uid, msg) {
@@ -1011,9 +1051,6 @@ define([
             //universal flag for indicating that there's something wrong enough
             //with the form that vellum can't deal.
             _this.data.core.formLoadingFailed = false;
-            _this.data.core.$tree.children().children().each(function (i, el) {
-                _this.jstree("delete_node", el);
-            });
             try {
                 // a place for plugins to put parse warnings
                 _this.data.core.parseWarnings = [];
@@ -1021,8 +1058,6 @@ define([
                 delete _this.data.core.parseWarnings;
 
                 if (formString) {
-                    _this._resetMessages(_this.data.core.form.errors);
-                    _this.reloadTree();
                     //re-enable all buttons and inputs in case they were disabled before.
                     _this.enableUI();
                     if (updateSaveButton) {
@@ -1102,6 +1137,9 @@ define([
         
     fn.loadXML = function (formXML) {
         var form, _this = this;
+        _this.data.core.$tree.children().children().each(function (i, el) {
+            _this.jstree("delete_node", el);
+        });
         this.data.core.form = form = parser.parseXForm(formXML, {
             mugTypes: this.data.core.mugTypes,
             allowedDataNodeReferences: this.opts().core.allowedDataNodeReferences, 
@@ -1161,6 +1199,10 @@ define([
             _this.refreshMugName(e.mug);
             _this.toggleConstraintItext(e.mug);
         });
+        if (formXML) {
+            _this._resetMessages(_this.data.core.form.errors);
+            _this.reloadTree();
+        }
     };
 
     fn.refreshMugName = function (mug, displayLang) {
@@ -1205,14 +1247,12 @@ define([
             _this.createQuestion(mug, mug.parentMug, 'into');
             _this.setTreeValidationIcon(mug);
         });
-        //get list of pure data nodes and throw them in the Question UI tree
-        //(at the bottom)
+        // get list of pure data nodes and throw them in the Question UI tree
         var dataNodeList = form.getDataNodeList();
         for (var i = 0; i < dataNodeList.length; i++) {
-            // make hidden values a flat list at the bottom.
+            // put hidden values at the end of their respective groups.
             var mug = dataNodeList[i],
-                refMug = (mug.parentMug && !mug.options.isDataOnly) ? 
-                    mug.parentMug : null;
+                refMug = (mug.parentMug) ? mug.parentMug : null;
             _this.createQuestion(mug, refMug, 'into');
             _this.setTreeValidationIcon(mug);
         }
@@ -1257,53 +1297,104 @@ define([
         return mug;
     };
 
-    // Test ability to insert a new mug of type `qType` into refMug, then after
-    // refMug, then after all of refMug's ancestors.  Delegates type checking to
-    // JSTree types plugin.
+    /**
+     * Find insertion position for new mug of type `qType`. Insert into refMug,
+     * then after refMug, then after each of refMug's ancestors. Hidden value
+     * questions will be inserted after all non-hidden-value questions, and
+     * non-hidden-value questions will be inserted before any hidden values.
+     */
     fn.getInsertTargetAndPosition = function (refMug, qType) {
-        var position = 'into';
-        if (qType === 'DataBindOnly') {
-            // put data nodes at the end
-            return [null, 'last'];
-        } else if (refMug && refMug.__className === 'DataBindOnly') {
-            // don't insert a regular node inside the data node range
-            refMug = this.getLowestNonDataNodeMug();
-            position = refMug ? 'after' : 'first';
-        }
+        // Valid positions: before, after, first, last, into (same as last)
+        var i, mug, parent, siblings, childTypes, position = 'last';
 
-        while (true) {
-            var r = refMug;
-            if (refMug && position !== 'into' && position !== 'last') {
-                r = refMug.parentMug;
+        // find insertion point without considering hidden values
+        while (refMug) {
+            if (position === 'after') {
+                parent = refMug.parentMug;
+                if (!parent) {
+                    break;
+                }
+            } else {
+                parent = refMug;
             }
-            var childTypes = r && typeData[r.__className].valid_children;
-            if ((!r && validRootChildren.indexOf(qType) !== -1) ||
-                (r && childTypes !== "none" && childTypes.indexOf(qType) !== -1))
-            {
+            childTypes = typeData[parent.__className].valid_children;
+            if (childTypes.indexOf(qType) !== -1) {
                 break;
-            } else if (r && position !== 'after') {
+            } else if (position !== 'after') {
                 position = 'after';
             } else {
-                refMug = refMug ? refMug.parentMug: null;
-                // root node
-                if (!refMug) {
-                    break;
+                refMug = refMug.parentMug;
+            }
+        }
+
+        // position hidden values after non-hidden-values
+        parent = (refMug && position === 'after') ? refMug.parentMug : refMug;
+        siblings = this.getJSTreeChildMugs(parent);
+        if (refMug && position === 'after') {
+            // assert siblings.indexOf(refMug) > -1, "refMug not found in its parent's children"
+            if (qType === 'DataBindOnly') {
+                // iterate backward through siblings until finding non-hidden-
+                // value or refMug (whichever comes first); insert after that
+                for (i = siblings.length - 1; i > -1; i--) {
+                    mug = siblings[i];
+                    if (mug === refMug || !mug.options.isDataOnly) {
+                        refMug = mug;
+                        break;
+                    }
+                }
+            } else if (refMug.options.isDataOnly) {
+                // iterate backward through siblings until finding non-hidden-
+                // value and insert after that
+                refMug = parent;
+                position = "first";
+                for (i = siblings.length - 1; i > -1; i--) {
+                    mug = siblings[i];
+                    if (!mug.options.isDataOnly) {
+                        refMug = mug;
+                        position = "after";
+                        break;
+                    }
+                }
+            }
+        } else {
+            if (qType === 'DataBindOnly') {
+                // always insert hidden values at end of group
+                position = "last";
+            } else {
+                // iterate through siblings in reverse looking for a
+                // non-hidden-value; insert after that, or "first" if not found
+                position = "first";
+                for (i = siblings.length - 1; i > -1; i--) {
+                    mug = siblings[i];
+                    if (!mug.options.isDataOnly) {
+                        position = "after";
+                        refMug = mug;
+                        break;
+                    }
                 }
             }
         }
+
         return [refMug, position];
     };
 
-    // todo: change this to use the model
-    fn.getLowestNonDataNodeMug = function () {
-        var questions = this.data.core.$tree.children().children()
-                .filter("[rel!='DataBindOnly']");
-        if (questions.length > 0) {
-            return this.data.core.form.getMugByUFID(
-                $(questions[questions.length - 1]).attr('id'));
+    /**
+     * Get an array of children of the given mug in the JSTree (UI)
+     *
+     * @param mug - The mug whose children should be retrieved. Get top-level
+     *              mugs when null or not provided.
+     */
+    fn.getJSTreeChildMugs = function (mug) {
+        var nodes;
+        if (mug) {
+            nodes = this.jstree("get_json", "#" + mug.ufid);
+            if (nodes.length) {
+                nodes = nodes[0].children || [];
+            }
         } else {
-            return null;
+            nodes = this.jstree("get_json", -1);
         }
+        return _.map(nodes, function (node) { return node.metadata.mug; });
     };
 
     fn.handleNewMug = function (mug, refMug, position) {
@@ -1313,6 +1404,11 @@ define([
     fn.createQuestion = function (mug, refMug, position) {
         var result = this.jstree("create",
             refMug ? "#" + refMug.ufid : this.data.core.$tree,
+            // NOTE 'into' is not a supported position in JSTree, but by a
+            // happy accident it turns out to be synonymous with 'last' which
+            // corresponds with the convention for 'into' in our tree.js.
+            // WARNING 'into' should not be confused with 'inside', which
+            // can be synonymous with 'first' in JSTree.
             position,
             {
                 data: this.getMugDisplayName(mug),

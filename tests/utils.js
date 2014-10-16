@@ -5,6 +5,7 @@ define([
     'jsdiff',
     'underscore',
     'jquery',
+    'jquery.jstree',
     'jquery.vellum'
 ], function (
     options,
@@ -49,6 +50,27 @@ define([
         opts = opts || {};
         opts.not = true;
         assertXmlEqual(actual, expected, opts);
+    }
+
+    function assertJSTreeState() {
+        function repr(node) {
+            var str, level = (this === window ? 0 : this.level);
+            if (_.isArray(node)) {
+                return _.map(node, repr, {level: level}).join("\n");
+            }
+            str = Array(level * 2 + 1).join(" ") + node.data.title;
+            if (node.children) {
+                str = str + "\n" + repr.bind({level: level + 1})(node.children);
+            }
+            return str;
+        }
+        var expected = Array.prototype.slice.call(arguments).join("\n") + "\n",
+            actual = repr(call("jstree", "get_json", -1)) + "\n";
+        if (expected !== actual) {
+            var patch = jsdiff.createPatch("", actual, expected, "actual", "expected");
+            patch = patch.replace(/^Index:/, "Unexpected jstree state");
+            assert(false, colorDiff(patch));
+        }
     }
 
     function cleanForDiff(value) {
@@ -176,6 +198,7 @@ define([
         assertInputCount: assertInputCount,
         assertXmlEqual: assertXmlEqual,
         assertXmlNotEqual: assertXmlNotEqual,
+        assertJSTreeState: assertJSTreeState,
         xmlines: function(xml) {
             return xml.replace(/>(\s\s+)</g, ">\n$1<");
         },
