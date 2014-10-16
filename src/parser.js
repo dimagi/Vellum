@@ -362,9 +362,25 @@ define([
         }
     }
 
+    function makeAbsolute(path, parentMug, form) {
+        if (!path) {
+            path = "unknown"; // question ID is missing
+        }
+        if (!path || path[0] !== "/") {
+            if (parentMug) {
+                var parentPath = parentMug.getAbsolutePath();
+                if (parentPath) {
+                    path = parentPath + "/" + path;
+                }
+            } else {
+                path = form.getBasePath() + path;
+            }
+        }
+        return path;
+    }
+
     function parseControlElement(form, nodePath, cEl, $groupEl, parentMug) {
-        var mug = form.getMugByPath(nodePath),
-            $cEl = $groupEl || cEl,
+        var $cEl = $groupEl || cEl,
             tagName, dataType, 
             appearance = $cEl.popAttr('appearance'),
             mediaType = $cEl.popAttr('mediatype') || null,
@@ -372,19 +388,23 @@ define([
         mediaType = mediaType ? mediaType.toLowerCase() : mediaType;
 
         tagName = $cEl[0].nodeName;
+        if (tagName !== 'item' && tagName !== 'itemset') {
+            nodePath = makeAbsolute(nodePath, parentMug, form);
+        }
+        var mug = form.getMugByPath(nodePath);
 
         //broadly categorize
         tagName = tagName.toLowerCase();
         var hasItemset;
-        if(tagName === 'select') {
+        if (tagName === 'select') {
             hasItemset = itemsetEnabled && $cEl.children('itemset').length;
             MugClass = hasItemset ? 'MSelectDynamic' : 'MSelect';
-        }else if (tagName === 'select1') {
+        } else if (tagName === 'select1') {
             hasItemset = itemsetEnabled && $cEl.children('itemset').length;
             MugClass = hasItemset ? 'SelectDynamic' : 'Select';
-        }else if (tagName === 'trigger') {
+        } else if (tagName === 'trigger') {
             MugClass = 'Trigger';
-        }else if (tagName === 'input') {
+        } else if (tagName === 'input') {
             if ($cEl.popAttr('readonly') === 'true()') {
                 MugClass = 'Trigger';
             } else {
@@ -395,18 +415,15 @@ define([
                 }
                 MugClass = mugTypeFromInput(dataType, appearance);
             }
-        }else if (tagName === 'item') {
+        } else if (tagName === 'item') {
             MugClass = 'Item';
-        }else if (tagName === 'itemset' && itemsetEnabled) {
+        } else if (tagName === 'itemset' && itemsetEnabled) {
             MugClass = 'Itemset';
-        }else if (tagName === 'group') {
+        } else if (tagName === 'group') {
             MugClass = mugTypeFromGroup($cEl, appearance);
-            if (MugClass === 'Repeat') {
-                tagName = 'repeat';
-            }
-        }else if (tagName === 'secret') {
+        } else if (tagName === 'secret') {
             MugClass = 'Secret';
-        }else if (tagName === 'upload') {
+        } else if (tagName === 'upload') {
             MugClass = mugTypeFromUpload(mediaType, nodePath);
         } else {
             // unknown question type
@@ -416,7 +433,7 @@ define([
         if (mug) {
             form.changeMugType(mug, MugClass);
         } else {
-            // items only
+            // items only. also can happen with bad XForm (missing data node)
             mug = form.mugTypes.make(MugClass, form);
         }
         mug.parentMug = parentMug;

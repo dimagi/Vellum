@@ -171,6 +171,10 @@ define([
     }
 
     Form.prototype = {
+        getBasePath: function () {
+            // the choice to use dataTree instead of controlTree is arbitrary
+            return "/" + this.dataTree.getRootNode().getID() + "/";
+        },
         fireChange: function (mug) {
             this.fire({
                 type: 'change',
@@ -658,6 +662,9 @@ define([
         },
         getAbsolutePath: function (mug, excludeRoot) {
             return this.dataTree.getAbsolutePath(mug, excludeRoot);
+        },
+        getControlPath: function (mug, excludeRoot) {
+            return this.controlTree.getAbsolutePath(mug, excludeRoot);
         },
         getMugByUFID: function (ufid) {
             return (this.dataTree.getMugFromUFID(ufid) ||

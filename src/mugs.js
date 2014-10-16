@@ -431,7 +431,18 @@ define([
             if (this.__className === "Item") {
                 return this.parentMug.getDefaultItextRoot() + "-" + this.p.defaultValue;
             } else {
-                return this.form.getAbsolutePath(this, true).slice(1);
+                var path = this.form.getAbsolutePath(this, true);
+                if (!path) {
+                    // fall back to control tree if mug not in data tree
+                    // this can happen with malformed XForms
+                    path = this.form.getControlPath(this, true);
+                }
+                if (!path) {
+                    // fall back to nodeID if mug path still not found
+                    // this can happen with malformed XForms
+                    path = "/" + this.getNodeID();
+                }
+                return path.slice(1);
             }
         },
         getDefaultLabelItextId: function () {

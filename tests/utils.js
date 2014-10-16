@@ -2,6 +2,7 @@ define([
     './options',
     'chai',
     'equivalent-xml',
+    'jsdiff',
     'underscore',
     'jquery',
     'jquery.vellum'
@@ -9,6 +10,7 @@ define([
     options,
     chai,
     EquivalentXml,
+    jsdiff,
     _,
     $
 ) {
@@ -22,9 +24,59 @@ define([
         return EquivalentXml.isEquivalent(xml1, xml2, {element_order: true});
     }
 
-    function formatXml(str) {
-        // doesn't work?
-        return new XMLSerializer().serializeToString($.parseXML(str));
+    function assertXmlEqual(actual, expected, opts) {
+        opts = opts || {};
+        if (opts.normalize_xmlns) {
+            var xmlns = $($.parseXML(expected)).find('data').attr('xmlns');
+            actual = actual.replace(/(data[^>]+xmlns=")(.+?)"/,
+                                    '$1' + xmlns + '"');
+        }
+        var result = xmlEqual(actual, expected);
+        if (opts.not) {
+            result = !result;
+        }
+        if (!result) {
+            actual = cleanForDiff(actual);
+            expected = cleanForDiff(expected);
+            var patch = jsdiff.createPatch("", actual, expected, "actual", "expected");
+            patch = patch.replace(/^Index:/,
+                    "XML " + (opts.not ? "should not be equivalent" : "mismatch"));
+            assert(false, colorDiff(patch));
+        }
+    }
+
+    function assertXmlNotEqual(actual, expected, opts) {
+        opts = opts || {};
+        opts.not = true;
+        assertXmlEqual(actual, expected, opts);
+    }
+
+    function cleanForDiff(value) {
+        // convert leading tabs to spaces
+        value = value.replace(/^\t+/mg, function (match) {
+            return match.replace(/\t/g, "  ");
+        });
+        // add newline at end of file if missing
+        if (!value.match(/\n$/)) {
+            value = value + "\n";
+        }
+        return value;
+    }
+
+    function colorDiff(patch) {
+        if (!window.mochaPhantomJS) {
+            // patch colors not supported in browser yet
+            return patch;
+        }
+        var colors = {
+                "-": 31, // red
+                "+": 32  // green
+            };
+        function color(str) {
+            var code = colors[str[0]] || 0;
+            return '\u001b[' + code + 'm' + str + '\u001b[0m';
+        }
+        return patch.replace(/^.+?$/gm, color);
     }
 
     function getInput(property) {
@@ -69,6 +121,15 @@ define([
         return $vellum.vellum.apply($vellum, args);
     }
 
+    // load XML syncronously
+    function loadXML(value) {
+        var xml, data = call("getData");
+        data.core.parseWarnings = [];
+        xml = call("loadXML", value);
+        delete data.core.parseWarnings;
+        return xml;
+    }
+
     // might need to convert this to use a deferred, see
     // https://github.com/mwhite/Vellum/commit/423360cd520f27d5fe3b0657984d2e023bf72fb8#diff-74a635be9be46d0f8b20784f5117bb0cR9
     function clickQuestion() {
@@ -107,27 +168,14 @@ define([
         options: options,
         init: init,
         call: call,
+        loadXML: loadXML,
         saveAndReload: function(callback) {
             call("loadXFormOrError", call("createXML"), callback);
         },
         getInput: getInput,
         assertInputCount: assertInputCount,
-        assertXmlEqual: function (actual, expected, opts) {
-            opts = opts || {};
-            if (opts.normalize_xmlns) {
-                var xmlns = $($.parseXML(expected)).find('data').attr('xmlns');
-                actual = actual.replace(/(data[^>]+xmlns=")(.+?)"/,
-                                        '$1' + xmlns + '"');
-            }
-            assert(xmlEqual(actual, expected),
-                "Expected \n\n" + formatXml(actual) + 
-                    "\n\n to be equivalent to \n\n" + formatXml(expected));
-        },
-        assertXmlNotEqual: function (str1, str2) {
-            assert.isFalse(xmlEqual(str1, str2),
-                "Expected \n\n" + formatXml(str1) + 
-                    "\n\n not to be equivalent to \n\n" + formatXml(str2));
-        },
+        assertXmlEqual: assertXmlEqual,
+        assertXmlNotEqual: assertXmlNotEqual,
         xmlines: function(xml) {
             return xml.replace(/>(\s\s+)</g, ">\n$1<");
         },
