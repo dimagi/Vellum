@@ -124,7 +124,7 @@
                 // NOTE less! and css! cannot be combined in the same module
                 // https://github.com/guybedford/require-less/issues/48
                 'css/css!../lib/codemirror/codemirror',
-                'css/css!../lib/jstree/default/style',
+                'css/css!../bower_components/jstree/dist/themes/default/style',
                 'css/css!../lib/fancybox/jquery.fancybox-1.3.4',
                 'css/css!yui-combo'
             ],
