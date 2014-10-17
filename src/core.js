@@ -676,66 +676,55 @@ define([
         }
     };
 
-    var validRootChildren,
-        typeData;
+    var typeData;
     // todo: jstree-related methods could be extracted out as a jstree wrapper
     // separate from the rest of the UI code.
     fn._createJSTree = function () {
-        typeData = {};
+        typeData = {
+            "#": {
+                valid_children: this.data.core.mugTypes.Group.validChildTypes
+            },
+            "default": {
+                icon: 'fa-question',
+                max_children: 0,
+                valid_children: []
+            }
+        };
         _(this.data.core.mugTypes.allTypes).each(function (type, typeName) {
             typeData[typeName] = {
+                icon: type.icon,
                 max_children: type.maxChildren,
                 valid_children: type.validChildTypes
             };
         });
-        validRootChildren = this.data.core.mugTypes.Group.validChildTypes;
 
         var $tree, _this = this;
         this.data.core.$tree = $tree = this.$f.find('.fd-question-tree');
         $tree.jstree({
-            "json_data" : {
-                "data" : []
-            },
             "core": {
+                data: [],
+                multiple: false, // single-item selection
                 strings: {
-                    new_node: this.opts().core.noTextString
-                }
-            },
-            "ui" : {
-                select_limit: 1
-            },
-            "crrm" : {
-                "move": {
-                    "always_copy": false,
-                    "check_move": function (m) {
-                        var source = $(m.o),
-                            target = $(m.r),
-                            position = m.p;
-                        return _this.checkMove(
-                                        source.attr('id'),
-                                        source.attr('rel'),
-                                        target.attr('id'),
-                                        target.attr('rel'),
-                                        position);
+                    'New node': this.opts().core.noTextString
+                },
+                check_callback: function(operation, node, parent, position, more) {
+                    // operation can be 'create_node', 'rename_node', 'delete_node',
+                    // 'move_node' or 'copy_node'. In case of 'rename_node'
+                    // position is filled with the new node name
+                    if (operation === "move_node") {
+                        return _this.checkMove(node.id, node.type,
+                                               parent.id, parent.type, position);
                     }
+                    return true;  //allow all other operations
                 }
             },
             "dnd" : {
-                "drop_finish" : function(data) {
-                    var target = $(data.r),
-                        sourceUid = $(data.o).attr('id'),
-                        mug = _this.data.core.form.getMugByUFID(sourceUid);
-
-                    _this.handleDropFinish(target, sourceUid, mug);
-                }
+                copy: false,
+                inside_pos: "last"
             },
-            "types": {
-                "max_children" : -1,
-                // valid root node types
-                "valid_children" : validRootChildren,
-                "types" : typeData
-            },
-            "plugins" : [ "themes", "json_data", "ui", "crrm", "types", "dnd" ]
+            "types": typeData,
+            "plugins" : [ "themes", "types", "dnd" ]
+// TODO is themes plugin still needed in JST3?
             // We enable the "themes" plugin, but bundle the default theme CSS
             // (with base64-embedded images) in our CSS build.  The themes
             // plugin needs to stay enabled because it adds CSS selectors to
@@ -744,21 +733,29 @@ define([
             // themes plugin getting a 404 for the CSS file, but we comment that
             // out.
         }).bind("select_node.jstree", function (e, data) {
-            var ufid = $(data.rslt.obj[0]).prop('id'),
-                mug = _this.data.core.form.getMugByUFID(ufid);
-
+            var mug = _this.data.core.form.getMugByUFID(data.node.id);
             _this.displayMugProperties(mug);
             _this.activateQuestionTypeGroup(mug.__className);
         }).bind("move_node.jstree", function (e, data) {
             var form = _this.data.core.form,
-                mug = form.getMugByUFID($(data.rslt.o).attr('id')),
-                refMug = form.getMugByUFID($(data.rslt.r).attr('id')),
-                position = data.rslt.p;
+                mug = form.getMugByUFID(data.node.id),
+                refMug = data.parent !== "#" ? form.getMugByUFID(data.parent.id) : null,
+                position = data.position;
 
             form.moveMug(mug, refMug, position);
             _this.refreshCurrentMug();
+        }).bind("dnd_stop.vakata", function (data) {
+// TODO check if this works in jstree3
+// was drop_finish callback in dnd options
+            var target = $(data.r),
+                sourceUid = $(data.o).attr('id'),
+                mug = _this.data.core.form.getMugByUFID(sourceUid);
+
+            _this.handleDropFinish(target, sourceUid, mug);
         }).bind("deselect_all.jstree deselect_node.jstree", function (e, data) {
             _this.resetQuestionTypeGroups();
+
+// TODO how to do this in jstree3?
         }).bind('before.jstree', function (e, data) {
             var stop = function () {
                 e.stopImmediatePropagation();
@@ -799,7 +796,7 @@ define([
                 }
             }
         }).bind('create_node.jstree', function (e, data) {
-            _this.overrideJSTreeIcon(data.args[2].metadata.mug);
+            _this.overrideJSTreeIcon(data.node.data.mug);
         }).bind('set_type.jstree', function (e, data) {
             var mug = _this.data.core.form.getMugByUFID(data.args[1].substring(1));
             _this.overrideJSTreeIcon(mug);
@@ -1274,28 +1271,22 @@ define([
     };
     
     fn.createQuestion = function (mug, refMug, position) {
-        var result = this.jstree("create",
-            refMug ? "#" + refMug.ufid : this.data.core.$tree,
-            // NOTE 'into' is not a supported position in JSTree, but by a
-            // happy accident it turns out to be synonymous with 'last' which
-            // corresponds with the convention for 'into' in our tree.js.
-            // WARNING 'into' should not be confused with 'inside', which
-            // can be synonymous with 'first' in JSTree.
-            position,
+        var result = this.jstree("create_node",
+            refMug ? "#" + refMug.ufid : "#",
             {
-                data: this.getMugDisplayName(mug),
-                metadata: {
-                    mug: mug,
-                    mugUfid: mug.ufid
-                },
-                attr: {
+                text: this.getMugDisplayName(mug),
+                type: mug.__className,
+                data: { mug: mug },
+                li_attr: {
                     id: mug.ufid,
                     rel: mug.__className
                 },
-                state: mug.options.isSpecialGroup ? 'open' : undefined
+                state: {
+                    opened: mug.options.isSpecialGroup ? true : undefined
+                }
             },
-            null, // callback
-            true  // skip_rename
+            // NOTE 'into' is not a supported position in JSTree
+            (position === 'into' ? 'last' : position)
         );
 
         // jstree.create returns the tree root if types prevent creation
