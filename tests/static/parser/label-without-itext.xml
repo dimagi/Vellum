@@ -1,0 +1,30 @@
+<h:html xmlns="http://www.w3.org/2002/xforms" xmlns:h="http://www.w3.org/1999/xhtml" xmlns:ev="http://www.w3.org/2001/xml-events" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa">
+<h:head>
+	<h:title>Reference Format Tests</h:title>
+	<model>
+		<instance>
+			<data xmlns="http://www.commcarehq.org/a/corpora/tests/references" version="1">
+				<group>
+					<a/>
+				</group>
+				<text />
+			</data>
+		</instance>
+	</model>
+</h:head>			
+<h:body>
+	<group ref="group">
+		<label>The group</label>
+		<select1 ref="a">
+			<label>The label</label>
+			<item><label>Yes</label><value>y</value></item>
+			<item><label>No</label><value>n</value></item>
+		</select1>
+	</group>
+	<group appearance="field-list">
+		<trigger ref="/data/text">
+			<label>The text</label>
+		</trigger>
+	</group>
+</h:body>
+</h:html>

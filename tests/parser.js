@@ -5,14 +5,16 @@ require([
     'underscore',
     'tests/utils',
     'vellum/parser',
-    'text!static/parser/other_item.xml'
+    'text!static/parser/other_item.xml',
+    'text!static/parser/label-without-itext.xml'
 ], function (
     chai,
     $,
     _,
     util,
     parser,
-    other_item_xml
+    OTHER_ITEM_XML,
+    LABEL_WITHOUT_ITEXT_XML
 ) {
     var assert = chai.assert,
         call = util.call,
@@ -83,7 +85,7 @@ require([
         it("should load select item without itext", function (done) {
             util.init({
                 core: {
-                    form: other_item_xml,
+                    form: OTHER_ITEM_XML,
                     onReady: function () {
                         var mug = call("getMugByPath", "/ClassroomObservationV3/Q0003"),
                             // HACK how to reference items in select?
@@ -94,6 +96,20 @@ require([
                 }
             });
         });
+
+        it("should load mugs with relative paths and label without itext", function () {
+            util.loadXML(LABEL_WITHOUT_ITEXT_XML);
+            var grp = call("getMugByPath", "/data/group"),
+                mug = call("getMugByPath", "/data/group/a"),
+                txt = call("getMugByPath", "/data/text");
+            assert.equal(grp.p.labelItextID.defaultValue(), 'The group');
+            assert.equal(mug.p.labelItextID.defaultValue(), 'The label');
+            assert.equal(txt.p.labelItextID.defaultValue(), 'The text');
+
+            // should not raise an error
+            util.assertXmlNotEqual(call("createXML"), LABEL_WITHOUT_ITEXT_XML);
+        });
+
     });
 
     var TEST_XML_1 = '' + 
