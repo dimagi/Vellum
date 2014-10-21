@@ -938,12 +938,13 @@ define([
             var form = mug.form,
                 children = form.getChildren(mug);
 
-            if (children.length && (typeName.indexOf("Select") === -1 || 
-                                    typeName.indexOf("Dynamic") !== -1)) 
+            // matches Select and MSelect; not SelectDynamic or MSelectDynamic
+            if (children.length && (typeName.indexOf("Select") !== -1 &&
+                                    typeName.indexOf("Dynamic") === -1))
             {
-                throw "you can't change a Multiple/Single Choice question to a non-Choice " +
-                      "question if it has Choices. Please remove all Choices " +
-                      "and try again.";
+                throw new Error("you can't change a Multiple/Single Choice " +
+                      "question to a non-Choice question if it has Choices. " +
+                      "Please remove all Choices and try again.");
             }
       
             mug.setOptionsAndProperties(this.allTypes[typeName]);

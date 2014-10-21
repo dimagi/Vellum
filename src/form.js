@@ -533,9 +533,13 @@ define([
             this.mugTypes.changeType(mug, questionType);
         },
         getChildren: function (mug) {
-            var node = this.controlTree.getNodeFromMug(mug),
-                children = node ? node.getChildren() : [];  // handles data node
-            return children.map(function (item) { return item.getValue();});
+            var ctrlNode = this.controlTree.getNodeFromMug(mug),
+                dataNode = this.dataTree.getNodeFromMug(mug),
+                ctrlNodes = ctrlNode ? ctrlNode.getChildren() : [],
+                dataNodes = dataNode ? dataNode.getChildren() : [];
+            return _.union(
+                ctrlNodes.map(function (item) { return item.getValue(); }),
+                dataNodes.map(function (item) { return item.getValue(); }));
         },
         duplicateMug: function (mug) {
             var foo = this._duplicateMug(mug, mug.parentMug),

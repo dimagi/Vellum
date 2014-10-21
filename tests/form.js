@@ -5,7 +5,8 @@ define([
     'vellum/form',
     'vellum/tree',
     'text!static/form/alternate-root-node-name.xml',
-    'text!static/form/question-referencing-other.xml'
+    'text!static/form/question-referencing-other.xml',
+    'text!static/form/hidden-value-in-group.xml'
 ], function (
     util,
     chai,
@@ -13,7 +14,8 @@ define([
     form_,
     Tree,
     ALTERNATE_ROOT_NODE_NAME_XML,
-    QUESTION_REFERENCING_OTHER_XML
+    QUESTION_REFERENCING_OTHER_XML,
+    HIDDEN_VALUE_IN_GROUP_XML
 ) {
     var Form = form_.Form,
         assert = chai.assert,
@@ -61,6 +63,20 @@ define([
                 blue = call("getMugByPath", "/other/blue");
             assert.equal(form.getBasePath(), "/other/");
             assert(blue !== null, "mug not found: /other/blue");
+        });
+
+        it("should update reference to hidden value in group", function () {
+            util.loadXML(HIDDEN_VALUE_IN_GROUP_XML);
+            var group = call("getMugByPath", "/data/group"),
+                label = call("getMugByPath", "/data/group/label"),
+                hidden = call("getMugByPath", "/data/group/hidden");
+
+            chai.expect(label.p.relevantAttr).to.include("/data/group/hidden");
+            group.p.nodeID = "x";
+            assert.equal(group.getAbsolutePath(), "/data/x");
+            assert.equal(label.getAbsolutePath(), "/data/x/label");
+            assert.equal(hidden.getAbsolutePath(), "/data/x/hidden");
+            chai.expect(label.p.relevantAttr).to.include("/data/x/hidden");
         });
 
         it("should merge data-only nodes with control nodes", function () {
