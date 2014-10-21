@@ -362,7 +362,7 @@ define([
                 if (refMug && refMug.options.isDataOnly) {
                     if (position !== 'after' && position !== 'before') {
                         // should never happen
-                        throw Error("cannot insert " + position + " " + refMug.__className);
+                        throw new Error("cannot insert " + position + " " + refMug.__className);
                     }
                     // find alternate insert refMug and position
                     var newRefMug = this.dataTree.findSibling(

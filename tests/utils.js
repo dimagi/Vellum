@@ -179,9 +179,9 @@ define([
         }
 
         if (!$current.length || $current.hasClass('jstree')) {
-            throw Error("No question " + questionDisplayNamesPath + " found");
+            throw new Error("No question " + questionDisplayNamesPath + " found");
         } else if ($current.length > 1) {
-            throw Error("Too many questions " + questionDisplayNamesPath + " found");
+            throw new Error("Too many questions " + questionDisplayNamesPath + " found");
         }
         $($current[0]).click();
     }
