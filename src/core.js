@@ -452,8 +452,8 @@ define([
             description: "This is the raw XML. You can edit or paste into this box to make changes " +
                          "to your form. Press 'Update Source' to save changes, or 'Close' to cancel."
         }));
-        modalHeaderHeight = $modal.find('.modal-header').outerHeight();
-        modalFooterHeight = $modal.find('.modal-footer').outerHeight();
+        modalHeaderHeight = $modal.find('.modal-header').outerHeight(false);
+        modalFooterHeight = $modal.find('.modal-footer').outerHeight(false);
         modalHeight = $(window).height() - 40;
         modalBodyHeight = modalHeight - (modalFooterHeight - modalHeaderHeight) - 126;
 
