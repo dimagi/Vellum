@@ -39,7 +39,7 @@ requirejs.config({
         'codemirrorBase': '../lib/codemirror/codemirror',
         'CryptoJS': '../lib/sha1',
         'diff-match-patch': '../lib/diff_match_patch',
-        'jquery': '../bower_components/jquery/jquery',
+        'jquery': '../bower_components/jquery/dist/jquery',
         'jquery-ui': '../lib/jquery-ui/jquery-ui-1.8.14.custom.min',
         'jquery.jstree': '../bower_components/jstree/dist/jstree',
         'jquery.fancybox': '../lib/fancybox/jquery.fancybox-1.3.4',
