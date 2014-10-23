@@ -771,14 +771,6 @@ define([
 
             form.moveMug(mug, rel.mug, rel.position);
             _this.refreshCurrentMug();
-        }).bind("dnd_stop.vakata", function (data) {
-// TODO check if this works in jstree3
-// was drop_finish callback in dnd options
-            var target = $(data.r),
-                sourceUid = $(data.o).attr('id'),
-                mug = _this.data.core.form.getMugByUFID(sourceUid);
-
-            _this.handleDropFinish(target, sourceUid, mug);
         }).bind("deselect_all.jstree deselect_node.jstree", function (e, data) {
             _this.resetQuestionTypeGroups();
 
@@ -788,6 +780,29 @@ define([
         }).bind('set_type.jstree', function (e, data) {
             var mug = _this.data.core.form.getMugByUFID(data.args[1].substring(1));
             _this.overrideJSTreeIcon(mug);
+        });
+
+        // handle drag/drop outside of tree
+        $(document).on("dnd_move.vakata.jstree", function (e, data) {
+            var target = $(data.event.target),
+                inst = $.jstree.reference(target);
+            if (!inst) {
+                // only when not dragging inside the tree
+                if (target.hasClass("jstree-drop")) {
+                    data.helper.find('.jstree-icon').removeClass('jstree-er').addClass('jstree-ok');
+                } else {
+                    data.helper.find('.jstree-icon').removeClass('jstree-ok').addClass('jstree-er');
+                }
+            }
+        }).on("dnd_stop.vakata.jstree", function (e, data) {
+            var target = $(data.event.target),
+                inst = $.jstree.reference(target),
+                sourceUid, mug;
+            if (!inst && target.hasClass("jstree-drop")) {
+                sourceUid = data.data.nodes[0];
+                mug = _this.data.core.form.getMugByUFID(sourceUid);
+                _this.handleDropFinish(target, sourceUid, mug);
+            }
         });
     };
 
