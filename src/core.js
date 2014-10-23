@@ -851,16 +851,16 @@ define([
 
     fn.setTreeNodeInvalid = function (uid, msg) {
         msg = msg.replace(/"/g, "'");
-        var $node = this.$f.find('#' + uid + ' > a');
+        var $node = this.$f.find('#' + uid + ' > a i');
         this.setTreeNodeValid(uid);
         $node.after(
-            '<div class="ui-icon ui-icon-alert fd-tree-valid-alert-icon"' +
+            '<div class="fd-tree-valid-alert-icon icon-exclamation-triangle"' +
             ' title="' + msg + '"></div>');
     };
 
     fn.setTreeNodeValid = function (uid) {
         this.$f.find('#' + uid + ' > a')
-            .siblings(".fd-tree-valid-alert-icon").remove();
+            .children(".fd-tree-valid-alert-icon").remove();
     };
 
     fn.setTreeValidationIcon = function (mug) {
