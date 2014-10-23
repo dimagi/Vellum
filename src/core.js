@@ -363,6 +363,10 @@ define([
         var curMug = this.getCurrentlySelectedMug();
         if (curMug) {
             this.displayMugProperties(curMug);
+            if (this.data.core.unsavedDuplicateNodeId) {
+                this.getCurrentMugInput("nodeID")
+                    .val(this.data.core.unsavedDuplicateNodeId);
+            }
         }
     };
 
