@@ -1143,7 +1143,8 @@ define([
         }).on('question-create', function (e) {
             _this.handleNewMug(e.mug, e.refMug, e.position);
             if (!e.isInternal) {
-                _this.jstree('select_node', '#' + e.mug.ufid, true);
+                _this.jstree("deselect_all", true)
+                     .jstree('select_node', '#' + e.mug.ufid);
             }
         }).on('change', function (e) {
             try {
@@ -1498,8 +1499,8 @@ define([
                 var duplicate = _this.data.core.form.duplicateMug(
                     _this.getCurrentlySelectedMug());
 
-                _this.jstree("deselect_all")
-                    .jstree("select_node", '#' + duplicate.ufid);
+                _this.jstree("deselect_all", true)
+                     .jstree("select_node", '#' + duplicate.ufid);
             });
         });
         $baseToolbar.find('.btn-toolbar.pull-left')
