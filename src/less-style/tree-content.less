@@ -34,11 +34,8 @@
   width: 100%;
 }
 
-.jstree a {
+.jstree-default .jstree-anchor {
   color: darken(@blueDark, 10);
-  line-height: 18px;
-  padding: 1px 6px 3px !important;
-  .border-radius(5px);
   &.jstree-hovered,
   &.jstree-clicked {
     border: none;
@@ -47,13 +44,9 @@
   &.jstree-clicked {
     .box-shadow(0px 0px 4px fade(@blue, 60%));
   }
-}
-
-.jstree a > ins.jstree-icon {
-  background: none;
-  font-size: .85em;
-}
-
-.jstree a > ins {
-  color: @blueLight;
+  > .jstree-icon {
+    background: none;
+    font-size: .85em;
+    color: @blueLight;
+  }
 }
