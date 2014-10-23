@@ -6,16 +6,32 @@ define([
     $,
     _
 ) {
-    // conditional select plugin
-    // from https://github.com/vakata/jstree/blob/master/src/misc.js
-    // see also http://stackoverflow.com/a/24499593/10840
+    /**
+     * Conditional events plugin
+     *
+     * Conditional handlers are called with the same arguments as the
+     * JSTree function that they are gating, and they are bound to the
+     * JSTree instance.
+     *
+     * based on https://github.com/vakata/jstree/blob/master/src/misc.js
+     * see also http://stackoverflow.com/a/24499593/10840
+     */
     "use strict";
-    $.jstree.defaults.conditionalselect = function () { return true; };
-    $.jstree.plugins.conditionalselect = function (options, parent) {
-        // own function
-        this.activate_node = function (obj, e) {
-            if(this.settings.conditionalselect.call(this, this.get_node(obj))) {
-                parent.activate_node.call(this, obj, e);
+    $.jstree.defaults.conditionalevents = {
+        should_activate: function () { return true; },
+        should_move: function () { return true; }
+    };
+    $.jstree.plugins.conditionalevents = function (options, parent) {
+        this.activate_node = function () {
+            var args = Array.prototype.slice.call(arguments);
+            if(this.settings.conditionalevents.should_activate.apply(this, args)) {
+                parent.activate_node.apply(this, args);
+            }
+        };
+        this.move_node = function () {
+            var args = Array.prototype.slice.call(arguments);
+            if(this.settings.conditionalevents.should_move.apply(this, args)) {
+                parent.move_node.apply(this, args);
             }
         };
     };

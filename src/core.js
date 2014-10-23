@@ -728,10 +728,32 @@ define([
                 inside_pos: "last"
             },
             "types": typeData,
-            conditionalselect: function (node) {
-                return _this.ensureCurrentMugIsSaved();
+            conditionalevents: {
+                should_activate: function () {
+                    return _this.ensureCurrentMugIsSaved();
+                },
+                should_move: function (obj, par) {
+                    var form = _this.data.core.form,
+                        mug = (_.isArray(obj) ? obj[0] : obj).data.mug,
+                        nodeID = mug.p.nodeID,
+                        parent = this.get_node(par),
+                        parentMug = parent.data ? parent.data.mug : null;
+
+                    // disallow moving node if it would have the same ID as a sibling
+                    if (nodeID) {
+                        var childMug = form.getMugChildrenByNodeID(parentMug, nodeID)[0];
+                        if (childMug && childMug !== mug) {
+                            // setup state for alert
+                            _this.setUnsavedDuplicateNodeId(nodeID, true);
+                            // trigger alert
+                            _this.ensureCurrentMugIsSaved();
+                            return false;
+                        }
+                    }
+                    return true;
+                }
             },
-            "plugins" : [ "themes", "types", "dnd", "conditionalselect" ]
+            "plugins" : [ "themes", "types", "dnd", "conditionalevents" ]
             // We enable the "themes" plugin, but bundle the default theme CSS
             // (with base64-embedded images) in our CSS build.  The themes
             // plugin needs to stay enabled because it adds CSS selectors to
@@ -761,41 +783,6 @@ define([
             _this.resetQuestionTypeGroups();
 
 // TODO how to do this in jstree3?
-        }).bind('before.jstree', function (e, data) {
-            var stop = function () {
-                e.stopImmediatePropagation();
-                return false;
-            };
-
-            if (data.func === 'move_node' && data.args[0].jquery) {
-                if (!_this.ensureCurrentMugIsSaved()) {
-                    return stop();
-                }
-                var form = _this.data.core.form,
-                    mug = form.getMugByUFID($(data.args[0]).attr('id')),
-                    nodeID = mug.p.nodeID,
-                    refMug = form.getMugByUFID($(data.args[1]).attr('id')),
-                    position = data.args[2],
-                    parentMug;
-
-                // disallow moving a node if it would have the same ID as a sibling
-                if (nodeID) {
-                    if (['inside', 'into', 'first', 'last'].indexOf(position) !== -1) {
-                        parentMug = refMug;
-                    } else {
-                        parentMug = refMug.parentMug;
-                    }
-
-                    var childMug = form.getMugChildrenByNodeID(parentMug, nodeID)[0];
-                    if (childMug && childMug !== mug) {
-                        // setup state for alert
-                        _this.setUnsavedDuplicateNodeId(nodeID, true);
-                        // trigger alert
-                        _this.ensureCurrentMugIsSaved();
-                        return stop();
-                    }
-                }
-            }
         }).bind('create_node.jstree', function (e, data) {
             _this.overrideJSTreeIcon(data.node.data.mug);
         }).bind('set_type.jstree', function (e, data) {
