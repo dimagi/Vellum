@@ -22,6 +22,7 @@ define([
     'vellum/util',
     'vellum/debugutil',
     'vellum/base',
+    'vellum/jstree-plugins',
     'less!vellum/less-style/main',
     'jquery.jstree',
     'jquery.bootstrap',
@@ -723,15 +724,15 @@ define([
                 inside_pos: "last"
             },
             "types": typeData,
-            "plugins" : [ "themes", "types", "dnd" ]
-// TODO is themes plugin still needed in JST3?
+            conditionalselect: function (node) {
+                return _this.ensureCurrentMugIsSaved();
+            },
+            "plugins" : [ "themes", "types", "dnd", "conditionalselect" ]
             // We enable the "themes" plugin, but bundle the default theme CSS
             // (with base64-embedded images) in our CSS build.  The themes
             // plugin needs to stay enabled because it adds CSS selectors to
             // themeable items, which it would be hard to adapt the existing
-            // selectors to if they didn't exist.  This would result in the
-            // themes plugin getting a 404 for the CSS file, but we comment that
-            // out.
+            // selectors to if they didn't exist.
         }).bind("select_node.jstree", function (e, data) {
             var mug = _this.data.core.form.getMugByUFID(data.node.id);
             _this.displayMugProperties(mug);
@@ -761,10 +762,6 @@ define([
                 e.stopImmediatePropagation();
                 return false;
             };
-
-            if (data.func === 'select_node' && !_this.ensureCurrentMugIsSaved()) {
-                return stop();
-            }
 
             if (data.func === 'move_node' && data.args[0].jquery) {
                 if (!_this.ensureCurrentMugIsSaved()) {
@@ -857,11 +854,10 @@ define([
         var selected = this.jstree('get_selected'),
             ret;
 
-        if (!selected || !selected[0]) {
+        if (!selected.length) {
             ret = null;
         } else {
-            selected = selected[0];
-            ret = this.data.core.form.getMugByUFID($(selected).prop('id'));
+            ret = this.data.core.form.getMugByUFID(selected[0]);
         }
         return ret;
     };
