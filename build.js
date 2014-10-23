@@ -68,7 +68,7 @@
                 'jquery.bootstrap',
 
                 // shim plugin dependencies don't get automatically included
-                'css/css!../lib/jquery-ui/redmond/jquery-ui-1.8.14.custom'
+                'css/css!../bower_components/jquery-ui/themes/redmond/jquery-ui'
             ],
             exclude: [
                 'exclude'

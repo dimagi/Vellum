@@ -28,7 +28,7 @@ console.log("loading Vellum from " + baseUrl);
 
 // comment these to use built versions
 define("jquery", [testBase + 'bower_components/jquery/dist/jquery'], function () { return window.jQuery; });
-define("jquery-ui", ["jquery", testBase + 'lib/jquery-ui/jquery-ui-1.8.14.custom.min'], function () {});
+define("jquery-ui", ["jquery", testBase + 'bower_components/jquery-ui/jquery-ui'], function () {});
 define("jquery.bootstrap", ["jquery", testBase + 'lib/bootstrap'], function () {});
 
 require.config({
