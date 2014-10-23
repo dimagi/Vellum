@@ -740,10 +740,10 @@ define([
         }).bind("move_node.jstree", function (e, data) {
             var form = _this.data.core.form,
                 mug = form.getMugByUFID(data.node.id),
-                refMug = data.parent !== "#" ? form.getMugByUFID(data.parent.id) : null,
-                position = data.position;
+                refMug = data.parent !== "#" ? form.getMugByUFID(data.parent) : null,
+                rel = _this.getRelativePosition(refMug, data.position);
 
-            form.moveMug(mug, refMug, position);
+            form.moveMug(mug, rel.mug, rel.position);
             _this.refreshCurrentMug();
         }).bind("dnd_stop.vakata", function (data) {
 // TODO check if this works in jstree3
@@ -798,6 +798,31 @@ define([
             var mug = _this.data.core.form.getMugByUFID(data.args[1].substring(1));
             _this.overrideJSTreeIcon(mug);
         });
+    };
+
+    /**
+     * Get relative position like "before", "after", "first", or "last"
+     *
+     * @param mug - The parent mug among whose children to position; null for
+     *              root.
+     * @param position - An integer or string position. If this is not a number
+     *                   then the given mug and position are returned.
+     * @returns An object `{mug: mug, position: string}`. The returned mug may
+     *          differ from the original "parent" mug.
+     */
+    fn.getRelativePosition = function (mug, position) {
+        if (!_.isNumber(position)) {
+            return {mug: mug, position: position};
+        }
+        if (position === 0) {
+            return {mug: mug, position: "first"};
+        }
+        var node = this.jstree("get_node", mug ? mug.ufid : "#");
+        if (position > node.children.length) {
+            return {mug: mug, position: "last"};
+        }
+        var child = this.jstree("get_node", node.children[position - 1]);
+        return {mug: child.data.mug, position: "after"};
     };
 
     fn.checkMove = function (srcId, srcType, dstId, dstType, position) {
@@ -1181,22 +1206,11 @@ define([
         var _this = this,
             form = this.data.core.form;
 
-        // monkey patch jstree.create to be faster, see
-        // https://groups.google.com/d/msg/jstree/AT8b9fWdBw8/SB3bXFwYbiQJ
-        // Patching clean_node as described in the above link actually seems
-        // to lead to a slight decrease in speed, and also messes up the
-        // collapsibility of internal nodes, so we don't do that.
-        var get_rollback = $.jstree._fn.get_rollback;
-        $.jstree._fn.get_rollback = function(){};
-
         form.mergedTreeMap(function (mug) {
             _this.createQuestion(mug, mug.parentMug, 'into');
             _this.setTreeValidationIcon(mug);
         });
         this.selectSomethingOrHideProperties(true);
-
-        // restore original jstree behavior
-        $.jstree._fn.get_rollback = get_rollback;
     };
 
     fn.selectSomethingOrHideProperties = function (forceDeselect) {

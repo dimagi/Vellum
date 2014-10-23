@@ -271,7 +271,7 @@ require([
                 }}});
             });
 
-            var data = [
+            var check_move_data = [
                     ["text1", "before", "text1", true],
                     ["text1", "inside", "text1", true],
                     ["text1", "after", "text1", true],
@@ -395,7 +395,7 @@ require([
                     ["hidden2", "after", "hidden1", true]
                 ];
 
-            _(data).each(function (test) {
+            _(check_move_data).each(function (test) {
                 var should = test[3],
                     prefix = should ? "allow move " : "prevent move ",
                     qsrc = test[0],
@@ -412,6 +412,61 @@ require([
                            ["move", qsrc, position, qdst, "->", result].join(" "));
                 });
             });
+
+
+            var relative_position_data = [
+                    [null, "first", null, "first"],
+                    [null, "last", null, "last"],
+
+                    ["group", "first", "group", "first"],
+                    ["group", "last", "group", "last"],
+                    ["group", "before", "group", "before"],
+                    ["group", "after", "group", "after"],
+
+                    ["text1", "before", "text1", "before"],
+                    ["text1", "after", "text1", "after"],
+
+                    [null, 0, null, "first"],
+                    [null, 1, "text1", "after"],
+                    [null, 2, "text2", "after"],
+                    [null, 3, "repeat", "after"],
+                    [null, 4, "group", "after"],
+                    [null, 5, "text5", "after"],
+                    [null, 6, "hidden1", "after"],
+                    [null, 7, null, "last"],
+                    [null, 8, null, "last"],
+
+                    ["repeat", 0, "repeat", "first"],
+                    ["repeat", 1, "repeat", "last"],
+                    ["repeat", 2, "repeat", "last"],
+
+                    ["group", 0, "group", "first"],
+                    ["group", 1, "text3", "after"],
+                    ["group", 2, "text4", "after"],
+                    ["group", 3, "hidden2", "after"],
+                    ["group", 4, "group", "last"],
+                    ["group", 5, "group", "last"]
+                ];
+
+            _(relative_position_data).each(function (test) {
+                var refMug = test[0],
+                    refPos = test[1],
+                    relMug = test[2],
+                    relPos = test[3],
+                    msg = "produce relative position " +
+                          refMug + "[" + refPos + "] => " +
+                          relPos + " " + relMug;
+                it(msg, function () {
+                    var src = refMug ? mugs[refMug] : null,
+                        dst = relMug ? mugs[relMug] : null,
+                        res = call("getRelativePosition", src, refPos),
+                        posStr = String(res.position),
+                        mugStr = res.mug ? res.mug.p.nodeID : String(res.mug);
+                    assert(res.position === relPos && res.mug === dst,
+                           [refPos, refMug, "->", posStr, mugStr].join(" "));
+                });
+            });
+
         });
 
     });
