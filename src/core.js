@@ -752,6 +752,16 @@ define([
                         }
                     }
                     return true;
+                },
+                redraw_node: function (obj) {
+                    var args = Array.prototype.slice.call(arguments),
+                        node = this.parent.redraw_node.apply(this.inst, args);
+                    obj = this.inst.get_node(obj);
+                    // decorate node with error indicator if present
+                    if (node && obj.data && obj.data.errors) {
+                        $(node).find('a > i').first().after(obj.data.errors);
+                    }
+                    return node;
                 }
             },
             "plugins" : [ "themes", "types", "dnd", "conditionalevents" ]
@@ -855,16 +865,16 @@ define([
 
     fn.setTreeNodeInvalid = function (uid, msg) {
         msg = msg.replace(/"/g, "'");
-        var $node = this.$f.find('#' + uid + ' > a i');
-        this.setTreeNodeValid(uid);
-        $node.after(
-            '<div class="fd-tree-valid-alert-icon icon-exclamation-triangle"' +
-            ' title="' + msg + '"></div>');
+        var node = this.jstree("get_node", uid);
+        node.data.errors = '<div class="fd-tree-valid-alert-icon icon-exclamation-triangle"' +
+            ' title="' + msg + '"></div>';
+        this.jstree("redraw_node", node);
     };
 
     fn.setTreeNodeValid = function (uid) {
-        this.$f.find('#' + uid + ' > a')
-            .children(".fd-tree-valid-alert-icon").remove();
+        var node = this.jstree("get_node", uid);
+        node.data.errors = null;
+        this.jstree("redraw_node", node);
     };
 
     fn.setTreeValidationIcon = function (mug) {
