@@ -690,7 +690,7 @@ define([
                 valid_children: this.data.core.mugTypes.Group.validChildTypes
             },
             "default": {
-                icon: 'fa-question',
+                icon: 'icon-question-sign',
                 max_children: 0,
                 valid_children: []
             }
@@ -768,18 +768,21 @@ define([
                 mug = form.getMugByUFID(data.node.id),
                 refMug = data.parent !== "#" ? form.getMugByUFID(data.parent) : null,
                 rel = _this.getRelativePosition(refMug, data.position);
-
             form.moveMug(mug, rel.mug, rel.position);
+            data.node.icon = mug.getIcon();
             _this.refreshCurrentMug();
         }).bind("deselect_all.jstree deselect_node.jstree", function (e, data) {
             _this.resetQuestionTypeGroups();
-
-// TODO how to do this in jstree3?
-        }).bind('create_node.jstree', function (e, data) {
-            _this.overrideJSTreeIcon(data.node.data.mug);
-        }).bind('set_type.jstree', function (e, data) {
-            var mug = _this.data.core.form.getMugByUFID(data.args[1].substring(1));
-            _this.overrideJSTreeIcon(mug);
+        }).bind('model.jstree', function (e, data) {
+            // Dynamically update node icons. This is unnecessary for
+            // most nodes, but some (items in select questions) have a
+            // different icon depending on their parent type.
+            _(data.nodes).each(function (id) {
+                var node = _this.jstree("get_node", id);
+                if (node.data.mug) {
+                    node.icon = node.data.mug.getIcon();
+                }
+            });
         });
 
         // handle drag/drop outside of tree
@@ -912,25 +915,6 @@ define([
         // Instead of depending on the UI state (currently selected mug), it
         // would probably be better to have this be handled by the widget using
         // its bound mug.
-    };
-
-    fn.overrideJSTreeIcon = function (mug) {
-        var $questionNode = this.$f.find('#' + mug.ufid),
-            iconClass;
-        if (!mug.getIcon) {
-            // mug is the question type definition, not an instance
-            iconClass = mug.icon;
-        } else {
-            iconClass = mug.getIcon();
-        }
-        iconClass = iconClass || 'icon-circle';
-        if (!$questionNode.find('> a > ins').hasClass(iconClass)) {
-            $questionNode.find('> a > ins')
-                .attr('class', 'jstree-icon')
-                .addClass(iconClass);
-        }
-        // TODO fix possible bug: mug.typeName -> mug.options.typeName
-        this.activateQuestionTypeGroup(mug.__className || mug.typeName);
     };
 
     fn.activateQuestionTypeGroup = function (className) {
@@ -1135,10 +1119,7 @@ define([
                 _this.refreshCurrentMug();
             }
         }).on('parent-question-type-change', function (e) {
-            _this.overrideJSTreeIcon(e.childMug);
-        }).on('question-move', function (e) {
-            // for select items
-            _this.overrideJSTreeIcon(e.mug);
+            _this.jstree("set_icon", e.childMug.ufid, e.childMug.getIcon());
         }).on('remove-question', function (e) {
             if (!e.isInternal) {
                 _this.jstree("delete_node", e.mug.ufid);
@@ -1297,9 +1278,7 @@ define([
                     id: mug.ufid,
                     rel: mug.__className
                 },
-                state: {
-                    opened: mug.options.isSpecialGroup ? true : undefined
-                }
+                state: { opened: true }
             },
             // NOTE 'into' is not a supported position in JSTree
             (position === 'into' ? 'last' : position)

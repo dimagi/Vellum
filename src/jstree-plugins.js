@@ -9,12 +9,13 @@ define([
     /**
      * Conditional events plugin
      *
-     * Conditional handlers are called with the same arguments as the
-     * JSTree function that they are gating, and they are bound to the
-     * JSTree instance.
+     * Conditional handlers are bound to the JSTree instance and are
+     * called with the same arguments as the JSTree function that they
+     * are gating. The boolean result of the handler will be used to
+     * determine if the gated method should be called (true -> call).
      *
-     * based on https://github.com/vakata/jstree/blob/master/src/misc.js
-     * see also http://stackoverflow.com/a/24499593/10840
+     * Based on https://github.com/vakata/jstree/blob/master/src/misc.js
+     * See also http://stackoverflow.com/a/24499593/10840
      */
     "use strict";
     $.jstree.defaults.conditionalevents = {
