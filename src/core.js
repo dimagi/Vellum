@@ -1123,8 +1123,13 @@ define([
             _this.jstree("set_icon", e.childMug.ufid, e.childMug.getIcon());
         }).on('remove-question', function (e) {
             if (!e.isInternal) {
+                var prev = _this.jstree("get_prev_dom", e.mug.ufid);
                 _this.jstree("delete_node", e.mug.ufid);
-                _this.selectSomethingOrHideProperties();
+                if (prev) {
+                    _this.jstree("select_node", prev);
+                } else {
+                    _this.selectSomethingOrHideProperties();
+                }
             }
         }).on('error-change', function (e) {
             _this._resetMessages(e.errors);
