@@ -1129,7 +1129,7 @@ define([
         form.formName = this.opts().core.formName || form.formName;
 
         form.on('question-type-change', function (e) {
-            _this.jstree("set_type", e.qType, '#' + e.mug.ufid);
+            _this.jstree("set_type", e.mug.ufid, e.qType);
 
             if (e.mug === _this.getCurrentlySelectedMug()) {
                 _this.refreshCurrentMug();
@@ -1141,7 +1141,7 @@ define([
             _this.overrideJSTreeIcon(e.mug);
         }).on('remove-question', function (e) {
             if (!e.isInternal) {
-                _this.jstree("remove", '#' + e.mug.ufid);
+                _this.jstree("delete_node", e.mug.ufid);
                 _this.selectSomethingOrHideProperties();
             }
         }).on('error-change', function (e) {
@@ -1150,7 +1150,7 @@ define([
             _this.handleNewMug(e.mug, e.refMug, e.position);
             if (!e.isInternal) {
                 _this.jstree("deselect_all", true)
-                     .jstree('select_node', '#' + e.mug.ufid);
+                     .jstree('select_node', e.mug.ufid);
             }
         }).on('change', function (e) {
             try {
@@ -1188,10 +1188,9 @@ define([
     };
 
     fn.refreshMugName = function (mug, displayLang) {
-        var $node = $('#' + mug.ufid),
-            name = mug.getDisplayName(this.data.core.currentItextDisplayLanguage);
-        if (name !== this.jstree("get_text", $node)) {
-            this.jstree('rename_node', $node, name);
+        var name = mug.getDisplayName(this.data.core.currentItextDisplayLanguage);
+        if (name !== this.jstree("get_text", mug.ufid)) {
+            this.jstree('rename_node', mug.ufid, name);
         }
     };
 
@@ -1506,7 +1505,7 @@ define([
                     _this.getCurrentlySelectedMug());
 
                 _this.jstree("deselect_all", true)
-                     .jstree("select_node", '#' + duplicate.ufid);
+                     .jstree("select_node", duplicate.ufid);
             });
         });
         $baseToolbar.find('.btn-toolbar.pull-left')
