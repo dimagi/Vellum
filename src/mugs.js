@@ -936,13 +936,11 @@ define([
         },
         changeType: function (mug, typeName) {
             var form = mug.form,
-                children = form.getChildren(mug);
+                children = form.getChildren(mug),
+                isSelect = /^M?Select$/.test.bind(/^M?Select$/);
 
-            // matches Select and MSelect; not SelectDynamic or MSelectDynamic
-            if (children.length && (typeName.indexOf("Select") !== -1 &&
-                                    typeName.indexOf("Dynamic") === -1))
-            {
-                throw new Error("you can't change a Multiple/Single Choice " +
+            if (children.length && isSelect(mug.__className) && !isSelect(typeName)) {
+                throw new Error("Cannot change a Multiple/Single Choice " +
                       "question to a non-Choice question if it has Choices. " +
                       "Please remove all Choices and try again.");
             }

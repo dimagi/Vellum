@@ -316,15 +316,31 @@ require([
             });
         });
 
-        describe("can change", function() {
+        describe("can", function() {
             var changes = [
-                ["Text", "Trigger"],
-                ["Trigger", "Select"],
-                ["Image", "Select"],
-                ["Audio", "Select"],
-                ["Video", "Select"],
-                ["PhoneNumber", "Text"]
-            ];
+                    ["Text", "Trigger"],
+                    ["Trigger", "Select"],
+                    ["Image", "Select"],
+                    ["Audio", "Select"],
+                    ["Video", "Select"],
+                    ["PhoneNumber", "Text"],
+                    ["Select", "Text"],
+                    ["MSelect", "Text"],
+                    ["Select", "MSelect"],
+                    ["MSelect", "Select"],
+                    ["Select + Choices", "MSelect"],
+                    ["MSelect + Choices", "Select"]
+                ],
+                no_change = [
+                    //["Text", "Group"],
+                    //["Text", "Repeat"],
+                    //["Text", "FieldList"],
+                    ["MSelect + Choices", "Text"],
+                    ["Select + Choices", "Text"]
+                    //["Group", "Text"],
+                    //["Repeat", "Text"],
+                    //["FieldList", "Text"]
+                ];
 
             before(function (done) {
                 util.init({
@@ -336,21 +352,50 @@ require([
                 });
             });
 
+            function setup(from, to) {
+                var choices = from.indexOf(" + Choices") > -1;
+                from = (choices ? from.replace(" + Choices", "") : from);
+                var nodeId = (from + (choices ? "_Choices" : "") + "_to_" + to),
+                    mug = addQuestion(from, nodeId);
+                if (!choices && from.indexOf("Select") > -1) {
+                    util.deleteQuestion(nodeId + "/item1");
+                    util.deleteQuestion(nodeId + "/item2");
+                }
+                assert.equal(mug.p.nodeID, nodeId, "got wrong mug before changing type");
+                assert.equal(mug.__className, from, "wrong mug type");
+                return mug;
+            }
+
             _.each(changes, function (change) {
-                var from = change[0], to = change[1];
-                it(from + " to " + to, function () {
-                    var nodeId = (from + "_to_" + to).toLowerCase();
-                    addQuestion(from, nodeId);
-                    var mug = call("getMugByPath", "/data/" + nodeId);
-                    assert.equal(mug.p.nodeID, nodeId, "got wrong mug before changing type");
-                    assert.equal(mug.__className, from, "wrong mug type");
+                var from = change[0],
+                    to = change[1];
+                it("change " + from + " to " + to, function () {
+                    var mug = setup(from, to);
                     call("changeMugType", mug, to);
-                    mug = call("getMugByPath", "/data/" + nodeId);
+                    mug = util.getMug(mug.p.nodeID);
                     assert.equal(mug.__className, to);
 
                     call("loadXML", call("createXML"));
-                    mug = call("getMugByPath", "/data/" + nodeId);
+                    mug = util.getMug(mug.p.nodeID);
                     assert.equal(mug.__className, to);
+                });
+            });
+
+            _.each(no_change, function (change) {
+                var from = change[0],
+                    to = change[1];
+                it("not change " + from + " to " + to, function () {
+                    var mug = setup(from, to),
+                        ok = true;
+                    try {
+                        call("changeMugType", mug, to);
+                        ok = false;
+                    } catch (error) {
+                        assert(String(error).indexOf("Cannot change") > 0, String(error));
+                    }
+                    assert(ok, "Error not raised when changing " + from + " to " + to);
+                    mug = util.getMug(mug.p.nodeID);
+                    assert.equal(mug.__className, from.replace(" + Choices", ""));
                 });
             });
         });

@@ -186,6 +186,42 @@ define([
         $($current[0]).click();
     }
 
+    /**
+     * Get a mug by path (even items!) from the active form
+     *
+     * @param path - The path of the item. If this is not an absolute path then
+     *               '/data/' will be prepended.
+     * @returns null if a mug with the given path is not found.
+     */
+    function getMug(path) {
+        if (path.indexOf("/") !== 0) {
+            path = "/data/" + path;
+        }
+        var mug = call("getMugByPath", path);
+        if (!mug) {
+            // look for item if the parent mug is a select
+            // not sure why getMugByPath doesn't do this... should it?
+            var elements = path.split("/"),
+                parentPath = elements.slice(0, -1).join("/"),
+                parent = call("getMugByPath", parentPath);
+            if (parent && parent.__className.indexOf("Select") > -1) {
+                var children = call("getData").core.form.getChildren(parent),
+                    nodeID = elements[elements.length - 1];
+                for (var i = 0; i < children.length; i++) {
+                    if (children[i].p.defaultValue === nodeID) {
+                        return children[i];
+                    }
+                }
+            }
+        }
+        return mug;
+    }
+
+    function deleteQuestion (path) {
+        call("getData").core.form.removeMugFromForm(getMug(path));
+        assert(!getMug(path), "mug not removed: " + path);
+    }
+
     return {
         options: options,
         init: init,
@@ -194,6 +230,7 @@ define([
         saveAndReload: function(callback) {
             call("loadXFormOrError", call("createXML"), callback);
         },
+        getMug: getMug,
         getInput: getInput,
         assertInputCount: assertInputCount,
         assertXmlEqual: assertXmlEqual,
@@ -226,6 +263,7 @@ define([
             return mug;
         },
         clickQuestion: clickQuestion,
+        deleteQuestion: deleteQuestion,
         isTreeNodeValid: function (mug) {
             var $node = $("#vellum").find('#' + mug.ufid + ' > a');
             return $node.siblings(".fd-tree-valid-alert-icon").length === 0;
