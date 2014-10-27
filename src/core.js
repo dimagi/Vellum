@@ -795,30 +795,37 @@ define([
                 }
             });
         });
-
-        // handle drag/drop outside of tree
-        $(document).on("dnd_move.vakata.jstree", function (e, data) {
-            var target = $(data.event.target),
-                inst = $.jstree.reference(target);
-            if (!inst) {
-                // only when not dragging inside the tree
-                if (target.hasClass("jstree-drop")) {
-                    data.helper.find('.jstree-icon').removeClass('jstree-er').addClass('jstree-ok');
-                } else {
-                    data.helper.find('.jstree-icon').removeClass('jstree-ok').addClass('jstree-er');
-                }
-            }
-        }).on("dnd_stop.vakata.jstree", function (e, data) {
-            var target = $(data.event.target),
-                inst = $.jstree.reference(target),
-                sourceUid, mug;
-            if (!inst && target.hasClass("jstree-drop")) {
-                sourceUid = data.data.nodes[0];
-                mug = _this.data.core.form.getMugByUFID(sourceUid);
-                _this.handleDropFinish(target, sourceUid, mug);
-            }
-        });
     };
+
+    /**
+     * Setup handlers for drag/drop outside of tree
+     *
+     * NOTE this is done once when Vellum is loaded. These handlers must work
+     * for multiple Vellum instances on the same page.
+     */
+    $(document).on("dnd_move.vakata.jstree", function (e, data) {
+        var source = $(data.data.obj.context),
+            target = $(data.event.target),
+            inst = $.jstree.reference(target);
+        if (!inst && target.vellum("get") === source.vellum("get")) {
+            // only when not dragging inside the tree
+            if (target.hasClass("jstree-drop")) {
+                data.helper.find('.jstree-icon').removeClass('jstree-er').addClass('jstree-ok');
+            } else {
+                data.helper.find('.jstree-icon').removeClass('jstree-ok').addClass('jstree-er');
+            }
+        }
+    }).on("dnd_stop.vakata.jstree", function (e, data) {
+        var vellum = $(data.data.obj.context).vellum("get"),
+            target = $(data.event.target),
+            inst = $.jstree.reference(target),
+            sourceUid, mug;
+        if (!inst && target.hasClass("jstree-drop") && vellum === target.vellum("get")) {
+            sourceUid = data.data.nodes[0];
+            mug = vellum.data.core.form.getMugByUFID(sourceUid);
+            vellum.handleDropFinish(target, sourceUid, mug);
+        }
+    });
 
     /**
      * Get relative position like "before", "after", "first", or "last"
