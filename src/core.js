@@ -708,6 +708,7 @@ define([
         $tree.jstree({
             "core": {
                 data: [],
+                worker: false,
                 multiple: false, // single-item selection
                 strings: {
                     'New node': this.opts().core.noTextString
