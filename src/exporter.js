@@ -53,9 +53,9 @@ define([
             }
 
             if (mug.p.tagName !== "item") {
-                row.Question = form.getAbsolutePath(mug, true);
+                row.Question = form.getAbsolutePath(mug);
             } else {
-                row.Question = form.getAbsolutePath(mug.parentMug, true) +
+                row.Question = form.getAbsolutePath(mug.parentMug) +
                                 "-" + mug.p.defaultValue;
             }
             row.Type = mug.options.typeName;
