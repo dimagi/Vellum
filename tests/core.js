@@ -4,6 +4,7 @@ require([
     'jquery',
     'underscore',
     'tests/utils',
+    'text!static/core/test1.xml',
     'text!static/core/group-rename.xml',
     'text!static/core/invalid-questions.xml',
     'text!static/core/increment-item.xml',
@@ -15,6 +16,7 @@ require([
     $,
     _,
     util,
+    TEST_XML_1,
     GROUP_RENAME_XML,
     INVALID_QUESTIONS_XML,
     INCREMENT_ITEM_XML,
@@ -470,39 +472,4 @@ require([
         });
 
     });
-
-    var TEST_XML_1 = '' +
-    '<?xml version="1.0" encoding="UTF-8" ?>\
-    <h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:orx="http://openrosa.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa" xmlns:vellum="http://commcarehq.org/xforms/vellum">\
-        <h:head>\
-            <h:title>Vellum testing</h:title>\
-            <model>\
-                <instance>\
-                    <data xmlns:jrm="http://dev.commcarehq.org/jr/xforms"\
-                          xmlns="http://openrosa.org/formdesigner/FFD00941-A932-471A-AEC8-87F6EFEF767F"\
-                          uiVersion="1" version="1" name="Vellum testing">\
-                        <state />\
-                    </data>\
-                </instance>\
-                <instance id="states" src="jr://fixture/item-list:state"></instance>\
-                <bind nodeset="/data/state" />\
-                <itext>\
-                    <translation lang="en" default="">\
-                        <text id="state-label">\
-                            <value>State</value>\
-                        </text>\
-                    </translation>\
-                </itext>\
-            </model>\
-        </h:head>\
-        <h:body>\
-            <select1 ref="/data/state">\
-                <label ref="jr:itext(\'state-label\')" />\
-                <itemset nodeset="instance(\'states\')/state_list/state">\
-                  <label ref="name"></label>\
-                  <value ref="id"></value>\
-                </itemset>\
-            </select1>\
-        </h:body>\
-    </h:html>';
 });

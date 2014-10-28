@@ -870,26 +870,18 @@ define([
         return true;
     };
 
-    fn.setTreeNodeInvalid = function (uid, msg) {
-        msg = msg.replace(/"/g, "'");
-        var node = this.jstree("get_node", uid);
-        node.data.errors = '<div class="fd-tree-valid-alert-icon icon-exclamation-triangle"' +
-            ' title="' + msg + '"></div>';
-        this.jstree("redraw_node", node);
-    };
-
-    fn.setTreeNodeValid = function (uid) {
-        var node = this.jstree("get_node", uid);
-        node.data.errors = null;
-        this.jstree("redraw_node", node);
-    };
-
     fn.setTreeValidationIcon = function (mug) {
-        var errors = this.getErrors(mug);
-        if (!errors.length) {
-            this.setTreeNodeValid(mug.ufid);
-        } else {
-            this.setTreeNodeInvalid(mug.ufid, errors.join("<p>"));
+        var node = mug.ufid && this.jstree("get_node", mug.ufid);
+        if (node) {
+            var errors = this.getErrors(mug);
+            if (errors.length) {
+                var msg = errors.join("<p>").replace(/"/g, "'");
+                node.data.errors = '<div class="fd-tree-valid-alert-icon ' +
+                    'icon-exclamation-triangle" title="' + msg + '"></div>';
+            } else {
+                node.data.errors = null;
+            }
+            this.jstree("redraw_node", node);
         }
     };
 
@@ -1217,8 +1209,10 @@ define([
             form = this.data.core.form;
 
         form.mergedTreeMap(function (mug) {
-            _this.createQuestion(mug, mug.parentMug, 'into');
-            _this.setTreeValidationIcon(mug);
+            var inTree = _this.createQuestion(mug, mug.parentMug, 'into');
+            if (inTree) {
+                _this.setTreeValidationIcon(mug);
+            }
         });
         this.selectSomethingOrHideProperties(true);
     };
@@ -1289,9 +1283,14 @@ define([
     fn.handleNewMug = function (mug, refMug, position) {
         this.createQuestion(mug, refMug, position);
     };
-    
+
+    /**
+     * Create a question in the tree GUI
+     *
+     * @returns The tree node that was created or `false` if it was not created.
+     */
     fn.createQuestion = function (mug, refMug, position) {
-        var result = this.jstree("create_node",
+        return this.jstree("create_node",
             refMug ? "#" + refMug.ufid : "#",
             {
                 text: this.getMugDisplayName(mug),
@@ -1306,14 +1305,6 @@ define([
             // NOTE 'into' is not a supported position in JSTree
             (position === 'into' ? 'last' : position)
         );
-
-        // jstree.create returns the tree root if types prevent creation
-        if (result[0] === this.data.core.$tree) {
-            throw new Error(
-                "Can't insert " + mug.__className + " into " + refMug.__className +
-                " (position: " + position + ")");
-        }
-        return result;  
     };
 
     fn.handleMugParseFinish = function (mug) {
