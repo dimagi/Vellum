@@ -266,7 +266,7 @@ define([
         deleteQuestion: deleteQuestion,
         isTreeNodeValid: function (mug) {
             var $node = $("#vellum").find('#' + mug.ufid + ' > a');
-            return $node.siblings(".fd-tree-valid-alert-icon").length === 0;
+            return $node.children(".fd-tree-valid-alert-icon").length === 0;
         }
     };
 });
