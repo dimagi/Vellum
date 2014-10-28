@@ -107,6 +107,9 @@ require(['jquery', 'jquery.vellum'], function ($) {
         var lastSavedForm = null;
 
         function runTests() {
+            function showTestResults() {
+                $(".sidebar .nav #resultsTab a").click();
+            }
             if (window.mochaPhantomJS) {
                 mochaPhantomJS.run();
             } else {
@@ -121,6 +124,8 @@ require(['jquery', 'jquery.vellum'], function ($) {
                 }).appendTo(".sidebar");
                 $("#mocha-stats li").css({display: "block"});
                 $("#mocha-stats li.progress").css({height: "40px"});
+                $("#mocha-stats li.passes a").click(showTestResults);
+                $("#mocha-stats li.failures a").click(showTestResults);
             }
         }
         $('#run-tests').click(runTests);
