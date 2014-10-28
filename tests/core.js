@@ -104,7 +104,7 @@ require([
 
         it("should increment item value on insert new select item after sibling item", function (done) {
             util.init({core: { form: INCREMENT_ITEM_XML, onReady: function () {
-                util.clickQuestion("item1");
+                util.clickQuestion("question1/item1");
                 var item = util.addQuestion("Item");
                 assert.equal(item.p.defaultValue, "item3");
                 done();
@@ -164,7 +164,7 @@ require([
         it("should add hidden value at end of group", function (done) {
             util.init({core: {form: INSERT_QUESTIONS_XML, onReady: function () {
                 util.addQuestion.bind({prevId: "hidden1"})("DataBindOnly", "hiddenA");
-                util.addQuestion.bind({prevId: "hidden2"})("DataBindOnly", "hiddenB");
+                util.addQuestion.bind({prevId: "group/hidden2"})("DataBindOnly", "hiddenB");
                 util.assertJSTreeState(
                     "text1",
                     "text2",
@@ -184,7 +184,7 @@ require([
         it("should add hidden value among other questions", function (done) {
             util.init({core: {form: INSERT_QUESTIONS_XML, onReady: function () {
                 util.addQuestion.bind({prevId: "text1"})("DataBindOnly", "hiddenA");
-                util.addQuestion.bind({prevId: "text3"})("DataBindOnly", "hiddenB");
+                util.addQuestion.bind({prevId: "group/text3"})("DataBindOnly", "hiddenB");
                 util.assertJSTreeState(
                     "text1",
                     "hiddenA",
@@ -204,7 +204,7 @@ require([
         it("should add question after selected question", function (done) {
             util.init({core: {form: INSERT_QUESTIONS_XML, onReady: function () {
                 util.addQuestion.bind({prevId: "text1"})("Text", "textA");
-                util.addQuestion.bind({prevId: "text3"})("Text", "textB");
+                util.addQuestion.bind({prevId: "group/text3"})("Text", "textB");
                 util.assertJSTreeState(
                     "text1",
                     "textA",
@@ -224,7 +224,7 @@ require([
         it("should add question after hidden value", function (done) {
             util.init({core: {form: INSERT_QUESTIONS_XML, onReady: function () {
                 util.addQuestion.bind({prevId: "hidden1"})("Text", "textA");
-                util.addQuestion.bind({prevId: "hidden2"})("Text", "textB");
+                util.addQuestion.bind({prevId: "group/hidden2"})("Text", "textB");
                 util.assertJSTreeState(
                     "text1",
                     "text2",

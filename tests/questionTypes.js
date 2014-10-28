@@ -18,6 +18,7 @@ require([
         questionTypes = [
             //{
             //    clickBeforeAdd: "questionX", // optional click this node before adding question
+            //    path: parent path (must end with /)
             //    type: "QuestionType", // required
             //    nodeId: "questionN", // required
             //    attrs: { // optional
@@ -119,24 +120,31 @@ require([
                 nodeId: 'question22'
             }, {
                 type: 'FieldList',
+                path: 'question22/',
                 nodeId: 'question23'
             }, {
                 type: 'Image',
+                path: 'question22/question23/',
                 nodeId: 'question24'
             }, {
                 type: 'Audio',
+                path: 'question22/question23/',
                 nodeId: 'question25'
             }, {
                 type: 'Video',
+                path: 'question22/question23/',
                 nodeId: 'question26'
             }, {
                 type: 'Geopoint',
+                path: 'question22/question23/',
                 nodeId: 'question27'
             }, {
                 type: 'Secret',
+                path: 'question22/question23/',
                 nodeId: 'question28'
             }, {
                 type: 'AndroidIntent',
+                path: 'question22/question23/',
                 nodeId: 'question7'
             }, {
                 clickBeforeAdd: "question19", // insert before question22
@@ -144,6 +152,7 @@ require([
                 nodeId: 'question21'
             }, {
                 type: 'Repeat',
+                path: 'question21/',
                 nodeId: 'question31',
                 attrs: {
                     requiredAttr: true,
@@ -175,7 +184,7 @@ require([
                 describe("with " + q.type + "[" + nodeId + "]", function () {
                     before(function (done) {
                         if (index > 0) {
-                            clickQuestion(nodeId);
+                            clickQuestion((q.path || "") + nodeId);
                         }
                         done();
                     });
@@ -226,10 +235,10 @@ require([
                     form: null,
                     onReady: function () {
                         _.each(questionTypes, function (q, i) {
-                            var prevId = q.clickBeforeAdd ||
-                                         (i > 0 ? questionTypes[i - 1].nodeId : null),
-                                obj = {prevId: prevId};
-                            addQuestion.call(obj, q.type, q.nodeId, q.attrs);
+                            var prev = (i > 0 ? questionTypes[i - 1] : {}),
+                                prevId = q.clickBeforeAdd ||
+                                    (prev.nodeId ? (prev.path || "") + prev.nodeId : null);
+                            addQuestion.call({prevId: prevId}, q.type, q.nodeId, q.attrs);
                         });
 
                         function addAllForms() {
@@ -271,7 +280,7 @@ require([
                         $("[name='itext-hin-label-custom']")
                             .val("question1 hin custom").change();
 
-                        clickQuestion("question3", "item1");
+                        clickQuestion("question3/item1");
                         addAllForms();
                         $("[name='itext-en-label-long']")
                             .val("item1 long en").change();
@@ -286,7 +295,7 @@ require([
                         $("[name='itext-hin-label-custom']")
                             .val("item1 custom hin").change();
 
-                        clickQuestion("question7");
+                        clickQuestion("question22/question23/question7");
                         $("[name='intent-app-id']").val("app_id").change();
                         $("[name='intent-extra'] .fd-kv-key").val('key1').change();
                         $("[name='intent-extra'] .fd-kv-val").val('value1').change();
@@ -307,9 +316,8 @@ require([
                         );
                         
                         // should have updated question tree
-                        clickQuestion("question1 en label");
+                        clickQuestion("question1");
 
-                        
                         done();
                     }
                 }
