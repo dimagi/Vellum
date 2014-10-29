@@ -1867,6 +1867,8 @@ define([
 
     fn.initWidget = function (widget) {};
 
+    fn.destroy = function () {};
+
     $.vellum.plugin("core", {
         form: null,
         loadDelay: 500,
