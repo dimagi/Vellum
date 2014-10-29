@@ -385,25 +385,14 @@ define([
          * the position specified by the arguments,
          */
         moveMug: function (mug, refMug, position) {
-            var _this = this,
-                mugs = this.getDescendants(mug).concat([mug]),
-                preMovePaths = mugs.map(function(mug) {
-                    return _this.dataTree.getAbsolutePath(mug);
-                });
+            var oldPath = this.dataTree.getAbsolutePath(mug);
 
             this.insertMug(refMug, mug, position);
-            
-            var updates = {};
-            for (var i = 0; i < mugs.length; i++) {
-                if (preMovePaths[i]) {
-                    updates[mugs[i].ufid] = [
-                        preMovePaths[i],
-                        this.dataTree.getAbsolutePath(mugs[i])
-                    ];
-                }
-            }
 
-            this._logicManager.updatePaths(updates);
+            var currentPath = this.dataTree.getAbsolutePath(mug);
+            this.vellum.handleMugRename(
+                this, mug, mug.p.nodeID, mug.p.nodeID, currentPath, oldPath);
+
             this.fire({
                 type: 'question-move',
                 mug: mug

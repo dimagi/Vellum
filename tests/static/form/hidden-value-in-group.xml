@@ -20,7 +20,7 @@
 						<value>group</value>
 					</text>
 					<text id="group/label-label">
-						<value>label</value>
+						<value>label <output value="/data/group/hidden"></output></value>
 					</text>
 				</translation>
 			</itext>

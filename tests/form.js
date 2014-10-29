@@ -79,6 +79,20 @@ define([
             chai.expect(label.p.relevantAttr).to.include("/data/x/hidden");
         });
 
+        it("should update reference to moved hidden value in output tag", function () {
+            util.loadXML(HIDDEN_VALUE_IN_GROUP_XML);
+            var form = call("getData").core.form,
+                label = call("getMugByPath", "/data/group/label"),
+                hidden = call("getMugByPath", "/data/group/hidden");
+
+            chai.expect(label.p.relevantAttr).to.include("/data/group/hidden");
+            chai.expect(label.p.labelItextID.defaultValue()).to.include("/data/group/hidden");
+            form.moveMug(hidden, null, "first");
+            assert.equal(hidden.getAbsolutePath(), "/data/hidden");
+            chai.expect(label.p.relevantAttr).to.include("/data/hidden");
+            chai.expect(label.p.labelItextID.defaultValue()).to.include("/data/hidden");
+        });
+
         it("should merge data-only nodes with control nodes", function () {
             var form = new Form({}),
                 values = [];
