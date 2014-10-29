@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:orx="http://openrosa.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa" xmlns:vellum="http://commcarehq.org/xforms/vellum">
+	<h:head>
+		<h:title>Untitled Form</h:title>
+		<model>
+			<instance>
+				<data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/F1210EA5-49BA-4B44-A572-7C625D480C88" uiVersion="1" version="1" name="Untitled Form">
+					<group>
+						<label />
+						<hidden />
+					</group>
+				</data>
+			</instance>
+			<bind nodeset="/data/group" />
+			<bind nodeset="/data/group/label" relevant="/data/group/hidden = 'abc'" />
+			<bind nodeset="/data/group/hidden" calculate="1" />
+			<itext>
+				<translation lang="en" default="">
+					<text id="group-label">
+						<value>group</value>
+					</text>
+					<text id="group/label-label">
+						<value>label <output value="/data/group/hidden"></output></value>
+					</text>
+				</translation>
+			</itext>
+		</model>
+	</h:head>
+	<h:body>
+		<group ref="/data/group">
+			<label ref="jr:itext('group-label')" />
+			<trigger ref="/data/group/label" appearance="minimal">
+				<label ref="jr:itext('group/label-label')" />
+			</trigger>
+		</group>
+	</h:body>
+</h:html>

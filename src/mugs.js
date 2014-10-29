@@ -896,7 +896,7 @@ define([
 
         var allTypeNames = _.keys(this.allTypes),
             innerChildTypeNames = _.without.apply(_, 
-                  [allTypeNames, 'DataBindOnly'].concat(
+                  [allTypeNames].concat(
                       _.keys(this.auxiliaryTypes))),
             nonGroupTypeNames = _.without(innerChildTypeNames,
                 'Group', 'Repeat', 'FieldList');
@@ -936,14 +936,13 @@ define([
         },
         changeType: function (mug, typeName) {
             var form = mug.form,
-                children = form.getChildren(mug);
+                children = form.getChildren(mug),
+                isSelect = /^M?Select$/.test.bind(/^M?Select$/);
 
-            if (children.length && (typeName.indexOf("Select") === -1 || 
-                                    typeName.indexOf("Dynamic") !== -1)) 
-            {
-                throw "you can't change a Multiple/Single Choice question to a non-Choice " +
-                      "question if it has Choices. Please remove all Choices " +
-                      "and try again.";
+            if (children.length && isSelect(mug.__className) && !isSelect(typeName)) {
+                throw new Error("Cannot change a Multiple/Single Choice " +
+                      "question to a non-Choice question if it has Choices. " +
+                      "Please remove all Choices and try again.");
             }
       
             mug.setOptionsAndProperties(this.allTypes[typeName]);

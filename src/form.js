@@ -359,6 +359,24 @@ define([
             }
 
             if (!newMug.options.isDataOnly) {
+                if (refMug && refMug.options.isDataOnly) {
+                    if (position !== 'after' && position !== 'before') {
+                        // should never happen
+                        throw new Error("cannot insert " + position + " " + refMug.__className);
+                    }
+                    // find alternate insert refMug and position
+                    var newRefMug = this.dataTree.findSibling(
+                                    refMug,
+                                    (position === 'after' ? 'before' : 'after'),
+                                    function (mug) { return !mug.options.isDataOnly; });
+                    if (newRefMug) {
+                        refMug = newRefMug;
+                    } else {
+                        // the parent mug will never be a data-only mug
+                        refMug = refMug.parentMug;
+                        position = (position === 'after' ? 'first' : 'last');
+                    }
+                }
                 this.controlTree.insertMug(newMug, position, refMug);
             }
         },
@@ -367,35 +385,101 @@ define([
          * the position specified by the arguments,
          */
         moveMug: function (mug, refMug, position) {
-            var _this = this,
-                mugs = this.getDescendants(mug).concat([mug]),
-                preMovePaths = mugs.map(function(mug) {
-                    return _this.dataTree.getAbsolutePath(mug);
-                });
+            var oldPath = this.dataTree.getAbsolutePath(mug);
 
-            if (!mug.options.isControlOnly) {
-                this.dataTree.insertMug(mug, position, refMug);
-            }
-            if (!mug.options.isDataOnly) {
-                this.controlTree.insertMug(mug, position, refMug);
-            }
-            
-            var updates = {};
-            for (var i = 0; i < mugs.length; i++) {
-                if (preMovePaths[i]) {
-                    updates[mugs[i].ufid] = [
-                        preMovePaths[i],
-                        this.dataTree.getAbsolutePath(mugs[i])
-                    ];
-                }
-            }
+            this.insertMug(refMug, mug, position);
 
-            this._logicManager.updatePaths(updates);
+            var currentPath = this.dataTree.getAbsolutePath(mug);
+            this.vellum.handleMugRename(
+                this, mug, mug.p.nodeID, mug.p.nodeID, currentPath, oldPath);
+
             this.fire({
                 type: 'question-move',
                 mug: mug
             });
             this.fireChange(mug);
+        },
+        /**
+         * Walk merged data and control trees calling valueFunc for each mug
+         *
+         * If common nodes in merged tree branches are not in the same order
+         * then the order of nodes in the control tree will be preserved, and
+         * all nodes in the data tree that are not also in the control tree will
+         * be visited last.
+         *
+         * @param valueFunc - a function called for each mug in the tree. The
+         * single argument is the mug.
+         */
+        mergedTreeMap: function (valueFunc) {
+            function getID(node) {
+                return node.getID() || node.getValue().ufid;
+            }
+            function hasControl(node) {
+                return !node.getValue().options.isDataOnly;
+            }
+            function makeGenerator(items) {
+                var i = 0;
+                if (!items) {
+                    return function () { return null; };
+                }
+                return function () {
+                    return i < items.length ? items[i++] : null;
+                };
+            }
+            function mergeNodes(node0, node1) {
+                if (getID(node0) === getID(node1)) {
+                    visitNode(node0, node1.getChildren());
+                    return true;
+                }
+                visitNode(node0);
+                return false;
+            }
+            function visitNode(node, mergeChildren) {
+                var nodeChildren = node.getChildren();
+                if (nodeChildren && mergeChildren) {
+                    var nodeIDs = _(_(nodeChildren).filter(hasControl)).map(getID),
+                        mergeIDs = _(mergeChildren).map(getID);
+
+                    // put data-only nodes after control nodes if control nodes are
+                    // not in same order in both trees
+                    if (nodeIDs.join(" ") !== mergeIDs.join(" ")) {
+                        var mergeIDMap = _.object(mergeIDs, mergeIDs); // hash for fast lookups
+                        nodeChildren = mergeChildren.concat(_(nodeChildren).filter(function (node) {
+                            return !mergeIDMap.hasOwnProperty(getID(node));
+                        }));
+                        mergeChildren = null;
+                    }
+                }
+
+                var nextChild0 = makeGenerator(nodeChildren),
+                    nextChild1 = makeGenerator(mergeChildren),
+                    child0 = nextChild0(),
+                    child1 = nextChild1(),
+                    value = node.getValue(),
+                    merged;
+
+                if (value) {
+                    valueFunc(value);
+                }
+                while (child0 || child1) {
+                    if (child0 && child1) {
+                        merged = mergeNodes(child0, child1);
+                        child0 = nextChild0();
+                        if (merged) {
+                            child1 = nextChild1();
+                        }
+                    } else if (child0) {
+                        visitNode(child0);
+                        child0 = nextChild0();
+                    } else if (child1) {
+                        visitNode(child1);
+                        child1 = nextChild1();
+                    }
+                }
+            }
+            visitNode(
+                this.dataTree.getRootNode(),
+                this.controlTree.getRootNode().getChildren());
         },
         getDescendants: function (mug) {
             var desc = this.getChildren(mug), i;
@@ -438,9 +522,13 @@ define([
             this.mugTypes.changeType(mug, questionType);
         },
         getChildren: function (mug) {
-            var node = this.controlTree.getNodeFromMug(mug),
-                children = node ? node.getChildren() : [];  // handles data node
-            return children.map(function (item) { return item.getValue();});
+            var ctrlNode = this.controlTree.getNodeFromMug(mug),
+                dataNode = this.dataTree.getNodeFromMug(mug),
+                ctrlNodes = ctrlNode ? ctrlNode.getChildren() : [],
+                dataNodes = dataNode ? dataNode.getChildren() : [];
+            return _.union(
+                ctrlNodes.map(function (item) { return item.getValue(); }),
+                dataNodes.map(function (item) { return item.getValue(); }));
         },
         duplicateMug: function (mug) {
             var foo = this._duplicateMug(mug, mug.parentMug),
