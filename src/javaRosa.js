@@ -893,7 +893,7 @@ define([
         // only hand-made forms will ever end up with a different
         // ID (the ability to set it in the UI has been broken for
         // a while), it seemed ok to make it just 'data'
-        block.itextWidget = itextMediaWidget('/data/');
+        block.itextWidget = itextMediaWidget(mug.form.getBasePath());
 
         return block;
     };
@@ -905,7 +905,7 @@ define([
             return _.intersection(block.activeForms, block.forms);
         };
 
-        block.itextWidget = itextMediaWidget('/help/data/');
+        block.itextWidget = itextMediaWidget('/help' + mug.form.getBasePath());
 
         return block;
     };
