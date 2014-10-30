@@ -1526,7 +1526,7 @@ define([
         },
         getMugByLabelItextID: function (itextID) {
             var node = this.data.core.form.dataTree.rootNode.getSingleMatchingNode(function (value) {
-                return value && value.getItext().id === itextID;
+                return value && value.getItext() && value.getItext().id === itextID;
             });
 
             return node ? node.getValue() : null;

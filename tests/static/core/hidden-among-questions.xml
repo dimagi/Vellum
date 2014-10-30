@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:orx="http://openrosa.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa" xmlns:vellum="http://commcarehq.org/xforms/vellum">
+	<h:head>
+		<h:title>Untitled Form</h:title>
+		<model>
+			<instance>
+				<data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/CB7A3F20-EE93-4371-B761-053F0412398F" uiVersion="1" version="1" name="Untitled Form">
+					<hidden1 />
+					<select1 />
+					<hidden2 />
+					<select2 />
+					<hidden3 />
+					<group>
+						<hidden4 />
+						<text3 />
+						<hidden5 />
+						<text4 />
+						<hidden6 />
+					</group>
+					<hidden7 />
+					<text5 />
+					<hidden8 />
+				</data>
+			</instance>
+			<bind nodeset="/data/hidden1" />
+			<bind nodeset="/data/select1" />
+			<bind nodeset="/data/hidden2" />
+			<bind nodeset="/data/select2" />
+			<bind nodeset="/data/hidden3" />
+			<bind nodeset="/data/group" />
+			<bind nodeset="/data/group/hidden4" />
+			<bind nodeset="/data/group/text3" type="xsd:string" />
+			<bind nodeset="/data/group/hidden5" />
+			<bind nodeset="/data/group/text4" type="xsd:string" />
+			<bind nodeset="/data/group/hidden6" />
+			<bind nodeset="/data/hidden7" />
+			<bind nodeset="/data/text5" type="xsd:string" />
+			<bind nodeset="/data/hidden8" />
+			<itext>
+				<translation lang="en" default="">
+					<text id="select1-label">
+						<value>select1</value>
+					</text>
+					<text id="select1-item1-label">
+						<value>item1</value>
+					</text>
+					<text id="select1-item2-label">
+						<value>item2</value>
+					</text>
+					<text id="select2-label">
+						<value>select2</value>
+					</text>
+					<text id="select2-item1-label">
+						<value>item1</value>
+					</text>
+					<text id="select2-item2-label">
+						<value>item2</value>
+					</text>
+					<text id="group-label">
+						<value>group</value>
+					</text>
+					<text id="group/text3-label">
+						<value>text3</value>
+					</text>
+					<text id="group/text4-label">
+						<value>text4</value>
+					</text>
+					<text id="text5-label">
+						<value>text5</value>
+					</text>
+				</translation>
+			</itext>
+		</model>
+	</h:head>
+	<h:body>
+		<select1 ref="/data/select1">
+			<label ref="jr:itext('select1-label')" />
+			<item>
+				<label ref="jr:itext('select1-item1-label')" />
+				<value>item1</value>
+			</item>
+			<item>
+				<label ref="jr:itext('select1-item2-label')" />
+				<value>item2</value>
+			</item>
+		</select1>
+		<select ref="/data/select2">
+			<label ref="jr:itext('select2-label')" />
+			<item>
+				<label ref="jr:itext('select2-item1-label')" />
+				<value>item1</value>
+			</item>
+			<item>
+				<label ref="jr:itext('select2-item2-label')" />
+				<value>item2</value>
+			</item>
+		</select>
+		<group ref="/data/group">
+			<label ref="jr:itext('group-label')" />
+			<input ref="/data/group/text3">
+				<label ref="jr:itext('group/text3-label')" />
+			</input>
+			<input ref="/data/group/text4">
+				<label ref="jr:itext('group/text4-label')" />
+			</input>
+		</group>
+		<input ref="/data/text5">
+			<label ref="jr:itext('text5-label')" />
+		</input>
+	</h:body>
+</h:html>
