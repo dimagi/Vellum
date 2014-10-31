@@ -6,7 +6,8 @@ define([
     'vellum/tree',
     'text!static/form/alternate-root-node-name.xml',
     'text!static/form/question-referencing-other.xml',
-    'text!static/form/hidden-value-in-group.xml'
+    'text!static/form/hidden-value-in-group.xml',
+    'text!static/form/select-questions.xml'
 ], function (
     util,
     chai,
@@ -15,7 +16,8 @@ define([
     Tree,
     ALTERNATE_ROOT_NODE_NAME_XML,
     QUESTION_REFERENCING_OTHER_XML,
-    HIDDEN_VALUE_IN_GROUP_XML
+    HIDDEN_VALUE_IN_GROUP_XML,
+    SELECT_QUESTIONS
 ) {
     var Form = form_.Form,
         assert = chai.assert,
@@ -63,6 +65,15 @@ define([
                 blue = call("getMugByPath", "/other/blue");
             assert.equal(form.getBasePath(), "/other/");
             assert(blue !== null, "mug not found: /other/blue");
+        });
+
+        it("should be able to move item from Select to MSelect", function () {
+            util.loadXML(SELECT_QUESTIONS);
+            var form = call("getData").core.form,
+                item1 = util.getMug("question1/item1"),
+                item2 = util.getMug("question2/item2");
+            // should not throw an error
+            form.moveMug(item1, item2, 'before');
         });
 
         it("should update reference to hidden value in group", function () {
