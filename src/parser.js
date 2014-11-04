@@ -357,6 +357,9 @@ define([
         } else if (mediaType === 'audio/*') {
             /* fix buggy eclipse syntax highlighter (because of above string) */ 
             return 'Audio';
+        } else if (mediaType === 'signature/*') {
+            /* fix buggy eclipse syntax highlighter (because of above string) */
+            return 'Signature';
         } else {
             throw 'Unrecognized upload question type for Element: ' + nodePath + '!';
         }

@@ -271,7 +271,8 @@ define([
                 questions: [
                     "Image",
                     "Audio",
-                    "Video"
+                    "Video",
+                    "Signature"
                 ]
             },
             {

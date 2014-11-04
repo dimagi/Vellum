@@ -672,6 +672,18 @@ define([
         }
     });
 
+    var Signature = util.extend(Audio, {
+        typeName: 'Signature Capture',
+        icon: 'icon-italic',
+        isODKOnly: true,
+        canOutputValue: false,
+        init: function (mug, form) {
+            Audio.init(mug, form);
+            mug.p.mediaType = "image/*"; /* */
+            mug.p.appearance = "signature";
+        }
+    });
+
     var Geopoint = util.extend(defaultOptions, {
         typeName: 'GPS',
         icon: 'icon-map-marker',
@@ -987,6 +999,7 @@ define([
                 "Repeat": Repeat,
                 "Secret": Secret,
                 "Select": Select,
+                "Signature": Signature,
                 "Text": Text,
                 "Time": Time,
                 "Trigger": Trigger,
