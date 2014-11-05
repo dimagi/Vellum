@@ -614,7 +614,7 @@ define([
     var DataBindOnly = util.extend(defaultOptions, {
         isDataOnly: true,
         typeName: 'Hidden Value',
-        icon: 'icon-vellum-variable',
+        icon: 'fcc fcc-fd-variable',
         isTypeChangeable: false,
         spec: {
             xmlnsAttr: { presence: "optional" },
@@ -638,7 +638,7 @@ define([
 
     var Text = util.extend(defaultOptions, {
         typeName: "Text",
-        icon: "icon-vellum-text",
+        icon: "fcc fcc-fd-text",
         init: function (mug, form) {
             mug.p.tagName = "input";
             mug.p.dataType = "xsd:string";
@@ -666,7 +666,7 @@ define([
 
     var Int = util.extend(defaultOptions, {
         typeName: 'Integer',
-        icon: 'icon-vellum-numeric',
+        icon: 'fcc fcc-fd-numeric',
         init: function (mug, form) {
             mug.p.tagName = "input";
             mug.p.dataType = "xsd:int";
@@ -675,7 +675,7 @@ define([
 
     var Audio = util.extend(defaultOptions, {
         typeName: 'Audio Capture',
-        icon: 'icon-vellum-audio-capture',
+        icon: 'fcc fcc-fd-audio-capture',
         isODKOnly: true,
         canOutputValue: false,
         writeCustomXML: function (xmlWriter, mug) {
@@ -760,7 +760,7 @@ define([
 
     var DateTime = util.extend(defaultOptions, {
         typeName: 'Date and Time',
-        icon: 'icon-vellum-datetime',
+        icon: 'fcc fcc-fd-datetime',
         init: function (mug, form) {
             mug.p.tagName = "input";
             mug.p.dataType = "xsd:dateTime";
@@ -778,7 +778,7 @@ define([
 
     var Long = util.extend(Int, {
         typeName: 'Long',
-        icon: 'icon-vellum-long',
+        icon: 'fcc fcc-fd-long',
         init: function (mug, form) {
             mug.p.tagName = "input";
             mug.p.dataType = "xsd:long";
@@ -787,7 +787,7 @@ define([
 
     var Double = util.extend(Int, {
         typeName: 'Decimal',
-        icon: 'icon-vellum-decimal',
+        icon: 'fcc fcc-fd-decimal',
         init: function (mug, form) {
             mug.p.tagName = "input";
             mug.p.dataType = "xsd:double";
@@ -797,14 +797,14 @@ define([
     var Item = util.extend(defaultOptions, {
         isControlOnly: true,
         typeName: 'Choice',
-        icon: 'icon-circle-blank',
+        icon: 'fcc fcc-fd-single-circle',
         isTypeChangeable: false,
         canOutputValue: false,
         getIcon: function (mug) {
             if (mug.parentMug.__className === "Select") {
-                return 'icon-circle-blank';
+                return 'fcc fcc-fd-single-circle';
             } else {
-                return 'icon-check-empty';
+                return 'fcc fcc-fd-multi-box';
             }
         },
         writeControlHint: false,
@@ -876,7 +876,7 @@ define([
 
     var MSelect = util.extend(BaseSelect, {
         typeName: 'Multiple Answer',
-        icon: 'icon-vellum-multi-select',
+        icon: 'fcc fcc-fd-multi-select',
         init: function (mug, form) {
             mug.p.tagName = "select";
         },
@@ -888,7 +888,7 @@ define([
 
     var Select = util.extend(MSelect, {
         typeName: 'Single Answer',
-        icon: 'icon-vellum-single-select',
+        icon: 'fcc fcc-fd-single-select',
         init: function (mug, form) {
             mug.p.tagName = "select1";
         },
