@@ -674,7 +674,7 @@ define([
 
     var Signature = util.extend(Audio, {
         typeName: 'Signature Capture',
-        icon: 'icon-italic',
+        icon: 'fcc fcc-fd-signature',
         isODKOnly: true,
         canOutputValue: false,
         init: function (mug, form) {
