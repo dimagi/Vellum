@@ -136,6 +136,9 @@ require([
                 type: 'Secret',
                 nodeId: 'question28'
             }, {
+                type: 'Signature',
+                nodeId: 'question29'
+            }, {
                 type: 'AndroidIntent',
                 nodeId: 'question7'
             }, {

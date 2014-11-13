@@ -28,6 +28,7 @@
 							<question26 />
 							<question27 />
 							<question28 />
+							<question29 />
 							<question7 />
 						</question23>
 					</question22>
@@ -58,6 +59,7 @@
 			<bind nodeset="/data/question22/question23/question26" type="binary" />
 			<bind nodeset="/data/question22/question23/question27" type="geopoint" />
 			<bind nodeset="/data/question22/question23/question28" type="xsd:string" />
+			<bind nodeset="/data/question22/question23/question29" type="binary" />
 			<bind nodeset="/data/question22/question23/question7" type="intent" />
 			<bind nodeset="/data/question20" />
 			<bind nodeset="/data/question32" calculate="1 + 2" />
@@ -158,6 +160,9 @@
 					<text id="question22/question23/question28-label">
 						<value>question28</value>
 					</text>
+					<text id="question22/question23/question29-label">
+						<value>question29</value>
+					</text>
 					<text id="question22/question23/question7-label">
 						<value>question7</value>
 					</text>
@@ -256,6 +261,9 @@
 					<text id="question22/question23/question28-label">
 						<value>question28</value>
 					</text>
+					<text id="question22/question23/question29-label">
+						<value>question29</value>
+					</text>
 					<text id="question22/question23/question7-label">
 						<value>question7</value>
 					</text>
@@ -350,6 +358,9 @@
 					<secret ref="/data/question22/question23/question28">
 						<label ref="jr:itext('question22/question23/question28-label')" />
 					</secret>
+					<upload ref="/data/question22/question23/question29" mediatype="image/*" appearance="signature">
+						<label ref="jr:itext('question22/question23/question29-label')" />
+					</upload>
 					<input ref="/data/question22/question23/question7" appearance="intent:question7">
 						<label ref="jr:itext('question22/question23/question7-label')" />
 					</input>
