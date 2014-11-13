@@ -672,14 +672,11 @@ define([
         }
     });
 
-    var Signature = util.extend(Audio, {
+    var Signature = util.extend(Image, {
         typeName: 'Signature Capture',
         icon: 'fcc fcc-fd-signature',
-        isODKOnly: true,
-        canOutputValue: false,
         init: function (mug, form) {
-            Audio.init(mug, form);
-            mug.p.mediaType = "image/*"; /* */
+            Image.init(mug, form);
             mug.p.appearance = "signature";
         }
     });
