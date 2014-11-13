@@ -5,14 +5,16 @@ require([
     'tests/utils',
     'vellum/javaRosa',
     'vellum/util',
-    'text!static/javaRosa/outputref-group-rename.xml'
+    'text!static/javaRosa/outputref-group-rename.xml',
+    'text!static/javaRosa/text-question.xml'
 ], function (
     chai,
     $,
     util,
     jr,
     vellum_util,
-    outputref_group_rename_xml
+    OUTPUTREF_GROUP_RENAME_XML,
+    TEXT_QUESTION_XML
 ) {
     var assert = chai.assert,
         call = util.call;
@@ -223,7 +225,7 @@ require([
             util.init({
                 javaRosa: {langs: ['en', 'hin']},
                 core: {
-                    form: outputref_group_rename_xml,
+                    form: OUTPUTREF_GROUP_RENAME_XML,
                     onReady: function () {
                         var group = util.call("getMugByPath", "/data/question2"),
                             q1 = util.call("getMugByPath", "/data/question1"),
@@ -239,6 +241,19 @@ require([
                     }
                 }
             });
+        });
+
+        it("should bulk update multi-line translation", function () {
+            util.loadXML(TEXT_QUESTION_XML);
+            var jr = util.call("getData").javaRosa,
+                trans = ('label\tdefault-en\tdefault-hin\n' +
+                         'question1-label\t"First ""line\n' +
+                         'Second"" line\nThird line"\tHindu trans\n');
+            jr.parseXLSItext(trans, jr.Itext);
+            var q1 = util.getMug("question1");
+            assert.equal(q1.p.labelItextID.get("en"),
+                         'First "line\nSecond" line\nThird line');
+            assert.equal(q1.p.labelItextID.get("hin"), 'Hindu trans');
         });
     });
 

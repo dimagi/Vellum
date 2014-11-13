@@ -100,7 +100,8 @@ require(['jquery', 'jquery.vellum'], function ($) {
         'tests/javaRosa',
         'tests/formdesigner.ignoreButRetain',
         'tests/formdesigner.lock',
-        'tests/itemset'
+        'tests/itemset',
+        'tests/tsv'
     ], function (
         options
     ) {
