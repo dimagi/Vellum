@@ -1216,7 +1216,8 @@ define([
     var generateItextXLS = function (vellum, Itext) {
         // todo: fix abstraction barrier
         vellum.beforeSerialize();
-        
+
+        // TODO move TSV generation logic into tsv module
         function getItemFormValues(item, languages, form) {
 
             var ret = [];
@@ -1225,8 +1226,11 @@ define([
                 var language = languages[i];
                 var value = item.hasForm(form) ? (item.getForm(form).getValueOrDefault(language) || "") : "";
 
-                // escape newlines.  What ever generates a \r ?
-                ret.push(value.replace(/\r?\n/g, "&#10;"));
+                if (specialChars.test(value)) {
+                    // quote field
+                    value = '"' + value.replace(/"/g, '""') + '"';
+                }
+                ret.push(value);
             }
             return ret.join("\t");
         }
@@ -1252,6 +1256,7 @@ define([
             return header_row.join("\t");
         }
 
+        var specialChars = /[\r\n\u2028\u2029"]/g;
         var ret = [];
         // TODO: should this be configurable?
         var exportCols = ["default", "audio", "image" , "video"];
@@ -1314,6 +1319,7 @@ define([
 
             // exposed for testing
             this.data.javaRosa.parseXLSItext = parseXLSItext;
+            this.data.javaRosa.generateItextXLS = generateItextXLS;
         },
         insertOutputRef: function (mug, target, path, dateFormat) {
             var output = getOutputRef(path, dateFormat),

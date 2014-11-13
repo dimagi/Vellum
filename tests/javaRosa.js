@@ -6,7 +6,8 @@ require([
     'vellum/javaRosa',
     'vellum/util',
     'text!static/javaRosa/outputref-group-rename.xml',
-    'text!static/javaRosa/text-question.xml'
+    'text!static/javaRosa/text-question.xml',
+    'text!static/javaRosa/multi-line-trans.xml'
 ], function (
     chai,
     $,
@@ -14,7 +15,8 @@ require([
     jr,
     vellum_util,
     OUTPUTREF_GROUP_RENAME_XML,
-    TEXT_QUESTION_XML
+    TEXT_QUESTION_XML,
+    MULTI_LINE_TRANS_XML
 ) {
     var assert = chai.assert,
         call = util.call;
@@ -254,6 +256,17 @@ require([
             assert.equal(q1.p.labelItextID.get("en"),
                          'First "line\nSecond" line\nThird line');
             assert.equal(q1.p.labelItextID.get("hin"), 'Hindu trans');
+        });
+
+        it("should generate bulk multi-line translation with user-friendly newlines", function () {
+            util.loadXML(MULTI_LINE_TRANS_XML);
+            var jr = util.call("getData").javaRosa,
+                fakeVellum = {beforeSerialize: function () {}};
+            assert.equal(jr.generateItextXLS(fakeVellum, jr.Itext),
+                         'label\tdefault-en\tdefault-hin\t' +
+                         'audio-en\taudio-hin\timage-en\timage-hin\tvideo-en\tvideo-hin\n' +
+                         'question1-label\t"First ""line\nSecond"" line\nThird line"\t' +
+                         'Hindu trans\t\t\t\t\t\t');
         });
     });
 
