@@ -140,9 +140,10 @@ define([
         var _this = this,
             bindBeforeUnload = this.opts().core.bindBeforeUnload;
         this.data.core.saveButton = SaveButton.init({
-            save: function() {
+            save: function(event) {
+                var forceFullSave = event.altKey;
                 _this.ensureCurrentMugIsSaved(function () {
-                    _this.validateAndSaveXForm();
+                    _this.validateAndSaveXForm(forceFullSave);
                 });
             },
             unsavedMessage: 'Are you sure you want to exit? All unsaved changes will be lost!'
@@ -1559,7 +1560,7 @@ define([
         return this.data.core.form.createXML();
     };
 
-    fn.validateAndSaveXForm = function () {
+    fn.validateAndSaveXForm = function (forceFullSave) {
         var _this = this,
             formText = this.createXML(),
             isValidXML = true;
@@ -1583,14 +1584,14 @@ define([
                 },
                 'Save anyway', function () {
                     $(this).dialog("close");
-                    _this.send(formText);
+                    _this.send(formText, forceFullSave ? 'full' : null);
                 },
                 'Form Validation Error');
             this._showConfirmDialog();
         }
 
         if (isValidXML) {
-            this.send(formText);
+            this.send(formText, forceFullSave ? 'full' : null);
         }
     };
         
