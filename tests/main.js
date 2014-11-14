@@ -144,8 +144,8 @@ require(['jquery', 'jquery.vellum'], function ($) {
                         console.log("saving patch:", data);
                         // fake conflict to retry with saveUrl
                         return {status: 'conflict'};
-                    },
-                    form: lastSavedForm
+                    }/*,
+                    form: lastSavedForm*/
                 }
             }));
 

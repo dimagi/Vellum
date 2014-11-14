@@ -1615,7 +1615,7 @@ define([
             var diff_match_patch = require('diff-match-patch'),
                 dmp = new diff_match_patch();
             patch = dmp.patch_toText(
-                dmp.patch_make(this.data.core.lastSavedXForm, formText)
+                dmp.patch_make(this.data.core.lastSavedXForm, formText) // crash site
             );
             // abort if diff too long and send full instead
             if (patch.length > formText.length && opts.saveUrl) {
