@@ -141,7 +141,13 @@ define([
             bindBeforeUnload = this.opts().core.bindBeforeUnload;
         this.data.core.saveButton = SaveButton.init({
             save: function(event) {
-                var forceFullSave = event.altKey;
+                var forceFullSave = event && event.altKey;
+                if (event.altKey && !window.confirm("Holding the ALT key while " +
+                            "clicking save invokes an inefficient save " +
+                            "procedure. You should only do this if you can't " +
+                            "save normally. Are you sure you want to proceed?")) {
+                    return; // abort
+                }
                 _this.ensureCurrentMugIsSaved(function () {
                     _this.validateAndSaveXForm(forceFullSave);
                 });
