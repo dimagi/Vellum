@@ -104,7 +104,7 @@ require(['jquery', 'jquery.vellum'], function ($) {
     ], function (
         options
     ) {
-        var lastSavedForm = null;
+        var lastSavedForm = "";
 
         function runTests() {
             if (window.mochaPhantomJS) {
@@ -137,7 +137,13 @@ require(['jquery', 'jquery.vellum'], function ($) {
             $('#vellum').empty().vellum($.extend(true, {}, options.options, {
                 core: {
                     saveUrl: function (data) {
+                        console.log("saving form:", data);
                         lastSavedForm = data.xform;
+                    },
+                    patchUrl: function (data) {
+                        console.log("saving patch:", data);
+                        // fake conflict to retry with saveUrl
+                        return {status: 'conflict'};
                     },
                     form: lastSavedForm
                 }
