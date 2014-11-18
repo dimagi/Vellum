@@ -1127,6 +1127,7 @@ define([
 
             if (e.mug === _this.getCurrentlySelectedMug()) {
                 _this.refreshCurrentMug();
+                _this.activateQuestionTypeGroup(e.mug.__className);
             }
         }).on('parent-question-type-change', function (e) {
             _this.jstree("set_icon", e.childMug.ufid, e.childMug.getIcon());
