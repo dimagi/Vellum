@@ -6,6 +6,7 @@ define([
     'vellum/tree',
     'text!static/form/alternate-root-node-name.xml',
     'text!static/form/question-referencing-other.xml',
+    'text!static/form/group-with-internal-refs.xml',
     'text!static/form/hidden-value-in-group.xml',
     'text!static/form/select-questions.xml'
 ], function (
@@ -16,6 +17,7 @@ define([
     Tree,
     ALTERNATE_ROOT_NODE_NAME_XML,
     QUESTION_REFERENCING_OTHER_XML,
+    GROUP_WITH_INTERNAL_REFS_XML,
     HIDDEN_VALUE_IN_GROUP_XML,
     SELECT_QUESTIONS
 ) {
@@ -57,6 +59,16 @@ define([
                        "black should be valid after blue is added");
                 done();
             });
+        });
+
+        it("should preserve internal references in copied group", function () {
+            util.loadXML(GROUP_WITH_INTERNAL_REFS_XML);
+            var form = call("getData").core.form,
+                group = util.getMug("group");
+            form.duplicateMug(group);
+            var green2 = util.getMug("copy-1-of-group/green");
+            assert.equal(green2.p.relevantAttr,
+                "/data/copy-1-of-group/blue = 'red' and /data/red = 'blue'");
         });
 
         it("should set non-standard form root node", function () {
