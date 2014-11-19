@@ -171,10 +171,11 @@ require([
 
                 var target = $("[name='itext-en-label']"),
                     sourceUid = mug1.ufid;
+                target.val("test string").change();
                 vellum_util.setCaretPosition(target[0], 4);
                 call("handleDropFinish", target, sourceUid, mug1);
                 var val = mug2.p.labelItextID.getValue('default', 'en');
-                assert.equal(val, 'ques<output value="/data/question1" />tion2');
+                assert.equal(val, 'test<output value="/data/question1" /> string');
                 done();
             }}});
         });
