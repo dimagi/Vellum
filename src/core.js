@@ -774,6 +774,13 @@ define([
             var mug = _this.data.core.form.getMugByUFID(data.node.id);
             _this.displayMugProperties(mug);
             _this.activateQuestionTypeGroup(mug.__className);
+        }).bind("close_node.jstree", function (e, data) {
+            var selected = _this.jstree('get_selected'),
+                sel = selected.length && _this.jstree('get_node', selected[0]);
+            if (sel && _.contains(sel.parents, data.node.id)) {
+                _this.jstree("deselect_all", true)
+                     .jstree("select_node", data.node);
+            }
         }).bind("move_node.jstree", function (e, data) {
             var form = _this.data.core.form,
                 mug = form.getMugByUFID(data.node.id),
@@ -1268,6 +1275,11 @@ define([
                 }
             } else {
                 parent = refMug;
+            }
+            if (this.jstree("is_closed", parent.ufid)) {
+                refMug = parent;
+                position = 'after';
+                continue;
             }
             childTypes = typeData[parent.__className].valid_children;
             if (childTypes.indexOf(qType) !== -1) {

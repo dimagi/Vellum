@@ -124,6 +124,74 @@ require([
             }}});
         });
 
+        it("should add question outside of collapsed group (ref group)", function () {
+            util.loadXML("");
+            var group = util.addQuestion("Group", "group");
+            util.addQuestion("Text", "text1");
+            util.collapseGroup(group);
+            util.addQuestion.bind({prevId: "group"})("Text", "text2");
+            util.expandGroup(group);
+            util.assertJSTreeState(
+                "group",
+                "  text1",
+                "text2"
+            );
+        });
+
+        it("should add question outside of collapsed group (ref inner question)", function () {
+            util.loadXML("");
+            var group = util.addQuestion("Group", "group"),
+                text1 = util.addQuestion("Text", "text1"),
+                selected;
+            util.clickQuestion("group/text1");
+            selected = call("getCurrentlySelectedMug");
+            assert.equal(selected, text1,
+                "wrong selected mug: " + (selected && selected.p.nodeID));
+            util.collapseGroup(group);
+            util.addQuestion("Text", "text2");
+            util.expandGroup(group);
+            util.assertJSTreeState(
+                "group",
+                "  text1",
+                "text2"
+            );
+        });
+
+        it("should select group of selected child question on collapse group", function () {
+            util.loadXML("");
+            var group1 = util.addQuestion("Group", "group"),
+                text, selected;
+            util.addQuestion("Group", "group");
+            text = util.addQuestion("Text", "text");
+            util.clickQuestion("group/group/text");
+            selected = call("getCurrentlySelectedMug");
+            assert.equal(selected, text,
+                "wrong selected mug: " + (selected && selected.p.nodeID));
+
+            util.collapseGroup(group1);
+
+            selected = call("getCurrentlySelectedMug");
+            assert.equal(selected, group1,
+                "wrong selected mug: " + (selected && selected.p.nodeID));
+        });
+
+        it("should not select group if external question is selected on collapse group", function () {
+            util.loadXML("");
+            var text1 = util.addQuestion("Text", "text1"),
+                group = util.addQuestion("Group", "group"),
+                selected;
+            util.clickQuestion("text1");
+            selected = call("getCurrentlySelectedMug");
+            assert.equal(selected, text1,
+                "wrong selected mug: " + (selected && selected.p.nodeID));
+
+            util.collapseGroup(group);
+
+            selected = call("getCurrentlySelectedMug");
+            assert.equal(selected, text1,
+                "wrong selected mug: " + (selected && selected.p.nodeID));
+        });
+
         it("should load hidden value in repeat group", function (done) {
             util.init({core: {form: HIDDEN_VALUE_IN_REPEAT_XML, onReady: function () {
                 util.assertJSTreeState(

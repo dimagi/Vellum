@@ -218,6 +218,14 @@ define([
         assert(!getMug(path), "mug not removed: " + path);
     }
 
+    function expandGroup(mug) {
+        call("jstree", "open_node", mug.ufid);
+    }
+
+    function collapseGroup(mug) {
+        call("jstree", "close_node", mug.ufid);
+    }
+
     return {
         options: options,
         init: init,
@@ -260,6 +268,8 @@ define([
         },
         clickQuestion: clickQuestion,
         deleteQuestion: deleteQuestion,
+        expandGroup: expandGroup,
+        collapseGroup: collapseGroup,
         isTreeNodeValid: function (mug) {
             var $node = $("#vellum").find('#' + mug.ufid + ' > a');
             return $node.children(".fd-tree-valid-alert-icon").length === 0;
