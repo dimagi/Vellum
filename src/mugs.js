@@ -383,6 +383,7 @@ define([
             }));
         }
 
+        this.ufid = util.get_guid();
         this.form = form;
         this._baseSpec = baseSpec;
         this.setOptionsAndProperties(options, properties);
@@ -938,10 +939,8 @@ define([
     }
     MugTypesManager.prototype = {
         make: function (typeName, form, copyFrom) {
-            var mugType = this.allTypes[typeName],
-                mug = new Mug(mugType, form, this.baseSpec, copyFrom);
-            mug.ufid = util.get_guid();
-            return mug;
+            var mugType = this.allTypes[typeName];
+            return new Mug(mugType, form, this.baseSpec, copyFrom);
         },
         changeType: function (mug, typeName) {
             var form = mug.form,

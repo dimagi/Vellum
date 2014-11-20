@@ -39,9 +39,9 @@ requirejs.config({
         'codemirrorBase': '../lib/codemirror/codemirror',
         'CryptoJS': '../lib/sha1',
         'diff-match-patch': '../lib/diff_match_patch',
-        'jquery': '../bower_components/jquery/jquery',
-        'jquery-ui': '../lib/jquery-ui/jquery-ui-1.8.14.custom.min',
-        'jquery.jstree': '../lib/jstree/jquery.jstree',
+        'jquery': '../bower_components/jquery/dist/jquery',
+        'jquery-ui': '../bower_components/jquery-ui/jquery-ui',
+        'jquery.jstree': '../bower_components/jstree/dist/jstree',
         'jquery.fancybox': '../lib/fancybox/jquery.fancybox-1.3.4',
         'jquery.bootstrap': '../lib/bootstrap',
         'jquery.bootstrap-popout': '../lib/bootstrap-popout',
@@ -83,11 +83,11 @@ requirejs.config({
         },
 
         'jquery-ui': {
-            deps: ['jquery', 'css!../lib/jquery-ui/redmond/jquery-ui-1.8.14.custom'],
+            deps: ['jquery', 'css!../bower_components/jquery-ui/themes/redmond/jquery-ui'],
             exports: '$.fn.autocomplete'
         },
         'jquery.jstree': {
-            deps: ['jquery', 'css!../lib/jstree/default/style'],
+            deps: ['jquery', 'css!../bower_components/jstree/dist/themes/default/style'],
             exports: '$.fn.jstree'
         },
         'jquery.fancybox': {

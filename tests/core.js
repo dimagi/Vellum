@@ -4,6 +4,7 @@ require([
     'jquery',
     'underscore',
     'tests/utils',
+    'text!static/core/test1.xml',
     'text!static/core/group-rename.xml',
     'text!static/core/invalid-questions.xml',
     'text!static/core/increment-item.xml',
@@ -15,6 +16,7 @@ require([
     $,
     _,
     util,
+    TEST_XML_1,
     GROUP_RENAME_XML,
     INVALID_QUESTIONS_XML,
     INCREMENT_ITEM_XML,
@@ -102,7 +104,7 @@ require([
 
         it("should increment item value on insert new select item after sibling item", function (done) {
             util.init({core: { form: INCREMENT_ITEM_XML, onReady: function () {
-                util.clickQuestion("item1");
+                util.clickQuestion("question1/item1");
                 var item = util.addQuestion("Item");
                 assert.equal(item.p.defaultValue, "item3");
                 done();
@@ -120,6 +122,74 @@ require([
                             {normalize_xmlns: true});
                 done();
             }}});
+        });
+
+        it("should add question outside of collapsed group (ref group)", function () {
+            util.loadXML("");
+            var group = util.addQuestion("Group", "group");
+            util.addQuestion("Text", "text1");
+            util.collapseGroup(group);
+            util.addQuestion.bind({prevId: "group"})("Text", "text2");
+            util.expandGroup(group);
+            util.assertJSTreeState(
+                "group",
+                "  text1",
+                "text2"
+            );
+        });
+
+        it("should add question outside of collapsed group (ref inner question)", function () {
+            util.loadXML("");
+            var group = util.addQuestion("Group", "group"),
+                text1 = util.addQuestion("Text", "text1"),
+                selected;
+            util.clickQuestion("group/text1");
+            selected = call("getCurrentlySelectedMug");
+            assert.equal(selected, text1,
+                "wrong selected mug: " + (selected && selected.p.nodeID));
+            util.collapseGroup(group);
+            util.addQuestion("Text", "text2");
+            util.expandGroup(group);
+            util.assertJSTreeState(
+                "group",
+                "  text1",
+                "text2"
+            );
+        });
+
+        it("should select group of selected child question on collapse group", function () {
+            util.loadXML("");
+            var group1 = util.addQuestion("Group", "group"),
+                text, selected;
+            util.addQuestion("Group", "group");
+            text = util.addQuestion("Text", "text");
+            util.clickQuestion("group/group/text");
+            selected = call("getCurrentlySelectedMug");
+            assert.equal(selected, text,
+                "wrong selected mug: " + (selected && selected.p.nodeID));
+
+            util.collapseGroup(group1);
+
+            selected = call("getCurrentlySelectedMug");
+            assert.equal(selected, group1,
+                "wrong selected mug: " + (selected && selected.p.nodeID));
+        });
+
+        it("should not select group if external question is selected on collapse group", function () {
+            util.loadXML("");
+            var text1 = util.addQuestion("Text", "text1"),
+                group = util.addQuestion("Group", "group"),
+                selected;
+            util.clickQuestion("text1");
+            selected = call("getCurrentlySelectedMug");
+            assert.equal(selected, text1,
+                "wrong selected mug: " + (selected && selected.p.nodeID));
+
+            util.collapseGroup(group);
+
+            selected = call("getCurrentlySelectedMug");
+            assert.equal(selected, text1,
+                "wrong selected mug: " + (selected && selected.p.nodeID));
         });
 
         it("should load hidden value in repeat group", function (done) {
@@ -162,7 +232,7 @@ require([
         it("should add hidden value at end of group", function (done) {
             util.init({core: {form: INSERT_QUESTIONS_XML, onReady: function () {
                 util.addQuestion.bind({prevId: "hidden1"})("DataBindOnly", "hiddenA");
-                util.addQuestion.bind({prevId: "hidden2"})("DataBindOnly", "hiddenB");
+                util.addQuestion.bind({prevId: "group/hidden2"})("DataBindOnly", "hiddenB");
                 util.assertJSTreeState(
                     "text1",
                     "text2",
@@ -182,7 +252,7 @@ require([
         it("should add hidden value among other questions", function (done) {
             util.init({core: {form: INSERT_QUESTIONS_XML, onReady: function () {
                 util.addQuestion.bind({prevId: "text1"})("DataBindOnly", "hiddenA");
-                util.addQuestion.bind({prevId: "text3"})("DataBindOnly", "hiddenB");
+                util.addQuestion.bind({prevId: "group/text3"})("DataBindOnly", "hiddenB");
                 util.assertJSTreeState(
                     "text1",
                     "hiddenA",
@@ -202,7 +272,7 @@ require([
         it("should add question after selected question", function (done) {
             util.init({core: {form: INSERT_QUESTIONS_XML, onReady: function () {
                 util.addQuestion.bind({prevId: "text1"})("Text", "textA");
-                util.addQuestion.bind({prevId: "text3"})("Text", "textB");
+                util.addQuestion.bind({prevId: "group/text3"})("Text", "textB");
                 util.assertJSTreeState(
                     "text1",
                     "textA",
@@ -222,7 +292,7 @@ require([
         it("should add question after hidden value", function (done) {
             util.init({core: {form: INSERT_QUESTIONS_XML, onReady: function () {
                 util.addQuestion.bind({prevId: "hidden1"})("Text", "textA");
-                util.addQuestion.bind({prevId: "hidden2"})("Text", "textB");
+                util.addQuestion.bind({prevId: "group/hidden2"})("Text", "textB");
                 util.assertJSTreeState(
                     "text1",
                     "text2",
@@ -271,7 +341,7 @@ require([
                 }}});
             });
 
-            var data = [
+            var check_move_data = [
                     ["text1", "before", "text1", true],
                     ["text1", "inside", "text1", true],
                     ["text1", "after", "text1", true],
@@ -395,7 +465,7 @@ require([
                     ["hidden2", "after", "hidden1", true]
                 ];
 
-            _(data).each(function (test) {
+            _(check_move_data).each(function (test) {
                 var should = test[3],
                     prefix = should ? "allow move " : "prevent move ",
                     qsrc = test[0],
@@ -412,42 +482,62 @@ require([
                            ["move", qsrc, position, qdst, "->", result].join(" "));
                 });
             });
+
+
+            var relative_position_data = [
+                    [null, "first", null, "first"],
+                    [null, "last", null, "last"],
+
+                    ["group", "first", "group", "first"],
+                    ["group", "last", "group", "last"],
+                    ["group", "before", "group", "before"],
+                    ["group", "after", "group", "after"],
+
+                    ["text1", "before", "text1", "before"],
+                    ["text1", "after", "text1", "after"],
+
+                    [null, 0, null, "first"],
+                    [null, 1, "text1", "after"],
+                    [null, 2, "text2", "after"],
+                    [null, 3, "repeat", "after"],
+                    [null, 4, "group", "after"],
+                    [null, 5, "text5", "after"],
+                    [null, 6, "hidden1", "after"],
+                    [null, 7, null, "last"],
+                    [null, 8, null, "last"],
+
+                    ["repeat", 0, "repeat", "first"],
+                    ["repeat", 1, "repeat", "last"],
+                    ["repeat", 2, "repeat", "last"],
+
+                    ["group", 0, "group", "first"],
+                    ["group", 1, "text3", "after"],
+                    ["group", 2, "text4", "after"],
+                    ["group", 3, "hidden2", "after"],
+                    ["group", 4, "group", "last"],
+                    ["group", 5, "group", "last"]
+                ];
+
+            _(relative_position_data).each(function (test) {
+                var refMug = test[0],
+                    refPos = test[1],
+                    relMug = test[2],
+                    relPos = test[3],
+                    msg = "produce relative position " +
+                          refMug + "[" + refPos + "] => " +
+                          relPos + " " + relMug;
+                it(msg, function () {
+                    var src = refMug ? mugs[refMug] : null,
+                        dst = relMug ? mugs[relMug] : null,
+                        res = call("getRelativePosition", src, refPos),
+                        posStr = String(res.position),
+                        mugStr = res.mug ? res.mug.p.nodeID : String(res.mug);
+                    assert(res.position === relPos && res.mug === dst,
+                           [refPos, refMug, "->", posStr, mugStr].join(" "));
+                });
+            });
+
         });
 
     });
-
-    var TEST_XML_1 = '' +
-    '<?xml version="1.0" encoding="UTF-8" ?>\
-    <h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:orx="http://openrosa.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa" xmlns:vellum="http://commcarehq.org/xforms/vellum">\
-        <h:head>\
-            <h:title>Vellum testing</h:title>\
-            <model>\
-                <instance>\
-                    <data xmlns:jrm="http://dev.commcarehq.org/jr/xforms"\
-                          xmlns="http://openrosa.org/formdesigner/FFD00941-A932-471A-AEC8-87F6EFEF767F"\
-                          uiVersion="1" version="1" name="Vellum testing">\
-                        <state />\
-                    </data>\
-                </instance>\
-                <instance id="states" src="jr://fixture/item-list:state"></instance>\
-                <bind nodeset="/data/state" />\
-                <itext>\
-                    <translation lang="en" default="">\
-                        <text id="state-label">\
-                            <value>State</value>\
-                        </text>\
-                    </translation>\
-                </itext>\
-            </model>\
-        </h:head>\
-        <h:body>\
-            <select1 ref="/data/state">\
-                <label ref="jr:itext(\'state-label\')" />\
-                <itemset nodeset="instance(\'states\')/state_list/state">\
-                  <label ref="name"></label>\
-                  <value ref="id"></value>\
-                </itemset>\
-            </select1>\
-        </h:body>\
-    </h:html>';
 });

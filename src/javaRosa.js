@@ -990,6 +990,7 @@ define([
                 widget.updateValue();
             } else {
                 var itextItem = widget.getItextItem(),
+                    nodeID = widget.mug.p.nodeID,
                     currentLangValue,
                     defaultLangValue;
 
@@ -1001,7 +1002,9 @@ define([
                 defaultLangValue = itextItem.getValue(widget.form, widget.defaultLang);
                 currentLangValue = itextItem.getValue(widget.form, widget.language);
 
-                if (!widget.isDefaultLang && !currentLangValue) {
+                if ((widget.isDefaultLang && defaultLangValue === nodeID) ||
+                    (!widget.isDefaultLang &&
+                        (currentLangValue === defaultLangValue || !currentLangValue))) {
                     widget.setPlaceholder(defaultLangValue);
                     widget.setValue("");
                 } else {
@@ -1536,7 +1539,7 @@ define([
                 oldPathRe = new RegExp(oldPath + '/', 'mg');
                 newPath = newPath + '/';
             } else {
-                oldPathRe = new RegExp(oldPath + '(?![a-zA-Z0-9_/])', 'mg');
+                oldPathRe = new RegExp(oldPath + '(?![\\w/-])', 'mg');
             }
 
             _(itext.getItems()).each(function (item) {

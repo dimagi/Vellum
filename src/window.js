@@ -46,11 +46,11 @@ define([
 
             availableHorizSpace = $fdc.width();
 
-            var availableColumnSpace = availableVertSpace - $('.fd-toolbar').outerHeight(),
+            var availableColumnSpace = availableVertSpace - $('.fd-toolbar').outerHeight(false),
             panelHeight, columnHeight, treeHeight;
 
             panelHeight = Math.max(availableColumnSpace - 5, this.opts().windowManager.minHeight);
-            columnHeight = panelHeight - $('.fd-head').outerHeight();
+            columnHeight = panelHeight - $('.fd-head').outerHeight(false);
             treeHeight = columnHeight;
 
             $fdc.find('.fd-content').css('height', panelHeight + 'px');
@@ -66,7 +66,7 @@ define([
             .css('height', columnHeight - $fdc.find('.fd-props-toolbar').outerHeight(true) + 'px');
         },
         getLeftWidth: function () {
-            return 2 + this.$f.find('.fd-content-left').outerWidth() + 
+            return 2 + this.$f.find('.fd-content-left').outerWidth(false) + 
                this.$f.find('.fd-content-divider').outerWidth(true);
         },
         getCurrentTopOffset: function () {

@@ -6,7 +6,9 @@ define([
     'vellum/tree',
     'text!static/form/alternate-root-node-name.xml',
     'text!static/form/question-referencing-other.xml',
-    'text!static/form/hidden-value-in-group.xml'
+    'text!static/form/group-with-internal-refs.xml',
+    'text!static/form/hidden-value-in-group.xml',
+    'text!static/form/select-questions.xml'
 ], function (
     util,
     chai,
@@ -15,7 +17,9 @@ define([
     Tree,
     ALTERNATE_ROOT_NODE_NAME_XML,
     QUESTION_REFERENCING_OTHER_XML,
-    HIDDEN_VALUE_IN_GROUP_XML
+    GROUP_WITH_INTERNAL_REFS_XML,
+    HIDDEN_VALUE_IN_GROUP_XML,
+    SELECT_QUESTIONS
 ) {
     var Form = form_.Form,
         assert = chai.assert,
@@ -57,12 +61,31 @@ define([
             });
         });
 
+        it("should preserve internal references in copied group", function () {
+            util.loadXML(GROUP_WITH_INTERNAL_REFS_XML);
+            var form = call("getData").core.form,
+                group = util.getMug("group");
+            form.duplicateMug(group);
+            var green2 = util.getMug("copy-1-of-group/green");
+            assert.equal(green2.p.relevantAttr,
+                "/data/copy-1-of-group/blue = 'red' and /data/red = 'blue'");
+        });
+
         it("should set non-standard form root node", function () {
             util.loadXML(ALTERNATE_ROOT_NODE_NAME_XML);
             var form = call("getData").core.form,
                 blue = call("getMugByPath", "/other/blue");
             assert.equal(form.getBasePath(), "/other/");
             assert(blue !== null, "mug not found: /other/blue");
+        });
+
+        it("should be able to move item from Select to MSelect", function () {
+            util.loadXML(SELECT_QUESTIONS);
+            var form = call("getData").core.form,
+                item1 = util.getMug("question1/item1"),
+                item2 = util.getMug("question2/item2");
+            // should not throw an error
+            form.moveMug(item1, item2, 'before');
         });
 
         it("should update reference to hidden value in group", function () {

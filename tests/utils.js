@@ -53,19 +53,21 @@ define([
     }
 
     function assertJSTreeState() {
-        function repr(node) {
-            var str, level = (this === window ? 0 : this.level);
-            if (_.isArray(node)) {
-                return _.map(node, repr, {level: level}).join("\n");
+        function repr(node, level) {
+            var i, len, child, items = [];
+            if (node.id === "#") {
+                level = -1;
+            } else {
+                items.push(Array(level * 2 + 1).join(" ") + node.text);
             }
-            str = Array(level * 2 + 1).join(" ") + node.data.title;
-            if (node.children) {
-                str = str + "\n" + repr.bind({level: level + 1})(node.children);
+            for (i = 0, len = node.children.length; i < len; i++) {
+                child = call("jstree", "get_node", node.children[i]);
+                items.push(repr(child, level + 1));
             }
-            return str;
+            return items.join("\n");
         }
         var expected = Array.prototype.slice.call(arguments).join("\n") + "\n",
-            actual = repr(call("jstree", "get_json", -1)) + "\n";
+            actual = repr(call("jstree", "get_node", "#")) + "\n";
         if (expected !== actual) {
             var patch = jsdiff.createPatch("", actual, expected, "actual", "expected");
             patch = patch.replace(/^Index:/, "Unexpected jstree state");
@@ -133,7 +135,18 @@ define([
             saveCount++;
             originalSaveUrl(data);
         };
-        $("#vellum").empty().vellum(vellum_options);
+        var vellum = $("#vellum"),
+            old = vellum.vellum("get");
+        if (old) {
+            old.destroy();
+
+            // clean up modal dialog artifacts
+            $('.fd-dialog-confirm').dialog("destroy");
+            $('body > div.ui-dialog, ' +
+              'body > div.modal, ' +
+              'body > div.modal-backdrop').remove();
+        }
+        vellum.empty().vellum(vellum_options);
     }
         
     // call a method on the active instance
@@ -152,38 +165,17 @@ define([
         return xml;
     }
 
-    // might need to convert this to use a deferred, see
-    // https://github.com/mwhite/Vellum/commit/423360cd520f27d5fe3b0657984d2e023bf72fb8#diff-74a635be9be46d0f8b20784f5117bb0cR9
-    function clickQuestion() {
-        var questionDisplayNamesPath = Array.prototype.slice.call(arguments),
-            $current = $(".jstree");
-
-        // try path
-        _.map(questionDisplayNamesPath, function (name) {
-            $current = $current.hasClass('jstree') ? 
-                $current.children('ul') : $current.next('ul');
-            $current = $current.children("li[rel]")
-                .children("a:contains('" + name + "')");
-            $current = $(_.filter($current, function (c) {
-                return $.trim($(c).text()) === name;
-            }));
-        });
-
-        // if that didn't work, try global
-        if (!$current.length && questionDisplayNamesPath.length === 1) {
-            var name = questionDisplayNamesPath[0];
-            $current = $("li[rel] > a:contains('" + name + "')");
-            $current = $(_.filter($current, function (c) {
-                return $.trim($(c).text()) === name;
-            }));
+    function clickQuestion(path) {
+        var node, mug = getMug(path);
+        if (!(mug && mug.ufid)) {
+            throw new Error("mug not found: " + path);
         }
-
-        if (!$current.length || $current.hasClass('jstree')) {
-            throw new Error("No question " + questionDisplayNamesPath + " found");
-        } else if ($current.length > 1) {
-            throw new Error("Too many questions " + questionDisplayNamesPath + " found");
+        node = $("#" + mug.ufid + "_anchor");
+        if (!node.length) {
+            throw new Error("tree node not found: " + path);
         }
-        $($current[0]).click();
+        $(node).click();
+        return node;
     }
 
     /**
@@ -207,6 +199,10 @@ define([
             if (parent && parent.__className.indexOf("Select") > -1) {
                 var children = call("getData").core.form.getChildren(parent),
                     nodeID = elements[elements.length - 1];
+                if (children.length === 1 && nodeID === "itemset" &&
+                        children[0].p.tagName === "itemset") {
+                    return children[0];
+                }
                 for (var i = 0; i < children.length; i++) {
                     if (children[i].p.defaultValue === nodeID) {
                         return children[i];
@@ -220,6 +216,14 @@ define([
     function deleteQuestion (path) {
         call("getData").core.form.removeMugFromForm(getMug(path));
         assert(!getMug(path), "mug not removed: " + path);
+    }
+
+    function expandGroup(mug) {
+        call("jstree", "open_node", mug.ufid);
+    }
+
+    function collapseGroup(mug) {
+        call("jstree", "close_node", mug.ufid);
     }
 
     return {
@@ -264,9 +268,11 @@ define([
         },
         clickQuestion: clickQuestion,
         deleteQuestion: deleteQuestion,
+        expandGroup: expandGroup,
+        collapseGroup: collapseGroup,
         isTreeNodeValid: function (mug) {
             var $node = $("#vellum").find('#' + mug.ufid + ' > a');
-            return $node.siblings(".fd-tree-valid-alert-icon").length === 0;
+            return $node.children(".fd-tree-valid-alert-icon").length === 0;
         }
     };
 });
