@@ -962,10 +962,18 @@ define([
         widget.defaultLang = Itext.getDefaultLanguage();
         widget.isDefaultLang = widget.language === widget.defaultLang;
         widget.isSyncedWithDefaultLang = false;
+        widget.hasDynamicPlaceholder = options.path === 'labelItext';
 
         widget.getItextItem = function () {
             // Make sure the real itextItem is being updated at all times, not a stale one.
             return options.getItextByMug(widget.mug);
+        };
+        widget.getItextValue = function (lang) {
+            var itextItem = widget.getItextItem();
+            if (!lang) {
+                lang = widget.language;
+            }
+            return itextItem && itextItem.getValue(widget.form, lang);
         };
 
         widget.getLangDesc = function () {
@@ -989,26 +997,24 @@ define([
                 widget.setValue(defaultValue);
                 widget.updateValue();
             } else {
-                var itextItem = widget.getItextItem(),
-                    nodeID = widget.mug.p.nodeID,
-                    currentLangValue,
-                    defaultLangValue;
+                var itextItem = widget.getItextItem();
 
                 if (!itextItem) {
                     widget.setValue("");
                     return;
                 }
 
-                defaultLangValue = itextItem.getValue(widget.form, widget.defaultLang);
-                currentLangValue = itextItem.getValue(widget.form, widget.language);
-
-                if ((widget.isDefaultLang && defaultLangValue === nodeID) ||
-                    (!widget.isDefaultLang &&
-                        (currentLangValue === defaultLangValue || !currentLangValue))) {
-                    widget.setPlaceholder(defaultLangValue);
-                    widget.setValue("");
-                } else {
-                    widget.setValue(currentLangValue);
+                if (widget.hasDynamicPlaceholder) {
+                    var nodeID = widget.mug.p.nodeID,
+                        value = widget.getItextValue(),
+                        placeholder;
+                    if (widget.isDefaultLang) {
+                        placeholder = nodeID;
+                    } else {
+                        placeholder = widget.getItextValue(widget.defaultLang) || nodeID;
+                    }
+                    widget.setPlaceholder(placeholder);
+                    widget.setValue(value && value !== placeholder ? value : "");
                 }
             }
         };
@@ -1054,23 +1060,30 @@ define([
             return null;
         };
 
-        if (!widget.isDefaultLang) {
-            widget.mug.on('defaultLanguage-itext-changed', function (e) {
-                if (e.form === widget.form && e.itextType === widget.itextType) {
-                    var itextItem = widget.getItextItem(),
-                        defaultLangValue,
-                        currentLangValue;
-                    defaultLangValue = itextItem.getValue(widget.form, widget.defaultLang);
-                    currentLangValue = itextItem.getValue(widget.form, widget.language);
-                    widget.setPlaceholder(e.value);
-                    if ((currentLangValue === e.prevValue && !widget.getValue()) || 
-                        !currentLangValue) 
-                    {
-                        // Make sure all the defaults keep in sync.
-                        widget.setItextFormValue(e.value);
+        if (widget.hasDynamicPlaceholder) {
+            if (widget.isDefaultLang) {
+                widget.mug.on('property-changed', function (e) {
+                    if (e.property === "nodeID") {
+                        widget.setPlaceholder(e.val);
+                        if (widget.getItextValue() === e.previous || !widget.getValue()) {
+                            widget.setItextFormValue(e.val);
+                            widget.setValue("");
+                        }
                     }
-                }
-            });
+                });
+            } else {
+                widget.mug.on('defaultLanguage-itext-changed', function (e) {
+                    if (e.form === widget.form && e.itextType === widget.itextType) {
+                        var placeholder = e.value || widget.mug.p.nodeID;
+                        widget.setPlaceholder(placeholder);
+                        if (widget.getItextValue() === e.prevValue || !widget.getValue()) {
+                            // Make sure all the defaults keep in sync.
+                            widget.setItextFormValue(placeholder);
+                            widget.setValue("");
+                        }
+                    }
+                });
+            }
         }
 
         widget.fireChangeEvents = function () {
