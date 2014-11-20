@@ -1536,7 +1536,7 @@ define([
                 oldPathRe = new RegExp(oldPath + '/', 'mg');
                 newPath = newPath + '/';
             } else {
-                oldPathRe = new RegExp(oldPath + '(?![\w/-])', 'mg');
+                oldPathRe = new RegExp(oldPath + '(?![\\w/-])', 'mg');
             }
 
             _(itext.getItems()).each(function (item) {
