@@ -144,6 +144,7 @@ require([
                 nodeId: 'question28'
             }, {
                 type: 'Signature',
+                path: 'question22/question23/',
                 nodeId: 'question29'
             }, {
                 type: 'AndroidIntent',
