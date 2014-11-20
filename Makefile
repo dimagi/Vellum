@@ -20,6 +20,10 @@ _rjs:
 	find _build/ -maxdepth 1 -mindepth 1 -not -name src -not -name lib -not -name README.md -not -name bower_components | xargs rm -rf
 # https://github.com/guybedford/require-css/issues/133 
 	cd _build/bower_components && ls . | grep -v MediaUploader | xargs rm -r
+	mkdir -p _build/bower_components/jstree/dist/themes/default
+	cp bower_components/jstree/dist/themes/default/*.png \
+	   bower_components/jstree/dist/themes/default/*.gif \
+	   _build/bower_components/jstree/dist/themes/default
 # combine CSS files (and adjust location for relative image paths)
 	# TODO do we need a blank line between the files? doesn't seem like it after initial test
 	cat _build/src/local-deps.css _build/src/main-components.css > _build/style.css

@@ -27,8 +27,8 @@ if (useBuilt) {
 console.log("loading Vellum from " + baseUrl);
 
 // comment these to use built versions
-define("jquery", [testBase + 'bower_components/jquery/jquery'], function () { return window.jQuery; });
-define("jquery-ui", ["jquery", testBase + 'lib/jquery-ui/jquery-ui-1.8.14.custom.min'], function () {});
+define("jquery", [testBase + 'bower_components/jquery/dist/jquery'], function () { return window.jQuery; });
+define("jquery-ui", ["jquery", testBase + 'bower_components/jquery-ui/jquery-ui'], function () {});
 define("jquery.bootstrap", ["jquery", testBase + 'lib/bootstrap'], function () {});
 
 require.config({
@@ -107,6 +107,9 @@ require(['jquery', 'jquery.vellum'], function ($) {
         var lastSavedForm = "";
 
         function runTests() {
+            function showTestResults() {
+                $(".sidebar .nav #resultsTab a").click();
+            }
             if (window.mochaPhantomJS) {
                 mochaPhantomJS.run();
             } else {
@@ -121,6 +124,8 @@ require(['jquery', 'jquery.vellum'], function ($) {
                 }).appendTo(".sidebar");
                 $("#mocha-stats li").css({display: "block"});
                 $("#mocha-stats li.progress").css({height: "40px"});
+                $("#mocha-stats li.passes a").click(showTestResults);
+                $("#mocha-stats li.failures a").click(showTestResults);
             }
         }
         $('#run-tests').click(runTests);

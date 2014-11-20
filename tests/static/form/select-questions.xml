@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:orx="http://openrosa.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa" xmlns:vellum="http://commcarehq.org/xforms/vellum">
+    <h:head>
+        <h:title>Untitled Form</h:title>
+        <model>
+            <instance>
+                <data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/D1202637-1EFD-4A9C-A0CE-958FD137F9AF" uiVersion="1" version="1" name="Untitled Form">
+                    <question1 />
+                    <question2 />
+                </data>
+            </instance>
+            <bind nodeset="/data/question1" />
+            <bind nodeset="/data/question2" />
+            <itext>
+                <translation lang="en" default="">
+                    <text id="question1-label">
+                        <value>question1</value>
+                    </text>
+                    <text id="question1-item1-label">
+                        <value>item1</value>
+                    </text>
+                    <text id="question2-item1-label">
+                        <value>item1</value>
+                    </text>
+                    <text id="question1-item2-label">
+                        <value>item2</value>
+                    </text>
+                    <text id="question2-label">
+                        <value>question2</value>
+                    </text>
+                    <text id="question2-item2-label">
+                        <value>item2</value>
+                    </text>
+                </translation>
+            </itext>
+        </model>
+    </h:head>
+    <h:body>
+        <select1 ref="/data/question1">
+            <label ref="jr:itext('question1-label')" />
+            <item>
+                <label ref="jr:itext('question1-item1-label')" />
+                <value>item1</value>
+            </item>
+            <item>
+                <label ref="jr:itext('question2-item1-label')" />
+                <value>item1</value>
+            </item>
+            <item>
+                <label ref="jr:itext('question1-item2-label')" />
+                <value>item2</value>
+            </item>
+        </select1>
+        <select ref="/data/question2">
+            <label ref="jr:itext('question2-label')" />
+            <item>
+                <label ref="jr:itext('question2-item2-label')" />
+                <value>item2</value>
+            </item>
+        </select>
+    </h:body>
+</h:html>

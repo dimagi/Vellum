@@ -5,7 +5,7 @@
     <title>Vellum Test</title>
     
     <link href="tests/lib/hqstyle-core.css" type="text/css" rel="stylesheet"></link>
-    <link href="lib/jquery-ui/redmond/jquery-ui-1.8.14.custom.css" type="text/css" rel="stylesheet"></link>
+    <link href="bower_components/jquery-ui/themes/redmond/jquery-ui.css" type="text/css" rel="stylesheet"></link>
     
     <!-- Mocha and test-only dependencies -->
     <!-- todo: call from tests/main.js -->
@@ -32,7 +32,7 @@
         <div class="span2 sidebar">
           <ul class="nav nav-list">
             <li class="active"><a data-toggle='tab' href='#test'><h4>Vellum</h4></a></li>
-            <li><a data-toggle='tab' href='#results'><h4>Test Results</h4></a></li>
+            <li id="resultsTab"><a data-toggle='tab' href='#results'><h4>Test Results</h4></a></li>
           </ul>
           <button class="btn" id="run-tests">
             <h4>Run tests</h4>

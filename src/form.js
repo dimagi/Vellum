@@ -504,8 +504,13 @@ define([
             }
             var tree = this.dataTree,
                 newName = mug.p.nodeID,
-                mugPath = tree.getAbsolutePath(mug),
-                mugs = this.getDescendants(mug).concat([mug]),
+                mugPath = tree.getAbsolutePath(mug);
+            if (!mugPath) {
+                // Items don't have an absolute path. I wonder if it would
+                // matter if they had one?
+                return;
+            }
+            var mugs = this.getDescendants(mug).concat([mug]),
                 postMovePaths = _(mugs).map(function(mug) { return tree.getAbsolutePath(mug); }),
                 prevMugPath = mugPath.replace(new RegExp("/" + RegExp.escape(newName) + "$"), "/" + oldName),
                 postRegExp = new RegExp("^" + RegExp.escape(mugPath) + "/"),

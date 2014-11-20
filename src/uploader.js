@@ -322,6 +322,13 @@ define([
                 uploadController.value.init();
             });
             return uploadController;
+        },
+        destroy: function () {
+            _.each(this.data.uploader.uploadControls, function (control, key) {
+                // HACK deep reach
+                // HQMediaFileUploadController should have a destroy method
+                control.value.uploader.destroy();
+            });
         }
     });
 });

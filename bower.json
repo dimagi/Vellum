@@ -23,8 +23,8 @@
     "dependencies": {
         "almond": "~0.2.9", 
         "underscore": "~1.5.2",
-        "jquery": "==1.7",
-        "jquery.ui": "1.8.16", 
+        "jquery": "~1.11.1",
+        "jquery-ui": "~1.11.2",
         "requirejs": "~2.1.11",
         "requirejs-text": "~2.0.12",
         "require-less": "~0.1.2",
@@ -32,6 +32,7 @@
         "requirejs-tpl": "jfparadis/requirejs-tpl",
         "requirejs-plugins": "~1.0.2",
 
+        "jstree": "vakata/jstree#110b6681ffd5fc7206c27ea174d87ce1b348776d",
         "langcodes": "dimagi/langcodes",
         "XMLWriter": "dimagi/XMLWriter#master",
         "MediaUploader": "dimagi/MediaUploader#master",
