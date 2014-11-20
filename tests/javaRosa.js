@@ -5,14 +5,16 @@ require([
     'tests/utils',
     'vellum/javaRosa',
     'vellum/util',
-    'text!static/javaRosa/outputref-group-rename.xml'
+    'text!static/javaRosa/outputref-group-rename.xml',
+    'text!static/javaRosa/output-refs.xml'
 ], function (
     chai,
     $,
     util,
     jr,
     vellum_util,
-    outputref_group_rename_xml
+    OUTPUTREF_GROUP_RENAME_XML,
+    OUTPUT_REFS_XML
 ) {
     var assert = chai.assert,
         call = util.call;
@@ -124,11 +126,22 @@ require([
 
                 util.assertXmlEqual(
                     call('createXML'),
-                    util.xmlines(TEST_XML_5),
+                    OUTPUT_REFS_XML,
                     {normalize_xmlns: true}
                 );
                 done();
             }}});
+        });
+
+        it("should only update exact output ref matches when question ids change (word boundary)", function () {
+            util.loadXML("");
+            util.addQuestion("Text", "load-one");
+            var label = util.addQuestion("Trigger", "label"),
+                text2 = util.addQuestion("Text", "text2");
+            label.p.labelItextID.setDefaultValue('<output value="/data/load-one" />');
+            text2.p.nodeID = "load";
+            text2.p.nodeID = "load-two";
+            assert.equal(label.p.labelItextID.getValue("default", "en"), '<output value="/data/load-one" />');
         });
 
         it("itext changes do not bleed back after copy", function (done) {
@@ -224,7 +237,7 @@ require([
             util.init({
                 javaRosa: {langs: ['en', 'hin']},
                 core: {
-                    form: outputref_group_rename_xml,
+                    form: OUTPUTREF_GROUP_RENAME_XML,
                     onReady: function () {
                         var group = util.call("getMugByPath", "/data/question2"),
                             q1 = util.call("getMugByPath", "/data/question1"),
@@ -449,57 +462,4 @@ require([
             </input>\
         </h:body>\
     </h:html>';
-
-    var TEST_XML_5 = '' +
-    '<h:html xmlns:h="http://www.w3.org/1999/xhtml"\
-             xmlns:orx="http://openrosa.org/jr/xforms"\
-             xmlns="http://www.w3.org/2002/xforms"\
-             xmlns:xsd="http://www.w3.org/2001/XMLSchema"\
-             xmlns:jr="http://openrosa.org/javarosa"\
-             xmlns:vellum="http://commcarehq.org/xforms/vellum">\
-        <h:head>\
-            <h:title>Untitled Form</h:title>\
-            <model>\
-                <instance>\
-                    <data xmlns:jrm="http://dev.commcarehq.org/jr/xforms"\
-                          xmlns="http://openrosa.org/formdesigner/8D6CF8A5-4396-45C3-9D05-64C3FD97A5D0"\
-                          uiVersion="1" version="1" name="Untitled Form">\
-                        <first_question/>\
-                        <question2/>\
-                    </data>\
-                </instance>\
-                <bind nodeset="/data/first_question" type="xsd:string"/>\
-                <bind nodeset="/data/question2" type="xsd:string"/>\
-                <itext>\
-                    <translation lang="en" default="">\
-                        <text id="first_question-label">\
-                            <value>question1</value>\
-                        </text>\
-                        <text id="question2-label">\
-                            <value>\
-                                <output value="/data/first_question" /> <output value="/data/question11" /> <output value="/data/question1/b" /> <output value="/data/question1b" />\
-                            </value>\
-                        </text>\
-                    </translation>\
-                    <translation lang="hin">\
-                        <text id="first_question-label">\
-                            <value>question1</value>\
-                        </text>\
-                        <text id="question2-label">\
-                            <value>question2</value>\
-                        </text>\
-                    </translation>\
-                </itext>\
-            </model>\
-        </h:head>\
-        <h:body>\
-            <input ref="/data/first_question">\
-                <label ref="jr:itext(\'first_question-label\')"/>\
-            </input>\
-            <input ref="/data/question2">\
-                <label ref="jr:itext(\'question2-label\')"/>\
-            </input>\
-        </h:body>\
-    </h:html>';
-
 });
