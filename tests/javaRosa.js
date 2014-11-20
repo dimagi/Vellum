@@ -131,6 +131,17 @@ require([
             }}});
         });
 
+        it("should only update exact output ref matches when question ids change (word boundary)", function () {
+            util.loadXML("");
+            util.addQuestion("Text", "load-one");
+            var label = util.addQuestion("Trigger", "label"),
+                text2 = util.addQuestion("Text", "text2");
+            label.p.labelItextID.setDefaultValue('<output value="/data/load-one" />');
+            text2.p.nodeID = "load";
+            text2.p.nodeID = "load-two";
+            assert.equal(label.p.labelItextID.getValue("default", "en"), '<output value="/data/load-one" />');
+        });
+
         it("itext changes do not bleed back after copy", function (done) {
             util.init({core: {onReady: function () {
                 var mug = util.addQuestion("Text", "question"),

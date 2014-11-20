@@ -217,7 +217,7 @@ define([
 
     that.isValidElementName = function (name) {
         // HT: http://stackoverflow.com/questions/2519845/how-to-check-if-string-is-a-valid-xml-element-name
-        var elementNameRegex = /^(?!XML)[a-zA-Z][\w0-9-]*$/;
+        var elementNameRegex = /^(?!XML)[a-zA-Z][\w-]*$/;
         return elementNameRegex.test(name);
     };
 
