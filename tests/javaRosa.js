@@ -123,7 +123,7 @@ require([
             assert.equal(hinLabel.attr("placeholder"), "English");
 
             util.clickQuestion("temp");
-            util.clickQuestion("English");
+            util.clickQuestion("question1");
             enLabel = $("[name='itext-en-label']");
             hinLabel = $("[name='itext-hin-label']");
             assert.equal(enLabel.val(), "English");
