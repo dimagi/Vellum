@@ -90,6 +90,47 @@ require([
             }}});
         });
 
+        it("itext widget should show placeholder when value is node ID (any language)", function () {
+            util.loadXML(TEST_XML_1);
+            util.addQuestion("Text", "temp");
+            util.clickQuestion("question1");
+            var enLabel = $("[name='itext-en-label']"),
+                hinLabel = $("[name='itext-hin-label']");
+            assert.equal(enLabel.val(), "");
+            assert.equal(enLabel.attr("placeholder"), "question1");
+            assert.equal(hinLabel.val(), "");
+            assert.equal(hinLabel.attr("placeholder"), "question1");
+
+            util.clickQuestion("temp");
+            util.clickQuestion("question1");
+            enLabel = $("[name='itext-en-label']");
+            hinLabel = $("[name='itext-hin-label']");
+            assert.equal(enLabel.val(), "");
+            assert.equal(enLabel.attr("placeholder"), "question1");
+            assert.equal(hinLabel.val(), "");
+            assert.equal(hinLabel.attr("placeholder"), "question1");
+        });
+
+        it("itext widget should show placeholder when value matches default language value", function () {
+            util.loadXML(TEST_XML_1);
+            util.addQuestion("Text", "temp");
+            util.clickQuestion("question1");
+            var enLabel = $("[name='itext-en-label']"),
+                hinLabel = $("[name='itext-hin-label']");
+            enLabel.val("English").change();
+            assert.equal(enLabel.val(), "English");
+            assert.equal(hinLabel.val(), "");
+            assert.equal(hinLabel.attr("placeholder"), "English");
+
+            util.clickQuestion("temp");
+            util.clickQuestion("English");
+            enLabel = $("[name='itext-en-label']");
+            hinLabel = $("[name='itext-hin-label']");
+            assert.equal(enLabel.val(), "English");
+            assert.equal(hinLabel.val(), "");
+            assert.equal(hinLabel.attr("placeholder"), "English");
+        });
+
         it("should update output refs when question ids change", function (done) {
             util.init({core: {onReady: function () {
                 util.addQuestion("Text", "question1");

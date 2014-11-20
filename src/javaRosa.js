@@ -990,6 +990,7 @@ define([
                 widget.updateValue();
             } else {
                 var itextItem = widget.getItextItem(),
+                    nodeID = widget.mug.p.nodeID,
                     currentLangValue,
                     defaultLangValue;
 
@@ -1001,7 +1002,9 @@ define([
                 defaultLangValue = itextItem.getValue(widget.form, widget.defaultLang);
                 currentLangValue = itextItem.getValue(widget.form, widget.language);
 
-                if (currentLangValue === defaultLangValue || !currentLangValue) {
+                if ((widget.isDefaultLang && defaultLangValue === nodeID) ||
+                    (!widget.isDefaultLang &&
+                        (currentLangValue === defaultLangValue || !currentLangValue))) {
                     widget.setPlaceholder(defaultLangValue);
                     widget.setValue("");
                 } else {
