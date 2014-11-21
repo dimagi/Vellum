@@ -903,20 +903,13 @@ define([
         var $input = $("<textarea></textarea>")
             .attr("name", widget.id)
             .attr("rows", "2")
-             .addClass('input-block-level itext-widget-input')
-             .on('change keyup', function () {
-                 widget.updateValue();
-             });
+            .addClass('input-block-level itext-widget-input')
+            .on('change keyup', function () {
+                widget.updateValue();
+            });
 
         if (options.path === 'labelItext') {
             $input.addClass('jstree-drop');
-        }
-
-        widget.getControl = function () {
-            return $input;
-        };
-
-        if (options.path === 'labelItext') {
             $input.keydown(function (e) {
                 // deletion of entire output ref in one go
                 if (e && e.which === 8 || e.which === 46) {
@@ -963,6 +956,10 @@ define([
         widget.isDefaultLang = widget.language === widget.defaultLang;
         widget.isSyncedWithDefaultLang = false;
         widget.hasDynamicPlaceholder = options.path === 'labelItext';
+
+        widget.getControl = function () {
+            return $input;
+        };
 
         widget.getItextItem = function () {
             // Make sure the real itextItem is being updated at all times, not a stale one.
