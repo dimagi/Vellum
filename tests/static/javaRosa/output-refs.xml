@@ -14,7 +14,7 @@
 			<itext>
 				<translation lang="en" default="">
 					<text id="first_question-label">
-						<value>question1</value>
+						<value>first_question</value>
 					</text>
 					<text id="question2-label">
 						<value><output value="/data/first_question" /> <output value="/data/question11" /> <output value="/data/question1/b" /> <output value="/data/question1b" /></value>
@@ -22,7 +22,7 @@
 				</translation>
 				<translation lang="hin">
 					<text id="first_question-label">
-						<value>question1</value>
+						<value>first_question</value>
 					</text>
 					<text id="question2-label">
 						<value>question2</value>

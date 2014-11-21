@@ -499,7 +499,7 @@ require([
                 <itext>\
                     <translation lang="en" default="">\
                         <text id="first_question-label">\
-                            <value>question1</value>\
+                            <value>first_question</value>\
                         </text>\
                         <text id="question2-label">\
                             <value><output value="/data/first_question" /> a <output value="/data/first_question" /> b <output value="/data/first_question" /> c <output value="/data/first_question" /> d <output value="if(/data/first_question = \'\', \'\', format-date(date(/data/first_question), \'%a%b%c\'))" /></value>\
@@ -507,7 +507,7 @@ require([
                     </translation>\
                     <translation lang="hin">\
                         <text id="first_question-label">\
-                            <value>question1</value>\
+                            <value>first_question</value>\
                         </text>\
                         <text id="question2-label">\
                             <value><output value="/data/first_question" /></value>\
