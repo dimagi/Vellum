@@ -726,7 +726,7 @@ define([
             var $buttonGroup = $("<div />").addClass("btn-group itext-options");
             _.each(block.forms, function (form) {
                 var $btn = $('<div />');
-                $btn.text(form)
+                $btn.text(' ' + form)
                     .addClass(block.getAddFormButtonClass(form))
                     .addClass('btn itext-option').click(function () {
                         block.addItext(form);
