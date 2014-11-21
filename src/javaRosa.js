@@ -968,12 +968,30 @@ define([
             // Make sure the real itextItem is being updated at all times, not a stale one.
             return options.getItextByMug(widget.mug);
         };
+
         widget.getItextValue = function (lang) {
             var itextItem = widget.getItextItem();
             if (!lang) {
                 lang = widget.language;
             }
             return itextItem && itextItem.getValue(widget.form, lang);
+        };
+
+        widget.setItextValue = function (value) {
+            var itextItem = widget.getItextItem();
+            if (itextItem) {
+                if (widget.isDefaultLang) {
+                    widget.mug.fire({
+                        type: 'defaultLanguage-itext-changed',
+                        form: widget.form,
+                        prevValue: itextItem.getValue(widget.form, widget.language),
+                        value: value,
+                        itextType: widget.itextType
+                    });
+                }
+                itextItem.getForm(widget.form).setValue(widget.language, value);
+                widget.fireChangeEvents();
+            }
         };
 
         widget.getLangDesc = function () {
@@ -1023,8 +1041,7 @@ define([
         widget.updateValue = function () {
             _updateValue();
             if (!widget.getValue() && !widget.isDefaultLang) {
-                var defaultLangValue = widget.getItextItem().getValue(widget.form, widget.defaultLang);
-                widget.setItextFormValue(defaultLangValue);
+                widget.setItextValue(widget.getItextValue(widget.defaultLang));
             }
         };
 
@@ -1066,7 +1083,7 @@ define([
                     if (e.property === "nodeID") {
                         widget.setPlaceholder(e.val);
                         if (widget.getItextValue() === e.previous || !widget.getValue()) {
-                            widget.setItextFormValue(e.val);
+                            widget.setItextValue(e.val);
                             widget.setValue("");
                         }
                     }
@@ -1078,7 +1095,7 @@ define([
                         widget.setPlaceholder(placeholder);
                         if (widget.getItextValue() === e.prevValue || !widget.getValue()) {
                             // Make sure all the defaults keep in sync.
-                            widget.setItextFormValue(placeholder);
+                            widget.setItextValue(placeholder);
                             widget.setValue("");
                         }
                     }
@@ -1123,26 +1140,7 @@ define([
         };
 
         widget.save = function () {
-            widget.setItextFormValue(widget.getValue());
-        };
-
-        widget.setItextFormValue = function (value) {
-            var itextItem = widget.getItextItem();
-            if (itextItem) {
-                if (widget.isDefaultLang) {
-                    widget.mug.fire({
-                        type: 'defaultLanguage-itext-changed',
-                        form: widget.form,
-                        prevValue: itextItem.getValue(widget.form, widget.language),
-                        value: value,
-                        itextType: widget.itextType
-                    });
-                }
-
-                var itextForm = itextItem.getForm(widget.form);
-                itextForm.setValue(widget.language, value);
-                widget.fireChangeEvents();
-            }
+            widget.setItextValue(widget.getValue());
         };
 
         return widget;
