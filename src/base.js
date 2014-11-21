@@ -21,8 +21,7 @@ define([
             'ignore',
             'uploader',
             'windowManager'
-        ],
-        instances = [];
+        ];
 
     function bindPluginMethod(pluginName, fn, fnName) {
         // this is not how jstree does it, and a bit hacky, but it makes
@@ -67,27 +66,31 @@ define([
     $.fn.vellum = function (options) {
         var isMethodCall = typeof options === 'string',
             args = Array.prototype.slice.call(arguments, 1),
-            retVal;
+            instance;
 
         if (isMethodCall) {
-            this.each(function () {
-                var instanceId = $.data(this, "vellum_instance_id"),
-                    instance = instances[instanceId];
-                retVal = instance[options].apply(instance, args);
-            });
-            return retVal;
+            if (options === "get") {
+                // get the vellum instance on the selected element or one of its parents
+                var obj = this;
+                while (obj && obj.length) {
+                    instance = obj.data("vellum_instance");
+                    if (instance instanceof $.vellum._instance) {
+                        return instance;
+                    }
+                    obj = obj.parent();
+                }
+                return null; // vellum instance not found
+            }
+            // call method
+            instance = this.data("vellum_instance");
+            return instance[options].apply(instance, args);
         } else {
             // Instantiate an instance for each element in the jquery object set
             // passed.  In practice, it's unlikely that you'd ever want to
             // instantiate multiple instances at once.
             this.each(function () {
-                var instanceId = $.data(this, "vellum_instance_id");
-                if (instanceId === undefined) {
-                    instances.push({});
-                    instanceId = instances.length - 1;
-                }
-                $.data(this, "vellum_instance_id", instanceId);
-                instances[instanceId] = new $.vellum._instance($(this), options);
+                var instance = new $.vellum._instance($(this), options);
+                $.data(this, "vellum_instance", instance);
             });
             return this;
         }

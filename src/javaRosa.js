@@ -733,7 +733,7 @@ define([
             var $buttonGroup = $("<div />").addClass("btn-group itext-options");
             _.each(block.forms, function (form) {
                 var $btn = $('<div />');
-                $btn.text(form)
+                $btn.text(' ' + form)
                     .addClass(block.getAddFormButtonClass(form))
                     .addClass('btn itext-option').click(function () {
                         block.addItext(form);
@@ -910,20 +910,13 @@ define([
         var $input = $("<textarea></textarea>")
             .attr("name", widget.id)
             .attr("rows", "2")
-             .addClass('input-block-level itext-widget-input')
-             .on('change keyup', function () {
-                 widget.updateValue();
-             });
+            .addClass('input-block-level itext-widget-input')
+            .on('change keyup', function () {
+                widget.updateValue();
+            });
 
         if (options.path === 'labelItext') {
             $input.addClass('jstree-drop');
-        }
-
-        widget.getControl = function () {
-            return $input;
-        };
-
-        if (options.path === 'labelItext') {
             $input.keydown(function (e) {
                 // deletion of entire output ref in one go
                 if (e && e.which === 8 || e.which === 46) {
@@ -969,10 +962,40 @@ define([
         widget.defaultLang = Itext.getDefaultLanguage();
         widget.isDefaultLang = widget.language === widget.defaultLang;
         widget.isSyncedWithDefaultLang = false;
+        widget.hasDynamicPlaceholder = options.path === 'labelItext';
+
+        widget.getControl = function () {
+            return $input;
+        };
 
         widget.getItextItem = function () {
             // Make sure the real itextItem is being updated at all times, not a stale one.
             return options.getItextByMug(widget.mug);
+        };
+
+        widget.getItextValue = function (lang) {
+            var itextItem = widget.getItextItem();
+            if (!lang) {
+                lang = widget.language;
+            }
+            return itextItem && itextItem.getValue(widget.form, lang);
+        };
+
+        widget.setItextValue = function (value) {
+            var itextItem = widget.getItextItem();
+            if (itextItem) {
+                if (widget.isDefaultLang) {
+                    widget.mug.fire({
+                        type: 'defaultLanguage-itext-changed',
+                        form: widget.form,
+                        prevValue: itextItem.getValue(widget.form, widget.language),
+                        value: value,
+                        itextType: widget.itextType
+                    });
+                }
+                itextItem.getForm(widget.form).setValue(widget.language, value);
+                widget.fireChangeEvents();
+            }
         };
 
         widget.getLangDesc = function () {
@@ -996,23 +1019,24 @@ define([
                 widget.setValue(defaultValue);
                 widget.updateValue();
             } else {
-                var itextItem = widget.getItextItem(),
-                    currentLangValue,
-                    defaultLangValue;
+                var itextItem = widget.getItextItem();
 
                 if (!itextItem) {
                     widget.setValue("");
                     return;
                 }
 
-                defaultLangValue = itextItem.getValue(widget.form, widget.defaultLang);
-                currentLangValue = itextItem.getValue(widget.form, widget.language);
-
-                if (!widget.isDefaultLang && !currentLangValue) {
-                    widget.setPlaceholder(defaultLangValue);
-                    widget.setValue("");
-                } else {
-                    widget.setValue(currentLangValue);
+                if (widget.hasDynamicPlaceholder) {
+                    var nodeID = widget.mug.p.nodeID,
+                        value = widget.getItextValue(),
+                        placeholder;
+                    if (widget.isDefaultLang) {
+                        placeholder = nodeID;
+                    } else {
+                        placeholder = widget.getItextValue(widget.defaultLang) || nodeID;
+                    }
+                    widget.setPlaceholder(placeholder);
+                    widget.setValue(value && value !== placeholder ? value : "");
                 }
             }
         };
@@ -1021,8 +1045,7 @@ define([
         widget.updateValue = function () {
             _updateValue();
             if (!widget.getValue() && !widget.isDefaultLang) {
-                var defaultLangValue = widget.getItextItem().getValue(widget.form, widget.defaultLang);
-                widget.setItextFormValue(defaultLangValue);
+                widget.setItextValue(widget.getItextValue(widget.defaultLang));
             }
         };
 
@@ -1058,23 +1081,30 @@ define([
             return null;
         };
 
-        if (!widget.isDefaultLang) {
-            widget.mug.on('defaultLanguage-itext-changed', function (e) {
-                if (e.form === widget.form && e.itextType === widget.itextType) {
-                    var itextItem = widget.getItextItem(),
-                        defaultLangValue,
-                        currentLangValue;
-                    defaultLangValue = itextItem.getValue(widget.form, widget.defaultLang);
-                    currentLangValue = itextItem.getValue(widget.form, widget.language);
-                    widget.setPlaceholder(e.value);
-                    if ((currentLangValue === e.prevValue && !widget.getValue()) || 
-                        !currentLangValue) 
-                    {
-                        // Make sure all the defaults keep in sync.
-                        widget.setItextFormValue(e.value);
+        if (widget.hasDynamicPlaceholder) {
+            if (widget.isDefaultLang) {
+                widget.mug.on('property-changed', function (e) {
+                    if (e.property === "nodeID") {
+                        widget.setPlaceholder(e.val);
+                        if (widget.getItextValue() === e.previous || !widget.getValue()) {
+                            widget.setItextValue(e.val);
+                            widget.setValue("");
+                        }
                     }
-                }
-            });
+                });
+            } else {
+                widget.mug.on('defaultLanguage-itext-changed', function (e) {
+                    if (e.form === widget.form && e.itextType === widget.itextType) {
+                        var placeholder = e.value || widget.mug.p.nodeID;
+                        widget.setPlaceholder(placeholder);
+                        if (widget.getItextValue() === e.prevValue || !widget.getValue()) {
+                            // Make sure all the defaults keep in sync.
+                            widget.setItextValue(placeholder);
+                            widget.setValue("");
+                        }
+                    }
+                });
+            }
         }
 
         widget.fireChangeEvents = function () {
@@ -1114,26 +1144,7 @@ define([
         };
 
         widget.save = function () {
-            widget.setItextFormValue(widget.getValue());
-        };
-
-        widget.setItextFormValue = function (value) {
-            var itextItem = widget.getItextItem();
-            if (itextItem) {
-                if (widget.isDefaultLang) {
-                    widget.mug.fire({
-                        type: 'defaultLanguage-itext-changed',
-                        form: widget.form,
-                        prevValue: itextItem.getValue(widget.form, widget.language),
-                        value: value,
-                        itextType: widget.itextType
-                    });
-                }
-
-                var itextForm = itextItem.getForm(widget.form);
-                itextForm.setValue(widget.language, value);
-                widget.fireChangeEvents();
-            }
+            widget.setItextValue(widget.getValue());
         };
 
         return widget;
@@ -1556,7 +1567,7 @@ define([
                 oldPathRe = new RegExp(oldPath + '/', 'mg');
                 newPath = newPath + '/';
             } else {
-                oldPathRe = new RegExp(oldPath + '(?![a-zA-Z0-9_/])', 'mg');
+                oldPathRe = new RegExp(oldPath + '(?![\\w/-])', 'mg');
             }
 
             _(itext.getItems()).each(function (item) {

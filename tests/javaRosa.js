@@ -7,7 +7,8 @@ require([
     'vellum/util',
     'text!static/javaRosa/outputref-group-rename.xml',
     'text!static/javaRosa/text-question.xml',
-    'text!static/javaRosa/multi-line-trans.xml'
+    'text!static/javaRosa/multi-line-trans.xml',
+    'text!static/javaRosa/output-refs.xml'
 ], function (
     chai,
     $,
@@ -16,7 +17,8 @@ require([
     vellum_util,
     OUTPUTREF_GROUP_RENAME_XML,
     TEXT_QUESTION_XML,
-    MULTI_LINE_TRANS_XML
+    MULTI_LINE_TRANS_XML,
+    OUTPUT_REFS_XML
 ) {
     var assert = chai.assert,
         call = util.call;
@@ -92,6 +94,69 @@ require([
             }}});
         });
 
+        it("itext widget should show placeholder when value is node ID (any language)", function () {
+            util.loadXML(TEST_XML_1);
+            util.addQuestion("Text", "temp");
+            util.clickQuestion("question1");
+            var enLabel = $("[name='itext-en-label']"),
+                hinLabel = $("[name='itext-hin-label']");
+            assert.equal(enLabel.val(), "");
+            assert.equal(enLabel.attr("placeholder"), "question1");
+            assert.equal(hinLabel.val(), "");
+            assert.equal(hinLabel.attr("placeholder"), "question1");
+
+            util.clickQuestion("temp");
+            util.clickQuestion("question1");
+            enLabel = $("[name='itext-en-label']");
+            hinLabel = $("[name='itext-hin-label']");
+            assert.equal(enLabel.val(), "");
+            assert.equal(enLabel.attr("placeholder"), "question1");
+            assert.equal(hinLabel.val(), "");
+            assert.equal(hinLabel.attr("placeholder"), "question1");
+        });
+
+        it("itext widget should show placeholder when value matches default language value", function () {
+            util.loadXML(TEST_XML_1);
+            util.addQuestion("Text", "temp");
+            util.clickQuestion("question1");
+            var enLabel = $("[name='itext-en-label']"),
+                hinLabel = $("[name='itext-hin-label']");
+            enLabel.val("English").change();
+            assert.equal(enLabel.val(), "English");
+            assert.equal(hinLabel.val(), "");
+            assert.equal(hinLabel.attr("placeholder"), "English");
+
+            util.clickQuestion("temp");
+            util.clickQuestion("question1");
+            enLabel = $("[name='itext-en-label']");
+            hinLabel = $("[name='itext-hin-label']");
+            assert.equal(enLabel.val(), "English");
+            assert.equal(hinLabel.val(), "");
+            assert.equal(hinLabel.attr("placeholder"), "English");
+        });
+
+        it("itext widget should show placeholder when empty", function () {
+            util.loadXML(TEST_XML_1);
+            util.addQuestion("Text", "temp");
+            util.clickQuestion("question1");
+            var enLabel = $("[name='itext-en-label']"),
+                hinLabel = $("[name='itext-hin-label']");
+            enLabel.val("").change();
+            assert.equal(enLabel.val(), "");
+            assert.equal(enLabel.attr("placeholder"), "question1");
+            assert.equal(hinLabel.val(), "");
+            assert.equal(hinLabel.attr("placeholder"), "question1");
+
+            util.clickQuestion("temp");
+            util.clickQuestion("question1");
+            enLabel = $("[name='itext-en-label']");
+            hinLabel = $("[name='itext-hin-label']");
+            assert.equal(enLabel.val(), "");
+            assert.equal(enLabel.attr("placeholder"), "question1");
+            assert.equal(hinLabel.val(), "");
+            assert.equal(hinLabel.attr("placeholder"), "question1");
+        });
+
         it("should update output refs when question ids change", function (done) {
             util.init({core: {onReady: function () {
                 util.addQuestion("Text", "question1");
@@ -128,11 +193,22 @@ require([
 
                 util.assertXmlEqual(
                     call('createXML'),
-                    util.xmlines(TEST_XML_5),
+                    OUTPUT_REFS_XML,
                     {normalize_xmlns: true}
                 );
                 done();
             }}});
+        });
+
+        it("should only update exact output ref matches when question ids change (word boundary)", function () {
+            util.loadXML("");
+            util.addQuestion("Text", "load-one");
+            var label = util.addQuestion("Trigger", "label"),
+                text2 = util.addQuestion("Text", "text2");
+            label.p.labelItextID.setDefaultValue('<output value="/data/load-one" />');
+            text2.p.nodeID = "load";
+            text2.p.nodeID = "load-two";
+            assert.equal(label.p.labelItextID.getValue("default", "en"), '<output value="/data/load-one" />');
         });
 
         it("itext changes do not bleed back after copy", function (done) {
@@ -175,10 +251,11 @@ require([
 
                 var target = $("[name='itext-en-label']"),
                     sourceUid = mug1.ufid;
+                target.val("test string").change();
                 vellum_util.setCaretPosition(target[0], 4);
                 call("handleDropFinish", target, sourceUid, mug1);
                 var val = mug2.p.labelItextID.getValue('default', 'en');
-                assert.equal(val, 'ques<output value="/data/question1" />tion2');
+                assert.equal(val, 'test<output value="/data/question1" /> string');
                 done();
             }}});
         });
@@ -450,7 +527,7 @@ require([
                 <itext>\
                     <translation lang="en" default="">\
                         <text id="first_question-label">\
-                            <value>question1</value>\
+                            <value>first_question</value>\
                         </text>\
                         <text id="question2-label">\
                             <value><output value="/data/first_question" /> a <output value="/data/first_question" /> b <output value="/data/first_question" /> c <output value="/data/first_question" /> d <output value="if(/data/first_question = \'\', \'\', format-date(date(/data/first_question), \'%a%b%c\'))" /></value>\
@@ -458,7 +535,7 @@ require([
                     </translation>\
                     <translation lang="hin">\
                         <text id="first_question-label">\
-                            <value>question1</value>\
+                            <value>first_question</value>\
                         </text>\
                         <text id="question2-label">\
                             <value><output value="/data/first_question" /></value>\
@@ -476,57 +553,4 @@ require([
             </input>\
         </h:body>\
     </h:html>';
-
-    var TEST_XML_5 = '' +
-    '<h:html xmlns:h="http://www.w3.org/1999/xhtml"\
-             xmlns:orx="http://openrosa.org/jr/xforms"\
-             xmlns="http://www.w3.org/2002/xforms"\
-             xmlns:xsd="http://www.w3.org/2001/XMLSchema"\
-             xmlns:jr="http://openrosa.org/javarosa"\
-             xmlns:vellum="http://commcarehq.org/xforms/vellum">\
-        <h:head>\
-            <h:title>Untitled Form</h:title>\
-            <model>\
-                <instance>\
-                    <data xmlns:jrm="http://dev.commcarehq.org/jr/xforms"\
-                          xmlns="http://openrosa.org/formdesigner/8D6CF8A5-4396-45C3-9D05-64C3FD97A5D0"\
-                          uiVersion="1" version="1" name="Untitled Form">\
-                        <first_question/>\
-                        <question2/>\
-                    </data>\
-                </instance>\
-                <bind nodeset="/data/first_question" type="xsd:string"/>\
-                <bind nodeset="/data/question2" type="xsd:string"/>\
-                <itext>\
-                    <translation lang="en" default="">\
-                        <text id="first_question-label">\
-                            <value>question1</value>\
-                        </text>\
-                        <text id="question2-label">\
-                            <value>\
-                                <output value="/data/first_question" /> <output value="/data/question11" /> <output value="/data/question1/b" /> <output value="/data/question1b" />\
-                            </value>\
-                        </text>\
-                    </translation>\
-                    <translation lang="hin">\
-                        <text id="first_question-label">\
-                            <value>question1</value>\
-                        </text>\
-                        <text id="question2-label">\
-                            <value>question2</value>\
-                        </text>\
-                    </translation>\
-                </itext>\
-            </model>\
-        </h:head>\
-        <h:body>\
-            <input ref="/data/first_question">\
-                <label ref="jr:itext(\'first_question-label\')"/>\
-            </input>\
-            <input ref="/data/question2">\
-                <label ref="jr:itext(\'question2-label\')"/>\
-            </input>\
-        </h:body>\
-    </h:html>';
-
 });

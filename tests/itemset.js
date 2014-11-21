@@ -59,7 +59,7 @@ require([
             beforeEach(beforeFn);
             it("adds a new instance node to the form when necessary", function (done) {
                 call('loadXFormOrError', TEST_XML_1, function () {
-                    clickQuestion("External Data");
+                    clickQuestion("question1/itemset");
                     $("[name='data_source']").val("somefixture");
                     $("[name='value_ref'], [name='label_ref'], [name='filter_condition']")
                         .val("dummy").change();
@@ -77,7 +77,7 @@ require([
 
             it("preserves inner filters if you never change the data source", function (done) {
                 call('loadXFormOrError', INNER_FILTERS_XML, function () {
-                    clickQuestion("External Data");
+                    clickQuestion("question2/itemset");
                     $("[name='label_ref']").val("dummy").change();
 
                     util.assertXmlEqual(INNER_FILTERS_XML.replace('case_name', 'dummy'),
@@ -89,7 +89,7 @@ require([
             it("doesn't preserve inner filters if you change the data source", function (done) {
                 call('loadXFormOrError', INNER_FILTERS_XML, function () {
 
-                    clickQuestion("External Data");
+                    clickQuestion("question2/itemset");
                     var origSource = $("[name='data_source']").val(),
                         valueRef = $("[name='value_ref']").val(),
                         labelRef = $("[name='label_ref']").val(),
@@ -107,7 +107,7 @@ require([
             
             it("hides the copy button for itemsets", function (done) {
                 call('loadXFormOrError', TEST_XML_1, function () {
-                    clickQuestion("External Data");
+                    clickQuestion("question1/itemset");
                     var $but = $("button:contains(Copy)");
                     assert($but.length === 0);
                     done();
