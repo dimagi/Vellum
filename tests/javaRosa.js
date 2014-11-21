@@ -131,6 +131,28 @@ require([
             assert.equal(hinLabel.attr("placeholder"), "English");
         });
 
+        it("itext widget should show placeholder when empty", function () {
+            util.loadXML(TEST_XML_1);
+            util.addQuestion("Text", "temp");
+            util.clickQuestion("question1");
+            var enLabel = $("[name='itext-en-label']"),
+                hinLabel = $("[name='itext-hin-label']");
+            enLabel.val("").change();
+            assert.equal(enLabel.val(), "");
+            assert.equal(enLabel.attr("placeholder"), "question1");
+            assert.equal(hinLabel.val(), "");
+            assert.equal(hinLabel.attr("placeholder"), "question1");
+
+            util.clickQuestion("temp");
+            util.clickQuestion("question1");
+            enLabel = $("[name='itext-en-label']");
+            hinLabel = $("[name='itext-hin-label']");
+            assert.equal(enLabel.val(), "");
+            assert.equal(enLabel.attr("placeholder"), "question1");
+            assert.equal(hinLabel.val(), "");
+            assert.equal(hinLabel.attr("placeholder"), "question1");
+        });
+
         it("should update output refs when question ids change", function (done) {
             util.init({core: {onReady: function () {
                 util.addQuestion("Text", "question1");
@@ -477,7 +499,7 @@ require([
                 <itext>\
                     <translation lang="en" default="">\
                         <text id="first_question-label">\
-                            <value>question1</value>\
+                            <value>first_question</value>\
                         </text>\
                         <text id="question2-label">\
                             <value><output value="/data/first_question" /> a <output value="/data/first_question" /> b <output value="/data/first_question" /> c <output value="/data/first_question" /> d <output value="if(/data/first_question = \'\', \'\', format-date(date(/data/first_question), \'%a%b%c\'))" /></value>\
@@ -485,7 +507,7 @@ require([
                     </translation>\
                     <translation lang="hin">\
                         <text id="first_question-label">\
-                            <value>question1</value>\
+                            <value>first_question</value>\
                         </text>\
                         <text id="question2-label">\
                             <value><output value="/data/first_question" /></value>\
