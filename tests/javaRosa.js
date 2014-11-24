@@ -317,6 +317,21 @@ require([
                 }
             });
         });
+
+        it("should highlight label after tab", function () {
+            util.loadXML(TEST_XML_3);
+            util.clickQuestion("question1");
+            var enLabel = $("[name='itext-en-label']"),
+                hinLabel = $("[name='itext-hin-label']");
+            enLabel.val("test string").change();
+            enLabel.focus();
+            hinLabel.val("hin test string").change();
+            hinLabel.focus();
+            assert.equal(enLabel[0].selectionStart, 0);
+            assert.equal(enLabel[0].selectionEnd, 11);
+            assert.equal(hinLabel[0].selectionStart, 0);
+            assert.equal(hinLabel[0].selectionEnd, 15);
+        });
     });
 
     var TEST_XML_1 = '' + 
