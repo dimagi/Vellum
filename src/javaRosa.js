@@ -1217,7 +1217,11 @@ define([
             for (i = 1; i < cells.length; i++) {
                 head = header[i];
                 if (head) {
-                    item.getOrCreateForm(head.form).setValue(head.lang, cells[i]);
+                    if (item.hasForm(head.form)) {
+                        item.getForm(head.form).setValue(head.lang, cells[i]);
+                    } else if ($.trim(cells[i])) {
+                        item.getOrCreateForm(head.form).setValue(head.lang, cells[i]);
+                    }
                 }
             }
             cells = nextRow();

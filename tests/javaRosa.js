@@ -345,6 +345,22 @@ require([
                          'question1-label\t"First ""line\nSecond"" line\nThird line"\t' +
                          'Hindu trans\t\t\t\t\t\t');
         });
+
+        it("bulk translation tool should not create empty itext forms", function () {
+            util.loadXML(TEXT_QUESTION_XML);
+            var jr = util.call("getData").javaRosa,
+                trans = ('label\tdefault-en\tdefault-hin\taudio-en\taudio-hin\n' +
+                         'question1-label\t"First ""line\n' +
+                         'Second"" line\nThird line"\t\t\t\n');
+            jr.parseXLSItext(trans, jr.Itext);
+            var q1 = util.getMug("question1");
+            assert.equal(q1.p.labelItextID.get("en"),
+                         'First "line\nSecond" line\nThird line');
+            // existing translation should be cleared
+            assert.equal(q1.p.labelItextID.get("hin"), '');
+            // non-existent form should not be added
+            assert(!q1.p.labelItextID.hasForm("audio"), "unexpected form: audio");
+        });
     });
 
     var TEST_XML_1 = '' + 
