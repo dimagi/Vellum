@@ -904,8 +904,15 @@ define([
             .attr("name", widget.id)
             .attr("rows", "2")
             .addClass('input-block-level itext-widget-input')
-            .on('change keyup', function () {
+            .focus(function() {
+                this.select();
+            })
+            .on('change keyup', function (e) {
                 widget.updateValue();
+                // workaround for webkit: http://stackoverflow.com/a/12114908
+                if (e.which === 9) {
+                    this.select();
+                }
             });
 
         if (options.path === 'labelItext') {
