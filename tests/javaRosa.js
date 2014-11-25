@@ -155,6 +155,24 @@ require([
             assert.equal(hinLabel.attr("placeholder"), "question1");
         });
 
+        it("non-labelItext widget should show placeholder for non-default language", function () {
+            util.loadXML(TEXT_WITH_CONSTRAINT_XML);
+            util.clickQuestion("text");
+            var enItext = $("[name='itext-en-constraintMsg']"),
+                hinItext = $("[name='itext-hin-constraintMsg']");
+            hinItext.val("").change();
+            assert.equal(enItext.val(), "English");
+            assert.equal(hinItext.val(), "");
+            assert.equal(hinItext.attr("placeholder"), "English");
+            assert(!enItext.attr("placeholder"), enItext.attr("placeholder"));
+
+            enItext.val("").change();
+            assert.equal(enItext.val(), "");
+            assert.equal(hinItext.val(), "");
+            assert(!enItext.attr("placeholder"), enItext.attr("placeholder"));
+            assert(!hinItext.attr("placeholder"), hinItext.attr("placeholder"));
+        });
+
         it("non-labelItext widget should contain value on load", function () {
             util.loadXML(TEXT_WITH_CONSTRAINT_XML);
             util.clickQuestion("text");

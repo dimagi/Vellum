@@ -955,7 +955,7 @@ define([
         widget.defaultLang = Itext.getDefaultLanguage();
         widget.isDefaultLang = widget.language === widget.defaultLang;
         widget.isSyncedWithDefaultLang = false;
-        widget.hasDynamicPlaceholder = options.path === 'labelItext';
+        widget.hasNodeIdPlaceholder = options.path === 'labelItext';
 
         widget.getControl = function () {
             return $input;
@@ -1020,17 +1020,11 @@ define([
                 }
 
                 var value = widget.getItextValue(),
-                    placeholder;
-
-                if (widget.hasDynamicPlaceholder) {
-                    var nodeID = widget.mug.p.nodeID;
-                    if (widget.isDefaultLang) {
-                        placeholder = nodeID;
-                    } else {
-                        placeholder = widget.getItextValue(widget.defaultLang) || nodeID;
-                    }
-                    widget.setPlaceholder(placeholder);
+                    placeholder = widget.hasNodeIdPlaceholder ? widget.mug.p.nodeID : "";
+                if (!widget.isDefaultLang) {
+                    placeholder = widget.getItextValue(widget.defaultLang) || placeholder;
                 }
+                widget.setPlaceholder(placeholder);
                 widget.setValue(value && value !== placeholder ? value : "");
             }
         };
@@ -1075,30 +1069,33 @@ define([
             return null;
         };
 
-        if (widget.hasDynamicPlaceholder) {
-            if (widget.isDefaultLang) {
-                widget.mug.on('property-changed', function (e) {
-                    if (e.property === "nodeID") {
-                        widget.setPlaceholder(e.val);
-                        if (widget.getItextValue() === e.previous || !widget.getValue()) {
-                            widget.setItextValue(e.val);
-                            widget.setValue("");
-                        }
+        if (widget.hasNodeIdPlaceholder && widget.isDefaultLang) {
+            widget.mug.on('property-changed', function (e) {
+                if (e.property === "nodeID") {
+                    widget.setPlaceholder(e.val);
+                    if (widget.getItextValue() === e.previous || !widget.getValue()) {
+                        widget.setItextValue(e.val);
+                        widget.setValue("");
                     }
-                });
-            } else {
-                widget.mug.on('defaultLanguage-itext-changed', function (e) {
-                    if (e.form === widget.form && e.itextType === widget.itextType) {
-                        var placeholder = e.value || widget.mug.p.nodeID;
-                        widget.setPlaceholder(placeholder);
-                        if (widget.getItextValue() === e.prevValue || !widget.getValue()) {
-                            // Make sure all the defaults keep in sync.
-                            widget.setItextValue(placeholder);
-                            widget.setValue("");
-                        }
+                }
+            });
+        }
+
+        if (!widget.isDefaultLang) {
+            widget.mug.on('defaultLanguage-itext-changed', function (e) {
+                if (e.form === widget.form && e.itextType === widget.itextType) {
+                    var placeholder = e.value;
+                    if (!placeholder && widget.hasNodeIdPlaceholder) {
+                        placeholder = widget.mug.p.nodeID;
                     }
-                });
-            }
+                    widget.setPlaceholder(placeholder);
+                    if (widget.getItextValue() === e.prevValue || !widget.getValue()) {
+                        // Make sure all the defaults keep in sync.
+                        widget.setItextValue(placeholder);
+                        widget.setValue("");
+                    }
+                }
+            });
         }
 
         widget.fireChangeEvents = function () {
