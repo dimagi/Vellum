@@ -909,6 +909,7 @@ define([
             })
             .on('change keyup', function (e) {
                 widget.updateValue();
+                // workaround for webkit: http://stackoverflow.com/a/12114908
                 if (e.which === 9) {
                     this.select();
                 }
