@@ -41,8 +41,14 @@ define([
                 i;
 
             var defaultOrNothing = function (item, language, form) {
-                return (item && item.hasForm(form)) ? 
-                    item.getForm(form).getValueOrDefault(language) : "";
+                var value;
+                if (item && item.hasForm(form)) {
+                    value = item.getForm(form).getValueOrDefault(language);
+                    value = value.replace(/\t/g, " ");
+                } else {
+                    value = "";
+                }
+                return value;
                 // TODO see newline treatment in javaRosa.js TSV logic
                 //return value.replace(/\r?\n/g, "&#10;");
             };

@@ -66,7 +66,7 @@
 			<itext>
 				<translation lang="en" default="">
 					<text id="question1-label">
-						<value>question1 en label</value>
+						<value>	question1 en label</value>
 						<value form="image">jr://file/commcare/image/data/question1.png</value>
 						<value form="audio">jr://file/commcare/audio/data/question1.mp3</value>
 						<value form="video">jr://file/commcare/video/data/question1.3gp</value>
