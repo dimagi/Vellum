@@ -1019,18 +1019,19 @@ define([
                     return;
                 }
 
+                var value = widget.getItextValue(),
+                    placeholder;
+
                 if (widget.hasDynamicPlaceholder) {
-                    var nodeID = widget.mug.p.nodeID,
-                        value = widget.getItextValue(),
-                        placeholder;
+                    var nodeID = widget.mug.p.nodeID;
                     if (widget.isDefaultLang) {
                         placeholder = nodeID;
                     } else {
                         placeholder = widget.getItextValue(widget.defaultLang) || nodeID;
                     }
                     widget.setPlaceholder(placeholder);
-                    widget.setValue(value && value !== placeholder ? value : "");
                 }
+                widget.setValue(value && value !== placeholder ? value : "");
             }
         };
 

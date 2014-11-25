@@ -6,7 +6,8 @@ require([
     'vellum/javaRosa',
     'vellum/util',
     'text!static/javaRosa/outputref-group-rename.xml',
-    'text!static/javaRosa/output-refs.xml'
+    'text!static/javaRosa/output-refs.xml',
+    'text!static/javaRosa/text-with-constraint.xml'
 ], function (
     chai,
     $,
@@ -14,7 +15,8 @@ require([
     jr,
     vellum_util,
     OUTPUTREF_GROUP_RENAME_XML,
-    OUTPUT_REFS_XML
+    OUTPUT_REFS_XML,
+    TEXT_WITH_CONSTRAINT_XML
 ) {
     var assert = chai.assert,
         call = util.call;
@@ -151,6 +153,13 @@ require([
             assert.equal(enLabel.attr("placeholder"), "question1");
             assert.equal(hinLabel.val(), "");
             assert.equal(hinLabel.attr("placeholder"), "question1");
+        });
+
+        it("non-labelItext widget should contain value on load", function () {
+            util.loadXML(TEXT_WITH_CONSTRAINT_XML);
+            util.clickQuestion("text");
+            assert.equal($("[name='itext-en-constraintMsg']").val(), "English");
+            assert.equal($("[name='itext-hin-constraintMsg']").val(), "Hindi");
         });
 
         it("should update output refs when question ids change", function (done) {
