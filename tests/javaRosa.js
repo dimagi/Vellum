@@ -8,7 +8,8 @@ require([
     'text!static/javaRosa/outputref-group-rename.xml',
     'text!static/javaRosa/text-question.xml',
     'text!static/javaRosa/multi-line-trans.xml',
-    'text!static/javaRosa/output-refs.xml'
+    'text!static/javaRosa/output-refs.xml',
+    'text!static/javaRosa/text-with-constraint.xml'
 ], function (
     chai,
     $,
@@ -18,7 +19,8 @@ require([
     OUTPUTREF_GROUP_RENAME_XML,
     TEXT_QUESTION_XML,
     MULTI_LINE_TRANS_XML,
-    OUTPUT_REFS_XML
+    OUTPUT_REFS_XML,
+    TEXT_WITH_CONSTRAINT_XML
 ) {
     var assert = chai.assert,
         call = util.call;
@@ -155,6 +157,31 @@ require([
             assert.equal(enLabel.attr("placeholder"), "question1");
             assert.equal(hinLabel.val(), "");
             assert.equal(hinLabel.attr("placeholder"), "question1");
+        });
+
+        it("non-labelItext widget should show placeholder for non-default language", function () {
+            util.loadXML(TEXT_WITH_CONSTRAINT_XML);
+            util.clickQuestion("text");
+            var enItext = $("[name='itext-en-constraintMsg']"),
+                hinItext = $("[name='itext-hin-constraintMsg']");
+            hinItext.val("").change();
+            assert.equal(enItext.val(), "English");
+            assert.equal(hinItext.val(), "");
+            assert.equal(hinItext.attr("placeholder"), "English");
+            assert(!enItext.attr("placeholder"), enItext.attr("placeholder"));
+
+            enItext.val("").change();
+            assert.equal(enItext.val(), "");
+            assert.equal(hinItext.val(), "");
+            assert(!enItext.attr("placeholder"), enItext.attr("placeholder"));
+            assert(!hinItext.attr("placeholder"), hinItext.attr("placeholder"));
+        });
+
+        it("non-labelItext widget should contain value on load", function () {
+            util.loadXML(TEXT_WITH_CONSTRAINT_XML);
+            util.clickQuestion("text");
+            assert.equal($("[name='itext-en-constraintMsg']").val(), "English");
+            assert.equal($("[name='itext-hin-constraintMsg']").val(), "Hindi");
         });
 
         it("should update output refs when question ids change", function (done) {
@@ -360,6 +387,21 @@ require([
             assert.equal(q1.p.labelItextID.get("hin"), '');
             // non-existent form should not be added
             assert(!q1.p.labelItextID.hasForm("audio"), "unexpected form: audio");
+        });
+
+        it("should highlight label after tab", function () {
+            util.loadXML(TEST_XML_3);
+            util.clickQuestion("question1");
+            var enLabel = $("[name='itext-en-label']"),
+                hinLabel = $("[name='itext-hin-label']");
+            enLabel.val("test string").change();
+            enLabel.focus();
+            hinLabel.val("hin test string").change();
+            hinLabel.focus();
+            assert.equal(enLabel[0].selectionStart, 0);
+            assert.equal(enLabel[0].selectionEnd, 11);
+            assert.equal(hinLabel[0].selectionStart, 0);
+            assert.equal(hinLabel[0].selectionEnd, 15);
         });
     });
 
