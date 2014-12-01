@@ -13,6 +13,7 @@ define([
     'text!vellum/templates/button_remove.html',
     'vellum/widgets',
     'vellum/util',
+    'vellum/tsv',
     'vellum/core'
 ], function (
     _,
@@ -22,7 +23,8 @@ define([
     control_group,
     button_remove,
     widgets,
-    util
+    util,
+    tsv
 ) {
     var SUPPORTED_MEDIA_TYPES = ['image', 'audio', 'video'],
         DEFAULT_EXTENSIONS = {
@@ -95,7 +97,12 @@ define([
                 });
             }
         },
+        get: function(lang, form) {
+            // convenience API
+            return this.getValue(_.isUndefined(form) ? "default" : form, lang);
+        },
         getValue: function(form, language) {
+            // DEPRECATED use `get("lang")` or `get("lang", "form")`
             if (this.hasForm(form)) {
                 return this.getForm(form).getValue(language);
             }
@@ -1192,36 +1199,45 @@ define([
     };
 
     var parseXLSItext = function (str, Itext) {
-        var rows = str.split('\n'),
-            i, j, k, cells, lang, iID, val;
+        var forms = ["default", "audio", "image" , "video"],
+            languages = Itext.getLanguages(),
+            nextRow = tsv.makeRowParser(str),
+            header = nextRow(),
+            i, cells, head, item;
 
-        // TODO: should this be configurable?
-        var exportCols = ["default", "audio", "image" , "video"];
-        var languages = Itext.getLanguages();
+        if (header) {
+            header = _.map(header, function (val) {
+                var formlang = val.split("-");
+                if (forms.indexOf(formlang[0]) === -1 ||
+                        languages.indexOf(formlang[1]) === -1) {
+                    return null;
+                }
+                return {form: formlang[0], lang: formlang[1]};
+            });
+        }
 
-        for (i = 1; i < rows.length; i++) {
-            cells = rows[i].split('\t');
-            iID = cells[0];
-
-            for(j = 0; j < exportCols.length; j++) {
-                var formName = exportCols[j];
-                for(k = 0; k < languages.length; k++) {
-                    if(cells[1 + j * languages.length + k]) {
-                        lang = languages[k];
-                        val = cells[1 + j * languages.length + k];
-
-                        Itext.getOrCreateItem(iID).getOrCreateForm(formName).setValue(lang, val);
+        cells = nextRow();
+        while (cells) {
+            item = Itext.getOrCreateItem(cells[0]);
+            for (i = 1; i < cells.length; i++) {
+                head = header[i];
+                if (head) {
+                    if (item.hasForm(head.form)) {
+                        item.getForm(head.form).setValue(head.lang, cells[i]);
+                    } else if ($.trim(cells[i])) {
+                        item.getOrCreateForm(head.form).setValue(head.lang, cells[i]);
                     }
                 }
             }
+            cells = nextRow();
         }
     };
-
 
     var generateItextXLS = function (vellum, Itext) {
         // todo: fix abstraction barrier
         vellum.beforeSerialize();
-        
+
+        // TODO move TSV generation logic into tsv module
         function getItemFormValues(item, languages, form) {
 
             var ret = [];
@@ -1230,8 +1246,11 @@ define([
                 var language = languages[i];
                 var value = item.hasForm(form) ? (item.getForm(form).getValueOrDefault(language) || "") : "";
 
-                // escape newlines.  What ever generates a \r ?
-                ret.push(value.replace(/\r?\n/g, "&#10;"));
+                if (specialChars.test(value)) {
+                    // quote field
+                    value = '"' + value.replace(/"/g, '""') + '"';
+                }
+                ret.push(value);
             }
             return ret.join("\t");
         }
@@ -1257,6 +1276,7 @@ define([
             return header_row.join("\t");
         }
 
+        var specialChars = /[\r\n\u2028\u2029"]/g;
         var ret = [];
         // TODO: should this be configurable?
         var exportCols = ["default", "audio", "image" , "video"];
@@ -1316,6 +1336,10 @@ define([
             this.data.javaRosa.ItextItem = ItextItem;
             this.data.javaRosa.ItextForm = ItextForm;
             this.data.javaRosa.ICONS = ICONS;
+
+            // exposed for testing
+            this.data.javaRosa.parseXLSItext = parseXLSItext;
+            this.data.javaRosa.generateItextXLS = generateItextXLS;
         },
         insertOutputRef: function (mug, target, path, dateFormat) {
             var output = getOutputRef(path, dateFormat),
