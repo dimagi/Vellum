@@ -1931,6 +1931,7 @@ define([
             $textarea.val(generateItextXLS(this, Itext));
 
             $modal.modal('show');
+            $modal.one('shown', function () { $textarea.focus(); });
         }
     });
 });
