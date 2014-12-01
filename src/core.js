@@ -494,7 +494,7 @@ define([
         codeMirror.setSize('100%', '100%');
 
         $modal.modal('show');
-        $modal.on('shown', function () {
+        $modal.one('shown', function () {
             codeMirror.refresh();
             codeMirror.focus();
         });
@@ -512,8 +512,10 @@ define([
         $modal.find('.modal-body').html($exportForm);
 
         // display current values
-        $exportForm.find('textarea').val(this.data.core.form.getExportTSV());
+        var $text = $exportForm.find('textarea');
+        $text.val(this.data.core.form.getExportTSV());
         $modal.modal('show');
+        $modal.one('shown', function () { $text.focus(); });
     };
         
     fn.showFormPropertiesDialog = function () {
@@ -561,6 +563,9 @@ define([
         });
 
         $modal.modal('show');
+        $modal.one('shown', function () {
+            $modalBody.find("input:first").focus().select();
+        });
     };
     
     fn.generateNewModal = function (title, buttons, closeButtonTitle) {
