@@ -673,6 +673,15 @@ define([
         }
     });
 
+    var Signature = util.extend(Image, {
+        typeName: 'Signature Capture',
+        icon: 'fcc fcc-fd-signature',
+        init: function (mug, form) {
+            Image.init(mug, form);
+            mug.p.appearance = "signature";
+        }
+    });
+
     var Geopoint = util.extend(defaultOptions, {
         typeName: 'GPS',
         icon: 'icon-map-marker',
@@ -986,6 +995,7 @@ define([
                 "Repeat": Repeat,
                 "Secret": Secret,
                 "Select": Select,
+                "Signature": Signature,
                 "Text": Text,
                 "Time": Time,
                 "Trigger": Trigger,
