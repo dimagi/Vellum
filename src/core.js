@@ -1905,9 +1905,27 @@ define([
         return parser.parseBindElement(form, el, path);
     };
 
-    fn.parseControlElement = function (form, path, $el, $groupEl, parentMug) {
-        return parser.parseControlElement(form, path, $el, $groupEl, parentMug);
-    };
+    /**
+     * Extension point for plugins to hook into the mapping of control nodes
+     * to control mugs.
+     *
+     * @param map - An object mapping control node tag names to functions.
+     *  The keys to this map are lowercase control node tag names.
+     *  The values are functions that support the following call signature:
+     *
+     *      `adapt = makeMugAdaptor($controlElement, appearance, nodePath)`
+     *
+     *  `makeMugAdaptor` must return a function that converts a data-bind-only
+     *  mug or null to a control mug. This function must support the following
+     *  call signature:
+     *
+     *      `mug = adapt(mug, form)`
+     *
+     *  Most adaptor factories will use `parser.js:makeMugAdaptor` to create an
+     *  `adapt` function that does a typical mug conversion. See also
+     *  `parser.js:makeControlOnlyMugAdaptor` for control-only mugs.
+     */
+    fn.updateControlNodeAdaptorMap = function (map) {};
 
     fn.contributeToModelXML = function (xmlWriter) {};
 

@@ -347,6 +347,17 @@ define([
         canOutputValue: true,
         maxChildren: -1,
         icon: null,
+        // whether it can be created during data node parsing
+        // due to presence of vellum:role="TypeName" attribute
+        supportsDataNodeRole: false,
+        /**
+         * Parser integration: get children from data node
+         *
+         * @param node - This mug's data node, a jQuery object.
+         */
+        dataNodeChildren: function ($node) {
+            return $node.children();
+        },
         afterInsert: function (form, mug) {},
         getAppearanceAttribute: function (mug) {
             return mug.p.appearance;

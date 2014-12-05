@@ -17,7 +17,10 @@ define([
         itemsetEnabled;
 
     function init (instance) {
+        var data = instance.data.core;
         itemsetEnabled = instance.isPluginEnabled("itemset");
+        data.controlNodeAdaptorMap = buildControlNodeAdaptorMap();
+        instance.updateControlNodeAdaptorMap(data.controlNodeAdaptorMap);
     }
 
     $.fn.popAttr = function (name) {
@@ -37,7 +40,7 @@ define([
         }
         return val;
     };
-   
+
     function getAttributes (element) {
         var attributes = $(element)[0].attributes,
             attrMap = {};
@@ -144,7 +147,7 @@ define([
             if (mug) {
                 form.dataTree.insertMug(mug, 'into', parentMug);
             }
-            $(this).children().each(function () {
+            mug.options.dataNodeChildren($(this)).each(function () {
                 recFunc.call(this, mug);
             });
         };
@@ -193,8 +196,16 @@ define([
             nodeVal = $el.children().length ? null : $el.text(),
             extraXMLNS = $el.popAttr('xmlns') || null,
             keyAttr = $el.popAttr('key') || null,
-            mug = form.mugTypes.make('DataBindOnly', form);
-        
+            role = $el.attr('vellum:role');
+
+        if (role && form.mugTypes.allTypes.hasOwnProperty(role) &&
+            form.mugTypes.allTypes[role].supportsDataNodeRole) {
+            $el.popAttr('vellum:role');
+        } else {
+            role = 'DataBindOnly';
+        }
+
+        var mug = form.mugTypes.make(role, form);
         mug.p.nodeID = nodeID;
         mug.p.dataValue = nodeVal;
 
@@ -299,73 +310,6 @@ define([
         }
     }
 
-    function mugTypeFromInput (dataType, appearance) {
-        if (!dataType) { 
-            return 'Text'; 
-        }
-        if(dataType === 'long') {
-            return 'Long';
-        }else if(dataType === 'int') {
-            return 'Int';
-        }else if(dataType === 'double') {
-            return 'Double';
-        }else if(dataType === 'geopoint') {
-            return 'Geopoint';
-        }else if(dataType === 'barcode') {
-            return 'Barcode';
-        }else if(dataType === 'intent') {
-            return 'AndroidIntent';
-        }else if(dataType === 'string') {
-            if (appearance === "numeric") {
-                return 'PhoneNumber';
-            } else {
-                return 'Text';
-            }
-        }else if(dataType === 'date') {
-            return 'Date';
-        }else if(dataType === 'datetime') {
-            return 'DateTime';
-        }else if(dataType === 'time') {
-            return 'Time';
-        }else {
-            return 'Text';
-        }
-    }
-
-    function mugTypeFromGroup (cEl, appearance) {
-        if (appearance === 'field-list') {
-            return 'FieldList';
-        } else if ($(cEl).children('repeat').length > 0) {
-            return 'Repeat';
-        } else {
-            return 'Group';
-        }
-    }
-
-    function mugTypeFromUpload (mediaType, nodePath, appearance) {
-        // todo: fix broken oldMug closure reference
-        if(!mediaType) {
-            throw 'Unable to parse binary question type. ' +
-                'The question has no MediaType attribute assigned to it!';
-        }
-        if (mediaType === 'video/*') {
-            /* fix buggy eclipse syntax highlighter (because of above string) */ 
-            return 'Video';
-        } else if (mediaType === 'image/*') {
-            /* fix buggy eclipse syntax highlighter (because of above string) */ 
-            if (appearance === 'signature') {
-                return 'Signature';
-            } else {
-                return 'Image';
-            }
-        } else if (mediaType === 'audio/*') {
-            /* fix buggy eclipse syntax highlighter (because of above string) */ 
-            return 'Audio';
-        } else {
-            throw 'Unrecognized upload question type for Element: ' + nodePath + '!';
-        }
-    }
-
     function makeAbsolute(path, parentMug, form) {
         if (!path) {
             path = "unknown"; // question ID is missing
@@ -385,72 +329,169 @@ define([
 
     function parseControlElement(form, nodePath, cEl, $groupEl, parentMug) {
         var $cEl = $groupEl || cEl,
-            tagName, dataType, 
+            tagName = $cEl[0].nodeName.toLowerCase(),
             appearance = $cEl.popAttr('appearance'),
-            mediaType = $cEl.popAttr('mediatype') || null,
-            MugClass;
-        mediaType = mediaType ? mediaType.toLowerCase() : mediaType;
+            adapt, mug;
 
-        tagName = $cEl[0].nodeName;
-        if (tagName !== 'item' && tagName !== 'itemset') {
-            nodePath = makeAbsolute(nodePath, parentMug, form);
+        var getAdaptor = form.vellum.data.core.controlNodeAdaptorMap[tagName];
+        if (getAdaptor) {
+            adapt = getAdaptor($cEl, appearance, nodePath);
         }
-        var mug = form.getMugByPath(nodePath);
-
-        //broadly categorize
-        tagName = tagName.toLowerCase();
-        var hasItemset;
-        if (tagName === 'select') {
-            hasItemset = itemsetEnabled && $cEl.children('itemset').length;
-            MugClass = hasItemset ? 'MSelectDynamic' : 'MSelect';
-        } else if (tagName === 'select1') {
-            hasItemset = itemsetEnabled && $cEl.children('itemset').length;
-            MugClass = hasItemset ? 'SelectDynamic' : 'Select';
-        } else if (tagName === 'trigger') {
-            MugClass = 'Trigger';
-        } else if (tagName === 'input') {
-            if ($cEl.popAttr('readonly') === 'true()') {
-                MugClass = 'Trigger';
-            } else {
-                dataType = mug && mug.p.dataType;
-                if (dataType) {
-                    dataType = dataType.replace('xsd:',''); //strip out extraneous namespace
-                    dataType = dataType.toLowerCase();
-                }
-                MugClass = mugTypeFromInput(dataType, appearance);
-            }
-        } else if (tagName === 'item') {
-            MugClass = 'Item';
-        } else if (tagName === 'itemset' && itemsetEnabled) {
-            MugClass = 'Itemset';
-        } else if (tagName === 'group') {
-            MugClass = mugTypeFromGroup($cEl, appearance);
-        } else if (tagName === 'secret') {
-            MugClass = 'Secret';
-        } else if (tagName === 'upload') {
-            MugClass = mugTypeFromUpload(mediaType, nodePath, appearance);
-        } else {
+        if (!adapt) {
             // unknown question type
-            MugClass = 'ReadOnly';
+            adapt = makeMugAdaptor('ReadOnly');
         }
 
-        if (mug) {
-            form.changeMugType(mug, MugClass);
-        } else {
-            // items only. also can happen with bad XForm (missing data node)
-            mug = form.mugTypes.make(MugClass, form);
+        if (!adapt.ignoreDataNode) {
+            nodePath = makeAbsolute(nodePath, parentMug, form);
+            mug = form.getMugByPath(nodePath);
         }
+        mug = adapt(mug, form);
         mug.parentMug = parentMug;
-
         if (appearance) {
             mug.p.appearance = appearance;
-        }
-        if (MugClass === "Trigger") {
-            mug.p.showOKCheckbox = (appearance !== 'minimal');
         }
         populateMug(form, nodePath, mug, cEl, $groupEl);
 
         return mug;
+    }
+
+    /**
+     * Make mug adaptor to convert from data-bind-only mug to control mug
+     *
+     * @param type - The final (adapted) mug type.
+     * @returns - An adaptor function that returns the adapted mug. The adaptor
+     *  function accepts two arguments `(mug, form)`: `mug` is a data-bind-only
+     *  mug or null, and `form` is the form object. Additionally, the adaptor
+     *  function has the following attributes:
+     *
+     *      - type : the `type` parameter passed to `makeMugAdaptor`.
+     */
+    function makeMugAdaptor(type) {
+        var adapt = function (mug, form) {
+            if (mug) {
+                form.changeMugType(mug, type);
+            } else {
+                // unexpected; can happen with bad XForm (missing data node)
+                // TODO parse warning
+                mug = form.mugTypes.make(type, form);
+            }
+            return mug;
+        };
+        adapt.type = type;
+        return adapt;
+    }
+
+    /**
+     * A mug adaptor factory for mugs with no corresponding data node (Item)
+     *
+     * The mug passed to `adapt` is ignored (assumed to be undefined). An
+     * attribute is set on the returned adaptor (`ignoreDataNode = true`)
+     * to make the parser skip the data node lookup.
+     */
+    function makeControlOnlyMugAdaptor(type) {
+        var adapt = function (mug, form) {
+            return form.mugTypes.make(type, form);
+        };
+        adapt.type = type;
+        adapt.ignoreDataNode = true;
+        return adapt;
+    }
+
+    function buildControlNodeAdaptorMap() {
+        var inputAdaptors = {
+                'string': makeMugAdaptor('Text'),
+                'long': makeMugAdaptor('Long'),
+                'int': makeMugAdaptor('Int'),
+                'double': makeMugAdaptor('Double'),
+                'date': makeMugAdaptor('Date'),
+                'datetime': makeMugAdaptor('DateTime'),
+                'time': makeMugAdaptor('Time'),
+                'geopoint': makeMugAdaptor('Geopoint'),
+                'barcode': makeMugAdaptor('Barcode'),
+                'intent': makeMugAdaptor('AndroidIntent')
+            },
+            adaptItem = makeControlOnlyMugAdaptor('Item'),
+            _adaptTrigger = makeMugAdaptor('Trigger'),
+            triggerAdaptor = function (appearance) {
+                return function (mug, form) {
+                    mug = _adaptTrigger(mug, form);
+                    mug.p.showOKCheckbox = (appearance !== 'minimal');
+                    return mug;
+                };
+            };
+        return {
+            itemset: function () { return makeControlOnlyMugAdaptor('Itemset'); }, // TODO move to itemsets plugin
+            item: function () { return adaptItem; },
+            secret: function () { return makeMugAdaptor('Secret'); },
+            trigger: function ($cEl, appearance) { return triggerAdaptor(appearance); },
+            select: function ($cEl) {
+                var hasItemset = itemsetEnabled && $cEl.children('itemset').length; // TODO move to itemsets plugin
+                return makeMugAdaptor(hasItemset ? 'MSelectDynamic' : 'MSelect');
+            },
+            select1: function ($cEl) {
+                var hasItemset = itemsetEnabled && $cEl.children('itemset').length; // TODO move to itemsets plugin
+                return makeMugAdaptor(hasItemset ? 'SelectDynamic' : 'Select');
+            },
+            input: function ($cEl, appearance) {
+                if ($cEl.popAttr('readonly') === 'true()') {
+                    // WARNING produces different XML than consumed (input -> trigger)
+                    return triggerAdaptor(appearance);
+                }
+                return function(mug, form) {
+                    var dataType = mug && mug.p.dataType;
+                    if (dataType) {
+                        dataType = dataType.replace('xsd:',''); //strip out extraneous namespace
+                        dataType = dataType.toLowerCase();
+                        if (inputAdaptors.hasOwnProperty(dataType)) {
+                            if (dataType === 'string' && appearance === 'numeric') {
+                                return makeMugAdaptor('PhoneNumber')(mug, form);
+                            }
+                            return inputAdaptors[dataType](mug, form);
+                        }
+                    }
+                    return inputAdaptors.string(mug, form);
+                };
+            },
+            group: function ($cEl, appearance) {
+                var type;
+                if (appearance === 'field-list') {
+                    type = 'FieldList';
+                } else if ($cEl.children('repeat').length > 0) {
+                    type = 'Repeat';
+                } else {
+                    type = 'Group';
+                }
+                return makeMugAdaptor(type);
+            },
+            upload: function ($cEl, appearance, nodePath) {
+                var mediaType = $cEl.popAttr('mediatype');
+                if(!mediaType) {
+                    // Why throw?! This will kill form parsing.
+                    // TODO create a parser warning instead?
+                    throw 'Unable to parse binary question type. ' +
+                        'The question has no MediaType attribute assigned to it!';
+                }
+                var type;
+                mediaType = mediaType.toLowerCase();
+                if (mediaType === 'video/*') { /* fix eclipse syntax highlighter */
+                    type = 'Video';
+                } else if (mediaType === 'image/*') { /* fix eclipse syntax highlighter */
+                    if (appearance === 'signature') {
+                        type = 'Signature';
+                    } else {
+                        type = 'Image';
+                    }
+                } else if (mediaType === 'audio/*') { /* fix eclipse syntax highlighter */
+                    type = 'Audio';
+                } else {
+                    // Why throw?! This will kill form parsing.
+                    // TODO create a parser warning instead?
+                    throw 'Unrecognized upload question type for Element: ' + nodePath;
+                }
+                return makeMugAdaptor(type);
+            }
+        };
     }
 
     function parseBoolAttributeValue (attrString, undefined) {
@@ -564,8 +605,7 @@ define([
             }
 
             var path = getPathFromControlElement(el, form),
-                mug = form.vellum.parseControlElement(
-                    form, path, el, groupEl, parentMug);
+                mug = parseControlElement(form, path, el, groupEl, parentMug);
 
             form.controlTree.insertMug(mug, 'into', parentMug);
 
@@ -694,6 +734,7 @@ define([
         parseXForm: parseXForm,
         parseDataElement: parseDataElement,
         parseBindElement: parseBindElement,
-        parseControlElement: parseControlElement
+        makeControlOnlyMugAdaptor: makeControlOnlyMugAdaptor,
+        makeMugAdaptor: makeMugAdaptor
     };
 });
