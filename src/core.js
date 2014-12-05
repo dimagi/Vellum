@@ -155,6 +155,17 @@ define([
             },
             unsavedMessage: 'Are you sure you want to exit? All unsaved changes will be lost!'
         });
+        this.data.core.$fullscreenButton = $('<button class="btn"><i class="icon-resize-full"></button>').click(function (e) {
+            e.preventDefault();
+            if (_this.data.windowManager.fullscreen) {
+                _this.data.windowManager.fullscreen = false;
+                $('i', this).removeClass('icon-resize-small').addClass('icon-resize-full');
+            } else {
+                _this.data.windowManager.fullscreen = true;
+                $('i', this).addClass('icon-resize-small').removeClass('icon-resize-full');
+            }
+            _this.data.windowManager.adjustToWindow();
+        })
         bindBeforeUnload(this.data.core.saveButton.beforeunload);
         this.data.core.currentErrors = [];
 
@@ -223,6 +234,8 @@ define([
 
         var $saveButtonContainer = this.$f.find('.fd-save-button');
         this.data.core.saveButton.ui.appendTo($saveButtonContainer);
+        var $fullscerenButtonContainer = this.$f.find('.fd-fullscreen-button');
+        this.data.core.$fullscreenButton.appendTo($fullscerenButtonContainer);
     };
 
     fn._getQuestionGroups = function () {
