@@ -155,17 +155,26 @@ define([
             },
             unsavedMessage: 'Are you sure you want to exit? All unsaved changes will be lost!'
         });
-        this.data.core.$fullscreenButton = $('<button class="btn"><i class="icon-resize-full"></button>').click(function (e) {
+        var setFullscreenIcon = function () {
+            var $i = $('i', _this.data.core.$fullscreenButton);
+            if (_this.data.windowManager.fullscreen) {
+                $i.addClass('icon-resize-small').removeClass('icon-resize-full');
+            } else {
+                $i.removeClass('icon-resize-small').addClass('icon-resize-full');
+            }
+        };
+        setTimeout(setFullscreenIcon, 0);
+        this.data.core.$fullscreenButton = $('<button class="btn"><i/></button>').click(function (e) {
             e.preventDefault();
             if (_this.data.windowManager.fullscreen) {
                 _this.data.windowManager.fullscreen = false;
-                $('i', this).removeClass('icon-resize-small').addClass('icon-resize-full');
             } else {
                 _this.data.windowManager.fullscreen = true;
-                $('i', this).addClass('icon-resize-small').removeClass('icon-resize-full');
             }
+            setFullscreenIcon();
             _this.data.windowManager.adjustToWindow();
-        })
+        });
+
         bindBeforeUnload(this.data.core.saveButton.beforeunload);
         this.data.core.currentErrors = [];
 
