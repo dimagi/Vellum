@@ -16,6 +16,21 @@ define([
             $(window).resize(adjustToWindow);
             $(document).scroll(adjustToWindow);
 
+            $('.fd-content-divider').mousedown(function (mousedown) {
+                var $left = $('.fd-content-left');
+                var leftWidth = $left.width();
+                var resize = function (mousemove) {
+                    $left.width(leftWidth + mousemove.pageX - mousedown.pageX);
+                    adjustToWindow();
+                };
+                $(window).disableSelection().on('mousemove', resize).one('mouseup', function () {
+                    $(this).enableSelection();
+                    $(this).off('mousemove', resize);
+                });
+            }).hover(function (e) {
+                e.target.style.cursor = 'col-resize';
+            });
+
             this.data.windowManager.offset = {
                 top: opts.topOffset || this.$f.offset().top-1,
                 bottom: opts.bottomOffset || 0,
