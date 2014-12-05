@@ -96,7 +96,7 @@ define(function () {
             },
             objectMap: {}  // todo
         },
-        plugins: ['itemset'],
+        plugins: ['itemset', 'modeliteration'],
         features: {
             'add_help_text': true,
             'group_in_field_list': true

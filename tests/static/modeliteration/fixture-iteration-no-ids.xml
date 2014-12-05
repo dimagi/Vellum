@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:orx="http://openrosa.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa" xmlns:vellum="http://commcarehq.org/xforms/vellum">
+	<h:head>
+		<h:title>Untitled</h:title>
+		<model>
+			<instance>
+				<data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/28B1D8B9-1144-4600-968A-349FD99FFCA5" uiVersion="1" version="1" name="Untitled">
+					<product count="" current_index="" vellum:role="repeat_model">
+						<item index="" jr:template=""/>
+					</product>
+				</data>
+			</instance>
+			<instance id="products" src="jr://fixture/commtrack:products"/>
+			<setvalue event="xforms-ready" ref="/data/product/@count" value="count(instance('products')/products/product)" />
+			<setvalue event="jr-insert" ref="/data/product/@current_index" value="count(/data/product/item)" />
+			<setvalue event="jr-insert" ref="/data/product/item/@index" value="int(/data/product/@current_index)" />
+			<bind nodeset="/data/product"/>
+			<itext>
+				<translation lang="en" default="">
+					<text id="product-label">
+						<value><output value="instance('products')/products/product[position()=current()/@index]/name"/></value>
+					</text>
+				</translation>
+			</itext>
+		</model>
+	</h:head>
+	<h:body>
+		<group>
+			<label ref="jr:itext('product-label')"/>
+			<repeat nodeset="/data/product/item" jr:count="/data/product/@count">
+			</repeat>
+		</group>
+	</h:body>
+</h:html>

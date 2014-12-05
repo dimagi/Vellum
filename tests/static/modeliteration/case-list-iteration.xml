@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:orx="http://openrosa.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa" xmlns:vellum="http://commcarehq.org/xforms/vellum">
+	<h:head>
+		<h:title>Untitled Form</h:title>
+		<model>
+			<instance>
+				<data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/28B1D8B9-1144-4600-968A-349FD99FFCA5" uiVersion="1" version="1" name="Untitled Form">
+					<child ids="" count="" current_index="" vellum:role="ModelRepeat">
+						<item id="" index="" jr:template="" />
+					</child>
+				</data>
+			</instance>
+			<instance id="casedb" src="jr://instance/casedb"></instance>
+			<bind nodeset="/data/child" />
+			<setvalue event="xforms-ready" ref="/data/child/@ids" value="join(' ', instance('casedb')/mother/child/@case_id)" />
+			<setvalue event="xforms-ready" ref="/data/child/@count" value="count-selected(/data/child/@ids)" />
+			<setvalue event="jr-insert" ref="/data/child/@current_index" value="count(/data/child/item)" />
+			<setvalue event="jr-insert" ref="/data/child/item/@index" value="int(/data/child/@current_index)" />
+			<setvalue event="jr-insert" ref="/data/child/item/@id" value="selected-at(/data/child/@ids,../@index)" />
+			<itext>
+				<translation lang="en" default="">
+					<text id="child-label">
+						<!-- is this <output> node a reasonable default for a model iteration?
+						     if not, what should go here? -->
+						<value><output value="instance('casedb')/mother/child[@case_id=current()/@id]/name"></output></value>
+					</text>
+				</translation>
+			</itext>
+		</model>
+	</h:head>
+	<h:body>
+		<group>
+			<label ref="jr:itext('child-label')" />
+			<repeat jr:count="/data/child/@count" jr:noAddRemove="true()" nodeset="/data/child/item" />
+		</group>
+	</h:body>
+</h:html>

@@ -721,6 +721,7 @@ define([
         parseXForm: parseXForm,
         parseDataElement: parseDataElement,
         parseBindElement: parseBindElement,
+        getAttributes: getAttributes,
         getPathFromControlElement: getPathFromControlElement,
         makeControlOnlyMugAdaptor: makeControlOnlyMugAdaptor,
         makeMugAdaptor: makeMugAdaptor
