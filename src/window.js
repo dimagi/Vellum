@@ -14,7 +14,17 @@ define([
                 adjustToWindow = function () { _this.adjustToWindow(); };
 
             $('.fd-scrollable').on('DOMMouseScroll mousewheel', function (ev) {
-                // copied from http://jsfiddle.net/TroyAlford/4wrxq/1/
+                /*
+                 * Copied from http://jsfiddle.net/TroyAlford/4wrxq/1/
+                 *
+                 * if your mouse is over the one of vellum's scrollable sections
+                 * and you use your mouse wheel (or touchpad, etc.) to scroll
+                 * you no longer start scrolling the window when the pane reaches the top/bottom
+                 *
+                 * up/down keys still have double scrolling behavior,
+                 * and you can still click the up down arrows on either scroll bar
+                 * for OS's that have that (i.e. most except macs)
+                 */
                 var $this = $(this),
                     scrollTop = this.scrollTop,
                     scrollHeight = this.scrollHeight,
