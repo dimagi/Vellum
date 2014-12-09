@@ -100,6 +100,9 @@ define(function () {
         features: {
             'add_help_text': true,
             'group_in_field_list': true
+        },
+        modelIteration: {
+            modelTypes: ['case', 'fixture']
         }
     };
 
