@@ -17,12 +17,12 @@ define([
     /**
      * A question, containing data, bind, and control elements.
      */
-    function Mug(options, form, baseSpec, copyFromMug) {
+    function Mug(options, form, baseSpec, attrs) {
         var properties = null;
         util.eventuality(this);
 
-        if (copyFromMug) {
-            properties = _.object(_.map(copyFromMug.p.getAttrs(), function (val, key) {
+        if (attrs) {
+            properties = _.object(_.map(attrs, function (val, key) {
                 if (val && typeof val === "object") {
                     // avoid potential duplicate references (e.g., itext items)
                     if ($.isPlainObject(val)) {
@@ -1298,7 +1298,8 @@ define([
     MugTypesManager.prototype = {
         make: function (typeName, form, copyFrom) {
             var mugType = this.allTypes[typeName];
-            return new Mug(mugType, form, this.baseSpec, copyFrom);
+            var attrs = copyFrom ? copyFrom.p.getAttrs() : null;
+            return new Mug(mugType, form, this.baseSpec, attrs);
         },
         changeType: function (mug, typeName) {
             var form = mug.form,
