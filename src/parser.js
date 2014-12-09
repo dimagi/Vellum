@@ -356,7 +356,7 @@ define([
         }
     }
 
-    function mugTypeFromUpload (mediaType, nodePath) {
+    function mugTypeFromUpload (mediaType, nodePath, appearance) {
         // todo: fix broken oldMug closure reference
         if(!mediaType) {
             throw 'Unable to parse binary question type. ' +
@@ -367,7 +367,11 @@ define([
             return 'Video';
         } else if (mediaType === 'image/*') {
             /* fix buggy eclipse syntax highlighter (because of above string) */ 
-            return 'Image';
+            if (appearance === 'signature') {
+                return 'Signature';
+            } else {
+                return 'Image';
+            }
         } else if (mediaType === 'audio/*') {
             /* fix buggy eclipse syntax highlighter (because of above string) */ 
             return 'Audio';
@@ -438,7 +442,7 @@ define([
         } else if (tagName === 'secret') {
             MugClass = 'Secret';
         } else if (tagName === 'upload') {
-            MugClass = mugTypeFromUpload(mediaType, nodePath);
+            MugClass = mugTypeFromUpload(mediaType, nodePath, appearance);
         } else {
             // unknown question type
             MugClass = 'ReadOnly';

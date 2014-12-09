@@ -383,6 +383,7 @@ define([
             }));
         }
 
+        this.ufid = util.get_guid();
         this.form = form;
         this._baseSpec = baseSpec;
         this.setOptionsAndProperties(options, properties);
@@ -672,6 +673,15 @@ define([
         }
     });
 
+    var Signature = util.extend(Image, {
+        typeName: 'Signature Capture',
+        icon: 'fcc fcc-fd-signature',
+        init: function (mug, form) {
+            Image.init(mug, form);
+            mug.p.appearance = "signature";
+        }
+    });
+
     var Geopoint = util.extend(defaultOptions, {
         typeName: 'GPS',
         icon: 'icon-map-marker',
@@ -930,10 +940,8 @@ define([
     }
     MugTypesManager.prototype = {
         make: function (typeName, form, copyFrom) {
-            var mugType = this.allTypes[typeName],
-                mug = new Mug(mugType, form, this.baseSpec, copyFrom);
-            mug.ufid = util.get_guid();
-            return mug;
+            var mugType = this.allTypes[typeName];
+            return new Mug(mugType, form, this.baseSpec, copyFrom);
         },
         changeType: function (mug, typeName) {
             var form = mug.form,
@@ -988,6 +996,7 @@ define([
                 "Repeat": Repeat,
                 "Secret": Secret,
                 "Select": Select,
+                "Signature": Signature,
                 "Text": Text,
                 "Time": Time,
                 "Trigger": Trigger,

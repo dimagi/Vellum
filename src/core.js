@@ -22,6 +22,7 @@ define([
     'vellum/util',
     'vellum/debugutil',
     'vellum/base',
+    'vellum/jstree-plugins',
     'less!vellum/less-style/main',
     'jquery.jstree',
     'jquery.bootstrap',
@@ -140,13 +141,40 @@ define([
         var _this = this,
             bindBeforeUnload = this.opts().core.bindBeforeUnload;
         this.data.core.saveButton = SaveButton.init({
-            save: function() {
+            save: function(event) {
+                var forceFullSave = event && event.altKey;
+                if (forceFullSave &&
+                    !window.confirm("Holding the ALT key while clicking save " +
+                            "invokes an inefficient save procedure. Do " +
+                            "this only if a normal save fails.")) {
+                    return; // abort
+                }
                 _this.ensureCurrentMugIsSaved(function () {
-                    _this.validateAndSaveXForm();
+                    _this.validateAndSaveXForm(forceFullSave);
                 });
             },
             unsavedMessage: 'Are you sure you want to exit? All unsaved changes will be lost!'
         });
+        var setFullscreenIcon = function () {
+            var $i = $('i', _this.data.core.$fullscreenButton);
+            if (_this.data.windowManager.fullscreen) {
+                $i.addClass('icon-resize-small').removeClass('icon-resize-full');
+            } else {
+                $i.removeClass('icon-resize-small').addClass('icon-resize-full');
+            }
+        };
+        setTimeout(setFullscreenIcon, 0);
+        this.data.core.$fullscreenButton = $('<button class="btn"><i/></button>').click(function (e) {
+            e.preventDefault();
+            if (_this.data.windowManager.fullscreen) {
+                _this.data.windowManager.fullscreen = false;
+            } else {
+                _this.data.windowManager.fullscreen = true;
+            }
+            setFullscreenIcon();
+            _this.data.windowManager.adjustToWindow();
+        });
+
         bindBeforeUnload(this.data.core.saveButton.beforeunload);
         this.data.core.currentErrors = [];
 
@@ -215,6 +243,8 @@ define([
 
         var $saveButtonContainer = this.$f.find('.fd-save-button');
         this.data.core.saveButton.ui.appendTo($saveButtonContainer);
+        var $fullscerenButtonContainer = this.$f.find('.fd-fullscreen-button');
+        this.data.core.$fullscreenButton.appendTo($fullscerenButtonContainer);
     };
 
     fn._getQuestionGroups = function () {
@@ -271,7 +301,8 @@ define([
                 questions: [
                     "Image",
                     "Audio",
-                    "Video"
+                    "Video",
+                    "Signature"
                 ]
             },
             {
@@ -362,6 +393,10 @@ define([
         var curMug = this.getCurrentlySelectedMug();
         if (curMug) {
             this.displayMugProperties(curMug);
+            if (this.data.core.unsavedDuplicateNodeId) {
+                this.getCurrentMugInput("nodeID")
+                    .val(this.data.core.unsavedDuplicateNodeId);
+            }
         }
     };
 
@@ -452,8 +487,8 @@ define([
             description: "This is the raw XML. You can edit or paste into this box to make changes " +
                          "to your form. Press 'Update Source' to save changes, or 'Close' to cancel."
         }));
-        modalHeaderHeight = $modal.find('.modal-header').outerHeight();
-        modalFooterHeight = $modal.find('.modal-footer').outerHeight();
+        modalHeaderHeight = $modal.find('.modal-header').outerHeight(false);
+        modalFooterHeight = $modal.find('.modal-footer').outerHeight(false);
         modalHeight = $(window).height() - 40;
         modalBodyHeight = modalHeight - (modalFooterHeight - modalHeaderHeight) - 126;
 
@@ -482,7 +517,7 @@ define([
         codeMirror.setSize('100%', '100%');
 
         $modal.modal('show');
-        $modal.on('shown', function () {
+        $modal.one('shown', function () {
             codeMirror.refresh();
             codeMirror.focus();
         });
@@ -500,8 +535,10 @@ define([
         $modal.find('.modal-body').html($exportForm);
 
         // display current values
-        $exportForm.find('textarea').val(this.data.core.form.getExportTSV());
+        var $text = $exportForm.find('textarea');
+        $text.val(this.data.core.form.getExportTSV());
         $modal.modal('show');
+        $modal.one('shown', function () { $text.focus(); });
     };
         
     fn.showFormPropertiesDialog = function () {
@@ -549,6 +586,9 @@ define([
         });
 
         $modal.modal('show');
+        $modal.one('shown', function () {
+            $modalBody.find("input:first").focus().select();
+        });
     };
     
     fn.generateNewModal = function (title, buttons, closeButtonTitle) {
@@ -676,134 +716,182 @@ define([
         }
     };
 
-    var validRootChildren,
-        typeData;
+    var typeData;
     // todo: jstree-related methods could be extracted out as a jstree wrapper
     // separate from the rest of the UI code.
     fn._createJSTree = function () {
-        typeData = {};
+        typeData = {
+            "#": {
+                valid_children: this.data.core.mugTypes.Group.validChildTypes
+            },
+            "default": {
+                icon: 'icon-question-sign',
+                max_children: 0,
+                valid_children: []
+            }
+        };
         _(this.data.core.mugTypes.allTypes).each(function (type, typeName) {
             typeData[typeName] = {
+                icon: type.icon,
                 max_children: type.maxChildren,
                 valid_children: type.validChildTypes
             };
         });
-        validRootChildren = this.data.core.mugTypes.Group.validChildTypes;
 
         var $tree, _this = this;
         this.data.core.$tree = $tree = this.$f.find('.fd-question-tree');
         $tree.jstree({
-            "json_data" : {
-                "data" : []
-            },
             "core": {
+                data: [],
+                worker: false,
+                multiple: false, // single-item selection
                 strings: {
-                    new_node: this.opts().core.noTextString
-                }
-            },
-            "ui" : {
-                select_limit: 1
-            },
-            "crrm" : {
-                "move": {
-                    "always_copy": false,
-                    "check_move": function (m) {
-                        var source = $(m.o),
-                            target = $(m.r),
-                            position = m.p;
-                        return _this.checkMove(
-                                        source.attr('id'),
-                                        source.attr('rel'),
-                                        target.attr('id'),
-                                        target.attr('rel'),
-                                        position);
+                    'New node': this.opts().core.noTextString
+                },
+                check_callback: function(operation, node, parent, position, more) {
+                    // operation can be 'create_node', 'rename_node', 'delete_node',
+                    // 'move_node' or 'copy_node'. In case of 'rename_node'
+                    // position is filled with the new node name
+                    if (operation === "move_node") {
+                        return _this.checkMove(node.id, node.type,
+                                               parent.id, parent.type, position);
                     }
+                    return true;  //allow all other operations
                 }
             },
             "dnd" : {
-                "drop_finish" : function(data) {
-                    var target = $(data.r),
-                        sourceUid = $(data.o).attr('id'),
-                        mug = _this.data.core.form.getMugByUFID(sourceUid);
+                copy: false,
+                inside_pos: "last"
+            },
+            "types": typeData,
+            conditionalevents: {
+                should_activate: function () {
+                    return _this.ensureCurrentMugIsSaved();
+                },
+                should_move: function (obj, par) {
+                    var form = _this.data.core.form,
+                        mug = (_.isArray(obj) ? obj[0] : obj).data.mug,
+                        nodeID = mug.p.nodeID,
+                        parent = this.get_node(par),
+                        parentMug = parent.data ? parent.data.mug : null;
 
-                    _this.handleDropFinish(target, sourceUid, mug);
+                    // disallow moving node if it would have the same ID as a sibling
+                    if (nodeID) {
+                        var childMug = form.getMugChildrenByNodeID(parentMug, nodeID)[0];
+                        if (childMug && childMug !== mug) {
+                            // setup state for alert
+                            _this.setUnsavedDuplicateNodeId(nodeID, true);
+                            // trigger alert
+                            _this.ensureCurrentMugIsSaved();
+                            return false;
+                        }
+                    }
+                    return true;
+                },
+                redraw_node: function (obj) {
+                    var args = Array.prototype.slice.call(arguments),
+                        node = this.parent.redraw_node.apply(this.inst, args);
+                    obj = this.inst.get_node(obj);
+                    // decorate node with error indicator if present
+                    if (node && obj.data && obj.data.errors) {
+                        $(node).find('a > i').first().after(obj.data.errors);
+                    }
+                    return node;
                 }
             },
-            "types": {
-                "max_children" : -1,
-                // valid root node types
-                "valid_children" : validRootChildren,
-                "types" : typeData
-            },
-            "plugins" : [ "themes", "json_data", "ui", "crrm", "types", "dnd" ]
+            "plugins" : [ "themes", "types", "dnd", "conditionalevents" ]
             // We enable the "themes" plugin, but bundle the default theme CSS
             // (with base64-embedded images) in our CSS build.  The themes
             // plugin needs to stay enabled because it adds CSS selectors to
             // themeable items, which it would be hard to adapt the existing
-            // selectors to if they didn't exist.  This would result in the
-            // themes plugin getting a 404 for the CSS file, but we comment that
-            // out.
+            // selectors to if they didn't exist.
         }).bind("select_node.jstree", function (e, data) {
-            var ufid = $(data.rslt.obj[0]).prop('id'),
-                mug = _this.data.core.form.getMugByUFID(ufid);
-
+            var mug = _this.data.core.form.getMugByUFID(data.node.id);
             _this.displayMugProperties(mug);
             _this.activateQuestionTypeGroup(mug.__className);
+        }).bind("close_node.jstree", function (e, data) {
+            var selected = _this.jstree('get_selected'),
+                sel = selected.length && _this.jstree('get_node', selected[0]);
+            if (sel && _.contains(sel.parents, data.node.id)) {
+                _this.jstree("deselect_all", true)
+                     .jstree("select_node", data.node);
+            }
         }).bind("move_node.jstree", function (e, data) {
             var form = _this.data.core.form,
-                mug = form.getMugByUFID($(data.rslt.o).attr('id')),
-                refMug = form.getMugByUFID($(data.rslt.r).attr('id')),
-                position = data.rslt.p;
-
-            form.moveMug(mug, refMug, position);
+                mug = form.getMugByUFID(data.node.id),
+                refMug = data.parent !== "#" ? form.getMugByUFID(data.parent) : null,
+                rel = _this.getRelativePosition(refMug, data.position);
+            form.moveMug(mug, rel.mug, rel.position);
+            data.node.icon = mug.getIcon();
             _this.refreshCurrentMug();
         }).bind("deselect_all.jstree deselect_node.jstree", function (e, data) {
             _this.resetQuestionTypeGroups();
-        }).bind('before.jstree', function (e, data) {
-            var stop = function () {
-                e.stopImmediatePropagation();
-                return false;
-            };
-
-            if (data.func === 'select_node' && !_this.ensureCurrentMugIsSaved()) {
-                return stop();
-            }
-
-            if (data.func === 'move_node' && data.args[0].jquery) {
-                if (!_this.ensureCurrentMugIsSaved()) {
-                    return stop();
+        }).bind('model.jstree', function (e, data) {
+            // Dynamically update node icons. This is unnecessary for
+            // most nodes, but some (items in select questions) have a
+            // different icon depending on their parent type.
+            _(data.nodes).each(function (id) {
+                var node = _this.jstree("get_node", id);
+                if (node.data.mug) {
+                    node.icon = node.data.mug.getIcon();
                 }
-                var form = _this.data.core.form,
-                    mug = form.getMugByUFID($(data.args[0]).attr('id')),
-                    nodeID = mug.p.nodeID,
-                    refMug = form.getMugByUFID($(data.args[1]).attr('id')),
-                    position = data.args[2],
-                    parentMug;
-
-                // disallow moving a node if it would have the same ID as a sibling
-                if (nodeID) {
-                    if (['inside', 'into', 'first', 'last'].indexOf(position) !== -1) {
-                        parentMug = refMug;
-                    } else {
-                        parentMug = refMug.parentMug;
-                    }
-
-                    var childMug = form.getMugChildrenByNodeID(parentMug, nodeID)[0];
-                    if (childMug && childMug !== mug) {
-                        // setup state for alert
-                        _this.setUnsavedDuplicateNodeId(nodeID, true);
-                        // trigger alert
-                        _this.ensureCurrentMugIsSaved();
-                        return stop();
-                    }
-                }
-            }
-        }).bind('create_node.jstree', function (e, data) {
-            _this.overrideJSTreeIcon(data.args[2].metadata.mug);
-        }).bind('set_type.jstree', function (e, data) {
-            var mug = _this.data.core.form.getMugByUFID(data.args[1].substring(1));
-            _this.overrideJSTreeIcon(mug);
+            });
         });
+    };
+
+    /**
+     * Setup handlers for drag/drop outside of tree
+     *
+     * NOTE this is done once when Vellum is loaded. These handlers must work
+     * for multiple Vellum instances on the same page.
+     */
+    $(document).on("dnd_move.vakata.jstree", function (e, data) {
+        var source = $(data.data.obj.context),
+            target = $(data.event.target),
+            inst = $.jstree.reference(target);
+        if (!inst && target.vellum("get") === source.vellum("get")) {
+            // only when not dragging inside the tree
+            if (target.hasClass("jstree-drop")) {
+                data.helper.find('.jstree-icon').removeClass('jstree-er').addClass('jstree-ok');
+            } else {
+                data.helper.find('.jstree-icon').removeClass('jstree-ok').addClass('jstree-er');
+            }
+        }
+    }).on("dnd_stop.vakata.jstree", function (e, data) {
+        var vellum = $(data.data.obj.context).vellum("get"),
+            target = $(data.event.target),
+            inst = $.jstree.reference(target),
+            sourceUid, mug;
+        if (!inst && target.hasClass("jstree-drop") && vellum === target.vellum("get")) {
+            sourceUid = data.data.nodes[0];
+            mug = vellum.data.core.form.getMugByUFID(sourceUid);
+            vellum.handleDropFinish(target, sourceUid, mug);
+        }
+    });
+
+    /**
+     * Get relative position like "before", "after", "first", or "last"
+     *
+     * @param mug - The parent mug among whose children to position; null for
+     *              root.
+     * @param position - An integer or string position. If this is not a number
+     *                   then the given mug and position are returned.
+     * @returns An object `{mug: mug, position: string}`. The returned mug may
+     *          differ from the original "parent" mug.
+     */
+    fn.getRelativePosition = function (mug, position) {
+        if (!_.isNumber(position)) {
+            return {mug: mug, position: position};
+        }
+        if (position === 0) {
+            return {mug: mug, position: "first"};
+        }
+        var node = this.jstree("get_node", mug ? mug.ufid : "#");
+        if (position > node.children.length) {
+            return {mug: mug, position: "last"};
+        }
+        var child = this.jstree("get_node", node.children[position - 1]);
+        return {mug: child.data.mug, position: "after"};
     };
 
     fn.checkMove = function (srcId, srcType, dstId, dstType, position) {
@@ -824,26 +912,18 @@ define([
         return true;
     };
 
-    fn.setTreeNodeInvalid = function (uid, msg) {
-        msg = msg.replace(/"/g, "'");
-        var $node = this.$f.find('#' + uid + ' > a');
-        this.setTreeNodeValid(uid);
-        $node.after(
-            '<div class="ui-icon ui-icon-alert fd-tree-valid-alert-icon"' +
-            ' title="' + msg + '"></div>');
-    };
-
-    fn.setTreeNodeValid = function (uid) {
-        this.$f.find('#' + uid + ' > a')
-            .siblings(".fd-tree-valid-alert-icon").remove();
-    };
-
     fn.setTreeValidationIcon = function (mug) {
-        var errors = this.getErrors(mug);
-        if (!errors.length) {
-            this.setTreeNodeValid(mug.ufid);
-        } else {
-            this.setTreeNodeInvalid(mug.ufid, errors.join("<p>"));
+        var node = mug.ufid && this.jstree("get_node", mug.ufid);
+        if (node) {
+            var errors = this.getErrors(mug);
+            if (errors.length) {
+                var msg = errors.join("<p>").replace(/"/g, "'");
+                node.data.errors = '<div class="fd-tree-valid-alert-icon ' +
+                    'icon-exclamation-triangle" title="' + msg + '"></div>';
+            } else {
+                node.data.errors = null;
+            }
+            this.jstree("redraw_node", node);
         }
     };
 
@@ -860,11 +940,10 @@ define([
         var selected = this.jstree('get_selected'),
             ret;
 
-        if (!selected || !selected[0]) {
+        if (!selected.length) {
             ret = null;
         } else {
-            selected = selected[0];
-            ret = this.data.core.form.getMugByUFID($(selected).prop('id'));
+            ret = this.data.core.form.getMugByUFID(selected[0]);
         }
         return ret;
     };
@@ -888,25 +967,6 @@ define([
         // Instead of depending on the UI state (currently selected mug), it
         // would probably be better to have this be handled by the widget using
         // its bound mug.
-    };
-
-    fn.overrideJSTreeIcon = function (mug) {
-        var $questionNode = this.$f.find('#' + mug.ufid),
-            iconClass;
-        if (!mug.getIcon) {
-            // mug is the question type definition, not an instance
-            iconClass = mug.icon;
-        } else {
-            iconClass = mug.getIcon();
-        }
-        iconClass = iconClass || 'icon-circle';
-        if (!$questionNode.find('> a > ins').hasClass(iconClass)) {
-            $questionNode.find('> a > ins')
-                .attr('class', 'jstree-icon')
-                .addClass(iconClass);
-        }
-        // TODO fix possible bug: mug.typeName -> mug.options.typeName
-        this.activateQuestionTypeGroup(mug.__className || mug.typeName);
     };
 
     fn.activateQuestionTypeGroup = function (className) {
@@ -1105,27 +1165,31 @@ define([
         form.formName = this.opts().core.formName || form.formName;
 
         form.on('question-type-change', function (e) {
-            _this.jstree("set_type", e.qType, '#' + e.mug.ufid);
+            _this.jstree("set_type", e.mug.ufid, e.qType);
 
             if (e.mug === _this.getCurrentlySelectedMug()) {
                 _this.refreshCurrentMug();
+                _this.activateQuestionTypeGroup(e.mug.__className);
             }
         }).on('parent-question-type-change', function (e) {
-            _this.overrideJSTreeIcon(e.childMug);
-        }).on('question-move', function (e) {
-            // for select items
-            _this.overrideJSTreeIcon(e.mug);
+            _this.jstree("set_icon", e.childMug.ufid, e.childMug.getIcon());
         }).on('remove-question', function (e) {
             if (!e.isInternal) {
-                _this.jstree("remove", '#' + e.mug.ufid);
-                _this.selectSomethingOrHideProperties();
+                var prev = _this.jstree("get_prev_dom", e.mug.ufid);
+                _this.jstree("delete_node", e.mug.ufid);
+                if (prev) {
+                    _this.jstree("select_node", prev);
+                } else {
+                    _this.selectSomethingOrHideProperties();
+                }
             }
         }).on('error-change', function (e) {
             _this._resetMessages(e.errors);
         }).on('question-create', function (e) {
             _this.handleNewMug(e.mug, e.refMug, e.position);
             if (!e.isInternal) {
-                _this.jstree('select_node', '#' + e.mug.ufid, true);
+                _this.jstree("deselect_all", true)
+                     .jstree('select_node', e.mug.ufid);
             }
         }).on('change', function (e) {
             try {
@@ -1163,10 +1227,9 @@ define([
     };
 
     fn.refreshMugName = function (mug, displayLang) {
-        var $node = $('#' + mug.ufid),
-            name = mug.getDisplayName(this.data.core.currentItextDisplayLanguage);
-        if (name !== this.jstree("get_text", $node)) {
-            this.jstree('rename_node', $node, name);
+        var name = mug.getDisplayName(this.data.core.currentItextDisplayLanguage);
+        if (name !== this.jstree("get_text", mug.ufid)) {
+            this.jstree('rename_node', mug.ufid, name);
         }
     };
 
@@ -1188,22 +1251,13 @@ define([
         var _this = this,
             form = this.data.core.form;
 
-        // monkey patch jstree.create to be faster, see
-        // https://groups.google.com/d/msg/jstree/AT8b9fWdBw8/SB3bXFwYbiQJ
-        // Patching clean_node as described in the above link actually seems
-        // to lead to a slight decrease in speed, and also messes up the
-        // collapsibility of internal nodes, so we don't do that.
-        var get_rollback = $.jstree._fn.get_rollback;
-        $.jstree._fn.get_rollback = function(){};
-
         form.mergedTreeMap(function (mug) {
-            _this.createQuestion(mug, mug.parentMug, 'into');
-            _this.setTreeValidationIcon(mug);
+            var inTree = _this.createQuestion(mug, mug.parentMug, 'into');
+            if (inTree) {
+                _this.setTreeValidationIcon(mug);
+            }
         });
         this.selectSomethingOrHideProperties(true);
-
-        // restore original jstree behavior
-        $.jstree._fn.get_rollback = get_rollback;
     };
 
     fn.selectSomethingOrHideProperties = function (forceDeselect) {
@@ -1257,6 +1311,11 @@ define([
             } else {
                 parent = refMug;
             }
+            if (this.jstree("is_closed", parent.ufid)) {
+                refMug = parent;
+                position = 'after';
+                continue;
+            }
             childTypes = typeData[parent.__className].valid_children;
             if (childTypes.indexOf(qType) !== -1) {
                 break;
@@ -1272,39 +1331,28 @@ define([
     fn.handleNewMug = function (mug, refMug, position) {
         this.createQuestion(mug, refMug, position);
     };
-    
+
+    /**
+     * Create a question in the tree GUI
+     *
+     * @returns The tree node that was created or `false` if it was not created.
+     */
     fn.createQuestion = function (mug, refMug, position) {
-        var result = this.jstree("create",
-            refMug ? "#" + refMug.ufid : this.data.core.$tree,
-            // NOTE 'into' is not a supported position in JSTree, but by a
-            // happy accident it turns out to be synonymous with 'last' which
-            // corresponds with the convention for 'into' in our tree.js.
-            // WARNING 'into' should not be confused with 'inside', which
-            // can be synonymous with 'first' in JSTree.
-            position,
+        return this.jstree("create_node",
+            refMug ? "#" + refMug.ufid : "#",
             {
-                data: this.getMugDisplayName(mug),
-                metadata: {
-                    mug: mug,
-                    mugUfid: mug.ufid
-                },
-                attr: {
+                text: this.getMugDisplayName(mug),
+                type: mug.__className,
+                data: { mug: mug },
+                li_attr: {
                     id: mug.ufid,
                     rel: mug.__className
                 },
-                state: mug.options.isSpecialGroup ? 'open' : undefined
+                state: { opened: true }
             },
-            null, // callback
-            true  // skip_rename
+            // NOTE 'into' is not a supported position in JSTree
+            (position === 'into' ? 'last' : position)
         );
-
-        // jstree.create returns the tree root if types prevent creation
-        if (result[0] === this.data.core.$tree) {
-            throw new Error(
-                "Can't insert " + mug.__className + " into " + refMug.__className +
-                " (position: " + position + ")");
-        }
-        return result;  
     };
 
     fn.handleMugParseFinish = function (mug) {
@@ -1497,8 +1545,8 @@ define([
                 var duplicate = _this.data.core.form.duplicateMug(
                     _this.getCurrentlySelectedMug());
 
-                _this.jstree("deselect_all")
-                    .jstree("select_node", '#' + duplicate.ufid);
+                _this.jstree("deselect_all", true)
+                     .jstree("select_node", duplicate.ufid);
             });
         });
         $baseToolbar.find('.btn-toolbar.pull-left')
@@ -1559,7 +1607,7 @@ define([
         return this.data.core.form.createXML();
     };
 
-    fn.validateAndSaveXForm = function () {
+    fn.validateAndSaveXForm = function (forceFullSave) {
         var _this = this,
             formText = this.createXML(),
             isValidXML = true;
@@ -1583,14 +1631,14 @@ define([
                 },
                 'Save anyway', function () {
                     $(this).dialog("close");
-                    _this.send(formText);
+                    _this.send(formText, forceFullSave ? 'full' : null);
                 },
                 'Form Validation Error');
             this._showConfirmDialog();
         }
 
         if (isValidXML) {
-            this.send(formText);
+            this.send(formText, forceFullSave ? 'full' : null);
         }
     };
         
@@ -1866,6 +1914,8 @@ define([
     fn.contributeToHeadXML = function (xmlWriter, form) {}; 
 
     fn.initWidget = function (widget) {};
+
+    fn.destroy = function () {};
 
     $.vellum.plugin("core", {
         form: null,

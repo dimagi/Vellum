@@ -9,7 +9,7 @@
 					<question2 />
 					<question30 />
 					<question3 />
-					<!-- arbitrary data attributes -->
+                    <!-- arbitrary data attributes -->
 					<question6 foo="bar" />
 					<question13 />
 					<question14 />
@@ -21,17 +21,16 @@
 					<question21>
 						<question31 jr:template="" />
 					</question21>
-					<question22 jr:template="">
-						<question23>
-							<question24 />
-							<question25 />
-							<question26 />
-							<question27 />
-							<question28 />
-							<question29 />
-							<question7 />
-						</question23>
-					</question22>
+                    <question22 jr:template="">
+                        <question23>
+                            <question24 />
+                            <question25 />
+                            <question26 />
+                            <question27 />
+                            <question28 />
+                            <question7 />
+                        </question23>
+                    </question22>
 					<question20 />
 					<question32 />
 				</data>
@@ -41,7 +40,7 @@
 			<bind nodeset="/data/question2" />
 			<bind nodeset="/data/question30" />
 			<bind nodeset="/data/question3" />
-			<!-- arbitrary bind attributes -->
+            <!-- arbitrary bind attributes -->
 			<bind nodeset="/data/question6" spam="eggs" />
 			<bind nodeset="/data/question13" type="xsd:int" />
 			<bind nodeset="/data/question14" type="xsd:string" />
@@ -59,12 +58,11 @@
 			<bind nodeset="/data/question22/question23/question26" type="binary" />
 			<bind nodeset="/data/question22/question23/question27" type="geopoint" />
 			<bind nodeset="/data/question22/question23/question28" type="xsd:string" />
-			<bind nodeset="/data/question22/question23/question29" type="binary" />
 			<bind nodeset="/data/question22/question23/question7" type="intent" />
 			<bind nodeset="/data/question20" />
 			<bind nodeset="/data/question32" calculate="1 + 2" />
-			<!-- setvalues -->
-			<setvalue event="xforms-ready" ref="/data/question1" value="2" />
+            <!-- setvalues -->
+            <setvalue event="xforms-ready" ref="/data/question1" value="2" />
 			<itext>
 				<translation lang="en" default="">
 					<text id="question1-label">
@@ -77,13 +75,7 @@
 						<value form="custom">question1 en custom</value>
 					</text>
 					<text id="question1-hint">
-						<value>question1 en hint</value>
-					</text>
-					<text id="question1-help">
-						<value>question1 en help</value>
-						<value form="image">jr://file/commcare/image/help/data/question1.png</value>
-						<value form="audio">jr://file/commcare/audio/help/data/question1.mp3</value>
-						<value form="video">jr://file/commcare/video/help/data/question1.3gp</value>
+						<value>question1 hint en</value>
 					</text>
 					<text id="question1-constraintMsg">
 						<value>question1 en validation</value>
@@ -166,10 +158,7 @@
 					<text id="question22/question23/question28-label">
 						<value>question28</value>
 					</text>
-					<text id="question22/question23/question29-label">
-						<value>question29</value>
-					</text>
-					<text id="question22/question23/question7-label">
+                    <text id="question22/question23/question7-label">
 						<value>question7</value>
 					</text>
 				</translation>
@@ -185,12 +174,6 @@
 					</text>
 					<text id="question1-hint">
 						<value>question1 hin hint</value>
-					</text>
-					<text id="question1-help">
-						<value>question1 hin help</value>
-						<value form="image">jr://file/commcare/image/help/data/question1.png</value>
-						<value form="audio">jr://file/commcare/audio/help/data/question1.mp3</value>
-						<value form="video">jr://file/commcare/video/help/data/question1.3gp</value>
 					</text>
 					<text id="question1-constraintMsg">
 						<value>question1 hin validation</value>
@@ -249,9 +232,9 @@
 					<text id="question21-label">
 						<value>question21</value>
 					</text>
-					<text id="question21/question31-label">
-						<value>question31</value>
-					</text>
+                    <text id="question21/question31-label">
+                        <value>question31</value>
+                    </text>
 					<text id="question22-label">
 						<value>question22</value>
 					</text>
@@ -273,16 +256,13 @@
 					<text id="question22/question23/question28-label">
 						<value>question28</value>
 					</text>
-					<text id="question22/question23/question29-label">
-						<value>question29</value>
-					</text>
-					<text id="question22/question23/question7-label">
+                    <text id="question22/question23/question7-label">
 						<value>question7</value>
 					</text>
 				</translation>
 			</itext>
 		</model>
-		&lt;!-- Intents inserted by Vellum: --&gt;
+        &lt;!-- Intents inserted by Vellum: --&gt;
 		<odkx:intent xmlns:odkx="http://opendatakit.org/xforms" id="question7" class="app_id">
 			<extra key="key1" ref="value1" />
 			<response key="key2" ref="value2" />
@@ -292,7 +272,6 @@
 		<input ref="/data/question1">
 			<label ref="jr:itext('question1-label')">non-itext label</label>
 			<hint ref="jr:itext('question1-hint')">non-itext hint</hint>
-			<help ref="jr:itext('question1-help')" />
 		</input>
 		<trigger ref="/data/question2" appearance="minimal">
 			<label ref="jr:itext('question2-label')" />
@@ -311,7 +290,7 @@
 				<value>item2</value>
 			</item>
 		</select1>
-		<!-- arbitrary control attributes -->
+        <!-- arbitrary control attributes -->
 		<select ref="/data/question6" foo="baz">
 			<label ref="jr:itext('question6-label')" />
 			<item>
@@ -351,37 +330,34 @@
 				<repeat jr:noAddRemove="true()"  nodeset="/data/question21/question31" jr:count="2" />
 			</group>
 		</group>
-		<group>
-			<label ref="jr:itext('question22-label')" />
-			<repeat nodeset="/data/question22">
-				<group ref="/data/question22/question23" appearance="field-list">
-					<label ref="jr:itext('question22/question23-label')" />
-					<upload ref="/data/question22/question23/question24" mediatype="image/*">
-						<label ref="jr:itext('question22/question23/question24-label')" />
-					</upload>
-					<upload ref="/data/question22/question23/question25" mediatype="audio/*">
-						<label ref="jr:itext('question22/question23/question25-label')" />
-					</upload>
-					<upload ref="/data/question22/question23/question26" mediatype="video/*">
-						<label ref="jr:itext('question22/question23/question26-label')" />
-					</upload>
-					<input ref="/data/question22/question23/question27">
-						<label ref="jr:itext('question22/question23/question27-label')" />
-					</input>
-					<secret ref="/data/question22/question23/question28">
-						<label ref="jr:itext('question22/question23/question28-label')" />
-					</secret>
-					<upload ref="/data/question22/question23/question29" mediatype="image/*" appearance="signature">
-						<label ref="jr:itext('question22/question23/question29-label')" />
-					</upload>
-					<input ref="/data/question22/question23/question7" appearance="intent:question7">
-						<label ref="jr:itext('question22/question23/question7-label')" />
-					</input>
-				</group>
-			</repeat>
-		</group>
-		<unrecognized>
-			<raw control="xml" />
-		</unrecognized>
+        <group>
+            <label ref="jr:itext('question22-label')" />
+            <repeat jr:noAddRemove="false()" nodeset="/data/question22">
+                <group ref="/data/question22/question23" appearance="field-list">
+                    <label ref="jr:itext('question22/question23-label')" />
+                    <upload ref="/data/question22/question23/question24" mediatype="image/*">
+                        <label ref="jr:itext('question22/question23/question24-label')" />
+                    </upload>
+                    <upload ref="/data/question22/question23/question25" mediatype="audio/*">
+                        <label ref="jr:itext('question22/question23/question25-label')" />
+                    </upload>
+                    <upload ref="/data/question22/question23/question26" mediatype="video/*">
+                        <label ref="jr:itext('question22/question23/question26-label')" />
+                    </upload>
+                    <input ref="/data/question22/question23/question27">
+                        <label ref="jr:itext('question22/question23/question27-label')" />
+                    </input>
+                    <secret ref="/data/question22/question23/question28">
+                        <label ref="jr:itext('question22/question23/question28-label')" />
+                    </secret>
+                    <input ref="/data/question22/question23/question7" appearance="intent:question7">
+                        <label ref="jr:itext('question22/question23/question7-label')" />
+                    </input>
+                </group>
+            </repeat>
+        </group>
+        <unrecognized>
+            <raw control="xml" />
+        </unrecognized>
 	</h:body>
 </h:html>

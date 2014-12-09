@@ -81,6 +81,7 @@ define(function () {
                 "meta/timeEnd"
             ],
             externalInstances: INSTANCES,
+            saveType: "patch",
             saveUrl: function (data) {}
         },
         javaRosa: {
