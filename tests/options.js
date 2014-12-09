@@ -96,7 +96,10 @@ define(function () {
             },
             objectMap: {}  // todo
         },
-        plugins: ['itemset']
+        plugins: ['itemset', 'modelIteration'],
+        modelIteration: {
+            modelTypes: ['case', 'fixture']
+        }
     };
 
     return {

@@ -185,7 +185,8 @@ define([
     'vellum/lock',
     'vellum/uploader',
     'vellum/window',
-    'vellum/polyfills'
+    'vellum/polyfills',
+    'vellum/modelIteration'
     // end buildmain.py delimiter
 ], function () {
     // adds $.vellum as a side-effect
