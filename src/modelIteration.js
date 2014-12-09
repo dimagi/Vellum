@@ -16,7 +16,7 @@ define([
             return this.opts().modelIteration.modelTypes;
         },
         getDataSources: function(type) {
-            var endpoint = this.opts().modelIteration.modelIterationUrl;
+            var endpoint = this.opts().modelIteration.modelIterationUrl[type];
 
             if (typeof endpoint === 'string') {
                 var x = $.ajax({
@@ -29,7 +29,7 @@ define([
                 });
                 return x.responseText;
             } else {
-                return endpoint(type);
+                return endpoint;
             }
         },
         getToolsMenuItems: function () {
