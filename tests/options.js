@@ -98,7 +98,14 @@ define(function () {
         },
         plugins: ['itemset', 'modelIteration'],
         modelIteration: {
-            modelTypes: ['case', 'fixture']
+            modelTypes: ['case', 'fixture'],
+            modelIterationUrl: function(type) {
+                if (type === 'case') {
+                    return ['case1', 'case2'];
+                } else if (type === 'fixture') {
+                    return ['fixture1', 'fixture2'];
+                }
+            }
         }
     };
 
