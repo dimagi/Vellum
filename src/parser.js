@@ -301,13 +301,6 @@ define([
         mug.p.hintLabel = hintVal;
     }
 
-    function parseDefaultValue (dEl, mug) {
-        var dVal = util.getXLabelValue($(dEl));
-        if(dVal){
-            mug.p.defaultValue = dVal;
-        }
-    }
-
     function makeAbsolute(path, parentMug, form) {
         if (!path) {
             path = "unknown"; // question ID is missing
@@ -421,7 +414,6 @@ define([
                 };
             };
         return {
-            item: function () { return adaptItem; },
             secret: function () { return makeMugAdaptor('Secret'); },
             select: function () { return makeMugAdaptor('MSelect'); },
             select1: function () { return adaptSelect; },
@@ -445,6 +437,19 @@ define([
                     }
                     return inputAdaptors.string(mug, form);
                 };
+            },
+            item: function ($cEl) {
+                var adapt = function (mug, form) {
+                    mug = adaptItem(mug, form);
+                    var value = util.getXLabelValue($cEl.children('value'));
+                    if (value) {
+                        mug.p.defaultValue = value;
+                    }
+                    return mug;
+                };
+                adapt.type = adaptItem.type;
+                adapt.ignoreDataNode = true;
+                return adapt;
             },
             group: function ($cEl, appearance) {
                 var type;
@@ -531,9 +536,6 @@ define([
         }
         if (hintEl.length > 0) {
             parseHint (form, hintEl, mug);
-        }
-        if (tag === 'item') {
-            parseDefaultValue($cEl.children('value'), mug);
         }
         
         // add any arbitrary attributes that were directly on the control
