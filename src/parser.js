@@ -13,12 +13,10 @@ define([
     xpath,
     xpathmodels
 ) {
-    var DEFAULT_FORM_ID = 'data',
-        itemsetEnabled;
+    var DEFAULT_FORM_ID = 'data';
 
     function init (instance) {
         var data = instance.data.core;
-        itemsetEnabled = instance.isPluginEnabled("itemset");
         data.controlNodeAdaptorMap = buildControlNodeAdaptorMap();
         instance.updateControlNodeAdaptorMap(data.controlNodeAdaptorMap);
     }
@@ -346,12 +344,12 @@ define([
             nodePath = makeAbsolute(nodePath, parentMug, form);
             mug = form.getMugByPath(nodePath);
         }
-        mug = adapt(mug, form);
+        mug = adapt(mug, form, parentMug);
         mug.parentMug = parentMug;
         if (appearance) {
             mug.p.appearance = appearance;
         }
-        populateMug(form, nodePath, mug, cEl, $groupEl);
+        populateMug(form, mug, cEl, $groupEl);
 
         return mug;
     }
@@ -411,6 +409,8 @@ define([
                 'barcode': makeMugAdaptor('Barcode'),
                 'intent': makeMugAdaptor('AndroidIntent')
             },
+            // pre-make adaptors for these because they are used frequently
+            adaptSelect = makeMugAdaptor('Select'),
             adaptItem = makeControlOnlyMugAdaptor('Item'),
             _adaptTrigger = makeMugAdaptor('Trigger'),
             triggerAdaptor = function (appearance) {
@@ -421,18 +421,11 @@ define([
                 };
             };
         return {
-            itemset: function () { return makeControlOnlyMugAdaptor('Itemset'); }, // TODO move to itemsets plugin
             item: function () { return adaptItem; },
             secret: function () { return makeMugAdaptor('Secret'); },
+            select: function () { return makeMugAdaptor('MSelect'); },
+            select1: function () { return adaptSelect; },
             trigger: function ($cEl, appearance) { return triggerAdaptor(appearance); },
-            select: function ($cEl) {
-                var hasItemset = itemsetEnabled && $cEl.children('itemset').length; // TODO move to itemsets plugin
-                return makeMugAdaptor(hasItemset ? 'MSelectDynamic' : 'MSelect');
-            },
-            select1: function ($cEl) {
-                var hasItemset = itemsetEnabled && $cEl.children('itemset').length; // TODO move to itemsets plugin
-                return makeMugAdaptor(hasItemset ? 'SelectDynamic' : 'Select');
-            },
             input: function ($cEl, appearance) {
                 if ($cEl.popAttr('readonly') === 'true()') {
                     // WARNING produces different XML than consumed (input -> trigger)
@@ -508,7 +501,7 @@ define([
         }
     }
                 
-    function populateMug (form, nodePath, mug, cEl, $groupEl) {
+    function populateMug(form, mug, cEl, $groupEl) {
         var $cEl = $(cEl);
         if (mug.__className === "ReadOnly") {
             if ($cEl.length === 1 && $cEl[0].poppedAttributes) {
@@ -533,22 +526,14 @@ define([
             hintEl = $cEl.children('hint');
         }
 
-        if (labelEl.length > 0 && mug.__className !== 'Itemset') {
+        if (labelEl.length > 0 && mug.spec.label.presence !== 'notallowed') {
             parseLabel(form, labelEl, mug);
         }
         if (hintEl.length > 0) {
             parseHint (form, hintEl, mug);
         }
         if (tag === 'item') {
-            parseDefaultValue($cEl.children('value'),mug);
-        }
-
-        if (tag === 'itemset' && itemsetEnabled) {
-            mug.p.itemsetData = new util.BoundPropertyMap(form, {
-                nodeset: nodePath,
-                labelRef: $cEl.children('label').attr('ref'),
-                valueRef: $cEl.children('value').attr('ref')
-            });
+            parseDefaultValue($cEl.children('value'), mug);
         }
         
         // add any arbitrary attributes that were directly on the control

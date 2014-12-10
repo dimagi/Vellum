@@ -1919,7 +1919,7 @@ define([
      *  mug or null to a control mug. This function must support the following
      *  call signature:
      *
-     *      `mug = adapt(mug, form)`
+     *      `mug = adapt(mug, form, parentMug)`
      *
      *  Most adaptor factories will use `parser.js:makeMugAdaptor` to create an
      *  `adapt` function that does a typical mug conversion. See also

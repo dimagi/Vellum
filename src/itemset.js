@@ -25,8 +25,9 @@ define([
     'vellum/widgets',
     'vellum/form',
     'vellum/mugs',
+    'vellum/parser',
     'vellum/util',
-    'vellum/core',
+    'vellum/debugutil',
     'jquery.bootstrap-better-typeahead'
 ], function (
     _,
@@ -36,7 +37,9 @@ define([
     widgets,
     form,
     mugs,
-    util
+    parser,
+    util,
+    debug
 ) {
     var mugTypes = mugs.baseMugTypes.normal,
         normalizeXPathExpr = form.normalizeXPathExpr,
@@ -126,10 +129,28 @@ define([
             });
             return types;
         },
-        getMugSpec: function () {
-            var spec = this.__callOld();
-
-            return spec;
+        updateControlNodeAdaptorMap: function (map) {
+            var adaptItemset = parser.makeControlOnlyMugAdaptor('Itemset');
+            map.itemset = function ($element, appearance, nodePath) {
+                var makeAdaptor = function (mug, form, parentMug) {
+                    if (parentMug.__className === 'Select') {
+                        form.changeMugType(parentMug, 'SelectDynamic');
+                    } else if (parentMug.__className === 'MSelect') {
+                        form.changeMugType(parentMug, 'MSelectDynamic');
+                    } else {
+                        debug.log("Unknown parent type: " + parentMug.__className);
+                    }
+                    mug = adaptItemset(mug, form, parentMug);
+                    mug.p.itemsetData = new util.BoundPropertyMap(form, {
+                        nodeset: nodePath,
+                        labelRef: $element.children('label').attr('ref'),
+                        valueRef: $element.children('value').attr('ref')
+                    });
+                    return mug;
+                };
+                makeAdaptor.ignoreDataNode = true;
+                return makeAdaptor;
+            };
         }
     });
 
