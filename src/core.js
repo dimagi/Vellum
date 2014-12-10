@@ -1913,13 +1913,13 @@ define([
      *  The keys to this map are lowercase control node tag names.
      *  The values are functions that support the following call signature:
      *
-     *      `adapt = makeMugAdaptor($controlElement, appearance, nodePath)`
+     *      `adapt = makeMugAdaptor($controlElement, appearance, form, parentMug)`
      *
      *  `makeMugAdaptor` must return a function that converts a data-bind-only
      *  mug or null to a control mug. This function must support the following
      *  call signature:
      *
-     *      `mug = adapt(mug, form, parentMug)`
+     *      `mug = adapt(mug, form)`
      *
      *  Most adaptor factories will use `parser.js:makeMugAdaptor` to create an
      *  `adapt` function that does a typical mug conversion. See also

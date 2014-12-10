@@ -301,32 +301,14 @@ define([
         mug.p.hintLabel = hintVal;
     }
 
-    function makeAbsolute(path, parentMug, form) {
-        if (!path) {
-            path = "unknown"; // question ID is missing
-        }
-        if (!path || path[0] !== "/") {
-            if (parentMug) {
-                var parentPath = parentMug.getAbsolutePath();
-                if (parentPath) {
-                    path = parentPath + "/" + path;
-                }
-            } else {
-                path = form.getBasePath() + path;
-            }
-        }
-        return path;
-    }
-
-    function parseControlElement(form, nodePath, cEl, $groupEl, parentMug) {
-        var $cEl = $groupEl || cEl,
-            tagName = $cEl[0].nodeName.toLowerCase(),
+    function parseControlElement(form, $cEl, parentMug) {
+        var tagName = $cEl[0].nodeName.toLowerCase(),
             appearance = $cEl.popAttr('appearance'),
-            adapt, mug;
+            adapt, mug = null;
 
         var getAdaptor = form.vellum.data.core.controlNodeAdaptorMap[tagName];
         if (getAdaptor) {
-            adapt = getAdaptor($cEl, appearance, nodePath);
+            adapt = getAdaptor($cEl, appearance, form, parentMug);
         }
         if (!adapt) {
             // unknown question type
@@ -334,15 +316,18 @@ define([
         }
 
         if (!adapt.ignoreDataNode) {
-            nodePath = makeAbsolute(nodePath, parentMug, form);
-            mug = form.getMugByPath(nodePath);
+            var path = adapt.path;
+            if (!path) {
+                path = getPathFromControlElement($cEl, form, parentMug);
+            }
+            mug = form.getMugByPath(path);
         }
-        mug = adapt(mug, form, parentMug);
+        mug = adapt(mug, form);
         mug.parentMug = parentMug;
         if (appearance) {
             mug.p.appearance = appearance;
         }
-        populateMug(form, mug, cEl, $groupEl);
+        populateMug(form, mug, $cEl);
 
         return mug;
     }
@@ -451,18 +436,29 @@ define([
                 adapt.ignoreDataNode = true;
                 return adapt;
             },
-            group: function ($cEl, appearance) {
+            group: function ($cEl, appearance, form, parentMug) {
                 var type;
                 if (appearance === 'field-list') {
                     type = 'FieldList';
-                } else if ($cEl.children('repeat').length > 0) {
-                    type = 'Repeat';
                 } else {
-                    type = 'Group';
+                    var repeat = $cEl.children('repeat');
+                    if (repeat.length === 1) {
+                        var adapt = function (mug, form) {
+                            mug = makeMugAdaptor('Repeat')(mug, form);
+                            mug.p.repeat_count = repeat.popAttr('jr:count') || null;
+                            return mug;
+                        };
+                        adapt.repeat = repeat;
+                        adapt.path = getPathFromControlElement(repeat, form, parentMug);
+                        adapt.type = 'Repeat';
+                        return adapt;
+                    } else {
+                        type = 'Group';
+                    }
                 }
                 return makeMugAdaptor(type);
             },
-            upload: function ($cEl, appearance, nodePath) {
+            upload: function ($cEl, appearance, form, parentMug) {
                 var mediaType = $cEl.popAttr('mediatype');
                 if(!mediaType) {
                     // Why throw?! This will kill form parsing.
@@ -485,7 +481,8 @@ define([
                 } else {
                     // Why throw?! This will kill form parsing.
                     // TODO create a parser warning instead?
-                    throw 'Unrecognized upload question type for Element: ' + nodePath;
+                    throw 'Unrecognized upload question type for Element: ' +
+                          getPathFromControlElement($cEl, form, parentMug);
                 }
                 return makeMugAdaptor(type);
             }
@@ -506,8 +503,7 @@ define([
         }
     }
                 
-    function populateMug(form, mug, cEl, $groupEl) {
-        var $cEl = $(cEl);
+    function populateMug(form, mug, $cEl) {
         if (mug.__className === "ReadOnly") {
             if ($cEl.length === 1 && $cEl[0].poppedAttributes) {
                 // restore attributes removed during parsing
@@ -518,49 +514,31 @@ define([
             mug.p.rawControlXML = $cEl;
             return;
         }
-        
-        var tag = mug.p.tagName,
-            labelEl, hintEl;
 
-        if(tag === 'repeat'){
-            labelEl = $groupEl.children('label');
-            hintEl = $groupEl.children('hint');
-            mug.p.repeat_count = $cEl.popAttr('jr:count') || null;
-        } else {
-            labelEl = $cEl.children('label');
+        var labelEl = $cEl.children('label'),
             hintEl = $cEl.children('hint');
-        }
 
         if (labelEl.length > 0 && mug.spec.label.presence !== 'notallowed') {
             parseLabel(form, labelEl, mug);
         }
         if (hintEl.length > 0) {
-            parseHint (form, hintEl, mug);
+            parseHint(form, hintEl, mug);
         }
-        
+
         // add any arbitrary attributes that were directly on the control
-        mug.p.rawControlAttributes = getAttributes(cEl);
-    }
-                
-    //figures out if this control DOM element is a repeat
-    function isRepeat(groupEl) {
-        if($(groupEl)[0].tagName !== 'group') {
-            return false;
-        }
-        return $(groupEl).children('repeat').length === 1;
+        mug.p.rawControlAttributes = getAttributes($cEl);
     }
 
     /**
      * Figures out what the xpath is of a control element
      * by looking at the ref or nodeset attributes.
-     * @param el - a jquery selector or DOM node of an xforms control element.
+     * @param el - a jquery-wrapped xforms control element.
      * @return - a string of the ref/nodeset value
      */
-    function getPathFromControlElement (el, form) {
+    function getPathFromControlElement(el, form, parentMug) {
         if(!el){
             return null;
         }
-        el = $(el); //make sure it's jquerified
         var path = el.popAttr('ref'),
             nodeId, pathToTry;
         if(!path){
@@ -574,41 +552,39 @@ define([
                 if (!form.getMugByPath(pathToTry)) {
                     form.parseWarnings.push("Ambiguous bind: " + nodeId);
                 } else {
-                    return pathToTry;
+                    path = pathToTry;
                 }
             }
         }
-        return path || nodeId || null;
+        path = path || nodeId || null;
+        if (path && path[0] !== "/") {
+            // make path absolute
+            if (parentMug) {
+                var parentPath = parentMug.getAbsolutePath();
+                if (parentPath) {
+                    path = parentPath + "/" + path;
+                }
+            } else {
+                path = form.getBasePath() + path;
+            }
+        }
+        return path;
     }
 
     function parseControlTree (form, controlsTree) {
-        function eachFunc(el, parentMug){
-            el = $(el);
-            var groupEl, tagName;
-
-            if (isRepeat(el)) {
-                groupEl = el;
-                el = $(el.children('repeat')[0]);
-            }
-
-            var path = getPathFromControlElement(el, form),
-                mug = parseControlElement(form, path, el, groupEl, parentMug);
+        function eachFunc(cEl, parentMug) {
+            var $cEl = $(cEl),
+                mug = parseControlElement(form, $cEl, parentMug);
 
             form.controlTree.insertMug(mug, 'into', parentMug);
 
             if (mug.__className === "ReadOnly") {
                 return;
             }
-            var couldHaveChildren = [
-                'repeat', 'group', 'fieldlist', 'select', 'select1'
-            ];
-            tagName = mug.p.tagName.toLowerCase();
-            if(couldHaveChildren.indexOf(tagName) !== -1) {
-                // recurse
-                $(el).children().not('label').not('value').not('hint')
-                    .each(function () {
-                        eachFunc(this, mug);
-                    });
+            if (mug.options.controlNodeChildren) {
+                mug.options.controlNodeChildren($cEl).each(function () {
+                    eachFunc(this, mug);
+                });
             }
             form.vellum.handleMugParseFinish(mug);
         }
@@ -721,6 +697,7 @@ define([
         parseXForm: parseXForm,
         parseDataElement: parseDataElement,
         parseBindElement: parseBindElement,
+        getPathFromControlElement: getPathFromControlElement,
         makeControlOnlyMugAdaptor: makeControlOnlyMugAdaptor,
         makeMugAdaptor: makeMugAdaptor
     };

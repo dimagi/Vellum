@@ -131,8 +131,8 @@ define([
         },
         updateControlNodeAdaptorMap: function (map) {
             var adaptItemset = parser.makeControlOnlyMugAdaptor('Itemset');
-            map.itemset = function ($element, appearance, nodePath) {
-                var makeAdaptor = function (mug, form, parentMug) {
+            map.itemset = function ($element, appearance, form, parentMug) {
+                var adapt = function (mug, form) {
                     if (parentMug.__className === 'Select') {
                         form.changeMugType(parentMug, 'SelectDynamic');
                     } else if (parentMug.__className === 'MSelect') {
@@ -140,16 +140,16 @@ define([
                     } else {
                         debug.log("Unknown parent type: " + parentMug.__className);
                     }
-                    mug = adaptItemset(mug, form, parentMug);
+                    mug = adaptItemset(mug, form);
                     mug.p.itemsetData = new util.BoundPropertyMap(form, {
-                        nodeset: nodePath,
+                        nodeset: $element.popAttr('nodeset'),
                         labelRef: $element.children('label').attr('ref'),
                         valueRef: $element.children('value').attr('ref')
                     });
                     return mug;
                 };
-                makeAdaptor.ignoreDataNode = true;
-                return makeAdaptor;
+                adapt.ignoreDataNode = true;
+                return adapt;
             };
         }
     });

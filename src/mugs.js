@@ -358,6 +358,7 @@ define([
         dataNodeChildren: function ($node) {
             return $node.children();
         },
+        controlNodeChildren: null,
         afterInsert: function (form, mug) {},
         getAppearanceAttribute: function (mug) {
             return mug.p.appearance;
@@ -816,6 +817,9 @@ define([
 
     var BaseSelect = util.extend(defaultOptions, {
         validChildTypes: ["Item"],
+        controlNodeChildren: function ($node) {
+            return $node.children().not('label').not('value').not('hint');
+        },
         afterInsert: function (form, mug) {
             var item = "Item";
             form.createQuestion(mug, 'into', item, true);
@@ -850,6 +854,9 @@ define([
         isSpecialGroup: true,
         isTypeChangeable: false,
         canOutputValue: false,
+        controlNodeChildren: function ($node) {
+            return $node.children().not('label').not('value').not('hint');
+        },
         init: function (mug, form) {
             mug.p.tagName = "group";
         },
@@ -872,6 +879,9 @@ define([
         isSpecialGroup: true,
         isTypeChangeable: false,
         canOutputValue: false,
+        controlNodeChildren: function ($node) {
+            return $node.children().not('label').not('value').not('hint');
+        },
         init: function (mug, form) {
             Group.init(mug, form);
             mug.p.appearance = 'field-list';
@@ -884,6 +894,9 @@ define([
         isSpecialGroup: true,
         isTypeChangeable: false,
         canOutputValue: false,
+        controlNodeChildren: function ($node) {
+            return $node.children('repeat').children();
+        },
         init: function (mug, form) {
             mug.p.tagName = "repeat";
             mug.p.repeat_count = null;
