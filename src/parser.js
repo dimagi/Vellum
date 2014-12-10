@@ -312,7 +312,7 @@ define([
         }
         if (!adapt) {
             // unknown question type
-            adapt = makeMugAdaptor('ReadOnly');
+            adapt = makeReadOnlyAdaptor($cEl, appearance, form, parentMug);
         }
 
         if (!adapt.ignoreDataNode) {
@@ -327,8 +327,9 @@ define([
         if (appearance) {
             mug.p.appearance = appearance;
         }
-        populateMug(form, mug, $cEl);
-
+        if (!adapt.skipPopulate) {
+            populateMug(form, mug, $cEl);
+        }
         return mug;
     }
 
@@ -371,6 +372,22 @@ define([
         };
         adapt.type = type;
         adapt.ignoreDataNode = true;
+        return adapt;
+    }
+
+    function makeReadOnlyAdaptor($cEl, appearance, form, parentMug) {
+        var adapt = function (mug, form) {
+            mug = makeMugAdaptor('ReadOnly')(mug, form);
+            if ($cEl.length === 1 && $cEl[0].poppedAttributes) {
+                // restore attributes removed during parsing
+                _.each($cEl[0].poppedAttributes, function (val, key) {
+                    $cEl.attr(key, val);
+                });
+            }
+            mug.p.rawControlXML = $cEl;
+            return mug;
+        };
+        adapt.skipPopulate = true;
         return adapt;
     }
 
@@ -504,24 +521,12 @@ define([
     }
                 
     function populateMug(form, mug, $cEl) {
-        if (mug.__className === "ReadOnly") {
-            if ($cEl.length === 1 && $cEl[0].poppedAttributes) {
-                // restore attributes removed during parsing
-                _.each($cEl[0].poppedAttributes, function (val, key) {
-                    $cEl.attr(key, val);
-                });
-            }
-            mug.p.rawControlXML = $cEl;
-            return;
-        }
-
         var labelEl = $cEl.children('label'),
             hintEl = $cEl.children('hint');
-
-        if (labelEl.length > 0 && mug.spec.label.presence !== 'notallowed') {
+        if (labelEl.length && mug.spec.label.presence !== 'notallowed') {
             parseLabel(form, labelEl, mug);
         }
-        if (hintEl.length > 0) {
+        if (hintEl.length && mug.spec.hintLabel.presence !== 'notallowed') {
             parseHint(form, hintEl, mug);
         }
 
