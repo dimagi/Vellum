@@ -155,6 +155,26 @@ define([
             },
             unsavedMessage: 'Are you sure you want to exit? All unsaved changes will be lost!'
         });
+        var setFullscreenIcon = function () {
+            var $i = $('i', _this.data.core.$fullscreenButton);
+            if (_this.data.windowManager.fullscreen) {
+                $i.addClass('icon-resize-small').removeClass('icon-resize-full');
+            } else {
+                $i.removeClass('icon-resize-small').addClass('icon-resize-full');
+            }
+        };
+        setTimeout(setFullscreenIcon, 0);
+        this.data.core.$fullscreenButton = $('<button class="btn"><i/></button>').click(function (e) {
+            e.preventDefault();
+            if (_this.data.windowManager.fullscreen) {
+                _this.data.windowManager.fullscreen = false;
+            } else {
+                _this.data.windowManager.fullscreen = true;
+            }
+            setFullscreenIcon();
+            _this.data.windowManager.adjustToWindow();
+        });
+
         bindBeforeUnload(this.data.core.saveButton.beforeunload);
         this.data.core.currentErrors = [];
 
@@ -223,6 +243,8 @@ define([
 
         var $saveButtonContainer = this.$f.find('.fd-save-button');
         this.data.core.saveButton.ui.appendTo($saveButtonContainer);
+        var $fullscerenButtonContainer = this.$f.find('.fd-fullscreen-button');
+        this.data.core.$fullscreenButton.appendTo($fullscerenButtonContainer);
     };
 
     fn._getQuestionGroups = function () {
@@ -1883,9 +1905,27 @@ define([
         return parser.parseBindElement(form, el, path);
     };
 
-    fn.parseControlElement = function (form, path, $el, $groupEl, parentMug) {
-        return parser.parseControlElement(form, path, $el, $groupEl, parentMug);
-    };
+    /**
+     * Extension point for plugins to hook into the mapping of control nodes
+     * to control mugs.
+     *
+     * @param map - An object mapping control node tag names to functions.
+     *  The keys to this map are lowercase control node tag names.
+     *  The values are functions that support the following call signature:
+     *
+     *      `adapt = makeMugAdaptor($controlElement, appearance, form, parentMug)`
+     *
+     *  `makeMugAdaptor` must return a function that converts a data-bind-only
+     *  mug or null to a control mug. This function must support the following
+     *  call signature:
+     *
+     *      `mug = adapt(mug, form)`
+     *
+     *  Most adaptor factories will use `parser.js:makeMugAdaptor` to create an
+     *  `adapt` function that does a typical mug conversion. See also
+     *  `parser.js:makeControlOnlyMugAdaptor` for control-only mugs.
+     */
+    fn.updateControlNodeAdaptorMap = function (map) {};
 
     fn.contributeToModelXML = function (xmlWriter) {};
 
