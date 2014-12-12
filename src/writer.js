@@ -200,22 +200,22 @@ define([
 
 
     var createControlBlock = function (form, xmlWriter) {
-        function mapFunc(node) {
-            if(node.isRootNode) { //skip
+        form.controlTree.walk(function (mug, nodeID, processChildren) {
+            if(!mug) {
+                // root node
+                processChildren();
                 return;
             }
 
-            var mug = node.getValue();
-                
             if (mug.__className === "ReadOnly") {
                 xmlWriter.writeXML($('<div>').append(mug.p.rawControlXML).clone().html());
                 return;
             }
             var label, isItextOptional;
 
-            function createOpenControlTag(tagName, elLabel) {
-                tagName = tagName.toLowerCase();
-                var isGroupOrRepeat = (tagName === 'group' || tagName === 'repeat'),
+            function createOpenControlTag(form, xmlWriter, mug, elLabel) {
+                var tagName = mug.p.tagName.toLowerCase(),
+                    isGroupOrRepeat = (tagName === 'group' || tagName === 'repeat'),
                     isODKMedia = (tagName === 'upload');
 
                 /**
@@ -249,7 +249,7 @@ define([
                 {
                     createLabel();
                 }
-               
+
                 var defaultValue = mug.p.defaultValue;
                 if (tagName === 'item' && defaultValue) {
                     //do a value tag for an item Mug
@@ -271,7 +271,7 @@ define([
                         'ref', data.getAttr('valueRef', ''));
                     xmlWriter.writeEndElement();
                 }
-                
+
                 // Write any custom attributes first
                 // HACK skip legacy attributes that should not be preserved
                 var skip = (tagName === "repeat") ?
@@ -283,7 +283,7 @@ define([
                         xmlWriter.writeAttributeString(k, rawControlAttributes[k]);
                     }
                 }
-                
+
                 // Set the nodeset/ref attribute correctly
                 if (tagName !== 'item' && tagName !== 'itemset') {
                     var attr, absPath;
@@ -295,7 +295,7 @@ define([
                     absPath = form.getAbsolutePath(mug);
                     xmlWriter.writeAttributeString(attr, absPath);
                 }
-                
+
                 // Set other relevant attributes
 
                 if (tagName === 'repeat') {
@@ -315,7 +315,7 @@ define([
                 if (appearanceAttr) {
                     xmlWriter.writeAttributeString("appearance", appearanceAttr);
                 }
-                
+
                 // Do hint label
                 if( tagName !== 'item' && tagName !== 'repeat'){
                     var hintLabel = mug.p.hintLabel,
@@ -353,26 +353,16 @@ define([
                 }
             }
 
-            createOpenControlTag(mug.p.tagName, label);
-        }
+            createOpenControlTag(form, xmlWriter, mug, label);
 
-        function afterFunc(node) {
-            if (node.isRootNode) {
-                return;
-            }
-            var mug = node.getValue();
-            if (mug.__className === "ReadOnly") {
-                return;
-            }
-            
+            processChildren(mug.options.controlChildFilter);
+
             //finish off
             xmlWriter.writeEndElement(); //close control tag.
             if(mug.p.tagName === 'repeat'){
                 xmlWriter.writeEndElement(); //special case where we have to close the repeat as well as the group tag.
             }
-        }
-
-        form.controlTree.treeMap(mapFunc, afterFunc);
+        });
     };
 
     return {

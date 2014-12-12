@@ -362,6 +362,7 @@ define([
 
         // XForm writer integration: ChildFilter(treeNodes, parentMug) -> treeNodes
         dataChildFilter: null,
+        controlChildFilter: null,
 
         afterInsert: function (form, mug) {},
         getAppearanceAttribute: function (mug) {
