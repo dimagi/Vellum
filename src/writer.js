@@ -198,7 +198,6 @@ define([
         }
     };
 
-
     var createControlBlock = function (form, xmlWriter) {
         form.controlTree.walk(function (mug, nodeID, processChildren) {
             if(!mug) {
@@ -212,137 +211,6 @@ define([
                 return;
             }
 
-            function createOpenControlTag(form, xmlWriter, mug) {
-                var tagName = mug.p.tagName.toLowerCase(),
-                    isGroupOrRepeat = (tagName === 'group' || tagName === 'repeat'),
-                    isODKMedia = (tagName === 'upload');
-
-                /**
-                 * Creates the label tag inside of a control Element in the xform
-                 */
-                function createLabel() {
-                    var labelItextID = mug.p.labelItextID,
-                        labelRef;
-                    if (labelItextID) {
-                        labelRef = "jr:itext('" + labelItextID.id + "')";
-                        // iID is optional so by extension Itext is optional.
-                        if (labelItextID.isEmpty() &&
-                                mug.spec.labelItextID.presence === 'optional') {
-                            labelRef = '';
-                        }
-                    }
-                    if (labelRef || mug.p.label) {
-                        xmlWriter.writeStartElement('label');
-                        if (labelRef) {
-                            xmlWriter.writeAttributeString('ref', labelRef);
-                        }
-                        if (mug.p.label) {
-                            xmlWriter.writeString(mug.p.label);
-                        }
-                        xmlWriter.writeEndElement(); // close label
-                    }
-                }
-
-                // Special logic block to make sure the label ends up in the right place
-                if (isGroupOrRepeat) {
-                    xmlWriter.writeStartElement('group');
-                    createLabel();
-                    if (tagName === 'repeat') {
-                        xmlWriter.writeStartElement('repeat');
-                    }
-                } else {
-                    xmlWriter.writeStartElement(tagName);
-                }
-                if (tagName !== 'group' && tagName !== 'repeat' &&
-                    tagName !== 'itemset')
-                {
-                    createLabel();
-                }
-
-                var defaultValue = mug.p.defaultValue;
-                if (tagName === 'item' && defaultValue) {
-                    //do a value tag for an item Mug
-                    xmlWriter.writeStartElement('value');
-                    xmlWriter.writeString(defaultValue);
-                    xmlWriter.writeEndElement();
-                }
-
-                if (tagName === 'itemset') {
-                    var data = mug.p.itemsetData;
-                    xmlWriter.writeAttributeString(
-                        'nodeset', data.getAttr('nodeset', ''));
-                    xmlWriter.writeStartElement('label');
-                    xmlWriter.writeAttributeString(
-                        'ref', data.getAttr('labelRef', ''));
-                    xmlWriter.writeEndElement();
-                    xmlWriter.writeStartElement('value');
-                    xmlWriter.writeAttributeString(
-                        'ref', data.getAttr('valueRef', ''));
-                    xmlWriter.writeEndElement();
-                }
-
-                // Write any custom attributes first
-                // HACK skip legacy attributes that should not be preserved
-                var skip = (tagName === "repeat") ?
-                    function (k) { return k.toLowerCase() === "jr:noaddremove"; } :
-                    function (k) { return false; };
-                var rawControlAttributes = mug.p.rawControlAttributes;
-                for (var k in rawControlAttributes) {
-                    if (rawControlAttributes.hasOwnProperty(k) && !skip(k)) {
-                        xmlWriter.writeAttributeString(k, rawControlAttributes[k]);
-                    }
-                }
-
-                // Set the nodeset/ref attribute correctly
-                if (tagName !== 'item' && tagName !== 'itemset') {
-                    var attr, absPath;
-                    if (tagName === 'repeat') {
-                        attr = 'nodeset';
-                    } else {
-                        attr = 'ref';
-                    }
-                    absPath = form.getAbsolutePath(mug);
-                    xmlWriter.writeAttributeString(attr, absPath);
-                }
-
-                // Set other relevant attributes
-
-                if (tagName === 'repeat') {
-                    var r_count = mug.p.repeat_count;
-                    if (r_count) {
-                        xmlWriter.writeAttributeString("jr:count", String(r_count));
-                        xmlWriter.writeAttributeString("jr:noAddRemove", "true()");
-                    }
-                } else if (isODKMedia) {
-                    var mediaType = mug.p.mediaType;
-                    if (mediaType) {
-                        xmlWriter.writeAttributeString("mediatype", mediaType);
-                    }
-                }
-
-                var appearanceAttr = mug.getAppearanceAttribute();
-                if (appearanceAttr) {
-                    xmlWriter.writeAttributeString("appearance", appearanceAttr);
-                }
-
-                // Do hint label
-                if( tagName !== 'item' && tagName !== 'repeat'){
-                    var hintLabel = mug.p.hintLabel,
-                        hintItextID = mug.p.hintItextID;
-                    if(hintLabel || (hintItextID && hintItextID.id)) {
-                        xmlWriter.writeStartElement('hint');
-                        if(hintLabel){
-                            xmlWriter.writeString(hintLabel);
-                        }
-                        if(hintItextID.id){
-                            var ref = "jr:itext('" + hintItextID.id + "')";
-                            xmlWriter.writeAttributeString('ref',ref);
-                        }
-                        xmlWriter.writeEndElement();
-                    }
-                }
-            }
-
             createOpenControlTag(form, xmlWriter, mug);
 
             processChildren(mug.options.controlChildFilter);
@@ -354,6 +222,137 @@ define([
             }
         });
     };
+
+    function createOpenControlTag(form, xmlWriter, mug) {
+        var tagName = mug.p.tagName.toLowerCase(),
+            isGroupOrRepeat = (tagName === 'group' || tagName === 'repeat'),
+            isODKMedia = (tagName === 'upload');
+
+        /**
+         * Creates the label tag inside of a control Element in the xform
+         */
+        function createLabel() {
+            var labelItextID = mug.p.labelItextID,
+                labelRef;
+            if (labelItextID) {
+                labelRef = "jr:itext('" + labelItextID.id + "')";
+                // iID is optional so by extension Itext is optional.
+                if (labelItextID.isEmpty() &&
+                        mug.spec.labelItextID.presence === 'optional') {
+                    labelRef = '';
+                }
+            }
+            if (labelRef || mug.p.label) {
+                xmlWriter.writeStartElement('label');
+                if (labelRef) {
+                    xmlWriter.writeAttributeString('ref', labelRef);
+                }
+                if (mug.p.label) {
+                    xmlWriter.writeString(mug.p.label);
+                }
+                xmlWriter.writeEndElement(); // close label
+            }
+        }
+
+        // Special logic block to make sure the label ends up in the right place
+        if (isGroupOrRepeat) {
+            xmlWriter.writeStartElement('group');
+            createLabel();
+            if (tagName === 'repeat') {
+                xmlWriter.writeStartElement('repeat');
+            }
+        } else {
+            xmlWriter.writeStartElement(tagName);
+        }
+        if (tagName !== 'group' && tagName !== 'repeat' &&
+            tagName !== 'itemset')
+        {
+            createLabel();
+        }
+
+        var defaultValue = mug.p.defaultValue;
+        if (tagName === 'item' && defaultValue) {
+            //do a value tag for an item Mug
+            xmlWriter.writeStartElement('value');
+            xmlWriter.writeString(defaultValue);
+            xmlWriter.writeEndElement();
+        }
+
+        if (tagName === 'itemset') {
+            var data = mug.p.itemsetData;
+            xmlWriter.writeAttributeString(
+                'nodeset', data.getAttr('nodeset', ''));
+            xmlWriter.writeStartElement('label');
+            xmlWriter.writeAttributeString(
+                'ref', data.getAttr('labelRef', ''));
+            xmlWriter.writeEndElement();
+            xmlWriter.writeStartElement('value');
+            xmlWriter.writeAttributeString(
+                'ref', data.getAttr('valueRef', ''));
+            xmlWriter.writeEndElement();
+        }
+
+        // Write any custom attributes first
+        // HACK skip legacy attributes that should not be preserved
+        var skip = (tagName === "repeat") ?
+            function (k) { return k.toLowerCase() === "jr:noaddremove"; } :
+            function (k) { return false; };
+        var rawControlAttributes = mug.p.rawControlAttributes;
+        for (var k in rawControlAttributes) {
+            if (rawControlAttributes.hasOwnProperty(k) && !skip(k)) {
+                xmlWriter.writeAttributeString(k, rawControlAttributes[k]);
+            }
+        }
+
+        // Set the nodeset/ref attribute correctly
+        if (tagName !== 'item' && tagName !== 'itemset') {
+            var attr, absPath;
+            if (tagName === 'repeat') {
+                attr = 'nodeset';
+            } else {
+                attr = 'ref';
+            }
+            absPath = form.getAbsolutePath(mug);
+            xmlWriter.writeAttributeString(attr, absPath);
+        }
+
+        // Set other relevant attributes
+
+        if (tagName === 'repeat') {
+            var r_count = mug.p.repeat_count;
+            if (r_count) {
+                xmlWriter.writeAttributeString("jr:count", String(r_count));
+                xmlWriter.writeAttributeString("jr:noAddRemove", "true()");
+            }
+        } else if (isODKMedia) {
+            var mediaType = mug.p.mediaType;
+            if (mediaType) {
+                xmlWriter.writeAttributeString("mediatype", mediaType);
+            }
+        }
+
+        var appearanceAttr = mug.getAppearanceAttribute();
+        if (appearanceAttr) {
+            xmlWriter.writeAttributeString("appearance", appearanceAttr);
+        }
+
+        // Do hint label
+        if( tagName !== 'item' && tagName !== 'repeat'){
+            var hintLabel = mug.p.hintLabel,
+                hintItextID = mug.p.hintItextID;
+            if(hintLabel || (hintItextID && hintItextID.id)) {
+                xmlWriter.writeStartElement('hint');
+                if(hintLabel){
+                    xmlWriter.writeString(hintLabel);
+                }
+                if(hintItextID.id){
+                    var ref = "jr:itext('" + hintItextID.id + "')";
+                    xmlWriter.writeAttributeString('ref',ref);
+                }
+                xmlWriter.writeEndElement();
+            }
+        }
+    }
 
     return {
         createXForm: createXForm
