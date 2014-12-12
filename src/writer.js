@@ -211,9 +211,8 @@ define([
                 xmlWriter.writeXML($('<div>').append(mug.p.rawControlXML).clone().html());
                 return;
             }
-            var label, isItextOptional;
 
-            function createOpenControlTag(form, xmlWriter, mug, elLabel) {
+            function createOpenControlTag(form, xmlWriter, mug) {
                 var tagName = mug.p.tagName.toLowerCase(),
                     isGroupOrRepeat = (tagName === 'group' || tagName === 'repeat'),
                     isODKMedia = (tagName === 'upload');
@@ -222,15 +221,25 @@ define([
                  * Creates the label tag inside of a control Element in the xform
                  */
                 function createLabel() {
-                    if (elLabel.ref || elLabel.defText) {
+                    var labelItextID = mug.p.labelItextID,
+                        labelRef;
+                    if (labelItextID) {
+                        labelRef = "jr:itext('" + labelItextID.id + "')";
+                        // iID is optional so by extension Itext is optional.
+                        if (labelItextID.isEmpty() &&
+                                mug.spec.labelItextID.presence === 'optional') {
+                            labelRef = '';
+                        }
+                    }
+                    if (labelRef || mug.p.label) {
                         xmlWriter.writeStartElement('label');
-                        if (elLabel.ref) {
-                            xmlWriter.writeAttributeString('ref',elLabel.ref);
+                        if (labelRef) {
+                            xmlWriter.writeAttributeString('ref', labelRef);
                         }
-                        if (elLabel.defText) {
-                            xmlWriter.writeString(elLabel.defText);
+                        if (mug.p.label) {
+                            xmlWriter.writeString(mug.p.label);
                         }
-                        xmlWriter.writeEndElement(); //close Label tag;
+                        xmlWriter.writeEndElement(); // close label
                     }
                 }
 
@@ -334,26 +343,7 @@ define([
                 }
             }
 
-            //create the label object (for createOpenControlTag())
-            if (mug.p.label) {
-                label = {};
-                label.defText = mug.p.label;
-            }
-            var labelItextID = mug.p.labelItextID;
-            if (labelItextID) {
-                if (!label) {
-                    label = {};
-                }
-                
-                label.ref = "jr:itext('" + labelItextID.id + "')";
-                // iID is optional so by extension Itext is optional.
-                isItextOptional = mug.spec.labelItextID.presence === 'optional';
-                if (labelItextID.isEmpty() && isItextOptional) {
-                    label.ref = '';
-                }
-            }
-
-            createOpenControlTag(form, xmlWriter, mug, label);
+            createOpenControlTag(form, xmlWriter, mug);
 
             processChildren(mug.options.controlChildFilter);
 
