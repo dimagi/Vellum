@@ -114,12 +114,10 @@ define([
     };
 
     var createDataBlock = function (form, xmlWriter) {
-        function mapFunc (node) {
-            var mug = node.getValue();
-
-            xmlWriter.writeStartElement(node.getID());
-            
-            if (node.isRootNode) {
+        form.dataTree.walk(function (mug, nodeID, processChildren) {
+            xmlWriter.writeStartElement(nodeID);
+            if (!mug) {
+                // tree root
                 createModelHeader(form, xmlWriter);
             } else {
                 var rawDataAttributes = mug.p.rawDataAttributes;
@@ -147,13 +145,9 @@ define([
                     xmlWriter.writeAttributeString("jr:template","");
                 }
             }
-        }
-
-        function afterFunc (node) {
+            processChildren(mug && mug.options.dataChildFilter);
             xmlWriter.writeEndElement();
-        }
-
-        form.dataTree.treeMap(mapFunc, afterFunc);
+        });
     };
 
     var createBindList = function (form, xmlWriter) {
