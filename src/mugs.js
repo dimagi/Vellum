@@ -372,6 +372,7 @@ define([
         writeControlRefAttr: 'ref',
         // a function with signature `(xmlWriter, mug)` to write custom XML
         writeCustomXML: null,
+        writesOnlyCustomXML: false,
 
         afterInsert: function (form, mug) {},
         getAppearanceAttribute: function (mug) {
@@ -614,6 +615,10 @@ define([
     });
 
     var ReadOnly = util.extend(defaultOptions, {
+        writesOnlyCustomXML: true,
+        writeCustomXML: function (xmlWriter, mug) {
+            return xmlWriter.writeXML($('<div>').append(mug.p.rawControlXML).clone().html());
+        },
         spec: {
             readOnlyControl: {
                 widget: widgets.readOnlyControl

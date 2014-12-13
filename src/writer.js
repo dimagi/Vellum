@@ -206,55 +206,43 @@ define([
                 return;
             }
 
-            if (mug.__className === "ReadOnly") {
-                xmlWriter.writeXML($('<div>').append(mug.p.rawControlXML).clone().html());
+            var opts = mug.options;
+            if (opts.writesOnlyCustomXML) {
+                opts.writeCustomXML(xmlWriter, mug);
                 return;
             }
 
-            createOpenControlTag(form, xmlWriter, mug);
+            xmlWriter.writeStartElement(mug.p.tagName.toLowerCase());
+            if (opts.writeControlLabel) {
+                createLabel(xmlWriter, mug);
+            }
+            if (opts.writeControlHint) {
+                createHint(xmlWriter, mug);
+            }
+            // Write custom attributes first
+            var attributes = mug.p.rawControlAttributes;
+            for (var k in attributes) {
+                if (attributes.hasOwnProperty(k)) {
+                    xmlWriter.writeAttributeString(k, attributes[k]);
+                }
+            }
+            if (opts.writeCustomXML) {
+                opts.writeCustomXML(xmlWriter, mug);
+            }
+            if (opts.writeControlRefAttr) {
+                var absPath = form.getAbsolutePath(mug);
+                xmlWriter.writeAttributeString(opts.writeControlRefAttr, absPath);
+            }
+            var appearanceAttr = mug.getAppearanceAttribute();
+            if (appearanceAttr) {
+                xmlWriter.writeAttributeString("appearance", appearanceAttr);
+            }
 
-            processChildren(mug.options.controlChildFilter);
+            processChildren(opts.controlChildFilter);
 
             xmlWriter.writeEndElement();
         });
     };
-
-    function createOpenControlTag(form, xmlWriter, mug) {
-        var tagName = mug.p.tagName.toLowerCase(),
-            opts = mug.options;
-
-        xmlWriter.writeStartElement(tagName);
-
-        if (opts.writeControlLabel) {
-            createLabel(xmlWriter, mug);
-        }
-        if (opts.writeControlHint) {
-            createHint(xmlWriter, mug);
-        }
-
-        // Write any custom attributes first
-        var rawControlAttributes = mug.p.rawControlAttributes;
-        for (var k in rawControlAttributes) {
-            if (rawControlAttributes.hasOwnProperty(k)) {
-                xmlWriter.writeAttributeString(k, rawControlAttributes[k]);
-            }
-        }
-
-        if (opts.writeCustomXML) {
-            opts.writeCustomXML(xmlWriter, mug);
-        }
-
-        if (opts.writeControlRefAttr) {
-            var absPath = form.getAbsolutePath(mug);
-            xmlWriter.writeAttributeString(opts.writeControlRefAttr, absPath);
-        }
-
-        // Set other relevant attributes
-        var appearanceAttr = mug.getAppearanceAttribute();
-        if (appearanceAttr) {
-            xmlWriter.writeAttributeString("appearance", appearanceAttr);
-        }
-    }
 
     /**
      * Creates the label tag inside of a control Element in the xform
