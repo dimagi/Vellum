@@ -364,6 +364,13 @@ define([
         dataChildFilter: null,
         controlChildFilter: null,
 
+        // control node writer options
+        writeControlLabel: true,
+        writeControlHint: true,
+        writeControlRefAttr: 'ref',
+        // a function with signature `(xmlWriter, mug)` to write custom XML
+        writeCustomXML: null,
+
         afterInsert: function (form, mug) {},
         getAppearanceAttribute: function (mug) {
             return mug.p.appearance;
@@ -654,6 +661,12 @@ define([
         icon: 'icon-vellum-audio-capture',
         isODKOnly: true,
         canOutputValue: false,
+        writeCustomXML: function (xmlWriter, mug) {
+            var mediaType = mug.p.mediaType;
+            if (mediaType) {
+                xmlWriter.writeAttributeString("mediatype", mediaType);
+            }
+        },
         init: function (mug, form) {
             mug.p.tagName = "upload";
             mug.p.mediaType = "audio/*"; /* */
@@ -777,6 +790,16 @@ define([
                 return 'icon-check-empty';
             }
         },
+        writeControlHint: false,
+        writeControlRefAttr: null,
+        writeCustomXML: function (xmlWriter, mug) {
+            var defaultValue = mug.p.defaultValue;
+            if (defaultValue) {
+                xmlWriter.writeStartElement('value');
+                xmlWriter.writeString(defaultValue);
+                xmlWriter.writeEndElement();
+            }
+        },
         init: function (mug, form) {
             mug.p.tagName = "item";
         },
@@ -862,6 +885,7 @@ define([
         controlNodeChildren: function ($node) {
             return $node.children().not('label').not('value').not('hint');
         },
+        writeControlLabel: false, // TODO remove when repeat is no longer special
         init: function (mug, form) {
             mug.p.tagName = "group";
         },
@@ -884,9 +908,6 @@ define([
         isSpecialGroup: true,
         isTypeChangeable: false,
         canOutputValue: false,
-        controlNodeChildren: function ($node) {
-            return $node.children().not('label').not('value').not('hint');
-        },
         init: function (mug, form) {
             Group.init(mug, form);
             mug.p.appearance = 'field-list';
@@ -901,6 +922,16 @@ define([
         canOutputValue: false,
         controlNodeChildren: function ($node) {
             return $node.children('repeat').children();
+        },
+        writeControlLabel: false,
+        writeControlHint: false,
+        writeControlRefAttr: 'nodeset',
+        writeCustomXML: function (xmlWriter, mug) {
+            var r_count = mug.p.repeat_count;
+            if (r_count) {
+                xmlWriter.writeAttributeString("jr:count", String(r_count));
+                xmlWriter.writeAttributeString("jr:noAddRemove", "true()");
+            }
         },
         init: function (mug, form) {
             mug.p.tagName = "repeat";
