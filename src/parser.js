@@ -463,6 +463,7 @@ define([
                         var adapt = function (mug, form) {
                             mug = makeMugAdaptor('Repeat')(mug, form);
                             mug.p.repeat_count = repeat.popAttr('jr:count') || null;
+                            mug.p.rawRepeatAttributes = getAttributes(repeat);
                             return mug;
                         };
                         adapt.repeat = repeat;

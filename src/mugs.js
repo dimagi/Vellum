@@ -1,11 +1,13 @@
 define([
     'jquery',
     'underscore',
+    'vellum/tree',
     'vellum/widgets',
     'vellum/util'
 ], function (
     $,
     _,
+    Tree,
     widgets,
     util,
     undefined
@@ -885,7 +887,6 @@ define([
         controlNodeChildren: function ($node) {
             return $node.children().not('label').not('value').not('hint');
         },
-        writeControlLabel: false, // TODO remove when repeat is no longer special
         init: function (mug, form) {
             mug.p.tagName = "group";
         },
@@ -923,18 +924,36 @@ define([
         controlNodeChildren: function ($node) {
             return $node.children('repeat').children();
         },
-        writeControlLabel: false,
-        writeControlHint: false,
-        writeControlRefAttr: 'nodeset',
-        writeCustomXML: function (xmlWriter, mug) {
-            var r_count = mug.p.repeat_count;
-            if (r_count) {
-                xmlWriter.writeAttributeString("jr:count", String(r_count));
-                xmlWriter.writeAttributeString("jr:noAddRemove", "true()");
-            }
+        controlChildFilter: function (children, mug) {
+            var absPath = mug.form.getAbsolutePath(mug),
+                r_count = mug.p.repeat_count,
+                attrs = _.omit(mug.p.rawRepeatAttributes, function (val, key) {
+                    return key.toLowerCase() === "jr:noaddremove";
+                });
+            return [new Tree.Node(children, {
+                getNodeID: function () {},
+                getAppearanceAttribute: function () {},
+                p: {
+                    tagName: 'repeat',
+                    rawControlAttributes: attrs
+                },
+                options: {
+                    writeControlLabel: false,
+                    writeControlHint: false,
+                    writeControlRefAttr: null,
+                    writeCustomXML: function (xmlWriter, mug) {
+                        if (r_count) {
+                            xmlWriter.writeAttributeString("jr:count", String(r_count));
+                            xmlWriter.writeAttributeString("jr:noAddRemove", "true()");
+                        }
+                        xmlWriter.writeAttributeString("nodeset", absPath);
+                    },
+                }
+            })];
         },
+        writeControlRefAttr: null,
         init: function (mug, form) {
-            mug.p.tagName = "repeat";
+            mug.p.tagName = "group";
             mug.p.repeat_count = null;
         },
         spec: {
@@ -943,6 +962,10 @@ define([
                 visibility: 'visible_if_present',
                 presence: 'optional',
                 widget: widgets.droppableText
+            },
+            rawRepeatAttributes: {
+                presence: 'optional',
+                lstring: "Extra Repeat Attributes"
             }
         }
     });

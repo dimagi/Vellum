@@ -441,6 +441,7 @@ define([
         }
     };
 
+    Tree.Node = Node; // exposed for walk filters
     return Tree;
 });
 

@@ -215,11 +215,7 @@ define([
 
             processChildren(mug.options.controlChildFilter);
 
-            //finish off
-            xmlWriter.writeEndElement(); //close control tag.
-            if(mug.p.tagName === 'repeat'){
-                xmlWriter.writeEndElement(); //special case where we have to close the repeat as well as the group tag.
-            }
+            xmlWriter.writeEndElement();
         });
     };
 
@@ -227,29 +223,19 @@ define([
         var tagName = mug.p.tagName.toLowerCase(),
             opts = mug.options;
 
-        // Special logic block to make sure the label ends up in the right place
-        if (tagName === 'group' || tagName === 'repeat') {
-            xmlWriter.writeStartElement('group');
-            createLabel(xmlWriter, mug);
-            if (tagName === 'repeat') {
-                xmlWriter.writeStartElement('repeat');
-            }
-        } else {
-            xmlWriter.writeStartElement(tagName);
-        }
+        xmlWriter.writeStartElement(tagName);
 
         if (opts.writeControlLabel) {
             createLabel(xmlWriter, mug);
         }
+        if (opts.writeControlHint) {
+            createHint(xmlWriter, mug);
+        }
 
         // Write any custom attributes first
-        // HACK skip legacy attributes that should not be preserved
-        var skip = (tagName === "repeat") ?
-            function (k) { return k.toLowerCase() === "jr:noaddremove"; } :
-            function (k) { return false; };
         var rawControlAttributes = mug.p.rawControlAttributes;
         for (var k in rawControlAttributes) {
-            if (rawControlAttributes.hasOwnProperty(k) && !skip(k)) {
+            if (rawControlAttributes.hasOwnProperty(k)) {
                 xmlWriter.writeAttributeString(k, rawControlAttributes[k]);
             }
         }
@@ -267,10 +253,6 @@ define([
         var appearanceAttr = mug.getAppearanceAttribute();
         if (appearanceAttr) {
             xmlWriter.writeAttributeString("appearance", appearanceAttr);
-        }
-
-        if(opts.writeControlHint) {
-            createHint(xmlWriter, mug);
         }
     }
 
