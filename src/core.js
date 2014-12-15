@@ -543,15 +543,29 @@ define([
         $modal.one('shown', function () { $text.focus(); });
     };
 
-    fn.showOverwriteWarning = function(send, formText) {
-        var $modal, $overwriteForm, _this = this;
+    fn.showOverwriteWarning = function(send, localForm, serverForm, oldForm) {
+        var diff_match_patch = require('diff-match-patch'),
+            dmp = new diff_match_patch(),
+            $modal,
+            $overwriteForm,
+            _this = this;
 
         $modal = this.generateNewModal("Lost work warning", [
             {
                 title: "Overwrite their work",
                 cssClasses: "btn-primary",
                 action: function () {
-                    _this.send(formText, 'full');
+                    _this.send(localForm, 'full');
+                    $modal.modal('hide');
+                }
+            },
+            {
+                title: "Attempt to automatically combine work",
+                cssClasses: "btn-primary",
+                action: function () {
+                    var localPatch = dmp.patch_make(oldForm, localForm),
+                        newForm = dmp.patch_apply(localPatch, serverForm);
+                    _this.send(newForm[0], 'full');
                     $modal.modal('hide');
                 }
             }
@@ -566,7 +580,7 @@ define([
 
         $modal.modal('show');
     };
-        
+
     fn.showFormPropertiesDialog = function () {
         // moved over just for display purposes, apparently the original
         // wasn't working perfectly, so this is a todo
@@ -1714,12 +1728,10 @@ define([
             success: function (data) {
                 if (saveType === 'patch') {
                     if (data.status === 'conflict') {
-                        /* todo: display diff and ask instead overwriting */
-                        // var diffHtml = dmp.diff_prettyHtml(
-                        //     dmp.diff_main(formText, data.xform)
-                        // );
                         _this._hideConfirmDialog();
-                        _this.showOverwriteWarning(_this.send, formText);
+                        _this.showOverwriteWarning(_this.send, formText,
+                                                   data.xform,
+                                                   _this.data.core.lastSavedXForm);
                         return;
                     } else if (CryptoJS.SHA1(formText).toString() !== data.sha1) {
                         debug.error("sha1's didn't match");
