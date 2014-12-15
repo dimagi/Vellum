@@ -362,7 +362,10 @@ define([
         },
         controlNodeChildren: null,
 
-        // XForm writer integration: ChildFilter(treeNodes, parentMug) -> treeNodes
+        // XForm writer integration:
+        //  `childFilter(treeNodes, parentMug) -> treeNodes`
+        // The writer passes these filter functions to `processChildren` of
+        // `Tree.walk`. See `Tree.walk` documentation for more details.
         dataChildFilter: null,
         controlChildFilter: null,
 

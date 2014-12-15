@@ -408,12 +408,8 @@ define([
          * manipulate its tree of children.
          *
          * @param callback - A function that accepts three arguments:
-         *  - mug : the node value (null for the root node). This object may
-         *          have a function `mug.options.dataWriterChildren`, which will
-         *          be called with the mug and a list of its child tree nodes
-         *          (not mugs). This allows the mug to manipulate it's tree
-         *          branches by returning a list of tree nodes.
-         *  - nodeID : The ID of the mug's tree node.
+         *  - mug : the node value (null for the root node).
+         *  - nodeID : the ID of the mug's tree node.
          *  - processChildren : a function that processes the mug's children. If
          *          this function is not called the mug's children will not be
          *          visited. This function accepts one optional argument,  a
