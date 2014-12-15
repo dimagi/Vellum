@@ -141,8 +141,13 @@ define([
                 if (xmlnsAttr){
                     xmlWriter.writeAttributeString("xmlns", xmlnsAttr);
                 }
-                if (mug.__className === "Repeat"){
-                    xmlWriter.writeAttributeString("jr:template","");
+                if (mug.options.getExtraDataAttributes) {
+                    var attributes = mug.options.getExtraDataAttributes(mug);
+                    for (k in attributes) {
+                        if (attributes.hasOwnProperty(k)) {
+                            xmlWriter.writeAttributeString(k, attributes[k]);
+                        }
+                    }
                 }
             }
             processChildren(mug && mug.options.dataChildFilter);

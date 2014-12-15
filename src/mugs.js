@@ -369,6 +369,9 @@ define([
         dataChildFilter: null,
         controlChildFilter: null,
 
+        // data node writer options
+        getExtraDataAttributes: null, // function (mug) { return {...}; }
+
         // control node writer options
         writeControlLabel: true,
         writeControlHint: true,
@@ -934,6 +937,9 @@ define([
         canOutputValue: false,
         controlNodeChildren: function ($node) {
             return $node.children('repeat').children();
+        },
+        getExtraDataAttributes: function (mug) {
+            return {"jr:template": ""};
         },
         controlChildFilter: function (children, mug) {
             var absPath = mug.form.getAbsolutePath(mug),
