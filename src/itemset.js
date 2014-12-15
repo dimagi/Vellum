@@ -28,6 +28,7 @@ define([
     'vellum/parser',
     'vellum/util',
     'vellum/debugutil',
+    'vellum/core',
     'jquery.bootstrap-better-typeahead'
 ], function (
     _,
