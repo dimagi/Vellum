@@ -565,8 +565,20 @@ define([
                 action: function () {
                     var localPatch = dmp.patch_make(oldForm, localForm),
                         newForm = dmp.patch_apply(localPatch, serverForm);
-                    _this.send(newForm[0], 'full');
-                    $modal.modal('hide');
+                    try {
+                        $.parseXML(newForm[0]);
+                        for (var patch in newForm[0]) {
+                            if (!patch) {
+                                throw 'Not all patches applied';
+                            }
+                        }
+                        _this.send(newForm[0], 'full');
+                        $modal.modal('hide');
+                    } catch(err) {
+                        $modal.modal('hide');
+                        _this._resetMessages(['Automatic merging can not be done']);
+                        return;
+                    }
                 }
             }
         ]);
