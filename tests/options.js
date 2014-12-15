@@ -96,7 +96,10 @@ define(function () {
             },
             objectMap: {}  // todo
         },
-        plugins: ['itemset']
+        plugins: ['itemset'],
+        features: {
+            'add_help_text': true
+        }
     };
 
     return {

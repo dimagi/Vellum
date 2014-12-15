@@ -322,8 +322,8 @@ define([
                     xmlWriter.writeAttributeString("appearance", appearanceAttr);
                 }
                 
-                // Do hint label
                 if( tagName !== 'item' && tagName !== 'repeat'){
+                    // Do hint label
                     var hintLabel = mug.p.hintLabel,
                         hintItextID = mug.p.hintItextID;
                     if(hintLabel || (hintItextID && hintItextID.id)) {
@@ -334,6 +334,17 @@ define([
                         if(hintItextID.id){
                             var ref = "jr:itext('" + hintItextID.id + "')";
                             xmlWriter.writeAttributeString('ref',ref);
+                        }
+                        xmlWriter.writeEndElement();
+                    }
+
+                    // Do help text
+                    var helpItextID = mug.p.helpItextID;
+                    if(helpItextID && helpItextID.id) {
+                        xmlWriter.writeStartElement('help');
+                        if(helpItextID.id){
+                            var helpRef = "jr:itext('" + helpItextID.id + "')";
+                            xmlWriter.writeAttributeString('ref',helpRef);
                         }
                         xmlWriter.writeEndElement();
                     }
