@@ -1,11 +1,13 @@
 define([
     'jquery',
     'underscore',
+    'vellum/tree',
     'vellum/widgets',
     'vellum/util'
 ], function (
     $,
     _,
+    Tree,
     widgets,
     util,
     undefined
@@ -359,6 +361,26 @@ define([
             return $node.children();
         },
         controlNodeChildren: null,
+
+        // XForm writer integration:
+        //  `childFilter(treeNodes, parentMug) -> treeNodes`
+        // The writer passes these filter functions to `processChildren` of
+        // `Tree.walk`. See `Tree.walk` documentation for more details.
+        dataChildFilter: null,
+        controlChildFilter: null,
+
+        // data node writer options
+        getExtraDataAttributes: null, // function (mug) { return {...}; }
+
+        // control node writer options
+        writeControlLabel: true,
+        writeControlHint: true,
+        writeControlHelp: true,
+        writeControlRefAttr: 'ref',
+        // a function with signature `(xmlWriter, mug)` to write custom XML
+        writeCustomXML: null,
+        writesOnlyCustomXML: false,
+
         afterInsert: function (form, mug) {},
         getAppearanceAttribute: function (mug) {
             return mug.p.appearance;
@@ -600,6 +622,10 @@ define([
     });
 
     var ReadOnly = util.extend(defaultOptions, {
+        writesOnlyCustomXML: true,
+        writeCustomXML: function (xmlWriter, mug) {
+            return xmlWriter.writeXML($('<div>').append(mug.p.rawControlXML).clone().html());
+        },
         spec: {
             readOnlyControl: {
                 widget: widgets.readOnlyControl
@@ -649,6 +675,12 @@ define([
         icon: 'icon-vellum-audio-capture',
         isODKOnly: true,
         canOutputValue: false,
+        writeCustomXML: function (xmlWriter, mug) {
+            var mediaType = mug.p.mediaType;
+            if (mediaType) {
+                xmlWriter.writeAttributeString("mediatype", mediaType);
+            }
+        },
         init: function (mug, form) {
             mug.p.tagName = "upload";
             mug.p.mediaType = "audio/*"; /* */
@@ -772,6 +804,17 @@ define([
                 return 'icon-check-empty';
             }
         },
+        writeControlHint: false,
+        writeControlHelp: false,
+        writeControlRefAttr: null,
+        writeCustomXML: function (xmlWriter, mug) {
+            var defaultValue = mug.p.defaultValue;
+            if (defaultValue) {
+                xmlWriter.writeStartElement('value');
+                xmlWriter.writeString(defaultValue);
+                xmlWriter.writeEndElement();
+            }
+        },
         init: function (mug, form) {
             mug.p.tagName = "item";
         },
@@ -880,9 +923,6 @@ define([
         isSpecialGroup: true,
         isTypeChangeable: false,
         canOutputValue: false,
-        controlNodeChildren: function ($node) {
-            return $node.children().not('label').not('value').not('hint');
-        },
         init: function (mug, form) {
             Group.init(mug, form);
             mug.p.appearance = 'field-list';
@@ -898,8 +938,40 @@ define([
         controlNodeChildren: function ($node) {
             return $node.children('repeat').children();
         },
+        getExtraDataAttributes: function (mug) {
+            return {"jr:template": ""};
+        },
+        controlChildFilter: function (children, mug) {
+            var absPath = mug.form.getAbsolutePath(mug),
+                r_count = mug.p.repeat_count,
+                attrs = _.omit(mug.p.rawRepeatAttributes, function (val, key) {
+                    return key.toLowerCase() === "jr:noaddremove";
+                });
+            return [new Tree.Node(children, {
+                getNodeID: function () {},
+                getAppearanceAttribute: function () {},
+                p: {
+                    tagName: 'repeat',
+                    rawControlAttributes: attrs
+                },
+                options: {
+                    writeControlLabel: false,
+                    writeControlHint: false,
+                    writeControlHelp: false,
+                    writeControlRefAttr: null,
+                    writeCustomXML: function (xmlWriter, mug) {
+                        if (r_count) {
+                            xmlWriter.writeAttributeString("jr:count", String(r_count));
+                            xmlWriter.writeAttributeString("jr:noAddRemove", "true()");
+                        }
+                        xmlWriter.writeAttributeString("nodeset", absPath);
+                    },
+                }
+            })];
+        },
+        writeControlRefAttr: null,
         init: function (mug, form) {
-            mug.p.tagName = "repeat";
+            mug.p.tagName = "group";
             mug.p.repeat_count = null;
         },
         spec: {
@@ -908,6 +980,10 @@ define([
                 visibility: 'visible_if_present',
                 presence: 'optional',
                 widget: widgets.droppableText
+            },
+            rawRepeatAttributes: {
+                presence: 'optional',
+                lstring: "Extra Repeat Attributes"
             }
         }
     });
