@@ -778,6 +778,7 @@ define([
         spec: {
             hintLabel: { presence: 'notallowed' },
             hintItextID: { presence: 'notallowed' },
+            helpItextID: { presence: 'notallowed' },
             defaultValue: {
                 lstring: 'Choice Value',
                 visibility: 'visible',

@@ -426,6 +426,10 @@ define([
                     !mug.p.hintItextID) {
                     mug.p.hintItextID = this.createItem("");
                 }
+                if (mug.spec.helpItextID.presence !== "notallowed" &&
+                    !mug.p.helpItextID) {
+                    mug.p.helpItextID = this.createItem("");
+                }
             }
             if (!mug.options.isControlOnly) {
                 // set constraint msg if legal and not there
@@ -476,6 +480,7 @@ define([
             var thingsToGet = [
                 'labelItextID',
                 'hintItextID', 
+                'helpItextID',
                 'constraintMsgItextID'
             ]; 
         
@@ -891,7 +896,23 @@ define([
             return _.intersection(block.activeForms, block.forms);
         };
 
-        block.itextWidget = itextMediaWidget;
+        // this used to be the form ID instead of 'data'.  Since
+        // only hand-made forms will ever end up with a different
+        // ID (the ability to set it in the UI has been broken for
+        // a while), it seemed ok to make it just 'data'
+        block.itextWidget = itextMediaWidget(mug.form.getBasePath());
+
+        return block;
+    };
+
+    var itextMediaHelpBlock = function (mug, options) {
+        var block = itextConfigurableBlock(mug, options);
+
+        block.getForms = function () {
+            return _.intersection(block.activeForms, block.forms);
+        };
+
+        block.itextWidget = itextMediaWidget('/help' + mug.form.getBasePath());
 
         return block;
     };
@@ -1173,31 +1194,28 @@ define([
         video: 'icon-facetime-video'
     };
 
-    var itextMediaWidget = function (mug, language, form, options) {
-        var widget = itextFormWidget(mug, language, form, options);
+    var itextMediaWidget = function (url_type) {
+        return function (mug, language, form, options) {
+            var widget = itextFormWidget(mug, language, form, options);
 
+            widget.getDefaultValue = function () {
+                if (SUPPORTED_MEDIA_TYPES.indexOf(form) !== -1) {
+                    // default formats
+                    // image: jr://file/commcare/image/form_id/question_id.png
+                    // audio: jr://file/commcare/audio/form_id/question_id.mp3
+                    var extension = DEFAULT_EXTENSIONS[form];
+                    return "jr://file/commcare/" + form + url_type +
+                           widget.mug.getDefaultItextRoot() + "." + extension;
+                }
+                return null;
+            };
 
-        widget.getDefaultValue = function () {
-            if (SUPPORTED_MEDIA_TYPES.indexOf(form) !== -1) {
-                // default formats
-                // image: jr://file/commcare/image/form_id/question_id.png
-                // audio: jr://file/commcare/audio/form_id/question_id.mp3
-                var extension = DEFAULT_EXTENSIONS[form];
-                return "jr://file/commcare/" + form + "/data/" +
-                    // this used to be the form ID instead of 'data'.  Since
-                    // only hand-made forms will ever end up with a different
-                    // ID (the ability to set it in the UI has been broken for
-                    // a while), it seemed ok to make it just 'data'
-                       widget.mug.getDefaultItextRoot() + "." + extension;
-            }
-            return null;
+            widget.mug.form.vellum.initWidget(widget);
+
+            return widget;
         };
-
-        widget.mug.form.vellum.initWidget(widget);
-
-        return widget;
     };
-
+    
     var parseXLSItext = function (str, Itext) {
         var forms = ["default", "audio", "image" , "video"],
             languages = Itext.getLanguages(),
@@ -1820,6 +1838,49 @@ define([
                     return validateItextItem(hintItext, "Hint");
                 }
             };
+            control.helpItext = {
+                visibility: 'helpItextID',
+                widget: function (mug, options) {
+                    return itextLabelBlock(mug, $.extend(options, {
+                        itextType: "help",
+                        getItextByMug: function (mug) {
+                            return mug.p.helpItextID;
+                        },
+                        displayName: "Help Message"
+                    }));
+                }
+            };
+            control.helpItextID = {
+                visibility: 'visible',
+                presence: function (mugOptions) {
+                    return mugOptions.isSpecialGroup ? 'notallowed' : 'optional';
+                },
+                lstring: "Help Itext ID",
+                widget: function (mug, options) {
+                    return iTextIDWidget(mug, $.extend(options, {
+                        itextType: "help",
+                        getItextByMug: function (mug) {
+                            return mug.p.helpItextID;
+                        },
+                        displayName: "Help Message"
+                    }));
+                },
+                validationFunc: function (mug) {
+                    var helpItext;
+                    helpItext = mug.p.helpItextID;
+                    if (helpItext && helpItext.id) {
+                        if (!util.isValidAttributeValue(helpItext.id)) {
+                            return helpItext.id + " is not a valid ID";
+                        }
+                    }
+                    if (mug.spec.helpItextID.presence === 'required' &&
+                        !helpItext.id) {
+                        return 'Help ID is required but not present in this question!';
+                    }
+                    
+                    return validateItextItem(helpItext, "Help");
+                }
+            };
 
             // virtual property used to get a widget
             control.otherItext = function (mugOptions) {
@@ -1859,6 +1920,25 @@ define([
                     }
                 };
             };
+            // virtual property used to get a widget
+            control.helpMediaIText = function (mugOptions) {
+                return mugOptions.isSpecialGroup ? undefined : {
+                    visibility: 'helpItextID',
+                    presence: 'optional',
+                    lstring: 'Add Help Media',
+                    widget: function (mug, options) {
+                        return itextMediaHelpBlock(mug, $.extend(options, {
+                            displayName: "Add Help Media",
+                            itextType: "help",
+                            getItextByMug: function (mug) {
+                                return mug.p.helpItextID;
+                            },
+                            forms: SUPPORTED_MEDIA_TYPES,
+                            formToIcon: ICONS
+                        }));
+                    }
+                };
+            };
             return spec;
         },
         getMainProperties: function () {
@@ -1886,8 +1966,17 @@ define([
                 'constraintMsgItextID',
                 'hintItextID',
                 'hintItext',
-                'otherItext'
             ]);
+
+            if (this.opts().features.add_help_text) {
+                ret = ret.concat([
+                    'helpItextID',
+                    'helpItext',
+                    'helpMediaIText',
+                ]);
+            }
+
+            ret = ret.concat(['otherItext']);
 
             return ret;
         },

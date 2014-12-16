@@ -103,6 +103,9 @@ define(function () {
                 case: ['case1', 'case2'],
                 fixture: ['fixture1', 'fixture2']
             }
+        },
+        features: {
+            'add_help_text': true
         }
     };
 
