@@ -944,9 +944,9 @@ define([
         controlChildFilter: function (children, mug) {
             var absPath = mug.form.getAbsolutePath(mug),
                 r_count = mug.p.repeat_count,
-                attrs = _.omit(mug.p.rawRepeatAttributes, function (val, key) {
-                    return key.toLowerCase() === "jr:noaddremove";
-                });
+                attrs = _.object(_.filter(_.map(mug.p.rawRepeatAttributes, function (val, key) {
+                    return key.toLowerCase() !== "jr:noaddremove" ? [key, val] : null;
+                }), _.identity));
             return [new Tree.Node(children, {
                 getNodeID: function () {},
                 getAppearanceAttribute: function () {},
