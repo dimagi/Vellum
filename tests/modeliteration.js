@@ -75,5 +75,19 @@ require([
             util.assertXmlEqual(call("createXML"), FIXTURE_REPEAT_XML,
                                 {normalize_xmlns: true});
         });
+
+        it("should create a fixture repeat containing a text input", function () {
+            util.loadXML("");
+            var repeat = util.addQuestion("ModelRepeat", "product");
+            repeat.p.dataSource = {
+                instance: {id: "products", src: "jr://fixture/commtrack:products"},
+                idsQuery: "instance('products')/products/product/@id"
+            };
+            util.addQuestion("Text", "text");
+            util.assertJSTreeState(
+                "product",
+                "  text"
+            );
+        });
     });
 });

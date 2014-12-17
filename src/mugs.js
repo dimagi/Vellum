@@ -899,6 +899,7 @@ define([
         typeName: 'Group',
         icon: 'icon-folder-open',
         isSpecialGroup: true,
+        isNestableGroup: true,
         isTypeChangeable: false,
         canOutputValue: false,
         controlNodeChildren: function ($node) {
@@ -924,6 +925,7 @@ define([
         typeName: 'Question List',
         icon: 'icon-reorder',
         isSpecialGroup: true,
+        isNestableGroup: false,
         isTypeChangeable: false,
         canOutputValue: false,
         init: function (mug, form) {
@@ -1025,7 +1027,7 @@ define([
 
         _.each(this.normalTypes, function (Mug, name) {
             var validChildTypes;
-            if (name === "Group" || name === "Repeat") {
+            if (Mug.isNestableGroup) {
                 validChildTypes = innerChildTypeNames;
             } else if (name === "FieldList") {
                 validChildTypes = fieldListChildTypes;
