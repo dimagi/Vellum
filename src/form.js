@@ -184,6 +184,17 @@ define([
         addInstance: function (instance) {
             this.externalInstances[instance.id] = instance;
         },
+        addInstanceIfNotExists: function (attrs) {
+            var hasInstance = _.any(this.instanceMetadata, function (m) {
+                return m.attributes.src === attrs.src;
+            });
+            if (!hasInstance) {
+                this.instanceMetadata.push(InstanceMetadata({
+                    src: attrs.src,
+                    id: attrs.id
+                }));
+            }
+        },
         // todo: update references on rename
         addSetValue: function (event, ref, value) {
             var existing = _.filter(this.setValues, function (setValue) {
@@ -295,17 +306,6 @@ define([
             dList = this.dataTree.treeMap(treeFunc);
 
             return util.mergeArray(cList, dList); //strip dupes and merge
-        },
-        addInstanceIfNotExists: function (attrs) {
-            var hasInstance = _.any(this.instanceMetadata, function (m) {
-                return m.attributes.src === attrs.src;
-            });
-            if (!hasInstance) {
-                this.instanceMetadata.push(InstanceMetadata({
-                    src: attrs.src,
-                    id: attrs.id
-                }));
-            }
         },
         updateError: function (errObj, options) {
             errObj = FormError(errObj);
