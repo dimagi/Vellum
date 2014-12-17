@@ -4,13 +4,15 @@ require([
     'underscore',
     'tests/utils',
     'text!static/modeliteration/case-list-iteration.xml',
+    'text!static/modeliteration/fixture-iteration.xml',
     'tests/modeliteration'
 ], function (
     chai,
     $,
     _,
     util,
-    CASE_LIST_REPEAT_XML
+    CASE_LIST_REPEAT_XML,
+    FIXTURE_REPEAT_XML
 ) {
     var assert = chai.assert,
         call = util.call,
@@ -50,6 +52,27 @@ require([
                 idsQuery: "instance('casedb')/mother/child/@case_id"
             };
             util.assertXmlEqual(call("createXML"), CASE_LIST_REPEAT_XML,
+                                {normalize_xmlns: true});
+        });
+
+        it("should load a fixture repeat", function () {
+            util.loadXML(FIXTURE_REPEAT_XML);
+            var repeat = util.getMug("product");
+            assert.deepEqual(repeat.p.dataSource, {
+                instance: {id: "products", src: "jr://fixture/commtrack:products"},
+                idsQuery: "instance('products')/products/product/@id"
+            });
+            util.assertXmlEqual(call("createXML"), FIXTURE_REPEAT_XML);
+        });
+
+        it("should create a fixture repeat", function () {
+            util.loadXML("");
+            var repeat = util.addQuestion("ModelRepeat", "product");
+            repeat.p.dataSource = {
+                instance: {id: "products", src: "jr://fixture/commtrack:products"},
+                idsQuery: "instance('products')/products/product/@id"
+            };
+            util.assertXmlEqual(call("createXML"), FIXTURE_REPEAT_XML,
                                 {normalize_xmlns: true});
         });
     });

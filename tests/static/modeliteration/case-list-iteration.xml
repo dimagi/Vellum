@@ -33,7 +33,7 @@
 	<h:body>
 		<group>
 			<label ref="jr:itext('child-label')" />
-			<repeat jr:count="/data/child/@count" jr:noAddRemove="true()" nodeset="/data/child/item" />
+			<repeat nodeset="/data/child/item" jr:count="/data/child/@count" jr:noAddRemove="true()" />
 		</group>
 	</h:body>
 </h:html>
