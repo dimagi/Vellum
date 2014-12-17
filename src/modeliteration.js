@@ -6,6 +6,7 @@ define([
     'vellum/parser',
     'vellum/tree',
     'vellum/util',
+    'vellum/widgets',
     'vellum/core'
 ], function (
     form_,
@@ -14,9 +15,42 @@ define([
     mugs,
     parser,
     Tree,
-    util
+    util,
+    widgets
 ) {
     var Repeat = mugs.baseMugTypes.normal.Repeat,
+        // the order of the items in this list is important:
+        // <setvalue> elements are evaluated in document order
+        setvalueData = [
+            {
+                key: "ids",
+                event: "xforms-ready",
+                path: "",
+                query: "join(' ', {})"
+            }, {
+                key: "count",
+                event: "xforms-ready",
+                path: "",
+                query: "count-selected({}/@ids)"
+            }, {
+                key: "current_index",
+                event: "jr-insert",
+                path: "",
+                query: "count({}/item)"
+            }, {
+                key: "index",
+                event: "jr-insert",
+                path: "/item",
+                query: "int({}/@current_index)"
+            }, {
+                key: "id",
+                event: "jr-insert",
+                path: "/item",
+                query: "selected-at({}/@ids,../@index)"
+            }
+        ],
+        instanceRegexp = /^instance\(['"]([^'"]+)['"]\)/i,
+        joinIdsRegexp = /^ *join\(['"] ['"], *(.*)\) *$/i,
         modelRepeatMugOptions = {
             typeName: 'Model Repeat',
             supportsDataNodeRole: true,
@@ -48,6 +82,8 @@ define([
                 return children;
             },
             getExtraDataAttributes: function (mug) {
+                // HACK must happen before <setvalue> and "other" <instance> elements are written
+                prepareForWrite(mug);
                 return {
                     ids: "",
                     count: "",
@@ -58,18 +94,32 @@ define([
             afterInsert: function (form, mug) {
                 // TODO create hidden values for case properties, etc.
                 //form.createQuestion(mug, 'into', "Hidden", true);
-//            },
-//            init: function (mug, form) {
-//                Repeat.init(mug, form);
-//                mug.p.repeat_count = "@count";
-    //        },
-    //        spec: {
-    //            repeat_count: {
-    //                lstring: 'Repeat Count',
-    //                visibility: 'visible_if_present',
-    //                presence: 'optional',
-    //                widget: widgets.droppableText
-    //            }
+            },
+            init: function (mug, form) {
+                Repeat.init(mug, form);
+                mug.p.repeat_count = "";
+                mug.p.setvalues = {};
+                mug.p.originalPath = null;
+                mug.p.dataSource = {};
+                mug.p.dataSourceChanged = false;
+                mug.on("mug-property-change", function (event) {
+                    if (event.property === "dataSource") {
+                        event.mug.dataSourceChanged = true;
+                        // TODO drop old instance (if no longer referenced)?
+                    }
+                });
+            },
+            spec: {
+                repeat_count: {
+                    visibility: "hidden"
+                },
+                dataSource: {
+                    lstring: 'Data Source',
+                    visibility: 'visible_if_present',
+                    presence: 'optional',
+                    // TODO data source selection widget
+                    widget: widgets.droppableText
+                }
             }
         };
 
@@ -93,7 +143,6 @@ define([
                         mug = form.getMugByPath(path.substring(0, path.length - 5));
                         if (mug && mug.__className === "ModelRepeat") {
                             adapt = function (ignore, form) {
-                                //mug.p.sourceParams = ... TODO
                                 mug.p.repeat_count = repeat.popAttr('jr:count') || null;
                                 mug.p.rawRepeatAttributes = parser.getAttributes(repeat);
                                 return mug;
@@ -111,24 +160,43 @@ define([
         handleMugParseFinish: function (mug) {
             this.__callOld();
             if (mug.__className === "ModelRepeat") {
-                var setvalues = mug.form.getSetValues(),
-                    path = mug.form.getAbsolutePath(mug),
-                    setvalueMap = {},
-                    iterationParams = {},
-                    i, value, key;
-                setvalueMap["xforms-ready " + path + "/@ids"] = "ids";
-                setvalueMap["xforms-ready " + path + "/@count"] = "count";
-                setvalueMap["jr-insert " + path + "/@current_index"] = "current_index";
-                setvalueMap["jr-insert " + path + "/item/@index"] = "index";
-                setvalueMap["jr-insert " + path + "/item/@id"] = "id";
-                for (i = 0; i < setvalues.length; i++) {
-                    value = setvalues[i];
-                    key = value.event + " " + value.ref;
-                    if (setvalueMap.hasOwnProperty(key)) {
-                        iterationParams[setvalueMap[key]] = value.value;
+                var path = mug.form.getAbsolutePath(mug),
+                    values = _.object(_.map(mug.form.getSetValues(), function (value) {
+                        return [value.event + " " + value.ref, value];
+                    }));
+                mug.p.dataSource = {};
+                mug.p.dataSourceChanged = false;
+                mug.p.setvalues = {};
+                mug.p.originalPath = path;
+                _.each(setvalueData, function (data) {
+                    var value = values[data.event + " " + path + data.path + "/@" + data.key];
+                    if (value) {
+                        mug.p.setvalues[data.key] = value;
+                        if (data.key === "ids") {
+                            // get dataSource.idsQuery
+                            value = value.value;
+                            var match = value && value.match(joinIdsRegexp);
+                            if (match) {
+                                mug.p.dataSource.idsQuery = match[1];
+                            } else {
+                                mug.p.dataSource.idsQuery = value;
+                            }
+                        }
+                    }
+                });
+                if (mug.p.dataSource.idsQuery) {
+                    var match = mug.p.dataSource.idsQuery.match(instanceRegexp);
+                    if (match) {
+                        var instances = _.object(_.map(mug.form.instanceMetadata, function (meta) {
+                                return [meta.attributes.id, meta.attributes.src];
+                            }));
+                        match = match[1];
+                        mug.p.dataSource.instance = {id: match};
+                        if (instances.hasOwnProperty(match) && instances[match]) {
+                            mug.p.dataSource.instance.src = instances[match];
+                        }
                     }
                 }
-                mug.p.iterationParams = iterationParams;
             }
         },
         // test function to be used before commcare data plugin is available
@@ -142,4 +210,40 @@ define([
             return value;
         }
     });
+
+    function prepareForWrite(mug) {
+        var path = mug.form.getAbsolutePath(mug);
+        if (!mug.p.dataSourceChanged && mug.p.originalPath === path) {
+            return;
+        }
+
+        var setvalues = mug.p.setvalues,
+            setvaluesById = _.groupBy(mug.form.getSetValues(), "_id"),
+            instance = mug.p.dataSource.instance,
+            query = mug.p.dataSource.idsQuery;
+
+        mug.p.repeat_count = path + "/@count";
+        if (instance.src) {
+            var instanceId = mug.form.addInstanceIfNotExists(instance);
+            if (instanceId !== instance.id) {
+                query = query.replace(instanceRegexp, "instance('" + instanceId + "')");
+            }
+        }
+
+        // add/update <setvalue> elements
+        _.each(setvalueData, function (data) {
+            var value = setvalues[data.key],
+                setvalue = null;
+            if (value) {
+                setvalue = setvaluesById[value._id] || {};
+            } else {
+                value = {};
+            }
+            value.ref = path + data.path + "/@" + data.key;
+            value.value = data.query.replace("{}", data.key === "ids" ? query : path);
+            if (!value.event) {
+                mug.form.addSetValue(data.event, value.ref, value.value);
+            }
+        });
+    }
 });

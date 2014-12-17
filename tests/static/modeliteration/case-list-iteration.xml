@@ -21,8 +21,10 @@
 				<translation lang="en" default="">
 					<text id="child-label">
 						<!-- is this <output> node a reasonable default for a model iteration?
-						     if not, what should go here? -->
-						<value><output value="instance('casedb')/mother/child[@case_id=current()/@id]/name"></output></value>
+						     if not, what should go here?
+						     <output value="instance('casedb')/mother/child[@case_id=current()/@id]/name"></output>
+						 -->
+						<value>child</value>
 					</text>
 				</translation>
 			</itext>

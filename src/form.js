@@ -140,6 +140,7 @@ define([
         var _this = this;
 
         this.setValues = [];
+        this._setValueId = 1;
 
         this._logicManager = new logic.LogicManager(this, {
                 allowedDataNodeReferences: opts.allowedDataNodeReferences
@@ -185,15 +186,17 @@ define([
             this.externalInstances[instance.id] = instance;
         },
         addInstanceIfNotExists: function (attrs) {
-            var hasInstance = _.any(this.instanceMetadata, function (m) {
+            var meta = _.find(this.instanceMetadata, function (m) {
                 return m.attributes.src === attrs.src;
             });
-            if (!hasInstance) {
+            if (!meta) {
                 this.instanceMetadata.push(InstanceMetadata({
                     src: attrs.src,
                     id: attrs.id
                 }));
+                return attrs.id;
             }
+            return meta.attributes.id;
         },
         // todo: update references on rename
         addSetValue: function (event, ref, value) {
@@ -204,6 +207,7 @@ define([
                 existing.value = value;
             } else {
                 this.setValues.push({
+                    _id: this._setValueId++,
                     event: event,
                     ref: ref,
                     value: value

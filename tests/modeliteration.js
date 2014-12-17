@@ -35,14 +35,22 @@ require([
         it("should load a case list repeat", function () {
             util.loadXML(CASE_LIST_REPEAT_XML);
             var repeat = util.getMug("child");
-            assert.deepEqual(repeat.p.iterationParams, {
-                ids: "join(' ', instance('casedb')/mother/child/@case_id)",
-                count: "count-selected(/data/child/@ids)",
-                current_index: "count(/data/child/item)",
-                index: "int(/data/child/@current_index)",
-                id: "selected-at(/data/child/@ids,../@index)"
+            assert.deepEqual(repeat.p.dataSource, {
+                instance: {id: "casedb", src: "jr://instance/casedb"},
+                idsQuery: "instance('casedb')/mother/child/@case_id"
             });
             util.assertXmlEqual(call("createXML"), CASE_LIST_REPEAT_XML);
+        });
+
+        it("should create a case list repeat", function () {
+            util.loadXML("");
+            var repeat = util.addQuestion("ModelRepeat", "child");
+            repeat.p.dataSource = {
+                instance: {id: "casedb", src: "jr://instance/casedb"},
+                idsQuery: "instance('casedb')/mother/child/@case_id"
+            };
+            util.assertXmlEqual(call("createXML"), CASE_LIST_REPEAT_XML,
+                                {normalize_xmlns: true});
         });
     });
 });
