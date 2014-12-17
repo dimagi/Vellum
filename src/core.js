@@ -1894,7 +1894,7 @@ define([
             return null;
         }
 
-        if (!propDef || 
+        if (!propDef || propDef.visibility === 'hidden' ||
             (_.isUndefined(propVal) &&
              (propDef.visibility === "visible_if_present" ||
               propDef.presence === "notallowed")))

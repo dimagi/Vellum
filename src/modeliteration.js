@@ -110,9 +110,7 @@ define([
                 });
             },
             spec: {
-                repeat_count: {
-                    visibility: "hidden"
-                },
+                repeat_count: {visibility: "hidden"},
                 dataSource: {
                     lstring: 'Data Source',
                     visibility: 'visible_if_present',
