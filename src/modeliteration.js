@@ -98,10 +98,6 @@ define([
                     "vellum:role": "Repeat"
                 };
             },
-            afterInsert: function (form, mug) {
-                // TODO create hidden values for case properties, etc.
-                //form.createQuestion(mug, 'into', "Hidden", true);
-            },
             init: function (mug, form) {
                 oldRepeat.init(mug, form);
                 mug.p.repeat_count = "";
