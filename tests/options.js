@@ -96,7 +96,14 @@ define(function () {
             },
             objectMap: {}  // todo
         },
-        plugins: ['itemset'],
+        plugins: ['itemset', 'modelIteration'],
+        modelIteration: {
+            modelTypes: ['case', 'fixture'],
+            modelIterationUrl: {
+                case: ['case1', 'case2'],
+                fixture: ['fixture1', 'fixture2']
+            }
+        },
         features: {
             'add_help_text': true
         }

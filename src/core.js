@@ -1935,6 +1935,15 @@ define([
 
     fn.destroy = function () {};
 
+     /**
+      * Get a list of data sources
+      *
+      * @param type - Data source type. Examples: "case", "fixture", ...
+      * @returns - An array of data source objects. The structure of a data
+      *            source object is dependent on the type of data source.
+      */
+    fn.getDataSources = function (type) { return []; };
+
     $.vellum.plugin("core", {
         form: null,
         loadDelay: 500,
