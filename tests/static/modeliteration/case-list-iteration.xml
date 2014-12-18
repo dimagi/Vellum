@@ -5,7 +5,7 @@
 		<model>
 			<instance>
 				<data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/28B1D8B9-1144-4600-968A-349FD99FFCA5" uiVersion="1" version="1" name="Untitled Form">
-					<child ids="" count="" current_index="" vellum:role="ModelRepeat">
+					<child ids="" count="" current_index="" vellum:role="Repeat">
 						<item id="" index="" jr:template="" />
 					</child>
 				</data>

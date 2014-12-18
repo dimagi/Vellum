@@ -217,6 +217,10 @@ define([
         getSetValues: function () {
             return this.setValues;
         },
+        dropSetValues: function (predicate) {
+            // Remove all <setvalue> elements matching predicate
+            this.setValues = _.reject(this.setValues, predicate);
+        },
         setFormID: function (id) {
             this.dataTree.setRootID(id);
             this.controlTree.setRootID(id);

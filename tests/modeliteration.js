@@ -5,6 +5,7 @@ require([
     'tests/utils',
     'text!static/modeliteration/case-list-iteration.xml',
     'text!static/modeliteration/fixture-iteration.xml',
+    'text!static/modeliteration/regular-repeat.xml',
     'tests/modeliteration'
 ], function (
     chai,
@@ -12,7 +13,8 @@ require([
     _,
     util,
     CASE_LIST_REPEAT_XML,
-    FIXTURE_REPEAT_XML
+    FIXTURE_REPEAT_XML,
+    REGULAR_REPEAT_XML
 ) {
     var assert = chai.assert,
         call = util.call,
@@ -46,7 +48,7 @@ require([
 
         it("should create a case list repeat", function () {
             util.loadXML("");
-            var repeat = util.addQuestion("ModelRepeat", "child");
+            var repeat = util.addQuestion("Repeat", "child");
             repeat.p.dataSource = {
                 instance: {id: "casedb", src: "jr://instance/casedb"},
                 idsQuery: "instance('casedb')/mother/child/@case_id"
@@ -67,7 +69,7 @@ require([
 
         it("should create a fixture repeat", function () {
             util.loadXML("");
-            var repeat = util.addQuestion("ModelRepeat", "product");
+            var repeat = util.addQuestion("Repeat", "product");
             repeat.p.dataSource = {
                 instance: {id: "products", src: "jr://fixture/commtrack:products"},
                 idsQuery: "instance('products')/products/product/@id"
@@ -76,9 +78,17 @@ require([
                                 {normalize_xmlns: true});
         });
 
+        it("should convert fixture repeat to regular repeat when data source is removed", function () {
+            util.loadXML(FIXTURE_REPEAT_XML);
+            var repeat = util.getMug("product");
+            repeat.p.dataSource = {};
+            repeat.p.repeat_count = "";
+            util.assertXmlEqual(call("createXML"), REGULAR_REPEAT_XML);
+        });
+
         it("should create a fixture repeat containing a text input", function () {
             util.loadXML("");
-            var repeat = util.addQuestion("ModelRepeat", "product");
+            var repeat = util.addQuestion("Repeat", "product");
             repeat.p.dataSource = {
                 instance: {id: "products", src: "jr://fixture/commtrack:products"},
                 idsQuery: "instance('products')/products/product/@id"

@@ -18,7 +18,7 @@ define([
     util,
     widgets
 ) {
-    var Repeat = mugs.baseMugTypes.normal.Repeat,
+    var oldRepeat = mugs.baseMugTypes.normal.Repeat,
         // the order of the items in this list is important:
         // <setvalue> elements are evaluated in document order
         setvalueData = [
@@ -52,15 +52,18 @@ define([
         instanceRegexp = /^instance\(['"]([^'"]+)['"]\)/i,
         joinIdsRegexp = /^ *join\(['"] ['"], *(.*)\) *$/i,
         modelRepeatMugOptions = {
-            typeName: 'Model Repeat',
+            //typeName: 'Model Repeat',
             supportsDataNodeRole: true,
             dataNodeChildren: function ($node) {
                 return $node.children("item").children();
             },
             dataChildFilter: function (children, mug) {
+                if (!mug.p.dataSource.idsQuery) {
+                    return children;
+                }
                 return [new Tree.Node(children, {
                     getNodeID: function () { return "item"; },
-                    p: {rawDataAttributes: {}},
+                    p: {rawDataAttributes: null},
                     options: {
                         getExtraDataAttributes: function (mug) {
                             return {id: "", index: "", "jr:template": ""};
@@ -69,26 +72,30 @@ define([
                 })];
             },
             controlChildFilter: function (children, mug) {
-                var absPath = mug.form.getAbsolutePath(mug),
+                var nodeset = mug.form.getAbsolutePath(mug) +
+                              (mug.p.dataSource.idsQuery ? "/item" : ""),
                     r_count = mug.p.repeat_count;
-                children = Repeat.controlChildFilter(children, mug);
+                children = oldRepeat.controlChildFilter(children, mug);
                 children[0].getValue().options.writeCustomXML = function (xmlWriter, mug) {
                     if (r_count) {
                         xmlWriter.writeAttributeString("jr:count", String(r_count));
                         xmlWriter.writeAttributeString("jr:noAddRemove", "true()");
                     }
-                    xmlWriter.writeAttributeString("nodeset", absPath + "/item");
+                    xmlWriter.writeAttributeString("nodeset", nodeset);
                 };
                 return children;
             },
             getExtraDataAttributes: function (mug) {
                 // HACK must happen before <setvalue> and "other" <instance> elements are written
                 prepareForWrite(mug);
+                if (!mug.p.dataSource.idsQuery) {
+                    return oldRepeat.getExtraDataAttributes(mug);
+                }
                 return {
                     ids: "",
                     count: "",
                     current_index: "",
-                    "vellum:role": "ModelRepeat"
+                    "vellum:role": "Repeat"
                 };
             },
             afterInsert: function (form, mug) {
@@ -96,21 +103,21 @@ define([
                 //form.createQuestion(mug, 'into', "Hidden", true);
             },
             init: function (mug, form) {
-                Repeat.init(mug, form);
+                oldRepeat.init(mug, form);
                 mug.p.repeat_count = "";
                 mug.p.setvalues = {};
                 mug.p.originalPath = null;
                 mug.p.dataSource = {};
                 mug.p.dataSourceChanged = false;
-                mug.on("mug-property-change", function (event) {
+                form.on("mug-property-change", function (event) {
                     if (event.property === "dataSource") {
-                        event.mug.dataSourceChanged = true;
+                        event.mug.p.dataSourceChanged = true;
                         // TODO drop old instance (if no longer referenced)?
                     }
                 });
             },
             spec: {
-                repeat_count: {visibility: "hidden"},
+                //repeat_count: {visibility: "hidden"},
                 dataSource: {
                     lstring: 'Data Source',
                     visibility: 'visible_if_present',
@@ -123,9 +130,8 @@ define([
 
     $.vellum.plugin("modeliteration", {}, {
         getMugTypes: function () {
-            var types = this.__callOld(),
-                Repeat = types.normal.Repeat;
-            types.normal.ModelRepeat = util.extend(Repeat, modelRepeatMugOptions);
+            var types = this.__callOld();
+            types.normal.Repeat = util.extend(oldRepeat, modelRepeatMugOptions);
             return types;
         },
         updateControlNodeAdaptorMap: function (map) {
@@ -139,13 +145,14 @@ define([
                         mug;
                     if (/\/item$/.test(path)) {
                         mug = form.getMugByPath(path.substring(0, path.length - 5));
-                        if (mug && mug.__className === "ModelRepeat") {
+                        if (mug && mug.__className === "Repeat") {
                             adapt = function (ignore, form) {
+                                mug.p.nodeset = path;
                                 mug.p.repeat_count = repeat.popAttr('jr:count') || null;
                                 mug.p.rawRepeatAttributes = parser.getAttributes(repeat);
                                 return mug;
                             };
-                            adapt.type = 'ModelRepeat';
+                            adapt.type = 'Repeat';
                             adapt.path = path;
                             adapt.repeat = repeat;
                             adapt.ignoreDataNode = true;
@@ -157,15 +164,18 @@ define([
         },
         handleMugParseFinish: function (mug) {
             this.__callOld();
-            if (mug.__className === "ModelRepeat") {
-                var path = mug.form.getAbsolutePath(mug),
-                    values = _.object(_.map(mug.form.getSetValues(), function (value) {
-                        return [value.event + " " + value.ref, value];
-                    }));
+            if (mug.__className === "Repeat") {
+                var path = mug.form.getAbsolutePath(mug);
                 mug.p.dataSource = {};
                 mug.p.dataSourceChanged = false;
                 mug.p.setvalues = {};
                 mug.p.originalPath = path;
+                if (!mug.p.nodeset || path === mug.p.nodeset) {
+                    return;
+                }
+                var values = _.object(_.map(mug.form.getSetValues(), function (value) {
+                        return [value.event + " " + value.ref, value];
+                    }));
                 _.each(setvalueData, function (data) {
                     var value = values[data.event + " " + path + data.path + "/@" + data.key];
                     if (value) {
@@ -195,6 +205,8 @@ define([
                         }
                     }
                 }
+                mug.p.rawDataAttributes = _.omit(
+                    mug.p.rawDataAttributes, ["ids", "count", "current_index"]);
             }
         },
         // test function to be used before commcare data plugin is available
@@ -215,33 +227,43 @@ define([
             return;
         }
 
-        var setvalues = mug.p.setvalues,
-            setvaluesById = _.groupBy(mug.form.getSetValues(), "_id"),
-            instance = mug.p.dataSource.instance,
+        var instance = mug.p.dataSource.instance,
             query = mug.p.dataSource.idsQuery;
 
-        mug.p.repeat_count = path + "/@count";
-        if (instance.src) {
-            var instanceId = mug.form.addInstanceIfNotExists(instance);
-            if (instanceId !== instance.id) {
-                query = query.replace(instanceRegexp, "instance('" + instanceId + "')");
+        if (query) {
+            mug.p.repeat_count = path + "/@count";
+            if (instance.src) {
+                var instanceId = mug.form.addInstanceIfNotExists(instance);
+                if (instanceId !== instance.id) {
+                    query = query.replace(instanceRegexp, "instance('" + instanceId + "')");
+                }
+            }
+
+            // add/update <setvalue> elements
+            var setvalues = mug.p.setvalues,
+                setvaluesById = _.groupBy(mug.form.getSetValues(), "_id");
+            _.each(setvalueData, function (data) {
+                var value = setvalues[data.key],
+                    setvalue = null;
+                if (value) {
+                    setvalue = setvaluesById[value._id] || {};
+                } else {
+                    value = {};
+                }
+                value.ref = path + data.path + "/@" + data.key;
+                value.value = data.query.replace("{}", data.key === "ids" ? query : path);
+                if (!value.event) {
+                    mug.form.addSetValue(data.event, value.ref, value.value);
+                }
+            });
+        } else {
+            // remove <setvalue> elements
+            if (mug.p.setvalues) {
+                var setvaluesToRemove = _.groupBy(mug.p.setvalues, "_id");
+                mug.form.dropSetValues(function (value) {
+                    return setvaluesToRemove.hasOwnProperty(value._id);
+                });
             }
         }
-
-        // add/update <setvalue> elements
-        _.each(setvalueData, function (data) {
-            var value = setvalues[data.key],
-                setvalue = null;
-            if (value) {
-                setvalue = setvaluesById[value._id] || {};
-            } else {
-                value = {};
-            }
-            value.ref = path + data.path + "/@" + data.key;
-            value.value = data.query.replace("{}", data.key === "ids" ? query : path);
-            if (!value.event) {
-                mug.form.addSetValue(data.event, value.ref, value.value);
-            }
-        });
     }
 });
