@@ -208,16 +208,6 @@ define([
                 mug.p.rawDataAttributes = _.omit(
                     mug.p.rawDataAttributes, ["ids", "count", "current_index"]);
             }
-        },
-        // test function to be used before commcare data plugin is available
-        getDataSources: function (type) {
-            var value;
-            if (type === "case") {
-                value = [];
-            } else {
-                value = this.__callOld();
-            }
-            return value;
         }
     });
 

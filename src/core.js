@@ -20,6 +20,7 @@ define([
     'vellum/mugs',
     'vellum/widgets',
     'vellum/parser',
+    'vellum/datasources',
     'vellum/util',
     'vellum/debugutil',
     'vellum/base',
@@ -49,6 +50,7 @@ define([
     mugs,
     widgets,
     parser,
+    datasources,
     util,
     debug
 ) {
@@ -194,6 +196,7 @@ define([
         this._createJSTree();
         this._init_modal_dialogs();
         this._setup_fancybox();
+        datasources.init(this);
     };
 
     fn.postInit = function () {
@@ -1970,15 +1973,6 @@ define([
     fn.initWidget = function (widget) {};
 
     fn.destroy = function () {};
-
-     /**
-      * Get a list of data sources
-      *
-      * @param type - Data source type. Examples: "case", "fixture", ...
-      * @returns - An array of data source objects. The structure of a data
-      *            source object is dependent on the type of data source.
-      */
-    fn.getDataSources = function (type) { return []; };
 
     $.vellum.plugin("core", {
         form: null,

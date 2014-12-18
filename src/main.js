@@ -186,8 +186,7 @@ define([
     'vellum/modeliteration',
     'vellum/uploader',
     'vellum/window',
-    'vellum/polyfills',
-    'vellum/datasources'
+    'vellum/polyfills'
     // end buildmain.py delimiter
 ], function () {
     // adds $.vellum as a side-effect

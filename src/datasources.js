@@ -1,81 +1,112 @@
 define([
     'jquery',
-    'tpl!vellum/templates/debug_case_data',
-    'vellum/core'
+    'underscore',
+    'vellum/widgets',
+    'tpl!vellum/templates/select_data_source'
 ], function (
     $,
+    _,
+    widgets,
     edit_source
 ) {
-    function supportedMugs(type) {
-        return ['DynamicMSelect', 'ModelRepeat'];
+    var vellum, dataSources;
+
+    function init(instance) {
+        vellum = instance;
+        dataSources = vellum.opts().core.dataSources || [];
     }
-    $.vellum.plugin('modelIteration', { }, {
-        init: function() {
-        },
-        getDataTypes: function() {
-            return this.opts().modelIteration.modelTypes;
-        },
-        getDataSources: function(type) {
-            var endpoint = this.opts().modelIteration.modelIterationUrl[type];
 
-            if (typeof endpoint === 'string') {
-                var x = $.ajax({
+    function getDataSources(type, callback) {
+        var source = _(dataSources).find(function (src) {
+            return src.key === type;
+        });
+
+        if (source) {
+            if (_.isString(source.endpoint)) {
+                $.ajax({
                     type: 'GET',
-                    url: endpoint,
+                    url: source.endpoint,
                     dataType: 'json',
-                    success: function() { },
-                    data: {},
-                    async: false
+                    success: function (data) { callback(data); },
+                    // TODO error handling
+                    data: {}
                 });
-                return x.responseText;
             } else {
-                return endpoint;
+                callback(source.endpoint());
             }
-        },
-        getToolsMenuItems: function () {
-            var _this = this;
-            return this.__callOld().concat([
-                {
-                    name: "Model Iteration",
-                    action: function (done) {
-                        _this.showDataDialog(done);
-                    }
-                }
-            ]);
-        },
-        showDataDialog:  function(done) {
-            var $modal,
-            $exportForm,
-            _this = this;
-
-            $modal = this.generateNewModal("Data from HQ", []);
-            $exportForm = $(edit_source({ }));
-            $modal.find('.modal-body').html($exportForm);
-
-            var $modelType = $exportForm.find('#model-type-selector'),
-                $mugType = $exportForm.find('#mug-type-selector'),
-                $text = $exportForm.find('textarea');
-
-            $.each(_this.getDataTypes(), function(index, value) {
-                $modelType.append($("<option />").val(value).text(value));
-            });
-
-            function populate() {
-                $mugType.find('option').remove();
-                $.each(supportedMugs($modelType.val()), function(index, value) {
-                    $mugType.append($("<option />").val(value).text(value));
-                });
-                $text.val(_this.getDataSources($modelType.val()));
-            }
-
-            populate();
-
-            $modelType.change(function() {
-                populate();
-            });
-
-            // display current values
-            $modal.modal('show');
+        } else {
+            callback([]);
         }
-    });
+    }
+
+    function selectDataSource(callback) {
+        var $modal,
+        $exportForm,
+        _this = this;
+
+        $modal = this.generateNewModal("Select Data Source", []);
+        $exportForm = $(edit_source({ }));
+        $modal.find('.modal-body').html($exportForm);
+
+        var $type = $exportForm.find('#type-selector'),
+            $source = $exportForm.find('#source-selector'),
+            //$mugType = $exportForm.find('#mug-type-selector'),
+            $query = $exportForm.find('#source-query'),
+            $text = $exportForm.find('textarea');
+
+        $text.attr("disabled", "disabled");
+        $type.empty();
+        $type.append($("<option />").text("-- Select a source type --"));
+        _.each(dataSources, function(source) {
+            $type.append($("<option />").val(source.key).text(source.name));
+        });
+
+        function populate() {
+            var key = $type.val();
+            $source.empty();
+            if (!key) {
+                select();
+                return;
+            }
+            _this.getDataSources(key, function (sources) {
+                $source.append($("<option />").text("-- Select a source --"));
+                _.each(sources, function (source) {
+                    $source.append($("<option />").data("source", source})
+                                                  .text(source.name));
+                });
+                select();
+            });
+        }
+
+        function select() {
+            var selected = $source.find(":selected"),
+                source = selected && selected.data("source");
+            if (source) {
+                $query.text("instance('{1}')/{2}"
+                    .replace("{1}", source.defaultId)
+                    .replace("{2}", source.rootNodeName)
+                );
+                $text.text([
+                    source.defaultId,
+                    source.sourceUri,
+                ].join("\n"));
+            } else {
+                $query.text("");
+                $text.text("");
+            }
+        }
+
+        $type.change(populate);
+        $source.change(select);
+
+        // display current values
+        $modal.modal('show');
+    }
+
+    return {
+        init: init,
+        getDataSources: getDataSources,
+        selectDataSource: selectDataSource
+    }
+
 });
