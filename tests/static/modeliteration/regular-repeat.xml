@@ -8,9 +8,7 @@
 					<product jr:template="" />
 				</data>
 			</instance>
-			<!-- TODO this should be removed -->
-			<instance id="products" src="jr://fixture/commtrack:products"/>
-			<bind nodeset="/data/product"/>
+			<bind nodeset="/data/product" />
 			<itext>
 				<translation lang="en" default="">
 					<text id="product-label">

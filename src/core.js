@@ -1104,7 +1104,7 @@ define([
             try {
                 // a place for plugins to put parse warnings
                 _this.data.core.parseWarnings = [];
-                _this.loadXML(formString);
+                _this.loadXML(formString, {});
                 delete _this.data.core.parseWarnings;
 
                 if (formString) {
@@ -1185,16 +1185,19 @@ define([
         }
     };
         
-    fn.loadXML = function (formXML) {
+    fn.loadXML = function (formXML, options) {
         var form, _this = this;
         _this.data.core.$tree.children().children().each(function (i, el) {
             _this.jstree("delete_node", el);
         });
-        this.data.core.form = form = parser.parseXForm(formXML, {
+        options = _.extend({
             mugTypes: this.data.core.mugTypes,
             allowedDataNodeReferences: this.opts().core.allowedDataNodeReferences, 
-            externalInstances: this.opts().core.externalInstances
-        }, this, _this.data.core.parseWarnings);
+            externalInstances: this.opts().core.externalInstances,
+            enableInstanceRefCounting: true
+        }, options);
+        this.data.core.form = form = parser.parseXForm(
+            formXML, options, this, _this.data.core.parseWarnings);
         form.formName = this.opts().core.formName || form.formName;
 
         form.on('question-type-change', function (e) {

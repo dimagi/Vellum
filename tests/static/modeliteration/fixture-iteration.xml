@@ -11,7 +11,7 @@
 				</data>
 			</instance>
 			<instance id="products" src="jr://fixture/commtrack:products"/>
-			<bind nodeset="/data/product"/>
+			<bind nodeset="/data/product" />
 			<setvalue event="xforms-ready" ref="/data/product/@ids" value="join(' ', instance('products')/products/product/@id)" />
 			<setvalue event="xforms-ready" ref="/data/product/@count" value="count-selected(/data/product/@ids)" />
 			<setvalue event="jr-insert" ref="/data/product/@current_index" value="count(/data/product/item)" />

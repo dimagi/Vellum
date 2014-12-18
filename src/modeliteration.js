@@ -112,7 +112,10 @@ define([
                 form.on("mug-property-change", function (event) {
                     if (event.property === "dataSource") {
                         event.mug.p.dataSourceChanged = true;
-                        // TODO drop old instance (if no longer referenced)?
+                        if (event.previous) {
+                            updateDataSourceInstanceRefs(
+                                event.mug, event.val, event.previous);
+                        }
                     }
                 });
             },
@@ -163,45 +166,41 @@ define([
         },
         handleMugParseFinish: function (mug) {
             this.__callOld();
-            if (mug.__className === "Repeat") {
-                var path = mug.form.getAbsolutePath(mug);
-                mug.p.dataSource = {};
-                mug.p.dataSourceChanged = false;
-                mug.p.setvalues = {};
-                mug.p.originalPath = path;
-                if (!mug.p.nodeset || path === mug.p.nodeset) {
-                    return;
-                }
-                var values = _.object(_.map(mug.form.getSetValues(), function (value) {
-                        return [value.event + " " + value.ref, value];
-                    }));
-                _.each(setvalueData, function (data) {
-                    var value = values[data.event + " " + path + data.path + "/@" + data.key];
-                    if (value) {
-                        mug.p.setvalues[data.key] = value;
-                        if (data.key === "ids") {
-                            // get dataSource.idsQuery
-                            value = value.value;
-                            var match = value && value.match(joinIdsRegexp);
-                            if (match) {
-                                mug.p.dataSource.idsQuery = match[1];
-                            } else {
-                                mug.p.dataSource.idsQuery = value;
-                            }
+            if (mug.__className !== "Repeat") {
+                return;
+            }
+            var path = mug.form.getAbsolutePath(mug);
+            mug.p.dataSource = {};
+            mug.p.dataSourceChanged = false;
+            mug.p.setvalues = {};
+            mug.p.originalPath = path;
+            var values = _.object(_.map(mug.form.getSetValues(), function (value) {
+                    return [value.event + " " + value.ref, value];
+                }));
+            _.each(setvalueData, function (data) {
+                var value = values[data.event + " " + path + data.path + "/@" + data.key];
+                if (value) {
+                    mug.p.setvalues[data.key] = value;
+                    if (data.key === "ids") {
+                        // get dataSource.idsQuery
+                        value = value.value;
+                        var match = value && value.match(joinIdsRegexp);
+                        if (match) {
+                            mug.p.dataSource.idsQuery = match[1];
+                        } else {
+                            mug.p.dataSource.idsQuery = value;
                         }
                     }
-                });
-                if (mug.p.dataSource.idsQuery) {
-                    var match = mug.p.dataSource.idsQuery.match(instanceRegexp);
-                    if (match) {
-                        var instances = _.object(_.map(mug.form.instanceMetadata, function (meta) {
-                                return [meta.attributes.id, meta.attributes.src];
-                            }));
-                        match = match[1];
-                        mug.p.dataSource.instance = {id: match};
-                        if (instances.hasOwnProperty(match) && instances[match]) {
-                            mug.p.dataSource.instance.src = instances[match];
-                        }
+                }
+            });
+            if (mug.p.dataSource.idsQuery) {
+                var match = mug.p.dataSource.idsQuery.match(instanceRegexp);
+                if (match) {
+                    var instanceId = match[1],
+                        ref = mug.ufid + ".dataSource.instance",
+                        meta = mug.form.referenceInstance(instanceId, ref);
+                    if (meta) {
+                        mug.p.dataSource.instance = _.clone(meta.attributes);
                     }
                 }
                 mug.p.rawDataAttributes = _.omit(
@@ -210,23 +209,39 @@ define([
         }
     });
 
+    function updateDataSourceInstanceRefs(mug, value, previous) {
+        var value_src = value && value.instance && value.instance.src,
+            prev_src = previous && previous.instance && previous.instance.src;
+        if (value_src !== prev_src) {
+            var ref = mug.ufid + ".dataSource.instance";
+            if (prev_src) {
+                mug.form.dropInstanceReference(prev_src, ref);
+            }
+            if (value_src) {
+                var instanceId = mug.form.addInstanceIfNotExists(value.instance, ref);
+                if (instanceId !== value.instance.id) {
+                    // is it too magical to replace the instance id in the query?
+                    // there might be edge cases where a user is entering a
+                    // custom instance and query and does not want this to
+                    // happen
+                    value.idsQuery = value.idsQuery.replace(
+                        instanceRegexp, "instance('" + instanceId + "')");
+                    mug.p.dataSource = value; // fire change handler
+                }
+            }
+        }
+    }
+
     function prepareForWrite(mug) {
         var path = mug.form.getAbsolutePath(mug);
         if (!mug.p.dataSourceChanged && mug.p.originalPath === path) {
             return;
         }
 
-        var instance = mug.p.dataSource.instance,
-            query = mug.p.dataSource.idsQuery;
+        var query = mug.p.dataSource.idsQuery;
 
         if (query) {
             mug.p.repeat_count = path + "/@count";
-            if (instance.src) {
-                var instanceId = mug.form.addInstanceIfNotExists(instance);
-                if (instanceId !== instance.id) {
-                    query = query.replace(instanceRegexp, "instance('" + instanceId + "')");
-                }
-            }
 
             // add/update <setvalue> elements
             var setvalues = mug.p.setvalues,

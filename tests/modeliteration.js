@@ -99,5 +99,30 @@ require([
                 "  text"
             );
         });
+
+        it("should change a fixture repeat to a case list repeat", function () {
+            util.loadXML(FIXTURE_REPEAT_XML);
+            var repeat = util.getMug("product");
+            repeat.p.dataSource = {
+                instance: {id: "casedb", src: "jr://instance/casedb"},
+                idsQuery: "instance('casedb')/mother/child/@case_id"
+            };
+            util.assertXmlEqual(call("createXML").replace(/product/g, "child"),
+                                CASE_LIST_REPEAT_XML);
+        });
+
+        it("should not remove instance when ignore/retain is active", function () {
+            var normal = '<bind nodeset="/data/product" />',
+                ignore = '<bind nodeset="/data/product" wierd="true()" vellum:ignore="retain" />',
+                xml = FIXTURE_REPEAT_XML.replace(normal, normal + ignore);
+            assert(xml.indexOf(ignore) > 0, ignore + " not found in XML:\n\n" + xml);
+            util.loadXML(xml);
+            var repeat = util.getMug("product");
+            repeat.p.dataSource = {};
+            repeat.p.repeat_count = "";
+            var newxml = call("createXML");
+            assert($(newxml).find("instance[id=products]").length === 1,
+                   "products instance not found in XML\n\n" + newxml);
+        });
     });
 });

@@ -157,10 +157,10 @@ define([
     }
 
     // load XML syncronously
-    function loadXML(value) {
+    function loadXML(value, options) {
         var xml, data = call("getData");
         data.core.parseWarnings = [];
-        xml = call("loadXML", value);
+        xml = call("loadXML", value, options || {});
         delete data.core.parseWarnings;
         return xml;
     }

@@ -129,10 +129,12 @@ define([
             .replace(/[^\w-]+/g,'');
     }
     
-    var InstanceMetadata = function (attributes, children) {
+    var InstanceMetadata = function (attributes, children, ref) {
         var that = {};
         that.attributes = attributes;
         that.children = children || [];
+        that.refs = {};
+        if (ref !== null && !_.isUndefined(ref)) { that.refs[ref] = null; }
         return that;
     };
 
@@ -161,6 +163,7 @@ define([
             _this.fireChange(e.mug);
         });
         this.instanceMetadata = [InstanceMetadata({})];
+        this.enableInstanceRefCounting = opts.enableInstanceRefCounting;
         this.errors = [];
         
         this.externalInstances = _.indexBy(
@@ -183,9 +186,32 @@ define([
             });
         },
         addInstance: function (instance) {
+            // NOTE this does something very different from addInstanceIfNotExists
             this.externalInstances[instance.id] = instance;
         },
-        addInstanceIfNotExists: function (attrs) {
+        /**
+         * Add an instance if it is not already on the form
+         *
+         * @param attrs - Instance attributes. The `src` attribute is used to
+         *          match other instances on the form, and is required. The
+         *          instance will be unconditionally added and it's id returned
+         *          if the instance has no `src` attribute.
+         * @param ref - Optional, a unique key of the thing that references
+         *          the instance. If provided, this will add a reference to
+         *          the added or existing instance unless ref counting is
+         *          disabled for the form or instance.
+         * @returns - The `id` of the added or already-existing instance.
+         */
+        addInstanceIfNotExists: function (attrs, ref) {
+            if (attrs.src === null || _.isUndefined(attrs.src)) {
+                // no ref counting for instances without a `src` since they cannot be dropped
+                this.instanceMetadata.push(InstanceMetadata({
+                    src: attrs.src,
+                    id: attrs.id
+                }));
+                return attrs.id;
+            }
+
             var meta = _.find(this.instanceMetadata, function (m) {
                 return m.attributes.src === attrs.src;
             });
@@ -193,10 +219,59 @@ define([
                 this.instanceMetadata.push(InstanceMetadata({
                     src: attrs.src,
                     id: attrs.id
-                }));
+                }, null, this.enableInstanceRefCounting ? ref : null));
                 return attrs.id;
+            } else if (meta.refs && this.enableInstanceRefCounting) {
+                if (_.isUndefined(ref)) {
+                    // disable ref counting for this instance. how unfortunate
+                    meta.refs = null;
+                } else {
+                    meta.refs[ref] = null;
+                }
             }
             return meta.attributes.id;
+        },
+        /**
+         * Add a reference to the instance with matching id
+         *
+         * @returns - The InstanceMetadata if found, otherwise null. Note
+         *            that this will always return the found instance, even if
+         *            ref counting is disabled.
+         */
+        referenceInstance: function (id, ref) {
+            var meta = _.find(this.instanceMetadata, function (meta) {
+                    return meta.attributes.id;
+                });
+            if (meta && meta.refs && this.enableInstanceRefCounting) {
+                meta.refs[ref] = null;
+            }
+            return meta || null;
+        },
+        /**
+         * Drop instance reference, possibly removing the instance
+         *
+         * @param src - The instance `src` attribute value.
+         * @param ref - The unique key of the thing that no longer references
+         *          the instance. The instance will be removed from the form
+         *          if this ref was tracked by the instance and it was the
+         *          last thing referencing the instance.
+         * @returns - True if the instance was removed, otherwise false.
+         */
+        dropInstanceReference: function (src, ref) {
+            if (!this.enableInstanceRefCounting) {
+                return false;
+            }
+            var meta = _.find(this.instanceMetadata, function (m) {
+                    return m.attributes.src === src;
+                });
+            if (meta && meta.refs) {
+                meta.refs = _.omit(meta.refs, ref);
+                if (_.isEmpty(meta.refs)) {
+                    this.instanceMetadata = _.without(this.instanceMetadata, meta);
+                    return true;
+                }
+            }
+            return false;
         },
         // todo: update references on rename
         addSetValue: function (event, ref, value) {
