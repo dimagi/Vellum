@@ -204,7 +204,7 @@ define([
                 return setValue.event === event && setValue.ref === ref;
             });
             if (existing[0]) {
-                existing.value = value;
+                existing[0].value = value;
             } else {
                 this.setValues.push({
                     _id: this._setValueId++,

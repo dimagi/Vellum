@@ -2,21 +2,21 @@ define([
     'vellum/form',
     'jquery',
     'underscore',
+    'vellum/datasources',
     'vellum/mugs',
     'vellum/parser',
     'vellum/tree',
     'vellum/util',
-    'vellum/widgets',
     'vellum/core'
 ], function (
     form_,
     $,
     _,
+    datasources,
     mugs,
     parser,
     Tree,
-    util,
-    widgets
+    util
 ) {
     var oldRepeat = mugs.baseMugTypes.normal.Repeat,
         // the order of the items in this list is important:
@@ -122,8 +122,7 @@ define([
                     lstring: 'Data Source',
                     visibility: 'visible_if_present',
                     presence: 'optional',
-                    // TODO data source selection widget
-                    widget: widgets.droppableText
+                    widget: datasources.dataSourceWidget
                 }
             }
         };

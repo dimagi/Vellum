@@ -1874,11 +1874,12 @@ define([
 
     fn.getAdvancedProperties = function () {
         return [
+            "dataSource",
             "dataValue",
             "xmlnsAttr",
             "label",
             "hintLabel",
-            "constraintMsgAttr",
+            "constraintMsgAttr"
         ];
     };
 

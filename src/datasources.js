@@ -40,18 +40,30 @@ define([
     }
 
     function selectDataSource(callback) {
-        var $modal,
-        $exportForm,
-        _this = this;
-
-        $modal = this.generateNewModal("Select Data Source", []);
-        $exportForm = $(edit_source({ }));
+        var $modal = vellum.generateNewModal("Select Data Source", [
+                {
+                    title: "Set Data Source",
+                    cssClasses: "btn-primary",
+                    action: function () {
+                        var sel = $source.find(":selected"),
+                            src = (sel && sel.data("source")) || {};
+                        callback({
+                            instance: {
+                                id: src.defaultId,
+                                src: src.sourceUri
+                            },
+                            idsQuery: $query.val(),
+                        });
+                        $modal.modal('hide');
+                    }
+                }
+            ]),
+            $exportForm = $(edit_source({}));
         $modal.find('.modal-body').html($exportForm);
 
-        var $type = $exportForm.find('#type-selector'),
-            $source = $exportForm.find('#source-selector'),
-            //$mugType = $exportForm.find('#mug-type-selector'),
-            $query = $exportForm.find('#source-query'),
+        var $type = $exportForm.find('[name=type-selector]'),
+            $source = $exportForm.find('[name=source-selector]'),
+            $query = $exportForm.find('[name=source-query]'),
             $text = $exportForm.find('textarea');
 
         $text.attr("disabled", "disabled");
@@ -68,10 +80,10 @@ define([
                 select();
                 return;
             }
-            _this.getDataSources(key, function (sources) {
+            getDataSources(key, function (sources) {
                 $source.append($("<option />").text("-- Select a source --"));
                 _.each(sources, function (source) {
-                    $source.append($("<option />").data("source", source})
+                    $source.append($("<option />").data("source", source)
                                                   .text(source.name));
                 });
                 select();
@@ -82,7 +94,7 @@ define([
             var selected = $source.find(":selected"),
                 source = selected && selected.data("source");
             if (source) {
-                $query.text("instance('{1}')/{2}"
+                $query.val("instance('{1}')/{2}"
                     .replace("{1}", source.defaultId)
                     .replace("{2}", source.rootNodeName)
                 );
@@ -91,7 +103,7 @@ define([
                     source.sourceUri,
                 ].join("\n"));
             } else {
-                $query.text("");
+                $query.val("");
                 $text.text("");
             }
         }
@@ -103,10 +115,45 @@ define([
         $modal.modal('show');
     }
 
+    function dataSourceWidget(mug, options) {
+        var widget = widgets.normal(mug, options),
+            getUIElement = widgets.util.getUIElement,
+            getUIElementWithEditButton = widgets.util.getUIElementWithEditButton,
+            $queryInput = $("<input type='text' name='value_ref' class='input-block-level'>"),
+            currentValue = {};
+
+        widget.getUIElement = function () {
+            var query = getUIElementWithEditButton(
+                    getUIElement($queryInput, "Model Iteration ID Query"), 
+                    function () {
+                        selectDataSource(function (source) {
+                            currentValue = source;
+                            mug.p.dataSource = source;
+                            widget.setValue(source);
+                        });
+                    }
+                );
+            return $("<div></div>").append(query);
+        };
+
+        $queryInput.on('change keyup', function () {
+            currentValue.idsQuery = $queryInput.val();
+            mug.p.dataSource = currentValue;
+        });
+
+        widget.setValue = function (val) {
+            currentValue = val;
+            $queryInput.val(val.idsQuery || "");
+        };
+
+        return widget;
+    }
+
     return {
         init: init,
         getDataSources: getDataSources,
-        selectDataSource: selectDataSource
-    }
+        selectDataSource: selectDataSource,
+        dataSourceWidget: dataSourceWidget
+    };
 
 });
