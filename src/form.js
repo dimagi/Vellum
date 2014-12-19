@@ -275,19 +275,21 @@ define([
         },
         // todo: update references on rename
         addSetValue: function (event, ref, value) {
-            var existing = _.filter(this.setValues, function (setValue) {
+            var setValue = _.find(this.setValues, function (setValue) {
                 return setValue.event === event && setValue.ref === ref;
             });
-            if (existing[0]) {
-                existing[0].value = value;
+            if (setValue) {
+                setValue.value = value;
             } else {
-                this.setValues.push({
+                setValue = {
                     _id: this._setValueId++,
                     event: event,
                     ref: ref,
                     value: value
-                });
+                };
+                this.setValues.push(setValue);
             }
+            return setValue;
         },
         getSetValues: function () {
             return this.setValues;

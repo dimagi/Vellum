@@ -140,5 +140,21 @@ require([
             assert($(xml).find("instance[id=products]").length === 1,
                    "products instance not found in XML\n\n" + xml);
         });
+
+        it("should not write duplicate <setvalue> nodes after rename", function () {
+            // add question, save, rename, save, should not have two sets of <setvalue>s
+            util.loadXML("");
+            var repeat = util.addQuestion("Repeat", "product");
+            repeat.p.dataSource = {
+                instance: {id: "casedb", src: "jr://instance/casedb"},
+                idsQuery: "instance('casedb')/mother/child/@case_id"
+            };
+            var xml = call("createXML"),
+                firstCount = $(xml).find("setvalue").length;
+            repeat.p.nodeID = "group";
+            xml = call("createXML");
+            assert.equal($(xml).find("setvalue").length, firstCount,
+                         "wrong number of <setvalue> nodes\n\n" + xml);
+        });
     });
 });

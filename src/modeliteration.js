@@ -259,7 +259,8 @@ define([
                 value.ref = path + data.path + "/@" + data.key;
                 value.value = data.query.replace("{}", data.key === "ids" ? query : path);
                 if (!value.event) {
-                    mug.form.addSetValue(data.event, value.ref, value.value);
+                    setvalues[data.key] = mug.form.addSetValue(
+                        data.event, value.ref, value.value);
                 }
             });
         } else {
