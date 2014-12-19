@@ -112,11 +112,9 @@ define([
                 mug.p.dataSourceChanged = false;
                 form.on("mug-property-change", function (event) {
                     if (event.property === "dataSource") {
-                        event.mug.p.dataSourceChanged = true;
-                        if (event.previous) {
-                            updateDataSourceInstanceRefs(
-                                event.mug, event.val, event.previous);
-                        }
+                        var mug = event.mug;
+                        mug.p.dataSourceChanged = true;
+                        updateDataSource(mug, event.val, event.previous);
                     }
                 });
             },
@@ -210,7 +208,7 @@ define([
         }
     });
 
-    function updateDataSourceInstanceRefs(mug, value, previous) {
+    function updateDataSource(mug, value, previous) {
         var value_src = value && value.instance && value.instance.src,
             prev_src = previous && previous.instance && previous.instance.src;
         if (value_src !== prev_src) {
@@ -230,6 +228,18 @@ define([
                     mug.p.dataSource = value; // fire change handler
                 }
             }
+        }
+        if (Boolean(value && value.idsQuery) !== Boolean(previous && previous.idsQuery)) {
+            var nodeID = mug.p.nodeID,
+                currentPath = mug.form.getAbsolutePath(mug),
+                oldPath;
+            if (value && value.idsQuery) {
+                oldPath = currentPath.replace(/\/item$/, "");
+            } else {
+                oldPath = currentPath + "/item";
+            }
+            mug.form.vellum.handleMugRename(
+                mug.form, mug, nodeID, nodeID, currentPath, oldPath);
         }
     }
 

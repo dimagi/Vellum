@@ -156,5 +156,32 @@ require([
             assert.equal($(xml).find("setvalue").length, firstCount,
                          "wrong number of <setvalue> nodes\n\n" + xml);
         });
+
+        it("should update expressions on set data source", function () {
+            util.loadXML("");
+            var repeat = util.addQuestion("Repeat", "product"),
+                blue = util.addQuestion("Text", "blue"),
+                text = util.addQuestion("Text", "text"),
+                getPath = blue.form.getAbsolutePath.bind(blue.form);
+            text.p.calculateAttr = getPath(blue);
+            blue.p.labelItextID.setDefaultValue(
+                '<output value="' + getPath(text) + '"/>');
+            repeat.p.dataSource = {
+                instance: {id: "casedb", src: "jr://instance/casedb"},
+                idsQuery: "instance('casedb')/mother/child/@case_id"
+            };
+            var xml = $(call("createXML"));
+            assert.equal(getPath(blue), "/data/product/item/blue");
+            assert.equal(getPath(text), "/data/product/item/text");
+            assert.equal(
+                xml.find("bind[calculate]").attr("calculate"),
+                "/data/product/item/blue",
+                xml.find("bind[calculate]").attr("nodeset") + "calculate expression mismatch");
+            assert.equal(xml.find("output:first").attr("value"),
+                         "/data/product/item/text",
+                         "output value mismatch");
+        });
+
+        // TODO should update expressions on clear data source
     });
 });

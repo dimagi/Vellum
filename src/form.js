@@ -575,20 +575,19 @@ define([
         },
         handleMugRename: function (mug, currentId, oldId, currentPath, oldPath) {
             this._logicManager.updatePath(mug.ufid, oldPath, currentPath);
-            this.mugWasRenamed(mug, oldId);
+            this.mugWasRenamed(mug, oldId, oldPath);
         },
         /**
          * Update references to mug and its children after it is renamed.
          */
-        mugWasRenamed: function(mug, oldName) {
+        mugWasRenamed: function(mug, oldName, oldPath) {
             function preMovePath(postPath) {
                 if (postPath === mugPath) {
-                    return prevMugPath;
+                    return oldPath;
                 }
-                return postPath.replace(postRegExp, prevMugPath + "/");
+                return postPath.replace(postRegExp, oldPath + "/");
             }
             var tree = this.dataTree,
-                newName = mug.p.nodeID,
                 mugPath = tree.getAbsolutePath(mug);
             if (!mugPath) {
                 // Items don't have an absolute path. I wonder if it would
@@ -597,7 +596,6 @@ define([
             }
             var mugs = this.getDescendants(mug).concat([mug]),
                 postMovePaths = _(mugs).map(function(mug) { return tree.getAbsolutePath(mug); }),
-                prevMugPath = mugPath.replace(new RegExp("/" + RegExp.escape(newName) + "$"), "/" + oldName),
                 postRegExp = new RegExp("^" + RegExp.escape(mugPath) + "/"),
                 updates = {};
             for (var i = 0; i < mugs.length; i++) {
