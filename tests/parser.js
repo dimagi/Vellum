@@ -82,19 +82,12 @@ require([
             });
         });
 
-        it("should load select item without itext", function (done) {
-            util.init({
-                core: {
-                    form: OTHER_ITEM_XML,
-                    onReady: function () {
-                        var mug = call("getMugByPath", "/ClassroomObservationV3/Q0003"),
-                            // HACK how to reference items in select?
-                            item = mug._node_control.children[1].value;
-                        assert.equal(item.p.defaultValue, 'other');
-                        done();
-                    }
-                }
-            });
+        it("should load select item without itext", function () {
+            util.loadXML(OTHER_ITEM_XML);
+            var mug = call("getMugByPath", "/ClassroomObservationV3/Q0003"),
+                // HACK how to reference items in select?
+                item = mug._node_control.children[1].value;
+            assert.equal(item.p.defaultValue, 'other');
         });
 
         it("should load mugs with relative paths and label without itext", function () {

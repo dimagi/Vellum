@@ -180,6 +180,10 @@ require([
             assert.equal(xml.find("output:first").attr("value"),
                          "/data/product/item/text",
                          "output value mismatch");
+            var errors = _.flatten(_.map([blue, text], function (mug) {
+                    return call("getErrors", mug);
+                }));
+            assert(!errors.length, errors.join("\n"));
         });
 
         // TODO should update expressions on clear data source

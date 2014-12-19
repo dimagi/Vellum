@@ -154,6 +154,7 @@ define([
         this.mugTypes = mugTypes;
 
         this.formName = 'New Form';
+        this.mugMap = {};
         this.dataTree = new Tree('data', 'data');
         this.dataTree.on('change', function (e) {
             _this.fireChange(e.mug);
@@ -581,7 +582,7 @@ define([
          * Update references to mug and its children after it is renamed.
          */
         mugWasRenamed: function(mug, oldName, oldPath) {
-            function preMovePath(postPath) {
+            function getPreMovePath(postPath) {
                 if (postPath === mugPath) {
                     return oldPath;
                 }
@@ -597,10 +598,13 @@ define([
             var mugs = this.getDescendants(mug).concat([mug]),
                 postMovePaths = _(mugs).map(function(mug) { return tree.getAbsolutePath(mug); }),
                 postRegExp = new RegExp("^" + RegExp.escape(mugPath) + "/"),
-                updates = {};
+                updates = {},
+                preMovePath;
             for (var i = 0; i < mugs.length; i++) {
                 if (postMovePaths[i]) {
-                    updates[mugs[i].ufid] = [preMovePath(postMovePaths[i]), postMovePaths[i]];
+                    preMovePath = getPreMovePath(postMovePaths[i]);
+                    updates[mugs[i].ufid] = [preMovePath, postMovePaths[i]];
+                    this._updateMugMap(mugs[i], postMovePaths[i], preMovePath);
                 }
             }
             this._logicManager.updatePaths(updates);
@@ -813,8 +817,10 @@ define([
             return mug;
         },
         insertQuestion: function (mug, refMug, position, isInternal) {
+            this.mugMap[mug.ufid] = mug;
             refMug = refMug || this.dataTree.getRootNode().getValue();
             this.insertMug(refMug, mug, position);
+            this._updateMugMap(mug);
             // todo: abstraction barrier
 
             this.fire({
@@ -828,6 +834,24 @@ define([
                 mug.options.afterInsert(this, mug);
             }
         },
+        _updateMugMap: function (mug, newPath, oldPath) {
+            var map = this.mugMap;
+            if (_.isUndefined(newPath)) {
+                newPath = this.getAbsolutePath(mug);
+            }
+            if (newPath) {
+                map[newPath] = mug;
+            }
+            delete map[oldPath];
+        },
+        _fixMugState: function (mug) {
+            // parser needs this because it inserts directly into the tree
+            this.mugMap[mug.ufid] = mug;
+            var path = this.dataTree.getAbsolutePath(mug);
+            if (path) {
+                this.mugMap[path] = mug;
+            }
+        },
         fixBrokenReferences: function (mug) {
             function updateReferences(mug) {
                 _this._logicManager.updateAllReferences(mug);
@@ -836,6 +860,14 @@ define([
             var _this = this;
             this._logicManager.forEachBrokenReference(updateReferences);
         },
+        /**
+         * Get the logical path of the mug's node in the data tree
+         *
+         * It is not always possible to lookup a mug by traversing either the
+         * data or control tree using it's absolute path. For example, some
+         * mugs encapsulate multiple levels of XML elements. This Form object
+         * maintains a hash table to quickly get a mug by its path.
+         */
         getAbsolutePath: function (mug, excludeRoot) {
             return this.dataTree.getAbsolutePath(mug, excludeRoot);
         },
@@ -843,48 +875,13 @@ define([
             return this.controlTree.getAbsolutePath(mug, excludeRoot);
         },
         getMugByUFID: function (ufid) {
-            return (this.dataTree.getMugFromUFID(ufid) ||
-                    this.controlTree.getMugFromUFID(ufid));
+            return this.mugMap[ufid];
         },
         getMugByPath: function (path) {
-            var recFunc, tokens, targetMug,
-                rootNode = this.dataTree.getRootNode();
             if(!path) { //no path specified
                 return null;
             }
-
-            recFunc = function (node, recTokens) {
-                var currentToken, rest, children, i;
-                if (recTokens.length === 0) {
-                    return node.getValue(); //found the target. It is this node.
-                }
-                currentToken = recTokens[0];
-                rest = recTokens.slice(1);
-                children = node.getChildren();
-
-                for (i in children) {
-                    if(children.hasOwnProperty(i)) {
-                        if (children[i].getID() === currentToken) {
-                            return recFunc(children[i], rest);
-                        }
-                    }
-                }
-
-                //if we got here this means 'path not found'
-                return null;
-            };
-
-            tokens = path.split('/').slice(1);
-            if (tokens.length === 0) {
-                return null; //empty path string === 'path not found'
-            }
-
-            if(rootNode.getID() !== tokens[0]) {
-                return null; //path not found
-            }
-
-            targetMug = recFunc(rootNode,tokens.slice(1));
-            return targetMug;
+            return this.mugMap[path];
         },
         removeMugFromForm: function (mug) {
             function breakReferences(mug) {
@@ -910,6 +907,8 @@ define([
                 }
             }
             
+            delete this.mugMap[mug.ufid];
+            delete this.mugMap[this.dataTree.getAbsolutePath(mug)];
             this.dataTree.removeMug(mug);
             this.controlTree.removeMug(mug);
             this.fire({

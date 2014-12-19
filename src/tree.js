@@ -63,15 +63,6 @@ define([
             }
             return null; //we haven't found what we're looking for
         },
-        // todo: store nodes as a data-attribute in JSTree so this doesn't have
-        // to walk the whole tree
-        getMugFromUFID: function (ufid) {
-            var node = this.getSingleMatchingNode(function (value) {
-                return value && value.ufid === ufid;
-            });
-            
-            return node ? node.getValue() : null;
-        },
         removeChild: function (node) {
             var childIdx = this.children.indexOf(node);
             if (childIdx !== -1) { //if arg node is a member of the children list
@@ -356,14 +347,6 @@ define([
         removeMug: function (mug) {
             this._removeNodeFromTree(this.getNodeFromMug(mug));
         },
-        /**
-         * Given a UFID searches through the tree for the corresponding Mug and returns it.
-         * @param ufid of a mug
-         */
-        getMugFromUFID: function (ufid) {
-            return this.rootNode.getMugFromUFID(ufid);
-        },
-
         /**
          * Returns all the children Mugs (as a list) of the
          * root node in the tree.
