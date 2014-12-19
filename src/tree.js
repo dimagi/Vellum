@@ -13,6 +13,7 @@ define([
     function Node(children, value) {
         this.value = value;
         this.children = children || [];
+        this.parent = null;
     }
 
     Node.prototype = {
@@ -22,17 +23,12 @@ define([
         getValue: function () {
             return this.value;
         },
-        setValue: function (val) {
-            this.value = val;
-            _(this.children).each(function (child) {
-                child.getValue().parentMug = val;
-            });
-        },
         /**
          * DOES NOT CHECK TO SEE IF NODE IS IN TREE ALREADY!
          * Adds child to END of children!
          */
         addChild: function (node) {
+            node.parent = this;
             this.children.push(node);
         },
         /**
@@ -48,7 +44,7 @@ define([
             if (index < 0) {
                 index = 0;
             }
-
+            node.parent = this;
             this.children.splice(index, 0, node);
         },
         getSingleMatchingNode: function (fn) {
@@ -81,31 +77,8 @@ define([
             if (childIdx !== -1) { //if arg node is a member of the children list
                 this.children.splice(childIdx, 1); //remove it
             }
-
+            node.parent = null;
             return node;
-        },
-        /**
-         * Finds the parentNode of the specified node (recursively going through the tree/children of this node)
-         * Returns the parent if found, else null.
-         */
-        findParentNode: function (node) {
-            var i, parent = null;
-            if (!this.children || this.children.length === 0) {
-                return null;
-            }
-            if (this.children.indexOf(node) !== -1) {
-                return this;
-            }
-
-            for (i in this.children) {
-                if (this.children.hasOwnProperty(i)) {
-                    parent = this.children[i].findParentNode(node);
-                    if (parent !== null) {
-                        return parent;
-                    }
-                }
-            }
-            return parent;
         },
         /**
          * An ID used during prettyPrinting of the Node. (a human readable value for the node)
@@ -217,11 +190,11 @@ define([
             this.rootNode.rootNodeId = id;
         },
         getParentNode: function (node) {
-            if (this.rootNode === node) { //special case:
+            if (this.rootNode === node) {
+                //special case:
                 return this.rootNode;
-            } else { //regular case
-                return this.rootNode.findParentNode(node);
             }
+            return node && node.parent;
         },
         getStructure: function () {
             return this.rootNode.getStructure();
@@ -311,24 +284,29 @@ define([
         },
         getAbsolutePath: function (mug, excludeRoot) {
             var node = this.getNodeFromMug(mug),
-                output, nodeParent;
-            if (!node) {
-                return null;
-            }
-            nodeParent = this.getParentNode(node);
-            output = '/' + node.getID();
-
-            while (nodeParent) {
-                if (!nodeParent.isRootNode || !excludeRoot) {
-                    output = '/' + nodeParent.getID() + output;
+                _this = this;
+            function pathOf(node) {
+                if (!node) {
+                    return null;
                 }
-                if (nodeParent.isRootNode) {
-                    break;
+                if (node.isRootNode) {
+                    if (excludeRoot) {
+                        return '';
+                    }
+                    return '/' + node.getID();
                 }
-                nodeParent = this.getParentNode(nodeParent);
+                var parentPath = pathOf(_this.getParentNode(node));
+                if (parentPath === null) {
+                    return null;
+                }
+                var path = parentPath + '/' + node.getID(),
+                    mug = node.getValue();
+                if (mug.options.adjustPath) {
+                    path = mug.options.adjustPath(mug, path);
+                }
+                return path;
             }
-
-            return output;
+            return pathOf(node);
         },
         /**
          * Find a sibling of refMug matching a predicate

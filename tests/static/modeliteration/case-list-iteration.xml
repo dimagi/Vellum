@@ -11,7 +11,7 @@
 				</data>
 			</instance>
 			<instance id="casedb" src="jr://instance/casedb"></instance>
-			<bind nodeset="/data/child" />
+			<bind nodeset="/data/child/item" />
 			<setvalue event="xforms-ready" ref="/data/child/@ids" value="join(' ', instance('casedb')/mother/child/@case_id)" />
 			<setvalue event="xforms-ready" ref="/data/child/@count" value="count-selected(/data/child/@ids)" />
 			<setvalue event="jr-insert" ref="/data/child/@current_index" value="count(/data/child/item)" />

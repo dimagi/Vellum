@@ -10,8 +10,8 @@
 					</product>
 				</data>
 			</instance>
-			<instance id="products" src="jr://fixture/commtrack:products"/>
-			<bind nodeset="/data/product" />
+			<instance id="products" src="jr://fixture/commtrack:products" />
+			<bind nodeset="/data/product/item" />
 			<setvalue event="xforms-ready" ref="/data/product/@ids" value="join(' ', instance('products')/products/product/@id)" />
 			<setvalue event="xforms-ready" ref="/data/product/@count" value="count-selected(/data/product/@ids)" />
 			<setvalue event="jr-insert" ref="/data/product/@current_index" value="count(/data/product/item)" />
@@ -29,7 +29,7 @@
 	</h:head>
 	<h:body>
 		<group>
-			<label ref="jr:itext('product-label')"/>
+			<label ref="jr:itext('product-label')" />
 			<repeat nodeset="/data/product/item" jr:count="/data/product/@count" jr:noAddRemove="true()" />
 		</group>
 	</h:body>

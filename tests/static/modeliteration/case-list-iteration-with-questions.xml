@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:orx="http://openrosa.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa" xmlns:vellum="http://commcarehq.org/xforms/vellum">
+	<h:head>
+		<h:title>Untitled Form</h:title>
+		<model>
+			<instance>
+				<data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/F38617FC-F2C2-4B94-90BC-CF1B77407F85" uiVersion="1" version="1" name="Untitled Form">
+					<group ids="" count="" current_index="" vellum:role="Repeat">
+						<item id="" index="" jr:template="">
+							<phone />
+							<hidden />
+						</item>
+					</group>
+				</data>
+			</instance>
+			<instance src="jr://instance/casedb" id="casedb"></instance>
+			<bind nodeset="/data/group/item" />
+			<bind nodeset="/data/group/item/phone" type="xsd:string" />
+			<bind nodeset="/data/group/item/hidden" calculate="/data/group/item/phone = '12345'" />
+			<setvalue event="xforms-ready" ref="/data/group/@ids" value="join(' ', instance('casedb')/mother/child/@case_id)" />
+			<setvalue event="xforms-ready" ref="/data/group/@count" value="count-selected(/data/group/@ids)" />
+			<setvalue event="jr-insert" ref="/data/group/@current_index" value="count(/data/group/item)" />
+			<setvalue event="jr-insert" ref="/data/group/item/@index" value="int(/data/group/@current_index)" />
+			<setvalue event="jr-insert" ref="/data/group/item/@id" value="selected-at(/data/group/@ids,../@index)" />
+			<itext>
+				<translation lang="en" default="">
+					<text id="group-label">
+						<value>group</value>
+					</text>
+					<text id="group/item/phone-label">
+						<value>phone</value>
+					</text>
+				</translation>
+			</itext>
+		</model>
+	</h:head>
+	<h:body>
+		<group>
+			<label ref="jr:itext('group-label')" />
+			<repeat jr:count="/data/group/@count" jr:noAddRemove="true()" nodeset="/data/group/item">
+				<input ref="/data/group/item/phone" appearance="numeric">
+					<label ref="jr:itext('group/item/phone-label')" />
+				</input>
+			</repeat>
+		</group>
+	</h:body>
+</h:html>

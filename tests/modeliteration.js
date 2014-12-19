@@ -4,6 +4,7 @@ require([
     'underscore',
     'tests/utils',
     'text!static/modeliteration/case-list-iteration.xml',
+    'text!static/modeliteration/case-list-iteration-with-questions.xml',
     'text!static/modeliteration/fixture-iteration.xml',
     'text!static/modeliteration/regular-repeat.xml',
     'tests/modeliteration'
@@ -13,6 +14,7 @@ require([
     _,
     util,
     CASE_LIST_REPEAT_XML,
+    CASE_LIST_REPEAT_WITH_QUESTIONS_XML,
     FIXTURE_REPEAT_XML,
     REGULAR_REPEAT_XML
 ) {
@@ -54,6 +56,20 @@ require([
                 idsQuery: "instance('casedb')/mother/child/@case_id"
             };
             util.assertXmlEqual(call("createXML"), CASE_LIST_REPEAT_XML,
+                                {normalize_xmlns: true});
+        });
+
+        it("should create a case list repeat with questions", function () {
+            util.loadXML("");
+            var group = util.addQuestion("Repeat", "group");
+            group.p.dataSource = {
+                instance: {id: "casedb", src: "jr://instance/casedb"},
+                idsQuery: "instance('casedb')/mother/child/@case_id"
+            };
+            util.addQuestion("PhoneNumber", "phone");
+            var hidden = util.addQuestion("DataBindOnly", "hidden");
+            hidden.p.calculateAttr = "/data/group/item/phone = '12345'";
+            util.assertXmlEqual(call("createXML"), CASE_LIST_REPEAT_WITH_QUESTIONS_XML,
                                 {normalize_xmlns: true});
         });
 
@@ -112,17 +128,17 @@ require([
         });
 
         it("should not remove instance when ignore/retain is active", function () {
-            var normal = '<bind nodeset="/data/product" />',
-                ignore = '<bind nodeset="/data/product" wierd="true()" vellum:ignore="retain" />',
+            var normal = '<bind nodeset="/data/product/item" />',
+                ignore = '<bind nodeset="/data/product/item" wierd="true()" vellum:ignore="retain" />',
                 xml = FIXTURE_REPEAT_XML.replace(normal, normal + ignore);
             assert(xml.indexOf(ignore) > 0, ignore + " not found in XML:\n\n" + xml);
             util.loadXML(xml);
             var repeat = util.getMug("product");
             repeat.p.dataSource = {};
             repeat.p.repeat_count = "";
-            var newxml = call("createXML");
-            assert($(newxml).find("instance[id=products]").length === 1,
-                   "products instance not found in XML\n\n" + newxml);
+            xml = call("createXML");
+            assert($(xml).find("instance[id=products]").length === 1,
+                   "products instance not found in XML\n\n" + xml);
         });
     });
 });

@@ -54,6 +54,12 @@ define([
         modelRepeatMugOptions = {
             //typeName: 'Model Repeat',
             supportsDataNodeRole: true,
+            adjustPath: function (mug, path) {
+                if (mug.p.dataSource.idsQuery) {
+                    path += "/item";
+                }
+                return path;
+            },
             dataNodeChildren: function ($node) {
                 return $node.children("item").children();
             },
@@ -72,8 +78,7 @@ define([
                 })];
             },
             controlChildFilter: function (children, mug) {
-                var nodeset = mug.form.getAbsolutePath(mug) +
-                              (mug.p.dataSource.idsQuery ? "/item" : ""),
+                var nodeset = mug.form.getAbsolutePath(mug),
                     r_count = mug.p.repeat_count;
                 children = oldRepeat.controlChildFilter(children, mug);
                 children[0].getValue().options.writeCustomXML = function (xmlWriter, mug) {
@@ -169,7 +174,6 @@ define([
             mug.p.dataSource = {};
             mug.p.dataSourceChanged = false;
             mug.p.setvalues = {};
-            mug.p.originalPath = path;
             var values = _.object(_.map(mug.form.getSetValues(), function (value) {
                     return [value.event + " " + value.ref, value];
                 }));
@@ -202,6 +206,7 @@ define([
                 mug.p.rawDataAttributes = _.omit(
                     mug.p.rawDataAttributes, ["ids", "count", "current_index"]);
             }
+            mug.p.originalPath = mug.form.getAbsolutePath(mug);
         }
     });
 
@@ -237,6 +242,7 @@ define([
         var query = mug.p.dataSource.idsQuery;
 
         if (query) {
+            path = path.replace(/\/item$/, "");
             mug.p.repeat_count = path + "/@count";
 
             // add/update <setvalue> elements
