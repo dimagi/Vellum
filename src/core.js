@@ -136,7 +136,7 @@ define([
 
     fn.init = function () {
         this.data.core.mugTypes = new mugs.MugTypesManager(
-            this.getMugSpec(), this.getMugTypes());
+            this.getMugSpec(), this.getMugTypes(), this.opts());
 
         var _this = this,
             bindBeforeUnload = this.opts().core.bindBeforeUnload;
