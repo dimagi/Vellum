@@ -544,14 +544,14 @@ define([
     };
 
     fn.showOverwriteWarning = function(send, formText) {
-        var $modal, $overwriteForm, _this = this;
+        var $modal, $overwriteForm;
 
         $modal = this.generateNewModal("Lost work warning", [
             {
                 title: "Overwrite their work",
                 cssClasses: "btn-primary",
                 action: function () {
-                    _this.send(formText, 'full');
+                    send(formText, 'full');
                     $modal.modal('hide');
                 }
             }
@@ -1719,7 +1719,7 @@ define([
                         //     dmp.diff_main(formText, data.xform)
                         // );
                         _this._hideConfirmDialog();
-                        _this.showOverwriteWarning(_this.send, formText);
+                        _this.showOverwriteWarning(_this.send.bind(_this), formText);
                         return;
                     } else if (CryptoJS.SHA1(formText).toString() !== data.sha1) {
                         debug.error("sha1's didn't match");
