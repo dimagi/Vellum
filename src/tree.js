@@ -162,6 +162,19 @@ define([
             }
             return store;
         },
+        walk: function (callback) {
+            function processChildren(filter) {
+                if (filter) {
+                    children = filter(children, value);
+                }
+                for (var i = 0; i < children.length; i++) {
+                    children[i].walk(callback);
+                }
+            }
+            var value = this.getValue(),
+                children = this.getChildren();
+            callback(value, this.getID(), processChildren);
+        },
         validateTree: function (validateValue) {
             var i, childResult;
             if(!this.getValue()){
@@ -390,6 +403,22 @@ define([
         treeMap: function (func, afterChildFunc) {
             return this.rootNode.treeMap(func, [], afterChildFunc);
         },
+        /**
+         * Call a function for each mug in the tree and allow each mug to
+         * manipulate its tree of children.
+         *
+         * @param callback - A function that accepts three arguments:
+         *  - mug : the node value (null for the root node).
+         *  - nodeID : the ID of the mug's tree node.
+         *  - processChildren : a function that processes the mug's children. If
+         *          this function is not called the mug's children will not be
+         *          visited. This function accepts one optional argument,  a
+         *          filter function `filter(childTreeNodes, mug)` that may
+         *          return a list of filtered tree nodes.
+         */
+        walk: function (callback) {
+            this.rootNode.walk(callback);
+        },
         isTreeValid: function(validateValue) {
             var rChildren = this.rootNode.getChildren(),
             i, retVal;
@@ -408,6 +437,7 @@ define([
         }
     };
 
+    Tree.Node = Node; // exposed for walk filters
     return Tree;
 });
 

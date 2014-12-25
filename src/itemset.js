@@ -28,6 +28,7 @@ define([
     'vellum/parser',
     'vellum/util',
     'vellum/debugutil',
+    'vellum/core',
     'jquery.bootstrap-better-typeahead'
 ], function (
     _,
@@ -68,12 +69,28 @@ define([
                 nodeset: ''
             });
         },
+        writeControlLabel: false,
+        writeControlRefAttr: null,
+        writeCustomXML: function (xmlWriter, mug) {
+            var data = mug.p.itemsetData;
+            xmlWriter.writeAttributeString(
+                'nodeset', data.getAttr('nodeset', ''));
+            xmlWriter.writeStartElement('label');
+            xmlWriter.writeAttributeString(
+                'ref', data.getAttr('labelRef', ''));
+            xmlWriter.writeEndElement();
+            xmlWriter.writeStartElement('value');
+            xmlWriter.writeAttributeString(
+                'ref', data.getAttr('valueRef', ''));
+            xmlWriter.writeEndElement();
+        },
         spec: {
             label: { presence: 'notallowed' },
             labelItext: { presence: 'notallowed' },
             labelItextID: { presence: 'notallowed' },
             hintLabel: { presence: 'notallowed' },
             hintItextID: { presence: 'notallowed' },
+            helpItextID: { presence: 'notallowed' },
             mediaItext: { presence: 'notallowed' },
             otherItext: { presence: 'notallowed' },
             itemsetData: {

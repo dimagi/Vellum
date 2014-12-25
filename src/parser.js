@@ -301,6 +301,20 @@ define([
         mug.p.hintLabel = hintVal;
     }
 
+    function parseHelp (form, hEl, mug) {
+        var Itext = form.vellum.data.javaRosa.Itext;
+        var $hEl = $(hEl),
+            helpRef = getLabelRef($hEl);
+
+        if (helpRef) {
+            mug.p.helpItextID = Itext.getOrCreateItem(helpRef);
+        } else {
+            // couldn't parse the help as itext.
+            // just create an empty placeholder for it
+            mug.p.helpItextID = Itext.createItem("");
+        }
+    }
+
     function parseControlElement(form, $cEl, parentMug) {
         var tagName = $cEl[0].nodeName.toLowerCase(),
             appearance = $cEl.popAttr('appearance'),
@@ -463,6 +477,7 @@ define([
                         var adapt = function (mug, form) {
                             mug = makeMugAdaptor('Repeat')(mug, form);
                             mug.p.repeat_count = repeat.popAttr('jr:count') || null;
+                            mug.p.rawRepeatAttributes = getAttributes(repeat);
                             return mug;
                         };
                         adapt.repeat = repeat;
@@ -522,12 +537,16 @@ define([
                 
     function populateMug(form, mug, $cEl) {
         var labelEl = $cEl.children('label'),
-            hintEl = $cEl.children('hint');
+            hintEl = $cEl.children('hint'),
+            helpEl = $cEl.children('help');
         if (labelEl.length && mug.spec.label.presence !== 'notallowed') {
             parseLabel(form, labelEl, mug);
         }
         if (hintEl.length && mug.spec.hintLabel.presence !== 'notallowed') {
             parseHint(form, hintEl, mug);
+        }
+        if (helpEl.length && mug.spec.label.presence !== 'notallowed') {
+            parseHelp(form, helpEl, mug);
         }
 
         // add any arbitrary attributes that were directly on the control
