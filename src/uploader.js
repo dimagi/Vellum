@@ -48,7 +48,7 @@ define([
         video: [
             {
                 'description': 'Video',
-                'extensions': '*.3gp'
+                'extensions': '*.3gp;*.mp4'
             }
         ]
     },
