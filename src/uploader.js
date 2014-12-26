@@ -167,7 +167,10 @@ define([
         
         widget.handleUploadComplete = function (event, data, objectMap) {
             if (data.ref && data.ref.path) {
+                var newExtension = '.' +data.ref.path.split('.').pop().toLowerCase(),
+                    currentPath = widget.getValue().replace(/\.[^/.]+$/, newExtension);
                 objectMap[data.ref.path] = data.ref;
+                widget.getControl().val(currentPath);
             }
             widget.updateMultimediaBlockUI(objectMap);
         };
