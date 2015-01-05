@@ -9,6 +9,7 @@ define([
     'text!vellum/templates/main.html',
     'tpl!vellum/templates/question_type_group',
     'tpl!vellum/templates/edit_source',
+    'tpl!vellum/templates/confirm_overwrite',
     'tpl!vellum/templates/control_group_stdInput',
     'tpl!vellum/templates/question_fieldset',
     'tpl!vellum/templates/question_type_changer',
@@ -37,6 +38,7 @@ define([
     main_template,
     question_type_group,
     edit_source,
+    confirm_overwrite,
     control_group_stdInput,
     question_fieldset,
     question_type_changer,
@@ -539,6 +541,30 @@ define([
         $text.val(this.data.core.form.getExportTSV());
         $modal.modal('show');
         $modal.one('shown', function () { $text.focus(); });
+    };
+
+    fn.showOverwriteWarning = function(send, formText) {
+        var $modal, $overwriteForm;
+
+        $modal = this.generateNewModal("Lost work warning", [
+            {
+                title: "Overwrite their work",
+                cssClasses: "btn-primary",
+                action: function () {
+                    send(formText, 'full');
+                    $modal.modal('hide');
+                }
+            }
+        ]);
+
+        $overwriteForm = $(confirm_overwrite({
+            description: "Looks like someone else has edited this form " +
+                         "since you loaded the page. Are you sure you want " +
+                         "to overwrite their work?"
+        }));
+        $modal.find('.modal-body').html($overwriteForm);
+
+        $modal.modal('show');
     };
         
     fn.showFormPropertiesDialog = function () {
@@ -1689,10 +1715,12 @@ define([
                 if (saveType === 'patch') {
                     if (data.status === 'conflict') {
                         /* todo: display diff and ask instead overwriting */
-//                            var diffHtml = dmp.diff_prettyHtml(
-//                                dmp.diff_main(lastSavedXForm, data.xform)
-//                            );
-                        _this.send(formText, 'full');
+                        // var diffHtml = dmp.diff_prettyHtml(
+                        //     dmp.diff_main(formText, data.xform)
+                        // );
+                        _this._hideConfirmDialog();
+                        _this.showOverwriteWarning(_this.send.bind(_this), formText);
+                        return;
                     } else if (CryptoJS.SHA1(formText).toString() !== data.sha1) {
                         debug.error("sha1's didn't match");
                         _this.send(formText, 'full');
