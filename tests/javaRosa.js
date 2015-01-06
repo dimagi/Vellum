@@ -179,6 +179,24 @@ require([
             assert(!hinItext.attr("placeholder"), hinItext.attr("placeholder"));
         });
 
+        it("itext widget should not overwrite label with question id", function () {
+            util.loadXML("");
+            var q1 = util.addQuestion("Text");
+            util.addQuestion("Text");
+            util.clickQuestion("question1");
+            $("[name='itext-en-label']").val("English").change();
+            q1.p.nodeID = "newid";
+
+            util.clickQuestion("question2");
+            util.clickQuestion("newid");
+
+            var enLabel = $("[name='itext-en-label']"),
+                hinLabel = $("[name='itext-hin-label']");
+            assert.equal(enLabel.val(), "English");
+            assert.equal(hinLabel.val(), "");
+            assert.equal(hinLabel.attr("placeholder"), "English");
+        });
+
         it("non-labelItext widget should contain value on load", function () {
             util.loadXML(TEXT_WITH_CONSTRAINT_XML);
             util.clickQuestion("text");

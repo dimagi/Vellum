@@ -141,18 +141,20 @@ define([
 
 
     
-    //Simple Event Framework
-    //Just run your object through this function to make it event aware
-    //Taken from 'JavaScript: The Good Parts'
+    // Simple Event Framework
+    // Just run your object through this function to make it event aware.
+    // Adapted from 'JavaScript: The Good Parts' chapter 5
     that.eventuality = function (that) {
         var registry = {};
+        /**
+         * Fire event, calling all registered handlers and unbind `one` handlers
+         */
         that.fire = function (event) {
             var array,
                 func,
                 handler,
                 i,
-                type = typeof event === 'string' ?
-                        event : event.type;
+                type = typeof event === 'string' ? event : event.type;
             if (registry.hasOwnProperty(type)) {
                 array = registry[type];
                 for (i = 0; i < array.length; i += 1) {
@@ -161,21 +163,47 @@ define([
                     if (typeof func === 'string') {
                         func = this[func];
                     }
-                    func.apply(this,
-                        handler.parameters || [event]);
+                    func.apply(this, handler.parameters || [event]);
                 }
             }
             return this;
         };
-        that.on = function (type, method, parameters) {
+        /**
+         * Register an event handler to be called each time an event is fired.
+         */
+        that.on = function (type, method, parameters, bindingContext) {
             var handler = {
                 method: method,
-                parameters: parameters
+                parameters: parameters,
+                bindingContext: bindingContext || method
             };
             if (registry.hasOwnProperty(type)) {
                 registry[type].push(handler);
             } else {
                 registry[type] = [handler];
+            }
+            return this;
+        };
+        /**
+         * Unbind an event handler for a given binding context
+         *
+         * @param bindingContext - the binding context or method that was
+         *        passed to `on`.
+         * @param type - optional event type. If undefined, all handlers
+         *        for the given binding context will be unbound.
+         */
+        that.unbind = function (bindingContext, type) {
+            if (_.isUndefined(type)) {
+                registry = _.object(_.map(registry, function (handlers, type, reg) {
+                    handlers = _.filter(handlers, function (handler) {
+                        return handler.bindingContext !== bindingContext;
+                    });
+                    return [type, handlers];
+                }));
+            } else if (registry.hasOwnProperty(type)) {
+                registry[type] = _.filter(registry[type], function (handler) {
+                    return handler.bindingContext !== bindingContext;
+                });
             }
             return this;
         };

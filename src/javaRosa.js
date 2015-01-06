@@ -592,7 +592,7 @@ define([
                     widget.updateValue();
                 }
             }
-        });
+        }, null, widget);
 
         widget.input.keyup(function () {
             // turn off auto-mode if the id is ever manually overridden
@@ -639,7 +639,11 @@ define([
             if (e.itextType === widget.getItextType()) {
                 widget.handleItextLabelChange(e);
             }
-        });
+        }, null, widget);
+
+        widget.mug.on("teardown-mug-properties", function (e) {
+            e.mug.unbind(widget);
+        }, null, widget);
 
         return widget;
     };
@@ -816,7 +820,7 @@ define([
                     }
                 });
                 $modal.modal('show');
-                $modal.on('shown', function () {
+                $modal.one('shown', function () {
                     $newItemInput.focus();
                 });
             });
@@ -1082,7 +1086,7 @@ define([
             .addClass('input-block-level itext-widget-input')
             .on('change keyup', widget.updateValue);
 
-        widget.mug.on('question-itext-deleted', widget.destroy);
+        widget.mug.on('question-itext-deleted', widget.destroy, null, widget);
 
         widget.toggleDefaultLangSync = function (val) {
             widget.isSyncedWithDefaultLang = !val && !widget.isDefaultLang;
@@ -1113,7 +1117,7 @@ define([
                         widget.setValue("");
                     }
                 }
-            });
+            }, null, widget);
         }
 
         if (!widget.isDefaultLang) {
@@ -1130,7 +1134,7 @@ define([
                         widget.setValue("");
                     }
                 }
-            });
+            }, null, widget);
         }
 
         widget.fireChangeEvents = function () {
@@ -1172,6 +1176,10 @@ define([
         widget.save = function () {
             widget.setItextValue(widget.getValue());
         };
+
+        widget.mug.on("teardown-mug-properties", function (e) {
+            e.mug.unbind(widget);
+        }, null, widget);
 
         return widget;
 
