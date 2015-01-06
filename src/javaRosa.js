@@ -579,7 +579,6 @@ define([
             widget.mug.setItextId(widget.path, widget.getValue());
         };
 
-        // todo: deal with this
         widget.mug.on('property-changed', function (e) {
             // keep the ids in sync if we're in auto mode
             if (widget.getAutoMode() &&
@@ -633,8 +632,6 @@ define([
 
         };
 
-        // todo: wouldn't this add an extra handler every time a mug is
-        // displayed?
         widget.mug.on('update-question-itextid', function (e) {
             if (e.itextType === widget.getItextType()) {
                 widget.handleItextLabelChange(e);
