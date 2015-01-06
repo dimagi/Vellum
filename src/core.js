@@ -1401,6 +1401,10 @@ define([
         this.showContent();
         this.hideQuestionProperties();
 
+        if (this._propertiesMug) {
+            this._propertiesMug.teardownProperties();
+        }
+        this._propertiesMug = mug;
         var $content = this.$f.find(".fd-props-content").empty(),
             sections = this.getSections();
 

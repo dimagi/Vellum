@@ -579,7 +579,6 @@ define([
             widget.mug.setItextId(widget.path, widget.getValue());
         };
 
-        // todo: deal with this
         widget.mug.on('property-changed', function (e) {
             // keep the ids in sync if we're in auto mode
             if (widget.getAutoMode() &&
@@ -592,7 +591,7 @@ define([
                     widget.updateValue();
                 }
             }
-        });
+        }, null, widget);
 
         widget.input.keyup(function () {
             // turn off auto-mode if the id is ever manually overridden
@@ -633,13 +632,15 @@ define([
 
         };
 
-        // todo: wouldn't this add an extra handler every time a mug is
-        // displayed?
         widget.mug.on('update-question-itextid', function (e) {
             if (e.itextType === widget.getItextType()) {
                 widget.handleItextLabelChange(e);
             }
-        });
+        }, null, widget);
+
+        widget.mug.on("teardown-mug-properties", function (e) {
+            e.mug.unbind(widget);
+        }, null, widget);
 
         return widget;
     };
@@ -816,7 +817,7 @@ define([
                     }
                 });
                 $modal.modal('show');
-                $modal.on('shown', function () {
+                $modal.one('shown', function () {
                     $newItemInput.focus();
                 });
             });
@@ -1082,7 +1083,7 @@ define([
             .addClass('input-block-level itext-widget-input')
             .on('change keyup', widget.updateValue);
 
-        widget.mug.on('question-itext-deleted', widget.destroy);
+        widget.mug.on('question-itext-deleted', widget.destroy, null, widget);
 
         widget.toggleDefaultLangSync = function (val) {
             widget.isSyncedWithDefaultLang = !val && !widget.isDefaultLang;
@@ -1113,7 +1114,7 @@ define([
                         widget.setValue("");
                     }
                 }
-            });
+            }, null, widget);
         }
 
         if (!widget.isDefaultLang) {
@@ -1130,7 +1131,7 @@ define([
                         widget.setValue("");
                     }
                 }
-            });
+            }, null, widget);
         }
 
         widget.fireChangeEvents = function () {
@@ -1172,6 +1173,10 @@ define([
         widget.save = function () {
             widget.setItextValue(widget.getValue());
         };
+
+        widget.mug.on("teardown-mug-properties", function (e) {
+            e.mug.unbind(widget);
+        }, null, widget);
 
         return widget;
 

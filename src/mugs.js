@@ -605,6 +605,9 @@ define([
                     _this.setItextId(path, id, true);
                 }
             });
+        },
+        teardownProperties: function () {
+            this.fire({type: "teardown-mug-properties", mug: this});
         }
     };
 
