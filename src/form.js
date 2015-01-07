@@ -241,7 +241,7 @@ define([
          */
         referenceInstance: function (id, ref) {
             var meta = _.find(this.instanceMetadata, function (meta) {
-                    return meta.attributes.id;
+                    return meta.attributes.id === id;
                 });
             if (meta && meta.refs && this.enableInstanceRefCounting) {
                 meta.refs[ref] = null;
