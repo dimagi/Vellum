@@ -143,13 +143,12 @@ define([
             recFunc;
 
         recFunc = function (parentMug) {
-            var mug = form.vellum.parseDataElement(form, this, parentMug);
-            if (mug) {
-                tree.insertMug(mug, 'into', parentMug);
-                // HACK fix abstraction broken by direct tree insert
-                form._fixMugState(mug);
-            }
-            mug.options.dataNodeChildren($(this)).each(function () {
+            var mug = form.vellum.parseDataElement(form, this, parentMug),
+                children = mug.options.dataNodeChildren(mug, $(this));
+            tree.insertMug(mug, 'into', parentMug);
+            // HACK fix abstraction broken by direct tree insert
+            form._fixMugState(mug);
+            children.each(function () {
                 recFunc.call(this, mug);
             });
         };

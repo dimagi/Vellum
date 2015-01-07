@@ -355,9 +355,13 @@ define([
         /**
          * Parser integration: get children from data node
          *
+         * Additionally, this may perform extra mug initialization. It is
+         * called before the mug is inserted into the data tree/mug hierarchy.
+         *
+         * @param mug - The mug object.
          * @param node - This mug's data node, a jQuery object.
          */
-        dataNodeChildren: function ($node) {
+        dataNodeChildren: function (mug, $node) {
             return $node.children();
         },
         controlNodeChildren: null,

@@ -60,7 +60,9 @@ define([
                 }
                 return path;
             },
-            dataNodeChildren: function ($node) {
+            dataNodeChildren: function (mug, $node) {
+                // temporary dataSource overwritten by handleMugParseFinish
+                mug.p.dataSource = {idsQuery: "value for adjustPath"};
                 return $node.children("item").children();
             },
             dataChildFilter: function (children, mug) {
@@ -110,13 +112,6 @@ define([
                 mug.p.originalPath = null;
                 mug.p.dataSource = {};
                 mug.p.dataSourceChanged = false;
-                form.on("mug-property-change", function (event) {
-                    if (event.property === "dataSource") {
-                        var mug = event.mug;
-                        mug.p.dataSourceChanged = true;
-                        updateDataSource(mug, event.val, event.previous);
-                    }
-                });
             },
             spec: {
                 //repeat_count: {visibility: "hidden"},
@@ -168,15 +163,23 @@ define([
             if (mug.__className !== "Repeat") {
                 return;
             }
-            var path = mug.form.getAbsolutePath(mug);
+            var path = mug.form.getAbsolutePath(mug),
+                container = null;
+            if (mug.p.dataSource.idsQuery) {
+                container = path.replace(/\/item$/, "");
+            }
+            mug.p.originalPath = path;
             mug.p.dataSource = {};
             mug.p.dataSourceChanged = false;
             mug.p.setvalues = {};
+            if (container === null) {
+                return;
+            }
             var values = _.object(_.map(mug.form.getSetValues(), function (value) {
                     return [value.event + " " + value.ref, value];
                 }));
             _.each(setvalueData, function (data) {
-                var value = values[data.event + " " + path + data.path + "/@" + data.key];
+                var value = values[data.event + " " + container + data.path + "/@" + data.key];
                 if (value) {
                     mug.p.setvalues[data.key] = value;
                     if (data.key === "ids") {
@@ -201,10 +204,23 @@ define([
                         mug.p.dataSource.instance = _.clone(meta.attributes);
                     }
                 }
-                mug.p.rawDataAttributes = _.omit(
-                    mug.p.rawDataAttributes, ["ids", "count", "current_index"]);
+            } else {
+                // keep paths consistent for malformed model repeat with
+                // missing IDs query. this XPath returns the empty set
+                mug.p.dataSource.idsQuery = "''";
             }
-            mug.p.originalPath = mug.form.getAbsolutePath(mug);
+            mug.p.rawDataAttributes = _.omit(
+                mug.p.rawDataAttributes, ["ids", "count", "current_index"]);
+        },
+        loadXML: function () {
+            this.__callOld();
+            this.data.core.form.on("mug-property-change", function (event) {
+                var mug = event.mug;
+                if (mug.__className === "Repeat" && event.property === "dataSource") {
+                    mug.p.dataSourceChanged = true;
+                    updateDataSource(mug, event.val, event.previous);
+                }
+            });
         }
     });
 

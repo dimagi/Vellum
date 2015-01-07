@@ -604,7 +604,7 @@ define([
                 if (postMovePaths[i]) {
                     preMovePath = getPreMovePath(postMovePaths[i]);
                     updates[mugs[i].ufid] = [preMovePath, postMovePaths[i]];
-                    this._updateMugMap(mugs[i], postMovePaths[i], preMovePath);
+                    this._updateMugPath(mugs[i], preMovePath, postMovePaths[i]);
                 }
             }
             this._logicManager.updatePaths(updates);
@@ -820,7 +820,7 @@ define([
             this.mugMap[mug.ufid] = mug;
             refMug = refMug || this.dataTree.getRootNode().getValue();
             this.insertMug(refMug, mug, position);
-            this._updateMugMap(mug);
+            this._updateMugPath(mug);
             // todo: abstraction barrier
 
             this.fire({
@@ -834,15 +834,15 @@ define([
                 mug.options.afterInsert(this, mug);
             }
         },
-        _updateMugMap: function (mug, newPath, oldPath) {
+        _updateMugPath: function (mug, oldPath, newPath) {
             var map = this.mugMap;
+            delete map[oldPath];
             if (_.isUndefined(newPath)) {
                 newPath = this.getAbsolutePath(mug);
             }
             if (newPath) {
                 map[newPath] = mug;
             }
-            delete map[oldPath];
         },
         _fixMugState: function (mug) {
             // parser needs this because it inserts directly into the tree

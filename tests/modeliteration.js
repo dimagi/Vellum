@@ -40,12 +40,31 @@ require([
 
         it("should load a case list repeat", function () {
             util.loadXML(CASE_LIST_REPEAT_XML);
-            var repeat = util.getMug("child");
+            var repeat = util.getMug("child/item");
             assert.deepEqual(repeat.p.dataSource, {
                 instance: {id: "casedb", src: "jr://instance/casedb"},
                 idsQuery: "instance('casedb')/mother/child/@case_id"
             });
             util.assertXmlEqual(call("createXML"), CASE_LIST_REPEAT_XML);
+        });
+
+        it("should load a case list repeat with questions", function () {
+            util.loadXML(CASE_LIST_REPEAT_WITH_QUESTIONS_XML);
+            util.assertJSTreeState(
+                "group",
+                "  phone",
+                "  hidden"
+            );
+            var repeat = util.getMug("group/item"),
+                phone = util.getMug("group/item/phone"),
+                hidden = util.getMug("group/item/hidden");
+            assert.deepEqual(repeat.p.dataSource, {
+                instance: {id: "casedb", src: "jr://instance/casedb"},
+                idsQuery: "instance('casedb')/mother/child/@case_id"
+            });
+            assert.equal(phone.__className, "PhoneNumber");
+            assert.equal(hidden.p.calculateAttr, "/data/group/item/phone = '12345'");
+            util.assertXmlEqual(call("createXML"), CASE_LIST_REPEAT_WITH_QUESTIONS_XML);
         });
 
         it("should create a case list repeat", function () {
@@ -75,7 +94,7 @@ require([
 
         it("should load a fixture repeat", function () {
             util.loadXML(FIXTURE_REPEAT_XML);
-            var repeat = util.getMug("product");
+            var repeat = util.getMug("product/item");
             assert.deepEqual(repeat.p.dataSource, {
                 instance: {id: "products", src: "jr://fixture/commtrack:products"},
                 idsQuery: "instance('products')/products/product/@id"
@@ -96,7 +115,7 @@ require([
 
         it("should convert fixture repeat to regular repeat when data source is removed", function () {
             util.loadXML(FIXTURE_REPEAT_XML);
-            var repeat = util.getMug("product");
+            var repeat = util.getMug("product/item");
             repeat.p.dataSource = {};
             repeat.p.repeat_count = "";
             util.assertXmlEqual(call("createXML"), REGULAR_REPEAT_XML);
@@ -118,7 +137,7 @@ require([
 
         it("should change a fixture repeat to a case list repeat", function () {
             util.loadXML(FIXTURE_REPEAT_XML);
-            var repeat = util.getMug("product");
+            var repeat = util.getMug("product/item");
             repeat.p.dataSource = {
                 instance: {id: "casedb", src: "jr://instance/casedb"},
                 idsQuery: "instance('casedb')/mother/child/@case_id"
@@ -133,7 +152,7 @@ require([
                 xml = FIXTURE_REPEAT_XML.replace(normal, normal + ignore);
             assert(xml.indexOf(ignore) > 0, ignore + " not found in XML:\n\n" + xml);
             util.loadXML(xml);
-            var repeat = util.getMug("product");
+            var repeat = util.getMug("product/item");
             repeat.p.dataSource = {};
             repeat.p.repeat_count = "";
             xml = call("createXML");
