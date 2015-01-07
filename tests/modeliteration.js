@@ -163,6 +163,8 @@ require([
                 blue = util.addQuestion("Text", "blue"),
                 text = util.addQuestion("Text", "text"),
                 getPath = blue.form.getAbsolutePath.bind(blue.form);
+            assert.equal(getPath(blue), "/data/product/blue");
+            assert.equal(getPath(text), "/data/product/text");
             text.p.calculateAttr = getPath(blue);
             blue.p.labelItextID.setDefaultValue(
                 '<output value="' + getPath(text) + '"/>');
@@ -176,7 +178,7 @@ require([
             assert.equal(
                 xml.find("bind[calculate]").attr("calculate"),
                 "/data/product/item/blue",
-                xml.find("bind[calculate]").attr("nodeset") + "calculate expression mismatch");
+                xml.find("bind[calculate]").attr("nodeset") + " calculate expression mismatch");
             assert.equal(xml.find("output:first").attr("value"),
                          "/data/product/item/text",
                          "output value mismatch");
@@ -186,6 +188,38 @@ require([
             assert(!errors.length, errors.join("\n"));
         });
 
-        // TODO should update expressions on clear data source
+        it("should update expressions on clear data source", function () {
+            util.loadXML("");
+            var repeat = util.addQuestion("Repeat", "product");
+            repeat.p.dataSource = {
+                instance: {id: "casedb", src: "jr://instance/casedb"},
+                idsQuery: "instance('casedb')/mother/child/@case_id"
+            };
+            var blue = util.addQuestion("Text", "blue"),
+                text = util.addQuestion("Text", "text"),
+                getPath = blue.form.getAbsolutePath.bind(blue.form);
+            text.p.calculateAttr = getPath(blue);
+            blue.p.labelItextID.setDefaultValue(
+                '<output value="' + getPath(text) + '"/>');
+            assert.equal(getPath(blue), "/data/product/item/blue");
+            assert.equal(getPath(text), "/data/product/item/text");
+
+            repeat.p.dataSource = {};
+            assert.equal(getPath(blue), "/data/product/blue");
+            assert.equal(getPath(text), "/data/product/text");
+            var xml = $(call("createXML"));
+            assert.equal(
+                xml.find("bind[calculate]").attr("calculate"),
+                "/data/product/blue",
+                xml.find("bind[calculate]").attr("nodeset") + " calculate expression mismatch");
+            assert.equal(xml.find("output:first").attr("value"),
+                         "/data/product/text",
+                         "output value mismatch");
+            var errors = _.flatten(_.map([blue, text], function (mug) {
+                    return call("getErrors", mug);
+                }));
+            assert(!errors.length, errors.join("\n"));
+        });
+
     });
 });
