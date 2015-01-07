@@ -542,7 +542,7 @@ define([
                 return "External Data";
             }
 
-            if (!itextItem) {
+            if (!itextItem || lang === '_ids') {
                 return this.getNodeID();
             }
             lang = lang || defaultLang;

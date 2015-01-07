@@ -1425,6 +1425,10 @@ define([
                     name: util.langCodeToName[lang] || lang
                 };
             });
+            fullLangs[fullLangs.length] = {
+                code: '_ids',
+                name: 'Question IDs'
+            };
 
             $langSelector = $(language_selector({
                 languages: fullLangs
@@ -1455,13 +1459,18 @@ define([
                     mug = form.getMugByUFID($el.prop('id'));
 
                 try {
-                    var labelItextID = mug.p.labelItextID;
-                    if (labelItextID) {
-                        var itextID = labelItextID.id,
-                            text = itext.getItem(itextID).getValue("default", lang);
-                        text = text || _this.getMugDisplayName(mug);
-                        _this.jstree('rename_node', $el, text ||
-                                _this.opts().core.noTextString);
+                    if (_this.data.core.currentItextDisplayLanguage === "_ids") {
+                        _this.jstree('rename_node', $el, mug.p.nodeID);
+                    }
+                    else {
+                        var labelItextID = mug.p.labelItextID;
+                        if (labelItextID) {
+                            var itextID = labelItextID.id,
+                                text = itext.getItem(itextID).getValue("default", lang);
+                            text = text || _this.getMugDisplayName(mug);
+                            _this.jstree('rename_node', $el, text ||
+                                    _this.opts().core.noTextString);
+                        }
                     }
                 } catch (e) {
                     /* This happens immediately after question duplication when
