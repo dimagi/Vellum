@@ -168,6 +168,10 @@ define([
         setTimeout(setFullscreenIcon, 0);
         this.data.core.$fullscreenButton = $('<button class="btn"><i/></button>').click(function (e) {
             e.preventDefault();
+            if (typeof window.ga !== "undefined") {
+                    window.ga('send', 'event', 'Form Builder', 'Full Screen Mode',
+                              this.opts().core.formId);
+                }
             if (_this.data.windowManager.fullscreen) {
                 _this.data.windowManager.fullscreen = false;
             } else {
