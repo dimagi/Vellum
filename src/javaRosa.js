@@ -1427,7 +1427,7 @@ define([
             });
             fullLangs[fullLangs.length] = {
                 code: '_ids',
-                name: 'Question IDs'
+                name: 'Question ID'
             };
 
             $langSelector = $(language_selector({
@@ -1460,7 +1460,7 @@ define([
 
                 try {
                     if (_this.data.core.currentItextDisplayLanguage === "_ids") {
-                        _this.jstree('rename_node', $el, mug.p.nodeID);
+                        _this.jstree('rename_node', $el, mug.getNodeID());
                     }
                     else {
                         var labelItextID = mug.p.labelItextID;

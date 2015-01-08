@@ -3,7 +3,7 @@
     <select class="input-medium">
         <% _.each(languages, function(language) { %>
         <option value="<%=language.code%>"<% if (language.selected) { %> selected="selected"<% } %>>
-            <%=language.name%><% if (language.name !== language.code) { %> (<%=language.code%>) <% } %>
+            <%=language.name%><% if (language.name !== language.code && language.code !== '_ids') { %> (<%=language.code%>) <% } %>
         </option>
         <% }); %>
     </select>
