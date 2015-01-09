@@ -376,6 +376,36 @@ define([
         // data node writer options
         getExtraDataAttributes: null, // function (mug) { return {...}; }
 
+        /**
+         * Returns a list of objects containing bind element attributes
+         */
+        getBindList: function (mug) {
+            var constraintMsgItextID = mug.p.constraintMsgItextID,
+                constraintMsg;
+            if (constraintMsgItextID && !constraintMsgItextID.isEmpty()) {
+                constraintMsg = "jr:itext('" + constraintMsgItextID.id + "')";
+            } else {
+                constraintMsg = mug.p.constraintMsgAttr;
+            }
+            var attrs = {
+                nodeset: mug.form.getAbsolutePath(mug),
+                type: mug.p.dataType,
+                constraint: mug.p.constraintAttr,
+                "jr:constraintMsg": constraintMsg,
+                relevant: mug.p.relevantAttr,
+                required: util.createXPathBoolFromJS(mug.p.requiredAttr),
+                calculate: mug.p.calculateAttr,
+                "jr:preload": mug.p.preload,
+                "jr:preloadParams": mug.p.preloadParams
+            };
+            _.each(mug.p.rawBindAttributes, function (value, key) {
+                if (!attrs.hasOwnProperty(key)) {
+                    attrs[key] = value;
+                }
+            });
+            return attrs.nodeset ? [attrs] : [];
+        },
+
         // control node writer options
         writeControlLabel: true,
         writeControlHint: true,

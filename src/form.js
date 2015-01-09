@@ -313,46 +313,6 @@ define([
             return writer.createXForm(this);
         },
         /**
-         * Loops through the data and the control trees and picks out all the
-         * unique bind elements.  Returns a list of Mugs
-         */
-        getBindList: function(){
-            var bList = [],
-                dataTree,controlTree,dBindList,cBindList,i,
-                getBind = function(node){ //the function we will pass to treeMap
-                    if(!node.getValue() || node.isRootNode){
-                        return null;
-                    }
-                    var mug = node.getValue();
-                    if (!mug.p.getDefinition('relevantAttr')) {
-                        return null;
-                    } else {
-                        return mug;
-                    }
-                };
-
-            dataTree = this.dataTree;
-            controlTree = this.controlTree;
-            dBindList = dataTree.treeMap(getBind);
-            cBindList = controlTree.treeMap(getBind);
-
-            //compare results, grab uniques
-            for(i in dBindList){
-                if(dBindList.hasOwnProperty(i)){
-                    bList.push(dBindList[i]);
-                }
-            }
-
-            for(i in cBindList){
-                if(cBindList.hasOwnProperty(i)){
-                    if(bList.indexOf(cBindList[i]) === -1){
-                        bList.push(cBindList[i]); //grab only anything that hasn't shown up in the dBindList
-                    }
-                }
-            }
-            return bList;
-        },
-        /**
          * Goes through and grabs all of the data nodes (i.e. nodes that are
          * only data nodes, possibly with a bind) without any kind of control.
          * Returns a flat list of these nodes (list items are mugs).
