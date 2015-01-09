@@ -33,11 +33,6 @@ define([
                 path: "",
                 query: "count-selected({}/@ids)"
             }, {
-                key: "current_index",
-                event: "jr-insert",
-                path: "",
-                query: "count({}/item)"
-            }, {
                 key: "index",
                 event: "jr-insert",
                 path: "/item",
@@ -105,6 +100,17 @@ define([
                     "vellum:role": "Repeat"
                 };
             },
+            getBindList: function (mug) {
+                var path = mug.form.getAbsolutePath(mug),
+                    binds = oldRepeat.getBindList(mug);
+                if (mug.p.dataSource.idsQuery) {
+                    binds.splice(0, 0, {
+                        nodeset: path.replace(/\/item$/, "/@current_index"),
+                        calculate: "count(" + path + ")"
+                    });
+                }
+                return binds;
+            },
             init: function (mug, form) {
                 oldRepeat.init(mug, form);
                 mug.p.repeat_count = "";
@@ -157,6 +163,20 @@ define([
                 }
                 return adapt;
             };
+        },
+        parseBindElement: function (form, el, path) {
+            var mug = form.getMugByPath(path);
+            if (!mug) {
+                var repeatPath = path.replace(/\/@current_index$/, "/item");
+                if (path !== repeatPath) {
+                    mug = form.getMugByPath(repeatPath);
+                    if (isModelRepeat(mug)) {
+                        // ignore this bind (it will be created automatically on write)
+                        return;
+                    }
+                }
+            }
+            this.__callOld();
         },
         handleMugParseFinish: function (mug) {
             this.__callOld();
@@ -223,6 +243,10 @@ define([
             });
         }
     });
+
+    function isModelRepeat(mug) {
+        return mug && mug.__className === "Repeat" && mug.p.dataSource.idsQuery;
+    }
 
     function updateDataSource(mug, value, previous) {
         var value_src = value && value.instance && value.instance.src,

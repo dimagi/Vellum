@@ -14,12 +14,12 @@
 				</data>
 			</instance>
 			<instance src="jr://instance/casedb" id="casedb"></instance>
+			<bind nodeset="/data/group/@current_index" calculate="count(/data/group/item)" />
 			<bind nodeset="/data/group/item" />
 			<bind nodeset="/data/group/item/phone" type="xsd:string" />
 			<bind nodeset="/data/group/item/hidden" calculate="/data/group/item/phone = '12345'" />
 			<setvalue event="xforms-ready" ref="/data/group/@ids" value="join(' ', instance('casedb')/mother/child/@case_id)" />
 			<setvalue event="xforms-ready" ref="/data/group/@count" value="count-selected(/data/group/@ids)" />
-			<setvalue event="jr-insert" ref="/data/group/@current_index" value="count(/data/group/item)" />
 			<setvalue event="jr-insert" ref="/data/group/item/@index" value="int(/data/group/@current_index)" />
 			<setvalue event="jr-insert" ref="/data/group/item/@id" value="selected-at(/data/group/@ids,../@index)" />
 			<itext>

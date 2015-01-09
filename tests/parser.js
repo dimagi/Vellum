@@ -82,8 +82,10 @@ require([
             });
         });
 
+        var ignoreWarnings = /Form (JRM namespace|does not have a (Name|(UI)?Version))/;
+
         it("should load select item without itext", function () {
-            util.loadXML(OTHER_ITEM_XML);
+            util.loadXML(OTHER_ITEM_XML, null, ignoreWarnings);
             var mug = call("getMugByPath", "/ClassroomObservationV3/Q0003"),
                 // HACK how to reference items in select?
                 item = mug._node_control.children[1].value;
@@ -91,7 +93,7 @@ require([
         });
 
         it("should load mugs with relative paths and label without itext", function () {
-            util.loadXML(LABEL_WITHOUT_ITEXT_XML);
+            util.loadXML(LABEL_WITHOUT_ITEXT_XML, null, ignoreWarnings);
             var grp = call("getMugByPath", "/data/group"),
                 mug = call("getMugByPath", "/data/group/a"),
                 txt = call("getMugByPath", "/data/text");

@@ -157,10 +157,18 @@ define([
     }
 
     // load XML syncronously
-    function loadXML(value, options) {
-        var xml, data = call("getData");
+    function loadXML(value, options, ignoreParseWarnings) {
+        var xml, warnings = [], data = call("getData");
         data.core.parseWarnings = [];
         xml = call("loadXML", value, options || {});
+        if (!ignoreParseWarnings) {
+            warnings = data.core.parseWarnings;
+        } else if (_.isRegExp(ignoreParseWarnings)) {
+            warnings = _.filter(data.core.parseWarnings, function (warning) {
+                return !ignoreParseWarnings.test(warning);
+            });
+        }
+        assert(!warnings.length, "unexpected parse warnings:\n- " + warnings.join("\n- "));
         delete data.core.parseWarnings;
         return xml;
     }

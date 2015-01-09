@@ -11,10 +11,10 @@
 				</data>
 			</instance>
 			<instance id="products" src="jr://fixture/commtrack:products" />
+			<bind nodeset="/data/product/@current_index" calculate="count(/data/product/item)" />
 			<bind nodeset="/data/product/item" />
 			<setvalue event="xforms-ready" ref="/data/product/@ids" value="join(' ', instance('products')/products/product/@id)" />
 			<setvalue event="xforms-ready" ref="/data/product/@count" value="count-selected(/data/product/@ids)" />
-			<setvalue event="jr-insert" ref="/data/product/@current_index" value="count(/data/product/item)" />
 			<setvalue event="jr-insert" ref="/data/product/item/@index" value="int(/data/product/@current_index)" />
 			<setvalue event="jr-insert" ref="/data/product/item/@id" value="selected-at(/data/product/@ids,../@index)" />
 			<itext>

@@ -194,10 +194,11 @@ require([
             var xml = $(call("createXML"));
             assert.equal(getPath(blue), "/data/product/item/blue");
             assert.equal(getPath(text), "/data/product/item/text");
+            var textBind = xml.find("bind[nodeset='" + getPath(text) + "']");
             assert.equal(
-                xml.find("bind[calculate]").attr("calculate"),
+                textBind.attr("calculate"),
                 "/data/product/item/blue",
-                xml.find("bind[calculate]").attr("nodeset") + " calculate expression mismatch");
+                textBind.attr("nodeset") + " calculate expression mismatch");
             assert.equal(xml.find("output:first").attr("value"),
                          "/data/product/item/text",
                          "output value mismatch");
@@ -226,11 +227,12 @@ require([
             repeat.p.dataSource = {};
             assert.equal(getPath(blue), "/data/product/blue");
             assert.equal(getPath(text), "/data/product/text");
-            var xml = $(call("createXML"));
+            var xml = $(call("createXML")),
+                textBind = xml.find("bind[nodeset='" + getPath(text) + "']");
             assert.equal(
-                xml.find("bind[calculate]").attr("calculate"),
+                textBind.attr("calculate"),
                 "/data/product/blue",
-                xml.find("bind[calculate]").attr("nodeset") + " calculate expression mismatch");
+                textBind.attr("nodeset") + " calculate expression mismatch");
             assert.equal(xml.find("output:first").attr("value"),
                          "/data/product/text",
                          "output value mismatch");

@@ -658,11 +658,10 @@ define([
         });
     }
 
-    function parseBindElement (form, el, mugPath) {
-        var mug = form.getMugByPath(mugPath),
-            path = el.popAttr('nodeset') || el.popAttr('ref'),
+    function parseBindElement (form, el, path) {
+        var mug = form.getMugByPath(path),
             Itext = form.vellum.data.javaRosa.Itext;
-        
+
         if(!mug){
             form.parseWarnings.push(
                 "Bind Node [" + path + "] found but has no associated " +
