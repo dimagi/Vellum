@@ -559,7 +559,7 @@ define([
                     $modal.modal('hide');
                 }
             }
-        ]);
+        ], "Cancel");
 
         $overwriteForm = $(confirm_overwrite({
             description: "Looks like someone else has edited this form " +
