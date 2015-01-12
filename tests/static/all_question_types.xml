@@ -23,6 +23,8 @@
 					</question21>
 					<question22 jr:template="">
 						<question23>
+							<question40 />
+							<question41 jr:template="" />
 							<question24 />
 							<question25 />
 							<question26 />
@@ -54,6 +56,8 @@
 			<bind nodeset="/data/question21/question31" required="true()" />
 			<bind nodeset="/data/question22" />
 			<bind nodeset="/data/question22/question23" />
+			<bind nodeset="/data/question22/question23/question40" />
+			<bind nodeset="/data/question22/question23/question41" />
 			<bind nodeset="/data/question22/question23/question24" type="binary" />
 			<bind nodeset="/data/question22/question23/question25" type="binary" />
 			<bind nodeset="/data/question22/question23/question26" type="binary" />
@@ -150,6 +154,12 @@
 					</text>
 					<text id="question22/question23-label">
 						<value>question23</value>
+					</text>
+					<text id="question22/question23/question40-label">
+						<value>question40</value>
+					</text>
+					<text id="question22/question23/question41-label">
+						<value>question41</value>
 					</text>
 					<text id="question22/question23/question24-label">
 						<value>question24</value>
@@ -258,6 +268,12 @@
 					<text id="question22/question23-label">
 						<value>question23</value>
 					</text>
+					<text id="question22/question23/question40-label">
+						<value>question40</value>
+					</text>
+					<text id="question22/question23/question41-label">
+						<value>question41</value>
+					</text>
 					<text id="question22/question23/question24-label">
 						<value>question24</value>
 					</text>
@@ -356,6 +372,13 @@
 			<repeat nodeset="/data/question22">
 				<group ref="/data/question22/question23" appearance="field-list">
 					<label ref="jr:itext('question22/question23-label')" />
+					<group ref="/data/question22/question23/question40">
+						<label ref="jr:itext('question22/question23/question40-label')" />
+					</group>
+					<group>
+						<label ref="jr:itext('question22/question23/question41-label')" />
+						<repeat nodeset="/data/question22/question23/question41" />
+					</group>
 					<upload ref="/data/question22/question23/question24" mediatype="image/*">
 						<label ref="jr:itext('question22/question23/question24-label')" />
 					</upload>

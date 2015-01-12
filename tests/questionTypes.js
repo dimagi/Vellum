@@ -123,6 +123,16 @@ require([
                 path: 'question22/',
                 nodeId: 'question23'
             }, {
+                type: 'Group',
+                path: 'question22/question23/',
+                nodeId: 'question40'
+            }, {
+                clickBeforeAdd: "question22/question23",
+                type: 'Repeat',
+                path: 'question22/question23/',
+                nodeId: 'question41'
+            },{
+                clickBeforeAdd: "question22/question23",
                 type: 'Image',
                 path: 'question22/question23/',
                 nodeId: 'question24'

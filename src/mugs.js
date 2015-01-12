@@ -991,8 +991,9 @@ define([
         }
     });
    
-    function MugTypesManager(baseSpec, mugTypes) {
-        var _this = this;
+    function MugTypesManager(baseSpec, mugTypes, opts) {
+        var _this = this,
+            group_in_field_list = opts.features.group_in_field_list;
 
         this.auxiliaryTypes = mugTypes.auxiliary;
         this.normalTypes = mugTypes.normal;
@@ -1012,8 +1013,11 @@ define([
             innerChildTypeNames = _.without.apply(_, 
                   [allTypeNames].concat(
                       _.keys(this.auxiliaryTypes))),
-            nonGroupTypeNames = _.without(innerChildTypeNames,
-                'Group', 'Repeat', 'FieldList');
+            fieldListChildTypes = _.without(innerChildTypeNames, 'FieldList');
+        if (!group_in_field_list) {
+            fieldListChildTypes = _.without(fieldListChildTypes, "Group",
+                                            "Repeat");
+        }
 
         _.each(this.auxiliaryTypes, function (type) {
             type.validChildTypes = [];
@@ -1024,7 +1028,7 @@ define([
             if (name === "Group" || name === "Repeat") {
                 validChildTypes = innerChildTypeNames;
             } else if (name === "FieldList") {
-                validChildTypes = nonGroupTypeNames;
+                validChildTypes = fieldListChildTypes;
             } else {
                 validChildTypes = [];
             }
