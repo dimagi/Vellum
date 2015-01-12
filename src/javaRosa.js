@@ -1415,10 +1415,6 @@ define([
                 fullLangs,
                 $langSelector;
 
-            if (langs.length < 2) {
-                return;
-            }
-
             fullLangs = _.map(langs, function (lang) {
                 return {
                     code: lang,
@@ -1429,6 +1425,10 @@ define([
                 code: '_ids',
                 name: 'Question ID'
             };
+
+            if (fullLangs.length < 2) {
+                return;
+            }
 
             $langSelector = $(language_selector({
                 languages: fullLangs
