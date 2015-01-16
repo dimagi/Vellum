@@ -1423,7 +1423,7 @@ define([
         }
         this._propertiesMug = mug;
         var $content = this.$f.find(".fd-props-content").empty(),
-            sections = this.getSections();
+            sections = this.getSections(mug);
 
         this.$f.find('.fd-props-toolbar').html(this.getMugToolbar(mug));
         for (var i = 0; i < sections.length; i++) {
@@ -1813,7 +1813,7 @@ define([
         this._showConfirmDialog();
     };
 
-    fn.getSections = function () {
+    fn.getSections = function (mug) {
         return [
             {
                 slug: "main",
