@@ -6,6 +6,7 @@ define([
     'vellum/parser',
     'vellum/tree',
     'vellum/util',
+    'vellum/widgets',
     'vellum/core'
 ], function (
     form_,
@@ -14,7 +15,8 @@ define([
     mugs,
     parser,
     Tree,
-    util
+    util,
+    widgets
 ) {
     var setvalueData = [
             {
@@ -76,15 +78,26 @@ define([
             init: function (mug, form) {
                 mug.p.sectionId = "";
                 mug.p.quantity = "";
-                mug.p.entryId = {value: "", event: "jr-insert"};
-                mug.p.src = {value: "", event: "jr-insert"};
-                mug.p.dest = {value: "", event: "jr-insert"};
-                mug.p.date = {value: "today()", event: "jr-insert"};
+                mug.p.entryId = {value: ""};
+                mug.p.src = {value: ""};
+                mug.p.dest = {value: ""};
+                mug.p.date = {value: "today()"};
             },
             spec: {
-                sectionId: { presence: "optional" },
-                quantity: { presence: "optional" },
                 xmlnsAttr: { presence: "optional" },
+                sectionId: {
+                    lstring: 'Section ID',
+                    visibility: 'visible_if_present',
+                    presence: 'optional',
+                    widget: widgets.text
+                },
+                quantity: {
+                    lstring: 'Quantity',
+                    visibility: 'visible_if_present',
+                    presence: 'optional',
+                    widget: widgets.xPath,
+                    xpathType: "generic"
+                },
                 requiredAttr: { presence: "notallowed" },
                 constraintAttr: { presence : "notallowed" },
                 calculateAttr: { visibility: "notallowed" }
@@ -92,6 +105,11 @@ define([
         };
 
     $.vellum.plugin("commtrack", {}, {
+        getAdvancedQuestions: function () {
+            return this.__callOld().concat([
+                "Transfer"
+            ]);
+        },
         getMugTypes: function () {
             var types = this.__callOld();
             types.normal.Transfer = util.extend(mugs.defaultOptions, transferMugOptions);
@@ -123,10 +141,27 @@ define([
                 }));
             _.each(setvalueData, function (data) {
                 mug.p[data.attr] = values[path + "/" + data.path] || {
-                    event: "jr-insert",
                     value: ""
                 };
             });
+        },
+        getSections: function (mug) {
+            if (!isTransfer(mug)) {
+                return this.__callOld();
+            }
+            return [
+                {
+                    slug: "main",
+                    displayName: "Basic",
+                    properties: [
+                        "sectionId",
+                        "quantity",
+                        "entryId",
+                        "src",
+                        "dest"
+                    ],
+                }
+            ];
         }
     });
 
