@@ -360,8 +360,9 @@ define([
          *
          * @param mug - The mug object.
          * @param node - This mug's data node, a jQuery object.
+         * @returns - A jquery collection of child nodes.
          */
-        dataNodeChildren: function (mug, $node) {
+        parseDataNode: function (mug, $node) {
             return $node.children();
         },
         controlNodeChildren: null,

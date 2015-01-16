@@ -144,7 +144,7 @@ define([
 
         recFunc = function (parentMug) {
             var mug = form.vellum.parseDataElement(form, this, parentMug),
-                children = mug.options.dataNodeChildren(mug, $(this));
+                children = mug.options.parseDataNode(mug, $(this), parentMug);
             tree.insertMug(mug, 'into', parentMug);
             // HACK fix abstraction broken by direct tree insert
             form._fixMugState(mug);

@@ -55,7 +55,7 @@ define([
                 }
                 return path;
             },
-            dataNodeChildren: function (mug, $node) {
+            parseDataNode: function (mug, $node) {
                 // temporary dataSource overwritten by handleMugParseFinish
                 mug.p.dataSource = {idsQuery: "value for adjustPath"};
                 return $node.children("item").children();
