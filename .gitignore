@@ -7,3 +7,4 @@ vellum.tar.gz
 npm-debug.log
 *~
 *.swp
+.idea/
