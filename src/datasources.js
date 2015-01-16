@@ -2,12 +2,14 @@ define([
     'jquery',
     'underscore',
     'vellum/widgets',
+    'tpl!vellum/templates/data_source_editor',
     'tpl!vellum/templates/select_data_source'
 ], function (
     $,
     _,
     widgets,
-    edit_source
+    edit_source,
+    select_source
 ) {
     var vellum, dataSources;
 
@@ -17,7 +19,7 @@ define([
     }
 
     function getDataSources(type, callback) {
-        var source = _(dataSources).find(function (src) {
+        var source = _.find(dataSources, function (src) {
             return src.key === type;
         });
 
@@ -58,7 +60,7 @@ define([
                     }
                 }
             ]),
-            $exportForm = $(edit_source({}));
+            $exportForm = $(select_source({}));
         $modal.find('.modal-body').html($exportForm);
 
         var $type = $exportForm.find('[name=type-selector]'),
@@ -115,35 +117,104 @@ define([
         $modal.modal('show');
     }
 
-    function dataSourceWidget(mug, options) {
+    /**
+     * Load data source editor
+     *
+     * @param $div - jQuery object in which editor will be created.
+     * @param options - Object containing editor options:
+     *      {
+     *          source: {
+     *              id: "<instance id>",
+     *              src: "<instance src>",
+     *              query: "<query expression>"
+     *          },
+     *          change: callback,   // called when the editor content changes
+     *          done: callback      // called with no arguments on cancel
+     *      }
+     */
+    function loadDataSourceEditor($div, options) {
+        var $ui = $(edit_source()),
+            $instanceId = $ui.find("[name=instance-id]"),
+            $instanceSrc = $ui.find("[name=instance-src]"),
+            $query = $ui.find("[name=query]");
+        $div.empty().append($ui);
+
+        if (options.source) {
+            $instanceId.val(options.source.id);
+            $instanceSrc.val(options.source.src);
+            $query.val(options.source.query);
+        }
+
+        function getDataSource() {
+            return {
+                id: $instanceId.val(),
+                src: $instanceSrc.val(),
+                query: $query.val()
+            };
+        }
+
+        if (options.change) {
+            $instanceId.on('change keyup', function (){
+                options.change(getDataSource());
+            });
+
+            $instanceSrc.on('change keyup', function (){
+                options.change(getDataSource());
+            });
+
+            $query.on('change keyup', function (){
+                options.change(getDataSource());
+            });
+        }
+
+        var done = function (val) {
+            $div.find('.fd-data-source-editor').hide();
+            options.done(val);
+        };
+
+        $ui.find('.fd-data-source-save-button').click(function() {
+            done(getDataSource());
+        });
+
+        $ui.find('.fd-data-source-cancel-button').click(function () {
+            done();
+        });
+    }
+
+    function dataSourceWidget(mug, options, labelText) {
         var widget = widgets.normal(mug, options),
             getUIElement = widgets.util.getUIElement,
             getUIElementWithEditButton = widgets.util.getUIElementWithEditButton,
-            $queryInput = $("<input type='text' name='value_ref' class='input-block-level'>"),
+            $widgetInput = $("<input type='text' name='value_ref' class='input-block-level'>"),
             currentValue = {};
 
         widget.getUIElement = function () {
             var query = getUIElementWithEditButton(
-                    getUIElement($queryInput, "Model Iteration ID Query"), 
+                    getUIElement($widgetInput, labelText),
                     function () {
-                        selectDataSource(function (source) {
-                            currentValue = source;
-                            mug.p.dataSource = source;
-                            widget.setValue(source);
+                        vellum.displaySecondaryEditor({
+                            source: mug.p.dataSource,
+                            headerText: labelText,
+                            loadEditor: loadDataSourceEditor,
+                            done: function (source) {
+                                currentValue = source;
+                                mug.p.dataSource = source;
+                                widget.setValue(source);
+                            }
                         });
                     }
                 );
             return $("<div></div>").append(query);
         };
 
-        $queryInput.on('change keyup', function () {
-            currentValue.idsQuery = $queryInput.val();
+        $widgetInput.on('change keyup', function () {
+            currentValue.idsQuery = $widgetInput.val();
             mug.p.dataSource = currentValue;
         });
 
         widget.setValue = function (val) {
             currentValue = val;
-            $queryInput.val(val.idsQuery || "");
+            $widgetInput.val(val.idsQuery || "");
         };
 
         return widget;

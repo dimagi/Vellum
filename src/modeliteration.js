@@ -125,7 +125,10 @@ define([
                     lstring: 'Data Source',
                     visibility: 'visible_if_present',
                     presence: 'optional',
-                    widget: datasources.dataSourceWidget
+                    widget: function (mug, options) {
+                        return datasources.dataSourceWidget(
+                            mug, options, "Model Iteration ID Query");
+                    }
                 }
             }
         };

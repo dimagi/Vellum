@@ -1441,7 +1441,7 @@ define([
     };
         
     fn.hideQuestionProperties = function() {
-        this.$f.find('.fd-question-properties').hide();
+        this.disableUI();
     };
 
     fn.showContent = function () {
@@ -1452,29 +1452,58 @@ define([
         this.$f.find('.fd-content-right').hide();
     };
 
-    fn.displayXPathEditor = function(options) {
+    /**
+     * Display an editor in the question properties area
+     *
+     * @param options - Object with editor options:
+     *  {
+     *      headerText: "text to display in header",
+     *      loadEditor: function($div, options),    // load editor into $div
+     *      change: function(value),                // editor changed callback
+     *      done: function(value)                   // editor done callback
+     *  }
+     */
+    fn.displaySecondaryEditor = function(options) {
+        // All mention of "xpath" in this function is from when this function
+        // displayed the xpath editor. It has been adapted to show any editor.
         var _this = this,
             $editor = this.$f.find('.fd-xpath-editor');
 
+        $editor.find('.fd-head').text(options.headerText);
         options.DEBUG_MODE = DEBUG_MODE;
-        this.hideQuestionProperties();
+        this.disableUI();
 
         var done = options.done;
         options.done = function (val) {
             done(val);
-            _this.data.core.hasXPathEditorChanged = false;
-            $editor.hide();
-            _this.refreshCurrentMug();
+            if (_this.data.core.hasXPathEditorChanged) {
+                _this.data.core.hasXPathEditorChanged = false;
+                $editor.hide();
+                _this.refreshCurrentMug();
+            } else {
+                $editor.hide();
+                _this.enableUI();
+            }
         };
-        options.change = function () {
+        var change = options.change;
+        options.change = function (val) {
             _this.data.core.hasXPathEditorChanged = true;
+            if (change) {
+                change(val);
+            }
         };
         $editor.show();
+        options.loadEditor(_this.$f.find('.fd-xpath-editor-content'), options);
+    };
 
-        require(['vellum/expressionEditor'], function (expressionEditor) {
-            expressionEditor.showXPathEditor(
-                _this.$f.find('.fd-xpath-editor-content'), options);
-        });
+    fn.displayXPathEditor = function(options) {
+        options.headerText = "Expression Editor";
+        options.loadEditor = function($div, options) {
+            require(['vellum/expressionEditor'], function (expressionEditor) {
+                expressionEditor.showXPathEditor($div, options);
+            });
+        };
+        this.displaySecondaryEditor(options);
     };
 
     fn.alert = function (title, message, buttons) {
