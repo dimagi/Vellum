@@ -53,5 +53,7 @@ define([
             util.assertXmlEqual(call("createXML"), TRANSFER_QUESTION_XML,
                                 {normalize_xmlns: true});
         });
+
+        // TODO tests for load/create transfer block in repeat
     });
 });

@@ -15,10 +15,10 @@
 			<instance id="ledger" src="jr://instance/ledgerdb" />
 			<bind nodeset="/data/amount_received" type="xsd:int" />
 			<bind nodeset="/data/transfer/entry/@quantity" calculate="/data/amount_received" />
-			<setvalue event="jr-insert" ref="/data/transfer/entry/@id" value="instance('commcaresession')/session/data/product_id" />
-			<setvalue event="jr-insert" ref="/data/transfer/@src" value="instance('commcaresession')/session/data/case_id" />
-			<setvalue event="jr-insert" ref="/data/transfer/@dest" value="instance('casedb')/casedb/case[@case_id=instance('commcaresession')/session/data/case_id]/index/parent" />
-			<setvalue event="jr-insert" ref="/data/transfer/@date" value="today()" />
+			<setvalue event="xforms-ready" ref="/data/transfer/entry/@id" value="instance('commcaresession')/session/data/product_id" />
+			<setvalue event="xforms-ready" ref="/data/transfer/@src" value="instance('commcaresession')/session/data/case_id" />
+			<setvalue event="xforms-ready" ref="/data/transfer/@dest" value="instance('casedb')/casedb/case[@case_id=instance('commcaresession')/session/data/case_id]/index/parent" />
+			<setvalue event="xforms-ready" ref="/data/transfer/@date" value="today()" />
 			<itext>
 				<translation lang="en" default="">
 					<text id="amount_received-label">

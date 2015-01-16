@@ -134,20 +134,29 @@ define([
         return mug && mug.__className === "Transfer";
     }
 
+    function isInRepeat(mug) {
+        if (mug.__className === "Repeat") { // HACK hard-coded class name
+            return true;
+        }
+        return mug.parentMug && isInRepeat(mug.parentMug);
+    }
+
     function prepareForWrite(mug) {
-        var path = mug.form.getAbsolutePath(mug);
+        var path = mug.form.getAbsolutePath(mug),
+            event = isInRepeat(mug) ? "jr-insert" : "xforms-ready";
 
         // update <setvalue> refs
         _.each(setvalueData, function (data) {
             var value = mug.p[data.attr];
             if (!value.ref) {
                 mug.p[data.attr] = mug.form.addSetValue(
-                    value.event,
+                    event,
                     path + "/" + data.path,
                     value.value
                 );
             } else {
                 value.ref = path + "/" + data.path;
+                value.event = event;
             }
         });
     }
