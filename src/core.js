@@ -317,12 +317,7 @@ define([
             {
                 group: ["Geopoint", 'Advanced', ''],
                 textOnly: true,
-                questions: [
-                    "Geopoint",
-                    "Barcode",
-                    "Secret",
-                    "AndroidIntent"
-                ]
+                questions: this.getAdvancedQuestions()
             }
         ];
     };
@@ -331,6 +326,15 @@ define([
         return [
             "Select",
             "MSelect"
+        ];
+    };
+
+    fn.getAdvancedQuestions = function () {
+        return [
+            "Geopoint",
+            "Barcode",
+            "Secret",
+            "AndroidIntent"
         ];
     };
 
