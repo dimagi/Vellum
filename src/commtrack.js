@@ -98,6 +98,34 @@ define([
                     widget: widgets.xPath,
                     xpathType: "generic"
                 },
+                entryId: {
+                    lstring: 'Entry ID',
+                    visibility: 'visible_if_present',
+                    presence: 'optional',
+                    widget: setValueWidget,
+                    xpathType: "generic"
+                },
+                src: {
+                    lstring: 'Source',
+                    visibility: 'visible_if_present',
+                    presence: 'optional',
+                    widget: setValueWidget,
+                    xpathType: "generic"
+                },
+                dest: {
+                    lstring: 'Destination',
+                    visibility: 'visible_if_present',
+                    presence: 'optional',
+                    widget: setValueWidget,
+                    xpathType: "generic"
+                },
+                date: {
+                    lstring: 'Date',
+                    visibility: 'visible_if_present',
+                    presence: 'optional',
+                    widget: setValueWidget,
+                    xpathType: "generic"
+                },
                 requiredAttr: { presence: "notallowed" },
                 constraintAttr: { presence : "notallowed" },
                 calculateAttr: { visibility: "notallowed" }
@@ -194,5 +222,25 @@ define([
                 value.event = event;
             }
         });
+    }
+
+    function setValueWidget(mug, options) {
+        var widget = widgets.xPath(mug, options),
+            _getValue = widget.getValue,
+            _setValue = widget.setValue,
+            _value = null;
+
+        widget.setValue = function (value) {
+            _value = value;
+            _setValue(value.value);
+        };
+
+        widget.getValue = function () {
+            var val = _value || {};
+            val.value = _getValue();
+            return val;
+        };
+
+        return widget;
     }
 });
