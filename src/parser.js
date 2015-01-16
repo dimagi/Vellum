@@ -616,7 +616,6 @@ define([
                     eachFunc(this, mug);
                 });
             }
-            form.vellum.handleMugParseFinish(mug);
         }
         controlsTree.each(function () {
             eachFunc(this, null);

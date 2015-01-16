@@ -1258,7 +1258,7 @@ define([
         });
         if (formXML) {
             _this._resetMessages(_this.data.core.form.errors);
-            _this.reloadTree();
+            _this._populateTree();
         }
     };
 
@@ -1283,11 +1283,14 @@ define([
         }
     };
 
-    fn.reloadTree = function () {
+    fn._populateTree = function () {
+        // NOTE: this performs the final step in the mug parsing process.
+        // It should only be called once after a new XForm is loaded.
         var _this = this,
             form = this.data.core.form;
 
         form.mergedTreeMap(function (mug) {
+            _this.handleMugParseFinish(mug);
             var inTree = _this.createQuestion(mug, mug.parentMug, 'into');
             if (inTree) {
                 _this.setTreeValidationIcon(mug);
