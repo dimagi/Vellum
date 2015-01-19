@@ -52,6 +52,29 @@ require([
             });
         });
 
+        it("should not allow adding choices with matching values", function (done) {
+            util.init({
+                core: {
+                    onReady: function () {
+                        util.addQuestion("Select", "question1");
+                        util.clickQuestion("question1/item2");
+                        var selected = call("getCurrentlySelectedMug");
+                        selected.p.defaultValue = "item1";
+
+                        // TODO fix tight coupling of this functionality with UI
+                        // HACK prevent modal alert in UI
+                        this.data.core.isAlertVisible = true;
+
+                        assert(!this.ensureCurrentMugIsSaved(),
+                               "save should fail with duplicate choice value");
+
+                        this.data.core.isAlertVisible = false;
+                        done();
+                    }
+                }
+            });
+        });
+
         it("should allow mug rename with itemset in form when the itemset plugin is disabled", function (done) {
             util.init({
                 plugins: pluginsWithoutItemset,
