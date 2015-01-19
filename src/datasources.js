@@ -182,24 +182,25 @@ define([
     }
 
     function dataSourceWidget(mug, options, labelText) {
-        var widget = widgets.normal(mug, options),
+        var widget = widgets.text(mug, options),
             getUIElement = widgets.util.getUIElement,
             getUIElementWithEditButton = widgets.util.getUIElementWithEditButton,
-            $widgetInput = $("<input type='text' name='value_ref' class='input-block-level'>"),
-            currentValue = {};
+            super_handleChange = widget.handleChange,
+            currentValue = null;
 
         widget.getUIElement = function () {
             var query = getUIElementWithEditButton(
-                    getUIElement($widgetInput, labelText),
+                    getUIElement(widget.input, labelText),
                     function () {
                         vellum.displaySecondaryEditor({
-                            source: mug.p.dataSource,
+                            source: currentValue,
                             headerText: labelText,
                             loadEditor: loadDataSourceEditor,
                             done: function (source) {
-                                currentValue = source;
-                                mug.p.dataSource = source;
-                                widget.setValue(source);
+                                if (!_.isUndefined(source)) {
+                                    local_setValue(source);
+                                    widget.handleChange();
+                                }
                             }
                         });
                     }
@@ -207,14 +208,18 @@ define([
             return $("<div></div>").append(query);
         };
 
-        $widgetInput.on('change keyup', function () {
-            currentValue.idsQuery = $widgetInput.val();
-            mug.p.dataSource = currentValue;
-        });
+        widget.getValue = function () {
+            return currentValue || {};
+        };
 
-        widget.setValue = function (val) {
+        var local_setValue = widget.setValue = function (val) {
             currentValue = val;
-            $widgetInput.val(val.idsQuery || "");
+            widget.input.val(val.query || "");
+        };
+
+        widget.handleChange = function () {
+            currentValue.query = widget.input.val();
+            super_handleChange();
         };
 
         return widget;

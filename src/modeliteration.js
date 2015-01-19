@@ -125,10 +125,7 @@ define([
                     lstring: 'Data Source',
                     visibility: 'visible_if_present',
                     presence: 'optional',
-                    widget: function (mug, options) {
-                        return datasources.dataSourceWidget(
-                            mug, options, "Model Iteration ID Query");
-                    }
+                    widget: idsQueryDataSourceWidget,
                 }
             }
         };
@@ -249,6 +246,32 @@ define([
 
     function isModelRepeat(mug) {
         return mug && mug.__className === "Repeat" && mug.p.dataSource.idsQuery;
+    }
+
+    function idsQueryDataSourceWidget(mug, options) {
+        var widget = datasources.dataSourceWidget(
+                                    mug, options, "Model Iteration ID Query"),
+            super_getValue = widget.getValue,
+            super_setValue = widget.setValue;
+
+        widget.getValue = function () {
+            var val = super_getValue();
+            return {
+                instance: ($.trim(val.src) ? {id: val.id, src: val.src} : null),
+                idsQuery: val.query
+            };
+        };
+
+        widget.setValue = function (val) {
+            val = val || {};
+            super_setValue({
+                id: (val.instance ? val.instance.id : ""),
+                src: (val.instance ? val.instance.src : ""),
+                query: val.idsQuery || ""
+            });
+        };
+
+        return widget;
     }
 
     function updateDataSource(mug, value, previous) {
