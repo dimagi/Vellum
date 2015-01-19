@@ -1042,6 +1042,38 @@ define([
             duplicateIsForMove = this.data.core.duplicateIsForMove,
             verb = duplicateIsForMove ? 'would have' : 'has';
 
+        function alertDuplicateButtons(resetMethod, inputID, autoValue) {
+            return [
+                    {
+                        title: "Fix Manually",
+                        action: function () {
+                            // Since we just changed state to trigger this
+                            // message when calling ensureCurrentMugIsSaved()
+                            // when attempting a move, reset the state.  It will
+                            // be changed again if the same move is attempted.
+                            if (duplicateIsForMove) {
+                                resetMethod(false);
+                            }
+                            _this.data.core.$modal.modal('hide');
+                            var input = _this.getCurrentMugInput(inputID);
+                            if (input) {
+                                input.select().focus();
+                            }
+                        }
+                    },
+                    {
+                        title: "Automatically rename to '" + autoValue + "'",
+                        cssClasses: 'btn-primary',
+                        action: function () {
+                            mug.p[inputID] = autoValue;
+                            resetMethod(false);
+                            _this.data.core.$modal.modal('hide');
+                            _this.refreshVisibleData();
+                            callback();
+                        } 
+                    }
+                ];
+        }
 
         if (this.data.core.hasXPathEditorChanged) {
             this.alert(
@@ -1057,36 +1089,8 @@ define([
                 "'" + duplicate + "' " + verb + " the same Question ID as " +
                 "another question in the same group. Please change '" + 
                 duplicate + "' to a unique Question ID before continuing.",
-                [
-                    {
-                        title: "Fix Manually",
-                        action: function () {
-                            // Since we just changed state to trigger this
-                            // message when calling ensureCurrentMugIsSaved()
-                            // when attempting a move, reset the state.  It will
-                            // be changed again if the same move is attempted.
-                            if (duplicateIsForMove) {
-                                _this.setUnsavedDuplicateNodeId(false);
-                            }
-                            _this.data.core.$modal.modal('hide');
-                            var input = _this.getCurrentMugInput("nodeID");
-                            if (input) {
-                                input.select().focus();
-                            }
-                        }
-                    },
-                    {
-                        title: "Automatically rename to '" + newQuestionId + "'",
-                        cssClasses: 'btn-primary',
-                        action: function () {
-                            mug.p.nodeID = newQuestionId;
-                            _this.setUnsavedDuplicateNodeId(false);
-                            _this.data.core.$modal.modal('hide');
-                            _this.refreshVisibleData();
-                            callback();
-                        } 
-                    }
-                ]);
+                alertDuplicateButtons(_this.setUnsavedDuplicateNodeId.bind(_this), "nodeID", newQuestionId)
+            );
             return false;
         } else if (duplicateChoice) {
             // weird that this uses generate_question_id, but it just uses
@@ -1098,36 +1102,8 @@ define([
                 "'" + duplicateChoice + "' " + verb + " the same Choice Value as " +
                 "another choice in the same group. Please change '" +
                 duplicateChoice + "' to a unique Choice Value before continuing.",
-                [
-                    {
-                        title: "Fix Manually",
-                        action: function () {
-                            // Since we just changed state to trigger this
-                            // message when calling ensureCurrentMugIsSaved()
-                            // when attempting a move, reset the state.  It will
-                            // be changed again if the same move is attempted.
-                            if (duplicateIsForMove) {
-                                _this.setUnsavedDuplicateChoiceValue(false);
-                            }
-                            _this.data.core.$modal.modal('hide');
-                            var input = _this.getCurrentMugInput("defaultValue");
-                            if (input) {
-                                input.select().focus();
-                            }
-                        }
-                    },
-                    {
-                        title: "Automatically rename to '" + newChoiceValue + "'",
-                        cssClasses: 'btn-primary',
-                        action: function () {
-                            mug.p.defaultValue = newChoiceValue;
-                            _this.setUnsavedDuplicateChoiceValue(false);
-                            _this.data.core.$modal.modal('hide');
-                            _this.refreshVisibleData();
-                            callback();
-                        }
-                    }
-                ]);
+                alertDuplicateButtons(_this.setUnsavedDuplicateChoiceValue.bind(_this), "defaultValue", newChoiceValue)
+            );
             return false;
         } else {
             callback();
