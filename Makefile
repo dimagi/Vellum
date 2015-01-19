@@ -34,6 +34,8 @@ _rjs:
 	rm _build/src/local-deps.css _build/src/main-components.css
 	# for some reason relative image paths are wrong, so move stuff around
 	mv _build/src/global-deps.css _build/src/images _build/
+	bower list > _build/bower_components/manifest.txt || \
+		bower list --offline > _build/bower_components/manifest.txt
 # TODO auto-generate this file from build.js
 	python buildmain.py > _build/src/main.js
 
