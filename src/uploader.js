@@ -48,7 +48,7 @@ define([
         video: [
             {
                 'description': 'Video',
-                'extensions': '*.3gp'
+                'extensions': '*.3gp;*.mp4'
             }
         ]
     },
@@ -167,6 +167,13 @@ define([
         
         widget.handleUploadComplete = function (event, data, objectMap) {
             if (data.ref && data.ref.path) {
+                var newExtension = '.' + data.ref.path.split('.').pop().toLowerCase(),
+                    oldExtension = '.' + widget.getValue().split('.').pop().toLowerCase();
+                if (newExtension !== oldExtension) {
+                    var currentPath = widget.getValue().replace(/\.[^/.]+$/, newExtension);
+                    widget.getControl().val(currentPath);
+                    widget.handleChange();
+                }
                 objectMap[data.ref.path] = data.ref;
             }
             widget.updateMultimediaBlockUI(objectMap);
