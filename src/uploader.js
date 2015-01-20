@@ -309,6 +309,9 @@ define([
             var uploadController = {value: null};
 
             require(['file-uploader'], function (HQMediaFileUploadController) {
+                if (uploadController.value !== null) {
+                    return;
+                }
                 uploadController.value = new HQMediaFileUploadController(
                     options.uploaderSlug, 
                     options.mediaType, 
@@ -332,9 +335,12 @@ define([
         },
         destroy: function () {
             _.each(this.data.uploader.uploadControls, function (control, key) {
-                // HACK deep reach
-                // HQMediaFileUploadController should have a destroy method
-                control.value.uploader.destroy();
+                if (control.value) {
+                    // HACK deep reach
+                    // HQMediaFileUploadController should have a destroy method
+                    control.value.uploader.destroy();
+                }
+                delete control.value;
             });
         }
     });
