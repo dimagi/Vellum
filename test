@@ -21,8 +21,7 @@ if [[ "$1" == "--no-jshint" ]]; then
     shift
 fi
 
-mocha-phantomjs -s loadImages=false "index.html$qs" "$@" \
-    | grep -v "Error loading resource file:///"
+mocha-phantomjs -s loadImages=false "index.html$qs" "$@"
 test ${PIPESTATUS[0]} -eq 0 # stop on mocha-phantomjs non-zero exit status
 # NOTE there may be edge cases where grep exits with non-zero causing this
 # script to exit prematurely

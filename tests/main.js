@@ -105,7 +105,7 @@ require(['jquery', 'jquery.vellum'], function ($) {
     ], function (
         options
     ) {
-        var lastSavedForm = "";
+        var session = window.sessionStorage;
 
         function runTests() {
             function showTestResults() {
@@ -139,19 +139,19 @@ require(['jquery', 'jquery.vellum'], function ($) {
             }
         }, 1000);
 
-        $('#load-saved').click(function () {
+        function load(form) {
             $('#vellum').empty().vellum($.extend(true, {}, options.options, {
                 core: {
                     saveUrl: function (data) {
                         console.log("saving form:", data);
-                        lastSavedForm = data.xform;
+                        session.setItem("vellum.tests.main.lastSavedForm", data.xform);
                     },
                     patchUrl: function (data) {
                         console.log("saving patch:", data);
                         // fake conflict to retry with saveUrl
                         return {status: 'conflict'};
                     },
-                    form: lastSavedForm
+                    form: form
                 }
             }));
 
@@ -159,8 +159,12 @@ require(['jquery', 'jquery.vellum'], function ($) {
             setTimeout(function () {
                 $(document).scroll();
             }, 500);
-        }).click();
+        }
 
+        $('#load-saved').click(function () {
+            load(session.getItem("vellum.tests.main.lastSavedForm") || "");
+        });
+        load(""); // load empty form on initial page load
     });
 });
 
