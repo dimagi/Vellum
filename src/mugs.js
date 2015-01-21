@@ -318,14 +318,6 @@ define([
                 return;
             }
             spec[name] = propertySpec;
-
-            _.each(propertySpec, function (value, key) {
-                if (_.isFunction(value) && key !== 'validationFunc' && 
-                    key !== 'widget') 
-                {
-                    propertySpec[key] = value(mugOptions);
-                }
-            });
         });
 
         

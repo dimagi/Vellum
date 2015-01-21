@@ -120,7 +120,11 @@ define([
                 mug.p.dataSourceChanged = false;
             },
             spec: {
-                //repeat_count: {visibility: "hidden"},
+                repeat_count: _.extend({}, oldRepeat.spec.repeat_count, {
+                    visibility: function (mug) {
+                        return !mug.p.dataSource.idsQuery;
+                    }
+                }),
                 dataSource: {
                     lstring: 'Data Source',
                     visibility: 'visible_if_present',
@@ -254,6 +258,11 @@ define([
             super_getValue = widget.getValue,
             super_setValue = widget.setValue;
 
+        // Make the input in the main properties view read-only to force use of
+        // the data source editor so mug properties will be reloaded on save
+        // -> show/hide repeat_count depending on idsQuery value.
+        widget.input.attr({"readonly": "readonly"});
+
         widget.getValue = function () {
             var val = super_getValue();
             return {
@@ -303,6 +312,9 @@ define([
                 oldPath = currentPath.replace(/\/item$/, "");
             } else {
                 oldPath = currentPath + "/item";
+                if (/\/@count$/.test(mug.p.repeat_count)) {
+                    mug.p.repeat_count = "";
+                }
             }
             mug.form.vellum.handleMugRename(
                 mug.form, mug, nodeID, nodeID, currentPath, oldPath);

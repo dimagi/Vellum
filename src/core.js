@@ -1932,12 +1932,13 @@ define([
         if (_.isUndefined(propVal) &&
             propDef && propDef.visibility &&
             mug.p.getDefinition(propDef.visibility) &&
-                !getWidgetClassAndOptions(propDef.visibility, mug))
+            !getWidgetClassAndOptions(propDef.visibility, mug))
         {
             return null;
         }
 
         if (!propDef || propDef.visibility === 'hidden' ||
+            (_.isFunction(propDef.visibility) && !propDef.visibility(mug, propDef)) ||
             (_.isUndefined(propVal) &&
              (propDef.visibility === "visible_if_present" ||
               propDef.presence === "notallowed")))

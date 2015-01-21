@@ -23,7 +23,7 @@ require([
         plugins = util.options.options.plugins || [],
         pluginsWithModelIteration = _.union(plugins, ["modeliteration"]);
 
-    describe("The model repeat plugin", function () {
+    describe("The model iteration plugin", function () {
         before(function (done) {
             util.init({
                 plugins: pluginsWithModelIteration,
@@ -242,5 +242,20 @@ require([
             assert(!errors.length, errors.join("\n"));
         });
 
+        it("should show repeat count for regular repeat", function () {
+            util.loadXML(REGULAR_REPEAT_XML);
+            util.clickQuestion("product");
+            // not ideal: references UI
+            assert.equal($("[name=property-repeat_count]").length, 1,
+                         "repeat count should be visible for regular repeat");
+        });
+
+        it("should hide repeat count for model repeat", function () {
+            util.loadXML(FIXTURE_REPEAT_XML);
+            util.clickQuestion("product/item");
+            // not ideal: references UI
+            assert.equal($("[name=property-repeat_count]").length, 0,
+                         "repeat count should not be visible for model repeat");
+        });
     });
 });
