@@ -1842,7 +1842,6 @@ define([
             "nodeID",
             "defaultValue",
             "label",
-            "showOKCheckbox",
             "readOnlyControl"
         ];
     };

@@ -846,21 +846,10 @@ define([
         icon: 'icon-tag',
         init: function (mug, form) {
             mug.p.tagName = "trigger";
-            mug.p.showOKCheckbox = false;
         },
         spec: {
             dataType: { presence: 'notallowed' },
-            dataValue: { presence: 'optional' },
-            showOKCheckbox: {
-                lstring: 'Add confirmation checkbox',
-                help: 'Add a confirmation message and checkbox below the label. Available on Android only.',
-                visibility: 'visible',
-                presence: 'optional',
-                widget: widgets.checkbox
-            }
-        },
-        getAppearanceAttribute: function (mug) {
-            return mug.p.showOKCheckbox ? null : 'minimal';
+            dataValue: { presence: 'optional' }
         }
     });
 
