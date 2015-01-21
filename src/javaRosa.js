@@ -1895,6 +1895,18 @@ define([
                     return validateItextItem(helpItext, "Help");
                 }
             };
+            control.appearanceItext = {
+                visibility: 'visible',
+                widget: function (mug, options) {
+                    return itextLabelBlock(mug, $.extend(options, {
+                        itextType: "appearance",
+                        getItextByMug: function (mug) {
+                            return mug.p.appearance;
+                        },
+                        displayName: "Appearance"
+                    }));
+                }
+            };
 
             // virtual property used to get a widget
             control.otherItext = function (mugOptions) {
@@ -1976,6 +1988,7 @@ define([
             );
 
             ret = ret.concat([
+                'appearance',
                 'labelItextID',
                 'constraintMsgItextID',
                 'hintItextID',

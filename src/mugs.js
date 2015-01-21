@@ -170,6 +170,7 @@ define([
             // BIND ELEMENT
             dataType: {
                 immutable: true,
+                deleteOnCopy: true,
                 visibility: 'hidden',
                 presence: 'optional',
                 lstring: 'Data Type'
@@ -236,11 +237,12 @@ define([
         control: {
             tagName: {
                 immutable: true,
+                deleteOnCopy: true,
                 visibility: 'hidden',
                 presence: 'required'
             },
             appearance: {
-                immutable: true,
+                deleteOnCopy: true,
                 visibility: 'hidden',
                 presence: 'optional',
                 lstring: 'Appearance Attribute'
@@ -437,7 +439,7 @@ define([
             // Reset any properties that are part of the question type
             // definition.
             _.each(this.spec, function (spec, name) {
-                if (spec.immutable) {
+                if (spec.deleteOnCopy) {
                     delete currentAttrs[name];
                 }
             });
