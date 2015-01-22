@@ -101,7 +101,12 @@ define([
         _plugins: {},
         _fn: {},
         _instance: function ($f, options) {
-            options.plugins = _.union(corePlugins, options.plugins || []);
+            options.plugins = _.filter(
+                _.union(corePlugins, options.plugins || []),
+                function (name) {
+                    return !_.isUndefined($.vellum._plugins[name]);
+                }
+            );
             options = $.extend(true, {}, $.vellum.defaults, options);
 
             var instance = this;
