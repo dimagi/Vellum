@@ -157,6 +157,36 @@ require([
             );
         });
 
+        it("should add question inside of collapsed select", function () {
+            util.loadXML("");
+            var group = util.addQuestion("Select", "select");
+            util.addQuestion("Item", "item3");
+            util.collapseGroup(group);
+            util.addQuestion.bind({prevId: "select"})("Item", "item4");
+            util.expandGroup(group);
+            util.assertJSTreeState(
+                "select",
+                "  item1",
+                "  item2",
+                "  item3",
+                "  item4"
+            );
+        });
+
+        it("should add text outside of collapsed select", function () {
+            util.loadXML("");
+            var group = util.addQuestion("Select", "select");
+            util.collapseGroup(group);
+            util.addQuestion.bind({prevId: "select"})("Text", "text1");
+            util.expandGroup(group);
+            util.assertJSTreeState(
+                "select",
+                "  item1",
+                "  item2",
+                "text1"
+            );
+        });
+
         it("should select group of selected child question on collapse group", function () {
             util.loadXML("");
             var group1 = util.addQuestion("Group", "group"),
