@@ -1206,6 +1206,7 @@ define([
         }).on('remove-question', function (e) {
             if (!e.isInternal) {
                 var prev = _this.jstree("get_prev_dom", e.mug.ufid);
+                _this.showVisualValidation(null);
                 _this.jstree("delete_node", e.mug.ufid);
                 if (prev) {
                     _this.jstree("select_node", prev);
@@ -1522,15 +1523,17 @@ define([
         // for now form warnings get reset every time validation gets called.
         this.data.core.form.clearErrors('form-warning');
       
-        this._resetMessages(
-            this.data.core.form.errors.concat(
-                _.map(this.getErrors(mug), function (error) {
-                    return {
-                        message: error,
-                        level: "form-warning",
-                    };
-                })));
-        this.setTreeValidationIcon(mug);
+        if (mug) {
+            this._resetMessages(
+                this.data.core.form.errors.concat(
+                    _.map(this.getErrors(mug), function (error) {
+                        return {
+                            message: error,
+                            level: "form-warning",
+                        };
+                    })));
+            this.setTreeValidationIcon(mug);
+        }
     };
 
     fn.getErrors = function (mug) {
