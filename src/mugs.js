@@ -846,6 +846,7 @@ define([
         icon: 'icon-tag',
         init: function (mug, form) {
             mug.p.tagName = "trigger";
+            mug.p.appearance = "minimal";
         },
         spec: {
             dataType: { presence: 'notallowed' },

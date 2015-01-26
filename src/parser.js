@@ -425,6 +425,7 @@ define([
             triggerAdaptor = function (appearance) {
                 return function (mug, form) {
                     mug = _adaptTrigger(mug, form);
+                    mug.p.appearance = appearance;
                     return mug;
                 };
             };
