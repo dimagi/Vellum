@@ -157,20 +157,14 @@ require([
             );
         });
 
-        it("should add question inside of collapsed select", function () {
+        it("should not be able to add choice to collapsed select", function () {
             util.loadXML("");
             var group = util.addQuestion("Select", "select");
             util.addQuestion("Item", "item3");
             util.collapseGroup(group);
-            util.addQuestion.bind({prevId: "select"})("Item", "item4");
-            util.expandGroup(group);
-            util.assertJSTreeState(
-                "select",
-                "  item1",
-                "  item2",
-                "  item3",
-                "  item4"
-            );
+            chai.expect(function() {
+                util.addQuestion.bind({prevId: "select"})("Item", "item4");
+            }).to.throw(Error);
         });
 
         it("should add text outside of collapsed select", function () {
