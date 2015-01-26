@@ -298,7 +298,6 @@
 				</translation>
 			</itext>
 		</model>
-		&lt;!-- Intents inserted by Vellum: --&gt;
 		<odkx:intent xmlns:odkx="http://opendatakit.org/xforms" id="question7" class="app_id">
 			<extra key="key1" ref="value1" />
 			<response key="key2" ref="value2" />

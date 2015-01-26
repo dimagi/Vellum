@@ -19,6 +19,7 @@ define([
             xmlns: "http://opendatakit.org/xforms",
             extra: {},
             response: {},
+            unknownAttributes: {},
             initialNodeID: nodeID
         });
     }
@@ -54,6 +55,9 @@ define([
         xmlWriter.writeAttributeString("xmlns:odkx", this.getAttr('xmlns'));
         xmlWriter.writeAttributeString("id", currentNodeID || this.getAttr('initialNodeID'));
         xmlWriter.writeAttributeString("class", this.getAttr('path'));
+        _.each(this.getAttr('unknownAttributes'), function (value, name) {
+            xmlWriter.writeAttributeString(name, value);
+        });
         writeInnerTagXML(xmlWriter, 'extra', this.getAttr('extra'));
         writeInnerTagXML(xmlWriter, 'response', this.getAttr('response'));
         xmlWriter.writeEndElement('odkx:intent');
@@ -75,6 +79,15 @@ define([
                 newTag.setAttr('xmlns', xmlns || newTag.getAttr('xmlns'));
                 newTag.setAttr('extra', parseInnerTags($tag, 'extra'));
                 newTag.setAttr('response', parseInnerTags($tag, 'response'));
+                var unknowns = newTag.getAttr('unknownAttributes');
+                _.each(tagXML.attributes, function (attr) {
+                    if (attr.nodeName !== 'id' &&
+                        attr.nodeName !== 'class' &&
+                        attr.nodeName !== 'xmlns:odkx')
+                    {
+                        unknowns[attr.nodeName] = attr.nodeValue;
+                    }
+                });
                 that.unmappedIntentTags[tagId] = newTag;
             });
         };
@@ -124,7 +137,6 @@ define([
                 };
             intents = dataTree.treeMap(getIntentMugs);
             if (intents.length > 0) {
-                xmlWriter.writeComment('Intents inserted by Vellum:');
                 intents.map(function (intentMug) {
                     intentMug.intentTag.writeXML(
                         xmlWriter, intentMug.p.nodeID);
