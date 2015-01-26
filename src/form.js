@@ -632,7 +632,7 @@ define([
                 this.vellum.setUnsavedDuplicateNodeId(value);
                 return null;
             }
-            else if (property === 'defaultValue' && previous &&
+            else if (property === 'defaultValue' && previous && mug.__className ==="Item" &&
                 this.getMugChildrenByChoiceValue(mug.parentMug, value).length > 0)
             {
                 // Short-circuit invalid change and trigger warning in UI
