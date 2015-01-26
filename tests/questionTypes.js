@@ -47,9 +47,6 @@ require([
             }, {
                 type: 'Trigger',
                 nodeId: 'question2',
-                attrs: {
-                    appearance: 'minimal'
-                },
                 inputs: {
                     // TODO add more input counts for each question type
                     calculateAttr: 0,
@@ -59,7 +56,10 @@ require([
                 }
             }, {
                 type: 'Trigger',
-                nodeId: 'question30'
+                nodeId: 'question30',
+                attrs: {
+                    appearance: ''
+                },
             }, {
                 type: 'Select',
                 nodeId: 'question3',
