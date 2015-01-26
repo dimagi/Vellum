@@ -838,7 +838,9 @@ define([
         }).bind("select_node.jstree", function (e, data) {
             var mug = _this.data.core.form.getMugByUFID(data.node.id);
             _this.displayMugProperties(mug);
-            _this.activateQuestionTypeGroup(mug.__className);
+            _this.activateQuestionTypeGroup(mug);
+        }).bind("open_node.jstree", function (e, data) {
+            _this.activateQuestionTypeGroup(_this.data.core.form.getMugByUFID(data.node.id));
         }).bind("close_node.jstree", function (e, data) {
             var selected = _this.jstree('get_selected'),
                 sel = selected.length && _this.jstree('get_node', selected[0]);
@@ -846,6 +848,7 @@ define([
                 _this.jstree("deselect_all", true)
                      .jstree("select_node", data.node);
             }
+            _this.activateQuestionTypeGroup(_this.data.core.form.getMugByUFID(data.node.id));
         }).bind("move_node.jstree", function (e, data) {
             var form = _this.data.core.form,
                 mug = form.getMugByUFID(data.node.id),
@@ -999,11 +1002,15 @@ define([
         // its bound mug.
     };
 
-    fn.activateQuestionTypeGroup = function (className) {
+    fn.activateQuestionTypeGroup = function (mug) {
+        var className = mug.__className;
         this.resetQuestionTypeGroups();
 
         var groupSlug = this.data.core.QUESTION_TYPE_TO_GROUP[className];
-        if (groupSlug && className !== 'MSelectDynamic' && className !== 'SelectDynamic') {
+        if (groupSlug && 
+            className !== 'MSelectDynamic' && 
+            className !== 'SelectDynamic' && 
+            !this.jstree("is_closed", mug.ufid)) {
             this.$f
                 .find('.' + getQuestionTypeGroupClass(groupSlug))
                 .find('.fd-question-type-related').removeClass('disabled');
@@ -1199,7 +1206,7 @@ define([
 
             if (e.mug === _this.getCurrentlySelectedMug()) {
                 _this.refreshCurrentMug();
-                _this.activateQuestionTypeGroup(e.mug.__className);
+                _this.activateQuestionTypeGroup(e.mug);
             }
         }).on('parent-question-type-change', function (e) {
             _this.jstree("set_icon", e.childMug.ufid, e.childMug.getIcon());
