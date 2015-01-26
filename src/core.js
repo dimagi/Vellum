@@ -1338,9 +1338,7 @@ define([
      */
     fn.getInsertTargetAndPosition = function (refMug, qType) {
         // Valid positions: before, after, first, last, into (same as last)
-        var parent, childTypes, position = 'last',
-            insertIntoMugs = ["Select", "MSelect"];
-
+        var parent, childTypes, position = 'last';
         while (refMug) {
             if (position === 'after') {
                 parent = refMug.parentMug;
@@ -1350,8 +1348,7 @@ define([
             } else {
                 parent = refMug;
             }
-            if (this.jstree("is_closed", parent.ufid) && 
-                insertIntoMugs.indexOf(refMug.__className) === -1) {
+            if (this.jstree("is_closed", parent.ufid)) {
                 refMug = parent;
                 position = 'after';
                 continue;
