@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:orx="http://openrosa.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa" xmlns:vellum="http://commcarehq.org/xforms/vellum">
+	<h:head>
+		<h:title>Untitled Form</h:title>
+		<model>
+			<instance>
+				<data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/DC38FCC5-930C-4385-AE6C-5B15ED1F95B1" uiVersion="1" version="1" name="Untitled Form">
+					<stock_amount />
+					<balance xmlns="http://commcarehq.org/ledger/v1" entity-id="" date="" section-id="stock" vellum:role="Balance">
+						<entry id="" quantity="" />
+					</balance>
+				</data>
+			</instance>
+			<instance id="products" src="jr://fixture/commtrack:products" />
+			<instance id="ledger" src="jr://instance/ledgerdb" />
+			<bind nodeset="/data/stock_amount" type="xsd:int" />
+			<bind nodeset="/data/balance/entry/@quantity" calculate="/data/stock_amount"/>
+			<setvalue event="xforms-ready" ref="/data/balance/entry/@id" value="instance('commcaresession')/session/data/product_id"/>
+			<setvalue event="xforms-ready" ref="/data/balance/@entity-id" value="instance('commcaresession')/session/data/case_id"/>
+			<setvalue event="xforms-ready" ref="/data/balance/@date" value="today()"/>
+			<itext>
+				<translation lang="en" default="">
+					<text id="stock_amount-label">
+						<value>stock_amount</value>
+					</text>
+				</translation>
+			</itext>
+		</model>
+	</h:head>
+	<h:body>
+		<input ref="/data/stock_amount">
+			<label ref="jr:itext('stock_amount-label')" />
+		</input>
+	</h:body>
+</h:html>

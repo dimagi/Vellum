@@ -18,29 +18,69 @@ define([
     util,
     widgets
 ) {
-    var setvalueData = [
-            {
-                attr: "entryId",
-                path: "entry/@id"
-            }, {
-                attr: "src",
-                path: "@src"
-            }, {
-                attr: "dest",
-                path: "@dest"
-            }, {
-                attr: "date",
-                path: "@date"
-            }
-        ],
-        transferMugOptions = {
-            typeName: 'Transfer',
+    var setvalueData = {
+            Balance: [
+                {
+                    attr: "entryId",
+                    path: "entry/@id"
+                }, {
+                    attr: "entityId",
+                    path: "@entity-id"
+                }, {
+                    attr: "date",
+                    path: "@date"
+                }
+            ],
+            Transfer: [
+                {
+                    attr: "entryId",
+                    path: "entry/@id"
+                }, {
+                    attr: "src",
+                    path: "@src"
+                }, {
+                    attr: "dest",
+                    path: "@dest"
+                }, {
+                    attr: "date",
+                    path: "@date"
+                }
+            ],
+        },
+        sectionData = {
+            Balance: [
+                {
+                    slug: "main",
+                    displayName: "Basic",
+                    properties: [
+                        "sectionId",
+                        "quantity",
+                        "entityId",
+                        "entryId"
+                    ],
+                }
+            ],
+            Transfer: [
+                {
+                    slug: "main",
+                    displayName: "Basic",
+                    properties: [
+                        "sectionId",
+                        "quantity",
+                        "entryId",
+                        "src",
+                        "dest"
+                    ],
+                }
+            ]
+        },
+        baseTransactionOptions = {
             isDataOnly: true,
             supportsDataNodeRole: true,
             parseDataNode: function (mug, $node) {
                 mug.p.sectionId = mug.p.rawDataAttributes["section-id"];
                 delete mug.p.rawDataAttributes["section-id"];
-                return $([]); // is this right?
+                return $([]);
             },
             dataChildFilter: function (children, mug) {
                 return [new Tree.Node(children, {
@@ -53,6 +93,80 @@ define([
                     }
                 })];
             },
+            getBindList: function (mug) {
+                mug.form.controlTree.walk(function (mug, nodeID, processChildren) {
+                    processChildren();
+                });
+                return [{
+                    nodeset: mug.form.getAbsolutePath(mug) + "/entry/@quantity",
+                    calculate: mug.p.quantity
+                }];
+            }
+        },
+        balanceMugOptions = {
+            typeName: 'Balance',
+            getExtraDataAttributes: function (mug) {
+                // HACK must happen before <setvalue> and "other" <instance> elements are written
+                prepareForWrite(mug);
+                var attrs = mug.p.rawDataAttributes || {};
+                return {
+                    xmlns: "http://commcarehq.org/ledger/v1",
+                    date: attrs.date || "",
+                    "entity-id": attrs.src || "",
+                    "section-id": mug.p.sectionId,
+                    "vellum:role": "Balance"
+                };
+            },
+            init: function (mug, form) {
+                mug.p.sectionId = "";
+                mug.p.quantity = "";
+                mug.p.entityId = {value: ""};
+                mug.p.entryId = {value: ""};
+                mug.p.date = {value: "today()"};
+            },
+            spec: {
+                xmlnsAttr: { presence: "optional" },
+                sectionId: {
+                    lstring: 'Section ID',
+                    visibility: 'visible_if_present',
+                    presence: 'optional',
+                    widget: widgets.text
+                },
+                quantity: {
+                    lstring: 'Quantity',
+                    visibility: 'visible_if_present',
+                    presence: 'optional',
+                    widget: widgets.xPath,
+                    xpathType: "generic"
+                },
+                entityId: {
+                    lstring: 'Entity ID',
+                    visibility: 'visible_if_present',
+                    presence: 'optional',
+                    widget: setValueWidget,
+                    xpathType: "generic"
+                },
+                entryId: {
+                    lstring: 'Entry ID',
+                    visibility: 'visible_if_present',
+                    presence: 'optional',
+                    widget: setValueWidget,
+                    xpathType: "generic"
+                },
+                date: {
+                    lstring: 'Date',
+                    visibility: 'visible_if_present',
+                    presence: 'optional',
+                    widget: setValueWidget,
+                    xpathType: "generic"
+                },
+                requiredAttr: { presence: "notallowed" },
+                constraintAttr: { presence : "notallowed" },
+                calculateAttr: { visibility: "notallowed" }
+            }
+        },
+        transferMugOptions = {
+            typeName: 'Transfer',
             getExtraDataAttributes: function (mug) {
                 // HACK must happen before <setvalue> and "other" <instance> elements are written
                 prepareForWrite(mug);
@@ -65,15 +179,6 @@ define([
                     "section-id": mug.p.sectionId,
                     "vellum:role": "Transfer"
                 };
-            },
-            getBindList: function (mug) {
-                mug.form.controlTree.walk(function (mug, nodeID, processChildren) {
-                    processChildren();
-                });
-                return [{
-                    nodeset: mug.form.getAbsolutePath(mug) + "/entry/@quantity",
-                    calculate: mug.p.quantity
-                }];
             },
             init: function (mug, form) {
                 mug.p.sectionId = "";
@@ -134,13 +239,14 @@ define([
 
     $.vellum.plugin("commtrack", {}, {
         getAdvancedQuestions: function () {
-            return this.__callOld().concat([
-                "Transfer"
-            ]);
+            return this.__callOld().concat(["Balance", "Transfer"]);
         },
         getMugTypes: function () {
             var types = this.__callOld();
-            types.normal.Transfer = util.extend(mugs.defaultOptions, transferMugOptions);
+            types.normal.Balance = util.extend(
+                mugs.defaultOptions, baseTransactionOptions, balanceMugOptions);
+            types.normal.Transfer = util.extend(
+                mugs.defaultOptions, baseTransactionOptions, transferMugOptions);
             return types;
         },
         parseBindElement: function (form, el, path) {
@@ -149,7 +255,7 @@ define([
                 var basePath = path.replace(/\/entry\/@quantity$/, "");
                 if (path !== basePath) {
                     mug = form.getMugByPath(basePath);
-                    if (isTransfer(mug)) {
+                    if (isTransaction(mug)) {
                         mug.p.quantity = el.attr("calculate");
                         return;
                     }
@@ -159,7 +265,7 @@ define([
         },
         handleMugParseFinish: function (mug) {
             this.__callOld();
-            if (!isTransfer(mug)) {
+            if (!isTransaction(mug)) {
                 return;
             }
             var path = mug.form.getAbsolutePath(mug);
@@ -167,34 +273,24 @@ define([
             var values = _.object(_.map(mug.form.getSetValues(), function (value) {
                     return [value.ref, value];
                 }));
-            _.each(setvalueData, function (data) {
+            _.each(setvalueData[mug.__className], function (data) {
                 mug.p[data.attr] = values[path + "/" + data.path] || {
                     value: ""
                 };
             });
         },
         getSections: function (mug) {
-            if (!isTransfer(mug)) {
-                return this.__callOld();
+            if (sectionData.hasOwnProperty(mug.__className)) {
+                return _.map(sectionData[mug.__className], function (section) {
+                    return _.clone(section);
+                });
             }
-            return [
-                {
-                    slug: "main",
-                    displayName: "Basic",
-                    properties: [
-                        "sectionId",
-                        "quantity",
-                        "entryId",
-                        "src",
-                        "dest"
-                    ],
-                }
-            ];
+            return this.__callOld();
         }
     });
 
-    function isTransfer(mug) {
-        return mug && mug.__className === "Transfer";
+    function isTransaction(mug) {
+        return mug && (mug.__className === "Balance" || mug.__className === "Transfer");
     }
 
     function isInRepeat(mug) {
@@ -209,7 +305,7 @@ define([
             event = isInRepeat(mug) ? "jr-insert" : "xforms-ready";
 
         // update <setvalue> refs
-        _.each(setvalueData, function (data) {
+        _.each(setvalueData[mug.__className], function (data) {
             var value = mug.p[data.attr];
             if (!value.ref) {
                 mug.p[data.attr] = mug.form.addSetValue(
