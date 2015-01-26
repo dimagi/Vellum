@@ -951,10 +951,6 @@ define([
     var FieldList = util.extend(Group, {
         typeName: 'Question List',
         icon: 'icon-reorder',
-        isSpecialGroup: true,
-        isNestableGroup: false,
-        isTypeChangeable: false,
-        canOutputValue: false,
         init: function (mug, form) {
             Group.init(mug, form);
             mug.p.appearance = 'field-list';
@@ -964,9 +960,6 @@ define([
     var Repeat = util.extend(Group, {
         typeName: 'Repeat Group',
         icon: 'icon-retweet',
-        isSpecialGroup: true,
-        isTypeChangeable: false,
-        canOutputValue: false,
         controlNodeChildren: function ($node) {
             return $node.children('repeat').children();
         },
@@ -1022,6 +1015,7 @@ define([
    
     function MugTypesManager(baseSpec, mugTypes, opts) {
         var _this = this,
+            // Nestable Field List not supported in CommCare before v2.16
             group_in_field_list = opts.features.group_in_field_list;
 
         this.auxiliaryTypes = mugTypes.auxiliary;
@@ -1040,12 +1034,16 @@ define([
 
         var allTypeNames = _.keys(this.allTypes),
             innerChildTypeNames = _.without.apply(_, 
-                  [allTypeNames].concat(
-                      _.keys(this.auxiliaryTypes))),
-            fieldListChildTypes = _.without(innerChildTypeNames, 'FieldList');
+                  [allTypeNames].concat(_.keys(this.auxiliaryTypes)));
+
         if (!group_in_field_list) {
-            fieldListChildTypes = _.without(fieldListChildTypes, "Group",
-                                            "Repeat");
+            this.normalTypes.FieldList.validChildTypes = _.without.apply(_,
+                [innerChildTypeNames].concat(_.without(_.map(this.allTypes,
+                    function (type, name) {
+                        return type.isNestableGroup ? name : null;
+                    }
+                ), null))
+            );
         }
 
         _.each(this.auxiliaryTypes, function (type) {
@@ -1053,18 +1051,16 @@ define([
         });
 
         _.each(this.normalTypes, function (Mug, name) {
+            if (Mug.validChildTypes) {
+                return; // do nothing if validChildTypes is already set
+            }
             var validChildTypes;
             if (Mug.isNestableGroup) {
                 validChildTypes = innerChildTypeNames;
-            } else if (name === "FieldList") {
-                validChildTypes = fieldListChildTypes;
             } else {
                 validChildTypes = [];
             }
-
-            if (!Mug.validChildTypes) {
-                Mug.validChildTypes = validChildTypes;
-            }
+            Mug.validChildTypes = validChildTypes;
         });
 
         _.each(this.allTypes, function (Mug, name) {
