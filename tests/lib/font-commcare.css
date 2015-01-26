@@ -1,0 +1,90 @@
+/* FONT PATH
+ * -------------------------- */
+@font-face {
+  font-family: 'CommCareHQFontRegular';
+  src: url('commcarehqfont-regular.eot?v=1.0');
+  src: url('commcarehqfont-regular.eot?#iefix&v=1.0') format('embedded-opentype'), url('commcarehqfont-regular.woff?v=1.0') format('woff'), url('commcarehqfont-regular.ttf?v=1.0') format('truetype'), url('commcarehqfont-regular.svg?v=1.0#CommCareHQFontRegular') format('svg');
+  font-weight: normal;
+  font-style: normal;
+}
+.fcc {
+  display: inline-block;
+  font-family: 'CommCareHQFontRegular';
+  font-style: normal;
+  font-weight: normal;
+  line-height: 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+.fcc-flower:before {
+  content: "\f000";
+}
+.fcc-applications:before {
+  content: "\f00e";
+}
+.fcc-commtrack:before {
+  content: "\f00f";
+}
+.fcc-reports:before {
+  content: "\f012";
+}
+.fcc-data:before {
+  content: "\f013";
+}
+.fcc-users:before {
+  content: "\f014";
+}
+.fcc-settings:before {
+  content: "\f015";
+}
+.fcc-help:before {
+  content: "\f016";
+}
+.fcc-exchange:before {
+  content: "\f017";
+}
+.fcc-messaging:before {
+  content: "\f018";
+}
+.fcc-fd-text:before {
+  content: "\f001";
+}
+.fcc-fd-numeric:before {
+  content: "\f002";
+}
+.fcc-fd-data:before {
+  content: "\f003";
+}
+.fcc-fd-variable:before {
+  content: "\f005";
+}
+.fcc-fd-single-select:before {
+  content: "\f006";
+}
+.fcc-fd-multi-select:before {
+  content: "\f007";
+}
+.fcc-fd-decimal:before {
+  content: "\f008";
+}
+.fcc-fd-long:before {
+  content: "\f009";
+}
+.fcc-fd-datetime:before {
+  content: "\f00a";
+}
+.fcc-fd-audio-capture:before {
+  content: "\f00b";
+}
+.fcc-fd-android-intent:before {
+  content: "\f00c";
+}
+.fcc-fd-signature:before {
+  content: "\f00d";
+}
+.fcc-fd-multi-box:before {
+  content: "\f010";
+}
+.fcc-fd-single-circle:before {
+  content: "\f011";
+}
