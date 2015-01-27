@@ -53,10 +53,10 @@ define([
                     slug: "main",
                     displayName: "Basic",
                     properties: [
-                        "sectionId",
-                        "quantity",
                         "entityId",
-                        "entryId"
+                        "sectionId",
+                        "entryId",
+                        "quantity"
                     ],
                 }
             ],
@@ -65,11 +65,11 @@ define([
                     slug: "main",
                     displayName: "Basic",
                     properties: [
-                        "sectionId",
-                        "quantity",
-                        "entryId",
                         "src",
-                        "dest"
+                        "dest",
+                        "sectionId",
+                        "entryId",
+                        "quantity"
                     ],
                 }
             ]
@@ -111,46 +111,46 @@ define([
                 var attrs = mug.p.rawDataAttributes || {};
                 return {
                     xmlns: "http://commcarehq.org/ledger/v1",
-                    date: attrs.date || "",
                     "entity-id": attrs.src || "",
                     "section-id": mug.p.sectionId,
+                    date: attrs.date || "",
                     "vellum:role": "Balance"
                 };
             },
             init: function (mug, form) {
-                mug.p.sectionId = "";
-                mug.p.quantity = "";
                 mug.p.entityId = {value: ""};
+                mug.p.sectionId = "";
                 mug.p.entryId = {value: ""};
+                mug.p.quantity = "";
                 mug.p.date = {value: "today()"};
             },
             spec: {
                 xmlnsAttr: { presence: "optional" },
+                entityId: {
+                    lstring: 'Case',
+                    visibility: 'visible_if_present',
+                    presence: 'optional',
+                    widget: setValueWidget,
+                    xpathType: "generic"
+                },
                 sectionId: {
-                    lstring: 'Section ID',
+                    lstring: 'Balance ID',
                     visibility: 'visible_if_present',
                     presence: 'optional',
                     widget: widgets.text
+                },
+                entryId: {
+                    lstring: 'Product',
+                    visibility: 'visible_if_present',
+                    presence: 'optional',
+                    widget: setValueWidget,
+                    xpathType: "generic"
                 },
                 quantity: {
                     lstring: 'Quantity',
                     visibility: 'visible_if_present',
                     presence: 'optional',
                     widget: widgets.xPath,
-                    xpathType: "generic"
-                },
-                entityId: {
-                    lstring: 'Entity ID',
-                    visibility: 'visible_if_present',
-                    presence: 'optional',
-                    widget: setValueWidget,
-                    xpathType: "generic"
-                },
-                entryId: {
-                    lstring: 'Entry ID',
-                    visibility: 'visible_if_present',
-                    presence: 'optional',
-                    widget: setValueWidget,
                     xpathType: "generic"
                 },
                 date: {
@@ -181,47 +181,47 @@ define([
                 };
             },
             init: function (mug, form) {
-                mug.p.sectionId = "";
-                mug.p.quantity = "";
-                mug.p.entryId = {value: ""};
                 mug.p.src = {value: ""};
                 mug.p.dest = {value: ""};
+                mug.p.sectionId = "";
+                mug.p.entryId = {value: ""};
+                mug.p.quantity = "";
                 mug.p.date = {value: "today()"};
             },
             spec: {
                 xmlnsAttr: { presence: "optional" },
-                sectionId: {
-                    lstring: 'Section ID',
-                    visibility: 'visible_if_present',
-                    presence: 'optional',
-                    widget: widgets.text
-                },
-                quantity: {
-                    lstring: 'Quantity',
-                    visibility: 'visible_if_present',
-                    presence: 'optional',
-                    widget: widgets.xPath,
-                    xpathType: "generic"
-                },
-                entryId: {
-                    lstring: 'Entry ID',
-                    visibility: 'visible_if_present',
-                    presence: 'optional',
-                    widget: setValueWidget,
-                    xpathType: "generic"
-                },
                 src: {
-                    lstring: 'Source',
+                    lstring: 'Source Case',
                     visibility: 'visible_if_present',
                     presence: 'optional',
                     widget: setValueWidget,
                     xpathType: "generic"
                 },
                 dest: {
-                    lstring: 'Destination',
+                    lstring: 'Destination Case',
                     visibility: 'visible_if_present',
                     presence: 'optional',
                     widget: setValueWidget,
+                    xpathType: "generic"
+                },
+                sectionId: {
+                    lstring: 'Balance ID',
+                    visibility: 'visible_if_present',
+                    presence: 'optional',
+                    widget: widgets.text
+                },
+                entryId: {
+                    lstring: 'Product',
+                    visibility: 'visible_if_present',
+                    presence: 'optional',
+                    widget: setValueWidget,
+                    xpathType: "generic"
+                },
+                quantity: {
+                    lstring: 'Quantity',
+                    visibility: 'visible_if_present',
+                    presence: 'optional',
+                    widget: widgets.xPath,
                     xpathType: "generic"
                 },
                 date: {
