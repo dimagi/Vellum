@@ -555,9 +555,6 @@ define([
         getNodeID: function () {
             return this.p.nodeID || this.p.defaultValue;
         },
-        getAbsolutePath: function () {
-            return this.form.getAbsolutePath(this);
-        },
         getDisplayName: function (lang) {
             var itextItem = this.p.labelItextID, 
                 Itext = this.form.vellum.data.javaRosa.Itext,
@@ -641,6 +638,12 @@ define([
             this.fire({type: "teardown-mug-properties", mug: this});
         }
     };
+
+    Object.defineProperty(Mug.prototype, "absolutePath", {
+        get: function () {
+            return this.form.getAbsolutePath(this);
+        }
+    });
 
     var DataBindOnly = util.extend(defaultOptions, {
         isDataOnly: true,

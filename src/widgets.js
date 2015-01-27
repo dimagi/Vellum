@@ -27,7 +27,7 @@ define([
                 return false;
             }
 
-            return mug.form.vellum.isPropertyLocked(mug.getAbsolutePath(), 
+            return mug.form.vellum.isPropertyLocked(mug.absolutePath,
                                                     widget.path);
         };
 

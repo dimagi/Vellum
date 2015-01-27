@@ -586,7 +586,7 @@ define([
         if (path && path[0] !== "/") {
             // make path absolute
             if (parentMug) {
-                var parentPath = parentMug.getAbsolutePath();
+                var parentPath = parentMug.absolutePath;
                 if (parentPath) {
                     path = parentPath + "/" + path;
                 }

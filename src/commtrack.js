@@ -98,7 +98,7 @@ define([
                     processChildren();
                 });
                 return [{
-                    nodeset: mug.form.getAbsolutePath(mug) + "/entry/@quantity",
+                    nodeset: mug.absolutePath + "/entry/@quantity",
                     calculate: mug.p.quantity
                 }];
             }
@@ -268,7 +268,7 @@ define([
             if (!isTransaction(mug)) {
                 return;
             }
-            var path = mug.form.getAbsolutePath(mug);
+            var path = mug.absolutePath;
             mug.p.setvalues = {};
             var values = _.object(_.map(mug.form.getSetValues(), function (value) {
                     return [value.ref, value];
@@ -301,7 +301,7 @@ define([
     }
 
     function prepareForWrite(mug) {
-        var path = mug.form.getAbsolutePath(mug),
+        var path = mug.absolutePath,
             event = isInRepeat(mug) ? "jr-insert" : "xforms-ready";
 
         // update <setvalue> refs
