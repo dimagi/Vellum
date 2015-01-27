@@ -930,10 +930,7 @@ define([
         init: function (mug, form) {
             Group.init(mug, form);
             mug.p.appearance = 'field-list';
-        },
-        spec: {
-            requiredAttr: { presence: "notallowed" },
-        },
+        }
     });
 
     var Repeat = util.extend(Group, {
@@ -991,8 +988,7 @@ define([
             rawRepeatAttributes: {
                 presence: 'optional',
                 lstring: "Extra Repeat Attributes"
-            },
-            requiredAttr: { presence: "notallowed" },
+            }
         }
     });
    
