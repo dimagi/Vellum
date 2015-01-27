@@ -135,41 +135,34 @@ define([
                 xmlnsAttr: { presence: "optional" },
                 entityId: {
                     lstring: 'Case',
-                    visibility: 'visible_if_present',
+                    visibility: 'visible',
                     presence: 'optional',
                     widget: setValueWidget,
                     xpathType: "generic"
                 },
                 sectionId: {
                     lstring: 'Balance ID',
-                    visibility: 'visible_if_present',
+                    visibility: 'visible',
                     presence: 'optional',
                     widget: widgets.text
                 },
                 entryId: {
                     lstring: 'Product',
-                    visibility: 'visible_if_present',
+                    visibility: 'visible',
                     presence: 'optional',
                     widget: setValueWidget,
                     xpathType: "generic"
                 },
                 quantity: {
                     lstring: 'Quantity',
-                    visibility: 'visible_if_present',
+                    visibility: 'visible',
                     presence: 'optional',
                     widget: widgets.xPath,
                     xpathType: "generic"
                 },
-                date: {
-                    lstring: 'Date',
-                    visibility: 'visible_if_present',
-                    presence: 'optional',
-                    widget: setValueWidget,
-                    xpathType: "generic"
-                },
                 requiredAttr: { presence: "notallowed" },
                 constraintAttr: { presence : "notallowed" },
-                calculateAttr: { visibility: "notallowed" }
+                calculateAttr: { presence: "notallowed" }
             }
         },
         transferMugOptions = {
@@ -201,48 +194,41 @@ define([
                 xmlnsAttr: { presence: "optional" },
                 src: {
                     lstring: 'Source Case',
-                    visibility: 'visible_if_present',
+                    visibility: 'visible',
                     presence: 'optional',
                     widget: setValueWidget,
                     xpathType: "generic"
                 },
                 dest: {
                     lstring: 'Destination Case',
-                    visibility: 'visible_if_present',
+                    visibility: 'visible',
                     presence: 'optional',
                     widget: setValueWidget,
                     xpathType: "generic"
                 },
                 sectionId: {
                     lstring: 'Balance ID',
-                    visibility: 'visible_if_present',
+                    visibility: 'visible',
                     presence: 'optional',
                     widget: widgets.text
                 },
                 entryId: {
                     lstring: 'Product',
-                    visibility: 'visible_if_present',
+                    visibility: 'visible',
                     presence: 'optional',
                     widget: setValueWidget,
                     xpathType: "generic"
                 },
                 quantity: {
                     lstring: 'Quantity',
-                    visibility: 'visible_if_present',
+                    visibility: 'visible',
                     presence: 'optional',
                     widget: widgets.xPath,
                     xpathType: "generic"
                 },
-                date: {
-                    lstring: 'Date',
-                    visibility: 'visible_if_present',
-                    presence: 'optional',
-                    widget: setValueWidget,
-                    xpathType: "generic"
-                },
                 requiredAttr: { presence: "notallowed" },
                 constraintAttr: { presence : "notallowed" },
-                calculateAttr: { visibility: "notallowed" }
+                calculateAttr: { presence: "notallowed" }
             }
         };
 
