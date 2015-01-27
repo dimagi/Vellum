@@ -930,7 +930,7 @@ define([
         init: function (mug, form) {
             Group.init(mug, form);
             mug.p.appearance = 'field-list';
-        }
+        },
     });
 
     var Repeat = util.extend(Group, {
