@@ -94,9 +94,6 @@ define([
                 })];
             },
             getBindList: function (mug) {
-                mug.form.controlTree.walk(function (mug, nodeID, processChildren) {
-                    processChildren();
-                });
                 return [{
                     nodeset: mug.absolutePath + "/entry/@quantity",
                     calculate: mug.p.quantity
