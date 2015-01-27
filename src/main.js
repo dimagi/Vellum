@@ -183,6 +183,7 @@ define([
     'vellum/itemset',
     'vellum/javaRosa',
     'vellum/lock',
+    'vellum/commtrack',
     'vellum/modeliteration',
     'vellum/uploader',
     'vellum/window',
