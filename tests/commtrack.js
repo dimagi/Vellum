@@ -26,7 +26,7 @@ define([
 
         it("should load a transfer block", function () {
             util.loadXML(TRANSFER_BLOCK_XML);
-            var trans = util.getMug("transfer");
+            var trans = util.getMug("transfer[@type='trans-1']");
             assert.equal(trans.p.sectionId, "stock");
             assert.equal(trans.p.quantity, "/data/amount_received");
             assert.equal(trans.p.entryId.value, "instance('commcaresession')/session/data/product_id");
@@ -38,7 +38,7 @@ define([
         it("should create a transfer block", function () {
             util.loadXML("");
             util.addQuestion("Int", "amount_received");
-            var trans = util.addQuestion("Transfer", "transfer");
+            var trans = util.addQuestion("Transfer", "trans-1");
             trans.p.sectionId = "stock";
             trans.p.quantity = "/data/amount_received";
             trans.p.entryId.value = "instance('commcaresession')/session/data/product_id";
@@ -58,7 +58,7 @@ define([
 
         it("should load a balance block", function () {
             util.loadXML(BALANCE_BLOCK_XML);
-            var bal = util.getMug("balance");
+            var bal = util.getMug("balance[@type='bal-0']");
             assert.equal(bal.p.sectionId, "stock");
             assert.equal(bal.p.quantity, "/data/stock_amount");
             assert.equal(bal.p.entityId.value, "instance('commcaresession')/session/data/case_id");
@@ -68,7 +68,7 @@ define([
         it("should create a balance block", function () {
             util.loadXML("");
             util.addQuestion("Int", "stock_amount");
-            var trans = util.addQuestion("Balance", "balance");
+            var trans = util.addQuestion("Balance", "bal-0");
             trans.p.sectionId = "stock";
             trans.p.quantity = "/data/stock_amount";
             trans.p.entityId.value = "instance('commcaresession')/session/data/case_id";

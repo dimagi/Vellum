@@ -18,7 +18,8 @@ define([
     util,
     widgets
 ) {
-    var setvalueData = {
+    var nextId = 0,
+        setvalueData = {
             Balance: [
                 {
                     attr: "entryId",
@@ -53,6 +54,7 @@ define([
                     slug: "main",
                     displayName: "Basic",
                     properties: [
+                        "nodeID",
                         "entityId",
                         "sectionId",
                         "entryId",
@@ -65,6 +67,7 @@ define([
                     slug: "main",
                     displayName: "Basic",
                     properties: [
+                        "nodeID",
                         "src",
                         "dest",
                         "sectionId",
@@ -78,9 +81,14 @@ define([
             isDataOnly: true,
             supportsDataNodeRole: true,
             parseDataNode: function (mug, $node) {
+                mug.p.nodeID = mug.p.rawDataAttributes.type || "tx-" + nextId++;
+                delete mug.p.rawDataAttributes.type;
                 mug.p.sectionId = mug.p.rawDataAttributes["section-id"];
                 delete mug.p.rawDataAttributes["section-id"];
                 return $([]);
+            },
+            getPathName: function (mug, name) {
+                return mug.options.getTagName() + "[@type='" + name + "']";
             },
             dataChildFilter: function (children, mug) {
                 return [new Tree.Node(children, {
@@ -102,12 +110,14 @@ define([
         },
         balanceMugOptions = {
             typeName: 'Balance',
+            getTagName: function () { return "balance"; },
             getExtraDataAttributes: function (mug) {
                 // HACK must happen before <setvalue> and "other" <instance> elements are written
                 prepareForWrite(mug);
                 var attrs = mug.p.rawDataAttributes || {};
                 return {
                     xmlns: "http://commcarehq.org/ledger/v1",
+                    type: mug.p.nodeID,
                     "entity-id": attrs.src || "",
                     "section-id": mug.p.sectionId,
                     date: attrs.date || "",
@@ -164,12 +174,14 @@ define([
         },
         transferMugOptions = {
             typeName: 'Transfer',
+            getTagName: function () { return "transfer"; },
             getExtraDataAttributes: function (mug) {
                 // HACK must happen before <setvalue> and "other" <instance> elements are written
                 prepareForWrite(mug);
                 var attrs = mug.p.rawDataAttributes || {};
                 return {
                     xmlns: "http://commcarehq.org/ledger/v1",
+                    type: mug.p.nodeID,
                     src: attrs.src || "",
                     dest: attrs.dest || "",
                     date: attrs.date || "",

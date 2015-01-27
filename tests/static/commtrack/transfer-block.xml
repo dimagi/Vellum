@@ -6,7 +6,7 @@
 			<instance>
 				<data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/DC38FCC5-930C-4385-AE6C-5B15ED1F95B1" uiVersion="1" version="1" name="Untitled Form">
 					<amount_received />
-					<transfer xmlns="http://commcarehq.org/ledger/v1" src="" dest="" date="" section-id="stock" vellum:role="Transfer">
+					<transfer xmlns="http://commcarehq.org/ledger/v1" src="" dest="" date="" section-id="stock" type="trans-1" vellum:role="Transfer">
 						<entry id="" quantity="" />
 					</transfer>
 				</data>
@@ -14,11 +14,11 @@
 			<instance id="products" src="jr://fixture/commtrack:products" />
 			<instance id="ledger" src="jr://instance/ledgerdb" />
 			<bind nodeset="/data/amount_received" type="xsd:int" />
-			<bind nodeset="/data/transfer/entry/@quantity" calculate="/data/amount_received" />
-			<setvalue event="xforms-ready" ref="/data/transfer/entry/@id" value="instance('commcaresession')/session/data/product_id" />
-			<setvalue event="xforms-ready" ref="/data/transfer/@src" value="instance('commcaresession')/session/data/case_id" />
-			<setvalue event="xforms-ready" ref="/data/transfer/@dest" value="instance('casedb')/casedb/case[@case_id=instance('commcaresession')/session/data/case_id]/index/parent" />
-			<setvalue event="xforms-ready" ref="/data/transfer/@date" value="today()" />
+			<bind nodeset="/data/transfer[@type='trans-1']/entry/@quantity" calculate="/data/amount_received" />
+			<setvalue event="xforms-ready" ref="/data/transfer[@type='trans-1']/entry/@id" value="instance('commcaresession')/session/data/product_id" />
+			<setvalue event="xforms-ready" ref="/data/transfer[@type='trans-1']/@src" value="instance('commcaresession')/session/data/case_id" />
+			<setvalue event="xforms-ready" ref="/data/transfer[@type='trans-1']/@dest" value="instance('casedb')/casedb/case[@case_id=instance('commcaresession')/session/data/case_id]/index/parent" />
+			<setvalue event="xforms-ready" ref="/data/transfer[@type='trans-1']/@date" value="today()" />
 			<itext>
 				<translation lang="en" default="">
 					<text id="amount_received-label">
