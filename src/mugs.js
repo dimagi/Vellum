@@ -361,6 +361,15 @@ define([
         },
         controlNodeChildren: null,
 
+        /**
+         * Get data node path name
+         *
+         * @param mug - The mug.
+         * @param name - The default path name.
+         * @returns - the name used in data node paths. It should
+         *      uniquely identify the data node among its siblings.
+         */
+        getPathName: null,
         // XForm writer integration:
         //  `childFilter(treeNodes, parentMug) -> treeNodes`
         // The writer passes these filter functions to `processChildren` of
