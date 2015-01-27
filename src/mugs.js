@@ -913,7 +913,8 @@ define([
             calculateAttr: { presence: "notallowed" },
             constraintAttr: { presence: "notallowed" },
             constraintMsgAttr: { presence: "notallowed" },
-            dataValue: { presence: "notallowed" }
+            dataValue: { presence: "notallowed" },
+            requiredAttr: { presence: "notallowed" },
         }
     });
     
@@ -929,6 +930,9 @@ define([
         init: function (mug, form) {
             Group.init(mug, form);
             mug.p.appearance = 'field-list';
+        },
+        spec: {
+            requiredAttr: { presence: "notallowed" },
         },
     });
 
@@ -987,7 +991,8 @@ define([
             rawRepeatAttributes: {
                 presence: 'optional',
                 lstring: "Extra Repeat Attributes"
-            }
+            },
+            requiredAttr: { presence: "notallowed" },
         }
     });
    
