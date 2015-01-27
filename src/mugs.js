@@ -370,6 +370,15 @@ define([
          *      uniquely identify the data node among its siblings.
          */
         getPathName: null,
+        /**
+         * Get data node tag name
+         *
+         * @param mug - The mug.
+         * @param name - The default tag name.
+         * @returns - the tag name used by the writer.
+         */
+        getTagName: null,
+
         // XForm writer integration:
         //  `childFilter(treeNodes, parentMug) -> treeNodes`
         // The writer passes these filter functions to `processChildren` of
