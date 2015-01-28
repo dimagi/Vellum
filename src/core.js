@@ -1268,7 +1268,7 @@ define([
             // existing duplicate warning state.
             if (e.property === 'nodeID') {
                 _this.setUnsavedDuplicateNodeId(false);
-            } else if (e.property === 'defaultValue') {
+            } else if (e.property === 'defaultValue' && e.mug.__className === 'Item') {
                 _this.setUnsavedDuplicateChoiceValue(false);
             }
 

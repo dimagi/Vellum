@@ -355,7 +355,7 @@ define([
         },
         getMugChildrenByChoiceValue: function (mug, value) {
             return _.filter(this.getChildren(mug), function (m) {
-                if (m.p.defaultValue) {
+                if (m.p.defaultValue && m.__className === 'Item') {
                     return m.p.defaultValue === value;
                 }
                 return false;
