@@ -841,6 +841,7 @@ define([
             _this.activateQuestionTypeGroup(mug);
         }).bind("open_node.jstree", function (e, data) {
             _this.activateQuestionTypeGroup(_this.data.core.form.getMugByUFID(data.node.id));
+            _this.refreshVisibleData();
         }).bind("close_node.jstree", function (e, data) {
             var selected = _this.jstree('get_selected'),
                 sel = selected.length && _this.jstree('get_node', selected[0]);
