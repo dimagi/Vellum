@@ -1027,6 +1027,11 @@ define([
         this.data.core.duplicateIsForMove = forMove;
     };
 
+    fn.setUnsavedDuplicateChoiceValue = function (value, forMove) {
+        this.data.core.unsavedDuplicateChoiceValue = value;
+        this.data.core.duplicateIsForMove = forMove;
+    };
+
     // Attempt to guard against doing actions when there are unsaved or invalid
     // pending changes. In the case of an invalid duplicate sibling ID, it tries
     // to call 'callback' after the user automatically fixes the invalid state,
@@ -1040,24 +1045,12 @@ define([
         var _this = this,
             mug = this.getCurrentlySelectedMug(),
             duplicate = this.data.core.unsavedDuplicateNodeId,
-            duplicateIsForMove = this.data.core.duplicateIsForMove;
+            duplicateChoice = this.data.core.unsavedDuplicateChoiceValue,
+            duplicateIsForMove = this.data.core.duplicateIsForMove,
+            verb = duplicateIsForMove ? 'would have' : 'has';
 
-        if (this.data.core.hasXPathEditorChanged) {
-            this.alert(
-                "Unsaved Changes in Editor",
-                "You have UNSAVED changes in the Expression Editor. Please save "+
-                "changes before continuing.");
-            return false;
-        } else if (duplicate) {
-            var verb = duplicateIsForMove ? 'would have' : 'has',
-                newQuestionId = this.data.core.form.generate_question_id(duplicate);
-
-            this.alert(
-                "Duplicate Question ID",
-                "'" + duplicate + "' " + verb + " the same Question ID as " +
-                "another question in the same group. Please change '" + 
-                duplicate + "' to a unique Question ID before continuing.",
-                [
+        function alertDuplicateButtons(resetMethod, inputID, autoValue) {
+            return [
                     {
                         title: "Fix Manually",
                         action: function () {
@@ -1066,28 +1059,58 @@ define([
                             // when attempting a move, reset the state.  It will
                             // be changed again if the same move is attempted.
                             if (duplicateIsForMove) {
-                                _this.setUnsavedDuplicateNodeId(false);
+                                resetMethod(false);
                             }
                             _this.data.core.$modal.modal('hide');
-                            var input = _this.getCurrentMugInput("nodeID");
+                            var input = _this.getCurrentMugInput(inputID);
                             if (input) {
                                 input.select().focus();
                             }
                         }
                     },
                     {
-                        title: "Automatically rename to '" + newQuestionId + "'",
+                        title: "Automatically rename to '" + autoValue + "'",
                         cssClasses: 'btn-primary',
                         action: function () {
-                            mug.p.nodeID = newQuestionId;
-                            _this.setUnsavedDuplicateNodeId(false);
+                            mug.p[inputID] = autoValue;
+                            resetMethod(false);
                             _this.data.core.$modal.modal('hide');
                             _this.refreshVisibleData();
                             callback();
                         } 
                     }
-                
-                ]);
+                ];
+        }
+
+        if (this.data.core.hasXPathEditorChanged) {
+            this.alert(
+                "Unsaved Changes in Editor",
+                "You have UNSAVED changes in the Expression Editor. Please save "+
+                "changes before continuing.");
+            return false;
+        } else if (duplicate) {
+            var newQuestionId = this.data.core.form.generate_question_id(duplicate);
+
+            this.alert(
+                "Duplicate Question ID",
+                "'" + duplicate + "' " + verb + " the same Question ID as " +
+                "another question in the same group. Please change '" + 
+                duplicate + "' to a unique Question ID before continuing.",
+                alertDuplicateButtons(_this.setUnsavedDuplicateNodeId.bind(_this), "nodeID", newQuestionId)
+            );
+            return false;
+        } else if (duplicateChoice) {
+            // weird that this uses generate_question_id, but it just uses
+            // it to dedupe it in form of copy-of-label
+            var newChoiceValue = this.data.core.form.generate_question_id(duplicateChoice);
+
+            this.alert(
+                "Duplicate Choice Value",
+                "'" + duplicateChoice + "' " + verb + " the same Choice Value as " +
+                "another choice in the same group. Please change '" +
+                duplicateChoice + "' to a unique Choice Value before continuing.",
+                alertDuplicateButtons(_this.setUnsavedDuplicateChoiceValue.bind(_this), "defaultValue", newChoiceValue)
+            );
             return false;
         } else {
             callback();
@@ -1253,6 +1276,8 @@ define([
             // existing duplicate warning state.
             if (e.property === 'nodeID') {
                 _this.setUnsavedDuplicateNodeId(false);
+            } else if (e.property === 'defaultValue' && e.mug.__className === 'Item') {
+                _this.setUnsavedDuplicateChoiceValue(false);
             }
 
             _this.refreshMugName(e.mug);
