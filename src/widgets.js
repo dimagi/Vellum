@@ -142,11 +142,7 @@ define([
 
             // If this input has focus and value hasn't changed much,
             // keep the cursor in the same position
-            if (
-                input.is(":focus")
-                && start === end
-                && oldvalue.length === value.length
-            ) {
+            if (input.is(":focus") && start === end && oldvalue.length === value.length) {
                 input[0].setSelectionRange(start, start);
             }
         };
