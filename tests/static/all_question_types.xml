@@ -53,7 +53,7 @@
 			<bind nodeset="/data/question18" type="xsd:time" />
 			<bind nodeset="/data/question19" type="xsd:dateTime" />
 			<bind nodeset="/data/question21" />
-			<bind nodeset="/data/question21/question31" required="true()" />
+			<bind nodeset="/data/question21/question31" />
 			<bind nodeset="/data/question22" />
 			<bind nodeset="/data/question22/question23" />
 			<bind nodeset="/data/question22/question23/question40" />

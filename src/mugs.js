@@ -913,7 +913,8 @@ define([
             calculateAttr: { presence: "notallowed" },
             constraintAttr: { presence: "notallowed" },
             constraintMsgAttr: { presence: "notallowed" },
-            dataValue: { presence: "notallowed" }
+            dataValue: { presence: "notallowed" },
+            requiredAttr: { presence: "notallowed" },
         }
     });
     
