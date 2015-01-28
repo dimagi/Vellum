@@ -135,7 +135,18 @@ define([
                 value = value.replace(
                     new RegExp(String.fromCharCode(10), 'g'), '&#10;');
             }
+            var start = input[0].selectionStart;
+            var end = input[0].selectionEnd;
+            var oldvalue = input.val();
             input.val(value);
+            if (
+                input.is(":focus")
+                && start === end
+                && oldvalue.length === value.length
+            ) {
+                input[0].setSelectionRange(start, start);
+console.log("setting selection range: " + start);
+            }
         };
 
         widget.getValue = function() {
