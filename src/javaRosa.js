@@ -1471,14 +1471,7 @@ define([
                         var labelItextID = mug.p.labelItextID;
                         if (labelItextID) {
                             var itextID = labelItextID.id,
-                                text = itext.getItem(itextID).getValue("default", lang);
-                            text = text || _this.getMugDisplayName(mug);
-
-                            var defaultLanguage = _this.data.javaRosa.Itext.getDefaultLanguage();
-                            if (lang !== defaultLanguage && mug.getDisplayName(lang) === mug.getDisplayName(defaultLanguage)) {
-                                text += " [" + defaultLanguage + "]";
-                            }
-
+                                text = _this.getMugDisplayName(mug);
                             _this.jstree('rename_node', $el, text ||
                                     _this.opts().core.noTextString);
                         }
