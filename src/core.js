@@ -1265,10 +1265,11 @@ define([
     };
 
     fn.refreshMugName = function (mug, displayLang) {
-        var name = mug.getDisplayName(this.data.core.currentItextDisplayLanguage);
+        displayLang = displayLang || this.data.core.currentItextDisplayLanguage;
+        var name = mug.getDisplayName(displayLang);
         if (name !== this.jstree("get_text", mug.ufid)) {
             var defaultLanguage = this.data.javaRosa.Itext.getDefaultLanguage();
-            if (this.data.core.currentItextDisplayLanguage !== defaultLanguage && mug.getDisplayName(this.data.core.currentItextDisplayLanguage) === mug.getDisplayName(defaultLanguage)) {
+            if (displayLang !== defaultLanguage && mug.getDisplayName(displayLang) === mug.getDisplayName(defaultLanguage)) {
                 name += " [" + defaultLanguage + "]";
             }
             this.jstree('rename_node', mug.ufid, name);
