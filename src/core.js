@@ -1329,7 +1329,7 @@ define([
             mug = _this.data.core.form.createQuestion(foo[0], foo[1], qType);
             var $firstInput = _this.$f.find(".fd-question-properties input:text:visible:first");
             if ($firstInput.length) {
-                util.setCaretPosition($firstInput[0], 0, $firstInput.val().length);
+                $firstInput.focus().select();
             }
         });
         // the returned value will be `undefined` if ensureCurrentMugIsSaved
