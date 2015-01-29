@@ -399,6 +399,14 @@ define([
                 return m.p.nodeID === nodeID;
             });
         },
+        getMugChildrenByChoiceValue: function (mug, value) {
+            return _.filter(this.getChildren(mug), function (m) {
+                if (m.p.defaultValue && m.__className === 'Item') {
+                    return m.p.defaultValue === value;
+                }
+                return false;
+            });
+        },
         insertMug: function (refMug, newMug, position) {
             if (!newMug.options.isControlOnly) {
                 this.dataTree.insertMug(newMug, position, refMug);
@@ -669,6 +677,13 @@ define([
             {
                 // Short-circuit invalid change and trigger warning in UI
                 this.vellum.setUnsavedDuplicateNodeId(value);
+                return null;
+            }
+            else if (property === 'defaultValue' && previous && mug.__className ==="Item" &&
+                this.getMugChildrenByChoiceValue(mug.parentMug, value).length > 0)
+            {
+                // Short-circuit invalid change and trigger warning in UI
+                this.vellum.setUnsavedDuplicateChoiceValue(value);
                 return null;
             }
 
