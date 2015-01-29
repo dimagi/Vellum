@@ -1290,7 +1290,8 @@ define([
     };
 
     fn.refreshMugName = function (mug, displayLang) {
-        var name = mug.getDisplayName(this.data.core.currentItextDisplayLanguage);
+        displayLang = displayLang || this.data.core.currentItextDisplayLanguage;
+        var name = mug.getDisplayName(displayLang);
         if (name !== this.jstree("get_text", mug.ufid)) {
             this.jstree('rename_node', mug.ufid, name);
         }

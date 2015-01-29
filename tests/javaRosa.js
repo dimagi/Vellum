@@ -197,6 +197,20 @@ require([
             assert.equal(hinLabel.attr("placeholder"), "English");
         });
 
+        it("tree should note when default language is being displayed instead of selected language", function() {
+            util.loadXML("");
+            util.addQuestion("Text", "question1");
+            util.clickQuestion("question1");
+            $("[name='itext-en-label']").val('english').change();
+            var treeSelector = ".fd-question-tree .jstree-anchor";
+
+            assert.equal($(treeSelector).text(), "english");
+            $(".fd-question-tree-lang select").val('hin').change();
+            assert.equal($(treeSelector).text(), "english [en]");
+            $("[name='itext-hin-label']").val('hindi').change();
+            assert.equal($(treeSelector).text(), "hindi");
+        });
+
         it("non-labelItext widget should contain value on load", function () {
             util.loadXML(TEXT_WITH_CONSTRAINT_XML);
             util.clickQuestion("text");

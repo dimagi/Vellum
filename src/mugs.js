@@ -533,7 +533,8 @@ define([
             var itextItem = this.p.labelItextID, 
                 Itext = this.form.vellum.data.javaRosa.Itext,
                 defaultLang = Itext.getDefaultLanguage(),
-                disp;
+                disp,
+                defaultDisp;
 
             if (this.__className === "ReadOnly") {
                 return "Unknown (read-only) question type";
@@ -551,13 +552,13 @@ define([
                 return 'No Translation Data';
             }
 
-            disp = itextItem.getValue("default", lang);
+            defaultDisp = itextItem.getValue("default", defaultLang);
+            disp = itextItem.getValue("default", lang) || defaultDisp;
+
             if (disp) {
-                return disp;
-            } else {
-                disp = itextItem.getValue("default", defaultLang);
-            }
-            if (disp) {
+                if (lang !== defaultLang && disp === defaultDisp) {
+                    disp += " [" + defaultLang + "]";
+                }
                 return disp;
             }
 
