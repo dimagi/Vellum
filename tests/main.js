@@ -101,6 +101,7 @@ require(['jquery', 'jquery.vellum'], function ($) {
         'tests/javaRosa',
         'tests/modeliteration',
         'tests/intentManager',
+        'tests/childNoParent',
         'tests/formdesigner.ignoreButRetain',
         'tests/formdesigner.lock',
         'tests/itemset',
