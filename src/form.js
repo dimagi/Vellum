@@ -409,7 +409,13 @@ define([
         },
         insertMug: function (refMug, newMug, position) {
             if (!newMug.options.isControlOnly) {
-                this.dataTree.insertMug(newMug, position, refMug);
+                if (!newMug.p.dataParent ||
+                    (!this.getMugByPath(newMug.p.dataParent) && newMug.p.dataParent + '/' !== this.getBasePath())) {
+                    this.dataTree.insertMug(newMug, position, refMug);
+                } else {
+                    var dataParentMug = this.getMugByPath(newMug.p.dataParent);
+                    this.dataTree.insertMug(newMug, 'into', dataParentMug);
+                }
             }
 
             if (!newMug.options.isDataOnly) {
