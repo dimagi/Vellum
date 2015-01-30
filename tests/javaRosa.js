@@ -197,6 +197,21 @@ require([
             assert.equal(hinLabel.attr("placeholder"), "English");
         });
 
+        it("tree should have option to display IDs", function() {
+            util.init({
+                javaRosa: { langs: ['en'] },
+            });
+            util.loadXML("");
+            util.addQuestion("Text", "question1");
+            util.clickQuestion("question1");
+            $("[name='itext-en-label']").val('english').change();
+
+            var treeSelector = ".fd-question-tree .jstree-anchor";
+            assert.equal($(treeSelector).text(), "english");
+            $(".fd-question-tree-lang select").val('_ids').change();
+            assert.equal($(treeSelector).text(), "question1");
+        });
+
         it("tree should note when default language is being displayed instead of selected language", function() {
             util.loadXML("");
             util.addQuestion("Text", "question1");
