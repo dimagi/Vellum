@@ -606,6 +606,11 @@ define([
             if (mug.options.isControlOnly) {
                 // HACK fix abstraction broken by direct tree insert
                 form.mugMap[mug.ufid] = mug;
+            } else if (form.getAbsolutePath(mug) &&
+                       form.getAbsolutePath(mug) !== form.getControlPath(mug)) {
+                var parentPath = form.getAbsolutePath(mug).split('/');
+                parentPath.pop();
+                mug.p.dataParent = parentPath.join('/');
             }
 
             if (mug.__className === "ReadOnly") {
