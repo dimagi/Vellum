@@ -850,13 +850,7 @@ define([
          * maintains a hash table to quickly get a mug by its path.
          */
         getAbsolutePath: function (mug, excludeRoot) {
-            var absPath;
-            if (mug.p.dataParent) {
-                absPath = mug.p.dataParent + '/' +  mug.p.nodeID;
-            } else {
-                absPath = this.dataTree.getAbsolutePath(mug, excludeRoot);
-            }
-            return absPath;
+            return this.dataTree.getAbsolutePath(mug, excludeRoot);
         },
         getControlPath: function (mug, excludeRoot) {
             return this.controlTree.getAbsolutePath(mug, excludeRoot);
