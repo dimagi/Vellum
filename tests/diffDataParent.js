@@ -3,7 +3,7 @@ require([
     'jquery',
     'underscore',
     'tests/utils',
-    'text!static/childNoParent/parse.xml'
+    'text!static/diffDataParent/parse.xml'
 ], function (
     chai,
     $,
@@ -14,7 +14,7 @@ require([
     var assert = chai.assert,
         call = util.call;
 
-    describe("Non child element", function() {
+    describe("Control elements with different data parents", function() {
         before(function (done) {
             util.init({
                 javaRosa: {langs: ['en', 'hin']},
@@ -22,7 +22,7 @@ require([
             });
         });
 
-        it("should not allow repeat group children to have other parents", function() {
+        it("should not allow repeat group children to have other data parents", function() {
             util.loadXML("");
             var repeat = util.addQuestion("Repeat", 'repeat1'),
                 text1 = util.addQuestion.bind({prevId: repeat.p.nodeID})("Text", 'text1'),
@@ -72,21 +72,21 @@ require([
 
         it("should clear the data parent when moving to a repeat group", function() {
             util.loadXML("");
-            var text1 = util.addQuestion("Text", 'text1'),
-                group1 = util.addQuestion("Group", 'group1'),
-                repeat1= util.addQuestion.bind({prevId: text1.p.nodeID})("Repeat", 'repeat1'),
+            var text1 = util.addQuestion("Text", 'text1');
+            util.addQuestion("Group", 'group1');
+            var repeat1= util.addQuestion.bind({prevId: text1.p.nodeID})("Repeat", 'repeat1'),
                 form = call("getData").core.form;
             text1.p.dataParent = '/data/group1';
             form.moveMug(text1, repeat1, 'into');
             assert(util.isTreeNodeValid(text1), "text1 should be valid");
         });
 
-        it("should parse like not a retard", function() {
+        it("should parse and write XML to have the same order", function() {
             util.loadXML(PARSE_XML);
             util.assertXmlEqual(call("createXML"), PARSE_XML);
         });
 
-        it("should have proper data parent", function() {
+        it("should have proper data parent after being loaded from xml", function() {
             util.loadXML(PARSE_XML);
             var question1 = call("getMugByPath", "/data/question4/question1");
             assert.equal(question1.p.dataParent, "/data/question4");
