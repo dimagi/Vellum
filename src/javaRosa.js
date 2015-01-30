@@ -1976,7 +1976,6 @@ define([
             );
 
             ret = ret.concat([
-                'appearance',
                 'labelItextID',
                 'constraintMsgItextID',
                 'hintItextID',

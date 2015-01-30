@@ -1875,6 +1875,7 @@ define([
             "label",
             "hintLabel",
             "constraintMsgAttr",
+            'appearance'
         ];
     };
 
