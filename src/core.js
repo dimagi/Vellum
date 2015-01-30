@@ -1288,6 +1288,11 @@ define([
                 _this.setUnsavedDuplicateNodeId(false);
             } else if (e.property === 'defaultValue' && e.mug.__className === 'Item') {
                 _this.setUnsavedDuplicateChoiceValue(false);
+            } else if (e.property === 'dataParent') {
+                // TODO Dirty write hack that needs to be replace
+                e.mug.options.isDataOnly = true;
+                _this.data.core.form.insertMug(e.mug.parentMug, e.mug, 'into');
+                e.mug.options.isDataOnly = false;
             }
 
             _this.refreshMugName(e.mug);
