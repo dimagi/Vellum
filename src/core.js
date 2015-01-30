@@ -1953,7 +1953,8 @@ define([
             "xmlnsAttr",
             "label",
             "hintLabel",
-            "constraintMsgAttr"
+            "constraintMsgAttr",
+            "dataParent"
         ];
     };
 
