@@ -1263,11 +1263,11 @@ define([
         // TODO move TSV generation logic into tsv module
         function getItemFormValues(item, languages, form) {
 
-            var ret = [];
+            var ret = [], i, value, language;
 
-            for(var i = 0; i < languages.length; i++) {
-                var language = languages[i];
-                var value = item.hasForm(form) ? (item.getForm(form).getValueOrDefault(language) || "") : "";
+            for(i = 0; i < languages.length; i++) {
+                language = languages[i];
+                value = item.hasForm(form) ? (item.get(language, form) || "") : "";
 
                 if (specialChars.test(value)) {
                     // quote field
@@ -1279,7 +1279,6 @@ define([
         }
 
         function makeRow (languages, item, forms) {
-
             var questions = getItemFormValues(item, languages, forms[0]);
             var audios = getItemFormValues(item, languages, forms[1]);
             var images = getItemFormValues(item, languages, forms[2]);
@@ -1299,7 +1298,7 @@ define([
             return header_row.join("\t");
         }
 
-        var specialChars = /[\r\n\u2028\u2029"]/g;
+        var specialChars = /[\r\n\u2028\u2029"]/;
         var ret = [];
         // TODO: should this be configurable?
         var exportCols = ["default", "audio", "image" , "video"];

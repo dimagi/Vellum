@@ -7,6 +7,7 @@ require([
     'vellum/util',
     'text!static/javaRosa/outputref-group-rename.xml',
     'text!static/javaRosa/text-question.xml',
+    'text!static/javaRosa/multi-lang-trans.xml',
     'text!static/javaRosa/multi-line-trans.xml',
     'text!static/javaRosa/output-refs.xml',
     'text!static/javaRosa/text-with-constraint.xml'
@@ -18,6 +19,7 @@ require([
     vellum_util,
     OUTPUTREF_GROUP_RENAME_XML,
     TEXT_QUESTION_XML,
+    MULTI_LANG_TRANS_XML,
     MULTI_LINE_TRANS_XML,
     OUTPUT_REFS_XML,
     TEXT_WITH_CONSTRAINT_XML
@@ -405,6 +407,16 @@ require([
                          'audio-en\taudio-hin\timage-en\timage-hin\tvideo-en\tvideo-hin\n' +
                          'question1-label\t"First ""line\nSecond"" line\nThird line"\t' +
                          'Hindu trans\t\t\t\t\t\t');
+        });
+
+        it("should escape all languages when generating bulk translations", function () {
+            util.loadXML(MULTI_LANG_TRANS_XML);
+            var jr = util.call("getData").javaRosa,
+                fakeVellum = {beforeSerialize: function () {}};
+            assert.equal(jr.generateItextXLS(fakeVellum, jr.Itext),
+                         'label\tdefault-en\tdefault-hin\taudio-en\taudio-hin\t' +
+                         'image-en\timage-hin\tvideo-en\tvideo-hin\n' +
+                         'text-label\t"""Text"\t"""Text"\t\t\t\t\t\t');
         });
 
         it("bulk translation tool should not create empty itext forms", function () {
