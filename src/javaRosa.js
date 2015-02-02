@@ -1257,63 +1257,49 @@ define([
     };
 
     var generateItextXLS = function (vellum, Itext) {
-        // todo: fix abstraction barrier
-        vellum.beforeSerialize();
-
-        // TODO move TSV generation logic into tsv module
         function getItemFormValues(item, languages, form) {
-
-            var ret = [], i, value, language;
-
+            var ret = [], i, language;
             for(i = 0; i < languages.length; i++) {
                 language = languages[i];
-                value = item.hasForm(form) ? (item.get(language, form) || "") : "";
-
-                if (specialChars.test(value)) {
-                    // quote field
-                    value = '"' + value.replace(/"/g, '""') + '"';
-                }
-                ret.push(value);
+                ret.push(item.hasForm(form) ? item.get(language, form) : "");
             }
-            return ret.join("\t");
+            return ret;
         }
 
-        function makeRow (languages, item, forms) {
-            var questions = getItemFormValues(item, languages, forms[0]);
-            var audios = getItemFormValues(item, languages, forms[1]);
-            var images = getItemFormValues(item, languages, forms[2]);
-            var videos = getItemFormValues(item, languages, forms[3]);
-
-            var row = [item.id, questions, audios, images, videos];
-            return row.join("\t");
+        function makeRow(languages, item, forms) {
+            var row = [item.id],
+                extend = Array.prototype.push.apply.bind(Array.prototype.push);
+            for (var i = 0; i < forms.length; i++) {
+                extend(row, getItemFormValues(item, languages, forms[i]));
+            }
+            return row;
         }
 
         function makeHeadings(languages, exportCols) {
-            var header_row = ["label"];
-            for(i = 0; i < exportCols.length; i++) {
-                for(j=0; j < languages.length; j++) {
+            var header_row = ["label"], i, j;
+            for (i = 0; i < exportCols.length; i++) {
+                for (j = 0; j < languages.length; j++) {
                     header_row.push(exportCols[i] + '-' + languages[j]);
                 }
             }
-            return header_row.join("\t");
+            return header_row;
         }
 
-        var specialChars = /[\r\n\u2028\u2029"]/;
-        var ret = [];
-        // TODO: should this be configurable?
-        var exportCols = ["default", "audio", "image" , "video"];
-        var languages = Itext.getLanguages();
+        // todo: fix abstraction barrier
+        vellum.beforeSerialize();
 
-        var allItems = Itext.getNonEmptyItems();
-        var item, i, j;
+        // TODO: should this be configurable?
+        var exportCols = ["default", "audio", "image" , "video"],
+            languages = Itext.getLanguages(),
+            allItems = Itext.getNonEmptyItems(),
+            rows = [];
         if (languages.length > 0) {
-            ret.push(makeHeadings(languages, exportCols));
-            for(i = 0; i < allItems.length; i++) {
-                item = allItems[i];
-                ret.push(makeRow(languages, item, exportCols));
+            rows.push(makeHeadings(languages, exportCols));
+            for(var i = 0; i < allItems.length; i++) {
+                rows.push(makeRow(languages, allItems[i], exportCols));
             }
         }
-        return ret.join("\n");
+        return tsv.tabDelimit(rows);
     };
 
     function validateItextItem(itextItem, name) {
