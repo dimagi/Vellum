@@ -1924,7 +1924,6 @@ define([
             "nodeID",
             "defaultValue",
             "label",
-            "showOKCheckbox",
             "readOnlyControl"
         ];
     };
@@ -1958,7 +1957,8 @@ define([
             "xmlnsAttr",
             "label",
             "hintLabel",
-            "constraintMsgAttr"
+            "constraintMsgAttr",
+            'appearance'
         ];
     };
 

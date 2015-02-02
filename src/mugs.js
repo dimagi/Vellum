@@ -170,6 +170,7 @@ define([
             // BIND ELEMENT
             dataType: {
                 immutable: true,
+                deleteOnCopy: true,
                 visibility: 'hidden',
                 presence: 'optional',
                 lstring: 'Data Type'
@@ -236,12 +237,13 @@ define([
         control: {
             tagName: {
                 immutable: true,
+                deleteOnCopy: true,
                 visibility: 'hidden',
                 presence: 'required'
             },
             appearance: {
-                immutable: true,
-                visibility: 'hidden',
+                deleteOnCopy: true,
+                visibility: 'optional',
                 presence: 'optional',
                 lstring: 'Appearance Attribute'
             },
@@ -464,7 +466,7 @@ define([
             // Reset any properties that are part of the question type
             // definition.
             _.each(this.spec, function (spec, name) {
-                if (spec.immutable) {
+                if (spec.deleteOnCopy) {
                     delete currentAttrs[name];
                 }
             });
@@ -872,21 +874,11 @@ define([
         icon: 'icon-tag',
         init: function (mug, form) {
             mug.p.tagName = "trigger";
-            mug.p.showOKCheckbox = false;
+            mug.p.appearance = "minimal";
         },
         spec: {
             dataType: { presence: 'notallowed' },
-            dataValue: { presence: 'optional' },
-            showOKCheckbox: {
-                lstring: 'Add confirmation checkbox',
-                help: 'Add a confirmation message and checkbox below the label. Available on Android only.',
-                visibility: 'visible',
-                presence: 'optional',
-                widget: widgets.checkbox
-            }
-        },
-        getAppearanceAttribute: function (mug) {
-            return mug.p.showOKCheckbox ? null : 'minimal';
+            dataValue: { presence: 'optional' }
         }
     });
 
