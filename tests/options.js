@@ -81,6 +81,17 @@ define(function () {
                 "meta/timeEnd"
             ],
             externalInstances: INSTANCES,
+            dataSources: [
+                {
+                    key: "case",
+                    name: "Cases",
+                    endpoint: function () { return [INSTANCES[0]]; }
+                }, {
+                    key: "fixture",
+                    name: "Fixtures",
+                    endpoint: function () { return INSTANCES.slice(1); }
+                }
+            ],
             saveType: "patch",
             saveUrl: function (data) {}
         },
@@ -96,7 +107,7 @@ define(function () {
             },
             objectMap: {}  // todo
         },
-        plugins: ['itemset'],
+        plugins: ['itemset', 'modeliteration'],
         features: {
             'add_help_text': true,
             'group_in_field_list': true

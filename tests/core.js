@@ -52,6 +52,72 @@ require([
             });
         });
 
+        it("should not allow adding choices with matching values", function (done) {
+            util.init({
+                core: {
+                    onReady: function () {
+                        util.addQuestion("Select", "question1");
+                        util.clickQuestion("question1/item2");
+                        var selected = call("getCurrentlySelectedMug");
+                        selected.p.defaultValue = "item1";
+
+                        // TODO fix tight coupling of this functionality with UI
+                        // HACK prevent modal alert in UI
+                        this.data.core.isAlertVisible = true;
+
+                        assert(!this.ensureCurrentMugIsSaved(),
+                               "save should fail with duplicate choice value");
+
+                        this.data.core.isAlertVisible = false;
+                        done();
+                    }
+                }
+            });
+        });
+
+        it("should not allow adding questions with blank node ID", function (done) {
+            util.init({
+                core: {
+                    onReady: function () {
+                        var mug = util.addQuestion("Text", "question1");
+                        var target = $("[name='property-nodeID']");
+                        target.val('').change();
+
+                        this.ensureCurrentMugIsSaved();
+
+                        call("loadXML", call("createXML"));
+
+                        target = util.getMug('question1');
+                        assert.equal(mug.p.nodeID, 'question1');
+                        done();
+                    }
+                }
+            });
+        });
+
+        it("should not allow adding choices with empty values", function (done) {
+            util.init({
+                core: {
+                    onReady: function () {
+                        // https://github.com/dimagi/Vellum/pull/302/files#r23277551
+                        util.addQuestion("Select", "question1");
+                        var mug = util.clickQuestion("question1/item2");
+                        var target = $("[name='property-defaultValue']");
+                        target.val('').change();
+
+                        this.ensureCurrentMugIsSaved();
+
+                        call("loadXML", call("createXML"));
+
+                        util.clickQuestion("question1/item2");
+                        mug = call("getCurrentlySelectedMug");
+                        assert.equal(mug.p.defaultValue, 'item2');
+                        done();
+                    }
+                }
+            });
+        });
+
         it("should allow mug rename with itemset in form when the itemset plugin is disabled", function (done) {
             util.init({
                 plugins: pluginsWithoutItemset,
@@ -154,6 +220,30 @@ require([
                 "group",
                 "  text1",
                 "text2"
+            );
+        });
+
+        it("should not be able to add choice to collapsed select", function () {
+            util.loadXML("");
+            var group = util.addQuestion("Select", "select");
+            util.addQuestion("Item", "item3");
+            util.collapseGroup(group);
+            chai.expect(function() {
+                util.addQuestion.bind({prevId: "select"})("Item", "item4");
+            }).to.throw(Error);
+        });
+
+        it("should add text outside of collapsed select", function () {
+            util.loadXML("");
+            var group = util.addQuestion("Select", "select");
+            util.collapseGroup(group);
+            util.addQuestion.bind({prevId: "select"})("Text", "text1");
+            util.expandGroup(group);
+            util.assertJSTreeState(
+                "select",
+                "  item1",
+                "  item2",
+                "text1"
             );
         });
 

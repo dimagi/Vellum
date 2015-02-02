@@ -20,7 +20,7 @@ define([
         });
 
         var testXmlPair = function (rawXml, processedXml) {
-            call('loadXML', rawXml);
+            util.loadXML(rawXml);
             assertXmlEqual(rawXml, call('createXML'));
 
             call('getData').ignore.ignoredNodes = [];
@@ -34,18 +34,18 @@ define([
         );
 
         it("can insert ignored element into empty parent", function () {
-            call('loadXML', EMPTY_PARENT);
+            util.loadXML(EMPTY_PARENT);
             assertXmlEqual(call('createXML'), EMPTY_PARENT);
         });
 
         it("does not insert multiple copies of ignored nodes", function () {
-            call('loadXML', MUTLI_MATCH);
+            util.loadXML(MUTLI_MATCH);
             assertXmlEqual(call('createXML'), MUTLI_MATCH);
         });
 
         it("can ignore elements in <head>", function () {
             // fixes TypeError: 'undefined' is not an object (evaluating 'element.firstElementChild')
-            call('loadXML', IGNORE_IN_HEAD);
+            util.loadXML(IGNORE_IN_HEAD);
             assertXmlEqual(call('createXML'), IGNORE_IN_HEAD);
         });
 
@@ -54,13 +54,13 @@ define([
         });
 
         it("handles an ignore node's reference node being renamed", function () {
-            call('loadXML', UNRENAMED);
+            util.loadXML(UNRENAMED);
             call('getMugByPath', '/data/question9').p.nodeID = 'question9a';
             assertXmlEqual(util.xmlines(RENAMED), call('createXML'));
         });
 
         it("handles a node being renamed that's referenced in an ignore node's XML", function () {
-            call('loadXML', REFERENCED_UNRENAMED);
+            util.loadXML(REFERENCED_UNRENAMED);
             call('getMugByPath', '/data/question1').p.nodeID = 'foobar';
             assertXmlEqual(REFERENCED_RENAMED, call('createXML'));
         });

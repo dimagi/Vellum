@@ -169,7 +169,6 @@ require([
                 path: 'question21/',
                 nodeId: 'question31',
                 attrs: {
-                    requiredAttr: true,
                     repeat_count: 2
                 }
             }

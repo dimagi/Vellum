@@ -156,51 +156,20 @@ define([
     };
 
     var createBindList = function (form, xmlWriter) {
-        var bList = form.getBindList(),
-            mug, i, attrs, j;
-
-        function populateVariables (mug){
-            var constraintMsgItextID = mug.p.constraintMsgItextID,
-                constraintMsg;
-            if (constraintMsgItextID && !constraintMsgItextID.isEmpty()) {
-                constraintMsg = "jr:itext('" + constraintMsgItextID.id + "')";
-            } else {
-                constraintMsg = mug.p.constraintMsgAttr;
-            }
-
-            return {
-                nodeset: form.getAbsolutePath(mug),
-                type: mug.p.dataType,
-                constraint: mug.p.constraintAttr,
-                "jr:constraintMsg": constraintMsg,
-                relevant: mug.p.relevantAttr,
-                required: util.createXPathBoolFromJS(mug.p.requiredAttr),
-                calculate: mug.p.calculateAttr,
-                "jr:preload": mug.p.preload,
-                "jr:preloadParams": mug.p.preloadParams
-            };
-        }
-
-        for (i in bList) {
-            if(bList.hasOwnProperty(i)){
-                mug = bList[i];
-                attrs = populateVariables(mug);
-                if(attrs.nodeset){
+        form.dataTree.walk(function (mug, nodeID, processChildren) {
+            if(mug) {
+                _.each(mug.options.getBindList(mug), function (attrs) {
                     xmlWriter.writeStartElement('bind');
-                    for (j in attrs) {
-                        if (attrs.hasOwnProperty(j) && attrs[j]) {
-                            xmlWriter.writeAttributeString(j, attrs[j]);
+                    _.each(attrs, function (value, key) {
+                        if (value) {
+                            xmlWriter.writeAttributeString(key, value);
                         }
-                    }
-                    _(mug.p.rawBindAttributes).each(function (v, k) {
-                        if (!attrs.hasOwnProperty(k)) {
-                            xmlWriter.writeAttributeString(k, v);
-                        } 
                     });
                     xmlWriter.writeEndElement();
-                }
+                });
             }
-        }
+            processChildren();
+        });
     };
 
     var createControlBlock = function (form, xmlWriter) {

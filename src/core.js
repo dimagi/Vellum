@@ -20,6 +20,7 @@ define([
     'vellum/mugs',
     'vellum/widgets',
     'vellum/parser',
+    'vellum/datasources',
     'vellum/util',
     'vellum/debugutil',
     'vellum/base',
@@ -49,6 +50,7 @@ define([
     mugs,
     widgets,
     parser,
+    datasources,
     util,
     debug
 ) {
@@ -194,6 +196,7 @@ define([
         this._createJSTree();
         this._init_modal_dialogs();
         this._setup_fancybox();
+        datasources.init(this);
     };
 
     fn.postInit = function () {
@@ -314,12 +317,7 @@ define([
             {
                 group: ["Geopoint", 'Advanced', ''],
                 textOnly: true,
-                questions: [
-                    "Geopoint",
-                    "Barcode",
-                    "Secret",
-                    "AndroidIntent"
-                ]
+                questions: this.getAdvancedQuestions()
             }
         ];
     };
@@ -328,6 +326,15 @@ define([
         return [
             "Select",
             "MSelect"
+        ];
+    };
+
+    fn.getAdvancedQuestions = function () {
+        return [
+            "Geopoint",
+            "Barcode",
+            "Secret",
+            "AndroidIntent"
         ];
     };
 
@@ -838,7 +845,9 @@ define([
         }).bind("select_node.jstree", function (e, data) {
             var mug = _this.data.core.form.getMugByUFID(data.node.id);
             _this.displayMugProperties(mug);
-            _this.activateQuestionTypeGroup(mug.__className);
+            _this.activateQuestionTypeGroup(mug);
+        }).bind("open_node.jstree", function (e, data) {
+            _this.activateQuestionTypeGroup(_this.data.core.form.getMugByUFID(data.node.id));
         }).bind("close_node.jstree", function (e, data) {
             var selected = _this.jstree('get_selected'),
                 sel = selected.length && _this.jstree('get_node', selected[0]);
@@ -846,6 +855,7 @@ define([
                 _this.jstree("deselect_all", true)
                      .jstree("select_node", data.node);
             }
+            _this.activateQuestionTypeGroup(_this.data.core.form.getMugByUFID(data.node.id));
         }).bind("move_node.jstree", function (e, data) {
             var form = _this.data.core.form,
                 mug = form.getMugByUFID(data.node.id),
@@ -999,11 +1009,15 @@ define([
         // its bound mug.
     };
 
-    fn.activateQuestionTypeGroup = function (className) {
+    fn.activateQuestionTypeGroup = function (mug) {
+        var className = mug.__className;
         this.resetQuestionTypeGroups();
 
         var groupSlug = this.data.core.QUESTION_TYPE_TO_GROUP[className];
-        if (groupSlug && className !== 'MSelectDynamic' && className !== 'SelectDynamic') {
+        if (groupSlug && 
+            className !== 'MSelectDynamic' && 
+            className !== 'SelectDynamic' && 
+            !this.jstree("is_closed", mug.ufid)) {
             this.$f
                 .find('.' + getQuestionTypeGroupClass(groupSlug))
                 .find('.fd-question-type-related').removeClass('disabled');
@@ -1020,6 +1034,11 @@ define([
         this.data.core.duplicateIsForMove = forMove;
     };
 
+    fn.setUnsavedDuplicateChoiceValue = function (value, forMove) {
+        this.data.core.unsavedDuplicateChoiceValue = value;
+        this.data.core.duplicateIsForMove = forMove;
+    };
+
     // Attempt to guard against doing actions when there are unsaved or invalid
     // pending changes. In the case of an invalid duplicate sibling ID, it tries
     // to call 'callback' after the user automatically fixes the invalid state,
@@ -1033,24 +1052,12 @@ define([
         var _this = this,
             mug = this.getCurrentlySelectedMug(),
             duplicate = this.data.core.unsavedDuplicateNodeId,
-            duplicateIsForMove = this.data.core.duplicateIsForMove;
+            duplicateChoice = this.data.core.unsavedDuplicateChoiceValue,
+            duplicateIsForMove = this.data.core.duplicateIsForMove,
+            verb = duplicateIsForMove ? 'would have' : 'has';
 
-        if (this.data.core.hasXPathEditorChanged) {
-            this.alert(
-                "Unsaved Changes in Editor",
-                "You have UNSAVED changes in the Expression Editor. Please save "+
-                "changes before continuing.");
-            return false;
-        } else if (duplicate) {
-            var verb = duplicateIsForMove ? 'would have' : 'has',
-                newQuestionId = this.data.core.form.generate_question_id(duplicate);
-
-            this.alert(
-                "Duplicate Question ID",
-                "'" + duplicate + "' " + verb + " the same Question ID as " +
-                "another question in the same group. Please change '" + 
-                duplicate + "' to a unique Question ID before continuing.",
-                [
+        function alertDuplicateButtons(resetMethod, inputID, autoValue) {
+            return [
                     {
                         title: "Fix Manually",
                         action: function () {
@@ -1059,28 +1066,58 @@ define([
                             // when attempting a move, reset the state.  It will
                             // be changed again if the same move is attempted.
                             if (duplicateIsForMove) {
-                                _this.setUnsavedDuplicateNodeId(false);
+                                resetMethod(false);
                             }
                             _this.data.core.$modal.modal('hide');
-                            var input = _this.getCurrentMugInput("nodeID");
+                            var input = _this.getCurrentMugInput(inputID);
                             if (input) {
                                 input.select().focus();
                             }
                         }
                     },
                     {
-                        title: "Automatically rename to '" + newQuestionId + "'",
+                        title: "Automatically rename to '" + autoValue + "'",
                         cssClasses: 'btn-primary',
                         action: function () {
-                            mug.p.nodeID = newQuestionId;
-                            _this.setUnsavedDuplicateNodeId(false);
+                            mug.p[inputID] = autoValue;
+                            resetMethod(false);
                             _this.data.core.$modal.modal('hide');
                             _this.refreshVisibleData();
                             callback();
                         } 
                     }
-                
-                ]);
+                ];
+        }
+
+        if (this.data.core.hasXPathEditorChanged) {
+            this.alert(
+                "Unsaved Changes in Editor",
+                "You have UNSAVED changes in the Expression Editor. Please save "+
+                "changes before continuing.");
+            return false;
+        } else if (duplicate) {
+            var newQuestionId = this.data.core.form.generate_question_id(duplicate);
+
+            this.alert(
+                "Duplicate Question ID",
+                "'" + duplicate + "' " + verb + " the same Question ID as " +
+                "another question in the same group. Please change '" + 
+                duplicate + "' to a unique Question ID before continuing.",
+                alertDuplicateButtons(_this.setUnsavedDuplicateNodeId.bind(_this), "nodeID", newQuestionId)
+            );
+            return false;
+        } else if (duplicateChoice) {
+            // weird that this uses generate_question_id, but it just uses
+            // it to dedupe it in form of copy-of-label
+            var newChoiceValue = this.data.core.form.generate_question_id(duplicateChoice);
+
+            this.alert(
+                "Duplicate Choice Value",
+                "'" + duplicateChoice + "' " + verb + " the same Choice Value as " +
+                "another choice in the same group. Please change '" +
+                duplicateChoice + "' to a unique Choice Value before continuing.",
+                alertDuplicateButtons(_this.setUnsavedDuplicateChoiceValue.bind(_this), "defaultValue", newChoiceValue)
+            );
             return false;
         } else {
             callback();
@@ -1101,7 +1138,7 @@ define([
             try {
                 // a place for plugins to put parse warnings
                 _this.data.core.parseWarnings = [];
-                _this.loadXML(formString);
+                _this.loadXML(formString, {});
                 delete _this.data.core.parseWarnings;
 
                 if (formString) {
@@ -1182,16 +1219,19 @@ define([
         }
     };
         
-    fn.loadXML = function (formXML) {
+    fn.loadXML = function (formXML, options) {
         var form, _this = this;
         _this.data.core.$tree.children().children().each(function (i, el) {
             _this.jstree("delete_node", el);
         });
-        this.data.core.form = form = parser.parseXForm(formXML, {
+        options = _.extend({
             mugTypes: this.data.core.mugTypes,
             allowedDataNodeReferences: this.opts().core.allowedDataNodeReferences, 
-            externalInstances: this.opts().core.externalInstances
-        }, this, _this.data.core.parseWarnings);
+            externalInstances: this.opts().core.externalInstances,
+            enableInstanceRefCounting: true
+        }, options);
+        this.data.core.form = form = parser.parseXForm(
+            formXML, options, this, _this.data.core.parseWarnings);
         form.formName = this.opts().core.formName || form.formName;
 
         form.on('question-type-change', function (e) {
@@ -1199,13 +1239,14 @@ define([
 
             if (e.mug === _this.getCurrentlySelectedMug()) {
                 _this.refreshCurrentMug();
-                _this.activateQuestionTypeGroup(e.mug.__className);
+                _this.activateQuestionTypeGroup(e.mug);
             }
         }).on('parent-question-type-change', function (e) {
             _this.jstree("set_icon", e.childMug.ufid, e.childMug.getIcon());
         }).on('remove-question', function (e) {
             if (!e.isInternal) {
                 var prev = _this.jstree("get_prev_dom", e.mug.ufid);
+                _this.showVisualValidation(null);
                 _this.jstree("delete_node", e.mug.ufid);
                 if (prev) {
                     _this.jstree("select_node", prev);
@@ -1245,6 +1286,8 @@ define([
             // existing duplicate warning state.
             if (e.property === 'nodeID') {
                 _this.setUnsavedDuplicateNodeId(false);
+            } else if (e.property === 'defaultValue' && e.mug.__className === 'Item') {
+                _this.setUnsavedDuplicateChoiceValue(false);
             }
 
             _this.refreshMugName(e.mug);
@@ -1252,12 +1295,13 @@ define([
         });
         if (formXML) {
             _this._resetMessages(_this.data.core.form.errors);
-            _this.reloadTree();
+            _this._populateTree();
         }
     };
 
     fn.refreshMugName = function (mug, displayLang) {
-        var name = mug.getDisplayName(this.data.core.currentItextDisplayLanguage);
+        displayLang = displayLang || this.data.core.currentItextDisplayLanguage;
+        var name = mug.getDisplayName(displayLang);
         if (name !== this.jstree("get_text", mug.ufid)) {
             this.jstree('rename_node', mug.ufid, name);
         }
@@ -1277,11 +1321,14 @@ define([
         }
     };
 
-    fn.reloadTree = function () {
+    fn._populateTree = function () {
+        // NOTE: this performs the final step in the mug parsing process.
+        // It should only be called once after a new XForm is loaded.
         var _this = this,
             form = this.data.core.form;
 
         form.mergedTreeMap(function (mug) {
+            _this.handleMugParseFinish(mug);
             var inTree = _this.createQuestion(mug, mug.parentMug, 'into');
             if (inTree) {
                 _this.setTreeValidationIcon(mug);
@@ -1319,6 +1366,10 @@ define([
             var foo = _this.getInsertTargetAndPosition(
                 _this.getCurrentlySelectedMug(), qType);
             mug = _this.data.core.form.createQuestion(foo[0], foo[1], qType);
+            var $firstInput = _this.$f.find(".fd-question-properties input:text:visible:first");
+            if ($firstInput.length) {
+                $firstInput.focus().select();
+            }
         });
         // the returned value will be `undefined` if ensureCurrentMugIsSaved
         // had to defer for user feedback
@@ -1410,7 +1461,7 @@ define([
         }
         this._propertiesMug = mug;
         var $content = this.$f.find(".fd-props-content").empty(),
-            sections = this.getSections();
+            sections = this.getSections(mug);
 
         this.$f.find('.fd-props-toolbar').html(this.getMugToolbar(mug));
         for (var i = 0; i < sections.length; i++) {
@@ -1435,7 +1486,7 @@ define([
     };
         
     fn.hideQuestionProperties = function() {
-        this.$f.find('.fd-question-properties').hide();
+        this.disableUI();
     };
 
     fn.showContent = function () {
@@ -1446,29 +1497,58 @@ define([
         this.$f.find('.fd-content-right').hide();
     };
 
-    fn.displayXPathEditor = function(options) {
+    /**
+     * Display an editor in the question properties area
+     *
+     * @param options - Object with editor options:
+     *  {
+     *      headerText: "text to display in header",
+     *      loadEditor: function($div, options),    // load editor into $div
+     *      change: function(value),                // editor changed callback
+     *      done: function(value)                   // editor done callback
+     *  }
+     */
+    fn.displaySecondaryEditor = function(options) {
+        // All mention of "xpath" in this function is from when this function
+        // displayed the xpath editor. It has been adapted to show any editor.
         var _this = this,
             $editor = this.$f.find('.fd-xpath-editor');
 
+        $editor.find('.fd-head').text(options.headerText);
         options.DEBUG_MODE = DEBUG_MODE;
-        this.hideQuestionProperties();
+        this.disableUI();
 
         var done = options.done;
         options.done = function (val) {
             done(val);
-            _this.data.core.hasXPathEditorChanged = false;
-            $editor.hide();
-            _this.refreshCurrentMug();
+            if (_this.data.core.hasXPathEditorChanged) {
+                _this.data.core.hasXPathEditorChanged = false;
+                $editor.hide();
+                _this.refreshCurrentMug();
+            } else {
+                $editor.hide();
+                _this.enableUI();
+            }
         };
-        options.change = function () {
+        var change = options.change;
+        options.change = function (val) {
             _this.data.core.hasXPathEditorChanged = true;
+            if (change) {
+                change(val);
+            }
         };
         $editor.show();
+        options.loadEditor(_this.$f.find('.fd-xpath-editor-content'), options);
+    };
 
-        require(['vellum/expressionEditor'], function (expressionEditor) {
-            expressionEditor.showXPathEditor(
-                _this.$f.find('.fd-xpath-editor-content'), options);
-        });
+    fn.displayXPathEditor = function(options) {
+        options.headerText = "Expression Editor";
+        options.loadEditor = function($div, options) {
+            require(['vellum/expressionEditor'], function (expressionEditor) {
+                expressionEditor.showXPathEditor($div, options);
+            });
+        };
+        this.displaySecondaryEditor(options);
     };
 
     fn.alert = function (title, message, buttons) {
@@ -1522,15 +1602,17 @@ define([
         // for now form warnings get reset every time validation gets called.
         this.data.core.form.clearErrors('form-warning');
       
-        this._resetMessages(
-            this.data.core.form.errors.concat(
-                _.map(this.getErrors(mug), function (error) {
-                    return {
-                        message: error,
-                        level: "form-warning",
-                    };
-                })));
-        this.setTreeValidationIcon(mug);
+        if (mug) {
+            this._resetMessages(
+                this.data.core.form.errors.concat(
+                    _.map(this.getErrors(mug), function (error) {
+                        return {
+                            message: error,
+                            level: "form-warning",
+                        };
+                    })));
+            this.setTreeValidationIcon(mug);
+        }
     };
 
     fn.getErrors = function (mug) {
@@ -1771,7 +1853,7 @@ define([
         this._showConfirmDialog();
     };
 
-    fn.getSections = function () {
+    fn.getSections = function (mug) {
         return [
             {
                 slug: "main",
@@ -1870,6 +1952,7 @@ define([
 
     fn.getAdvancedProperties = function () {
         return [
+            "dataSource",
             "dataValue",
             "xmlnsAttr",
             "label",
@@ -1889,12 +1972,13 @@ define([
         if (_.isUndefined(propVal) &&
             propDef && propDef.visibility &&
             mug.p.getDefinition(propDef.visibility) &&
-                !getWidgetClassAndOptions(propDef.visibility, mug))
+            !getWidgetClassAndOptions(propDef.visibility, mug))
         {
             return null;
         }
 
-        if (!propDef || 
+        if (!propDef || propDef.visibility === 'hidden' ||
+            (_.isFunction(propDef.visibility) && !propDef.visibility(mug, propDef)) ||
             (_.isUndefined(propVal) &&
              (propDef.visibility === "visible_if_present" ||
               propDef.presence === "notallowed")))

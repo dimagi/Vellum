@@ -1,0 +1,47 @@
+<div class="fd-data-source-editor-container form form-horizontal">
+
+    <fieldset class="data-source-advanced">
+        <legend>
+            <i class="icon-cog"></i> Edit Data Source (Advanced)
+        </legend>
+        <div class="control-group">
+            <label class="control-label">
+                Query Expression:
+            </label>
+            <div class="controls">
+                <textarea rows="5"
+                          name="query"
+                          class="input-block-level fd-data-source-query jstree-drop"></textarea>
+                <!--p class="help-block">Hint: You can drag a multi-select question into the box.</p-->
+                <p class="help-block">
+                    <a target="_blank"
+                       href="https://help.commcarehq.org/display/commcarepublic/Common+Logic+and+Calculations">
+                        <i class="icon-info-sign"></i> Guide to Common Logic and Calculations
+                    </a>
+                </p>
+            </div>
+        </div>
+        <div class="fd-data-source-validation-summary">Optional Instance Properties</div>
+        <div class="control-group">
+            <label class="control-label">
+                Instance ID:
+            </label>
+            <div class="controls">
+                <input name="instance-id" type="text" class="input-block-level jstree-drop" />
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label">
+                Instance URI:
+            </label>
+            <div class="controls">
+                <input name="instance-src" type="text" class="input-block-level jstree-drop" />
+            </div>
+        </div>
+    </fieldset>
+
+    <div class="form-actions form-actions-condensed fd-data-source-actions">
+        <button type="button" class="btn btn-primary fd-data-source-save-button">Save</button>
+        <button type="button" class="btn fd-data-source-cancel-button">Cancel</button>
+    </div>
+</div>

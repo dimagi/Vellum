@@ -199,11 +199,11 @@ define([
             );
             return getUIElementWithEditButton(elem, function () {
                 widget.options.displayXPathEditor({
-                    value: mug.p[options.path],
+                    value: widget.input.val(),
                     xpathType: widget.definition.xpathType,
                     done: function (val) {
                         if (val !== false) {
-                            mug.p[widget.path] = val;
+                            widget.input.val(val).change();
                         }
                     }
                 });

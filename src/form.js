@@ -129,10 +129,12 @@ define([
             .replace(/[^\w-]+/g,'');
     }
     
-    var InstanceMetadata = function (attributes, children) {
+    var InstanceMetadata = function (attributes, children, ref) {
         var that = {};
         that.attributes = attributes;
         that.children = children || [];
+        that.refs = {};
+        if (ref !== null && !_.isUndefined(ref)) { that.refs[ref] = null; }
         return that;
     };
 
@@ -140,6 +142,7 @@ define([
         var _this = this;
 
         this.setValues = [];
+        this._setValueId = 1;
 
         this._logicManager = new logic.LogicManager(this, {
                 allowedDataNodeReferences: opts.allowedDataNodeReferences
@@ -151,6 +154,7 @@ define([
         this.mugTypes = mugTypes;
 
         this.formName = 'New Form';
+        this.mugMap = {};
         this.dataTree = new Tree('data', 'data');
         this.dataTree.on('change', function (e) {
             _this.fireChange(e.mug);
@@ -160,6 +164,7 @@ define([
             _this.fireChange(e.mug);
         });
         this.instanceMetadata = [InstanceMetadata({})];
+        this.enableInstanceRefCounting = opts.enableInstanceRefCounting;
         this.errors = [];
         
         this.externalInstances = _.indexBy(
@@ -182,25 +187,117 @@ define([
             });
         },
         addInstance: function (instance) {
+            // NOTE this does something very different from addInstanceIfNotExists
             this.externalInstances[instance.id] = instance;
+        },
+        /**
+         * Add an instance if it is not already on the form
+         *
+         * @param attrs - Instance attributes. The `src` attribute is used to
+         *          match other instances on the form, and is required. The
+         *          instance will be unconditionally added and it's id returned
+         *          if the instance has no `src` attribute.
+         * @param ref - Optional, a unique key of the thing that references
+         *          the instance. If provided, this will add a reference to
+         *          the added or existing instance unless ref counting is
+         *          disabled for the form or instance.
+         * @returns - The `id` of the added or already-existing instance.
+         */
+        addInstanceIfNotExists: function (attrs, ref) {
+            if (attrs.src === null || _.isUndefined(attrs.src)) {
+                // no ref counting for instances without a `src` since they cannot be dropped
+                this.instanceMetadata.push(InstanceMetadata({
+                    src: attrs.src,
+                    id: attrs.id
+                }));
+                return attrs.id;
+            }
+
+            var meta = _.find(this.instanceMetadata, function (m) {
+                return m.attributes.src === attrs.src;
+            });
+            if (!meta) {
+                this.instanceMetadata.push(InstanceMetadata({
+                    src: attrs.src,
+                    id: attrs.id
+                }, null, this.enableInstanceRefCounting ? ref : null));
+                return attrs.id;
+            } else if (meta.refs && this.enableInstanceRefCounting) {
+                if (_.isUndefined(ref)) {
+                    // disable ref counting for this instance. how unfortunate
+                    meta.refs = null;
+                } else {
+                    meta.refs[ref] = null;
+                }
+            }
+            return meta.attributes.id;
+        },
+        /**
+         * Add a reference to the instance with matching id
+         *
+         * @returns - The InstanceMetadata if found, otherwise null. Note
+         *            that this will always return the found instance, even if
+         *            ref counting is disabled.
+         */
+        referenceInstance: function (id, ref) {
+            var meta = _.find(this.instanceMetadata, function (meta) {
+                    return meta.attributes.id === id;
+                });
+            if (meta && meta.refs && this.enableInstanceRefCounting) {
+                meta.refs[ref] = null;
+            }
+            return meta || null;
+        },
+        /**
+         * Drop instance reference, possibly removing the instance
+         *
+         * @param src - The instance `src` attribute value.
+         * @param ref - The unique key of the thing that no longer references
+         *          the instance. The instance will be removed from the form
+         *          if this ref was tracked by the instance and it was the
+         *          last thing referencing the instance.
+         * @returns - True if the instance was removed, otherwise false.
+         */
+        dropInstanceReference: function (src, ref) {
+            if (!this.enableInstanceRefCounting) {
+                return false;
+            }
+            var meta = _.find(this.instanceMetadata, function (m) {
+                    return m.attributes.src === src;
+                });
+            if (meta && meta.refs) {
+                meta.refs = _.omit(meta.refs, ref);
+                if (_.isEmpty(meta.refs)) {
+                    this.instanceMetadata = _.without(this.instanceMetadata, meta);
+                    return true;
+                }
+            }
+            return false;
         },
         // todo: update references on rename
         addSetValue: function (event, ref, value) {
-            var existing = _.filter(this.setValues, function (setValue) {
+            var setValue = _.find(this.setValues, function (setValue) {
                 return setValue.event === event && setValue.ref === ref;
             });
-            if (existing[0]) {
-                existing.value = value;
+            if (setValue) {
+                setValue.value = value;
             } else {
-                this.setValues.push({
+                setValue = {
+                    _id: this._setValueId++,
                     event: event,
                     ref: ref,
                     value: value
-                });
+                };
+                this.setValues.push(setValue);
             }
+            return setValue;
         },
         getSetValues: function () {
             return this.setValues;
+        },
+        dropSetValues: function (predicate) {
+            // Remove all <setvalue> elements matching predicate
+            this.setValues = _.reject(this.setValues, predicate);
         },
         setFormID: function (id) {
             this.dataTree.setRootID(id);
@@ -214,46 +311,6 @@ define([
         },
         createXML: function () {
             return writer.createXForm(this);
-        },
-        /**
-         * Loops through the data and the control trees and picks out all the
-         * unique bind elements.  Returns a list of Mugs
-         */
-        getBindList: function(){
-            var bList = [],
-                dataTree,controlTree,dBindList,cBindList,i,
-                getBind = function(node){ //the function we will pass to treeMap
-                    if(!node.getValue() || node.isRootNode){
-                        return null;
-                    }
-                    var mug = node.getValue();
-                    if (!mug.p.getDefinition('relevantAttr')) {
-                        return null;
-                    } else {
-                        return mug;
-                    }
-                };
-
-            dataTree = this.dataTree;
-            controlTree = this.controlTree;
-            dBindList = dataTree.treeMap(getBind);
-            cBindList = controlTree.treeMap(getBind);
-
-            //compare results, grab uniques
-            for(i in dBindList){
-                if(dBindList.hasOwnProperty(i)){
-                    bList.push(dBindList[i]);
-                }
-            }
-
-            for(i in cBindList){
-                if(cBindList.hasOwnProperty(i)){
-                    if(bList.indexOf(cBindList[i]) === -1){
-                        bList.push(cBindList[i]); //grab only anything that hasn't shown up in the dBindList
-                    }
-                }
-            }
-            return bList;
         },
         /**
          * Goes through and grabs all of the data nodes (i.e. nodes that are
@@ -295,17 +352,6 @@ define([
             dList = this.dataTree.treeMap(treeFunc);
 
             return util.mergeArray(cList, dList); //strip dupes and merge
-        },
-        addInstanceIfNotExists: function (attrs) {
-            var hasInstance = _.any(this.instanceMetadata, function (m) {
-                return m.attributes.src === attrs.src;
-            });
-            if (!hasInstance) {
-                this.instanceMetadata.push(InstanceMetadata({
-                    src: attrs.src,
-                    id: attrs.id
-                }));
-            }
         },
         updateError: function (errObj, options) {
             errObj = FormError(errObj);
@@ -351,6 +397,14 @@ define([
                                   : this.dataTree.rootNode);
             return _.filter(parentNode.getChildrenMugs(), function (m) {
                 return m.p.nodeID === nodeID;
+            });
+        },
+        getMugChildrenByChoiceValue: function (mug, value) {
+            return _.filter(this.getChildren(mug), function (m) {
+                if (m.p.defaultValue && m.__className === 'Item') {
+                    return m.p.defaultValue === value;
+                }
+                return false;
             });
         },
         insertMug: function (refMug, newMug, position) {
@@ -490,20 +544,19 @@ define([
         },
         handleMugRename: function (mug, currentId, oldId, currentPath, oldPath) {
             this._logicManager.updatePath(mug.ufid, oldPath, currentPath);
-            this.mugWasRenamed(mug, oldId);
+            this.mugWasRenamed(mug, oldId, oldPath);
         },
         /**
          * Update references to mug and its children after it is renamed.
          */
-        mugWasRenamed: function(mug, oldName) {
-            function preMovePath(postPath) {
+        mugWasRenamed: function(mug, oldName, oldPath) {
+            function getPreMovePath(postPath) {
                 if (postPath === mugPath) {
-                    return prevMugPath;
+                    return oldPath;
                 }
-                return postPath.replace(postRegExp, prevMugPath + "/");
+                return postPath.replace(postRegExp, oldPath + "/");
             }
             var tree = this.dataTree,
-                newName = mug.p.nodeID,
                 mugPath = tree.getAbsolutePath(mug);
             if (!mugPath) {
                 // Items don't have an absolute path. I wonder if it would
@@ -512,12 +565,14 @@ define([
             }
             var mugs = this.getDescendants(mug).concat([mug]),
                 postMovePaths = _(mugs).map(function(mug) { return tree.getAbsolutePath(mug); }),
-                prevMugPath = mugPath.replace(new RegExp("/" + RegExp.escape(newName) + "$"), "/" + oldName),
                 postRegExp = new RegExp("^" + RegExp.escape(mugPath) + "/"),
-                updates = {};
+                updates = {},
+                preMovePath;
             for (var i = 0; i < mugs.length; i++) {
                 if (postMovePaths[i]) {
-                    updates[mugs[i].ufid] = [preMovePath(postMovePaths[i]), postMovePaths[i]];
+                    preMovePath = getPreMovePath(postMovePaths[i]);
+                    updates[mugs[i].ufid] = [preMovePath, postMovePaths[i]];
+                    this._updateMugPath(mugs[i], preMovePath, postMovePaths[i]);
                 }
             }
             this._logicManager.updatePaths(updates);
@@ -622,6 +677,13 @@ define([
             {
                 // Short-circuit invalid change and trigger warning in UI
                 this.vellum.setUnsavedDuplicateNodeId(value);
+                return null;
+            }
+            else if (property === 'defaultValue' && previous && mug.__className ==="Item" &&
+                this.getMugChildrenByChoiceValue(mug.parentMug, value).length > 0)
+            {
+                // Short-circuit invalid change and trigger warning in UI
+                this.vellum.setUnsavedDuplicateChoiceValue(value);
                 return null;
             }
 
@@ -730,8 +792,10 @@ define([
             return mug;
         },
         insertQuestion: function (mug, refMug, position, isInternal) {
+            this.mugMap[mug.ufid] = mug;
             refMug = refMug || this.dataTree.getRootNode().getValue();
             this.insertMug(refMug, mug, position);
+            this._updateMugPath(mug);
             // todo: abstraction barrier
 
             this.fire({
@@ -745,6 +809,24 @@ define([
                 mug.options.afterInsert(this, mug);
             }
         },
+        _updateMugPath: function (mug, oldPath, newPath) {
+            var map = this.mugMap;
+            delete map[oldPath];
+            if (_.isUndefined(newPath)) {
+                newPath = this.getAbsolutePath(mug);
+            }
+            if (newPath) {
+                map[newPath] = mug;
+            }
+        },
+        _fixMugState: function (mug) {
+            // parser needs this because it inserts directly into the tree
+            this.mugMap[mug.ufid] = mug;
+            var path = this.dataTree.getAbsolutePath(mug);
+            if (path) {
+                this.mugMap[path] = mug;
+            }
+        },
         fixBrokenReferences: function (mug) {
             function updateReferences(mug) {
                 _this._logicManager.updateAllReferences(mug);
@@ -753,6 +835,14 @@ define([
             var _this = this;
             this._logicManager.forEachBrokenReference(updateReferences);
         },
+        /**
+         * Get the logical path of the mug's node in the data tree
+         *
+         * It is not always possible to lookup a mug by traversing either the
+         * data or control tree using it's absolute path. For example, some
+         * mugs encapsulate multiple levels of XML elements. This Form object
+         * maintains a hash table to quickly get a mug by its path.
+         */
         getAbsolutePath: function (mug, excludeRoot) {
             return this.dataTree.getAbsolutePath(mug, excludeRoot);
         },
@@ -760,48 +850,13 @@ define([
             return this.controlTree.getAbsolutePath(mug, excludeRoot);
         },
         getMugByUFID: function (ufid) {
-            return (this.dataTree.getMugFromUFID(ufid) ||
-                    this.controlTree.getMugFromUFID(ufid));
+            return this.mugMap[ufid];
         },
         getMugByPath: function (path) {
-            var recFunc, tokens, targetMug,
-                rootNode = this.dataTree.getRootNode();
             if(!path) { //no path specified
                 return null;
             }
-
-            recFunc = function (node, recTokens) {
-                var currentToken, rest, children, i;
-                if (recTokens.length === 0) {
-                    return node.getValue(); //found the target. It is this node.
-                }
-                currentToken = recTokens[0];
-                rest = recTokens.slice(1);
-                children = node.getChildren();
-
-                for (i in children) {
-                    if(children.hasOwnProperty(i)) {
-                        if (children[i].getID() === currentToken) {
-                            return recFunc(children[i], rest);
-                        }
-                    }
-                }
-
-                //if we got here this means 'path not found'
-                return null;
-            };
-
-            tokens = path.split('/').slice(1);
-            if (tokens.length === 0) {
-                return null; //empty path string === 'path not found'
-            }
-
-            if(rootNode.getID() !== tokens[0]) {
-                return null; //path not found
-            }
-
-            targetMug = recFunc(rootNode,tokens.slice(1));
-            return targetMug;
+            return this.mugMap[path];
         },
         removeMugFromForm: function (mug) {
             function breakReferences(mug) {
@@ -827,6 +882,8 @@ define([
                 }
             }
             
+            delete this.mugMap[mug.ufid];
+            delete this.mugMap[this.dataTree.getAbsolutePath(mug)];
             this.dataTree.removeMug(mug);
             this.controlTree.removeMug(mug);
             this.fire({

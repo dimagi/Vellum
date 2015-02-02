@@ -1450,8 +1450,7 @@ define([
         },
         _changeTreeDisplayLanguage: function (lang) {
             var _this = this,
-                form = this.data.core.form,
-                itext = this.data.javaRosa.Itext;
+                form = this.data.core.form;
            
             // todo: getMugDisplayName should not rely on this state, it should be
             // passed
@@ -1470,9 +1469,7 @@ define([
                     else {
                         var labelItextID = mug.p.labelItextID;
                         if (labelItextID) {
-                            var itextID = labelItextID.id,
-                                text = itext.getItem(itextID).getValue("default", lang);
-                            text = text || _this.getMugDisplayName(mug);
+                            var text = _this.getMugDisplayName(mug);
                             _this.jstree('rename_node', $el, text ||
                                     _this.opts().core.noTextString);
                         }

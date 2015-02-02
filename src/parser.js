@@ -138,14 +138,17 @@ define([
 
     // DATA PARSING FUNCTIONS
     function parseDataTree (form, dataEl) {
-        var root = $(dataEl), recFunc;
+        var root = $(dataEl),
+            tree = form.dataTree,
+            recFunc;
 
         recFunc = function (parentMug) {
-            var mug = form.vellum.parseDataElement(form, this, parentMug);
-            if (mug) {
-                form.dataTree.insertMug(mug, 'into', parentMug);
-            }
-            mug.options.dataNodeChildren($(this)).each(function () {
+            var mug = form.vellum.parseDataElement(form, this, parentMug),
+                children = mug.options.parseDataNode(mug, $(this), parentMug);
+            tree.insertMug(mug, 'into', parentMug);
+            // HACK fix abstraction broken by direct tree insert
+            form._fixMugState(mug);
+            children.each(function () {
                 recFunc.call(this, mug);
             });
         };
@@ -154,6 +157,11 @@ define([
             form.parseErrors.push(
                 'Data block has no children elements! Please make sure your form is a valid JavaRosa XForm!'
             );
+        }
+        if (root[0]) {
+            form.setFormID(root[0].tagName);
+        } else {
+            form.setFormID(DEFAULT_FORM_ID);
         }
         root.children().each(function () {
             recFunc.call(this, null);
@@ -165,12 +173,6 @@ define([
         form.formVersion = root.attr("version");
         form.formName = root.attr("name");
 
-        if (root[0]) {
-            form.setFormID(root[0].tagName);
-        } else {
-            form.setFormID(DEFAULT_FORM_ID);
-        }
-        
         if (!form.formUuid) {
             form.parseWarnings.push('Form does not have a unique xform XMLNS (in data block). Will be added automatically');
         }
@@ -601,6 +603,10 @@ define([
                 mug = parseControlElement(form, $cEl, parentMug);
 
             form.controlTree.insertMug(mug, 'into', parentMug);
+            if (mug.options.isControlOnly) {
+                // HACK fix abstraction broken by direct tree insert
+                form.mugMap[mug.ufid] = mug;
+            }
 
             if (mug.__className === "ReadOnly") {
                 return;
@@ -610,7 +616,6 @@ define([
                     eachFunc(this, mug);
                 });
             }
-            form.vellum.handleMugParseFinish(mug);
         }
         controlsTree.each(function () {
             eachFunc(this, null);
@@ -652,11 +657,10 @@ define([
         });
     }
 
-    function parseBindElement (form, el, mugPath) {
-        var mug = form.getMugByPath(mugPath),
-            path = el.popAttr('nodeset') || el.popAttr('ref'),
+    function parseBindElement (form, el, path) {
+        var mug = form.getMugByPath(path),
             Itext = form.vellum.data.javaRosa.Itext;
-        
+
         if(!mug){
             form.parseWarnings.push(
                 "Bind Node [" + path + "] found but has no associated " +
@@ -721,6 +725,7 @@ define([
         parseXForm: parseXForm,
         parseDataElement: parseDataElement,
         parseBindElement: parseBindElement,
+        getAttributes: getAttributes,
         getPathFromControlElement: getPathFromControlElement,
         makeControlOnlyMugAdaptor: makeControlOnlyMugAdaptor,
         makeMugAdaptor: makeMugAdaptor

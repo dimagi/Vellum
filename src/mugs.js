@@ -243,7 +243,7 @@ define([
             },
             appearance: {
                 deleteOnCopy: true,
-                visibility: 'hidden',
+                visibility: 'optional',
                 presence: 'optional',
                 lstring: 'Appearance Attribute'
             },
@@ -320,14 +320,6 @@ define([
                 return;
             }
             spec[name] = propertySpec;
-
-            _.each(propertySpec, function (value, key) {
-                if (_.isFunction(value) && key !== 'validationFunc' && 
-                    key !== 'widget') 
-                {
-                    propertySpec[key] = value(mugOptions);
-                }
-            });
         });
 
         
@@ -357,9 +349,14 @@ define([
         /**
          * Parser integration: get children from data node
          *
+         * Additionally, this may perform extra mug initialization. It is
+         * called before the mug is inserted into the data tree/mug hierarchy.
+         *
+         * @param mug - The mug object.
          * @param node - This mug's data node, a jQuery object.
+         * @returns - A jquery collection of child nodes.
          */
-        dataNodeChildren: function ($node) {
+        parseDataNode: function (mug, $node) {
             return $node.children();
         },
         controlNodeChildren: null,
@@ -373,6 +370,36 @@ define([
 
         // data node writer options
         getExtraDataAttributes: null, // function (mug) { return {...}; }
+
+        /**
+         * Returns a list of objects containing bind element attributes
+         */
+        getBindList: function (mug) {
+            var constraintMsgItextID = mug.p.constraintMsgItextID,
+                constraintMsg;
+            if (constraintMsgItextID && !constraintMsgItextID.isEmpty()) {
+                constraintMsg = "jr:itext('" + constraintMsgItextID.id + "')";
+            } else {
+                constraintMsg = mug.p.constraintMsgAttr;
+            }
+            var attrs = {
+                nodeset: mug.form.getAbsolutePath(mug),
+                type: mug.p.dataType,
+                constraint: mug.p.constraintAttr,
+                "jr:constraintMsg": constraintMsg,
+                relevant: mug.p.relevantAttr,
+                required: util.createXPathBoolFromJS(mug.p.requiredAttr),
+                calculate: mug.p.calculateAttr,
+                "jr:preload": mug.p.preload,
+                "jr:preloadParams": mug.p.preloadParams
+            };
+            _.each(mug.p.rawBindAttributes, function (value, key) {
+                if (!attrs.hasOwnProperty(key)) {
+                    attrs[key] = value;
+                }
+            });
+            return attrs.nodeset ? [attrs] : [];
+        },
 
         // control node writer options
         writeControlLabel: true,
@@ -535,7 +562,8 @@ define([
             var itextItem = this.p.labelItextID, 
                 Itext = this.form.vellum.data.javaRosa.Itext,
                 defaultLang = Itext.getDefaultLanguage(),
-                disp;
+                disp,
+                defaultDisp;
 
             if (this.__className === "ReadOnly") {
                 return "Unknown (read-only) question type";
@@ -553,13 +581,13 @@ define([
                 return 'No Translation Data';
             }
 
-            disp = itextItem.getValue("default", lang);
+            defaultDisp = itextItem.getValue("default", defaultLang);
+            disp = itextItem.getValue("default", lang) || defaultDisp;
+
             if (disp) {
-                return disp;
-            } else {
-                disp = itextItem.getValue("default", defaultLang);
-            }
-            if (disp) {
+                if (lang !== defaultLang && disp === defaultDisp) {
+                    disp += " [" + defaultLang + "]";
+                }
                 return disp;
             }
 
@@ -616,7 +644,7 @@ define([
     var DataBindOnly = util.extend(defaultOptions, {
         isDataOnly: true,
         typeName: 'Hidden Value',
-        icon: 'icon-vellum-variable',
+        icon: 'fcc fcc-fd-variable',
         isTypeChangeable: false,
         spec: {
             xmlnsAttr: { presence: "optional" },
@@ -640,7 +668,7 @@ define([
 
     var Text = util.extend(defaultOptions, {
         typeName: "Text",
-        icon: "icon-vellum-text",
+        icon: "fcc fcc-fd-text",
         init: function (mug, form) {
             mug.p.tagName = "input";
             mug.p.dataType = "xsd:string";
@@ -668,7 +696,7 @@ define([
 
     var Int = util.extend(defaultOptions, {
         typeName: 'Integer',
-        icon: 'icon-vellum-numeric',
+        icon: 'fcc fcc-fd-numeric',
         init: function (mug, form) {
             mug.p.tagName = "input";
             mug.p.dataType = "xsd:int";
@@ -677,7 +705,7 @@ define([
 
     var Audio = util.extend(defaultOptions, {
         typeName: 'Audio Capture',
-        icon: 'icon-vellum-audio-capture',
+        icon: 'fcc fcc-fd-audio-capture',
         isODKOnly: true,
         canOutputValue: false,
         writeCustomXML: function (xmlWriter, mug) {
@@ -762,7 +790,7 @@ define([
 
     var DateTime = util.extend(defaultOptions, {
         typeName: 'Date and Time',
-        icon: 'icon-vellum-datetime',
+        icon: 'fcc fcc-fd-datetime',
         init: function (mug, form) {
             mug.p.tagName = "input";
             mug.p.dataType = "xsd:dateTime";
@@ -780,7 +808,7 @@ define([
 
     var Long = util.extend(Int, {
         typeName: 'Long',
-        icon: 'icon-vellum-long',
+        icon: 'fcc fcc-fd-long',
         init: function (mug, form) {
             mug.p.tagName = "input";
             mug.p.dataType = "xsd:long";
@@ -789,7 +817,7 @@ define([
 
     var Double = util.extend(Int, {
         typeName: 'Decimal',
-        icon: 'icon-vellum-decimal',
+        icon: 'fcc fcc-fd-decimal',
         init: function (mug, form) {
             mug.p.tagName = "input";
             mug.p.dataType = "xsd:double";
@@ -799,14 +827,14 @@ define([
     var Item = util.extend(defaultOptions, {
         isControlOnly: true,
         typeName: 'Choice',
-        icon: 'icon-circle-blank',
+        icon: 'fcc fcc-fd-single-circle',
         isTypeChangeable: false,
         canOutputValue: false,
         getIcon: function (mug) {
             if (mug.parentMug.__className === "Select") {
-                return 'icon-circle-blank';
+                return 'fcc fcc-fd-single-circle';
             } else {
-                return 'icon-check-empty';
+                return 'fcc fcc-fd-multi-box';
             }
         },
         writeControlHint: false,
@@ -868,7 +896,7 @@ define([
 
     var MSelect = util.extend(BaseSelect, {
         typeName: 'Multiple Answer',
-        icon: 'icon-vellum-multi-select',
+        icon: 'fcc fcc-fd-multi-select',
         init: function (mug, form) {
             mug.p.tagName = "select";
         },
@@ -880,7 +908,7 @@ define([
 
     var Select = util.extend(MSelect, {
         typeName: 'Single Answer',
-        icon: 'icon-vellum-single-select',
+        icon: 'fcc fcc-fd-single-select',
         init: function (mug, form) {
             mug.p.tagName = "select1";
         },
@@ -891,6 +919,7 @@ define([
         typeName: 'Group',
         icon: 'icon-folder-open',
         isSpecialGroup: true,
+        isNestableGroup: true,
         isTypeChangeable: false,
         canOutputValue: false,
         controlNodeChildren: function ($node) {
@@ -905,7 +934,8 @@ define([
             calculateAttr: { presence: "notallowed" },
             constraintAttr: { presence: "notallowed" },
             constraintMsgAttr: { presence: "notallowed" },
-            dataValue: { presence: "notallowed" }
+            dataValue: { presence: "notallowed" },
+            requiredAttr: { presence: "notallowed" },
         }
     });
     
@@ -915,9 +945,6 @@ define([
     var FieldList = util.extend(Group, {
         typeName: 'Question List',
         icon: 'icon-reorder',
-        isSpecialGroup: true,
-        isTypeChangeable: false,
-        canOutputValue: false,
         init: function (mug, form) {
             Group.init(mug, form);
             mug.p.appearance = 'field-list';
@@ -927,9 +954,6 @@ define([
     var Repeat = util.extend(Group, {
         typeName: 'Repeat Group',
         icon: 'icon-retweet',
-        isSpecialGroup: true,
-        isTypeChangeable: false,
-        canOutputValue: false,
         controlNodeChildren: function ($node) {
             return $node.children('repeat').children();
         },
@@ -985,6 +1009,7 @@ define([
    
     function MugTypesManager(baseSpec, mugTypes, opts) {
         var _this = this,
+            // Nestable Field List not supported in CommCare before v2.16
             group_in_field_list = opts.features.group_in_field_list;
 
         this.auxiliaryTypes = mugTypes.auxiliary;
@@ -1003,12 +1028,16 @@ define([
 
         var allTypeNames = _.keys(this.allTypes),
             innerChildTypeNames = _.without.apply(_, 
-                  [allTypeNames].concat(
-                      _.keys(this.auxiliaryTypes))),
-            fieldListChildTypes = _.without(innerChildTypeNames, 'FieldList');
+                  [allTypeNames].concat(_.keys(this.auxiliaryTypes)));
+
         if (!group_in_field_list) {
-            fieldListChildTypes = _.without(fieldListChildTypes, "Group",
-                                            "Repeat");
+            this.normalTypes.FieldList.validChildTypes = _.without.apply(_,
+                [innerChildTypeNames].concat(_.without(_.map(this.allTypes,
+                    function (type, name) {
+                        return type.isNestableGroup ? name : null;
+                    }
+                ), null))
+            );
         }
 
         _.each(this.auxiliaryTypes, function (type) {
@@ -1016,18 +1045,16 @@ define([
         });
 
         _.each(this.normalTypes, function (Mug, name) {
+            if (Mug.validChildTypes) {
+                return; // do nothing if validChildTypes is already set
+            }
             var validChildTypes;
-            if (name === "Group" || name === "Repeat") {
+            if (Mug.isNestableGroup) {
                 validChildTypes = innerChildTypeNames;
-            } else if (name === "FieldList") {
-                validChildTypes = fieldListChildTypes;
             } else {
                 validChildTypes = [];
             }
-
-            if (!Mug.validChildTypes) {
-                Mug.validChildTypes = validChildTypes;
-            }
+            Mug.validChildTypes = validChildTypes;
         });
 
         _.each(this.allTypes, function (Mug, name) {

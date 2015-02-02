@@ -147,6 +147,7 @@ define([
             return types;
         },
         updateControlNodeAdaptorMap: function (map) {
+            this.__callOld();
             var adaptItemset = parser.makeControlOnlyMugAdaptor('Itemset');
             map.itemset = function ($element, appearance, form, parentMug) {
                 var adapt = function (mug, form) {
