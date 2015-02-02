@@ -424,7 +424,7 @@ require([
         });
 
         it("should highlight label after tab", function () {
-            util.loadXML(TEST_XML_3);
+            util.loadXML(TEST_XML_3, null, /You have languages in your form/);
             util.clickQuestion("question1");
             var enLabel = $("[name='itext-en-label']"),
                 hinLabel = $("[name='itext-hin-label']");

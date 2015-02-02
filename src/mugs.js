@@ -318,14 +318,6 @@ define([
                 return;
             }
             spec[name] = propertySpec;
-
-            _.each(propertySpec, function (value, key) {
-                if (_.isFunction(value) && key !== 'validationFunc' && 
-                    key !== 'widget') 
-                {
-                    propertySpec[key] = value(mugOptions);
-                }
-            });
         });
 
         
@@ -355,9 +347,14 @@ define([
         /**
          * Parser integration: get children from data node
          *
+         * Additionally, this may perform extra mug initialization. It is
+         * called before the mug is inserted into the data tree/mug hierarchy.
+         *
+         * @param mug - The mug object.
          * @param node - This mug's data node, a jQuery object.
+         * @returns - A jquery collection of child nodes.
          */
-        dataNodeChildren: function ($node) {
+        parseDataNode: function (mug, $node) {
             return $node.children();
         },
         controlNodeChildren: null,
@@ -371,6 +368,36 @@ define([
 
         // data node writer options
         getExtraDataAttributes: null, // function (mug) { return {...}; }
+
+        /**
+         * Returns a list of objects containing bind element attributes
+         */
+        getBindList: function (mug) {
+            var constraintMsgItextID = mug.p.constraintMsgItextID,
+                constraintMsg;
+            if (constraintMsgItextID && !constraintMsgItextID.isEmpty()) {
+                constraintMsg = "jr:itext('" + constraintMsgItextID.id + "')";
+            } else {
+                constraintMsg = mug.p.constraintMsgAttr;
+            }
+            var attrs = {
+                nodeset: mug.form.getAbsolutePath(mug),
+                type: mug.p.dataType,
+                constraint: mug.p.constraintAttr,
+                "jr:constraintMsg": constraintMsg,
+                relevant: mug.p.relevantAttr,
+                required: util.createXPathBoolFromJS(mug.p.requiredAttr),
+                calculate: mug.p.calculateAttr,
+                "jr:preload": mug.p.preload,
+                "jr:preloadParams": mug.p.preloadParams
+            };
+            _.each(mug.p.rawBindAttributes, function (value, key) {
+                if (!attrs.hasOwnProperty(key)) {
+                    attrs[key] = value;
+                }
+            });
+            return attrs.nodeset ? [attrs] : [];
+        },
 
         // control node writer options
         writeControlLabel: true,
@@ -900,6 +927,7 @@ define([
         typeName: 'Group',
         icon: 'icon-folder-open',
         isSpecialGroup: true,
+        isNestableGroup: true,
         isTypeChangeable: false,
         canOutputValue: false,
         controlNodeChildren: function ($node) {
@@ -925,9 +953,6 @@ define([
     var FieldList = util.extend(Group, {
         typeName: 'Question List',
         icon: 'icon-reorder',
-        isSpecialGroup: true,
-        isTypeChangeable: false,
-        canOutputValue: false,
         init: function (mug, form) {
             Group.init(mug, form);
             mug.p.appearance = 'field-list';
@@ -937,9 +962,6 @@ define([
     var Repeat = util.extend(Group, {
         typeName: 'Repeat Group',
         icon: 'icon-retweet',
-        isSpecialGroup: true,
-        isTypeChangeable: false,
-        canOutputValue: false,
         controlNodeChildren: function ($node) {
             return $node.children('repeat').children();
         },
@@ -995,6 +1017,7 @@ define([
    
     function MugTypesManager(baseSpec, mugTypes, opts) {
         var _this = this,
+            // Nestable Field List not supported in CommCare before v2.16
             group_in_field_list = opts.features.group_in_field_list;
 
         this.auxiliaryTypes = mugTypes.auxiliary;
@@ -1013,12 +1036,16 @@ define([
 
         var allTypeNames = _.keys(this.allTypes),
             innerChildTypeNames = _.without.apply(_, 
-                  [allTypeNames].concat(
-                      _.keys(this.auxiliaryTypes))),
-            fieldListChildTypes = _.without(innerChildTypeNames, 'FieldList');
+                  [allTypeNames].concat(_.keys(this.auxiliaryTypes)));
+
         if (!group_in_field_list) {
-            fieldListChildTypes = _.without(fieldListChildTypes, "Group",
-                                            "Repeat");
+            this.normalTypes.FieldList.validChildTypes = _.without.apply(_,
+                [innerChildTypeNames].concat(_.without(_.map(this.allTypes,
+                    function (type, name) {
+                        return type.isNestableGroup ? name : null;
+                    }
+                ), null))
+            );
         }
 
         _.each(this.auxiliaryTypes, function (type) {
@@ -1026,18 +1053,16 @@ define([
         });
 
         _.each(this.normalTypes, function (Mug, name) {
+            if (Mug.validChildTypes) {
+                return; // do nothing if validChildTypes is already set
+            }
             var validChildTypes;
-            if (name === "Group" || name === "Repeat") {
+            if (Mug.isNestableGroup) {
                 validChildTypes = innerChildTypeNames;
-            } else if (name === "FieldList") {
-                validChildTypes = fieldListChildTypes;
             } else {
                 validChildTypes = [];
             }
-
-            if (!Mug.validChildTypes) {
-                Mug.validChildTypes = validChildTypes;
-            }
+            Mug.validChildTypes = validChildTypes;
         });
 
         _.each(this.allTypes, function (Mug, name) {

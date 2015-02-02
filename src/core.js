@@ -20,6 +20,7 @@ define([
     'vellum/mugs',
     'vellum/widgets',
     'vellum/parser',
+    'vellum/datasources',
     'vellum/util',
     'vellum/debugutil',
     'vellum/base',
@@ -49,6 +50,7 @@ define([
     mugs,
     widgets,
     parser,
+    datasources,
     util,
     debug
 ) {
@@ -194,6 +196,7 @@ define([
         this._createJSTree();
         this._init_modal_dialogs();
         this._setup_fancybox();
+        datasources.init(this);
     };
 
     fn.postInit = function () {
@@ -314,12 +317,7 @@ define([
             {
                 group: ["Geopoint", 'Advanced', ''],
                 textOnly: true,
-                questions: [
-                    "Geopoint",
-                    "Barcode",
-                    "Secret",
-                    "AndroidIntent"
-                ]
+                questions: this.getAdvancedQuestions()
             }
         ];
     };
@@ -328,6 +326,15 @@ define([
         return [
             "Select",
             "MSelect"
+        ];
+    };
+
+    fn.getAdvancedQuestions = function () {
+        return [
+            "Geopoint",
+            "Barcode",
+            "Secret",
+            "AndroidIntent"
         ];
     };
 
@@ -1131,7 +1138,7 @@ define([
             try {
                 // a place for plugins to put parse warnings
                 _this.data.core.parseWarnings = [];
-                _this.loadXML(formString);
+                _this.loadXML(formString, {});
                 delete _this.data.core.parseWarnings;
 
                 if (formString) {
@@ -1212,16 +1219,19 @@ define([
         }
     };
         
-    fn.loadXML = function (formXML) {
+    fn.loadXML = function (formXML, options) {
         var form, _this = this;
         _this.data.core.$tree.children().children().each(function (i, el) {
             _this.jstree("delete_node", el);
         });
-        this.data.core.form = form = parser.parseXForm(formXML, {
+        options = _.extend({
             mugTypes: this.data.core.mugTypes,
             allowedDataNodeReferences: this.opts().core.allowedDataNodeReferences, 
-            externalInstances: this.opts().core.externalInstances
-        }, this, _this.data.core.parseWarnings);
+            externalInstances: this.opts().core.externalInstances,
+            enableInstanceRefCounting: true
+        }, options);
+        this.data.core.form = form = parser.parseXForm(
+            formXML, options, this, _this.data.core.parseWarnings);
         form.formName = this.opts().core.formName || form.formName;
 
         form.on('question-type-change', function (e) {
@@ -1285,7 +1295,7 @@ define([
         });
         if (formXML) {
             _this._resetMessages(_this.data.core.form.errors);
-            _this.reloadTree();
+            _this._populateTree();
         }
     };
 
@@ -1311,11 +1321,14 @@ define([
         }
     };
 
-    fn.reloadTree = function () {
+    fn._populateTree = function () {
+        // NOTE: this performs the final step in the mug parsing process.
+        // It should only be called once after a new XForm is loaded.
         var _this = this,
             form = this.data.core.form;
 
         form.mergedTreeMap(function (mug) {
+            _this.handleMugParseFinish(mug);
             var inTree = _this.createQuestion(mug, mug.parentMug, 'into');
             if (inTree) {
                 _this.setTreeValidationIcon(mug);
@@ -1448,7 +1461,7 @@ define([
         }
         this._propertiesMug = mug;
         var $content = this.$f.find(".fd-props-content").empty(),
-            sections = this.getSections();
+            sections = this.getSections(mug);
 
         this.$f.find('.fd-props-toolbar').html(this.getMugToolbar(mug));
         for (var i = 0; i < sections.length; i++) {
@@ -1473,7 +1486,7 @@ define([
     };
         
     fn.hideQuestionProperties = function() {
-        this.$f.find('.fd-question-properties').hide();
+        this.disableUI();
     };
 
     fn.showContent = function () {
@@ -1484,29 +1497,58 @@ define([
         this.$f.find('.fd-content-right').hide();
     };
 
-    fn.displayXPathEditor = function(options) {
+    /**
+     * Display an editor in the question properties area
+     *
+     * @param options - Object with editor options:
+     *  {
+     *      headerText: "text to display in header",
+     *      loadEditor: function($div, options),    // load editor into $div
+     *      change: function(value),                // editor changed callback
+     *      done: function(value)                   // editor done callback
+     *  }
+     */
+    fn.displaySecondaryEditor = function(options) {
+        // All mention of "xpath" in this function is from when this function
+        // displayed the xpath editor. It has been adapted to show any editor.
         var _this = this,
             $editor = this.$f.find('.fd-xpath-editor');
 
+        $editor.find('.fd-head').text(options.headerText);
         options.DEBUG_MODE = DEBUG_MODE;
-        this.hideQuestionProperties();
+        this.disableUI();
 
         var done = options.done;
         options.done = function (val) {
             done(val);
-            _this.data.core.hasXPathEditorChanged = false;
-            $editor.hide();
-            _this.refreshCurrentMug();
+            if (_this.data.core.hasXPathEditorChanged) {
+                _this.data.core.hasXPathEditorChanged = false;
+                $editor.hide();
+                _this.refreshCurrentMug();
+            } else {
+                $editor.hide();
+                _this.enableUI();
+            }
         };
-        options.change = function () {
+        var change = options.change;
+        options.change = function (val) {
             _this.data.core.hasXPathEditorChanged = true;
+            if (change) {
+                change(val);
+            }
         };
         $editor.show();
+        options.loadEditor(_this.$f.find('.fd-xpath-editor-content'), options);
+    };
 
-        require(['vellum/expressionEditor'], function (expressionEditor) {
-            expressionEditor.showXPathEditor(
-                _this.$f.find('.fd-xpath-editor-content'), options);
-        });
+    fn.displayXPathEditor = function(options) {
+        options.headerText = "Expression Editor";
+        options.loadEditor = function($div, options) {
+            require(['vellum/expressionEditor'], function (expressionEditor) {
+                expressionEditor.showXPathEditor($div, options);
+            });
+        };
+        this.displaySecondaryEditor(options);
     };
 
     fn.alert = function (title, message, buttons) {
@@ -1811,7 +1853,7 @@ define([
         this._showConfirmDialog();
     };
 
-    fn.getSections = function () {
+    fn.getSections = function (mug) {
         return [
             {
                 slug: "main",
@@ -1911,11 +1953,12 @@ define([
 
     fn.getAdvancedProperties = function () {
         return [
+            "dataSource",
             "dataValue",
             "xmlnsAttr",
             "label",
             "hintLabel",
-            "constraintMsgAttr",
+            "constraintMsgAttr"
         ];
     };
 
@@ -1929,12 +1972,13 @@ define([
         if (_.isUndefined(propVal) &&
             propDef && propDef.visibility &&
             mug.p.getDefinition(propDef.visibility) &&
-                !getWidgetClassAndOptions(propDef.visibility, mug))
+            !getWidgetClassAndOptions(propDef.visibility, mug))
         {
             return null;
         }
 
-        if (!propDef || 
+        if (!propDef || propDef.visibility === 'hidden' ||
+            (_.isFunction(propDef.visibility) && !propDef.visibility(mug, propDef)) ||
             (_.isUndefined(propVal) &&
              (propDef.visibility === "visible_if_present" ||
               propDef.presence === "notallowed")))

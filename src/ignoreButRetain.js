@@ -105,7 +105,7 @@ define([
     var xmls = new XMLSerializer();
 
     $.vellum.plugin("ignore", {}, {
-        loadXML: function (xmlStr) {
+        loadXML: function (xmlStr, options) {
             this.data.ignore.ignoredNodes = [];
             if (!xmlStr) {
                 this.__callOld();
@@ -123,6 +123,7 @@ define([
                 return;
             }
 
+            options.enableInstanceRefCounting = false;
             ignores.each(function (i, el) {
                 _this.data.ignore.ignoredNodes.push(getPathAndPosition(el));
                 ignoredEls.push(el);
@@ -134,7 +135,7 @@ define([
                 el.parentElement.removeChild(el);
             });
            
-            this.__callOld(xmls.serializeToString(xml[0]));
+            this.__callOld(xmls.serializeToString(xml[0]), options);
         },
         createXML: function () {
             var xmlStr = this.__callOld(),
