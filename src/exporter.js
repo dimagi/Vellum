@@ -1,7 +1,7 @@
 define([
-    'vellum/util'
+    'vellum/tsv'
 ], function (
-    util
+    tsv
 ) {
     // todo: abstract out IText stuff into part of the plugin interface
     var generateExportTSV = function (form) {
@@ -89,16 +89,11 @@ define([
                 }
             }
             
-            return util.tabSeparate(columnOrder.map(function (column) {
-                return row[column];
-            }));
+            return columnOrder.map(function (column) { return row[column]; });
         };
      
-        var headers = [util.tabSeparate(columnOrder)],
-            rows = headers.concat(
-                form.getMugList().map(mugToExportRow));
-
-        return rows.join("\n");
+        var rows = [columnOrder].concat(form.getMugList().map(mugToExportRow));
+        return tsv.tabDelimit(rows);
     };
 
     return {
