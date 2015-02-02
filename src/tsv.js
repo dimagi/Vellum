@@ -3,6 +3,8 @@ define([
 ], function (
     _
 ) {
+    var specialChars = /[\r\n\u2028\u2029"]/;
+
     /**
      * Get a function that returns the next row of tab-separated values
      * each time it is called. Returns null after last row is generated.
@@ -72,8 +74,26 @@ define([
         return rows;
     }
 
+    function escape(value) {
+        if (!value) {
+            value = "";
+        }
+        if (specialChars.test(value)) {
+            value = '"' + value.replace(/"/g, '""') + '"';
+        }
+        return value;
+    }
+
+    function tabDelimit(rows) {
+        return _.map(rows, function (row) {
+            return _.map(row, escape).join("\t");
+        }).join("\n");
+    }
+
     return {
+        escape: escape,
         makeRowParser: makeRowParser,
-        parseRows: parseRows
+        parseRows: parseRows,
+        tabDelimit: tabDelimit
     };
 });
