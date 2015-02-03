@@ -79,6 +79,7 @@ require([
             text1.p.dataParent = '/data/group1';
             form.moveMug(text1, repeat1, 'into');
             assert(util.isTreeNodeValid(text1), "text1 should be valid");
+            assert.isUndefined(text1.p.dataParent);
         });
 
         it("should parse and write XML to have the same order", function() {
@@ -88,8 +89,13 @@ require([
 
         it("should have proper data parent after being loaded from xml", function() {
             util.loadXML(PARSE_XML);
-            var question1 = call("getMugByPath", "/data/question4/question1");
+            var question1 = util.getMug("/data/question4/question1");
             assert.equal(question1.p.dataParent, "/data/question4");
+            util.assertJSTreeState(
+                "question1",
+                "question4",
+                "  question3"
+            );
         });
     });
 });
