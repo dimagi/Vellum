@@ -7,7 +7,8 @@ require([
     'text!static/all_question_types.xml',
     'text!static/all_question_types.tsv',
     'text!static/exporter/item-id.xml',
-    'text!static/exporter/item-id.tsv'
+    'text!static/exporter/item-id.tsv',
+    'text!static/javaRosa/multi-lang-trans.xml'
 ], function (
     chai,
     $,
@@ -15,8 +16,9 @@ require([
     util,
     ALL_QUESTIONS_XML,
     ALL_QUESTIONS_TSV,
-    item_id_xml,
-    item_id_tsv
+    ITEM_ID_XML,
+    ITEM_ID_TSV,
+    MULTI_LANG_TRANS_XML
 ) {
     var assert = chai.assert,
         call = util.call;
@@ -33,13 +35,23 @@ require([
         });
 
         it("should include question type in TSV", function () {
-            call("loadXML", ALL_QUESTIONS_XML);
+            util.loadXML(ALL_QUESTIONS_XML);
             assert.equal(call("getData").core.form.getExportTSV(), ALL_QUESTIONS_TSV);
         });
 
         it("should include item values in TSV", function () {
-            call("loadXML", item_id_xml);
-            assert.equal(call("getData").core.form.getExportTSV(), item_id_tsv);
+            util.loadXML(ITEM_ID_XML);
+            assert.equal(call("getData").core.form.getExportTSV(), ITEM_ID_TSV);
+        });
+
+        it("should properly escape special characters", function () {
+            util.loadXML(MULTI_LANG_TRANS_XML);
+            assert.equal(call("getData").core.form.getExportTSV(),
+                'Question\tType\tText (en)\tText (hin)\tAudio (en)\t' +
+                'Audio (hin)\tImage (en)\tImage (hin)\tDisplay Condition\t' +
+                'Validation Condition\tValidation Message\tCalculate Condition\tRequired\n' +
+                '/text\tText\t"""Text"\t"""Text"\t\t\t\t\t\t\t\t\tno'
+            );
         });
     });
 

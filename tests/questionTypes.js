@@ -43,12 +43,10 @@ require([
                 },
                 inputs: {
                     calculateAttr: 0
-                    //showOKCheckbox: 0
                 }
             }, {
                 type: 'Trigger',
                 nodeId: 'question2',
-                attrs: {showOKCheckbox: false},
                 inputs: {
                     // TODO add more input counts for each question type
                     calculateAttr: 0,
@@ -59,7 +57,9 @@ require([
             }, {
                 type: 'Trigger',
                 nodeId: 'question30',
-                attrs: {showOKCheckbox: true}
+                attrs: {
+                    appearance: ''
+                },
             }, {
                 type: 'Select',
                 nodeId: 'question3',

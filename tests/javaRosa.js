@@ -7,6 +7,7 @@ require([
     'vellum/util',
     'text!static/javaRosa/outputref-group-rename.xml',
     'text!static/javaRosa/text-question.xml',
+    'text!static/javaRosa/multi-lang-trans.xml',
     'text!static/javaRosa/multi-line-trans.xml',
     'text!static/javaRosa/output-refs.xml',
     'text!static/javaRosa/text-with-constraint.xml'
@@ -18,6 +19,7 @@ require([
     vellum_util,
     OUTPUTREF_GROUP_RENAME_XML,
     TEXT_QUESTION_XML,
+    MULTI_LANG_TRANS_XML,
     MULTI_LINE_TRANS_XML,
     OUTPUT_REFS_XML,
     TEXT_WITH_CONSTRAINT_XML
@@ -195,6 +197,20 @@ require([
             assert.equal(enLabel.val(), "English");
             assert.equal(hinLabel.val(), "");
             assert.equal(hinLabel.attr("placeholder"), "English");
+        });
+
+        it("tree should note when default language is being displayed instead of selected language", function() {
+            util.loadXML("");
+            util.addQuestion("Text", "question1");
+            util.clickQuestion("question1");
+            $("[name='itext-en-label']").val('english').change();
+            var treeSelector = ".fd-question-tree .jstree-anchor";
+
+            assert.equal($(treeSelector).text(), "english");
+            $(".fd-question-tree-lang select").val('hin').change();
+            assert.equal($(treeSelector).text(), "english [en]");
+            $("[name='itext-hin-label']").val('hindi').change();
+            assert.equal($(treeSelector).text(), "hindi");
         });
 
         it("non-labelItext widget should contain value on load", function () {
@@ -391,6 +407,16 @@ require([
                          'audio-en\taudio-hin\timage-en\timage-hin\tvideo-en\tvideo-hin\n' +
                          'question1-label\t"First ""line\nSecond"" line\nThird line"\t' +
                          'Hindu trans\t\t\t\t\t\t');
+        });
+
+        it("should escape all languages when generating bulk translations", function () {
+            util.loadXML(MULTI_LANG_TRANS_XML);
+            var jr = util.call("getData").javaRosa,
+                fakeVellum = {beforeSerialize: function () {}};
+            assert.equal(jr.generateItextXLS(fakeVellum, jr.Itext),
+                         'label\tdefault-en\tdefault-hin\taudio-en\taudio-hin\t' +
+                         'image-en\timage-hin\tvideo-en\tvideo-hin\n' +
+                         'text-label\t"""Text"\t"""Text"\t\t\t\t\t\t');
         });
 
         it("bulk translation tool should not create empty itext forms", function () {

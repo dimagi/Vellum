@@ -1257,64 +1257,43 @@ define([
     };
 
     var generateItextXLS = function (vellum, Itext) {
+        function rowify(firstVal, languages, forms, func) {
+            var row = [firstVal];
+            _.each(forms, function (form) {
+                _.each(languages, function (language) {
+                    row.push(func(language, form));
+                });
+            });
+            return row;
+        }
+
+        function makeRow(item, languages, forms) {
+            return rowify(item.id, languages, forms, function (language, form) {
+                return item.hasForm(form) ? item.get(language, form) : "";
+            });
+        }
+
+        function makeHeadings(languages, forms) {
+            return rowify("label", languages, forms, function (language, form) {
+                return form + '-' + language;
+            });
+        }
+
         // todo: fix abstraction barrier
         vellum.beforeSerialize();
 
-        // TODO move TSV generation logic into tsv module
-        function getItemFormValues(item, languages, form) {
-
-            var ret = [];
-
-            for(var i = 0; i < languages.length; i++) {
-                var language = languages[i];
-                var value = item.hasForm(form) ? (item.getForm(form).getValueOrDefault(language) || "") : "";
-
-                if (specialChars.test(value)) {
-                    // quote field
-                    value = '"' + value.replace(/"/g, '""') + '"';
-                }
-                ret.push(value);
-            }
-            return ret.join("\t");
-        }
-
-        function makeRow (languages, item, forms) {
-
-            var questions = getItemFormValues(item, languages, forms[0]);
-            var audios = getItemFormValues(item, languages, forms[1]);
-            var images = getItemFormValues(item, languages, forms[2]);
-            var videos = getItemFormValues(item, languages, forms[3]);
-
-            var row = [item.id, questions, audios, images, videos];
-            return row.join("\t");
-        }
-
-        function makeHeadings(languages, exportCols) {
-            var header_row = ["label"];
-            for(i = 0; i < exportCols.length; i++) {
-                for(j=0; j < languages.length; j++) {
-                    header_row.push(exportCols[i] + '-' + languages[j]);
-                }
-            }
-            return header_row.join("\t");
-        }
-
-        var specialChars = /[\r\n\u2028\u2029"]/g;
-        var ret = [];
         // TODO: should this be configurable?
-        var exportCols = ["default", "audio", "image" , "video"];
-        var languages = Itext.getLanguages();
-
-        var allItems = Itext.getNonEmptyItems();
-        var item, i, j;
+        var forms = ["default", "audio", "image" , "video"],
+            languages = Itext.getLanguages(),
+            allItems = Itext.getNonEmptyItems(),
+            rows = [];
         if (languages.length > 0) {
-            ret.push(makeHeadings(languages, exportCols));
-            for(i = 0; i < allItems.length; i++) {
-                item = allItems[i];
-                ret.push(makeRow(languages, item, exportCols));
+            rows.push(makeHeadings(languages, forms));
+            for(var i = 0; i < allItems.length; i++) {
+                rows.push(makeRow(allItems[i], languages, forms));
             }
         }
-        return ret.join("\n");
+        return tsv.tabDelimit(rows);
     };
 
     function validateItextItem(itextItem, name) {
@@ -1450,8 +1429,7 @@ define([
         },
         _changeTreeDisplayLanguage: function (lang) {
             var _this = this,
-                form = this.data.core.form,
-                itext = this.data.javaRosa.Itext;
+                form = this.data.core.form;
            
             // todo: getMugDisplayName should not rely on this state, it should be
             // passed
@@ -1470,9 +1448,7 @@ define([
                     else {
                         var labelItextID = mug.p.labelItextID;
                         if (labelItextID) {
-                            var itextID = labelItextID.id,
-                                text = itext.getItem(itextID).getValue("default", lang);
-                            text = text || _this.getMugDisplayName(mug);
+                            var text = _this.getMugDisplayName(mug);
                             _this.jstree('rename_node', $el, text ||
                                     _this.opts().core.noTextString);
                         }
