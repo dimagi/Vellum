@@ -317,16 +317,15 @@ define([
 
                     if (dataParent) {
                         dataParentMug = form.getMugByPath(dataParent);
-                    }
 
-                    if (dataParent &&
-                        form.getBasePath().slice(0, -1) !== dataParent &&
-                        !dataParentMug) {
-                        return "Must be valid path";
-                    } else if (dataParentMug && dataParentMug.__className !== 'Group') {
-                        return "Data must be a child of a group";
-                    } else if (dataParent && !mug.spec.dataParent.visibility(mug)) {
-                        return "Children of repeat groups cannot have a different data parent";
+                        if(!dataParentMug &&
+                           form.getBasePath().slice(0, -1) !== dataParent) {
+                            return "Must be valid path";
+                        } else if (dataParentMug && dataParentMug.__className !== 'Group') {
+                            return "Data must be a child of a group";
+                        } else if (!mug.spec.dataParent.visibility(mug)) {
+                            return "Children of repeat groups cannot have a different data parent";
+                        }
                     }
 
                     return "pass";
