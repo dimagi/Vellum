@@ -248,18 +248,6 @@ define([
         var elementNameRegex = /^(?!XML)[a-zA-Z][\w-]*$/;
         return elementNameRegex.test(name);
     };
-
-    /**
-     * Turns a list of strings into a single tab separated straing.
-     * Replaces newlines with ' ' so they don't affect the spacing.
-     * @param list
-     */
-    that.tabSeparate = function (list) {
-        var cleanVal = function (val) {
-            return val.replace(/\n/g, ' ');
-        };
-        return list.map(cleanVal).join("\t");
-    };
     
 
     /**
