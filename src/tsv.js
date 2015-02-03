@@ -74,6 +74,17 @@ define([
         return rows;
     }
 
+    /**
+     * Escape a TSV field value
+     *
+     * This will convert any object to a string, regardless of whether
+     * the object has a nice string representation that would be
+     * converted back to the original value by the parser. Null and
+     * undefined values are converted to empty string.
+     *
+     * @param value - a field value.
+     * @returns - a string, the escaped field value.
+     */
     function escape(value) {
         if (value === null || _.isUndefined(value)) {
             value = "";
@@ -86,6 +97,15 @@ define([
         return value;
     }
 
+    /**
+     * Serialize an array of rows to a tab-delimited string
+     *
+     * Each row is expected to be an array of field values, which will
+     * be converted to strings using the `escape` function.
+     *
+     * @param rows - an array of row arrays.
+     * @returns - a string, the tab-delimited rows. One row per line.
+     */
     function tabDelimit(rows) {
         return _.map(rows, function (row) {
             return _.map(row, escape).join("\t");
