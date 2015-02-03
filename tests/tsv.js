@@ -8,23 +8,26 @@ require([
 ) {
     var assert = chai.assert;
 
-    function eq(value, parsed) {
+    function eq(value, parsed, roundTrip) {
         var repr = value
                     .replace(/\r/g, "\\r")
                     .replace(/\n/g, "\\n")
                     .replace(/\t/g, "\\t");
         assert.deepEqual(tsv.parseRows(value, parsed.length + 5), parsed,
                          "parsed '" + repr + "'");
+        if (roundTrip) {
+            assert.strictEqual(tsv.tabDelimit(parsed), value);
+        }
     }
 
     describe("The TSV parser", function () {
 
         it("should parse empty string", function () {
-            eq("", []);
+            eq("", [], true);
         });
 
         it("should parse simple TSV", function () {
-            eq('a\tb', [['a', 'b']]);
+            eq('a\tb', [['a', 'b']], true);
             eq('a\tb\r', [['a', 'b']]);
             eq('a\tb\n', [['a', 'b']]);
             eq('a\tb\u2028', [['a', 'b']]);
@@ -34,6 +37,7 @@ require([
         });
 
         it("should parse simple mutli-line TSV", function () {
+            eq('a\tb\nc', [['a', 'b'], ['c']], true);
             eq('a\tb\rc\r', [['a', 'b'], ['c']]);
             eq('a\tb\nc\n', [['a', 'b'], ['c']]);
             eq('a\tb\u2028c\u2028', [['a', 'b'], ['c']]);
@@ -43,7 +47,7 @@ require([
         });
 
         it("should parse quoted field", function () {
-            eq('"a"\t"b\tc"', [['a', 'b\tc']]);
+            eq('a\t"b\tc"', [['a', 'b\tc']], true);
             eq('"a"\t"b\tc"\r', [['a', 'b\tc']]);
             eq('"a"\t"b\tc"\n', [['a', 'b\tc']]);
             eq('"a"\t"b\tc"\u2028', [['a', 'b\tc']]);
@@ -59,19 +63,19 @@ require([
         });
 
         it("should parse quoted field with escaped quotes", function () {
-            eq('"a""x"\t"b""\t""c"\n', [['a"x', 'b"\t"c']]);
-            eq('"a""x"\t"b""""""c"\n', [['a"x', 'b"""c']]);
+            eq('"a""x"\t"b""\t""c"', [['a"x', 'b"\t"c']], true);
+            eq('"a""x"\t"b""""""c"', [['a"x', 'b"""c']], true);
 
-            eq('"a""x"\t"b""\t""c"\n"a""x"\t"b""\t""c"\n',
-                [['a"x', 'b"\t"c'], ['a"x', 'b"\t"c']]);
+            eq('"a""x"\t"b""\t""c"\n"a""x"\t"b""\t""c"',
+                [['a"x', 'b"\t"c'], ['a"x', 'b"\t"c']], true);
         });
 
         it("should parse quoted multi-line field", function () {
-            eq('"a""x"\t"b\nc\rd\r\ne"\n', [['a"x', 'b\nc\rd\r\ne']]);
-            eq('"a""x"\t"b\u2028c\u2029d"\n', [['a"x', 'b\u2028c\u2029d']]);
+            eq('"a""x"\t"b\nc\rd\r\ne"', [['a"x', 'b\nc\rd\r\ne']], true);
+            eq('"a""x"\t"b\u2028c\u2029d"', [['a"x', 'b\u2028c\u2029d']], true);
 
-            eq('"a""x"\t"b\nc\rd\r\ne"\n"a""x"\t"b\nc\rd\r\ne"\n',
-                [['a"x', 'b\nc\rd\r\ne'], ['a"x', 'b\nc\rd\r\ne']]);
+            eq('"a""x"\t"b\nc\rd\r\ne"\n"a""x"\t"b\nc\rd\r\ne"',
+                [['a"x', 'b\nc\rd\r\ne'], ['a"x', 'b\nc\rd\r\ne']], true);
         });
 
         it("should parse malformed quoted field", function () {
@@ -83,5 +87,34 @@ require([
             //eq('abc\t"def"ghi""\t"jkl', [['abc', '"def"ghi""\t"jkl']]);
         });
 
+    });
+
+    describe("The TSV writer", function () {
+
+        it("should convert null to empty string", function () {
+            assert.strictEqual(tsv.escape(null), "");
+        });
+
+        it("should convert undefined to empty string", function () {
+            (function (undefined) {
+                assert.strictEqual(tsv.escape(undefined), "");
+            })();
+        });
+
+        it("should not convert zero to empty string", function () {
+            assert.strictEqual(tsv.escape(0), "0");
+        });
+
+        it("should escape special characters", function () {
+            var rows = [
+                    ['""', '\t\t\t', '\n\n\n', '\r\r\r', ''],
+                    ['  '] // space is not a special character
+                ],
+                encoded = '""""""\t"\t\t\t"\t"\n\n\n"\t"\r\r\r"\t\n  ';
+            assert.strictEqual(tsv.tabDelimit(rows), encoded);
+
+            // test round-trip for good measure
+            eq(encoded, rows, true);
+        });
     });
 });

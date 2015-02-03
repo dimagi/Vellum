@@ -170,6 +170,7 @@ define([
             // BIND ELEMENT
             dataType: {
                 immutable: true,
+                deleteOnCopy: true,
                 visibility: 'hidden',
                 presence: 'optional',
                 lstring: 'Data Type'
@@ -236,12 +237,13 @@ define([
         control: {
             tagName: {
                 immutable: true,
+                deleteOnCopy: true,
                 visibility: 'hidden',
                 presence: 'required'
             },
             appearance: {
-                immutable: true,
-                visibility: 'hidden',
+                deleteOnCopy: true,
+                visibility: 'optional',
                 presence: 'optional',
                 lstring: 'Appearance Attribute'
             },
@@ -293,7 +295,44 @@ define([
             rawControlXML: {
                 presence: 'optional',
                 lstring: 'Raw XML'
-            }
+            },
+            dataParent: {
+                lstring: 'Data Parent',
+                visibility: function(mug) {
+                    function recFunc(mug) {
+                        if (!mug) {
+                            return true;
+                        } else if (mug.__className === 'Repeat') {
+                            return false;
+                        }
+                        return recFunc(mug.form.controlTree.getNodeFromMug(mug).parent.value);
+                    }
+
+                    return recFunc(mug);
+                },
+                presence: 'optional',
+                widget: widgets.droppableText,
+                validationFunc: function(mug) {
+                    var dataParent = mug.p.dataParent,
+                        form = mug.form,
+                        dataParentMug;
+
+                    if (dataParent) {
+                        dataParentMug = form.getMugByPath(dataParent);
+
+                        if(!dataParentMug &&
+                           form.getBasePath().slice(0, -1) !== dataParent) {
+                            return "Must be valid path";
+                        } else if (dataParentMug && dataParentMug.__className !== 'Group') {
+                            return "Data must be a child of a group";
+                        } else if (!mug.spec.dataParent.visibility(mug)) {
+                            return "Children of repeat groups cannot have a different data parent";
+                        }
+                    }
+
+                    return "pass";
+                }
+            },
         }
     };
 
@@ -464,7 +503,7 @@ define([
             // Reset any properties that are part of the question type
             // definition.
             _.each(this.spec, function (spec, name) {
-                if (spec.immutable) {
+                if (spec.deleteOnCopy) {
                     delete currentAttrs[name];
                 }
             });
@@ -560,7 +599,8 @@ define([
             var itextItem = this.p.labelItextID, 
                 Itext = this.form.vellum.data.javaRosa.Itext,
                 defaultLang = Itext.getDefaultLanguage(),
-                disp;
+                disp,
+                defaultDisp;
 
             if (this.__className === "ReadOnly") {
                 return "Unknown (read-only) question type";
@@ -578,13 +618,13 @@ define([
                 return 'No Translation Data';
             }
 
-            disp = itextItem.getValue("default", lang);
+            defaultDisp = itextItem.getValue("default", defaultLang);
+            disp = itextItem.getValue("default", lang) || defaultDisp;
+
             if (disp) {
-                return disp;
-            } else {
-                disp = itextItem.getValue("default", defaultLang);
-            }
-            if (disp) {
+                if (lang !== defaultLang && disp === defaultDisp) {
+                    disp += " [" + defaultLang + "]";
+                }
                 return disp;
             }
 
@@ -871,21 +911,11 @@ define([
         icon: 'icon-tag',
         init: function (mug, form) {
             mug.p.tagName = "trigger";
-            mug.p.showOKCheckbox = false;
+            mug.p.appearance = "minimal";
         },
         spec: {
             dataType: { presence: 'notallowed' },
-            dataValue: { presence: 'optional' },
-            showOKCheckbox: {
-                lstring: 'Add confirmation checkbox',
-                help: 'Add a confirmation message and checkbox below the label. Available on Android only.',
-                visibility: 'visible',
-                presence: 'optional',
-                widget: widgets.checkbox
-            }
-        },
-        getAppearanceAttribute: function (mug) {
-            return mug.p.showOKCheckbox ? null : 'minimal';
+            dataValue: { presence: 'optional' }
         }
     });
 

@@ -1288,10 +1288,20 @@ define([
                 _this.setUnsavedDuplicateNodeId(false);
             } else if (e.property === 'defaultValue' && e.mug.__className === 'Item') {
                 _this.setUnsavedDuplicateChoiceValue(false);
+            } else if (e.property === 'dataParent') {
+                // TODO Dirty write hack that needs to be replace
+                e.mug.options.isDataOnly = true;
+                _this.data.core.form.insertMug(e.mug.parentMug, e.mug, 'into');
+                e.mug.options.isDataOnly = false;
             }
 
             _this.refreshMugName(e.mug);
             _this.toggleConstraintItext(e.mug);
+        }).on('question-move', function(e) {
+            if (e.mug.spec.dataParent &&
+                e.mug.spec.dataParent.validationFunc(e.mug) !== 'pass') {
+                e.mug.p.dataParent = undefined;
+            }
         });
         if (formXML) {
             _this._resetMessages(_this.data.core.form.errors);
@@ -1300,7 +1310,8 @@ define([
     };
 
     fn.refreshMugName = function (mug, displayLang) {
-        var name = mug.getDisplayName(this.data.core.currentItextDisplayLanguage);
+        displayLang = displayLang || this.data.core.currentItextDisplayLanguage;
+        var name = mug.getDisplayName(displayLang);
         if (name !== this.jstree("get_text", mug.ufid)) {
             this.jstree('rename_node', mug.ufid, name);
         }
@@ -1365,6 +1376,10 @@ define([
             var foo = _this.getInsertTargetAndPosition(
                 _this.getCurrentlySelectedMug(), qType);
             mug = _this.data.core.form.createQuestion(foo[0], foo[1], qType);
+            var $firstInput = _this.$f.find(".fd-question-properties input:text:visible:first");
+            if ($firstInput.length) {
+                $firstInput.focus().select();
+            }
         });
         // the returned value will be `undefined` if ensureCurrentMugIsSaved
         // had to defer for user feedback
@@ -1919,7 +1934,6 @@ define([
             "nodeID",
             "defaultValue",
             "label",
-            "showOKCheckbox",
             "readOnlyControl"
         ];
     };
@@ -1953,7 +1967,9 @@ define([
             "xmlnsAttr",
             "label",
             "hintLabel",
-            "constraintMsgAttr"
+            "constraintMsgAttr",
+            "dataParent",
+            'appearance'
         ];
     };
 
