@@ -179,6 +179,20 @@ require([
             assert(!hinItext.attr("placeholder"), hinItext.attr("placeholder"));
         });
 
+        it("should display correct language for question that was collapsed when language changed", function () {
+            util.loadXML("");
+            var group = util.addQuestion("Group", "group");
+            util.addQuestion("Text", "question2");
+            util.clickQuestion("group/question2");
+            $("[name='itext-en-label']").val('english').change();
+            $("[name='itext-hin-label']").val('hindi').change();
+            util.collapseGroup(group);
+            assert.equal($(".fd-question-tree .jstree-anchor").length, 1);
+            $(".fd-question-tree-lang select").val('hin').change();
+            util.expandGroup(group);
+            assert.equal($(".fd-question-tree .jstree-anchor:last").text(), "hindi");
+        });
+
         it("itext widget should not overwrite label with question id", function () {
             util.loadXML("");
             var q1 = util.addQuestion("Text");
