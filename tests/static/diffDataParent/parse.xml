@@ -26,17 +26,6 @@
 						<value>question3</value>
 					</text>
 				</translation>
-				<translation lang="hin">
-					<text id="question1-label">
-						<value>question1</value>
-					</text>
-					<text id="question4-label">
-						<value>question4</value>
-					</text>
-					<text id="question3-label">
-						<value>question3</value>
-					</text>
-				</translation>
 			</itext>
 		</model>
 	</h:head>
