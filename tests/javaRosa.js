@@ -451,6 +451,29 @@ require([
         });
     });
 
+    describe("the language selector", function() {
+        before(function(done) {
+            util.init({
+                javaRosa: { langs: ['en'] },
+                core: {onReady: done}
+            });
+        });
+
+        it("should have option to display IDs", function() {
+            util.loadXML("");
+            util.addQuestion("Text", "question1");
+            util.clickQuestion("question1");
+            $("[name='itext-en-label']").val('english').change();
+
+            var treeSelector = ".fd-question-tree .jstree-anchor";
+            assert.equal($(treeSelector).text(), "english");
+            var $dropdown = $(".fd-question-tree-lang select");
+            $dropdown.val('_ids').change();
+            assert.equal($dropdown.find("option").length, 2);
+            assert.equal($(treeSelector).text(), "question1");
+        });
+    });
+
     var TEST_XML_1 = '' + 
     '<?xml version="1.0" encoding="UTF-8" ?>\
     <h:html xmlns:h="http://www.w3.org/1999/xhtml"\
