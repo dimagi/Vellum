@@ -437,28 +437,28 @@ require([
             assert.equal(hinLabel[0].selectionStart, 0);
             assert.equal(hinLabel[0].selectionEnd, 15);
         });
+    });
 
-        describe("the language selector", function() {
-            before(function(done) {
-                util.init({
-                    javaRosa: { langs: ['en'] },
-                    core: {onReady: done}
-                });
+    describe("the language selector", function() {
+        before(function(done) {
+            util.init({
+                javaRosa: { langs: ['en'] },
+                core: {onReady: done}
             });
-    
-            it("should have option to display IDs", function() {
-                util.loadXML("");
-                util.addQuestion("Text", "question1");
-                util.clickQuestion("question1");
-                $("[name='itext-en-label']").val('english').change();
-    
-                var treeSelector = ".fd-question-tree .jstree-anchor";
-                assert.equal($(treeSelector).text(), "english");
-                var $dropdown = $(".fd-question-tree-lang select");
-                $dropdown.val('_ids').change();
-                assert.equal($dropdown.find("option").length, 2);
-                assert.equal($(treeSelector).text(), "question1");
-            });
+        });
+
+        it("should have option to display IDs", function() {
+            util.loadXML("");
+            util.addQuestion("Text", "question1");
+            util.clickQuestion("question1");
+            $("[name='itext-en-label']").val('english').change();
+
+            var treeSelector = ".fd-question-tree .jstree-anchor";
+            assert.equal($(treeSelector).text(), "english");
+            var $dropdown = $(".fd-question-tree-lang select");
+            $dropdown.val('_ids').change();
+            assert.equal($dropdown.find("option").length, 2);
+            assert.equal($(treeSelector).text(), "question1");
         });
     });
 
