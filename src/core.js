@@ -840,8 +840,11 @@ define([
             _this.displayMugProperties(mug);
             _this.activateQuestionTypeGroup(mug);
         }).bind("open_node.jstree", function (e, data) {
-            _this.activateQuestionTypeGroup(_this.data.core.form.getMugByUFID(data.node.id));
-            _this.refreshVisibleData();
+            var mug = _this.data.core.form.getMugByUFID(data.node.id);
+            _this.activateQuestionTypeGroup(mug);
+            _this.data.core.form.getDescendants(mug).map(function(descendant) {
+                _this.refreshMugName(descendant);
+            });
         }).bind("close_node.jstree", function (e, data) {
             var selected = _this.jstree('get_selected'),
                 sel = selected.length && _this.jstree('get_node', selected[0]);
