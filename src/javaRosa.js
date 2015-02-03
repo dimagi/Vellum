@@ -1257,46 +1257,40 @@ define([
     };
 
     var generateItextXLS = function (vellum, Itext) {
-        function getItemFormValues(item, languages, form) {
-            var ret = [], i, language;
-            for(i = 0; i < languages.length; i++) {
-                language = languages[i];
-                ret.push(item.hasForm(form) ? item.get(language, form) : "");
-            }
-            return ret;
-        }
-
-        function makeRow(languages, item, forms) {
-            var row = [item.id],
-                extend = Array.prototype.push.apply.bind(Array.prototype.push);
-            for (var i = 0; i < forms.length; i++) {
-                extend(row, getItemFormValues(item, languages, forms[i]));
-            }
+        function rowify(firstVal, languages, forms, func) {
+            var row = [firstVal];
+            _.each(forms, function (form) {
+                _.each(languages, function (language) {
+                    row.push(func(language, form));
+                });
+            });
             return row;
         }
 
-        function makeHeadings(languages, exportCols) {
-            var header_row = ["label"], i, j;
-            for (i = 0; i < exportCols.length; i++) {
-                for (j = 0; j < languages.length; j++) {
-                    header_row.push(exportCols[i] + '-' + languages[j]);
-                }
-            }
-            return header_row;
+        function makeRow(item, languages, forms) {
+            return rowify(item.id, languages, forms, function (language, form) {
+                return item.hasForm(form) ? item.get(language, form) : "";
+            });
+        }
+
+        function makeHeadings(languages, forms) {
+            return rowify("label", languages, forms, function (language, form) {
+                return form + '-' + language;
+            });
         }
 
         // todo: fix abstraction barrier
         vellum.beforeSerialize();
 
         // TODO: should this be configurable?
-        var exportCols = ["default", "audio", "image" , "video"],
+        var forms = ["default", "audio", "image" , "video"],
             languages = Itext.getLanguages(),
             allItems = Itext.getNonEmptyItems(),
             rows = [];
         if (languages.length > 0) {
-            rows.push(makeHeadings(languages, exportCols));
+            rows.push(makeHeadings(languages, forms));
             for(var i = 0; i < allItems.length; i++) {
-                rows.push(makeRow(languages, allItems[i], exportCols));
+                rows.push(makeRow(allItems[i], languages, forms));
             }
         }
         return tsv.tabDelimit(rows);
