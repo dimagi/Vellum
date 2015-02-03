@@ -84,4 +84,21 @@ require([
         });
 
     });
+
+    describe("The TSV writer", function () {
+
+        it("should convert null to empty string", function () {
+            assert.strictEqual(tsv.escape(null), "");
+        });
+
+        it("should convert undefined to empty string", function () {
+            (function (undefined) {
+                assert.strictEqual(tsv.escape(undefined), "");
+            })();
+        });
+
+        it("should not convert zero to empty string", function () {
+            assert.strictEqual(tsv.escape(0), "0");
+        });
+    });
 });

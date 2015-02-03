@@ -75,8 +75,10 @@ define([
     }
 
     function escape(value) {
-        if (!value) {
+        if (value === null || _.isUndefined(value)) {
             value = "";
+        } else {
+            value = String(value);
         }
         if (specialChars.test(value)) {
             value = '"' + value.replace(/"/g, '""') + '"';
