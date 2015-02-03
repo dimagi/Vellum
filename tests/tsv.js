@@ -100,5 +100,17 @@ require([
         it("should not convert zero to empty string", function () {
             assert.strictEqual(tsv.escape(0), "0");
         });
+
+        it("should escape special characters", function () {
+            var rows = [
+                    ['""', '\t\t\t', '\n\n\n', '\r\r\r', ''],
+                    ['  '] // space is not a special character
+                ],
+                encoded = '""""""\t"\t\t\t"\t"\n\n\n"\t"\r\r\r"\t\n  ';
+            assert.strictEqual(tsv.tabDelimit(rows), encoded);
+
+            // test round-trip for good measure
+            eq(encoded, rows);
+        });
     });
 });

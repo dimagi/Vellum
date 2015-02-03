@@ -3,7 +3,7 @@ define([
 ], function (
     _
 ) {
-    var specialChars = /[\r\n\u2028\u2029"]/;
+    var specialChars = /[\r\n\u2028\u2029"\t]/;
 
     /**
      * Get a function that returns the next row of tab-separated values
