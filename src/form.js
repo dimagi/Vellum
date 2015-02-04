@@ -384,17 +384,16 @@ define([
                 this.dataTree.insertMug(newMug, position, refMug);
             }
 
-            if (!newMug.options.isDataOnly) {
-                if (refMug && refMug.options.isDataOnly) {
-                    if (position !== 'after' && position !== 'before') {
-                        // should never happen
-                        throw new Error("cannot insert " + position + " " + refMug.__className);
-                    }
-                    // find alternate insert refMug and position
-                    var newRefMug = this.dataTree.findSibling(
-                                    refMug,
-                                    (position === 'after' ? 'before' : 'after'),
-                                    function (mug) { return !mug.options.isDataOnly; });
+            if (refMug && refMug.options.isDataOnly) {
+                if (position !== 'after' && position !== 'before') {
+                    // should never happen
+                    throw new Error("cannot insert " + position + " " + refMug.__className);
+                }
+                // find alternate insert refMug and position
+                var newRefMug = this.dataTree.findSibling(
+                    refMug,
+                    (position === 'after' ? 'before' : 'after'),
+                    function (mug) { return !mug.options.isDataOnly; });
                     if (newRefMug) {
                         refMug = newRefMug;
                     } else {
@@ -402,9 +401,8 @@ define([
                         refMug = refMug.parentMug;
                         position = (position === 'after' ? 'first' : 'last');
                     }
-                }
-                this.controlTree.insertMug(newMug, position, refMug);
             }
+            this.controlTree.insertMug(newMug, position, refMug);
         },
         /**
          * Move a mug from its current place (in both the Data and Control trees) to
