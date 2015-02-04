@@ -1214,6 +1214,10 @@ define([
         this.data.core.form = form = parser.parseXForm(
             formXML, options, this, _this.data.core.parseWarnings);
         form.formName = this.opts().core.formName || form.formName;
+        if (formXML) {
+            _this._resetMessages(_this.data.core.form.errors);
+            _this._populateTree();
+        }
 
         form.on('question-type-change', function (e) {
             _this.jstree("set_type", e.mug.ufid, e.qType);
@@ -1272,10 +1276,6 @@ define([
             _this.refreshMugName(e.mug);
             _this.toggleConstraintItext(e.mug);
         });
-        if (formXML) {
-            _this._resetMessages(_this.data.core.form.errors);
-            _this._populateTree();
-        }
     };
 
     fn.refreshMugName = function (mug, displayLang) {
