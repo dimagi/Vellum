@@ -459,7 +459,7 @@ define([
     };
 
     /**
-     * Walks through both internal trees (data and control) and grabs
+     * Walks through internal tree and grabs
      * the Itext id's from any Mugs that are found.  Returns
      * a flat list of iIDs.  This list is primarily used
      * for trimming out crufty itext.
@@ -499,7 +499,6 @@ define([
         };
         
         form.controlTree.treeMap(appendItemsIfPresent);
-        form.dataTree.treeMap(appendItemsIfPresent);
         return ret; 
 
     };
@@ -1555,7 +1554,7 @@ define([
             this.data.javaRosa.Itext.updateForExistingMug(mug);
         },
         getMugByLabelItextID: function (itextID) {
-            var node = this.data.core.form.dataTree.rootNode.getSingleMatchingNode(function (value) {
+            var node = this.data.core.form.controlTree.rootNode.getSingleMatchingNode(function (value) {
                 return value && value.getItext() && value.getItext().id === itextID;
             });
 
