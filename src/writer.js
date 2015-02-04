@@ -181,6 +181,9 @@ define([
             }
 
             var opts = mug.options;
+            if (opts.isDataOnly) {
+                return;
+            }
             if (opts.writesOnlyCustomXML) {
                 opts.writeCustomXML(xmlWriter, mug);
                 return;
