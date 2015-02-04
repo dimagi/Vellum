@@ -1,11 +1,13 @@
 define([
     'tpl!vellum/templates/widget_control_keyvalue',
     'underscore',
-    'jquery'
+    'jquery',
+    'vellum/util'
 ], function (
     widget_control_keyvalue,
     _,
-    $
+    $,
+    util
 ) {
     var base = function(mug, options) {
         // set properties shared by all widgets
@@ -135,7 +137,16 @@ define([
                 value = value.replace(
                     new RegExp(String.fromCharCode(10), 'g'), '&#10;');
             }
+
+            var position = util.getCaretPosition(input[0]);
+            var oldvalue = input.val();
             input.val(value);
+
+            // If this input has focus and value hasn't changed much,
+            // keep the cursor in the same position
+            if (input.is(":focus") && oldvalue.length === value.length) {
+                util.setCaretPosition(input[0], position, position);
+            }
         };
 
         widget.getValue = function() {
