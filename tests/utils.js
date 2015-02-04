@@ -228,10 +228,12 @@ define([
 
     function expandGroup(mug) {
         call("jstree", "open_node", mug.ufid);
+        call("jstree", "redraw_node", mug.ufid, true, false, false);
     }
 
     function collapseGroup(mug) {
         call("jstree", "close_node", mug.ufid);
+        call("jstree", "redraw_node", mug.ufid, true, false, false);
     }
 
     return {
