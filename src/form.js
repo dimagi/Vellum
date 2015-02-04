@@ -177,8 +177,7 @@ define([
 
     Form.prototype = {
         getBasePath: function () {
-            // the choice to use dataTree instead of controlTree is arbitrary
-            return "/" + this.dataTree.getRootNode().getID() + "/";
+            return "/" + this.controlTree.getRootNode().getID() + "/";
         },
         fireChange: function (mug) {
             this.fire({
@@ -313,25 +312,6 @@ define([
             return writer.createXForm(this);
         },
         /**
-         * Goes through and grabs all of the data nodes (i.e. nodes that are
-         * only data nodes, possibly with a bind) without any kind of control.
-         * Returns a flat list of these nodes (list items are mugs).
-         */
-        getDataNodeList: function () {
-            return this.dataTree.treeMap(function(node){
-                if (!node.getValue() || node.isRootNode) {
-                    return null;
-                }
-                var mug = node.getValue();
-
-                if (!mug.options.isDataOnly) {
-                    return null;
-                } else {
-                    return mug;
-                }
-            });
-        },
-        /**
          * Walks through both internal trees (data and control) and grabs
          * all mugs that are not (1)Choices.  Returns
          * a flat list of unique mugs.  This list is primarily for the
@@ -393,8 +373,8 @@ define([
                 this.controlTree.isTreeValid(validateMug);
         },
         getMugChildrenByNodeID: function (mug, nodeID) {
-            var parentNode = (mug ? this.dataTree.getNodeFromMug(mug)
-                                  : this.dataTree.rootNode);
+            var parentNode = (mug ? this.controlTree.getNodeFromMug(mug)
+                                  : this.controlTree.rootNode);
             return _.filter(parentNode.getChildrenMugs(), function (m) {
                 return m.p.nodeID === nodeID;
             });
@@ -779,7 +759,7 @@ define([
         },
         insertQuestion: function (mug, refMug, position, isInternal) {
             this.mugMap[mug.ufid] = mug;
-            refMug = refMug || this.dataTree.getRootNode().getValue();
+            refMug = refMug || this.controlTree.getRootNode().getValue();
             this.insertMug(refMug, mug, position);
             this._updateMugPath(mug);
             // todo: abstraction barrier
@@ -869,7 +849,7 @@ define([
             }
             
             delete this.mugMap[mug.ufid];
-            delete this.mugMap[this.dataTree.getAbsolutePath(mug)];
+            delete this.mugMap[this.controlTree.getAbsolutePath(mug)];
             this.dataTree.removeMug(mug);
             this.controlTree.removeMug(mug);
             this.fire({
