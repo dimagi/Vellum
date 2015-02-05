@@ -391,11 +391,11 @@ define([
          * the position specified by the arguments,
          */
         moveMug: function (mug, refMug, position) {
-            var oldPath = this.dataTree.getAbsolutePath(mug);
+            var oldPath = this.controlTree.getAbsolutePath(mug);
 
             this.insertMug(refMug, mug, position);
 
-            var currentPath = this.dataTree.getAbsolutePath(mug);
+            var currentPath = this.controlTree.getAbsolutePath(mug);
             this.vellum.handleMugRename(
                 this, mug, mug.p.nodeID, mug.p.nodeID, currentPath, oldPath);
 
@@ -508,7 +508,7 @@ define([
                 }
                 return postPath.replace(postRegExp, oldPath + "/");
             }
-            var tree = this.dataTree,
+            var tree = this.controlTree,
                 mugPath = tree.getAbsolutePath(mug);
             if (!mugPath) {
                 // Items don't have an absolute path. I wonder if it would
@@ -764,7 +764,7 @@ define([
         _fixMugState: function (mug) {
             // parser needs this because it inserts directly into the tree
             this.mugMap[mug.ufid] = mug;
-            var path = this.dataTree.getAbsolutePath(mug);
+            var path = this.controlTree.getAbsolutePath(mug);
             if (path) {
                 this.mugMap[path] = mug;
             }
