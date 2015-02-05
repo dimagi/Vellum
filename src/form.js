@@ -155,10 +155,6 @@ define([
 
         this.formName = 'New Form';
         this.mugMap = {};
-        this.dataTree = new Tree('data', 'data');
-        this.dataTree.on('change', function (e) {
-            _this.fireChange(e.mug);
-        });
         this.controlTree = new Tree('data', 'control');
         this.controlTree.on('change', function (e) {
             _this.fireChange(e.mug);
@@ -299,7 +295,6 @@ define([
             this.setValues = _.reject(this.setValues, predicate);
         },
         setFormID: function (id) {
-            this.dataTree.setRootID(id);
             this.controlTree.setRootID(id);
         },
         setAttr: function (slug, val) {
@@ -312,13 +307,13 @@ define([
             return writer.createXForm(this);
         },
         /**
-         * Walks through both internal trees (data and control) and grabs
+         * Walks through internal tree and grabs
          * all mugs that are not (1)Choices.  Returns
          * a flat list of unique mugs.  This list is primarily for the
          * autocomplete skip logic wizard.
          */
         getMugList: function () {
-            var treeFunc, cList, dList;
+            var treeFunc, cList;
 
             treeFunc = function (node) {
                 if(node.isRootNode) {
@@ -329,9 +324,8 @@ define([
             };
 
             cList = this.controlTree.treeMap(treeFunc);
-            dList = this.dataTree.treeMap(treeFunc);
 
-            return util.mergeArray(cList, dList); //strip dupes and merge
+            return cList;
         },
         updateError: function (errObj, options) {
             errObj = FormError(errObj);
@@ -369,8 +363,7 @@ define([
             });
         },
         isFormValid: function (validateMug) {
-            return this.dataTree.isTreeValid(validateMug) && 
-                this.controlTree.isTreeValid(validateMug);
+            return this.controlTree.isTreeValid(validateMug);
         },
         getMugChildrenByNodeID: function (mug, nodeID) {
             var parentNode = (mug ? this.controlTree.getNodeFromMug(mug)
@@ -380,10 +373,6 @@ define([
             });
         },
         insertMug: function (refMug, newMug, position) {
-            if (!newMug.options.isControlOnly) {
-                this.dataTree.insertMug(newMug, position, refMug);
-            }
-
             this.controlTree.insertMug(newMug, position, refMug);
         },
         /**
@@ -730,12 +719,15 @@ define([
          * Get the logical path of the mug's node in the data tree
          *
          * It is not always possible to lookup a mug by traversing either the
-         * data or control tree using it's absolute path. For example, some
+         * control tree using it's absolute path. For example, some
          * mugs encapsulate multiple levels of XML elements. This Form object
          * maintains a hash table to quickly get a mug by its path.
          */
         getAbsolutePath: function (mug, excludeRoot) {
-            return this.dataTree.getAbsolutePath(mug, excludeRoot);
+            if (!mug.options.isControlOnly) {
+                return this.controlTree.getAbsolutePath(mug, excludeRoot);
+            }
+            return null;
         },
         getControlPath: function (mug, excludeRoot) {
             return this.controlTree.getAbsolutePath(mug, excludeRoot);
@@ -775,7 +767,6 @@ define([
             
             delete this.mugMap[mug.ufid];
             delete this.mugMap[this.controlTree.getAbsolutePath(mug)];
-            this.dataTree.removeMug(mug);
             this.controlTree.removeMug(mug);
             this.fire({
                 type: 'remove-question',
