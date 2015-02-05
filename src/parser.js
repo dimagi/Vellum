@@ -605,6 +605,7 @@ define([
                 mug = parseControlElement(form, $cEl, parentMug);
 
             if (!form.controlTree.getNodeFromMug(mug)) {
+                mug.options.isControlOnly = true;
                 form.controlTree.insertMug(mug, 'into', parentMug);
             }
             if (mug.options.isControlOnly) {
