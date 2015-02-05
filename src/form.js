@@ -406,23 +406,12 @@ define([
             this.fireChange(mug);
         },
         /**
-         * Walk merged data and control trees calling valueFunc for each mug
-         *
-         * If common nodes in merged tree branches are not in the same order
-         * then the order of nodes in the control tree will be preserved, and
-         * all nodes in the data tree that are not also in the control tree will
-         * be visited last.
+         * Walk through the mugs of the tree and call valueFunc on each mug
          *
          * @param valueFunc - a function called for each mug in the tree. The
          * single argument is the mug.
          */
-        mergedTreeMap: function (valueFunc) {
-            function getID(node) {
-                return node.getID() || node.getValue().ufid;
-            }
-            function hasControl(node) {
-                return !node.getValue().options.isDataOnly;
-            }
+        walkMugs: function (valueFunc) {
             function makeGenerator(items) {
                 var i = 0;
                 if (!items) {
@@ -432,60 +421,21 @@ define([
                     return i < items.length ? items[i++] : null;
                 };
             }
-            function mergeNodes(node0, node1) {
-                if (getID(node0) === getID(node1)) {
-                    visitNode(node0, node1.getChildren());
-                    return true;
-                }
-                visitNode(node0);
-                return false;
-            }
-            function visitNode(node, mergeChildren) {
-                var nodeChildren = node.getChildren();
-                if (nodeChildren && mergeChildren) {
-                    var nodeIDs = _(_(nodeChildren).filter(hasControl)).map(getID),
-                        mergeIDs = _(mergeChildren).map(getID);
-
-                    // put data-only nodes after control nodes if control nodes are
-                    // not in same order in both trees
-                    if (nodeIDs.join(" ") !== mergeIDs.join(" ")) {
-                        var mergeIDMap = _.object(mergeIDs, mergeIDs); // hash for fast lookups
-                        nodeChildren = mergeChildren.concat(_(nodeChildren).filter(function (node) {
-                            return !mergeIDMap.hasOwnProperty(getID(node));
-                        }));
-                        mergeChildren = null;
-                    }
-                }
-
-                var nextChild0 = makeGenerator(nodeChildren),
-                    nextChild1 = makeGenerator(mergeChildren),
-                    child0 = nextChild0(),
-                    child1 = nextChild1(),
-                    value = node.getValue(),
-                    merged;
+            function visitNode(node) {
+                var nodeChildren = node.getChildren(),
+                    nextChild = makeGenerator(nodeChildren),
+                    child = nextChild(),
+                    value = node.getValue();
 
                 if (value) {
                     valueFunc(value);
                 }
-                while (child0 || child1) {
-                    if (child0 && child1) {
-                        merged = mergeNodes(child0, child1);
-                        child0 = nextChild0();
-                        if (merged) {
-                            child1 = nextChild1();
-                        }
-                    } else if (child0) {
-                        visitNode(child0);
-                        child0 = nextChild0();
-                    } else if (child1) {
-                        visitNode(child1);
-                        child1 = nextChild1();
-                    }
+                while (child) {
+                    visitNode(child);
+                    child = nextChild();
                 }
             }
-            visitNode(
-                this.dataTree.getRootNode(),
-                this.controlTree.getRootNode().getChildren());
+            visitNode(this.controlTree.getRootNode());
         },
         getDescendants: function (mug) {
             var desc = this.getChildren(mug), i;
