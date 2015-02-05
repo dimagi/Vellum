@@ -1940,6 +1940,7 @@ define([
             "label",
             "hintLabel",
             "constraintMsgAttr",
+            "dataParent",
             'appearance'
         ];
     };

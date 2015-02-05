@@ -295,7 +295,44 @@ define([
             rawControlXML: {
                 presence: 'optional',
                 lstring: 'Raw XML'
-            }
+            },
+            dataParent: {
+                lstring: 'Data Parent',
+                visibility: function(mug) {
+                    function recFunc(mug) {
+                        if (!mug) {
+                            return true;
+                        } else if (mug.__className === 'Repeat') {
+                            return false;
+                        }
+                        return recFunc(mug.form.controlTree.getNodeFromMug(mug).parent.value);
+                    }
+
+                    return recFunc(mug);
+                },
+                presence: 'optional',
+                widget: widgets.droppableText,
+                validationFunc: function(mug) {
+                    var dataParent = mug.p.dataParent,
+                        form = mug.form,
+                        dataParentMug;
+
+                    if (dataParent) {
+                        dataParentMug = form.getMugByPath(dataParent);
+
+                        if(!dataParentMug &&
+                           form.getBasePath().slice(0, -1) !== dataParent) {
+                            return "Must be valid path";
+                        } else if (dataParentMug && dataParentMug.__className !== 'Group') {
+                            return "Data must be a child of a group";
+                        } else if (!mug.spec.dataParent.visibility(mug)) {
+                            return "Children of repeat groups cannot have a different data parent";
+                        }
+                    }
+
+                    return "pass";
+                }
+            },
         }
     };
 
