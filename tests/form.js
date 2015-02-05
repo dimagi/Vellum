@@ -115,7 +115,6 @@ define([
             chai.expect(label.p.labelItextID.defaultValue()).to.include("/data/hidden");
         });
 
-
         it ("should show warnings for duplicate choice value", function() {
             util.loadXML("");
             var select = util.addQuestion("Select", 'select'),
