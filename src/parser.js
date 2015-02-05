@@ -140,12 +140,14 @@ define([
     function parseDataTree (form, dataEl) {
         var root = $(dataEl),
             tree = form.dataTree,
+            ctree = form.controlTree,
             recFunc;
 
         recFunc = function (parentMug) {
             var mug = form.vellum.parseDataElement(form, this, parentMug),
                 children = mug.options.parseDataNode(mug, $(this), parentMug);
             tree.insertMug(mug, 'into', parentMug);
+            ctree.insertMug(mug, 'into', parentMug);
             // HACK fix abstraction broken by direct tree insert
             form._fixMugState(mug);
             children.each(function () {
@@ -602,7 +604,9 @@ define([
             var $cEl = $(cEl),
                 mug = parseControlElement(form, $cEl, parentMug);
 
-            form.controlTree.insertMug(mug, 'into', parentMug);
+            if (!form.controlTree.getNodeFromMug(mug)) {
+                form.controlTree.insertMug(mug, 'into', parentMug);
+            }
             if (mug.options.isControlOnly) {
                 // HACK fix abstraction broken by direct tree insert
                 form.mugMap[mug.ufid] = mug;
@@ -648,7 +652,7 @@ define([
     }
 
     function parseBindList (form, bindList) {
-        var rootNodeName = form.dataTree.getRootNode().getID();
+        var rootNodeName = form.controlTree.getRootNode().getID();
 
         bindList.each(function () {
             var el = $(this),

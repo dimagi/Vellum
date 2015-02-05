@@ -384,24 +384,6 @@ define([
                 this.dataTree.insertMug(newMug, position, refMug);
             }
 
-            if (refMug && refMug.options.isDataOnly) {
-                if (position !== 'after' && position !== 'before') {
-                    // should never happen
-                    throw new Error("cannot insert " + position + " " + refMug.__className);
-                }
-                // find alternate insert refMug and position
-                var newRefMug = this.dataTree.findSibling(
-                    refMug,
-                    (position === 'after' ? 'before' : 'after'),
-                    function (mug) { return !mug.options.isDataOnly; });
-                    if (newRefMug) {
-                        refMug = newRefMug;
-                    } else {
-                        // the parent mug will never be a data-only mug
-                        refMug = refMug.parentMug;
-                        position = (position === 'after' ? 'first' : 'last');
-                    }
-            }
             this.controlTree.insertMug(newMug, position, refMug);
         },
         /**
@@ -553,12 +535,8 @@ define([
         },
         getChildren: function (mug) {
             var ctrlNode = this.controlTree.getNodeFromMug(mug),
-                dataNode = this.dataTree.getNodeFromMug(mug),
-                ctrlNodes = ctrlNode ? ctrlNode.getChildren() : [],
-                dataNodes = dataNode ? dataNode.getChildren() : [];
-            return _.union(
-                ctrlNodes.map(function (item) { return item.getValue(); }),
-                dataNodes.map(function (item) { return item.getValue(); }));
+                ctrlNodes = ctrlNode ? ctrlNode.getChildren() : [];
+            return ctrlNodes.map(function (item) { return item.getValue(); });
         },
         duplicateMug: function (mug) {
             var foo = this._duplicateMug(mug, mug.parentMug),
