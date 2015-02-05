@@ -139,13 +139,13 @@ define([
     // DATA PARSING FUNCTIONS
     function parseDataTree (form, dataEl) {
         var root = $(dataEl),
-            ctree = form.controlTree,
+            tree = form.controlTree,
             recFunc;
 
         recFunc = function (parentMug) {
             var mug = form.vellum.parseDataElement(form, this, parentMug),
                 children = mug.options.parseDataNode(mug, $(this), parentMug);
-            ctree.insertMug(mug, 'into', parentMug);
+            tree.insertMug(mug, 'into', parentMug);
             // HACK fix abstraction broken by direct tree insert
             form._fixMugState(mug);
             children.each(function () {

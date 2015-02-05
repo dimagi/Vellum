@@ -313,19 +313,13 @@ define([
          * autocomplete skip logic wizard.
          */
         getMugList: function () {
-            var treeFunc, cList;
-
-            treeFunc = function (node) {
+            return this.controlTree.treeMap( function (node) {
                 if(node.isRootNode) {
                     return;
                 }
 
                 return node.getValue();
-            };
-
-            cList = this.controlTree.treeMap(treeFunc);
-
-            return cList;
+            });
         },
         updateError: function (errObj, options) {
             errObj = FormError(errObj);
@@ -719,7 +713,7 @@ define([
         /**
          * Get the logical path of the mug's node in the data tree
          *
-         * It is not always possible to lookup a mug by traversing either the
+         * It is not always possible to lookup a mug by traversing the
          * control tree using it's absolute path. For example, some
          * mugs encapsulate multiple levels of XML elements. This Form object
          * maintains a hash table to quickly get a mug by its path.
