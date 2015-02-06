@@ -395,30 +395,13 @@ define([
          * single argument is the mug.
          */
         walkMugs: function (valueFunc) {
-            function makeGenerator(items) {
-                var i = 0;
-                if (!items) {
-                    return function () { return null; };
+            function callback(mug, nodeID, processChildren) {
+                if (mug !== null) {
+                    valueFunc(mug);
                 }
-                return function () {
-                    return i < items.length ? items[i++] : null;
-                };
+                processChildren();
             }
-            function visitNode(node) {
-                var nodeChildren = node.getChildren(),
-                    nextChild = makeGenerator(nodeChildren),
-                    child = nextChild(),
-                    value = node.getValue();
-
-                if (value) {
-                    valueFunc(value);
-                }
-                while (child) {
-                    visitNode(child);
-                    child = nextChild();
-                }
-            }
-            visitNode(this.tree.getRootNode());
+            this.tree.walk(callback);
         },
         getDescendants: function (mug) {
             var desc = this.getChildren(mug), i;
