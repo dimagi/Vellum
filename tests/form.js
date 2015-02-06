@@ -8,7 +8,8 @@ define([
     'text!static/form/question-referencing-other.xml',
     'text!static/form/group-with-internal-refs.xml',
     'text!static/form/hidden-value-in-group.xml',
-    'text!static/form/select-questions.xml'
+    'text!static/form/select-questions.xml',
+    'text!static/form/mismatch-tree-order.xml'
 ], function (
     util,
     chai,
@@ -19,7 +20,8 @@ define([
     QUESTION_REFERENCING_OTHER_XML,
     GROUP_WITH_INTERNAL_REFS_XML,
     HIDDEN_VALUE_IN_GROUP_XML,
-    SELECT_QUESTIONS
+    SELECT_QUESTIONS,
+    MISMATCH_TREE_ORDER_XML
 ) {
     var assert = chai.assert,
         call = util.call;
@@ -109,6 +111,18 @@ define([
             assert.equal(hidden.getAbsolutePath(), "/data/hidden");
             chai.expect(label.p.relevantAttr).to.include("/data/hidden");
             chai.expect(label.p.labelItextID.defaultValue()).to.include("/data/hidden");
+        });
+
+        it("should preserve order of the control tree", function() {
+            util.loadXML(MISMATCH_TREE_ORDER_XML);
+            util.assertJSTreeState(
+                "question1",
+                "question5",
+                "question2",
+                "  question3",
+                "question6",
+                "question4"
+            );
         });
     });
 });

@@ -598,30 +598,55 @@ define([
     }
 
     function parseControlTree (form, controlsTree) {
-        function eachFunc(cEl, parentMug) {
+        function eachFunc(cEl, parentMug, index) {
             var $cEl = $(cEl),
-                mug = parseControlElement(form, $cEl, parentMug);
+                mug = parseControlElement(form, $cEl, parentMug),
+                tree = form.controlTree,
+                node = tree.getNodeFromMug(mug);
 
-            if (!form.controlTree.getNodeFromMug(mug)) {
+            if (!node) {
                 mug.options.isControlOnly = true;
                 form.controlTree.insertMug(mug, 'into', parentMug);
+                node = tree.getNodeFromMug(mug);
             }
+
             if (mug.options.isControlOnly) {
                 // HACK fix abstraction broken by direct tree insert
                 form.mugMap[mug.ufid] = mug;
             }
 
-            if (mug.__className === "ReadOnly") {
-                return;
+            // preserve the control order 
+            var siblings = node.parent.getChildren(),
+                realIndex = index,
+                numControlStructs = 0,
+                numChildren = siblings.length;
+
+            for (var i = 0; i < numChildren; i++) {
+                if (siblings[i].value.options.isDataOnly) {
+                    realIndex++;
+                } else {
+                    numControlStructs++;
+                }
+
+                if (numControlStructs > index) {
+                    break;
+                }
             }
-            if (mug.options.controlNodeChildren) {
+
+            form.controlTree.insertMug(mug, 'index', parentMug, realIndex);
+
+            if (mug.__className !== "ReadOnly" && mug.options.controlNodeChildren) {
+                var index1 = 0;
                 mug.options.controlNodeChildren($cEl).each(function () {
-                    eachFunc(this, mug);
+                    eachFunc(this, mug, index1);
+                    index1 = index1 + 1;
                 });
             }
         }
+        var index = 0;
         controlsTree.each(function () {
-            eachFunc(this, null);
+            eachFunc(this, null, index);
+            index = index + 1;
         });
     }
 
