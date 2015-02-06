@@ -305,7 +305,7 @@ define([
                         } else if (mug.__className === 'Repeat') {
                             return false;
                         }
-                        return recFunc(mug.form.controlTree.getNodeFromMug(mug).parent.value);
+                        return recFunc(mug.form.tree.getNodeFromMug(mug).parent.value);
                     }
 
                     return recFunc(mug);
