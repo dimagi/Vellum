@@ -335,6 +335,9 @@ define([
             mug = form.getMugByPath(path);
         }
         mug = adapt(mug, form);
+        if (parentMug !== mug.parentMug) {
+            mug.p.dataParent = form.getAbsolutePath(mug.parentMug);
+        }
         if (appearance) {
             mug.p.appearance = appearance;
         }
