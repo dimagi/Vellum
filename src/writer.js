@@ -158,7 +158,7 @@ define([
 
     var createBindList = function (form, xmlWriter) {
         form.tree.walk(function (mug, nodeID, processChildren) {
-            if(mug) {
+            if(mug && !mug.options.isControlOnly) {
                 _.each(mug.options.getBindList(mug), function (attrs) {
                     xmlWriter.writeStartElement('bind');
                     _.each(attrs, function (value, key) {
