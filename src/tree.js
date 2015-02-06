@@ -223,7 +223,7 @@ define([
          *
          * If an invalid move is specified, no operation will occur.
          */
-        insertMug: function (mug, position, refMug) {
+        insertMug: function (mug, position, refMug, index) {
             var refNode = refMug ? this.getNodeFromMug(refMug) : this.rootNode,
                 node = this.getNodeFromMug(mug),
                 refNodeSiblings, refNodeIndex, refNodeParent;
@@ -241,7 +241,7 @@ define([
             refNodeSiblings = refNodeParent.getChildren();
             refNodeIndex = refNodeSiblings.indexOf(refNode);
 
-            if (['into', 'first', 'last', 'inside'].indexOf(position) !== -1) {
+            if (['index', 'into', 'first', 'last', 'inside'].indexOf(position) !== -1) {
                 mug.parentMug = refMug;
             } else {
                 mug.parentMug = refNodeParent.getValue();
@@ -262,6 +262,9 @@ define([
                 break;
                 case 'first':
                     refNode.insertChild(node, 0);
+                break;
+                case 'index':
+                    refNode.insertChild(node, index);
                 break;
                 default:
                     throw "in insertMug() position argument MUST be null, " +
