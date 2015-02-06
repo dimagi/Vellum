@@ -155,8 +155,8 @@ define([
 
         this.formName = 'New Form';
         this.mugMap = {};
-        this.controlTree = new Tree('data', 'control');
-        this.controlTree.on('change', function (e) {
+        this.tree = new Tree('data', 'control');
+        this.tree.on('change', function (e) {
             _this.fireChange(e.mug);
         });
         this.instanceMetadata = [InstanceMetadata({})];
@@ -173,7 +173,7 @@ define([
 
     Form.prototype = {
         getBasePath: function () {
-            return "/" + this.controlTree.getRootNode().getID() + "/";
+            return "/" + this.tree.getRootNode().getID() + "/";
         },
         fireChange: function (mug) {
             this.fire({
@@ -295,7 +295,7 @@ define([
             this.setValues = _.reject(this.setValues, predicate);
         },
         setFormID: function (id) {
-            this.controlTree.setRootID(id);
+            this.tree.setRootID(id);
         },
         setAttr: function (slug, val) {
             this[slug] = val;
@@ -313,7 +313,7 @@ define([
          * autocomplete skip logic wizard.
          */
         getMugList: function () {
-            return this.controlTree.treeMap( function (node) {
+            return this.tree.treeMap( function (node) {
                 if(node.isRootNode) {
                     return;
                 }
@@ -357,28 +357,28 @@ define([
             });
         },
         isFormValid: function (validateMug) {
-            return this.controlTree.isTreeValid(validateMug);
+            return this.tree.isTreeValid(validateMug);
         },
         getMugChildrenByNodeID: function (mug, nodeID) {
-            var parentNode = (mug ? this.controlTree.getNodeFromMug(mug)
-                                  : this.controlTree.rootNode);
+            var parentNode = (mug ? this.tree.getNodeFromMug(mug)
+                                  : this.tree.rootNode);
             return _.filter(parentNode.getChildrenMugs(), function (m) {
                 return m.p.nodeID === nodeID;
             });
         },
         insertMug: function (refMug, newMug, position) {
-            this.controlTree.insertMug(newMug, position, refMug);
+            this.tree.insertMug(newMug, position, refMug);
         },
         /**
-         * Move a mug from its current place (in both the Data and Control trees) to
+         * Move a mug from its current place to
          * the position specified by the arguments,
          */
         moveMug: function (mug, refMug, position) {
-            var oldPath = this.controlTree.getAbsolutePath(mug);
+            var oldPath = this.tree.getAbsolutePath(mug);
 
             this.insertMug(refMug, mug, position);
 
-            var currentPath = this.controlTree.getAbsolutePath(mug);
+            var currentPath = this.tree.getAbsolutePath(mug);
             this.vellum.handleMugRename(
                 this, mug, mug.p.nodeID, mug.p.nodeID, currentPath, oldPath);
 
@@ -418,7 +418,7 @@ define([
                     child = nextChild();
                 }
             }
-            visitNode(this.controlTree.getRootNode());
+            visitNode(this.tree.getRootNode());
         },
         getDescendants: function (mug) {
             var desc = this.getChildren(mug), i;
@@ -441,7 +441,7 @@ define([
                 }
                 return postPath.replace(postRegExp, oldPath + "/");
             }
-            var tree = this.controlTree,
+            var tree = this.tree,
                 mugPath = tree.getAbsolutePath(mug);
             if (!mugPath) {
                 // Items don't have an absolute path. I wonder if it would
@@ -467,7 +467,7 @@ define([
             this.mugTypes.changeType(mug, questionType);
         },
         getChildren: function (mug) {
-            var ctrlNode = this.controlTree.getNodeFromMug(mug),
+            var ctrlNode = this.tree.getNodeFromMug(mug),
                 ctrlNodes = ctrlNode ? ctrlNode.getChildren() : [];
             return ctrlNodes.map(function (item) { return item.getValue(); });
         },
@@ -606,7 +606,7 @@ define([
 
                 // update the itext ids of child items if they weren't manually set
                 if (mug.__className === "Select" || mug.__className === "MSelect") {
-                    var node = this.controlTree.getNodeFromMug(mug),
+                    var node = this.tree.getNodeFromMug(mug),
                         // node can be null when the mug hasn't been inserted into
                         // the tree yet
                         children = node ? node.getChildrenMugs() : [];
@@ -667,7 +667,7 @@ define([
         },
         insertQuestion: function (mug, refMug, position, isInternal) {
             this.mugMap[mug.ufid] = mug;
-            refMug = refMug || this.controlTree.getRootNode().getValue();
+            refMug = refMug || this.tree.getRootNode().getValue();
             this.insertMug(refMug, mug, position);
             this._updateMugPath(mug);
             // todo: abstraction barrier
@@ -696,7 +696,7 @@ define([
         _fixMugState: function (mug) {
             // parser needs this because it inserts directly into the tree
             this.mugMap[mug.ufid] = mug;
-            var path = this.controlTree.getAbsolutePath(mug);
+            var path = this.tree.getAbsolutePath(mug);
             if (path) {
                 this.mugMap[path] = mug;
             }
@@ -719,12 +719,12 @@ define([
          */
         getAbsolutePath: function (mug, excludeRoot) {
             if (!mug.options.isControlOnly) {
-                return this.controlTree.getAbsolutePath(mug, excludeRoot);
+                return this.tree.getAbsolutePath(mug, excludeRoot);
             }
             return null;
         },
         getControlPath: function (mug, excludeRoot) {
-            return this.controlTree.getAbsolutePath(mug, excludeRoot);
+            return this.tree.getAbsolutePath(mug, excludeRoot);
         },
         getMugByUFID: function (ufid) {
             return this.mugMap[ufid];
@@ -751,17 +751,17 @@ define([
             this._logicManager.forEachReferencingProperty(ufids, breakReferences);
         },
         _removeMugFromForm: function(mug, isInternal) {
-            var fromTree = this.controlTree.getNodeFromMug(mug);
+            var fromTree = this.tree.getNodeFromMug(mug);
             if (fromTree) {
-                var children = this.controlTree.getNodeFromMug(mug).getChildrenMugs();
+                var children = this.tree.getNodeFromMug(mug).getChildrenMugs();
                 for (var i = 0; i < children.length; i++) {
                     this._removeMugFromForm(children[i], true);
                 }
             }
             
             delete this.mugMap[mug.ufid];
-            delete this.mugMap[this.controlTree.getAbsolutePath(mug)];
-            this.controlTree.removeMug(mug);
+            delete this.mugMap[this.tree.getAbsolutePath(mug)];
+            this.tree.removeMug(mug);
             this.fire({
                 type: 'remove-question',
                 mug: mug,

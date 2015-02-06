@@ -109,37 +109,6 @@ define([
         
         return resStr;
     };
-
-    /**
-     * Given two lists, creates a new array (and returns it)
-     * that contains only unique values
-     * based on comparing the two argument arrays.
-     * @param arrA
-     * @param arrB
-     */
-    var mergeArray = function (arrA, arrB) {
-        var result = [], i;
-        for(i in arrA){
-            if(arrA.hasOwnProperty(i)){
-                if(arrA.slice(0,arrA.indexOf(i)).indexOf(i) === -1){ //check to see if there aren't dupes in arrA
-                    result.push(arrA[i]);
-                }
-            }
-        }
-
-        for(i in arrB){
-            if(arrB.hasOwnProperty(i)){
-                if(result.indexOf(arrB[i]) === -1){
-                    result.push(arrB[i]); //grab only anything that hasn't shown up yet
-                }
-            }
-        }
-
-        return result;
-    };
-    that.mergeArray = mergeArray;
-
-
     
     // Simple Event Framework
     // Just run your object through this function to make it event aware.
