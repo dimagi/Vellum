@@ -144,9 +144,9 @@ require([
             util.addQuestion.bind({prevId: "group"})("Text", "text2");
             util.expandGroup(group);
             util.assertJSTreeState(
-                "group",
-                "  text1",
-                "text2"
+                "[group]",
+                "  [text1]",
+                "[text2]"
             );
         });
 
@@ -163,9 +163,9 @@ require([
             util.addQuestion("Text", "text2");
             util.expandGroup(group);
             util.assertJSTreeState(
-                "group",
-                "  text1",
-                "text2"
+                "[group]",
+                "  [text1]",
+                "[text2]"
             );
         });
 
@@ -186,10 +186,10 @@ require([
             util.addQuestion.bind({prevId: "select"})("Text", "text1");
             util.expandGroup(group);
             util.assertJSTreeState(
-                "select",
-                "  item1",
-                "  item2",
-                "text1"
+                "[select]",
+                "  [item1]",
+                "  [item2]",
+                "[text1]"
             );
         });
 
@@ -231,9 +231,9 @@ require([
         it("should load hidden value in repeat group", function (done) {
             util.init({core: {form: HIDDEN_VALUE_IN_REPEAT_XML, onReady: function () {
                 util.assertJSTreeState(
-                    "repeat",
-                    "  text",
-                    "  hidden"
+                    "[repeat]",
+                    "  [text]",
+                    "  [hidden]"
                 );
                 done();
             }}});
@@ -242,24 +242,24 @@ require([
         it("should load hidden values interspersed with other questions", function (done) {
             util.init({core: {form: HIDDEN_AMONG_QUESTIONS_XML, onReady: function () {
                 util.assertJSTreeState(
-                    "hidden1",
-                    "select1",
-                    "  item1",
-                    "  item2",
-                    "hidden2",
-                    "select2",
-                    "  item1",
-                    "  item2",
-                    "hidden3",
-                    "group",
-                    "  hidden4",
-                    "  text3",
-                    "  hidden5",
-                    "  text4",
-                    "  hidden6",
-                    "hidden7",
-                    "text5",
-                    "hidden8"
+                    "[hidden1]",
+                    "[select1]",
+                    "  [item1]",
+                    "  [item2]",
+                    "[hidden2]",
+                    "[select2]",
+                    "  [item1]",
+                    "  [item2]",
+                    "[hidden3]",
+                    "[group]",
+                    "  [hidden4]",
+                    "  [text3]",
+                    "  [hidden5]",
+                    "  [text4]",
+                    "  [hidden6]",
+                    "[hidden7]",
+                    "[text5]",
+                    "[hidden8]"
                 );
                 done();
             }}});
@@ -270,16 +270,16 @@ require([
                 util.addQuestion.bind({prevId: "hidden1"})("DataBindOnly", "hiddenA");
                 util.addQuestion.bind({prevId: "group/hidden2"})("DataBindOnly", "hiddenB");
                 util.assertJSTreeState(
-                    "text1",
-                    "text2",
-                    "group",
-                    "  text3",
-                    "  text4",
-                    "  hidden2",
-                    "  hiddenB",
-                    "text5",
-                    "hidden1",
-                    "hiddenA"
+                    "[text1]",
+                    "[text2]",
+                    "[group]",
+                    "  [text3]",
+                    "  [text4]",
+                    "  [hidden2]",
+                    "  [hiddenB]",
+                    "[text5]",
+                    "[hidden1]",
+                    "[hiddenA]"
                 );
                 done();
             }}});
@@ -290,16 +290,16 @@ require([
                 util.addQuestion.bind({prevId: "text1"})("DataBindOnly", "hiddenA");
                 util.addQuestion.bind({prevId: "group/text3"})("DataBindOnly", "hiddenB");
                 util.assertJSTreeState(
-                    "text1",
-                    "hiddenA",
-                    "text2",
-                    "group",
-                    "  text3",
-                    "  hiddenB",
-                    "  text4",
-                    "  hidden2",
-                    "text5",
-                    "hidden1"
+                    "[text1]",
+                    "[hiddenA]",
+                    "[text2]",
+                    "[group]",
+                    "  [text3]",
+                    "  [hiddenB]",
+                    "  [text4]",
+                    "  [hidden2]",
+                    "[text5]",
+                    "[hidden1]"
                 );
                 done();
             }}});
@@ -310,16 +310,16 @@ require([
                 util.addQuestion.bind({prevId: "text1"})("Text", "textA");
                 util.addQuestion.bind({prevId: "group/text3"})("Text", "textB");
                 util.assertJSTreeState(
-                    "text1",
-                    "textA",
-                    "text2",
-                    "group",
-                    "  text3",
-                    "  textB",
-                    "  text4",
-                    "  hidden2",
-                    "text5",
-                    "hidden1"
+                    "[text1]",
+                    "[textA]",
+                    "[text2]",
+                    "[group]",
+                    "  [text3]",
+                    "  [textB]",
+                    "  [text4]",
+                    "  [hidden2]",
+                    "[text5]",
+                    "[hidden1]"
                 );
                 done();
             }}});
@@ -330,16 +330,16 @@ require([
                 util.addQuestion.bind({prevId: "hidden1"})("Text", "textA");
                 util.addQuestion.bind({prevId: "group/hidden2"})("Text", "textB");
                 util.assertJSTreeState(
-                    "text1",
-                    "text2",
-                    "group",
-                    "  text3",
-                    "  text4",
-                    "  hidden2",
-                    "  textB",
-                    "text5",
-                    "hidden1",
-                    "textA"
+                    "[text1]",
+                    "[text2]",
+                    "[group]",
+                    "  [text3]",
+                    "  [text4]",
+                    "  [hidden2]",
+                    "  [textB]",
+                    "[text5]",
+                    "[hidden1]",
+                    "[textA]"
                 );
                 done();
             }}});
@@ -350,8 +350,8 @@ require([
                 util.addQuestion("DataBindOnly", "hidden");
                 util.addQuestion.bind({prevId: "hidden"})("Text", "text");
                 util.assertJSTreeState(
-                    "hidden",
-                    "text"
+                    "[hidden]",
+                    "[text]"
                 );
                 done();
             }}});

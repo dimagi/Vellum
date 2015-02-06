@@ -51,9 +51,9 @@ require([
         it("should load a case list repeat with questions", function () {
             util.loadXML(CASE_LIST_REPEAT_WITH_QUESTIONS_XML);
             util.assertJSTreeState(
-                "group",
-                "  phone",
-                "  hidden"
+                "[group]",
+                "  [phone]",
+                "  [hidden]"
             );
             var repeat = util.getMug("group/item"),
                 phone = util.getMug("group/item/phone"),
@@ -130,8 +130,8 @@ require([
             };
             util.addQuestion("Text", "text");
             util.assertJSTreeState(
-                "product",
-                "  text"
+                "[product]",
+                "  [text]"
             );
         });
 

@@ -564,7 +564,7 @@ define([
                 defaultLang = Itext.getDefaultLanguage(),
                 disp,
                 defaultDisp,
-                nodeID;
+                nodeID = this.getNodeID();
 
             if (this.__className === "ReadOnly") {
                 return "Unknown (read-only) question type";
@@ -574,7 +574,7 @@ define([
             }
 
             if (!itextItem || lang === '_ids') {
-                return this.getNodeID();
+                return '[' + nodeID + ']';
             }
             lang = lang || defaultLang;
 
@@ -584,7 +584,6 @@ define([
 
             defaultDisp = itextItem.getValue("default", defaultLang);
             disp = itextItem.getValue("default", lang) || defaultDisp;
-            nodeID = this.getNodeID();
 
             if (disp && disp !== nodeID) {
                 if (lang !== defaultLang && disp === defaultDisp) {
