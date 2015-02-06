@@ -498,7 +498,7 @@ define([
             }    
         };
         
-        form.controlTree.treeMap(appendItemsIfPresent);
+        form.tree.treeMap(appendItemsIfPresent);
         return ret; 
 
     };
@@ -1554,7 +1554,7 @@ define([
             this.data.javaRosa.Itext.updateForExistingMug(mug);
         },
         getMugByLabelItextID: function (itextID) {
-            var node = this.data.core.form.controlTree.rootNode.getSingleMatchingNode(function (value) {
+            var node = this.data.core.form.tree.rootNode.getSingleMatchingNode(function (value) {
                 return value && value.getItext() && value.getItext().id === itextID;
             });
 

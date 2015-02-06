@@ -139,7 +139,7 @@ define([
     // DATA PARSING FUNCTIONS
     function parseDataTree (form, dataEl) {
         var root = $(dataEl),
-            tree = form.controlTree,
+            tree = form.tree,
             recFunc;
 
         recFunc = function (parentMug) {
@@ -601,12 +601,12 @@ define([
         function eachFunc(cEl, parentMug, index) {
             var $cEl = $(cEl),
                 mug = parseControlElement(form, $cEl, parentMug),
-                tree = form.controlTree,
+                tree = form.tree,
                 node = tree.getNodeFromMug(mug);
 
             if (!node) {
                 mug.options.isControlOnly = true;
-                form.controlTree.insertMug(mug, 'into', parentMug);
+                form.tree.insertMug(mug, 'into', parentMug);
                 node = tree.getNodeFromMug(mug);
             }
 
@@ -633,7 +633,7 @@ define([
                 }
             }
 
-            form.controlTree.insertMug(mug, 'index', parentMug, realIndex);
+            form.tree.insertMug(mug, 'index', parentMug, realIndex);
 
             if (mug.__className !== "ReadOnly" && mug.options.controlNodeChildren) {
                 var index1 = 0;
@@ -676,7 +676,7 @@ define([
     }
 
     function parseBindList (form, bindList) {
-        var rootNodeName = form.controlTree.getRootNode().getID();
+        var rootNodeName = form.tree.getRootNode().getID();
 
         bindList.each(function () {
             var el = $(this),

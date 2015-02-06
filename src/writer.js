@@ -114,7 +114,7 @@ define([
     };
 
     var createDataBlock = function (form, xmlWriter) {
-        form.controlTree.walk(function (mug, nodeID, processChildren) {
+        form.tree.walk(function (mug, nodeID, processChildren) {
             if (mug && mug.options.isControlOnly) { return; }
             if (mug && mug.options.getTagName) {
                 nodeID = mug.options.getTagName(mug, nodeID);
@@ -160,7 +160,7 @@ define([
     };
 
     var createBindList = function (form, xmlWriter) {
-        form.controlTree.walk(function (mug, nodeID, processChildren) {
+        form.tree.walk(function (mug, nodeID, processChildren) {
             if(mug) {
                 _.each(mug.options.getBindList(mug), function (attrs) {
                     xmlWriter.writeStartElement('bind');
@@ -177,7 +177,7 @@ define([
     };
 
     var createControlBlock = function (form, xmlWriter) {
-        form.controlTree.walk(function (mug, nodeID, processChildren) {
+        form.tree.walk(function (mug, nodeID, processChildren) {
             if(!mug) {
                 // root node
                 processChildren();
