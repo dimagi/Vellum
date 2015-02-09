@@ -91,7 +91,7 @@ require([
             text1.p.dataParent = '/data/group1';
             util.loadXML(call("createXML"));
             assert.equal(text1.p.dataParent, '/data/group1');
-            util.assertDataTreeState(form.dataTree,
+            util.assertDataTreeState(form.dataTree(),
                 "group1",
                 "  text1"
             );
@@ -122,11 +122,11 @@ require([
 
             text1.p.dataParent = '/data/group';
             util.addQuestion.bind({prevId: text1.p.nodeID})("Text", 'text3');
-            util.assertDataTreeState(form.dataTree,
+            util.assertDataTreeState(form.dataTree(),
                 "text3",
                 "group",
-                "  text2",
-                "  text1"
+                "  text1",
+                "  text2"
             );
         });
     });
