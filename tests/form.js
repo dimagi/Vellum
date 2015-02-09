@@ -140,10 +140,10 @@ define([
             util.assertJSTreeState(
                 "question1",
                 "question5",
-                "question2",
-                "  question3",
                 "question6",
-                "question4"
+                "question4",
+                "question2",
+                "  question3"
             );
         });
     });
