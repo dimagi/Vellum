@@ -477,11 +477,17 @@ require([
             util.loadXML("");
             util.addQuestion("Text", "question1");
             util.clickQuestion("question1");
-            $("[name='itext-en-label']").val('english').change();
-
-            var treeSelector = ".fd-question-tree .jstree-anchor";
-            assert.equal($(treeSelector).text(), "english");
             var $dropdown = $(".fd-question-tree-lang select");
+            var treeSelector = ".fd-question-tree .jstree-anchor";
+
+            $("[name='itext-en-label']").val('x').change();
+            assert.equal($(treeSelector).text(), "x");
+            $("[name='itext-en-label']").val('').change();
+            assert.equal($(treeSelector).text(), "question1");
+
+            $dropdown.val('en').change();
+            $("[name='itext-en-label']").val('english').change();
+            assert.equal($(treeSelector).text(), "english");
             $dropdown.val('_ids').change();
             assert.equal($dropdown.find("option").length, 2);
             assert.equal($(treeSelector).text(), "question1");
