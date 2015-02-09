@@ -172,6 +172,40 @@ define([
     }
 
     Form.prototype = {
+        dataTree: function() {
+            var rootId = this.getBasePath().slice(1,-1),
+                dataTree = new Tree(rootId, 'data'),
+                parentMug = null,
+                diffDataParents = {},
+                _this = this;
+            this.tree.walk(function(mug, nodeID, processChildren) {
+                if (mug) {
+                    if (mug.options.isControlOnly) {
+                        return;
+                    } else if (mug.p.dataParent) {
+                        var dp = mug.p.dataParent;
+                        if (diffDataParents[dp]) {
+                            diffDataParents[dp].push(mug);
+                        } else {
+                            diffDataParents[dp] = [mug];
+                        }
+                    } else {
+                        dataTree.insertMug(mug, 'into', parentMug);
+                        var absolutePath = _this.getAbsolutePath(mug);
+                        if (diffDataParents.hasOwnProperty(absolutePath)) {
+                            _.each(diffDataParents[absolutePath], function(childMug) {
+                                dataTree.insertMug(childMug, 'into', mug);
+                            });
+                        }
+                    }
+                }
+                var oldParentMug = parentMug;
+                parentMug = mug;
+                processChildren(mug && mug.options.dataChildFilter);
+                parentMug = oldParentMug;
+            });
+            return dataTree;
+        },
         getBasePath: function () {
             return "/" + this.tree.getRootNode().getID() + "/";
         },
@@ -703,6 +737,9 @@ define([
          */
         getAbsolutePath: function (mug, excludeRoot) {
             if (mug && !mug.options.isControlOnly) {
+                if (mug.p.dataParent) {
+                    return mug.p.dataParent + '/' + mug.p.nodeID;
+                }
                 return this.tree.getAbsolutePath(mug, excludeRoot);
             }
             return null;
