@@ -1271,6 +1271,11 @@ define([
 
             _this.refreshMugName(e.mug);
             _this.toggleConstraintItext(e.mug);
+        }).on('question-move', function(e) {
+            if (e.mug.spec.dataParent &&
+                e.mug.spec.dataParent.validationFunc(e.mug) !== 'pass') {
+                e.mug.p.dataParent = undefined;
+            }
         });
         if (formXML) {
             _this._resetMessages(_this.data.core.form.errors);
