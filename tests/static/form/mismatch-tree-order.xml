@@ -42,14 +42,14 @@
         <input ref="/data/question1">
             <label ref="jr:itext('question1-label')" />
         </input>
+        <input ref="/data/question4">
+            <label ref="jr:itext('question2/question4-label')" />
+        </input>
         <group ref="/data/question2">
             <label ref="jr:itext('question2-label')" />
             <input ref="/data/question2/question3">
                 <label ref="jr:itext('question2/question3-label')" />
             </input>
         </group>
-        <input ref="/data/question4">
-            <label ref="jr:itext('question2/question4-label')" />
-        </input>
     </h:body>
 </h:html>
