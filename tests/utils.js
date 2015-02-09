@@ -75,6 +75,29 @@ define([
         }
     }
 
+    function assertDataTreeState(tree) {
+        function repr(node, level) {
+            var i, len, child, items = [];
+            if (node.isRootNode) {
+                level = -1;
+            } else {
+                items.push(Array(level * 2 + 1).join(" ") + node.value.p.nodeID);
+            }
+            for (i = 0, len = node.children.length; i < len; i++) {
+                child = node.children[i];
+                items.push(repr(child, level + 1));
+            }
+            return items.join("\n");
+        }
+        var expected = Array.prototype.slice.call(arguments, 1).join("\n") + "\n",
+            actual = repr(tree.rootNode, 0) + "\n";
+        if (expected !== actual) {
+            var patch = jsdiff.createPatch("", actual, expected, "actual", "expected");
+            patch = patch.replace(/^Index:/, "Unexpected jstree state");
+            assert(false, colorDiff(patch));
+        }
+    }
+
     function cleanForDiff(value) {
         // convert leading tabs to spaces
         value = value.replace(/^\t+/mg, function (match) {
@@ -250,6 +273,7 @@ define([
         assertXmlEqual: assertXmlEqual,
         assertXmlNotEqual: assertXmlNotEqual,
         assertJSTreeState: assertJSTreeState,
+        assertDataTreeState: assertDataTreeState,
         xmlines: function(xml) {
             return xml.replace(/>(\s\s+)</g, ">\n$1<");
         },
