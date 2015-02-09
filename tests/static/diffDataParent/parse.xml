@@ -6,14 +6,14 @@
 			<instance>
 				<data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/960D6510-6982-48D9-BDB0-A70E352F8A57" uiVersion="1" version="1" name="Untitled Form">
 					<question4>
-						<question3 />
 						<question1 />
+						<question3 />
 					</question4>
 				</data>
 			</instance>
 			<bind nodeset="/data/question4" />
-			<bind nodeset="/data/question4/question3" type="xsd:string" />
 			<bind nodeset="/data/question4/question1" type="xsd:string" />
+			<bind nodeset="/data/question4/question3" type="xsd:string" />
 			<itext>
 				<translation lang="en" default="">
 					<text id="question1-label">
