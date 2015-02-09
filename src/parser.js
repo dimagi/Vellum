@@ -636,10 +636,10 @@ define([
             form.tree.insertMug(mug, 'index', parentMug, realIndex);
 
             if (mug.__className !== "ReadOnly" && mug.options.controlNodeChildren) {
-                var index1 = 0;
+                var child_index = 0;
                 mug.options.controlNodeChildren($cEl).each(function () {
-                    eachFunc(this, mug, index1);
-                    index1 = index1 + 1;
+                    eachFunc(this, mug, child_index);
+                    child_index = child_index + 1;
                 });
             }
         }
