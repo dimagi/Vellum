@@ -574,7 +574,7 @@ define([
             }
 
             if (!itextItem || lang === '_ids') {
-                return '[' + nodeID + ']';
+                return nodeID;
             }
             lang = lang || defaultLang;
 
@@ -592,7 +592,7 @@ define([
                 return disp;
             }
 
-            return '[' + nodeID + ']';
+            return nodeID;
         },
         // todo: move these into javarosa
         getItextAutoID: function (propertyPath) {

@@ -218,13 +218,13 @@ require([
             util.addQuestion("Text", "question1");
             var treeSelector = ".fd-question-tree .jstree-anchor";
             var $input = $("[name='itext-en-label']");
-            assert.equal($(treeSelector).text(), "[question1]");
+            assert.equal($(treeSelector).text(), "question1");
             $input.val('bye').change();
             assert.equal($(treeSelector).text(), "bye");
             $input.val('').change();
-            assert.equal($(treeSelector).text(), "[question1]");
+            assert.equal($(treeSelector).text(), "question1");
             $input.val('question1').change();
-            assert.equal($(treeSelector).text(), "[question1]");
+            assert.equal($(treeSelector).text(), "question1");
         });
 
         it("tree should note when default language is being displayed instead of selected language", function() {
