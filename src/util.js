@@ -49,7 +49,8 @@ define([
     that.XPATH_REFERENCES = [
         "relevantAttr",
         "calculateAttr",
-        "constraintAttr"
+        "constraintAttr",
+        "dataParent"
     ];
 
     that.getTemplateObject = function (selector, params) {
