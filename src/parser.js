@@ -598,7 +598,33 @@ define([
     }
 
     function parseControlTree (form, controlsTree) {
-        function eachFunc(cEl, parentMug, index) {
+        function fixChildOrder(node, controlOrder) {
+            var children = node.getChildrenMugs(),
+                mug = node.value,
+                controlCounter = 0,
+                tmpMug, i, beginInserts = false;
+
+            for (i = 0; i < children.length; i++) {
+                tmpMug = children[i];
+                if (tmpMug.options.isDataOnly) {
+                    continue;
+                }
+
+                if (tmpMug !== controlOrder[controlCounter]) {
+                    beginInserts = true;
+                    break;
+                }
+                controlCounter++;
+            }
+
+            if (beginInserts) {
+                for (; controlCounter < controlOrder.length; controlCounter++, i++) {
+                    form.tree.insertMug(controlOrder[controlCounter], 'index', mug, i);
+                }
+            }
+        }
+
+        function eachFunc(cEl, parentMug, siblings) {
             var $cEl = $(cEl),
                 mug = parseControlElement(form, $cEl, parentMug),
                 tree = form.tree,
@@ -615,39 +641,22 @@ define([
                 form.mugMap[mug.ufid] = mug;
             }
 
-            // preserve the control order 
-            var siblings = node.parent.getChildren(),
-                realIndex = index,
-                numControlStructs = 0,
-                numChildren = siblings.length;
-
-            for (var i = 0; i < numChildren; i++) {
-                if (siblings[i].value.options.isDataOnly) {
-                    realIndex++;
-                } else {
-                    numControlStructs++;
-                }
-
-                if (numControlStructs > index) {
-                    break;
-                }
-            }
-
-            form.tree.insertMug(mug, 'index', parentMug, realIndex);
+            siblings.push(mug);
 
             if (mug.__className !== "ReadOnly" && mug.options.controlNodeChildren) {
-                var child_index = 0;
+                var children = [];
                 mug.options.controlNodeChildren($cEl).each(function () {
-                    eachFunc(this, mug, child_index);
-                    child_index = child_index + 1;
+                    eachFunc(this, mug, children);
                 });
+                fixChildOrder(node, children);
             }
         }
-        var index = 0;
+
+        var children = [];
         controlsTree.each(function () {
-            eachFunc(this, null, index);
-            index = index + 1;
+            eachFunc(this, null, children);
         });
+        fixChildOrder(form.tree.getRootNode(), children);
     }
 
     // BIND PARSING FUNCTIONS
