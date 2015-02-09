@@ -563,7 +563,8 @@ define([
                 Itext = this.form.vellum.data.javaRosa.Itext,
                 defaultLang = Itext.getDefaultLanguage(),
                 disp,
-                defaultDisp;
+                defaultDisp,
+                nodeID = this.getNodeID();
 
             if (this.__className === "ReadOnly") {
                 return "Unknown (read-only) question type";
@@ -573,7 +574,7 @@ define([
             }
 
             if (!itextItem || lang === '_ids') {
-                return this.getNodeID();
+                return nodeID;
             }
             lang = lang || defaultLang;
 
@@ -584,14 +585,14 @@ define([
             defaultDisp = itextItem.getValue("default", defaultLang);
             disp = itextItem.getValue("default", lang) || defaultDisp;
 
-            if (disp) {
+            if (disp && disp !== nodeID) {
                 if (lang !== defaultLang && disp === defaultDisp) {
                     disp += " [" + defaultLang + "]";
                 }
                 return disp;
             }
 
-            return '[' + this.getNodeID() + ']';
+            return nodeID;
         },
         // todo: move these into javarosa
         getItextAutoID: function (propertyPath) {
