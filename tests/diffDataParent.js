@@ -64,9 +64,9 @@ require([
                 form = call("getData").core.form;
 
             text1.p.dataParent = '/data/group1';
+            assert.equal(text1.p.dataParent, "/data/group1");
             form.moveMug(group1, group2, 'into');
-            util.clickQuestion(text1.p.nodeID);
-            assert(!util.isTreeNodeValid(text1), "text1 should not be valid");
+            assert.equal(text1.p.dataParent, "/data/group2/group1");
         });
 
         it("should clear the data parent when moving to a repeat group", function() {

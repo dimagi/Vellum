@@ -500,7 +500,7 @@ define([
                 this.insertQuestion(duplicate, parentMug, 'into', true);
             }
 
-            this._logicManager.updateAllReferences(duplicate);
+            this.updateAllLogicReferences(duplicate);
 
             duplicate.unlinkItext();
 
@@ -619,7 +619,8 @@ define([
                     }
                 }
             } else {
-                if (mug.p.getDefinition(e.property).widget === widgets.xPath) {
+                if (mug.p.getDefinition(e.property).widget === widgets.xPath ||
+                    mug.p.getDefinition(e.property).widget === widgets.droppableText) {
                     this.updateAllLogicReferences(mug);
                 }
             }
@@ -686,7 +687,7 @@ define([
         },
         fixBrokenReferences: function (mug) {
             function updateReferences(mug) {
-                _this._logicManager.updateAllReferences(mug);
+                _this.updateAllLogicReferences(mug);
                 _this.vellum.setTreeValidationIcon(mug);
             }
             var _this = this;
@@ -701,7 +702,7 @@ define([
          * maintains a hash table to quickly get a mug by its path.
          */
         getAbsolutePath: function (mug, excludeRoot) {
-            if (!mug.options.isControlOnly) {
+            if (mug && !mug.options.isControlOnly) {
                 return this.tree.getAbsolutePath(mug, excludeRoot);
             }
             return null;
@@ -719,7 +720,7 @@ define([
             function breakReferences(mug) {
                 if (!seen.hasOwnProperty(mug.ufid)) {
                     seen[mug.ufid] = null;
-                    _this._logicManager.updateAllReferences(mug);
+                    _this.updateAllLogicReferences(mug);
                     _this.vellum.setTreeValidationIcon(mug);
                 }
             }
