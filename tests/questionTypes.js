@@ -441,5 +441,28 @@ require([
             }
             util.init({core: {onReady: test}});
         });
+
+        it("should allow user to view longs but not add them", function() {
+            util.loadXML("");
+
+            // able to programatically add long
+            util.addQuestion("Long", "long");
+            util.addQuestion("Int", "int");
+            util.assertJSTreeState(
+                "long",
+                "int"
+            );
+
+            // can't change another question to a long
+            var $changer = $(".fd-question-changer");
+            $changer.children("a").click();
+            assert.equal($changer.find("[data-qtype='Text']").length, 1);
+            assert.equal($changer.find("[data-qtype='Long']").length, 0);
+
+            // can't add new long with toolbar
+            var $toolbar = $(".fd-container-question-type-group");
+            assert.equal($toolbar.find("[data-qtype='Text']:not(.btn)").length, 1); // dropdown item, not button
+            assert.equal($toolbar.find("[data-qtype='Long']").length, 0);
+        });
     });
 });
