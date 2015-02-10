@@ -807,6 +807,8 @@ define([
         }
     });
 
+    // Deprecated. Users may not add new longs to forms, 
+    // but must be able to view forms already containing longs.
     var Long = util.extend(Int, {
         typeName: 'Long',
         icon: 'fcc fcc-fd-long',

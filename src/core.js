@@ -280,7 +280,6 @@ define([
                     "Int",
                     "PhoneNumber",
                     "Double",
-                    "Long"
                 ]
             },
             {
