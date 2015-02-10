@@ -117,10 +117,10 @@ define([
             util.loadXML(MISMATCH_TREE_ORDER_XML);
             util.assertJSTreeState(
                 "question1",
-                "question5",
                 "question4",
                 "question2",
                 "  question3",
+                "question5",
                 "question6"
             );
         });
