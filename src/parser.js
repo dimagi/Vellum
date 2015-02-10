@@ -597,66 +597,69 @@ define([
         return path;
     }
 
-    function parseControlTree (form, controlsTree) {
-        function fixChildOrder(node, controlOrder) {
-            var children = node.getChildrenMugs(),
-                mug = node.value,
-                controlCounter = 0,
-                tmpMug, i, beginInserts = false;
-
-            for (i = 0; i < children.length; i++) {
-                tmpMug = children[i];
-                if (tmpMug.options.isDataOnly) {
-                    continue;
+    function parseControlTree(form, controlsTree) {
+        function controlGenerator(controlNodes, parentMug) {
+            var i = 0, count = controlNodes.length;
+            return function () {
+                if (i >= count) {
+                    return null;
                 }
+                var $cEl = $(controlNodes[i++]),
+                    mug = parseControlElement(form, $cEl, parentMug),
+                    node = form.tree.getNodeFromMug(mug);
 
-                if (tmpMug !== controlOrder[controlCounter]) {
-                    beginInserts = true;
-                    break;
+                if (!node) {
+                    mug.options.isControlOnly = true;
+                    form.tree.insertMug(mug, 'into', parentMug);
+                    // HACK fix abstraction broken by direct tree insert
+                    form.mugMap[mug.ufid] = mug;
+                    node = form.tree.getNodeFromMug(mug);
                 }
-                controlCounter++;
+                if (mug.options.controlNodeChildren) {
+                    merge(node, mug.options.controlNodeChildren($cEl));
+                }
+                return node;
+            };
+        }
+        function makeGenerator(items) {
+            var i = 0, count = items.length;
+            return function () {
+                return i < count ? items[i++] : null;
+            };
+        }
+        function getID(node) {
+            return node.value.ufid;
+        }
+        function merge(node, controlsTree) {
+            // getID(child) must have a unique and stable return value
+            // for each child for the duration of this function call
+            var nextChild0 = makeGenerator(node.children),
+                nextChild1 = controlGenerator(controlsTree, node.value),
+                child0 = nextChild0(),
+                child1 = nextChild1(),
+                controls = [],
+                seen = {},
+                fixOrder = false;
+
+            while (child1) {
+                if (child0) {
+                    if (child0 === child1) {
+                        controls.push(child1);
+                        child1 = nextChild1();
+                    }
+                    seen[getID(child0)] = null;
+                    child0 = nextChild0();
+                } else {
+                    fixOrder = fixOrder || seen.hasOwnProperty(getID(child1));
+                    controls.push(child1);
+                    child1 = nextChild1();
+                }
             }
-
-            if (beginInserts) {
-                for (; controlCounter < controlOrder.length; controlCounter++, i++) {
-                    form.tree.insertMug(controlOrder[controlCounter], 'index', mug, i);
-                }
+            if (fixOrder) {
+                node.children = _.union(controls, node.children);
             }
         }
-
-        function eachFunc(cEl, parentMug, siblings) {
-            var $cEl = $(cEl),
-                mug = parseControlElement(form, $cEl, parentMug),
-                tree = form.tree,
-                node = tree.getNodeFromMug(mug);
-
-            if (!node) {
-                mug.options.isControlOnly = true;
-                form.tree.insertMug(mug, 'into', parentMug);
-                node = tree.getNodeFromMug(mug);
-            }
-
-            if (mug.options.isControlOnly) {
-                // HACK fix abstraction broken by direct tree insert
-                form.mugMap[mug.ufid] = mug;
-            }
-
-            siblings.push(mug);
-
-            if (mug.__className !== "ReadOnly" && mug.options.controlNodeChildren) {
-                var children = [];
-                mug.options.controlNodeChildren($cEl).each(function () {
-                    eachFunc(this, mug, children);
-                });
-                fixChildOrder(node, children);
-            }
-        }
-
-        var children = [];
-        controlsTree.each(function () {
-            eachFunc(this, null, children);
-        });
-        fixChildOrder(form.tree.getRootNode(), children);
+        merge(form.tree.getRootNode(), controlsTree);
     }
 
     // BIND PARSING FUNCTIONS
