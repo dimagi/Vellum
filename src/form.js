@@ -729,9 +729,6 @@ define([
             }
             return null;
         },
-        getControlPath: function (mug, excludeRoot) {
-            return this.tree.getAbsolutePath(mug, excludeRoot);
-        },
         getMugByUFID: function (ufid) {
             return this.mugMap[ufid];
         },
