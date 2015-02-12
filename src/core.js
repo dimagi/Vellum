@@ -1228,7 +1228,6 @@ define([
         }).on('parent-question-type-change', function (e) {
             _this.jstree("set_icon", e.childMug.ufid, e.childMug.getIcon());
         }).on('remove-question', function (e) {
-//jls
             var currentMug = _this.getCurrentlySelectedMug();
             if (e.mug && e.mug.parentMug && e.mug.parentMug === currentMug) {
                 _this.displayMugProperties(currentMug);
@@ -1246,7 +1245,6 @@ define([
         }).on('error-change', function (e) {
             _this._resetMessages(e.errors);
         }).on('question-create', function (e) {
-//jls
             _this.handleNewMug(e.mug, e.refMug, e.position);
             var currentMug = _this.getCurrentlySelectedMug();
             if (e.mug && e.mug.parentMug && e.mug.parentMug === currentMug) {
