@@ -491,22 +491,30 @@ define([
         isValid: function () {
             return !this.getErrors().length;
         },
-        getDefaultItextRoot: function () {
+        getDefaultItextRoot: function (parentMug) {
             if (this.__className === "Item") {
-                return this.parentMug.getDefaultItextRoot() + "-" + this.p.defaultValue;
+                if (!parentMug) {
+                    parentMug = this.parentMug;
+                }
+                return parentMug.getDefaultItextRoot() + "-" + this.p.defaultValue;
             } else {
                 var path = this.form.getAbsolutePath(this, true);
                 if (!path) {
-                    // fall back to nodeID if mug path still not found
-                    // this can happen with malformed XForms
-                    path = "/" + this.getNodeID();
+                    if (parentMug) {
+                        path = this.form.getAbsolutePath(parentMug, true) +
+                                "/" + this.getNodeID();
+                    } else {
+                        // fall back to nodeID if mug path still not found
+                        // this can happen with malformed XForms
+                        path = "/" + this.getNodeID();
+                    }
                 }
                 return path.slice(1);
             }
         },
-        getDefaultLabelItextId: function () {
+        getDefaultLabelItextId: function (parentMug) {
             // Default Itext ID
-            return this.getDefaultItextRoot() + "-label";
+            return this.getDefaultItextRoot(parentMug) + "-label";
         },
         /*
          * Gets a default label, auto-generating if necessary
@@ -635,6 +643,13 @@ define([
             this.fire({type: "teardown-mug-properties", mug: this});
         }
     };
+
+    Object.defineProperty(Mug.prototype, "parentMug", {
+        get: function () {
+            var node = this.form.tree.getNodeFromMug(this);
+            return node ? node.parent.value : null;
+        }
+    });
 
     var DataBindOnly = util.extend(defaultOptions, {
         isDataOnly: true,
