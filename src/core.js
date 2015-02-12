@@ -1664,7 +1664,7 @@ define([
                 questions = (mug.options.limitTypeChangeTo || 
                      _this.data.core.QUESTIONS_IN_TOOLBAR),
                 ret = [],
-                hasChildren = mug.form.getChildren(mug).length > 0;
+                hasChildren = mug.form.getChildren(mug).length > 0,
                 isSelect = /^M?Select$/.test.bind(/^M?Select$/);
 
             for (var i = 0; i < questions.length; i++) {
