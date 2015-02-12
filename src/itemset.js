@@ -93,6 +93,7 @@ define([
             helpItextID: { presence: 'notallowed' },
             mediaItext: { presence: 'notallowed' },
             otherItext: { presence: 'notallowed' },
+            appearance: { presence: 'notallowed' },
             itemsetData: {
                 visibility: 'visible_if_present',
                 presence: 'optional',
