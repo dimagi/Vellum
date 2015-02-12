@@ -285,12 +285,17 @@ define([
                     }
                     return '/' + node.getID();
                 }
-                var parentPath = pathOf(_this.getParentNode(node));
+                var mug = node.value, parentPath;
+                if (mug.p.dataParent) {
+                    parentPath = mug.p.dataParent;
+                } else {
+                    parentPath = pathOf(_this.getParentNode(node));
+                }
                 if (parentPath === null) {
                     return null;
                 }
-                var name = node.getID(),
-                    mug = node.getValue();
+                var name = node.getID();
+                mug = node.getValue();
                 if (mug.options.getPathName) {
                     name = mug.options.getPathName(mug, name);
                 }

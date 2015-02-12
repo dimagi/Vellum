@@ -173,14 +173,19 @@ define([
         dataTree: function() {
             var rootId = this.getBasePath().slice(1,-1),
                 dataTree = new Tree(rootId, 'data'),
-                parentMug = null,
-                diffDataParents = {},
-                _this = this;
+                diffDataParents = {};
             this.tree.walk(function(mug, nodeID, processChildren) {
                 if (mug) {
                     if (mug.options.isControlOnly) {
                         return;
                     } else if (mug.p.dataParent) {
+                        // TODO write a test with dataParent's mug already
+                        // inserted into dataTree when we get here.
+                        // NOTE this is the actual use case for which we're
+                        // building this feature.
+                        // Tree structure:
+                        // - group
+                        //   - text (dataParent = /data)
                         var dp = mug.p.dataParent;
                         if (diffDataParents[dp]) {
                             diffDataParents[dp].push(mug);
@@ -188,8 +193,8 @@ define([
                             diffDataParents[dp] = [mug];
                         }
                     } else {
-                        dataTree.insertMug(mug, 'into', parentMug);
-                        var absolutePath = _this.getAbsolutePath(mug);
+                        dataTree.insertMug(mug, 'into', mug.parentMug);
+                        var absolutePath = dataTree.getAbsolutePath(mug);
                         if (diffDataParents.hasOwnProperty(absolutePath)) {
                             _.each(diffDataParents[absolutePath], function(childMug) {
                                 dataTree.insertMug(childMug, 'into', mug);
@@ -197,10 +202,7 @@ define([
                         }
                     }
                 }
-                var oldParentMug = parentMug;
-                parentMug = mug;
-                processChildren(mug && mug.options.dataChildFilter);
-                parentMug = oldParentMug;
+                processChildren();
             });
             return dataTree;
         },
@@ -753,16 +755,16 @@ define([
         /**
          * Get the logical path of the mug's node in the data tree
          *
-         * It is not always possible to lookup a mug by traversing the
-         * control tree using it's absolute path. For example, some
-         * mugs encapsulate multiple levels of XML elements. This Form object
-         * maintains a hash table to quickly get a mug by its path.
+         * Invariant: absolute paths returned by this function are always
+         * data paths, and may not match the control hierarchy.
+         *
+         * It is not always possible to lookup a mug by traversing the tree
+         * using it's absolute path. For example, some mugs encapsulate multiple
+         * levels of XML elements. This Form object maintains a hash table to
+         * quickly get a mug by its path.
          */
         getAbsolutePath: function (mug, excludeRoot) {
             if (mug && !mug.options.isControlOnly) {
-                if (mug.p.dataParent) {
-                    return mug.p.dataParent + '/' + mug.p.nodeID;
-                }
                 return this.tree.getAbsolutePath(mug, excludeRoot);
             }
             return null;
