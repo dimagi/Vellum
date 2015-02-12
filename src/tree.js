@@ -18,9 +18,11 @@ define([
 
     Node.prototype = {
         getChildren: function () {
+            // DEPRECATED use 'children' directly
             return this.children;
         },
         getValue: function () {
+            // DEPRECATED use 'value' directly
             return this.value;
         },
         /**
@@ -226,7 +228,7 @@ define([
         insertMug: function (mug, position, refMug, index) {
             var refNode = refMug ? this.getNodeFromMug(refMug) : this.rootNode,
                 node = this.getNodeFromMug(mug),
-                refNodeSiblings, refNodeIndex, refNodeParent;
+                refNodeIndex, refNodeParent;
 
             if (node) {
                 this._removeNodeFromTree(node); 
@@ -237,23 +239,17 @@ define([
                 mug['_node_' + this.treeType] = node;
             }
 
-            refNodeParent = this.getParentNode(refNode);
-            refNodeSiblings = refNodeParent.getChildren();
-            refNodeIndex = refNodeSiblings.indexOf(refNode);
-
-            if (['index', 'into', 'first', 'last', 'inside'].indexOf(position) !== -1) {
-                mug.parentMug = refMug;
-            } else {
-                mug.parentMug = refNodeParent.getValue();
-            }
-
             switch (position) {
                 case 'before':
                 case 'inside': // for compatibility with JSTree
+                    refNodeParent = this.getParentNode(refNode);
+                    refNodeIndex = refNodeParent.children.indexOf(refNode);
                     refNodeParent.insertChild(node, refNodeIndex);
                 break;
                 case null:
                 case 'after':
+                    refNodeParent = this.getParentNode(refNode);
+                    refNodeIndex = refNodeParent.children.indexOf(refNode);
                     refNodeParent.insertChild(node, refNodeIndex + 1);
                 break;
                 case 'into': // not officially supported by, but happens to work in JSTree

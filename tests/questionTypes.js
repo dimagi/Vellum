@@ -477,6 +477,7 @@ require([
 
             util.deleteQuestion("question1/item1");
             util.deleteQuestion("question1/item2");
+            util.clickQuestion("question1");
             assert.ok($(changerSelector + " .change-question:not([data-qtype*='Select'])").length > 0);
         });
     });
