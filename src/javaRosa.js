@@ -992,6 +992,7 @@ define([
         widget.isDefaultLang = widget.language === widget.defaultLang;
         widget.isSyncedWithDefaultLang = false;
         widget.hasNodeIdPlaceholder = options.path === 'labelItext';
+        widget.customPlaceholder = options.customPlaceholder;
 
         widget.getControl = function () {
             return $input;
@@ -1056,7 +1057,15 @@ define([
                 }
 
                 var value = widget.getItextValue(),
-                    placeholder = widget.hasNodeIdPlaceholder ? widget.mug.p.nodeID : "";
+                    placeholder;
+                if (widget.customPlaceholder) {
+                    placeholder = widget.customPlaceholder;
+                } else if (widget.hasNodeIdPlaceholder) {
+                    placeholder = widget.mug.p.nodeID;
+                } else {
+                    placeholder = "";
+                }
+
                 if (!widget.isDefaultLang) {
                     placeholder = widget.getItextValue(widget.defaultLang) || placeholder;
                 }
@@ -1836,7 +1845,8 @@ define([
                         getItextByMug: function (mug) {
                             return mug.p.helpItextID;
                         },
-                        displayName: "Help Message"
+                        displayName: "Help Message",
+                        customPlaceholder: "Android only"
                     }));
                 }
             };
