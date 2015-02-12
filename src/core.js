@@ -1227,7 +1227,7 @@ define([
             }
         }).on('parent-question-type-change', function (e) {
             _this.jstree("set_icon", e.childMug.ufid, e.childMug.getIcon());
-        }).on('remove-question', function (e) {
+        }).on('question-remove', function (e) {
             if (!e.isInternal) {
                 var prev = _this.jstree("get_prev_dom", e.mug.ufid);
                 _this.showVisualValidation(null);
