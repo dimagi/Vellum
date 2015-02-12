@@ -1228,6 +1228,11 @@ define([
         }).on('parent-question-type-change', function (e) {
             _this.jstree("set_icon", e.childMug.ufid, e.childMug.getIcon());
         }).on('remove-question', function (e) {
+//jls
+            var currentMug = _this.getCurrentlySelectedMug();
+            if (e.mug && e.mug.parentMug && e.mug.parentMug === currentMug) {
+                _this.displayMugProperties(currentMug);
+            }
             if (!e.isInternal) {
                 var prev = _this.jstree("get_prev_dom", e.mug.ufid);
                 _this.showVisualValidation(null);
@@ -1241,7 +1246,12 @@ define([
         }).on('error-change', function (e) {
             _this._resetMessages(e.errors);
         }).on('question-create', function (e) {
+//jls
             _this.handleNewMug(e.mug, e.refMug, e.position);
+            var currentMug = _this.getCurrentlySelectedMug();
+            if (e.mug && e.mug.parentMug && e.mug.parentMug === currentMug) {
+                _this.displayMugProperties(currentMug);
+            }
             if (!e.isInternal) {
                 _this.jstree("deselect_all", true)
                      .jstree('select_node', e.mug.ufid);
@@ -1655,14 +1665,17 @@ define([
             var currentType = mug.__className,
                 questions = (mug.options.limitTypeChangeTo || 
                      _this.data.core.QUESTIONS_IN_TOOLBAR),
-                ret = [];
+                ret = [],
+                hasChildren = mug.form.getChildren(mug).length > 0;
+                isSelect = /^M?Select$/.test.bind(/^M?Select$/);
 
             for (var i = 0; i < questions.length; i++) {
                 var typeName = questions[i],
                     q = _this.data.core.mugTypes[typeName];
                 if (q.isTypeChangeable && currentType !== typeName &&
                     (!q.limitTypeChangeTo || 
-                     q.limitTypeChangeTo.indexOf(currentType) !== -1))
+                     q.limitTypeChangeTo.indexOf(currentType) !== -1) &&
+                    (!hasChildren || !isSelect(mug.__className) || isSelect(typeName)))
                 {
                     ret.push({
                         slug: questions[i],
