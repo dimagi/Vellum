@@ -316,7 +316,7 @@ define([
     function parseControlElement(form, $cEl, parentMug) {
         var tagName = $cEl[0].nodeName.toLowerCase(),
             appearance = $cEl.popAttr('appearance'),
-            adapt, mug = null;
+            adapt, dataParent, mug = null;
 
         var getAdaptor = form.vellum.data.core.controlNodeAdaptorMap[tagName];
         if (getAdaptor) {
@@ -335,8 +335,10 @@ define([
             mug = form.getMugByPath(path);
         }
         mug = adapt(mug, form);
-        if (parentMug !== mug.parentMug) {
-            mug.p.dataParent = form.getAbsolutePath(mug.parentMug);
+        dataParent = mug.parentMug;
+        if (dataParent && dataParent !== parentMug) {
+            mug.p.dataParent = form.getAbsolutePath(dataParent);
+            form.tree.insertMug(mug, 'into', parentMug);
         }
         if (appearance) {
             mug.p.appearance = appearance;
