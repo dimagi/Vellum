@@ -497,11 +497,6 @@ define([
             } else {
                 var path = this.form.getAbsolutePath(this, true);
                 if (!path) {
-                    // fall back to control tree if mug not in data tree
-                    // this can happen with malformed XForms
-                    path = this.form.getControlPath(this, true);
-                }
-                if (!path) {
                     // fall back to nodeID if mug path still not found
                     // this can happen with malformed XForms
                     path = "/" + this.getNodeID();
