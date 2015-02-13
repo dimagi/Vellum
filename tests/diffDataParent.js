@@ -83,7 +83,7 @@ require([
             assert.isUndefined(text1.p.dataParent);
         });
 
-        it("should have proper data parent after change through UI", function() {
+        it("should have proper data parent after reloading the form", function() {
             util.loadXML("");
             var text1 = util.addQuestion("Text", 'text1'),
                 form = call("getData").core.form;
