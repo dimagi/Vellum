@@ -75,7 +75,7 @@ define([
         }
     }
 
-    function assertDataTreeState(tree) {
+    function assertTreeState(tree) {
         function repr(node, level) {
             var i, len, child, items = [];
             if (node.isRootNode) {
@@ -273,7 +273,7 @@ define([
         assertXmlEqual: assertXmlEqual,
         assertXmlNotEqual: assertXmlNotEqual,
         assertJSTreeState: assertJSTreeState,
-        assertDataTreeState: assertDataTreeState,
+        assertTreeState: assertTreeState,
         xmlines: function(xml) {
             return xml.replace(/>(\s\s+)</g, ">\n$1<");
         },
