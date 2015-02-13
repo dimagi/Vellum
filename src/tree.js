@@ -141,6 +141,28 @@ define([
                 children = this.getChildren();
             callback(value, this.getID(), processChildren);
         },
+        getAbsolutePath: function (excludeRoot) {
+            if (this.isRootNode) {
+                if (excludeRoot) {
+                    return '';
+                }
+                return '/' + this.getID();
+            }
+            var mug = this.value, parentPath;
+            if (mug.p.dataParent) {
+                parentPath = mug.p.dataParent;
+            } else {
+                parentPath = this.parent.getAbsolutePath(excludeRoot);
+                if (parentPath === null) {
+                    return null;
+                }
+            }
+            var path = parentPath + '/' + this.getID();
+            if (mug.options.adjustPath) {
+                path = mug.options.adjustPath(mug, path);
+            }
+            return path;
+        },
         validateTree: function (validateValue) {
             var i, childResult;
             if(!this.getValue()){
@@ -273,34 +295,11 @@ define([
             });
         },
         getAbsolutePath: function (mug, excludeRoot) {
-            var node = this.getNodeFromMug(mug),
-                _this = this;
-            function pathOf(node) {
-                if (!node) {
-                    return null;
-                }
-                if (node.isRootNode) {
-                    if (excludeRoot) {
-                        return '';
-                    }
-                    return '/' + node.getID();
-                }
-                var mug = node.value, parentPath;
-                if (mug.p.dataParent) {
-                    parentPath = mug.p.dataParent;
-                } else {
-                    parentPath = pathOf(_this.getParentNode(node));
-                }
-                if (parentPath === null) {
-                    return null;
-                }
-                var path = parentPath + '/' + node.getID();
-                if (mug.options.adjustPath) {
-                    path = mug.options.adjustPath(mug, path);
-                }
-                return path;
+            var node = this.getNodeFromMug(mug);
+            if (!node) {
+                return null;
             }
-            return pathOf(node);
+            return node.getAbsolutePath(excludeRoot);
         },
         /**
          * Find a sibling of refMug matching a predicate

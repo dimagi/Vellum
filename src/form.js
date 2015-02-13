@@ -175,19 +175,13 @@ define([
         dataTree: function() {
             var rootId = this.getBasePath().slice(1,-1),
                 dataTree = new Tree(rootId, 'data'),
-                diffDataParents = {};
+                diffDataParents = {},
+                _this = this;
             this.tree.walk(function(mug, nodeID, processChildren) {
                 if (mug) {
                     if (mug.options.isControlOnly) {
                         return;
                     } else if (mug.p.dataParent) {
-                        // TODO write a test with dataParent's mug already
-                        // inserted into dataTree when we get here.
-                        // NOTE this is the actual use case for which we're
-                        // building this feature.
-                        // Tree structure:
-                        // - group
-                        //   - text (dataParent = /data)
                         var dp = mug.p.dataParent;
                         if (diffDataParents[dp]) {
                             diffDataParents[dp].push(mug);
@@ -196,15 +190,15 @@ define([
                         }
                     } else {
                         dataTree.insertMug(mug, 'into', mug.parentMug);
-                        var absolutePath = dataTree.getAbsolutePath(mug);
-                        if (diffDataParents.hasOwnProperty(absolutePath)) {
-                            _.each(diffDataParents[absolutePath], function(childMug) {
-                                dataTree.insertMug(childMug, 'into', mug);
-                            });
-                        }
                     }
                 }
                 processChildren();
+            });
+            _.each(diffDataParents, function (mugs, dataParent) {
+                var dataParentMug = _this.mugMap[dataParent];
+                for (var i = 0, len = mugs.length; i < len; i++) {
+                    dataTree.insertMug(mugs[i], 'into', dataParentMug);
+                }
             });
             return dataTree;
         },
