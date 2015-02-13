@@ -79,6 +79,7 @@ define([
         },
         baseTransactionOptions = {
             isDataOnly: true,
+            isTypeChangeable: false,
             supportsDataNodeRole: true,
             parseDataNode: function (mug, $node) {
                 mug.p.nodeID = mug.p.rawDataAttributes.type || "tx-" + nextId++;
