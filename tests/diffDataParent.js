@@ -131,6 +131,12 @@ require([
                 "  text2",
                 "  text1"
             );
+            util.assertJSTreeState(
+                "text1",
+                "text3",
+                "group",
+                "  text2"
+            );
         });
 
         it("should properly load group before sibling/child", function() {
