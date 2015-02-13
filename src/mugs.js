@@ -323,7 +323,7 @@ define([
                         if(!dataParentMug &&
                            form.getBasePath().slice(0, -1) !== dataParent) {
                             return "Must be valid path";
-                        } else if (dataParentMug && dataParentMug.__className !== 'Group') {
+                        } else if (dataParentMug && !dataParentMug.options.possibleDataParent) {
                             return "Data must be a child of a group";
                         } else if (!mug.spec.dataParent.visibility(mug)) {
                             return "Children of repeat groups cannot have a different data parent";
@@ -968,6 +968,7 @@ define([
         isSpecialGroup: true,
         isNestableGroup: true,
         isTypeChangeable: false,
+        possibleDataParent: true,
         canOutputValue: false,
         controlNodeChildren: function ($node) {
             return $node.children().not('label').not('value').not('hint');
@@ -1001,6 +1002,7 @@ define([
     var Repeat = util.extend(Group, {
         typeName: 'Repeat Group',
         icon: 'icon-retweet',
+        possibleDataParent: false,
         controlNodeChildren: function ($node) {
             return $node.children('repeat').children();
         },
