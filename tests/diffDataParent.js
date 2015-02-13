@@ -3,12 +3,14 @@ require([
     'jquery',
     'underscore',
     'tests/utils',
-    'text!static/diffDataParent/parse.xml'
+    'text!static/diffDataParent/parse.xml',
+    'text!static/diffDataParent/sibling-as-child.xml'
 ], function (
     chai, $,
     _,
     util,
-    PARSE_XML
+    PARSE_XML,
+    SIBLING_AS_CHILD
 ) {
     var assert = chai.assert,
         call = util.call;
@@ -122,12 +124,24 @@ require([
 
             text1.p.dataParent = '/data/group';
             util.addQuestion.bind({prevId: text1.p.nodeID})("Text", 'text3');
+            // questions with alternate dataParent always come last in the data tree
             util.assertDataTreeState(form.dataTree(),
                 "text3",
                 "group",
-                "  text1",
-                "  text2"
+                "  text2",
+                "  text1"
             );
+        });
+
+        it("should properly load group before sibling/child", function() {
+            util.loadXML(SIBLING_AS_CHILD);
+            var text = util.getMug("/data/text");
+            assert.equal(text.p.dataParent, "/data");
+            util.assertJSTreeState(
+                "group",
+                "  text"
+            );
+            util.assertXmlEqual(call("createXML"), SIBLING_AS_CHILD);
         });
     });
 });

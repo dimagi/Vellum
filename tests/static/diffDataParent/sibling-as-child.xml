@@ -5,38 +5,29 @@
 		<model>
 			<instance>
 				<data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/960D6510-6982-48D9-BDB0-A70E352F8A57" uiVersion="1" version="1" name="Untitled Form">
-					<question4>
-						<question3 />
-						<question1 />
-					</question4>
+					<group />
+					<text />
 				</data>
 			</instance>
-			<bind nodeset="/data/question4" />
-			<bind nodeset="/data/question4/question3" type="xsd:string" />
-			<bind nodeset="/data/question4/question1" type="xsd:string" />
+			<bind nodeset="/data/group" />
+			<bind nodeset="/data/text" type="xsd:string" />
 			<itext>
 				<translation lang="en" default="">
-					<text id="question1-label">
-						<value>question1</value>
+					<text id="group-label">
+						<value>group</value>
 					</text>
-					<text id="question4-label">
-						<value>question4</value>
-					</text>
-					<text id="question3-label">
-						<value>question3</value>
+					<text id="text-label">
+						<value>text</value>
 					</text>
 				</translation>
 			</itext>
 		</model>
 	</h:head>
 	<h:body>
-		<input ref="/data/question4/question1">
-			<label ref="jr:itext('question1-label')" />
-		</input>
-		<group ref="/data/question4">
-			<label ref="jr:itext('question4-label')" />
-			<input ref="/data/question4/question3">
-				<label ref="jr:itext('question3-label')" />
+		<group ref="/data/group">
+			<label ref="jr:itext('group-label')" />
+			<input ref="/data/text">
+				<label ref="jr:itext('text-label')" />
 			</input>
 		</group>
 	</h:body>
