@@ -137,6 +137,7 @@ define([
         if (ref !== null && !_.isUndefined(ref)) { that.refs[ref] = null; }
         return that;
     };
+    var INSTANCE_REGEXP = /^instance\((['"])([^'"]+)\1\)/i;
 
     function Form (opts, vellum, mugTypes) {
         var _this = this;
@@ -197,13 +198,16 @@ define([
          *          match other instances on the form, and is required. The
          *          instance will be unconditionally added and it's id returned
          *          if the instance has no `src` attribute.
-         * @param ref - Optional, a unique key of the thing that references
+         * @param mug - (optional) The mug with which this query is associated.
+         *          If provided, this is used along with the next parameter
+         *          to construct a unique key of the thing that references
          *          the instance. If provided, this will add a reference to
          *          the added or existing instance unless ref counting is
          *          disabled for the form or instance.
+         * @param property - (optional) The mug property name for the query.
          * @returns - The `id` of the added or already-existing instance.
          */
-        addInstanceIfNotExists: function (attrs, ref) {
+        addInstanceIfNotExists: function (attrs, mug, property) {
             if (attrs.src === null || _.isUndefined(attrs.src)) {
                 // no ref counting for instances without a `src` since they cannot be dropped
                 this.instanceMetadata.push(InstanceMetadata({
@@ -214,8 +218,9 @@ define([
             }
 
             var meta = _.find(this.instanceMetadata, function (m) {
-                return m.attributes.src === attrs.src;
-            });
+                    return m.attributes.src === attrs.src;
+                }),
+                ref = mug ? mug.ufid + "." + property : null;
             if (!meta) {
                 this.instanceMetadata.push(InstanceMetadata({
                     src: attrs.src,
@@ -223,7 +228,7 @@ define([
                 }, null, this.enableInstanceRefCounting ? ref : null));
                 return attrs.id;
             } else if (meta.refs && this.enableInstanceRefCounting) {
-                if (_.isUndefined(ref)) {
+                if (ref === null) {
                     // disable ref counting for this instance. how unfortunate
                     meta.refs = null;
                 } else {
@@ -233,13 +238,29 @@ define([
             return meta.attributes.id;
         },
         /**
-         * Add a reference to the instance with matching id
+         * Parse query and get instance metadata
          *
-         * @returns - The InstanceMetadata if found, otherwise null. Note
-         *            that this will always return the found instance, even if
-         *            ref counting is disabled.
+         * This adds a reference to the instance if found.
+         *
+         * @param query - A query string, which may start with "instance(...)"
+         * @param mug - The mug with which this query is associated.
+         * @param property - (optional) The mug property name for the query.
+         * @reutrns - an object containing instance attributes or null.
          */
-        referenceInstance: function (id, ref) {
+        parseInstance: function (query, mug, property) {
+            var match = query.match(INSTANCE_REGEXP),
+                instance = null;
+            if (match) {
+                var instanceId = match[2],
+                    ref = mug.ufid + "." + property,
+                    meta = this._referenceInstance(instanceId, ref);
+                if (meta) {
+                    instance = _.clone(meta.attributes);
+                }
+            }
+            return instance;
+        },
+        _referenceInstance: function (id, ref) {
             var meta = _.find(this.instanceMetadata, function (meta) {
                     return meta.attributes.id === id;
                 });
@@ -249,23 +270,32 @@ define([
             return meta || null;
         },
         /**
+         * Replace the instance id in the given query (utility function)
+         *
+         * Is it too magical to replace the instance id in the query?
+         * There might be edge cases where a user is entering a
+         * custom instance and query and does not want this.
+         */
+        updateInstanceQuery: function (query, instanceId) {
+            return query.replace(INSTANCE_REGEXP, "instance('" + instanceId + "')");
+        },
+        /**
          * Drop instance reference, possibly removing the instance
          *
          * @param src - The instance `src` attribute value.
-         * @param ref - The unique key of the thing that no longer references
-         *          the instance. The instance will be removed from the form
-         *          if this ref was tracked by the instance and it was the
-         *          last thing referencing the instance.
+         * @param mug - (optional) A mug that references the query.
+         * @param property - (optional) The mug property name for the query.
          * @returns - True if the instance was removed, otherwise false.
          */
-        dropInstanceReference: function (src, ref) {
+        dropInstanceReference: function (src, mug, property) {
             if (!this.enableInstanceRefCounting) {
                 return false;
             }
             var meta = _.find(this.instanceMetadata, function (m) {
                     return m.attributes.src === src;
                 });
-            if (meta && meta.refs) {
+            if (meta && meta.refs && mug) {
+                var ref = mug.ufid + "." + property;
                 meta.refs = _.omit(meta.refs, ref);
                 if (_.isEmpty(meta.refs)) {
                     this.instanceMetadata = _.without(this.instanceMetadata, meta);

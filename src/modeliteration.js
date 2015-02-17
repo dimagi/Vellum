@@ -44,7 +44,6 @@ define([
                 query: "selected-at({}/@ids,../@index)"
             }
         ],
-        instanceRegexp = /^instance\(['"]([^'"]+)['"]\)/i,
         joinIdsRegexp = /^ *join\(['"] ['"], *(.*)\) *$/i,
         modelRepeatMugOptions = {
             //typeName: 'Model Repeat',
@@ -219,15 +218,8 @@ define([
                 }
             });
             if (mug.p.dataSource.idsQuery) {
-                var match = mug.p.dataSource.idsQuery.match(instanceRegexp);
-                if (match) {
-                    var instanceId = match[1],
-                        ref = mug.ufid + ".dataSource.instance",
-                        meta = mug.form.referenceInstance(instanceId, ref);
-                    if (meta) {
-                        mug.p.dataSource.instance = _.clone(meta.attributes);
-                    }
-                }
+                mug.p.dataSource.instance = mug.form.parseInstance(
+                        mug.p.dataSource.idsQuery, mug, "dataSource.instance");
             } else {
                 // keep paths consistent for malformed model repeat with
                 // missing IDs query. this XPath returns the empty set
@@ -284,20 +276,20 @@ define([
     }
 
     function updateDataSource(mug, value, previous) {
-        var ref = mug.ufid + ".dataSource.instance";
         if (previous && previous.instance && previous.instance.src) {
-            mug.form.dropInstanceReference(previous.instance.src, ref);
+            mug.form.dropInstanceReference(
+                        previous.instance.src, mug, "dataSource.instance");
         }
         if (value && value.instance && value.instance.src) {
-            var instanceId = mug.form.addInstanceIfNotExists(value.instance, ref);
+            var instanceId = mug.form.addInstanceIfNotExists(
+                                    value.instance, mug, "dataSource.instance");
             if (instanceId !== value.instance.id) {
                 // is it too magical to replace the instance id in the query?
                 // there might be edge cases where a user is entering a
                 // custom instance and query and does not want this to
                 // happen
                 value.instance.id = instanceId;
-                value.idsQuery = value.idsQuery.replace(
-                    instanceRegexp, "instance('" + instanceId + "')");
+                value.idsQuery = mug.form.updateInstanceQuery(value.idsQuery, instanceId);
             }
         }
         if (Boolean(value && value.idsQuery) !== Boolean(previous && previous.idsQuery)) {
