@@ -620,7 +620,9 @@ define([
                 // Is this necessary, since itext is a reference?
                 // It probably triggers handlers.
                 this.p[propertyPath] = itext;
+                return true;
             }
+            return false;
         },
         unlinkItext: function () {
             var _this = this;
