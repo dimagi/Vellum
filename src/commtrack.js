@@ -53,6 +53,13 @@ define([
                 {
                     slug: "main",
                     displayName: "Basic",
+                    help: {
+                        title: "Basic",
+                        text: "<p>The <strong>Question ID</strong> is an internal identifier for a question. " +
+                            "It does not appear on the phone. It is the name of the question in data exports.</p>" +
+                            "<p>Click through for more info.</p>",
+                        link: "https://help.commcarehq.org/display/commcarepublic/Transactions",
+                    },
                     properties: [
                         "nodeID",
                         "entityId",
@@ -66,6 +73,13 @@ define([
                 {
                     slug: "main",
                     displayName: "Basic",
+                    help: {
+                        title: "Basic",
+                        text: "<p>The <strong>Question ID</strong> is an internal identifier for a question. " +
+                            "It does not appear on the phone. It is the name of the question in data exports.</p>" +
+                            "<p>Click through for more info.</p>",
+                        link: "https://help.commcarehq.org/display/commcarepublic/Transactions",
+                    },
                     properties: [
                         "nodeID",
                         "src",
@@ -139,27 +153,32 @@ define([
                     visibility: 'visible',
                     presence: 'optional',
                     widget: setValueWidget,
-                    xpathType: "generic"
+                    xpathType: "generic",
+                    help: 'XPath expression for the case ID associated with this balance.',
                 },
                 sectionId: {
                     lstring: 'Balance ID',
                     visibility: 'visible',
                     presence: 'optional',
-                    widget: widgets.text
+                    widget: widgets.text,
+                    help: 'The name of the balance you are tracking. ' + 
+                         'This is an internal identifier which does not appear on the phone.',
                 },
                 entryId: {
                     lstring: 'Product',
                     visibility: 'visible',
                     presence: 'optional',
                     widget: setValueWidget,
-                    xpathType: "generic"
+                    xpathType: "generic",
+                    help: 'A reference to a product ID, e.g., "/data/products/current_product"',
                 },
                 quantity: {
                     lstring: 'Quantity',
                     visibility: 'visible',
                     presence: 'optional',
                     widget: widgets.xPath,
-                    xpathType: "generic"
+                    xpathType: "generic",
+                    help: 'A reference to an integer question in this form.',
                 },
                 requiredAttr: { presence: "notallowed" },
                 constraintAttr: { presence : "notallowed" },
@@ -183,6 +202,7 @@ define([
                     "vellum:role": "Transfer"
                 };
             },
+            icon: 'icon-exchange',
             init: function (mug, form) {
                 mug.p.src = {value: ""};
                 mug.p.dest = {value: ""};
@@ -198,34 +218,40 @@ define([
                     visibility: 'visible',
                     presence: 'optional',
                     widget: setValueWidget,
-                    xpathType: "generic"
+                    xpathType: "generic",
+                    help: 'XPath expression for the case ID issuing the transaction. Leave blank if unknown or not applicable.',
                 },
                 dest: {
                     lstring: 'Destination Case',
                     visibility: 'visible',
                     presence: 'optional',
                     widget: setValueWidget,
-                    xpathType: "generic"
+                    xpathType: "generic",
+                    help: 'XPath expression for the case ID receiving the transaction. Leave blank if unknown or not applicable.',
                 },
                 sectionId: {
                     lstring: 'Balance ID',
                     visibility: 'visible',
                     presence: 'optional',
-                    widget: widgets.text
+                    widget: widgets.text,
+                    help: 'The name of the balance you are tracking. ' + 
+                         'This is an internal identifier which does not appear on the phone.',
                 },
                 entryId: {
                     lstring: 'Product',
                     visibility: 'visible',
                     presence: 'optional',
                     widget: setValueWidget,
-                    xpathType: "generic"
+                    xpathType: "generic",
+                    help: 'A reference to a product ID, e.g., "/data/products/current_product"',
                 },
                 quantity: {
                     lstring: 'Quantity',
                     visibility: 'visible',
                     presence: 'optional',
                     widget: widgets.xPath,
-                    xpathType: "generic"
+                    xpathType: "generic",
+                    help: 'A reference to an integer question in this form.',
                 },
                 requiredAttr: { presence: "notallowed" },
                 constraintAttr: { presence : "notallowed" },
