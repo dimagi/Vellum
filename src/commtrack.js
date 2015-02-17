@@ -185,6 +185,12 @@ define([
                 calculateAttr: { presence: "notallowed" }
             }
         },
+        transferMugValidation = function (mug) {
+            if (mug.p.dest.value || mug.p.src.value) {
+                return 'pass';
+            }
+            return 'Transfer must have at least one of source case and destination case.';
+        },
         transferMugOptions = {
             typeName: 'Transfer',
             getTagName: function () { return "transfer"; },
@@ -220,6 +226,7 @@ define([
                     widget: setValueWidget,
                     xpathType: "generic",
                     help: 'XPath expression for the case ID issuing the transaction. Leave blank if unknown or not applicable.',
+                    validationFunc: transferMugValidation,
                 },
                 dest: {
                     lstring: 'Destination Case',
@@ -228,6 +235,7 @@ define([
                     widget: setValueWidget,
                     xpathType: "generic",
                     help: 'XPath expression for the case ID receiving the transaction. Leave blank if unknown or not applicable.',
+                    validationFunc: transferMugValidation,
                 },
                 sectionId: {
                     lstring: 'Balance ID',
