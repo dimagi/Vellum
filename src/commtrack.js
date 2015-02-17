@@ -269,10 +269,11 @@ define([
 
     $.vellum.plugin("commtrack", {}, {
         getAdvancedQuestions: function () {
-            if (!this.opts().features.transaction_question_types) {
-                return [];
+            var questions = this.__callOld();
+            if (this.opts().features.transaction_question_types) {
+                questions = questions.concat(["Balance", "Transfer"]);
             }
-            return this.__callOld().concat(["Balance", "Transfer"]);
+            return questions;
         },
         getMugTypes: function () {
             var types = this.__callOld();
