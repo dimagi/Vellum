@@ -167,9 +167,6 @@ define([
         this.instanceMetadata = [InstanceMetadata({})];
         this.enableInstanceRefCounting = opts.enableInstanceRefCounting;
         this.errors = [];
-        
-        this.externalInstances = _.indexBy(
-            _.map(opts.externalInstances || [], processInstance), 'id');
         this.question_counter = 1;
         
         //make the object event aware
@@ -186,10 +183,6 @@ define([
                 type: 'change',
                 mug: mug
             });
-        },
-        addInstance: function (instance) {
-            // NOTE this does something very different from addInstanceIfNotExists
-            this.externalInstances[instance.id] = instance;
         },
         /**
          * Add an instance if it is not already on the form
