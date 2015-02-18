@@ -193,6 +193,7 @@ define([
         handleMugRename: function (form, mug, newID, oldID, newPath, oldPath) {
             this.__callOld();
 
+            oldPath = oldPath ? RegExp.escape(oldPath) : oldPath;
             var pathRegex = new RegExp(oldPath, 'g'),
                 idNameRegex = new RegExp('(> )?' + oldID + '( >)?', 'g'),
                 // this depends on itext ids being question ID + '-label' in order

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:orx="http://openrosa.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa" xmlns:vellum="http://commcarehq.org/xforms/vellum">
+	<h:head>
+		<h:title>Untitled Form</h:title>
+		<model>
+			<instance>
+				<data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/DC38FCC5-930C-4385-AE6C-5B15ED1F95B1" uiVersion="1" version="1" name="Untitled Form">
+					<amount_received />
+					<transfer xmlns="http://commcarehq.org/ledger/v1" src="" dest="" date="" section-id="stock" type="trans-1" vellum:role="Transfer">
+						<entry id="" quantity="" />
+					</transfer>
+				</data>
+			</instance>
+			<instance id="products" src="jr://fixture/commtrack:products" />
+			<instance id="ledger" src="jr://instance/ledgerdb" />
+			<bind nodeset="/data/amount_received" type="xsd:int" />
+			<bind nodeset="/data/transfer[@type='trans-1']/entry/@quantity" calculate="/data/amount_received" />
+			<setvalue event="xforms-ready" ref="/data/transfer[@type='trans-1']/entry/@id" value="instance('commcaresession')/session/data/product_id" />
+			<setvalue event="xforms-ready" ref="/data/transfer[@type='trans-1']/@src" value="instance('commcaresession')/session/data/case_id" />
+			<setvalue event="xforms-ready" ref="/data/transfer[@type='trans-1']/@dest" value="instance('casedb')/casedb/case[@case_id=instance('commcaresession')/session/data/case_id]/index/parent" />
+			<setvalue event="xforms-ready" ref="/data/transfer[@type='trans-1']/@date" value="today()" />
+			<itext>
+				<translation lang="en" default="">
+					<text id="amount_received-label">
+						<value>amount_received</value>
+					</text>
+				</translation>
+			</itext>
+		</model>
+	</h:head>
+	<h:body>
+		<input ref="/data/amount_received">
+			<label ref="jr:itext('amount_received-label')" />
+		</input>
+	</h:body>
+</h:html>

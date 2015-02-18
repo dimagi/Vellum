@@ -872,7 +872,7 @@ define([
             this.dataTree.removeMug(mug);
             this.controlTree.removeMug(mug);
             this.fire({
-                type: 'remove-question',
+                type: 'question-remove',
                 mug: mug,
                 isInternal: isInternal
             });

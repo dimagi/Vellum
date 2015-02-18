@@ -361,6 +361,24 @@ define([
         },
         controlNodeChildren: null,
 
+        /**
+         * Get data node path name
+         *
+         * @param mug - The mug.
+         * @param name - The default path name.
+         * @returns - the name used in data node paths. It should
+         *      uniquely identify the data node among its siblings.
+         */
+        getPathName: null,
+        /**
+         * Get data node tag name
+         *
+         * @param mug - The mug.
+         * @param name - The default tag name.
+         * @returns - the tag name used by the writer.
+         */
+        getTagName: null,
+
         // XForm writer integration:
         //  `childFilter(treeNodes, parentMug) -> treeNodes`
         // The writer passes these filter functions to `processChildren` of
@@ -555,9 +573,6 @@ define([
         getNodeID: function () {
             return this.p.nodeID || this.p.defaultValue;
         },
-        getAbsolutePath: function () {
-            return this.form.getAbsolutePath(this);
-        },
         getDisplayName: function (lang) {
             var itextItem = this.p.labelItextID, 
                 Itext = this.form.vellum.data.javaRosa.Itext,
@@ -617,8 +632,8 @@ define([
                 }
 
                 itext.id = id;
-                // Is this necessary, since itext is a reference?
-                // It probably triggers handlers.
+                // HACK to ensure property really changes
+                this.p.__data[propertyPath] = null;
                 this.p[propertyPath] = itext;
             }
         },
@@ -641,6 +656,12 @@ define([
             this.fire({type: "teardown-mug-properties", mug: this});
         }
     };
+
+    Object.defineProperty(Mug.prototype, "absolutePath", {
+        get: function () {
+            return this.form.getAbsolutePath(this);
+        }
+    });
 
     var DataBindOnly = util.extend(defaultOptions, {
         isDataOnly: true,

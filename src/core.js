@@ -941,7 +941,7 @@ define([
         var form = this.data.core.form,
             targetMug = form.getMugByUFID(dstId),
             sourceMug = form.getMugByUFID(srcId),
-            locked = !this.isMugPathMoveable(sourceMug.getAbsolutePath());
+            locked = !this.isMugPathMoveable(sourceMug.absolutePath);
         if (position === 'inside') { position = 'into'; } // normalize for Vellum
 
         if (locked) {
@@ -1227,7 +1227,7 @@ define([
             }
         }).on('parent-question-type-change', function (e) {
             _this.jstree("set_icon", e.childMug.ufid, e.childMug.getIcon());
-        }).on('remove-question', function (e) {
+        }).on('question-remove', function (e) {
             var currentMug = _this.getCurrentlySelectedMug();
             if (e.mug && e.mug.parentMug && e.mug.parentMug === currentMug) {
                 _this.displayMugProperties(currentMug);
