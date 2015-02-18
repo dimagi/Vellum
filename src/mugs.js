@@ -608,8 +608,7 @@ define([
             return rootId + nodeId + "-" + itextType;
         },
         setItextId: function (propertyPath, id, unlink) {
-            var itext = this.p[propertyPath],
-                _this = this;
+            var itext = this.p[propertyPath];
 
             if (id !== itext.id) {
                 if (unlink) {
@@ -618,13 +617,9 @@ define([
                 }
 
                 itext.id = id;
-                // Is this necessary, since itext is a reference?
-                // It probably triggers handlers.
+                // HACK to ensure property really changes
+                this.p.__data[propertyPath] = null;
                 this.p[propertyPath] = itext;
-                this.form.fire({
-                    type: 'change',
-                    mug: _this
-                });
             }
         },
         unlinkItext: function () {
