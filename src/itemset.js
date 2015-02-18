@@ -131,14 +131,18 @@ define([
             types.normal = $.extend(types.normal, {
                 "MSelectDynamic": util.extend(mugTypes.MSelect, {
                     typeName: 'Multiple Answer - Dynamic List',
-                    limitTypeChangeTo: ["SelectDynamic"],
+                    typeChangeError: function (mug, typeName) {
+                        return typeName === "SelectDynamic" ? "" : "Can only change to a dynamic single answer";
+                    },
                     validChildTypes: ["Itemset"],
                     maxChildren: 1,
                     afterInsert: afterDynamicSelectInsert,
                 }),
                 "SelectDynamic": util.extend(mugTypes.Select, {
                     typeName: 'Single Answer - Dynamic List',
-                    limitTypeChangeTo: ["MSelectDynamic"],
+                    typeChangeError: function (mug, typeName) {
+                        return typeName === "MSelectDynamic" ? "" : "Can only change to a dynamic multiple answer";
+                    },
                     validChildTypes: ["Itemset"],
                     maxChildren: 1,
                     afterInsert: afterDynamicSelectInsert

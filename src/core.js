@@ -1660,21 +1660,15 @@ define([
     fn.getQuestionTypeChanger = function (mug) {
         var _this = this;
         var getQuestionList = function (mug) {
-            var currentType = mug.__className,
-                questions = (mug.options.limitTypeChangeTo || 
-                     _this.data.core.QUESTIONS_IN_TOOLBAR),
-                ret = [],
-                hasChildren = mug.form.getChildren(mug).length > 0,
-                isSelect = /^M?Select$/.test.bind(/^M?Select$/);
+            var currentTypeName = mug.__className,
+                currentType = _this.data.core.mugTypes[currentTypeName],
+                questions = _this.data.core.QUESTIONS_IN_TOOLBAR,
+                ret = [];
 
             for (var i = 0; i < questions.length; i++) {
                 var typeName = questions[i],
                     q = _this.data.core.mugTypes[typeName];
-                if (q.isTypeChangeable && currentType !== typeName &&
-                    (!q.limitTypeChangeTo || 
-                     q.limitTypeChangeTo.indexOf(currentType) !== -1) &&
-                    (!hasChildren || !isSelect(mug.__className) || isSelect(typeName)))
-                {
+                if (currentTypeName !== typeName && !currentType.typeChangeError(mug, typeName)) {
                     ret.push({
                         slug: questions[i],
                         name: q.typeName,
