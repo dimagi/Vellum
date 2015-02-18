@@ -130,12 +130,9 @@ define([
         input.attr("type", "text").addClass('input-block-level');
 
         widget.setValue = function (value) {
-            // Why is this here?  Is it because the browser XML parser converts
-            // escape codes to their values?  If so, this should be done where
-            // it's called at parse time, not in the UI.
             if (value) {
-                value = value.replace(
-                    new RegExp(String.fromCharCode(10), 'g'), '&#10;');
+                // <input> converts newlines to spaces; this preserves them
+                value = value.replace(/\n/g, '&#10;');
             }
 
             var position = util.getCaretPosition(input[0]);
@@ -150,7 +147,7 @@ define([
         };
 
         widget.getValue = function() {
-            return input.val();
+            return input.val().replace(/&#10;/g, '\n');
         };
 
         input.bind("change keyup", function () {
@@ -192,7 +189,8 @@ define([
     var xPath = function (mug, options) {
         var widget = text(mug, options);
 
-        var super_getValue = widget.getValue;
+        var super_getValue = widget.getValue,
+            super_setValue = widget.setValue;
         widget.getValue = function() {
             var val = super_getValue();
             if ($.trim(val) === "") {
@@ -210,11 +208,12 @@ define([
             );
             return getUIElementWithEditButton(elem, function () {
                 widget.options.displayXPathEditor({
-                    value: widget.input.val(),
+                    value: super_getValue(),
                     xpathType: widget.definition.xpathType,
                     done: function (val) {
                         if (val !== false) {
-                            widget.input.val(val).change();
+                            super_setValue(val);
+                            widget.handleChange();
                         }
                     }
                 });
