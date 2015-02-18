@@ -293,12 +293,12 @@ define([
                 if (parentPath === null) {
                     return null;
                 }
-                var path = parentPath + '/' + node.getID(),
+                var name = node.getID(),
                     mug = node.getValue();
-                if (mug.options.adjustPath) {
-                    path = mug.options.adjustPath(mug, path);
+                if (mug.options.getPathName) {
+                    name = mug.options.getPathName(mug, name);
                 }
-                return path;
+                return parentPath + '/' + name;
             }
             return pathOf(node);
         },

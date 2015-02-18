@@ -107,7 +107,7 @@ define(function () {
             },
             objectMap: {}  // todo
         },
-        plugins: ['itemset', 'modeliteration'],
+        plugins: ['itemset', 'modeliteration', 'commtrack'],
         features: {
             'add_help_text': true,
             'group_in_field_list': true

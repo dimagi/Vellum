@@ -746,7 +746,7 @@ define([
             delete this.mugMap[this.tree.getAbsolutePath(mug)];
             this.tree.removeMug(mug);
             this.fire({
-                type: 'remove-question',
+                type: 'question-remove',
                 mug: mug,
                 isInternal: isInternal
             });

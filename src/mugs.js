@@ -361,6 +361,24 @@ define([
         },
         controlNodeChildren: null,
 
+        /**
+         * Get data node path name
+         *
+         * @param mug - The mug.
+         * @param name - The default path name.
+         * @returns - the name used in data node paths. It should
+         *      uniquely identify the data node among its siblings.
+         */
+        getPathName: null,
+        /**
+         * Get data node tag name
+         *
+         * @param mug - The mug.
+         * @param name - The default tag name.
+         * @returns - the tag name used by the writer.
+         */
+        getTagName: null,
+
         // XForm writer integration:
         //  `childFilter(treeNodes, parentMug) -> treeNodes`
         // The writer passes these filter functions to `processChildren` of
@@ -555,15 +573,13 @@ define([
         getNodeID: function () {
             return this.p.nodeID || this.p.defaultValue;
         },
-        getAbsolutePath: function () {
-            return this.form.getAbsolutePath(this);
-        },
         getDisplayName: function (lang) {
             var itextItem = this.p.labelItextID, 
                 Itext = this.form.vellum.data.javaRosa.Itext,
                 defaultLang = Itext.getDefaultLanguage(),
                 disp,
-                defaultDisp;
+                defaultDisp,
+                nodeID = this.getNodeID();
 
             if (this.__className === "ReadOnly") {
                 return "Unknown (read-only) question type";
@@ -573,7 +589,7 @@ define([
             }
 
             if (!itextItem || lang === '_ids') {
-                return this.getNodeID();
+                return nodeID;
             }
             lang = lang || defaultLang;
 
@@ -584,14 +600,14 @@ define([
             defaultDisp = itextItem.getValue("default", defaultLang);
             disp = itextItem.getValue("default", lang) || defaultDisp;
 
-            if (disp) {
+            if (disp && disp !== nodeID) {
                 if (lang !== defaultLang && disp === defaultDisp) {
                     disp += " [" + defaultLang + "]";
                 }
                 return disp;
             }
 
-            return '[' + this.getNodeID() + ']';
+            return nodeID;
         },
         // todo: move these into javarosa
         getItextAutoID: function (propertyPath) {
@@ -616,8 +632,8 @@ define([
                 }
 
                 itext.id = id;
-                // Is this necessary, since itext is a reference?
-                // It probably triggers handlers.
+                // HACK to ensure property really changes
+                this.p.__data[propertyPath] = null;
                 this.p[propertyPath] = itext;
             }
         },
@@ -640,6 +656,12 @@ define([
             this.fire({type: "teardown-mug-properties", mug: this});
         }
     };
+
+    Object.defineProperty(Mug.prototype, "absolutePath", {
+        get: function () {
+            return this.form.getAbsolutePath(this);
+        }
+    });
 
     var DataBindOnly = util.extend(defaultOptions, {
         isDataOnly: true,
@@ -806,6 +828,8 @@ define([
         }
     });
 
+    // Deprecated. Users may not add new longs to forms, 
+    // but must be able to view forms already containing longs.
     var Long = util.extend(Int, {
         typeName: 'Long',
         icon: 'fcc fcc-fd-long',

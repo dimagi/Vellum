@@ -93,9 +93,9 @@ define([
 
             chai.expect(label.p.relevantAttr).to.include("/data/group/hidden");
             group.p.nodeID = "x";
-            assert.equal(group.getAbsolutePath(), "/data/x");
-            assert.equal(label.getAbsolutePath(), "/data/x/label");
-            assert.equal(hidden.getAbsolutePath(), "/data/x/hidden");
+            assert.equal(group.absolutePath, "/data/x");
+            assert.equal(label.absolutePath, "/data/x/label");
+            assert.equal(hidden.absolutePath, "/data/x/hidden");
             chai.expect(label.p.relevantAttr).to.include("/data/x/hidden");
         });
 
@@ -108,7 +108,7 @@ define([
             chai.expect(label.p.relevantAttr).to.include("/data/group/hidden");
             chai.expect(label.p.labelItextID.defaultValue()).to.include("/data/group/hidden");
             form.moveMug(hidden, null, "first");
-            assert.equal(hidden.getAbsolutePath(), "/data/hidden");
+            assert.equal(hidden.absolutePath, "/data/hidden");
             chai.expect(label.p.relevantAttr).to.include("/data/hidden");
             chai.expect(label.p.labelItextID.defaultValue()).to.include("/data/hidden");
         });

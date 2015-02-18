@@ -116,6 +116,9 @@ define([
     var createDataBlock = function (form, xmlWriter) {
         form.tree.walk(function (mug, nodeID, processChildren) {
             if (mug && mug.options.isControlOnly) { return; }
+            if (mug && mug.options.getTagName) {
+                nodeID = mug.options.getTagName(mug, nodeID);
+            }
             xmlWriter.writeStartElement(nodeID);
             if (!mug) {
                 // tree root
