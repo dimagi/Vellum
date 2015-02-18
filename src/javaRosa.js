@@ -1580,6 +1580,7 @@ define([
                 newRef,
                 change;
 
+            oldPath = oldPath ? RegExp.escape(oldPath) : oldPath;
             if (mug.options.isSpecialGroup) {
                 oldPathRe = new RegExp(oldPath + '/', 'mg');
                 newPath = newPath + '/';

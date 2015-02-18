@@ -586,7 +586,7 @@ define([
         if (path && path[0] !== "/") {
             // make path absolute
             if (parentMug) {
-                var parentPath = parentMug.getAbsolutePath();
+                var parentPath = parentMug.absolutePath;
                 if (parentPath) {
                     path = parentPath + "/" + path;
                 }
@@ -640,6 +640,8 @@ define([
         if (parsed.initial_context === xpathmodels.XPathInitialContextEnum.RELATIVE) {
             parsed.steps.splice(0, 0, xpathmodels.XPathStep({axis: "child", test: rootNodeName}));
             parsed.initial_context = xpathmodels.XPathInitialContextEnum.ROOT;
+        } else {
+            return path;
         }
         newPath = parsed.toXPath();
         return newPath;

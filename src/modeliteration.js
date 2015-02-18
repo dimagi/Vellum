@@ -49,15 +49,15 @@ define([
         modelRepeatMugOptions = {
             //typeName: 'Model Repeat',
             supportsDataNodeRole: true,
-            adjustPath: function (mug, path) {
+            getPathName: function (mug, name) {
                 if (mug.p.dataSource.idsQuery) {
-                    path += "/item";
+                    name += "/item";
                 }
-                return path;
+                return name;
             },
             parseDataNode: function (mug, $node) {
                 // temporary dataSource overwritten by handleMugParseFinish
-                mug.p.dataSource = {idsQuery: "value for adjustPath"};
+                mug.p.dataSource = {idsQuery: "value for getPathName"};
                 return $node.children("item").children();
             },
             dataChildFilter: function (children, mug) {

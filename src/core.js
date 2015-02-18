@@ -941,7 +941,7 @@ define([
         var form = this.data.core.form,
             targetMug = form.getMugByUFID(dstId),
             sourceMug = form.getMugByUFID(srcId),
-            locked = !this.isMugPathMoveable(sourceMug.getAbsolutePath());
+            locked = !this.isMugPathMoveable(sourceMug.absolutePath);
         if (position === 'inside') { position = 'into'; } // normalize for Vellum
 
         if (locked) {
