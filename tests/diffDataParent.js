@@ -112,12 +112,12 @@ require([
 
         it("should have proper data parent after being loaded from xml", function() {
             util.loadXML(PARSE_XML);
-            var question1 = util.getMug("/data/question4/question1");
-            assert.equal(question1.p.dataParent, "/data/question4");
+            var diffChild = util.getMug("/data/parent/different-child");
+            assert.equal(diffChild.p.dataParent, "/data/parent");
             util.assertJSTreeState(
-                "question1",
-                "question4",
-                "  question3"
+                "different-child",
+                "parent",
+                "  normal-child"
             );
         });
 
@@ -158,37 +158,37 @@ require([
 
         it("should properly load mug after other mugs", function() {
             util.loadXML(DATA_PARENT_MUG_AFTER);
-            var text = util.getMug("/data/question4/question1");
-            assert.equal(text.p.dataParent, "/data/question4");
+            var child = util.getMug("/data/parent/child");
+            assert.equal(child.p.dataParent, "/data/parent");
             util.assertJSTreeState(
-                "question3",
-                "question1",
-                "question4"
+                "before-child",
+                "child",
+                "parent"
             );
             util.assertXmlEqual(call("createXML"), DATA_PARENT_MUG_AFTER);
         });
 
         it("should properly load mug before other mugs", function() {
             util.loadXML(DATA_PARENT_MUG_BEFORE);
-            var text = util.getMug("/data/question4/question1");
-            assert.equal(text.p.dataParent, "/data/question4");
+            var child = util.getMug("/data/parent/child");
+            assert.equal(child.p.dataParent, "/data/parent");
             util.assertJSTreeState(
-                "question1",
-                "question3",
-                "question4"
+                "child",
+                "after-child",
+                "parent"
             );
             util.assertXmlEqual(call("createXML"), DATA_PARENT_MUG_BEFORE);
         });
 
         it("should properly load mug in between other mugs", function() {
             util.loadXML(DATA_PARENT_MUG_IN_BETWEEN);
-            var text = util.getMug("/data/question4/question1");
-            assert.equal(text.p.dataParent, "/data/question4");
+            var child = util.getMug("/data/parent/child");
+            assert.equal(child.p.dataParent, "/data/parent");
             util.assertJSTreeState(
-                "question3",
-                "question1",
-                "question5",
-                "question4"
+                "before-child",
+                "child",
+                "after-child",
+                "parent"
             );
             util.assertXmlEqual(call("createXML"), DATA_PARENT_MUG_IN_BETWEEN);
         });
