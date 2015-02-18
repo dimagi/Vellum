@@ -116,6 +116,9 @@ define([
 
     var createDataBlock = function (form, dataTree, xmlWriter) {
         dataTree.walk(function (mug, nodeID, processChildren) {
+            if (mug && mug.options.getTagName) {
+                nodeID = mug.options.getTagName(mug, nodeID);
+            }
             xmlWriter.writeStartElement(nodeID);
             if (!mug) {
                 // tree root

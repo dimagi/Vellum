@@ -1,3 +1,7 @@
+_FILES=$(shell git diff-files --quiet --ignore-submodules && true || echo '+')
+_INDEX=$(shell git diff-index --cached --quiet HEAD && true || echo '+')
+VERSION=$(shell git rev-parse HEAD)$(_FILES)$(_INDEX)
+
 all:  tar
 
 rjs: deps _rjs
@@ -34,11 +38,11 @@ _rjs:
 	rm _build/src/local-deps.css _build/src/main-components.css
 	# for some reason relative image paths are wrong, so move stuff around
 	mv _build/src/global-deps.css _build/src/images _build/
+	echo "$(VERSION)" > _build/version.txt
 	(`npm bin`/bower list || `npm bin`/bower list --offline) | \
 		grep -Ev "^(Vellum|bower) " > _build/bower_components/manifest.txt
 # TODO auto-generate this file from build.js
 	python buildmain.py > _build/src/main.js
-
 
 _tar:
 	rm -f vellum.tar.gz

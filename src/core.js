@@ -280,7 +280,6 @@ define([
                     "Int",
                     "PhoneNumber",
                     "Double",
-                    "Long"
                 ]
             },
             {
@@ -942,7 +941,7 @@ define([
         var form = this.data.core.form,
             targetMug = form.getMugByUFID(dstId),
             sourceMug = form.getMugByUFID(srcId),
-            locked = !this.isMugPathMoveable(sourceMug.getAbsolutePath());
+            locked = !this.isMugPathMoveable(sourceMug.absolutePath);
         if (position === 'inside') { position = 'into'; } // normalize for Vellum
 
         if (locked) {
@@ -1214,6 +1213,10 @@ define([
         this.data.core.form = form = parser.parseXForm(
             formXML, options, this, _this.data.core.parseWarnings);
         form.formName = this.opts().core.formName || form.formName;
+        if (formXML) {
+            _this._resetMessages(_this.data.core.form.errors);
+            _this._populateTree();
+        }
 
         form.on('question-type-change', function (e) {
             _this.jstree("set_type", e.mug.ufid, e.qType);
@@ -1224,7 +1227,7 @@ define([
             }
         }).on('parent-question-type-change', function (e) {
             _this.jstree("set_icon", e.childMug.ufid, e.childMug.getIcon());
-        }).on('remove-question', function (e) {
+        }).on('question-remove', function (e) {
             if (!e.isInternal) {
                 var prev = _this.jstree("get_prev_dom", e.mug.ufid);
                 _this.showVisualValidation(null);
@@ -1277,10 +1280,6 @@ define([
                 e.mug.p.dataParent = undefined;
             }
         });
-        if (formXML) {
-            _this._resetMessages(_this.data.core.form.errors);
-            _this._populateTree();
-        }
     };
 
     fn.refreshMugName = function (mug, displayLang) {

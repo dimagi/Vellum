@@ -52,6 +52,18 @@ require([
             });
         });
 
+        it("should load form with save button in 'saved' state", function (done) {
+            util.init({
+                core: {
+                    form: TEST_XML_1,
+                    onReady: function () {
+                        assert.equal(this.data.core.saveButton.state, "saved");
+                        done();
+                    }
+                }
+            });
+        });
+
         it("should allow mug rename with itemset in form when the itemset plugin is disabled", function (done) {
             util.init({
                 plugins: pluginsWithoutItemset,
