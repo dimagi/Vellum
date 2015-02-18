@@ -139,6 +139,7 @@ define([
                     "vellum:role": "Balance"
                 };
             },
+            icon: 'icon-balance',
             init: function (mug, form) {
                 mug.p.entityId = {value: ""};
                 mug.p.sectionId = "";
