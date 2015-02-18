@@ -617,8 +617,8 @@ define([
                 }
 
                 itext.id = id;
-                // Is this necessary, since itext is a reference?
-                // It probably triggers handlers.
+                // HACK to ensure property really changes
+                this.p.__data[propertyPath] = null;
                 this.p[propertyPath] = itext;
             }
         },
