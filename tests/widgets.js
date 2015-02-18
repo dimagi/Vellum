@@ -52,14 +52,13 @@ require([
             assert.equal(input.val(), escaped);
 
             // click Edit button
-            input.closest("div").siblings(".fd-edit-button").click();
+            input.closest(".control-group").find(".fd-edit-button").click();
 
             events.on("showXPathEditor", function () {
                 events.unbind(events); // unregister this event handler first
-                var textarea = $(".xpath-advanced").find("textarea");
-                assert.equal(textarea.val(), value,
-                             "textarea content should have newline");
+                var text = $(".xpath-advanced").find("textarea").val();
                 $(".fd-xpath-cancel-button").click();
+                assert.equal(text, value, "textarea content should have newline");
                 done();
             }, null, events);
         });
@@ -68,15 +67,15 @@ require([
             // HACK this ugly test references a lot of implementation details
             util.loadXML("");
             var value = '"line 1 \n line 2"',
-                escaped = '"line 1 &#10; line 2"';
-            util.addQuestion("DataBindOnly", "hidden", {
-                calculateAttr: ""
-            });
+                escaped = '"line 1 &#10; line 2"',
+                hidden = util.addQuestion("DataBindOnly", "hidden", {
+                    calculateAttr: ""
+                });
             util.clickQuestion("/data/hidden");
 
             // click Edit button
             var input = $("[name=property-calculateAttr]");
-            input.closest("div").siblings(".fd-edit-button").click();
+            input.closest(".control-group").find(".fd-edit-button").click();
 
             events.on("showXPathEditor", function () {
                 events.unbind(events); // unregister this event handler first
@@ -86,6 +85,7 @@ require([
 
                 var input = $("[name=property-calculateAttr]");
                 assert.equal(input.val(), escaped, "input value not escaped");
+                assert.equal(hidden.p.calculateAttr, value, "wrong mug value");
                 done();
             }, null, events);
         });
