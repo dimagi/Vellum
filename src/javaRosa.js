@@ -576,12 +576,7 @@ define([
 
         widget.save = function () {
             // override save to call out to rename itext
-            if (widget.mug.setItextId(widget.path, widget.getValue())) {
-                mug.form.fire({
-                    type: 'change',
-                    mug: mug
-                });
-            }
+            widget.mug.setItextId(widget.path, widget.getValue());
         };
 
         widget.mug.on('property-changed', function (e) {
