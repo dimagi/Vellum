@@ -464,5 +464,20 @@ require([
             assert.equal($toolbar.find("[data-qtype='Text']:not(.btn)").length, 1); // dropdown item, not button
             assert.equal($toolbar.find("[data-qtype='Long']").length, 0);
         });
+
+        it("prevents changing selects with children to non-selects", function() {
+            util.loadXML("");
+            util.addQuestion("Select", "question1");
+            var changerSelector = ".fd-question-changer";
+
+            $(changerSelector + " > a").click();
+            var $options = $(changerSelector + " .change-question");
+            assert.equal($options.length, 1);
+            assert.equal($options.length, $options.filter("[data-qtype*='Select']").length);
+
+            util.deleteQuestion("question1/item1");
+            util.deleteQuestion("question1/item2");
+            assert.ok($(changerSelector + " .change-question:not([data-qtype*='Select'])").length > 0);
+        });
     });
 });

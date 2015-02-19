@@ -334,7 +334,16 @@ define([
         isControlOnly: false,
         // whether you can change to or from this question's type in the UI
         isTypeChangeable: true,
-        limitTypeChangeTo: false,
+        /**
+         * Determine if this mug can have its type changed to typeName
+         *
+         * @param mug - The mug object.
+         * @param typeName - The name of the new type for mug (e.g., 'MSelect').
+         * @returns - Empty string if the mug can change to type, otherwise error message.
+         */
+        typeChangeError: function (mug, typeName) {
+            return '';
+        },
         // controls whether delete button shows up - you can still delete a
         // mug's ancestor even if it's not removeable
         isRemoveable: true,
@@ -911,6 +920,14 @@ define([
         controlNodeChildren: function ($node) {
             return $node.children().not('label').not('value').not('hint');
         },
+        typeChangeError: function (mug, typeName) {
+            if (mug.form.getChildren(mug).length > 0 && !typeName.match(/^M?Select$/)) {
+                return "Cannot change a Multiple/Single Choice " +
+                      "question to a non-Choice question if it has Choices. " +
+                      "Please remove all Choices and try again.";
+            }
+            return '';
+        },
         afterInsert: function (form, mug) {
             var item = "Item";
             form.createQuestion(mug, 'into', item, true);
@@ -1095,15 +1112,13 @@ define([
         },
         changeType: function (mug, typeName) {
             var form = mug.form,
-                children = form.getChildren(mug),
-                isSelect = /^M?Select$/.test.bind(/^M?Select$/);
+                children = form.getChildren(mug);
 
-            if (children.length && isSelect(mug.__className) && !isSelect(typeName)) {
-                throw new Error("Cannot change a Multiple/Single Choice " +
-                      "question to a non-Choice question if it has Choices. " +
-                      "Please remove all Choices and try again.");
+            var message = this.allTypes[mug.__className].typeChangeError(mug, typeName);
+            if (message) {
+                throw new Error(message);
             }
-      
+
             mug.setOptionsAndProperties(this.allTypes[typeName]);
 
             if (typeName.indexOf("Select") !== -1) {

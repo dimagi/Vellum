@@ -1228,6 +1228,10 @@ define([
         }).on('parent-question-type-change', function (e) {
             _this.jstree("set_icon", e.childMug.ufid, e.childMug.getIcon());
         }).on('question-remove', function (e) {
+            var currentMug = _this.getCurrentlySelectedMug();
+            if (e.mug && e.mug.parentMug && e.mug.parentMug === currentMug) {
+                _this.displayMugProperties(currentMug);
+            }
             if (!e.isInternal) {
                 var prev = _this.jstree("get_prev_dom", e.mug.ufid);
                 _this.showVisualValidation(null);
@@ -1242,6 +1246,10 @@ define([
             _this._resetMessages(e.errors);
         }).on('question-create', function (e) {
             _this.handleNewMug(e.mug, e.refMug, e.position);
+            var currentMug = _this.getCurrentlySelectedMug();
+            if (e.mug && e.mug.parentMug && e.mug.parentMug === currentMug) {
+                _this.displayMugProperties(currentMug);
+            }
             if (!e.isInternal) {
                 _this.jstree("deselect_all", true)
                      .jstree('select_node', e.mug.ufid);
@@ -1652,18 +1660,15 @@ define([
     fn.getQuestionTypeChanger = function (mug) {
         var _this = this;
         var getQuestionList = function (mug) {
-            var currentType = mug.__className,
-                questions = (mug.options.limitTypeChangeTo || 
-                     _this.data.core.QUESTIONS_IN_TOOLBAR),
+            var currentTypeName = mug.__className,
+                currentType = _this.data.core.mugTypes[currentTypeName],
+                questions = _this.data.core.QUESTIONS_IN_TOOLBAR,
                 ret = [];
 
             for (var i = 0; i < questions.length; i++) {
                 var typeName = questions[i],
                     q = _this.data.core.mugTypes[typeName];
-                if (q.isTypeChangeable && currentType !== typeName &&
-                    (!q.limitTypeChangeTo || 
-                     q.limitTypeChangeTo.indexOf(currentType) !== -1))
-                {
+                if (currentTypeName !== typeName && !currentType.typeChangeError(mug, typeName)) {
                     ret.push({
                         slug: questions[i],
                         name: q.typeName,
