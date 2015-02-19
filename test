@@ -1,7 +1,6 @@
 #! /bin/bash
+# run vellum tests and jshint the source
 
-# stop on error
-set -e
 export PATH=`npm bin`:$PATH
 
 if [[ "$1" == "--help" ]]; then
@@ -21,13 +20,26 @@ if [[ "$1" == "--no-jshint" ]]; then
     shift
 fi
 
-mocha-phantomjs -s loadImages=false "index.html$qs" "$@"
-test ${PIPESTATUS[0]} -eq 0 # stop on mocha-phantomjs non-zero exit status
-# NOTE there may be edge cases where grep exits with non-zero causing this
-# script to exit prematurely
+temp="/tmp/test-$$.tmp"
+
+# run the tests
+mocha-phantomjs -s loadImages=false "index.html$qs" "$@" | tee $temp
+
+RESULT="${PIPESTATUS[0]}"
+if grep -q "Parse error" $temp; then
+    rm $temp
+else
+    rm $temp
+    if [ "$RESULT" -ne 0 ]; then
+        # stop on mocha-phantomjs non-zero exit status (except parse error)
+        # NOTE there may be edge cases where grep exits with non-zero
+        # causing this script to exit prematurely
+        exit 1
+    fi
+fi
 
 if [[ "$run_jshint" == "true" ]]; then
-    jshint src/*.js
-    jshint --config tests/.jshintrc tests/*.js
-    echo "jshint passed"
+    jshint src/*.js \
+        && jshint --config tests/.jshintrc tests/*.js \
+        && echo "jshint passed"
 fi
