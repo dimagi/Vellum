@@ -35,6 +35,24 @@ require([
                 core: {onReady: done}
             });
         }
+        before(beforeFn);
+
+        it("adds a new instance node to the form when necessary", function () {
+            util.loadXML(TEST_XML_1);
+            var itemset = util.getMug("question1/itemset");
+            itemset.p.itemsetData = {
+                instance: {id: "somefixture", src: "jr://somefixture"},
+                nodeset: "instance('somefixture')/some/items",
+                labelRef: "label",
+                valueRef: "value",
+            };
+
+            var xml = call('createXML'),
+                $xml = $(xml);
+            assert($xml.find("instance[id=somefixture]").length,
+                   "somefixture instance not found:\n" + xml);
+        });
+
 
         describe("parsing and serializing", function () {
             before(beforeFn);
@@ -53,22 +71,6 @@ require([
 
         describe("UI", function () {
             before(beforeFn);
-            it("adds a new instance node to the form when necessary", function () {
-                util.loadXML(TEST_XML_1);
-                clickQuestion("question1/itemset");
-                $("[name='data_source']").val("somefixture");
-                $("[name='value_ref'], [name='label_ref'], [name='filter_condition']")
-                    .val("dummy").change();
-
-                var xml = call('createXML');
-                assert(xml.indexOf(
-                        '<instance src="jr://fixture/some-fixture" id="somefixture" />'
-                    ) !== -1 ||
-                    xml.indexOf(
-                        '<instance id="somefixture" src="jr://fixture/some-fixture" />'
-                    ) !== -1);
-            });
-
             it("preserves inner filters if you never change the data source", function () {
                 util.loadXML(INNER_FILTERS_XML);
                 clickQuestion("question2/itemset");
@@ -96,6 +98,5 @@ require([
                 assert.equal(4, (call('createXML').match(/itemset/g) || []).length);
             });
         });
-
     });
 });
