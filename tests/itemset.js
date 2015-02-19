@@ -27,7 +27,7 @@ require([
         clickQuestion = util.clickQuestion,
         plugins = _.union(util.options.options.plugins || [], ["itemset"]);
 
-    describe("The Dynamic Itemset functionality", function () {
+    describe("The Dynamic Itemset plugin", function () {
         function beforeFn(done) {
             util.init({
                 plugins: plugins,
@@ -36,74 +36,64 @@ require([
             });
         }
 
-        describe("The itemset parsing and serializing", function () {
-            beforeEach(beforeFn);
-            it("preserves XML with itemsets in <select>s", function (done) {
+        describe("parsing and serializing", function () {
+            before(beforeFn);
+            it("preserves XML with itemsets in <select>s", function () {
                 assert(TEST_XML_1.indexOf('select1') !== -1);
-                call('loadXFormOrError', TEST_XML_1, function () {
-                    util.assertXmlEqual(call('createXML'), TEST_XML_1);
-                    done();
-                });
+                util.loadXML(TEST_XML_1);
+                util.assertXmlEqual(call('createXML'), TEST_XML_1);
             });
 
-            it("preserves XML with itemsets in <select1>s", function (done) {
+            it("preserves XML with itemsets in <select1>s", function () {
                 var newXml = TEST_XML_1.replace(/select1/g, 'select');
-                call('loadXFormOrError', newXml, function () {
-                    util.assertXmlEqual(call('createXML'), newXml);
-                    done();
-                });
+                util.loadXML(newXml);
+                util.assertXmlEqual(call('createXML'), newXml);
             });
         });
 
-        describe("The itemset UI", function () {
-            beforeEach(beforeFn);
-            it("adds a new instance node to the form when necessary", function (done) {
-                call('loadXFormOrError', TEST_XML_1, function () {
-                    clickQuestion("question1/itemset");
-                    $("[name='data_source']").val("somefixture");
-                    $("[name='value_ref'], [name='label_ref'], [name='filter_condition']")
-                        .val("dummy").change();
+        describe("UI", function () {
+            before(beforeFn);
+            it("adds a new instance node to the form when necessary", function () {
+                util.loadXML(TEST_XML_1);
+                clickQuestion("question1/itemset");
+                $("[name='data_source']").val("somefixture");
+                $("[name='value_ref'], [name='label_ref'], [name='filter_condition']")
+                    .val("dummy").change();
 
-                    var xml = call('createXML');
-                    assert(xml.indexOf(
-                            '<instance src="jr://fixture/some-fixture" id="somefixture" />'
-                        ) !== -1 ||
-                        xml.indexOf(
-                            '<instance id="somefixture" src="jr://fixture/some-fixture" />'
-                        ));
-                    done();
-                });
+                var xml = call('createXML');
+                assert(xml.indexOf(
+                        '<instance src="jr://fixture/some-fixture" id="somefixture" />'
+                    ) !== -1 ||
+                    xml.indexOf(
+                        '<instance id="somefixture" src="jr://fixture/some-fixture" />'
+                    ) !== -1);
             });
 
-            it("preserves inner filters if you never change the data source", function (done) {
-                call('loadXFormOrError', INNER_FILTERS_XML, function () {
-                    clickQuestion("question2/itemset");
-                    $("[name='label_ref']").val("dummy").change();
+            it("preserves inner filters if you never change the data source", function () {
+                util.loadXML(INNER_FILTERS_XML);
+                clickQuestion("question2/itemset");
+                $("[name='label_ref']").val("dummy").change();
 
-                    util.assertXmlEqual(INNER_FILTERS_XML.replace('case_name', 'dummy'),
-                       call('createXML'));
-                    done();
-                });
+                util.assertXmlEqual(
+                    INNER_FILTERS_XML.replace('case_name', 'dummy'),
+                    call('createXML')
+                );
             });
             
-            it("hides the copy button for itemsets", function (done) {
-                call('loadXFormOrError', TEST_XML_1, function () {
-                    clickQuestion("question1/itemset");
-                    var $but = $("button:contains(Copy)");
-                    assert($but.length === 0);
-                    done();
-                });
+            it("hides the copy button for itemsets", function () {
+                util.loadXML(TEST_XML_1);
+                clickQuestion("question1/itemset");
+                var $but = $("button:contains(Copy)");
+                assert($but.length === 0);
             });
 
-            it("allows copying a select with an itemset", function (done) {
-                call('loadXFormOrError', TEST_XML_1, function () {
-                    clickQuestion("question1");
-                    var $but = $("button:contains(Copy)");
-                    $but.click();
+            it("allows copying a select with an itemset", function () {
+                util.loadXML(TEST_XML_1);
+                clickQuestion("question1");
+                var $but = $("button:contains(Copy)");
+                $but.click();
 
-                    assert.equal(4, (call('createXML').match(/itemset/g) || []).length);
-                    done();
-                });
+                assert.equal(4, (call('createXML').match(/itemset/g) || []).length);
             });
         });
 
