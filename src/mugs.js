@@ -896,6 +896,15 @@ define([
                     if (/\s/.test(mug.p.defaultValue)) {
                         return "Whitespace in values is not allowed.";
                     }
+                    var num = 0;
+                    _.each(mug.form.getChildren(mug.parentMug), function(ele, index) {
+                        if (ele.p.defaultValue === mug.p.defaultValue) {
+                            num++;
+                        }
+                    });
+                    if (num > 1) {
+                        return "This choice value has been used in the same question";
+                    }
                     return "pass";
                 }
             }
