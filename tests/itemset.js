@@ -53,6 +53,28 @@ require([
                    "somefixture instance not found:\n" + xml);
         });
 
+        it("renames instance on add itemset with matching instance", function () {
+            util.loadXML(TEST_XML_1);
+            util.addQuestion("SelectDynamic", "select2");
+            var itemset = util.getMug("select2/itemset");
+            itemset.p.itemsetData = {
+                instance: {id: "cases", src: "jr://instance/casedb"},
+                nodeset: "instance('cases')/cases/case[@case_id > 2]",
+                labelRef: "label",
+                valueRef: "value",
+            };
+
+            var data = itemset.p.itemsetData;
+            assert.equal(data.instance.id, "casedb");
+            assert.equal(data.instance.src, "jr://instance/casedb");
+            assert.equal(data.nodeset, "instance('casedb')/cases/case[@case_id > 2]");
+            var xml = call('createXML'),
+                $xml = $(xml);
+            assert($xml.find("instance[id=casedb]").length,
+                   "casedb instance not found:\n" + xml);
+            assert($xml.find("instance[id=cases]").length === 0,
+                   "cases instance should have been renamed/merged:\n" + xml);
+        });
 
         describe("parsing and serializing", function () {
             before(beforeFn);
