@@ -9,7 +9,8 @@ define([
     'text!static/form/group-with-internal-refs.xml',
     'text!static/form/hidden-value-in-group.xml',
     'text!static/form/select-questions.xml',
-    'text!static/form/mismatch-tree-order.xml'
+    'text!static/form/mismatch-tree-order.xml',
+    'text!static/form/hidden-value-tree-order.xml'
 ], function (
     util,
     chai,
@@ -21,7 +22,8 @@ define([
     GROUP_WITH_INTERNAL_REFS_XML,
     HIDDEN_VALUE_IN_GROUP_XML,
     SELECT_QUESTIONS,
-    MISMATCH_TREE_ORDER_XML
+    MISMATCH_TREE_ORDER_XML,
+    HIDDEN_VALUE_TREE_ORDER
 ) {
     var assert = chai.assert,
         call = util.call;
@@ -122,6 +124,18 @@ define([
                 "  question3",
                 "question5",
                 "question6"
+            );
+        });
+
+        it("should merge data-only-nodes with control nodes", function() {
+            util.loadXML(HIDDEN_VALUE_TREE_ORDER);
+            util.assertJSTreeState(
+                "question1",
+                "question5",
+                "question2",
+                "  question3",
+                "question6",
+                "question4"
             );
         });
     });
