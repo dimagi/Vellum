@@ -257,5 +257,46 @@ require([
             assert.equal($("[name=property-repeat_count]").length, 0,
                          "repeat count should not be visible for model repeat");
         });
+
+        it("should change instance name when editing its sole reference", function () {
+            util.loadXML(FIXTURE_REPEAT_XML);
+            var repeat = util.getMug("product/item");
+            assert.equal(repeat.p.dataSource.instance.id, "products");
+            repeat.p.dataSource = {
+                instance: {id: "new-name", src: "jr://fixture/commtrack:products"},
+                idsQuery: "instance('new-name')/products/product/@id"
+            };
+            // name should be updated to match existing instance
+            assert.deepEqual(repeat.p.dataSource, {
+                instance: {id: "new-name", src: "jr://fixture/commtrack:products"},
+                idsQuery: "instance('new-name')/products/product/@id"
+            });
+        });
+
+        it("should sync instance name with existing instance", function () {
+            util.loadXML(FIXTURE_REPEAT_XML);
+            var repeat = util.getMug("product/item"),
+                repeat2 = util.addQuestion("Repeat", "product2");
+            repeat2.p.dataSource = {
+                instance: {id: "products", src: "jr://fixture/commtrack:products"},
+                idsQuery: "instance('products')/products/product/@id"
+            };
+            assert.equal(repeat.p.dataSource.instance.id, "products");
+            assert.equal(repeat2.p.dataSource.instance.id, "products");
+            repeat.p.dataSource = {
+                instance: {id: "new-name", src: "jr://fixture/commtrack:products"},
+                idsQuery: "instance('new-name')/products/product/@id"
+            };
+            // name should be reverted to match existing instance
+            // TODO Maybe all references to the instance should be updated
+            // when it is renamed for any question? (more user-friendly, but
+            // hard to implement). Currently it is very hard to rename an
+            // instance (without editing XML directly) if there are multiple
+            // questions in the form referencing the instance.
+            assert.deepEqual(repeat.p.dataSource, {
+                instance: {id: "products", src: "jr://fixture/commtrack:products"},
+                idsQuery: "instance('products')/products/product/@id"
+            });
+        });
     });
 });

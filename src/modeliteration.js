@@ -284,24 +284,20 @@ define([
     }
 
     function updateDataSource(mug, value, previous) {
-        var value_src = value && value.instance && value.instance.src,
-            prev_src = previous && previous.instance && previous.instance.src;
-        if (value_src !== prev_src) {
-            var ref = mug.ufid + ".dataSource.instance";
-            if (prev_src) {
-                mug.form.dropInstanceReference(prev_src, ref);
-            }
-            if (value_src) {
-                var instanceId = mug.form.addInstanceIfNotExists(value.instance, ref);
-                if (instanceId !== value.instance.id) {
-                    // is it too magical to replace the instance id in the query?
-                    // there might be edge cases where a user is entering a
-                    // custom instance and query and does not want this to
-                    // happen
-                    value.idsQuery = value.idsQuery.replace(
-                        instanceRegexp, "instance('" + instanceId + "')");
-                    mug.p.dataSource = value; // fire change handler
-                }
+        var ref = mug.ufid + ".dataSource.instance";
+        if (previous && previous.instance && previous.instance.src) {
+            mug.form.dropInstanceReference(previous.instance.src, ref);
+        }
+        if (value && value.instance && value.instance.src) {
+            var instanceId = mug.form.addInstanceIfNotExists(value.instance, ref);
+            if (instanceId !== value.instance.id) {
+                // is it too magical to replace the instance id in the query?
+                // there might be edge cases where a user is entering a
+                // custom instance and query and does not want this to
+                // happen
+                value.instance.id = instanceId;
+                value.idsQuery = value.idsQuery.replace(
+                    instanceRegexp, "instance('" + instanceId + "')");
             }
         }
         if (Boolean(value && value.idsQuery) !== Boolean(previous && previous.idsQuery)) {
