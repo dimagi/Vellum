@@ -295,7 +295,44 @@ define([
             rawControlXML: {
                 presence: 'optional',
                 lstring: 'Raw XML'
-            }
+            },
+            dataParent: {
+                lstring: 'Data Parent',
+                visibility: function(mug) {
+                    function recFunc(mug) {
+                        if (!mug) {
+                            return true;
+                        } else if (mug.__className === 'Repeat') {
+                            return false;
+                        }
+                        return recFunc(mug.form.tree.getNodeFromMug(mug).parent.value);
+                    }
+
+                    return recFunc(mug);
+                },
+                presence: 'optional',
+                widget: widgets.droppableText,
+                validationFunc: function(mug) {
+                    var dataParent = mug.p.dataParent,
+                        form = mug.form,
+                        dataParentMug;
+
+                    if (dataParent) {
+                        dataParentMug = form.getMugByPath(dataParent);
+
+                        if(!dataParentMug &&
+                           form.getBasePath().slice(0, -1) !== dataParent) {
+                            return "Must be valid path";
+                        } else if (dataParentMug && !dataParentMug.options.possibleDataParent) {
+                            return "Data must be a child of a group";
+                        } else if (!mug.spec.dataParent.visibility(mug)) {
+                            return "Children of repeat groups cannot have a different data parent";
+                        }
+                    }
+
+                    return "pass";
+                }
+            },
         }
     };
 
@@ -509,27 +546,30 @@ define([
         isValid: function () {
             return !this.getErrors().length;
         },
-        getDefaultItextRoot: function () {
+        getDefaultItextRoot: function (parentMug) {
             if (this.__className === "Item") {
-                return this.parentMug.getDefaultItextRoot() + "-" + this.p.defaultValue;
+                if (!parentMug) {
+                    parentMug = this.parentMug;
+                }
+                return parentMug.getDefaultItextRoot() + "-" + this.p.defaultValue;
             } else {
                 var path = this.form.getAbsolutePath(this, true);
                 if (!path) {
-                    // fall back to control tree if mug not in data tree
-                    // this can happen with malformed XForms
-                    path = this.form.getControlPath(this, true);
-                }
-                if (!path) {
-                    // fall back to nodeID if mug path still not found
-                    // this can happen with malformed XForms
-                    path = "/" + this.getNodeID();
+                    if (parentMug) {
+                        path = this.form.getAbsolutePath(parentMug, true) +
+                                "/" + this.getNodeID();
+                    } else {
+                        // fall back to nodeID if mug path still not found
+                        // this can happen with malformed XForms
+                        path = "/" + this.getNodeID();
+                    }
                 }
                 return path.slice(1);
             }
         },
-        getDefaultLabelItextId: function () {
+        getDefaultLabelItextId: function (parentMug) {
             // Default Itext ID
-            return this.getDefaultItextRoot() + "-label";
+            return this.getDefaultItextRoot(parentMug) + "-label";
         },
         /*
          * Gets a default label, auto-generating if necessary
@@ -660,6 +700,13 @@ define([
     Object.defineProperty(Mug.prototype, "absolutePath", {
         get: function () {
             return this.form.getAbsolutePath(this);
+        }
+    });
+
+    Object.defineProperty(Mug.prototype, "parentMug", {
+        get: function () {
+            var node = this.form.tree.getNodeFromMug(this);
+            return node ? node.parent.value : null;
         }
     });
 
@@ -945,6 +992,7 @@ define([
         isSpecialGroup: true,
         isNestableGroup: true,
         isTypeChangeable: false,
+        possibleDataParent: true,
         canOutputValue: false,
         controlNodeChildren: function ($node) {
             return $node.children().not('label').not('value').not('hint');
@@ -978,6 +1026,7 @@ define([
     var Repeat = util.extend(Group, {
         typeName: 'Repeat Group',
         icon: 'icon-retweet',
+        possibleDataParent: false,
         controlNodeChildren: function ($node) {
             return $node.children('repeat').children();
         },

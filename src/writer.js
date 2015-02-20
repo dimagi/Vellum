@@ -25,8 +25,9 @@ define([
         xmlWriter.writeStartElement('model');
         xmlWriter.writeStartElement('instance');
         _writeInstanceAttributes(xmlWriter, form.instanceMetadata[0]);
-        
-        createDataBlock(form, xmlWriter);
+
+        var dataTree = form.dataTree();
+        createDataBlock(form, dataTree, xmlWriter);
         xmlWriter.writeEndElement(); //CLOSE MAIN INSTANCE
         
         // other instances
@@ -34,7 +35,7 @@ define([
             _writeInstance(xmlWriter, form.instanceMetadata[i], true);
         }
         
-        createBindList(form, xmlWriter);
+        createBindList(dataTree, xmlWriter);
         
         _.each(form.getSetValues(), function (setValue) {
             xmlWriter.writeStartElement('setvalue');
@@ -113,9 +114,8 @@ define([
         writer.writeEndElement(); 
     };
 
-    var createDataBlock = function (form, xmlWriter) {
-        form.tree.walk(function (mug, nodeID, processChildren) {
-            if (mug && mug.options.isControlOnly) { return; }
+    var createDataBlock = function (form, dataTree, xmlWriter) {
+        dataTree.walk(function (mug, nodeID, processChildren) {
             if (mug && mug.options.getTagName) {
                 nodeID = mug.options.getTagName(mug, nodeID);
             }
@@ -159,9 +159,9 @@ define([
         });
     };
 
-    var createBindList = function (form, xmlWriter) {
-        form.tree.walk(function (mug, nodeID, processChildren) {
-            if(mug && !mug.options.isControlOnly) {
+    var createBindList = function (dataTree, xmlWriter) {
+        dataTree.walk(function (mug, nodeID, processChildren) {
+            if(mug && mug.options.getBindList) {
                 _.each(mug.options.getBindList(mug), function (attrs) {
                     xmlWriter.writeStartElement('bind');
                     _.each(attrs, function (value, key) {

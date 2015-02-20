@@ -18,9 +18,11 @@ define([
 
     Node.prototype = {
         getChildren: function () {
+            // DEPRECATED use 'children' directly
             return this.children;
         },
         getValue: function () {
+            // DEPRECATED use 'value' directly
             return this.value;
         },
         /**
@@ -139,6 +141,28 @@ define([
                 children = this.getChildren();
             callback(value, this.getID(), processChildren);
         },
+        getAbsolutePath: function (excludeRoot) {
+            if (this.isRootNode) {
+                if (excludeRoot) {
+                    return '';
+                }
+                return '/' + this.getID();
+            }
+            var mug = this.value, parentPath;
+            if (mug.p.dataParent) {
+                parentPath = mug.p.dataParent;
+            } else {
+                parentPath = this.parent.getAbsolutePath(excludeRoot);
+                if (parentPath === null) {
+                    return null;
+                }
+            }
+            var name = this.getID();
+            if (mug.options.getPathName) {
+                name = mug.options.getPathName(mug, name);
+            }
+            return parentPath + '/' + name;
+        },
         validateTree: function (validateValue) {
             var i, childResult;
             if(!this.getValue()){
@@ -226,7 +250,7 @@ define([
         insertMug: function (mug, position, refMug, index) {
             var refNode = refMug ? this.getNodeFromMug(refMug) : this.rootNode,
                 node = this.getNodeFromMug(mug),
-                refNodeSiblings, refNodeIndex, refNodeParent;
+                refNodeIndex, refNodeParent;
 
             if (node) {
                 this._removeNodeFromTree(node); 
@@ -237,23 +261,17 @@ define([
                 mug['_node_' + this.treeType] = node;
             }
 
-            refNodeParent = this.getParentNode(refNode);
-            refNodeSiblings = refNodeParent.getChildren();
-            refNodeIndex = refNodeSiblings.indexOf(refNode);
-
-            if (['index', 'into', 'first', 'last', 'inside'].indexOf(position) !== -1) {
-                mug.parentMug = refMug;
-            } else {
-                mug.parentMug = refNodeParent.getValue();
-            }
-
             switch (position) {
                 case 'before':
                 case 'inside': // for compatibility with JSTree
+                    refNodeParent = this.getParentNode(refNode);
+                    refNodeIndex = refNodeParent.children.indexOf(refNode);
                     refNodeParent.insertChild(node, refNodeIndex);
                 break;
                 case null:
                 case 'after':
+                    refNodeParent = this.getParentNode(refNode);
+                    refNodeIndex = refNodeParent.children.indexOf(refNode);
                     refNodeParent.insertChild(node, refNodeIndex + 1);
                 break;
                 case 'into': // not officially supported by, but happens to work in JSTree
@@ -277,30 +295,11 @@ define([
             });
         },
         getAbsolutePath: function (mug, excludeRoot) {
-            var node = this.getNodeFromMug(mug),
-                _this = this;
-            function pathOf(node) {
-                if (!node) {
-                    return null;
-                }
-                if (node.isRootNode) {
-                    if (excludeRoot) {
-                        return '';
-                    }
-                    return '/' + node.getID();
-                }
-                var parentPath = pathOf(_this.getParentNode(node));
-                if (parentPath === null) {
-                    return null;
-                }
-                var name = node.getID(),
-                    mug = node.getValue();
-                if (mug.options.getPathName) {
-                    name = mug.options.getPathName(mug, name);
-                }
-                return parentPath + '/' + name;
+            var node = this.getNodeFromMug(mug);
+            if (!node) {
+                return null;
             }
-            return pathOf(node);
+            return node.getAbsolutePath(excludeRoot);
         },
         /**
          * Find a sibling of refMug matching a predicate
