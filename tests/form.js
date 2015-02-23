@@ -112,6 +112,16 @@ define([
             chai.expect(label.p.labelItextID.defaultValue()).to.include("/data/hidden");
         });
 
+        it("should update repeat group reference", function () {
+            util.loadXML("");
+            var text = util.addQuestion("Text", 'text'),
+                repeat = util.addQuestion("Repeat", 'repeat');
+            repeat.p.repeat_count = '/data/text';
+            assert.equal(repeat.p.repeat_count, '/data/text');
+            text.p.nodeID = 'text2';
+            assert.equal(repeat.p.repeat_count, '/data/text2');
+        });
+
         it("should merge data-only nodes with control nodes", function () {
             var form = new Form({}),
                 values = [];
