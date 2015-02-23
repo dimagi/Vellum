@@ -185,7 +185,8 @@ define([
         var widget = widgets.text(mug, options),
             getUIElement = widgets.util.getUIElement,
             getUIElementWithEditButton = widgets.util.getUIElementWithEditButton,
-            super_handleChange = widget.handleChange,
+            super_getValue = widget.getValue,
+            super_setValue = widget.setValue,
             currentValue = null;
 
         widget.getUIElement = function () {
@@ -193,7 +194,7 @@ define([
                     getUIElement(widget.input, labelText),
                     function () {
                         vellum.displaySecondaryEditor({
-                            source: currentValue,
+                            source: local_getValue(),
                             headerText: labelText,
                             loadEditor: loadDataSourceEditor,
                             done: function (source) {
@@ -208,19 +209,18 @@ define([
             return $("<div></div>").append(query);
         };
 
-        widget.getValue = function () {
-            return currentValue || {};
-        };
+        function local_getValue() {
+            currentValue.query = super_getValue();
+            return currentValue;
+        }
 
-        var local_setValue = widget.setValue = function (val) {
-            currentValue = val;
-            widget.input.val(val.query || "");
-        };
+        function local_setValue(val) {
+            currentValue = val || {};
+            super_setValue(currentValue.query || "");
+        }
 
-        widget.handleChange = function () {
-            currentValue.query = widget.input.val();
-            super_handleChange();
-        };
+        widget.getValue = local_getValue;
+        widget.setValue = local_setValue;
 
         return widget;
     }
