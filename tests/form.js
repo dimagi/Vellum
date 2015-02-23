@@ -143,6 +143,18 @@ define([
             form.mergedTreeMap(function (v) { values.push(v.id); });
             assert.equal(values.join(" "), "a c b x1 x2");
         });
+
+        it ("should show warnings for duplicate choice value", function() {
+            util.loadXML("");
+            var select = util.addQuestion("Select", 'select'),
+                item1 = select.form.getChildren(select)[0],
+                item2 = select.form.getChildren(select)[1];
+            assert(util.isTreeNodeValid(item1), "sanity check failed: item1 is invalid");
+            assert(util.isTreeNodeValid(item2), "sanity check failed: item2 is invalid");
+            item2.p.defaultValue = "item1";
+            assert(util.isTreeNodeValid(item1), "item1 should be valid");
+            assert(!util.isTreeNodeValid(item2), "item2 should be invalid");
+        });
     });
 
     // helper functions
