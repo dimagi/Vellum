@@ -80,7 +80,6 @@ define(function () {
                 "meta/timeStart",
                 "meta/timeEnd"
             ],
-            externalInstances: INSTANCES,
             dataSources: [
                 {
                     key: "case",

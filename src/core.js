@@ -1207,7 +1207,6 @@ define([
         options = _.extend({
             mugTypes: this.data.core.mugTypes,
             allowedDataNodeReferences: this.opts().core.allowedDataNodeReferences, 
-            externalInstances: this.opts().core.externalInstances,
             enableInstanceRefCounting: true
         }, options);
         this.data.core.form = form = parser.parseXForm(
@@ -2046,7 +2045,6 @@ define([
         saveType: 'full',
         staticPrefix: "",
         allowedDataNodeReferences: [],
-        externalInstances: [],
         noTextString: '[no text]',
         onReady: function () {},
         onFormSave: function (data) {},

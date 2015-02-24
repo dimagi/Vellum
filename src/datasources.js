@@ -140,9 +140,9 @@ define([
         $div.empty().append($ui);
 
         if (options.source) {
-            $instanceId.val(options.source.id);
-            $instanceSrc.val(options.source.src);
-            $query.val(options.source.query);
+            $instanceId.val(options.source.id || "");
+            $instanceSrc.val(options.source.src || "");
+            $query.val(options.source.query || "");
         }
 
         function getDataSource() {
@@ -154,15 +154,15 @@ define([
         }
 
         if (options.change) {
-            $instanceId.on('change keyup', function (){
+            $instanceId.on('change keyup', function () {
                 options.change(getDataSource());
             });
 
-            $instanceSrc.on('change keyup', function (){
+            $instanceSrc.on('change keyup', function () {
                 options.change(getDataSource());
             });
 
-            $query.on('change keyup', function (){
+            $query.on('change keyup', function () {
                 options.change(getDataSource());
             });
         }
@@ -172,7 +172,7 @@ define([
             options.done(val);
         };
 
-        $ui.find('.fd-data-source-save-button').click(function() {
+        $ui.find('.fd-data-source-save-button').click(function () {
             done(getDataSource());
         });
 
@@ -215,8 +215,8 @@ define([
         }
 
         function local_setValue(val) {
-            currentValue = val || {};
-            super_setValue(currentValue.query || "");
+            currentValue = val;
+            super_setValue(val.query || "");
         }
 
         widget.getValue = local_getValue;
