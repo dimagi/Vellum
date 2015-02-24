@@ -49,8 +49,7 @@ define([
     that.XPATH_REFERENCES = [
         "relevantAttr",
         "calculateAttr",
-        "constraintAttr",
-        "repeat_count"
+        "constraintAttr"
     ];
 
     that.getTemplateObject = function (selector, params) {
