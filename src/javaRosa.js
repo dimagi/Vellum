@@ -1957,15 +1957,10 @@ define([
                 'constraintMsgItextID',
                 'hintItextID',
                 'hintItext',
+                'helpItextID',
+                'helpItext',
+                'helpMediaIText',
             ]);
-
-            if (this.opts().features.add_help_text) {
-                ret = ret.concat([
-                    'helpItextID',
-                    'helpItext',
-                    'helpMediaIText',
-                ]);
-            }
 
             ret = ret.concat(['otherItext']);
 
