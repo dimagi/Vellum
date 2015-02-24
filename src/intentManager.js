@@ -117,7 +117,7 @@ define([
             }
         };
 
-        that.writeIntentXML = function (xmlWriter, dataTree) {
+        that.writeIntentXML = function (xmlWriter, tree) {
             // make sure any leftover intent tags are still kept
             _.each(that.unmappedIntentTags, function (tag) {
                tag.writeXML(xmlWriter, null);
@@ -135,7 +135,7 @@ define([
                         return null;
                     }
                 };
-            intents = dataTree.treeMap(getIntentMugs);
+            intents = tree.treeMap(getIntentMugs);
             if (intents.length > 0) {
                 intents.map(function (intentMug) {
                     intentMug.intentTag.writeXML(
@@ -256,7 +256,7 @@ define([
         },
         contributeToHeadXML: function (xmlWriter, form) {
             this.__callOld();
-            this.data.intents.manager.writeIntentXML(xmlWriter, form.dataTree);
+            this.data.intents.manager.writeIntentXML(xmlWriter, form.tree);
         },
         handleNewMug: function (mug) {
             var ret = this.__callOld();

@@ -8,7 +8,9 @@ define([
     'text!static/form/question-referencing-other.xml',
     'text!static/form/group-with-internal-refs.xml',
     'text!static/form/hidden-value-in-group.xml',
-    'text!static/form/select-questions.xml'
+    'text!static/form/select-questions.xml',
+    'text!static/form/mismatch-tree-order.xml',
+    'text!static/form/hidden-value-tree-order.xml'
 ], function (
     util,
     chai,
@@ -19,10 +21,11 @@ define([
     QUESTION_REFERENCING_OTHER_XML,
     GROUP_WITH_INTERNAL_REFS_XML,
     HIDDEN_VALUE_IN_GROUP_XML,
-    SELECT_QUESTIONS
+    SELECT_QUESTIONS,
+    MISMATCH_TREE_ORDER_XML,
+    HIDDEN_VALUE_TREE_ORDER
 ) {
-    var Form = form_.Form,
-        assert = chai.assert,
+    var assert = chai.assert,
         call = util.call;
 
     describe("The form component", function() {
@@ -122,28 +125,6 @@ define([
             assert.equal(repeat.p.repeat_count, '/data/text2');
         });
 
-        it("should merge data-only nodes with control nodes", function () {
-            var form = new Form({}),
-                values = [];
-
-            form.dataTree = makeTree("data", ["a", "x1", "b", "x2", "c"]);
-            form.controlTree = makeTree("control", ["a", "b", "c"]);
-
-            form.mergedTreeMap(function (v) { values.push(v.id); });
-            assert.equal(values.join(" "), "a x1 b x2 c");
-        });
-
-        it("should prefer control tree order on merge", function () {
-            var form = new Form({}),
-                values = [];
-
-            form.dataTree = makeTree("data", ["a", "x1", "b", "x2", "c"]);
-            form.controlTree = makeTree("control", ["a", "c", "b"]);
-
-            form.mergedTreeMap(function (v) { values.push(v.id); });
-            assert.equal(values.join(" "), "a c b x1 x2");
-        });
-
         it ("should show warnings for duplicate choice value", function() {
             util.loadXML("");
             var select = util.addQuestion("Select", 'select'),
@@ -155,18 +136,29 @@ define([
             assert(util.isTreeNodeValid(item1), "item1 should be valid");
             assert(!util.isTreeNodeValid(item2), "item2 should be invalid");
         });
+
+        it("should preserve order of the control tree", function() {
+            util.loadXML(MISMATCH_TREE_ORDER_XML);
+            util.assertJSTreeState(
+                "question1",
+                "question4",
+                "question2",
+                "  question3",
+                "question5",
+                "question6"
+            );
+        });
+
+        it("should merge data-only-nodes with control nodes", function() {
+            util.loadXML(HIDDEN_VALUE_TREE_ORDER);
+            util.assertJSTreeState(
+                "question1",
+                "question5",
+                "question2",
+                "  question3",
+                "question6",
+                "question4"
+            );
+        });
     });
-
-    // helper functions
-
-    function makeTree(name, data) {
-        var tree = new Tree(name, name),
-            mug;
-        for (var i = 0; i < data.length; i++) {
-            mug = {id: data[i], getNodeID: function () { return this.id; }};
-            mug.options = {isDataOnly: (data[i][0] === "x")};
-            tree.insertMug(mug, 'into');
-        }
-        return tree;
-    }
 });

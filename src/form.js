@@ -156,12 +156,8 @@ define([
 
         this.formName = 'New Form';
         this.mugMap = {};
-        this.dataTree = new Tree('data', 'data');
-        this.dataTree.on('change', function (e) {
-            _this.fireChange(e.mug);
-        });
-        this.controlTree = new Tree('data', 'control');
-        this.controlTree.on('change', function (e) {
+        this.tree = new Tree('data', 'control');
+        this.tree.on('change', function (e) {
             _this.fireChange(e.mug);
         });
         this.instanceMetadata = [InstanceMetadata({})];
@@ -175,8 +171,7 @@ define([
 
     Form.prototype = {
         getBasePath: function () {
-            // the choice to use dataTree instead of controlTree is arbitrary
-            return "/" + this.dataTree.getRootNode().getID() + "/";
+            return "/" + this.tree.getRootNode().getID() + "/";
         },
         fireChange: function (mug) {
             this.fire({
@@ -323,8 +318,7 @@ define([
             this.setValues = _.reject(this.setValues, predicate);
         },
         setFormID: function (id) {
-            this.dataTree.setRootID(id);
-            this.controlTree.setRootID(id);
+            this.tree.setRootID(id);
         },
         setAttr: function (slug, val) {
             this[slug] = val;
@@ -336,45 +330,19 @@ define([
             return writer.createXForm(this);
         },
         /**
-         * Goes through and grabs all of the data nodes (i.e. nodes that are
-         * only data nodes, possibly with a bind) without any kind of control.
-         * Returns a flat list of these nodes (list items are mugs).
-         */
-        getDataNodeList: function () {
-            return this.dataTree.treeMap(function(node){
-                if (!node.getValue() || node.isRootNode) {
-                    return null;
-                }
-                var mug = node.getValue();
-
-                if (!mug.options.isDataOnly) {
-                    return null;
-                } else {
-                    return mug;
-                }
-            });
-        },
-        /**
-         * Walks through both internal trees (data and control) and grabs
+         * Walks through internal tree and grabs
          * all mugs that are not (1)Choices.  Returns
          * a flat list of unique mugs.  This list is primarily for the
          * autocomplete skip logic wizard.
          */
         getMugList: function () {
-            var treeFunc, cList, dList;
-
-            treeFunc = function (node) {
+            return this.tree.treeMap( function (node) {
                 if(node.isRootNode) {
                     return;
                 }
 
                 return node.getValue();
-            };
-
-            cList = this.controlTree.treeMap(treeFunc);
-            dList = this.dataTree.treeMap(treeFunc);
-
-            return util.mergeArray(cList, dList); //strip dupes and merge
+            });
         },
         updateError: function (errObj, options) {
             errObj = FormError(errObj);
@@ -412,53 +380,28 @@ define([
             });
         },
         isFormValid: function (validateMug) {
-            return this.dataTree.isTreeValid(validateMug) && 
-                this.controlTree.isTreeValid(validateMug);
+            return this.tree.isTreeValid(validateMug);
         },
         getMugChildrenByNodeID: function (mug, nodeID) {
-            var parentNode = (mug ? this.dataTree.getNodeFromMug(mug)
-                                  : this.dataTree.rootNode);
+            var parentNode = (mug ? this.tree.getNodeFromMug(mug)
+                                  : this.tree.rootNode);
             return _.filter(parentNode.getChildrenMugs(), function (m) {
                 return m.p.nodeID === nodeID;
             });
         },
         insertMug: function (refMug, newMug, position) {
-            if (!newMug.options.isControlOnly) {
-                this.dataTree.insertMug(newMug, position, refMug);
-            }
-
-            if (!newMug.options.isDataOnly) {
-                if (refMug && refMug.options.isDataOnly) {
-                    if (position !== 'after' && position !== 'before') {
-                        // should never happen
-                        throw new Error("cannot insert " + position + " " + refMug.__className);
-                    }
-                    // find alternate insert refMug and position
-                    var newRefMug = this.dataTree.findSibling(
-                                    refMug,
-                                    (position === 'after' ? 'before' : 'after'),
-                                    function (mug) { return !mug.options.isDataOnly; });
-                    if (newRefMug) {
-                        refMug = newRefMug;
-                    } else {
-                        // the parent mug will never be a data-only mug
-                        refMug = refMug.parentMug;
-                        position = (position === 'after' ? 'first' : 'last');
-                    }
-                }
-                this.controlTree.insertMug(newMug, position, refMug);
-            }
+            this.tree.insertMug(newMug, position, refMug);
         },
         /**
-         * Move a mug from its current place (in both the Data and Control trees) to
+         * Move a mug from its current place to
          * the position specified by the arguments,
          */
         moveMug: function (mug, refMug, position) {
-            var oldPath = this.dataTree.getAbsolutePath(mug);
+            var oldPath = this.tree.getAbsolutePath(mug);
 
             this.insertMug(refMug, mug, position);
 
-            var currentPath = this.dataTree.getAbsolutePath(mug);
+            var currentPath = this.tree.getAbsolutePath(mug);
             this.vellum.handleMugRename(
                 this, mug, mug.p.nodeID, mug.p.nodeID, currentPath, oldPath);
 
@@ -469,86 +412,19 @@ define([
             this.fireChange(mug);
         },
         /**
-         * Walk merged data and control trees calling valueFunc for each mug
-         *
-         * If common nodes in merged tree branches are not in the same order
-         * then the order of nodes in the control tree will be preserved, and
-         * all nodes in the data tree that are not also in the control tree will
-         * be visited last.
+         * Walk through the mugs of the tree and call valueFunc on each mug
          *
          * @param valueFunc - a function called for each mug in the tree. The
          * single argument is the mug.
          */
-        mergedTreeMap: function (valueFunc) {
-            function getID(node) {
-                return node.getID() || node.getValue().ufid;
-            }
-            function hasControl(node) {
-                return !node.getValue().options.isDataOnly;
-            }
-            function makeGenerator(items) {
-                var i = 0;
-                if (!items) {
-                    return function () { return null; };
+        walkMugs: function (valueFunc) {
+            function callback(mug, nodeID, processChildren) {
+                if (mug !== null) {
+                    valueFunc(mug);
                 }
-                return function () {
-                    return i < items.length ? items[i++] : null;
-                };
+                processChildren();
             }
-            function mergeNodes(node0, node1) {
-                if (getID(node0) === getID(node1)) {
-                    visitNode(node0, node1.getChildren());
-                    return true;
-                }
-                visitNode(node0);
-                return false;
-            }
-            function visitNode(node, mergeChildren) {
-                var nodeChildren = node.getChildren();
-                if (nodeChildren && mergeChildren) {
-                    var nodeIDs = _(_(nodeChildren).filter(hasControl)).map(getID),
-                        mergeIDs = _(mergeChildren).map(getID);
-
-                    // put data-only nodes after control nodes if control nodes are
-                    // not in same order in both trees
-                    if (nodeIDs.join(" ") !== mergeIDs.join(" ")) {
-                        var mergeIDMap = _.object(mergeIDs, mergeIDs); // hash for fast lookups
-                        nodeChildren = mergeChildren.concat(_(nodeChildren).filter(function (node) {
-                            return !mergeIDMap.hasOwnProperty(getID(node));
-                        }));
-                        mergeChildren = null;
-                    }
-                }
-
-                var nextChild0 = makeGenerator(nodeChildren),
-                    nextChild1 = makeGenerator(mergeChildren),
-                    child0 = nextChild0(),
-                    child1 = nextChild1(),
-                    value = node.getValue(),
-                    merged;
-
-                if (value) {
-                    valueFunc(value);
-                }
-                while (child0 || child1) {
-                    if (child0 && child1) {
-                        merged = mergeNodes(child0, child1);
-                        child0 = nextChild0();
-                        if (merged) {
-                            child1 = nextChild1();
-                        }
-                    } else if (child0) {
-                        visitNode(child0);
-                        child0 = nextChild0();
-                    } else if (child1) {
-                        visitNode(child1);
-                        child1 = nextChild1();
-                    }
-                }
-            }
-            visitNode(
-                this.dataTree.getRootNode(),
-                this.controlTree.getRootNode().getChildren());
+            this.tree.walk(callback);
         },
         getDescendants: function (mug) {
             var desc = this.getChildren(mug), i;
@@ -571,7 +447,7 @@ define([
                 }
                 return postPath.replace(postRegExp, oldPath + "/");
             }
-            var tree = this.dataTree,
+            var tree = this.tree,
                 mugPath = tree.getAbsolutePath(mug);
             if (!mugPath) {
                 // Items don't have an absolute path. I wonder if it would
@@ -597,13 +473,9 @@ define([
             this.mugTypes.changeType(mug, questionType);
         },
         getChildren: function (mug) {
-            var ctrlNode = this.controlTree.getNodeFromMug(mug),
-                dataNode = this.dataTree.getNodeFromMug(mug),
-                ctrlNodes = ctrlNode ? ctrlNode.getChildren() : [],
-                dataNodes = dataNode ? dataNode.getChildren() : [];
-            return _.union(
-                ctrlNodes.map(function (item) { return item.getValue(); }),
-                dataNodes.map(function (item) { return item.getValue(); }));
+            var ctrlNode = this.tree.getNodeFromMug(mug),
+                ctrlNodes = ctrlNode ? ctrlNode.getChildren() : [];
+            return ctrlNodes.map(function (item) { return item.getValue(); });
         },
         duplicateMug: function (mug) {
             var foo = this._duplicateMug(mug, mug.parentMug),
@@ -740,7 +612,7 @@ define([
 
                 // update the itext ids of child items if they weren't manually set
                 if (mug.__className === "Select" || mug.__className === "MSelect") {
-                    var node = this.controlTree.getNodeFromMug(mug),
+                    var node = this.tree.getNodeFromMug(mug),
                         // node can be null when the mug hasn't been inserted into
                         // the tree yet
                         children = node ? node.getChildrenMugs() : [];
@@ -802,7 +674,7 @@ define([
         },
         insertQuestion: function (mug, refMug, position, isInternal) {
             this.mugMap[mug.ufid] = mug;
-            refMug = refMug || this.dataTree.getRootNode().getValue();
+            refMug = refMug || this.tree.getRootNode().getValue();
             this.insertMug(refMug, mug, position);
             this._updateMugPath(mug);
             // todo: abstraction barrier
@@ -831,7 +703,7 @@ define([
         _fixMugState: function (mug) {
             // parser needs this because it inserts directly into the tree
             this.mugMap[mug.ufid] = mug;
-            var path = this.dataTree.getAbsolutePath(mug);
+            var path = this.tree.getAbsolutePath(mug);
             if (path) {
                 this.mugMap[path] = mug;
             }
@@ -847,16 +719,19 @@ define([
         /**
          * Get the logical path of the mug's node in the data tree
          *
-         * It is not always possible to lookup a mug by traversing either the
-         * data or control tree using it's absolute path. For example, some
+         * It is not always possible to lookup a mug by traversing the
+         * control tree using it's absolute path. For example, some
          * mugs encapsulate multiple levels of XML elements. This Form object
          * maintains a hash table to quickly get a mug by its path.
          */
         getAbsolutePath: function (mug, excludeRoot) {
-            return this.dataTree.getAbsolutePath(mug, excludeRoot);
+            if (!mug.options.isControlOnly) {
+                return this.tree.getAbsolutePath(mug, excludeRoot);
+            }
+            return null;
         },
         getControlPath: function (mug, excludeRoot) {
-            return this.controlTree.getAbsolutePath(mug, excludeRoot);
+            return this.tree.getAbsolutePath(mug, excludeRoot);
         },
         getMugByUFID: function (ufid) {
             return this.mugMap[ufid];
@@ -883,18 +758,17 @@ define([
             this._logicManager.forEachReferencingProperty(ufids, breakReferences);
         },
         _removeMugFromForm: function(mug, isInternal) {
-            var fromTree = this.controlTree.getNodeFromMug(mug);
+            var fromTree = this.tree.getNodeFromMug(mug);
             if (fromTree) {
-                var children = this.controlTree.getNodeFromMug(mug).getChildrenMugs();
+                var children = this.tree.getNodeFromMug(mug).getChildrenMugs();
                 for (var i = 0; i < children.length; i++) {
                     this._removeMugFromForm(children[i], true);
                 }
             }
             
             delete this.mugMap[mug.ufid];
-            delete this.mugMap[this.dataTree.getAbsolutePath(mug)];
-            this.dataTree.removeMug(mug);
-            this.controlTree.removeMug(mug);
+            delete this.mugMap[this.tree.getAbsolutePath(mug)];
+            this.tree.removeMug(mug);
             this.fire({
                 type: 'question-remove',
                 mug: mug,

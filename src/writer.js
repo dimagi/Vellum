@@ -114,7 +114,8 @@ define([
     };
 
     var createDataBlock = function (form, xmlWriter) {
-        form.dataTree.walk(function (mug, nodeID, processChildren) {
+        form.tree.walk(function (mug, nodeID, processChildren) {
+            if (mug && mug.options.isControlOnly) { return; }
             if (mug && mug.options.getTagName) {
                 nodeID = mug.options.getTagName(mug, nodeID);
             }
@@ -159,8 +160,8 @@ define([
     };
 
     var createBindList = function (form, xmlWriter) {
-        form.dataTree.walk(function (mug, nodeID, processChildren) {
-            if(mug) {
+        form.tree.walk(function (mug, nodeID, processChildren) {
+            if(mug && !mug.options.isControlOnly) {
                 _.each(mug.options.getBindList(mug), function (attrs) {
                     xmlWriter.writeStartElement('bind');
                     _.each(attrs, function (value, key) {
@@ -176,7 +177,7 @@ define([
     };
 
     var createControlBlock = function (form, xmlWriter) {
-        form.controlTree.walk(function (mug, nodeID, processChildren) {
+        form.tree.walk(function (mug, nodeID, processChildren) {
             if(!mug) {
                 // root node
                 processChildren();
@@ -184,6 +185,9 @@ define([
             }
 
             var opts = mug.options;
+            if (opts.isDataOnly) {
+                return;
+            }
             if (opts.writesOnlyCustomXML) {
                 opts.writeCustomXML(xmlWriter, mug);
                 return;

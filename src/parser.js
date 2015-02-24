@@ -139,7 +139,7 @@ define([
     // DATA PARSING FUNCTIONS
     function parseDataTree (form, dataEl) {
         var root = $(dataEl),
-            tree = form.dataTree,
+            tree = form.tree,
             recFunc;
 
         recFunc = function (parentMug) {
@@ -597,29 +597,69 @@ define([
         return path;
     }
 
-    function parseControlTree (form, controlsTree) {
-        function eachFunc(cEl, parentMug) {
-            var $cEl = $(cEl),
-                mug = parseControlElement(form, $cEl, parentMug);
+    function parseControlTree(form, controlsTree) {
+        function controlGenerator(controlNodes, parentMug) {
+            var i = 0, count = controlNodes.length;
+            return function () {
+                if (i >= count) {
+                    return null;
+                }
+                var $cEl = $(controlNodes[i++]),
+                    mug = parseControlElement(form, $cEl, parentMug),
+                    node = form.tree.getNodeFromMug(mug);
 
-            form.controlTree.insertMug(mug, 'into', parentMug);
-            if (mug.options.isControlOnly) {
-                // HACK fix abstraction broken by direct tree insert
-                form.mugMap[mug.ufid] = mug;
-            }
+                if (!node) {
+                    mug.options.isControlOnly = true;
+                    form.tree.insertMug(mug, 'into', parentMug);
+                    // HACK fix abstraction broken by direct tree insert
+                    form.mugMap[mug.ufid] = mug;
+                    node = form.tree.getNodeFromMug(mug);
+                }
+                if (mug.options.controlNodeChildren) {
+                    merge(node, mug.options.controlNodeChildren($cEl));
+                }
+                return node;
+            };
+        }
+        function makeGenerator(items) {
+            var i = 0, count = items.length;
+            return function () {
+                return i < count ? items[i++] : null;
+            };
+        }
+        function getID(node) {
+            return node.value.ufid;
+        }
+        function merge(node, controlsTree) {
+            // getID(child) must have a unique and stable return value
+            // for each child for the duration of this function call
+            var nextChild0 = makeGenerator(node.children),
+                nextChild1 = controlGenerator(controlsTree, node.value),
+                child0 = nextChild0(),
+                child1 = nextChild1(),
+                controls = [],
+                seen = {},
+                fixOrder = false;
 
-            if (mug.__className === "ReadOnly") {
-                return;
+            while (child1) {
+                if (child0) {
+                    if (child0 === child1) {
+                        controls.push(child1);
+                        child1 = nextChild1();
+                    }
+                    seen[getID(child0)] = null;
+                    child0 = nextChild0();
+                } else {
+                    fixOrder = fixOrder || seen.hasOwnProperty(getID(child1));
+                    controls.push(child1);
+                    child1 = nextChild1();
+                }
             }
-            if (mug.options.controlNodeChildren) {
-                mug.options.controlNodeChildren($cEl).each(function () {
-                    eachFunc(this, mug);
-                });
+            if (fixOrder) {
+                node.children = _.union(controls, node.children);
             }
         }
-        controlsTree.each(function () {
-            eachFunc(this, null);
-        });
+        merge(form.tree.getRootNode(), controlsTree);
     }
 
     // BIND PARSING FUNCTIONS
@@ -648,7 +688,7 @@ define([
     }
 
     function parseBindList (form, bindList) {
-        var rootNodeName = form.dataTree.getRootNode().getID();
+        var rootNodeName = form.tree.getRootNode().getID();
 
         bindList.each(function () {
             var el = $(this),

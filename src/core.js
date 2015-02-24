@@ -1312,7 +1312,7 @@ define([
         var _this = this,
             form = this.data.core.form;
 
-        form.mergedTreeMap(function (mug) {
+        form.walkMugs(function (mug) {
             _this.handleMugParseFinish(mug);
             var inTree = _this.createQuestion(mug, mug.parentMug, 'into');
             if (inTree) {
