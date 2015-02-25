@@ -642,7 +642,8 @@ define([
                     }
                 }
             } else {
-                if (mug.p.getDefinition(e.property).widget === widgets.xPath) {
+                if (mug.p.getDefinition(e.property).widget === widgets.xPath ||
+                    mug.p.getDefinition(e.property).widget === widgets.droppableText) {
                     this.updateAllLogicReferences(mug);
                 }
             }
