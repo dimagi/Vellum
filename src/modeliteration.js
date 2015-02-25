@@ -130,7 +130,8 @@ define([
                     presence: 'optional',
                     widget: idsQueryDataSourceWidget,
                 }
-            }
+            },
+            noLogicReference: true
         };
 
     $.vellum.plugin("modeliteration", {}, {
