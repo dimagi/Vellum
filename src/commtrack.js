@@ -198,16 +198,21 @@ define([
             getExtraDataAttributes: function (mug) {
                 // HACK must happen before <setvalue> and "other" <instance> elements are written
                 prepareForWrite(mug);
-                var attrs = mug.p.rawDataAttributes || {};
-                return {
-                    xmlns: "http://commcarehq.org/ledger/v1",
-                    type: mug.p.nodeID,
-                    src: attrs.src || "",
-                    dest: attrs.dest || "",
-                    date: attrs.date || "",
-                    "section-id": mug.p.sectionId,
-                    "vellum:role": "Transfer"
-                };
+                var raw = mug.p.rawDataAttributes || {},
+                    attrs = {
+                        xmlns: "http://commcarehq.org/ledger/v1",
+                        type: mug.p.nodeID,
+                        date: raw.date || "",
+                        "section-id": mug.p.sectionId,
+                        "vellum:role": "Transfer"
+                    };
+                if ($.trim(mug.p.src.value)) {
+                    attrs.src = raw.src || "";
+                }
+                if ($.trim(mug.p.dest.value)) {
+                    attrs.dest = raw.dest || "";
+                }
+                return attrs;
             },
             icon: 'icon-exchange',
             init: function (mug, form) {
@@ -333,13 +338,14 @@ define([
 
     function prepareForWrite(mug) {
         var path = mug.absolutePath,
-            event = isInRepeat(mug) ? "jr-insert" : "xforms-ready";
+            event = isInRepeat(mug) ? "jr-insert" : "xforms-ready",
+            drops = {};
 
         // update <setvalue> refs
         _.each(setvalueData[mug.__className], function (data) {
             var value = mug.p[data.attr];
             if (!value.ref) {
-                mug.p[data.attr] = mug.form.addSetValue(
+                mug.p[data.attr] = value = mug.form.addSetValue(
                     event,
                     path + "/" + data.path,
                     value.value
@@ -348,7 +354,17 @@ define([
                 value.ref = path + "/" + data.path;
                 value.event = event;
             }
+            if (!$.trim(value.value)) {
+                drops[event + " " + value.ref] = true;
+                drops.enabled = true;
+            }
         });
+
+        if (drops.enabled) {
+            mug.form.dropSetValues(function (value) {
+                return drops.hasOwnProperty(value.event + " " + value.ref);
+            });
+        }
     }
 
     function setValueWidget(mug, options) {
