@@ -157,11 +157,11 @@ define([
                     return null;
                 }
             }
-            var path = parentPath + '/' + this.getID();
-            if (mug.options.adjustPath) {
-                path = mug.options.adjustPath(mug, path);
+            var name = this.getID();
+            if (mug.options.getPathName) {
+                name = mug.options.getPathName(mug, name);
             }
-            return path;
+            return parentPath + '/' + name;
         },
         validateTree: function (validateValue) {
             var i, childResult;
