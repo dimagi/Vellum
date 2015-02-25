@@ -935,7 +935,7 @@ define([
             .focus(function() {
                 this.select();
             })
-            .on('change keyup', function (e) {
+            .on('change input', function (e) {
                 widget.updateValue();
                 // workaround for webkit: http://stackoverflow.com/a/12114908
                 if (e.which === 9) {
@@ -1080,7 +1080,7 @@ define([
 
         $input.attr("type", "text")
             .addClass('input-block-level itext-widget-input')
-            .on('change keyup', widget.updateValue);
+            .on('change input', widget.updateValue);
 
         widget.mug.on('question-itext-deleted', widget.destroy, null, widget);
 

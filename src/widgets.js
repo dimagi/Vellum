@@ -150,7 +150,7 @@ define([
             return input.val().replace(/&#10;/g, '\n');
         };
 
-        input.bind("change keyup", function () {
+        input.bind("change input", function () {
             widget.handleChange();
         });
         return widget;
