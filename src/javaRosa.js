@@ -14,6 +14,7 @@ define([
     'vellum/widgets',
     'vellum/util',
     'vellum/tsv',
+    'vellum/xml',
     'vellum/core'
 ], function (
     _,
@@ -24,7 +25,8 @@ define([
     button_remove,
     widgets,
     util,
-    tsv
+    tsv,
+    xml
 ) {
     var SUPPORTED_MEDIA_TYPES = ['image', 'audio', 'video'],
         DEFAULT_EXTENSIONS = {
@@ -1650,9 +1652,7 @@ define([
                             if(form.name !== "default") {
                                 xmlWriter.writeAttributeString('form', form.name);
                             }
-                            // HACK replace &nbsp; with space because it is not a valid XML entity
-                            xmlWriter.writeXML(
-                                $('<div>').append(val).clone().html().replace(/&nbsp;/g, " "));
+                            xmlWriter.writeXML(xml.normalize(val));
                             xmlWriter.writeEndElement();
                         }
                         xmlWriter.writeEndElement();

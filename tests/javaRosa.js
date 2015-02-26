@@ -10,6 +10,7 @@ require([
     'text!static/javaRosa/multi-lang-trans.xml',
     'text!static/javaRosa/multi-line-trans.xml',
     'text!static/javaRosa/output-refs.xml',
+    'text!static/javaRosa/outputref-with-inequality.xml',
     'text!static/javaRosa/text-with-constraint.xml'
 ], function (
     chai,
@@ -22,6 +23,7 @@ require([
     MULTI_LANG_TRANS_XML,
     MULTI_LINE_TRANS_XML,
     OUTPUT_REFS_XML,
+    OUTPUTREF_WITH_INEQUALITY_XML,
     TEXT_WITH_CONSTRAINT_XML
 ) {
     var assert = chai.assert,
@@ -275,6 +277,15 @@ require([
                 );
                 done();
             }}});
+        });
+
+        it("should escape inequality operators in output ref", function () {
+            util.loadXML(OUTPUTREF_WITH_INEQUALITY_XML);
+            util.assertXmlEqual(
+                call('createXML'),
+                OUTPUTREF_WITH_INEQUALITY_XML,
+                {normalize_xmlns: true}
+            );
         });
 
         it("should only update exact output ref matches when question ids change (word boundary)", function () {
