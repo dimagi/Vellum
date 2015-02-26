@@ -122,6 +122,15 @@ define([
             assert.equal($xml.find("setvalue").length, 4, xml);
         });
 
+        it("transfer question should not be valid when src and dest are both empty", function () {
+            util.loadXML();
+            var trans = util.addQuestion("Transfer", "t1");
+            assert.strictEqual(trans.p.src.value, "");
+            assert.strictEqual(trans.p.dest.value, "");
+            assert(!util.isTreeNodeValid(trans),
+                "Transfer question with empty src and dest should be invalid");
+        });
+
         it("should create two transfer blocks with the same parent node", function () {
             util.loadXML();
             util.addQuestion("Transfer", "t1").p.src.value = "value";
