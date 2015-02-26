@@ -122,15 +122,58 @@ define([
             assert.equal($xml.find("setvalue").length, 4, xml);
         });
 
+        it("transfer question should not be valid when src and dest are both empty", function () {
+            util.loadXML();
+            var trans = util.addQuestion("Transfer", "t1");
+            assert.strictEqual(trans.p.src.value, "");
+            assert.strictEqual(trans.p.dest.value, "");
+            assert(!util.isTreeNodeValid(trans),
+                "Transfer question with empty src and dest should be invalid");
+        });
+
         it("should create two transfer blocks with the same parent node", function () {
             util.loadXML();
-            util.addQuestion("Transfer", "t1");
-            util.addQuestion("Transfer", "t2");
+            util.addQuestion("Transfer", "t1").p.src.value = "value";
+            util.addQuestion("Transfer", "t2").p.src.value = "value";
             var xml = util.call("createXML"),
                 $xml = $(xml);
             assert.equal($xml.find("transfer").length, 2, xml);
             assert.equal($xml.find("setvalue[ref='/data/transfer[@type=\\'t1\\']/@src']").length, 1, xml);
             assert.equal($xml.find("setvalue[ref='/data/transfer[@type=\\'t2\\']/@src']").length, 1, xml);
+        });
+
+        it("transfer question type should omit src when empty", function () {
+            util.loadXML();
+            var trans = util.addQuestion("Transfer", "t1");
+            trans.p.src.value = "something";
+            trans.p.dest.value = "";
+            var xml = util.call("createXML"),
+                $xml = $(xml);
+            assert.strictEqual($xml.find("transfer[type='t1']").attr("src"), "",
+                "unexpected transfer src attribute\n" + xml);
+            assert.isUndefined($xml.find("transfer[type='t1']").attr("dest"),
+                "unexpected transfer dest attribute\n" + xml);
+            assert.equal($xml.find("setvalue[ref='/data/transfer[@type=\\'t1\\']/@src']").length, 1,
+                "unexpected @src setvalue:\n" + xml);
+            assert.equal($xml.find("setvalue[ref='/data/transfer[@type=\\'t1\\']/@dest']").length, 0,
+                "unexpected @dest setvalue:\n" + xml);
+        });
+
+        it("transfer question type should omit dest when empty", function () {
+            util.loadXML();
+            var trans = util.addQuestion("Transfer", "t1");
+            trans.p.src.value = "";
+            trans.p.dest.value = "something";
+            var xml = util.call("createXML"),
+                $xml = $(xml);
+            assert.isUndefined($xml.find("transfer[type='t1']").attr("src"),
+                "unexpected transfer src attribute\n" + xml);
+            assert.strictEqual($xml.find("transfer[type='t1']").attr("dest"), "",
+                "unexpected transfer dest attribute\n" + xml);
+            assert.equal($xml.find("setvalue[ref='/data/transfer[@type=\\'t1\\']/@src']").length, 0,
+                "unexpected @src setvalue:\n" + xml);
+            assert.equal($xml.find("setvalue[ref='/data/transfer[@type=\\'t1\\']/@dest']").length, 1,
+                "unexpected @dest setvalue:\n" + xml);
         });
     });
 });
