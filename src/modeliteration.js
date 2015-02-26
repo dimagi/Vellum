@@ -130,6 +130,9 @@ define([
                     presence: 'optional',
                     widget: idsQueryDataSourceWidget,
                 }
+            },
+            ignoreReferenceWarning: function(mug) {
+                return isModelRepeat(mug);
             }
         };
 

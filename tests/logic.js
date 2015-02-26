@@ -26,6 +26,24 @@ require([
                 }
             });
         });
+
+        it("should not update expressions for model iteration", function (done) {
+            util.init({
+                core: {
+                    form: "", 
+                    onReady: function () {
+                        var repeat = util.addQuestion("Repeat", "product");
+                        repeat.p.dataSource = {
+                            instance: {id: "products", src: "jr://fixture/commtrack:products"},
+                            idsQuery: "instance('products')/products/product/@id"
+                        };
+                        call("createXML");
+                        assert(util.isTreeNodeValid(repeat), "repeat should be valid");
+                        done();
+                    }
+                }
+            });
+        });
     });
 
     var TEST_XML_1 = '' + 
