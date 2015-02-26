@@ -124,7 +124,12 @@ define([
                 // tree root
                 createModelHeader(form, xmlWriter);
             } else {
-                var rawDataAttributes = mug.p.rawDataAttributes;
+                var rawDataAttributes = mug.p.rawDataAttributes,
+                    extra = null;
+                if (mug.options.getExtraDataAttributes) {
+                    // call this early so it can munge raw attributes
+                    extra = mug.options.getExtraDataAttributes(mug);
+                }
                 // Write any custom attributes first
                 for (var k in rawDataAttributes) {
                     if (rawDataAttributes.hasOwnProperty(k)) {
@@ -145,11 +150,10 @@ define([
                 if (xmlnsAttr){
                     xmlWriter.writeAttributeString("xmlns", xmlnsAttr);
                 }
-                if (mug.options.getExtraDataAttributes) {
-                    var attributes = mug.options.getExtraDataAttributes(mug);
-                    for (k in attributes) {
-                        if (attributes.hasOwnProperty(k)) {
-                            xmlWriter.writeAttributeString(k, attributes[k]);
+                if (extra) {
+                    for (k in extra) {
+                        if (extra.hasOwnProperty(k)) {
+                            xmlWriter.writeAttributeString(k, extra[k]);
                         }
                     }
                 }
