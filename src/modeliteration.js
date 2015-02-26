@@ -131,7 +131,9 @@ define([
                     widget: idsQueryDataSourceWidget,
                 }
             },
-            noLogicReference: true
+            ignoreReferenceWarning: function(mug) {
+                return isModelRepeat(mug);
+            }
         };
 
     $.vellum.plugin("modeliteration", {}, {
