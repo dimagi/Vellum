@@ -176,6 +176,14 @@ define([
                 "unexpected @dest setvalue:\n" + xml);
         });
 
+        it("should enable the save button when a transfer's source or destination is updated", function () {
+            util.loadXML(TRANSFER_BLOCK_XML);
+            util.clickQuestion("/data/transfer[@type='trans-1']");
+            var selector = ".fd-save-button .btn";
+            $("input[name='property-dest']").val("different").change();
+            assert.ok(!$(selector).hasClass("disabled"));
+        });
+
         it("transfer question should omit src when its value expression is removed", function () {
             util.loadXML(TRANSFER_BLOCK_XML);
             var trans = util.getMug("transfer[@type='trans-1']");

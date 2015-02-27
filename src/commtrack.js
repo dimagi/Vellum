@@ -383,7 +383,7 @@ define([
         };
 
         widget.getValue = function () {
-            var val = _value || {};
+            var val = _.clone(_value) || {};
             val.value = _getValue();
             return val;
         };
