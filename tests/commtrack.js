@@ -175,5 +175,14 @@ define([
             assert.equal($xml.find("setvalue[ref='/data/transfer[@type=\\'t1\\']/@dest']").length, 1,
                 "unexpected @dest setvalue:\n" + xml);
         });
+
+        it("should enable the save button when a transfer's source or destination is updated", function () {
+            util.loadXML(TRANSFER_BLOCK_XML);
+            util.clickQuestion("/data/transfer[@type='trans-1']");
+            var selector = ".fd-save-button .btn";
+            $("input[name='property-dest']").val("different").change();
+            assert.ok(!$(selector).hasClass("disabled"));
+        });
+
     });
 });
