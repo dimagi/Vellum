@@ -208,9 +208,13 @@ define([
                     };
                 if ($.trim(mug.p.src.value)) {
                     attrs.src = raw.src || "";
+                } else {
+                    delete raw.src;
                 }
                 if ($.trim(mug.p.dest.value)) {
                     attrs.dest = raw.dest || "";
+                } else {
+                    delete raw.dest;
                 }
                 return attrs;
             },

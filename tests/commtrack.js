@@ -142,7 +142,7 @@ define([
             assert.equal($xml.find("setvalue[ref='/data/transfer[@type=\\'t2\\']/@src']").length, 1, xml);
         });
 
-        it("transfer question type should omit src when empty", function () {
+        it("transfer question should omit dest when empty", function () {
             util.loadXML();
             var trans = util.addQuestion("Transfer", "t1");
             trans.p.src.value = "something";
@@ -159,7 +159,7 @@ define([
                 "unexpected @dest setvalue:\n" + xml);
         });
 
-        it("transfer question type should omit dest when empty", function () {
+        it("transfer question should omit src when empty", function () {
             util.loadXML();
             var trans = util.addQuestion("Transfer", "t1");
             trans.p.src.value = "";
@@ -173,6 +173,38 @@ define([
             assert.equal($xml.find("setvalue[ref='/data/transfer[@type=\\'t1\\']/@src']").length, 0,
                 "unexpected @src setvalue:\n" + xml);
             assert.equal($xml.find("setvalue[ref='/data/transfer[@type=\\'t1\\']/@dest']").length, 1,
+                "unexpected @dest setvalue:\n" + xml);
+        });
+
+        it("transfer question should omit src when its value expression is removed", function () {
+            util.loadXML(TRANSFER_BLOCK_XML);
+            var trans = util.getMug("transfer[@type='trans-1']");
+            trans.p.src.value = "";
+            var xml = util.call("createXML"),
+                $xml = $(xml);
+            assert.isUndefined($xml.find("transfer[type='trans-1']").attr("src"),
+                "unexpected transfer src attribute\n" + xml);
+            assert.strictEqual($xml.find("transfer[type='trans-1']").attr("dest"), "",
+                "unexpected transfer dest attribute\n" + xml);
+            assert.equal($xml.find("setvalue[ref='/data/transfer[@type=\\'trans-1\\']/@src']").length, 0,
+                "unexpected @src setvalue:\n" + xml);
+            assert.equal($xml.find("setvalue[ref='/data/transfer[@type=\\'trans-1\\']/@dest']").length, 1,
+                "unexpected @dest setvalue:\n" + xml);
+        });
+
+        it("transfer question should omit dest when its value expression is removed", function () {
+            util.loadXML(TRANSFER_BLOCK_XML);
+            var trans = util.getMug("transfer[@type='trans-1']");
+            trans.p.dest.value = "";
+            var xml = util.call("createXML"),
+                $xml = $(xml);
+            assert.strictEqual($xml.find("transfer[type='trans-1']").attr("src"), "",
+                "unexpected transfer src attribute\n" + xml);
+            assert.isUndefined($xml.find("transfer[type='trans-1']").attr("dest"),
+                "unexpected transfer dest attribute\n" + xml);
+            assert.equal($xml.find("setvalue[ref='/data/transfer[@type=\\'trans-1\\']/@src']").length, 1,
+                "unexpected @src setvalue:\n" + xml);
+            assert.equal($xml.find("setvalue[ref='/data/transfer[@type=\\'trans-1\\']/@dest']").length, 0,
                 "unexpected @dest setvalue:\n" + xml);
         });
     });
