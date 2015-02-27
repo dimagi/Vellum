@@ -1495,7 +1495,7 @@ define([
                             curForm = "default";
                         }
                         item.getOrCreateForm(curForm)
-                            .setValue(lang, util.getXLabelValue(valEl));
+                            .setValue(lang, xml.humanize(valEl));
                     }
                     textEl.children().each(eachValue);
                 }
@@ -1532,8 +1532,7 @@ define([
             var xmlDoc;
             if (xmlString) {
                 xmlDoc = $.parseXML(xmlString);
-                var xml = $(xmlDoc),
-                    head = xml.find('h\\:head, head'),
+                var head = $(xmlDoc).find('h\\:head, head'),
                     itextBlock = head.find('itext');
             
                 $(itextBlock).children().each(eachLang);

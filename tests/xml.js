@@ -1,17 +1,23 @@
 require([
     'jquery',
+    'underscore',
     'chai',
     'vellum/xml'
 ], function (
     $,
+    _,
     chai,
     xml
 ) {
     var assert = chai.assert;
 
     describe("The XML normalizer", function () {
-        function eq(value, escaped) {
-            assert.strictEqual(xml.normalize(value), escaped);
+        function eq(value, escaped, humanize) {
+            var normal = xml.normalize(value);
+            assert.strictEqual(normal, escaped);
+            if (_.isUndefined(humanize) || humanize) {
+                assert.strictEqual(xml.humanize(normal), value);
+            }
         }
 
         it("should preserve empty string", function () {
@@ -51,11 +57,11 @@ require([
         });
 
         it("should escape attribute value with < tight", function () {
-            eq('<output value="2<3" />', '<output value="2&lt;3" />');
+            eq('<output value="2<3" />', '<output value="2&lt;3" />', false);
         });
 
         it("should escape attribute value with > tight", function () {
-            eq('<output value="2>3" />', '<output value="2&gt;3" />');
+            eq('<output value="2>3" />', '<output value="2&gt;3" />', false);
         });
 
         it("should escape < character", function () {
@@ -90,11 +96,11 @@ require([
         });
 
         it("should preserve attribute without value", function () {
-            eq('<output attr />', '<output attr="" />');
+            eq('<output attr />', '<output attr="" />', false);
         });
 
         it("should preserve attribute value with path, unterminated tag", function () {
-            eq('<output value="/path">', '<output value="/path" />');
+            eq('<output value="/path">', '<output value="/path" />', false);
         });
 
         it("should preserve newline", function () {
@@ -107,22 +113,71 @@ require([
         });
 
         it("should preserve attribute with unquoted value", function () {
-            eq('<output attr=value />', '<output attr="value" />');
+            eq('<output attr=value />', '<output attr="value" />', false);
         });
 
         it("should accept jquery node", function () {
-            eq($('<output />'), '<output />');
+            eq($('<value><output /></value>'), '<output />', false);
         });
 
         /* -- The following are lossy -- */
 
         it("should handle malformed tag", function () {
             // big loss here
-            eq('<output value="/path"', ''); //'<output value="/path" />');
+            eq('<output value="/path"', '', false);
         });
 
         it("should replace &nbsp; with space", function () {
-            eq('a &nbsp; b', 'a   b');
+            eq('a &nbsp; b', 'a   b', false);
+        });
+    });
+
+    describe("The XML humanizer", function () {
+        function eq(value, humanized) {
+            assert.strictEqual(xml.humanize(value), humanized);
+        }
+
+        it("should convert free < character", function () {
+            eq('2 &lt; 3', '2 < 3');
+        });
+
+        it("should convert free > character", function () {
+            eq('2 &gt; 3', '2 > 3');
+        });
+
+        it("should convert free & character", function () {
+            eq('2 &amp; 3', '2 & 3');
+        });
+
+        it("should not convert escaped tag", function () {
+            eq(' &lt;div&gt; ', ' &lt;div&gt; ');
+        });
+
+        it("should convert output tag", function () {
+            eq('<output value="1 &amp; 2 &lt; 3" />',
+               '<output value="1 & 2 < 3" />');
+        });
+
+        it("should convert child nodes", function () {
+            var value = "<value>1 &amp; 2 &lt; 3 <output value='/path' /></value>";
+            eq($(value), '1 & 2 < 3 <output value="/path" />');
+        });
+
+        it("should convert child output node", function () {
+            var value = "<value><output value='1 &amp; 2 &lt; 3' /></value>";
+            eq($(value), '<output value="1 & 2 < 3" />');
+        });
+
+        it("should convert empty child nodes", function () {
+            eq($("<value />"), "");
+        });
+
+        it("should space child node", function () {
+            eq($("<value> </value>"), " ");
+        });
+
+        it("should newline child node", function () {
+            eq($("<value>\n</value>"), "\n");
         });
     });
 });

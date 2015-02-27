@@ -1,6 +1,7 @@
 define([
     'vellum/form',
     'vellum/util',
+    'vellum/xml',
     'jquery',
     'underscore',
     'xpath',
@@ -8,6 +9,7 @@ define([
 ], function (
     form_,
     util,
+    xml,
     $,
     _,
     xpath,
@@ -254,7 +256,7 @@ define([
     function parseLabel(form, lEl, mug) {
         var Itext = form.vellum.data.javaRosa.Itext,
             $lEl = $(lEl),
-            labelVal = util.getXLabelValue($lEl),
+            labelVal = xml.humanize($lEl),
             labelRef = getLabelRef($lEl),
             labelItext;
         if (labelVal) {
@@ -290,7 +292,7 @@ define([
     function parseHint (form, hEl, mug) {
         var Itext = form.vellum.data.javaRosa.Itext;
         var $hEl = $(hEl),
-            hintVal = util.getXLabelValue($hEl),
+            hintVal = xml.humanize($hEl),
             hintRef = getLabelRef($hEl);
 
         if (hintRef) {
@@ -459,7 +461,7 @@ define([
             item: function ($cEl) {
                 var adapt = function (mug, form) {
                     mug = adaptItem(mug, form);
-                    var value = util.getXLabelValue($cEl.children('value'));
+                    var value = xml.humanize($cEl.children('value'));
                     if (value) {
                         mug.p.defaultValue = value;
                     }

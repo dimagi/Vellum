@@ -281,6 +281,9 @@ require([
 
         it("should escape inequality operators in output ref", function () {
             util.loadXML(OUTPUTREF_WITH_INEQUALITY_XML);
+            var mug = util.getMug("product");
+            assert.equal(mug.p.labelItextID.get("en"),
+                '<output value="if(1 < 2 or 2 > 3 or 3 <= 3 or 4 >= 5, \'product\', \'other\')"/>');
             util.assertXmlEqual(
                 call('createXML'),
                 OUTPUTREF_WITH_INEQUALITY_XML,
