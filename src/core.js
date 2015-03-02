@@ -1266,8 +1266,6 @@ define([
                 // It might be better to add an option for these changes not to
                 // fire a change event.
             }
-
-            _this.data.core.saveButton.fire('change');
         }).on('question-label-text-change', function (e) {
             _this.refreshMugName(e.mug);
             _this.toggleConstraintItext(e.mug);
@@ -1607,6 +1605,7 @@ define([
 
     fn.getSectionDisplay = function (mug, options) {
         var _this = this,
+            saveButton = _this.data.core.saveButton,
             $sec = $(question_fieldset({
                 fieldsetClass: "fd-question-edit-" + options.slug || "anon",
                 fieldsetTitle: options.displayName,
@@ -1625,6 +1624,9 @@ define([
                 }
             }));
             elemWidget.setValue(elemWidget.currentValue);
+            elemWidget.on("change", function () {
+                saveButton.fire('change');
+            });
             $fieldsetContent.append(elemWidget.getUIElement());
         });
         return $sec;

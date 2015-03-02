@@ -12,12 +12,10 @@ define([
     var base = function(mug, options) {
         // set properties shared by all widgets
         var widget = {};
-        // this shared method provides fake inheritance, assuming
-        // it is called in a constructor on the object being constructed
-        // ^^ what?
         widget.options = options;
         widget.mug = mug;
         widget.id = options.id;
+        util.eventuality(widget);
 
         widget.isDisabled = function () {
             // requires widget.path to be set.  This only happens in
@@ -61,6 +59,7 @@ define([
         widget.handleChange = function () {
             widget.updateValue();
             options.afterChange();
+            widget.fire("change");
         };
 
         widget.updateValue = function () {

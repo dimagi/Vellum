@@ -234,6 +234,24 @@ require([
             assert.equal($("[name='itext-hin-constraintMsg']").val(), "Hindi");
         });
 
+        it("should enable save button on itext label change", function () {
+            util.loadXML(TEXT_QUESTION_XML);
+            util.saveButtonEnabled(false);
+            util.clickQuestion("question1");
+            assert(!util.saveButtonEnabled(), "click should not cause change");
+            $("[name='itext-en-label']").val("new").change();
+            assert(util.saveButtonEnabled(), "save button is disabled");
+        });
+
+        it("should enable save button on itext constraintMsg change", function () {
+            util.loadXML(TEXT_QUESTION_XML);
+            util.saveButtonEnabled(false);
+            util.clickQuestion("question1");
+            assert(!util.saveButtonEnabled(), "click should not cause change");
+            $("[name='itext-hin-constraintMsg']").val("new").change();
+            assert(util.saveButtonEnabled(), "save button is disabled");
+        });
+
         it("should update output refs when question ids change", function (done) {
             util.init({core: {onReady: function () {
                 util.addQuestion("Text", "question1");

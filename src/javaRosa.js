@@ -647,6 +647,7 @@ define([
     var baseItextBlock = function (mug, options) {
         var Itext = mug.form.vellum.data.javaRosa.Itext,
             block = {};
+        util.eventuality(block);
 
         block.mug = mug;
         block.itextType = options.itextType;
