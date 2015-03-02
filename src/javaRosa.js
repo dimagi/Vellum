@@ -81,9 +81,6 @@ define([
                     itextModel: this.itextModel
                 });
                 this.forms.push(newForm);
-                this.itextModel.fire({
-                    type: 'change'
-                });
                 return newForm;
             }
         },
@@ -92,9 +89,6 @@ define([
             var index = names.indexOf(name);
             if (index !== -1) {
                 this.forms.splice(index, 1);
-                this.itextModel.fire({
-                    type: 'change'
-                });
             }
         },
         get: function(lang, form) {
@@ -149,11 +143,6 @@ define([
             return this.data[lang];
         },
         setValue: function (lang, value) {
-            if (this.data[lang] !== value) {
-                this.itextModel.fire({
-                    type: 'change'
-                });
-            }
             this.data[lang] = value;
             this.outputExpressions = null;
         },
@@ -239,17 +228,11 @@ define([
         addLanguage: function (lang) {
             if (!this.hasLanguage(lang)) {
                 this.languages.push(lang);
-                this.fire({
-                    type: 'change'
-                });
             } 
         },
         removeLanguage: function (lang) {
             if(this.hasLanguage(lang)) {
                 this.languages.splice(this.languages.indexOf(lang), 1);
-                this.fire({
-                    type: 'change'
-                });
             }
             // if we removed the default, reset it
             if (this.getDefaultLanguage() === lang) {
@@ -257,11 +240,6 @@ define([
             }
         },
         setDefaultLanguage: function (lang) {
-            if (lang !== this.defaultLanguage) {
-                this.fire({
-                    type: 'change'
-                });
-            }
             this.defaultLanguage = lang;
         },
         getDefaultLanguage: function () {
@@ -300,11 +278,6 @@ define([
                 }
                 found.push(item.id);
             }
-            if (changed) {
-                this.fire({
-                    type: 'change'
-                });
-            }
         },
         hasItem: function (item) {
             return this.items.indexOf(item) !== -1;
@@ -317,9 +290,6 @@ define([
         addItem: function (item) {
             if (!this.hasItem(item)) {
                 this.items.push(item);
-                this.fire({
-                    type: 'change'
-                });
             } 
         },
         /*
@@ -365,9 +335,6 @@ define([
             var index = this.items.indexOf(item);
             if (index !== -1) {
                 this.items.splice(index, 1);
-                this.fire({
-                    type: 'change'
-                });
             } 
         },
         /**
@@ -540,7 +507,7 @@ define([
         $autoBox.change(function () {
             if ($(this).prop('checked')) {
                 widget.updateAutoId();
-                widget.updateValue();
+                widget.handleChange();
             }
         });
 
@@ -587,7 +554,7 @@ define([
                 var newVal = widget.autoGenerateId();
                 if (newVal !== widget.getValue()) {
                     widget.setValue({id: newVal});
-                    widget.updateValue();
+                    widget.handleChange();
                 }
             }
         }, null, widget);
@@ -622,11 +589,11 @@ define([
             if (isItextPresent && !currentVal) {
                 widget.setAutoMode(true);
                 widget.updateAutoId();
-                widget.updateValue();
+                widget.handleChange();
             } else if (!isItextPresent && currentVal) {
                 widget.setAutoMode(false);
                 widget.setValue({id: ''});
-                widget.updateValue();
+                widget.handleChange();
             }
 
         };
@@ -691,6 +658,9 @@ define([
                 _.each(block.languages, function (lang) {
                     var itextWidget = block.itextWidget(block.mug, lang, form, options);
                     itextWidget.init();
+                    itextWidget.on("change", function () {
+                        block.fire("change");
+                    });
                     $formGroup.append(itextWidget.getUIElement());
                 });
                 $blockUI.append($formGroup);
@@ -831,6 +801,7 @@ define([
                 itextItem.removeForm(form);
             }
             block.activeForms = _.without(block.activeForms, form);
+            block.fire("change");
         };
 
         block.getDeleteFormButton = function (form) {
@@ -856,12 +827,16 @@ define([
                 return;
             }
             block.activeForms.push(form);
+            block.fire("change");
 
             $('.' + block.getAddFormButtonClass(form)).addClass('disabled');
             var $groupContainer = block.getFormGroupContainer(form);
             _.each(block.languages, function (lang) {
                 var itextWidget = block.itextWidget(block.mug, lang, form, options);
                 itextWidget.init(true);
+                itextWidget.on("change", function () {
+                    block.fire("change");
+                });
                 $groupContainer.append(itextWidget.getUIElement());
             });
             $blockUI.find('.new-itext-control-group').after($groupContainer);
@@ -937,7 +912,7 @@ define([
                 this.select();
             })
             .on('change input', function (e) {
-                widget.updateValue();
+                widget.handleChange();
                 // workaround for webkit: http://stackoverflow.com/a/12114908
                 if (e.which === 9) {
                     this.select();
@@ -1046,7 +1021,7 @@ define([
                 var defaultValue = widget.getDefaultValue();
                 widget.getItextItem().getOrCreateForm(widget.form);
                 widget.setValue(defaultValue);
-                widget.updateValue();
+                widget.handleChange();
             } else {
                 var itextItem = widget.getItextItem();
 
@@ -1078,10 +1053,6 @@ define([
                 widget.fireChangeEvents();
             }
         };
-
-        $input.attr("type", "text")
-            .addClass('input-block-level itext-widget-input')
-            .on('change input', widget.updateValue);
 
         widget.mug.on('question-itext-deleted', widget.destroy, null, widget);
 
@@ -1545,10 +1516,6 @@ define([
             this._makeLanguageSelectorDropdown();
 
             this.__callOld();
-            
-            Itext.on('change', function () {
-                _this.data.core.saveButton.fire('change');
-            });
         },
         handleMugParseFinish: function (mug) {
             this.__callOld();
