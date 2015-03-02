@@ -324,7 +324,7 @@ define([
                            form.getBasePath().slice(0, -1) !== dataParent) {
                             return "Must be valid path";
                         } else if (dataParentMug && !dataParentMug.options.possibleDataParent) {
-                            return "Data must be a child of a group";
+                            return dataParentMug.absolutePath + " is not a valid data parent";
                         } else if (!mug.spec.dataParent.visibility(mug)) {
                             return "Children of repeat groups cannot have a different data parent";
                         }
