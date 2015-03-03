@@ -101,7 +101,7 @@ define([
         var getExpressionFromUI = function () {
             if ($div.find(".xpath-simple").hasClass('hide')) {
                 // advanced
-                return getExpressionInput().val();
+                return getExpressionInput().val().replace(/[\n\t\r]/g, '');
             } else {
                 return getExpressionFromSimpleMode();
             }
