@@ -302,7 +302,8 @@ define([
                     function recFunc(mug) {
                         if (!mug) {
                             return true;
-                        } else if (mug.__className === 'Repeat') {
+                        } else if (mug.__className === 'Repeat' ||
+                                   mug.__className === "Item") {
                             return false;
                         }
                         return recFunc(mug.form.tree.getNodeFromMug(mug).parent.value);
