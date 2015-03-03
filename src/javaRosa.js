@@ -1100,6 +1100,10 @@ define([
             return $input.val();
         };
 
+        widget.getPlaceholder = function () {
+            return $input.attr('placeholder');
+        };
+
         widget.getDefaultValue = function () {
             return null;
         };
