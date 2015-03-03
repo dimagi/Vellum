@@ -217,7 +217,7 @@ define([
     };
 
     var getUploadButtonUI = function (widget, objectMap) {
-        var currentPath = widget.getValue(),
+        var currentPath = widget.getValue() || widget.getPlaceholder(),
             $uploadBtn;
         $uploadBtn = $(multimedia_upload_trigger({
             multimediaExists: currentPath in objectMap,
