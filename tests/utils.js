@@ -226,6 +226,22 @@ define([
         assert(!getMug(path), "mug not removed: " + path);
     }
 
+    /**
+     * Query or set save button enabled state
+     *
+     * @param value - (opitonal) set enabled/disabled (true/false).
+     * @returns - true if the save button is enabled, otherwise false.
+     */
+    function saveButtonEnabled(value) {
+        var button = call("getData").core.saveButton;
+        if (!_.isUndefined(value)) {
+            var state = value ? "save" : "saved";
+            button.setStateWhenReady(state);
+            assert.equal(button.state, state, "sanity check failed");
+        }
+        return button.state === "save";
+    }
+
     function expandGroup(mug) {
         call("jstree", "open_node", mug.ufid);
         call("jstree", "redraw_node", mug.ufid, true, false, false);
@@ -278,6 +294,7 @@ define([
         },
         clickQuestion: clickQuestion,
         deleteQuestion: deleteQuestion,
+        saveButtonEnabled: saveButtonEnabled,
         expandGroup: expandGroup,
         collapseGroup: collapseGroup,
         isTreeNodeValid: function (mug) {

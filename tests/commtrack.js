@@ -207,5 +207,13 @@ define([
             assert.equal($xml.find("setvalue[ref='/data/transfer[@type=\\'trans-1\\']/@dest']").length, 0,
                 "unexpected @dest setvalue:\n" + xml);
         });
+
+        it("should enable save button when a transfer's source or destination changes", function () {
+            util.loadXML(TRANSFER_BLOCK_XML);
+            util.saveButtonEnabled(false);
+            util.clickQuestion("transfer[@type='trans-1']");
+            $("input[name='property-dest']").change();
+            assert(util.saveButtonEnabled(), "save button is disabled");
+        });
     });
 });

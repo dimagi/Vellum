@@ -970,6 +970,32 @@ define([
         }
     };
 
+    fn._onFormChange = function (mug) {
+        // Widget change events, in addition to form change events,
+        // trigger mug validation and save button activation because
+        // some mug property values have sub-properties that do not
+        // trigger mug property change events when they are changed.
+        // util.BoundPropertyMap is a possible alternative, but has its
+        // own set of complexities (binding event handlers to mug
+        // property values).
+        if (mug) {
+            try {
+                this.setTreeValidationIcon(mug);
+            } catch (err) {
+                // Some changes can temporarily leave the form in a state where
+                // this will raise an exception (copying a question and you try
+                // to get errors for it before all of its elements have been
+                // populated).
+                // It might be better to add an option for these changes not to
+                // fire a change event.
+                // TODO track them down and handle the errors at their source
+                // rather than here. setTreeValidationIcon should never raise
+                // an error under normal circumstances.
+            }
+        }
+        this.data.core.saveButton.fire("change");
+    };
+
     fn.jstree = function () {
         var tree = this.data.core.$tree;
         return tree.jstree.apply(tree, arguments);
@@ -1254,20 +1280,7 @@ define([
                      .jstree('select_node', e.mug.ufid);
             }
         }).on('change', function (e) {
-            try {
-                if (e.mug) {
-                    _this.setTreeValidationIcon(e.mug);
-                }
-            } catch (err) {
-                // Some changes can temporarily leave the form in a state where
-                // this will raise an exception (copying a question and you try
-                // to get errors for it before all of its elements have been
-                // populated).
-                // It might be better to add an option for these changes not to
-                // fire a change event.
-            }
-
-            _this.data.core.saveButton.fire('change');
+            _this._onFormChange(e.mug);
         }).on('question-label-text-change', function (e) {
             _this.refreshMugName(e.mug);
             _this.toggleConstraintItext(e.mug);
@@ -1625,6 +1638,9 @@ define([
                 }
             }));
             elemWidget.setValue(elemWidget.currentValue);
+            elemWidget.on("change", function () {
+                _this._onFormChange(mug);
+            });
             $fieldsetContent.append(elemWidget.getUIElement());
         });
         return $sec;
