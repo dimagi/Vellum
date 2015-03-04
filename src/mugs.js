@@ -613,7 +613,7 @@ define([
                 if (lang !== defaultLang && disp === defaultDisp) {
                     disp += " [" + defaultLang + "]";
                 }
-                return disp;
+                return $('<div>').text(disp).html();
             }
 
             return nodeID;
