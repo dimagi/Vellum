@@ -253,7 +253,7 @@ define([
     };
 
     // CONTROL PARSING FUNCTIONS
-    function parseLabel(form, lEl, mug) {
+    function parseLabel(form, lEl, mug, parentMug) {
         var Itext = form.vellum.data.javaRosa.Itext,
             $lEl = $(lEl),
             labelVal = xml.humanize($lEl),
@@ -263,18 +263,14 @@ define([
             mug.p.label = labelVal;
         }
         
-        function newLabelItext(mug) {
-            return form.vellum.data.javaRosa.Itext.createItem(
-                mug.getDefaultLabelItextId());
-        }
-        
         if (labelRef){
             labelItext = Itext.getOrCreateItem(labelRef);
         } else {
+            // WARNING disaster area
             // if there was a ref attribute but it wasn't formatted like an
             // itext reference, it's likely an error, though not sure what
             // we should do here for now just populate with the default
-            labelItext = newLabelItext(mug);
+            labelItext = Itext.createItem(mug.getDefaultLabelItextId(parentMug));
         }
        
         if (labelItext.isEmpty()) {
@@ -341,12 +337,16 @@ define([
             mug = form.getMugByPath(path);
         }
         mug = adapt(mug, form);
-        mug.parentMug = parentMug;
+        var node = form.tree.getNodeFromMug(mug);
+        if (node && node.parent.value !== parentMug) {
+            mug.p.dataParent = node.parent.getAbsolutePath();
+            form.tree.insertMug(mug, 'into', parentMug);
+        }
         if (appearance) {
             mug.p.appearance = appearance;
         }
         if (!adapt.skipPopulate) {
-            populateMug(form, mug, $cEl);
+            populateMug(form, mug, $cEl, parentMug);
         }
         return mug;
     }
@@ -539,12 +539,12 @@ define([
         }
     }
                 
-    function populateMug(form, mug, $cEl) {
+    function populateMug(form, mug, $cEl, parentMug) {
         var labelEl = $cEl.children('label'),
             hintEl = $cEl.children('hint'),
             helpEl = $cEl.children('help');
         if (labelEl.length && mug.spec.label.presence !== 'notallowed') {
-            parseLabel(form, labelEl, mug);
+            parseLabel(form, labelEl, mug, parentMug);
         }
         if (hintEl.length && mug.spec.hintLabel.presence !== 'notallowed') {
             parseHint(form, hintEl, mug);

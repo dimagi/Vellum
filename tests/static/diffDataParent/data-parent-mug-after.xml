@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:orx="http://openrosa.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa" xmlns:vellum="http://commcarehq.org/xforms/vellum">
+	<h:head>
+		<h:title>Untitled Form</h:title>
+		<model>
+			<instance>
+				<data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/960D6510-6982-48D9-BDB0-A70E352F8A57" uiVersion="1" version="1" name="Untitled Form">
+					<before-child />
+					<parent>
+						<child />
+					</parent>
+				</data>
+			</instance>
+			<bind nodeset="/data/before-child" type="xsd:string" />
+			<bind nodeset="/data/parent" />
+			<bind nodeset="/data/parent/child" type="xsd:string" />
+			<itext>
+				<translation lang="en" default="">
+					<text id="before-child-label">
+						<value>before-child</value>
+					</text>
+					<text id="child-label">
+						<value>child</value>
+					</text>
+					<text id="parent-label">
+						<value>parent</value>
+					</text>
+				</translation>
+			</itext>
+		</model>
+	</h:head>
+	<h:body>
+		<input ref="/data/before-child">
+			<label ref="jr:itext('before-child-label')" />
+		</input>
+		<input ref="/data/parent/child">
+			<label ref="jr:itext('child-label')" />
+		</input>
+		<group ref="/data/parent">
+			<label ref="jr:itext('parent-label')" />
+		</group>
+	</h:body>
+</h:html>

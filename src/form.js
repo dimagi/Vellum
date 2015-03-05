@@ -170,6 +170,36 @@ define([
     }
 
     Form.prototype = {
+        dataTree: function() {
+            var rootId = this.getBasePath().slice(1,-1),
+                dataTree = new Tree(rootId, 'data'),
+                diffDataParents = {},
+                _this = this;
+            this.tree.walk(function(mug, nodeID, processChildren) {
+                if (mug) {
+                    if (mug.options.isControlOnly) {
+                        return;
+                    } else if (mug.p.dataParent) {
+                        var dp = mug.p.dataParent;
+                        if (diffDataParents[dp]) {
+                            diffDataParents[dp].push(mug);
+                        } else {
+                            diffDataParents[dp] = [mug];
+                        }
+                    } else {
+                        dataTree.insertMug(mug, 'into', mug.parentMug);
+                    }
+                }
+                processChildren();
+            });
+            _.each(diffDataParents, function (mugs, dataParent) {
+                var dataParentMug = _this.mugMap[dataParent];
+                for (var i = 0, len = mugs.length; i < len; i++) {
+                    dataTree.insertMug(mugs[i], 'into', dataParentMug);
+                }
+            });
+            return dataTree;
+        },
         getBasePath: function () {
             return "/" + this.tree.getRootNode().getID() + "/";
         },
@@ -523,7 +553,7 @@ define([
                 this.insertQuestion(duplicate, parentMug, 'into', true);
             }
 
-            this._logicManager.updateAllReferences(duplicate);
+            this.updateAllLogicReferences(duplicate);
 
             duplicate.unlinkItext();
 
@@ -710,7 +740,7 @@ define([
         },
         fixBrokenReferences: function (mug) {
             function updateReferences(mug) {
-                _this._logicManager.updateAllReferences(mug);
+                _this.updateAllLogicReferences(mug);
                 _this.vellum.setTreeValidationIcon(mug);
             }
             var _this = this;
@@ -719,19 +749,19 @@ define([
         /**
          * Get the logical path of the mug's node in the data tree
          *
-         * It is not always possible to lookup a mug by traversing the
-         * control tree using it's absolute path. For example, some
-         * mugs encapsulate multiple levels of XML elements. This Form object
-         * maintains a hash table to quickly get a mug by its path.
+         * Invariant: absolute paths returned by this function are always
+         * data paths, and may not match the control hierarchy.
+         *
+         * It is not always possible to lookup a mug by traversing the tree
+         * using it's absolute path. For example, some mugs encapsulate multiple
+         * levels of XML elements. This Form object maintains a hash table to
+         * quickly get a mug by its path.
          */
         getAbsolutePath: function (mug, excludeRoot) {
-            if (!mug.options.isControlOnly) {
+            if (mug && !mug.options.isControlOnly) {
                 return this.tree.getAbsolutePath(mug, excludeRoot);
             }
             return null;
-        },
-        getControlPath: function (mug, excludeRoot) {
-            return this.tree.getAbsolutePath(mug, excludeRoot);
         },
         getMugByUFID: function (ufid) {
             return this.mugMap[ufid];
@@ -746,7 +776,7 @@ define([
             function breakReferences(mug) {
                 if (!seen.hasOwnProperty(mug.ufid)) {
                     seen[mug.ufid] = null;
-                    _this._logicManager.updateAllReferences(mug);
+                    _this.updateAllLogicReferences(mug);
                     _this.vellum.setTreeValidationIcon(mug);
                 }
             }

@@ -113,9 +113,11 @@ define([
                     pathWithoutRoot = pathString.substring(1 + pathString.indexOf('/', 1)),
                     refMug = _this.form.getMugByPath(pathString);
 
+                // last part is hack to allow root node in data parents
                 if (!refMug &&
                     (!mug.options.ignoreReferenceWarning || !mug.options.ignoreReferenceWarning(mug)) &&
-                    _this.opts.allowedDataNodeReferences.indexOf(pathWithoutRoot) === -1) {
+                    _this.opts.allowedDataNodeReferences.indexOf(pathWithoutRoot) === -1 &&
+                    !(property === "dataParent" && pathString === _this.form.getBasePath().slice(0,-1))) {
                     error.message.push("The question '" + mug.p.nodeID + 
                         "' references an unknown question " + path.toXPath() + 
                         " in its " + mug.p.getDefinition(property).lstring + ".");

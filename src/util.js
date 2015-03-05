@@ -50,6 +50,7 @@ define([
         "relevantAttr",
         "calculateAttr",
         "constraintAttr",
+        "dataParent",
         "repeat_count"
     ];
 
