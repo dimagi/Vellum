@@ -302,14 +302,16 @@ define([
                     function recFunc(mug) {
                         if (!mug) {
                             return true;
-                        } else if (mug.__className === 'Repeat' ||
-                                   mug.__className === "Item") {
+                        } else if (!mug.options.possibleDataParent) {
                             return false;
                         }
-                        return recFunc(mug.form.tree.getNodeFromMug(mug).parent.value);
+                        return recFunc(mug.parentMug);
+                    }
+                    if (mug.__className === "Item") {
+                        return false;
                     }
 
-                    return recFunc(mug);
+                    return recFunc(mug.parentMug);
                 },
                 presence: 'optional',
                 widget: widgets.droppableText,
