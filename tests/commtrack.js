@@ -250,6 +250,19 @@ define([
                 assert.equal($xml.find("instance[src='jr://instance/ledgerdb']").length, 0,
                              "ledger instance should be removed\n" + xml);
             });
+
+            it("should drop setvalue nodes on delete " + type + " question", function () {
+                var trans = type === "Transfer";
+                util.loadXML(trans ? TRANSFER_BLOCK_XML : BALANCE_BLOCK_XML);
+                var question = util.getMug(trans ?
+                                            "transfer[@type='trans-1']" :
+                                            "balance[@type='bal-0']");
+                util.deleteQuestion(question.absolutePath);
+                var xml = util.call("createXML"),
+                    $xml = $(xml);
+                assert.equal($xml.find("setvalue").length, 0,
+                             "setvalue nodes should be removed\n" + xml);
+            });
         });
 
         it("should not remove ledger instance on delete second Transfer question", function () {
