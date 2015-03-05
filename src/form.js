@@ -129,12 +129,63 @@ define([
             .replace(/[^\w-]+/g,'');
     }
     
-    var InstanceMetadata = function (attributes, children, ref) {
-        var that = {};
+    var InstanceMetadata = function (attributes, children, mug, property) {
+        var that = {},
+            refs = {};
         that.attributes = attributes;
         that.children = children || [];
-        that.refs = {};
-        if (ref !== null && !_.isUndefined(ref)) { that.refs[ref] = null; }
+
+        /**
+         * Add a reference from mug/property to this instance
+         *
+         * This does nothing if ref counting is disabled for this instance.
+         *
+         * @param mug - the referencing mug. Ref counting will be disabled
+         *      for this instance if this is evaluates to false.
+         * @param property - the property referencing this instance. A generic
+         *      reference will be created if this evaluates to false.
+         */
+        that.addReference = function (mug, property) {
+            if (!refs) { return; }
+            if (!mug) {
+                // disable ref counting for this instance. how unfortunate
+                refs = null;
+            } else {
+                if (!refs[mug.ufid]) {
+                    refs[mug.ufid] = {};
+                }
+                refs[mug.ufid][property || "."] = null;
+            }
+        };
+
+        /**
+         * Drop reference from mug/property to this instance
+         *
+         * @param mug - the referencing mug. Must be a real mug.
+         * @param property - the property referencing this instance. All
+         *      references from mug will be removed if this evaluates to false.
+         * @returns - true if the last reference to this instance was dropped,
+         *      otherwise false. Note: returns false if the given mug did not
+         *      reference this instance, even if there are no other references.
+         */
+        that.dropReference = function (mug, property) {
+            if (refs && refs[mug.ufid]) {
+                if (property) {
+                    delete refs[mug.ufid][property];
+                    if (_.isEmpty(refs[mug.ufid])) {
+                        delete refs[mug.ufid];
+                    }
+                } else {
+                    delete refs[mug.ufid];
+                }
+                return _.isEmpty(refs);
+            }
+            return false;
+        };
+
+        if (!_.isUndefined(mug)) {
+            that.addReference(mug, property);
+        }
         return that;
     };
     var INSTANCE_REGEXP = /^instance\((['"])([^'"]+)\1\)/i;
@@ -217,12 +268,10 @@ define([
          *          instance will be unconditionally added and it's id returned
          *          if the instance has no `src` attribute.
          * @param mug - (optional) The mug with which this query is associated.
-         *          If provided, this is used along with the next parameter
-         *          to construct a unique key of the thing that references
-         *          the instance. If provided, this will add a reference to
-         *          the added or existing instance unless ref counting is
-         *          disabled for the form or instance.
-         * @param property - (optional) The mug property name for the query.
+         *          This and the next parameter are used for instance ref
+         *          counting. If omitted, ref counting will be disabled for the
+         *          instance.
+         * @param property - (optional) The mug property name.
          * @returns - The `id` of the added or already-existing instance.
          */
         addInstanceIfNotExists: function (attrs, mug, property) {
@@ -237,21 +286,15 @@ define([
 
             var meta = _.find(this.instanceMetadata, function (m) {
                     return m.attributes.src === attrs.src;
-                }),
-                ref = mug ? mug.ufid + "." + property : null;
+                });
             if (!meta) {
                 this.instanceMetadata.push(InstanceMetadata({
                     src: attrs.src,
                     id: attrs.id
-                }, null, this.enableInstanceRefCounting ? ref : null));
+                }, null, mug || null, property));
                 return attrs.id;
-            } else if (meta.refs && this.enableInstanceRefCounting) {
-                if (ref === null) {
-                    // disable ref counting for this instance. how unfortunate
-                    meta.refs = null;
-                } else {
-                    meta.refs[ref] = null;
-                }
+            } else if (this.enableInstanceRefCounting) {
+                meta.addReference(mug, property);
             }
             return meta.attributes.id;
         },
@@ -270,20 +313,19 @@ define([
                 instance = null;
             if (match) {
                 var instanceId = match[2],
-                    ref = mug.ufid + "." + property,
-                    meta = this._referenceInstance(instanceId, ref);
+                    meta = this._referenceInstance(instanceId, mug, property);
                 if (meta) {
                     instance = _.clone(meta.attributes);
                 }
             }
             return instance;
         },
-        _referenceInstance: function (id, ref) {
+        _referenceInstance: function (id, mug, property) {
             var meta = _.find(this.instanceMetadata, function (meta) {
                     return meta.attributes.id === id;
                 });
-            if (meta && meta.refs && this.enableInstanceRefCounting) {
-                meta.refs[ref] = null;
+            if (meta && this.enableInstanceRefCounting) {
+                meta.addReference(mug, property);
             }
             return meta || null;
         },
@@ -306,16 +348,14 @@ define([
          * @returns - True if the instance was removed, otherwise false.
          */
         dropInstanceReference: function (src, mug, property) {
-            if (!this.enableInstanceRefCounting) {
+            if (!this.enableInstanceRefCounting || !mug) {
                 return false;
             }
             var meta = _.find(this.instanceMetadata, function (m) {
                     return m.attributes.src === src;
                 });
-            if (meta && meta.refs && mug) {
-                var ref = mug.ufid + "." + property;
-                meta.refs = _.omit(meta.refs, ref);
-                if (_.isEmpty(meta.refs)) {
+            if (meta) {
+                if (meta.dropReference(mug, property)) {
                     this.instanceMetadata = _.without(this.instanceMetadata, meta);
                     return true;
                 }
@@ -795,7 +835,11 @@ define([
                     this._removeMugFromForm(children[i], true);
                 }
             }
-            
+            if (this.enableInstanceRefCounting) {
+                this.instanceMetadata = _.filter(this.instanceMetadata, function (meta) {
+                    return !meta.dropReference(mug);
+                });
+            }
             delete this.mugMap[mug.ufid];
             delete this.mugMap[this.tree.getAbsolutePath(mug)];
             this.tree.removeMug(mug);
