@@ -1229,6 +1229,7 @@ define([
             }
             cells = nextRow();
         }
+        Itext.fire("change");
     };
 
     var generateItextXLS = function (vellum, Itext) {
@@ -1520,6 +1521,8 @@ define([
             this._makeLanguageSelectorDropdown();
 
             this.__callOld();
+
+            Itext.on('change', function () { _this.onFormChange(); });
         },
         handleMugParseFinish: function (mug) {
             this.__callOld();

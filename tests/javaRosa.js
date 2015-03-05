@@ -467,6 +467,17 @@ require([
             assert(!q1.p.labelItextID.hasForm("audio"), "unexpected form: audio");
         });
 
+        it("bulk translation tool should enable the save button on update", function () {
+            util.loadXML(TEXT_QUESTION_XML);
+            util.saveButtonEnabled(false);
+            var jr = util.call("getData").javaRosa,
+                trans = ('label\tdefault-en\tdefault-hin\taudio-en\taudio-hin\n' +
+                         'question1-label\t"First ""line\n' +
+                         'Second"" line\nThird line"\t\t\t\n');
+            jr.parseXLSItext(trans, jr.Itext);
+            assert(util.saveButtonEnabled(), "save button not enabled");
+        });
+
         it("should highlight label after tab", function () {
             util.loadXML(TEST_XML_3, null, /You have languages in your form/);
             util.clickQuestion("question1");

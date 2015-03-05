@@ -970,7 +970,7 @@ define([
         }
     };
 
-    fn._onFormChange = function (mug) {
+    fn.onFormChange = function (mug) {
         // Widget change events, in addition to form change events,
         // trigger mug validation and save button activation because
         // some mug property values have sub-properties that do not
@@ -1280,7 +1280,7 @@ define([
                      .jstree('select_node', e.mug.ufid);
             }
         }).on('change', function (e) {
-            _this._onFormChange(e.mug);
+            _this.onFormChange(e.mug);
         }).on('question-label-text-change', function (e) {
             _this.refreshMugName(e.mug);
             _this.toggleConstraintItext(e.mug);
@@ -1639,7 +1639,7 @@ define([
             }));
             elemWidget.setValue(elemWidget.currentValue);
             elemWidget.on("change", function () {
-                _this._onFormChange(mug);
+                _this.onFormChange(mug);
             });
             $fieldsetContent.append(elemWidget.getUIElement());
         });
