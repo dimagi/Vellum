@@ -146,6 +146,7 @@ define([
                 mug.p.entryId = {value: ""};
                 mug.p.quantity = "";
                 mug.p.date = {value: "today()"};
+                addLedgerDBInstance(mug, form);
             },
             spec: {
                 xmlnsAttr: { presence: "optional" },
@@ -226,6 +227,7 @@ define([
                 mug.p.entryId = {value: ""};
                 mug.p.quantity = "";
                 mug.p.date = {value: "today()"};
+                addLedgerDBInstance(mug, form);
             },
             spec: {
                 xmlnsAttr: { presence: "optional" },
@@ -338,6 +340,11 @@ define([
             return true;
         }
         return mug.parentMug && isInRepeat(mug.parentMug);
+    }
+
+    function addLedgerDBInstance(mug, form) {
+        var data = {id: "ledger", src: "jr://instance/ledgerdb"};
+        form.addInstanceIfNotExists(data, mug, "");
     }
 
     function prepareForWrite(mug) {

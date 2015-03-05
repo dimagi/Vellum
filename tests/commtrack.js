@@ -215,5 +215,23 @@ define([
             $("input[name='property-dest']").change();
             assert(util.saveButtonEnabled(), "save button is disabled");
         });
+
+        it("should add ledgerdb instance for transfer question", function () {
+            util.loadXML("");
+            util.addQuestion("Transfer", "trans");
+            var xml = util.call("createXML"),
+                $xml = $(xml);
+            assert.equal($xml.find("instance[src='jr://instance/ledgerdb']").length, 1,
+                         "wrong ledgerdb instance count\n" + xml);
+        });
+
+        it("should add ledgerdb instance for balance question", function () {
+            util.loadXML("");
+            util.addQuestion("Balance", "bal");
+            var xml = util.call("createXML"),
+                $xml = $(xml);
+            assert.equal($xml.find("instance[src='jr://instance/ledgerdb']").length, 1,
+                         "wrong ledgerdb instance count\n" + xml);
+        });
     });
 });
