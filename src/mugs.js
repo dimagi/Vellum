@@ -307,9 +307,6 @@ define([
                         }
                         return recFunc(mug.parentMug);
                     }
-                    if (mug.__className === "Item") {
-                        return false;
-                    }
 
                     return recFunc(mug.parentMug);
                 },
