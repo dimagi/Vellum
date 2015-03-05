@@ -66,6 +66,8 @@ requirejs.config({
 
         'swfobject': '../bower_components/MediaUploader/swfobject',
         'file-uploader': '../bower_components/MediaUploader/hqmedia.upload_controller',
+        'equivalent-xml': '../bower_components/equivalent-xml-js/src/equivalent-xml',
+        'jsdiff': '../bower_components/jsdiff/diff',
     },
     shim: {
         'codemirror': {
@@ -150,6 +152,13 @@ requirejs.config({
         },
         'biginteger': {
             exports: 'BigInteger'
+        },
+        'equivalent-xml': {
+            deps: ['underscore'],
+            exports: 'EquivalentXml'
+        },
+        'jsdiff': {
+            exports: 'JsDiff'
         }
     },
     less: {
