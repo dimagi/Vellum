@@ -577,6 +577,21 @@ define([
         }));
         $modal.find('.modal-body').html($overwriteForm);
 
+        var modalHeaderHeight = $modal.find('.modal-header').outerHeight(false),
+            modalFooterHeight = $modal.find('.modal-footer').outerHeight(false),
+            modalHeight = $(window).height() - 40,
+            modalBodyHeight = modalHeight - (modalFooterHeight - modalHeaderHeight) - 126;
+
+        $modal
+            .css('height', modalHeight + 'px')
+            .css('width', $(window).width() - 40 + 'px');
+
+        $modal.addClass('fd-source-modal')
+            .removeClass('form-horizontal')
+            .find('.modal-body')
+            .html($overwriteForm)
+            .css('height', modalBodyHeight + 'px');
+
         $modal.modal('show');
     };
         
