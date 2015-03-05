@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:orx="http://openrosa.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa" xmlns:vellum="http://commcarehq.org/xforms/vellum">
+	<h:head>
+		<h:title>Untitled Form</h:title>
+		<model>
+			<instance>
+				<data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/D26EC2F3-D3B5-42F4-81BD-38A8342E8202" uiVersion="1" version="1" name="Untitled Form">
+					<product />
+				</data>
+			</instance>
+			<instance src="jr://fixture/commtrack:products" id="products"></instance>
+			<bind nodeset="/data/product" />
+			<itext>
+				<translation lang="en" default="">
+					<text id="product-label">
+						<value><output value="if(1 &lt; 2 or 2 &gt; 3 or 3 &lt;= 3 or 4 &gt;= 5, 'product', 'other')" /></value>
+					</text>
+				</translation>
+				<translation lang="hin">
+					<text id="product-label">
+						<value><output value="if(1 &lt; 2 or 2 &gt; 3 or 3 &lt;= 3 or 4 &gt;= 5, 'product', 'other')" /></value>
+					</text>
+				</translation>
+			</itext>
+		</model>
+	</h:head>
+	<h:body>
+		<select1 ref="/data/product">
+			<label ref="jr:itext('product-label')" />
+			<itemset nodeset="instance('products')/products/product[(@id &gt; 3 and @id &lt; 6) or (@id &gt;= 3 and @id &lt;= 6)]">
+				<label ref="name" />
+				<value ref="@id" />
+			</itemset>
+		</select1>
+	</h:body>
+</h:html>

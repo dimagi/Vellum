@@ -65,52 +65,6 @@ define([
         return (/^[^<&'"]*$/).test(value);
     };
     
-    /**
-     * Grabs the value between the tags of the element passed in
-     * and returns a string of everything inside.
-     *
-     * This method is kindy of hacky, so buyer beware.
-     *
-     * Motivation: Jquery's selector can't do this.  We need to be able to
-     * grab the value of label tags, even if it includes <output> tags inside
-     * of it (since the tag may need to be displayed to the user).
-     * @param el - jquery selector or string used in the selector pointing to a DOM element.
-     */
-    that.getXLabelValue = function(el){
-        var xmls = new XMLSerializer(),
-            resStr, resEl;
-        function getEndTag (str) {
-            var res, reo, last;
-            reo = /<\/(?:"[^"]*"['"]*|'[^']*'['"]*|[^'">])+>/g;
-            res = reo.exec(str);
-            last = res;
-            while(res !== null) {
-                last = res;
-                res = reo.exec(str);
-            }
-            if(last){
-                return last[0];
-            }else{
-                return null;
-            }
-            
-        }
-
-        function getStartTag (str) {
-            var re, res;
-            re = /<(?:"[^"]*"['"]*|'[^']*'['"]*|[^'">])+>/;
-            res = re.exec(str);
-            return res[0];
-        }
-
-        resEl = $(el)[0];
-        if(!resEl) { return; }
-        resStr = xmls.serializeToString(resEl);
-        resStr = resStr.replace(getStartTag(resStr),'').replace(getEndTag(resStr),'');
-        
-        return resStr;
-    };
-    
     // Simple Event Framework
     // Just run your object through this function to make it event aware.
     // Adapted from 'JavaScript: The Good Parts' chapter 5
