@@ -88,3 +88,6 @@
 .fcc-fd-single-circle:before {
   content: "\f011";
 }
+.fcc-fd-hash:before {
+  content: "\f019";
+}

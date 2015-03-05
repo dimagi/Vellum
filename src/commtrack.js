@@ -139,7 +139,7 @@ define([
                     "vellum:role": "Balance"
                 };
             },
-            icon: 'icon-balance',
+            icon: 'fcc fcc-fd-hash',
             init: function (mug, form) {
                 mug.p.entityId = {value: ""};
                 mug.p.sectionId = "";
