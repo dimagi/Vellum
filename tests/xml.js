@@ -72,6 +72,31 @@ require([
             eq('your visit count must be > 5', 'your visit count must be &gt; 5');
         });
 
+        it("should escape attribute value with > and trailing text (v1)", function () {
+            eq('<output value="2 > 3" /> text',
+               '<output value="2 &gt; 3" /> text');
+        });
+
+        it("should escape attribute value with > and trailing text (v2)", function () {
+            eq("<output value='2 > 3' /> text",
+               '<output value="2 &gt; 3" /> text', false);
+        });
+
+        it("should escape attribute value with > and trailing text (v3)", function () {
+            eq('<output value="2 > 3"/>text',
+               '<output value="2 &gt; 3" />text', false);
+        });
+
+        it("should escape attribute value with > and trailing text (v4)", function () {
+            eq('<output value="2 > 3"></output> text',
+               '<output value="2 &gt; 3" /> text', false);
+        });
+
+        it("should escape attribute value with < and trailing text", function () {
+            eq('<output value="2 < 3" /> text',
+               '<output value="2 &lt; 3" /> text');
+        });
+
         it("should escape < character before tag", function () {
             // immortalizing https://github.com/dimagi/Vellum/pull/212
             eq('your visit count must be < <output value="/path" />',
