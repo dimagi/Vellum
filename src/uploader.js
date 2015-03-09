@@ -168,9 +168,9 @@ define([
         widget.handleUploadComplete = function (event, data, objectMap) {
             if (data.ref && data.ref.path) {
                 var newExtension = '.' + data.ref.path.split('.').pop().toLowerCase(),
-                    oldExtension = '.' + widget.getValue().split('.').pop().toLowerCase();
+                    oldExtension = '.' + widget.getItextValue().split('.').pop().toLowerCase();
                 if (newExtension !== oldExtension) {
-                    var currentPath = widget.getValue().replace(/\.[^/.]+$/, newExtension);
+                    var currentPath = widget.getItextValue().replace(/\.[^/.]+$/, newExtension);
                     widget.getControl().val(currentPath);
                     widget.handleChange();
                 }
@@ -191,14 +191,14 @@ define([
         };
 
         widget.updateReference = function () {
-            var currentPath = widget.getValue();
+            var currentPath = widget.getItextValue();
             $uiElem.attr('data-hqmediapath', currentPath);
             widget.mediaRef.updateRef(currentPath);
         };
     };
 
     var getPreviewUI = function (widget, objectMap, ICONS) {
-        var currentPath = widget.getValue(),
+        var currentPath = widget.getItextValue(),
             previewHtml;
         if (!currentPath && !widget.isDefaultLang) {
             currentPath = widget.getItextItem().getValue(widget.form, widget.defaultLang);
@@ -217,7 +217,7 @@ define([
     };
 
     var getUploadButtonUI = function (widget, objectMap) {
-        var currentPath = widget.getValue() || widget.getPlaceholder(),
+        var currentPath = widget.getItextValue(),
             $uploadBtn;
         $uploadBtn = $(multimedia_upload_trigger({
             multimediaExists: currentPath in objectMap,
@@ -257,34 +257,42 @@ define([
                 return;
             }
 
-            this.data.uploader.uploadControls = {
-                'image': this.initUploadController({
-                    uploaderSlug: 'fd_hqimage', 
-                    mediaType: 'image',
-                    sessionid: sessionid,
-                    uploadUrl: uploadUrls.image,
-                    swfUrl: swfUrl
-                }),
-                'audio': this.initUploadController({
-                    uploaderSlug: 'fd_hqaudio',
-                    mediaType: 'audio',
-                    sessionid: sessionid,
-                    uploadUrl: uploadUrls.audio,
-                    swfUrl: swfUrl
-                }),
-                'video': this.initUploadController({
-                    uploaderSlug: 'fd_hqvideo',
-                    mediaType: 'video',
-                    sessionid: sessionid,
-                    uploadUrl: uploadUrls.video,
-                    swfUrl: swfUrl
-                })
+            this.data.deferredInit = function () {
+                this.data.uploader.uploadControls = {
+                    'image': this.initUploadController({
+                        uploaderSlug: 'fd_hqimage',
+                        mediaType: 'image',
+                        sessionid: sessionid,
+                        uploadUrl: uploadUrls.image,
+                        swfUrl: swfUrl
+                    }),
+                    'audio': this.initUploadController({
+                        uploaderSlug: 'fd_hqaudio',
+                        mediaType: 'audio',
+                        sessionid: sessionid,
+                        uploadUrl: uploadUrls.audio,
+                        swfUrl: swfUrl
+                    }),
+                    'video': this.initUploadController({
+                        uploaderSlug: 'fd_hqvideo',
+                        mediaType: 'video',
+                        sessionid: sessionid,
+                        uploadUrl: uploadUrls.video,
+                        swfUrl: swfUrl
+                    })
+                };
             };
         },
         initWidget: function (widget) {
             this.__callOld();
             if (!this.data.uploader.uploadEnabled) {
                 return;
+            }
+
+            var deferredInit = this.data.deferredInit;
+            if (deferredInit !== null) {
+                this.data.deferredInit = null;
+                deferredInit.apply(this);
             }
 
             addUploaderToWidget(widget, 
