@@ -29,11 +29,11 @@ define([
             if (!/[<>&]/.test(value)) {
                 return value; // value contains no XML tags
             }
-            value = inner ? $(value) : $("<div />").append(value);
+            value = inner ? $(value) : $("<div />").append(fixGTBug(value));
         }
         var xml = new XMLSerializer(),
-            wrapper = /^<(\w+)(?:\s+\w+=(["'])[^]*?\2\s*)*(?:\/>|>([^]*)<\/\1>)$/g,
-            emptytag = /<((\w+)(?:\s+\w+=(["'])[^]*?\3\s*)*)><\/\2>/g;
+            wrapper = /^<([\w:.-]+)(?:\s+[\w:.-]+=(["'])[^]*?\2)*\s*(?:\/>|>([^]*)<\/\1>)$/g,
+            emptytag = /<(([\w:.-]+)(?:\s+[\w:.-]+=(["'])[^]*?\3)*\s*)><\/\2>/g;
         return xml.serializeToString(value[0]) // pure magic
             .replace(wrapper, "$3")         // remove outer tag
             .replace(emptytag, "<$1 />")    // <tag></tag> to <tag />
@@ -61,6 +61,27 @@ define([
         return xml.replace(refs, function (match, lt, gt, amp) {
             return lt ? ("<" + lt) : (gt ? (gt + ">") : ("&" + amp));
         });
+    }
+
+    /**
+     * Work around XML escaping bug in browser
+     *
+     * Buggy conversion:
+     * '<tag attr="a > b" />tail' => '<tag attr="a > b">tail</tag>'
+     *
+     * Empty tags that do not end with /> do not have this problem:
+     * '<tag attr="a > b"></tag>tail' => '<tag attr="a > b"></tag>tail'
+     *
+     * For the examples above, assume => is a funciton that does
+     * $("<div/>").append(value).html()
+     *
+     * NOTE: there are still edge cases (mainly malformed XML) that will not be
+     * fixed by this. For example:
+     *      <tag attr=a>b />
+     */
+    function fixGTBug(value) {
+        var empty = /<(([\w:.-]+)(?:\s+[\w:.-]+=(["'])[^]*?\3)*\s*)\/>/g;
+        return value.replace(empty, "<$1></$2>");
     }
 
     return {

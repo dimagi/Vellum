@@ -72,6 +72,36 @@ require([
             eq('your visit count must be > 5', 'your visit count must be &gt; 5');
         });
 
+        it("should escape attribute value with > and trailing text (v1)", function () {
+            eq('<output value="2 > 3" /> text',
+               '<output value="2 &gt; 3" /> text');
+        });
+
+        it("should escape attribute value with > and trailing text (v2)", function () {
+            eq("<output value='2 > 3' /> text",
+               '<output value="2 &gt; 3" /> text', false);
+        });
+
+        it("should escape attribute value with > and trailing text (v3)", function () {
+            eq('<output value="2 > 3"/>text',
+               '<output value="2 &gt; 3" />text', false);
+        });
+
+        it("should escape attribute value with > and trailing text (v4)", function () {
+            eq('<output value="2 > 3"></output> text',
+               '<output value="2 &gt; 3" /> text', false);
+        });
+
+        it("should escape attribute value with > and trailing text (v5)", function () {
+            eq('<out:p_3-6. h:v-1._="2 > 3" />text',
+               '<out:p_3-6. h:v-1._="2 &gt; 3" />text');
+        });
+
+        it("should escape attribute value with < and trailing text", function () {
+            eq('<output value="2 < 3" /> text',
+               '<output value="2 &lt; 3" /> text');
+        });
+
         it("should escape < character before tag", function () {
             // immortalizing https://github.com/dimagi/Vellum/pull/212
             eq('your visit count must be < <output value="/path" />',
@@ -133,29 +163,33 @@ require([
     });
 
     describe("The XML humanizer", function () {
-        function eq(value, humanized) {
-            assert.strictEqual(xml.humanize(value), humanized);
+        function eq(value, humanized, normalize) {
+            var human = xml.humanize(value);
+            assert.strictEqual(human, humanized);
+            if (normalize) {
+                assert.strictEqual(xml.normalize(human), value);
+            }
         }
 
         it("should convert free < character", function () {
-            eq('2 &lt; 3', '2 < 3');
+            eq('2 &lt; 3', '2 < 3', true);
         });
 
         it("should convert free > character", function () {
-            eq('2 &gt; 3', '2 > 3');
+            eq('2 &gt; 3', '2 > 3', true);
         });
 
         it("should convert free & character", function () {
-            eq('2 &amp; 3', '2 & 3');
+            eq('2 &amp; 3', '2 & 3', true);
         });
 
         it("should not convert escaped tag", function () {
-            eq(' &lt;div&gt; ', ' &lt;div&gt; ');
+            eq(' &lt;div&gt; ', ' &lt;div&gt; ', true);
         });
 
         it("should convert output tag", function () {
             eq('<output value="1 &amp; 2 &lt; 3" />',
-               '<output value="1 & 2 < 3" />');
+               '<output value="1 & 2 < 3" />', true);
         });
 
         it("should convert child nodes", function () {
