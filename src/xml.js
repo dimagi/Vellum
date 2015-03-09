@@ -32,8 +32,8 @@ define([
             value = inner ? $(value) : $("<div />").append(fixGTBug(value));
         }
         var xml = new XMLSerializer(),
-            wrapper = /^<(\w+)(?:\s+\w+=(["'])[^]*?\2\s*)*(?:\/>|>([^]*)<\/\1>)$/g,
-            emptytag = /<((\w+)(?:\s+\w+=(["'])[^]*?\3\s*)*)><\/\2>/g;
+            wrapper = /^<([\w:.-]+)(?:\s+[\w:.-]+=(["'])[^]*?\2)*\s*(?:\/>|>([^]*)<\/\1>)$/g,
+            emptytag = /<(([\w:.-]+)(?:\s+[\w:.-]+=(["'])[^]*?\3)*\s*)><\/\2>/g;
         return xml.serializeToString(value[0]) // pure magic
             .replace(wrapper, "$3")         // remove outer tag
             .replace(emptytag, "<$1 />")    // <tag></tag> to <tag />
@@ -80,7 +80,7 @@ define([
      *      <tag attr=a>b />
      */
     function fixGTBug(value) {
-        var empty = /<((\w+)(?:\s+\w+=(["'])[^]*?\3\s*)*)\/>/g;
+        var empty = /<(([\w:.-]+)(?:\s+[\w:.-]+=(["'])[^]*?\3)*\s*)\/>/g;
         return value.replace(empty, "<$1></$2>");
     }
 

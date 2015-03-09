@@ -92,6 +92,11 @@ require([
                '<output value="2 &gt; 3" /> text', false);
         });
 
+        it("should escape attribute value with > and trailing text (v5)", function () {
+            eq('<out:p_3-6. h:v-1._="2 > 3" />text',
+               '<out:p_3-6. h:v-1._="2 &gt; 3" />text');
+        });
+
         it("should escape attribute value with < and trailing text", function () {
             eq('<output value="2 < 3" /> text',
                '<output value="2 &lt; 3" /> text');
