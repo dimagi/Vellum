@@ -257,34 +257,42 @@ define([
                 return;
             }
 
-            this.data.uploader.uploadControls = {
-                'image': this.initUploadController({
-                    uploaderSlug: 'fd_hqimage', 
-                    mediaType: 'image',
-                    sessionid: sessionid,
-                    uploadUrl: uploadUrls.image,
-                    swfUrl: swfUrl
-                }),
-                'audio': this.initUploadController({
-                    uploaderSlug: 'fd_hqaudio',
-                    mediaType: 'audio',
-                    sessionid: sessionid,
-                    uploadUrl: uploadUrls.audio,
-                    swfUrl: swfUrl
-                }),
-                'video': this.initUploadController({
-                    uploaderSlug: 'fd_hqvideo',
-                    mediaType: 'video',
-                    sessionid: sessionid,
-                    uploadUrl: uploadUrls.video,
-                    swfUrl: swfUrl
-                })
+            this.data.deferredInit = function () {
+                this.data.uploader.uploadControls = {
+                    'image': this.initUploadController({
+                        uploaderSlug: 'fd_hqimage',
+                        mediaType: 'image',
+                        sessionid: sessionid,
+                        uploadUrl: uploadUrls.image,
+                        swfUrl: swfUrl
+                    }),
+                    'audio': this.initUploadController({
+                        uploaderSlug: 'fd_hqaudio',
+                        mediaType: 'audio',
+                        sessionid: sessionid,
+                        uploadUrl: uploadUrls.audio,
+                        swfUrl: swfUrl
+                    }),
+                    'video': this.initUploadController({
+                        uploaderSlug: 'fd_hqvideo',
+                        mediaType: 'video',
+                        sessionid: sessionid,
+                        uploadUrl: uploadUrls.video,
+                        swfUrl: swfUrl
+                    })
+                };
             };
         },
         initWidget: function (widget) {
             this.__callOld();
             if (!this.data.uploader.uploadEnabled) {
                 return;
+            }
+
+            var deferredInit = this.data.deferredInit;
+            if (deferredInit !== null) {
+                this.data.deferredInit = null;
+                deferredInit.apply(this);
             }
 
             addUploaderToWidget(widget, 
