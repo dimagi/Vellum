@@ -168,9 +168,9 @@ define([
         widget.handleUploadComplete = function (event, data, objectMap) {
             if (data.ref && data.ref.path) {
                 var newExtension = '.' + data.ref.path.split('.').pop().toLowerCase(),
-                    oldExtension = '.' + widget.getValue().split('.').pop().toLowerCase();
+                    oldExtension = '.' + widget.getItextValue().split('.').pop().toLowerCase();
                 if (newExtension !== oldExtension) {
-                    var currentPath = widget.getValue().replace(/\.[^/.]+$/, newExtension);
+                    var currentPath = widget.getItextValue().replace(/\.[^/.]+$/, newExtension);
                     widget.getControl().val(currentPath);
                     widget.handleChange();
                 }
@@ -191,14 +191,14 @@ define([
         };
 
         widget.updateReference = function () {
-            var currentPath = widget.getValue();
+            var currentPath = widget.getItextValue();
             $uiElem.attr('data-hqmediapath', currentPath);
             widget.mediaRef.updateRef(currentPath);
         };
     };
 
     var getPreviewUI = function (widget, objectMap, ICONS) {
-        var currentPath = widget.getValue(),
+        var currentPath = widget.getItextValue(),
             previewHtml;
         if (!currentPath && !widget.isDefaultLang) {
             currentPath = widget.getItextItem().getValue(widget.form, widget.defaultLang);
@@ -217,7 +217,7 @@ define([
     };
 
     var getUploadButtonUI = function (widget, objectMap) {
-        var currentPath = widget.getValue() || widget.getPlaceholder(),
+        var currentPath = widget.getItextValue(),
             $uploadBtn;
         $uploadBtn = $(multimedia_upload_trigger({
             multimediaExists: currentPath in objectMap,
