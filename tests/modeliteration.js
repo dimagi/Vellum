@@ -176,6 +176,15 @@ require([
                          "wrong number of <setvalue> nodes\n\n" + xml);
         });
 
+        it("should drop setvalue nodes on delete model repeat", function () {
+            // add question, save, rename, save, should not have two sets of <setvalue>s
+            util.loadXML(FIXTURE_REPEAT_XML);
+            util.deleteQuestion("product/item");
+            var xml = call("createXML");
+            assert.equal($(xml).find("setvalue").length, 0,
+                         "wrong number of <setvalue> nodes\n\n" + xml);
+        });
+
         it("should update expressions on set data source", function () {
             util.loadXML("");
             var repeat = util.addQuestion("Repeat", "product"),

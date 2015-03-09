@@ -245,7 +245,9 @@ define([
     }
 
     function deleteQuestion (path) {
-        call("getData").core.form.removeMugFromForm(getMug(path));
+        var mug = getMug(path);
+        assert(mug, "mug not found: " + path);
+        call("getData").core.form.removeMugFromForm(mug);
         assert(!getMug(path), "mug not removed: " + path);
     }
 

@@ -2,6 +2,7 @@ define([
     'tests/utils',
     'chai',
     'jquery',
+    'underscore',
     'vellum/commtrack',
     'text!static/commtrack/balance-block.xml',
     'text!static/commtrack/transfer-block.xml'
@@ -9,6 +10,7 @@ define([
     util,
     chai,
     $,
+    _,
     commtrack,
     BALANCE_BLOCK_XML,
     TRANSFER_BLOCK_XML
@@ -214,6 +216,64 @@ define([
             util.clickQuestion("transfer[@type='trans-1']");
             $("input[name='property-dest']").change();
             assert(util.saveButtonEnabled(), "save button is disabled");
+        });
+
+        _.each(["Balance", "Transfer"], function (type) {
+            it("should add ledger instance on add " + type + " question", function () {
+                util.loadXML("");
+                util.addQuestion(type, "question");
+                var xml = util.call("createXML"),
+                    $xml = $(xml);
+                assert.equal($xml.find("instance[src='jr://instance/ledgerdb']").length, 1,
+                             "wrong ledger instance count\n" + xml);
+            });
+
+            it("should remove ledger instance on delete " + type + " question", function () {
+                util.loadXML("");
+                var question = util.addQuestion(type, "question");
+                util.deleteQuestion(question.absolutePath);
+                var xml = util.call("createXML"),
+                    $xml = $(xml);
+                assert.equal($xml.find("instance[src='jr://instance/ledgerdb']").length, 0,
+                             "ledger instance should be removed\n" + xml);
+            });
+
+            it("should remove ledger instance on delete " + type + " loaded from XML", function () {
+                var trans = type === "Transfer";
+                util.loadXML(trans ? TRANSFER_BLOCK_XML : BALANCE_BLOCK_XML);
+                var question = util.getMug(trans ?
+                                            "transfer[@type='trans-1']" :
+                                            "balance[@type='bal-0']");
+                util.deleteQuestion(question.absolutePath);
+                var xml = util.call("createXML"),
+                    $xml = $(xml);
+                assert.equal($xml.find("instance[src='jr://instance/ledgerdb']").length, 0,
+                             "ledger instance should be removed\n" + xml);
+            });
+
+            it("should drop setvalue nodes on delete " + type + " question", function () {
+                var trans = type === "Transfer";
+                util.loadXML(trans ? TRANSFER_BLOCK_XML : BALANCE_BLOCK_XML);
+                var question = util.getMug(trans ?
+                                            "transfer[@type='trans-1']" :
+                                            "balance[@type='bal-0']");
+                util.deleteQuestion(question.absolutePath);
+                var xml = util.call("createXML"),
+                    $xml = $(xml);
+                assert.equal($xml.find("setvalue").length, 0,
+                             "setvalue nodes should be removed\n" + xml);
+            });
+        });
+
+        it("should not remove ledger instance on delete second Transfer question", function () {
+            util.loadXML("");
+            util.addQuestion("Transfer", "trans");
+            var question = util.addQuestion("Transfer", "question");
+            util.deleteQuestion(question.absolutePath);
+            var xml = util.call("createXML"),
+                $xml = $(xml);
+            assert.equal($xml.find("instance[src='jr://instance/ledgerdb']").length, 1,
+                         "ledger instance should be removed\n" + xml);
         });
     });
 });

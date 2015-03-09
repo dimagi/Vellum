@@ -146,6 +146,7 @@ define([
                 mug.p.entryId = {value: ""};
                 mug.p.quantity = "";
                 mug.p.date = {value: "today()"};
+                addLedgerDBInstance(mug, form);
             },
             spec: {
                 xmlnsAttr: { presence: "optional" },
@@ -226,6 +227,7 @@ define([
                 mug.p.entryId = {value: ""};
                 mug.p.quantity = "";
                 mug.p.date = {value: "today()"};
+                addLedgerDBInstance(mug, form);
             },
             spec: {
                 xmlnsAttr: { presence: "optional" },
@@ -309,7 +311,6 @@ define([
                 return;
             }
             var path = mug.absolutePath;
-            mug.p.setvalues = {};
             var values = _.object(_.map(mug.form.getSetValues(), function (value) {
                     return [value.ref, value];
                 }));
@@ -326,6 +327,12 @@ define([
                 });
             }
             return this.__callOld();
+        },
+        loadXML: function () {
+            this.__callOld();
+            this.data.core.form.on("question-remove", function (event) {
+                dropSetValues(event.mug);
+            });
         }
     });
 
@@ -338,6 +345,11 @@ define([
             return true;
         }
         return mug.parentMug && isInRepeat(mug.parentMug);
+    }
+
+    function addLedgerDBInstance(mug, form) {
+        var data = {id: "ledger", src: "jr://instance/ledgerdb"};
+        form.addInstanceIfNotExists(data, mug, "");
     }
 
     function prepareForWrite(mug) {
@@ -367,6 +379,22 @@ define([
         if (drops.enabled) {
             mug.form.dropSetValues(function (value) {
                 return drops.hasOwnProperty(value.event + " " + value.ref);
+            });
+        }
+    }
+
+    function dropSetValues(mug) {
+        // remove <setvalue> elements
+        var setvaluesToRemove = {};
+        _.each(setvalueData[mug.__className], function (data) {
+            var value = mug.p[data.attr];
+            if (value._id) {
+                setvaluesToRemove[value._id] = true;
+            }
+        });
+        if (!_.isEmpty(setvaluesToRemove)) {
+            mug.form.dropSetValues(function (value) {
+                return setvaluesToRemove.hasOwnProperty(value._id);
             });
         }
     }

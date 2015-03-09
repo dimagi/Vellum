@@ -239,6 +239,8 @@ define([
                     mug.p.dataSourceChanged = true;
                     updateDataSource(mug, event.val, event.previous);
                 }
+            }).on("question-remove", function (event) {
+                dropSetValues(event.mug);
             });
         }
     });
@@ -343,13 +345,17 @@ define([
                 }
             });
         } else {
-            // remove <setvalue> elements
-            if (mug.p.setvalues) {
-                var setvaluesToRemove = _.groupBy(mug.p.setvalues, "_id");
-                mug.form.dropSetValues(function (value) {
-                    return setvaluesToRemove.hasOwnProperty(value._id);
-                });
-            }
+            dropSetValues(mug);
+        }
+    }
+
+    function dropSetValues(mug) {
+        // remove <setvalue> elements
+        if (mug.p.setvalues) {
+            var setvaluesToRemove = _.groupBy(mug.p.setvalues, "_id");
+            mug.form.dropSetValues(function (value) {
+                return setvaluesToRemove.hasOwnProperty(value._id);
+            });
         }
     }
 });
