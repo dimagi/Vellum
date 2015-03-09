@@ -163,29 +163,33 @@ require([
     });
 
     describe("The XML humanizer", function () {
-        function eq(value, humanized) {
-            assert.strictEqual(xml.humanize(value), humanized);
+        function eq(value, humanized, normalize) {
+            var human = xml.humanize(value);
+            assert.strictEqual(human, humanized);
+            if (normalize) {
+                assert.strictEqual(xml.normalize(human), value);
+            }
         }
 
         it("should convert free < character", function () {
-            eq('2 &lt; 3', '2 < 3');
+            eq('2 &lt; 3', '2 < 3', true);
         });
 
         it("should convert free > character", function () {
-            eq('2 &gt; 3', '2 > 3');
+            eq('2 &gt; 3', '2 > 3', true);
         });
 
         it("should convert free & character", function () {
-            eq('2 &amp; 3', '2 & 3');
+            eq('2 &amp; 3', '2 & 3', true);
         });
 
         it("should not convert escaped tag", function () {
-            eq(' &lt;div&gt; ', ' &lt;div&gt; ');
+            eq(' &lt;div&gt; ', ' &lt;div&gt; ', true);
         });
 
         it("should convert output tag", function () {
             eq('<output value="1 &amp; 2 &lt; 3" />',
-               '<output value="1 & 2 < 3" />');
+               '<output value="1 & 2 < 3" />', true);
         });
 
         it("should convert child nodes", function () {
