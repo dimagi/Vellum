@@ -18,7 +18,10 @@ define([
     util,
     widgets
 ) {
-    var nextId = 0,
+    var LEDGER_XMLNS = "http://commcarehq.org/ledger/v1",
+        LEDGER_INSTANCE_ID = "ledger",
+        LEDGER_INSTANCE_URI = "jr://instance/ledgerdb",
+        nextId = 0,
         setvalueData = {
             Balance: [
                 {
@@ -131,7 +134,7 @@ define([
                 prepareForWrite(mug);
                 var attrs = mug.p.rawDataAttributes || {};
                 return {
-                    xmlns: "http://commcarehq.org/ledger/v1",
+                    xmlns: LEDGER_XMLNS,
                     type: mug.p.nodeID,
                     "entity-id": attrs.src || "",
                     "section-id": mug.p.sectionId,
@@ -201,7 +204,7 @@ define([
                 prepareForWrite(mug);
                 var raw = mug.p.rawDataAttributes || {},
                     attrs = {
-                        xmlns: "http://commcarehq.org/ledger/v1",
+                        xmlns: LEDGER_XMLNS,
                         type: mug.p.nodeID,
                         date: raw.date || "",
                         "section-id": mug.p.sectionId,
@@ -348,7 +351,7 @@ define([
     }
 
     function addLedgerDBInstance(mug, form) {
-        var data = {id: "ledger", src: "jr://instance/ledgerdb"};
+        var data = {id: LEDGER_INSTANCE_ID, src: LEDGER_INSTANCE_URI};
         form.addInstanceIfNotExists(data, mug, "");
     }
 
