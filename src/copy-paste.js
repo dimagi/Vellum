@@ -16,76 +16,82 @@ define([
             height: 0
         }).css(offScreen).appendTo('body');
 
-    function focusTextarea($element, value) {
-        hiddenTextarea.css({top: $element.offset().top});
+    function focusTextarea($focus, value) {
+        if ($focus.length === 0) {
+            $focus = $("body");
+        }
+        hiddenTextarea.css({top: $focus.offset().top});
         hiddenTextarea.val(value);
         hiddenTextarea.focus();
         hiddenTextarea.select();
     }
 
-    function unfocusTextarea($element) {
-        $element.focus();
+    function unfocusTextarea($focus) {
+        $focus.focus();
         return hiddenTextarea.val();
     }
 
     function onCopy(opts) {
-        var $element = $(':focus'),
-            text = opts.copy($element);
-        if (text) {
-            focusTextarea($element, text);
-            setTimeout(function () {
-                unfocusTextarea($element);
-            }, 0);
+        var $focus = $(':focus');
+        if ($focus.is('.jstree-anchor')) {
+            var mugs = [vellum.getCurrentlySelectedMug()],
+                text = opts.copy(mugs);
+            if (text) {
+                focusTextarea($focus, text);
+                setTimeout(function () {
+                    unfocusTextarea($focus);
+                }, 10);
+            }
         }
     }
 
     function onPaste(opts) {
-        var $element = $(':focus');
-        focusTextarea($element);
-        setTimeout(function () {
-            var pasteValue = unfocusTextarea($element);
-            // on chrome this gets called twice,
-            // the first time with a blank value
-            if (pasteValue) {
-                opts.paste($element, pasteValue);
-            }
-        }, 0);
-    }
-
-    function copy($element) {
-        if ($element.is('.jstree-anchor')) {
-            var mug = vellum.data.core.form.getMugByUFID($element.parent().get(0).id);
-            // serialize the mug
-            return JSON.stringify({
-                type: 'Mug',
-                content: {
-                    // These, plus the form itself,
-                    // are the arguments to pass into Mug
-                    options: mug.options,
-                    baseSpec: mug._baseSpec,
-                    attrs: mug.p.getAttrs()
+        var $focus = $(':focus');
+        if ($focus.length === 0 || $focus.parents('.fd-tree').length) {
+            focusTextarea($focus);
+            setTimeout(function () {
+                var pasteValue = unfocusTextarea($focus);
+                // on chrome this gets called twice,
+                // the first time with a blank value
+                if (pasteValue) {
+                    opts.paste(pasteValue);
                 }
-            }, function (key, value) {
-                var type = (function () {
-                    if (!value) {
-                        return null;
-                    } else if (value.getNonEmptyItems) {
-                        return 'ItextModel';
-                    } else {
-                        return null;
-                    }
-                }());
-                if (type === 'ItextModel') {
-                    return {_skipped: type};
-                } else {
-                    return value;
-                }
-            });
+            }, 0);
         }
     }
 
-    function paste($element, data) {
-        console.log($element, data);
+    function copy(mugs) {
+        // serialize mugs
+        var mug = mugs[0]; // TODO support for more than one mug
+        return JSON.stringify({
+            type: 'Mug',
+            content: {
+                // These, plus the form itself,
+                // are the arguments to pass into Mug
+                options: mug.options,
+                baseSpec: mug._baseSpec,
+                attrs: mug.p.getAttrs()
+            }
+        }, function (key, value) {
+            var type = (function () {
+                if (!value) {
+                    return null;
+                } else if (value.getNonEmptyItems) {
+                    return 'ItextModel';
+                } else {
+                    return null;
+                }
+            }());
+            if (type === 'ItextModel') {
+                return {_skipped: type};
+            } else {
+                return value;
+            }
+        });
+    }
+
+    function paste(data) {
+        console.log("paste data:", data);
     }
 
     $.vellum.plugin('copyPaste', {
