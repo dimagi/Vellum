@@ -20,8 +20,7 @@ define([
             'lock',
             'ignore',
             'uploader',
-            'windowManager',
-            'copyPaste'
+            'windowManager'
         ];
 
     function bindPluginMethod(pluginName, fn, fnName) {
