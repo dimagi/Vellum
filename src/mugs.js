@@ -295,6 +295,28 @@ define([
 
             return nodeID;
         },
+        serialize: function () {
+            var mug = this,
+                data = {type: mug.__className};
+            _.each(mug.p.__data, function (value, key) {
+                var spec = mug.spec[key];
+                if (spec.presence === "notallowed" ||
+                    (spec.presence === "optional" &&
+                        (_.isUndefined(value) || value === null))) {
+                    return;
+                }
+                if (spec.serialize === "notempty") {
+                    if (!_.isEmpty(value)) {
+                        data[key] = value;
+                    }
+                } else if (spec.serialize) {
+                    _.extend(data, spec.serialize(value, key, mug));
+                } else {
+                    data[key] = value;
+                }
+            });
+            return data;
+        },
         teardownProperties: function () {
             this.fire({type: "teardown-mug-properties", mug: this});
         }
@@ -555,6 +577,9 @@ define([
                 widget: widgets.identifier,
                 validationFunc: function (mug) {
                     return validateElementName(mug.p.nodeID, "Question ID");
+                },
+                serialize: function (value, key, mug) {
+                    return {id: mug.form.getAbsolutePath(mug, true)};
                 }
             },
             conflictedNodeId: {
@@ -581,7 +606,8 @@ define([
             dataValue: {
                 visibility: 'visible',
                 presence: 'optional',
-                lstring: 'Default Data Value'
+                lstring: 'Default Data Value',
+                serialize: "notempty"
             },
             xmlnsAttr: {
                 visibility: 'visible',
@@ -590,7 +616,8 @@ define([
             },
             rawDataAttributes: {
                 presence: 'optional',
-                lstring: 'Extra Data Attributes'
+                lstring: 'Extra Data Attributes',
+                serialize: "notempty"
             },
 
             // BIND ELEMENT
@@ -650,7 +677,8 @@ define([
             // could use a key-value widget for this in the future
             rawBindAttributes: {
                 presence: 'optional',
-                lstring: 'Extra Bind Attributes'
+                lstring: 'Extra Bind Attributes',
+                serialize: "notempty"
             }
         },
 
@@ -679,7 +707,8 @@ define([
             },
             rawControlAttributes: {
                 presence: 'optional',
-                lstring: "Extra Control Attributes"
+                lstring: "Extra Control Attributes",
+                serialize: "notempty"
             },
             rawControlXML: {
                 presence: 'optional',
@@ -1233,7 +1262,8 @@ define([
             },
             rawRepeatAttributes: {
                 presence: 'optional',
-                lstring: "Extra Repeat Attributes"
+                lstring: "Extra Repeat Attributes",
+                serialize: "notempty"
             }
         }
     });

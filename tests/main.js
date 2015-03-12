@@ -96,6 +96,7 @@ require(['jquery', 'jquery.vellum'], function ($) {
         'tests/widgets',
         'tests/writer',
         'tests/commtrack',
+        'tests/copy-paste',
         'tests/javaRosa',
         'tests/modeliteration',
         'tests/intentManager',

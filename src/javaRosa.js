@@ -1668,6 +1668,24 @@ define([
                 };
             }
 
+            function makeSerializer(name) {
+                return function (value, key, mug) {
+                    var data = {};
+                    _.each(value.forms, function (form) {
+                        if (!form.isEmpty()) {
+                            _.each(value.itextModel.languages, function (lang) {
+                                var key = name + ":" + lang + "-" + form.name;
+                                data[key] = form.getValue(lang);
+                            });
+                        }
+                    });
+                    if (!value.autoId && !_.isEmpty(data)) {
+                        data[name] = value.id;
+                    }
+                    return data;
+                };
+            }
+
             // DATA ELEMENT
             databind.keyAttr = {
                 visibility: 'visible',
@@ -1711,6 +1729,7 @@ define([
                     }
                     return itextValidator("constraintMsgItext", "Validation Message")(mug);
                 },
+                serialize: makeSerializer("constraintMsgItext")
             };
             // virtual property used to define a widget
             databind.constraintMsgItextID = {
@@ -1741,6 +1760,7 @@ define([
                     }));
                 },
                 validationFunc: itextValidator("labelItext", "Label"),
+                serialize: makeSerializer("labelItext")
             };
             // virtual property used to define a widget
             control.labelItextID = {
@@ -1767,6 +1787,7 @@ define([
                     }));
                 },
                 validationFunc: itextValidator("hintItext", "Hint Message"),
+                serialize: makeSerializer("hintItext")
             };
             // virtual property used to get a widget
             control.hintItextID = {
@@ -1807,6 +1828,7 @@ define([
                     return block;
                 },
                 validationFunc: itextValidator("helpItext", "Help Message")
+                serialize: makeSerializer("helpItext")
             };
             // virtual property used to get a widget
             control.helpItextID = {

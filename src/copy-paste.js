@@ -8,7 +8,8 @@ define([
     _,
     tsv
 ) {
-    var vellum,
+    var PREAMBLE = ["vellum copy/paste", "version 1"],
+        vellum,
         offScreen = {top: -10000, left: -10000},
         hiddenTextarea = $('<textarea></textarea>').css({
             position: 'absolute',
@@ -34,8 +35,7 @@ define([
     function onCopy(opts) {
         var $focus = $(':focus');
         if ($focus.is('.jstree-anchor')) {
-            var mugs = [vellum.getCurrentlySelectedMug()],
-                text = opts.copy(mugs);
+            var text = opts.copy();
             if (text) {
                 focusTextarea($focus, text);
                 setTimeout(function () {
@@ -60,34 +60,41 @@ define([
         }
     }
 
-    function copy(mugs) {
-        // serialize mugs
-        var mug = mugs[0]; // TODO support for more than one mug
-        return JSON.stringify({
-            type: 'Mug',
-            content: {
-                // These, plus the form itself,
-                // are the arguments to pass into Mug
-                options: mug.options,
-                baseSpec: mug._baseSpec,
-                attrs: mug.p.getAttrs()
-            }
-        }, function (key, value) {
-            var type = (function () {
-                if (!value) {
-                    return null;
-                } else if (value.getNonEmptyItems) {
-                    return 'ItextModel';
-                } else {
+    // matches strings that could be JSON; see http://json.org/
+    var JSON_STRING = /^(null|true|false|\[.*\]|\{.*\}|".*"|-?\d+(\.\d+)?([Ee][+-]?\d)?])$/;
+
+    function jsonify(value) {
+        if (value && _.isString(value) && !JSON_STRING.test(value)) {
+            return value;
+        }
+        return JSON.stringify(value);
+    }
+
+    function copy() {
+        // serialize selected mugs
+        var mugs = [vellum.getCurrentlySelectedMug()],
+            header = ["type", "id"],
+            headings = {type: true, id: true},
+            rows = _.map(mugs, function (mug) {
+                var row = mug.serialize();
+                if (!row) {
                     return null;
                 }
-            }());
-            if (type === 'ItextModel') {
-                return {_skipped: type};
-            } else {
-                return value;
-            }
-        });
+                _.each(row, function (value, key) {
+                    if (!headings.hasOwnProperty(key)) {
+                        header.push(key);
+                        headings[key] = true;
+                    }
+                });
+                return row;
+            });
+
+        return tsv.tabDelimit([PREAMBLE, header].concat(_.map(rows, function (row) {
+            return _.map(header, function (key) {
+                var val = row[key];
+                return _.isUndefined(val) || val === null ? "" : jsonify(val);
+            });
+        })));
     }
 
     function paste(data) {

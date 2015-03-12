@@ -43,10 +43,8 @@ define([
         if (!result) {
             actual = cleanForDiff(actual);
             expected = cleanForDiff(expected);
-            var patch = jsdiff.createPatch("", actual, expected, "actual", "expected");
-            patch = patch.replace(/^Index:/,
-                    "XML " + (opts.not ? "should not be equivalent" : "mismatch"));
-            assert(false, colorDiff(patch));
+            assertEqual(actual, expected,
+                "XML " + (opts.not ? "should not be equivalent" : "mismatch"));
         }
     }
 
@@ -72,11 +70,7 @@ define([
         }
         var expected = Array.prototype.slice.call(arguments).join("\n") + "\n",
             actual = repr(call("jstree", "get_node", "#")) + "\n";
-        if (expected !== actual) {
-            var patch = jsdiff.createPatch("", actual, expected, "actual", "expected");
-            patch = patch.replace(/^Index:/, "Unexpected jstree state");
-            assert(false, colorDiff(patch));
-        }
+        assertEqual(actual, expected, "Unexpected jstree state");
     }
 
     function assertTreeState(tree) {
@@ -95,9 +89,16 @@ define([
         }
         var expected = Array.prototype.slice.call(arguments, 1).join("\n") + "\n",
             actual = repr(tree.rootNode, 0) + "\n";
-        if (expected !== actual) {
+        assertEqual(actual, expected, "Unexpected tree state");
+    }
+
+    /**
+     * Assert equality, diff actual/expected if unequal
+     */
+    function assertEqual(actual, expected, message) {
+        if (actual !== expected) {
             var patch = jsdiff.createPatch("", actual, expected, "actual", "expected");
-            patch = patch.replace(/^Index:/, "Unexpected jstree state");
+            patch = patch.replace(/^Index:/, message || "Not equal:");
             assert(false, colorDiff(patch));
         }
     }
@@ -304,6 +305,7 @@ define([
         },
         getMug: getMug,
         getInput: getInput,
+        assertEqual: assertEqual,
         assertInputCount: assertInputCount,
         assertXmlEqual: assertXmlEqual,
         assertXmlNotEqual: assertXmlNotEqual,
