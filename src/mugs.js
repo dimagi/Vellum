@@ -978,7 +978,7 @@ define([
     var BaseSelect = util.extend(defaultOptions, {
         validChildTypes: ["Item"],
         controlNodeChildren: function ($node) {
-            return $node.children().not('label').not('value').not('hint');
+            return $node.children().not('label, value, hint, help');
         },
         typeChangeError: function (mug, typeName) {
             if (mug.form.getChildren(mug).length > 0 && !typeName.match(/^M?Select$/)) {
@@ -1025,7 +1025,7 @@ define([
         possibleDataParent: true,
         canOutputValue: false,
         controlNodeChildren: function ($node) {
-            return $node.children().not('label').not('value').not('hint');
+            return $node.children().not('label, value, hint, help');
         },
         init: function (mug, form) {
             mug.p.tagName = "group";
