@@ -2,6 +2,7 @@
 require([
     'chai',
     'jquery',
+    'underscore',
     'tests/utils',
     'vellum/javaRosa',
     'vellum/util',
@@ -11,10 +12,13 @@ require([
     'text!static/javaRosa/multi-line-trans.xml',
     'text!static/javaRosa/output-refs.xml',
     'text!static/javaRosa/outputref-with-inequality.xml',
-    'text!static/javaRosa/text-with-constraint.xml'
+    'text!static/javaRosa/text-with-constraint.xml',
+    'text!static/javaRosa/group-help.xml',
+    'text!static/javaRosa/select1-help.xml'
 ], function (
     chai,
     $,
+    _,
     util,
     jr,
     vellum_util,
@@ -24,7 +28,9 @@ require([
     MULTI_LINE_TRANS_XML,
     OUTPUT_REFS_XML,
     OUTPUTREF_WITH_INEQUALITY_XML,
-    TEXT_WITH_CONSTRAINT_XML
+    TEXT_WITH_CONSTRAINT_XML,
+    GROUP_HELP_XML,
+    SELECT1_HELP_XML
 ) {
     var assert = chai.assert,
         call = util.call;
@@ -505,6 +511,16 @@ require([
             assert.equal(enLabel[0].selectionEnd, 11);
             assert.equal(hinLabel[0].selectionStart, 0);
             assert.equal(hinLabel[0].selectionEnd, 15);
+        });
+
+        _.each({group: GROUP_HELP_XML, select: SELECT1_HELP_XML}, function (XML, name) {
+            it("should not create duplicate <help> node on " + name, function () {
+                util.loadXML(XML);
+                var xml = call("createXML"),
+                    $xml = $(xml);
+                assert.strictEqual($xml.find("help").length, 1,
+                                   "wrong <help> node count\n" + xml);
+            });
         });
     });
 

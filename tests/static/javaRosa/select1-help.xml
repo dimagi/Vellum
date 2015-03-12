@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:orx="http://openrosa.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa" xmlns:vellum="http://commcarehq.org/xforms/vellum">
+	<h:head>
+		<h:title>Untitled Form</h:title>
+		<model>
+			<instance>
+				<data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/4CA64B95-95E9-420A-90A8-7649C745D336" uiVersion="1" version="1" name="Untitled Form">
+					<question1 />
+				</data>
+			</instance>
+			<bind nodeset="/data/question1" />
+			<itext>
+				<translation lang="en" default="">
+					<text id="question1-label">
+						<value>question1</value>
+					</text>
+					<text id="question1-help">
+						<value>help</value>
+					</text>
+					<text id="question1-item1-label">
+						<value>item1</value>
+					</text>
+					<text id="question1-item2-label">
+						<value>item2</value>
+					</text>
+				</translation>
+				<translation lang="hin">
+					<text id="question1-label">
+						<value>question1</value>
+					</text>
+					<text id="question1-help">
+						<value>help</value>
+					</text>
+					<text id="question1-item1-label">
+						<value>item1</value>
+					</text>
+					<text id="question1-item2-label">
+						<value>item2</value>
+					</text>
+				</translation>
+			</itext>
+		</model>
+	</h:head>
+	<h:body>
+		<select1 ref="/data/question1">
+			<label ref="jr:itext('question1-label')" />
+			<help ref="jr:itext('question1-help')" />
+			<item>
+				<label ref="jr:itext('question1-item1-label')" />
+				<value>item1</value>
+			</item>
+			<item>
+				<label ref="jr:itext('question1-item2-label')" />
+				<value>item2</value>
+			</item>
+		</select1>
+	</h:body>
+</h:html>
