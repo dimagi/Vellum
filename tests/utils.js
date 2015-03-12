@@ -231,7 +231,7 @@ define([
                 var children = call("getData").core.form.getChildren(parent),
                     nodeID = elements[elements.length - 1];
                 if (children.length === 1 && nodeID === "itemset" &&
-                        children[0].p.tagName === "itemset") {
+                        children[0].options.tagName === "itemset") {
                     return children[0];
                 }
                 for (var i = 0; i < children.length; i++) {

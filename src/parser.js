@@ -444,11 +444,12 @@ define([
                     return triggerAdaptor(appearance);
                 }
                 return function(mug, form) {
-                    var dataType = mug && mug.p.dataType;
+                    var dataType = mug && mug.p.rawBindAttributes.type;
                     if (dataType) {
                         dataType = dataType.replace('xsd:',''); //strip out extraneous namespace
                         dataType = dataType.toLowerCase();
                         if (inputAdaptors.hasOwnProperty(dataType)) {
+                            delete mug.p.rawBindAttributes.type;
                             if (dataType === 'string' && appearance === 'numeric') {
                                 return makeMugAdaptor('PhoneNumber')(mug, form);
                             }
@@ -716,16 +717,10 @@ define([
             relevantAttr: el.popAttr('relevant'),
             calculateAttr: el.popAttr('calculate'),
             constraintAttr: el.popAttr('constraint'),
-            dataType: el.popAttr('type'),
             requiredAttr: parseBoolAttributeValue(el.popAttr('required')),
             preload: lookForNamespaced(el, "preload"),
             preloadParams: lookForNamespaced(el, "preloadParams")
         };
-
-        // normalize this dataType ('int' and 'integer' are both valid).
-        if(attrs.dataType && attrs.dataType.toLowerCase() === 'xsd:integer') { 
-            attrs.dataType = 'xsd:int';
-        }
 
         var constraintMsg = lookForNamespaced(el, "constraintMsg"),
             constraintItext = getITextReference(constraintMsg);
@@ -737,7 +732,12 @@ define([
             attrs.constraintMsgAttr = constraintMsg;    
         }
 
-        attrs.rawBindAttributes = getAttributes(el);
+        var raw = attrs.rawBindAttributes = getAttributes(el);
+
+        // normalize type ('int' and 'integer' are both valid).
+        if(raw.type && raw.type.toLowerCase() === 'xsd:integer') { 
+            raw.type = 'xsd:int';
+        }
       
         mug.p.setAttrs(attrs);
     }

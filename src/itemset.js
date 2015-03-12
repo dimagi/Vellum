@@ -50,6 +50,7 @@ define([
     Itemset = util.extend(mugs.defaultOptions, {
         isControlOnly: true,
         typeName: 'External Data',
+        tagName: 'itemset',
         icon: 'icon-circle-blank',
         isTypeChangeable: false,
         // have to delete the parent select
@@ -63,7 +64,6 @@ define([
             }
         },
         init: function (mug, form, baseSpec) {
-            mug.p.tagName = "itemset";
             mug.p.itemsetData = {};
         },
         writeControlLabel: false,

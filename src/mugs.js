@@ -86,13 +86,6 @@ define([
                 return;
             }
 
-            // Should never happen.  Can probably remove once type-defining
-            // attributes are specified abstractly.
-            if (spec.immutable && !_.isUndefined(prev)) {
-                throw new Error(
-                    "Tried to set immutable property with existing value.");
-            }
-
             var callback = this.shouldChange(this.__mug, attr, val, prev);
             if (callback) {
                 this.__data[attr] = val;
@@ -168,13 +161,6 @@ define([
             },
 
             // BIND ELEMENT
-            dataType: {
-                immutable: true,
-                deleteOnCopy: true,
-                visibility: 'hidden',
-                presence: 'optional',
-                lstring: 'Data Type'
-            },
             relevantAttr: {
                 visibility: 'visible',
                 presence: 'optional',
@@ -235,12 +221,6 @@ define([
         },
 
         control: {
-            tagName: {
-                immutable: true,
-                deleteOnCopy: true,
-                visibility: 'hidden',
-                presence: 'required'
-            },
             appearance: {
                 deleteOnCopy: true,
                 visibility: 'optional',
@@ -367,6 +347,7 @@ define([
     // question type
     var defaultOptions = {
         typeName: "Base",
+        tagName: "input",
         isDataOnly: false,
         isControlOnly: false,
         // whether you can change to or from this question's type in the UI
@@ -448,7 +429,7 @@ define([
             }
             var attrs = {
                 nodeset: mug.form.getAbsolutePath(mug),
-                type: mug.p.dataType,
+                type: mug.options.dataType,
                 constraint: mug.p.constraintAttr,
                 "jr:constraintMsg": constraintMsg,
                 relevant: mug.p.relevantAttr,
@@ -458,7 +439,7 @@ define([
                 "jr:preloadParams": mug.p.preloadParams
             };
             _.each(mug.p.rawBindAttributes, function (value, key) {
-                if (!attrs.hasOwnProperty(key)) {
+                if (!attrs.hasOwnProperty(key) || _.isUndefined(attrs[key])) {
                     attrs[key] = value;
                 }
             });
@@ -750,10 +731,9 @@ define([
 
     var Text = util.extend(defaultOptions, {
         typeName: "Text",
+        dataType: "xsd:string",
         icon: "fcc fcc-fd-text",
         init: function (mug, form) {
-            mug.p.tagName = "input";
-            mug.p.dataType = "xsd:string";
         }
     });
 
@@ -768,25 +748,26 @@ define([
 
     var Secret = util.extend(defaultOptions, {
         typeName: 'Password',
+        dataType: 'xsd:string',
+        tagName: 'secret',
         icon: 'icon-key',
         canOutputValue: false,
         init: function (mug, form) {
-            mug.p.tagName = "secret";
-            mug.p.dataType = "xsd:string";
         }
     });
 
     var Int = util.extend(defaultOptions, {
         typeName: 'Integer',
+        dataType: 'xsd:int',
         icon: 'fcc fcc-fd-numeric',
         init: function (mug, form) {
-            mug.p.tagName = "input";
-            mug.p.dataType = "xsd:int";
         }
     });
 
     var Audio = util.extend(defaultOptions, {
         typeName: 'Audio Capture',
+        dataType: 'binary',
+        tagName: 'upload',
         icon: 'fcc fcc-fd-audio-capture',
         isODKOnly: true,
         canOutputValue: false,
@@ -797,9 +778,7 @@ define([
             }
         },
         init: function (mug, form) {
-            mug.p.tagName = "upload";
             mug.p.mediaType = "audio/*"; /* */
-            mug.p.dataType = "binary";
         },
         spec: {
             mediaType: {
@@ -843,48 +822,43 @@ define([
 
     var Geopoint = util.extend(defaultOptions, {
         typeName: 'GPS',
+        dataType: 'geopoint',
         icon: 'icon-map-marker',
         isODKOnly: true,
         init: function (mug, form) {
-            mug.p.tagName = "input";
-            mug.p.dataType = "geopoint";
         }
     });
 
     var Barcode = util.extend(defaultOptions, {
         typeName: 'Barcode Scan',
+        dataType: 'barcode',
         icon: 'icon-barcode',
         isODKOnly: true,
         init: function (mug, form) {
-            mug.p.tagName = "input";
-            mug.p.dataType = "barcode";
         }
     });
 
     var Date = util.extend(defaultOptions, {
         typeName: 'Date',
+        dataType: 'xsd:date',
         icon: 'icon-calendar',
         init: function (mug, form) {
-            mug.p.tagName = "input";
-            mug.p.dataType = "xsd:date";
         }
     });
 
     var DateTime = util.extend(defaultOptions, {
         typeName: 'Date and Time',
+        dataType: 'xsd:dateTime',
         icon: 'fcc fcc-fd-datetime',
         init: function (mug, form) {
-            mug.p.tagName = "input";
-            mug.p.dataType = "xsd:dateTime";
         }
     });
 
     var Time = util.extend(defaultOptions, {
         typeName: 'Time',
+        dataType: 'xsd:time',
         icon: 'icon-time',
         init: function (mug, form) {
-            mug.p.tagName = "input";
-            mug.p.dataType = "xsd:time";
         }
     });
 
@@ -892,25 +866,24 @@ define([
     // but must be able to view forms already containing longs.
     var Long = util.extend(Int, {
         typeName: 'Long',
+        dataType: 'xsd:long',
         icon: 'fcc fcc-fd-long',
         init: function (mug, form) {
-            mug.p.tagName = "input";
-            mug.p.dataType = "xsd:long";
         }
     });
 
     var Double = util.extend(Int, {
         typeName: 'Decimal',
+        dataType: 'xsd:double',
         icon: 'fcc fcc-fd-decimal',
         init: function (mug, form) {
-            mug.p.tagName = "input";
-            mug.p.dataType = "xsd:double";
         }
     });
 
     var Item = util.extend(defaultOptions, {
         isControlOnly: true,
         typeName: 'Choice',
+        tagName: 'item',
         icon: 'fcc fcc-fd-single-circle',
         isTypeChangeable: false,
         canOutputValue: false,
@@ -933,7 +906,6 @@ define([
             }
         },
         init: function (mug, form) {
-            mug.p.tagName = "item";
         },
         spec: {
             hintLabel: { presence: 'notallowed' },
@@ -964,13 +936,12 @@ define([
 
     var Trigger = util.extend(defaultOptions, {
         typeName: 'Label',
+        tagName: 'trigger',
         icon: 'icon-tag',
         init: function (mug, form) {
-            mug.p.tagName = "trigger";
             mug.p.appearance = "minimal";
         },
         spec: {
-            dataType: { presence: 'notallowed' },
             dataValue: { presence: 'optional' }
         }
     });
@@ -997,27 +968,27 @@ define([
 
     var MSelect = util.extend(BaseSelect, {
         typeName: 'Multiple Answer',
+        tagName: 'select',
         icon: 'fcc fcc-fd-multi-select',
         init: function (mug, form) {
-            mug.p.tagName = "select";
         },
         spec: {
-            dataType: { visibility: "hidden" }
         },
         defaultOperator: "selected"
     });
 
     var Select = util.extend(MSelect, {
         typeName: 'Single Answer',
+        tagName: 'select1',
         icon: 'fcc fcc-fd-single-select',
         init: function (mug, form) {
-            mug.p.tagName = "select1";
         },
         defaultOperator: null
     });
 
     var Group = util.extend(defaultOptions, {
         typeName: 'Group',
+        tagName: 'group',
         icon: 'icon-folder-open',
         isSpecialGroup: true,
         isNestableGroup: true,
@@ -1028,11 +999,9 @@ define([
             return $node.children().not('label, value, hint, help');
         },
         init: function (mug, form) {
-            mug.p.tagName = "group";
         },
         spec: {
             hintLabel: { presence: "notallowed" },
-            dataType: { presence: "notallowed" },
             calculateAttr: { presence: "notallowed" },
             constraintAttr: { presence: "notallowed" },
             constraintMsgAttr: { presence: "notallowed" },
@@ -1073,10 +1042,10 @@ define([
                 getNodeID: function () {},
                 getAppearanceAttribute: function () {},
                 p: {
-                    tagName: 'repeat',
                     rawControlAttributes: attrs
                 },
                 options: {
+                    tagName: 'repeat',
                     writeControlLabel: false,
                     writeControlHint: false,
                     writeControlHelp: false,
@@ -1093,7 +1062,6 @@ define([
         },
         writeControlRefAttr: null,
         init: function (mug, form) {
-            mug.p.tagName = "group";
             mug.p.repeat_count = null;
         },
         spec: {

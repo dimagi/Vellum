@@ -197,7 +197,7 @@ define([
                 return;
             }
 
-            xmlWriter.writeStartElement(mug.p.tagName.toLowerCase());
+            xmlWriter.writeStartElement(mug.options.tagName.toLowerCase());
             if (opts.writeControlLabel) {
                 createLabel(xmlWriter, mug);
             }
