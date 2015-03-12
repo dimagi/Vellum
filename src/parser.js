@@ -222,98 +222,13 @@ define([
         return mug;
     }
             
-    /**
-     * Get and itext reference from a value. Returns nothing if it can't
-     * parse it as a valid itext reference.
-     */
-    var getITextReference = function (value) {
-        try {
-            var parsed = xpath.parse(value);
-            if (parsed instanceof xpathmodels.XPathFuncExpr && parsed.id === "jr:itext") {
-                return parsed.args[0].value;
-            } 
-        } catch (err) {
-            // this seems like a real error since the reference should presumably
-            // have been valid xpath, but don't deal with it here
-        }
-        return false;
-    };
-    
-    function getLabelRef($lEl) {
-        var ref = $lEl.attr('ref');
-        return ref ? getITextReference(ref) : null;
-    }
-
     var lookForNamespaced = function (element, reference) {
         // due to the fact that FF and Webkit store namespaced
         // values slightly differently, we have to look in 
         // a couple different places.
         return element.popAttr("jr:" + reference) || 
-            element.popAttr("jr\\:" + reference) || null;
+               element.popAttr("jr\\:" + reference) || null;
     };
-
-    // CONTROL PARSING FUNCTIONS
-    function parseLabel(form, lEl, mug, parentMug) {
-        var Itext = form.vellum.data.javaRosa.Itext,
-            $lEl = $(lEl),
-            labelVal = xml.humanize($lEl),
-            labelRef = getLabelRef($lEl),
-            labelItext;
-        if (labelVal) {
-            mug.p.label = labelVal;
-        }
-        
-        if (labelRef){
-            labelItext = Itext.getOrCreateItem(labelRef);
-        } else {
-            // WARNING disaster area
-            // if there was a ref attribute but it wasn't formatted like an
-            // itext reference, it's likely an error, though not sure what
-            // we should do here for now just populate with the default
-            labelItext = Itext.createItem(mug.getDefaultLabelItextId(parentMug));
-        }
-       
-        if (labelItext.isEmpty()) {
-            //if no default Itext has been set, set it with the default label
-            if (labelVal) {
-                labelItext.setDefaultValue(labelVal);
-            } else {
-                // or some sensible deafult
-                labelItext.setDefaultValue(mug.getDefaultLabelValue());
-            }
-        }
-        mug.p.labelItextID = labelItext;
-    }
-
-    function parseHint (form, hEl, mug) {
-        var Itext = form.vellum.data.javaRosa.Itext;
-        var $hEl = $(hEl),
-            hintVal = xml.humanize($hEl),
-            hintRef = getLabelRef($hEl);
-
-        if (hintRef) {
-            mug.p.hintItextID = Itext.getOrCreateItem(hintRef);
-        } else {
-            // couldn't parse the hint as itext.
-            // just create an empty placeholder for it
-            mug.p.hintItextID = Itext.createItem(""); 
-        }
-        mug.p.hintLabel = hintVal;
-    }
-
-    function parseHelp (form, hEl, mug) {
-        var Itext = form.vellum.data.javaRosa.Itext;
-        var $hEl = $(hEl),
-            helpRef = getLabelRef($hEl);
-
-        if (helpRef) {
-            mug.p.helpItextID = Itext.getOrCreateItem(helpRef);
-        } else {
-            // couldn't parse the help as itext.
-            // just create an empty placeholder for it
-            mug.p.helpItextID = Itext.createItem("");
-        }
-    }
 
     function parseControlElement(form, $cEl, parentMug) {
         var tagName = $cEl[0].nodeName.toLowerCase(),
@@ -346,9 +261,26 @@ define([
             mug.p.appearance = appearance;
         }
         if (!adapt.skipPopulate) {
-            populateMug(form, mug, $cEl, parentMug);
+            form.vellum.populateControlMug(mug, $cEl, parentMug, form);
+
+            // add any arbitrary attributes that were directly on the control
+            mug.p.rawControlAttributes = getAttributes($cEl);
         }
         return mug;
+    }
+
+    function populateControlMug(mug, $cEl) {
+        var labelEl = $cEl.children('label'),
+            hintEl = $cEl.children('hint');
+        if (labelEl.length && mug.spec.label.presence !== 'notallowed') {
+            var labelVal = xml.humanize(labelEl);
+            if (labelVal) {
+                mug.p.label = labelVal;
+            }
+        }
+        if (hintEl.length && mug.spec.hintLabel.presence !== 'notallowed') {
+            mug.p.hintLabel = xml.humanize(hintEl);
+        }
     }
 
     /**
@@ -540,24 +472,6 @@ define([
         }
     }
                 
-    function populateMug(form, mug, $cEl, parentMug) {
-        var labelEl = $cEl.children('label'),
-            hintEl = $cEl.children('hint'),
-            helpEl = $cEl.children('help');
-        if (labelEl.length && mug.spec.label.presence !== 'notallowed') {
-            parseLabel(form, labelEl, mug, parentMug);
-        }
-        if (hintEl.length && mug.spec.hintLabel.presence !== 'notallowed') {
-            parseHint(form, hintEl, mug);
-        }
-        if (helpEl.length && mug.spec.label.presence !== 'notallowed') {
-            parseHelp(form, helpEl, mug);
-        }
-
-        // add any arbitrary attributes that were directly on the control
-        mug.p.rawControlAttributes = getAttributes($cEl);
-    }
-
     /**
      * Figures out what the xpath is of a control element
      * by looking at the ref or nodeset attributes.
@@ -703,8 +617,7 @@ define([
     }
 
     function parseBindElement (form, el, path) {
-        var mug = form.getMugByPath(path),
-            Itext = form.vellum.data.javaRosa.Itext;
+        var mug = form.getMugByPath(path);
 
         if(!mug){
             form.parseWarnings.push(
@@ -717,20 +630,11 @@ define([
             relevantAttr: el.popAttr('relevant'),
             calculateAttr: el.popAttr('calculate'),
             constraintAttr: el.popAttr('constraint'),
+            constraintMsgAttr: lookForNamespaced(el, "constraintMsg"),
             requiredAttr: parseBoolAttributeValue(el.popAttr('required')),
             preload: lookForNamespaced(el, "preload"),
             preloadParams: lookForNamespaced(el, "preloadParams")
         };
-
-        var constraintMsg = lookForNamespaced(el, "constraintMsg"),
-            constraintItext = getITextReference(constraintMsg);
-
-        if (constraintItext) {
-            attrs.constraintMsgItextID = Itext.getOrCreateItem(constraintItext);
-        } else {
-            attrs.constraintMsgItextID = Itext.createItem("");
-            attrs.constraintMsgAttr = constraintMsg;    
-        }
 
         var raw = attrs.rawBindAttributes = getAttributes(el);
 
@@ -769,6 +673,7 @@ define([
         parseXForm: parseXForm,
         parseDataElement: parseDataElement,
         parseBindElement: parseBindElement,
+        populateControlMug: populateControlMug,
         getAttributes: getAttributes,
         getPathFromControlElement: getPathFromControlElement,
         makeControlOnlyMugAdaptor: makeControlOnlyMugAdaptor,

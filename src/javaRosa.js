@@ -7,6 +7,8 @@
 define([
     'underscore',
     'jquery',
+    'xpath',
+    'xpathmodels',
     'tpl!vellum/templates/edit_source',
     'tpl!vellum/templates/language_selector',
     'tpl!vellum/templates/control_group',
@@ -19,6 +21,8 @@ define([
 ], function (
     _,
     $,
+    xpath,
+    xpathmodels,
     edit_source,
     language_selector,
     control_group,
@@ -1524,6 +1528,76 @@ define([
             this.__callOld();
 
             Itext.on('change', function () { _this.onFormChange(); });
+        },
+        populateControlMug: function(mug, controlElement, parentMug, form) {
+            this.__callOld();
+
+            var Itext = form.vellum.data.javaRosa.Itext;
+
+            function getITextReference(value) {
+                try {
+                    var parsed = xpath.parse(value);
+                    if (parsed instanceof xpathmodels.XPathFuncExpr &&
+                        parsed.id === "jr:itext")
+                    {
+                        return parsed.args[0].value;
+                    }
+                } catch (err) {
+                    // this seems like a real error since the reference should presumably
+                    // have been valid xpath, but don't deal with it here
+                }
+                return "";
+            }
+
+            function parseItextRef($el, mug) {
+                var ref = $el.attr('ref');
+                ref = ref ? getITextReference(ref) : "";
+                if (ref) {
+                    return Itext.getOrCreateItem(ref);
+                } else {
+                    if (mug) {
+                        // WARNING disaster area
+                        // if there was a ref attribute but it wasn't formatted like an
+                        // itext reference, it's likely an error, though not sure what
+                        // we should do here for now just populate with the default
+                        ref = mug.getDefaultLabelItextId(parentMug);
+                    }
+                    return Itext.createItem(ref);
+                }
+            }
+
+            var labelEl = controlElement.children('label'),
+                hintEl = controlElement.children('hint'),
+                helpEl = controlElement.children('help');
+            if (labelEl.length && mug.spec.label.presence !== 'notallowed') {
+                var labelItext = parseItextRef(labelEl, mug);
+                if (labelItext.isEmpty()) {
+                    //if no default Itext has been set, set it with the default label
+                    var labelVal = xml.humanize(labelEl);
+                    if (labelVal) {
+                        labelItext.setDefaultValue(labelVal);
+                    } else {
+                        // or some sensible deafult
+                        labelItext.setDefaultValue(mug.getDefaultLabelValue());
+                    }
+                }
+                mug.p.labelItextID = labelItext;
+            }
+            if (hintEl.length && mug.spec.hintLabel.presence !== 'notallowed') {
+                mug.p.hintItextID = parseItextRef(hintEl);
+            }
+            if (helpEl.length && mug.spec.label.presence !== 'notallowed') {
+                mug.p.helpItextID = parseItextRef(helpEl);
+            }
+            if (mug.p.constraintMsgAttr) {
+                var constraintItext = getITextReference(mug.p.constraintMsgAttr);
+                if (constraintItext) {
+                    mug.p.constraintMsgItextID = Itext.getOrCreateItem(constraintItext);
+                    mug.p.constraintMsgAttr = null;
+                } else {
+                    mug.p.constraintMsgItextID = Itext.createItem("");
+                }
+            }
         },
         handleMugParseFinish: function (mug) {
             this.__callOld();

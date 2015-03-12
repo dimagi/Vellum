@@ -2030,6 +2030,18 @@ define([
     };
 
     /**
+     * Extension point for mug setup during control node parsing
+     *
+     * @param mug - for which the control element is being parsed.
+     * @param controlElement - jQuery-wrapped control element.
+     * @param parentMug - the mug's control parent.
+     * @param form - the form object.
+     */
+    fn.populateControlMug = function (mug, controlElement, parentMug, form) {
+        return parser.populateControlMug(mug, controlElement, parentMug, form);
+    };
+
+    /**
      * Extension point for plugins to hook into the mapping of control nodes
      * to control mugs.
      *
