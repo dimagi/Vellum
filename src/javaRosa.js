@@ -1668,8 +1668,8 @@ define([
                 };
             }
 
-            function makeSerializer(name) {
-                return function (value, key, mug) {
+            function addSerializer(data) {
+                data.serialize = function (value, name, mug) {
                     var data = {};
                     _.each(value.forms, function (form) {
                         if (!form.isEmpty()) {
@@ -1684,6 +1684,30 @@ define([
                     }
                     return data;
                 };
+                data.deserialize = function (data, name, mug) {
+                    var item = mug.p[name],
+                        found = false;
+                    if (data.hasOwnProperty(name)) {
+                        // non-autoID
+                    }
+                    _.each(item.itextModel.languages, function (lang) {
+                        var prelen = name.length + lang.length + 2,
+                            regexp = new RegExp("^" +
+                                                RegExp.escape(name) + ":" +
+                                                RegExp.escape(lang) + "-");
+                        _.each(data, function (value, key) {
+                            if (regexp.test(key)) {
+                                var form = key.slice(prelen);
+                                item.getOrCreateForm(form).setValue(lang, value);
+                                found = true;
+                            }
+                        });
+                    });
+                    if (found && !data.hasOwnProperty(name)) {
+                        item.id = getDefaultItextId(mug, name);
+                    }
+                };
+                return data;
             }
 
             // DATA ELEMENT
@@ -1707,7 +1731,7 @@ define([
 
             // hide non-itext constraint message unless it's present
             databind.constraintMsgAttr.visibility = "visible_if_present";
-            databind.constraintMsgItext = {
+            databind.constraintMsgItext = addSerializer({
                 visibility: 'visible',
                 presence: function (mugOptions) {
                     return mugOptions.isSpecialGroup ? 'notallowed' : 'optional';
@@ -1728,9 +1752,8 @@ define([
                         return "Can't have a Validation Message Itext ID without a Validation Condition";
                     }
                     return itextValidator("constraintMsgItext", "Validation Message")(mug);
-                },
-                serialize: makeSerializer("constraintMsgItext")
-            };
+                }
+            });
             // virtual property used to define a widget
             databind.constraintMsgItextID = {
                 visibility: 'constraintMsgItext',
@@ -1746,7 +1769,7 @@ define([
             control.label.visibility = "visible_if_present";
             control.hintLabel.visibility = "visible_if_present";
 
-            control.labelItext = {
+            control.labelItext = addSerializer({
                 visibility: 'visible',
                 presence: 'optional',
                 lstring: "Label",
@@ -1759,9 +1782,8 @@ define([
                         displayName: "Label"
                     }));
                 },
-                validationFunc: itextValidator("labelItext", "Label"),
-                serialize: makeSerializer("labelItext")
-            };
+                validationFunc: itextValidator("labelItext", "Label")
+            });
             // virtual property used to define a widget
             control.labelItextID = {
                 visibility: 'labelItext',
@@ -1771,7 +1793,7 @@ define([
                 widgetValuePath: "labelItext"
             };
 
-            control.hintItext = {
+            control.hintItext = addSerializer({
                 visibility: 'visible',
                 presence: function (mugOptions) {
                     return mugOptions.isSpecialGroup ? 'notallowed' : 'optional';
@@ -1786,9 +1808,8 @@ define([
                         displayName: "Hint Message"
                     }));
                 },
-                validationFunc: itextValidator("hintItext", "Hint Message"),
-                serialize: makeSerializer("hintItext")
-            };
+                validationFunc: itextValidator("hintItext", "Hint Message")
+            });
             // virtual property used to get a widget
             control.hintItextID = {
                 visibility: 'hintItext',
@@ -1797,7 +1818,7 @@ define([
                 widgetValuePath: "hintItext"
             };
 
-            control.helpItext = {
+            control.helpItext = addSerializer({
                 visibility: 'visible',
                 presence: function (mugOptions) {
                     return mugOptions.isSpecialGroup ? 'notallowed' : 'optional';
@@ -1828,8 +1849,7 @@ define([
                     return block;
                 },
                 validationFunc: itextValidator("helpItext", "Help Message")
-                serialize: makeSerializer("helpItext")
-            };
+            });
             // virtual property used to get a widget
             control.helpItextID = {
                 visibility: 'helpItext',

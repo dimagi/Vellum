@@ -41,12 +41,18 @@ require([
             eq(mod.copy(), TEXT_SERIAL);
         });
 
-        // TODO test for each mug spec item
+        it("should paste a text question", function () {
+            util.loadXML("");
+            assert.deepEqual(mod.paste(TEXT_SERIAL), []);
+            util.assertXmlEqual(call("createXML"), TEXT_QUESTION_XML, {normalize_xmlns: true});
+        });
+
+        // TODO test each mug spec item
         // TODO test bad paste values
         // TODO insert question with same nodeID
     });
 
-    TEXT_SERIAL = tsv.tabDelimit([
+    var TEXT_SERIAL = tsv.tabDelimit([
         ["vellum copy/paste", "version 1"],
         [
             "type",

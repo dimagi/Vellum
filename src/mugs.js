@@ -317,6 +317,21 @@ define([
             });
             return data;
         },
+        deserialize: function (data) {
+            var mug = this;
+            _.each(mug.spec, function (spec, key) {
+                if (spec.presence !== 'notallowed') {
+                    if (spec.deserialize) {
+                        var value = spec.deserialize(data, key, mug);
+                        if (!_.isUndefined(value)) {
+                            mug.p[key] = value;
+                        }
+                    } else if (data.hasOwnProperty(key)) {
+                        mug.p[key] = data[key];
+                    }
+                }
+            });
+        },
         teardownProperties: function () {
             this.fire({type: "teardown-mug-properties", mug: this});
         }
@@ -580,6 +595,9 @@ define([
                 },
                 serialize: function (value, key, mug) {
                     return {id: mug.form.getAbsolutePath(mug, true)};
+                },
+                deserialize: function (data) {
+                    return data.id && data.id.slice(data.id.lastIndexOf("/") + 1);
                 }
             },
             conflictedNodeId: {

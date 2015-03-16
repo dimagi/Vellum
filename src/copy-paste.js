@@ -63,11 +63,29 @@ define([
     // matches strings that could be JSON; see http://json.org/
     var JSON_STRING = /^(null|true|false|\[.*\]|\{.*\}|".*"|-?\d+(\.\d+)?([Ee][+-]?\d)?])$/;
 
-    function jsonify(value) {
+    /**
+     * Convert value to string
+     *
+     * Does nothing to strings that do not look like JSON.
+     */
+    function stringify(value) {
         if (value && _.isString(value) && !JSON_STRING.test(value)) {
             return value;
         }
         return JSON.stringify(value);
+    }
+
+    /**
+     * Convert string to value
+     *
+     * Strings that look like JSON will be parsed as JSON, otherwise the
+     * string value is passed through unchanged.
+     */
+    function valuify(string) {
+        if (JSON_STRING.test(string)) {
+            return JSON.parse(string);
+        }
+        return string;
     }
 
     function copy() {
@@ -92,13 +110,42 @@ define([
         return tsv.tabDelimit([PREAMBLE, header].concat(_.map(rows, function (row) {
             return _.map(header, function (key) {
                 var val = row[key];
-                return _.isUndefined(val) || val === null ? "" : jsonify(val);
+                return _.isUndefined(val) || val === null ? "" : stringify(val);
             });
         })));
     }
 
     function paste(data) {
-        console.log("paste data:", data);
+        var next = tsv.makeRowParser(data);
+        if (!_.isEqual(next(), PREAMBLE)) {
+            return ["Unsupported paste format"];
+        }
+        var types = vellum.data.core.mugTypes.allTypes,
+            form = vellum.data.core.form,
+            mug = vellum.getCurrentlySelectedMug(),
+            header = next(),
+            row = next(),
+            errors = [],
+            values, pos;
+        for (; row; row = next()) {
+            try {
+                values = _.object(header, _.map(row, function (str) {
+                    return valuify(str);
+                }));
+            } catch (err) {
+                errors.push("Unsupported paste format: " + row.join(", "));
+                continue;
+            }
+            if (!types.hasOwnProperty(values.type)) {
+                errors.push("Unknown question type: " + row.join(", "));
+                continue;
+            }
+            //path = mug ? mug.absolutePath : form.getBasePath();
+            pos = "after"; // TODO calcualte position from path
+            mug = form.createQuestion(mug, pos, values.type);
+            mug.deserialize(values);
+        }
+        return errors;
     }
 
     $.vellum.plugin('copyPaste', {
