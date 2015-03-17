@@ -90,10 +90,28 @@ define([
         return string;
     }
 
+    function headerKey(item) {
+        var rank = "1",
+            itext = /^(.*)Itext(?::([^-]+)-(.*))?$/.exec(item);
+        if (itext) {
+            rank = "0"; // itext before other fields
+            // label before all other itext types
+            if (itext[1] === "label") { itext[1] = "!"; }
+            if (itext[3] === "default") {
+                itext[3] = "!"; // default form before other forms
+            } else if (!itext[3]) {
+                itext[3] = "~"; // itext ID after forms
+            }
+            // sort by itext type, then form, then language
+            item = itext[1] + " " + itext[3] + " " + itext[2];
+        }
+        return rank + item;
+    }
+
     function copy() {
         var mugs = [vellum.getCurrentlySelectedMug()],
-            header = ["type", "id"],
-            headings = {type: true, id: true},
+            header = [],
+            headings = {id: true, type: true},
             rows = _.map(mugs, function (mug) {
                 var row = mug.serialize();
                 _.each(row, function (value, key) {
@@ -105,6 +123,7 @@ define([
                 return row;
             });
 
+        header = ["id", "type"].concat(_.sortBy(header, headerKey));
         return tsv.tabDelimit([PREAMBLE, header].concat(_.map(rows, function (row) {
             return _.map(header, function (key) {
                 var val = row[key];

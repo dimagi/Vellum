@@ -1689,6 +1689,18 @@ define([
                         found = false;
                     if (data.hasOwnProperty(name)) {
                         // non-autoID
+                        //var Itext = mug.form.vellum.data.javaRosa.Itext;
+                        //try {
+                        //    Itext.getItem(data[name]); // getItem no longer exists
+                        //    // TODO test...
+                        //    //var namedItem = Itext.getItem(data[name]);
+                        //    //Itext.removeItem(item);
+                        //    //mug.p[property] = namedItem
+                        //    return;
+                        //} catch (err) {
+                        //}
+                        item.id = data[name];
+                        item.autoId = false;
                     }
                     _.each(item.itextModel.languages, function (lang) {
                         var prelen = name.length + lang.length + 2,

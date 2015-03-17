@@ -3,6 +3,7 @@ require([
     'jquery',
     'underscore',
     'tests/utils',
+    'text!static/copy-paste/many-itext-forms.xml',
     'text!static/copy-paste/text-question.xml',
     'vellum/copy-paste',
     'vellum/tsv'
@@ -11,6 +12,7 @@ require([
     $,
     _,
     util,
+    MANY_ITEXT_FORMS_XML,
     TEXT_QUESTION_XML,
     mod,
     tsv
@@ -36,18 +38,125 @@ require([
             });
         });
 
-        it("should copy a text question", function () {
-            util.loadXML(TEXT_QUESTION_XML);
-            eq(mod.copy(), TEXT_SERIAL);
+        _.each([
+            {
+                message: "a text question",
+                xml: TEXT_QUESTION_XML,
+                serial: tsv.tabDelimit([
+                    ["vellum copy/paste", "version 1"],
+                    [
+                        "id",
+                        "type",
+                        "labelItext:en-default",
+                        "labelItext:hin-default",
+                        "constraintMsgItext:en-default",
+                        "constraintMsgItext:hin-default",
+                        "constraintAttr",
+                        "relevantAttr",
+                        "requiredAttr",
+                    ], [
+                        "/txt",
+                        "Text",
+                        "English Text",
+                        "Hindi Text",
+                        "Nope",
+                        "Nope",
+                        "1 = 0",
+                        "x = y",
+                        "true",
+                    ],
+                ]),
+            }, {
+                message: "a question with many itext forms",
+                xml: MANY_ITEXT_FORMS_XML,
+                serial: tsv.tabDelimit([
+                    ["vellum copy/paste", "version 1"],
+                    [
+                        "id",
+                        "type",
+                        "labelItext:en-default",
+                        "labelItext:hin-default",
+                        "labelItext:en-audio",
+                        "labelItext:hin-audio",
+                        "labelItext:en-custom",
+                        "labelItext:hin-custom",
+                        "labelItext:en-image",
+                        "labelItext:hin-image",
+                        "labelItext:en-long",
+                        "labelItext:hin-long",
+                        "labelItext:en-short",
+                        "labelItext:hin-short",
+                        "labelItext:en-video",
+                        "labelItext:hin-video",
+                        "labelItext",
+                        "constraintMsgItext:en-default",
+                        "constraintMsgItext:hin-default",
+                        "helpItext:en-default",
+                        "helpItext:hin-default",
+                        "helpItext:en-audio",
+                        "helpItext:hin-audio",
+                        "helpItext:en-image",
+                        "helpItext:hin-image",
+                        "helpItext:en-video",
+                        "helpItext:hin-video",
+                        "helpItext",
+                        "hintItext:en-default",
+                        "hintItext:hin-default",
+                        "hintItext",
+                        "constraintAttr",
+                        "hintLabel",
+                    ], [
+                        "/text",
+                        "Text",
+                        "default",
+                        "default",
+                        "jr://file/commcare/audio/data/text.mp3",
+                        "jr://file/commcare/audio/data/text.mp3",
+                        "custom",
+                        "custom",
+                        "jr://file/commcare/image/data/text.png",
+                        "jr://file/commcare/image/data/text.png",
+                        "long",
+                        "long",
+                        "short",
+                        "short",
+                        "jr://file/commcare/video/data/text.3gp",
+                        "jr://file/commcare/video/data/text.3gp",
+                        "default-label",
+                        "valid",
+                        "valid",
+                        "help",
+                        "help",
+                        "jr://file/commcare/audio/help/data/text.mp3",
+                        "jr://file/commcare/audio/help/data/text.mp3",
+                        "jr://file/commcare/image/help/data/text.png",
+                        "jr://file/commcare/image/help/data/text.png",
+                        "jr://file/commcare/video/help/data/text.3gp",
+                        "jr://file/commcare/video/help/data/text.3gp",
+                        "default-help",
+                        "hint",
+                        "hint",
+                        "default-hint",
+                        "1 = 0",
+                        "",
+                    ],
+                ]),
+            }
+        ], function (item) {
+            it("should copy " + item.message, function () {
+                util.loadXML(item.xml);
+                eq(mod.copy(), item.serial);
+            });
+
+            it("should paste " + item.message, function () {
+                util.loadXML("");
+                assert.deepEqual(mod.paste(item.serial), []);
+                util.assertXmlEqual(call("createXML"), item.xml, {normalize_xmlns: true});
+            });
         });
 
-        it("should paste a text question", function () {
-            util.loadXML("");
-            assert.deepEqual(mod.paste(TEXT_SERIAL), []);
-            util.assertXmlEqual(call("createXML"), TEXT_QUESTION_XML, {normalize_xmlns: true});
-        });
-
-        // TODO test each mug spec item
+        // TODO allow mutliple selection in tree
+        // TODO test each mug spec item (don't forget exotic/plugin question types)
         // TODO test bad paste values
         // TODO insert question with same nodeID
         // TODO find a case where, when copying multiple questions, one
@@ -56,6 +165,7 @@ require([
         //      to mug.deserialize().
         //      ALSO maybe find the converse: property serializes to null
         //      but that null value must be passed to mug.deserialize()
+        //      (seems less likely that this is a thing)
     });
 
     describe("The copy-paste string conversions should", function () {
@@ -112,29 +222,4 @@ require([
         test("[1] [2]", '"[1] [2]"');
         test("01", '"01"');
     });
-
-    var TEXT_SERIAL = tsv.tabDelimit([
-        ["vellum copy/paste", "version 1"],
-        [
-            "type",
-            "id",
-            "relevantAttr",
-            "constraintAttr",
-            "requiredAttr",
-            "labelItext:en-default",
-            "labelItext:hin-default",
-            "constraintMsgItext:en-default",
-            "constraintMsgItext:hin-default",
-        ], [
-            "Text",
-            "/txt",
-            "x = y",
-            "1 = 0",
-            "true",
-            "English Text",
-            "Hindi Text",
-            "Nope",
-            "Nope",
-        ]
-    ]);
 });
