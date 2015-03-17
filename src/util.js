@@ -1,14 +1,12 @@
 define([
     'json!langCodes',
     'underscore',
-    'equivalent-xml',
     'jsdiff',
     'jquery',
     'jquery.bootstrap-popout'
 ], function (
     langCodes,
     _,
-    EquivalentXml,
     jsdiff,
     $
 ) {
