@@ -109,19 +109,28 @@ define([
     }
 
     function copy() {
-        var mugs = [vellum.getCurrentlySelectedMug()],
-            header = [],
-            headings = {id: true, type: true},
-            rows = _.map(mugs, function (mug) {
-                var row = mug.serialize();
-                _.each(row, function (value, key) {
-                    if (!headings.hasOwnProperty(key)) {
-                        header.push(key);
-                        headings[key] = true;
-                    }
-                });
-                return row;
+        var mugs = vellum.getCurrentlySelectedMug(true);
+        if (!mugs.length) { return; }
+
+        function serialize(mug) {
+            var row = mug.serialize(),
+                children = form.getChildren(mug);
+            _.each(row, function (value, key) {
+                if (!headings.hasOwnProperty(key)) {
+                    header.push(key);
+                    headings[key] = true;
+                }
             });
+            if (children.length) {
+                row = [row].concat(_.map(children, serialize));
+            }
+            return row;
+        }
+
+        var headings = {id: true, type: true},
+            header = [],
+            form = mugs[0].form,
+            rows = _.flatten(_.map(mugs, serialize));
 
         header = ["id", "type"].concat(_.sortBy(header, headerKey));
         return tsv.tabDelimit([PREAMBLE, header].concat(_.map(rows, function (row) {

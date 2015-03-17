@@ -763,7 +763,7 @@ define([
             "core": {
                 data: [],
                 worker: false,
-                multiple: false, // single-item selection
+                multiple: true,
                 strings: {
                     'New node': this.opts().core.noTextString
                 },
@@ -931,14 +931,17 @@ define([
      * Use only when absolutely necessary, or you're probably doing something
      * wrong!
      */
-    fn.getCurrentlySelectedMug = function () {
+    fn.getCurrentlySelectedMug = function (multiple) {
         var selected = this.jstree('get_selected'),
+            form = this.data.core.form,
             ret;
 
         if (!selected.length) {
             ret = null;
+        } else if (multiple) {
+            ret = _.map(selected, form.getMugByUFID.bind(form));
         } else {
-            ret = this.data.core.form.getMugByUFID(selected[0]);
+            ret = form.getMugByUFID(selected[0]);
         }
         return ret;
     };

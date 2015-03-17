@@ -201,17 +201,16 @@ define([
         return data.core.form; // return the Form object
     }
 
-    function clickQuestion(path) {
-        var node, mug = getMug(path);
-        if (!(mug && mug.ufid)) {
-            throw new Error("mug not found: " + path);
-        }
-        node = $("#" + mug.ufid + "_anchor");
-        if (!node.length) {
-            throw new Error("tree node not found: " + path);
-        }
-        $(node).click();
-        return node;
+    function clickQuestion() {
+        var ufids = _.map(arguments, function (path) {
+            var mug = getMug(path);
+            if (!(mug && mug.ufid)) {
+                throw new Error("mug not found: " + path);
+            }
+            return mug.ufid;
+        });
+        call("jstree", "deselect_all", true);
+        call("jstree", "select_node", ufids);
     }
 
     /**

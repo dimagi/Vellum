@@ -3,6 +3,7 @@ require([
     'jquery',
     'underscore',
     'tests/utils',
+    'text!static/copy-paste/four-questions.xml',
     'text!static/copy-paste/many-itext-forms.xml',
     'text!static/copy-paste/text-question.xml',
     'vellum/copy-paste',
@@ -12,6 +13,7 @@ require([
     $,
     _,
     util,
+    FOUR_QUESTIONS_XML,
     MANY_ITEXT_FORMS_XML,
     TEXT_QUESTION_XML,
     mod,
@@ -155,7 +157,55 @@ require([
             });
         });
 
-        // TODO allow mutliple selection in tree
+        it("should copy two selected text questions", function () {
+            util.loadXML(FOUR_QUESTIONS_XML);
+            util.clickQuestion("group/text", "group/choice");
+            eq(mod.copy(), tsv.tabDelimit([
+                ["vellum copy/paste", "version 1"],
+                [
+                    "id",
+                    "type",
+                    "labelItext:en-default",
+                    "labelItext:hin-default",
+                    "labelItext:en-image",
+                    "labelItext:hin-image",
+                    "labelItext",
+                ], [
+                    "/group/text",
+                    "Text",
+                    "text with image",
+                    "ひらがな",
+                    "jr://file/commcare/image/data/en-text.png",
+                    "jr://file/commcare/image/data/hin-text.png",
+                    "text-label",
+                ], [
+                    "/group/choice",
+                    "Select",
+                    "Do you like it?",
+                    "Do you like it?",
+                    "null",
+                    "null",
+                    "null",
+                ], [
+                    "/group/choice/true",
+                    "Item",
+                    "Yes",
+                    "Yes",
+                    "null",
+                    "null",
+                    "null",
+                ], [
+                    "/group/choice/false",
+                    "Item",
+                    "No",
+                    "No",
+                    "null",
+                    "null",
+                    "null",
+                ],
+            ]));
+        });
+
         // TODO test each mug spec item (don't forget exotic/plugin question types)
         // TODO test bad paste values
         // TODO insert question with same nodeID

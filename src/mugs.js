@@ -1109,6 +1109,10 @@ define([
         init: function (mug, form) {
         },
         spec: {
+            nodeID: {
+                serialize: function () {},
+                deserialize: function () {}
+            },
             hintLabel: { presence: 'notallowed' },
             hintItext: { presence: 'notallowed' },
             helpItext: { presence: 'notallowed' },
@@ -1134,6 +1138,13 @@ define([
                         }
                     }
                     return "pass";
+                },
+                serialize: function (value, key, mug) {
+                    var path = mug.form.getAbsolutePath(mug.parentMug, true);
+                    return {id: path + "/" + value};
+                },
+                deserialize: function (data) {
+                    return data.id && data.id.slice(data.id.lastIndexOf("/") + 1);
                 }
             }
         }
