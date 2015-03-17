@@ -561,8 +561,33 @@ define([
                 title: "Overwrite their work",
                 cssClasses: "btn-primary",
                 action: function () {
+                    $('#form-differences').hide();
                     send(formText, 'full');
                     $modal.modal('hide');
+                }
+            },
+            {
+                title: "Show XML Differences",
+                cssClasses: "btn-info",
+                action: function () {
+                    $('#form-differences').show();
+
+                    var modalHeaderHeight = $modal.find('.modal-header').outerHeight(false),
+                        modalFooterHeight = $modal.find('.modal-footer').outerHeight(false),
+                        modalHeight = $(window).height() - 40,
+                        modalBodyHeight = modalHeight - (modalFooterHeight - modalHeaderHeight) - 126;
+
+                    $modal
+                        .css('height', modalHeight + 'px')
+                        .css('width', $(window).width() - 40 + 'px');
+
+                    $modal.addClass('fd-source-modal')
+                        .removeClass('form-horizontal')
+                        .find('.modal-body')
+                        .html($overwriteForm)
+                        .css('height', modalBodyHeight + 'px');
+
+                    $modal.find('.btn-info').attr('disabled', 'disabled');
                 }
             }
         ], "Cancel");
@@ -577,21 +602,7 @@ define([
         }));
         $modal.find('.modal-body').html($overwriteForm);
 
-        var modalHeaderHeight = $modal.find('.modal-header').outerHeight(false),
-            modalFooterHeight = $modal.find('.modal-footer').outerHeight(false),
-            modalHeight = $(window).height() - 40,
-            modalBodyHeight = modalHeight - (modalFooterHeight - modalHeaderHeight) - 126;
-
-        $modal
-            .css('height', modalHeight + 'px')
-            .css('width', $(window).width() - 40 + 'px');
-
-        $modal.addClass('fd-source-modal')
-            .removeClass('form-horizontal')
-            .find('.modal-body')
-            .html($overwriteForm)
-            .css('height', modalBodyHeight + 'px');
-
+        $('#form-differences').hide();
         $modal.modal('show');
     };
         
