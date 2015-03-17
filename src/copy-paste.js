@@ -61,15 +61,17 @@ define([
     }
 
     // matches strings that could be JSON; see http://json.org/
-    var JSON_STRING = /^(null|true|false|\[.*\]|\{.*\}|".*"|-?\d+(\.\d+)?([Ee][+-]?\d)?])$/;
+    var JSON_STRING = /^(null|true|false|\[[^]*\]|\{[^]*\}|"[^]*"|-?\d+(\.\d+)?([Ee][+-]?\d+)?)$/;
 
     /**
      * Convert value to string
      *
-     * Does nothing to strings that do not look like JSON.
+     * Does nothing to strings that do not look like JSON. The idea
+     * behind this (along with valuify) is to make the output as human
+     * readable as possible while maintaining lossless de/serialization.
      */
     function stringify(value) {
-        if (value && _.isString(value) && !JSON_STRING.test(value)) {
+        if (_.isString(value) && !JSON_STRING.test(value)) {
             return value;
         }
         return JSON.stringify(value);
@@ -89,15 +91,11 @@ define([
     }
 
     function copy() {
-        // serialize selected mugs
         var mugs = [vellum.getCurrentlySelectedMug()],
             header = ["type", "id"],
             headings = {type: true, id: true},
             rows = _.map(mugs, function (mug) {
                 var row = mug.serialize();
-                if (!row) {
-                    return null;
-                }
                 _.each(row, function (value, key) {
                     if (!headings.hasOwnProperty(key)) {
                         header.push(key);
@@ -110,7 +108,7 @@ define([
         return tsv.tabDelimit([PREAMBLE, header].concat(_.map(rows, function (row) {
             return _.map(header, function (key) {
                 var val = row[key];
-                return _.isUndefined(val) || val === null ? "" : stringify(val);
+                return stringify(_.isUndefined(val) ? null : val);
             });
         })));
     }
@@ -172,6 +170,8 @@ define([
 
     return {
         copy: copy,
-        paste: paste
+        paste: paste,
+        stringify: stringify,
+        valuify: valuify
     };
 });

@@ -50,6 +50,67 @@ require([
         // TODO test each mug spec item
         // TODO test bad paste values
         // TODO insert question with same nodeID
+        // TODO find a case where, when copying multiple questions, one
+        //      ends up with a null value on a property that it did not
+        //      return from mug.serialize(), and should not be passed
+        //      to mug.deserialize().
+        //      ALSO maybe find the converse: property serializes to null
+        //      but that null value must be passed to mug.deserialize()
+    });
+
+    describe("The copy-paste string conversions should", function () {
+        function test(value, string) {
+            var json = JSON.stringify(value),
+                jstr = JSON.stringify(string);
+
+            it("stringify(" + json + ") -> " + jstr, function () {
+                assert.deepEqual(mod.stringify(value), string);
+            });
+
+            it(" valuify(" + jstr + ") -> " + json, function () {
+                assert.deepEqual(mod.valuify(string), value);
+            });
+        }
+
+        // primitives
+        test(null, 'null');
+        test(true, 'true');
+        test(false, 'false');
+        test("null", '"null"');
+        test("true", '"true"');
+        test("false", '"false"');
+
+        // JSON-like values
+        test([], '[]');
+        test({}, '{}');
+        test('', '');
+        test('x', 'x');
+        test('"', '"');
+        test('[\n]', '"[\\n]"');
+        test("{\n}", '"{\\n}"');
+        test('"\n"', '"\\"\\n\\""');
+
+        // numbers
+        test(0, '0');
+        test(1, '1');
+        test(350, '350');
+        test(0.5, '0.5');
+        test(-1.2e-10, '-1.2e-10');
+        test("0", '"0"');
+        test("1", '"1"');
+        test("350", '"350"');
+        test("0.5", '"0.5"');
+        test("-1.2e-10", '"-1.2e-10"');
+
+        // edge cases
+        (function (undefined) {
+            // is this what we want? does it matter?
+            test(undefined, undefined);
+        })();
+        test("{1} ", "{1} ");
+        test("{1} {2}", '"{1} {2}"');
+        test("[1] [2]", '"[1] [2]"');
+        test("01", '"01"');
     });
 
     var TEXT_SERIAL = tsv.tabDelimit([
