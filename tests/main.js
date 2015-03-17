@@ -51,9 +51,14 @@ require(['jquery', 'jquery.vellum'], function ($) {
         waitSeconds: 60,
         paths: {
             'static': testBase + 'tests/static',
-            'chai': testBase + 'bower_components/chai/chai'
+            'chai': testBase + 'bower_components/chai/chai',
+            'equivalent-xml': testBase + 'bower_components/equivalent-xml-js/src/equivalent-xml'
         },
         shim: {
+            'equivalent-xml': {
+                deps: ['underscore'],
+                exports: 'EquivalentXml'
+            }
         }
     });
 
