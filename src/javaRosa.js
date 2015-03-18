@@ -418,7 +418,7 @@ define([
                 defaultLang = this.getDefaultLanguage();
             formData[defaultLang] = defaultValue;
             item = new ItextItem({
-                id: mug.getDefaultLabelItextId(),
+                id: getDefaultLabelItextId(mug),
                 forms: [new ItextForm({
                             name: "default",
                             data: formData,
@@ -1191,7 +1191,7 @@ define([
                     // audio: jr://file/commcare/audio/form_id/question_id.mp3
                     var extension = DEFAULT_EXTENSIONS[form];
                     return "jr://file/commcare/" + form + url_type +
-                           widget.mug.getDefaultItextRoot() + "." + extension;
+                           getDefaultItextRoot(widget.mug) + "." + extension;
                 }
                 return null;
             };
@@ -1311,6 +1311,29 @@ define([
         }
     }
 
+    function getDefaultItextRoot(mug) {
+        if (mug.__className === "Item") {
+            return getDefaultItextRoot(mug.parentMug) + "-" + mug.getNodeID();
+        } else {
+            var path = mug.form.getAbsolutePath(mug, true);
+            if (!path) {
+                if (mug.parentMug) {
+                    path = mug.form.getAbsolutePath(mug.parentMug, true) +
+                            "/" + mug.getNodeID();
+                } else {
+                    // fall back to nodeID if mug path still not found
+                    // this can happen with malformed XForms
+                    path = "/" + mug.getNodeID();
+                }
+            }
+            return path.slice(1);
+        }
+    }
+
+    function getDefaultLabelItextId(mug, property) {
+        return getDefaultItextRoot(mug) + "-label";
+    }
+
     $.vellum.plugin("javaRosa", {
         langs: ['en'],
         displayLanguage: 'en'
@@ -1320,10 +1343,6 @@ define([
             this.data.javaRosa.ItextItem = ItextItem;
             this.data.javaRosa.ItextForm = ItextForm;
             this.data.javaRosa.ICONS = ICONS;
-
-            // exposed for testing
-            this.data.javaRosa.parseXLSItext = parseXLSItext;
-            this.data.javaRosa.generateItextXLS = generateItextXLS;
         },
         insertOutputRef: function (mug, target, path, dateFormat) {
             var output = getOutputRef(path, dateFormat),
@@ -1534,7 +1553,7 @@ define([
 
             var Itext = mug.form.vellum.data.javaRosa.Itext;
 
-            function getITextReference(value) {
+            function getITextID(value) {
                 try {
                     var parsed = xpath.parse(value);
                     if (parsed instanceof xpathmodels.XPathFuncExpr &&
@@ -1550,19 +1569,19 @@ define([
             }
 
             function parseItextRef($el, mug) {
-                var ref = $el.attr('ref');
-                ref = ref ? getITextReference(ref) : "";
-                if (ref) {
-                    return Itext.getOrCreateItem(ref);
+                var ref = $el.attr('ref'),
+                    id = ref ? getITextID(ref) : "";
+                if (id) {
+                    return Itext.getOrCreateItem(id);
                 } else {
                     if (mug) {
                         // WARNING disaster area
                         // if there was a ref attribute but it wasn't formatted like an
                         // itext reference, it's likely an error, though not sure what
                         // we should do here for now just populate with the default
-                        ref = mug.getDefaultLabelItextId();
+                        id = getDefaultLabelItextId(mug);
                     }
-                    return Itext.createItem(ref);
+                    return Itext.createItem(id);
                 }
             }
 
@@ -1590,9 +1609,9 @@ define([
                 mug.p.helpItextID = parseItextRef(helpEl);
             }
             if (mug.p.constraintMsgAttr) {
-                var constraintItext = getITextReference(mug.p.constraintMsgAttr);
-                if (constraintItext) {
-                    mug.p.constraintMsgItextID = Itext.getOrCreateItem(constraintItext);
+                var id = getITextID(mug.p.constraintMsgAttr);
+                if (id) {
+                    mug.p.constraintMsgItextID = Itext.getOrCreateItem(id);
                     mug.p.constraintMsgAttr = null;
                 } else {
                     mug.p.constraintMsgItextID = Itext.createItem("");
@@ -2056,4 +2075,12 @@ define([
             $modal.one('shown', function () { $textarea.focus(); });
         }
     });
+
+    return {
+        // TODO push these out to all places that use mug.getDefault...
+        getDefaultItextRoot: getDefaultItextRoot,
+        getDefaultLabelItextId: getDefaultLabelItextId,
+        parseXLSItext: parseXLSItext,
+        generateItextXLS: generateItextXLS
+    };
 });

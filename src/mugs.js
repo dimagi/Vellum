@@ -2,12 +2,14 @@ define([
     'jquery',
     'underscore',
     'vellum/tree',
+    'vellum/javaRosa', // TODO move all Itext stuff to javaRosa and remove this
     'vellum/widgets',
     'vellum/util'
 ], function (
     $,
     _,
     Tree,
+    javaRosa,
     widgets,
     util,
     undefined
@@ -537,26 +539,10 @@ define([
             return !this.getErrors().length;
         },
         getDefaultItextRoot: function () {
-            if (this.__className === "Item") {
-                return this.parentMug.getDefaultItextRoot() + "-" + this.p.defaultValue;
-            } else {
-                var path = this.form.getAbsolutePath(this, true);
-                if (!path) {
-                    if (this.parentMug) {
-                        path = this.form.getAbsolutePath(this.parentMug, true) +
-                                "/" + this.getNodeID();
-                    } else {
-                        // fall back to nodeID if mug path still not found
-                        // this can happen with malformed XForms
-                        path = "/" + this.getNodeID();
-                    }
-                }
-                return path.slice(1);
-            }
+            return javaRosa.getDefaultItextRoot(this);
         },
         getDefaultLabelItextId: function () {
-            // Default Itext ID
-            return this.getDefaultItextRoot() + "-label";
+            return javaRosa.getDefaultLabelItextId(this);
         },
         /*
          * Gets a default label, auto-generating if necessary
