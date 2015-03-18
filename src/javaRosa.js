@@ -1529,10 +1529,10 @@ define([
 
             Itext.on('change', function () { _this.onFormChange(); });
         },
-        populateControlMug: function(mug, controlElement, parentMug, form) {
+        populateControlMug: function(mug, controlElement) {
             this.__callOld();
 
-            var Itext = form.vellum.data.javaRosa.Itext;
+            var Itext = mug.form.vellum.data.javaRosa.Itext;
 
             function getITextReference(value) {
                 try {
@@ -1560,7 +1560,7 @@ define([
                         // if there was a ref attribute but it wasn't formatted like an
                         // itext reference, it's likely an error, though not sure what
                         // we should do here for now just populate with the default
-                        ref = mug.getDefaultLabelItextId(parentMug);
+                        ref = mug.getDefaultLabelItextId();
                     }
                     return Itext.createItem(ref);
                 }

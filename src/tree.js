@@ -240,6 +240,7 @@ define([
          *                   Can be null, 'before', 'after', 'first', 'last'
          *                   or 'into' (synonym for 'last')
          * @param refMug - reference Mug.
+         * @returns - the tree node of the inserted mug.
          *
          * If refMug is null, will default to the last child of the root node.
          * If position is null, will default to 'after'.  If 'into' is
@@ -293,6 +294,7 @@ define([
                 type: 'change',
                 mug: mug
             });
+            return node;
         },
         getAbsolutePath: function (mug, excludeRoot) {
             var node = this.getNodeFromMug(mug);

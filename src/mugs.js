@@ -536,17 +536,14 @@ define([
         isValid: function () {
             return !this.getErrors().length;
         },
-        getDefaultItextRoot: function (parentMug) {
+        getDefaultItextRoot: function () {
             if (this.__className === "Item") {
-                if (!parentMug) {
-                    parentMug = this.parentMug;
-                }
-                return parentMug.getDefaultItextRoot() + "-" + this.p.defaultValue;
+                return this.parentMug.getDefaultItextRoot() + "-" + this.p.defaultValue;
             } else {
                 var path = this.form.getAbsolutePath(this, true);
                 if (!path) {
-                    if (parentMug) {
-                        path = this.form.getAbsolutePath(parentMug, true) +
+                    if (this.parentMug) {
+                        path = this.form.getAbsolutePath(this.parentMug, true) +
                                 "/" + this.getNodeID();
                     } else {
                         // fall back to nodeID if mug path still not found
@@ -557,9 +554,9 @@ define([
                 return path.slice(1);
             }
         },
-        getDefaultLabelItextId: function (parentMug) {
+        getDefaultLabelItextId: function () {
             // Default Itext ID
-            return this.getDefaultItextRoot(parentMug) + "-label";
+            return this.getDefaultItextRoot() + "-label";
         },
         /*
          * Gets a default label, auto-generating if necessary

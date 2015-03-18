@@ -253,20 +253,27 @@ define([
         }
         mug = adapt(mug, form);
         var node = form.tree.getNodeFromMug(mug);
-        if (node && node.parent.value !== parentMug) {
+        if (!node) {
+            // insert control-only mug into the tree
+            mug.options.isControlOnly = true;
+            node = form.tree.insertMug(mug, 'into', parentMug);
+            // HACK fix abstraction broken by direct tree insert
+            form.mugMap[mug.ufid] = mug;
+        } else if (node.parent.value !== parentMug) {
             mug.p.dataParent = node.parent.getAbsolutePath();
-            form.tree.insertMug(mug, 'into', parentMug);
+            node = form.tree.insertMug(mug, 'into', parentMug);
         }
         if (appearance) {
             mug.p.appearance = appearance;
         }
+
         if (!adapt.skipPopulate) {
-            form.vellum.populateControlMug(mug, $cEl, parentMug, form);
+            form.vellum.populateControlMug(mug, $cEl);
 
             // add any arbitrary attributes that were directly on the control
             mug.p.rawControlAttributes = getAttributes($cEl);
         }
-        return mug;
+        return node;
     }
 
     function populateControlMug(mug, $cEl) {
@@ -522,16 +529,8 @@ define([
                     return null;
                 }
                 var $cEl = $(controlNodes[i++]),
-                    mug = parseControlElement(form, $cEl, parentMug),
-                    node = form.tree.getNodeFromMug(mug);
-
-                if (!node) {
-                    mug.options.isControlOnly = true;
-                    form.tree.insertMug(mug, 'into', parentMug);
-                    // HACK fix abstraction broken by direct tree insert
-                    form.mugMap[mug.ufid] = mug;
-                    node = form.tree.getNodeFromMug(mug);
-                }
+                    node = parseControlElement(form, $cEl, parentMug),
+                    mug = node.value;
                 if (mug.options.controlNodeChildren) {
                     merge(node, mug.options.controlNodeChildren($cEl));
                 }
