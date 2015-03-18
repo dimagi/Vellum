@@ -66,6 +66,7 @@ requirejs.config({
 
         'swfobject': '../bower_components/MediaUploader/swfobject',
         'file-uploader': '../bower_components/MediaUploader/hqmedia.upload_controller',
+        'jsdiff': '../bower_components/jsdiff/diff',
     },
     shim: {
         'codemirror': {
@@ -150,6 +151,9 @@ requirejs.config({
         },
         'biginteger': {
             exports: 'BigInteger'
+        },
+        'jsdiff': {
+            exports: 'JsDiff'
         }
     },
     less: {

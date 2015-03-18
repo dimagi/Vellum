@@ -1,11 +1,13 @@
 define([
     'json!langCodes',
     'underscore',
+    'jsdiff',
     'jquery',
     'jquery.bootstrap-popout'
 ], function (
     langCodes,
     _,
+    jsdiff,
     $
 ) {
     RegExp.escape = function(s) {
@@ -267,6 +269,33 @@ define([
         jqctrl.val(front + text + back).change();
         pos = pos + text.length;
         that.setCaretPosition(ctrl, start, pos);
+    };
+
+
+    that.xmlDiff = function (localForm, serverForm, opts) {
+        function cleanForDiff (value) {
+            // convert leading tabs to spaces
+            value = value.replace(/^\t+/mg, function (match) {
+                return match.replace(/\t/g, "  ");
+            });
+            // add newline at end of file if missing
+            if (!value.match(/\n$/)) {
+                value = value + "\n";
+            }
+            return value;
+        }
+        opts = opts || {};
+        if (opts.normalize_xmlns) {
+            var xmlns = $($.parseXML(serverForm)).find('data').attr('xmlns');
+            localForm = localForm.replace(/(data[^>]+xmlns=")(.+?)"/,
+                                    '$1' + xmlns + '"');
+        }
+        localForm = cleanForDiff(localForm);
+        serverForm = cleanForDiff(serverForm);
+        var patch = jsdiff.createPatch("", serverForm, localForm, "Server Form", "Local Form");
+        patch = patch.replace(/^Index:/,
+                "XML " + (opts.not ? "should not be equivalent" : "mismatch"));
+        return patch;
     };
         
     return that;

@@ -553,7 +553,7 @@ define([
         $modal.one('shown', function () { $text.focus(); });
     };
 
-    fn.showOverwriteWarning = function(send, formText) {
+    fn.showOverwriteWarning = function(send, formText, serverForm) {
         var $modal, $overwriteForm;
 
         $modal = this.generateNewModal("Lost work warning", [
@@ -561,19 +561,48 @@ define([
                 title: "Overwrite their work",
                 cssClasses: "btn-primary",
                 action: function () {
+                    $('#form-differences').hide();
                     send(formText, 'full');
                     $modal.modal('hide');
+                }
+            },
+            {
+                title: "Show XML Differences",
+                cssClasses: "btn-info",
+                action: function () {
+                    $('#form-differences').show();
+
+                    var modalHeaderHeight = $modal.find('.modal-header').outerHeight(false),
+                        modalFooterHeight = $modal.find('.modal-footer').outerHeight(false),
+                        modalHeight = $(window).height() - 40,
+                        modalBodyHeight = modalHeight - (modalFooterHeight - modalHeaderHeight) - 126;
+
+                    $modal
+                        .css('height', modalHeight + 'px')
+                        .css('width', $(window).width() - 40 + 'px');
+
+                    $modal.addClass('fd-source-modal')
+                        .removeClass('form-horizontal')
+                        .find('.modal-body')
+                        .html($overwriteForm)
+                        .css('height', modalBodyHeight + 'px');
+
+                    $modal.find('.btn-info').attr('disabled', 'disabled');
                 }
             }
         ], "Cancel");
 
+        var diff = util.xmlDiff(formText, serverForm);
+
         $overwriteForm = $(confirm_overwrite({
             description: "Looks like someone else has edited this form " +
                          "since you loaded the page. Are you sure you want " +
-                         "to overwrite their work?"
+                         "to overwrite their work?",
+            xmldiff: $('<div>').text(diff).html()
         }));
         $modal.find('.modal-body').html($overwriteForm);
 
+        $('#form-differences').hide();
         $modal.modal('show');
     };
         
@@ -1812,7 +1841,7 @@ define([
                         //     dmp.diff_main(formText, data.xform)
                         // );
                         _this._hideConfirmDialog();
-                        _this.showOverwriteWarning(_this.send.bind(_this), formText);
+                        _this.showOverwriteWarning(_this.send.bind(_this), formText, data.xform);
                         return;
                     } else if (CryptoJS.SHA1(formText).toString() !== data.sha1) {
                         debug.error("sha1's didn't match");
