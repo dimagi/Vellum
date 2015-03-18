@@ -6,6 +6,8 @@ require([
     'text!static/copy-paste/four-questions.xml',
     'text!static/copy-paste/many-itext-forms.xml',
     'text!static/copy-paste/text-question.xml',
+    'text!static/copy-paste/two-choices.xml',
+    'text!static/copy-paste/two-questions.xml',
     'vellum/copy-paste',
     'vellum/tsv'
 ], function (
@@ -16,14 +18,27 @@ require([
     FOUR_QUESTIONS_XML,
     MANY_ITEXT_FORMS_XML,
     TEXT_QUESTION_XML,
+    TWO_CHOICES_XML,
+    TWO_QUESTIONS_XML,
     mod,
     tsv
 ) {
     var assert = chai.assert,
-        call = util.call;
+        call = util.call,
+        HEADER = ["vellum copy/paste", "version 1"];
 
     function eq(serial, rows, message) {
+        if (!_.isString(rows)) {
+            rows = tsv.tabDelimit([HEADER].concat(rows));
+        }
         util.assertEqual(serial + "\n", rows + "\n", message);
+    }
+
+    function paste(rows, errors, print) {
+        var data = tsv.tabDelimit([HEADER].concat(rows)),
+            err = mod.paste(data);
+        if (print) { window.console.log(data); } // debugging helper
+        assert.deepEqual(err, errors || []);
     }
 
     describe("The copy-paste plugin", function () {
@@ -45,7 +60,7 @@ require([
                 message: "a text question",
                 xml: TEXT_QUESTION_XML,
                 serial: tsv.tabDelimit([
-                    ["vellum copy/paste", "version 1"],
+                    HEADER,
                     [
                         "id",
                         "type",
@@ -69,10 +84,98 @@ require([
                     ],
                 ]),
             }, {
+                message: "two text questions",
+                xml: TWO_QUESTIONS_XML,
+                select: ["text", "choice"],
+                serial: tsv.tabDelimit([
+                    HEADER,
+                    [
+                        "id",
+                        "type",
+                        "labelItext:en-default",
+                        "labelItext:hin-default",
+                        "labelItext",
+                    ], [
+                        "/text",
+                        "Text",
+                        "text with image",
+                        "text with image",
+                        "default-label",
+                    ], [
+                        "/choice",
+                        "Select",
+                        "Do you like it?",
+                        "Do you like it?",
+                        "null",
+                    ], [
+                        "/choice/true",
+                        "Item",
+                        "Yes",
+                        "Yes",
+                        "null",
+                    ], [
+                        "/choice/false",
+                        "Item",
+                        "No",
+                        "No",
+                        "null",
+                    ],
+                ]),
+            }, {
+                message: "two choices with shared itext",
+                xml: TWO_CHOICES_XML,
+                select: ["box", "fox"],
+                serial: tsv.tabDelimit([
+                    HEADER,
+                    [
+                        "id",
+                        "type",
+                        "labelItext:en-default",
+                        "labelItext:hin-default",
+                        "labelItext",
+                    ], [
+                        "/box",
+                        "Select",
+                        "In a box?",
+                        "In a box?",
+                        "null",
+                    ], [
+                        "/box/yes",
+                        "Item",
+                        "Yes",
+                        "Yes",
+                        "yes-label",
+                    ], [
+                        "/box/no",
+                        "Item",
+                        "No",
+                        "No",
+                        "no-label",
+                    ], [
+                        "/fox",
+                        "Select",
+                        "With a fox?",
+                        "With a fox?",
+                        "null",
+                    ], [
+                        "/fox/yes",
+                        "Item",
+                        "Yes",
+                        "Yes",
+                        "yes-label",
+                    ], [
+                        "/fox/no",
+                        "Item",
+                        "No",
+                        "No",
+                        "no-label",
+                    ],
+                ]),
+            }, {
                 message: "a question with many itext forms",
                 xml: MANY_ITEXT_FORMS_XML,
                 serial: tsv.tabDelimit([
-                    ["vellum copy/paste", "version 1"],
+                    HEADER,
                     [
                         "id",
                         "type",
@@ -147,6 +250,9 @@ require([
         ], function (item) {
             it("should copy " + item.message, function () {
                 util.loadXML(item.xml);
+                if (item.select) {
+                    util.clickQuestion.apply(null, item.select);
+                }
                 eq(mod.copy(), item.serial);
             });
 
@@ -157,11 +263,10 @@ require([
             });
         });
 
-        it("should copy two selected text questions", function () {
+        it("should copy two text questions in a group", function () {
             util.loadXML(FOUR_QUESTIONS_XML);
             util.clickQuestion("group/text", "group/choice");
-            eq(mod.copy(), tsv.tabDelimit([
-                ["vellum copy/paste", "version 1"],
+            eq(mod.copy(), [
                 [
                     "id",
                     "type",
@@ -203,7 +308,140 @@ require([
                     "null",
                     "null",
                 ],
-            ]));
+            ]);
+        });
+
+        it("should paste two questions with the same id", function () {
+            util.loadXML("");
+            paste([
+                ["id", "type", "labelItext:en-default", "labelItext:hin-default"],
+                ["/text", "Text", "text1", "text1"],
+                ["/text", "Text", "text2", "text2"],
+            ]);
+            util.selectAll();
+            eq(mod.copy(), [
+                ["id", "type", "labelItext:en-default", "labelItext:hin-default"],
+                ["/text", "Text", "text1", "text1"],
+                ["/copy-1-of-text", "Text", "text2", "text2"],
+            ]);
+        });
+
+        it("should paste two questions with the same id (one in group)", function () {
+            util.loadXML("");
+            paste([
+                ["id", "type", "labelItext:en-default", "labelItext:hin-default"],
+                ["/text", "Text", "text", "text"],
+                ["/group", "Group", "group", "group"],
+                ["/group/text", "Text", "text", "text"],
+            ]);
+            util.selectAll();
+            eq(mod.copy(), [
+                ["id", "type", "labelItext:en-default", "labelItext:hin-default"],
+                ["/text", "Text", "text", "text"],
+                ["/group", "Group", "group", "group"],
+                ["/group/text", "Text", "text", "text"],
+            ]);
+        });
+
+        it("should not paste item into tree root", function () {
+            util.loadXML("");
+            paste([
+                ["id", "type", "labelItext:en-default", "labelItext:hin-default"],
+                ["/select/item", "Item", "item1", "item1"],
+            ], ["Cannot insert Item into tree root"]);
+            util.selectAll();
+            eq(mod.copy(), "");
+        });
+
+        it("should not paste text into select", function () {
+            util.loadXML("");
+            paste([
+                ["id", "type", "labelItext:en-default", "labelItext:hin-default"],
+                ["/select", "Select", "select", "select"],
+                ["/select/item1", "Item", "item1", "item1"],
+            ]);
+            util.clickQuestion("select/item1");
+            paste([
+                ["id", "type", "labelItext:en-default", "labelItext:hin-default"],
+                ["/text", "Text", "text", "text"],
+            ], ["Cannot insert Text into Select"]);
+            util.selectAll();
+            eq(mod.copy(), [
+                ["id", "type", "labelItext:en-default", "labelItext:hin-default"],
+                ["/select", "Select", "select", "select"],
+                ["/select/item1", "Item", "item1", "item1"],
+            ]);
+        });
+
+        it("should paste question with empty id", function () {
+            util.loadXML("");
+            paste([
+                ["id", "type", "labelItext:en-default", "labelItext:hin-default"],
+                ["", "Text", "text", "text"],
+            ]);
+            util.selectAll();
+            eq(mod.copy(), [
+                ["id", "type", "labelItext:en-default", "labelItext:hin-default"],
+                ["/question1", "Text", "text", "text"],
+            ]);
+        });
+
+        it("should paste question with / id", function () {
+            util.loadXML("");
+            paste([
+                ["id", "type", "labelItext:en-default", "labelItext:hin-default"],
+                ["/", "Text", "text", "text"],
+            ]);
+            util.selectAll();
+            eq(mod.copy(), [
+                ["id", "type", "labelItext:en-default", "labelItext:hin-default"],
+                ["/question2", "Text", "text", "text"],
+            ]);
+        });
+
+        it("should not paste item into or after text", function () {
+            util.loadXML("");
+            paste([
+                ["id", "type", "labelItext:en-default", "labelItext:hin-default"],
+                ["/text", "Text", "text", "text"],
+            ]);
+            util.selectAll();
+            paste([
+                ["id", "type", "labelItext:en-default", "labelItext:hin-default"],
+                ["/select/item", "Item", "item1", "item1"],
+            ], ["Cannot insert Item into or after Text"]);
+            util.selectAll();
+            eq(mod.copy(), [
+                ["id", "type", "labelItext:en-default", "labelItext:hin-default"],
+                ["/text", "Text", "text", "text"],
+            ]);
+        });
+
+        it("should not overwrite itext with auto-id", function () {
+            util.loadXML("");
+            paste([
+                ["id", "type", "labelItext:en-default", "labelItext:hin-default"],
+                ["/text", "Text", "auto", "auto"],
+            ]);
+            util.clickQuestion("text");
+            paste([
+                ["id", "type", "labelItext:en-default", "labelItext:hin-default", "labelItext"],
+                ["/text2", "Text", "non", "non", "text-label"],
+            ]);
+            util.selectAll();
+            eq(mod.copy(), [
+                ["id", "type", "labelItext:en-default", "labelItext:hin-default", "labelItext"],
+                ["/text", "Text", "auto", "auto", "null"],
+                ["/text2", "Text", "non", "non", "text-label"],
+            ]);
+            call("createXML");
+            var text = util.getMug("text"),
+                text2 = util.getMug("text2");
+            // NOTE which one gets auto-renamed is somewhat arbitrary
+            assert.equal(text.p.labelItext.autoId, true);
+            assert.equal(text.p.labelItext.id, "text-label");
+            assert.equal(text2.p.labelItext.autoId, false);
+            assert.equal(text2.p.labelItext.id, "text-label2");
         });
 
         // TODO test each mug spec item (don't forget exotic/plugin question types)
@@ -216,6 +454,10 @@ require([
         //      ALSO maybe find the converse: property serializes to null
         //      but that null value must be passed to mug.deserialize()
         //      (seems less likely that this is a thing)
+        // TODO paste item with all null Itext values
+        //      (itextItem.id should not be overwritten with null)
+        // TODO paste item with non-auto Itext ID
+
     });
 
     describe("The copy-paste string conversions should", function () {

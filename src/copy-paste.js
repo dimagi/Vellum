@@ -108,11 +108,51 @@ define([
         return rank + item;
     }
 
+    function getInsertTargetAndPosition(node, values) {
+        var pos;
+        while (true) {
+            if (!node.parent || values.id.startsWith(node.id + "/")) {
+                // node is the paste root or a possible parent (by path)
+                pos = vellum.getInsertTargetAndPosition(node.mug, values.type);
+                break;
+            }
+            node = node.parent;
+        }
+        if (!pos) {
+            pos = {};
+            if (!node.mug) {
+                pos.error = "Cannot insert " + values.type + " into tree root";
+            } else {
+                pos.error = "Cannot insert $1 into or after $2"
+                        .replace("$1", values.type)
+                        .replace("$2", node.mug.__className);
+            }
+        } else {
+            // verify that item will be inserted inside the paste root
+            while (node.mug !== pos.mug) {
+                if (!node.parent) {
+                    // valid insertion point was outside of the paste root
+                    pos.error = "Cannot insert $1 into $2"
+                        .replace("$1", values.type)
+                        .replace("$2", node.mug.parentMug.__className);
+                    break;
+                }
+                node = node.parent;
+            }
+        }
+        return pos;
+    }
+
     function copy() {
-        var mugs = vellum.getCurrentlySelectedMug(true);
-        if (!mugs.length) { return; }
+        var mugs = vellum.getCurrentlySelectedMug(true),
+            seen = {};
+        if (!mugs || !mugs.length) { return ""; }
 
         function serialize(mug) {
+            if (seen.hasOwnProperty(mug.ufid)) {
+                return;
+            }
+            seen[mug.ufid] = true;
             var row = mug.serialize(),
                 children = form.getChildren(mug);
             _.each(row, function (value, key) {
@@ -130,7 +170,7 @@ define([
         var headings = {id: true, type: true},
             header = [],
             form = mugs[0].form,
-            rows = _.flatten(_.map(mugs, serialize));
+            rows = _.filter(_.flatten(_.map(mugs, serialize)), _.identity);
 
         header = ["id", "type"].concat(_.sortBy(header, headerKey));
         return tsv.tabDelimit([PREAMBLE, header].concat(_.map(rows, function (row) {
@@ -152,7 +192,10 @@ define([
             header = next(),
             row = next(),
             errors = [],
-            values, pos;
+            node = {id: null, mug: mug, parent: null},
+            into = {into: 1, last: 1},
+            values, pos, parent;
+        vellum.beforeBulkInsert(form);
         for (; row; row = next()) {
             try {
                 values = _.object(header, _.map(row, function (str) {
@@ -166,11 +209,33 @@ define([
                 errors.push("Unknown question type: " + row.join(", "));
                 continue;
             }
-            //path = mug ? mug.absolutePath : form.getBasePath();
-            pos = "after"; // TODO calcualte position from path
-            mug = form.createQuestion(mug, pos, values.type);
+            pos = getInsertTargetAndPosition(node, values);
+            if (pos.hasOwnProperty("error")) {
+                errors.push(pos.error);
+                continue;
+            }
+            if (pos.position === "after") {
+                parent = node.parent;
+            } else if (into.hasOwnProperty(pos.position)) {
+                parent = node;
+            } else {
+                // should never happen
+                if (pos.position === "last") { pos.position = "into"; }
+                errors.push("Cannot insert $1 $2 $3"
+                    .replace("$1", values.type) // TODO user-friendly type names
+                    .replace("$2", pos.position)
+                    .replace("$3", pos.mug.__className));
+                break;
+            }
+            mug = form.createQuestion(pos.mug, pos.position, values.type, true);
             mug.deserialize(values);
+            node = {
+                id: values.id,
+                mug: mug,
+                parent: parent,
+            };
         }
+        vellum.afterBulkInsert(form);
         return errors;
     }
 

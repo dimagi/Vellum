@@ -2007,8 +2007,12 @@ define([
     fn.duplicateMugProperties = function(mug) {};
 
     fn.beforeSerialize = function () {};
-
     fn.afterSerialize = function () {};
+
+    fn.beforeBulkInsert = function (form) {};
+    fn.afterBulkInsert = function (form) {
+        this.refreshVisibleData();
+    };
 
     fn.parseDataElement = function (form, el, parentMug) {
         return parser.parseDataElement(form, el, parentMug);

@@ -596,8 +596,12 @@ define([
                 serialize: function (value, key, mug) {
                     return {id: mug.form.getAbsolutePath(mug, true)};
                 },
-                deserialize: function (data) {
-                    return data.id && data.id.slice(data.id.lastIndexOf("/") + 1);
+                deserialize: function (data, key, mug) {
+                    if (!data.id || data.id === mug.p.nodeID) {
+                        return mug.p.nodeID; // use default id
+                    }
+                    var id = data.id.slice(data.id.lastIndexOf("/") + 1);
+                    return mug.form.generate_question_id(id, mug);
                 }
             },
             conflictedNodeId: {
@@ -1110,6 +1114,7 @@ define([
         },
         spec: {
             nodeID: {
+                presence: 'notallowed',
                 serialize: function () {},
                 deserialize: function () {}
             },

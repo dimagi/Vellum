@@ -213,6 +213,10 @@ define([
         call("jstree", "select_node", ufids);
     }
 
+    function selectAll() {
+        call("jstree", "select_all");
+    }
+
     /**
      * Get a mug by path (even items!) from the active form
      *
@@ -337,6 +341,7 @@ define([
             return mug;
         },
         clickQuestion: clickQuestion,
+        selectAll: selectAll,
         deleteQuestion: deleteQuestion,
         saveButtonEnabled: saveButtonEnabled,
         expandGroup: expandGroup,

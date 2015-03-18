@@ -838,7 +838,7 @@ define([
         _removeMugFromForm: function(mug, isInternal) {
             var fromTree = this.tree.getNodeFromMug(mug);
             if (fromTree) {
-                var children = this.tree.getNodeFromMug(mug).getChildrenMugs();
+                var children = fromTree.getChildrenMugs();
                 for (var i = 0; i < children.length; i++) {
                     this._removeMugFromForm(children[i], true);
                 }
@@ -857,36 +857,38 @@ define([
                 isInternal: isInternal
             });
         },
-        questionIdCount: function (qId) {
-            var allMugs = this.getMugList(),
-                count = 0;
-            for (var i = 0; i < allMugs.length; i++) {
-                var mug = allMugs[i];
-                if (qId === mug.p.nodeID || qId === mug.p.defaultValue) {
-                    count++; 
-                }
+        isUniqueQuestionId: function (qId, mug) {
+            var mugs;
+            if (!mug) {
+                mugs = this.getMugList(); // check against entire form
+            } else {
+                var node = this.tree.getNodeFromMug(mug);
+                mugs = this.tree.getParentNode(node).getChildrenMugs();
             }
-            return count;
+            return !_.any(mugs, function (mug) { return mug.p.nodeID === qId; });
         },
 
         /**
-         * Generates a unique question ID (unique in this form) and
-         * returns it as a string.
+         * Generates a unique question ID
+         *
+         * @param question_id - a proposed question ID (may be empty)
+         * @param mug
          */
-        generate_question_id: function (question_id) {
+        generate_question_id: function (question_id, mug) {
             if (question_id) {
                 var match = /^copy-(\d+)-of-(.+)$/.exec(question_id) ;
                 if (match) {
                     question_id = match[2]; 
                 }
+                var new_id = question_id;
                 for (var i = 1;; i++) {
-                    var new_id = "copy-" + i + "-of-" + question_id;
-                    if (!this.questionIdCount(new_id)) {
+                    if (this.isUniqueQuestionId(new_id, mug)) {
                         return new_id; 
                     }
+                    new_id = "copy-" + i + "-of-" + question_id;
                 }
             } else {
-                return this._make_label('question');
+                return this._make_label('question', mug);
             }
         },
         generate_item_label: function (parentMug) {
@@ -903,12 +905,12 @@ define([
         /**
          * Private method for constructing unique questionIDs, labels for items, etc
          */
-        _make_label: function (prefixStr) {
+        _make_label: function (prefixStr, mug) {
             var ret;
             do {
                 ret = prefixStr + this.question_counter;
                 this.question_counter += 1;
-            } while (this.questionIdCount(ret));
+            } while (!this.isUniqueQuestionId(ret, mug));
             return ret;
         },
         getExportTSV: function () {

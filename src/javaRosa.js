@@ -378,11 +378,13 @@ define([
      * times such as save, copy, paste, export translations, etc.
      *
      * @param form - the vellum instance's Form object.
-     * @param empty - if true, return empty items as well. Otherwise omit them.
-     * @returns - a list of Itext items.
+     * @param asObject - if true, return all items in an object keyed by id;
+     *                   otherwise return a list of non-empty Itext items.
+     * @returns - a list or object containing Itext items (see `asObject`).
      */
-    function getItextItemsFromMugs(form, empty) {
-        var ret = [],
+    function getItextItemsFromMugs(form, asObject) {
+        var empty = asObject,
+            items = [],
             byId = {},
             props = _.object(_.map(ITEXT_PROPERTIES, function (thing) {
                 return [thing, thing.replace("Itext", "")];
@@ -395,8 +397,8 @@ define([
                          getDefaultItextId(mug, props[property]) : item.id,
                     origId = id,
                     count = 2;
-                if (itemIsEmpty && byId.hasOwnProperty(id)) {
-                    // ignore empty item with duplicate ID
+                if (byId.hasOwnProperty(id) && (itemIsEmpty || item === byId[id])) {
+                    // ignore same or empty item with duplicate ID
                     return;
                 }
                 while (byId.hasOwnProperty(id)) {
@@ -404,10 +406,12 @@ define([
                 }
                 item.id = id;
                 byId[id] = item;
-                ret.push(item);
+                if (!asObject) {
+                    items.push(item);
+                }
             }
         });
-        return ret; 
+        return asObject ? byId : items;
     }
 
     var iTextIDWidget = function (mug, options) {
@@ -1109,7 +1113,6 @@ define([
         }
 
         var items = getItextItemsFromMugs(form, true);
-        items = _.object(_.map(items, function (item) { return [item.id, item]; }));
         cells = nextRow();
         while (cells) {
             // what's the point of creating items here?
@@ -1632,6 +1635,14 @@ define([
             this.__callOld();
             delete this.data.javaRosa.itextItemsFromBeforeSerialize;
         },
+        beforeBulkInsert: function (form) {
+            this.__callOld();
+            this.data.javaRosa.itextById = getItextItemsFromMugs(form, true);
+        },
+        afterBulkInsert: function () {
+            this.__callOld();
+            delete this.data.javaRosa.itextById;
+        },
         getMugTypes: function () {
             var types = this.__callOld(),
                 normal = types.normal;
@@ -1687,20 +1698,18 @@ define([
                 data.deserialize = function (data, name, mug) {
                     var item = mug.p[name],
                         found = false;
-                    if (data.hasOwnProperty(name)) {
-                        // non-autoID
-                        //var Itext = mug.form.vellum.data.javaRosa.Itext;
-                        //try {
-                        //    Itext.getItem(data[name]); // getItem no longer exists
-                        //    // TODO test...
-                        //    //var namedItem = Itext.getItem(data[name]);
-                        //    //Itext.removeItem(item);
-                        //    //mug.p[property] = namedItem
-                        //    return;
-                        //} catch (err) {
-                        //}
-                        item.id = data[name];
-                        item.autoId = false;
+                    if (data[name]) {
+                        // non-autoId
+                        var itext = mug.form.vellum.data.javaRosa.itextById,
+                            id = data[name];
+                        if (itext.hasOwnProperty(id) && !itext[id].autoId) {
+                            mug.p[name] = item = itext[id];
+                        } else {
+                            item.id = data[name];
+                            item.autoId = false;
+                            // possibly (intentionally) overwrites autoId item
+                            itext[item.id] = item;
+                        }
                     }
                     _.each(item.itextModel.languages, function (lang) {
                         var prelen = name.length + lang.length + 2,
@@ -1715,8 +1724,8 @@ define([
                             }
                         });
                     });
-                    if (found && !data.hasOwnProperty(name)) {
-                        item.id = getDefaultItextId(mug, name);
+                    if (found && !data[name]) {
+                        item.id = getDefaultItextId(mug, name.replace(/Itext$/, ""));
                     }
                 };
                 return data;
