@@ -1840,17 +1840,7 @@ define([
                 visibility: 'visible',
                 presence: 'optional',
                 lstring: "Question Itext ID",
-                widget: function (mug, options) {
-                    return iTextIDWidget(mug, $.extend(options, {
-                        displayName: "Add Other Content",
-                        itextType: "label",
-                        getItextByMug: function (mug) {
-                            return mug.p.labelItextID;
-                        },
-                        forms: ['long', 'short'],
-                        isCustomAllowed: true
-                    }));
-                },
+                widget: iTextIDWidget,
                 validationFunc: spec.control.label.validationFunc
             };
             // virtual property used to define a widget
@@ -1875,15 +1865,7 @@ define([
                     return mugOptions.isSpecialGroup ? 'notallowed' : 'optional';
                 },
                 lstring: "Hint Itext ID",
-                widget: function (mug, options) {
-                    return iTextIDWidget(mug, $.extend(options, {
-                        itextType: "hint",
-                        getItextByMug: function (mug) {
-                            return mug.p.hintItextID;
-                        },
-                        displayName: "Hint Message"
-                    }));
-                },
+                widget: iTextIDWidget,
                 validationFunc: function (mug) {
                     var hintItext;
                     hintItext = mug.p.hintItextID;
@@ -1920,15 +1902,7 @@ define([
                     return mugOptions.isSpecialGroup ? 'notallowed' : 'optional';
                 },
                 lstring: "Help Itext ID",
-                widget: function (mug, options) {
-                    return iTextIDWidget(mug, $.extend(options, {
-                        itextType: "help",
-                        getItextByMug: function (mug) {
-                            return mug.p.helpItextID;
-                        },
-                        displayName: "Help Message"
-                    }));
-                },
+                widget: iTextIDWidget,
                 validationFunc: function (mug) {
                     var helpItext;
                     helpItext = mug.p.helpItextID;
