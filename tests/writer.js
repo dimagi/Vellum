@@ -73,6 +73,18 @@ require([
                 {normalize_xmlns: true}
             );
         });
+
+        it("should still save more than once", function () {
+            util.call("loadXML", "");
+            util.addQuestion("FieldList", 'fieldlist');
+            util.addQuestion("Text", 'text1');
+            util.addQuestion("Text", 'text2');
+            util.addQuestion("Text", 'text3');
+            util.addQuestion("Text", 'text4');
+            util.call("createXML");
+            util.deleteQuestion("/data/fieldlist/text1");
+            util.call("createXML");
+        });
     });
 
 });
