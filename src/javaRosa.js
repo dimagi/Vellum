@@ -1835,21 +1835,6 @@ define([
             // hide non-itext messages unless present
             control.label.visibility = "visible_if_present";
             control.hintLabel.visibility = "visible_if_present";
-            // virtual property used to define a widget
-            control.labelItext = {
-                visibility: 'labelItextID',
-                presence: 'optional',
-                widget: function (mug, options) {
-                    return itextLabelBlock(mug, $.extend(options, {
-                        itextType: "label",
-                        getItextByMug: function (mug) {
-                            return mug.p.labelItextID;
-                        },
-                        displayName: "Label"
-                    }));
-                },
-                lstring: "Label"
-            };
 
             control.labelItextID = {
                 visibility: 'visible',
@@ -1868,19 +1853,22 @@ define([
                 },
                 validationFunc: spec.control.label.validationFunc
             };
-            // virtual property used to get a widget
-            control.hintItext = {
-                visibility: 'hintItextID',
+            // virtual property used to define a widget
+            control.labelItext = {
+                visibility: 'labelItextID',
+                presence: 'optional',
                 widget: function (mug, options) {
                     return itextLabelBlock(mug, $.extend(options, {
-                        itextType: "hint",
+                        itextType: "label",
                         getItextByMug: function (mug) {
-                            return mug.p.hintItextID;
+                            return mug.p.labelItextID;
                         },
-                        displayName: "Hint Message"
+                        displayName: "Label"
                     }));
-                }
+                },
+                lstring: "Label"
             };
+
             control.hintItextID = {
                 visibility: 'visible',
                 presence: function (mugOptions) {
@@ -1912,18 +1900,20 @@ define([
                     return validateItextItem(hintItext, "Hint");
                 }
             };
-            control.helpItext = {
-                visibility: 'helpItextID',
+            // virtual property used to get a widget
+            control.hintItext = {
+                visibility: 'hintItextID',
                 widget: function (mug, options) {
                     return itextLabelBlock(mug, $.extend(options, {
-                        itextType: "help",
+                        itextType: "hint",
                         getItextByMug: function (mug) {
-                            return mug.p.helpItextID;
+                            return mug.p.hintItextID;
                         },
-                        displayName: "Help Message"
+                        displayName: "Hint Message"
                     }));
                 }
             };
+
             control.helpItextID = {
                 visibility: 'visible',
                 presence: function (mugOptions) {
@@ -1953,6 +1943,19 @@ define([
                     }
                     
                     return validateItextItem(helpItext, "Help");
+                }
+            };
+            // virtual property used to get a widget
+            control.helpItext = {
+                visibility: 'helpItextID',
+                widget: function (mug, options) {
+                    return itextLabelBlock(mug, $.extend(options, {
+                        itextType: "help",
+                        getItextByMug: function (mug) {
+                            return mug.p.helpItextID;
+                        },
+                        displayName: "Help Message"
+                    }));
                 }
             };
 
