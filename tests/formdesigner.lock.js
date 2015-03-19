@@ -141,8 +141,7 @@ require([
         });
 
         it("allows changing only the Itext IDs of a 'value' locked node", function () {
-            assert.isFalse(locked(
-                '/data/value_locked', 'constraintMsgItextID'));
+            assert.isFalse(locked('/data/value_locked', 'constraintMsgItext'));
             assert(locked('/data/value_locked', 'constraintAttr'));
         });
 

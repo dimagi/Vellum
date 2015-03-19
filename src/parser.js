@@ -255,7 +255,7 @@ define([
         var node = form.tree.getNodeFromMug(mug);
         if (!node) {
             // insert control-only mug into the tree
-            mug.options.isControlOnly = true;
+            mug.options.isControlOnly = true; // TODO should not be mutating mug.options, check if this is necessary
             node = form.tree.insertMug(mug, 'into', parentMug);
             // HACK fix abstraction broken by direct tree insert
             form.mugMap[mug.ufid] = mug;

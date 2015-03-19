@@ -9,7 +9,7 @@ define([
     $,
     _,
     Tree,
-    javaRosa,
+    jr,
     widgets,
     util,
     undefined
@@ -194,9 +194,9 @@ define([
                 presence: 'optional',
                 validationFunc : function (mug) {
                     var hasConstraint = mug.p.constraintAttr,
-                        constraintMsgItextID = mug.p.constraintMsgItextID,
+                        constraintMsgItext = mug.p.constraintMsgItext,
                         hasConstraintMsg = (mug.p.constraintMsgAttr || 
-                                            (constraintMsgItextID && constraintMsgItextID.id));
+                                            (constraintMsgItext && constraintMsgItext.id));
                     if (hasConstraintMsg && !hasConstraint) {
                         return 'ERROR: You cannot have a Validation Error Message with no Validation Condition!';
                     } else {
@@ -422,10 +422,10 @@ define([
          * Returns a list of objects containing bind element attributes
          */
         getBindList: function (mug) {
-            var constraintMsgItextID = mug.p.constraintMsgItextID,
+            var constraintMsgItext = mug.p.constraintMsgItext,
                 constraintMsg;
-            if (constraintMsgItextID && !constraintMsgItextID.isEmpty()) {
-                constraintMsg = "jr:itext('" + constraintMsgItextID.id + "')";
+            if (constraintMsgItext && !constraintMsgItext.isEmpty()) {
+                constraintMsg = "jr:itext('" + constraintMsgItext.id + "')";
             } else {
                 constraintMsg = mug.p.constraintMsgAttr;
             }
@@ -539,10 +539,10 @@ define([
             return !this.getErrors().length;
         },
         getDefaultItextRoot: function () {
-            return javaRosa.getDefaultItextRoot(this);
+            return jr.getDefaultItextRoot(this);
         },
         getDefaultLabelItextId: function () {
-            return javaRosa.getDefaultLabelItextId(this);
+            return jr.getDefaultLabelItextId(this);
         },
         /*
          * Gets a default label, auto-generating if necessary
@@ -631,37 +631,22 @@ define([
                 nodeId = isSelectItem ?
                     this.p.defaultValue || "null" :
                     this.getDefaultItextRoot(),
-                itextType = propertyPath.replace("ItextID", "");
-       
+                // temporary double replace (until ItextID <-> Itext properties renamed)
+                itextType = propertyPath.replace("ItextID", "").replace("Itext", "");
             return rootId + nodeId + "-" + itextType;
-        },
-        setItextId: function (propertyPath, id, unlink) {
-            var itext = this.p[propertyPath];
-
-            if (id !== itext.id) {
-                if (unlink) {
-                    itext = itext.clone();
-                    this.form.vellum.data.javaRosa.Itext.addItem(itext);
-                }
-
-                itext.id = id;
-                // HACK to ensure property really changes
-                this.p.__data[propertyPath] = null;
-                this.p[propertyPath] = itext;
-            }
         },
         unlinkItext: function () {
             var _this = this;
             _.each([
                 "labelItextID",
-                "constraintMsgItextID",
+                "constraintMsgItext",
                 "hintItextID"
             ], function (path) {
                 var val = _this.p[path];
-                // items don't have a constraintMsgItextID
+                // items don't have a constraintMsgItext
                 if (val && val.id) {
                     var id = _this.getItextAutoID(path);
-                    _this.setItextId(path, id, true);
+                    jr.setItextId(_this, path, id, true);
                 }
             });
         },

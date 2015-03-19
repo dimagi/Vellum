@@ -45,7 +45,7 @@ define([
                 propertyPath === 'nodeID') 
             {
                 return true;
-            } else if (lock === 'value' && propertyPath.indexOf('ItextID') === -1) {
+            } else if (lock === 'value' && propertyPath.indexOf('Itext') === -1) {
                 return true;
             }
 

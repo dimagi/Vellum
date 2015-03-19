@@ -370,7 +370,7 @@ define([
                 if (hintItext) {
                     this.removeItem(hintItext);
                 }
-                constraintItext = mug.p.constraintMsgItextID;
+                constraintItext = mug.p.constraintMsgItext;
                 if (constraintItext) {
                     this.removeItem(constraintItext);
                 }
@@ -406,9 +406,9 @@ define([
             }
             if (!mug.options.isControlOnly) {
                 // set constraint msg if legal and not there
-                if (mug.spec.constraintMsgItextID.presence !== "notallowed" &&
-                    !mug.p.constraintMsgItextID) {
-                    mug.p.constraintMsgItextID = this.createItem("");
+                if (mug.spec.constraintMsgItext.presence !== "notallowed" &&
+                    !mug.p.constraintMsgItext) {
+                    mug.p.constraintMsgItext = this.createItem("");
                 }
             }
         },
@@ -454,7 +454,7 @@ define([
                 'labelItextID',
                 'hintItextID', 
                 'helpItextID',
-                'constraintMsgItextID'
+                'constraintMsgItext'
             ]; 
         
             var val;            
@@ -486,7 +486,8 @@ define([
 
         // a few little hacks to support auto-update of choices
         widget.getItextType = function () {
-            return widget.path.replace("ItextID", "");
+            // temporary double replace (until ItextID <-> Itext properties renamed)
+            return widget.path.replace("ItextID", "").replace("Itext", "");
         };
 
         widget.autoGenerateId = function () {
@@ -548,7 +549,7 @@ define([
 
         widget.save = function () {
             // override save to call out to rename itext
-            widget.mug.setItextId(widget.path, widget.getValue());
+            setItextId(widget.mug, widget.path, widget.getValue());
         };
 
         widget.mug.on('property-changed', function (e) {
@@ -1334,6 +1335,21 @@ define([
         return getDefaultItextRoot(mug) + "-label";
     }
 
+    function setItextId(mug, propertyPath, id, unlink) {
+        var itext = mug.p[propertyPath];
+        if (id !== itext.id) {
+            if (unlink) {
+                itext = itext.clone();
+                mug.form.vellum.data.javaRosa.Itext.addItem(itext);
+            }
+
+            itext.id = id;
+            // HACK to ensure property really changes
+            mug.p.__data[propertyPath] = null;
+            mug.p[propertyPath] = itext;
+        }
+    }
+
     $.vellum.plugin("javaRosa", {
         langs: ['en'],
         displayLanguage: 'en'
@@ -1611,10 +1627,10 @@ define([
             if (mug.p.constraintMsgAttr) {
                 var id = getITextID(mug.p.constraintMsgAttr);
                 if (id) {
-                    mug.p.constraintMsgItextID = Itext.getOrCreateItem(id);
+                    mug.p.constraintMsgItext = Itext.getOrCreateItem(id);
                     mug.p.constraintMsgAttr = null;
                 } else {
-                    mug.p.constraintMsgItextID = Itext.createItem("");
+                    mug.p.constraintMsgItext = Itext.createItem("");
                 }
             }
         },
@@ -1744,7 +1760,7 @@ define([
                 normal = types.normal;
 
             normal.Group.spec = util.extend(normal.Group.spec, {
-                constraintMsgItextID: {
+                constraintMsgItext: {
                     presence: 'notallowed'
                 }
             });
@@ -1777,15 +1793,23 @@ define([
 
             // hide non-itext constraint message unless it's present
             databind.constraintMsgAttr.visibility = "visible_if_present";
-            databind.constraintMsgItextID = {
+            databind.constraintMsgItext = {
                 visibility: 'visible',
                 presence: function (mugOptions) {
                     return mugOptions.isSpecialGroup ? 'notallowed' : 'optional';
                 },
-                lstring: "Validation Error Message ID",
-                widget: iTextIDWidget,
+                lstring: 'Validation Message',
+                widget: function (mug, options) {
+                    return itextLabelBlock(mug, $.extend(options, {
+                        itextType: "constraintMsg",
+                        getItextByMug: function (mug) {
+                            return mug.p.constraintMsgItext;
+                        },
+                        displayName: "Validation Message"
+                    }));
+                },
                 validationFunc: function (mug) {
-                    var constraintItext = mug.p.constraintMsgItextID;
+                    var constraintItext = mug.p.constraintMsgItext;
                     if (constraintItext && constraintItext.id) {
                         if (!util.isValidAttributeValue(constraintItext.id)) {
                             return constraintItext.id + " is not a valid ID";
@@ -1798,19 +1822,12 @@ define([
                 }
             };
             // virtual property used to define a widget
-            databind.constraintMsgItext = {
-                visibility: 'constraintMsgItextID',
+            databind.constraintMsgItextID = {
+                visibility: 'constraintMsgItext',
                 presence: 'optional',
-                widget: function (mug, options) {
-                    return itextLabelBlock(mug, $.extend(options, {
-                        itextType: "constraintMsg",
-                        getItextByMug: function (mug) {
-                            return mug.p.constraintMsgItextID;
-                        },
-                        displayName: "Validation Message"
-                    }));
-                },
-                lstring: 'Validation Message'
+                widget: iTextIDWidget,
+                widgetValuePath: "constraintMsgItext",
+                lstring: "Validation Error Message ID"
             };
 
             // CONTROL ELEMENT
@@ -2080,6 +2097,7 @@ define([
         // TODO push these out to all places that use mug.getDefault...
         getDefaultItextRoot: getDefaultItextRoot,
         getDefaultLabelItextId: getDefaultLabelItextId,
+        setItextId: setItextId,
         parseXLSItext: parseXLSItext,
         generateItextXLS: generateItextXLS
     };

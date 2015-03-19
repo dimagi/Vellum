@@ -78,7 +78,7 @@ define([
 
                 row["Validation Condition"] = mug.p.constraintAttr;
                 row["Validation Message"] = defaultOrNothing(
-                    mug.p.constraintMsgItextID,
+                    mug.p.constraintMsgItext,
                     defaultLanguage, 'default');
             }
 

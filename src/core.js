@@ -1312,8 +1312,8 @@ define([
 
     fn.toggleConstraintItext = function (mug) {
         // todo: don't handle this one-off in the UI layer
-        var state = (mug.p.constraintMsgItextID && 
-                     (!mug.p.constraintMsgItextID.isEmpty() || 
+        var state = (mug.p.constraintMsgItext &&
+                     (!mug.p.constraintMsgItext.isEmpty() ||
                       mug.p.constraintAttr)),
             $constraintItext = $('.itext-block-constraintMsg');
         
