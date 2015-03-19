@@ -485,8 +485,7 @@ define([
 
         // a few little hacks to support auto-update of choices
         widget.getItextType = function () {
-            // temporary double replace (until ItextID <-> Itext properties renamed)
-            return widget.path.replace("ItextID", "").replace("Itext", "");
+            return widget.path.replace("Itext", "");
         };
 
         widget.autoGenerateId = function () {

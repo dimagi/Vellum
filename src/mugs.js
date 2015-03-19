@@ -631,8 +631,7 @@ define([
                 nodeId = isSelectItem ?
                     this.p.defaultValue || "null" :
                     this.getDefaultItextRoot(),
-                // temporary double replace (until ItextID <-> Itext properties renamed)
-                itextType = propertyPath.replace("ItextID", "").replace("Itext", "");
+                itextType = propertyPath.replace("Itext", "");
             return rootId + nodeId + "-" + itextType;
         },
         unlinkItext: function () {
