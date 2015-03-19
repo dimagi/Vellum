@@ -260,14 +260,14 @@ define([
 
     function createHint(xmlWriter, mug) {
         var hintLabel = mug.p.hintLabel,
-            hintItextID = mug.p.hintItextID;
-        if(hintLabel || (hintItextID && hintItextID.id)) {
+            hintItext = mug.p.hintItext;
+        if(hintLabel || (hintItext && hintItext.id)) {
             xmlWriter.writeStartElement('hint');
             if(hintLabel){
                 xmlWriter.writeString(hintLabel);
             }
-            if(hintItextID.id){
-                var ref = "jr:itext('" + hintItextID.id + "')";
+            if(hintItext.id){
+                var ref = "jr:itext('" + hintItext.id + "')";
                 xmlWriter.writeAttributeString('ref',ref);
             }
             xmlWriter.writeEndElement();

@@ -640,7 +640,7 @@ define([
             _.each([
                 "labelItext",
                 "constraintMsgItext",
-                "hintItextID"
+                "hintItext"
             ], function (path) {
                 var val = _this.p[path];
                 // items don't have a constraintMsgItext
@@ -877,7 +877,7 @@ define([
         },
         spec: {
             hintLabel: { presence: 'notallowed' },
-            hintItextID: { presence: 'notallowed' },
+            hintItext: { presence: 'notallowed' },
             helpItextID: { presence: 'notallowed' },
             defaultValue: {
                 lstring: 'Choice Value',

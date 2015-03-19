@@ -363,7 +363,7 @@ define([
             var labelItext, hintItext, constraintItext;
             if (mug){
                 labelItext = mug.p.labelItext;
-                hintItext = mug.p.hintItextID;
+                hintItext = mug.p.hintItext;
                 if (labelItext) {
                     this.removeItem(labelItext);
                 }
@@ -394,9 +394,9 @@ define([
                     mug.p.labelItext = this.getDefaultLabelItext(mug, defaultLabelValue);
                 }
                 // set hint if legal and not there
-                if (mug.spec.hintItextID.presence !== "notallowed" &&
-                    !mug.p.hintItextID) {
-                    mug.p.hintItextID = this.createItem("");
+                if (mug.spec.hintItext.presence !== "notallowed" &&
+                    !mug.p.hintItext) {
+                    mug.p.hintItext = this.createItem("");
                 }
                 if (mug.spec.helpItextID.presence !== "notallowed" &&
                     !mug.p.helpItextID) {
@@ -451,7 +451,7 @@ define([
         
             var thingsToGet = [
                 'labelItext',
-                'hintItextID', 
+                'hintItext', 
                 'helpItextID',
                 'constraintMsgItext'
             ]; 
@@ -1617,7 +1617,7 @@ define([
                 mug.p.labelItext = labelItext;
             }
             if (hintEl.length && mug.spec.hintLabel.presence !== 'notallowed') {
-                mug.p.hintItextID = parseItextRef(hintEl);
+                mug.p.hintItext = parseItextRef(hintEl);
             }
             if (helpEl.length && mug.spec.label.presence !== 'notallowed') {
                 mug.p.helpItextID = parseItextRef(helpEl);
@@ -1858,22 +1858,29 @@ define([
                 widgetValuePath: "labelItext"
             };
 
-            control.hintItextID = {
+            control.hintItext = {
                 visibility: 'visible',
                 presence: function (mugOptions) {
                     return mugOptions.isSpecialGroup ? 'notallowed' : 'optional';
                 },
-                lstring: "Hint Itext ID",
-                widget: iTextIDWidget,
+                lstring: "Hint",
+                widget: function (mug, options) {
+                    return itextLabelBlock(mug, $.extend(options, {
+                        itextType: "hint",
+                        getItextByMug: function (mug) {
+                            return mug.p.hintItext;
+                        },
+                        displayName: "Hint Message"
+                    }));
+                },
                 validationFunc: function (mug) {
-                    var hintItext;
-                    hintItext = mug.p.hintItextID;
+                    var hintItext = mug.p.hintItext;
                     if (hintItext && hintItext.id) {
                         if (!util.isValidAttributeValue(hintItext.id)) {
                             return hintItext.id + " is not a valid ID";
                         }
                     }
-                    if (mug.spec.hintItextID.presence === 'required' &&
+                    if (mug.spec.hintItext.presence === 'required' &&
                         !hintItext.id) {
                         return 'Hint ID is required but not present in this question!';
                     }
@@ -1882,17 +1889,11 @@ define([
                 }
             };
             // virtual property used to get a widget
-            control.hintItext = {
-                visibility: 'hintItextID',
-                widget: function (mug, options) {
-                    return itextLabelBlock(mug, $.extend(options, {
-                        itextType: "hint",
-                        getItextByMug: function (mug) {
-                            return mug.p.hintItextID;
-                        },
-                        displayName: "Hint Message"
-                    }));
-                }
+            control.hintItextID = {
+                visibility: 'hintItext',
+                lstring: "Hint Itext ID",
+                widget: iTextIDWidget,
+                widgetValuePath: "hintItext"
             };
 
             control.helpItextID = {

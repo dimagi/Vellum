@@ -86,6 +86,7 @@ define([
             labelItext: { presence: 'notallowed' },
             labelItextID: { presence: 'notallowed' },
             hintLabel: { presence: 'notallowed' },
+            hintItext: { presence: 'notallowed' },
             hintItextID: { presence: 'notallowed' },
             helpItextID: { presence: 'notallowed' },
             mediaItext: { presence: 'notallowed' },
