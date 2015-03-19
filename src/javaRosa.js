@@ -398,9 +398,9 @@ define([
                     !mug.p.hintItext) {
                     mug.p.hintItext = this.createItem("");
                 }
-                if (mug.spec.helpItextID.presence !== "notallowed" &&
-                    !mug.p.helpItextID) {
-                    mug.p.helpItextID = this.createItem("");
+                if (mug.spec.helpItext.presence !== "notallowed" &&
+                    !mug.p.helpItext) {
+                    mug.p.helpItext = this.createItem("");
                 }
             }
             if (!mug.options.isControlOnly) {
@@ -452,7 +452,7 @@ define([
             var thingsToGet = [
                 'labelItext',
                 'hintItext', 
-                'helpItextID',
+                'helpItext',
                 'constraintMsgItext'
             ]; 
         
@@ -1620,7 +1620,7 @@ define([
                 mug.p.hintItext = parseItextRef(hintEl);
             }
             if (helpEl.length && mug.spec.label.presence !== 'notallowed') {
-                mug.p.helpItextID = parseItextRef(helpEl);
+                mug.p.helpItext = parseItextRef(helpEl);
             }
             if (mug.p.constraintMsgAttr) {
                 var id = getITextID(mug.p.constraintMsgAttr);
@@ -1823,9 +1823,9 @@ define([
             databind.constraintMsgItextID = {
                 visibility: 'constraintMsgItext',
                 presence: 'optional',
+                lstring: "Validation Error Message ID",
                 widget: iTextIDWidget,
-                widgetValuePath: "constraintMsgItext",
-                lstring: "Validation Error Message ID"
+                widgetValuePath: "constraintMsgItext"
             };
 
             // CONTROL ELEMENT
@@ -1896,22 +1896,29 @@ define([
                 widgetValuePath: "hintItext"
             };
 
-            control.helpItextID = {
+            control.helpItext = {
                 visibility: 'visible',
                 presence: function (mugOptions) {
                     return mugOptions.isSpecialGroup ? 'notallowed' : 'optional';
                 },
-                lstring: "Help Itext ID",
-                widget: iTextIDWidget,
+                lstring: "Help Message",
+                widget: function (mug, options) {
+                    return itextLabelBlock(mug, $.extend(options, {
+                        itextType: "help",
+                        getItextByMug: function (mug) {
+                            return mug.p.helpItext;
+                        },
+                        displayName: "Help Message"
+                    }));
+                },
                 validationFunc: function (mug) {
-                    var helpItext;
-                    helpItext = mug.p.helpItextID;
+                    var helpItext = mug.p.helpItext;
                     if (helpItext && helpItext.id) {
                         if (!util.isValidAttributeValue(helpItext.id)) {
                             return helpItext.id + " is not a valid ID";
                         }
                     }
-                    if (mug.spec.helpItextID.presence === 'required' &&
+                    if (mug.spec.helpItext.presence === 'required' &&
                         !helpItext.id) {
                         return 'Help ID is required but not present in this question!';
                     }
@@ -1920,17 +1927,11 @@ define([
                 }
             };
             // virtual property used to get a widget
-            control.helpItext = {
-                visibility: 'helpItextID',
-                widget: function (mug, options) {
-                    return itextLabelBlock(mug, $.extend(options, {
-                        itextType: "help",
-                        getItextByMug: function (mug) {
-                            return mug.p.helpItextID;
-                        },
-                        displayName: "Help Message"
-                    }));
-                }
+            control.helpItextID = {
+                visibility: 'helpItext',
+                lstring: "Help Itext ID",
+                widget: iTextIDWidget,
+                widgetValuePath: "helpItext"
             };
 
             // virtual property used to get a widget
@@ -1974,7 +1975,7 @@ define([
             // virtual property used to get a widget
             control.helpMediaIText = function (mugOptions) {
                 return mugOptions.isSpecialGroup ? undefined : {
-                    visibility: 'helpItextID',
+                    visibility: 'helpItext',
                     presence: 'optional',
                     lstring: 'Add Help Media',
                     widget: function (mug, options) {
@@ -1982,7 +1983,7 @@ define([
                             displayName: "Add Help Media",
                             itextType: "help",
                             getItextByMug: function (mug) {
-                                return mug.p.helpItextID;
+                                return mug.p.helpItext;
                             },
                             forms: SUPPORTED_MEDIA_TYPES,
                             formToIcon: ICONS

@@ -88,6 +88,7 @@ define([
             hintLabel: { presence: 'notallowed' },
             hintItext: { presence: 'notallowed' },
             hintItextID: { presence: 'notallowed' },
+            helpItext: { presence: 'notallowed' },
             helpItextID: { presence: 'notallowed' },
             mediaItext: { presence: 'notallowed' },
             otherItext: { presence: 'notallowed' },

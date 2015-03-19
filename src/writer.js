@@ -275,11 +275,11 @@ define([
     }
 
     function createHelp(xmlWriter, mug) {
-        var helpItextID = mug.p.helpItextID;
-        if(helpItextID && helpItextID.id) {
+        var helpItext = mug.p.helpItext;
+        if(helpItext && helpItext.id) {
             xmlWriter.writeStartElement('help');
-            if(helpItextID.id){
-                var helpRef = "jr:itext('" + helpItextID.id + "')";
+            if(helpItext.id){
+                var helpRef = "jr:itext('" + helpItext.id + "')";
                 xmlWriter.writeAttributeString('ref',helpRef);
             }
             xmlWriter.writeEndElement();
