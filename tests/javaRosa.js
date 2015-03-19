@@ -306,7 +306,7 @@ require([
         it("should escape inequality operators in output ref", function () {
             util.loadXML(OUTPUTREF_WITH_INEQUALITY_XML);
             var mug = util.getMug("product");
-            assert.equal(mug.p.labelItextID.get("en"),
+            assert.equal(mug.p.labelItext.get("en"),
                 '<output value="if(1 < 2 or 2 > 3 or 3 <= 3 or 4 >= 5, \'product\', \'other\')"/>');
             util.assertXmlEqual(
                 call('createXML'),
@@ -320,21 +320,21 @@ require([
             util.addQuestion("Text", "load-one");
             var label = util.addQuestion("Trigger", "label"),
                 text2 = util.addQuestion("Text", "text2");
-            label.p.labelItextID.setDefaultValue('<output value="/data/load-one" />');
+            label.p.labelItext.setDefaultValue('<output value="/data/load-one" />');
             text2.p.nodeID = "load";
             text2.p.nodeID = "load-two";
-            assert.equal(label.p.labelItextID.getValue("default", "en"), '<output value="/data/load-one" />');
+            assert.equal(label.p.labelItext.getValue("default", "en"), '<output value="/data/load-one" />');
         });
 
         it("itext changes do not bleed back after copy", function (done) {
             util.init({core: {onReady: function () {
                 var mug = util.addQuestion("Text", "question"),
                     dup = mug.form.duplicateMug(mug);
-                dup.p.labelItextID.setDefaultValue("q2");
+                dup.p.labelItext.setDefaultValue("q2");
 
                 util.saveAndReload(function () {
                     var mug = call("getMugByPath", "/data/question");
-                    assert.equal(mug.p.labelItextID.defaultValue(), "question");
+                    assert.equal(mug.p.labelItext.defaultValue(), "question");
                     done();
                 });
             }}});
@@ -345,15 +345,15 @@ require([
                 var mug = util.addQuestion("Text", "question"),
                     dup = mug.form.duplicateMug(mug),
                     cpy = mug.form.duplicateMug(dup);
-                cpy.p.labelItextID.setDefaultValue("copy");
+                cpy.p.labelItext.setDefaultValue("copy");
 
                 util.saveAndReload(function () {
                     var mug = call("getMugByPath", "/data/question"),
                         dup = call("getMugByPath", "/data/copy-1-of-question"),
                         cpy = call("getMugByPath", "/data/copy-2-of-question");
-                    assert.equal(mug.p.labelItextID.defaultValue(), "question");
-                    assert.equal(dup.p.labelItextID.defaultValue(), "question");
-                    assert.equal(cpy.p.labelItextID.defaultValue(), "copy");
+                    assert.equal(mug.p.labelItext.defaultValue(), "question");
+                    assert.equal(dup.p.labelItext.defaultValue(), "question");
+                    assert.equal(cpy.p.labelItext.defaultValue(), "copy");
                     done();
                 });
             }}});
@@ -369,7 +369,7 @@ require([
                 target.val("test string").change();
                 vellum_util.setCaretPosition(target[0], 4);
                 call("handleDropFinish", target, sourceUid, mug1);
-                var val = mug2.p.labelItextID.getValue('default', 'en');
+                var val = mug2.p.labelItext.getValue('default', 'en');
                 assert.equal(val, 'test<output value="/data/question1" /> string');
                 done();
             }}});
@@ -389,7 +389,7 @@ require([
                     ctrlKey: false
                 });
                 target.change();
-                var val = mug.p.labelItextID.getValue('default', 'en');
+                var val = mug.p.labelItext.getValue('default', 'en');
                 assert.equal(val, 'question1  end');
                 done();
             }}});
@@ -409,7 +409,7 @@ require([
                     ctrlKey: false
                 });
                 target.change();
-                var val = mug.p.labelItextID.getValue('default', 'en');
+                var val = mug.p.labelItext.getValue('default', 'en');
                 assert.equal(val, 'question1  end');
                 done();
             }}});
@@ -423,7 +423,7 @@ require([
                     onReady: function () {
                         var group = util.call("getMugByPath", "/data/question2"),
                             q1 = util.call("getMugByPath", "/data/question1"),
-                            itext = q1.p.labelItextID;
+                            itext = q1.p.labelItext;
 
                         assert(itext.getValue('default', 'en').indexOf('"/data/question2/question3"') > 0,
                             '"/data/question2/question3" not in ' + itext.getValue('default', 'en'));
@@ -445,9 +445,9 @@ require([
                          'Second"" line\nThird line"\tHindu trans\n');
             jr.parseXLSItext(trans, Itext);
             var q1 = util.getMug("question1");
-            assert.equal(q1.p.labelItextID.get("en"),
+            assert.equal(q1.p.labelItext.get("en"),
                          'First "line\nSecond" line\nThird line');
-            assert.equal(q1.p.labelItextID.get("hin"), 'Hindu trans');
+            assert.equal(q1.p.labelItext.get("hin"), 'Hindu trans');
         });
 
         it("should generate bulk multi-line translation with user-friendly newlines", function () {
@@ -479,12 +479,12 @@ require([
                          'Second"" line\nThird line"\t\t\t\n');
             jr.parseXLSItext(trans, Itext);
             var q1 = util.getMug("question1");
-            assert.equal(q1.p.labelItextID.get("en"),
+            assert.equal(q1.p.labelItext.get("en"),
                          'First "line\nSecond" line\nThird line');
             // existing translation should be cleared
-            assert.equal(q1.p.labelItextID.get("hin"), '');
+            assert.equal(q1.p.labelItext.get("hin"), '');
             // non-existent form should not be added
-            assert(!q1.p.labelItextID.hasForm("audio"), "unexpected form: audio");
+            assert(!q1.p.labelItext.hasForm("audio"), "unexpected form: audio");
         });
 
         it("bulk translation tool should enable the save button on update", function () {

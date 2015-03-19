@@ -236,13 +236,13 @@ define([
      * Creates the label tag inside of a control Element in the xform
      */
     function createLabel(xmlWriter, mug) {
-        var labelItextID = mug.p.labelItextID,
+        var labelItext = mug.p.labelItext,
             labelRef;
-        if (labelItextID) {
-            labelRef = "jr:itext('" + labelItextID.id + "')";
+        if (labelItext) {
+            labelRef = "jr:itext('" + labelItext.id + "')";
             // iID is optional so by extension Itext is optional.
-            if (labelItextID.isEmpty() &&
-                    mug.spec.labelItextID.presence === 'optional') {
+            if (labelItext.isEmpty() &&
+                    mug.spec.labelItext.presence === 'optional') {
                 labelRef = '';
             }
         }

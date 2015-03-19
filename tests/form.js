@@ -108,11 +108,11 @@ define([
                 hidden = call("getMugByPath", "/data/group/hidden");
 
             chai.expect(label.p.relevantAttr).to.include("/data/group/hidden");
-            chai.expect(label.p.labelItextID.defaultValue()).to.include("/data/group/hidden");
+            chai.expect(label.p.labelItext.defaultValue()).to.include("/data/group/hidden");
             form.moveMug(hidden, null, "first");
             assert.equal(hidden.absolutePath, "/data/hidden");
             chai.expect(label.p.relevantAttr).to.include("/data/hidden");
-            chai.expect(label.p.labelItextID.defaultValue()).to.include("/data/hidden");
+            chai.expect(label.p.labelItext.defaultValue()).to.include("/data/hidden");
         });
 
         it("should update repeat group reference", function () {

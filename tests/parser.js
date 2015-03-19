@@ -97,9 +97,9 @@ require([
             var grp = call("getMugByPath", "/data/group"),
                 mug = call("getMugByPath", "/data/group/a"),
                 txt = call("getMugByPath", "/data/text");
-            assert.equal(grp.p.labelItextID.defaultValue(), 'The group');
-            assert.equal(mug.p.labelItextID.defaultValue(), 'The label');
-            assert.equal(txt.p.labelItextID.defaultValue(), 'The text');
+            assert.equal(grp.p.labelItext.defaultValue(), 'The group');
+            assert.equal(mug.p.labelItext.defaultValue(), 'The label');
+            assert.equal(txt.p.labelItext.defaultValue(), 'The text');
 
             // should not raise an error
             util.assertXmlNotEqual(call("createXML"), LABEL_WITHOUT_ITEXT_XML);

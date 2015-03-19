@@ -237,7 +237,7 @@ define([
                 validationFunc: function (mug) {
                     var hasLabel, hasLabelItextID, missing, hasItext;
                     hasLabel = mug.p.label;
-                    var itextBlock = mug.p.labelItextID;
+                    var itextBlock = mug.p.labelItext;
                     hasLabelItextID = itextBlock && (typeof itextBlock.id !== "undefined");
 
                     if (hasLabelItextID && !util.isValidAttributeValue(itextBlock.id)) {
@@ -248,8 +248,8 @@ define([
                     if (hasLabel) {
                         return 'pass';
                     } else if (!hasLabel && !hasItext && (mug.spec.label.presence === 'optional' || 
-                               mug.spec.labelItextID.presence === 'optional')) {
-                        //make allowance for questions that have label/labelItextID set to 'optional'
+                               mug.spec.labelItext.presence === 'optional')) {
+                        //make allowance for questions that have label/labelItext set to 'optional'
                         return 'pass';
                     } else if (hasLabelItextID && hasItext) {
                         return 'pass';
@@ -574,20 +574,20 @@ define([
         
         // Add some useful functions for dealing with itext.
         setItextID: function (val) {
-            var labelItextID = this.p.labelItextID;
-            if (labelItextID) {
-                labelItextID.id = val;
+            var labelItext = this.p.labelItext;
+            if (labelItext) {
+                labelItext.id = val;
             }
         },
         
         getItext: function () {
-            return this.p.labelItextID;
+            return this.p.labelItext;
         },
         getNodeID: function () {
             return this.p.nodeID || this.p.defaultValue;
         },
         getDisplayName: function (lang) {
-            var itextItem = this.p.labelItextID, 
+            var itextItem = this.p.labelItext, 
                 Itext = this.form.vellum.data.javaRosa.Itext,
                 defaultLang = Itext.getDefaultLanguage(),
                 disp,
@@ -638,7 +638,7 @@ define([
         unlinkItext: function () {
             var _this = this;
             _.each([
-                "labelItextID",
+                "labelItext",
                 "constraintMsgItext",
                 "hintItextID"
             ], function (path) {

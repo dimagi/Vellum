@@ -304,8 +304,8 @@ define([
             if (nodeId) {
                 assert(_.isUndefined(attrs.nodeID),
                        "unexpected attribute for " + qType + "[" + nodeId + "]");
-                if (mug.p.labelItextID) {
-                    mug.p.labelItextID.setDefaultValue(nodeId);
+                if (mug.p.labelItext) {
+                    mug.p.labelItext.setDefaultValue(nodeId);
                 }
                 // HACK set nodeID after label itext so tree node gets renamed
                 mug.p.nodeID = nodeId;

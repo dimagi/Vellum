@@ -704,7 +704,7 @@ define([
                                     // and item ID parts of the ID
                                     new RegExp("(^|/)" + e.val + "(/|-)"),
                                     "$1" + e.previous + "$2")),
-                            isAuto = (oldAutoID === child.p.labelItextID.id);
+                            isAuto = (oldAutoID === child.p.labelItext.id);
 
                         if (isAuto) {
                             child.setItextID(child.getDefaultLabelItextId());

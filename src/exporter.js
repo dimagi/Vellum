@@ -36,7 +36,7 @@ define([
 
         var mugToExportRow = function (mug) {
             var row = {},
-                itext = mug.p.labelItextID,
+                itext = mug.p.labelItext,
                 defaultLanguage = form.vellum.data.javaRosa.Itext.getDefaultLanguage(),
                 i;
 

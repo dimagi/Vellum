@@ -362,7 +362,7 @@ define([
             // itext makes removal problematic.
             var labelItext, hintItext, constraintItext;
             if (mug){
-                labelItext = mug.p.labelItextID;
+                labelItext = mug.p.labelItext;
                 hintItext = mug.p.hintItextID;
                 if (labelItext) {
                     this.removeItem(labelItext);
@@ -388,11 +388,10 @@ define([
             // set default itext id/values
             if (!mug.options.isDataOnly) {
                 // set label if not there
-                if (!mug.p.labelItextID && 
-                    mug.spec.labelItextID.presence !== "notallowed")
+                if (!mug.p.labelItext && 
+                    mug.spec.labelItext.presence !== "notallowed")
                 {
-                    var labelItextID = this.getDefaultLabelItext(mug, defaultLabelValue);
-                    mug.p.labelItextID = labelItextID;
+                    mug.p.labelItext = this.getDefaultLabelItext(mug, defaultLabelValue);
                 }
                 // set hint if legal and not there
                 if (mug.spec.hintItextID.presence !== "notallowed" &&
@@ -451,7 +450,7 @@ define([
             }
         
             var thingsToGet = [
-                'labelItextID',
+                'labelItext',
                 'hintItextID', 
                 'helpItextID',
                 'constraintMsgItext'
@@ -1135,7 +1134,7 @@ define([
                 allMugs.map(function (mug) {
                     var treeName = itextItem.getValue(widget.form, widget.language) || 
                             mug.form.vellum.getMugDisplayName(mug),
-                        it = mug.p.labelItextID;
+                        it = mug.p.labelItext;
                     if (it && it.id === itextItem.id && widget.form === "default") {
                         mug.form.fire({
                             type: 'question-label-text-change',
@@ -1463,8 +1462,7 @@ define([
                         _this.jstree('rename_node', $el, mug.getNodeID());
                     }
                     else {
-                        var labelItextID = mug.p.labelItextID;
-                        if (labelItextID) {
+                        if (mug.p.labelItext) {
                             var text = _this.getMugDisplayName(mug);
                             _this.jstree('rename_node', $el, text ||
                                     _this.opts().core.noTextString);
@@ -1616,7 +1614,7 @@ define([
                         labelItext.setDefaultValue(mug.getDefaultLabelValue());
                     }
                 }
-                mug.p.labelItextID = labelItext;
+                mug.p.labelItext = labelItext;
             }
             if (hintEl.length && mug.spec.hintLabel.presence !== 'notallowed') {
                 mug.p.hintItextID = parseItextRef(hintEl);
@@ -1836,27 +1834,28 @@ define([
             control.label.visibility = "visible_if_present";
             control.hintLabel.visibility = "visible_if_present";
 
-            control.labelItextID = {
+            control.labelItext = {
                 visibility: 'visible',
                 presence: 'optional',
-                lstring: "Question Itext ID",
-                widget: iTextIDWidget,
-                validationFunc: spec.control.label.validationFunc
-            };
-            // virtual property used to define a widget
-            control.labelItext = {
-                visibility: 'labelItextID',
-                presence: 'optional',
+                lstring: "Label",
                 widget: function (mug, options) {
                     return itextLabelBlock(mug, $.extend(options, {
                         itextType: "label",
                         getItextByMug: function (mug) {
-                            return mug.p.labelItextID;
+                            return mug.p.labelItext;
                         },
                         displayName: "Label"
                     }));
                 },
-                lstring: "Label"
+                validationFunc: spec.control.label.validationFunc
+            };
+            // virtual property used to define a widget
+            control.labelItextID = {
+                visibility: 'labelItext',
+                presence: 'optional',
+                lstring: "Question Itext ID",
+                widget: iTextIDWidget,
+                widgetValuePath: "labelItext"
             };
 
             control.hintItextID = {
@@ -1936,7 +1935,7 @@ define([
             // virtual property used to get a widget
             control.otherItext = function (mugOptions) {
                 return mugOptions.isSpecialGroup ? undefined : {
-                    visibility: 'labelItextID',
+                    visibility: 'labelItext',
                     presence: 'optional',
                     lstring: "Add Other Content",
                     widget: function (mug, options) {
@@ -1944,7 +1943,7 @@ define([
                             displayName: "Add Other Content",
                             itextType: "label",
                             getItextByMug: function (mug) {
-                                return mug.p.labelItextID;
+                                return mug.p.labelItext;
                             },
                             forms: ['long', 'short'],
                             isCustomAllowed: true
@@ -1955,7 +1954,7 @@ define([
             // virtual property used to get a widget
             control.mediaItext = function (mugOptions) {
                 return mugOptions.isSpecialGroup ? undefined : {
-                    visibility: 'labelItextID',
+                    visibility: 'labelItext',
                     presence: 'optional',
                     lstring: 'Add Multimedia',
                     widget: function (mug, options) {
@@ -1963,7 +1962,7 @@ define([
                             displayName: "Add Multimedia",
                             itextType: "label",
                             getItextByMug: function (mug) {
-                                return mug.p.labelItextID;
+                                return mug.p.labelItext;
                             },
                             forms: SUPPORTED_MEDIA_TYPES,
                             formToIcon: ICONS
