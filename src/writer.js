@@ -36,6 +36,7 @@ define([
         }
         
         createBindList(dataTree, xmlWriter);
+        form.clearDataTree();
         
         _.each(form.getSetValues(), function (setValue) {
             xmlWriter.writeStartElement('setvalue');

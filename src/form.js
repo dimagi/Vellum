@@ -221,6 +221,16 @@ define([
     }
 
     Form.prototype = {
+        clearDataTree: function() {
+            var rootId = this.getBasePath().slice(1,-1),
+                dataTree = new Tree(rootId, 'data');
+            this.tree.walk(function(mug, nodeID, processChildren) {
+                processChildren();
+                if (mug) {
+                    dataTree.removeMug(mug);
+                }
+            });
+        },
         dataTree: function() {
             var rootId = this.getBasePath().slice(1,-1),
                 dataTree = new Tree(rootId, 'data'),
