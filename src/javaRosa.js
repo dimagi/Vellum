@@ -119,10 +119,9 @@ define([
         },
         isEmpty: function () {
             if (this.forms) {
-                var nonEmptyItems = _(this.forms).filter(function (form) {
-                    return !form.isEmpty();
+                return _.every(this.forms, function (form) {
+                    return form.isEmpty();
                 });
-                return nonEmptyItems.length === 0;
             }
             return true;
         },
@@ -261,28 +260,6 @@ define([
         getItems: function () {
             return this.items;
         },
-        getNonEmptyItems: function () {
-            return _(this.items).filter(function (item) {
-                return !item.isEmpty();
-            });
-        },
-        deduplicateIds: function () {
-            var nonEmpty = this.getNonEmptyItems();
-            var found = [];
-            var counter, item, origId,
-                changed = false;
-            for (var i = 0; i < nonEmpty.length; i++) {
-                item = nonEmpty[i];
-                origId = item.id;
-                counter = 2;
-                while (found.indexOf(item.id) !== -1) {
-                    item.id = origId + counter;
-                    counter = counter + 1;
-                    changed = true;
-                }
-                found.push(item.id);
-            }
-        },
         hasItem: function (item) {
             return item.key && this.items.hasOwnProperty(item.key);
         },
@@ -411,17 +388,23 @@ define([
     };
 
     /**
-     * Walks the tree and grabs the Itext items from all mugs
+     * Walks the tree and grabs Itext items from mugs
      *
-     * All empty and unreferenced itext items are omitted from this list.
-     * This updates the id on each returned auto-id Itext item.
+     * This updates the ID of each returned Itext item according to it's
+     * autoId property. IDs of items with autoId turned off will not be
+     * modified unless the ID is blank or it conflicts with another item.
+     * NOTE because this mutates itext IDs it could cause subtle side
+     * effects if anything depends on Itext IDs not changing at random
+     * times such as save, copy, paste, export translations, etc.
      *
-     * @returns - a flat list of Itext items.
+     * @param form - the vellum instance's Form object.
+     * @param empty - if true, return empty items as well. Otherwise omit them.
+     * @returns - a list of Itext items.
      */
-    var getAllNonEmptyItextItemsFromMugs = function (form) {
-        // get all the itext references in the forms
+    var getItextItemsFromMugs = function (form, empty) {
         var ret = [],
             seen = {},
+            byId = {},
             thingsToGet = [
                 'labelItext',
                 'hintItext', 
@@ -433,26 +416,40 @@ define([
             }));
 
         form.tree.walk(function (mug, nodeID, processChildren) {
-            if(mug) { // skips root node
+            if(mug) { // skip root node
                 _.each(thingsToGet, function (property) {
-                    try {
-                        var item = mug.p[property];
-                        if (item && !item.isEmpty() && !seen.hasOwnProperty(item.key)) {
-                            if (item.autoId) {
-                                item.id = getDefaultItextId(mug, props[property]);
+                    var item = mug.p[property];
+                    if (item && !item.key) {
+                        // this should never happen
+                        window.console.log(
+                            "ignoring ItextItem without a key: " + item.id);
+                        return;
+                    } else if (item && !seen.hasOwnProperty(item.key)) {
+                        seen[item.key] = true;
+                        var itemIsEmpty = item.isEmpty();
+                        if (!itemIsEmpty || empty) {
+                            var id = item.autoId || !item.id ?
+                                     getDefaultItextId(mug, props[property]) :
+                                     item.id,
+                                origId = id,
+                                count = 2;
+                            if (itemIsEmpty && byId.hasOwnProperty(id)) {
+                                // ignore empty item with duplicate ID
+                                return;
                             }
+                            while (byId.hasOwnProperty(id)) {
+                                id = origId + count;
+                            }
+                            item.id = id;
+                            byId[id] = item;
                             ret.push(item);
-                            seen[item.key] = true;
-                        } 
-                    } catch (err) {
-                        // probably just wasn't in the mug
+                        }
                     }
                 });
             }
             processChildren();
         });
         return ret; 
-
     };
 
     var iTextIDWidget = function (mug, options) {
@@ -1130,12 +1127,16 @@ define([
             });
         }
 
-        // HACK update all referenced itext IDs (side effect)
-        getAllNonEmptyItextItemsFromMugs(vellum.data.core.form);
+        var items = getItextItemsFromMugs(vellum.data.core.form, true);
+        items = _.object(_.map(items, function (item) { return [item.id, item]; }));
         cells = nextRow();
         while (cells) {
             // what's the point of creating items here?
-            item = Itext.getOrCreateItem(cells[0]);
+            item = items[cells[0]];
+            if (!item) {
+                // TODO alert user that row was skipped
+                continue;
+            }
             for (i = 1; i < cells.length; i++) {
                 head = header[i];
                 if (head) {
@@ -1174,20 +1175,17 @@ define([
             });
         }
 
-        // todo: fix abstraction barrier
-        vellum.beforeSerialize();
-
         // TODO: should this be configurable?
         var forms = ["default", "audio", "image" , "video"],
             languages = Itext.getLanguages(),
-            allItems = getAllNonEmptyItextItemsFromMugs(vellum.data.core.form),
             rows = [];
 
         if (languages.length > 0) {
+            var items = getItextItemsFromMugs(vellum.data.core.form);
             rows.push(makeHeadings(languages, forms));
-            for(var i = 0; i < allItems.length; i++) {
-                rows.push(makeRow(allItems[i], languages, forms));
-            }
+            _.each(items, function (item) {
+                rows.push(makeRow(item, languages, forms));
+            });
         }
         return tsv.tabDelimit(rows);
     };
@@ -1622,8 +1620,8 @@ define([
             // non-duplicates
 
             var Itext = this.data.javaRosa.Itext,
+                items = this.data.javaRosa.itextItemsFromBeforeSerialize,
                 languages = Itext.getLanguages(),
-                allItems = Itext.getNonEmptyItems(),
                 item, forms, form, lang, val;
             if (languages.length > 0) {
                 xmlWriter.writeStartElement("itext");
@@ -1634,8 +1632,8 @@ define([
                     if (Itext.getDefaultLanguage() === lang) {
                         xmlWriter.writeAttributeString("default", '');
                     }
-                    for (var j = 0; j < allItems.length; j++) {
-                        item = allItems[j];
+                    for (var j = 0; j < items.length; j++) {
+                        item = items[j];
                         xmlWriter.writeStartElement("text");
                         xmlWriter.writeAttributeString("id", item.id);
                         forms = item.getForms();
@@ -1660,11 +1658,9 @@ define([
         beforeSerialize: function () {
             this.__callOld();
 
-            // remove crufty itext that isn't linked to anything in the form
-            this.data.javaRosa.Itext.items = getAllNonEmptyItextItemsFromMugs(
-                this.data.core.form);
-
-            this.data.javaRosa.Itext.deduplicateIds();
+            // update and dedup all non-empty Itext items IDs
+            this.data.javaRosa.itextItemsFromBeforeSerialize =
+                getItextItemsFromMugs(this.data.core.form);
         },
         getMugTypes: function () {
             var types = this.__callOld(),
