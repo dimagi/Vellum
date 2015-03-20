@@ -14,6 +14,9 @@ require([
     'text!static/javaRosa/outputref-with-inequality.xml',
     'text!static/javaRosa/text-with-constraint.xml',
     'text!static/javaRosa/group-help.xml',
+    'text!static/javaRosa/itext-item-rename.xml',
+    'text!static/javaRosa/itext-item-rename-group-move.xml',
+    'text!static/javaRosa/itext-item-non-auto-id.xml',
     'text!static/javaRosa/select1-help.xml'
 ], function (
     chai,
@@ -30,6 +33,9 @@ require([
     OUTPUTREF_WITH_INEQUALITY_XML,
     TEXT_WITH_CONSTRAINT_XML,
     GROUP_HELP_XML,
+    ITEXT_ITEM_RENAME_XML,
+    ITEXT_ITEM_RENAME_GROUP_MOVE_XML,
+    ITEXT_ITEM_NON_AUTO_ID_XML,
     SELECT1_HELP_XML
 ) {
     var assert = chai.assert,
@@ -519,6 +525,40 @@ require([
                 assert.strictEqual($xml.find("help").length, 1,
                                    "wrong <help> node count\n" + xml);
             });
+        });
+
+        it("should rename itext item ID after move", function () {
+            util.loadXML("");
+            util.addQuestion("Select", "ns");
+            util.addQuestion("Select", "ew");
+            var north = util.getMug("ns/item1"),
+                south = util.getMug("ew/item1");
+            north.p.defaultValue = "north";
+            south.p.defaultValue = "south";
+            north.form.moveMug(south, north, "after");
+            util.assertXmlEqual(util.call("createXML"), ITEXT_ITEM_RENAME_XML,
+                                {normalize_xmlns: true});
+        });
+
+        it("should rename group's child itext item IDs after move group", function () {
+            util.loadXML("");
+            var green = util.addQuestion("Group", "green"),
+                blue = util.addQuestion("Group", "blue");
+            util.addQuestion("Text", "text");
+            blue.form.moveMug(blue, green, "before");
+            util.assertXmlEqual(util.call("createXML"),
+                                ITEXT_ITEM_RENAME_GROUP_MOVE_XML,
+                                {normalize_xmlns: true});
+        });
+
+        it("should not auto-update itext ID when multiple questions point to auto-ish-id", function () {
+            util.loadXML(ITEXT_ITEM_NON_AUTO_ID_XML);
+            var north = util.getMug("north");
+            north.p.nodeID = "west";
+            var xml = call("createXML"),
+                $xml = $(xml);
+            assert.strictEqual($xml.find("text#north-label").length, 2,
+                               "wrong <text> node count\n" + xml);
         });
     });
 
