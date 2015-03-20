@@ -183,6 +183,12 @@ define([
 
             //If we got this far, everything checks out.
             return true;
+        },
+        getRootNode: function () {
+            if (this.isRootNode) {
+                return this;
+            }
+            return this.parent.getRootNode();
         }
     };
 
@@ -252,7 +258,7 @@ define([
                 node = this.getNodeFromMug(mug),
                 refNodeIndex, refNodeParent;
 
-            if (node) {
+            if (node && this.rootNode === node.getRootNode()) {
                 this._removeNodeFromTree(node); 
             } else {
                 node = new Node(null, mug);
