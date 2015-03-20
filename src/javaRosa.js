@@ -40,13 +40,15 @@ define([
         },
         RESERVED_ITEXT_CONTENT_TYPES = [
             'default', 'short', 'long', 'audio', 'video', 'image'
-        ];
+        ],
+        _nextItextItemKey = 1;
 
     function ItextItem(options) {
         this.forms = options.forms || [];
         this.id = options.id || "";
         this.autoId = _.isUndefined(options.autoId) ? true : options.autoId;
         this.itextModel = options.itextModel;
+        this.key = String(_nextItextItemKey++);
     }
     ItextItem.prototype = {
         clone: function () {
@@ -56,7 +58,6 @@ define([
                 autoId: this.autoId,
                 itextModel: this.itextModel
             });
-            this.itextModel.addItem(item);
             return item;
         },
         getForms: function () {
@@ -223,8 +224,6 @@ define([
         util.eventuality(this);
         
         this.languages = [];
-        this.items = [];
-        this._nextKey = 1;
     }
     ItextModel.prototype = {
         getLanguages: function () {
@@ -257,33 +256,11 @@ define([
                 return this.languages.length > 0 ? this.languages[0] : "";
             }
         },
-        getItems: function () {
-            return this.items;
-        },
-        hasItem: function (item) {
-            return item.key && this.items.hasOwnProperty(item.key);
-        },
-        /**
-         * Add an itext item to the global Itext object.
-         * Item is an ItextItem object.
-         * Does nothing if the item was already in the itext object.
-         */
-        addItem: function (item) {
-            if (item.key) {
-                if (this.items[item.key] !== item) {
-                    throw new Error("cannot add new item with existing key");
-                }
-            } else {
-                var key = String(this._nextKey++);
-                this.items[key] = item;
-                item.key = key;
-            } 
-        },
         /*
-         * Create a new blank item and add it to the list.
+         * Create a new blank item
          */
         createItem: function (id, autoId) {
-            var item = new ItextItem({
+            return new ItextItem({
                 id: id,
                 autoId: autoId,
                 itextModel: this,
@@ -292,62 +269,6 @@ define([
                     itextModel: this
                 })]
             });
-            this.addItem(item);
-            return item;
-        },
-        /**
-         * Get the Itext Item by ID.
-         */
-        getItem: function (iID) {
-            return _.find(this.items, function (item) {
-                return item.id === iID;
-            });
-        },
-        getOrCreateItem: function (id) {
-            var item = this.getItem(id);
-            if (!item) {
-                item = this.createItem(id);
-            }
-            return item;
-        },
-        removeItem: function (item) {
-            var index = this.items.indexOf(item);
-            if (index !== -1) {
-                this.items.splice(index, 1);
-            } 
-        },
-        /**
-         * Generates a flat list of all unique Itext IDs currently in the
-         * Itext object.
-         */
-        getAllItemIDs: function () {
-            return this.items.map(function (item) {
-                return item.id;
-            });
-        },
-        /**
-         * Remove all Itext associated with the given mug
-         * @param mug
-         */
-        removeMugItext: function (mug) {
-            // NOTE: this is not currently used. We clear itext
-            // at form-generation time. This is because shared 
-            // itext makes removal problematic.
-            var labelItext, hintItext, constraintItext;
-            if (mug){
-                labelItext = mug.p.labelItext;
-                hintItext = mug.p.hintItext;
-                if (labelItext) {
-                    this.removeItem(labelItext);
-                }
-                if (hintItext) {
-                    this.removeItem(hintItext);
-                }
-                constraintItext = mug.p.constraintMsgItext;
-                if (constraintItext) {
-                    this.removeItem(constraintItext);
-                }
-            }
         },
         updateForNewMug: function(mug) {
             // for new mugs, generate a label
@@ -387,6 +308,38 @@ define([
         }
     };
 
+    var ITEXT_PROPERTIES = [
+            'labelItext',
+            'hintItext',
+            'helpItext',
+            'constraintMsgItext'
+        ];
+
+    /**
+     * Call visitor function for each Itext item in the form
+     */
+    function forEachItextItem(form, visit) {
+        var seen = {};
+
+        form.tree.walk(function (mug, nodeID, processChildren) {
+            if(mug) { // skip root node
+                _.each(ITEXT_PROPERTIES, function (property) {
+                    var item = mug.p[property];
+                    if (item && !item.key) {
+                        // this should never happen
+                        window.console.log(
+                            "ignoring ItextItem without a key: " + item.id);
+                        return;
+                    } else if (item && !seen.hasOwnProperty(item.key)) {
+                        seen[item.key] = true;
+                        visit(item, mug, property);
+                    }
+                });
+            }
+            processChildren();
+        });
+    }
+
     /**
      * Walks the tree and grabs Itext items from mugs
      *
@@ -401,56 +354,34 @@ define([
      * @param empty - if true, return empty items as well. Otherwise omit them.
      * @returns - a list of Itext items.
      */
-    var getItextItemsFromMugs = function (form, empty) {
+    function getItextItemsFromMugs(form, empty) {
         var ret = [],
-            seen = {},
             byId = {},
-            thingsToGet = [
-                'labelItext',
-                'hintItext', 
-                'helpItext',
-                'constraintMsgItext'
-            ],
-            props = _.object(_.map(thingsToGet, function (thing) {
+            props = _.object(_.map(ITEXT_PROPERTIES, function (thing) {
                 return [thing, thing.replace("Itext", "")];
             }));
 
-        form.tree.walk(function (mug, nodeID, processChildren) {
-            if(mug) { // skip root node
-                _.each(thingsToGet, function (property) {
-                    var item = mug.p[property];
-                    if (item && !item.key) {
-                        // this should never happen
-                        window.console.log(
-                            "ignoring ItextItem without a key: " + item.id);
-                        return;
-                    } else if (item && !seen.hasOwnProperty(item.key)) {
-                        seen[item.key] = true;
-                        var itemIsEmpty = item.isEmpty();
-                        if (!itemIsEmpty || empty) {
-                            var id = item.autoId || !item.id ?
-                                     getDefaultItextId(mug, props[property]) :
-                                     item.id,
-                                origId = id,
-                                count = 2;
-                            if (itemIsEmpty && byId.hasOwnProperty(id)) {
-                                // ignore empty item with duplicate ID
-                                return;
-                            }
-                            while (byId.hasOwnProperty(id)) {
-                                id = origId + count;
-                            }
-                            item.id = id;
-                            byId[id] = item;
-                            ret.push(item);
-                        }
-                    }
-                });
+        forEachItextItem(form, function (item, mug, property) {
+            var itemIsEmpty = item.isEmpty();
+            if (!itemIsEmpty || empty) {
+                var id = item.autoId || !item.id ?
+                         getDefaultItextId(mug, props[property]) : item.id,
+                    origId = id,
+                    count = 2;
+                if (itemIsEmpty && byId.hasOwnProperty(id)) {
+                    // ignore empty item with duplicate ID
+                    return;
+                }
+                while (byId.hasOwnProperty(id)) {
+                    id = origId + count;
+                }
+                item.id = id;
+                byId[id] = item;
+                ret.push(item);
             }
-            processChildren();
         });
         return ret; 
-    };
+    }
 
     var iTextIDWidget = function (mug, options) {
         var widget = widgets.text(mug, options),
@@ -1400,9 +1331,10 @@ define([
         loadXML: function (xmlString) {
             var _this = this,
                 langs = this.opts().javaRosa.langs,
-                Itext;
+                Itext, itextMap;
 
             this.data.javaRosa.Itext = Itext = new ItextModel();
+            this.data.javaRosa.itextMap = itextMap = {};
 
             function eachLang() {
                 var el = $(this);
@@ -1411,7 +1343,11 @@ define([
                 function eachText() {
                     var textEl = $(this);
                     var id = textEl.attr('id');
-                    var item = Itext.getOrCreateItem(id);
+                    var item = itextMap[id];
+                    if (!item || !itextMap.hasOwnProperty(id)) {
+                        item = Itext.createItem(id);
+                        itextMap[id] = item;
+                    }
 
                     function eachValue() {
                         var valEl = $(this);
@@ -1471,12 +1407,14 @@ define([
 
             this.__callOld();
 
+            delete this.data.javaRosa.itextMap;
             Itext.on('change', function () { _this.onFormChange(); });
         },
         populateControlMug: function(mug, controlElement) {
             this.__callOld();
 
-            var Itext = mug.form.vellum.data.javaRosa.Itext;
+            var Itext = this.data.javaRosa.Itext,
+                itextMap = this.data.javaRosa.itextMap;
 
             function getITextID(value) {
                 try {
@@ -1496,8 +1434,8 @@ define([
             function getItextItem(id, property) {
                 var auto = !id || id === getDefaultItextId(mug, property);
                 if (id) {
-                    var item = Itext.getItem(id);
-                    if (item) {
+                    var item = itextMap[id];
+                    if (item && itextMap.hasOwnProperty(id)) {
                         if (!auto) {
                             item.autoId = false;
                         }
@@ -1581,7 +1519,7 @@ define([
                 oldPathRe = new RegExp(oldPath + '(?![\\w/-])', 'mg');
             }
 
-            _(itext.getItems()).each(function (item) {
+            forEachItextItem(form, function (item) {
                 change = false;
                 _(item.forms).each(function (itForm) {
                     _(itForm.getOutputRefExpressions()).each(function (refs, lang) {
