@@ -438,12 +438,12 @@ require([
         });
 
         it("should bulk update multi-line translation", function () {
-            util.loadXML(TEXT_QUESTION_XML);
-            var Itext = util.call("getData").javaRosa.Itext,
+            var vellum = util.loadXML(TEXT_QUESTION_XML),
+                Itext = util.call("getData").javaRosa.Itext,
                 trans = ('label\tdefault-en\tdefault-hin\n' +
                          'question1-label\t"First ""line\n' +
                          'Second"" line\nThird line"\tHindu trans\n');
-            jr.parseXLSItext(trans, Itext);
+            jr.parseXLSItext(vellum, trans, Itext);
             var q1 = util.getMug("question1");
             assert.equal(q1.p.labelItext.get("en"),
                          'First "line\nSecond" line\nThird line');
@@ -451,10 +451,9 @@ require([
         });
 
         it("should generate bulk multi-line translation with user-friendly newlines", function () {
-            util.loadXML(MULTI_LINE_TRANS_XML);
-            var Itext = util.call("getData").javaRosa.Itext,
-                fakeVellum = {beforeSerialize: function () {}};
-            assert.equal(jr.generateItextXLS(fakeVellum, Itext),
+            var vellum = util.loadXML(MULTI_LINE_TRANS_XML),
+                Itext = util.call("getData").javaRosa.Itext;
+            assert.equal(jr.generateItextXLS(vellum, Itext),
                          'label\tdefault-en\tdefault-hin\t' +
                          'audio-en\taudio-hin\timage-en\timage-hin\tvideo-en\tvideo-hin\n' +
                          'question1-label\t"First ""line\nSecond"" line\nThird line"\t' +
@@ -462,22 +461,21 @@ require([
         });
 
         it("should escape all languages when generating bulk translations", function () {
-            util.loadXML(MULTI_LANG_TRANS_XML);
-            var Itext = util.call("getData").javaRosa.Itext,
-                fakeVellum = {beforeSerialize: function () {}};
-            assert.equal(jr.generateItextXLS(fakeVellum, Itext),
+            var vellum = util.loadXML(MULTI_LANG_TRANS_XML),
+                Itext = util.call("getData").javaRosa.Itext;
+            assert.equal(jr.generateItextXLS(vellum, Itext),
                          'label\tdefault-en\tdefault-hin\taudio-en\taudio-hin\t' +
                          'image-en\timage-hin\tvideo-en\tvideo-hin\n' +
                          'text-label\t"""Text"\t"""Text"\t\t\t\t\t\t');
         });
 
         it("bulk translation tool should not create empty itext forms", function () {
-            util.loadXML(TEXT_QUESTION_XML);
-            var Itext = util.call("getData").javaRosa.Itext,
+            var vellum = util.loadXML(TEXT_QUESTION_XML),
+                Itext = util.call("getData").javaRosa.Itext,
                 trans = ('label\tdefault-en\tdefault-hin\taudio-en\taudio-hin\n' +
                          'question1-label\t"First ""line\n' +
                          'Second"" line\nThird line"\t\t\t\n');
-            jr.parseXLSItext(trans, Itext);
+            jr.parseXLSItext(vellum, trans, Itext);
             var q1 = util.getMug("question1");
             assert.equal(q1.p.labelItext.get("en"),
                          'First "line\nSecond" line\nThird line');
@@ -488,13 +486,13 @@ require([
         });
 
         it("bulk translation tool should enable the save button on update", function () {
-            util.loadXML(TEXT_QUESTION_XML);
+            var vellum = util.loadXML(TEXT_QUESTION_XML);
             util.saveButtonEnabled(false);
             var Itext = util.call("getData").javaRosa.Itext,
                 trans = ('label\tdefault-en\tdefault-hin\taudio-en\taudio-hin\n' +
                          'question1-label\t"First ""line\n' +
                          'Second"" line\nThird line"\t\t\t\n');
-            jr.parseXLSItext(trans, Itext);
+            jr.parseXLSItext(vellum, trans, Itext);
             assert(util.saveButtonEnabled(), "save button not enabled");
         });
 

@@ -181,9 +181,9 @@ define([
 
     // load XML syncronously
     function loadXML(value, options, ignoreParseWarnings) {
-        var xml, warnings = [], data = call("getData");
+        var warnings = [], data = call("getData");
         data.core.parseWarnings = [];
-        xml = call("loadXML", value, options || {});
+        call("loadXML", value, options || {});
         if (!ignoreParseWarnings) {
             warnings = data.core.parseWarnings;
         } else if (_.isRegExp(ignoreParseWarnings)) {
@@ -193,7 +193,7 @@ define([
         }
         assert(!warnings.length, "unexpected parse warnings:\n- " + warnings.join("\n- "));
         delete data.core.parseWarnings;
-        return xml;
+        return call("get"); // return vellum instance
     }
 
     function clickQuestion(path) {

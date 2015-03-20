@@ -541,9 +541,6 @@ define([
         getDefaultItextRoot: function () {
             return jr.getDefaultItextRoot(this);
         },
-        getDefaultLabelItextId: function () {
-            return jr.getDefaultLabelItextId(this);
-        },
         /*
          * Gets a default label, auto-generating if necessary
          */

@@ -37,14 +37,15 @@ define([
             image: 'png',
             audio: 'mp3',
             video: '3gp'
-        };
-    var RESERVED_ITEXT_CONTENT_TYPES = [
-        'default', 'short', 'long', 'audio', 'video', 'image'
-    ];
+        },
+        RESERVED_ITEXT_CONTENT_TYPES = [
+            'default', 'short', 'long', 'audio', 'video', 'image'
+        ];
 
     function ItextItem(options) {
         this.forms = options.forms || [];
         this.id = options.id || "";
+        this.autoId = _.isUndefined(options.autoId) ? true : options.autoId;
         this.itextModel = options.itextModel;
     }
     ItextItem.prototype = {
@@ -52,6 +53,7 @@ define([
             var item = new ItextItem({
                 forms: _.map(this.forms, function (f) { return f.clone(); }),
                 id: this.id,
+                autoId: this.autoId,
                 itextModel: this.itextModel
             });
             this.itextModel.addItem(item);
@@ -223,6 +225,7 @@ define([
         
         this.languages = [];
         this.items = [];
+        this._nextKey = 1;
     }
     ItextModel.prototype = {
         getLanguages: function () {
@@ -263,11 +266,6 @@ define([
                 return !item.isEmpty();
             });
         },
-        getNonEmptyItemIds: function () {
-            return this.getNonEmptyItems().map(function (item) {
-                return item.id;
-            });
-        },
         deduplicateIds: function () {
             var nonEmpty = this.getNonEmptyItems();
             var found = [];
@@ -286,7 +284,7 @@ define([
             }
         },
         hasItem: function (item) {
-            return this.items.indexOf(item) !== -1;
+            return item.key && this.items.hasOwnProperty(item.key);
         },
         /**
          * Add an itext item to the global Itext object.
@@ -294,16 +292,23 @@ define([
          * Does nothing if the item was already in the itext object.
          */
         addItem: function (item) {
-            if (!this.hasItem(item)) {
-                this.items.push(item);
+            if (item.key) {
+                if (this.items[item.key] !== item) {
+                    throw new Error("cannot add new item with existing key");
+                }
+            } else {
+                var key = String(this._nextKey++);
+                this.items[key] = item;
+                item.key = key;
             } 
         },
         /*
          * Create a new blank item and add it to the list.
          */
-        createItem: function (id) {
+        createItem: function (id, autoId) {
             var item = new ItextItem({
                 id: id,
+                autoId: autoId,
                 itextModel: this,
                 forms: [new ItextForm({
                     name: "default",
@@ -317,25 +322,16 @@ define([
          * Get the Itext Item by ID.
          */
         getItem: function (iID) {
-            // this is O[n] when it could be O[1] with some other
-            // data structure. That would require keeping the ids
-            // in sync in multiple places though.
-            // This could be worked around via careful event handling,
-            // but is not implemented until we see slowness.
-            try {
-                return util.reduceToOne(this.items, function (item) {
-                    return item.id === iID;
-                }, "itext id = " + iID);
-            } catch (e) {
-                throw "NoItextItemFound";
-            }
+            return _.find(this.items, function (item) {
+                return item.id === iID;
+            });
         },
         getOrCreateItem: function (id) {
-            try {
-                return this.getItem(id);
-            } catch (err) {
-                return this.createItem(id); 
+            var item = this.getItem(id);
+            if (!item) {
+                item = this.createItem(id);
             }
+            return item;
         },
         removeItem: function (item) {
             var index = this.items.indexOf(item);
@@ -391,119 +387,104 @@ define([
                 if (!mug.p.labelItext && 
                     mug.spec.labelItext.presence !== "notallowed")
                 {
-                    mug.p.labelItext = this.getDefaultLabelItext(mug, defaultLabelValue);
+                    var item = mug.p.labelItext = this.createItem();
+                    item.setDefaultValue(defaultLabelValue);
                 }
                 // set hint if legal and not there
                 if (mug.spec.hintItext.presence !== "notallowed" &&
                     !mug.p.hintItext) {
-                    mug.p.hintItext = this.createItem("");
+                    mug.p.hintItext = this.createItem();
                 }
                 if (mug.spec.helpItext.presence !== "notallowed" &&
                     !mug.p.helpItext) {
-                    mug.p.helpItext = this.createItem("");
+                    mug.p.helpItext = this.createItem();
                 }
             }
             if (!mug.options.isControlOnly) {
                 // set constraint msg if legal and not there
                 if (mug.spec.constraintMsgItext.presence !== "notallowed" &&
                     !mug.p.constraintMsgItext) {
-                    mug.p.constraintMsgItext = this.createItem("");
+                    mug.p.constraintMsgItext = this.createItem();
                 }
             }
-        },
-        getDefaultLabelItext: function (mug, defaultValue) {
-            var item,
-                formData = {},
-                defaultLang = this.getDefaultLanguage();
-            formData[defaultLang] = defaultValue;
-            item = new ItextItem({
-                id: getDefaultLabelItextId(mug),
-                forms: [new ItextForm({
-                            name: "default",
-                            data: formData,
-                            itextModel: this
-                        })],
-                itextModel: this
-            });
-            this.addItem(item);
-            return item;
         }
     };
 
     /**
-     * Walks through internal tree and grabs
-     * the Itext id's from any Mugs that are found.  Returns
-     * a flat list of iIDs.  This list is primarily used
-     * for trimming out crufty itext.
+     * Walks the tree and grabs the Itext items from all mugs
+     *
+     * All empty and unreferenced itext items are omitted from this list.
+     * This updates the id on each returned auto-id Itext item.
+     *
+     * @returns - a flat list of Itext items.
      */
     var getAllNonEmptyItextItemsFromMugs = function (form) {
         // get all the itext references in the forms
-        var ret = [];
-        var appendItemsIfPresent = function (node) {
-            if (node.isRootNode) {
-                return;
-            }
-
-            var mt = node.getValue();
-            if(!mt) {
-                throw 'Node in tree without value?!?!';
-            }
-        
-            var thingsToGet = [
+        var ret = [],
+            seen = {},
+            thingsToGet = [
                 'labelItext',
                 'hintItext', 
                 'helpItext',
                 'constraintMsgItext'
-            ]; 
-        
-            var val;            
-            for (var i = 0; i < thingsToGet.length; i++) {
-                try {
-                    val = mt.p[thingsToGet[i]];
-                    if (val && !val.isEmpty() && ret.indexOf(val) === -1) {
-                       // it was there and not present so add it to the list
-                       ret.push(val);
-                    } 
-                } catch (err) {
-                    // probably just wasn't in the mug
-                }
-            }    
-        };
-        
-        form.tree.treeMap(appendItemsIfPresent);
+            ],
+            props = _.object(_.map(thingsToGet, function (thing) {
+                return [thing, thing.replace("Itext", "")];
+            }));
+
+        form.tree.walk(function (mug, nodeID, processChildren) {
+            if(mug) { // skips root node
+                _.each(thingsToGet, function (property) {
+                    try {
+                        var item = mug.p[property];
+                        if (item && !item.isEmpty() && !seen.hasOwnProperty(item.key)) {
+                            if (item.autoId) {
+                                item.id = getDefaultItextId(mug, props[property]);
+                            }
+                            ret.push(item);
+                            seen[item.key] = true;
+                        } 
+                    } catch (err) {
+                        // probably just wasn't in the mug
+                    }
+                });
+            }
+            processChildren();
+        });
         return ret; 
 
     };
 
     var iTextIDWidget = function (mug, options) {
         var widget = widgets.text(mug, options),
-            $input = widget.input;
+            $input = widget.input,
+            currentValue = null;
 
-        widget.isSelectItem = (mug.__className === "Item");
-        widget.parentMug = widget.isSelectItem ? widget.mug.parentMug : null;
-        widget.langs = widget.mug.form.vellum.data.javaRosa.Itext.getLanguages();
-
-        // a few little hacks to support auto-update of choices
-        widget.getItextType = function () {
-            return widget.path.replace("Itext", "");
-        };
-
-        widget.autoGenerateId = function () {
+        function autoGenerateId() {
             return mug.getItextAutoID(widget.path);
-        };
+        }
 
-        widget.updateAutoId = function () {
-            widget.setValue({id: widget.autoGenerateId()});
-        };
+        function updateAutoId() {
+            _setValue(autoGenerateId());
+            setAutoMode(true);
+        }
 
         var _setValue = widget.setValue;
 
         widget.setValue = function (value) {
-            _setValue(value.id);
+            currentValue = value;
+            if (value.autoId) {
+                updateAutoId();
+            } else {
+                _setValue(value.id);
+                setAutoMode(false);
+            }
         };
 
         widget.getValue = function() {
-            return $input.val();
+            currentValue.id = $input.val();
+            currentValue.autoId = getAutoMode();
+            return currentValue;
         };
 
         // auto checkbox
@@ -511,22 +492,17 @@ define([
 
         $autoBox.change(function () {
             if ($(this).prop('checked')) {
-                widget.updateAutoId();
+                updateAutoId();
                 widget.handleChange();
             }
         });
 
-        widget.setAutoMode = function (autoMode) {
+        function setAutoMode(autoMode) {
             $autoBox.prop("checked", autoMode);
-        };
+        }
 
-        widget.getAutoMode = function () {
+        function getAutoMode() {
             return $autoBox.prop('checked');
-        };
-
-        // support auto mode to keep ids in sync
-        if (widget.currentValue && widget.currentValue.id === widget.autoGenerateId()) {
-            widget.setAutoMode(true);
         }
 
         var _getUIElement = widget.getUIElement;
@@ -545,73 +521,13 @@ define([
             return $uiElem;
         };
 
-        widget.save = function () {
-            // override save to call out to rename itext
-            setItextId(widget.mug, widget.path, widget.getValue());
-        };
-
-        widget.mug.on('property-changed', function (e) {
-            // keep the ids in sync if we're in auto mode
-            if (widget.getAutoMode() &&
-                (e.property === "nodeID" ||
-                 widget.isSelectItem && e.property === "defaultValue")) 
-            {
-                var newVal = widget.autoGenerateId();
-                if (newVal !== widget.getValue()) {
-                    widget.setValue({id: newVal});
-                    widget.handleChange();
-                }
-            }
-        }, null, widget);
-
         widget.input.keyup(function () {
             // turn off auto-mode if the id is ever manually overridden
             var newVal = $(this).val();
-            if (newVal !== widget.autoGenerateId()) {
-                widget.setAutoMode(false);
+            if (newVal !== autoGenerateId()) {
+                setAutoMode(false);
             }
         });
-
-        widget.handleItextLabelChange = function (e) {
-            // Makes sure that there is an autoID present if itext of the same type
-            // exists for any form in any language.
-
-            var currentVal = widget.getValue(),
-                itextItem = e.itextItem,
-                isItextPresent;
-            isItextPresent = itextItem && (function () {
-                var currentForms = itextItem.getForms();
-                for (var i = 0; i < currentForms.length; i++) {
-                    for (var j = 0; j < widget.langs.length; j++) {
-                        if (currentForms[i].getValue(widget.langs[j])) {
-                            return true;
-                        }
-                    }
-                }
-                return false;
-            })();
-
-            if (isItextPresent && !currentVal) {
-                widget.setAutoMode(true);
-                widget.updateAutoId();
-                widget.handleChange();
-            } else if (!isItextPresent && currentVal) {
-                widget.setAutoMode(false);
-                widget.setValue({id: ''});
-                widget.handleChange();
-            }
-
-        };
-
-        widget.mug.on('update-question-itextid', function (e) {
-            if (e.itextType === widget.getItextType()) {
-                widget.handleItextLabelChange(e);
-            }
-        }, null, widget);
-
-        widget.mug.on("teardown-mug-properties", function (e) {
-            e.mug.unbind(widget);
-        }, null, widget);
 
         return widget;
     };
@@ -1143,11 +1059,6 @@ define([
                     }
                 });
             }
-            widget.mug.fire({
-               type: 'update-question-itextid',
-               itextType: widget.itextType,
-               itextItem: itextItem
-            });
         };
 
         widget.save = function () {
@@ -1201,7 +1112,7 @@ define([
         };
     };
     
-    var parseXLSItext = function (str, Itext) {
+    var parseXLSItext = function (vellum, str, Itext) {
         var forms = ["default", "audio", "image" , "video"],
             languages = Itext.getLanguages(),
             nextRow = tsv.makeRowParser(str),
@@ -1219,8 +1130,11 @@ define([
             });
         }
 
+        // HACK update all referenced itext IDs (side effect)
+        getAllNonEmptyItextItemsFromMugs(vellum.data.core.form);
         cells = nextRow();
         while (cells) {
+            // what's the point of creating items here?
             item = Itext.getOrCreateItem(cells[0]);
             for (i = 1; i < cells.length; i++) {
                 head = header[i];
@@ -1266,8 +1180,9 @@ define([
         // TODO: should this be configurable?
         var forms = ["default", "audio", "image" , "video"],
             languages = Itext.getLanguages(),
-            allItems = Itext.getNonEmptyItems(),
+            allItems = getAllNonEmptyItextItemsFromMugs(vellum.data.core.form),
             rows = [];
+
         if (languages.length > 0) {
             rows.push(makeHeadings(languages, forms));
             for(var i = 0; i < allItems.length; i++) {
@@ -1329,8 +1244,8 @@ define([
         }
     }
 
-    function getDefaultLabelItextId(mug, property) {
-        return getDefaultItextRoot(mug) + "-label";
+    function getDefaultItextId(mug, property) {
+        return getDefaultItextRoot(mug) + "-" + property;
     }
 
     function setItextId(mug, propertyPath, id, unlink) {
@@ -1338,7 +1253,6 @@ define([
         if (id !== itext.id) {
             if (unlink) {
                 itext = itext.clone();
-                mug.form.vellum.data.javaRosa.Itext.addItem(itext);
             }
 
             itext.id = id;
@@ -1500,7 +1414,7 @@ define([
                     var textEl = $(this);
                     var id = textEl.attr('id');
                     var item = Itext.getOrCreateItem(id);
-                    
+
                     function eachValue() {
                         var valEl = $(this);
                         var curForm = valEl.attr('form');
@@ -1581,28 +1495,30 @@ define([
                 return "";
             }
 
-            function parseItextRef($el, mug) {
-                var ref = $el.attr('ref'),
-                    id = ref ? getITextID(ref) : "";
+            function getItextItem(id, property) {
+                var auto = !id || id === getDefaultItextId(mug, property);
                 if (id) {
-                    return Itext.getOrCreateItem(id);
-                } else {
-                    if (mug) {
-                        // WARNING disaster area
-                        // if there was a ref attribute but it wasn't formatted like an
-                        // itext reference, it's likely an error, though not sure what
-                        // we should do here for now just populate with the default
-                        id = getDefaultLabelItextId(mug);
+                    var item = Itext.getItem(id);
+                    if (item) {
+                        if (!auto) {
+                            item.autoId = false;
+                        }
+                        return item;
                     }
-                    return Itext.createItem(id);
                 }
+                return Itext.createItem(id, auto);
+            }
+
+            function parseItextRef($el, property) {
+                var ref = $el.attr('ref');
+                return getItextItem(ref ? getITextID(ref) : "", property);
             }
 
             var labelEl = controlElement.children('label'),
                 hintEl = controlElement.children('hint'),
                 helpEl = controlElement.children('help');
             if (labelEl.length && mug.spec.label.presence !== 'notallowed') {
-                var labelItext = parseItextRef(labelEl, mug);
+                var labelItext = parseItextRef(labelEl, "label");
                 if (labelItext.isEmpty()) {
                     //if no default Itext has been set, set it with the default label
                     var labelVal = xml.humanize(labelEl);
@@ -1616,18 +1532,16 @@ define([
                 mug.p.labelItext = labelItext;
             }
             if (hintEl.length && mug.spec.hintLabel.presence !== 'notallowed') {
-                mug.p.hintItext = parseItextRef(hintEl);
+                mug.p.hintItext = parseItextRef(hintEl, "hint");
             }
             if (helpEl.length && mug.spec.label.presence !== 'notallowed') {
-                mug.p.helpItext = parseItextRef(helpEl);
+                mug.p.helpItext = parseItextRef(helpEl, "help");
             }
             if (mug.p.constraintMsgAttr) {
                 var id = getITextID(mug.p.constraintMsgAttr);
                 if (id) {
-                    mug.p.constraintMsgItext = Itext.getOrCreateItem(id);
+                    mug.p.constraintMsgItext = getItextItem(id, "constraintMsg");
                     mug.p.constraintMsgAttr = null;
-                } else {
-                    mug.p.constraintMsgItext = Itext.createItem("");
                 }
             }
         },
@@ -2038,15 +1952,16 @@ define([
             ]);
         },
         showItextDialog: function (done) {
-            var $modal, $updateForm, $textarea,
-                Itext = this.data.javaRosa.Itext;
+            var vellum = this,
+                $modal, $updateForm, $textarea,
+                Itext = vellum.data.javaRosa.Itext;
 
-            $modal = this.generateNewModal("Edit Bulk Translations", [
+            $modal = vellum.generateNewModal("Edit Bulk Translations", [
                 {
                     title: "Update Translations",
                     cssClasses: "btn-primary",
                     action: function () {
-                        parseXLSItext($textarea.val(), Itext);
+                        parseXLSItext(vellum, $textarea.val(), Itext);
                         $modal.modal('hide');
                         done();
                     }
@@ -2063,7 +1978,7 @@ define([
 
             // display current values
             $textarea = $updateForm.find('textarea');
-            $textarea.val(generateItextXLS(this, Itext));
+            $textarea.val(generateItextXLS(vellum, Itext));
 
             $modal.modal('show');
             $modal.one('shown', function () { $textarea.focus(); });
@@ -2073,7 +1988,6 @@ define([
     return {
         // TODO push these out to all places that use mug.getDefault...
         getDefaultItextRoot: getDefaultItextRoot,
-        getDefaultLabelItextId: getDefaultLabelItextId,
         setItextId: setItextId,
         parseXLSItext: parseXLSItext,
         generateItextXLS: generateItextXLS

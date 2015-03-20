@@ -19,7 +19,7 @@
 			<setvalue event="jr-insert" ref="/data/product/item/@id" value="selected-at(/data/product/@ids,../@index)" />
 			<itext>
 				<translation lang="en" default="">
-					<text id="product-label">
+					<text id="product/item-label">
 						<!--output value="instance('products')/products/product[position()=current()/@index]/name"/-->
 						<value>product</value>
 					</text>
@@ -29,7 +29,7 @@
 	</h:head>
 	<h:body>
 		<group>
-			<label ref="jr:itext('product-label')" />
+			<label ref="jr:itext('product/item-label')" />
 			<repeat nodeset="/data/product/item" jr:count="/data/product/@count" jr:noAddRemove="true()" />
 		</group>
 	</h:body>

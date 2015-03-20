@@ -19,7 +19,7 @@
 			<setvalue event="jr-insert" ref="/data/child/item/@id" value="selected-at(/data/child/@ids,../@index)" />
 			<itext>
 				<translation lang="en" default="">
-					<text id="child-label">
+					<text id="child/item-label">
 						<!-- is this <output> node a reasonable default for a model iteration?
 						     if not, what should go here?
 						     <output value="instance('casedb')/mother/child[@case_id=current()/@id]/name"></output>
@@ -32,7 +32,7 @@
 	</h:head>
 	<h:body>
 		<group>
-			<label ref="jr:itext('child-label')" />
+			<label ref="jr:itext('child/item-label')" />
 			<repeat nodeset="/data/child/item" jr:count="/data/child/@count" jr:noAddRemove="true()" />
 		</group>
 	</h:body>
