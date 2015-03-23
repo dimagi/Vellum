@@ -193,7 +193,7 @@ define([
         }
         assert(!warnings.length, "unexpected parse warnings:\n- " + warnings.join("\n- "));
         delete data.core.parseWarnings;
-        return call("get"); // return vellum instance
+        return data.core.form; // return the Form object
     }
 
     function clickQuestion(path) {

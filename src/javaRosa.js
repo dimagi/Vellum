@@ -1040,7 +1040,7 @@ define([
         };
     };
     
-    var parseXLSItext = function (vellum, str, Itext) {
+    var parseXLSItext = function (form, str, Itext) {
         var forms = ["default", "audio", "image" , "video"],
             languages = Itext.getLanguages(),
             nextRow = tsv.makeRowParser(str),
@@ -1058,7 +1058,7 @@ define([
             });
         }
 
-        var items = getItextItemsFromMugs(vellum.data.core.form, true);
+        var items = getItextItemsFromMugs(form, true);
         items = _.object(_.map(items, function (item) { return [item.id, item]; }));
         cells = nextRow();
         while (cells) {
@@ -1083,7 +1083,7 @@ define([
         Itext.fire("change");
     };
 
-    var generateItextXLS = function (vellum, Itext) {
+    var generateItextXLS = function (form, Itext) {
         function rowify(firstVal, languages, forms, func) {
             var row = [firstVal];
             _.each(forms, function (form) {
@@ -1112,7 +1112,7 @@ define([
             rows = [];
 
         if (languages.length > 0) {
-            var items = getItextItemsFromMugs(vellum.data.core.form);
+            var items = getItextItemsFromMugs(form);
             rows.push(makeHeadings(languages, forms));
             _.each(items, function (item) {
                 rows.push(makeRow(item, languages, forms));
@@ -1888,14 +1888,15 @@ define([
         showItextDialog: function (done) {
             var vellum = this,
                 $modal, $updateForm, $textarea,
-                Itext = vellum.data.javaRosa.Itext;
+                Itext = vellum.data.javaRosa.Itext,
+                form = vellum.data.core.form;
 
             $modal = vellum.generateNewModal("Edit Bulk Translations", [
                 {
                     title: "Update Translations",
                     cssClasses: "btn-primary",
                     action: function () {
-                        parseXLSItext(vellum, $textarea.val(), Itext);
+                        parseXLSItext(form, $textarea.val(), Itext);
                         $modal.modal('hide');
                         done();
                     }
@@ -1912,7 +1913,7 @@ define([
 
             // display current values
             $textarea = $updateForm.find('textarea');
-            $textarea.val(generateItextXLS(vellum, Itext));
+            $textarea.val(generateItextXLS(form, Itext));
 
             $modal.modal('show');
             $modal.one('shown', function () { $textarea.focus(); });
