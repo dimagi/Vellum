@@ -69,9 +69,13 @@ define([
         writeControlLabel: false,
         writeControlRefAttr: null,
         writeCustomXML: function (xmlWriter, mug) {
-            var data = mug.p.itemsetData;
+            var data = mug.p.itemsetData,
+                nodeset = data.nodeset;
+            if (mug.p.filter) {
+                nodeset += mug.p.filter;
+            }
             xmlWriter.writeAttributeString(
-                'nodeset', data.nodeset || '');
+                'nodeset', nodeset || '');
             xmlWriter.writeStartElement('label');
             xmlWriter.writeAttributeString(
                 'ref', data.labelRef || '');
