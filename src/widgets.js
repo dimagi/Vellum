@@ -149,6 +149,12 @@ define([
             return input.val().replace(/&#10;/g, '\n');
         };
 
+        widget.addAutoComplete = function(sources) {
+            input.autocomplete({
+                source: sources
+            });
+        };
+
         input.bind("change input", function () {
             widget.handleChange();
         });
