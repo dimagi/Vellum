@@ -201,21 +201,21 @@ define([
     }
 
     function itemsetWidget(mug, options) {
-        var widget = datasources.dataSourceWidget(mug, options, "Data Source"),
+        var widget = datasources.fixtureDataSourceWidget(mug, options, "Lookup Table"),
             super_getUIElement = widget.getUIElement,
             super_getValue = widget.getValue,
             super_setValue = widget.setValue,
             handleChange = widget.handleChange.bind(widget),
-            labelRef = refSelect("label_ref", "Choice Label", widget.isDisabled()),
-            valueRef = refSelect("value_ref", "Choice Value", widget.isDisabled());
+            labelRef = refSelect("label_ref", "Label", widget.isDisabled()),
+            valueRef = refSelect("value_ref", "Value", widget.isDisabled());
 
         labelRef.onChange(handleChange);
         valueRef.onChange(handleChange);
 
         widget.getUIElement = function () {
             return super_getUIElement()
-                .append(labelRef.element)
-                .append(valueRef.element);
+                .append(valueRef.element)
+                .append(labelRef.element);
         };
 
         widget.getValue = function () {
