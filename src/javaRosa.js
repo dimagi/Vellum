@@ -1591,14 +1591,16 @@ define([
                 }
                 xmlWriter.writeEndElement();
             }
-        
         },
         beforeSerialize: function () {
             this.__callOld();
-
             // update and dedup all non-empty Itext items IDs
             this.data.javaRosa.itextItemsFromBeforeSerialize =
                 getItextItemsFromMugs(this.data.core.form);
+        },
+        afterSerialize: function () {
+            this.__callOld();
+            delete this.data.javaRosa.itextItemsFromBeforeSerialize;
         },
         getMugTypes: function () {
             var types = this.__callOld(),
@@ -1921,7 +1923,6 @@ define([
     });
 
     return {
-        // TODO push these out to all places that use mug.getDefault...
         getDefaultItextRoot: getDefaultItextRoot,
         setItextId: setItextId,
         parseXLSItext: parseXLSItext,

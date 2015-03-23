@@ -58,10 +58,9 @@ define([
         xmlWriter.writeEndElement(); //CLOSE BODY
         xmlWriter.writeEndElement(); //CLOSE HTML
         xmlWriter.writeEndDocument(); //CLOSE DOCUMENT
+        form.vellum.afterSerialize();
 
-        var ret = xmlWriter.flush();
-
-        return ret;
+        return xmlWriter.flush();
     };
 
     var createModelHeader = function (form, xmlWriter) {

@@ -873,7 +873,9 @@ define([
         },
         getExportTSV: function () {
             this.vellum.beforeSerialize();
-            return exporter.generateExportTSV(this);
+            var value = exporter.generateExportTSV(this);
+            this.vellum.afterSerialize();
+            return value;
         }
     };
 

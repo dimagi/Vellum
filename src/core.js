@@ -2067,6 +2067,8 @@ define([
 
     fn.beforeSerialize = function () {};
 
+    fn.afterSerialize = function () {};
+
     fn.parseDataElement = function (form, el, parentMug) {
         return parser.parseDataElement(form, el, parentMug);
     };
