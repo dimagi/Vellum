@@ -38,36 +38,30 @@ define(function () {
                     ]
                 }
             ],
-        },
+        }
+    ];
+
+    var fixtures = [
         {
             name: "Some Fixture",
-            sourceUri: "jr://fixture/some-fixture",
-            defaultId: "somefixture",
-            rootNodeName: "foos",
-            levels: [
-                {
-                    nodeName: "foo",
-                    subsets: [
-                        {
-                            name: "woos",
-                            // should handle quotes
-                            selector: "@foo_type=\"woo\""
-                        }
-                    ]
-                },
-                {
-                    nodeName: "bar",
-                    subsets: [
-                        {
-                            name: "eggs",
-                            selector: "@bar_type='eggs'"
-                        }
-                    ]
-                }
+            sourceUri: "jr://fixture/item-list:some-fixture",
+            columns: [
+                'column1',
+                'column2',
+                'column3'
+            ]
+        },
+        {
+            name: "Some Other Fixture",
+            sourceUri: "jr://fixture/item-list:some-other-fixture",
+            columns: [
+                'othercolumn1',
+                'othercolumn2',
+                'othercolumn3'
             ]
         }
     ];
-    
+
     var OPTIONS = {
         core: {
             loadDelay: 0,
@@ -88,7 +82,7 @@ define(function () {
                 }, {
                     key: "fixture",
                     name: "Fixtures",
-                    endpoint: function () { return INSTANCES.slice(1); }
+                    endpoint: function () { return fixtures; }
                 }
             ],
             saveType: "patch",

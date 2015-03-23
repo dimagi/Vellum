@@ -117,6 +117,17 @@ define([
         $modal.modal('show');
     }
 
+    function generateFixtureQueries(widget) {
+        return function(fixtures) {
+            widget.addOptions(_.map(fixtures, function(f) {
+                return {
+                    value: f.sourceUri,
+                    text: f.name
+                };
+            }));
+        }
+    }
+
     /**
      * Load data source editor
      *
@@ -225,11 +236,42 @@ define([
         return widget;
     }
 
+    function fixtureDataSourceWidget(mug, options, labelText) {
+        var widget = widgets.dropdown(mug, options),
+            getUIElement = widgets.util.getUIElement,
+            super_getValue = widget.getValue,
+            super_setValue = widget.setValue,
+            currentValue = null;
+
+        getDataSources("fixture", generateFixtureQueries(widget));
+
+        widget.getUIElement = function () {
+            var query = getUIElement(widget.input, labelText);
+            return $("<div></div>").append(query);
+        };
+
+        function local_getValue() {
+            currentValue.query = super_getValue();
+            return currentValue;
+        }
+
+        function local_setValue(val) {
+            currentValue = val;
+            super_setValue(val.query || "");
+        }
+
+        widget.getValue = local_getValue;
+        widget.setValue = local_setValue;
+
+        return widget;
+    }
+
     return {
         init: init,
         getDataSources: getDataSources,
         selectDataSource: selectDataSource,
-        dataSourceWidget: dataSourceWidget
+        dataSourceWidget: dataSourceWidget,
+        fixtureDataSourceWidget: fixtureDataSourceWidget
     };
 
 });
