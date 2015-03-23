@@ -12,14 +12,20 @@ define([
     edit_source,
     select_source
 ) {
-    var vellum, dataSources;
+    var vellum, dataSources, cachedData;
 
     function init(instance) {
         vellum = instance;
         dataSources = vellum.opts().core.dataSources || [];
+        cachedData = {};
     }
 
     function getDataSources(type, callback) {
+        if (cachedData[type]) {
+            callback(cachedData[type]);
+            return;
+        }
+
         var source = _.find(dataSources, function (src) {
             return src.key === type;
         });
@@ -30,7 +36,10 @@ define([
                     type: 'GET',
                     url: source.endpoint,
                     dataType: 'json',
-                    success: function (data) { callback(data); },
+                    success: function (data) {
+                        cachedData[type] = data;
+                        callback(data);
+                    },
                     // TODO error handling
                     data: {}
                 });
