@@ -266,6 +266,14 @@ define([
         return widget;
     }
 
+    $.vellum.plugin("datasources", { }, {
+        getLogicProperties: function () {
+            var ret = this.__callOld();
+            ret.push('filter');
+            return ret;
+        }
+    });
+
     return {
         init: init,
         getDataSources: getDataSources,

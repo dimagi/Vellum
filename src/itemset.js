@@ -108,6 +108,11 @@ define([
                     }
                     return 'pass';
                 }
+            },
+            filter: {
+                presence: 'optional',
+                widget: widgets.text,
+                lstring: 'Filter'
             }
         }
     });
