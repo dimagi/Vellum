@@ -3,7 +3,8 @@ define([
     'underscore',
     'vellum/widgets',
     'tpl!vellum/templates/data_source_editor',
-    'tpl!vellum/templates/select_data_source'
+    'tpl!vellum/templates/select_data_source',
+    'vellum/core'
 ], function (
     $,
     _,
