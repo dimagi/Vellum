@@ -69,16 +69,21 @@ define([
         writeControlLabel: false,
         writeControlRefAttr: null,
         writeCustomXML: function (xmlWriter, mug) {
-            var data = mug.p.itemsetData;
+            var nodeset = mug.p.itemsetData.nodeset,
+                value = mug.p.itemsetValue,
+                label = mug.p.itemsetLabel;
+            if (mug.p.filter) {
+                nodeset += mug.p.filter;
+            }
             xmlWriter.writeAttributeString(
-                'nodeset', data.nodeset || '');
+                'nodeset', nodeset || '');
             xmlWriter.writeStartElement('label');
             xmlWriter.writeAttributeString(
-                'ref', data.labelRef || '');
+                'ref', label || '');
             xmlWriter.writeEndElement();
             xmlWriter.writeStartElement('value');
             xmlWriter.writeAttributeString(
-                'ref', data.valueRef || '');
+                'ref', value || '');
             xmlWriter.writeEndElement();
         },
         spec: {
@@ -102,14 +107,35 @@ define([
                     if (!itemsetData.nodeset) {
                         return "A data source must be selected.";
                     }
-                    if (!itemsetData.valueRef) {
-                        return "Choice Value must be specified.";
-                    }
-                    if (!itemsetData.labelRef) {
+                    return 'pass';
+                }
+            },
+            itemsetLabel: {
+                presence: 'optional',
+                widget: widgets.text,
+                lstring: 'Label',
+                validationFunc: function (mug) {
+                    if (!mug.p.itemsetLabel) {
                         return "Choice Label must be specified.";
                     }
                     return 'pass';
                 }
+            },
+            itemsetValue: {
+                presence: 'optional',
+                widget: widgets.text,
+                lstring: 'Value',
+                validationFunc: function (mug) {
+                    if (!mug.p.itemsetValue) {
+                        return "Choice Value must be specified.";
+                    }
+                    return 'pass';
+                }
+            },
+            filter: {
+                presence: 'optional',
+                widget: widgets.text,
+                lstring: 'Filter'
             }
         }
     });
@@ -166,10 +192,10 @@ define([
                     var nodeset = $element.popAttr('nodeset');
                     mug.p.itemsetData = {
                         instance: form.parseInstance(nodeset, mug, "itemsetData.instance"),
-                        nodeset: nodeset,
-                        labelRef: $element.children('label').attr('ref'),
-                        valueRef: $element.children('value').attr('ref')
+                        nodeset: nodeset
                     };
+                    mug.p.itemsetLabel = $element.children('label').attr('ref');
+                    mug.p.itemsetValue = $element.children('value').attr('ref');
                     return mug;
                 };
                 adapt.ignoreDataNode = true;
@@ -206,18 +232,10 @@ define([
         var widget = datasources.dataSourceWidget(mug, options, "Data Source"),
             super_getUIElement = widget.getUIElement,
             super_getValue = widget.getValue,
-            super_setValue = widget.setValue,
-            handleChange = widget.handleChange.bind(widget),
-            labelRef = refSelect("label_ref", "Choice Label", widget.isDisabled()),
-            valueRef = refSelect("value_ref", "Choice Value", widget.isDisabled());
-
-        labelRef.onChange(handleChange);
-        valueRef.onChange(handleChange);
+            super_setValue = widget.setValue;
 
         widget.getUIElement = function () {
-            return super_getUIElement()
-                .append(labelRef.element)
-                .append(valueRef.element);
+            return super_getUIElement();
         };
 
         widget.getValue = function () {
@@ -225,8 +243,6 @@ define([
             return {
                 instance: ($.trim(val.src) ? {id: val.id, src: val.src} : null),
                 nodeset: val.query,
-                labelRef: labelRef.val(),
-                valueRef: valueRef.val()
             };
         };
 
@@ -237,28 +253,8 @@ define([
                 src: (val.instance ? val.instance.src : ""),
                 query: val.nodeset || ""
             });
-            labelRef.val(val.labelRef);
-            valueRef.val(val.valueRef);
         };
 
         return widget;
-    }
-
-    function refSelect(name, label, isDisabled) {
-        var input = $("<input type='text' class='input-block-level'>");
-        input.attr("name", name);
-        return {
-            element: widgets.util.getUIElement(input, label, isDisabled),
-            val: function (value) {
-                if (_.isUndefined(value)) {
-                    return input.val();
-                } else {
-                    input.val(value || "");
-                }
-            },
-            onChange: function (callback) {
-                input.bind("change keyup", callback);
-            }
-        };
     }
 });
