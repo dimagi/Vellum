@@ -390,7 +390,7 @@ define([
             isSelectItem = mug.__className === "Item";
 
         function autoGenerateId() {
-            return mug.getItextAutoID(widget.path);
+            return getDefaultItextId(mug, widget.path);
         }
 
         function updateAutoId() {
@@ -1177,20 +1177,6 @@ define([
         return getDefaultItextRoot(mug) + "-" + property;
     }
 
-    function setItextId(mug, propertyPath, id, unlink) {
-        var itext = mug.p[propertyPath];
-        if (id !== itext.id) {
-            if (unlink) {
-                itext = itext.clone();
-            }
-
-            itext.id = id;
-            // HACK to ensure property really changes
-            mug.p.__data[propertyPath] = null;
-            mug.p[propertyPath] = itext;
-        }
-    }
-
     $.vellum.plugin("javaRosa", {
         langs: ['en'],
         displayLanguage: 'en'
@@ -1539,6 +1525,15 @@ define([
                         mug: _this.getMugByLabelItextID(item.id),
                         text: item.getValue('default', itext.getDefaultLanguage())
                     });
+                }
+            });
+        },
+        duplicateMugProperties: function (mug) {
+            this.__callOld();
+            _.each(ITEXT_PROPERTIES, function (path) {
+                var itext = mug.p[path];
+                if (itext && itext.autoId) {
+                    mug.p[path] = itext.clone();
                 }
             });
         },
@@ -1911,8 +1906,6 @@ define([
     });
 
     return {
-        getDefaultItextRoot: getDefaultItextRoot,
-        setItextId: setItextId,
         parseXLSItext: parseXLSItext,
         generateItextXLS: generateItextXLS
     };

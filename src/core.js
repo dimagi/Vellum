@@ -2098,6 +2098,8 @@ define([
         form.handleMugRename(mug, val, previous, currentPath, oldPath);
     };
 
+    fn.duplicateMugProperties = function(mug) {};
+
     fn.beforeSerialize = function () {};
 
     fn.afterSerialize = function () {};

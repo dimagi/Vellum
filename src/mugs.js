@@ -518,9 +518,6 @@ define([
         isValid: function () {
             return !this.getErrors().length;
         },
-        getDefaultItextRoot: function () {
-            return jr.getDefaultItextRoot(this);
-        },
         /*
          * Gets a default label, auto-generating if necessary
          */
@@ -598,33 +595,6 @@ define([
             }
 
             return nodeID;
-        },
-        // todo: move these into javarosa
-        getItextAutoID: function (propertyPath) {
-            var isSelectItem = (this.__className === "Item"),
-                rootId = isSelectItem && this.parentMug ?
-                    this.parentMug.getDefaultItextRoot() + "-" :
-                    "",
-                nodeId = isSelectItem ?
-                    this.p.defaultValue || "null" :
-                    this.getDefaultItextRoot(),
-                itextType = propertyPath.replace("Itext", "");
-            return rootId + nodeId + "-" + itextType;
-        },
-        unlinkItext: function () {
-            var _this = this;
-            _.each([
-                "labelItext",
-                "constraintMsgItext",
-                "hintItext"
-            ], function (path) {
-                var val = _this.p[path];
-                // items don't have a constraintMsgItext
-                if (val && val.id) {
-                    var id = _this.getItextAutoID(path);
-                    jr.setItextId(_this, path, id, true);
-                }
-            });
         },
         teardownProperties: function () {
             this.fire({type: "teardown-mug-properties", mug: this});
