@@ -386,7 +386,8 @@ define([
     var iTextIDWidget = function (mug, options) {
         var widget = widgets.text(mug, options),
             $input = widget.input,
-            currentValue = null;
+            currentValue = null,
+            isSelectItem = mug.__className === "Item";
 
         function autoGenerateId() {
             return mug.getItextAutoID(widget.path);
@@ -456,6 +457,18 @@ define([
                 setAutoMode(false);
             }
         });
+
+        mug.on("property-changed", function (e) {
+            if (getAutoMode() && (
+                    e.property === "nodeID" ||
+                    (isSelectItem && e.property === "defaultValue"))) {
+                $input.val(autoGenerateId());
+            }
+        }, null, widget);
+
+        mug.on("teardown-mug-properties", function (e) {
+            e.mug.unbind(widget);
+        }, null, widget);
 
         return widget;
     };
