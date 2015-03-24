@@ -261,13 +261,13 @@ define([
         };
 
         function local_getValue() {
-            currentValue.query = super_getValue();
+            currentValue.src = super_getValue();
             return currentValue;
         }
 
         function local_setValue(val) {
             currentValue = val;
-            super_setValue(val.query || "");
+            super_setValue(val.src || "");
         }
 
         widget.getValue = local_getValue;

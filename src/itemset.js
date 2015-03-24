@@ -237,10 +237,11 @@ define([
         };
 
         widget.getValue = function () {
-            var val = super_getValue();
+            var val = super_getValue(),
+                id = val.src.split(':')[val.src.split(':').length-1];
             return {
-                instance: ($.trim(val.src) ? {id: val.id, src: val.src} : null),
-                nodeset: val.query,
+                instance: ($.trim(val.src) ? {id: id, src: val.src} : null),
+                nodeset: "instance('" + id + "')",
             };
         };
 
