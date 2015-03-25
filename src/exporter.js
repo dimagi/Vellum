@@ -36,7 +36,7 @@ define([
 
         var mugToExportRow = function (mug) {
             var row = {},
-                itext = mug.p.labelItextID,
+                itext = mug.p.labelItext,
                 defaultLanguage = form.vellum.data.javaRosa.Itext.getDefaultLanguage(),
                 i;
 
@@ -52,7 +52,7 @@ define([
                 row[columnOrder[i]] = "";
             }
 
-            if (mug.p.tagName !== "item") {
+            if (mug.options.tagName !== "item") {
                 row.Question = form.getAbsolutePath(mug, true);
             } else {
                 row.Question = form.getAbsolutePath(mug.parentMug, true) +
@@ -78,7 +78,7 @@ define([
 
                 row["Validation Condition"] = mug.p.constraintAttr;
                 row["Validation Message"] = defaultOrNothing(
-                    mug.p.constraintMsgItextID,
+                    mug.p.constraintMsgItext,
                     defaultLanguage, 'default');
             }
 

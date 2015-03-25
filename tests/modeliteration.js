@@ -194,7 +194,7 @@ require([
             assert.equal(getPath(blue), "/data/product/blue");
             assert.equal(getPath(text), "/data/product/text");
             text.p.calculateAttr = getPath(blue);
-            blue.p.labelItextID.setDefaultValue(
+            blue.p.labelItext.setDefaultValue(
                 '<output value="' + getPath(text) + '"/>');
             repeat.p.dataSource = {
                 instance: {id: "casedb", src: "jr://instance/casedb"},
@@ -228,7 +228,7 @@ require([
                 text = util.addQuestion("Text", "text"),
                 getPath = blue.form.getAbsolutePath.bind(blue.form);
             text.p.calculateAttr = getPath(blue);
-            blue.p.labelItextID.setDefaultValue(
+            blue.p.labelItext.setDefaultValue(
                 '<output value="' + getPath(text) + '"/>');
             assert.equal(getPath(blue), "/data/product/item/blue");
             assert.equal(getPath(text), "/data/product/item/text");

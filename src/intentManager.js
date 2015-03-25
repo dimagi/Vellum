@@ -129,7 +129,7 @@ define([
                     if (!mug || node.isRootNode) {
                         return null;
                     }
-                    if (mug.p.dataType === 'intent') {
+                    if (mug.options.dataType === 'intent') {
                         return mug;
                     } else {
                         return null;
@@ -213,13 +213,13 @@ define([
     
     var AndroidIntent = util.extend(mugs.defaultOptions, {
         typeName: 'Android App Callout',
+        dataType: 'intent',
+        tagName: 'input',
         icon: 'icon-vellum-android-intent',
         isODKOnly: true,
         isTypeChangeable: false,
         intentTag: null,
         init: function (mug, form) {
-            mug.p.tagName = "input";
-            mug.p.dataType = "intent";
         },
         spec: {
             androidIntentAppId: {

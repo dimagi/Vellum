@@ -181,9 +181,9 @@ define([
 
     // load XML syncronously
     function loadXML(value, options, ignoreParseWarnings) {
-        var xml, warnings = [], data = call("getData");
+        var warnings = [], data = call("getData");
         data.core.parseWarnings = [];
-        xml = call("loadXML", value, options || {});
+        call("loadXML", value, options || {});
         if (!ignoreParseWarnings) {
             warnings = data.core.parseWarnings;
         } else if (_.isRegExp(ignoreParseWarnings)) {
@@ -193,7 +193,7 @@ define([
         }
         assert(!warnings.length, "unexpected parse warnings:\n- " + warnings.join("\n- "));
         delete data.core.parseWarnings;
-        return xml;
+        return data.core.form; // return the Form object
     }
 
     function clickQuestion(path) {
@@ -231,7 +231,7 @@ define([
                 var children = call("getData").core.form.getChildren(parent),
                     nodeID = elements[elements.length - 1];
                 if (children.length === 1 && nodeID === "itemset" &&
-                        children[0].p.tagName === "itemset") {
+                        children[0].options.tagName === "itemset") {
                     return children[0];
                 }
                 for (var i = 0; i < children.length; i++) {
@@ -304,8 +304,8 @@ define([
             if (nodeId) {
                 assert(_.isUndefined(attrs.nodeID),
                        "unexpected attribute for " + qType + "[" + nodeId + "]");
-                if (mug.p.labelItextID) {
-                    mug.p.labelItextID.setDefaultValue(nodeId);
+                if (mug.p.labelItext) {
+                    mug.p.labelItext.setDefaultValue(nodeId);
                 }
                 // HACK set nodeID after label itext so tree node gets renamed
                 mug.p.nodeID = nodeId;

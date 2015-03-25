@@ -24,7 +24,7 @@
 			<setvalue event="jr-insert" ref="/data/group/item/@id" value="selected-at(/data/group/@ids,../@index)" />
 			<itext>
 				<translation lang="en" default="">
-					<text id="group-label">
+					<text id="group/item-label">
 						<value>group</value>
 					</text>
 					<text id="group/item/phone-label">
@@ -36,7 +36,7 @@
 	</h:head>
 	<h:body>
 		<group>
-			<label ref="jr:itext('group-label')" />
+			<label ref="jr:itext('group/item-label')" />
 			<repeat jr:count="/data/group/@count" jr:noAddRemove="true()" nodeset="/data/group/item">
 				<input ref="/data/group/item/phone" appearance="numeric">
 					<label ref="jr:itext('group/item/phone-label')" />

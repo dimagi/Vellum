@@ -2,12 +2,14 @@ define([
     'jquery',
     'underscore',
     'vellum/tree',
+    'vellum/javaRosa', // TODO move all Itext stuff to javaRosa and remove this
     'vellum/widgets',
     'vellum/util'
 ], function (
     $,
     _,
     Tree,
+    jr,
     widgets,
     util,
     undefined
@@ -86,13 +88,6 @@ define([
                 return;
             }
 
-            // Should never happen.  Can probably remove once type-defining
-            // attributes are specified abstractly.
-            if (spec.immutable && !_.isUndefined(prev)) {
-                throw new Error(
-                    "Tried to set immutable property with existing value.");
-            }
-
             var callback = this.shouldChange(this.__mug, attr, val, prev);
             if (callback) {
                 this.__data[attr] = val;
@@ -168,13 +163,6 @@ define([
             },
 
             // BIND ELEMENT
-            dataType: {
-                immutable: true,
-                deleteOnCopy: true,
-                visibility: 'hidden',
-                presence: 'optional',
-                lstring: 'Data Type'
-            },
             relevantAttr: {
                 visibility: 'visible',
                 presence: 'optional',
@@ -206,9 +194,9 @@ define([
                 presence: 'optional',
                 validationFunc : function (mug) {
                     var hasConstraint = mug.p.constraintAttr,
-                        constraintMsgItextID = mug.p.constraintMsgItextID,
+                        constraintMsgItext = mug.p.constraintMsgItext,
                         hasConstraintMsg = (mug.p.constraintMsgAttr || 
-                                            (constraintMsgItextID && constraintMsgItextID.id));
+                                            (constraintMsgItext && constraintMsgItext.id));
                     if (hasConstraintMsg && !hasConstraint) {
                         return 'ERROR: You cannot have a Validation Error Message with no Validation Condition!';
                     } else {
@@ -235,12 +223,6 @@ define([
         },
 
         control: {
-            tagName: {
-                immutable: true,
-                deleteOnCopy: true,
-                visibility: 'hidden',
-                presence: 'required'
-            },
             appearance: {
                 deleteOnCopy: true,
                 visibility: 'optional',
@@ -255,7 +237,7 @@ define([
                 validationFunc: function (mug) {
                     var hasLabel, hasLabelItextID, missing, hasItext;
                     hasLabel = mug.p.label;
-                    var itextBlock = mug.p.labelItextID;
+                    var itextBlock = mug.p.labelItext;
                     hasLabelItextID = itextBlock && (typeof itextBlock.id !== "undefined");
 
                     if (hasLabelItextID && !util.isValidAttributeValue(itextBlock.id)) {
@@ -266,8 +248,8 @@ define([
                     if (hasLabel) {
                         return 'pass';
                     } else if (!hasLabel && !hasItext && (mug.spec.label.presence === 'optional' || 
-                               mug.spec.labelItextID.presence === 'optional')) {
-                        //make allowance for questions that have label/labelItextID set to 'optional'
+                               mug.spec.labelItext.presence === 'optional')) {
+                        //make allowance for questions that have label/labelItext set to 'optional'
                         return 'pass';
                     } else if (hasLabelItextID && hasItext) {
                         return 'pass';
@@ -367,6 +349,7 @@ define([
     // question type
     var defaultOptions = {
         typeName: "Base",
+        tagName: "input",
         isDataOnly: false,
         isControlOnly: false,
         // whether you can change to or from this question's type in the UI
@@ -439,16 +422,16 @@ define([
          * Returns a list of objects containing bind element attributes
          */
         getBindList: function (mug) {
-            var constraintMsgItextID = mug.p.constraintMsgItextID,
+            var constraintMsgItext = mug.p.constraintMsgItext,
                 constraintMsg;
-            if (constraintMsgItextID && !constraintMsgItextID.isEmpty()) {
-                constraintMsg = "jr:itext('" + constraintMsgItextID.id + "')";
+            if (constraintMsgItext && !constraintMsgItext.isEmpty()) {
+                constraintMsg = "jr:itext('" + constraintMsgItext.id + "')";
             } else {
                 constraintMsg = mug.p.constraintMsgAttr;
             }
             var attrs = {
                 nodeset: mug.form.getAbsolutePath(mug),
-                type: mug.p.dataType,
+                type: mug.options.dataType,
                 constraint: mug.p.constraintAttr,
                 "jr:constraintMsg": constraintMsg,
                 relevant: mug.p.relevantAttr,
@@ -458,7 +441,7 @@ define([
                 "jr:preloadParams": mug.p.preloadParams
             };
             _.each(mug.p.rawBindAttributes, function (value, key) {
-                if (!attrs.hasOwnProperty(key)) {
+                if (!attrs.hasOwnProperty(key) || _.isUndefined(attrs[key])) {
                     attrs[key] = value;
                 }
             });
@@ -555,30 +538,8 @@ define([
         isValid: function () {
             return !this.getErrors().length;
         },
-        getDefaultItextRoot: function (parentMug) {
-            if (this.__className === "Item") {
-                if (!parentMug) {
-                    parentMug = this.parentMug;
-                }
-                return parentMug.getDefaultItextRoot() + "-" + this.p.defaultValue;
-            } else {
-                var path = this.form.getAbsolutePath(this, true);
-                if (!path) {
-                    if (parentMug) {
-                        path = this.form.getAbsolutePath(parentMug, true) +
-                                "/" + this.getNodeID();
-                    } else {
-                        // fall back to nodeID if mug path still not found
-                        // this can happen with malformed XForms
-                        path = "/" + this.getNodeID();
-                    }
-                }
-                return path.slice(1);
-            }
-        },
-        getDefaultLabelItextId: function (parentMug) {
-            // Default Itext ID
-            return this.getDefaultItextRoot(parentMug) + "-label";
+        getDefaultItextRoot: function () {
+            return jr.getDefaultItextRoot(this);
         },
         /*
          * Gets a default label, auto-generating if necessary
@@ -610,20 +571,20 @@ define([
         
         // Add some useful functions for dealing with itext.
         setItextID: function (val) {
-            var labelItextID = this.p.labelItextID;
-            if (labelItextID) {
-                labelItextID.id = val;
+            var labelItext = this.p.labelItext;
+            if (labelItext) {
+                labelItext.id = val;
             }
         },
         
         getItext: function () {
-            return this.p.labelItextID;
+            return this.p.labelItext;
         },
         getNodeID: function () {
             return this.p.nodeID || this.p.defaultValue;
         },
         getDisplayName: function (lang) {
-            var itextItem = this.p.labelItextID, 
+            var itextItem = this.p.labelItext, 
                 Itext = this.form.vellum.data.javaRosa.Itext,
                 defaultLang = Itext.getDefaultLanguage(),
                 disp,
@@ -667,37 +628,21 @@ define([
                 nodeId = isSelectItem ?
                     this.p.defaultValue || "null" :
                     this.getDefaultItextRoot(),
-                itextType = propertyPath.replace("ItextID", "");
-       
+                itextType = propertyPath.replace("Itext", "");
             return rootId + nodeId + "-" + itextType;
-        },
-        setItextId: function (propertyPath, id, unlink) {
-            var itext = this.p[propertyPath];
-
-            if (id !== itext.id) {
-                if (unlink) {
-                    itext = itext.clone();
-                    this.form.vellum.data.javaRosa.Itext.addItem(itext);
-                }
-
-                itext.id = id;
-                // HACK to ensure property really changes
-                this.p.__data[propertyPath] = null;
-                this.p[propertyPath] = itext;
-            }
         },
         unlinkItext: function () {
             var _this = this;
             _.each([
-                "labelItextID",
-                "constraintMsgItextID",
-                "hintItextID"
+                "labelItext",
+                "constraintMsgItext",
+                "hintItext"
             ], function (path) {
                 var val = _this.p[path];
-                // items don't have a constraintMsgItextID
+                // items don't have a constraintMsgItext
                 if (val && val.id) {
                     var id = _this.getItextAutoID(path);
-                    _this.setItextId(path, id, true);
+                    jr.setItextId(_this, path, id, true);
                 }
             });
         },
@@ -750,10 +695,9 @@ define([
 
     var Text = util.extend(defaultOptions, {
         typeName: "Text",
+        dataType: "xsd:string",
         icon: "fcc fcc-fd-text",
         init: function (mug, form) {
-            mug.p.tagName = "input";
-            mug.p.dataType = "xsd:string";
         }
     });
 
@@ -768,25 +712,26 @@ define([
 
     var Secret = util.extend(defaultOptions, {
         typeName: 'Password',
+        dataType: 'xsd:string',
+        tagName: 'secret',
         icon: 'icon-key',
         canOutputValue: false,
         init: function (mug, form) {
-            mug.p.tagName = "secret";
-            mug.p.dataType = "xsd:string";
         }
     });
 
     var Int = util.extend(defaultOptions, {
         typeName: 'Integer',
+        dataType: 'xsd:int',
         icon: 'fcc fcc-fd-numeric',
         init: function (mug, form) {
-            mug.p.tagName = "input";
-            mug.p.dataType = "xsd:int";
         }
     });
 
     var Audio = util.extend(defaultOptions, {
         typeName: 'Audio Capture',
+        dataType: 'binary',
+        tagName: 'upload',
         icon: 'fcc fcc-fd-audio-capture',
         isODKOnly: true,
         canOutputValue: false,
@@ -797,9 +742,7 @@ define([
             }
         },
         init: function (mug, form) {
-            mug.p.tagName = "upload";
             mug.p.mediaType = "audio/*"; /* */
-            mug.p.dataType = "binary";
         },
         spec: {
             mediaType: {
@@ -843,48 +786,43 @@ define([
 
     var Geopoint = util.extend(defaultOptions, {
         typeName: 'GPS',
+        dataType: 'geopoint',
         icon: 'icon-map-marker',
         isODKOnly: true,
         init: function (mug, form) {
-            mug.p.tagName = "input";
-            mug.p.dataType = "geopoint";
         }
     });
 
     var Barcode = util.extend(defaultOptions, {
         typeName: 'Barcode Scan',
+        dataType: 'barcode',
         icon: 'icon-barcode',
         isODKOnly: true,
         init: function (mug, form) {
-            mug.p.tagName = "input";
-            mug.p.dataType = "barcode";
         }
     });
 
     var Date = util.extend(defaultOptions, {
         typeName: 'Date',
+        dataType: 'xsd:date',
         icon: 'icon-calendar',
         init: function (mug, form) {
-            mug.p.tagName = "input";
-            mug.p.dataType = "xsd:date";
         }
     });
 
     var DateTime = util.extend(defaultOptions, {
         typeName: 'Date and Time',
+        dataType: 'xsd:dateTime',
         icon: 'fcc fcc-fd-datetime',
         init: function (mug, form) {
-            mug.p.tagName = "input";
-            mug.p.dataType = "xsd:dateTime";
         }
     });
 
     var Time = util.extend(defaultOptions, {
         typeName: 'Time',
+        dataType: 'xsd:time',
         icon: 'icon-time',
         init: function (mug, form) {
-            mug.p.tagName = "input";
-            mug.p.dataType = "xsd:time";
         }
     });
 
@@ -892,25 +830,24 @@ define([
     // but must be able to view forms already containing longs.
     var Long = util.extend(Int, {
         typeName: 'Long',
+        dataType: 'xsd:long',
         icon: 'fcc fcc-fd-long',
         init: function (mug, form) {
-            mug.p.tagName = "input";
-            mug.p.dataType = "xsd:long";
         }
     });
 
     var Double = util.extend(Int, {
         typeName: 'Decimal',
+        dataType: 'xsd:double',
         icon: 'fcc fcc-fd-decimal',
         init: function (mug, form) {
-            mug.p.tagName = "input";
-            mug.p.dataType = "xsd:double";
         }
     });
 
     var Item = util.extend(defaultOptions, {
         isControlOnly: true,
         typeName: 'Choice',
+        tagName: 'item',
         icon: 'fcc fcc-fd-single-circle',
         isTypeChangeable: false,
         canOutputValue: false,
@@ -933,12 +870,11 @@ define([
             }
         },
         init: function (mug, form) {
-            mug.p.tagName = "item";
         },
         spec: {
             hintLabel: { presence: 'notallowed' },
-            hintItextID: { presence: 'notallowed' },
-            helpItextID: { presence: 'notallowed' },
+            hintItext: { presence: 'notallowed' },
+            helpItext: { presence: 'notallowed' },
             defaultValue: {
                 lstring: 'Choice Value',
                 visibility: 'visible',
@@ -964,13 +900,12 @@ define([
 
     var Trigger = util.extend(defaultOptions, {
         typeName: 'Label',
+        tagName: 'trigger',
         icon: 'icon-tag',
         init: function (mug, form) {
-            mug.p.tagName = "trigger";
             mug.p.appearance = "minimal";
         },
         spec: {
-            dataType: { presence: 'notallowed' },
             dataValue: { presence: 'optional' }
         }
     });
@@ -997,27 +932,27 @@ define([
 
     var MSelect = util.extend(BaseSelect, {
         typeName: 'Multiple Answer',
+        tagName: 'select',
         icon: 'fcc fcc-fd-multi-select',
         init: function (mug, form) {
-            mug.p.tagName = "select";
         },
         spec: {
-            dataType: { visibility: "hidden" }
         },
         defaultOperator: "selected"
     });
 
     var Select = util.extend(MSelect, {
         typeName: 'Single Answer',
+        tagName: 'select1',
         icon: 'fcc fcc-fd-single-select',
         init: function (mug, form) {
-            mug.p.tagName = "select1";
         },
         defaultOperator: null
     });
 
     var Group = util.extend(defaultOptions, {
         typeName: 'Group',
+        tagName: 'group',
         icon: 'icon-folder-open',
         isSpecialGroup: true,
         isNestableGroup: true,
@@ -1028,11 +963,9 @@ define([
             return $node.children().not('label, value, hint, help');
         },
         init: function (mug, form) {
-            mug.p.tagName = "group";
         },
         spec: {
             hintLabel: { presence: "notallowed" },
-            dataType: { presence: "notallowed" },
             calculateAttr: { presence: "notallowed" },
             constraintAttr: { presence: "notallowed" },
             constraintMsgAttr: { presence: "notallowed" },
@@ -1073,10 +1006,10 @@ define([
                 getNodeID: function () {},
                 getAppearanceAttribute: function () {},
                 p: {
-                    tagName: 'repeat',
                     rawControlAttributes: attrs
                 },
                 options: {
+                    tagName: 'repeat',
                     writeControlLabel: false,
                     writeControlHint: false,
                     writeControlHelp: false,
@@ -1093,7 +1026,6 @@ define([
         },
         writeControlRefAttr: null,
         init: function (mug, form) {
-            mug.p.tagName = "group";
             mug.p.repeat_count = null;
         },
         spec: {

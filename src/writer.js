@@ -58,10 +58,9 @@ define([
         xmlWriter.writeEndElement(); //CLOSE BODY
         xmlWriter.writeEndElement(); //CLOSE HTML
         xmlWriter.writeEndDocument(); //CLOSE DOCUMENT
+        form.vellum.afterSerialize();
 
-        var ret = xmlWriter.flush();
-
-        return ret;
+        return xmlWriter.flush();
     };
 
     var createModelHeader = function (form, xmlWriter) {
@@ -197,7 +196,7 @@ define([
                 return;
             }
 
-            xmlWriter.writeStartElement(mug.p.tagName.toLowerCase());
+            xmlWriter.writeStartElement(mug.options.tagName.toLowerCase());
             if (opts.writeControlLabel) {
                 createLabel(xmlWriter, mug);
             }
@@ -236,13 +235,13 @@ define([
      * Creates the label tag inside of a control Element in the xform
      */
     function createLabel(xmlWriter, mug) {
-        var labelItextID = mug.p.labelItextID,
+        var labelItext = mug.p.labelItext,
             labelRef;
-        if (labelItextID) {
-            labelRef = "jr:itext('" + labelItextID.id + "')";
+        if (labelItext) {
+            labelRef = "jr:itext('" + labelItext.id + "')";
             // iID is optional so by extension Itext is optional.
-            if (labelItextID.isEmpty() &&
-                    mug.spec.labelItextID.presence === 'optional') {
+            if (labelItext.isEmpty() &&
+                    mug.spec.labelItext.presence === 'optional') {
                 labelRef = '';
             }
         }
@@ -260,14 +259,14 @@ define([
 
     function createHint(xmlWriter, mug) {
         var hintLabel = mug.p.hintLabel,
-            hintItextID = mug.p.hintItextID;
-        if(hintLabel || (hintItextID && hintItextID.id)) {
+            hintItext = mug.p.hintItext;
+        if(hintLabel || (hintItext && hintItext.id)) {
             xmlWriter.writeStartElement('hint');
             if(hintLabel){
                 xmlWriter.writeString(hintLabel);
             }
-            if(hintItextID.id){
-                var ref = "jr:itext('" + hintItextID.id + "')";
+            if(hintItext.id){
+                var ref = "jr:itext('" + hintItext.id + "')";
                 xmlWriter.writeAttributeString('ref',ref);
             }
             xmlWriter.writeEndElement();
@@ -275,11 +274,11 @@ define([
     }
 
     function createHelp(xmlWriter, mug) {
-        var helpItextID = mug.p.helpItextID;
-        if(helpItextID && helpItextID.id) {
+        var helpItext = mug.p.helpItext;
+        if(helpItext && helpItext.id) {
             xmlWriter.writeStartElement('help');
-            if(helpItextID.id){
-                var helpRef = "jr:itext('" + helpItextID.id + "')";
+            if(helpItext.id){
+                var helpRef = "jr:itext('" + helpItext.id + "')";
                 xmlWriter.writeAttributeString('ref',helpRef);
             }
             xmlWriter.writeEndElement();

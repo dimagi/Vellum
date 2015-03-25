@@ -99,13 +99,13 @@ define([
     };
 
     var normal = function(mug, options) {
-        var path = options.path,
+        var path = options.widgetValuePath || options.path,
             inputID = 'property-' + path,
             disabled = options.disabled || false,
             widget = base(mug, options);
 
         widget.path = path;
-        widget.definition = mug.p.getDefinition(path);
+        widget.definition = mug.p.getDefinition(options.path);
         widget.currentValue = mug.p[path];
         widget.id = inputID;
 

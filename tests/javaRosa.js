@@ -14,6 +14,9 @@ require([
     'text!static/javaRosa/outputref-with-inequality.xml',
     'text!static/javaRosa/text-with-constraint.xml',
     'text!static/javaRosa/group-help.xml',
+    'text!static/javaRosa/itext-item-rename.xml',
+    'text!static/javaRosa/itext-item-rename-group-move.xml',
+    'text!static/javaRosa/itext-item-non-auto-id.xml',
     'text!static/javaRosa/select1-help.xml'
 ], function (
     chai,
@@ -30,6 +33,9 @@ require([
     OUTPUTREF_WITH_INEQUALITY_XML,
     TEXT_WITH_CONSTRAINT_XML,
     GROUP_HELP_XML,
+    ITEXT_ITEM_RENAME_XML,
+    ITEXT_ITEM_RENAME_GROUP_MOVE_XML,
+    ITEXT_ITEM_NON_AUTO_ID_XML,
     SELECT1_HELP_XML
 ) {
     var assert = chai.assert,
@@ -306,7 +312,7 @@ require([
         it("should escape inequality operators in output ref", function () {
             util.loadXML(OUTPUTREF_WITH_INEQUALITY_XML);
             var mug = util.getMug("product");
-            assert.equal(mug.p.labelItextID.get("en"),
+            assert.equal(mug.p.labelItext.get("en"),
                 '<output value="if(1 < 2 or 2 > 3 or 3 <= 3 or 4 >= 5, \'product\', \'other\')"/>');
             util.assertXmlEqual(
                 call('createXML'),
@@ -320,21 +326,21 @@ require([
             util.addQuestion("Text", "load-one");
             var label = util.addQuestion("Trigger", "label"),
                 text2 = util.addQuestion("Text", "text2");
-            label.p.labelItextID.setDefaultValue('<output value="/data/load-one" />');
+            label.p.labelItext.setDefaultValue('<output value="/data/load-one" />');
             text2.p.nodeID = "load";
             text2.p.nodeID = "load-two";
-            assert.equal(label.p.labelItextID.getValue("default", "en"), '<output value="/data/load-one" />');
+            assert.equal(label.p.labelItext.getValue("default", "en"), '<output value="/data/load-one" />');
         });
 
         it("itext changes do not bleed back after copy", function (done) {
             util.init({core: {onReady: function () {
                 var mug = util.addQuestion("Text", "question"),
                     dup = mug.form.duplicateMug(mug);
-                dup.p.labelItextID.setDefaultValue("q2");
+                dup.p.labelItext.setDefaultValue("q2");
 
                 util.saveAndReload(function () {
                     var mug = call("getMugByPath", "/data/question");
-                    assert.equal(mug.p.labelItextID.defaultValue(), "question");
+                    assert.equal(mug.p.labelItext.defaultValue(), "question");
                     done();
                 });
             }}});
@@ -345,15 +351,15 @@ require([
                 var mug = util.addQuestion("Text", "question"),
                     dup = mug.form.duplicateMug(mug),
                     cpy = mug.form.duplicateMug(dup);
-                cpy.p.labelItextID.setDefaultValue("copy");
+                cpy.p.labelItext.setDefaultValue("copy");
 
                 util.saveAndReload(function () {
                     var mug = call("getMugByPath", "/data/question"),
                         dup = call("getMugByPath", "/data/copy-1-of-question"),
                         cpy = call("getMugByPath", "/data/copy-2-of-question");
-                    assert.equal(mug.p.labelItextID.defaultValue(), "question");
-                    assert.equal(dup.p.labelItextID.defaultValue(), "question");
-                    assert.equal(cpy.p.labelItextID.defaultValue(), "copy");
+                    assert.equal(mug.p.labelItext.defaultValue(), "question");
+                    assert.equal(dup.p.labelItext.defaultValue(), "question");
+                    assert.equal(cpy.p.labelItext.defaultValue(), "copy");
                     done();
                 });
             }}});
@@ -369,7 +375,7 @@ require([
                 target.val("test string").change();
                 vellum_util.setCaretPosition(target[0], 4);
                 call("handleDropFinish", target, sourceUid, mug1);
-                var val = mug2.p.labelItextID.getValue('default', 'en');
+                var val = mug2.p.labelItext.getValue('default', 'en');
                 assert.equal(val, 'test<output value="/data/question1" /> string');
                 done();
             }}});
@@ -389,7 +395,7 @@ require([
                     ctrlKey: false
                 });
                 target.change();
-                var val = mug.p.labelItextID.getValue('default', 'en');
+                var val = mug.p.labelItext.getValue('default', 'en');
                 assert.equal(val, 'question1  end');
                 done();
             }}});
@@ -409,7 +415,7 @@ require([
                     ctrlKey: false
                 });
                 target.change();
-                var val = mug.p.labelItextID.getValue('default', 'en');
+                var val = mug.p.labelItext.getValue('default', 'en');
                 assert.equal(val, 'question1  end');
                 done();
             }}});
@@ -423,7 +429,7 @@ require([
                     onReady: function () {
                         var group = util.call("getMugByPath", "/data/question2"),
                             q1 = util.call("getMugByPath", "/data/question1"),
-                            itext = q1.p.labelItextID;
+                            itext = q1.p.labelItext;
 
                         assert(itext.getValue('default', 'en').indexOf('"/data/question2/question3"') > 0,
                             '"/data/question2/question3" not in ' + itext.getValue('default', 'en'));
@@ -438,23 +444,22 @@ require([
         });
 
         it("should bulk update multi-line translation", function () {
-            util.loadXML(TEXT_QUESTION_XML);
-            var jr = util.call("getData").javaRosa,
+            var form = util.loadXML(TEXT_QUESTION_XML),
+                Itext = util.call("getData").javaRosa.Itext,
                 trans = ('label\tdefault-en\tdefault-hin\n' +
                          'question1-label\t"First ""line\n' +
                          'Second"" line\nThird line"\tHindu trans\n');
-            jr.parseXLSItext(trans, jr.Itext);
+            jr.parseXLSItext(form, trans, Itext);
             var q1 = util.getMug("question1");
-            assert.equal(q1.p.labelItextID.get("en"),
+            assert.equal(q1.p.labelItext.get("en"),
                          'First "line\nSecond" line\nThird line');
-            assert.equal(q1.p.labelItextID.get("hin"), 'Hindu trans');
+            assert.equal(q1.p.labelItext.get("hin"), 'Hindu trans');
         });
 
         it("should generate bulk multi-line translation with user-friendly newlines", function () {
-            util.loadXML(MULTI_LINE_TRANS_XML);
-            var jr = util.call("getData").javaRosa,
-                fakeVellum = {beforeSerialize: function () {}};
-            assert.equal(jr.generateItextXLS(fakeVellum, jr.Itext),
+            var form = util.loadXML(MULTI_LINE_TRANS_XML),
+                Itext = util.call("getData").javaRosa.Itext;
+            assert.equal(jr.generateItextXLS(form, Itext),
                          'label\tdefault-en\tdefault-hin\t' +
                          'audio-en\taudio-hin\timage-en\timage-hin\tvideo-en\tvideo-hin\n' +
                          'question1-label\t"First ""line\nSecond"" line\nThird line"\t' +
@@ -462,39 +467,38 @@ require([
         });
 
         it("should escape all languages when generating bulk translations", function () {
-            util.loadXML(MULTI_LANG_TRANS_XML);
-            var jr = util.call("getData").javaRosa,
-                fakeVellum = {beforeSerialize: function () {}};
-            assert.equal(jr.generateItextXLS(fakeVellum, jr.Itext),
+            var form = util.loadXML(MULTI_LANG_TRANS_XML),
+                Itext = util.call("getData").javaRosa.Itext;
+            assert.equal(jr.generateItextXLS(form, Itext),
                          'label\tdefault-en\tdefault-hin\taudio-en\taudio-hin\t' +
                          'image-en\timage-hin\tvideo-en\tvideo-hin\n' +
                          'text-label\t"""Text"\t"""Text"\t\t\t\t\t\t');
         });
 
         it("bulk translation tool should not create empty itext forms", function () {
-            util.loadXML(TEXT_QUESTION_XML);
-            var jr = util.call("getData").javaRosa,
+            var form = util.loadXML(TEXT_QUESTION_XML),
+                Itext = util.call("getData").javaRosa.Itext,
                 trans = ('label\tdefault-en\tdefault-hin\taudio-en\taudio-hin\n' +
                          'question1-label\t"First ""line\n' +
                          'Second"" line\nThird line"\t\t\t\n');
-            jr.parseXLSItext(trans, jr.Itext);
+            jr.parseXLSItext(form, trans, Itext);
             var q1 = util.getMug("question1");
-            assert.equal(q1.p.labelItextID.get("en"),
+            assert.equal(q1.p.labelItext.get("en"),
                          'First "line\nSecond" line\nThird line');
             // existing translation should be cleared
-            assert.equal(q1.p.labelItextID.get("hin"), '');
+            assert.equal(q1.p.labelItext.get("hin"), '');
             // non-existent form should not be added
-            assert(!q1.p.labelItextID.hasForm("audio"), "unexpected form: audio");
+            assert(!q1.p.labelItext.hasForm("audio"), "unexpected form: audio");
         });
 
         it("bulk translation tool should enable the save button on update", function () {
-            util.loadXML(TEXT_QUESTION_XML);
+            var form = util.loadXML(TEXT_QUESTION_XML);
             util.saveButtonEnabled(false);
-            var jr = util.call("getData").javaRosa,
+            var Itext = util.call("getData").javaRosa.Itext,
                 trans = ('label\tdefault-en\tdefault-hin\taudio-en\taudio-hin\n' +
                          'question1-label\t"First ""line\n' +
                          'Second"" line\nThird line"\t\t\t\n');
-            jr.parseXLSItext(trans, jr.Itext);
+            jr.parseXLSItext(form, trans, Itext);
             assert(util.saveButtonEnabled(), "save button not enabled");
         });
 
@@ -521,6 +525,40 @@ require([
                 assert.strictEqual($xml.find("help").length, 1,
                                    "wrong <help> node count\n" + xml);
             });
+        });
+
+        it("should rename itext item ID after move", function () {
+            util.loadXML("");
+            util.addQuestion("Select", "ns");
+            util.addQuestion("Select", "ew");
+            var north = util.getMug("ns/item1"),
+                south = util.getMug("ew/item1");
+            north.p.defaultValue = "north";
+            south.p.defaultValue = "south";
+            north.form.moveMug(south, north, "after");
+            util.assertXmlEqual(util.call("createXML"), ITEXT_ITEM_RENAME_XML,
+                                {normalize_xmlns: true});
+        });
+
+        it("should rename group's child itext item IDs after move group", function () {
+            util.loadXML("");
+            var green = util.addQuestion("Group", "green"),
+                blue = util.addQuestion("Group", "blue");
+            util.addQuestion("Text", "text");
+            blue.form.moveMug(blue, green, "before");
+            util.assertXmlEqual(util.call("createXML"),
+                                ITEXT_ITEM_RENAME_GROUP_MOVE_XML,
+                                {normalize_xmlns: true});
+        });
+
+        it("should not auto-update itext ID when multiple questions point to auto-ish-id", function () {
+            util.loadXML(ITEXT_ITEM_NON_AUTO_ID_XML);
+            var north = util.getMug("north");
+            north.p.nodeID = "west";
+            var xml = call("createXML"),
+                $xml = $(xml);
+            assert.strictEqual($xml.find("text#north-label").length, 2,
+                               "wrong <text> node count\n" + xml);
         });
     });
 

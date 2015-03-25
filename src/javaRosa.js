@@ -7,6 +7,8 @@
 define([
     'underscore',
     'jquery',
+    'xpath',
+    'xpathmodels',
     'tpl!vellum/templates/edit_source',
     'tpl!vellum/templates/language_selector',
     'tpl!vellum/templates/control_group',
@@ -19,6 +21,8 @@ define([
 ], function (
     _,
     $,
+    xpath,
+    xpathmodels,
     edit_source,
     language_selector,
     control_group,
@@ -33,24 +37,27 @@ define([
             image: 'png',
             audio: 'mp3',
             video: '3gp'
-        };
-    var RESERVED_ITEXT_CONTENT_TYPES = [
-        'default', 'short', 'long', 'audio', 'video', 'image'
-    ];
+        },
+        RESERVED_ITEXT_CONTENT_TYPES = [
+            'default', 'short', 'long', 'audio', 'video', 'image'
+        ],
+        _nextItextItemKey = 1;
 
     function ItextItem(options) {
         this.forms = options.forms || [];
         this.id = options.id || "";
+        this.autoId = _.isUndefined(options.autoId) ? true : options.autoId;
         this.itextModel = options.itextModel;
+        this.key = String(_nextItextItemKey++);
     }
     ItextItem.prototype = {
         clone: function () {
             var item = new ItextItem({
                 forms: _.map(this.forms, function (f) { return f.clone(); }),
                 id: this.id,
+                autoId: this.autoId,
                 itextModel: this.itextModel
             });
-            this.itextModel.addItem(item);
             return item;
         },
         getForms: function () {
@@ -113,10 +120,9 @@ define([
         },
         isEmpty: function () {
             if (this.forms) {
-                var nonEmptyItems = _(this.forms).filter(function (form) {
-                    return !form.isEmpty();
+                return _.every(this.forms, function (form) {
+                    return form.isEmpty();
                 });
-                return nonEmptyItems.length === 0;
             }
             return true;
         },
@@ -218,7 +224,6 @@ define([
         util.eventuality(this);
         
         this.languages = [];
-        this.items = [];
     }
     ItextModel.prototype = {
         getLanguages: function () {
@@ -251,126 +256,19 @@ define([
                 return this.languages.length > 0 ? this.languages[0] : "";
             }
         },
-        getItems: function () {
-            return this.items;
-        },
-        getNonEmptyItems: function () {
-            return _(this.items).filter(function (item) {
-                return !item.isEmpty();
-            });
-        },
-        getNonEmptyItemIds: function () {
-            return this.getNonEmptyItems().map(function (item) {
-                return item.id;
-            });
-        },
-        deduplicateIds: function () {
-            var nonEmpty = this.getNonEmptyItems();
-            var found = [];
-            var counter, item, origId,
-                changed = false;
-            for (var i = 0; i < nonEmpty.length; i++) {
-                item = nonEmpty[i];
-                origId = item.id;
-                counter = 2;
-                while (found.indexOf(item.id) !== -1) {
-                    item.id = origId + counter;
-                    counter = counter + 1;
-                    changed = true;
-                }
-                found.push(item.id);
-            }
-        },
-        hasItem: function (item) {
-            return this.items.indexOf(item) !== -1;
-        },
-        /**
-         * Add an itext item to the global Itext object.
-         * Item is an ItextItem object.
-         * Does nothing if the item was already in the itext object.
-         */
-        addItem: function (item) {
-            if (!this.hasItem(item)) {
-                this.items.push(item);
-            } 
-        },
         /*
-         * Create a new blank item and add it to the list.
+         * Create a new blank item
          */
-        createItem: function (id) {
-            var item = new ItextItem({
+        createItem: function (id, autoId) {
+            return new ItextItem({
                 id: id,
+                autoId: autoId,
                 itextModel: this,
                 forms: [new ItextForm({
                     name: "default",
                     itextModel: this
                 })]
             });
-            this.addItem(item);
-            return item;
-        },
-        /**
-         * Get the Itext Item by ID.
-         */
-        getItem: function (iID) {
-            // this is O[n] when it could be O[1] with some other
-            // data structure. That would require keeping the ids
-            // in sync in multiple places though.
-            // This could be worked around via careful event handling,
-            // but is not implemented until we see slowness.
-            try {
-                return util.reduceToOne(this.items, function (item) {
-                    return item.id === iID;
-                }, "itext id = " + iID);
-            } catch (e) {
-                throw "NoItextItemFound";
-            }
-        },
-        getOrCreateItem: function (id) {
-            try {
-                return this.getItem(id);
-            } catch (err) {
-                return this.createItem(id); 
-            }
-        },
-        removeItem: function (item) {
-            var index = this.items.indexOf(item);
-            if (index !== -1) {
-                this.items.splice(index, 1);
-            } 
-        },
-        /**
-         * Generates a flat list of all unique Itext IDs currently in the
-         * Itext object.
-         */
-        getAllItemIDs: function () {
-            return this.items.map(function (item) {
-                return item.id;
-            });
-        },
-        /**
-         * Remove all Itext associated with the given mug
-         * @param mug
-         */
-        removeMugItext: function (mug) {
-            // NOTE: this is not currently used. We clear itext
-            // at form-generation time. This is because shared 
-            // itext makes removal problematic.
-            var labelItext, hintItext, constraintItext;
-            if (mug){
-                labelItext = mug.p.labelItextID;
-                hintItext = mug.p.hintItextID;
-                if (labelItext) {
-                    this.removeItem(labelItext);
-                }
-                if (hintItext) {
-                    this.removeItem(hintItext);
-                }
-                constraintItext = mug.p.constraintMsgItextID;
-                if (constraintItext) {
-                    this.removeItem(constraintItext);
-                }
-            }
         },
         updateForNewMug: function(mug) {
             // for new mugs, generate a label
@@ -384,123 +282,138 @@ define([
             // set default itext id/values
             if (!mug.options.isDataOnly) {
                 // set label if not there
-                if (!mug.p.labelItextID && 
-                    mug.spec.labelItextID.presence !== "notallowed")
+                if (!mug.p.labelItext && 
+                    mug.spec.labelItext.presence !== "notallowed")
                 {
-                    var labelItextID = this.getDefaultLabelItext(mug, defaultLabelValue);
-                    mug.p.labelItextID = labelItextID;
+                    var item = mug.p.labelItext = this.createItem();
+                    item.setDefaultValue(defaultLabelValue);
                 }
                 // set hint if legal and not there
-                if (mug.spec.hintItextID.presence !== "notallowed" &&
-                    !mug.p.hintItextID) {
-                    mug.p.hintItextID = this.createItem("");
+                if (mug.spec.hintItext.presence !== "notallowed" &&
+                    !mug.p.hintItext) {
+                    mug.p.hintItext = this.createItem();
                 }
-                if (mug.spec.helpItextID.presence !== "notallowed" &&
-                    !mug.p.helpItextID) {
-                    mug.p.helpItextID = this.createItem("");
+                if (mug.spec.helpItext.presence !== "notallowed" &&
+                    !mug.p.helpItext) {
+                    mug.p.helpItext = this.createItem();
                 }
             }
             if (!mug.options.isControlOnly) {
                 // set constraint msg if legal and not there
-                if (mug.spec.constraintMsgItextID.presence !== "notallowed" &&
-                    !mug.p.constraintMsgItextID) {
-                    mug.p.constraintMsgItextID = this.createItem("");
+                if (mug.spec.constraintMsgItext.presence !== "notallowed" &&
+                    !mug.p.constraintMsgItext) {
+                    mug.p.constraintMsgItext = this.createItem();
                 }
             }
-        },
-        getDefaultLabelItext: function (mug, defaultValue) {
-            var item,
-                formData = {},
-                defaultLang = this.getDefaultLanguage();
-            formData[defaultLang] = defaultValue;
-            item = new ItextItem({
-                id: mug.getDefaultLabelItextId(),
-                forms: [new ItextForm({
-                            name: "default",
-                            data: formData,
-                            itextModel: this
-                        })],
-                itextModel: this
-            });
-            this.addItem(item);
-            return item;
         }
     };
 
+    var ITEXT_PROPERTIES = [
+            'labelItext',
+            'hintItext',
+            'helpItext',
+            'constraintMsgItext'
+        ];
+
     /**
-     * Walks through internal tree and grabs
-     * the Itext id's from any Mugs that are found.  Returns
-     * a flat list of iIDs.  This list is primarily used
-     * for trimming out crufty itext.
+     * Call visitor function for each Itext item in the form
      */
-    var getAllNonEmptyItextItemsFromMugs = function (form) {
-        // get all the itext references in the forms
-        var ret = [];
-        var appendItemsIfPresent = function (node) {
-            if (node.isRootNode) {
-                return;
-            }
+    function forEachItextItem(form, visit) {
+        var seen = {};
 
-            var mt = node.getValue();
-            if(!mt) {
-                throw 'Node in tree without value?!?!';
+        form.tree.walk(function (mug, nodeID, processChildren) {
+            if(mug) { // skip root node
+                _.each(ITEXT_PROPERTIES, function (property) {
+                    var item = mug.p[property];
+                    if (item && !item.key) {
+                        // this should never happen
+                        window.console.log(
+                            "ignoring ItextItem without a key: " + item.id);
+                        return;
+                    } else if (item && !seen.hasOwnProperty(item.key)) {
+                        seen[item.key] = true;
+                        visit(item, mug, property);
+                    }
+                });
             }
-        
-            var thingsToGet = [
-                'labelItextID',
-                'hintItextID', 
-                'helpItextID',
-                'constraintMsgItextID'
-            ]; 
-        
-            var val;            
-            for (var i = 0; i < thingsToGet.length; i++) {
-                try {
-                    val = mt.p[thingsToGet[i]];
-                    if (val && !val.isEmpty() && ret.indexOf(val) === -1) {
-                       // it was there and not present so add it to the list
-                       ret.push(val);
-                    } 
-                } catch (err) {
-                    // probably just wasn't in the mug
+            processChildren();
+        });
+    }
+
+    /**
+     * Walks the tree and grabs Itext items from mugs
+     *
+     * This updates the ID of each returned Itext item according to it's
+     * autoId property. IDs of items with autoId turned off will not be
+     * modified unless the ID is blank or it conflicts with another item.
+     * NOTE because this mutates itext IDs it could cause subtle side
+     * effects if anything depends on Itext IDs not changing at random
+     * times such as save, copy, paste, export translations, etc.
+     *
+     * @param form - the vellum instance's Form object.
+     * @param empty - if true, return empty items as well. Otherwise omit them.
+     * @returns - a list of Itext items.
+     */
+    function getItextItemsFromMugs(form, empty) {
+        var ret = [],
+            byId = {},
+            props = _.object(_.map(ITEXT_PROPERTIES, function (thing) {
+                return [thing, thing.replace("Itext", "")];
+            }));
+
+        forEachItextItem(form, function (item, mug, property) {
+            var itemIsEmpty = item.isEmpty();
+            if (!itemIsEmpty || empty) {
+                var id = item.autoId || !item.id ?
+                         getDefaultItextId(mug, props[property]) : item.id,
+                    origId = id,
+                    count = 2;
+                if (itemIsEmpty && byId.hasOwnProperty(id)) {
+                    // ignore empty item with duplicate ID
+                    return;
                 }
-            }    
-        };
-        
-        form.tree.treeMap(appendItemsIfPresent);
+                while (byId.hasOwnProperty(id)) {
+                    id = origId + count;
+                }
+                item.id = id;
+                byId[id] = item;
+                ret.push(item);
+            }
+        });
         return ret; 
-
-    };
+    }
 
     var iTextIDWidget = function (mug, options) {
         var widget = widgets.text(mug, options),
-            $input = widget.input;
+            $input = widget.input,
+            currentValue = null,
+            isSelectItem = mug.__className === "Item";
 
-        widget.isSelectItem = (mug.__className === "Item");
-        widget.parentMug = widget.isSelectItem ? widget.mug.parentMug : null;
-        widget.langs = widget.mug.form.vellum.data.javaRosa.Itext.getLanguages();
-
-        // a few little hacks to support auto-update of choices
-        widget.getItextType = function () {
-            return widget.path.replace("ItextID", "");
-        };
-
-        widget.autoGenerateId = function () {
+        function autoGenerateId() {
             return mug.getItextAutoID(widget.path);
-        };
+        }
 
-        widget.updateAutoId = function () {
-            widget.setValue({id: widget.autoGenerateId()});
-        };
+        function updateAutoId() {
+            _setValue(autoGenerateId());
+            setAutoMode(true);
+        }
 
         var _setValue = widget.setValue;
 
         widget.setValue = function (value) {
-            _setValue(value.id);
+            currentValue = value;
+            if (value.autoId) {
+                updateAutoId();
+            } else {
+                _setValue(value.id);
+                setAutoMode(false);
+            }
         };
 
         widget.getValue = function() {
-            return $input.val();
+            currentValue.id = $input.val();
+            currentValue.autoId = getAutoMode();
+            return currentValue;
         };
 
         // auto checkbox
@@ -508,22 +421,17 @@ define([
 
         $autoBox.change(function () {
             if ($(this).prop('checked')) {
-                widget.updateAutoId();
+                updateAutoId();
                 widget.handleChange();
             }
         });
 
-        widget.setAutoMode = function (autoMode) {
+        function setAutoMode(autoMode) {
             $autoBox.prop("checked", autoMode);
-        };
+        }
 
-        widget.getAutoMode = function () {
+        function getAutoMode() {
             return $autoBox.prop('checked');
-        };
-
-        // support auto mode to keep ids in sync
-        if (widget.currentValue && widget.currentValue.id === widget.autoGenerateId()) {
-            widget.setAutoMode(true);
         }
 
         var _getUIElement = widget.getUIElement;
@@ -542,71 +450,23 @@ define([
             return $uiElem;
         };
 
-        widget.save = function () {
-            // override save to call out to rename itext
-            widget.mug.setItextId(widget.path, widget.getValue());
-        };
-
-        widget.mug.on('property-changed', function (e) {
-            // keep the ids in sync if we're in auto mode
-            if (widget.getAutoMode() &&
-                (e.property === "nodeID" ||
-                 widget.isSelectItem && e.property === "defaultValue")) 
-            {
-                var newVal = widget.autoGenerateId();
-                if (newVal !== widget.getValue()) {
-                    widget.setValue({id: newVal});
-                    widget.handleChange();
-                }
-            }
-        }, null, widget);
-
         widget.input.keyup(function () {
             // turn off auto-mode if the id is ever manually overridden
             var newVal = $(this).val();
-            if (newVal !== widget.autoGenerateId()) {
-                widget.setAutoMode(false);
+            if (newVal !== autoGenerateId()) {
+                setAutoMode(false);
             }
         });
 
-        widget.handleItextLabelChange = function (e) {
-            // Makes sure that there is an autoID present if itext of the same type
-            // exists for any form in any language.
-
-            var currentVal = widget.getValue(),
-                itextItem = e.itextItem,
-                isItextPresent;
-            isItextPresent = itextItem && (function () {
-                var currentForms = itextItem.getForms();
-                for (var i = 0; i < currentForms.length; i++) {
-                    for (var j = 0; j < widget.langs.length; j++) {
-                        if (currentForms[i].getValue(widget.langs[j])) {
-                            return true;
-                        }
-                    }
-                }
-                return false;
-            })();
-
-            if (isItextPresent && !currentVal) {
-                widget.setAutoMode(true);
-                widget.updateAutoId();
-                widget.handleChange();
-            } else if (!isItextPresent && currentVal) {
-                widget.setAutoMode(false);
-                widget.setValue({id: ''});
-                widget.handleChange();
-            }
-
-        };
-
-        widget.mug.on('update-question-itextid', function (e) {
-            if (e.itextType === widget.getItextType()) {
-                widget.handleItextLabelChange(e);
+        mug.on("property-changed", function (e) {
+            if (getAutoMode() && (
+                    e.property === "nodeID" ||
+                    (isSelectItem && e.property === "defaultValue"))) {
+                $input.val(autoGenerateId());
             }
         }, null, widget);
 
-        widget.mug.on("teardown-mug-properties", function (e) {
+        mug.on("teardown-mug-properties", function (e) {
             e.mug.unbind(widget);
         }, null, widget);
 
@@ -1130,7 +990,7 @@ define([
                 allMugs.map(function (mug) {
                     var treeName = itextItem.getValue(widget.form, widget.language) || 
                             mug.form.vellum.getMugDisplayName(mug),
-                        it = mug.p.labelItextID;
+                        it = mug.p.labelItext;
                     if (it && it.id === itextItem.id && widget.form === "default") {
                         mug.form.fire({
                             type: 'question-label-text-change',
@@ -1140,11 +1000,6 @@ define([
                     }
                 });
             }
-            widget.mug.fire({
-               type: 'update-question-itextid',
-               itextType: widget.itextType,
-               itextItem: itextItem
-            });
         };
 
         widget.save = function () {
@@ -1187,7 +1042,7 @@ define([
                     // audio: jr://file/commcare/audio/form_id/question_id.mp3
                     var extension = DEFAULT_EXTENSIONS[form];
                     return "jr://file/commcare/" + form + url_type +
-                           widget.mug.getDefaultItextRoot() + "." + extension;
+                           getDefaultItextRoot(widget.mug) + "." + extension;
                 }
                 return null;
             };
@@ -1198,7 +1053,7 @@ define([
         };
     };
     
-    var parseXLSItext = function (str, Itext) {
+    var parseXLSItext = function (form, str, Itext) {
         var forms = ["default", "audio", "image" , "video"],
             languages = Itext.getLanguages(),
             nextRow = tsv.makeRowParser(str),
@@ -1216,9 +1071,16 @@ define([
             });
         }
 
+        var items = getItextItemsFromMugs(form, true);
+        items = _.object(_.map(items, function (item) { return [item.id, item]; }));
         cells = nextRow();
         while (cells) {
-            item = Itext.getOrCreateItem(cells[0]);
+            // what's the point of creating items here?
+            item = items[cells[0]];
+            if (!item) {
+                // TODO alert user that row was skipped
+                continue;
+            }
             for (i = 1; i < cells.length; i++) {
                 head = header[i];
                 if (head) {
@@ -1234,7 +1096,7 @@ define([
         Itext.fire("change");
     };
 
-    var generateItextXLS = function (vellum, Itext) {
+    var generateItextXLS = function (form, Itext) {
         function rowify(firstVal, languages, forms, func) {
             var row = [firstVal];
             _.each(forms, function (form) {
@@ -1257,19 +1119,17 @@ define([
             });
         }
 
-        // todo: fix abstraction barrier
-        vellum.beforeSerialize();
-
         // TODO: should this be configurable?
         var forms = ["default", "audio", "image" , "video"],
             languages = Itext.getLanguages(),
-            allItems = Itext.getNonEmptyItems(),
             rows = [];
+
         if (languages.length > 0) {
+            var items = getItextItemsFromMugs(form);
             rows.push(makeHeadings(languages, forms));
-            for(var i = 0; i < allItems.length; i++) {
-                rows.push(makeRow(allItems[i], languages, forms));
-            }
+            _.each(items, function (item) {
+                rows.push(makeRow(item, languages, forms));
+            });
         }
         return tsv.tabDelimit(rows);
     };
@@ -1307,6 +1167,43 @@ define([
         }
     }
 
+    function getDefaultItextRoot(mug) {
+        if (mug.__className === "Item") {
+            return getDefaultItextRoot(mug.parentMug) + "-" + mug.getNodeID();
+        } else {
+            var path = mug.form.getAbsolutePath(mug, true);
+            if (!path) {
+                if (mug.parentMug) {
+                    path = mug.form.getAbsolutePath(mug.parentMug, true) +
+                            "/" + mug.getNodeID();
+                } else {
+                    // fall back to nodeID if mug path still not found
+                    // this can happen with malformed XForms
+                    path = "/" + mug.getNodeID();
+                }
+            }
+            return path.slice(1);
+        }
+    }
+
+    function getDefaultItextId(mug, property) {
+        return getDefaultItextRoot(mug) + "-" + property;
+    }
+
+    function setItextId(mug, propertyPath, id, unlink) {
+        var itext = mug.p[propertyPath];
+        if (id !== itext.id) {
+            if (unlink) {
+                itext = itext.clone();
+            }
+
+            itext.id = id;
+            // HACK to ensure property really changes
+            mug.p.__data[propertyPath] = null;
+            mug.p[propertyPath] = itext;
+        }
+    }
+
     $.vellum.plugin("javaRosa", {
         langs: ['en'],
         displayLanguage: 'en'
@@ -1316,10 +1213,6 @@ define([
             this.data.javaRosa.ItextItem = ItextItem;
             this.data.javaRosa.ItextForm = ItextForm;
             this.data.javaRosa.ICONS = ICONS;
-
-            // exposed for testing
-            this.data.javaRosa.parseXLSItext = parseXLSItext;
-            this.data.javaRosa.generateItextXLS = generateItextXLS;
         },
         insertOutputRef: function (mug, target, path, dateFormat) {
             var output = getOutputRef(path, dateFormat),
@@ -1424,8 +1317,7 @@ define([
                         _this.jstree('rename_node', $el, mug.getNodeID());
                     }
                     else {
-                        var labelItextID = mug.p.labelItextID;
-                        if (labelItextID) {
+                        if (mug.p.labelItext) {
                             var text = _this.getMugDisplayName(mug);
                             _this.jstree('rename_node', $el, text ||
                                     _this.opts().core.noTextString);
@@ -1452,9 +1344,10 @@ define([
         loadXML: function (xmlString) {
             var _this = this,
                 langs = this.opts().javaRosa.langs,
-                Itext;
+                Itext, itextMap;
 
             this.data.javaRosa.Itext = Itext = new ItextModel();
+            this.data.javaRosa.itextMap = itextMap = {};
 
             function eachLang() {
                 var el = $(this);
@@ -1463,8 +1356,12 @@ define([
                 function eachText() {
                     var textEl = $(this);
                     var id = textEl.attr('id');
-                    var item = Itext.getOrCreateItem(id);
-                    
+                    var item = itextMap[id];
+                    if (!item || !itextMap.hasOwnProperty(id)) {
+                        item = Itext.createItem(id);
+                        itextMap[id] = item;
+                    }
+
                     function eachValue() {
                         var valEl = $(this);
                         var curForm = valEl.attr('form');
@@ -1523,7 +1420,79 @@ define([
 
             this.__callOld();
 
+            delete this.data.javaRosa.itextMap;
             Itext.on('change', function () { _this.onFormChange(); });
+        },
+        populateControlMug: function(mug, controlElement) {
+            this.__callOld();
+
+            var Itext = this.data.javaRosa.Itext,
+                itextMap = this.data.javaRosa.itextMap;
+
+            function getITextID(value) {
+                try {
+                    var parsed = xpath.parse(value);
+                    if (parsed instanceof xpathmodels.XPathFuncExpr &&
+                        parsed.id === "jr:itext")
+                    {
+                        return parsed.args[0].value;
+                    }
+                } catch (err) {
+                    // this seems like a real error since the reference should presumably
+                    // have been valid xpath, but don't deal with it here
+                }
+                return "";
+            }
+
+            function getItextItem(id, property) {
+                var auto = !id || id === getDefaultItextId(mug, property);
+                if (id) {
+                    var item = itextMap[id];
+                    if (item && itextMap.hasOwnProperty(id)) {
+                        if (!auto) {
+                            item.autoId = false;
+                        }
+                        return item;
+                    }
+                }
+                return Itext.createItem(id, auto);
+            }
+
+            function parseItextRef($el, property) {
+                var ref = $el.attr('ref');
+                return getItextItem(ref ? getITextID(ref) : "", property);
+            }
+
+            var labelEl = controlElement.children('label'),
+                hintEl = controlElement.children('hint'),
+                helpEl = controlElement.children('help');
+            if (labelEl.length && mug.spec.label.presence !== 'notallowed') {
+                var labelItext = parseItextRef(labelEl, "label");
+                if (labelItext.isEmpty()) {
+                    //if no default Itext has been set, set it with the default label
+                    var labelVal = xml.humanize(labelEl);
+                    if (labelVal) {
+                        labelItext.setDefaultValue(labelVal);
+                    } else {
+                        // or some sensible deafult
+                        labelItext.setDefaultValue(mug.getDefaultLabelValue());
+                    }
+                }
+                mug.p.labelItext = labelItext;
+            }
+            if (hintEl.length && mug.spec.hintLabel.presence !== 'notallowed') {
+                mug.p.hintItext = parseItextRef(hintEl, "hint");
+            }
+            if (helpEl.length && mug.spec.label.presence !== 'notallowed') {
+                mug.p.helpItext = parseItextRef(helpEl, "help");
+            }
+            if (mug.p.constraintMsgAttr) {
+                var id = getITextID(mug.p.constraintMsgAttr);
+                if (id) {
+                    mug.p.constraintMsgItext = getItextItem(id, "constraintMsg");
+                    mug.p.constraintMsgAttr = null;
+                }
+            }
         },
         handleMugParseFinish: function (mug) {
             this.__callOld();
@@ -1563,7 +1532,7 @@ define([
                 oldPathRe = new RegExp(oldPath + '(?![\\w/-])', 'mg');
             }
 
-            _(itext.getItems()).each(function (item) {
+            forEachItextItem(form, function (item) {
                 change = false;
                 _(item.forms).each(function (itForm) {
                     _(itForm.getOutputRefExpressions()).each(function (refs, lang) {
@@ -1602,8 +1571,8 @@ define([
             // non-duplicates
 
             var Itext = this.data.javaRosa.Itext,
+                items = this.data.javaRosa.itextItemsFromBeforeSerialize,
                 languages = Itext.getLanguages(),
-                allItems = Itext.getNonEmptyItems(),
                 item, forms, form, lang, val;
             if (languages.length > 0) {
                 xmlWriter.writeStartElement("itext");
@@ -1614,8 +1583,8 @@ define([
                     if (Itext.getDefaultLanguage() === lang) {
                         xmlWriter.writeAttributeString("default", '');
                     }
-                    for (var j = 0; j < allItems.length; j++) {
-                        item = allItems[j];
+                    for (var j = 0; j < items.length; j++) {
+                        item = items[j];
                         xmlWriter.writeStartElement("text");
                         xmlWriter.writeAttributeString("id", item.id);
                         forms = item.getForms();
@@ -1635,23 +1604,23 @@ define([
                 }
                 xmlWriter.writeEndElement();
             }
-        
         },
         beforeSerialize: function () {
             this.__callOld();
-
-            // remove crufty itext that isn't linked to anything in the form
-            this.data.javaRosa.Itext.items = getAllNonEmptyItextItemsFromMugs(
-                this.data.core.form);
-
-            this.data.javaRosa.Itext.deduplicateIds();
+            // update and dedup all non-empty Itext items IDs
+            this.data.javaRosa.itextItemsFromBeforeSerialize =
+                getItextItemsFromMugs(this.data.core.form);
+        },
+        afterSerialize: function () {
+            this.__callOld();
+            delete this.data.javaRosa.itextItemsFromBeforeSerialize;
         },
         getMugTypes: function () {
             var types = this.__callOld(),
                 normal = types.normal;
 
             normal.Group.spec = util.extend(normal.Group.spec, {
-                constraintMsgItextID: {
+                constraintMsgItext: {
                     presence: 'notallowed'
                 }
             });
@@ -1684,15 +1653,23 @@ define([
 
             // hide non-itext constraint message unless it's present
             databind.constraintMsgAttr.visibility = "visible_if_present";
-            databind.constraintMsgItextID = {
+            databind.constraintMsgItext = {
                 visibility: 'visible',
                 presence: function (mugOptions) {
                     return mugOptions.isSpecialGroup ? 'notallowed' : 'optional';
                 },
-                lstring: "Validation Error Message ID",
-                widget: iTextIDWidget,
+                lstring: 'Validation Message',
+                widget: function (mug, options) {
+                    return itextLabelBlock(mug, $.extend(options, {
+                        itextType: "constraintMsg",
+                        getItextByMug: function (mug) {
+                            return mug.p.constraintMsgItext;
+                        },
+                        displayName: "Validation Message"
+                    }));
+                },
                 validationFunc: function (mug) {
-                    var constraintItext = mug.p.constraintMsgItextID;
+                    var constraintItext = mug.p.constraintMsgItext;
                     if (constraintItext && constraintItext.id) {
                         if (!util.isValidAttributeValue(constraintItext.id)) {
                             return constraintItext.id + " is not a valid ID";
@@ -1705,19 +1682,12 @@ define([
                 }
             };
             // virtual property used to define a widget
-            databind.constraintMsgItext = {
-                visibility: 'constraintMsgItextID',
+            databind.constraintMsgItextID = {
+                visibility: 'constraintMsgItext',
                 presence: 'optional',
-                widget: function (mug, options) {
-                    return itextLabelBlock(mug, $.extend(options, {
-                        itextType: "constraintMsg",
-                        getItextByMug: function (mug) {
-                            return mug.p.constraintMsgItextID;
-                        },
-                        displayName: "Validation Message"
-                    }));
-                },
-                lstring: 'Validation Message'
+                lstring: "Validation Error Message ID",
+                widget: iTextIDWidget,
+                widgetValuePath: "constraintMsgItext"
             };
 
             // CONTROL ELEMENT
@@ -1725,76 +1695,54 @@ define([
             // hide non-itext messages unless present
             control.label.visibility = "visible_if_present";
             control.hintLabel.visibility = "visible_if_present";
-            // virtual property used to define a widget
+
             control.labelItext = {
-                visibility: 'labelItextID',
+                visibility: 'visible',
                 presence: 'optional',
+                lstring: "Label",
                 widget: function (mug, options) {
                     return itextLabelBlock(mug, $.extend(options, {
                         itextType: "label",
                         getItextByMug: function (mug) {
-                            return mug.p.labelItextID;
+                            return mug.p.labelItext;
                         },
                         displayName: "Label"
                     }));
                 },
-                lstring: "Label"
-            };
-
-            control.labelItextID = {
-                visibility: 'visible',
-                presence: 'optional',
-                lstring: "Question Itext ID",
-                widget: function (mug, options) {
-                    return iTextIDWidget(mug, $.extend(options, {
-                        displayName: "Add Other Content",
-                        itextType: "label",
-                        getItextByMug: function (mug) {
-                            return mug.p.labelItextID;
-                        },
-                        forms: ['long', 'short'],
-                        isCustomAllowed: true
-                    }));
-                },
                 validationFunc: spec.control.label.validationFunc
             };
-            // virtual property used to get a widget
-            control.hintItext = {
-                visibility: 'hintItextID',
-                widget: function (mug, options) {
-                    return itextLabelBlock(mug, $.extend(options, {
-                        itextType: "hint",
-                        getItextByMug: function (mug) {
-                            return mug.p.hintItextID;
-                        },
-                        displayName: "Hint Message"
-                    }));
-                }
+            // virtual property used to define a widget
+            control.labelItextID = {
+                visibility: 'labelItext',
+                presence: 'optional',
+                lstring: "Question Itext ID",
+                widget: iTextIDWidget,
+                widgetValuePath: "labelItext"
             };
-            control.hintItextID = {
+
+            control.hintItext = {
                 visibility: 'visible',
                 presence: function (mugOptions) {
                     return mugOptions.isSpecialGroup ? 'notallowed' : 'optional';
                 },
-                lstring: "Hint Itext ID",
+                lstring: "Hint",
                 widget: function (mug, options) {
-                    return iTextIDWidget(mug, $.extend(options, {
+                    return itextLabelBlock(mug, $.extend(options, {
                         itextType: "hint",
                         getItextByMug: function (mug) {
-                            return mug.p.hintItextID;
+                            return mug.p.hintItext;
                         },
                         displayName: "Hint Message"
                     }));
                 },
                 validationFunc: function (mug) {
-                    var hintItext;
-                    hintItext = mug.p.hintItextID;
+                    var hintItext = mug.p.hintItext;
                     if (hintItext && hintItext.id) {
                         if (!util.isValidAttributeValue(hintItext.id)) {
                             return hintItext.id + " is not a valid ID";
                         }
                     }
-                    if (mug.spec.hintItextID.presence === 'required' &&
+                    if (mug.spec.hintItext.presence === 'required' &&
                         !hintItext.id) {
                         return 'Hint ID is required but not present in this question!';
                     }
@@ -1802,42 +1750,37 @@ define([
                     return validateItextItem(hintItext, "Hint");
                 }
             };
-            control.helpItext = {
-                visibility: 'helpItextID',
-                widget: function (mug, options) {
-                    return itextLabelBlock(mug, $.extend(options, {
-                        itextType: "help",
-                        getItextByMug: function (mug) {
-                            return mug.p.helpItextID;
-                        },
-                        displayName: "Help Message"
-                    }));
-                }
+            // virtual property used to get a widget
+            control.hintItextID = {
+                visibility: 'hintItext',
+                lstring: "Hint Itext ID",
+                widget: iTextIDWidget,
+                widgetValuePath: "hintItext"
             };
-            control.helpItextID = {
+
+            control.helpItext = {
                 visibility: 'visible',
                 presence: function (mugOptions) {
                     return mugOptions.isSpecialGroup ? 'notallowed' : 'optional';
                 },
-                lstring: "Help Itext ID",
+                lstring: "Help Message",
                 widget: function (mug, options) {
-                    return iTextIDWidget(mug, $.extend(options, {
+                    return itextLabelBlock(mug, $.extend(options, {
                         itextType: "help",
                         getItextByMug: function (mug) {
-                            return mug.p.helpItextID;
+                            return mug.p.helpItext;
                         },
                         displayName: "Help Message"
                     }));
                 },
                 validationFunc: function (mug) {
-                    var helpItext;
-                    helpItext = mug.p.helpItextID;
+                    var helpItext = mug.p.helpItext;
                     if (helpItext && helpItext.id) {
                         if (!util.isValidAttributeValue(helpItext.id)) {
                             return helpItext.id + " is not a valid ID";
                         }
                     }
-                    if (mug.spec.helpItextID.presence === 'required' &&
+                    if (mug.spec.helpItext.presence === 'required' &&
                         !helpItext.id) {
                         return 'Help ID is required but not present in this question!';
                     }
@@ -1845,11 +1788,18 @@ define([
                     return validateItextItem(helpItext, "Help");
                 }
             };
+            // virtual property used to get a widget
+            control.helpItextID = {
+                visibility: 'helpItext',
+                lstring: "Help Itext ID",
+                widget: iTextIDWidget,
+                widgetValuePath: "helpItext"
+            };
 
             // virtual property used to get a widget
             control.otherItext = function (mugOptions) {
                 return mugOptions.isSpecialGroup ? undefined : {
-                    visibility: 'labelItextID',
+                    visibility: 'labelItext',
                     presence: 'optional',
                     lstring: "Add Other Content",
                     widget: function (mug, options) {
@@ -1857,7 +1807,7 @@ define([
                             displayName: "Add Other Content",
                             itextType: "label",
                             getItextByMug: function (mug) {
-                                return mug.p.labelItextID;
+                                return mug.p.labelItext;
                             },
                             forms: ['long', 'short'],
                             isCustomAllowed: true
@@ -1868,7 +1818,7 @@ define([
             // virtual property used to get a widget
             control.mediaItext = function (mugOptions) {
                 return mugOptions.isSpecialGroup ? undefined : {
-                    visibility: 'labelItextID',
+                    visibility: 'labelItext',
                     presence: 'optional',
                     lstring: 'Add Multimedia',
                     widget: function (mug, options) {
@@ -1876,7 +1826,7 @@ define([
                             displayName: "Add Multimedia",
                             itextType: "label",
                             getItextByMug: function (mug) {
-                                return mug.p.labelItextID;
+                                return mug.p.labelItext;
                             },
                             forms: SUPPORTED_MEDIA_TYPES,
                             formToIcon: ICONS
@@ -1887,7 +1837,7 @@ define([
             // virtual property used to get a widget
             control.helpMediaIText = function (mugOptions) {
                 return mugOptions.isSpecialGroup ? undefined : {
-                    visibility: 'helpItextID',
+                    visibility: 'helpItext',
                     presence: 'optional',
                     lstring: 'Add Help Media',
                     widget: function (mug, options) {
@@ -1895,7 +1845,7 @@ define([
                             displayName: "Add Help Media",
                             itextType: "help",
                             getItextByMug: function (mug) {
-                                return mug.p.helpItextID;
+                                return mug.p.helpItext;
                             },
                             forms: SUPPORTED_MEDIA_TYPES,
                             formToIcon: ICONS
@@ -1951,15 +1901,17 @@ define([
             ]);
         },
         showItextDialog: function (done) {
-            var $modal, $updateForm, $textarea,
-                Itext = this.data.javaRosa.Itext;
+            var vellum = this,
+                $modal, $updateForm, $textarea,
+                Itext = vellum.data.javaRosa.Itext,
+                form = vellum.data.core.form;
 
-            $modal = this.generateNewModal("Edit Bulk Translations", [
+            $modal = vellum.generateNewModal("Edit Bulk Translations", [
                 {
                     title: "Update Translations",
                     cssClasses: "btn-primary",
                     action: function () {
-                        parseXLSItext($textarea.val(), Itext);
+                        parseXLSItext(form, $textarea.val(), Itext);
                         $modal.modal('hide');
                         done();
                     }
@@ -1976,10 +1928,17 @@ define([
 
             // display current values
             $textarea = $updateForm.find('textarea');
-            $textarea.val(generateItextXLS(this, Itext));
+            $textarea.val(generateItextXLS(form, Itext));
 
             $modal.modal('show');
             $modal.one('shown', function () { $textarea.focus(); });
         }
     });
+
+    return {
+        getDefaultItextRoot: getDefaultItextRoot,
+        setItextId: setItextId,
+        parseXLSItext: parseXLSItext,
+        generateItextXLS: generateItextXLS
+    };
 });

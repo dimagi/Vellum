@@ -1341,8 +1341,8 @@ define([
 
     fn.toggleConstraintItext = function (mug) {
         // todo: don't handle this one-off in the UI layer
-        var state = (mug.p.constraintMsgItextID && 
-                     (!mug.p.constraintMsgItextID.isEmpty() || 
+        var state = (mug.p.constraintMsgItext &&
+                     (!mug.p.constraintMsgItext.isEmpty() ||
                       mug.p.constraintAttr)),
             $constraintItext = $('.itext-block-constraintMsg');
         
@@ -1397,7 +1397,10 @@ define([
         this.ensureCurrentMugIsSaved(function () {
             var foo = _this.getInsertTargetAndPosition(
                 _this.getCurrentlySelectedMug(), qType);
-            mug = _this.data.core.form.createQuestion(foo[0], foo[1], qType);
+            if (!foo) {
+                throw new Error("cannot add " + qType + " at the current position");
+            }
+            mug = _this.data.core.form.createQuestion(foo.mug, foo.position, qType);
             var $firstInput = _this.$f.find(".fd-question-properties input:text:visible:first");
             if ($firstInput.length) {
                 $firstInput.focus().select();
@@ -1409,16 +1412,25 @@ define([
     };
 
     /**
-     * Find insertion position for new mug of type `qType`. Insert into refMug,
-     * then after refMug, then after each of refMug's ancestors.
+     * Find insertion position for new mug of type `qType`.
+     *
+     * Try insert into `refMug`, then after `refMug`, then after each of
+     * `refMug`'s ancestors.
+     *
+     * @returns - `{mug: <refMug>, position: <position>}` or, if there is
+     *      no valid insert position for the given question type, `null`.
+     *      Valid positions: before, after, first, last, into (same as last).
+     *      In practice position will be one of `"last"` or `"after"`.
      */
     fn.getInsertTargetAndPosition = function (refMug, qType) {
-        // Valid positions: before, after, first, last, into (same as last)
         var parent, childTypes, position = 'last';
         while (refMug) {
             if (position === 'after') {
                 parent = refMug.parentMug;
                 if (!parent) {
+                    if (!this.isInsertAllowed(qType, position, refMug)) {
+                        return null;
+                    }
                     break;
                 }
             } else {
@@ -1438,7 +1450,41 @@ define([
                 refMug = refMug.parentMug;
             }
         }
-        return [refMug, position];
+        if (!refMug && !this.isInsertAllowed(qType, position, refMug)) {
+            return null;
+        }
+        return {mug: refMug, position: position};
+    };
+
+    /**
+     * Check if a question of the given `type` can be inserted at `position`
+     * relative to `refMug`
+     *
+     * WARNING the bare minimum has been implemented to support
+     * getInsertTargetAndPosition(). Needs to be fleshed out for other uses.
+     *
+     * Valid positions: before, after, first, last, into (same as last)
+     */
+    fn.isInsertAllowed = function (type, position, refMug) {
+        var parentType = "#"; // root type
+        if (refMug) {
+            if (position === "after" || position === "before") {
+                if (refMug.parent) {
+                    throw new Error("validation of insert " + position + " " +
+                                    refMug.__className + " not implemented");
+                    //parentType = refMug.parent.__className;
+                }
+            //} else if (position === "into" || position === "first" || position === "last") {
+            } else {
+                throw new Error("validation of insert " + position + " " +
+                                refMug.__className + " not implemented");
+            }
+        } else if (position !== "into" && position !== "first" && position !== "last") {
+            throw new Error("validation of insert " + position + " " +
+                            refMug.__className + " not implemented");
+            //return false;
+        }
+        return typeData[parentType].valid_children.indexOf(type) !== -1;
     };
 
     fn.handleNewMug = function (mug, refMug, position) {
@@ -2050,12 +2096,27 @@ define([
 
     fn.beforeSerialize = function () {};
 
+    fn.afterSerialize = function () {};
+
     fn.parseDataElement = function (form, el, parentMug) {
         return parser.parseDataElement(form, el, parentMug);
     };
 
     fn.parseBindElement = function (form, el, path) {
         return parser.parseBindElement(form, el, path);
+    };
+
+    /**
+     * Extension point for mug setup during control node parsing
+     *
+     * The mug has been inserted into the tree by the time this method
+     * is called.
+     *
+     * @param mug - for which the control element is being parsed.
+     * @param controlElement - jQuery-wrapped control element.
+     */
+    fn.populateControlMug = function (mug, controlElement) {
+        return parser.populateControlMug(mug, controlElement);
     };
 
     /**
