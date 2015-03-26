@@ -1017,7 +1017,7 @@ define([
 
                 if (formString) {
                     //re-enable all buttons and inputs in case they were disabled before.
-                    _this.enableUI();
+                    _this.showQuestionProperties();
                     if (updateSaveButton) {
                         _this.data.core.saveButton.fire('change');
                     }
@@ -1037,7 +1037,7 @@ define([
                 // todo: fix
                 //var showSourceButton = $('#fd-editsource-button');
                 //disable all buttons and inputs
-                _this.disableUI();
+                _this.hideQuestionProperties();
                 //enable the view source button so the form can be tweaked by
                 //hand.
                 //showSourceButton.button('enable');
@@ -1076,23 +1076,6 @@ define([
         }, this.opts().core.loadDelay);
     };
 
-    fn.disableUI = function () {
-        this.flipUI(false);
-    };
-
-    fn.enableUI = function () {
-        this.flipUI(true);
-    };
-
-    fn.flipUI = function (state) {
-        var $props = this.$f.find('.fd-question-properties');
-        if (state) {
-            $props.show();
-        } else {
-            $props.hide();
-        }
-    };
-        
     fn.loadXML = function (formXML, options) {
         var form, _this = this;
         _this.data.core.$tree.children().children().each(function (i, el) {
@@ -1212,7 +1195,7 @@ define([
                 return true;
             } else {
                 // otherwise clear the Question Edit UI pane
-                this.hideContent();
+                this.hideContentRight();
                 this.jstree('deselect_all');
                 return false;
             }
@@ -1368,8 +1351,8 @@ define([
         /* update display */
         $props.animate({}, 200);
 
-        this.showContent();
-        this.hideQuestionProperties();
+        this.showContentRight();
+        $props.hide();
 
         if (this._propertiesMug) {
             this._propertiesMug.teardownProperties();
@@ -1419,16 +1402,20 @@ define([
         this.toggleConstraintItext(mug);
     };
 
-    fn.hideQuestionProperties = function() {
-        this.disableUI();
-    };
-
-    fn.showContent = function () {
+    fn.showContentRight = function () {
         this.$f.find('.fd-content-right').show();
     };
 
-    fn.hideContent = function () {
+    fn.hideContentRight = function () {
         this.$f.find('.fd-content-right').hide();
+    };
+
+    fn.showQuestionProperties = function () {
+        this.$f.find('.fd-question-properties').show();
+    };
+
+    fn.hideQuestionProperties = function () {
+        this.$f.find('.fd-question-properties').hide();
     };
 
     /**
@@ -1450,7 +1437,7 @@ define([
 
         $editor.find('.fd-head').text(options.headerText);
         options.DEBUG_MODE = DEBUG_MODE;
-        this.disableUI();
+        this.hideQuestionProperties();
 
         var done = options.done;
         options.done = function (val) {
@@ -1461,7 +1448,7 @@ define([
                 _this.refreshCurrentMug();
             } else {
                 $editor.hide();
-                _this.enableUI();
+                _this.showQuestionProperties();
             }
         };
         var change = options.change;
