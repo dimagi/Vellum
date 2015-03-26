@@ -39,6 +39,30 @@ define([
         });
     }
 
+    function generateFixtureOptions() {
+        return _.map(getPossibleFixtures(), function(fixture) {
+            return {
+                value: JSON.stringify(fixture),
+                text: fixture.src
+            };
+        });
+    }
+
+    function valueInFixtures(value) {
+        return _.find(getPossibleFixtures(), function(fixture) {
+            return _.isEqual(value, fixture);
+        });
+    }
+
+    function valueInFixtures2(value) {
+        var value2 = {
+            id: value.instance.id,
+            src: value.instance.src,
+            query: value.nodeset
+        };
+        return valueInFixtures(value2);
+    }
+
     function getDataSources(type, callback) {
         var source = _.find(dataSources, function (src) {
             return src.key === type;
@@ -247,29 +271,34 @@ define([
     }
 
     function fixtureWidget(mug, options, labelText) {
-        var widget = dataSourceWidget(mug, options),
-            getUIElement = widgets.util.getUIElement,
+        var widget, isDropdown, currentValue = null;
+
+        if (valueInFixtures2(mug.p[options.path])) {
+            widget = widgets.dropdown(mug, options);
+            widget.addOptions(generateFixtureOptions());
+            isDropdown = true;
+        } else {
+            widget = widgets.text(mug, options);
+            isDropdown = false;
+        }
+
+        var getUIElement = widgets.util.getUIElement,
             getUIElementWithEditButton = widgets.util.getUIElementWithEditButton,
             super_getValue = widget.getValue,
-            super_setValue = widget.setValue;
+            super_setValue = widget.setValue,
+            currentValue = null;
 
         widget.getUIElement = function () {
-            function currentValueInFixtures(value) {
-                return _.find(getPossibleFixtures(), function(fixture) {
-                    return _.isEqual(value, fixture);
-                });
-            }
             var query = getUIElementWithEditButton(
-                    getUIElement(widget.input, labelText,
-                                 !currentValueInFixtures(super_getValue())),
+                    getUIElement(widget.input, labelText, !isDropdown),
                     function () {
                         vellum.displaySecondaryEditor({
-                            source: super_getValue(),
+                            source: local_getValue(),
                             headerText: labelText,
                             loadEditor: loadDataSourceEditor,
                             done: function (source) {
                                 if (!_.isUndefined(source)) {
-                                    super_setValue(source);
+                                    local_setValue(source);
                                     widget.handleChange();
                                 }
                             }
@@ -279,6 +308,22 @@ define([
                 );
             return $("<div></div>").append(query);
         };
+
+        function local_getValue() {
+            return currentValue;
+        }
+
+        function local_setValue(val) {
+            currentValue = val;
+            if (isDropdown) {
+                widget.input.val(JSON.stringify(val));
+            } else {
+                super_setValue(val.query || "");
+            }
+        }
+
+        widget.getValue = local_getValue;
+        widget.setValue = local_setValue;
 
         return widget;
     }
