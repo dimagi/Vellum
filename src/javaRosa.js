@@ -1679,8 +1679,8 @@ define([
                 };
             }
 
-            function addSerializer(data) {
-                data.serialize = function (value, name, mug) {
+            function addSerializer(options) {
+                options.serialize = function (value, name, mug) {
                     var data = {};
                     _.each(value.forms, function (form) {
                         if (!form.isEmpty()) {
@@ -1695,7 +1695,7 @@ define([
                     }
                     return data;
                 };
-                data.deserialize = function (data, name, mug) {
+                options.deserialize = function (data, name, mug) {
                     var item = mug.p[name],
                         found = false;
                     if (data[name]) {
@@ -1711,15 +1711,30 @@ define([
                             itext[item.id] = item;
                         }
                     }
+                    var dlang = item.itextModel.getDefaultLanguage(),
+                        nodeID = "";
+                    if (data.id) {
+                        // a little hacky, but it's a fallback default
+                        nodeID = data.id.slice(data.id.lastIndexOf("/") + 1);
+                    }
                     _.each(item.itextModel.languages, function (lang) {
                         var prelen = name.length + lang.length + 2,
                             regexp = new RegExp("^" +
                                                 RegExp.escape(name) + ":" +
-                                                RegExp.escape(lang) + "-");
+                                                RegExp.escape(lang) + "-"),
+                            seen = {};
                         _.each(data, function (value, key) {
                             if (regexp.test(key)) {
                                 var form = key.slice(prelen);
-                                item.getOrCreateForm(form).setValue(lang, value);
+                                if (!seen.hasOwnProperty(form)) {
+                                    seen[form] = true;
+                                    // set default value(s) for this form
+                                    var dkey = name + ":" + dlang + "-" + form;
+                                    item.set(data[dkey] || value || nodeID, form);
+                                }
+                                if (value) {
+                                    item.set(value, form, lang);
+                                }
                                 found = true;
                             }
                         });
@@ -1728,7 +1743,7 @@ define([
                         item.id = getDefaultItextId(mug, name.replace(/Itext$/, ""));
                     }
                 };
-                return data;
+                return options;
             }
 
             // DATA ELEMENT

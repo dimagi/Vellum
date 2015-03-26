@@ -444,9 +444,55 @@ require([
             assert.equal(text2.p.labelItext.id, "text-label2");
         });
 
+        it("should fill empty itext forms", function () {
+            util.loadXML("");
+            paste([
+                ["id", "type", "labelItext:en-default"],
+                ["/text1", "Text", "Label"],
+                ["/text2", "Text", ""],
+                ["/text3", "Text", "null"],
+                ["/text4", "Text"],
+            ]);
+            util.selectAll();
+            eq(mod.copy(), [
+                ["id", "type", "labelItext:en-default", "labelItext:hin-default"],
+                ["/text1", "Text", "Label", "Label"],
+                ["/text2", "Text", "text2", "text2"],
+                ["/text3", "Text", "text3", "text3"],
+                ["/text4", "Text", "text4", "text4"],
+            ]);
+        });
+
+        it("should fill empty default itext forms", function () {
+            util.loadXML("");
+            paste([
+                ["id", "type", "labelItext:en-default", "labelItext:hin-default"],
+                ["/text", "Text", "", "Label"],
+            ]);
+            util.selectAll();
+            eq(mod.copy(), [
+                ["id", "type", "labelItext:en-default", "labelItext:hin-default"],
+                ["/text", "Text", "Label", "Label"],
+            ]);
+        });
+
+        it("should ignore empty itext ID", function () {
+            util.loadXML("");
+            paste([
+                ["id", "type", "labelItext:en-default", "labelItext"],
+                ["/text1", "Text", "text"],
+                ["/text2", "Text"],
+            ]);
+            util.selectAll();
+            eq(mod.copy(), [
+                ["id", "type", "labelItext:en-default", "labelItext:hin-default"],
+                ["/text1", "Text", "text", "text"],
+                ["/text2", "Text", "text2", "text2"],
+            ]);
+        });
+
         // TODO test each mug spec item (don't forget exotic/plugin question types)
         // TODO test bad paste values
-        // TODO insert question with same nodeID
         // TODO find a case where, when copying multiple questions, one
         //      ends up with a null value on a property that it did not
         //      return from mug.serialize(), and should not be passed
@@ -454,9 +500,6 @@ require([
         //      ALSO maybe find the converse: property serializes to null
         //      but that null value must be passed to mug.deserialize()
         //      (seems less likely that this is a thing)
-        // TODO paste item with all null Itext values
-        //      (itextItem.id should not be overwritten with null)
-        // TODO paste item with non-auto Itext ID
 
     });
 
