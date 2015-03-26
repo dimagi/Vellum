@@ -11,11 +11,21 @@ define([
     edit_source,
     select_source
 ) {
-    var vellum, dataSources;
+    var vellum, dataSources, cachedDataSources;
 
     function init(instance) {
         vellum = instance;
         dataSources = vellum.opts().core.dataSources || [];
+        cachedDataSources = {
+            fixtures: {}
+        };
+        getDataSources('fixture', cacheFixtures);
+    }
+
+    function cacheFixtures(data) {
+        _.map(data, function(fixture) {
+            cachedDataSources.fixtures[fixture.name] = fixture;
+        });
     }
 
     function getDataSources(type, callback) {
