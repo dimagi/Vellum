@@ -201,7 +201,7 @@ define([
         var currentPath = widget.getItextValue(),
             previewHtml;
         if (!currentPath && !widget.isDefaultLang) {
-            currentPath = widget.getItextItem().getValue(widget.form, widget.defaultLang);
+            currentPath = widget.getItextItem().get(widget.form, widget.defaultLang);
         }
         if (currentPath in objectMap) {
             var linkedObject = objectMap[currentPath];

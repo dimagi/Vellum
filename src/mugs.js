@@ -584,8 +584,8 @@ define([
                 return 'No Translation Data';
             }
 
-            defaultDisp = itextItem.getValue("default", defaultLang);
-            disp = itextItem.getValue("default", lang) || defaultDisp;
+            defaultDisp = itextItem.get("default", defaultLang);
+            disp = itextItem.get("default", lang) || defaultDisp;
 
             if (disp && disp !== nodeID) {
                 if (lang !== defaultLang && disp === defaultDisp) {
