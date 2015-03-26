@@ -307,9 +307,11 @@ define([
         return widget;
     };
    
-    var getUIElementWithEditButton = function($uiElem, editFn) {
-        var input = $uiElem.find('input'),
+    var getUIElementWithEditButton = function($uiElem, editFn, isDisabled) {
+        var input = $uiElem.find('input');
+        if (_.isUndefined(isDisabled)) {
             isDisabled = input ? input.prop('disabled') : false;
+        }
 
         var button = $('<button />')
             .addClass("fd-edit-button pull-right")
