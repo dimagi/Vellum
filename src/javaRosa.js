@@ -310,20 +310,14 @@ define([
         updateForMug: function (mug, defaultLabelValue) {
             // set default itext id/values
             if (!mug.options.isDataOnly) {
-                // set label if not there
-                if (!mug.p.labelItext && 
-                    mug.spec.labelItext.presence !== "notallowed")
-                {
+                if (!mug.p.labelItext && mug.spec.labelItext.presence !== "notallowed") {
                     var item = mug.p.labelItext = this.createItem();
                     item.set(defaultLabelValue);
                 }
-                // set hint if legal and not there
-                if (mug.spec.hintItext.presence !== "notallowed" &&
-                    !mug.p.hintItext) {
+                if (!mug.p.hintItext && mug.spec.hintItext.presence !== "notallowed") {
                     mug.p.hintItext = this.createItem();
                 }
-                if (mug.spec.helpItext.presence !== "notallowed" &&
-                    !mug.p.helpItext) {
+                if (!mug.p.helpItext && mug.spec.helpItext.presence !== "notallowed") {
                     mug.p.helpItext = this.createItem();
                 }
             }
@@ -1495,13 +1489,6 @@ define([
             this.__callOld();
             this.data.javaRosa.Itext.updateForExistingMug(mug);
         },
-        getMugByLabelItextID: function (itextID) {
-            var node = this.data.core.form.tree.rootNode.getSingleMatchingNode(function (value) {
-                return value && value.getItext() && value.getItext().id === itextID;
-            });
-
-            return node ? node.getValue() : null;
-        },
         handleMugRename: function (form, mug, newID, oldID, newPath, oldPath) {
             this.__callOld();
 
@@ -1514,9 +1501,7 @@ define([
                 }
             }
 
-            var _this = this,
-                itext = this.data.javaRosa.Itext,
-                oldPathRe,
+            var oldPathRe,
                 outputRe,
                 newRef,
                 change;
@@ -1529,7 +1514,7 @@ define([
                 oldPathRe = new RegExp(oldPath + '(?![\\w/-])', 'mg');
             }
 
-            forEachItextItem(form, function (item) {
+            forEachItextItem(form, function (item, mug) {
                 change = false;
                 _(item.forms).each(function (itForm) {
                     _(itForm.getOutputRefExpressions()).each(function (refs, lang) {
@@ -1537,7 +1522,10 @@ define([
                             if (ref.match(oldPathRe)) {
                                 newRef = ref.replace(oldPathRe, newPath);
                                 outputRe = new RegExp(getOutputRef(ref, true), 'mg');
-                                itForm.setValue(lang, itForm.data[lang].replace(outputRe, getOutputRef(newRef)));
+                                itForm.setValue(
+                                    lang,
+                                    itForm.getValue(lang)
+                                          .replace(outputRe, getOutputRef(newRef)));
                                 change = true;
                             }
                         });
@@ -1546,7 +1534,7 @@ define([
                 if (change) {
                     form.fire({
                         type: 'question-label-text-change',
-                        mug: _this.getMugByLabelItextID(item.id),
+                        mug: mug, // TODO fire for other mugs referencing item
                         text: item.get()
                     });
                 }
