@@ -229,7 +229,7 @@ define([
     }
 
     function itemsetWidget(mug, options) {
-        var widget = datasources.dataSourceWidget(mug, options, "Data Source"),
+        var widget = datasources.fixtureWidget(mug, options, "Data Source"),
             super_getUIElement = widget.getUIElement,
             super_getValue = widget.getValue,
             super_setValue = widget.setValue;
