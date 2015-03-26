@@ -24,7 +24,7 @@ define([
 
     function cacheFixtures(data) {
         _.map(data, function(fixture) {
-            cachedDataSources.fixtures[fixture.name] = fixture;
+            cachedDataSources.fixtures[fixture.sourceUri] = fixture;
         });
     }
 
@@ -46,6 +46,19 @@ define([
                 text: fixture.src
             };
         });
+    }
+
+    function generateFixtureColumns(fixture) {
+        if (fixture) {
+            return _.map(fixture.levels, function(level) {
+                return level.nodeName;
+            });
+        }
+        return "";
+    }
+
+    function autocompleteChoices(fixture_uri) {
+        return generateFixtureColumns(cachedDataSources.fixtures[fixture_uri]);
     }
 
     function valueInFixtures(value) {
@@ -271,26 +284,25 @@ define([
     }
 
     function fixtureWidget(mug, options, labelText) {
-        var widget, isDropdown, currentValue = null;
+        var widget;
 
         if (valueInFixtures2(mug.p[options.path])) {
             widget = widgets.dropdown(mug, options);
             widget.addOptions(generateFixtureOptions());
-            isDropdown = true;
+            widget.isDropdown = true;
         } else {
             widget = widgets.text(mug, options);
-            isDropdown = false;
+            widget.isDropdown = false;
         }
 
         var getUIElement = widgets.util.getUIElement,
             getUIElementWithEditButton = widgets.util.getUIElementWithEditButton,
-            super_getValue = widget.getValue,
             super_setValue = widget.setValue,
             currentValue = null;
 
         widget.getUIElement = function () {
             var query = getUIElementWithEditButton(
-                    getUIElement(widget.input, labelText, !isDropdown),
+                    getUIElement(widget.input, labelText, !widget.isDropdown),
                     function () {
                         vellum.displaySecondaryEditor({
                             source: local_getValue(),
@@ -315,7 +327,7 @@ define([
 
         function local_setValue(val) {
             currentValue = val;
-            if (isDropdown) {
+            if (widget.isDropdown) {
                 widget.input.val(JSON.stringify(val));
             } else {
                 super_setValue(val.query || "");
@@ -333,7 +345,8 @@ define([
         getDataSources: getDataSources,
         selectDataSource: selectDataSource,
         dataSourceWidget: dataSourceWidget,
-        fixtureWidget: fixtureWidget
+        fixtureWidget: fixtureWidget,
+        autocompleteChoices:autocompleteChoices
     };
 
 });

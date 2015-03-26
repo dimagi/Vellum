@@ -207,12 +207,25 @@ define([
             super_getUIElement = widget.getUIElement,
             super_getValue = widget.getValue,
             super_setValue = widget.setValue,
-            handleChange = widget.handleChange.bind(widget),
-            labelRef = refSelect("label_ref", "Choice Label", widget.isDisabled()),
-            valueRef = refSelect("value_ref", "Choice Value", widget.isDisabled());
+            super_handleChange = widget.handleChange,
+            labelRef = refSelect("label_ref", "Choice Label", false),
+            valueRef = refSelect("value_ref", "Choice Value", false);
 
-        labelRef.onChange(handleChange);
-        valueRef.onChange(handleChange);
+        function updateAutoComplete() {
+            var sources = datasources.autocompleteChoices(widget.getValue().instance.src);
+            labelRef.addAutoComplete(sources);
+            valueRef.addAutoComplete(sources);
+        }
+
+        var local_handleChange = function() {
+            updateAutoComplete();
+            super_handleChange.bind(widget)();
+        };
+
+        widget.handleChange = local_handleChange;
+
+        labelRef.onChange(local_handleChange);
+        valueRef.onChange(local_handleChange);
 
         widget.getUIElement = function () {
             return super_getUIElement()
@@ -248,6 +261,9 @@ define([
         var input = $("<input type='text' class='input-block-level'>");
         input.attr("name", name);
         return {
+            addAutoComplete: function(sources) {
+                input.autocomplete({source: sources});
+            },
             element: widgets.util.getUIElement(input, label, isDisabled),
             val: function (value) {
                 if (_.isUndefined(value)) {
