@@ -28,6 +28,17 @@ define([
         });
     }
 
+    function getPossibleFixtures() {
+        return _.map(cachedDataSources.fixtures, function(fixture) {
+            var id = fixture.defaultId;
+            return {
+                src: fixture.sourceUri,
+                id: id,
+                query: "instance('" + id + "')/" + id + "_list/" + id
+            };
+        });
+    }
+
     function getDataSources(type, callback) {
         var source = _.find(dataSources, function (src) {
             return src.key === type;
@@ -235,11 +246,49 @@ define([
         return widget;
     }
 
+    function fixtureWidget(mug, options, labelText) {
+        var widget = dataSourceWidget(mug, options),
+            getUIElement = widgets.util.getUIElement,
+            getUIElementWithEditButton = widgets.util.getUIElementWithEditButton,
+            super_getValue = widget.getValue,
+            super_setValue = widget.setValue;
+
+        widget.getUIElement = function () {
+            function currentValueInFixtures(value) {
+                return _.find(getPossibleFixtures(), function(fixture) {
+                    return _.isEqual(value, fixture);
+                });
+            }
+            var query = getUIElementWithEditButton(
+                    getUIElement(widget.input, labelText,
+                                 !currentValueInFixtures(super_getValue())),
+                    function () {
+                        vellum.displaySecondaryEditor({
+                            source: super_getValue(),
+                            headerText: labelText,
+                            loadEditor: loadDataSourceEditor,
+                            done: function (source) {
+                                if (!_.isUndefined(source)) {
+                                    super_setValue(source);
+                                    widget.handleChange();
+                                }
+                            }
+                        });
+                    },
+                    false
+                );
+            return $("<div></div>").append(query);
+        };
+
+        return widget;
+    }
+
     return {
         init: init,
         getDataSources: getDataSources,
         selectDataSource: selectDataSource,
-        dataSourceWidget: dataSourceWidget
+        dataSourceWidget: dataSourceWidget,
+        fixtureWidget: fixtureWidget
     };
 
 });
