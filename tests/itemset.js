@@ -43,9 +43,9 @@ require([
             itemset.p.itemsetData = {
                 instance: {id: "somefixture", src: "jr://somefixture"},
                 nodeset: "instance('somefixture')/some/items",
+                labelRef: "label",
+                valueRef: "value",
             };
-            itemset.p.itemsetValue = 'value';
-            itemset.p.itemsetLabel = 'label';
 
             var xml = call('createXML'),
                 $xml = $(xml);
@@ -60,9 +60,9 @@ require([
             itemset.p.itemsetData = {
                 instance: {id: "cases", src: "jr://instance/casedb"},
                 nodeset: "instance('cases')/cases/case[@case_id > 2]",
+                labelRef: "label",
+                valueRef: "value",
             };
-            itemset.p.itemsetValue = 'value';
-            itemset.p.itemsetLabel = 'label';
 
             var data = itemset.p.itemsetData;
             assert.equal(data.instance.id, "casedb");
@@ -96,7 +96,7 @@ require([
             it("preserves inner filters if you never change the data source", function () {
                 util.loadXML(INNER_FILTERS_XML);
                 clickQuestion("question2/itemset");
-                $("[name='property-itemsetLabel']").val("dummy").change();
+                $("[name='label_ref']").val("dummy").change();
 
                 util.assertXmlEqual(
                     INNER_FILTERS_XML.replace('case_name', 'dummy'),

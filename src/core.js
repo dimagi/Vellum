@@ -2012,9 +2012,7 @@ define([
 
     fn.getDataSourceProperties = function () {
         return [
-            "itemsetData",
-            "itemsetLabel",
-            "itemsetValue"
+            "itemsetData"
         ];
     };
 
