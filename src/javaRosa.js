@@ -1134,19 +1134,6 @@ define([
         return tsv.tabDelimit(rows);
     };
 
-    function validateItextItem(itextItem, name) {
-        if (itextItem) {
-            var val = itextItem.defaultValue();
-            if (itextItem.id && !val) {
-                return "Question has " + name + " ID but no " + name + " label!";
-            }
-            if (val && !itextItem.id) {
-                return "Question has " + name + " label but no " + name + " ID!";
-            }
-        }
-        return "pass";
-    }
-
     function warnOnNonOutputableValue(form, mug, path) {
         if (!mug.options.canOutputValue) {
             var typeName = mug.options.typeName;
@@ -1632,6 +1619,25 @@ define([
                 databind = spec.databind,
                 control = spec.control;
 
+            function itextValidator(property, name) {
+                return function (mug) {
+                    var itext = mug.p[property],
+                        hasItext = itext && itext.hasHumanReadableItext();
+                    if (!hasItext && mug.spec[property].presence === 'required') {
+                        return name + ' is required';
+                    }
+                    if (itext && !itext.autoId) {
+                        // Itext ID validation
+                        if (!itext.id) {
+                            return name + " Itext ID is required";
+                        } else if (!util.isValidAttributeValue(itext.id)) {
+                            return itext.id + " is not a valid ID";
+                        }
+                    }
+                    return "pass";
+                };
+            }
+
             // DATA ELEMENT
             databind.keyAttr = {
                 visibility: 'visible',
@@ -1669,23 +1675,18 @@ define([
                     }));
                 },
                 validationFunc: function (mug) {
-                    var constraintItext = mug.p.constraintMsgItext;
-                    if (constraintItext && constraintItext.id) {
-                        if (!util.isValidAttributeValue(constraintItext.id)) {
-                            return constraintItext.id + " is not a valid ID";
-                        }
+                    var itext = mug.p.constraintMsgItext;
+                    if (!mug.p.constraintAttr && itext && itext.id && !itext.autoId) {
+                        return "Can't have a Validation Message Itext ID without a Validation Condition";
                     }
-                    if (constraintItext && constraintItext.id && !mug.p.constraintAttr) {
-                        return "Can't have a Validation Message ID without a Validation Condition";
-                    }
-                    return validateItextItem(constraintItext, "Validation Error Message");
-                }
+                    return itextValidator("constraintMsgItext", "Validation Message")(mug);
+                },
             };
             // virtual property used to define a widget
             databind.constraintMsgItextID = {
                 visibility: 'constraintMsgItext',
                 presence: 'optional',
-                lstring: "Validation Error Message ID",
+                lstring: "Validation Message Itext ID",
                 widget: iTextIDWidget,
                 widgetValuePath: "constraintMsgItext"
             };
@@ -1709,13 +1710,13 @@ define([
                         displayName: "Label"
                     }));
                 },
-                validationFunc: spec.control.label.validationFunc
+                validationFunc: itextValidator("labelItext", "Label"),
             };
             // virtual property used to define a widget
             control.labelItextID = {
                 visibility: 'labelItext',
                 presence: 'optional',
-                lstring: "Question Itext ID",
+                lstring: "Label Itext ID",
                 widget: iTextIDWidget,
                 widgetValuePath: "labelItext"
             };
@@ -1725,7 +1726,7 @@ define([
                 presence: function (mugOptions) {
                     return mugOptions.isSpecialGroup ? 'notallowed' : 'optional';
                 },
-                lstring: "Hint",
+                lstring: "Hint Message",
                 widget: function (mug, options) {
                     return itextLabelBlock(mug, $.extend(options, {
                         itextType: "hint",
@@ -1735,20 +1736,7 @@ define([
                         displayName: "Hint Message"
                     }));
                 },
-                validationFunc: function (mug) {
-                    var hintItext = mug.p.hintItext;
-                    if (hintItext && hintItext.id) {
-                        if (!util.isValidAttributeValue(hintItext.id)) {
-                            return hintItext.id + " is not a valid ID";
-                        }
-                    }
-                    if (mug.spec.hintItext.presence === 'required' &&
-                        !hintItext.id) {
-                        return 'Hint ID is required but not present in this question!';
-                    }
-                    
-                    return validateItextItem(hintItext, "Hint");
-                }
+                validationFunc: itextValidator("hintItext", "Hint Message"),
             };
             // virtual property used to get a widget
             control.hintItextID = {
@@ -1773,20 +1761,7 @@ define([
                         displayName: "Help Message"
                     }));
                 },
-                validationFunc: function (mug) {
-                    var helpItext = mug.p.helpItext;
-                    if (helpItext && helpItext.id) {
-                        if (!util.isValidAttributeValue(helpItext.id)) {
-                            return helpItext.id + " is not a valid ID";
-                        }
-                    }
-                    if (mug.spec.helpItext.presence === 'required' &&
-                        !helpItext.id) {
-                        return 'Help ID is required but not present in this question!';
-                    }
-                    
-                    return validateItextItem(helpItext, "Help");
-                }
+                validationFunc: itextValidator("helpItext", "Help Message")
             };
             // virtual property used to get a widget
             control.helpItextID = {

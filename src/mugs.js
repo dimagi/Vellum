@@ -233,36 +233,11 @@ define([
                 visibility: 'visible',
                 presence: 'optional',
                 lstring: "Default Label",
-                // todo: fix itext plugin abstraction barrier break here
                 validationFunc: function (mug) {
-                    var hasLabel, hasLabelItextID, missing, hasItext;
-                    hasLabel = mug.p.label;
-                    var itextBlock = mug.p.labelItext;
-                    hasLabelItextID = itextBlock && (typeof itextBlock.id !== "undefined");
-
-                    if (hasLabelItextID && !util.isValidAttributeValue(itextBlock.id)) {
-                        return itextBlock.id + " is not a valid Itext ID";
+                    if (!mug.p.label && mug.spec.label.presence === 'required') {
+                        return 'Default Label is required';
                     }
-                    hasItext = itextBlock && itextBlock.hasHumanReadableItext();
-                    
-                    if (hasLabel) {
-                        return 'pass';
-                    } else if (!hasLabel && !hasItext && (mug.spec.label.presence === 'optional' || 
-                               mug.spec.labelItext.presence === 'optional')) {
-                        //make allowance for questions that have label/labelItext set to 'optional'
-                        return 'pass';
-                    } else if (hasLabelItextID && hasItext) {
-                        return 'pass';
-                    } else if (hasLabelItextID && !hasItext) {
-                        missing = 'a display label';
-                    } else if (!hasLabel && !hasLabelItextID) {
-                        missing = 'a display label ID';
-                    } else if (!hasLabel) {
-                        missing = 'a display label';
-                    } else if (!hasLabelItextID) {
-                        missing = 'a display label ID';
-                    }
-                    return 'Question is missing ' + missing + ' value!';
+                    return 'pass';
                 }
             },
             hintLabel: {
