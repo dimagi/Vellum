@@ -329,6 +329,15 @@ define([
             });
         };
 
+        widget.getOptions = function () {
+            return _.map(widget.input.find('option'), function(option) {
+                return {
+                    value: option.value,
+                    text: option.text
+                };
+            });
+        };
+
         return widget;
     };
     
