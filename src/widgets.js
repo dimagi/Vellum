@@ -149,6 +149,12 @@ define([
             return input.val().replace(/&#10;/g, '\n');
         };
 
+        widget.addAutoComplete = function(sources) {
+            input.autocomplete({
+                source: sources
+            });
+        };
+
         input.bind("change input", function () {
             widget.handleChange();
         });
@@ -292,6 +298,45 @@ define([
         return widget;
     };
 
+    var dropdown = function (mug, options) {
+        var widget = normal(mug, options);
+        widget.input = $("<select />")
+            .attr("name", "property-" + widget.id);
+
+        var input = widget.input;
+
+        widget.setValue = function (value) {
+            input.val(value);
+        };
+
+        widget.getValue = function () {
+            return input.val();
+        };
+
+        widget.updateValue = function () {
+            widget.save();
+        };
+
+        input.change(function () {
+            widget.handleChange();
+        });
+
+        widget.addOption = function (value, text) {
+            var option = $('<option />')
+                .attr('value', value)
+                .text(text);
+            this.input.append(option);
+        };
+
+        widget.addOptions = function (options) {
+            var _this = this;
+            _.forEach(options, function(option) {
+                _this.addOption(option.value, option.text);
+            });
+        };
+
+        return widget;
+    };
     
     var readOnlyControl = function (mug, options) {
         options.id = "readonly-control";
@@ -358,6 +403,7 @@ define([
         text: text,
         droppableText: droppableText,
         checkbox: checkbox,
+        dropdown: dropdown,
         xPath: xPath,
         baseKeyValue: baseKeyValue,
         readOnlyControl: readOnlyControl,

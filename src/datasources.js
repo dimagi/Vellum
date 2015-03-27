@@ -3,7 +3,8 @@ define([
     'underscore',
     'vellum/widgets',
     'tpl!vellum/templates/data_source_editor',
-    'tpl!vellum/templates/select_data_source'
+    'tpl!vellum/templates/select_data_source',
+    'vellum/core'
 ], function (
     $,
     _,
@@ -11,14 +12,20 @@ define([
     edit_source,
     select_source
 ) {
-    var vellum, dataSources;
+    var vellum, dataSources, cachedData;
 
     function init(instance) {
         vellum = instance;
         dataSources = vellum.opts().core.dataSources || [];
+        cachedData = {};
     }
 
     function getDataSources(type, callback) {
+        if (cachedData[type]) {
+            callback(cachedData[type]);
+            return;
+        }
+
         var source = _.find(dataSources, function (src) {
             return src.key === type;
         });
@@ -29,7 +36,10 @@ define([
                     type: 'GET',
                     url: source.endpoint,
                     dataType: 'json',
-                    success: function (data) { callback(data); },
+                    success: function (data) {
+                        cachedData[type] = data;
+                        callback(data);
+                    },
                     // TODO error handling
                     data: {}
                 });
@@ -115,6 +125,17 @@ define([
 
         // display current values
         $modal.modal('show');
+    }
+
+    function generateFixtureQueries(widget) {
+        return function(fixtures) {
+            widget.addOptions(_.map(fixtures, function(f) {
+                return {
+                    value: f.sourceUri,
+                    text: f.name
+                };
+            }));
+        };
     }
 
     /**
@@ -225,11 +246,50 @@ define([
         return widget;
     }
 
+    function fixtureDataSourceWidget(mug, options, labelText) {
+        var widget = widgets.dropdown(mug, options),
+            getUIElement = widgets.util.getUIElement,
+            super_getValue = widget.getValue,
+            super_setValue = widget.setValue,
+            currentValue = null;
+
+        getDataSources("fixture", generateFixtureQueries(widget));
+
+        widget.getUIElement = function () {
+            var query = getUIElement(widget.input, labelText);
+            return $("<div></div>").append(query);
+        };
+
+        function local_getValue() {
+            currentValue.src = super_getValue();
+            return currentValue;
+        }
+
+        function local_setValue(val) {
+            currentValue = val;
+            super_setValue(val.src || "");
+        }
+
+        widget.getValue = local_getValue;
+        widget.setValue = local_setValue;
+
+        return widget;
+    }
+
+    $.vellum.plugin("datasources", { }, {
+        getLogicProperties: function () {
+            var ret = this.__callOld();
+            ret.push('filter');
+            return ret;
+        }
+    });
+
     return {
         init: init,
         getDataSources: getDataSources,
         selectDataSource: selectDataSource,
-        dataSourceWidget: dataSourceWidget
+        dataSourceWidget: dataSourceWidget,
+        fixtureDataSourceWidget: fixtureDataSourceWidget
     };
 
 });
