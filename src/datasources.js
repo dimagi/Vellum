@@ -286,7 +286,8 @@ define([
     function fixtureWidget(mug, options, labelText) {
         var widget;
 
-        if (valueInFixtures2(mug.p[options.path])) {
+        if (valueInFixtures2(mug.p[options.path]) || !mug.p[options.path].nodeset) {
+            // todo select first value as the current value
             widget = widgets.dropdown(mug, options);
             widget.addOptions(generateFixtureOptions());
             widget.isDropdown = true;
