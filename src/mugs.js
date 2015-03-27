@@ -357,6 +357,11 @@ define([
         /**
          * Determine if this mug can have its type changed to typeName
          *
+         * Note: this method will also be called to verify that the reverse
+         * type change is possible, in which case `mug`'s type will be the
+         * same as `typeName`. This works for all current question types, but
+         * could conceivably be wrong for some type that does not yet exist.
+         *
          * @param mug - The mug object.
          * @param typeName - The name of the new type for mug (e.g., 'MSelect').
          * @returns - Empty string if the mug can change to type, otherwise error message.
