@@ -357,6 +357,42 @@ require([
             }}});
         });
 
+        describe("type changer", function () {
+            function test(mug, type, allowed) {
+                var show = allowed ? "show " : "not show ";
+                it("should " + show + type + " in menu for " + mug.__className, function () {
+                    // HACK this depends on UI HTML
+                    var changer = form.vellum.getQuestionTypeChanger(mug),
+                        anchor = changer.find("[data-qtype=" + type + "]");
+                    assert(anchor.length === (allowed ? 1 : 0),
+                           anchor.parent().html() || (type + " not found in menu"));
+                });
+            }
+
+            var form = util.loadXML("");
+
+            var text = util.addQuestion("Text", "text");
+            test(text, "Trigger", true);
+            test(text, "Item");
+            test(text, "Group");
+            test(text, "DataBindOnly");
+            test(text, "Select", true);
+            test(text, "MSelect", true);
+            test(text, "SelectDynamic");
+            test(text, "MSelectDynamic");
+
+            var select = util.addQuestion("Select", "select");
+            test(select, "MSelect", true);
+            test(select, "Text");
+            test(select, "SelectDynamic");
+            test(select, "MSelectDynamic");
+
+            var selectDynamic = util.addQuestion("SelectDynamic", "select");
+            test(selectDynamic, "MSelectDynamic", true);
+            test(selectDynamic, "Select");
+            test(selectDynamic, "MSelect");
+        });
+
         describe("drag+drop should", function () {
             var mugs;
             before(function (done) {

@@ -1763,7 +1763,11 @@ define([
             for (var i = 0; i < questions.length; i++) {
                 var typeName = questions[i],
                     q = _this.data.core.mugTypes[typeName];
-                if (currentTypeName !== typeName && !currentType.typeChangeError(mug, typeName)) {
+                if (currentTypeName !== typeName &&
+                        !currentType.typeChangeError(mug, typeName) &&
+                        // Check the reverse change as well.
+                        q.isTypeChangeable &&
+                        !q.typeChangeError(mug, currentTypeName)) {
                     ret.push({
                         slug: questions[i],
                         name: q.typeName,
