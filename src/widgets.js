@@ -354,7 +354,34 @@ define([
 
         return widget;
     };
-   
+
+    var textOrDropDown = function (mug, options, dropDownOptions, val) {
+        var widget, useDropDown = false;
+
+        if (val) { 
+            useDropDown = _.some(dropDownOptions, function(option){
+                return _.isEqual(option, val);
+            });
+        } else {
+            useDropDown = true;
+            dropDownOptions = [{
+                value: '',
+                text: 'No lookup table selected',
+            }].concat(dropDownOptions);
+        }
+
+        if (useDropDown) {
+            widget = dropdown(mug, options);
+            widget.addOptions(dropDownOptions);
+            widget.isDropdown = true;
+            widget.setValue(val);
+        } else {
+            widget = text(mug, options);
+        }
+
+        return widget;
+    };
+    
     var getUIElementWithEditButton = function($uiElem, editFn, isDisabled) {
         var input = $uiElem.find('input');
         if (_.isUndefined(isDisabled)) {
@@ -410,6 +437,7 @@ define([
         checkbox: checkbox,
         dropdown: dropdown,
         xPath: xPath,
+        textOrDropDown: textOrDropDown,
         baseKeyValue: baseKeyValue,
         readOnlyControl: readOnlyControl,
         util: {

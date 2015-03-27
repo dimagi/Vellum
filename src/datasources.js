@@ -61,20 +61,20 @@ define([
         return generateFixtureColumns(cachedDataSources.fixtures[fixture_uri]);
     }
 
-    function valueInFixtures(value) {
-        return _.find(getPossibleFixtures(), function(fixture) {
-            return _.isEqual(value, fixture);
-        });
-    }
+    // function valueInFixtures(value) {
+    //     return _.find(getPossibleFixtures(), function(fixture) {
+    //         return _.isEqual(value, fixture);
+    //     });
+    // }
 
-    function valueInFixtures2(value) {
-        var value2 = {
-            id: value.instance ? value.instance.id : '',
-            src: value.instance ? value.instance.src : '',
-            query: value.nodeset
-        };
-        return valueInFixtures(value2);
-    }
+    // function valueInFixtures2(value) {
+    //     var value2 = {
+    //         id: value.instance ? value.instance.id : '',
+    //         src: value.instance ? value.instance.src : '',
+    //         query: value.nodeset
+    //     };
+    //     return valueInFixtures(value2);
+    // }
 
     function getDataSources(type, callback) {
         var source = _.find(dataSources, function (src) {
@@ -284,20 +284,14 @@ define([
     }
 
     function fixtureWidget(mug, options, labelText) {
-        var widget;
-
-        if (valueInFixtures2(mug.p[options.path]) || !mug.p[options.path].nodeset) {
-            // todo select first value as the current value
-            widget = widgets.dropdown(mug, options);
-            widget.addOptions(generateFixtureOptions());
-            widget.isDropdown = true;
-        } else {
-            widget = widgets.text(mug, options);
-            widget.isDropdown = false;
+        var currentVal = mug.p[options.path];
+        if (!currentVal.instance) {
+            currentVal = null;
         }
-
-        var getUIElement = widgets.util.getUIElement,
+        var widget = widgets.textOrDropDown(mug, options, generateFixtureOptions(), currentVal), 
+            getUIElement = widgets.util.getUIElement,
             getUIElementWithEditButton = widgets.util.getUIElementWithEditButton,
+            super_getValue = widget.getValue,
             super_setValue = widget.setValue,
             currentValue = null;
 
@@ -323,6 +317,11 @@ define([
         };
 
         function local_getValue() {
+            if (widget.isDropdown) {
+                currentValue = JSON.parse(super_getValue());
+            } else {
+                currentValue.query = super_getValue();
+            }
             return currentValue;
         }
 

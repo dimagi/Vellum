@@ -212,9 +212,11 @@ define([
             valueRef = refSelect("value_ref", "Choice Value", false);
 
         function updateAutoComplete() {
-            var sources = datasources.autocompleteChoices(widget.getValue().instance.src);
-            labelRef.addAutoComplete(sources);
-            valueRef.addAutoComplete(sources);
+            if (widget.getValue().instance) {
+                var sources = datasources.autocompleteChoices(widget.getValue().instance.src);
+                labelRef.addAutoComplete(sources);
+                valueRef.addAutoComplete(sources);
+            }
         }
 
         var local_handleChange = function() {
