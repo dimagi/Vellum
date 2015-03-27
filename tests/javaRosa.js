@@ -562,7 +562,106 @@ require([
         });
     });
 
-    describe("the language selector", function() {
+    describe("The javaRosa plugin itext widgets", function() {
+        before(function(done) {
+            util.init({
+                javaRosa: { langs: ['en'] },
+                core: {
+                    onReady: function () {
+                        var form = util.loadXML(""),
+                            Itext = form.vellum.data.javaRosa.Itext;
+                        mug = util.addQuestion("Text");
+                        // trigger itext id population
+                        jr.parseXLSItext(form, "", Itext);
+                        done();
+                    }
+                }
+            });
+        });
+        var mug;
+
+        function testItextIdValidation(property) {
+            it("should not display " + property + " validation error for autoId itext", function() {
+                var itext = mug.p[property],
+                    spec = mug.spec[property],
+                    before = itext.id;
+                itext.autoId = true;
+
+                assert(itext.id, property + ".id should have a value");
+                assert.equal(spec.validationFunc(mug), "pass");
+
+                itext.id = "";
+                try {
+                    assert.equal(spec.validationFunc(mug), "pass");
+                } finally {
+                    itext.id = before;
+                }
+            });
+
+            it("should display " + property + " validation error for non-autoId itext", function() {
+                var itext = mug.p[property],
+                    spec = mug.spec[property];
+                itext.autoId = false;
+                assert(itext.id, property + ".id should have a value");
+                assert(spec.validationFunc(mug),
+                       property + " validation should produce an error");
+            });
+
+            it("should display " + property + " validation error for non-autoId itext with blank ID", function() {
+                var itext = mug.p[property],
+                    spec = mug.spec[property],
+                    before = itext.id;
+                itext.autoId = false;
+                itext.id = "";
+                try {
+                    assert(spec.validationFunc(mug),
+                           property + " validation should produce an error");
+                } finally {
+                    itext.id = before;
+                }
+            });
+
+            it("should not have " + property + "ID validator (it will not be invoked)", function() {
+                assert(!mug.spec[property + "ID"].validationFunc,
+                       property + "ID virtual property validator will not be invoked");
+            });
+        }
+
+        testItextIdValidation("labelItext");
+        testItextIdValidation("hintItext");
+        testItextIdValidation("helpItext");
+        testItextIdValidation("constraintMsgItext");
+
+        it("should display constraintMsgItext validation error for non-autoId itext without validation condition", function() {
+            var itext = mug.p.constraintMsgItext,
+                spec = mug.spec.constraintMsgItext,
+                before = mug.p.constraintAttr;
+            itext.autoId = false;
+            mug.p.constraintAttr = "";
+            try {
+                assert(itext.id, "constraintMsgItext.id should have a value");
+                assert.equal(spec.validationFunc(mug),
+                    "Can't have a Validation Message Itext ID without a Validation Condition");
+            } finally {
+                mug.p.constraintAttr = before;
+            }
+        });
+
+        it("should not display constraintMsgItext validation error for autoId itext with validation condition", function() {
+            var itext = mug.p.constraintMsgItext,
+                spec = mug.spec.constraintMsgItext,
+                before = mug.p.constraintAttr;
+            itext.autoId = true;
+            mug.p.constraintAttr = "x = y";
+            try {
+                assert.equal(spec.validationFunc(mug), "pass");
+            } finally {
+                mug.p.constraintAttr = before;
+            }
+        });
+    });
+
+    describe("The javaRosa plugin language selector", function() {
         before(function(done) {
             util.init({
                 javaRosa: { langs: ['en'] },

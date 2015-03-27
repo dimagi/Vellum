@@ -358,39 +358,43 @@ require([
         });
 
         describe("type changer", function () {
-            function test(mug, type, allowed) {
+            function test(srcType, dstType, allowed) {
                 var show = allowed ? "show " : "not show ";
-                it("should " + show + type + " in menu for " + mug.__className, function () {
+                it("should " + show + dstType + " in menu for " + srcType, function () {
                     // HACK this depends on UI HTML
-                    var changer = form.vellum.getQuestionTypeChanger(mug),
-                        anchor = changer.find("[data-qtype=" + type + "]");
+                    var mug = map[srcType],
+                        changer = form.vellum.getQuestionTypeChanger(mug),
+                        anchor = changer.find("[data-qtype=" + dstType + "]");
                     assert(anchor.length === (allowed ? 1 : 0),
-                           anchor.parent().html() || (type + " not found in menu"));
+                           anchor.parent().html() ||
+                           (dstType + " not found in menu"));
                 });
             }
+            var form, map = {};
+            before(function () {
+                form = util.loadXML("");
+                map.Text = util.addQuestion("Text");
+                map.Select = util.addQuestion("Select");
+                map.SelectDynamic = util.addQuestion("SelectDynamic");
+            });
 
-            var form = util.loadXML("");
+            test("Text", "Trigger", true);
+            test("Text", "Item");
+            test("Text", "Group");
+            test("Text", "DataBindOnly");
+            test("Text", "Select", true);
+            test("Text", "MSelect", true);
+            test("Text", "SelectDynamic");
+            test("Text", "MSelectDynamic");
 
-            var text = util.addQuestion("Text", "text");
-            test(text, "Trigger", true);
-            test(text, "Item");
-            test(text, "Group");
-            test(text, "DataBindOnly");
-            test(text, "Select", true);
-            test(text, "MSelect", true);
-            test(text, "SelectDynamic");
-            test(text, "MSelectDynamic");
+            test("Select", "MSelect", true);
+            test("Select", "Text");
+            test("Select", "SelectDynamic");
+            test("Select", "MSelectDynamic");
 
-            var select = util.addQuestion("Select", "select");
-            test(select, "MSelect", true);
-            test(select, "Text");
-            test(select, "SelectDynamic");
-            test(select, "MSelectDynamic");
-
-            var selectDynamic = util.addQuestion("SelectDynamic", "select");
-            test(selectDynamic, "MSelectDynamic", true);
-            test(selectDynamic, "Select");
-            test(selectDynamic, "MSelect");
+            test("SelectDynamic", "MSelectDynamic", true);
+            test("SelectDynamic", "Select");
+            test("SelectDynamic", "MSelect");
         });
 
         describe("drag+drop should", function () {
