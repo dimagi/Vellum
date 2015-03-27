@@ -69,8 +69,8 @@ define([
 
     function valueInFixtures2(value) {
         var value2 = {
-            id: value.instance.id,
-            src: value.instance.src,
+            id: value.instance ? value.instance.id : '',
+            src: value.instance ? value.instance.src : '',
             query: value.nodeset
         };
         return valueInFixtures(value2);
