@@ -8,7 +8,8 @@ require([
     'vellum/itemset',
     'vellum/form',
     'text!static/itemset/test1.xml',
-    'text!static/itemset/inner-filters.xml'
+    'text!static/itemset/inner-filters.xml',
+    'text!static/itemset/dropdown-fixture.xml'
 ], function (
     options,
     util,
@@ -18,7 +19,8 @@ require([
     itemset,
     form,
     TEST_XML_1,
-    INNER_FILTERS_XML
+    INNER_FILTERS_XML,
+    DROPDOWN_FIXTURE_XML
 ) {
 
     // see note about controlling time in formdesigner.lock.js
@@ -118,6 +120,21 @@ require([
                 $but.click();
 
                 assert.equal(4, (call('createXML').match(/itemset/g) || []).length);
+            });
+
+            it ("uses a dropdown when the nodeset is known", function() {
+                util.loadXML(DROPDOWN_FIXTURE_XML);
+                clickQuestion("question2/itemset");
+
+                assert($('[name=property-itemsetData]').is('select'));
+            });
+
+            it ("uses a disabled input when the nodeset is not known", function() {
+                util.loadXML(INNER_FILTERS_XML);
+                clickQuestion("question2/itemset");
+
+                assert($('[name=property-itemsetData]').is('input'));
+                assert($('[name=property-itemsetData]').is(':disabled'));
             });
         });
     });
