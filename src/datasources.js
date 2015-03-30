@@ -243,7 +243,11 @@ define([
         };
 
         function local_getValue() {
-            currentValue = JSON.parse(super_getValue());
+            if (widget.isDropdown) {
+                currentValue = JSON.parse(super_getValue());
+            } else {
+                currentValue.query = super_getValue();
+            }
             return currentValue;
         }
 
