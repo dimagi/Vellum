@@ -171,7 +171,7 @@ define([
                         filter = nodeset.slice(nodeset.search(/\[.*\]$/));
                     mug.p.itemsetData = {
                         instance: form.parseInstance(nodeset, mug, "itemsetData.instance"),
-                        nodeset: nodeset,
+                        nodeset: nodeset.replace(/\[.*\]$/, ''),
                         labelRef: $element.children('label').attr('ref'),
                         valueRef: $element.children('value').attr('ref'),
                         filterRef: filter
