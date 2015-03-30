@@ -29,13 +29,26 @@ define([
     }
 
     function getPossibleFixtures() {
-        return _.map(cachedDataSources.fixtures, function(fixture) {
-            return {
+        function generateFixtureDefinitions(structure, baseFixture) {
+            return _.flatten(_.map(structure, function(value, key) {
+                var newBaseFixture = {
+                    src: baseFixture.src,
+                    id: baseFixture.id,
+                    query: baseFixture.query + "/" + key
+                };
+                return [newBaseFixture].concat(generateFixtureDefinitions(value, newBaseFixture));
+            }));
+        }
+
+        return _.flatten(_.map(cachedDataSources.fixtures, function(fixture) {
+            var baseFixture = {
                 src: fixture.sourceUri,
                 id: fixture.defaultId,
                 query: fixture.initialQuery
             };
-        });
+
+            return [baseFixture].concat(generateFixtureDefinitions(fixture.structure, baseFixture));
+        }));
     }
 
     function generateFixtureOptions() {
