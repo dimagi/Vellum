@@ -69,9 +69,13 @@ define([
         writeControlLabel: false,
         writeControlRefAttr: null,
         writeCustomXML: function (xmlWriter, mug) {
-            var data = mug.p.itemsetData;
+            var data = mug.p.itemsetData,
+                nodeset = data.nodeset;
+            if (data.filterRef) {
+                nodeset += data.filterRef;
+            }
             xmlWriter.writeAttributeString(
-                'nodeset', data.nodeset || '');
+                'nodeset', nodeset || '');
             xmlWriter.writeStartElement('label');
             xmlWriter.writeAttributeString(
                 'ref', data.labelRef || '');
@@ -163,12 +167,14 @@ define([
                         debug.log("Unknown parent type: " + parentMug.__className);
                     }
                     mug = adaptItemset(mug, form);
-                    var nodeset = $element.popAttr('nodeset');
+                    var nodeset = $element.popAttr('nodeset'),
+                        filter = nodeset.slice(nodeset.search(/\[.*\]$/));
                     mug.p.itemsetData = {
                         instance: form.parseInstance(nodeset, mug, "itemsetData.instance"),
                         nodeset: nodeset,
                         labelRef: $element.children('label').attr('ref'),
-                        valueRef: $element.children('value').attr('ref')
+                        valueRef: $element.children('value').attr('ref'),
+                        filterRef: filter
                     };
                     return mug;
                 };
@@ -207,9 +213,10 @@ define([
             super_getUIElement = widget.getUIElement,
             super_getValue = widget.getValue,
             super_setValue = widget.setValue,
-            super_handleChange = widget.handleChange,
+            super_handleChange = widget.handleChange.bind(widget),
             labelRef = refSelect("label_ref", "Choice Label", false),
-            valueRef = refSelect("value_ref", "Choice Value", false);
+            valueRef = refSelect("value_ref", "Choice Value", false),
+            filterRef = refSelect("filter_ref", "Choice Filter", false);
 
         function updateAutoComplete() {
             if (widget.getValue().instance) {
@@ -221,27 +228,30 @@ define([
 
         var local_handleChange = function() {
             updateAutoComplete();
-            super_handleChange.bind(widget)();
+            super_handleChange();
         };
 
         widget.handleChange = local_handleChange;
 
         labelRef.onChange(local_handleChange);
         valueRef.onChange(local_handleChange);
+        filterRef.onChange(super_handleChange);
 
         widget.getUIElement = function () {
             return super_getUIElement()
                 .append(labelRef.element)
-                .append(valueRef.element);
+                .append(valueRef.element)
+                .append(filterRef.element);
         };
 
         widget.getValue = function () {
             var val = super_getValue();
             return {
                 instance: ($.trim(val.src) ? {id: val.id, src: val.src} : null),
-                nodeset: val.query,
+                nodeset: val.query ? val.query.replace(/\[.*\]$/, '') : '',
                 labelRef: labelRef.val(),
-                valueRef: valueRef.val()
+                valueRef: valueRef.val(),
+                filterRef: filterRef.val()
             };
         };
 
@@ -250,10 +260,11 @@ define([
             super_setValue({
                 id: (val.instance ? val.instance.id : ""),
                 src: (val.instance ? val.instance.src : ""),
-                query: val.nodeset || ""
+                query: val.nodeset ? val.nodeset.replace(/\[.*\]$/, '') : ""
             });
             labelRef.val(val.labelRef);
             valueRef.val(val.valueRef);
+            filterRef.val(val.filterRef);
         };
 
         return widget;

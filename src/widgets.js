@@ -377,7 +377,8 @@ define([
 
         if (val) { 
             useDropDown = _.some(dropDownOptions, function(option){
-                return _.isEqual(option, val);
+                return _.isEqual(_.isObject(option.value) ? JSON.parse(option.value) : {},
+                                 _.isObject(val.value) ? JSON.parse(val.value) : {});
             });
         } else {
             useDropDown = true;
