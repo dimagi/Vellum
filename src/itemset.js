@@ -233,8 +233,8 @@ define([
 
         widget.handleChange = local_handleChange;
 
-        labelRef.onChange(local_handleChange);
-        valueRef.onChange(local_handleChange);
+        labelRef.onChange(super_handleChange);
+        valueRef.onChange(super_handleChange);
         filterRef.onChange(super_handleChange);
 
         widget.getUIElement = function () {
