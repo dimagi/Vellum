@@ -42,7 +42,7 @@ define([
         return _.map(getPossibleFixtures(), function(fixture) {
             return {
                 value: JSON.stringify(fixture),
-                text: fixture.src
+                text: fixture.query
             };
         });
     }
