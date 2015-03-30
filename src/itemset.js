@@ -279,7 +279,7 @@ define([
         input.attr("name", name);
         return {
             addAutoComplete: function(sources) {
-                input.autocomplete({source: sources});
+                input.autocomplete({source: sources, minLength: 0});
             },
             element: widgets.util.getUIElement(input, label, isDisabled),
             val: function (value) {
