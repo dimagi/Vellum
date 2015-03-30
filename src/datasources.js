@@ -61,21 +61,6 @@ define([
         return generateFixtureColumns(cachedDataSources.fixtures[fixture_uri]);
     }
 
-    // function valueInFixtures(value) {
-    //     return _.find(getPossibleFixtures(), function(fixture) {
-    //         return _.isEqual(value, fixture);
-    //     });
-    // }
-
-    // function valueInFixtures2(value) {
-    //     var value2 = {
-    //         id: value.instance ? value.instance.id : '',
-    //         src: value.instance ? value.instance.src : '',
-    //         query: value.nodeset
-    //     };
-    //     return valueInFixtures(value2);
-    // }
-
     function getDataSources(type, callback) {
         var source = _.find(dataSources, function (src) {
             return src.key === type;
@@ -97,82 +82,6 @@ define([
         } else {
             callback([]);
         }
-    }
-
-    function selectDataSource(callback) {
-        var $modal = vellum.generateNewModal("Select Data Source", [
-                {
-                    title: "Set Data Source",
-                    cssClasses: "btn-primary",
-                    action: function () {
-                        var sel = $source.find(":selected"),
-                            src = (sel && sel.data("source")) || {};
-                        callback({
-                            instance: {
-                                id: src.defaultId,
-                                src: src.sourceUri
-                            },
-                            idsQuery: $query.val(),
-                        });
-                        $modal.modal('hide');
-                    }
-                }
-            ]),
-            $exportForm = $(select_source({}));
-        $modal.find('.modal-body').html($exportForm);
-
-        var $type = $exportForm.find('[name=type-selector]'),
-            $source = $exportForm.find('[name=source-selector]'),
-            $query = $exportForm.find('[name=source-query]'),
-            $text = $exportForm.find('textarea');
-
-        $text.attr("disabled", "disabled");
-        $type.empty();
-        $type.append($("<option />").text("-- Select a source type --"));
-        _.each(dataSources, function(source) {
-            $type.append($("<option />").val(source.key).text(source.name));
-        });
-
-        function populate() {
-            var key = $type.val();
-            $source.empty();
-            if (!key) {
-                select();
-                return;
-            }
-            getDataSources(key, function (sources) {
-                $source.append($("<option />").text("-- Select a source --"));
-                _.each(sources, function (source) {
-                    $source.append($("<option />").data("source", source)
-                                                  .text(source.name));
-                });
-                select();
-            });
-        }
-
-        function select() {
-            var selected = $source.find(":selected"),
-                source = selected && selected.data("source");
-            if (source) {
-                $query.val("instance('{1}')/{2}"
-                    .replace("{1}", source.defaultId)
-                    .replace("{2}", source.rootNodeName)
-                );
-                $text.text([
-                    source.defaultId,
-                    source.sourceUri,
-                ].join("\n"));
-            } else {
-                $query.val("");
-                $text.text("");
-            }
-        }
-
-        $type.change(populate);
-        $source.change(select);
-
-        // display current values
-        $modal.modal('show');
     }
 
     /**
@@ -355,11 +264,8 @@ define([
 
     return {
         init: init,
-        getDataSources: getDataSources,
-        selectDataSource: selectDataSource,
         dataSourceWidget: dataSourceWidget,
         fixtureWidget: fixtureWidget,
         autocompleteChoices:autocompleteChoices
     };
-
 });
