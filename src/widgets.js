@@ -296,11 +296,18 @@ define([
         var widget = normal(mug, options);
         widget.input = $("<select />")
             .attr("name", widget.id);
+        widget.isDropdown = true;
 
         var input = widget.input;
 
         widget.setValue = function (value) {
-            input.val(value);
+            var val = equivilentOption(value);
+            if (val) {
+                input.val(val.value);
+            } else {
+                widget.addOption(value, "custom");
+                input.val(value);
+            }
         };
 
         widget.getValue = function () {
@@ -338,9 +345,18 @@ define([
             });
         };
 
+        function equivilentOption(val) {
+            val = val ? JSON.parse(val) : '';
+            return _.find(widget.getOptions(), function (option) {
+                return _.isEqual(option.value ? JSON.parse(option.value) : '', val);
+            });
+        }
+
+        widget.equivilentOption = equivilentOption;
+
         return widget;
     };
-    
+
     var readOnlyControl = function (mug, options) {
         options.id = "readonly-control";
         var widget = base(mug, options);
@@ -356,7 +372,8 @@ define([
     };
 
     var textOrDropDown = function (mug, options, dropDownOptions, val) {
-        var widget, useDropDown = false;
+        var widget, useDropDown = false,
+            super_setValue;
 
         if (val) { 
             useDropDown = _.some(dropDownOptions, function(option){
@@ -373,11 +390,25 @@ define([
         if (useDropDown) {
             widget = dropdown(mug, options);
             widget.addOptions(dropDownOptions);
-            widget.isDropdown = true;
-            widget.setValue(val);
+            widget.setValue(val ? val.value : '');
         } else {
             widget = text(mug, options);
         }
+
+        super_setValue = widget.setValue;
+
+        widget.setValue = function(value) {
+            if (widget.isDropdown) {
+                if (widget.equivilentOption(value)) {
+                    super_setValue(value);
+                } else {
+                    widget = text(mug, options);
+                    widget.setValue(value);
+                }
+            } else {
+                super_setValue(value);
+            }
+        };
 
         return widget;
     };

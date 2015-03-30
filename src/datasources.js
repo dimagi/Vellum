@@ -287,6 +287,15 @@ define([
         var currentVal = mug.p[options.path];
         if (!currentVal.instance) {
             currentVal = null;
+        } else {
+            currentVal = {
+                value: JSON.stringify({
+                    src: currentVal.instance.src,
+                    id: currentVal.instance.id,
+                    query: currentVal.nodeset
+                }),
+                text: currentVal.instance.src
+            };
         }
         var widget = widgets.textOrDropDown(mug, options, generateFixtureOptions(), currentVal), 
             getUIElement = widgets.util.getUIElement,
@@ -317,21 +326,13 @@ define([
         };
 
         function local_getValue() {
-            if (widget.isDropdown) {
-                currentValue = JSON.parse(super_getValue());
-            } else {
-                currentValue.query = super_getValue();
-            }
+            currentValue = JSON.parse(super_getValue());
             return currentValue;
         }
 
         function local_setValue(val) {
             currentValue = val;
-            if (widget.isDropdown) {
-                widget.input.val(JSON.stringify(val));
-            } else {
-                super_setValue(val.query || "");
-            }
+            super_setValue(val ? JSON.stringify(val) : '');
         }
 
         widget.getValue = local_getValue;
