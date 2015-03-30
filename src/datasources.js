@@ -340,7 +340,11 @@ define([
 
         function local_setValue(val) {
             currentValue = val;
-            super_setValue(val ? JSON.stringify(val) : '');
+            if (widget.isDropdown) {
+                super_setValue(val ? JSON.stringify(val) : '');
+            } else {
+                super_setValue(val.query);
+            }
         }
 
         widget.getValue = local_getValue;
