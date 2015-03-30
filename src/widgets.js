@@ -295,7 +295,7 @@ define([
     var dropdown = function (mug, options) {
         var widget = normal(mug, options);
         widget.input = $("<select />")
-            .attr("name", "property-" + widget.id);
+            .attr("name", widget.id);
 
         var input = widget.input;
 
