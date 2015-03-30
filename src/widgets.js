@@ -295,7 +295,8 @@ define([
     var dropdown = function (mug, options) {
         var widget = normal(mug, options);
         widget.input = $("<select />")
-            .attr("name", widget.id);
+            .attr("name", widget.id)
+            .addClass('input-block-level');
         widget.isDropdown = true;
 
         var input = widget.input;
