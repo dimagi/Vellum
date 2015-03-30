@@ -304,9 +304,6 @@ define([
             var val = equivilentOption(value);
             if (val) {
                 input.val(val.value);
-            } else {
-                widget.addOption(value, "custom");
-                input.val(value);
             }
         };
 
@@ -371,21 +368,20 @@ define([
         return widget;
     };
 
-    var textOrDropDown = function (mug, options, dropDownOptions, val) {
+    var textOrDropDown = function (mug, options, dropDownOptions, val, 
+                                   emptyDropDownOption) {
         var widget, useDropDown = false,
             super_setValue;
+        emptyDropDownOption = emptyDropDownOption || {value: "", text: "Empty"};
 
         if (val) { 
             useDropDown = _.some(dropDownOptions, function(option){
-                return _.isEqual(_.isObject(option.value) ? JSON.parse(option.value) : {},
-                                 _.isObject(val.value) ? JSON.parse(val.value) : {});
+                return _.isEqual(_.isString(option.value) ? JSON.parse(option.value) : {},
+                                 _.isString(val.value) ? JSON.parse(val.value) : {});
             });
         } else {
             useDropDown = true;
-            dropDownOptions = [{
-                value: '',
-                text: 'No lookup table selected',
-            }].concat(dropDownOptions);
+            dropDownOptions.push(emptyDropDownOption);
         }
 
         if (useDropDown) {
@@ -399,16 +395,10 @@ define([
         super_setValue = widget.setValue;
 
         widget.setValue = function(value) {
-            if (widget.isDropdown) {
-                if (widget.equivilentOption(value)) {
-                    super_setValue(value);
-                } else {
-                    widget = text(mug, options);
-                    widget.setValue(value);
-                }
-            } else {
-                super_setValue(value);
+            if (widget.isDropdown && !widget.equivilentOption(value)) {
+                widget.addOption(value, 'Temp Value -- Should not be displayed');
             }
+            super_setValue(value);
         };
 
         return widget;

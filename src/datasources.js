@@ -297,7 +297,15 @@ define([
                 text: currentVal.instance.src
             };
         }
-        var widget = widgets.textOrDropDown(mug, options, generateFixtureOptions(), currentVal), 
+        var emptyDropdown = {
+            text: "No lookup table selected",
+            value: JSON.stringify({
+                id: "",
+                src: "",
+                query: ""
+            })
+        };
+        var widget = widgets.textOrDropDown(mug, options, generateFixtureOptions(), currentVal, emptyDropdown), 
             getUIElement = widgets.util.getUIElement,
             getUIElementWithEditButton = widgets.util.getUIElementWithEditButton,
             super_getValue = widget.getValue,
