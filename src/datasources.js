@@ -30,11 +30,10 @@ define([
 
     function getPossibleFixtures() {
         return _.map(cachedDataSources.fixtures, function(fixture) {
-            var id = fixture.defaultId;
             return {
                 src: fixture.sourceUri,
-                id: id,
-                query: "instance('" + id + "')/" + id + "_list/" + id
+                id: fixture.defaultId,
+                query: fixture.initialQuery
             };
         });
     }
@@ -49,10 +48,14 @@ define([
     }
 
     function generateFixtureColumns(fixture) {
+        function generateColumns(structure) {
+            return _.flatten(_.map(structure, function(value, key) {
+                return [key].concat(generateColumns(value));
+            }));
+        }
+
         if (fixture) {
-            return _.map(fixture.levels, function(level) {
-                return level.nodeName;
-            });
+            return generateColumns(fixture.structure);
         }
         return "";
     }

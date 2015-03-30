@@ -40,31 +40,16 @@ define(function () {
             ],
         },
         {
-            name: "Some Fixture",
-            sourceUri: "jr://fixture/some-fixture",
-            defaultId: "somefixture",
-            rootNodeName: "foos",
-            levels: [
-                {
-                    nodeName: "foo",
-                    subsets: [
-                        {
-                            name: "woos",
-                            // should handle quotes
-                            selector: "@foo_type=\"woo\""
-                        }
-                    ]
+            sourceUri: "jr://fixture/item-list:some-fixture",
+            defaultId: "some-fixture",
+            initialQuery: "instance('some-fixture')/some-fixture_list/some-fixture",
+            structure: {
+                "attribute1": {
+                    "foo": {},
+                    "bar": {}
                 },
-                {
-                    nodeName: "bar",
-                    subsets: [
-                        {
-                            name: "eggs",
-                            selector: "@bar_type='eggs'"
-                        }
-                    ]
-                }
-            ]
+                "attribute2": {}
+            }
         }
     ];
     
