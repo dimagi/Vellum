@@ -45,7 +45,8 @@ define([
     debug
 ) {
     var mugTypes = mugs.baseMugTypes.normal,
-        Itemset;
+        Itemset,
+        END_FILTER = /\[.*\]$/;
 
     Itemset = util.extend(mugs.defaultOptions, {
         isControlOnly: true,
@@ -168,10 +169,11 @@ define([
                     }
                     mug = adaptItemset(mug, form);
                     var nodeset = $element.popAttr('nodeset'),
-                        filter = nodeset.slice(nodeset.search(/\[.*\]$/));
+                        s = nodeset.search(END_FILTER),
+                        filter = s === -1 ? '' : nodeset.slice(s);
                     mug.p.itemsetData = {
                         instance: form.parseInstance(nodeset, mug, "itemsetData.instance"),
-                        nodeset: nodeset.replace(/\[.*\]$/, ''),
+                        nodeset: nodeset.replace(END_FILTER, ''),
                         labelRef: $element.children('label').attr('ref'),
                         valueRef: $element.children('value').attr('ref'),
                         filterRef: filter
@@ -245,13 +247,15 @@ define([
         };
 
         widget.getValue = function () {
-            var val = super_getValue();
+            var val = super_getValue(),
+                s = val.query.search(END_FILTER),
+                filter = s === -1 ? '' : val.query.slice(s);
             return {
                 instance: ($.trim(val.src) ? {id: val.id, src: val.src} : null),
-                nodeset: val.query ? val.query.replace(/\[.*\]$/, '') : '',
+                nodeset: val.query ? val.query.replace(END_FILTER, '') : '',
                 labelRef: labelRef.val(),
                 valueRef: valueRef.val(),
-                filterRef: filterRef.val()
+                filterRef: filterRef.val() || filter
             };
         };
 
@@ -260,7 +264,7 @@ define([
             super_setValue({
                 id: (val.instance ? val.instance.id : ""),
                 src: (val.instance ? val.instance.src : ""),
-                query: val.nodeset ? val.nodeset.replace(/\[.*\]$/, '') : ""
+                query: val.nodeset ? val.nodeset.replace(END_FILTER, '') : ""
             });
             labelRef.val(val.labelRef);
             valueRef.val(val.valueRef);
