@@ -37,7 +37,7 @@ define([
                         id: baseFixture.id,
                         query: baseFixture.query + "/" + key
                     };
-                newBaseFixture.name = value.name || newBaseFixture.query;
+                newBaseFixture.name = baseFixture.name + " - " + (value.name || key);
 
                 if (!value.no_option) {
                     ret = [newBaseFixture];
@@ -51,7 +51,7 @@ define([
                 src: fixture.sourceUri,
                 id: fixture.defaultId,
                 query: fixture.initialQuery,
-                name: fixture.name || fixture.initialQuery
+                name: fixture.name || fixture.defaultId
             };
 
             return [baseFixture].concat(generateFixtureDefinitions(fixture.structure, baseFixture));
