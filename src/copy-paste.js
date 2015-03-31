@@ -8,7 +8,7 @@ define([
     _,
     tsv
 ) {
-    var PREAMBLE = ["vellum copy/paste", "version 1"],
+    var PREAMBLE = ["Form Builder clip", "version 1"],
         vellum,
         offScreen = {top: -10000, left: -10000},
         hiddenTextarea = $('<textarea></textarea>').css({
@@ -183,7 +183,7 @@ define([
 
     function paste(data) {
         var next = tsv.makeRowParser(data);
-        if (!_.isEqual(next(), PREAMBLE)) {
+        if (!_.isEqual(next().slice(0, 2), PREAMBLE)) {
             return ["Unsupported paste format"];
         }
         var types = vellum.data.core.mugTypes.allTypes,

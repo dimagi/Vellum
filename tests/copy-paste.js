@@ -25,7 +25,7 @@ require([
 ) {
     var assert = chai.assert,
         call = util.call,
-        HEADER = ["vellum copy/paste", "version 1"];
+        HEADER = ["Form Builder clip", "version 1"];
 
     function eq(serial, rows, message) {
         if (!_.isString(rows)) {
@@ -35,10 +35,11 @@ require([
     }
 
     function paste(rows, errors, print) {
-        var data = tsv.tabDelimit([HEADER].concat(rows)),
-            err = mod.paste(data);
-        if (print) { window.console.log(data); } // debugging helper
-        assert.deepEqual(err, errors || []);
+        if (!_.isString(rows)) {
+            rows = tsv.tabDelimit([HEADER].concat(rows));
+        }
+        if (print) { window.console.log(rows); } // debugging helper
+        assert.deepEqual(mod.paste(rows), errors || []);
     }
 
     describe("The copy-paste plugin", function () {
@@ -473,6 +474,20 @@ require([
             eq(mod.copy(), [
                 ["id", "type", "labelItext:en-default", "labelItext:hin-default"],
                 ["/text", "Text", "Label", "Label"],
+            ]);
+        });
+
+        it("should ignore extra cells in header row", function () {
+            util.loadXML("");
+            paste(tsv.tabDelimit([
+                HEADER.concat(["", ""]),
+                ["id", "type", "labelItext:en-default", "labelItext"],
+                ["/text1", "Text", "text", "text-id"],
+            ]));
+            util.selectAll();
+            eq(mod.copy(), [
+                ["id", "type", "labelItext:en-default", "labelItext:hin-default", "labelItext"],
+                ["/text1", "Text", "text", "text", "text-id"],
             ]);
         });
 
