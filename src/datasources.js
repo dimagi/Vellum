@@ -70,7 +70,9 @@ define([
     function generateFixtureColumns(fixture) {
         function generateColumns(structure) {
             return _.map(structure, function(value, key) {
-                return [key].concat(generateColumns(value.structure));
+                return [key].concat(_.map(generateColumns(value.structure), function(value) {
+                    return key + '/' + value;
+                }));
             });
         }
 
