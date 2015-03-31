@@ -11,6 +11,7 @@ define([
     'tpl!vellum/templates/edit_source',
     'tpl!vellum/templates/confirm_overwrite',
     'tpl!vellum/templates/control_group_stdInput',
+    'tpl!vellum/templates/copy_paste_help',
     'tpl!vellum/templates/form_errors_template',
     'tpl!vellum/templates/question_fieldset',
     'tpl!vellum/templates/question_type_changer',
@@ -42,6 +43,7 @@ define([
     edit_source,
     confirm_overwrite,
     control_group_stdInput,
+    copy_paste_help,
     form_errors_template,
     question_fieldset,
     question_type_changer,
@@ -805,9 +807,14 @@ define([
             // themeable items, which it would be hard to adapt the existing
             // selectors to if they didn't exist.
         }).bind("select_node.jstree", function (e, data) {
-            var mug = _this.data.core.form.getMugByUFID(data.node.id);
-            _this.displayMugProperties(mug);
-            _this.activateQuestionTypeGroup(mug);
+            var selected = _this.jstree('get_selected');
+            if (selected.length < 2) {
+                var mug = _this.data.core.form.getMugByUFID(data.node.id);
+                _this.displayMugProperties(mug);
+                _this.activateQuestionTypeGroup(mug);
+            } else {
+                _this.displayMultipleSelectionView();
+            }
         }).bind("open_node.jstree", function (e, data) {
             var mug = _this.data.core.form.getMugByUFID(data.node.id);
             _this.activateQuestionTypeGroup(mug);
@@ -1357,15 +1364,7 @@ define([
         this.showContentRight();
         $props.hide();
 
-        if (this._propertiesMug) {
-            this._propertiesMug.teardownProperties();
-            try {
-                this._propertiesMug.validate();
-            } catch (err) {
-                // ignore error
-            }
-        }
-        this._propertiesMug = mug;
+        this._setPropertiesMug(mug);
         var $content = this.$f.find(".fd-props-content").empty(),
             sections = this.getSections(mug),
             $messages = $("<div class='messages' />");
@@ -1403,6 +1402,30 @@ define([
         this.$f.find('.fd-help').fdHelp();
 
         this.toggleConstraintItext(mug);
+    };
+
+    fn._setPropertiesMug = function (mug) {
+        if (this._propertiesMug) {
+            this._propertiesMug.teardownProperties();
+            try {
+                this._propertiesMug.validate();
+            } catch (err) {
+                // ignore error
+            }
+        }
+        this._propertiesMug = mug;
+    };
+
+    fn.displayMultipleSelectionView = function () {
+        var isMac = /Mac/i.test(navigator.platform),
+            mugs = this.getCurrentlySelectedMug(true);
+        this.showContentRight();
+        this.hideQuestionProperties();
+        this._setPropertiesMug(null);
+        this.$f.find('.fd-props-toolbar').html(this.getMugToolbar(mugs, true));
+        this.$f.find(".fd-props-content")
+            .html(copy_paste_help({"metachar": (isMac ? "\u2318" : "Ctrl+")}));
+        this.showQuestionProperties();
     };
 
     fn.showContentRight = function () {
