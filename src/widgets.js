@@ -301,10 +301,13 @@ define([
 
         var input = widget.input;
 
-        widget.setValue = function (value) {
+        widget.setValue = function (value, option_name) {
             var val = equivilentOption(value);
             if (val) {
                 input.val(val.value);
+            } else {
+                widget.addOption(value, option_name || "Nothing Selected");
+                input.val(value);
             }
         };
 

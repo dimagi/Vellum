@@ -128,14 +128,6 @@ require([
 
                 assert($('[name=property-itemsetData]').is('select'));
             });
-
-            it ("uses a disabled input when the nodeset is not known", function() {
-                util.loadXML(INNER_FILTERS_XML);
-                clickQuestion("question2/itemset");
-
-                assert($('[name=property-itemsetData]').is('input'));
-                assert($('[name=property-itemsetData]').is(':disabled'));
-            });
         });
     });
 });

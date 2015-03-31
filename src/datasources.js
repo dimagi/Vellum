@@ -216,37 +216,18 @@ define([
     }
 
     function fixtureWidget(mug, options, labelText) {
-        var currentVal = mug.p[options.path];
-        if (!currentVal.instance) {
-            currentVal = null;
-        } else {
-            currentVal = {
-                value: JSON.stringify({
-                    src: currentVal.instance.src,
-                    id: currentVal.instance.id,
-                    query: currentVal.nodeset
-                }),
-                text: currentVal.instance.src
-            };
-        }
-        var emptyDropdown = {
-            text: "No lookup table selected",
-            value: JSON.stringify({
-                id: "",
-                src: "",
-                query: ""
-            })
-        };
-        var widget = widgets.textOrDropDown(mug, options, generateFixtureOptions(), currentVal, emptyDropdown), 
+        var widget = widgets.dropdown(mug, options), 
             getUIElement = widgets.util.getUIElement,
             getUIElementWithEditButton = widgets.util.getUIElementWithEditButton,
             super_getValue = widget.getValue,
             super_setValue = widget.setValue,
             currentValue = null;
 
+        widget.addOptions(generateFixtureOptions());
+
         widget.getUIElement = function () {
             var query = getUIElementWithEditButton(
-                    getUIElement(widget.input, labelText, !widget.isDropdown),
+                    getUIElement(widget.input, labelText),
                     function () {
                         vellum.displaySecondaryEditor({
                             source: local_getValue(),
@@ -266,21 +247,13 @@ define([
         };
 
         function local_getValue() {
-            if (widget.isDropdown) {
-                currentValue = JSON.parse(super_getValue());
-            } else {
-                currentValue.query = super_getValue();
-            }
+            currentValue = JSON.parse(super_getValue());
             return currentValue;
         }
 
         function local_setValue(val) {
             currentValue = val;
-            if (widget.isDropdown) {
-                super_setValue(val ? JSON.stringify(val) : '');
-            } else {
-                super_setValue(val.query);
-            }
+            super_setValue(val ? JSON.stringify(val) : '', val.query);
         }
 
         widget.getValue = local_getValue;
