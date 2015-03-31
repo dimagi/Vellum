@@ -104,7 +104,8 @@ require(['jquery', 'jquery.vellum'], function ($) {
         'tests/formdesigner.lock',
         'tests/itemset',
         'tests/tsv',
-        'tests/xml'
+        'tests/xml',
+        'tests/datasources'
     ], function (
         options
     ) {

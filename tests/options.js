@@ -43,13 +43,18 @@ define(function () {
             sourceUri: "jr://fixture/item-list:some-fixture",
             defaultId: "some-fixture",
             initialQuery: "instance('some-fixture')/some-fixture_list/some-fixture",
-            name: 'some-fixture',
+            name: 'some-fixture-name',
             structure: {
-                "@id": {
-                    "no_option": true
+                "inner-attribute": {
+                    structure: {
+                        "extra-inner-attribute": {}
+                    }
                 },
-                "name": {
-                    "no_option": true
+                "@id": {
+                    no_option: true
+                },
+                name: {
+                    no_option: true
                 }
             }
         }
