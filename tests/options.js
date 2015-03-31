@@ -43,12 +43,14 @@ define(function () {
             sourceUri: "jr://fixture/item-list:some-fixture",
             defaultId: "some-fixture",
             initialQuery: "instance('some-fixture')/some-fixture_list/some-fixture",
+            name: 'some-fixture',
             structure: {
-                "attribute1": {
-                    "foo": {},
-                    "bar": {}
+                "@id": {
+                    "no_option": true
                 },
-                "attribute2": {}
+                "name": {
+                    "no_option": true
+                }
             }
         }
     ];

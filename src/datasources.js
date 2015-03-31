@@ -30,21 +30,28 @@ define([
 
     function getPossibleFixtures() {
         function generateFixtureDefinitions(structure, baseFixture) {
-            return _.flatten(_.map(structure, function(value, key) {
-                var newBaseFixture = {
-                    src: baseFixture.src,
-                    id: baseFixture.id,
-                    query: baseFixture.query + "/" + key
-                };
-                return [newBaseFixture].concat(generateFixtureDefinitions(value, newBaseFixture));
-            }));
+            return _.map(structure, function(value, key) {
+                var ret = [],
+                    newBaseFixture = {
+                        src: baseFixture.src,
+                        id: baseFixture.id,
+                        query: baseFixture.query + "/" + key
+                    };
+                newBaseFixture.name = value.name || newBaseFixture.query;
+
+                if (!value.no_option) {
+                    ret = [newBaseFixture];
+                }
+                return ret.concat(generateFixtureDefinitions(value.structure, newBaseFixture));
+            });
         }
 
         return _.flatten(_.map(cachedDataSources.fixtures, function(fixture) {
             var baseFixture = {
                 src: fixture.sourceUri,
                 id: fixture.defaultId,
-                query: fixture.initialQuery
+                query: fixture.initialQuery,
+                name: fixture.name || fixture.initialQuery
             };
 
             return [baseFixture].concat(generateFixtureDefinitions(fixture.structure, baseFixture));
@@ -54,21 +61,21 @@ define([
     function generateFixtureOptions() {
         return _.map(getPossibleFixtures(), function(fixture) {
             return {
-                value: JSON.stringify(fixture),
-                text: fixture.query
+                value: JSON.stringify(_.omit(fixture, 'name')),
+                text: fixture.name
             };
         });
     }
 
     function generateFixtureColumns(fixture) {
         function generateColumns(structure) {
-            return _.flatten(_.map(structure, function(value, key) {
-                return [key].concat(generateColumns(value));
-            }));
+            return _.map(structure, function(value, key) {
+                return [key].concat(generateColumns(value.structure));
+            });
         }
 
         if (fixture) {
-            return generateColumns(fixture.structure);
+            return _.flatten(generateColumns(fixture.structure));
         }
         return "";
     }
