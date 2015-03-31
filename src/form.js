@@ -821,7 +821,7 @@ define([
             }
             return this.mugMap[path];
         },
-        removeMugFromForm: function (mug) {
+        removeMugsFromForm: function (mugs) {
             function breakReferences(mug) {
                 if (!seen.hasOwnProperty(mug.ufid)) {
                     seen[mug.ufid] = null;
@@ -830,9 +830,21 @@ define([
             }
             var _this = this,
                 seen = {},
-                mugs = this.getDescendants(mug).concat([mug]),
-                ufids = _.object(_(mugs).map(function(mug) { return [mug.ufid, null]; }));
-            this._removeMugFromForm(mug, false);
+                ufids = {},
+                parents = {};
+            _.each(mugs, function (mug) {
+                parents[mug.ufid] = mug;
+                ufids[mug.ufid] = null;
+                _.each(_this.getDescendants(mug), function (child) {
+                    ufids[child.ufid] = null;
+                    if (parents.hasOwnProperty(child.ufid)) {
+                        delete parents[child.ufid];
+                    }
+                });
+            });
+            _.each(_.values(parents), function (mug) {
+                _this._removeMugFromForm(mug, false);
+            });
             this._logicManager.forEachReferencingProperty(ufids, breakReferences);
         },
         _removeMugFromForm: function(mug, isInternal) {

@@ -95,7 +95,7 @@ define([
             assert(util.isTreeNodeValid(green), "sanity check failed: green is invalid");
             assert(util.isTreeNodeValid(black), "sanity check failed: black is invalid");
             util.clickQuestion("blue");
-            blue.form.removeMugFromForm(blue);
+            blue.form.removeMugsFromForm([blue]);
             assert(util.isTreeNodeValid(green), "green should be valid");
             assert(!util.isTreeNodeValid(black), "black should not be valid");
         });
@@ -104,7 +104,7 @@ define([
             util.loadXML(QUESTION_REFERENCING_OTHER_XML);
             var blue = call("getMugByPath", "/data/blue"),
                 black = call("getMugByPath", "/data/black");
-            blue.form.removeMugFromForm(blue);
+            blue.form.removeMugsFromForm([blue]);
             assert(!util.isTreeNodeValid(black), "black should not be valid");
             blue = util.addQuestion("Text", "blue");
             assert(util.isTreeNodeValid(black), util.getMessages(black));

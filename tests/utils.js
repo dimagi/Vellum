@@ -252,11 +252,16 @@ define([
         return mug;
     }
 
-    function deleteQuestion (path) {
-        var mug = getMug(path);
-        assert(mug, "mug not found: " + path);
-        call("getData").core.form.removeMugFromForm(mug);
-        assert(!getMug(path), "mug not removed: " + path);
+    function deleteQuestion () {
+        var mugs = _.map(arguments, function (path) {
+                var mug = getMug(path);
+                assert(mug, "mug not found: " + path);
+                return mug;
+            });
+        call("getData").core.form.removeMugsFromForm(mugs);
+        _.each(arguments, function (path) {
+            assert(!getMug(path), "mug not removed: " + path);
+        });
     }
 
     /**

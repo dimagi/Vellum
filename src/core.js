@@ -1596,29 +1596,31 @@ define([
         return $sec;
     };
         
-    fn.getMugToolbar = function (mug) {
-        var _this = this;
-        var $baseToolbar = $(question_toolbar({
-            isDeleteable: this.isMugRemoveable(mug,
-                    this.data.core.form.getAbsolutePath(mug)),
-            isCopyable: mug.options.isCopyable
-        }));
+    fn.getMugToolbar = function (mug, multiselect) {
+        var _this = this,
+            form = this.data.core.form,
+            mugs = multiselect ? mug : [mug],
+            $baseToolbar = $(question_toolbar({
+                isDeleteable: _.every(mugs, function (mug) {
+                    return _this.isMugRemoveable(mug, form.getAbsolutePath(mug));
+                }),
+                isCopyable: !multiselect && mug.options.isCopyable
+            }));
         $baseToolbar.find('.fd-button-remove').click(function () {
-            var mug = _this.getCurrentlySelectedMug();
-            _this.data.core.form.removeMugFromForm(mug);
+            var mugs = _this.getCurrentlySelectedMug(true);
+            form.removeMugsFromForm(mugs);
         });
         $baseToolbar.find('.fd-button-copy').click(function () {
             _this.ensureCurrentMugIsSaved(function () {
-                var duplicate = _this.data.core.form.duplicateMug(
-                    _this.getCurrentlySelectedMug());
-
+                var duplicate = form.duplicateMug(_this.getCurrentlySelectedMug());
                 _this.jstree("deselect_all", true)
                      .jstree("select_node", duplicate.ufid);
             });
         });
-        $baseToolbar.find('.btn-toolbar.pull-left')
-            .prepend(this.getQuestionTypeChanger(mug));
-
+        if (!multiselect) {
+            $baseToolbar.find('.btn-toolbar.pull-left')
+                .prepend(this.getQuestionTypeChanger(mug));
+        }
         return $baseToolbar;
     };
 
