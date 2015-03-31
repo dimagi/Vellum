@@ -1627,7 +1627,7 @@ define([
                 isDeleteable: _.every(mugs, function (mug) {
                     return _this.isMugRemoveable(mug, form.getAbsolutePath(mug));
                 }),
-                isCopyable: !multiselect && mug.options.isCopyable
+                isCopyable: !multiselect // mug.options.isCopyable
             }));
         $baseToolbar.find('.fd-button-remove').click(function () {
             var mugs = _this.getCurrentlySelectedMug(true);
@@ -1635,9 +1635,11 @@ define([
         });
         $baseToolbar.find('.fd-button-copy').click(function () {
             _this.ensureCurrentMugIsSaved(function () {
-                var duplicate = form.duplicateMug(_this.getCurrentlySelectedMug());
-                _this.jstree("deselect_all", true)
-                     .jstree("select_node", duplicate.ufid);
+                _this.displayMultipleSelectionView();
+                var selected = _this.jstree("get_selected");
+                if (selected.length) {
+                    $("#" + selected[0] + " a").focus();
+                }
             });
         });
         if (!multiselect) {
