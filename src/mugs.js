@@ -196,7 +196,8 @@ define([
                     var hasConstraint = mug.p.constraintAttr,
                         constraintMsgItext = mug.p.constraintMsgItext,
                         hasConstraintMsg = (mug.p.constraintMsgAttr || 
-                                            (constraintMsgItext && constraintMsgItext.id));
+                                            (constraintMsgItext &&
+                                             !constraintMsgItext.isEmpty()));
                     if (hasConstraintMsg && !hasConstraint) {
                         return 'ERROR: You cannot have a Validation Error Message with no Validation Condition!';
                     } else {
