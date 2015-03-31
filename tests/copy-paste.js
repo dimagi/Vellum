@@ -506,6 +506,22 @@ require([
             ]);
         });
 
+        it("should remove questions on cut", function () {
+            util.loadXML("");
+            paste(tsv.tabDelimit([
+                HEADER.concat(["", ""]),
+                ["id", "type", "labelItext:en-default", "labelItext"],
+                ["/text1", "Text", "text", "text-id"],
+            ]));
+            util.selectAll();
+            eq(mod.cut(), [
+                ["id", "type", "labelItext:en-default", "labelItext:hin-default", "labelItext"],
+                ["/text1", "Text", "text", "text", "text-id"],
+            ]);
+            util.selectAll();
+            eq(mod.cut(), "");
+        });
+
         // TODO test each mug spec item (don't forget exotic/plugin question types)
         // TODO test bad paste values
         // TODO find a case where, when copying multiple questions, one

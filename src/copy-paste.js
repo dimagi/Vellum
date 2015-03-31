@@ -32,6 +32,19 @@ define([
         return hiddenTextarea.val();
     }
 
+    function onCut(opts) {
+        var $focus = $(':focus');
+        if ($focus.is('.jstree-anchor')) {
+            var text = opts.cut();
+            if (text) {
+                focusTextarea($focus, text);
+                setTimeout(function () {
+                    unfocusTextarea($focus);
+                }, 10);
+            }
+        }
+    }
+
     function onCopy(opts) {
         var $focus = $(':focus');
         if ($focus.is('.jstree-anchor')) {
@@ -143,6 +156,15 @@ define([
         return pos;
     }
 
+    function cut() {
+        var data = copy(),
+            mugs = vellum.getCurrentlySelectedMug(true);
+        if (mugs && mugs.length) {
+            vellum.data.core.form.removeMugsFromForm(mugs);
+        }
+        return data;
+    }
+
     function copy() {
         var mugs = vellum.getCurrentlySelectedMug(true),
             seen = {};
@@ -236,10 +258,12 @@ define([
             };
         }
         vellum.afterBulkInsert(form);
+        if (!window.mochaPhantomJS) { console.log(errors); } // for debugging only
         return errors;
     }
 
     $.vellum.plugin('copyPaste', {
+        cut: cut,
         copy: copy,
         paste: paste
     }, {
@@ -249,8 +273,11 @@ define([
             // Firefox only fires copy/paste when it thinks it's appropriate
             // Chrome doesn't fire copy/paste after key down has changed the focus
             // So we need implement both copy/paste as catching keystrokes Ctrl+C/V
-            $(document).on('copy paste keydown', function (e) {
-                if (e.type === 'copy' ||
+            $(document).on('cut copy paste keydown', function (e) {
+                if (e.type === 'cut' ||
+                    e.metaKey && String.fromCharCode(e.keyCode) === 'X') {
+                    onCut(opts);
+                } else if (e.type === 'copy' ||
                     e.metaKey && String.fromCharCode(e.keyCode) === 'C') {
                     onCopy(opts);
                 } else if (e.type === 'paste' ||
@@ -262,6 +289,7 @@ define([
     });
 
     return {
+        cut: cut,
         copy: copy,
         paste: paste,
         stringify: stringify,
