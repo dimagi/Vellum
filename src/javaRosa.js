@@ -1680,8 +1680,7 @@ define([
             }
 
             function addSerializer(options) {
-                options.serialize = function (value, name, mug) {
-                    var data = {};
+                options.serialize = function (value, name, mug, data) {
                     _.each(value.forms, function (form) {
                         if (!form.isEmpty()) {
                             _.each(value.itextModel.languages, function (lang) {
@@ -1693,7 +1692,6 @@ define([
                     if (!value.autoId && !_.isEmpty(data)) {
                         data[name] = value.id;
                     }
-                    return data;
                 };
                 options.deserialize = function (data, name, mug) {
                     var item = mug.p[name],

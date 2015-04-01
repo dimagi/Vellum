@@ -1627,7 +1627,7 @@ define([
                 isDeleteable: _.every(mugs, function (mug) {
                     return _this.isMugRemoveable(mug, form.getAbsolutePath(mug));
                 }),
-                isCopyable: !multiselect // mug.options.isCopyable
+                isCopyable: !multiselect && mug.options.isCopyable
             }));
         $baseToolbar.find('.fd-button-remove').click(function () {
             var mugs = _this.getCurrentlySelectedMug(true);

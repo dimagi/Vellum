@@ -175,6 +175,9 @@ define([
                 return;
             }
             seen[mug.ufid] = true;
+            if (!mug.options.isCopyable) {
+                return;
+            }
             var row = mug.serialize(),
                 children = form.getChildren(mug);
             _.each(row, function (value, key) {

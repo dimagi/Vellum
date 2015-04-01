@@ -62,7 +62,7 @@
 	<h:body>
 		<input ref="/data/text">
 			<label ref="jr:itext('default-label')" />
-			<hint ref="jr:itext('default-hint')" />
+			<hint ref="jr:itext('default-hint')">hint label</hint>
 			<help ref="jr:itext('default-help')" />
 		</input>
 	</h:body>

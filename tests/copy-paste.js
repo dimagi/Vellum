@@ -31,7 +31,8 @@ require([
         if (!_.isString(rows)) {
             rows = tsv.tabDelimit([HEADER].concat(rows));
         }
-        util.assertEqual(serial + "\n", rows + "\n", message);
+        util.assertEqual(serial + "\n", rows + "\n",
+                         message || "cut or copy mismatch");
     }
 
     function paste(rows, errors, print) {
@@ -244,7 +245,7 @@ require([
                         "hint",
                         "default-hint",
                         "1 = 0",
-                        "",
+                        "hint label",
                     ],
                 ]),
             }
@@ -508,11 +509,10 @@ require([
 
         it("should remove questions on cut", function () {
             util.loadXML("");
-            paste(tsv.tabDelimit([
-                HEADER.concat(["", ""]),
+            paste([
                 ["id", "type", "labelItext:en-default", "labelItext"],
                 ["/text1", "Text", "text", "text-id"],
-            ]));
+            ]);
             util.selectAll();
             eq(mod.cut(), [
                 ["id", "type", "labelItext:en-default", "labelItext:hin-default", "labelItext"],
@@ -520,6 +520,21 @@ require([
             ]);
             util.selectAll();
             eq(mod.cut(), "");
+        });
+
+        it("should copy dynamic select with itemset data", function () {
+            util.loadXML("");
+            paste([
+                ["id", "type", "labelItext:en-default", "itemsetData"],
+                ["/select", "SelectDynamic", "select",
+                 '[{"instance":null,"nodeset":"/items","labelRef":"@name","valueRef":"@id"}]'],
+            ]);
+            util.selectAll();
+            eq(mod.copy(), [
+                ["id", "type", "labelItext:en-default", "labelItext:hin-default", "itemsetData"],
+                ["/select", "SelectDynamic", "select", "select",
+                 '[{"instance":null,"nodeset":"/items","labelRef":"@name","valueRef":"@id"}]'],
+            ]);
         });
 
         // TODO test each mug spec item (don't forget exotic/plugin question types)
@@ -531,7 +546,6 @@ require([
         //      ALSO maybe find the converse: property serializes to null
         //      but that null value must be passed to mug.deserialize()
         //      (seems less likely that this is a thing)
-
     });
 
     describe("The copy-paste string conversions should", function () {

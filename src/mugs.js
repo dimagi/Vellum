@@ -298,20 +298,23 @@ define([
         serialize: function () {
             var mug = this,
                 data = {type: mug.__className};
-            _.each(mug.p.__data, function (value, key) {
-                var spec = mug.spec[key];
-                if (spec.presence === "notallowed" ||
-                    (spec.presence === "optional" &&
-                        (_.isUndefined(value) || value === null))) {
+            _.each(mug.spec, function (spec, key) {
+                if (spec.presence === "notallowed") {
                     return;
                 }
-                if (spec.serialize === "notempty") {
-                    if (!_.isEmpty(value)) {
+                var value = mug.p[key];
+                if (spec.serialize) {
+                    value = spec.serialize(value, key, mug, data);
+                    if (!_.isUndefined(value)) {
                         data[key] = value;
                     }
-                } else if (spec.serialize) {
-                    _.extend(data, spec.serialize(value, key, mug));
-                } else {
+                } else if (!(
+                                value === null ||
+                                value === "" ||
+                                _.isUndefined(value) ||
+                                (_.isEmpty(value) &&
+                                    (_.isObject(value) || _.isArray(value)))
+                           )) {
                     data[key] = value;
                 }
             });
@@ -593,8 +596,8 @@ define([
                 validationFunc: function (mug) {
                     return validateElementName(mug.p.nodeID, "Question ID");
                 },
-                serialize: function (value, key, mug) {
-                    return {id: mug.form.getAbsolutePath(mug, true)};
+                serialize: function (value, key, mug, data) {
+                    data.id = mug.form.getAbsolutePath(mug, true);
                 },
                 deserialize: function (data, key, mug) {
                     if (!data.id || data.id === mug.p.nodeID) {
@@ -629,7 +632,6 @@ define([
                 visibility: 'visible',
                 presence: 'optional',
                 lstring: 'Default Data Value',
-                serialize: "notempty"
             },
             xmlnsAttr: {
                 visibility: 'visible',
@@ -639,7 +641,6 @@ define([
             rawDataAttributes: {
                 presence: 'optional',
                 lstring: 'Extra Data Attributes',
-                serialize: "notempty"
             },
 
             // BIND ELEMENT
@@ -700,7 +701,6 @@ define([
             rawBindAttributes: {
                 presence: 'optional',
                 lstring: 'Extra Bind Attributes',
-                serialize: "notempty"
             }
         },
 
@@ -730,7 +730,6 @@ define([
             rawControlAttributes: {
                 presence: 'optional',
                 lstring: "Extra Control Attributes",
-                serialize: "notempty"
             },
             rawControlXML: {
                 presence: 'optional',
@@ -1144,9 +1143,9 @@ define([
                     }
                     return "pass";
                 },
-                serialize: function (value, key, mug) {
+                serialize: function (value, key, mug, data) {
                     var path = mug.form.getAbsolutePath(mug.parentMug, true);
-                    return {id: path + "/" + value};
+                    data.id = path + "/" + value;
                 },
                 deserialize: function (data) {
                     return data.id && data.id.slice(data.id.lastIndexOf("/") + 1);
@@ -1191,8 +1190,6 @@ define([
         typeName: 'Multiple Answer',
         tagName: 'select',
         icon: 'fcc fcc-fd-multi-select',
-        init: function (mug, form) {
-        },
         spec: {
         },
         defaultOperator: "selected"
@@ -1202,8 +1199,6 @@ define([
         typeName: 'Single Answer',
         tagName: 'select1',
         icon: 'fcc fcc-fd-single-select',
-        init: function (mug, form) {
-        },
         defaultOperator: null
     });
 
@@ -1297,7 +1292,6 @@ define([
             rawRepeatAttributes: {
                 presence: 'optional',
                 lstring: "Extra Repeat Attributes",
-                serialize: "notempty"
             }
         }
     });
