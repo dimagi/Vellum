@@ -372,42 +372,6 @@ define([
         return widget;
     };
 
-    var textOrDropDown = function (mug, options, dropDownOptions, val, 
-                                   emptyDropDownOption) {
-        var widget, useDropDown = false,
-            super_setValue;
-        emptyDropDownOption = emptyDropDownOption || {value: "", text: "Empty"};
-
-        if (val) { 
-            useDropDown = _.some(dropDownOptions, function(option){
-                return _.isEqual(_.isString(option.value) ? JSON.parse(option.value) : {},
-                                 _.isString(val.value) ? JSON.parse(val.value) : {});
-            });
-        } else {
-            useDropDown = true;
-            dropDownOptions.push(emptyDropDownOption);
-        }
-
-        if (useDropDown) {
-            widget = dropdown(mug, options);
-            widget.addOptions(dropDownOptions);
-            widget.setValue(val ? val.value : '');
-        } else {
-            widget = text(mug, options);
-        }
-
-        super_setValue = widget.setValue;
-
-        widget.setValue = function(value) {
-            if (widget.isDropdown && !widget.equivilentOption(value)) {
-                widget.addOption(value, 'Temp Value -- Should not be displayed');
-            }
-            super_setValue(value);
-        };
-
-        return widget;
-    };
-    
     var getUIElementWithEditButton = function($uiElem, editFn, isDisabled) {
         var input = $uiElem.find('input');
         if (_.isUndefined(isDisabled)) {
@@ -454,7 +418,6 @@ define([
         return uiElem;
     };
 
-
     return {
         base: base,
         normal: normal,
@@ -463,7 +426,6 @@ define([
         checkbox: checkbox,
         dropdown: dropdown,
         xPath: xPath,
-        textOrDropDown: textOrDropDown,
         baseKeyValue: baseKeyValue,
         readOnlyControl: readOnlyControl,
         util: {
