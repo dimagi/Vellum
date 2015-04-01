@@ -17,14 +17,13 @@ define([
         vellum = instance;
         dataSources = vellum.opts().core.dataSources || [];
         cachedDataSources = {
-            fixtures: {}
+            fixture: {}
         };
-        getDataSources('fixture', cacheFixtures);
     }
 
     function cacheFixtures(data) {
         _.map(data, function(fixture) {
-            cachedDataSources.fixtures[fixture.sourceUri] = fixture;
+            cachedDataSources.fixture[fixture.sourceUri] = fixture;
         });
     }
 
@@ -46,7 +45,7 @@ define([
             });
         }
 
-        return _.flatten(_.map(cachedDataSources.fixtures, function(fixture) {
+        return _.flatten(_.map(cachedDataSources.fixture, function(fixture) {
             var baseFixture = {
                 src: fixture.sourceUri,
                 id: fixture.defaultId,
@@ -83,10 +82,14 @@ define([
     }
 
     function autocompleteChoices(fixture_uri) {
-        return generateFixtureColumns(cachedDataSources.fixtures[fixture_uri]);
+        return generateFixtureColumns(cachedDataSources.fixture[fixture_uri]);
     }
 
     function getDataSources(type, callback) {
+        if (!_.isEmpty(cachedDataSources[type])) {
+            return;
+        }
+
         var source = _.find(dataSources, function (src) {
             return src.key === type;
         });
@@ -99,7 +102,8 @@ define([
                     dataType: 'json',
                     success: function (data) { callback(data); },
                     // TODO error handling
-                    data: {}
+                    data: {},
+                    async: false
                 });
             } else {
                 callback(source.endpoint());
@@ -218,6 +222,8 @@ define([
     }
 
     function fixtureWidget(mug, options, labelText) {
+        getDataSources('fixture', cacheFixtures);
+
         var widget = widgets.dropdown(mug, options), 
             getUIElement = widgets.util.getUIElement,
             getUIElementWithEditButton = widgets.util.getUIElementWithEditButton,
