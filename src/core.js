@@ -155,6 +155,9 @@ define([
                 }
                 _this.ensureCurrentMugIsSaved(function () {
                     _this.validateAndSaveXForm(forceFullSave);
+                    if (typeof window.analytics !== "undefined") {
+                        window.analytics.track("Clicked Save in Formbuilder");
+                    }
                 });
             },
             unsavedMessage: 'Are you sure you want to exit? All unsaved changes will be lost!'
@@ -1406,6 +1409,10 @@ define([
                 $firstInput.focus().select();
             }
         });
+
+        if (typeof window.analytics !== "undefined") {
+            window.analytics.track("Added a question");
+        }
         // the returned value will be `undefined` if ensureCurrentMugIsSaved
         // had to defer for user feedback
         return mug;
