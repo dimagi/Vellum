@@ -301,7 +301,7 @@ define([
         var input = widget.input;
 
         widget.setValue = function (value, option_name) {
-            var val = equivilentOption(value);
+            var val = equivalentOption(value);
             if (val) {
                 input.val(val.value);
             } else {
@@ -345,14 +345,12 @@ define([
             });
         };
 
-        function equivilentOption(val) {
+        function equivalentOption(val) {
             val = val ? JSON.parse(val) : '';
             return _.find(widget.getOptions(), function (option) {
                 return _.isEqual(option.value ? JSON.parse(option.value) : '', val);
             });
         }
-
-        widget.equivilentOption = equivilentOption;
 
         return widget;
     };
