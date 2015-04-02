@@ -22,7 +22,7 @@ define([
     }
 
     function cacheFixtures(data) {
-        _.map(data, function(fixture) {
+        _.each(data, function(fixture) {
             cachedDataSources.fixture[fixture.sourceUri] = fixture;
         });
     }
@@ -78,7 +78,7 @@ define([
         if (fixture) {
             return _.flatten(generateColumns(fixture.structure));
         }
-        return "";
+        return [];
     }
 
     function autocompleteChoices(fixture_uri) {

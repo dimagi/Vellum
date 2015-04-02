@@ -297,7 +297,6 @@ define([
         widget.input = $("<select />")
             .attr("name", widget.id)
             .addClass('input-block-level');
-        widget.isDropdown = true;
 
         var input = widget.input;
 
