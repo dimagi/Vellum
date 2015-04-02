@@ -138,6 +138,7 @@ define([
                 visibility: 'visible',
                 presence: 'required',
                 lstring: 'Question ID',
+                widget: widgets.identifier,
                 validationFunc: function (mug) {
                     return validateElementName(mug.p.nodeID, "Question ID");
                 }
@@ -825,6 +826,7 @@ define([
                 lstring: 'Choice Value',
                 visibility: 'visible',
                 presence: 'required',
+                widget: widgets.identifier,
                 validationFunc: function (mug) {
                     if (/\s/.test(mug.p.defaultValue)) {
                         return "Whitespace in values is not allowed.";

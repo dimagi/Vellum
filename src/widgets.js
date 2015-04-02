@@ -65,24 +65,6 @@ define([
         widget.updateValue = function () {
             // When a widget's value changes, do whatever work you need to in 
             // the model/UI to make sure we are in a consistent state.
-            
-            var isID = (['nodeID', 'defaultValue'].indexOf(widget.path) !== -1),
-                val = widget.getValue();
-
-            if (isID && val.indexOf(' ') !== -1) { 
-                // attempt to sanitize nodeID and choice values
-                // TODO, still may allow some bad values
-                widget.setValue(val.replace(/\s/g, '_'));
-            }
-            
-            //short circuit the mug property changing process for when the
-            //nodeID is changed to empty-string (i.e. when the user backspaces
-            //the whole value).  This allows us to keep a reference to everything
-            //and rename smoothly to the new value the user will ultimately enter.
-            if (isID && val === "") {
-                return;
-            }
-            
             widget.save();
         };
 
@@ -152,6 +134,33 @@ define([
         input.bind("change input", function () {
             widget.handleChange();
         });
+        return widget;
+    };
+
+    var identifier = function (mug, options) {
+        var widget = text(mug, options),
+            super_updateValue = widget.updateValue;
+
+        widget.updateValue = function () {
+            var val = widget.getValue();
+
+            if (val.indexOf(' ') !== -1) {
+                // attempt to sanitize nodeID and choice values
+                // TODO, still may allow some bad values
+                widget.setValue(val.replace(/\s/g, '_'));
+            }
+
+            //short circuit the mug property changing process for when the
+            //nodeID is changed to empty-string (i.e. when the user backspaces
+            //the whole value).  This allows us to keep a reference to everything
+            //and rename smoothly to the new value the user will ultimately enter.
+            if (val === "") {
+                return;
+            }
+
+            super_updateValue();
+        };
+
         return widget;
     };
 
@@ -356,6 +365,7 @@ define([
         base: base,
         normal: normal,
         text: text,
+        identifier: identifier,
         droppableText: droppableText,
         checkbox: checkbox,
         xPath: xPath,
