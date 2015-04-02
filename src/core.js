@@ -1113,8 +1113,8 @@ define([
         if (this.data.core.hasXPathEditorChanged) {
             this.alert(
                 "Unsaved Changes in Editor",
-                "You have UNSAVED changes in the Expression Editor. Please save "+
-                "changes before continuing.");
+                "You have UNSAVED changes in the Expression Editor. " +
+                "Please save changes before continuing.");
             return false;
         } else if (duplicate) {
             var verb = duplicateIsForMove ? 'would have' : 'has',
