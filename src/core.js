@@ -1892,12 +1892,14 @@ define([
             success: function (data) {
                 if (saveType === 'patch') {
                     if (data.status === 'conflict') {
-                        /* todo: display diff and ask instead overwriting */
-                        // var diffHtml = dmp.diff_prettyHtml(
-                        //     dmp.diff_main(formText, data.xform)
-                        // );
-                        _this._hideConfirmDialog();
-                        _this.showOverwriteWarning(_this.send.bind(_this), formText, data.xform);
+                        if (_.isUndefined(data.xform)) {
+                            // unconditionally overwrite if no xform to compare
+                            _this.send(formText, 'full');
+                        } else {
+                            _this._hideConfirmDialog();
+                            _this.showOverwriteWarning(_this.send.bind(_this),
+                                                       formText, data.xform);
+                        }
                         return;
                     } else if (CryptoJS.SHA1(formText).toString() !== data.sha1) {
                         debug.error("sha1's didn't match");
