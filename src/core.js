@@ -154,6 +154,9 @@ define([
                     return; // abort
                 }
                 _this.ensureCurrentMugIsSaved(function () {
+                    if (!_.isUndefined(window.analytics)) {
+                        window.analytics.track("Clicked Save in Formbuilder");
+                    }
                     _this.validateAndSaveXForm(forceFullSave);
                 });
             },
@@ -1399,6 +1402,9 @@ define([
                 _this.getCurrentlySelectedMug(), qType);
             if (!foo) {
                 throw new Error("cannot add " + qType + " at the current position");
+            }
+            if (!_.isUndefined(window.analytics)) {
+                window.analytics.track("Added a question");
             }
             mug = _this.data.core.form.createQuestion(foo.mug, foo.position, qType);
             var $firstInput = _this.$f.find(".fd-question-properties input:text:visible:first");
