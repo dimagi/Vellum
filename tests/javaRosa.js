@@ -561,6 +561,25 @@ require([
             assert.strictEqual($xml.find("text#north-label").length, 2,
                                "wrong <text> node count\n" + xml);
         });
+
+        _.each(["hint", "help", "constraintMsg"], function (tag) {
+            it("should not serialize empty " + tag + " itext item with non-empty id and autoId = true", function() {
+                util.loadXML("");
+                var mug = util.addQuestion("Text"),
+                    itext = mug.p[tag + "Itext"];
+                itext.id = tag;
+                itext.autoId = true;
+                var xml = call("createXML"),
+                    $xml = $(xml);
+                if (tag === "constraintMsg") {
+                    assert.strictEqual($xml.find("[jr\\:" + tag + "]").length, 0,
+                                       "wrong " + tag + " count\n" + xml);
+                } else {
+                    assert.strictEqual($xml.find(tag).length, 0,
+                                       "wrong <" + tag + "> node count\n" + xml);
+                }
+            });
+        });
     });
 
     describe("The javaRosa plugin itext widgets", function() {
