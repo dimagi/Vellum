@@ -154,10 +154,10 @@ define([
                     return; // abort
                 }
                 _this.ensureCurrentMugIsSaved(function () {
-                    _this.validateAndSaveXForm(forceFullSave);
-                    if (typeof window.analytics !== "undefined") {
+                    if (!_.isUndefined(window.analytics)) {
                         window.analytics.track("Clicked Save in Formbuilder");
                     }
+                    _this.validateAndSaveXForm(forceFullSave);
                 });
             },
             unsavedMessage: 'Are you sure you want to exit? All unsaved changes will be lost!'
@@ -1403,16 +1403,15 @@ define([
             if (!foo) {
                 throw new Error("cannot add " + qType + " at the current position");
             }
+            if (!_.isUndefined(window.analytics)) {
+                window.analytics.track("Added a question");
+            }
             mug = _this.data.core.form.createQuestion(foo.mug, foo.position, qType);
             var $firstInput = _this.$f.find(".fd-question-properties input:text:visible:first");
             if ($firstInput.length) {
                 $firstInput.focus().select();
             }
         });
-
-        if (typeof window.analytics !== "undefined") {
-            window.analytics.track("Added a question");
-        }
         // the returned value will be `undefined` if ensureCurrentMugIsSaved
         // had to defer for user feedback
         return mug;
