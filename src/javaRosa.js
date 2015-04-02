@@ -1633,7 +1633,7 @@ define([
                     if (!hasItext && mug.spec[property].presence === 'required') {
                         return name + ' is required';
                     }
-                    if (itext && !itext.autoId) {
+                    if (itext && !itext.autoId && !itext.isEmpty()) {
                         // Itext ID validation
                         if (!itext.id) {
                             return name + " Itext ID is required";

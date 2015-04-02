@@ -618,26 +618,33 @@ require([
                 }
             });
 
-            it("should display " + property + " validation error for non-autoId itext", function() {
-                var itext = mug.p[property],
-                    spec = mug.spec[property];
-                itext.autoId = false;
-                assert(itext.id, property + ".id should have a value");
-                assert(spec.validationFunc(mug),
-                       property + " validation should produce an error");
-            });
-
-            it("should display " + property + " validation error for non-autoId itext with blank ID", function() {
+            it("should display " + property + " validation error for non-autoId non-empty itext with blank ID", function() {
                 var itext = mug.p[property],
                     spec = mug.spec[property],
-                    before = itext.id;
+                    before = [itext.id, itext.get()];
                 itext.autoId = false;
                 itext.id = "";
+                itext.set("not empty");
                 try {
-                    assert(spec.validationFunc(mug),
-                           property + " validation should produce an error");
+                    assert.notEqual(spec.validationFunc(mug), "pass", property);
                 } finally {
-                    itext.id = before;
+                    itext.id = before[0];
+                    itext.set(before[1]);
+                }
+            });
+
+            it("should not display " + property + " validation error for non-autoId empty itext with blank ID", function() {
+                var itext = mug.p[property],
+                    spec = mug.spec[property],
+                    before = [itext.id, itext.get()];
+                itext.autoId = false;
+                itext.id = "";
+                itext.set("");
+                try {
+                    assert.equal(spec.validationFunc(mug), "pass");
+                } finally {
+                    itext.id = before[0];
+                    itext.set(before[1]);
                 }
             });
 
