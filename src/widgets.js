@@ -204,9 +204,13 @@ define([
                 widget.getDisplayName(),
                 !!widget.isDisabled(),
                 widget.getHelp()
-            );
+            ), autocompleteSources;
+            if (_.isFunction(options.autocompleteSources)) {
+                autocompleteSources = options.autocompleteSources.bind(mug);
+            }
             return getUIElementWithEditButton(elem, function () {
                 widget.options.displayXPathEditor({
+                    autocompleteSources: autocompleteSources,
                     value: super_getValue(),
                     xpathType: widget.definition.xpathType,
                     done: function (val) {

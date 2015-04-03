@@ -1,5 +1,6 @@
 define([
     'jquery',
+    'underscore',
     'vellum/debugutil',
     'xpath',
     'xpathmodels',
@@ -9,6 +10,7 @@ define([
     'less!vellum/less-style/xpath-editor'
 ], function (
     $,
+    _,
     debug,
     xpath,
     xpathmodels,
@@ -200,6 +202,12 @@ define([
                     // so we need to update the reference
                     populateQuestionInputBox(getRightQuestionInput(), expOp.right, expOp.left);
                 }
+                var autocompleteOptions = {
+                    source: _.isFunction(options.autocompleteSources) ? options.autocompleteSources() : [],
+                    minLength: 0
+                };
+                getLeftQuestionInput().autocomplete(autocompleteOptions);
+                getRightQuestionInput().autocomplete(autocompleteOptions);
                 return $expUI;
             };
 
