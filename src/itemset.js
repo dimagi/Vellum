@@ -237,8 +237,8 @@ define([
         function updateAutoComplete() {
             if (widget.getValue().instance) {
                 var sources = datasources.autocompleteChoices(widget.getValue().instance.src);
-                labelRef.addAutoComplete(sources);
-                valueRef.addAutoComplete(sources);
+                labelRef.addAutoComplete(sources, super_handleChange);
+                valueRef.addAutoComplete(sources, super_handleChange);
             }
         }
 
@@ -289,8 +289,13 @@ define([
         var input = $("<input type='text' class='input-block-level'>");
         input.attr("name", name);
         return {
-            addAutoComplete: function(sources) {
-                input.autocomplete({source: sources, minLength: 0});
+            addAutoComplete: function(sources, changeFunction) {
+                input.autocomplete({
+                    source: sources,
+                    minLength: 0,
+                    change: changeFunction,
+                    close: changeFunction
+                });
             },
             element: widgets.util.getUIElement(input, label, isDisabled),
             val: function (value) {
