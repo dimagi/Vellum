@@ -231,8 +231,8 @@ define([
             super_getValue = widget.getValue,
             super_setValue = widget.setValue,
             super_handleChange = widget.handleChange.bind(widget),
-            labelRef = refSelect("label_ref", "Choice Label", false),
-            valueRef = refSelect("value_ref", "Choice Value", false);
+            labelRef = refSelect("label_ref", "Label Field", false),
+            valueRef = refSelect("value_ref", "Value Field", false);
 
         function updateAutoComplete() {
             if (widget.getValue().instance) {
@@ -254,8 +254,8 @@ define([
 
         widget.getUIElement = function () {
             return super_getUIElement()
-                .append(labelRef.element)
-                .append(valueRef.element);
+                .append(valueRef.element)
+                .append(labelRef.element);
         };
 
         widget.getValue = function () {

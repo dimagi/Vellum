@@ -309,7 +309,7 @@ define([
             if (val) {
                 input.val(val.value);
             } else {
-                widget.addOption(value, option_name || "Nothing Selected");
+                widget.addOption(value, option_name || "");
                 input.val(value);
             }
         };
