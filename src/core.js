@@ -1113,8 +1113,8 @@ define([
         if (this.data.core.hasXPathEditorChanged) {
             this.alert(
                 "Unsaved Changes in Editor",
-                "You have UNSAVED changes in the Expression Editor. Please save "+
-                "changes before continuing.");
+                "You have UNSAVED changes in the Expression Editor. " +
+                "Please save changes before continuing.");
             return false;
         } else if (duplicate) {
             var verb = duplicateIsForMove ? 'would have' : 'has',
@@ -1892,12 +1892,14 @@ define([
             success: function (data) {
                 if (saveType === 'patch') {
                     if (data.status === 'conflict') {
-                        /* todo: display diff and ask instead overwriting */
-                        // var diffHtml = dmp.diff_prettyHtml(
-                        //     dmp.diff_main(formText, data.xform)
-                        // );
-                        _this._hideConfirmDialog();
-                        _this.showOverwriteWarning(_this.send.bind(_this), formText, data.xform);
+                        if (_.isUndefined(data.xform)) {
+                            // unconditionally overwrite if no xform to compare
+                            _this.send(formText, 'full');
+                        } else {
+                            _this._hideConfirmDialog();
+                            _this.showOverwriteWarning(_this.send.bind(_this),
+                                                       formText, data.xform);
+                        }
                         return;
                     } else if (CryptoJS.SHA1(formText).toString() !== data.sha1) {
                         debug.error("sha1's didn't match");

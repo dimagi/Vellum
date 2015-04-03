@@ -139,12 +139,7 @@ define([
                 presence: 'required',
                 lstring: 'Question ID',
                 validationFunc: function (mug) {
-                    var qId = mug.p.nodeID;
-                    var res = validateElementName(qId, "Question ID");
-                    if (res !== "pass") {
-                        return res;
-                    }
-                    return "pass";
+                    return validateElementName(mug.p.nodeID, "Question ID");
                 }
             },
             dataValue: {
@@ -196,7 +191,8 @@ define([
                     var hasConstraint = mug.p.constraintAttr,
                         constraintMsgItext = mug.p.constraintMsgItext,
                         hasConstraintMsg = (mug.p.constraintMsgAttr || 
-                                            (constraintMsgItext && constraintMsgItext.id));
+                                            (constraintMsgItext &&
+                                             !constraintMsgItext.isEmpty()));
                     if (hasConstraintMsg && !hasConstraint) {
                         return 'ERROR: You cannot have a Validation Error Message with no Validation Condition!';
                     } else {
