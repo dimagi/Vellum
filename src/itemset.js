@@ -120,7 +120,11 @@ define([
             filter: {
                 lstring: 'Filter',
                 presence: 'optional',
-                widget: widgets.xPath
+                widget: widgets.xPath,
+                xpathType: 'bool',
+                autocompleteSources: function() {
+                    return datasources.autocompleteChoices(this.p.itemsetData.instance.src);
+                }
             }
         }
     });
