@@ -279,6 +279,9 @@ define([
             valueRef.val(val.valueRef);
         };
 
+        // initialize the auto complete sources after getValue is overridden
+        updateAutoComplete();
+
         return widget;
     }
 
