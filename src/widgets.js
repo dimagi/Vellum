@@ -180,6 +180,7 @@ define([
 
         return widget;
     };
+    droppableText.hasLogicReferences = true;
 
     var checkbox = function (mug, options) {
         var widget = normal(mug, options),
@@ -201,9 +202,8 @@ define([
     };
 
     var xPath = function (mug, options) {
-        var widget = text(mug, options);
-
-        var super_getValue = widget.getValue,
+        var widget = text(mug, options),
+            super_getValue = widget.getValue,
             super_setValue = widget.setValue;
         widget.getValue = function() {
             var val = super_getValue();
@@ -239,6 +239,7 @@ define([
 
         return widget;
     };
+    xPath.hasLogicReferences = true;
 
     var baseKeyValue = function (mug, options) {
         var widget = base(mug, options),

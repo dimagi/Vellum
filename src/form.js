@@ -734,7 +734,7 @@ define([
         },
         handleMugPropertyChange: function (mug, e) {
             var widget = mug.p.getDefinition(e.property).widget;
-            if (widget === widgets.xPath || widget === widgets.droppableText) {
+            if (widget && widget.hasLogicReferences) {
                 this.updateAllLogicReferences(mug);
             }
         },
