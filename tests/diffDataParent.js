@@ -105,6 +105,21 @@ require([
             );
         });
 
+        it("should update mug path mapping on set data parent", function() {
+            var form = util.loadXML(""),
+                text = util.addQuestion("Text", 'text');
+            util.addQuestion("Group", 'group');
+            text.p.dataParent = '/data/group';
+            var map = JSON.stringify(_.object(_.map(form.mugMap, function (mug, path) {
+                if (path.startsWith("/")) {
+                    return [path, mug.__className];
+                }
+                return ["", undefined];
+            })));
+            assert(util.getMug('/data/group/text'),
+                   'cannot find "/data/group/text" in ' + map);
+        });
+
         it("should parse and write XML to have the same order", function() {
             util.loadXML(PARSE_XML);
             util.assertXmlEqual(call("createXML"), PARSE_XML);
@@ -129,7 +144,7 @@ require([
             util.addQuestion("Text", 'text2');
 
             text1.p.dataParent = '/data/group';
-            util.addQuestion.bind({prevId: text1.p.nodeID})("Text", 'text3');
+            util.addQuestion.bind({prevId: text1.absolutePath})("Text", 'text3');
             // questions with alternate dataParent always come last in the data tree
             util.assertTreeState(form.dataTree(),
                 "text3",

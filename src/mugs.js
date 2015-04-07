@@ -303,6 +303,11 @@ define([
                     return recFunc(mug.parentMug);
                 },
                 presence: 'optional',
+                setter: function (mug, attr, value) {
+                    var oldPath = mug.absolutePath;
+                    mug.p.set(attr, value);
+                    mug.form._updateMugPath(mug, oldPath);
+                },
                 widget: widgets.droppableText,
                 validationFunc: function(mug) {
                     var dataParent = mug.p.dataParent,
