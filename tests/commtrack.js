@@ -116,7 +116,7 @@ define([
             util.loadXML(TRANSFER_BLOCK_XML);
             var group = util.addQuestion("Repeat", "group"),
                 trans = util.getMug("transfer[@type='trans-1']");
-            trans.form.moveMug(trans, group, "into");
+            trans.form.moveMug(trans, "into", group);
             var xml = util.call("createXML"),
                 $xml = $(xml);
             assert.equal($xml.find("setvalue[event=jr-insert]").length, 4, xml);

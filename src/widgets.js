@@ -84,11 +84,17 @@ define([
         var path = options.widgetValuePath || options.path,
             inputID = 'property-' + path,
             disabled = options.disabled || false,
-            widget = base(mug, options);
+            widget = base(mug, options),
+            mugValue = options.mugValue || function (mug, value) {
+                if (arguments.length === 1) {
+                    return mug.p[path];
+                }
+                mug.p[path] = value;
+            };
 
         widget.path = path;
         widget.definition = mug.p.getDefinition(options.path);
-        widget.currentValue = mug.p[path];
+        widget.currentValue = mugValue(mug);
         widget.id = inputID;
 
         widget.input = $("<input />")
@@ -100,7 +106,7 @@ define([
         };
 
         widget.save = function () {
-            this.mug.p[this.path] = this.getValue();
+            mugValue(mug, widget.getValue());
         };
         return widget;
     };

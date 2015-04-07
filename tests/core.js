@@ -29,27 +29,13 @@ require([
         pluginsWithoutItemset = _(util.options.options.plugins || []).without("itemset");
 
     describe("Vellum core", function () {
-        it("should not allow adding questions with matching paths", function (done) {
-            util.init({
-                core: {
-                    onReady: function () {
-                        var dup;
-                        util.addQuestion("Text", "question1");
-                        dup = util.addQuestion("Text", "question2");
-                        dup.p.nodeID = "question1";
-
-                        // TODO fix tight coupling of this functionality with UI
-                        // HACK prevent modal alert in UI
-                        this.data.core.isAlertVisible = true;
-
-                        assert(!this.ensureCurrentMugIsSaved(),
-                               "save should fail with duplicate question ID");
-
-                        this.data.core.isAlertVisible = false;
-                        done();
-                    }
-                }
-            });
+        it("should show validation error on add question with duplicate path", function () {
+            var form = util.loadXML("");
+            util.addQuestion("Text", "question1");
+            var dup = util.addQuestion("Text", "question2");
+            dup.p.nodeID = "question1";
+            assert(form.vellum.ensureCurrentMugIsSaved(), "mug is not saved");
+            assert(!util.isTreeNodeValid(dup), "mug should not be valid");
         });
 
         it("should load form with save button in 'saved' state", function (done) {

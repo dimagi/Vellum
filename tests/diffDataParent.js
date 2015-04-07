@@ -59,7 +59,7 @@ require([
             util.addQuestion("Group", 'group1');
             text2.p.dataParent = '/data/group1';
 
-            form.moveMug(text2, text1, 'before');
+            form.moveMug(text2, 'before', text1);
 
             assert.equal(text2.p.dataParent, '/data/group1');
         });
@@ -73,7 +73,7 @@ require([
 
             text1.p.dataParent = '/data/group1';
             assert.equal(text1.p.dataParent, "/data/group1");
-            form.moveMug(group1, group2, 'into');
+            form.moveMug(group1, 'into', group2);
             assert.equal(text1.p.dataParent, "/data/group2/group1");
         });
 
@@ -84,8 +84,8 @@ require([
             var repeat1= util.addQuestion.bind({prevId: text1.p.nodeID})("Repeat", 'repeat1'),
                 form = call("getData").core.form;
             text1.p.dataParent = '/data/group1';
-            form.moveMug(text1, repeat1, 'into');
-            assert(util.isTreeNodeValid(text1), "text1 should be valid");
+            form.moveMug(text1, 'into', repeat1);
+            assert(util.isTreeNodeValid(text1), text1.getErrors().join("\n"));
             assert.isUndefined(text1.p.dataParent);
         });
 

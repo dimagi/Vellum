@@ -536,7 +536,7 @@ require([
                 south = util.getMug("ew/item1");
             north.p.defaultValue = "north";
             south.p.defaultValue = "south";
-            north.form.moveMug(south, north, "after");
+            north.form.moveMug(south, "after", north);
             util.assertXmlEqual(util.call("createXML"), ITEXT_ITEM_RENAME_XML,
                                 {normalize_xmlns: true});
         });
@@ -546,7 +546,7 @@ require([
             var green = util.addQuestion("Group", "green"),
                 blue = util.addQuestion("Group", "blue");
             util.addQuestion("Text", "text");
-            blue.form.moveMug(blue, green, "before");
+            blue.form.moveMug(blue, "before", green);
             util.assertXmlEqual(util.call("createXML"),
                                 ITEXT_ITEM_RENAME_GROUP_MOVE_XML,
                                 {normalize_xmlns: true});

@@ -300,6 +300,7 @@ define([
         if (Boolean(value && value.idsQuery) !== Boolean(previous && previous.idsQuery)) {
             var nodeID = mug.p.nodeID,
                 currentPath = mug.form.getAbsolutePath(mug),
+                oldParent = mug.parentMug,
                 oldPath;
             if (value && value.idsQuery) {
                 oldPath = currentPath.replace(/\/item$/, "");
@@ -310,7 +311,7 @@ define([
                 }
             }
             mug.form.vellum.handleMugRename(
-                mug.form, mug, nodeID, nodeID, currentPath, oldPath);
+                mug.form, mug, nodeID, nodeID, currentPath, oldPath, oldParent);
         }
     }
 

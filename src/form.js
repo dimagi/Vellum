@@ -449,37 +449,111 @@ define([
                 errors: this.errors
             });
         },
+        /**
+         * Get a list of warnings pertaining to form serialization
+         *
+         * All serialization warnings reported here can be fixed
+         * automatically, but the user may prefer to fix them manually.
+         *
+         * @returns - A list of error objects. See
+         * `Mug.getSerializationWarnings` for more details.
+         */
+        getSerializationWarnings: function () {
+            var errors = [];
+            this.walkMugs(function (mug) {
+                var errs = mug.getSerializationWarnings();
+                if (errs.length) {
+                    errors.push({mug: mug, errors: errs});
+                }
+            });
+            return errors;
+        },
+        /**
+         * Automatically fix serialization errors
+         *
+         * After fixing serialization errors, no more errors
+         * should be reported by `getSerializationWarnings`.
+         *
+         * @param errors - The list of error objects returned by
+         *                 `getSerializationWarnings`.
+         */
+        fixSerializationWarnings: function (errors) {
+            _.each(errors || [], function (error) {
+                error.mug.fixSerializationWarnings(error.errors);
+            });
+        },
         isFormValid: function (validateMug) {
             return this.tree.isTreeValid(validateMug);
         },
-        getMugChildrenByNodeID: function (mug, nodeID) {
-            var parentNode = (mug ? this.tree.getNodeFromMug(mug)
-                                  : this.tree.rootNode);
-            return _.filter(parentNode.getChildrenMugs(), function (m) {
-                return m.p.nodeID === nodeID;
-            });
+        findFirstMatchingChild: function (parentMug, match) {
+            var parent = (parentMug ? this.tree.getNodeFromMug(parentMug)
+                                    : this.tree.rootNode);
+            return _.find(parent.getChildrenMugs(), match);
         },
         insertMug: function (refMug, newMug, position) {
             this.tree.insertMug(newMug, position, refMug);
         },
         /**
          * Move a mug from its current place to
-         * the position specified by the arguments,
+         * the position specified by the arguments.
+         *
+         * @param mug - The mug to be moved.
+         * @param position - The position relative to `refMug`
+         *          ("after", "into", "last", etc.) or "rename", in
+         *          which case `refMug` is the new name.
+         * @param refMug - The mug relative to which `mug` is moving.
+         *          Alternately, the new name if `position` is "rename".
+         * @returns - True if the mug was able to be moved without
+         *          changing it's nodeID, otherwise false.
          */
-        moveMug: function (mug, refMug, position) {
-            var oldPath = this.tree.getAbsolutePath(mug);
+        moveMug: function (mug, position, refMug) {
+            function match(sibling) {
+                return sibling !== mug && sibling.p.nodeID === newId;
+            }
+            var oldId = mug.p.nodeID,
+                oldPath = this.tree.getAbsolutePath(mug),
+                oldParent = mug.parentMug,
+                newId, conflictParent;
 
-            this.insertMug(refMug, mug, position);
+            if (position === "rename") {
+                newId = refMug;
+                conflictParent = oldParent;
+            } else {
+                this.insertMug(refMug, mug, position);
+                var spec = mug.spec.dataParent;
+                if (spec && spec.validationFunc(mug) !== 'pass') {
+                    mug.p.set("dataParent"); // clear dataParent
+                }
+                newId = oldId;
+                conflictParent = mug.parentMug;
+            }
 
-            var currentPath = this.tree.getAbsolutePath(mug);
+            // TODO make Item not a special case
+            if (mug.__className !== "Item") {
+                if (this.findFirstMatchingChild(conflictParent, match)) {
+                    mug.p.conflictedNodeId = newId;
+                    newId = this.generate_question_id(newId, mug);
+                    // HACK broken abstraction barrier
+                    this.vellum.setTreeValidationIcon(mug);
+                } else if (mug.p.has("conflictedNodeId")) {
+                    mug.p.set("conflictedNodeId"); // clear conflict
+                    // HACK broken abstraction barrier
+                    this.vellum.setTreeValidationIcon(mug);
+                }
+
+                if (mug.p.nodeID !== newId) {
+                    // rename without events; nodeID setter calls form.moveMug
+                    mug.p.set("nodeID", newId);
+                }
+            }
+
+            var newPath = this.tree.getAbsolutePath(mug);
             this.vellum.handleMugRename(
-                this, mug, mug.p.nodeID, mug.p.nodeID, currentPath, oldPath);
+                this, mug, newId, oldId, newPath, oldPath, oldParent);
 
-            this.fire({
-                type: 'question-move',
-                mug: mug
-            });
-            this.fireChange(mug);
+            if (position !== "rename") {
+                this.fireChange(mug);
+            }
         },
         /**
          * Walk through the mugs of the tree and call valueFunc on each mug
@@ -503,30 +577,26 @@ define([
             }
             return desc;
         },
-        handleMugRename: function (mug, currentId, oldId, currentPath, oldPath) {
-            this._logicManager.updatePath(mug.ufid, oldPath, currentPath);
-            this.mugWasRenamed(mug, oldId, oldPath);
-        },
         /**
          * Update references to mug and its children after it is renamed.
          */
-        mugWasRenamed: function(mug, oldName, oldPath) {
+        handleMugRename: function (mug, newId, oldId, newPath, oldPath, oldParent) {
             function getPreMovePath(postPath) {
-                if (postPath === mugPath) {
+                if (postPath === newPath) {
                     return oldPath;
                 }
                 return postPath.replace(postRegExp, oldPath + "/");
             }
-            var tree = this.tree,
-                mugPath = tree.getAbsolutePath(mug);
-            if (!mugPath) {
+            this._logicManager.updatePath(mug.ufid, oldPath, newPath);
+            var tree = this.tree;
+            if (!newPath) {
                 // Items don't have an absolute path. I wonder if it would
                 // matter if they had one?
                 return;
             }
             var mugs = this.getDescendants(mug).concat([mug]),
                 postMovePaths = _(mugs).map(function(mug) { return tree.getAbsolutePath(mug); }),
-                postRegExp = new RegExp("^" + RegExp.escape(mugPath) + "/"),
+                postRegExp = new RegExp("^" + RegExp.escape(newPath) + "/"),
                 updates = {},
                 preMovePath;
             for (var i = 0; i < mugs.length; i++) {
@@ -538,6 +608,17 @@ define([
             }
             this._logicManager.updatePaths(updates);
             this.fixBrokenReferences(mug);
+            // TODO make Item not a special case
+            if (mug.__className !== "Item") {
+                // update first child of old parent with matching conflicted nodeID
+                var conflict = this.findFirstMatchingChild(oldParent, function (mug) {
+                        var conflictId = mug.p.conflictedNodeId;
+                        return conflictId && conflictId === oldId;
+                    });
+                if (conflict) {
+                    this.moveMug(conflict, "rename", oldId);
+                }
+            }
         },
         changeMugType: function (mug, questionType) {
             this.mugTypes.changeType(mug, questionType);
@@ -580,8 +661,7 @@ define([
             if (depth === 0) {
                 var nodeID = mug.p.nodeID;
                 if (nodeID) {
-                    var newQuestionID = this.generate_question_id(nodeID); 
-                    duplicate.p.nodeID = newQuestionID;
+                    duplicate.p.set("conflictedNodeId"); // clear conflict
                 } else {
                     var newItemValue = this.generate_question_id(
                         mug.p.defaultValue);
@@ -627,14 +707,6 @@ define([
                 // skip property change handlers during loading phase
                 return function () {};
             }
-            // update the logic properties that reference the mug
-            if (property === 'nodeID' && previous &&
-                this.getMugChildrenByNodeID(mug.parentMug, value).length > 0)
-            {
-                // Short-circuit invalid change and trigger warning in UI
-                this.vellum.setUnsavedDuplicateNodeId(value);
-                return null;
-            }
 
             return function () {
                 var event = {
@@ -661,28 +733,9 @@ define([
             }.bind(this);
         },
         handleMugPropertyChange: function (mug, e) {
-            if (e.property === 'nodeID') {
-                var currentPath = this.getAbsolutePath(mug),
-                    valid = true,
-                    parsed;
-                try {
-                    parsed = xpath.parse(currentPath);
-                    if (_.isUndefined(parsed.steps)) {
-                        valid = false;
-                    }
-                } catch (err) {
-                    valid = false;
-                }
-                if (valid) {
-                    parsed.steps[parsed.steps.length - 1].name = e.previous;
-                    var oldPath = parsed.toXPath();
-                    this.vellum.handleMugRename(this, mug, e.val, e.previous, currentPath, oldPath);
-                }
-            } else {
-                if (mug.p.getDefinition(e.property).widget === widgets.xPath ||
-                    mug.p.getDefinition(e.property).widget === widgets.droppableText) {
-                    this.updateAllLogicReferences(mug);
-                }
+            var widget = mug.p.getDefinition(e.property).widget;
+            if (widget === widgets.xPath || widget === widgets.droppableText) {
+                this.updateAllLogicReferences(mug);
             }
         },
         createQuestion: function (refMug, position, newMugType, isInternal) {
