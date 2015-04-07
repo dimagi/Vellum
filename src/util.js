@@ -291,9 +291,7 @@ define([
                                     '$1' + xmlns + '"');
         }
         localForm = cleanForDiff(localForm);
-        if (serverForm) {
-            serverForm = cleanForDiff(serverForm);
-        }
+        serverForm = cleanForDiff(serverForm);
         var patch = jsdiff.createPatch("", serverForm, localForm, "Server Form", "Local Form");
         patch = patch.replace(/^Index:/,
                 "XML " + (opts.not ? "should not be equivalent" : "mismatch"));
