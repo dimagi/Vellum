@@ -261,6 +261,9 @@ define([
             };
         }
         vellum.afterBulkInsert(form);
+        if (mug && pos) {
+            vellum.setCurrentMug(mug);
+        }
         if (!window.mochaPhantomJS) { console.log(errors); } // for debugging only
         return errors;
     }

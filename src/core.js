@@ -1137,8 +1137,7 @@ define([
                 _this.displayMugProperties(currentMug);
             }
             if (!e.isInternal) {
-                _this.jstree("deselect_all", true)
-                     .jstree('select_node', e.mug.ufid);
+                _this.setCurrentMug(e.mug);
             }
         }).on('change', function (e) {
             _this.onFormChange(e.mug);
@@ -1350,7 +1349,11 @@ define([
     fn.getMugByPath = function (path) {
         return this.data.core.form.getMugByPath(path);
     };
-    
+
+    fn.setCurrentMug = function (mug) {
+        this.jstree("deselect_all", true).jstree('select_node', mug.ufid);
+    };
+
     fn.displayMugProperties = function (mug) {
         var $props = this.$f.find('.fd-question-properties'),
             _getWidgetClassAndOptions = function (property) {
