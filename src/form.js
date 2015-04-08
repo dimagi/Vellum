@@ -503,8 +503,6 @@ define([
          *          which case `refMug` is the new name.
          * @param refMug - The mug relative to which `mug` is moving.
          *          Alternately, the new name if `position` is "rename".
-         * @returns - True if the mug was able to be moved without
-         *          changing it's nodeID, otherwise false.
          */
         moveMug: function (mug, position, refMug) {
             function match(sibling) {
@@ -609,11 +607,10 @@ define([
             this._logicManager.updatePaths(updates);
             this.fixBrokenReferences(mug);
             // TODO make Item not a special case
-            if (mug.__className !== "Item") {
+            if (oldId && mug.__className !== "Item") {
                 // update first child of old parent with matching conflicted nodeID
                 var conflict = this.findFirstMatchingChild(oldParent, function (mug) {
-                        var conflictId = mug.p.conflictedNodeId;
-                        return conflictId && conflictId === oldId;
+                        return mug.p.conflictedNodeId === oldId;
                     });
                 if (conflict) {
                     this.moveMug(conflict, "rename", oldId);
