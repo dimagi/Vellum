@@ -48,6 +48,10 @@ define([
         that.langCodeToName[lang.two] = name;
     });
 
+    that.formatExc = function (error) {
+        return error && error.stack ? error.stack : String(error);
+    };
+
     that.XPATH_REFERENCES = [
         "relevantAttr",
         "calculateAttr",

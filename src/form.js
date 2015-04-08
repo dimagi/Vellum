@@ -414,9 +414,8 @@ define([
                 return node.getValue();
             });
         },
-        updateError: function (errObj, options) {
+        updateError: function (errObj) {
             errObj = FormError(errObj);
-            options = options || {};
             if (!errObj.key) {
                 this.errors.push(errObj);
             }
@@ -436,14 +435,10 @@ define([
                 errors: this.errors
             });
         },
-        clearErrors: function (type, options) {
-            var filterFn = function (err) {
+        clearErrors: function (type) {
+            this.errors = this.errors.filter(function (err) {
                 return err.level !== type;
-            };
-            options = options || {};
-            for (var i = 0; i < this.errors.length; i++) {
-                this.errors = this.errors.filter(filterFn);
-            }
+            });
             this.fire({
                 type: 'error-change',
                 errors: this.errors
@@ -541,12 +536,8 @@ define([
                 if (this.findFirstMatchingChild(conflictParent, match)) {
                     mug.p.conflictedNodeId = newId;
                     newId = this.generate_question_id(newId, mug);
-                    // HACK broken abstraction barrier
-                    this.vellum.setTreeValidationIcon(mug);
                 } else if (mug.p.has("conflictedNodeId")) {
-                    mug.p.set("conflictedNodeId"); // clear conflict
-                    // HACK broken abstraction barrier
-                    this.vellum.setTreeValidationIcon(mug);
+                    mug.p.conflictedNodeId = null;
                 }
 
                 if (mug.p.nodeID !== newId) {
@@ -669,7 +660,7 @@ define([
                 var nodeID = mug.p.nodeID;
                 if (nodeID) {
                     if (duplicate.p.conflictedNodeId) {
-                        duplicate.p.set("conflictedNodeId"); // clear conflict
+                        duplicate.p.conflictedNodeId = null;
                     } else {
                         duplicate.p.nodeID = this.generate_question_id(nodeID, mug);
                     }

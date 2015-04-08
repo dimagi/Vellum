@@ -1143,6 +1143,9 @@ define([
         }).on('parent-question-type-change', function (e) {
             _this.jstree("set_icon", e.childMug.ufid, e.childMug.getIcon());
         }).on('question-remove', function (e) {
+            if (e.mug) {
+                e.mug.unbind(_this.data.core);
+            }
             var currentMug = _this.getCurrentlySelectedMug();
             if (e.mug && e.mug.parentMug && e.mug.parentMug === currentMug) {
                 _this.displayMugProperties(currentMug);
@@ -1349,6 +1352,10 @@ define([
      * @returns The tree node that was created or `false` if it was not created.
      */
     fn.createQuestion = function (mug, refMug, position) {
+        var _this = this;
+        mug.on("messages-changed", function (event) {
+            _this.setTreeValidationIcon(event.mug);
+        }, null, this.data.core);
         return this.jstree("create_node",
             refMug ? "#" + refMug.ufid : "#",
             {
@@ -1414,7 +1421,7 @@ define([
         this.toggleConstraintItext(mug);
         this.showVisualValidation(mug);
     };
-        
+
     fn.hideQuestionProperties = function() {
         this.disableUI();
     };
@@ -1517,14 +1524,6 @@ define([
         this.data.core.form.clearErrors('form-warning');
       
         if (mug) {
-            this._resetMessages(
-                this.data.core.form.errors.concat(
-                    _.map(this.getErrors(mug), function (error) {
-                        return {
-                            message: error,
-                            level: "form-warning",
-                        };
-                    })));
             this.setTreeValidationIcon(mug);
         }
     };
@@ -1545,8 +1544,13 @@ define([
     };
 
     fn.getErrors = function (mug) {
-        return mug.getErrors().concat(
-            this.data.core.form._logicManager.getErrors(mug));
+        // this should be moved into the logic manager; nodeID is clearly wrong here
+        mug.addMessage("nodeID", {
+            key: "core-logic-manager-error",
+            level: "error",
+            message: this.data.core.form._logicManager.getErrors(mug).join("\n")
+        });
+        return mug.getErrors();
     };
 
     fn._resetMessages = function (errors) {
@@ -1607,9 +1611,6 @@ define([
             $fieldsetContent = $sec.find('.fd-fieldset-content');
         options.properties.map(function (prop) {
             var elemWidget = prop.widget(mug, $.extend(prop.options, {
-                afterChange: function () {
-                    _this.showVisualValidation(mug);
-                },
                 displayXPathEditor: function (options) {
                     _this.data.core.currentlyEditedProperty = prop.options.path;
                     _this.displayXPathEditor(options);
@@ -1620,6 +1621,9 @@ define([
                 _this.onFormChange(mug);
             });
             $fieldsetContent.append(elemWidget.getUIElement());
+            if (elemWidget.refreshMessages) {
+                elemWidget.refreshMessages();
+            }
         });
         return $sec;
     };

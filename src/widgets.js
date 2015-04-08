@@ -1,10 +1,12 @@
 define([
     'tpl!vellum/templates/widget_control_keyvalue',
+    'tpl!vellum/templates/widget_control_message',
     'underscore',
     'jquery',
     'vellum/util'
 ], function (
     widget_control_keyvalue,
+    widget_control_message,
     _,
     $,
     util
@@ -58,7 +60,10 @@ define([
 
         widget.handleChange = function () {
             widget.updateValue();
-            options.afterChange();
+            // TODO make all widgets that inherit from base set path
+            if (widget.path) {
+                mug.validate(widget.path);
+            }
             widget.fire("change");
         };
 
@@ -105,9 +110,32 @@ define([
             return widget.input; 
         };
 
+        widget.getMessagesContainer = function () {
+            return widget.getControl()
+                    .closest(".widget.control-group")
+                    .find(".messages:last");
+        };
+
+        widget.refreshMessages = function () {
+            var $messages = $();
+            mug.messages.each(path, function (msg) {
+                $messages = $messages.add($(widget_control_message(msg)));
+            });
+            var $container = widget.getMessagesContainer().empty();
+            if ($messages.length) {
+                $container.append($messages);
+            }
+        };
+
+        mug.on("messages-changed", widget.refreshMessages, null, widget);
+        mug.on("teardown-mug-properties", function (e) {
+            e.mug.unbind(widget);
+        }, null, widget);
+
         widget.save = function () {
             mugValue(mug, widget.getValue());
         };
+
         return widget;
     };
 
@@ -344,6 +372,7 @@ define([
     var getUIElement = function($input, labelText, isDisabled, help) {
         var uiElem = $("<div />").addClass("widget control-group"),
             $controls = $('<div class="controls" />'),
+            $messages = $('<div class="messages" />'),
             $label = $("<label />").text(labelText);
         $label.addClass('control-label');
         if (help) {
@@ -364,6 +393,7 @@ define([
         $input.prop('disabled', !!isDisabled);
         $controls.append($input);
         uiElem.append($controls);
+        uiElem.append($messages);
         return uiElem;
     };
 
