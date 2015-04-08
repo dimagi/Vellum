@@ -14,6 +14,235 @@ define([
     util,
     undefined
 ) {
+    /**
+     * A question, containing data, bind, and control elements.
+     */
+    function Mug(options, form, baseSpec, copyFromMug) {
+        var properties = null;
+        util.eventuality(this);
+
+        if (copyFromMug) {
+            properties = _.object(_.map(copyFromMug.p.getAttrs(), function (val, key) {
+                if (val && typeof val === "object") {
+                    // avoid potential duplicate references (e.g., itext items)
+                    if ($.isPlainObject(val)) {
+                        val = _.clone(val);
+                    } else {
+                        // All non-plain objects must provide a clone method,
+                        // otherwise there could be circular references.  It can
+                        // simply return the same object if it's safe.
+                        // This is not really fleshed out.
+                        val = val.clone();
+                    }
+                }
+                return [key, val];
+            }));
+        }
+
+        this.ufid = util.get_guid();
+        this.form = form;
+        this._baseSpec = baseSpec;
+        this.setOptionsAndProperties(options, properties);
+    }
+    Mug.prototype = {
+        // set or change question type
+        setOptionsAndProperties: function (options, properties) {
+            var _this = this,
+                currentAttrs = properties || (this.p && this.p.getAttrs()) || {};
+
+            // These could both be calculated once for each type instead of
+            // each instance.
+            this.options = util.extend(defaultOptions, options);
+            this.__className = this.options.__className;
+            this.spec = copyAndProcessSpec(this._baseSpec, this.options.spec, this.options);
+
+            // Reset any properties that are part of the question type
+            // definition.
+            _.each(this.spec, function (spec, name) {
+                if (spec.deleteOnCopy) {
+                    delete currentAttrs[name];
+                }
+            });
+
+            this.p = new MugProperties({
+                spec: this.spec,
+                mug: this,
+                shouldChange: _this.form.shouldMugPropertyChange.bind(_this.form),
+            });
+            this.options.init(this, this.form);
+            this.p.setAttrs(currentAttrs);
+        },
+        getAppearanceAttribute: function () {
+            return this.options.getAppearanceAttribute(this);
+        },
+        getIcon: function () {
+            return this.options.getIcon(this);
+        },
+        getErrors: function () {
+            return this.p.getErrors();
+        },
+        /**
+         * Get a list of form serialization warnings
+         *
+         * All warnings returned by this function should also be reported
+         * by the normal mug validation process. Serialization warnings
+         * can be ignored or fixed automatically, but the user may
+         * prefer to fix them manually.
+         *
+         * @returns - A list of warning objects, each having a `message`
+         * attribute describing the warning. This list can be passed to
+         * `fixSerializationWarnings` to automatically fix the warnings.
+         */
+        getSerializationWarnings: function () {
+            var dupId = this.p.conflictedNodeId;
+            if (!_.isUndefined(dupId)) {
+                return [{
+                    code: "conflictedNodeId",
+                    message: "'" + dupId + "' has the same Question ID as " +
+                        "another question in the same group. Please choose " +
+                        "a unique Question ID."
+                }];
+            }
+            return [];
+        },
+        /**
+         * Automatically fix serialization warnings
+         *
+         * No warnings should be reported by `getSerializationWarnings`
+         * after calling this function with the list of warnings
+         * returned by `getSerializationWarnings`.
+         *
+         * @param warnings - The list of warnings returned by
+         *                 `getSerializationWarnings`.
+         */
+        fixSerializationWarnings: function (warnings) {
+            var mug = this;
+            _.each(warnings, function (warning) {
+                if (warning.code === "conflictedNodeId") {
+                    // clear warning; mug already has copy-N-of-... ID
+                    mug.p.set("conflictedNodeId");
+                    return;
+                }
+                throw new Error("unknown warning: " + warning.code);
+            });
+        },
+        isValid: function () {
+            return !this.getErrors().length;
+        },
+        /*
+         * Gets a default label, auto-generating if necessary
+         */
+        getDefaultLabelValue: function () {
+            var label = this.p.label,
+                nodeID = this.p.nodeID;
+            if (label) {
+                return label;
+            } else if (nodeID) {
+                return nodeID;
+            } else if (this.__className === "Item") {
+                return this.p.defaultValue;
+            }
+        },
+
+        /*
+         * Gets the actual label, either from the control element or an empty
+         * string if not found.
+         */
+        getLabelValue: function () {
+            var label = this.p.label;
+            if (label) {
+                return label;
+            } else {
+                return "";
+            }
+        },
+        getNodeID: function () {
+            return this.p.nodeID || this.p.defaultValue;
+        },
+        getDisplayName: function (lang) {
+            var itextItem = this.p.labelItext,
+                Itext = this.form.vellum.data.javaRosa.Itext,
+                defaultLang = Itext.getDefaultLanguage(),
+                disp,
+                defaultDisp,
+                nodeID = this.getNodeID();
+
+            if (this.__className === "ReadOnly") {
+                return "Unknown (read-only) question type";
+            }
+            if (this.__className === "Itemset") {
+                return "External Data";
+            }
+
+            if (!itextItem || lang === '_ids') {
+                return nodeID;
+            }
+            lang = lang || defaultLang;
+
+            if(!lang) {
+                return 'No Translation Data';
+            }
+
+            defaultDisp = itextItem.get("default", defaultLang);
+            disp = itextItem.get("default", lang) || defaultDisp;
+
+            if (disp && disp !== nodeID) {
+                if (lang !== defaultLang && disp === defaultDisp) {
+                    disp += " [" + defaultLang + "]";
+                }
+                return $('<div>').text(disp).html();
+            }
+
+            return nodeID;
+        },
+        teardownProperties: function () {
+            this.fire({type: "teardown-mug-properties", mug: this});
+        }
+    };
+
+    Object.defineProperty(Mug.prototype, "absolutePath", {
+        get: function () {
+            return this.form.getAbsolutePath(this);
+        }
+    });
+
+    Object.defineProperty(Mug.prototype, "parentMug", {
+        get: function () {
+            var node = this.form.tree.getNodeFromMug(this);
+            if (node && node.parent) {
+                return node.parent.value;
+            } else {
+                return null;
+            }
+        }
+    });
+
+    function copyAndProcessSpec(baseSpec, mugSpec, mugOptions) {
+        var control = baseSpec.control,
+            databind = baseSpec.databind;
+
+        if (mugOptions.isDataOnly) {
+            control = {};
+        } else if (mugOptions.isControlOnly) {
+            databind = {};
+        }
+
+        var spec = $.extend(true, {}, databind, control, mugSpec);
+
+        _.each(spec, function (propertySpec, name) {
+            if (_.isFunction(propertySpec)) {
+                propertySpec = propertySpec(mugOptions);
+            }
+            if (!propertySpec) {
+                delete spec[name];
+                return;
+            }
+            spec[name] = propertySpec;
+        });
+
+        return spec;
+    }
+
     function validateRule(ruleKey, ruleValue, testingObj, mug) {
         var presence = ruleValue.presence,
             retBlock = {
@@ -333,33 +562,6 @@ define([
         }
     };
 
-    function copyAndProcessSpec(baseSpec, mugSpec, mugOptions) {
-        var control = baseSpec.control,
-            databind = baseSpec.databind;
-
-        if (mugOptions.isDataOnly) {
-            control = {};
-        } else if (mugOptions.isControlOnly) {
-            databind = {};
-        }
-
-        var spec = $.extend(true, {}, databind, control, mugSpec);
-
-        _.each(spec, function (propertySpec, name) {
-            if (_.isFunction(propertySpec)) {
-                propertySpec = propertySpec(mugOptions);
-            }
-            if (!propertySpec) {
-                delete spec[name];
-                return;
-            }
-            spec[name] = propertySpec;
-        });
-
-        
-        return spec;
-    }
-
     // question-type specific properties, gets reset when you change the
     // question type
     var defaultOptions = {
@@ -487,221 +689,6 @@ define([
         init: function (mug, form) {},
         spec: {}
     };
-
-    /**
-     * A question, containing data, bind, and control elements.
-     */
-    function Mug (options, form, baseSpec, copyFromMug) {
-        var properties = null;
-        util.eventuality(this);
-
-        if (copyFromMug) {
-            properties = _.object(_.map(copyFromMug.p.getAttrs(), function (val, key) {
-                if (val && typeof val === "object") {
-                    // avoid potential duplicate references (e.g., itext items)
-                    if ($.isPlainObject(val)) {
-                        val = _.clone(val);
-                    } else {
-                        // All non-plain objects must provide a clone method,
-                        // otherwise there could be circular references.  It can
-                        // simply return the same object if it's safe.
-                        // This is not really fleshed out.
-                        val = val.clone();
-                    }
-                }
-                return [key, val];
-            }));
-        }
-
-        this.ufid = util.get_guid();
-        this.form = form;
-        this._baseSpec = baseSpec;
-        this.setOptionsAndProperties(options, properties);
-    }
-    Mug.prototype = {
-        // set or change question type
-        setOptionsAndProperties: function (options, properties) {
-            var _this = this,
-                currentAttrs = properties || (this.p && this.p.getAttrs()) || {};
-
-            // These could both be calculated once for each type instead of
-            // each instance.
-            this.options = util.extend(defaultOptions, options);
-            this.__className = this.options.__className;
-            this.spec = copyAndProcessSpec(this._baseSpec, this.options.spec, this.options);
-
-            // Reset any properties that are part of the question type
-            // definition.
-            _.each(this.spec, function (spec, name) {
-                if (spec.deleteOnCopy) {
-                    delete currentAttrs[name];
-                }
-            });
-
-            this.p = new MugProperties({
-                spec: this.spec,
-                mug: this,
-                shouldChange: _this.form.shouldMugPropertyChange.bind(_this.form),
-            });
-            this.options.init(this, this.form);
-            this.p.setAttrs(currentAttrs);
-        },
-        getAppearanceAttribute: function () {
-            return this.options.getAppearanceAttribute(this);
-        },
-        getIcon: function () {
-            return this.options.getIcon(this);
-        },
-        getErrors: function () {
-            return this.p.getErrors();
-        },
-        /**
-         * Get a list of form serialization warnings
-         *
-         * All warnings returned by this function should also be reported
-         * by the normal mug validation process. Serialization warnings
-         * can be ignored or fixed automatically, but the user may
-         * prefer to fix them manually.
-         *
-         * @returns - A list of warning objects, each having a `message`
-         * attribute describing the warning. This list can be passed to
-         * `fixSerializationWarnings` to automatically fix the warnings.
-         */
-        getSerializationWarnings: function () {
-            var dupId = this.p.conflictedNodeId;
-            if (!_.isUndefined(dupId)) {
-                return [{
-                    code: "conflictedNodeId",
-                    message: "'" + dupId + "' has the same Question ID as " +
-                        "another question in the same group. Please choose " +
-                        "a unique Question ID."
-                }];
-            }
-            return [];
-        },
-        /**
-         * Automatically fix serialization warnings
-         *
-         * No warnings should be reported by `getSerializationWarnings`
-         * after calling this function with the list of warnings
-         * returned by `getSerializationWarnings`.
-         *
-         * @param warnings - The list of warnings returned by
-         *                 `getSerializationWarnings`.
-         */
-        fixSerializationWarnings: function (warnings) {
-            var mug = this;
-            _.each(warnings, function (warning) {
-                if (warning.code === "conflictedNodeId") {
-                    // clear warning; mug already has copy-N-of-... ID
-                    mug.p.set("conflictedNodeId");
-                    return;
-                }
-                throw new Error("unknown warning: " + warning.code);
-            });
-        },
-        isValid: function () {
-            return !this.getErrors().length;
-        },
-        /*
-         * Gets a default label, auto-generating if necessary
-         */
-        getDefaultLabelValue: function () {
-            var label = this.p.label,
-                nodeID = this.p.nodeID;
-            if (label) {
-                return label;
-            } else if (nodeID) {
-                return nodeID;
-            } else if (this.__className === "Item") {
-                return this.p.defaultValue;
-            }
-        },
-        
-        /*
-         * Gets the actual label, either from the control element or an empty
-         * string if not found.
-         */
-        getLabelValue: function () {
-            var label = this.p.label;
-            if (label) {
-                return label;
-            } else {
-                return "";
-            } 
-        },
-        
-        // Add some useful functions for dealing with itext.
-        setItextID: function (val) {
-            var labelItext = this.p.labelItext;
-            if (labelItext) {
-                labelItext.id = val;
-            }
-        },
-        
-        getItext: function () {
-            return this.p.labelItext;
-        },
-        getNodeID: function () {
-            return this.p.nodeID || this.p.defaultValue;
-        },
-        getDisplayName: function (lang) {
-            var itextItem = this.p.labelItext, 
-                Itext = this.form.vellum.data.javaRosa.Itext,
-                defaultLang = Itext.getDefaultLanguage(),
-                disp,
-                defaultDisp,
-                nodeID = this.getNodeID();
-
-            if (this.__className === "ReadOnly") {
-                return "Unknown (read-only) question type";
-            }
-            if (this.__className === "Itemset") {
-                return "External Data";
-            }
-
-            if (!itextItem || lang === '_ids') {
-                return nodeID;
-            }
-            lang = lang || defaultLang;
-
-            if(!lang) {
-                return 'No Translation Data';
-            }
-
-            defaultDisp = itextItem.get("default", defaultLang);
-            disp = itextItem.get("default", lang) || defaultDisp;
-
-            if (disp && disp !== nodeID) {
-                if (lang !== defaultLang && disp === defaultDisp) {
-                    disp += " [" + defaultLang + "]";
-                }
-                return $('<div>').text(disp).html();
-            }
-
-            return nodeID;
-        },
-        teardownProperties: function () {
-            this.fire({type: "teardown-mug-properties", mug: this});
-        }
-    };
-
-    Object.defineProperty(Mug.prototype, "absolutePath", {
-        get: function () {
-            return this.form.getAbsolutePath(this);
-        }
-    });
-
-    Object.defineProperty(Mug.prototype, "parentMug", {
-        get: function () {
-            var node = this.form.tree.getNodeFromMug(this);
-            if (node && node.parent) {
-                return node.parent.value;
-            } else {
-                return null;
-            }
-        }
-    });
 
     var DataBindOnly = util.extend(defaultOptions, {
         isDataOnly: true,
