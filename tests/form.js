@@ -68,6 +68,24 @@ define([
             assert(util.isTreeNodeValid(black), black.getErrors().join("\n"));
         });
 
+        it("should retain conflicted mug ID on move", function () {
+            var form = util.loadXML(""),
+                hid = util.addQuestion("DataBindOnly", "hid"),
+                text = util.addQuestion("Text", "text"),
+                group = util.addQuestion("Group", "group");
+            util.addQuestion("Text", "text");
+            hid.p.calculateAttr = "/data/text + /data/group/text";
+            form.moveMug(text, "into", group);
+            assert.notEqual(hid.p.calculateAttr, "/data/text + /data/group/text");
+            assert.notEqual(text.p.nodeID, "text");
+            assert(!util.isTreeNodeValid(text), "expected /data/text error");
+
+            form.moveMug(text, "into", null);
+            assert.equal(text.p.nodeID, "text");
+            assert.equal(hid.p.calculateAttr, "/data/text + /data/group/text");
+            assert(util.isTreeNodeValid(text), text.getErrors().join("\n"));
+        });
+
         it("should show warnings for broken references on delete mug", function () {
             util.loadXML(QUESTION_REFERENCING_OTHER_XML);
             var blue = call("getMugByPath", "/data/blue"),

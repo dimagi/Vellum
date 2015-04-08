@@ -524,7 +524,7 @@ define([
                 if (spec && spec.validationFunc(mug) !== 'pass') {
                     mug.p.set("dataParent"); // clear dataParent
                 }
-                newId = oldId;
+                newId = mug.p.conflictedNodeId || oldId;
                 conflictParent = mug.parentMug;
             }
 
