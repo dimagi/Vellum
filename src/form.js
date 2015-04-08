@@ -497,6 +497,9 @@ define([
          * Move a mug from its current place to
          * the position specified by the arguments.
          *
+         * NOTE the cannonical way to rename a mug is to set its
+         * `nodeID` property: `mug.p.nodeID = "name"`
+         *
          * @param mug - The mug to be moved.
          * @param position - The position relative to `refMug`
          *          ("after", "into", "last", etc.) or "rename", in
@@ -508,15 +511,22 @@ define([
             function match(sibling) {
                 return sibling !== mug && sibling.p.nodeID === newId;
             }
-            var oldId = mug.p.nodeID,
-                oldPath = this.tree.getAbsolutePath(mug),
-                oldParent = mug.parentMug,
-                newId, conflictParent;
+            var newId, oldId, oldPath, oldParent, conflictParent;
 
             if (position === "rename") {
                 newId = refMug;
-                conflictParent = oldParent;
+                if (!this.tree.getNodeFromMug(mug)) {
+                    // skip conflict resolution if not in tree
+                    mug.p.set("nodeID", newId);
+                    return;
+                }
+                oldId = mug.p.nodeID;
+                oldPath = this.tree.getAbsolutePath(mug);
+                oldParent = conflictParent = mug.parentMug;
             } else {
+                oldId = mug.p.nodeID;
+                oldPath = this.tree.getAbsolutePath(mug);
+                oldParent = mug.parentMug;
                 this.insertMug(refMug, mug, position);
                 var spec = mug.spec.dataParent;
                 if (spec && spec.validationFunc(mug) !== 'pass') {
@@ -658,7 +668,11 @@ define([
             if (depth === 0) {
                 var nodeID = mug.p.nodeID;
                 if (nodeID) {
-                    duplicate.p.set("conflictedNodeId"); // clear conflict
+                    if (duplicate.p.conflictedNodeId) {
+                        duplicate.p.set("conflictedNodeId"); // clear conflict
+                    } else {
+                        duplicate.p.nodeID = this.generate_question_id(nodeID, mug);
+                    }
                 } else {
                     var newItemValue = this.generate_question_id(
                         mug.p.defaultValue);
