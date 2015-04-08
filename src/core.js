@@ -410,10 +410,6 @@ define([
         var curMug = this.getCurrentlySelectedMug();
         if (curMug) {
             this.displayMugProperties(curMug);
-            if (this.data.core.unsavedDuplicateNodeId) {
-                this.getCurrentMugInput("nodeID")
-                    .val(this.data.core.unsavedDuplicateNodeId);
-            }
         }
     };
 
@@ -1072,75 +1068,17 @@ define([
             .addClass('disabled');
     };
 
-    fn.setUnsavedDuplicateNodeId = function (nodeId, forMove) {
-        this.data.core.unsavedDuplicateNodeId = nodeId;
-        this.data.core.duplicateIsForMove = forMove;
-    };
-
     // Attempt to guard against doing actions when there are unsaved or invalid
-    // pending changes. In the case of an invalid duplicate sibling ID, it tries
-    // to call 'callback' after the user automatically fixes the invalid state,
-    // if they choose, but in any case returns false immediately if the current
-    // mug is not saved, for use when this is called in response to a JSTree
-    // event that needs to immediately be decided whether to stop propagation
-    // of.
+    // pending changes.
     fn.ensureCurrentMugIsSaved = function (callback) {
-        callback = callback || function () {};
-
-        var _this = this,
-            mug = this.getCurrentlySelectedMug(),
-            duplicate = this.data.core.unsavedDuplicateNodeId,
-            duplicateIsForMove = this.data.core.duplicateIsForMove;
-
         if (this.data.core.hasXPathEditorChanged) {
             this.alert(
                 "Unsaved Changes in Editor",
                 "You have UNSAVED changes in the Expression Editor. " +
                 "Please save changes before continuing.");
             return false;
-        } else if (duplicate) {
-            var verb = duplicateIsForMove ? 'would have' : 'has',
-                newQuestionId = this.data.core.form.generate_question_id(duplicate);
-
-            this.alert(
-                "Duplicate Question ID",
-                "'" + duplicate + "' " + verb + " the same Question ID as " +
-                "another question in the same group. Please change '" + 
-                duplicate + "' to a unique Question ID before continuing.",
-                [
-                    {
-                        title: "Fix Manually",
-                        action: function () {
-                            // Since we just changed state to trigger this
-                            // message when calling ensureCurrentMugIsSaved()
-                            // when attempting a move, reset the state.  It will
-                            // be changed again if the same move is attempted.
-                            if (duplicateIsForMove) {
-                                _this.setUnsavedDuplicateNodeId(false);
-                            }
-                            _this.data.core.$modal.modal('hide');
-                            var input = _this.getCurrentMugInput("nodeID");
-                            if (input) {
-                                input.select().focus();
-                            }
-                        }
-                    },
-                    {
-                        title: "Automatically rename to '" + newQuestionId + "'",
-                        cssClasses: 'btn-primary',
-                        action: function () {
-                            mug.p.nodeID = newQuestionId;
-                            _this.setUnsavedDuplicateNodeId(false);
-                            _this.data.core.$modal.modal('hide');
-                            _this.refreshVisibleData();
-                            callback();
-                        } 
-                    }
-                
-                ]);
-            return false;
         } else {
-            callback();
+            (callback || function () {})();
             return true;
         }
     };
@@ -1299,13 +1237,6 @@ define([
             _this.refreshMugName(e.mug);
             _this.toggleConstraintItext(e.mug);
         }).on('mug-property-change', function (e) {
-            // The nodeID property for the current question successfully
-            // changed, so it wasn't caught as a duplicate, so remove any
-            // existing duplicate warning state.
-            if (e.property === 'nodeID') {
-                _this.setUnsavedDuplicateNodeId(false);
-            }
-
             _this.refreshMugName(e.mug);
             _this.toggleConstraintItext(e.mug);
         });
