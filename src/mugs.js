@@ -604,7 +604,7 @@ define([
                         return mug.p.nodeID; // use default id
                     }
                     var id = data.id.slice(data.id.lastIndexOf("/") + 1);
-                    return mug.form.generate_question_id(id, mug);
+                    return id || mug.form.generate_question_id(id, mug);
                 }
             },
             conflictedNodeId: {

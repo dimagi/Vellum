@@ -322,9 +322,9 @@ require([
             ]);
             util.selectAll();
             eq(mod.copy(), [
-                ["id", "type", "labelItext:en-default", "labelItext:hin-default"],
-                ["/text", "Text", "text1", "text1"],
-                ["/copy-1-of-text", "Text", "text2", "text2"],
+                ["id", "type", "labelItext:en-default", "labelItext:hin-default", "conflictedNodeId"],
+                ["/text", "Text", "text1", "text1", "null"],
+                ["/copy-1-of-text", "Text", "text2", "text2", "text"],
             ]);
         });
 
