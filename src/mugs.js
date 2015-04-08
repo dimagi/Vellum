@@ -320,20 +320,32 @@ define([
             });
             return data;
         },
+        /**
+         * Deserialize mug property data
+         *
+         * @returns - An array of `Later` objects to be executed as the
+         *      final step in deserializing a group of related mugs.
+         */
         deserialize: function (data) {
-            var mug = this;
+            var mug = this,
+                later = [];
             _.each(mug.spec, function (spec, key) {
                 if (spec.presence !== 'notallowed') {
                     if (spec.deserialize) {
                         var value = spec.deserialize(data, key, mug);
                         if (!_.isUndefined(value)) {
-                            mug.p[key] = value;
+                            if (value instanceof Later) {
+                                later.push(value);
+                            } else {
+                                mug.p[key] = value;
+                            }
                         }
                     } else if (data.hasOwnProperty(key)) {
                         mug.p[key] = data[key];
                     }
                 }
             });
+            return later;
         },
         teardownProperties: function () {
             this.fire({type: "teardown-mug-properties", mug: this});
@@ -381,6 +393,10 @@ define([
         });
 
         return spec;
+    }
+
+    function Later(execute) {
+        this.execute = execute;
     }
 
     function MugMessages() {
@@ -603,8 +619,24 @@ define([
                     if (!data.id || data.id === mug.p.nodeID) {
                         return mug.p.nodeID; // use default id
                     }
-                    var id = data.id.slice(data.id.lastIndexOf("/") + 1);
-                    return id || mug.form.generate_question_id(id, mug);
+                    var id = data.id.slice(data.id.lastIndexOf("/") + 1) ||
+                             mug.form.generate_question_id(id, mug);
+                    if (data.conflictedNodeId) {
+                        // first set to value that is in expressions
+                        // to make associations in logic manager
+                        // NOTE obscure edge case: if (this temporary) id
+                        // conflicts with an existing question then expressions
+                        // will be associated with that question and the Later
+                        // assignment will not work.
+                        mug.p.nodeID = id;
+                        return new Later(function () {
+                            // after all other properties are deserialized,
+                            // assign conflicted ID to convert expressions
+                            // or setup new conflict
+                            mug.p.nodeID = data.conflictedNodeId;
+                        });
+                    }
+                    return id;
                 }
             },
             conflictedNodeId: {
@@ -626,6 +658,9 @@ define([
                         message: message,
                         fixSerializationWarning: resolveConflictedNodeId
                     });
+                },
+                deserialize: function () {
+                    // deserialization is done by nodeID
                 }
             },
             dataValue: {

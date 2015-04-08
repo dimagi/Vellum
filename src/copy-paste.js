@@ -219,6 +219,7 @@ define([
             errors = [],
             node = {id: null, mug: mug, parent: null},
             into = {into: 1, last: 1},
+            later = [],
             values, pos, parent;
         vellum.beforeBulkInsert(form);
         for (; row; row = next()) {
@@ -253,13 +254,14 @@ define([
                 break;
             }
             mug = form.createQuestion(pos.mug, pos.position, values.type, true);
-            mug.deserialize(values);
+            later.push(mug.deserialize(values));
             node = {
                 id: values.id,
                 mug: mug,
                 parent: parent,
             };
         }
+        _.each(_.flatten(later), function (f) { f.execute(); });
         vellum.afterBulkInsert(form);
         if (mug && pos) {
             vellum.setCurrentMug(mug);

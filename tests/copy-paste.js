@@ -345,6 +345,23 @@ require([
             ]);
         });
 
+        it("should resolve pasted question with conflicting question ID", function () {
+            util.loadXML("");
+            paste([
+                ["id", "type", "calculateAttr", "conflictedNodeId"],
+                ["/radius", "DataBindOnly", "42", "null"],
+                ["/copy-1-of-pi", "DataBindOnly", "3.1415", "pi"],
+                ["/circumference", "DataBindOnly", "2 * /data/copy-1-of-pi * /data/radius", "null"],
+            ]);
+            util.selectAll();
+            eq(mod.copy(), [
+                ["id", "type", "calculateAttr"],
+                ["/radius", "DataBindOnly", "42"],
+                ["/pi", "DataBindOnly", "3.1415"],
+                ["/circumference", "DataBindOnly", "2 * /data/pi * /data/radius"],
+            ]);
+        });
+
         it("should not paste item into tree root", function () {
             util.loadXML("");
             paste([
@@ -546,6 +563,8 @@ require([
         //      ALSO maybe find the converse: property serializes to null
         //      but that null value must be passed to mug.deserialize()
         //      (seems less likely that this is a thing)
+        // TODO paste sibling groups (should all end up being siblings,
+        //      not group2, group3, ... inside group1)
     });
 
     describe("The copy-paste string conversions should", function () {
