@@ -155,6 +155,23 @@ define([
             }
         },
         /**
+         * Add many messages for many properties at once
+         *
+         * @param messages - An object mapping property names to lists
+         *          of message objects.
+         */
+        addMessages: function (messages) {
+            var mug = this,
+                changed = _.reduce(messages, function (m1, list, attr) {
+                    return _.reduce(list, function (m2, msg) {
+                        return mug.messages.update(attr, msg) || m2;
+                    }, false) || m1;
+                }, false);
+            if (changed) {
+                this.fire({type: "messages-changed", mug: this});
+            }
+        },
+        /**
          * Get a list of error message strings
          *
          * Currently there are only two message levels: "warning" and
@@ -337,25 +354,29 @@ define([
                 // should never happen
                 throw new Error("missing key: " + JSON.stringify(msg));
             }
-            var changed = true,
-                messages = _.filter(this.messages[attr], function (obj) {
-                    if (obj.key === msg.key) {
-                        changed = !_.isEqual(obj, msg);
+            var messages = this.messages[attr] || [],
+                removed = false;
+            for (var i = messages.length - 1; i >= 0; i--) {
+                var obj = messages[i];
+                if (obj.key === msg.key) {
+                    if (obj.level === msg.level && obj.message === msg.message) {
+                        // added messages already exist (no change)
                         return false;
                     }
-                    return true;
-                });
-            if (!changed) {
-                return false;
+                    messages.splice(i, 1);
+                    removed = true;
+                    break;
+                }
             }
             if (msg.message) {
                 messages.push(msg);
-                this.messages[attr] = messages;
-            } else if (!messages.length) {
-                delete this.messages[attr];
-            } else {
-                // no messages existed for attr and no new message added
+            } else if (!removed) {
                 return false;
+            }
+            if (messages.length) {
+                this.messages[attr] = messages;
+            } else {
+                delete this.messages[attr];
             }
             return true;
         },
@@ -363,8 +384,8 @@ define([
             if (attr) {
                 return _.flatten(_.pluck(this.messages[attr], "message"));
             }
-            return _.flatten(_.map(this.messages, function (listForAttr) {
-                return _.pluck(listForAttr, "message");
+            return _.flatten(_.map(this.messages, function (messages) {
+                return _.pluck(messages, "message");
             }), _.identity);
         },
         /**
@@ -392,6 +413,18 @@ define([
                 });
             }
         },
+        toString: function () {
+            var messages = [],
+                last = null;
+            this.each(function (msg, attr) {
+                if (attr !== last) {
+                    messages.push(attr + ":");
+                    last = attr;
+                }
+                messages.push("  - " + msg.message); // + " [" + msg.key + "]");
+            });
+            return messages.join("\n");
+        }
     };
 
     function MugProperties (options) {

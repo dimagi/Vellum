@@ -1544,12 +1544,6 @@ define([
     };
 
     fn.getErrors = function (mug) {
-        // this should be moved into the logic manager; nodeID is clearly wrong here
-        mug.addMessage("nodeID", {
-            key: "core-logic-manager-error",
-            level: "error",
-            message: this.data.core.form._logicManager.getErrors(mug).join("\n")
-        });
         return mug.getErrors();
     };
 

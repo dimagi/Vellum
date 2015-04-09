@@ -803,7 +803,6 @@ define([
         fixBrokenReferences: function (mug) {
             function updateReferences(mug) {
                 _this.updateAllLogicReferences(mug);
-                _this.vellum.setTreeValidationIcon(mug);
             }
             var _this = this;
             this._logicManager.forEachBrokenReference(updateReferences);

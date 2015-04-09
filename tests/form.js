@@ -107,8 +107,7 @@ define([
             blue.form.removeMugFromForm(blue);
             assert(!util.isTreeNodeValid(black), "black should not be valid");
             blue = util.addQuestion("Text", "blue");
-            assert(util.isTreeNodeValid(black),
-                   "black should be valid after blue is added");
+            assert(util.isTreeNodeValid(black), black.messages.toString());
         });
 
         it("should show duplicate question ID warning inline", function () {
