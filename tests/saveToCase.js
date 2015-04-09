@@ -26,9 +26,9 @@ define([
         it("should load an update property", function () {
             util.loadXML(UPDATE_PROPERTY_XML);
             var trans = util.getMug("save_to_case");
-            assert.equal(trans.p.caseProperty, "name");
-            assert.equal(trans.p.action, "update");
-            assert.equal(trans.p.source, "/data/name");
+            assert.equal(trans.p.caseProperties.property, "name");
+            assert.equal(trans.p.caseProperties.action, "update");
+            assert.equal(trans.p.caseProperties.source, "/data/name");
         });
     });
 });
