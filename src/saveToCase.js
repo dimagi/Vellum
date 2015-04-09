@@ -110,6 +110,15 @@ define([
         return widget;
     };
 
+    function createsCase(mug) {
+        if (mug) {
+            if (mug.p.createCaseName && mug.p.createCaseType) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     var CASE_XMLNS = "http://commcarehq.org/case/transaction/v2",
         saveToCaseMugOptions = {
             typeName: 'Save to Case',
@@ -120,30 +129,23 @@ define([
             init: function (mug, form) {},
             spec: {
                 xmlnsAttr: { presence: "optional" },
-                caseProperties: {
-                    lstring: "invisible",
+                createCaseType: {
+                    lstring: "Case Type",
                     visibility: 'visibile',
                     presence: 'optional',
-                    widget: SaveToCaseWidget
+                    widget: widgets.text
                 },
-                "caseProperties.relevantAttr": { 
-                    lstring: "Conditional",
-                    presence: "optional" 
-                },
-                "caseProperties.property": {
-                    lstring: 'Case Property',
-                    visibility: 'visible',
+                createCaseName: {
+                    lstring: "Case Name",
+                    visibility: 'visibile',
                     presence: 'optional',
+                    widget: widgets.text
                 },
-                "caseProperties.action": {
-                    lstring: 'Action',
-                    visibility: 'visible',
+                ownerName: {
+                    lstring: "Owner Name",
+                    visibility: 'visibile',
                     presence: 'optional',
-                },
-                "caseProperties.source": {
-                    lstring: 'Source',
-                    visibility: 'visible',
-                    presence: 'optional',
+                    widget: widgets.checkbox
                 }
             },
             getExtraDataAttributes: function (mug) {
@@ -152,17 +154,32 @@ define([
                 };
             },
             dataChildFilter: function (children, mug) {
-                var prop = new Tree.Node(children, {
-                        getNodeID: function () { return mug.p.caseProperties.property; },
+                function simpleNode(name, children, dataValue) {
+                    children = children ? children : [];
+                    var node = new Tree.Node(children, {
+                        getNodeID: function () { return name; },
                         p: {rawDataAttributes: null},
                         options: { }
-                    }),
-                    action = [new Tree.Node([prop], {
-                        getNodeID: function () { return mug.p.caseProperties.action; },
-                        p: {rawDataAttributes: null},
-                        options: { }
-                    })];
-                return [new Tree.Node(action, {
+                    });
+                    if (dataValue) {
+                        node.value.p.dataValue = dataValue;
+                    }
+                    return node;
+                }
+
+                var actions = [];
+                if (createsCase(mug)) {
+                    var columns = [
+                        simpleNode('case_type', [], mug.p.createCaseType), 
+                        simpleNode('case_name')
+                    ];
+                    if (mug.p.ownerName) {
+                        columns.push(simpleNode('owner_name'));
+                    }
+                    actions.push(simpleNode('create', columns));
+                }
+
+                return [new Tree.Node(actions, {
                     getNodeID: function () { return "c:case"; },
                     p: {rawDataAttributes: null},
                     options: { 
@@ -179,11 +196,20 @@ define([
 
             },
             getBindList: function (mug) {
-                return [{
-                    nodeset: mug.absolutePath + "/case/" + mug.p.caseProperties.action + "/" + mug.p.caseProperties.property,
-                    relevant: mug.p.caseProperties.relevantAttr,
-                    calculate: mug.p.caseProperties.source,
-                }];
+                var ret = [];
+                if (createsCase(mug)) {
+                    ret.push({
+                        nodeset: mug.absolutePath + "/case/create/case_name",
+                        calulate: mug.p.case_name
+                    });
+                    if (mug.p.ownerName) {
+                        ret.push({
+                            nodeset: mug.absolutePath + "/case/create/owner_name",
+                            calulate: '/data/meta/userID'
+                        });
+                    }
+                }
+                return ret;
             },
             parseDataNode: function (mug, $node) {
                 var case_ = $node.children(),
@@ -203,6 +229,15 @@ define([
                     properties: [
                         "nodeID",
                         "caseProperties",
+                    ],
+                },
+                {
+                    slug: "create",
+                    displayName: "Create",
+                    properties: [
+                        "createCaseType",
+                        "createCaseName",
+                        "ownerName"
                     ],
                 }
             ]
@@ -233,6 +268,7 @@ define([
                 if (path !== basePath) {
                     mug = form.getMugByPath(basePath);
                     if (mug.__className === "SaveToCase") {
+                        var attribute = _.last(path.split(/\/case\/(create|update|close|index)\//));
                         mug.p.caseProperties.relevantAttr = el.attr("relevant");
                         mug.p.caseProperties.source = el.attr("calculate");
                         return;
