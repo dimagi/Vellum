@@ -749,11 +749,13 @@ define([
             //    this.fixBrokenReferences(mug);
             //}
             if (mug.options.isODKOnly) {
-                this.updateError({
+                // is this a good candidate for "info" message level?
+                mug.addMessage(null, {
+                    key: 'form-odk-only-warning',
+                    level: 'warning',
                     message: mug.options.typeName + ' works on Android devices ' +
                         'and some feature phones; please test your specific ' +
-                        'model to ensure that this question type is supported',
-                    level: 'form-warning'
+                        'model to ensure that this question type is supported'
                 });
             }
             return mug;

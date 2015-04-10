@@ -123,6 +123,13 @@ define([
             assert.equal(msg[0].text, messages[0].message);
         });
 
+        it("should add ODK warning to mug on create Audio question", function () {
+            util.loadXML("");
+            var mug = util.addQuestion("Audio"),
+                messages = mug.messages.toString();
+            chai.expect(messages).to.include("Android");
+        });
+
         it("should preserve internal references in copied group", function () {
             util.loadXML(GROUP_WITH_INTERNAL_REFS_XML);
             var form = call("getData").core.form,
