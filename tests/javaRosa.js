@@ -434,6 +434,16 @@ require([
             });
         });
 
+        it("should add warning on add Audio output ref to itext", function () {
+            util.loadXML("");
+            var audio = util.addQuestion("Audio", "audio"),
+                text = util.addQuestion("Text", "text"),
+                target = $("[name='itext-en-label']");
+            call("handleDropFinish", target, audio.ufid, audio);
+            chai.expect(text.messages.toString())
+                .to.include("Audio Capture nodes cannot be used in an output value");
+        });
+
         it("should bulk update multi-line translation", function () {
             var form = util.loadXML(TEXT_QUESTION_XML),
                 Itext = util.call("getData").javaRosa.Itext,

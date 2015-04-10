@@ -1162,13 +1162,19 @@ define([
 
     function warnOnNonOutputableValue(form, mug, path) {
         if (!mug.options.canOutputValue) {
-            var typeName = mug.options.typeName;
-            form.updateError({
-                level: "form-warning",
-                message: typeName + " nodes can not be used in an output value. " +
-                    "Please remove the output value for '" + path +
-                    "' or your form will have errors."
-            }, {updateUI: true});
+            // TODO display message near where it was dropped
+            // HACK should be in the itext widget, which has the mug and path
+            var current = form.vellum.getCurrentlySelectedMug(),
+                typeName = mug.options.typeName;
+            if (current) {
+                current.addMessage(null, {
+                    key: "javaRosa-output-value-type-error",
+                    level: "warning",
+                    message: typeName + " nodes cannot be used in an " +
+                        "output value. Please remove the output value for " +
+                        "'" + path + "' or your form will have errors."
+                });
+            }
         }
     }
 
