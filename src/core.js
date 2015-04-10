@@ -710,53 +710,6 @@ define([
             onClosed: function() {}
         });
     };
-        
-    fn._resetMessages = function (errors) {
-        var error, messages_div = this.$f.find('.fd-messages');
-        messages_div.empty();
-
-        function asArray(value) {
-            // TODO: I don't like this array business, should be refactored away
-            // to the callers.
-            if (typeof value === "string" || !(value instanceof Array)) {
-                // value is a string or not-an-array (so try turn it into a string)
-                value = ['' + value];
-            }
-            return value;
-        }
-
-        if (errors.length > 0) {
-            // Show message(s) from the last error only because multiple errors
-            // fill up the screen and thus impede usability.  TODO ideally the
-            // other errors would be accessible in some way.  Maybe hidden by
-            // default with a clickable indicator to show them?
-
-            error = errors[errors.length - 1];
-            messages_div
-                .html(alert_global({
-                    messageType: MESSAGE_TYPES[error.level],
-                    messages: asArray(error.message)
-                }))
-                .find('.alert').removeClass('hide').addClass('in');
-        }
-    };
-  
-    fn.warnOnCircularReference = function(property, form, mug, path, refName) {
-        if (path === "." && (
-            property === "relevantAttr" ||
-            property === "calculateAttr" ||
-            property === "label"
-        )) {
-            var fieldName = mug.p.getDefinition(property).lstring;
-            form.updateError({
-                level: "form-warning",
-                message: "The " + fieldName + " for a question " + 
-                    "is not allowed to reference the question itself. " + 
-                    "Please remove the " + refName + " from the " + fieldName +
-                    " or your form will have errors."
-            }, {updateUI: true});
-        }
-    };
 
     fn.handleDropFinish = function(target, sourceUid, mug) {
         var _this = this,
@@ -963,21 +916,6 @@ define([
         }
 
         return true;
-    };
-
-    fn.setTreeValidationIcon = function (mug) {
-        var node = mug.ufid && this.jstree("get_node", mug.ufid);
-        if (node) {
-            var errors = this.getErrors(mug);
-            if (errors.length) {
-                var msg = errors.join("<p>").replace(/"/g, "'");
-                node.data.errors = '<div class="fd-tree-valid-alert-icon ' +
-                    'icon-exclamation-triangle" title="' + msg + '"></div>';
-            } else {
-                node.data.errors = null;
-            }
-            this.jstree("redraw_node", node);
-        }
     };
 
     fn.onFormChange = function (mug) {
@@ -1591,9 +1529,71 @@ define([
         }
     };
 
+    fn.setTreeValidationIcon = function (mug) {
+        var node = mug.ufid && this.jstree("get_node", mug.ufid);
+        if (node) {
+            var errors = this.getErrors(mug);
+            if (errors.length) {
+                var msg = errors.join("<p>").replace(/"/g, "'");
+                node.data.errors = '<div class="fd-tree-valid-alert-icon ' +
+                    'icon-exclamation-triangle" title="' + msg + '"></div>';
+            } else {
+                node.data.errors = null;
+            }
+            this.jstree("redraw_node", node);
+        }
+    };
+
     fn.getErrors = function (mug) {
         return mug.getErrors().concat(
             this.data.core.form._logicManager.getErrors(mug));
+    };
+
+    fn._resetMessages = function (errors) {
+        var error, messages_div = this.$f.find('.fd-messages');
+        messages_div.empty();
+
+        function asArray(value) {
+            // TODO: I don't like this array business, should be refactored away
+            // to the callers.
+            if (typeof value === "string" || !(value instanceof Array)) {
+                // value is a string or not-an-array (so try turn it into a string)
+                value = ['' + value];
+            }
+            return value;
+        }
+
+        if (errors.length > 0) {
+            // Show message(s) from the last error only because multiple errors
+            // fill up the screen and thus impede usability.  TODO ideally the
+            // other errors would be accessible in some way.  Maybe hidden by
+            // default with a clickable indicator to show them?
+
+            error = errors[errors.length - 1];
+            messages_div
+                .html(alert_global({
+                    messageType: MESSAGE_TYPES[error.level],
+                    messages: asArray(error.message)
+                }))
+                .find('.alert').removeClass('hide').addClass('in');
+        }
+    };
+
+    fn.warnOnCircularReference = function(property, form, mug, path, refName) {
+        if (path === "." && (
+            property === "relevantAttr" ||
+            property === "calculateAttr" ||
+            property === "label"
+        )) {
+            var fieldName = mug.p.getDefinition(property).lstring;
+            form.updateError({
+                level: "form-warning",
+                message: "The " + fieldName + " for a question " + 
+                    "is not allowed to reference the question itself. " + 
+                    "Please remove the " + refName + " from the " + fieldName +
+                    " or your form will have errors."
+            }, {updateUI: true});
+        }
     };
 
     fn.getSectionDisplay = function (mug, options) {
