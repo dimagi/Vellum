@@ -463,7 +463,7 @@ define([
             _this._hideConfirmDialog();
         }
         function validateMug(mug) {
-            return !_this.getErrors(mug).length;
+            return !mug.getErrors().length;
         }
         // todo: should this also show up for saving? Did it at some point in
         // the past?
@@ -1531,7 +1531,7 @@ define([
     fn.setTreeValidationIcon = function (mug) {
         var node = mug.ufid && this.jstree("get_node", mug.ufid);
         if (node) {
-            var errors = this.getErrors(mug);
+            var errors = mug.getErrors();
             if (errors.length) {
                 var msg = errors.join("<p>").replace(/"/g, "'");
                 node.data.errors = '<div class="fd-tree-valid-alert-icon ' +
@@ -1541,10 +1541,6 @@ define([
             }
             this.jstree("redraw_node", node);
         }
-    };
-
-    fn.getErrors = function (mug) {
-        return mug.getErrors();
     };
 
     fn._resetMessages = function (errors) {

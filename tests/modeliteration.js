@@ -211,7 +211,7 @@ require([
                          "/data/product/item/text",
                          "output value mismatch");
             var errors = _.flatten(_.map([blue, text], function (mug) {
-                    return call("getErrors", mug);
+                    return mug.getErrors();
                 }));
             assert(!errors.length, errors.join("\n"));
         });
@@ -244,7 +244,7 @@ require([
                          "/data/product/text",
                          "output value mismatch");
             var errors = _.flatten(_.map([blue, text], function (mug) {
-                    return call("getErrors", mug);
+                    return mug.getErrors();
                 }));
             assert(!errors.length, errors.join("\n"));
         });
