@@ -1375,7 +1375,8 @@ define([
         }
         this._propertiesMug = mug;
         var $content = this.$f.find(".fd-props-content").empty(),
-            sections = this.getSections(mug);
+            sections = this.getSections(mug),
+            $messages = $("<div class='messages' />");
 
         this.$f.find('.fd-props-toolbar').html(this.getMugToolbar(mug));
         for (var i = 0; i < sections.length; i++) {
@@ -1387,10 +1388,24 @@ define([
                 .filter(_.identity);
            
             if (section.properties.length) {
-                this.getSectionDisplay(mug, section)
-                    .appendTo($content);
+                this.getSectionDisplay(mug, section).appendTo($content);
             }
         }
+
+        // Setup area for messages not associated with a property/widget.
+        if ($content.children().length) {
+            $messages.insertAfter($content.children().first());
+        } else {
+            $messages.appendTo($content);
+        }
+        function refreshMessages() {
+            $messages.empty().append(widgets.getMessages(mug, null));
+        }
+        mug.on("messages-changed", refreshMessages, null, $messages);
+        mug.on("teardown-mug-properties", function () {
+            mug.unbind($messages);
+        }, null, $messages);
+        refreshMessages();
 
         $props.show();
         this.$f.find('.fd-help').fdHelp();

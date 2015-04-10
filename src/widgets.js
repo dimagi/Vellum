@@ -124,22 +124,9 @@ define([
         };
 
         widget.refreshMessages = function () {
-            var $messages = $();
-            mug.messages.each(path, function (msg) {
-                var html = $(widget_control_message({
-                        msg: msg,
-                        html: /\n/.test(msg.message) ?
-                                util.markdownlite(msg.message) : ""
-                    }));
-                html.find("button.close").click(function () {
-                    mug.dropMessage(path, msg.key);
-                });
-                $messages = $messages.add(html);
-            });
-            var $container = widget.getMessagesContainer().empty();
-            if ($messages.length) {
-                $container.append($messages);
-            }
+            widget.getMessagesContainer()
+                  .empty()
+                  .append(getMessages(mug, path));
         };
 
         mug.on("messages-changed", widget.refreshMessages, null, widget);
@@ -412,6 +399,21 @@ define([
         return uiElem;
     };
 
+    function getMessages(mug, path) {
+        var $messages = $();
+        mug.messages.each(path, function (msg) {
+            var html = $(widget_control_message({
+                    msg: msg,
+                    html: /\n/.test(msg.message) ?
+                            util.markdownlite(msg.message) : ""
+                }));
+            html.find("button.close").click(function () {
+                mug.dropMessage(path, msg.key);
+            });
+            $messages = $messages.add(html);
+        });
+        return $messages;
+    }
 
     return {
         base: base,
@@ -423,6 +425,7 @@ define([
         xPath: xPath,
         baseKeyValue: baseKeyValue,
         readOnlyControl: readOnlyControl,
+        getMessages: getMessages,
         util: {
             getUIElementWithEditButton: getUIElementWithEditButton,
             getUIElement: getUIElement

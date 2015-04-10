@@ -142,18 +142,9 @@ define([
         /**
          * Add a message for a property
          *
-         * A message object has the following attributes:
-         *
-         *  {
-         *      key: <message type key>,
-         *      level: <"warning", or "error">,
-         *      message: <message string>
-         *  }
-         *
          * Adding a message object with the same key as an existing
-         * message will replace the existing message. Messages can be
-         * removed by adding a message object with the same key and a
-         * blank message when the message no longer applies.
+         * message will replace the existing message.
+         * See `MugMessages.update` for more about message objects.
          *
          * This method may fire a "messages-changed" event.
          *
@@ -190,11 +181,12 @@ define([
          * Get a list of error message strings
          *
          * Currently there are only two message levels: "warning" and
-         * "error". If a lower level message type such as "info" is
-         * added we may want to change this to drop "info" messages.
+         * "error", and this function returns both. If a lower level
+         * message type such as "info" is added we may want to change
+         * this to drop "info" messages.
          */
-        getErrors: function (attr) {
-            return this.messages.get(attr);
+        getErrors: function () {
+            return this.messages.get();
         },
         /**
          * Get a list of form serialization warnings
@@ -352,9 +344,23 @@ define([
     }
     MugMessages.prototype = {
         /**
-         * Update messages for property, return true if changed else false
+         * Update messages for property
+         *
+         * @param attr - The attribute to which the message applies.
+         *      This may be a falsey value (typically `null`) for
+         *      messages that are not associated with a property.
+         * @param msg - A message object.
+         *
+         *      {
+         *          key: <message type key>,
+         *          level: <"warning", or "error">,
+         *          message: <message string>
+         *      }
+         *
+         * @returns - true if changed else false
          */
         update: function (attr, msg) {
+            attr = attr || "";
             if (arguments.length === 1) {
                 if (this.messages.hasOwnProperty(attr)) {
                     delete this.messages[attr];
@@ -396,8 +402,8 @@ define([
             return true;
         },
         get: function (attr) {
-            if (attr) {
-                return _.flatten(_.pluck(this.messages[attr], "message"));
+            if (arguments.length) {
+                return _.flatten(_.pluck(this.messages[attr || ""], "message"));
             }
             return _.flatten(_.map(this.messages, function (messages) {
                 return _.pluck(messages, "message");
@@ -415,8 +421,8 @@ define([
          */
         each: function () {
             var attr, callback;
-            if (arguments.length > 1 && arguments[1]) {
-                attr = arguments[0];
+            if (arguments.length > 1) {
+                attr = arguments[0] || "";
                 callback = arguments[1];
                 _.each(this.messages[attr], callback);
             } else {
