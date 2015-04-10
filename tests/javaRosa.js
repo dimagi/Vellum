@@ -42,41 +42,33 @@ require([
         call = util.call;
 
     describe("The javaRosa plugin with multiple languages", function () {
-        it("should not show itext errors when there is text in any language", function (done) {
+        before(function (done) {
             util.init({
                 javaRosa: {langs: ['en', 'hin']},
-                core: {
-                    form: TEST_XML_1, 
-                    onReady: function () {
-                        $("textarea[name=itext-en-constraintMsg]").val("").change();
-                        util.saveAndReload(function () {
-                            // there should be no errors on load
-                            // todo: this should inspect the model, not UI
-                            var errors = $(".alert-block");
-                            assert.equal(errors.length, 0, errors.text());
-                            done();
-                        });
-                    }
-                }
+                core: {onReady: function () { done(); }}
             });
         });
 
-        it("should show warning on load for with unknown language", function (done) {
-            util.init({
-                javaRosa: {langs: ['en', 'hin']},
-                core: {
-                    form: TEST_XML_3,
-                    onReady: function () {
-                        // todo: this should inspect the model, not UI
-                        var errors = $(".alert-block"),
-                            text = errors.text();
-                        assert.equal(errors.length, 1, text);
-                        assert(text.indexOf("You have languages in your form that are not specified") > -1, text);
-                        assert(text.indexOf("page: es.") > -1, text);
-                        done();
-                    }
-                }
+        it("should not show itext errors when there is text in any language", function (done) {
+            util.loadXML(TEST_XML_1);
+            $("textarea[name=itext-en-constraintMsg]").val("").change();
+            util.saveAndReload(function () {
+                // there should be no errors on load
+                // todo: this should inspect the model, not UI
+                var errors = $(".alert-block");
+                assert.equal(errors.length, 0, errors.text());
+                done();
             });
+        });
+
+        it("should show warning on load for with unknown language", function () {
+            util.loadXML(TEST_XML_3, null, /You have languages in your form/);
+            // todo: this should inspect the model, not UI
+            var errors = $(".alert-block"),
+                text = errors.text();
+            assert.equal(errors.length, 1, text);
+            assert(text.indexOf("You have languages in your form that are not specified") > -1, text);
+            assert(text.indexOf("page: es.") > -1, text);
         });
 
         it("should preserve itext values on load + save", function (done) {
@@ -400,24 +392,22 @@ require([
             }}});
         });
 
-        it("output ref deleted with single delete keypress", function (done) {
-            util.init({core: {onReady: function () {
-                var mug = util.addQuestion("Text", "question1");
+        it("output ref deleted with single delete keypress", function () {
+            util.loadXML("");
+            var mug = util.addQuestion("Text", "question1");
 
-                var target = $("[name='itext-en-label']");
-                target.val('question1 <output value="/data/question2" /> end').change();
-                vellum_util.setCaretPosition(target[0], 10);
+            var target = $("[name='itext-en-label']");
+            target.val('question1 <output value="/data/question2" /> end').change();
+            vellum_util.setCaretPosition(target[0], 10);
 
-                target.trigger({
-                    type: "keydown",
-                    which: 46,
-                    ctrlKey: false
-                });
-                target.change();
-                var val = mug.p.labelItext.get('default', 'en');
-                assert.equal(val, 'question1  end');
-                done();
-            }}});
+            target.trigger({
+                type: "keydown",
+                which: 46,
+                ctrlKey: false
+            });
+            target.change();
+            var val = mug.p.labelItext.get('default', 'en');
+            assert.equal(val, 'question1  end');
         });
 
         it("should update output ref on group rename", function (done) {
