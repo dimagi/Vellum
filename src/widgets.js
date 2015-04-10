@@ -1,10 +1,12 @@
 define([
     'tpl!vellum/templates/widget_control_keyvalue',
+    'tpl!vellum/templates/widget_update_case',
     'underscore',
     'jquery',
     'vellum/util'
 ], function (
     widget_control_keyvalue,
+    widget_update_case,
     _,
     $,
     util
@@ -292,6 +294,80 @@ define([
         return widget;
     };
 
+    var saveCaseProp = function (mug, options) {
+        var widget = normal(mug, options),
+            id = options.id;
+        widget.definition = {};
+
+        // todo make a style for this when vellum gets a facelift
+        widget.kvInput = $('<div class="control-row" />').attr('name', id);
+
+        widget.getControl = function () {
+            if (widget.isDisabled()) {
+                // todo
+            }
+            return widget.kvInput;
+        };
+
+        widget.setValue = function (value) {
+            value = _.isUndefined(value) ? {} : value;
+            widget.kvInput.html(widget_update_case({
+                props: value
+            }));
+            widget.kvInput.find('input').bind('change keyup', function () {
+                widget.handleChange();
+            });
+            widget.kvInput.find('.fd-add-update-property').click(function (e) {
+                widget.refreshControl();
+                e.preventDefault();
+            });
+            widget.kvInput.find('.fd-remove-update-property').click(function (e) {
+                $(this).parent().parent().parent().remove();
+                widget.refreshControl();
+                widget.save();
+                e.preventDefault();
+            });
+        };
+
+        widget.getValue = function () {
+            var currentValues = {};
+            _.each(widget.kvInput.find('.fd-update-property'), function (kvPair) {
+                var $pair = $(kvPair);
+                currentValues[$pair.find('.fd-update-property-name').val()] = {
+                    calculate: $pair.find('.fd-update-property-source').val(),
+                    relevant: $pair.find('.fd-update-property-relevant').val(),
+                };
+            });
+            return currentValues;
+        };
+
+        widget.save = function () {
+            this.mug.p[this.path] = this.getValue();
+        };
+
+        widget.getValidValues = function () {
+            var values = _.clone(widget.getValue());
+            if (values[""]) {
+                delete values[""];
+            }
+            return values;
+        };
+
+        widget.updateValue = function () {
+            var currentValues = widget.getValue();
+            if (!("" in currentValues)) {
+                widget.kvInput.find('.btn').removeClass('hide');
+                widget.kvInput.find('.fd-remove-update-property').removeClass('hide');
+            }
+            widget.save();
+        };
+
+        widget.refreshControl = function () {
+            widget.setValue(widget.getValue());
+        };
+
+        return widget;
+    };
     
     var readOnlyControl = function (mug, options) {
         options.id = "readonly-control";
@@ -361,6 +437,7 @@ define([
         xPath: xPath,
         baseKeyValue: baseKeyValue,
         readOnlyControl: readOnlyControl,
+        saveCaseProp: saveCaseProp,
         util: {
             getUIElementWithEditButton: getUIElementWithEditButton,
             getUIElement: getUIElement

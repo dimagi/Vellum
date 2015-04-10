@@ -118,6 +118,10 @@ define([
         return mug ? mug.p.use_close : false;
     }
 
+    function updatesCase(mug) {
+        return mug ? mug.p.use_update : false;
+    }
+
     var CASE_XMLNS = "http://commcarehq.org/case/transaction/v2",
         saveToCaseMugOptions = {
             typeName: 'Save to Case',
@@ -163,6 +167,18 @@ define([
                     visibility: 'visible',
                     presence: 'optional',
                     widget: widgets.xPath
+                },
+                "use_update": {
+                    lstring: "Update Case",
+                    visibility: 'visible',
+                    presence: 'optional',
+                    widget: widgets.checkbox
+                },
+                "update_property": {
+                    lstring: "Update",
+                    visibility: 'visible',
+                    presence: 'optional',
+                    widget: widgets.saveCaseProp
                 }
             },
             getExtraDataAttributes: function (mug) {
@@ -184,9 +200,9 @@ define([
                     return node;
                 }
 
-                var actions = [];
+                var actions = [], columns;
                 if (createsCase(mug)) {
-                    var columns = [
+                    columns = [
                         simpleNode('case_type', [], mug.p.case_type), 
                         simpleNode('case_name')
                     ];
@@ -194,6 +210,13 @@ define([
                         columns.push(simpleNode('owner_id'));
                     }
                     actions.push(simpleNode('create', columns));
+                }
+
+                if (updatesCase(mug)) {
+                    columns = _.map(mug.p.update_property, function(v, k) {
+                        return simpleNode(k);
+                    });
+                    actions.push(simpleNode('update', columns));
                 }
 
                 if (closesCase(mug)) {
@@ -229,6 +252,15 @@ define([
                         });
                     }
                 }
+                if (updatesCase(mug)) {
+                    ret = ret.concat(_.map(mug.p.update_property, function(v, k) {
+                        return {
+                            nodeset: mug.absolutePath + "/case/update/" + k,
+                            calculate: v.calculate,
+                            relevant: v.relevant
+                        };
+                    }));
+                }
                 if (closesCase(mug)) {
                     ret.push({
                         nodeset: mug.absolutePath + "/case/close",
@@ -239,16 +271,18 @@ define([
             },
             parseDataNode: function (mug, $node) {
                 var case_ = $node.children(),
-                    action = case_.children(),
-                    properties = action.children(),
                     create = case_.find('create'),
-                    close = case_.find('close');
+                    close = case_.find('close'),
+                    update = case_.find('update');
                 if (create && create.length !== 0) {
                     mug.p.use_create = true;
                     mug.p.case_type = $.trim(create.find('case_type').text());
                     if (create.find('owner_id')) {
                         mug.p.owner_id = true;
                     }
+                }
+                if (update && update.length !== 0) {
+                    mug.p.use_update = true;
                 }
                 if (close && close.length !== 0) {
                     mug.p.use_close = true;
@@ -274,6 +308,22 @@ define([
                         "case_type",
                         "case_name",
                         "owner_id"
+                    ],
+                },
+                {
+                    slug: "update",
+                    displayName: "Update",
+                    properties: [
+                        "use_update",
+                        "update_property",
+                    ],
+                },
+                {
+                    slug: "close",
+                    displayName: "Close",
+                    properties: [
+                        "use_close",
+                        "close_condition",
                     ],
                 }
             ]
@@ -304,11 +354,25 @@ define([
                 if (path !== basePath) {
                     mug = form.getMugByPath(basePath);
                     if (mug.__className === "SaveToCase") {
-                        var createAttr = _.last(path.split(/\/case\/create\//));
-                        if (createAttr === "owner_id") {
+                        if (/\/case\/create\/[\w_]*$/.test(path)) {
+                            var createAttr = _.last(path.split(/\/case\/create\//));
+                            if (createAttr && createAttr !== "owner_id") {
+                                mug.p[createAttr] = el.attr("calculate");
+                            }
                             return;
                         }
-                        mug.p[createAttr] = el.attr("calculate");
+                        if (/\/case\/update\/[\w_]*$/.test(path)) {
+                            var updateAttr = _.last(path.split(/\/case\/update\//));
+                            if (updateAttr) {
+                                if (!mug.p.update_property) {
+                                    mug.p.update_property = {};
+                                }
+                                mug.p.update_property[updateAttr] = {
+                                    calculate: el.attr("calculate"),
+                                    relevant: el.attr("relevant")
+                                };
+                            }
+                        }
                         return;
                     }
                 }
