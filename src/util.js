@@ -301,7 +301,42 @@ define([
                 "XML " + (opts.not ? "should not be equivalent" : "mismatch"));
         return patch;
     };
-        
+
+    that.markdownlite = function (text) {
+        // escape html characters and convert
+        // - groups of "- ..." to <ul><li>...</li><li>...</li>...</ul>
+        // - normal lines to <p>line</p>
+        function terminateList() {
+            if (list) {
+                div.append(list);
+                list = null;
+            }
+        }
+        var div = $("<div />"),
+            list = null,
+            trimmed;
+        _.each(text.split("\n"), function (line) {
+            trimmed = line.trim();
+            if (trimmed) {
+                if (trimmed.startsWith("- ")) {
+                    // list item
+                    if (!list) {
+                        list = $("<ul>");
+                    }
+                    list.append($("<li>").text(trimmed.slice(2)));
+                } else {
+                    terminateList();
+                    div.append($("<p>").text(line));
+                }
+            } else {
+                terminateList();
+                // ignore blank line
+            }
+        });
+        terminateList();
+        return div.html();
+    };
+
     return that;
 });
 

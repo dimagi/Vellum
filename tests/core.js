@@ -343,6 +343,26 @@ require([
             }}});
         });
 
+        describe("should show validation error on circular reference", function () {
+            var mug;
+            before(function () {
+                util.loadXML("");
+                mug = util.addQuestion("Text", "text");
+            });
+
+            _.each(["relevantAttr", "calculateAttr", "label"], function (attr) {
+                it("in " + attr, function () {
+                    assert.deepEqual(mug.messages.get(attr), []);
+                    mug.form.vellum.warnOnCircularReference(
+                        attr, mug.form, mug, ".", "period");
+                    assert.equal(mug.messages.get(attr).length, 1,
+                                 mug.messages.toString());
+                    mug.dropMessage(attr, "core-circular-reference-warning");
+                    assert.deepEqual(mug.messages.get(attr), []);
+                });
+            });
+        });
+
         describe("type changer", function () {
             function test(srcType, dstType, allowed) {
                 var show = allowed ? "show " : "not show ";

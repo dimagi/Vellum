@@ -166,6 +166,9 @@ define([
                 this.fire({type: "messages-changed", mug: this});
             }
         },
+        dropMessage: function (attr, key) {
+            this.addMessage(attr, {key: key});
+        },
         /**
          * Add many messages for many properties at once
          *

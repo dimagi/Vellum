@@ -126,7 +126,15 @@ define([
         widget.refreshMessages = function () {
             var $messages = $();
             mug.messages.each(path, function (msg) {
-                $messages = $messages.add($(widget_control_message(msg)));
+                var html = $(widget_control_message({
+                        msg: msg,
+                        html: /\n/.test(msg.message) ?
+                                util.markdownlite(msg.message) : ""
+                    }));
+                html.find("button.close").click(function () {
+                    mug.dropMessage(path, msg.key);
+                });
+                $messages = $messages.add(html);
             });
             var $container = widget.getMessagesContainer().empty();
             if ($messages.length) {
@@ -379,7 +387,7 @@ define([
     var getUIElement = function($input, labelText, isDisabled, help) {
         var uiElem = $("<div />").addClass("widget control-group"),
             $controls = $('<div class="controls" />'),
-            $messages = $('<div class="messages" />'),
+            $messages = $('<div class="controls messages" />'),
             $label = $("<label />").text(labelText);
         $label.addClass('control-label');
         if (help) {

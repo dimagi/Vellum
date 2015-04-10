@@ -1541,19 +1541,21 @@ define([
     };
 
     fn.warnOnCircularReference = function(property, form, mug, path, refName) {
+        // TODO do this in the logic manager
         if (path === "." && (
             property === "relevantAttr" ||
             property === "calculateAttr" ||
             property === "label"
         )) {
             var fieldName = mug.p.getDefinition(property).lstring;
-            form.updateError({
-                level: "form-warning",
-                message: "The " + fieldName + " for a question " + 
-                    "is not allowed to reference the question itself. " + 
-                    "Please remove the " + refName + " from the " + fieldName +
-                    " or your form will have errors."
-            }, {updateUI: true});
+            mug.addMessage(property, {
+                key: "core-circular-reference-warning",
+                level: "warning",
+                message: "The " + fieldName + " for a question " +
+                    "is not allowed to reference the question itself. " +
+                    "Please remove the " + refName + " from the " +
+                    fieldName +" or your form will have errors."
+            });
         }
     };
 
