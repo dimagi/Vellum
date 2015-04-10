@@ -213,9 +213,11 @@ define([
                 }
 
                 if (updatesCase(mug)) {
-                    columns = _.map(mug.p.update_property, function(v, k) {
-                        return simpleNode(k);
-                    });
+                    columns = _.filter(_.map(mug.p.update_property, function(v, k) {
+                        if (k) {
+                            return simpleNode(k);
+                        }
+                    }), function(v) { return v; });
                     actions.push(simpleNode('update', columns));
                 }
 
@@ -253,12 +255,17 @@ define([
                     }
                 }
                 if (updatesCase(mug)) {
-                    ret = ret.concat(_.map(mug.p.update_property, function(v, k) {
-                        return {
-                            nodeset: mug.absolutePath + "/case/update/" + k,
-                            calculate: v.calculate,
-                            relevant: v.relevant
-                        };
+                    var b = _.map(mug.p.update_property, function(v, k) {
+                        if (k) {
+                            return {
+                                nodeset: mug.absolutePath + "/case/update/" + k,
+                                calculate: v.calculate,
+                                relevant: v.relevant
+                            };
+                        }
+                    });
+                    ret = ret.concat(_.filter(b, function(v) {
+                        return v;
                     }));
                 }
                 if (closesCase(mug)) {
