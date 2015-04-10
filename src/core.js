@@ -919,28 +919,6 @@ define([
     };
 
     fn.onFormChange = function (mug) {
-        // Widget change events, in addition to form change events,
-        // trigger mug validation and save button activation because
-        // some mug property values have sub-properties that do not
-        // trigger mug property change events when they are changed.
-        // util.BoundPropertyMap is a possible alternative, but has its
-        // own set of complexities (binding event handlers to mug
-        // property values).
-        if (mug) {
-            try {
-                this.setTreeValidationIcon(mug);
-            } catch (err) {
-                // Some changes can temporarily leave the form in a state where
-                // this will raise an exception (copying a question and you try
-                // to get errors for it before all of its elements have been
-                // populated).
-                // It might be better to add an option for these changes not to
-                // fire a change event.
-                // TODO track them down and handle the errors at their source
-                // rather than here. setTreeValidationIcon should never raise
-                // an error under normal circumstances.
-            }
-        }
         this.data.core.saveButton.fire("change");
     };
 
@@ -1152,7 +1130,6 @@ define([
             }
             if (!e.isInternal) {
                 var prev = _this.jstree("get_prev_dom", e.mug.ufid);
-                _this.showVisualValidation(null);
                 _this.jstree("delete_node", e.mug.ufid);
                 if (prev) {
                     _this.jstree("select_node", prev);
@@ -1215,7 +1192,7 @@ define([
             _this.handleMugParseFinish(mug);
             var inTree = _this.createQuestion(mug, mug.parentMug, 'into');
             if (inTree) {
-                _this.setTreeValidationIcon(mug);
+                mug.validate();
             }
         });
         this.selectSomethingOrHideProperties(true);
@@ -1419,7 +1396,6 @@ define([
         this.$f.find('.fd-help').fdHelp();
 
         this.toggleConstraintItext(mug);
-        this.showVisualValidation(mug);
     };
 
     fn.hideQuestionProperties = function() {
@@ -1517,15 +1493,6 @@ define([
             .on('hide', function () {
                 _this.data.core.isAlertVisible = false;
             });
-    };
-
-    fn.showVisualValidation = function (mug) {
-        // for now form warnings get reset every time validation gets called.
-        this.data.core.form.clearErrors('form-warning');
-      
-        if (mug) {
-            this.setTreeValidationIcon(mug);
-        }
     };
 
     fn.setTreeValidationIcon = function (mug) {

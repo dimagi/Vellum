@@ -132,24 +132,31 @@ define([
             return [{
                 key: "logic-bad-path-warning",
                 level: "warning",
-                message: function () {
+                message: (function () {
                     if (!unknowns.length) {
                         return "";
                     } else if (unknowns.length === 1) {
                         return "Unknown question: " + unknowns[0];
                     }
                     return "Unknown questions:\n- " + unknowns.join("\n- ");
-                }()
+                })()
             }];
         },
-        updateAllReferences: function (mug) {
+        updateReferences: function (mug, property) {
+            function update(property) {
+                _this.clearReferences(mug, property);
+                messages[property] = _this.addReferences(mug, property);
+            }
             // avoid control-only nodes
             if (mug.p.nodeID) {
-                var messages = {};
-                for (var i = 0; i < util.XPATH_REFERENCES.length; i++) {
-                    var property = util.XPATH_REFERENCES[i];
-                    this.clearReferences(mug, property);
-                    messages[property] = this.addReferences(mug, property);
+                var _this = this,
+                    messages = {};
+                if (property) {
+                    if (util.XPATH_REFERENCES.indexOf(property) !== -1) {
+                        update(property);
+                    }
+                } else {
+                    _.each(util.XPATH_REFERENCES, update);
                 }
                 mug.addMessages(messages);
             }

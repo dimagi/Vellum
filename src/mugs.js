@@ -83,13 +83,20 @@ define([
          * Validate mug
          *
          * This method may fire a "messages-changed" event.
+         *
+         * @param attr - The property to validate. All properties will
+         *      be validated if this argument is omitted.
          */
         validate: function (attr) {
-            var changed;
+            var mug = this,
+                changed;
+            this.form.updateLogicReferences(this, attr);
             if (attr) {
                 changed = this._validate(attr);
             } else {
-                throw new Error("TODO validate all properties")
+                _.each(_.keys(this.p.__data), function (attr) {
+                    changed = changed || mug._validate(attr);
+                });
             }
             if (changed) {
                 this.fire({type: "messages-changed", mug: this});
@@ -97,8 +104,13 @@ define([
         },
         _validate: function (attr) {
             var mug = this,
-                spec = mug.spec[attr],
-                value = mug.p[attr],
+                spec = mug.spec[attr];
+            if (!spec) {
+                // should throw error?
+                window.console.log("unexpected property: " + attr);
+                return false;
+            }
+            var value = mug.p[attr],
                 label = spec.lstring || attr,
                 message = "";
 
@@ -495,7 +507,6 @@ define([
                 } else {
                     this.__data[attr] = val;
                 }
-                mug.validate(attr);
                 callback();
             }
         },

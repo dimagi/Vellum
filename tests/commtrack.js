@@ -129,8 +129,11 @@ define([
             var trans = util.addQuestion("Transfer", "t1");
             assert.strictEqual(trans.p.src.value, "");
             assert.strictEqual(trans.p.dest.value, "");
+            trans.validate(); // normally called by widget.handleChange
             assert(!util.isTreeNodeValid(trans),
                 "Transfer question with empty src and dest should be invalid");
+            assert(trans.messages.get("src").length, "src should have messages");
+            assert(trans.messages.get("dest").length, "src should have messages");
         });
 
         it("should create two transfer blocks with the same parent node", function () {

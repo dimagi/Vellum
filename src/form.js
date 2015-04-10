@@ -675,7 +675,7 @@ define([
                 this.insertQuestion(duplicate, parentMug, 'into', true);
             }
 
-            this.updateAllLogicReferences(duplicate);
+            this.updateLogicReferences(duplicate);
             this.vellum.duplicateMugProperties(duplicate);
 
             var children = this.getChildren(mug),
@@ -693,8 +693,8 @@ define([
 
             return [duplicate, pathReplacements];
         },
-        updateAllLogicReferences: function (mug) {
-            this._logicManager.updateAllReferences(mug);
+        updateLogicReferences: function (mug, property) {
+            this._logicManager.updateReferences(mug, property);
         },
         /**
          * Determine if a mug property should change
@@ -718,7 +718,7 @@ define([
                     val: value,
                     previous: previous
                 };
-                this.handleMugPropertyChange(mug, event);
+                mug.validate(property);
                 this.fire(event);
 
                 // legacy, enables auto itext ID behavior, don't add
@@ -733,12 +733,6 @@ define([
 
                 this.fireChange(mug);
             }.bind(this);
-        },
-        handleMugPropertyChange: function (mug, e) {
-            var widget = mug.p.getDefinition(e.property).widget;
-            if (widget && widget.hasLogicReferences) {
-                this.updateAllLogicReferences(mug);
-            }
         },
         createQuestion: function (refMug, position, newMugType, isInternal) {
             var mug = this.mugTypes.make(newMugType, this);
@@ -802,7 +796,7 @@ define([
         },
         fixBrokenReferences: function (mug) {
             function updateReferences(mug) {
-                _this.updateAllLogicReferences(mug);
+                _this.updateLogicReferences(mug);
             }
             var _this = this;
             this._logicManager.forEachBrokenReference(updateReferences);
@@ -837,8 +831,7 @@ define([
             function breakReferences(mug) {
                 if (!seen.hasOwnProperty(mug.ufid)) {
                     seen[mug.ufid] = null;
-                    _this.updateAllLogicReferences(mug);
-                    _this.vellum.setTreeValidationIcon(mug);
+                    _this.updateLogicReferences(mug);
                 }
             }
             var _this = this,
