@@ -114,6 +114,10 @@ define([
         return mug ? mug.p.use_create : false;
     }
 
+    function closesCase(mug) {
+        return mug ? mug.p.use_close : false;
+    }
+
     var CASE_XMLNS = "http://commcarehq.org/case/transaction/v2",
         saveToCaseMugOptions = {
             typeName: 'Save to Case',
@@ -126,27 +130,39 @@ define([
                 xmlnsAttr: { presence: "optional" },
                 "use_create": {
                     lstring: "Create Case",
-                    visibility: 'visibile',
+                    visibility: 'visible',
                     presence: 'optional',
                     widget: widgets.checkbox
                 },
                 "case_type": {
                     lstring: "Case Type",
-                    visibility: 'visibile',
+                    visibility: 'visible',
                     presence: 'optional',
                     widget: widgets.text
                 },
                 "case_name": {
                     lstring: "Case Name",
-                    visibility: 'visibile',
+                    visibility: 'visible',
                     presence: 'optional',
                     widget: widgets.text
                 },
                 "owner_id": {
                     lstring: "Owner ID",
-                    visibility: 'visibile',
+                    visibility: 'visible',
                     presence: 'optional',
                     widget: widgets.checkbox
+                },
+                "use_close": {
+                    lstring: "Close Case",
+                    visibility: 'visible',
+                    presence: 'optional',
+                    widget: widgets.checkbox
+                },
+                "close_condition": {
+                    lstring: "Close Condition",
+                    visibility: 'visible',
+                    presence: 'optional',
+                    widget: widgets.xPath
                 }
             },
             getExtraDataAttributes: function (mug) {
@@ -180,6 +196,10 @@ define([
                     actions.push(simpleNode('create', columns));
                 }
 
+                if (closesCase(mug)) {
+                    actions.push(simpleNode('close'));
+                }
+
                 return [new Tree.Node(actions, {
                     getNodeID: function () { return "c:case"; },
                     p: {rawDataAttributes: null},
@@ -194,7 +214,6 @@ define([
                         }
                     }
                 })];
-
             },
             getBindList: function (mug) {
                 var ret = [];
@@ -210,19 +229,29 @@ define([
                         });
                     }
                 }
+                if (closesCase(mug)) {
+                    ret.push({
+                        nodeset: mug.absolutePath + "/case/close",
+                        relevant: mug.p.close_condition
+                    });
+                }
                 return ret;
             },
             parseDataNode: function (mug, $node) {
                 var case_ = $node.children(),
                     action = case_.children(),
                     properties = action.children(),
-                    create = case_.find('create');
-                if (create) {
+                    create = case_.find('create'),
+                    close = case_.find('close');
+                if (create && create.length !== 0) {
                     mug.p.use_create = true;
                     mug.p.case_type = $.trim(create.find('case_type').text());
                     if (create.find('owner_id')) {
                         mug.p.owner_id = true;
                     }
+                }
+                if (close && close.length !== 0) {
+                    mug.p.use_close = true;
                 }
                 return $([]);
             }
@@ -275,11 +304,22 @@ define([
                 if (path !== basePath) {
                     mug = form.getMugByPath(basePath);
                     if (mug.__className === "SaveToCase") {
-                        var attribute = _.last(path.split(/\/case\/create\//));
-                        if (attribute === "owner_id") {
+                        var createAttr = _.last(path.split(/\/case\/create\//));
+                        if (createAttr === "owner_id") {
                             return;
                         }
-                        mug.p[attribute] = el.attr("calculate");
+                        mug.p[createAttr] = el.attr("calculate");
+                        return;
+                    }
+                }
+                var closePath = path.replace(/\/case\/close$/, "");
+                if (path !== closePath) {
+                    mug = form.getMugByPath(closePath);
+                    if (mug.__className === "SaveToCase") {
+                        var closeAttr = /\/case\/close$/.test(path);
+                        if (closeAttr && mug.p.use_close) {
+                            mug.p.close_condition = el.attr('relevant');
+                        }
                         return;
                     }
                 }
