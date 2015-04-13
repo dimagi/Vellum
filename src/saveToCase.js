@@ -138,23 +138,11 @@ define([
                     presence: 'optional',
                     widget: widgets.checkbox
                 },
-                "case_type": {
-                    lstring: "Case Type",
+                "create_property": {
+                    lstring: "Update",
                     visibility: 'visible',
                     presence: 'optional',
-                    widget: widgets.text
-                },
-                "case_name": {
-                    lstring: "Case Name",
-                    visibility: 'visible',
-                    presence: 'optional',
-                    widget: widgets.text
-                },
-                "owner_id": {
-                    lstring: "Owner ID",
-                    visibility: 'visible',
-                    presence: 'optional',
-                    widget: widgets.checkbox
+                    widget: widgets.saveCaseProp
                 },
                 "use_close": {
                     lstring: "Close Case",
@@ -202,13 +190,11 @@ define([
 
                 var actions = [], columns;
                 if (createsCase(mug)) {
-                    columns = [
-                        simpleNode('case_type', [], mug.p.case_type), 
-                        simpleNode('case_name')
-                    ];
-                    if (mug.p.owner_id) {
-                        columns.push(simpleNode('owner_id'));
-                    }
+                    columns = _.filter(_.map(mug.p.create_property, function(v, k) {
+                        if (k) {
+                            return simpleNode(k);
+                        }
+                    }), function(v) { return v; });
                     actions.push(simpleNode('create', columns));
                 }
 
@@ -241,21 +227,24 @@ define([
                 })];
             },
             getBindList: function (mug) {
-                var ret = [];
+                var ret = [],
+                    b;
                 if (createsCase(mug)) {
-                    ret.push({
-                        nodeset: mug.absolutePath + "/case/create/case_name",
-                        calculate: mug.p.case_name
+                    b = _.map(mug.p.create_property, function(v, k) {
+                        if (k) {
+                            return {
+                                nodeset: mug.absolutePath + "/case/create/" + k,
+                                calculate: v.calculate,
+                                relevant: v.relevant
+                            };
+                        }
                     });
-                    if (mug.p.owner_id) {
-                        ret.push({
-                            nodeset: mug.absolutePath + "/case/create/owner_id",
-                            calculate: '/data/meta/userID'
-                        });
-                    }
+                    ret = ret.concat(_.filter(b, function(v) {
+                        return v;
+                    }));
                 }
                 if (updatesCase(mug)) {
-                    var b = _.map(mug.p.update_property, function(v, k) {
+                    b = _.map(mug.p.update_property, function(v, k) {
                         if (k) {
                             return {
                                 nodeset: mug.absolutePath + "/case/update/" + k,
@@ -283,10 +272,6 @@ define([
                     update = case_.find('update');
                 if (create && create.length !== 0) {
                     mug.p.use_create = true;
-                    mug.p.case_type = $.trim(create.find('case_type').text());
-                    if (create.find('owner_id')) {
-                        mug.p.owner_id = true;
-                    }
                 }
                 if (update && update.length !== 0) {
                     mug.p.use_update = true;
@@ -312,9 +297,7 @@ define([
                     displayName: "Create",
                     properties: [
                         "use_create",
-                        "case_type",
-                        "case_name",
-                        "owner_id"
+                        "create_property",
                     ],
                 },
                 {
@@ -363,8 +346,14 @@ define([
                     if (mug.__className === "SaveToCase") {
                         if (/\/case\/create\/[\w_]*$/.test(path)) {
                             var createAttr = _.last(path.split(/\/case\/create\//));
-                            if (createAttr && createAttr !== "owner_id") {
-                                mug.p[createAttr] = el.attr("calculate");
+                            if (createAttr) {
+                                if (!mug.p.create_property) {
+                                    mug.p.create_property = {};
+                                }
+                                mug.p.create_property[createAttr] = {
+                                    calculate: el.attr("calculate"),
+                                    relevant: el.attr("relevant")
+                                };
                             }
                             return;
                         }

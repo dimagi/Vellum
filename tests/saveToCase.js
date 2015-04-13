@@ -30,11 +30,12 @@ define([
 
         it("should load and save a create property", function () {
             util.loadXML(CREATE_PROPERTY_XML);
-            var create = util.getMug("save_to_case");
-            assert.equal(create.p.case_type, "caseType");
-            assert.equal(create.p.case_name, "/data/name");
+            var create = util.getMug("save_to_case"),
+                props = create.p.create_property;
+            assert.equal(props.case_type.calculate, "caseType");
+            assert.equal(props.case_name.calculate, "/data/name");
             assert.equal(create.p.use_create, true);
-            assert.equal(create.p.owner_id, true);
+            assert.equal(props.owner_id.calculate, '/data/meta/userID');
             util.assertXmlEqual(call("createXML"), CREATE_PROPERTY_XML);
         });
 
