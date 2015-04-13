@@ -305,7 +305,7 @@ define([
             .addClass('input-block-level');
 
         var input = widget.input,
-            customXML = "Custom XML has been used";
+            customXML = "Unrecognized lookup table. This form may have been changed outside the form builder";
 
         widget.setValue = function (value, option_name) {
             var val = equivalentOption(value);
