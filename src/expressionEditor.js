@@ -206,8 +206,16 @@ define([
                     source: _.isFunction(options.autocompleteSources) ? options.autocompleteSources() : [],
                     minLength: 0
                 };
-                getLeftQuestionInput().autocomplete(autocompleteOptions);
-                getRightQuestionInput().autocomplete(autocompleteOptions);
+                getLeftQuestionInput()
+                    .autocomplete(autocompleteOptions)
+                    .focus(function(e) {
+                        $(this).autocomplete('search', $(this).val());
+                    });
+                getRightQuestionInput()
+                    .autocomplete(autocompleteOptions)
+                    .focus(function(e) {
+                        $(this).autocomplete('search', $(this).val());
+                    });
                 return $expUI;
             };
 

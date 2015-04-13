@@ -295,6 +295,9 @@ define([
                     minLength: 0,
                     change: changeFunction,
                     close: changeFunction
+                }).focus(function (e) {
+                    // populate the list
+                    $(this).autocomplete('search', $(this).val());
                 });
             },
             element: widgets.util.getUIElement(input, label, isDisabled),
