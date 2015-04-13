@@ -132,6 +132,24 @@ define([
             init: function (mug, form) {},
             spec: {
                 xmlnsAttr: { presence: "optional" },
+                "date_modified": {
+                    lstring: "Date modified",
+                    visibility: 'visible',
+                    presence: 'required',
+                    widget: widgets.xPath,
+                    validationFunc: function (mug) {
+                        if (mug.p.date_modified === "") {
+                            return "Date Modified is required";
+                        }
+                        return 'pass';
+                    }
+                },
+                "user_id": {
+                    lstring: "User ID",
+                    visibility: 'visible',
+                    presence: 'optional',
+                    widget: widgets.xPath
+                },
                 "use_create": {
                     lstring: "Create Case",
                     visibility: 'visible',
@@ -304,6 +322,18 @@ define([
                         relevant: mug.p.close_condition
                     });
                 }
+
+                if (createsCase(mug) || updatesCase(mug) || closesCase(mug)) {
+                    ret.push({
+                        nodeset: mug.absolutePath + "/case/@date_modified",
+                        calculate: mug.p.date_modified,
+                        type: "xsd:dateTime"
+                    });
+                    ret.push({
+                        nodeset: mug.absolutePath + "/case/@user_id",
+                        calculate: mug.p.user_id
+                    });
+                }
                 return ret;
             },
             parseDataNode: function (mug, $node) {
@@ -330,7 +360,8 @@ define([
                     displayName: "Basic",
                     properties: [
                         "nodeID",
-                        "caseProperties",
+                        "date_modified",
+                        "user_id",
                     ],
                 },
                 {
@@ -421,6 +452,23 @@ define([
                         if (closeAttr && mug.p.use_close) {
                             mug.p.close_condition = el.attr('relevant');
                         }
+                        return;
+                    }
+                }
+
+                var datePath = path.replace(/\/case\/@date_modified$/, "");
+                if (path !== datePath) {
+                    mug = form.getMugByPath(datePath);
+                    if (mug.__className === "SaveToCase") {
+                        mug.p.date_modified = el.attr('calculate');
+                        return;
+                    }
+                }
+                var userPath = path.replace(/\/case\/@user_id/, "");
+                if (path !== userPath) {
+                    mug = form.getMugByPath(userPath);
+                    if (mug.__className === "SaveToCase") {
+                        mug.p.user_id = el.attr('calculate');
                         return;
                     }
                 }

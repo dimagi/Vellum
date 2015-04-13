@@ -15,6 +15,8 @@
 			</instance>
 			<bind nodeset="/data/name" type="xsd:string" />
 			<bind nodeset="/data/save_to_case/case/close" relevant="1=1" />
+			<bind nodeset="/data/save_to_case/case/@date_modified" calculate="/data/meta/timeEnd" type="xsd:dateTime" />
+			<bind nodeset="/data/save_to_case/case/@user_id" calculate="/data/meta/userID" />
 			<itext>
 				<translation lang="en" default="">
 					<text id="name-label">

@@ -21,6 +21,8 @@
 			<bind nodeset="/data/save_to_case/case/create/case_type" calculate="caseType" />
 			<bind nodeset="/data/save_to_case/case/create/case_name" calculate="/data/name" />
 			<bind nodeset="/data/save_to_case/case/create/owner_id" calculate="/data/meta/userID" />
+			<bind nodeset="/data/save_to_case/case/@date_modified" calculate="/data/meta/timeEnd" type="xsd:dateTime" />
+			<bind nodeset="/data/save_to_case/case/@user_id" calculate="/data/meta/userID" />
 			<itext>
 				<translation lang="en" default="">
 					<text id="name-label">

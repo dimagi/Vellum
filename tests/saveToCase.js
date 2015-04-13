@@ -36,6 +36,8 @@ define([
             assert.equal(props.case_name.calculate, "/data/name");
             assert.equal(create.p.use_create, true);
             assert.equal(props.owner_id.calculate, '/data/meta/userID');
+            assert.equal(create.p.date_modified, '/data/meta/timeEnd');
+            assert.equal(create.p.user_id, "/data/meta/userID");
             util.assertXmlEqual(call("createXML"), CREATE_PROPERTY_XML);
         });
 
