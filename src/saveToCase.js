@@ -142,7 +142,27 @@ define([
                     lstring: "Update",
                     visibility: 'visible',
                     presence: 'optional',
-                    widget: widgets.saveCaseProp
+                    widget: widgets.saveCaseProp,
+                    validationFunc: function (mug) {
+                        if (mug.p.use_create) {
+                            var props = _.without(_.keys(mug.p.create_property), ""),
+                                required = ["case_type", "case_name"],
+                                optional = ["owner_id"],
+                                legal = _.union(required, optional),
+                                illegalProps = _.difference(props, legal),
+                                requiredProps = _.intersection(props, required);
+
+                            if (requiredProps.length !== required.length) {
+                                return "You must include " + 
+                                    required.join(", ") + 
+                                    " columns to create a case";
+                            } else if (illegalProps.length > 0) {
+                                return illegalProps.join(", ") +
+                                    " are invalid properties";
+                            }
+                        }
+                        return 'pass';
+                    }
                 },
                 "use_close": {
                     lstring: "Close Case",
