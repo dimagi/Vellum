@@ -50,7 +50,7 @@ define([
 
     Itemset = util.extend(mugs.defaultOptions, {
         isControlOnly: true,
-        typeName: 'External Data',
+        typeName: 'Lookup Table Data',
         tagName: 'itemset',
         icon: 'icon-circle-blank',
         isTypeChangeable: false,
@@ -145,7 +145,7 @@ define([
             types.auxiliary.Itemset = Itemset;
             types.normal = $.extend(types.normal, {
                 "MSelectDynamic": util.extend(mugTypes.MSelect, {
-                    typeName: 'Multiple Answer - Dynamic List',
+                    typeName: 'Multiple Answer - Lookup Table',
                     typeChangeError: function (mug, typeName) {
                         return typeName === "SelectDynamic" ? "" : "Can only change to a dynamic single answer";
                     },
@@ -154,7 +154,7 @@ define([
                     afterInsert: afterDynamicSelectInsert,
                 }),
                 "SelectDynamic": util.extend(mugTypes.Select, {
-                    typeName: 'Single Answer - Dynamic List',
+                    typeName: 'Single Answer - Lookup Table',
                     typeChangeError: function (mug, typeName) {
                         return typeName === "MSelectDynamic" ? "" : "Can only change to a dynamic multiple answer";
                     },
@@ -226,7 +226,7 @@ define([
     }
 
     function itemsetWidget(mug, options) {
-        var widget = datasources.fixtureWidget(mug, options, "Data Source"),
+        var widget = datasources.fixtureWidget(mug, options, "Lookup Table"),
             super_getUIElement = widget.getUIElement,
             super_getValue = widget.getValue,
             super_setValue = widget.setValue,
