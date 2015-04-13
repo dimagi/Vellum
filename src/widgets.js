@@ -302,18 +302,22 @@ define([
             .attr("name", widget.id)
             .addClass('input-block-level');
 
-        var input = widget.input;
+        var input = widget.input,
+            customXML = "Custom XML has been used";
 
         widget.setValue = function (value, option_name) {
             var val = equivalentOption(value);
             if (val) {
                 input.val(val.value);
-                input.prop('disabled', false);
             } else {
-                widget.addOption(value, "");
+                widget.addOption(value, customXML);
                 input.val(value);
-                input.prop('disabled', true);
             }
+        };
+
+        widget.isDisabled = function () {
+            return input.find('option:selected').text() === customXML &&
+                   input.val() !== "";
         };
 
         widget.getValue = function () {
