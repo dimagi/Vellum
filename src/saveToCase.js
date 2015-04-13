@@ -150,16 +150,23 @@ define([
                                 optional = ["owner_id"],
                                 legal = _.union(required, optional),
                                 illegalProps = _.difference(props, legal),
-                                requiredProps = _.intersection(props, required);
+                                requiredProps = _.intersection(props, required),
+                                invalidProps = _.filter(props, function(p) {
+                                    return !/[a-z_]*/.test(p);
+                                });
 
                             if (requiredProps.length !== required.length) {
                                 return "You must include " + 
                                     required.join(", ") + 
                                     " columns to create a case";
                             } else if (illegalProps.length > 0) {
-                                return illegalProps.join(", ") +
+                                return "You can only use the following properties: " +
+                                    legal.join(', ');
+                            } else if (invalidProps.length > 0) {
+                                return invalidProps.join(", ") + 
                                     " are invalid properties";
                             }
+
                         }
                         return 'pass';
                     }
@@ -186,7 +193,21 @@ define([
                     lstring: "Update",
                     visibility: 'visible',
                     presence: 'optional',
-                    widget: widgets.saveCaseProp
+                    widget: widgets.saveCaseProp,
+                    validationFunc: function (mug) {
+                        if (mug.p.use_update) {
+                            var props = _.without(_.keys(mug.p.update_property), ""),
+                                invalidProps = _.filter(props, function(p) {
+                                    return !/[a-z_]*/.test(p);
+                                });
+
+                            if (invalidProps.length > 0) {
+                                return invalidProps.join(", ") + 
+                                    " are invalid properties";
+                            }
+                        }
+                        return 'pass';
+                    }
                 }
             },
             getExtraDataAttributes: function (mug) {
