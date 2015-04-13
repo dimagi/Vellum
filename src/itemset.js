@@ -96,6 +96,7 @@ define([
             otherItext: { presence: 'notallowed' },
             appearance: { presence: 'notallowed' },
             itemsetData: {
+                lstring: 'Lookup Table',
                 visibility: 'visible_if_present',
                 presence: 'optional',
                 widget: itemsetWidget,
@@ -249,7 +250,7 @@ define([
         valueRef.onChange(super_handleChange);
 
         widget.getUIElement = function () {
-            return super_getUIElement()
+            return $('<div>').append(super_getUIElement())
                 .append(valueRef.element)
                 .append(labelRef.element);
         };

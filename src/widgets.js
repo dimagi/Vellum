@@ -308,9 +308,11 @@ define([
             var val = equivalentOption(value);
             if (val) {
                 input.val(val.value);
+                input.prop('disabled', false);
             } else {
-                widget.addOption(value, option_name || "");
+                widget.addOption(value, "");
                 input.val(value);
+                input.prop('disabled', true);
             }
         };
 

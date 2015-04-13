@@ -177,7 +177,7 @@ define([
         });
     }
 
-    function dataSourceWidget(mug, options, labelText) {
+    function advancedDataSourceWidget(mug, options, labelText) {
         var widget = widgets.text(mug, options),
             getUIElement = widgets.util.getUIElement,
             getUIElementWithEditButton = widgets.util.getUIElementWithEditButton,
@@ -225,34 +225,11 @@ define([
         getDataSources('fixture', cacheFixtures);
 
         var widget = widgets.dropdown(mug, options), 
-            getUIElement = widgets.util.getUIElement,
-            getUIElementWithEditButton = widgets.util.getUIElementWithEditButton,
             super_getValue = widget.getValue,
             super_setValue = widget.setValue,
             currentValue = null;
 
         widget.addOptions(generateFixtureOptions());
-
-        widget.getUIElement = function () {
-            var query = getUIElementWithEditButton(
-                    getUIElement(widget.input, labelText),
-                    function () {
-                        vellum.displaySecondaryEditor({
-                            source: local_getValue(),
-                            headerText: labelText,
-                            loadEditor: loadDataSourceEditor,
-                            done: function (source) {
-                                if (!_.isUndefined(source)) {
-                                    local_setValue(source);
-                                    widget.handleChange();
-                                }
-                            }
-                        });
-                    },
-                    false
-                );
-            return $("<div></div>").append(query);
-        };
 
         function local_getValue() {
             currentValue = JSON.parse(super_getValue());
@@ -272,7 +249,7 @@ define([
 
     return {
         init: init,
-        dataSourceWidget: dataSourceWidget,
+        advancedDataSourceWidget: advancedDataSourceWidget,
         fixtureWidget: fixtureWidget,
         autocompleteChoices:autocompleteChoices
     };
