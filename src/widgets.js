@@ -210,6 +210,8 @@ define([
             }
             return getUIElementWithEditButton(elem, function () {
                 widget.options.displayXPathEditor({
+                    leftPlaceholder: options.leftPlaceholder,
+                    rightPlaceholder: options.rightPlaceholder,
                     autocompleteSources: autocompleteSources,
                     value: super_getValue(),
                     xpathType: widget.definition.xpathType,

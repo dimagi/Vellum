@@ -61,6 +61,10 @@ define([
 
     function showXPathEditor($div, options) {
         var editorContent = $div;
+        options = _.defaults(options, {
+            leftPlaceholder: "Hint: drag a question here.",
+            rightPlaceholder: "Hint: drag a question here.",
+        });
 
         var getExpressionInput = function () {
             return $div.find(".fd-xpath-editor-text");
@@ -146,7 +150,9 @@ define([
             var newExpressionUIElement = function (expOp) {
 
                 var $expUI = $(xpath_expression({
-                    operationOpts: operationOpts
+                    operationOpts: operationOpts,
+                    leftPlaceholder: options.leftPlaceholder,
+                    rightPlaceholder: options.rightPlaceholder
                 }));
 
                 var getLeftQuestionInput = function () {
