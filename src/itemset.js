@@ -52,17 +52,13 @@ define([
         isControlOnly: true,
         typeName: 'Lookup Table Data',
         tagName: 'itemset',
-        icon: 'icon-circle-blank',
+        icon: 'icon-th',
         isTypeChangeable: false,
         // have to delete the parent select
         isRemoveable: false,
         isCopyable: false,
         getIcon: function (mug) {
-            if (mug.parentMug.__className === "SelectDynamic") {
-                return 'icon-circle-blank';
-            } else {
-                return 'icon-check-empty';
-            }
+            return 'icon-th';
         },
         init: function (mug, form, baseSpec) {
             mug.p.itemsetData = {};
