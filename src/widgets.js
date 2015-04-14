@@ -304,22 +304,16 @@ define([
             .attr("name", widget.id)
             .addClass('input-block-level');
 
-        var input = widget.input,
-            customXML = "Unrecognized lookup table. This form may have been changed outside the form builder";
+        var input = widget.input;
 
-        widget.setValue = function (value, option_name) {
-            var val = equivalentOption(value);
+        widget.setValue = function (value) {
+            var val = widget.equivalentOption(value);
             if (val) {
                 input.val(val.value);
             } else {
-                widget.addOption(value, customXML);
+                widget.addOption(value, "Custom");
                 input.val(value);
             }
-        };
-
-        widget.isDisabled = function () {
-            return input.find('option:selected').text() === customXML &&
-                   input.val() !== "";
         };
 
         widget.getValue = function () {
@@ -357,12 +351,12 @@ define([
             });
         };
 
-        function equivalentOption(val) {
+        widget.equivalentOption = function (val) {
             val = val ? JSON.parse(val) : '';
             return _.find(widget.getOptions(), function (option) {
                 return _.isEqual(option.value ? JSON.parse(option.value) : '', val);
             });
-        }
+        };
 
         return widget;
     };

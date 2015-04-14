@@ -38,24 +38,12 @@ require([
             util.loadXML("");
             util.addQuestion("SelectDynamic", "select1");
             clickQuestion('select1/itemset');
-            assert.equal($('[name=property-itemsetData] option').size(), NUM_OPTIONS + 1);
+            assert.equal($('[name=property-itemsetData] option').size(), NUM_OPTIONS);
         });
 
         it("does not show options with no_option specified", function() {
             util.loadXML("");
             util.addQuestion("SelectDynamic", "select1");
-            clickQuestion('select1/itemset');
-            assert.equal($('[name=property-itemsetData] option').size(), NUM_OPTIONS + 1);
-        });
-
-        it("removes the nothing selected option", function() {
-            util.loadXML("");
-            util.addQuestion("SelectDynamic", "select1");
-            clickQuestion('select1/itemset');
-            var select = $('[name=property-itemsetData]'),
-                firstOption = select.find('option').first().val();
-            assert.equal($('[name=property-itemsetData] option').size(), NUM_OPTIONS + 1);
-            select.val(firstOption).change();
             clickQuestion('select1/itemset');
             assert.equal($('[name=property-itemsetData] option').size(), NUM_OPTIONS);
         });
