@@ -212,7 +212,7 @@ define([
                 widget.options.displayXPathEditor({
                     leftPlaceholder: options.leftPlaceholder,
                     rightPlaceholder: options.rightPlaceholder,
-                    autocompleteSources: autocompleteSources,
+                    leftAutoCompleteSources: autocompleteSources,
                     value: super_getValue(),
                     xpathType: widget.definition.xpathType,
                     done: function (val) {

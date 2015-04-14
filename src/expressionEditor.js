@@ -208,17 +208,21 @@ define([
                     // so we need to update the reference
                     populateQuestionInputBox(getRightQuestionInput(), expOp.right, expOp.left);
                 }
-                var autocompleteOptions = {
-                    source: _.isFunction(options.autocompleteSources) ? options.autocompleteSources() : [],
-                    minLength: 0
-                };
+
+                function autoSources(sources) {
+                    return {
+                        source: _.isFunction(sources) ? sources() : [],
+                        minLength: 0
+                    };
+                }
+
                 getLeftQuestionInput()
-                    .autocomplete(autocompleteOptions)
+                    .autocomplete(autoSources(options.leftAutoCompleteSources))
                     .focus(function(e) {
                         $(this).autocomplete('search', $(this).val());
                     });
                 getRightQuestionInput()
-                    .autocomplete(autocompleteOptions)
+                    .autocomplete(autoSources(options.rightAutoCompleteSources))
                     .focus(function(e) {
                         $(this).autocomplete('search', $(this).val());
                     });
