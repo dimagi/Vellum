@@ -540,6 +540,7 @@ define([
 
         block.getUIElement = function () {
             _.each(block.getForms(), function (form) {
+                if (form === "markdown") { return; }
                 var $formGroup = block.getFormGroupContainer(form);
                 _.each(block.languages, function (lang) {
                     var itextWidget = block.itextWidget(block.mug, lang, form, options);
