@@ -250,10 +250,15 @@ define([
     }
 
     function idsQueryDataSourceWidget(mug, options) {
-        var widget = datasources.fixtureWidget(
+        var widget = datasources.advancedDataSourceWidget(
                                     mug, options, "Model Iteration ID Query"),
             super_getValue = widget.getValue,
             super_setValue = widget.setValue;
+
+        // Make the input in the main properties view read-only to force use of
+        // the data source editor so mug properties will be reloaded on save
+        // -> show/hide repeat_count depending on idsQuery value.
+        widget.input.attr({"readonly": "readonly"});
 
         widget.getValue = function () {
             var val = super_getValue();
