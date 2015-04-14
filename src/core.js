@@ -1500,7 +1500,7 @@ define([
         if (node) {
             var errors = mug.getErrors();
             if (errors.length) {
-                var msg = errors.join("<p>").replace(/"/g, "'");
+                var msg = errors.join("\n").replace(/"/g, "'");
                 node.data.errors = '<div class="fd-tree-valid-alert-icon ' +
                     'icon-exclamation-triangle" title="' + msg + '"></div>';
             } else {
