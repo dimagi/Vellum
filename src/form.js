@@ -414,6 +414,11 @@ define([
                 return node.getValue();
             });
         },
+        /**
+         * Add parsing error to the form
+         *
+         * NOTE these errors are displayed on form load only.
+         */
         updateError: function (errObj) {
             errObj = FormError(errObj);
             if (!errObj.key) {
@@ -430,19 +435,6 @@ define([
                     this.errors.push(errObj);
                 }
             }
-            this.fire({
-                type: 'error-change',
-                errors: this.errors
-            });
-        },
-        clearErrors: function (type) {
-            this.errors = this.errors.filter(function (err) {
-                return err.level !== type;
-            });
-            this.fire({
-                type: 'error-change',
-                errors: this.errors
-            });
         },
         /**
          * Get a list of warnings pertaining to form serialization

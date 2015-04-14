@@ -1137,8 +1137,6 @@ define([
                     _this.selectSomethingOrHideProperties();
                 }
             }
-        }).on('error-change', function (e) {
-            _this._resetMessages(e.errors);
         }).on('question-create', function (e) {
             _this.handleNewMug(e.mug, e.refMug, e.position);
             var currentMug = _this.getCurrentlySelectedMug();
