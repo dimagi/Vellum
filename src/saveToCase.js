@@ -289,35 +289,22 @@ define([
                 })];
             },
             getBindList: function (mug) {
-                var ret = [],
-                    b;
-                if (createsCase(mug)) {
-                    b = _.map(mug.p.create_property, function(v, k) {
-                        if (k) {
-                            return {
-                                nodeset: mug.absolutePath + "/case/create/" + k,
-                                calculate: v.calculate,
-                                relevant: v.relevant
-                            };
-                        }
+                var ret = [];
+                function generateBinds(action, properties) {
+                    return _.map(properties, function(v, k) {
+                        return {
+                            nodeset: mug.absolutePath + "/case/" + action + "/" + k,
+                            calculate: v.calculate,
+                            relevant: v.relevant
+                        };
                     });
-                    ret = ret.concat(_.filter(b, function(v) {
-                        return v;
-                    }));
+                }
+
+                if (createsCase(mug)) {
+                    ret = ret.concat(generateBinds('create', mug.p.create_property));
                 }
                 if (updatesCase(mug)) {
-                    b = _.map(mug.p.update_property, function(v, k) {
-                        if (k) {
-                            return {
-                                nodeset: mug.absolutePath + "/case/update/" + k,
-                                calculate: v.calculate,
-                                relevant: v.relevant
-                            };
-                        }
-                    });
-                    ret = ret.concat(_.filter(b, function(v) {
-                        return v;
-                    }));
+                    ret = ret.concat(generateBinds('update', mug.p.update_property));
                 }
                 if (closesCase(mug)) {
                     ret.push({
