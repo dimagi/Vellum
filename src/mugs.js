@@ -90,16 +90,16 @@ define([
         validate: function (attr) {
             var mug = this,
                 changed;
-            this.form.updateLogicReferences(this, attr);
+            this.form.updateLogicReferences(mug, attr);
             if (attr) {
-                changed = this._validate(attr);
+                changed = mug._validate(attr);
             } else {
-                _.each(_.keys(this.p.__data), function (attr) {
+                _.each(_.keys(mug.p.__data), function (attr) {
                     changed = changed || mug._validate(attr);
                 });
             }
             if (changed) {
-                this.fire({type: "messages-changed", mug: this});
+                this.fire({type: "messages-changed", mug: mug});
             }
             return changed;
         },
