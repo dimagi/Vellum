@@ -281,6 +281,19 @@ define([
         call("jstree", "redraw_node", mug.ufid, true, false, false);
     }
 
+    function getMessages(mug) {
+        var messages = [],
+            last = null;
+        mug.messages.each(function (msg, attr) {
+            if (attr !== last) {
+                messages.push(attr + ":");
+                last = attr;
+            }
+            messages.push("  - " + msg.message); // + " [" + msg.key + "]");
+        });
+        return messages.join("\n");
+    }
+
     return {
         options: options,
         init: init,
@@ -327,6 +340,7 @@ define([
         saveButtonEnabled: saveButtonEnabled,
         expandGroup: expandGroup,
         collapseGroup: collapseGroup,
+        getMessages: getMessages,
         isTreeNodeValid: function (mug) {
             var $node = $("#vellum").find('#' + mug.ufid + ' > a');
             return $node.children(".fd-tree-valid-alert-icon").length === 0;

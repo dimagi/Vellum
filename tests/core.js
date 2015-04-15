@@ -29,6 +29,10 @@ require([
         pluginsWithoutItemset = _(util.options.options.plugins || []).without("itemset");
 
     describe("Vellum core", function () {
+        before(function (done) {
+            util.init({core: {onReady: function () { done(); }}});
+        });
+
         it("should show validation error on add question with duplicate path", function () {
             var form = util.loadXML("");
             util.addQuestion("Text", "question1");
@@ -36,6 +40,20 @@ require([
             dup.p.nodeID = "question1";
             assert(form.vellum.ensureCurrentMugIsSaved(), "mug is not saved");
             assert(!util.isTreeNodeValid(dup), "mug should not be valid");
+        });
+
+        it("should display non-widget message", function () {
+            util.loadXML("");
+            var text = util.addQuestion("Text", "text"),
+                msg = "Test non-widget message.";
+            text.addMessage(null, {
+                key: "testing-1-2-3",
+                level: "error",
+                message: msg
+            });
+            var div = $(".fd-content-right").find(".messages");
+            chai.expect(util.getMessages(text)).to.include(msg);
+            chai.expect(div.text()).to.include(msg);
         });
 
         it("should load form with save button in 'saved' state", function (done) {
@@ -341,6 +359,26 @@ require([
                 );
                 done();
             }}});
+        });
+
+        describe("should show validation error on circular reference", function () {
+            var mug;
+            before(function () {
+                util.loadXML("");
+                mug = util.addQuestion("Text", "text");
+            });
+
+            _.each(["relevantAttr", "calculateAttr", "label"], function (attr) {
+                it("in " + attr, function () {
+                    assert.deepEqual(mug.messages.get(attr), []);
+                    mug.form.vellum.warnOnCircularReference(
+                        attr, mug.form, mug, ".", "period");
+                    assert.equal(mug.messages.get(attr).length, 1,
+                                 util.getMessages(mug));
+                    mug.dropMessage(attr, "core-circular-reference-warning");
+                    assert.deepEqual(mug.messages.get(attr), []);
+                });
+            });
         });
 
         describe("type changer", function () {

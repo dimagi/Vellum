@@ -1,10 +1,12 @@
 define([
     'tpl!vellum/templates/widget_control_keyvalue',
+    'tpl!vellum/templates/widget_control_message',
     'underscore',
     'jquery',
     'vellum/util'
 ], function (
     widget_control_keyvalue,
+    widget_control_message,
     _,
     $,
     util
@@ -56,9 +58,23 @@ define([
             return null;
         };
 
+        widget.refreshMessages = function () {
+            // placeholder to be overridden by widgets that inherit from base
+        };
+
         widget.handleChange = function () {
             widget.updateValue();
-            options.afterChange();
+            // TODO make all widgets that inherit from base set path
+            if (widget.path) {
+                // Widget change events, in addition to mug property
+                // setters, trigger mug validation because some mug
+                // property values have sub-properties that do not
+                // trigger mug property change events when they are
+                // changed. util.BoundPropertyMap is a possible
+                // alternative, but has its own set of complexities
+                // (binding event handlers to mug property values).
+                mug.validate(widget.path);
+            }
             widget.fire("change");
         };
 
@@ -105,9 +121,31 @@ define([
             return widget.input; 
         };
 
+        widget.getMessagesContainer = function () {
+            return widget.getControl()
+                    .closest(".widget.control-group")
+                    .find(".messages:last");
+        };
+
+        widget.getMessages = function (mug, path) {
+            return getMessages(mug, path);
+        };
+
+        widget.refreshMessages = function () {
+            widget.getMessagesContainer()
+                .empty()
+                .append(widget.getMessages(mug, path));
+        };
+
+        mug.on("messages-changed",
+               function () { widget.refreshMessages(); }, null, widget);
+        mug.on("teardown-mug-properties",
+               function (e) { e.mug.unbind(widget); }, null, widget);
+
         widget.save = function () {
             mugValue(mug, widget.getValue());
         };
+
         return widget;
     };
 
@@ -337,13 +375,14 @@ define([
             .click(editFn);
 
         $uiElem.find('label').after(button);
-        $uiElem.find('.controls').css('margin-right', '60px');
+        $uiElem.find('.controls').not(".messages").css('margin-right', '60px');
         return $uiElem;
     };
     
     var getUIElement = function($input, labelText, isDisabled, help) {
         var uiElem = $("<div />").addClass("widget control-group"),
             $controls = $('<div class="controls" />'),
+            $messages = $('<div class="controls messages" />'),
             $label = $("<label />").text(labelText);
         $label.addClass('control-label');
         if (help) {
@@ -364,9 +403,25 @@ define([
         $input.prop('disabled', !!isDisabled);
         $controls.append($input);
         uiElem.append($controls);
+        uiElem.append($messages);
         return uiElem;
     };
 
+    function getMessages(mug, path) {
+        var $messages = $();
+        mug.messages.each(path, function (msg) {
+            var html = $(widget_control_message({
+                    msg: msg,
+                    html: /\n/.test(msg.message) ?
+                            util.markdownlite(msg.message) : ""
+                }));
+            html.find("button.close").click(function () {
+                mug.dropMessage(path, msg.key);
+            });
+            $messages = $messages.add(html);
+        });
+        return $messages;
+    }
 
     return {
         base: base,
@@ -378,6 +433,7 @@ define([
         xPath: xPath,
         baseKeyValue: baseKeyValue,
         readOnlyControl: readOnlyControl,
+        getMessages: getMessages,
         util: {
             getUIElementWithEditButton: getUIElementWithEditButton,
             getUIElement: getUIElement

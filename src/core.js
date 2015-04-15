@@ -463,12 +463,12 @@ define([
             _this._hideConfirmDialog();
         }
         function validateMug(mug) {
-            return !_this.getErrors(mug).length;
+            mug.validate();
+            return !mug.getErrors().length;
         }
         // todo: should this also show up for saving? Did it at some point in
         // the past?
         if (!this.data.core.form.isFormValid(validateMug)) {
-
             var msg = "There are validation errors in the form.  Do you want to continue anyway? WARNING:" +
                       "The form will not be valid and likely not perform correctly on your device!";
             this.setDialogInfo(msg, 'Continue', onContinue, 'Abort', onAbort);
@@ -919,28 +919,6 @@ define([
     };
 
     fn.onFormChange = function (mug) {
-        // Widget change events, in addition to form change events,
-        // trigger mug validation and save button activation because
-        // some mug property values have sub-properties that do not
-        // trigger mug property change events when they are changed.
-        // util.BoundPropertyMap is a possible alternative, but has its
-        // own set of complexities (binding event handlers to mug
-        // property values).
-        if (mug) {
-            try {
-                this.setTreeValidationIcon(mug);
-            } catch (err) {
-                // Some changes can temporarily leave the form in a state where
-                // this will raise an exception (copying a question and you try
-                // to get errors for it before all of its elements have been
-                // populated).
-                // It might be better to add an option for these changes not to
-                // fire a change event.
-                // TODO track them down and handle the errors at their source
-                // rather than here. setTreeValidationIcon should never raise
-                // an error under normal circumstances.
-            }
-        }
         this.data.core.saveButton.fire("change");
     };
 
@@ -1143,13 +1121,15 @@ define([
         }).on('parent-question-type-change', function (e) {
             _this.jstree("set_icon", e.childMug.ufid, e.childMug.getIcon());
         }).on('question-remove', function (e) {
+            if (e.mug) {
+                e.mug.unbind(_this.data.core);
+            }
             var currentMug = _this.getCurrentlySelectedMug();
             if (e.mug && e.mug.parentMug && e.mug.parentMug === currentMug) {
                 _this.displayMugProperties(currentMug);
             }
             if (!e.isInternal) {
                 var prev = _this.jstree("get_prev_dom", e.mug.ufid);
-                _this.showVisualValidation(null);
                 _this.jstree("delete_node", e.mug.ufid);
                 if (prev) {
                     _this.jstree("select_node", prev);
@@ -1157,8 +1137,6 @@ define([
                     _this.selectSomethingOrHideProperties();
                 }
             }
-        }).on('error-change', function (e) {
-            _this._resetMessages(e.errors);
         }).on('question-create', function (e) {
             _this.handleNewMug(e.mug, e.refMug, e.position);
             var currentMug = _this.getCurrentlySelectedMug();
@@ -1212,7 +1190,10 @@ define([
             _this.handleMugParseFinish(mug);
             var inTree = _this.createQuestion(mug, mug.parentMug, 'into');
             if (inTree) {
-                _this.setTreeValidationIcon(mug);
+                var changed = mug.validate();
+                if (!changed && mug.getErrors().length) {
+                    _this.setTreeValidationIcon(mug);
+                }
             }
         });
         this.selectSomethingOrHideProperties(true);
@@ -1349,6 +1330,10 @@ define([
      * @returns The tree node that was created or `false` if it was not created.
      */
     fn.createQuestion = function (mug, refMug, position) {
+        var _this = this;
+        mug.on("messages-changed", function (event) {
+            _this.setTreeValidationIcon(event.mug);
+        }, null, this.data.core);
         return this.jstree("create_node",
             refMug ? "#" + refMug.ufid : "#",
             {
@@ -1388,10 +1373,16 @@ define([
 
         if (this._propertiesMug) {
             this._propertiesMug.teardownProperties();
+            try {
+                this._propertiesMug.validate();
+            } catch (err) {
+                // ignore error
+            }
         }
         this._propertiesMug = mug;
         var $content = this.$f.find(".fd-props-content").empty(),
-            sections = this.getSections(mug);
+            sections = this.getSections(mug),
+            $messages = $("<div class='messages' />");
 
         this.$f.find('.fd-props-toolbar').html(this.getMugToolbar(mug));
         for (var i = 0; i < sections.length; i++) {
@@ -1403,18 +1394,31 @@ define([
                 .filter(_.identity);
            
             if (section.properties.length) {
-                this.getSectionDisplay(mug, section)
-                    .appendTo($content);
+                this.getSectionDisplay(mug, section).appendTo($content);
             }
         }
+
+        // Setup area for messages not associated with a property/widget.
+        if ($content.children().length) {
+            $messages.insertAfter($content.children().first());
+        } else {
+            $messages.appendTo($content);
+        }
+        function refreshMessages() {
+            $messages.empty().append(widgets.getMessages(mug, null));
+        }
+        mug.on("messages-changed", refreshMessages, null, $messages);
+        mug.on("teardown-mug-properties", function () {
+            mug.unbind($messages);
+        }, null, $messages);
+        refreshMessages();
 
         $props.show();
         this.$f.find('.fd-help').fdHelp();
 
         this.toggleConstraintItext(mug);
-        this.showVisualValidation(mug);
     };
-        
+
     fn.hideQuestionProperties = function() {
         this.disableUI();
     };
@@ -1512,29 +1516,12 @@ define([
             });
     };
 
-    fn.showVisualValidation = function (mug) {
-        // for now form warnings get reset every time validation gets called.
-        this.data.core.form.clearErrors('form-warning');
-      
-        if (mug) {
-            this._resetMessages(
-                this.data.core.form.errors.concat(
-                    _.map(this.getErrors(mug), function (error) {
-                        return {
-                            message: error,
-                            level: "form-warning",
-                        };
-                    })));
-            this.setTreeValidationIcon(mug);
-        }
-    };
-
     fn.setTreeValidationIcon = function (mug) {
         var node = mug.ufid && this.jstree("get_node", mug.ufid);
         if (node) {
-            var errors = this.getErrors(mug);
+            var errors = mug.getErrors();
             if (errors.length) {
-                var msg = errors.join("<p>").replace(/"/g, "'");
+                var msg = errors.join("\n").replace(/"/g, "'");
                 node.data.errors = '<div class="fd-tree-valid-alert-icon ' +
                     'icon-exclamation-triangle" title="' + msg + '"></div>';
             } else {
@@ -1542,11 +1529,6 @@ define([
             }
             this.jstree("redraw_node", node);
         }
-    };
-
-    fn.getErrors = function (mug) {
-        return mug.getErrors().concat(
-            this.data.core.form._logicManager.getErrors(mug));
     };
 
     fn._resetMessages = function (errors) {
@@ -1580,19 +1562,21 @@ define([
     };
 
     fn.warnOnCircularReference = function(property, form, mug, path, refName) {
+        // TODO do this in the logic manager
         if (path === "." && (
             property === "relevantAttr" ||
             property === "calculateAttr" ||
             property === "label"
         )) {
             var fieldName = mug.p.getDefinition(property).lstring;
-            form.updateError({
-                level: "form-warning",
-                message: "The " + fieldName + " for a question " + 
-                    "is not allowed to reference the question itself. " + 
-                    "Please remove the " + refName + " from the " + fieldName +
-                    " or your form will have errors."
-            }, {updateUI: true});
+            mug.addMessage(property, {
+                key: "core-circular-reference-warning",
+                level: mug.WARNING,
+                message: "The " + fieldName + " for a question " +
+                    "is not allowed to reference the question itself. " +
+                    "Please remove the " + refName + " from the " +
+                    fieldName +" or your form will have errors."
+            });
         }
     };
 
@@ -1607,9 +1591,6 @@ define([
             $fieldsetContent = $sec.find('.fd-fieldset-content');
         options.properties.map(function (prop) {
             var elemWidget = prop.widget(mug, $.extend(prop.options, {
-                afterChange: function () {
-                    _this.showVisualValidation(mug);
-                },
                 displayXPathEditor: function (options) {
                     _this.data.core.currentlyEditedProperty = prop.options.path;
                     _this.displayXPathEditor(options);
@@ -1620,6 +1601,7 @@ define([
                 _this.onFormChange(mug);
             });
             $fieldsetContent.append(elemWidget.getUIElement());
+            elemWidget.refreshMessages();
         });
         return $sec;
     };

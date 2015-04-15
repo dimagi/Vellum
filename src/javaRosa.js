@@ -466,7 +466,7 @@ define([
             $autoBoxLabel.prepend($autoBox);
             $autoBoxContainer.append($autoBoxLabel);
 
-            $uiElem.find('.controls')
+            $uiElem.find('.controls').not(".messages")
                 .addClass('fd-itextID-controls')
                 .before($autoBoxContainer);
 
@@ -535,6 +535,11 @@ define([
 
         block.getForms = function () {
             return block.forms;
+        };
+
+        block.refreshMessages = function () {
+            // does nothing for now since there are no validation errors
+            // that pertain to itext content
         };
 
         block.getUIElement = function () {
@@ -840,6 +845,9 @@ define([
                 }
             });
         }
+
+        // future proof for when widgets.base sets path
+        widget.path = widget.path || options.path;
 
         widget.displayName = options.displayName;
         widget.itextType = options.itextType;
@@ -1159,13 +1167,19 @@ define([
 
     function warnOnNonOutputableValue(form, mug, path) {
         if (!mug.options.canOutputValue) {
-            var typeName = mug.options.typeName;
-            form.updateError({
-                level: "form-warning",
-                message: typeName + " nodes can not be used in an output value. " +
-                    "Please remove the output value for '" + path +
-                    "' or your form will have errors."
-            }, {updateUI: true});
+            // TODO display message near where it was dropped
+            // HACK should be in the itext widget, which has the mug and path
+            var current = form.vellum.getCurrentlySelectedMug(),
+                typeName = mug.options.typeName;
+            if (current) {
+                current.addMessage(null, {
+                    key: "javaRosa-output-value-type-error",
+                    level: mug.WARNING,
+                    message: typeName + " nodes cannot be used in an " +
+                        "output value. Please remove the output value for " +
+                        "'" + path + "' or your form will have errors."
+                });
+            }
         }
     }
 

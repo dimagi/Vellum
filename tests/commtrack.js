@@ -5,6 +5,7 @@ define([
     'underscore',
     'vellum/commtrack',
     'text!static/commtrack/balance-block.xml',
+    'text!static/commtrack/invalid-transfer.xml',
     'text!static/commtrack/transfer-block.xml'
 ], function (
     util,
@@ -13,6 +14,7 @@ define([
     _,
     commtrack,
     BALANCE_BLOCK_XML,
+    INVALID_TRANSFER_XML,
     TRANSFER_BLOCK_XML
 ) {
     var assert = chai.assert,
@@ -129,8 +131,25 @@ define([
             var trans = util.addQuestion("Transfer", "t1");
             assert.strictEqual(trans.p.src.value, "");
             assert.strictEqual(trans.p.dest.value, "");
+            trans.validate(); // normally called by widget.handleChange
             assert(!util.isTreeNodeValid(trans),
                 "Transfer question with empty src and dest should be invalid");
+            assert(trans.messages.get("src").length, "src should have messages");
+            assert(trans.messages.get("dest").length, "src should have messages");
+        });
+
+        it("new transfer question should not have validation errors", function () {
+            util.loadXML();
+            var trans = util.addQuestion("Transfer", "t1");
+            assert.strictEqual(trans.p.src.value, "");
+            assert.strictEqual(trans.p.dest.value, "");
+            assert.deepEqual(util.getMessages(trans), "");
+        });
+
+        it("should show error icon in tree on load invalid transfer question", function () {
+            util.loadXML(INVALID_TRANSFER_XML);
+            var trans = util.getMug("transfer[@type='trans']");
+            assert(!util.isTreeNodeValid(trans), "tree node should not be valid");
         });
 
         it("should create two transfer blocks with the same parent node", function () {

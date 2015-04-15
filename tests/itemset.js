@@ -119,6 +119,16 @@ require([
 
                 assert.equal(4, (call('createXML').match(/itemset/g) || []).length);
             });
+
+            it("shows validation error on navigate away from blank External Data", function () {
+                util.loadXML();
+                util.addQuestion("SelectDynamic", "select2");
+                var itemset = util.getMug("select2/itemset");
+                clickQuestion("select2/itemset");
+                assert(util.isTreeNodeValid(itemset), "itemset should be valid");
+                clickQuestion("select2");
+                assert(!util.isTreeNodeValid(itemset), "itemset should not be valid");
+            });
         });
     });
 });

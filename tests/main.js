@@ -113,6 +113,7 @@ require(['jquery', 'jquery.vellum'], function ($) {
         function runTests() {
             function showTestResults() {
                 $(".sidebar .nav #resultsTab a").click();
+                return false;
             }
             if (window.mochaPhantomJS) {
                 mochaPhantomJS.run();

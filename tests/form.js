@@ -48,7 +48,8 @@ define([
             form.fixSerializationWarnings(errors);
             assert.equal(one.p.nodeID, "question");
             assert.notEqual(one.absolutePath, two.absolutePath);
-            assert.deepEqual(form.getSerializationWarnings(), []);
+            errors = form.getSerializationWarnings();
+            assert.deepEqual(errors, [], JSON.stringify(errors));
         });
 
         it("should retain expression meaning on rename matching path", function () {
@@ -106,8 +107,27 @@ define([
             blue.form.removeMugFromForm(blue);
             assert(!util.isTreeNodeValid(black), "black should not be valid");
             blue = util.addQuestion("Text", "blue");
-            assert(util.isTreeNodeValid(black),
-                   "black should be valid after blue is added");
+            assert(util.isTreeNodeValid(black), util.getMessages(black));
+        });
+
+        it("should show duplicate question ID warning inline", function () {
+            util.loadXML("");
+            util.addQuestion("Text", "text");
+            var text = util.addQuestion("Text", "text"),
+                messages = text.messages.get("nodeID");
+            assert.equal(messages.length, 1, messages.join("\n"));
+            // UI dependent, possibly fragile
+            var div = $("[name=property-nodeID]").closest(".control-group"),
+                msg = div.find(".messages").children();
+            assert.equal(msg.length, messages.length, msg.text());
+            assert.equal(msg[0].text, messages[0].message);
+        });
+
+        it("should add ODK warning to mug on create Audio question", function () {
+            util.loadXML("");
+            var mug = util.addQuestion("Audio"),
+                messages = util.getMessages(mug);
+            chai.expect(messages).to.include("Android");
         });
 
         it("should preserve internal references in copied group", function () {
@@ -180,8 +200,8 @@ define([
             var select = util.addQuestion("Select", 'select'),
                 item1 = select.form.getChildren(select)[0],
                 item2 = select.form.getChildren(select)[1];
-            assert(util.isTreeNodeValid(item1), "sanity check failed: item1 is invalid");
-            assert(util.isTreeNodeValid(item2), "sanity check failed: item2 is invalid");
+            assert(util.isTreeNodeValid(item1), item1.getErrors().join("\n"));
+            assert(util.isTreeNodeValid(item2), item2.getErrors().join("\n"));
             item2.p.defaultValue = "item1";
             assert(util.isTreeNodeValid(item1), "item1 should be valid");
             assert(!util.isTreeNodeValid(item2), "item2 should be invalid");

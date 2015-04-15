@@ -414,9 +414,13 @@ define([
                 return node.getValue();
             });
         },
-        updateError: function (errObj, options) {
+        /**
+         * Add parsing error to the form
+         *
+         * NOTE these errors are displayed on form load only.
+         */
+        updateError: function (errObj) {
             errObj = FormError(errObj);
-            options = options || {};
             if (!errObj.key) {
                 this.errors.push(errObj);
             }
@@ -431,23 +435,6 @@ define([
                     this.errors.push(errObj);
                 }
             }
-            this.fire({
-                type: 'error-change',
-                errors: this.errors
-            });
-        },
-        clearErrors: function (type, options) {
-            var filterFn = function (err) {
-                return err.level !== type;
-            };
-            options = options || {};
-            for (var i = 0; i < this.errors.length; i++) {
-                this.errors = this.errors.filter(filterFn);
-            }
-            this.fire({
-                type: 'error-change',
-                errors: this.errors
-            });
         },
         /**
          * Get a list of warnings pertaining to form serialization
@@ -541,12 +528,8 @@ define([
                 if (this.findFirstMatchingChild(conflictParent, match)) {
                     mug.p.conflictedNodeId = newId;
                     newId = this.generate_question_id(newId, mug);
-                    // HACK broken abstraction barrier
-                    this.vellum.setTreeValidationIcon(mug);
                 } else if (mug.p.has("conflictedNodeId")) {
-                    mug.p.set("conflictedNodeId"); // clear conflict
-                    // HACK broken abstraction barrier
-                    this.vellum.setTreeValidationIcon(mug);
+                    mug.p.conflictedNodeId = null;
                 }
 
                 if (mug.p.nodeID !== newId) {
@@ -669,7 +652,7 @@ define([
                 var nodeID = mug.p.nodeID;
                 if (nodeID) {
                     if (duplicate.p.conflictedNodeId) {
-                        duplicate.p.set("conflictedNodeId"); // clear conflict
+                        duplicate.p.conflictedNodeId = null;
                     } else {
                         duplicate.p.nodeID = this.generate_question_id(nodeID, mug);
                     }
@@ -684,7 +667,7 @@ define([
                 this.insertQuestion(duplicate, parentMug, 'into', true);
             }
 
-            this.updateAllLogicReferences(duplicate);
+            this.updateLogicReferences(duplicate);
             this.vellum.duplicateMugProperties(duplicate);
 
             var children = this.getChildren(mug),
@@ -702,8 +685,8 @@ define([
 
             return [duplicate, pathReplacements];
         },
-        updateAllLogicReferences: function (mug) {
-            this._logicManager.updateAllReferences(mug);
+        updateLogicReferences: function (mug, property) {
+            this._logicManager.updateReferences(mug, property);
         },
         /**
          * Determine if a mug property should change
@@ -727,7 +710,7 @@ define([
                     val: value,
                     previous: previous
                 };
-                this.handleMugPropertyChange(mug, event);
+                mug.validate(property);
                 this.fire(event);
 
                 // legacy, enables auto itext ID behavior, don't add
@@ -742,12 +725,6 @@ define([
 
                 this.fireChange(mug);
             }.bind(this);
-        },
-        handleMugPropertyChange: function (mug, e) {
-            var widget = mug.p.getDefinition(e.property).widget;
-            if (widget && widget.hasLogicReferences) {
-                this.updateAllLogicReferences(mug);
-            }
         },
         createQuestion: function (refMug, position, newMugType, isInternal) {
             var mug = this.mugTypes.make(newMugType, this);
@@ -764,11 +741,13 @@ define([
             //    this.fixBrokenReferences(mug);
             //}
             if (mug.options.isODKOnly) {
-                this.updateError({
+                // is this a good candidate for "info" message level?
+                mug.addMessage(null, {
+                    key: 'form-odk-only-warning',
+                    level: mug.WARNING,
                     message: mug.options.typeName + ' works on Android devices ' +
                         'and some feature phones; please test your specific ' +
-                        'model to ensure that this question type is supported',
-                    level: 'form-warning'
+                        'model to ensure that this question type is supported'
                 });
             }
             return mug;
@@ -811,8 +790,7 @@ define([
         },
         fixBrokenReferences: function (mug) {
             function updateReferences(mug) {
-                _this.updateAllLogicReferences(mug);
-                _this.vellum.setTreeValidationIcon(mug);
+                _this.updateLogicReferences(mug);
             }
             var _this = this;
             this._logicManager.forEachBrokenReference(updateReferences);
@@ -847,8 +825,7 @@ define([
             function breakReferences(mug) {
                 if (!seen.hasOwnProperty(mug.ufid)) {
                     seen[mug.ufid] = null;
-                    _this.updateAllLogicReferences(mug);
-                    _this.vellum.setTreeValidationIcon(mug);
+                    _this.updateLogicReferences(mug);
                 }
             }
             var _this = this,

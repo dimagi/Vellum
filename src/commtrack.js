@@ -191,10 +191,19 @@ define([
             }
         },
         transferMugValidation = function (mug) {
-            if (mug.p.dest.value || mug.p.src.value) {
-                return 'pass';
+            var error;
+            if ((mug.p.dest && mug.p.dest.value) || (mug.p.src && mug.p.src.value)) {
+                error = {key: "commtrack-transfer-src-dest-error"};
+            } else {
+                error = {
+                    key: "commtrack-transfer-src-dest-error",
+                    level: mug.ERROR,
+                    message: "Transfer must have at least one of source " +
+                             "case and destination case."
+                };
             }
-            return 'Transfer must have at least one of source case and destination case.';
+            mug.addMessages({src: [error], dest: [error]});
+            return 'pass';
         },
         transferMugOptions = {
             typeName: 'Transfer',
