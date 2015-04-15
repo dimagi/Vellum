@@ -136,6 +136,14 @@ define([
             assert(trans.messages.get("dest").length, "src should have messages");
         });
 
+        it("new transfer question should not have validation errors", function () {
+            util.loadXML();
+            var trans = util.addQuestion("Transfer", "t1");
+            assert.strictEqual(trans.p.src.value, "");
+            assert.strictEqual(trans.p.dest.value, "");
+            assert.deepEqual(trans.messages.toString(), "");
+        });
+
         it("should create two transfer blocks with the same parent node", function () {
             util.loadXML();
             util.addQuestion("Transfer", "t1").p.src.value = "value";

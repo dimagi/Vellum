@@ -48,8 +48,7 @@ define([
     Mug.prototype = {
         // set or change question type
         setOptionsAndProperties: function (options, properties) {
-            var _this = this,
-                currentAttrs = properties || (this.p && this.p.getAttrs()) || {};
+            var currentAttrs = properties || (this.p && this.p.getAttrs()) || {};
 
             // These could both be calculated once for each type instead of
             // each instance.
@@ -68,10 +67,10 @@ define([
             this.p = new MugProperties({
                 spec: this.spec,
                 mug: this,
-                shouldChange: _this.form.shouldMugPropertyChange.bind(_this.form),
             });
             this.options.init(this, this.form);
             this.p.setAttrs(currentAttrs);
+            this.p.shouldChange = this.form.shouldMugPropertyChange.bind(this.form);
         },
         getAppearanceAttribute: function () {
             return this.options.getAppearanceAttribute(this);
@@ -452,7 +451,7 @@ define([
         this.__data = {};
         this.__spec = options.spec;
         this.__mug = options.mug;
-        this.shouldChange = options.shouldChange || function () { return function () {}; };
+        this.shouldChange = function () { return function () {}; };
     }
     MugProperties.setBaseSpec = function (baseSpec) {
         _.each(baseSpec, function (spec, name) {
