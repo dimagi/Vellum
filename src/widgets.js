@@ -58,6 +58,10 @@ define([
             return null;
         };
 
+        widget.refreshMessages = function () {
+            // placeholder to be overridden by widgets that inherit from base
+        };
+
         widget.handleChange = function () {
             widget.updateValue();
             // TODO make all widgets that inherit from base set path

@@ -1593,9 +1593,7 @@ define([
                 _this.onFormChange(mug);
             });
             $fieldsetContent.append(elemWidget.getUIElement());
-            if (elemWidget.refreshMessages) {
-                elemWidget.refreshMessages();
-            }
+            elemWidget.refreshMessages();
         });
         return $sec;
     };
