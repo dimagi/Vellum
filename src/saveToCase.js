@@ -58,6 +58,18 @@ define([
                     presence: 'optional',
                     widget: widgets.xPath
                 },
+                "case_id": {
+                    lstring: "Case ID",
+                    visibility: 'visible',
+                    presence: 'optional',
+                    widget: widgets.xPath,
+                    validationFunc: function (mug) {
+                        if (mug.p.case_id === "") {
+                            return "Case ID is required";
+                        }
+                        return 'pass';
+                    }
+                },
                 "use_create": {
                     lstring: "Create Case",
                     visibility: 'visible',
@@ -241,6 +253,13 @@ define([
                         nodeset: mug.absolutePath + "/case/@user_id",
                         calculate: mug.p.user_id
                     });
+
+                    if (!createsCase(mug)) {
+                        ret.push({
+                            nodeset: mug.absolutePath + "/case/@case_id",
+                            calculate: mug.p.case_id
+                        });
+                    }
                 }
                 return ret;
             },
@@ -270,6 +289,7 @@ define([
                         "nodeID",
                         "date_modified",
                         "user_id",
+                        "case_id",
                     ],
                 },
                 {
@@ -390,6 +410,14 @@ define([
                     mug = form.getMugByPath(userPath);
                     if (mug.__className === "SaveToCase") {
                         mug.p.user_id = el.attr('calculate');
+                        return;
+                    }
+                }
+                var caseIdPath = path.replace(/\/case\/@case_id/, "");
+                if (path !== caseIdPath) {
+                    mug = form.getMugByPath(caseIdPath);
+                    if (mug.__className === "SaveToCase") {
+                        mug.p.case_id = el.attr('calculate');
                         return;
                     }
                 }

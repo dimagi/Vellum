@@ -43,9 +43,12 @@ define([
 
         it("should load and save a close property", function () {
             util.loadXML(CLOSE_PROPERTY_XML);
-            var create = util.getMug("save_to_case");
-            assert.equal(create.p.use_close, true);
-            assert.equal(create.p.close_condition, "1=1");
+            var close = util.getMug("save_to_case");
+            assert.equal(close.p.use_close, true);
+            assert.equal(close.p.close_condition, "1=1");
+            assert.equal(close.p.date_modified, '/data/meta/timeEnd');
+            assert.equal(close.p.user_id, "/data/meta/userID");
+            assert.equal(close.p.case_id, "/data/meta/caseID");
             util.assertXmlEqual(call("createXML"), CLOSE_PROPERTY_XML);
         });
 
@@ -59,6 +62,9 @@ define([
                     calculate: "/data/name"
                 }
             }));
+            assert.equal(update.p.date_modified, '/data/meta/timeEnd');
+            assert.equal(update.p.user_id, "/data/meta/userID");
+            assert.equal(update.p.case_id, "/data/meta/caseID");
             util.assertXmlEqual(call("createXML"), UPDATE_PROPERTY_XML);
         });
     });
