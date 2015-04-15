@@ -279,6 +279,9 @@ define([
                         "use_create",
                         "create_property",
                     ],
+                    isCollapsed: function (mug) {
+                        return !createsCase(mug);
+                    },
                 },
                 {
                     slug: "update",
@@ -287,6 +290,9 @@ define([
                         "use_update",
                         "update_property",
                     ],
+                    isCollapsed: function (mug) {
+                        return !updatesCase(mug);
+                    },
                 },
                 {
                     slug: "close",
@@ -295,6 +301,9 @@ define([
                         "use_close",
                         "close_condition",
                     ],
+                    isCollapsed: function (mug) {
+                        return !closesCase(mug);
+                    },
                 }
             ]
         };
@@ -312,7 +321,11 @@ define([
         getSections: function (mug) {
             if (sectionData.hasOwnProperty(mug.__className)) {
                 return _.map(sectionData[mug.__className], function (section) {
-                    return _.clone(section);
+                    var tmpSection = _.clone(section);
+                    if (_.isFunction(tmpSection.isCollapsed)) {
+                        tmpSection.isCollapsed = tmpSection.isCollapsed(mug);
+                    }
+                    return tmpSection;
                 });
             }
             return this.__callOld();
