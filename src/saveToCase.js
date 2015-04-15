@@ -43,7 +43,6 @@ define([
     var saveCasePropWidget = function (mug, options) {
         var widget = widgets.normal(mug, options),
             id = options.id;
-        widget.definition = {};
 
         // todo make a style for this when vellum gets a facelift
         widget.kvInput = $('<div class="control-row" />').attr('name', id);
@@ -162,7 +161,7 @@ define([
                     widget: widgets.checkbox
                 },
                 "create_property": {
-                    lstring: "Update",
+                    lstring: "Properties To Create",
                     visibility: 'visible',
                     presence: 'optional',
                     widget: saveCasePropWidget,
@@ -213,7 +212,7 @@ define([
                     widget: widgets.checkbox
                 },
                 "update_property": {
-                    lstring: "Update",
+                    lstring: "Properties To Update",
                     visibility: 'visible',
                     presence: 'optional',
                     widget: saveCasePropWidget,
