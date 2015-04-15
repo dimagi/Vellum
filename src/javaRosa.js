@@ -1785,7 +1785,7 @@ define([
                                     return itext.name === 'markdown';
                                 });
                             if (markdownForms) {
-                                markdownForms.data = JSON.parse(JSON.stringify(helpItextForm.data));
+                                markdownForms.data = _.clone(helpItextForm.data);
                             }
                         });
 
