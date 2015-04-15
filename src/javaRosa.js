@@ -846,7 +846,7 @@ define([
             });
         }
 
-        // future proof for when widget.base sets path
+        // future proof for when widgets.base sets path
         widget.path = widget.path || options.path;
 
         widget.displayName = options.displayName;

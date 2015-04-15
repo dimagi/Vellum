@@ -345,12 +345,14 @@ define([
     }
     MugMessages.prototype = {
         /**
-         * Update messages for property
+         * Update message for property
          *
          * @param attr - The attribute to which the message applies.
          *      This may be a falsey value (typically `null`) for
          *      messages that are not associated with a property.
-         * @param msg - A message object.
+         * @param msg - A message object. A message object with a blank
+         *      message will cause an existing message with the same
+         *      key to be discarded.
          *
          *      {
          *          key: <message type key>,
@@ -382,7 +384,7 @@ define([
                 var obj = messages[i];
                 if (obj.key === msg.key) {
                     if (obj.level === msg.level && obj.message === msg.message) {
-                        // added messages already exist (no change)
+                        // message already exists (no change)
                         return false;
                     }
                     messages.splice(i, 1);
@@ -404,7 +406,7 @@ define([
         },
         get: function (attr) {
             if (arguments.length) {
-                return _.flatten(_.pluck(this.messages[attr || ""], "message"));
+                return _.pluck(this.messages[attr || ""], "message");
             }
             return _.flatten(_.map(this.messages, function (messages) {
                 return _.pluck(messages, "message");
