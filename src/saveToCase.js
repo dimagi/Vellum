@@ -120,7 +120,7 @@ define([
             isTypeChangeable: false,
             isDataOnly: true,
             supportsDataNodeRole: true,
-            icon: 'icon-italic',
+            icon: 'icon-save',
             init: function (mug, form) {},
             spec: {
                 xmlnsAttr: { presence: "optional" },
