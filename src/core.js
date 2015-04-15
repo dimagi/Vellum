@@ -463,12 +463,12 @@ define([
             _this._hideConfirmDialog();
         }
         function validateMug(mug) {
+            mug.validate();
             return !mug.getErrors().length;
         }
         // todo: should this also show up for saving? Did it at some point in
         // the past?
         if (!this.data.core.form.isFormValid(validateMug)) {
-
             var msg = "There are validation errors in the form.  Do you want to continue anyway? WARNING:" +
                       "The form will not be valid and likely not perform correctly on your device!";
             this.setDialogInfo(msg, 'Continue', onContinue, 'Abort', onAbort);
@@ -1373,6 +1373,11 @@ define([
 
         if (this._propertiesMug) {
             this._propertiesMug.teardownProperties();
+            try {
+                this._propertiesMug.validate();
+            } catch (err) {
+                // ignore error
+            }
         }
         this._propertiesMug = mug;
         var $content = this.$f.find(".fd-props-content").empty(),

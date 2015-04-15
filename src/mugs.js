@@ -1325,6 +1325,7 @@ define([
                 });
             }
 
+            mug.validate();
             form.fire({
                 type: 'question-type-change',
                 qType: typeName,
