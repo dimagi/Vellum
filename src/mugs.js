@@ -85,6 +85,7 @@ define([
          *
          * @param attr - The property to validate. All properties will
          *      be validated if this argument is omitted.
+         * @returns - True if validation messages changed else false.
          */
         validate: function (attr) {
             var mug = this,
@@ -100,6 +101,7 @@ define([
             if (changed) {
                 this.fire({type: "messages-changed", mug: this});
             }
+            return changed;
         },
         _validate: function (attr) {
             var mug = this,

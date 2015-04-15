@@ -5,6 +5,7 @@ define([
     'underscore',
     'vellum/commtrack',
     'text!static/commtrack/balance-block.xml',
+    'text!static/commtrack/invalid-transfer.xml',
     'text!static/commtrack/transfer-block.xml'
 ], function (
     util,
@@ -13,6 +14,7 @@ define([
     _,
     commtrack,
     BALANCE_BLOCK_XML,
+    INVALID_TRANSFER_XML,
     TRANSFER_BLOCK_XML
 ) {
     var assert = chai.assert,
@@ -142,6 +144,12 @@ define([
             assert.strictEqual(trans.p.src.value, "");
             assert.strictEqual(trans.p.dest.value, "");
             assert.deepEqual(trans.messages.toString(), "");
+        });
+
+        it("should show error icon in tree on load invalid transfer question", function () {
+            util.loadXML(INVALID_TRANSFER_XML);
+            var trans = util.getMug("transfer[@type='trans']");
+            assert(!util.isTreeNodeValid(trans), "tree node should not be valid");
         });
 
         it("should create two transfer blocks with the same parent node", function () {

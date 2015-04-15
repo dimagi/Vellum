@@ -1190,7 +1190,10 @@ define([
             _this.handleMugParseFinish(mug);
             var inTree = _this.createQuestion(mug, mug.parentMug, 'into');
             if (inTree) {
-                mug.validate();
+                var changed = mug.validate();
+                if (!changed && mug.getErrors().length) {
+                    _this.setTreeValidationIcon(mug);
+                }
             }
         });
         this.selectSomethingOrHideProperties(true);
