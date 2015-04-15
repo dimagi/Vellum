@@ -30,6 +30,14 @@ define([
         return mug ? mug.p.use_update : false;
     }
 
+    function addSetValue(mug) {
+        var path = mug.absolutePath;
+
+        if (createsCase(mug)) {
+            mug.form.addSetValue('xforms-ready', path + "/case/@case_id", mug.p.case_id);
+        }
+    }
+
     var CASE_XMLNS = "http://commcarehq.org/case/transaction/v2",
         saveToCaseMugOptions = {
             typeName: 'Save to Case',
@@ -149,6 +157,7 @@ define([
                 }
             },
             getExtraDataAttributes: function (mug) {
+                addSetValue(mug);
                 return {
                     "vellum:role": "SaveToCase"
                 };
@@ -331,6 +340,22 @@ define([
     $.vellum.plugin("saveToCase", {}, {
         getAdvancedQuestions: function () {
             return this.__callOld().concat(["SaveToCase"]);
+        },
+        handleMugParseFinish: function (mug) {
+            this.__callOld();
+            // cases that are created use a setvalue for case_id
+            if (!createsCase(mug)) {
+                return;
+            }
+            var values = _.object(_.map(mug.form.getSetValues(), function (value) {
+                    return [value.ref, value];
+                }));
+
+            _.each(values, function(value) {
+                if (/case\/@case_id$/.test(value.ref)) {
+                    mug.p.case_id = value.value;
+                }
+            });
         },
         getMugTypes: function () {
             var types = this.__callOld();
