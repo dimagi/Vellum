@@ -243,32 +243,30 @@ define([
                     children = children ? children : [];
                     var node = new Tree.Node(children, {
                         getNodeID: function () { return name; },
-                        p: {rawDataAttributes: null},
+                        p: {
+                            rawDataAttributes: null,
+                            dataValue: dataValue
+                        },
                         options: { }
                     });
-                    if (dataValue) {
-                        node.value.p.dataValue = dataValue;
-                    }
                     return node;
                 }
 
-                var actions = [], columns;
-                if (createsCase(mug)) {
-                    columns = _.filter(_.map(mug.p.create_property, function(v, k) {
+                function makeColumns(properties) {
+                    return _.map(properties, function(v, k) {
                         if (k) {
                             return simpleNode(k);
                         }
-                    }), function(v) { return v; });
-                    actions.push(simpleNode('create', columns));
+                    });
+                }
+
+                var actions = [];
+                if (createsCase(mug)) {
+                    actions.push(simpleNode('create', makeColumns(mug.p.create_property)));
                 }
 
                 if (updatesCase(mug)) {
-                    columns = _.filter(_.map(mug.p.update_property, function(v, k) {
-                        if (k) {
-                            return simpleNode(k);
-                        }
-                    }), function(v) { return v; });
-                    actions.push(simpleNode('update', columns));
+                    actions.push(simpleNode('update', makeColumns(mug.p.update_property)));
                 }
 
                 if (closesCase(mug)) {
