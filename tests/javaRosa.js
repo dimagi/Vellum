@@ -440,7 +440,7 @@ require([
                 text = util.addQuestion("Text", "text"),
                 target = $("[name='itext-en-label']");
             call("handleDropFinish", target, audio.ufid, audio);
-            chai.expect(text.messages.toString())
+            chai.expect(util.getMessages(text))
                 .to.include("Audio Capture nodes cannot be used in an output value");
         });
 

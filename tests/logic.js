@@ -62,7 +62,7 @@ require([
             _.each(properties, function (attr) {
                 it("invalid path in " + attr, function () {
                     var mug = attr.startsWith("repeat") ? repeat : text;
-                    assert(util.isTreeNodeValid(mug), mug.messages.toString());
+                    assert(util.isTreeNodeValid(mug), util.getMessages(mug));
                     assert.deepEqual(mug.messages.get(attr), []);
 
                     mug.p[attr] = "/data/unknown";
@@ -71,7 +71,7 @@ require([
                            attr + " should have messages");
 
                     mug.p[attr] = "";
-                    assert(util.isTreeNodeValid(mug), mug.messages.toString());
+                    assert(util.isTreeNodeValid(mug), util.getMessages(mug));
                     assert.deepEqual(mug.messages.get(attr), []);
                 });
             });

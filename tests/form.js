@@ -107,7 +107,7 @@ define([
             blue.form.removeMugFromForm(blue);
             assert(!util.isTreeNodeValid(black), "black should not be valid");
             blue = util.addQuestion("Text", "blue");
-            assert(util.isTreeNodeValid(black), black.messages.toString());
+            assert(util.isTreeNodeValid(black), util.getMessages(black));
         });
 
         it("should show duplicate question ID warning inline", function () {
@@ -126,7 +126,7 @@ define([
         it("should add ODK warning to mug on create Audio question", function () {
             util.loadXML("");
             var mug = util.addQuestion("Audio"),
-                messages = mug.messages.toString();
+                messages = util.getMessages(mug);
             chai.expect(messages).to.include("Android");
         });
 

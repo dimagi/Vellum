@@ -52,7 +52,7 @@ require([
                 message: msg
             });
             var div = $(".fd-content-right").find(".messages");
-            chai.expect(text.messages.toString()).to.include(msg);
+            chai.expect(util.getMessages(text)).to.include(msg);
             chai.expect(div.text()).to.include(msg);
         });
 
@@ -374,7 +374,7 @@ require([
                     mug.form.vellum.warnOnCircularReference(
                         attr, mug.form, mug, ".", "period");
                     assert.equal(mug.messages.get(attr).length, 1,
-                                 mug.messages.toString());
+                                 util.getMessages(mug));
                     mug.dropMessage(attr, "core-circular-reference-warning");
                     assert.deepEqual(mug.messages.get(attr), []);
                 });

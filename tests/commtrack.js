@@ -143,7 +143,7 @@ define([
             var trans = util.addQuestion("Transfer", "t1");
             assert.strictEqual(trans.p.src.value, "");
             assert.strictEqual(trans.p.dest.value, "");
-            assert.deepEqual(trans.messages.toString(), "");
+            assert.deepEqual(util.getMessages(trans), "");
         });
 
         it("should show error icon in tree on load invalid transfer question", function () {

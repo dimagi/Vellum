@@ -436,18 +436,6 @@ define([
                     });
                 });
             }
-        },
-        toString: function () {
-            var messages = [],
-                last = null;
-            this.each(function (msg, attr) {
-                if (attr !== last) {
-                    messages.push(attr + ":");
-                    last = attr;
-                }
-                messages.push("  - " + msg.message); // + " [" + msg.key + "]");
-            });
-            return messages.join("\n");
         }
     };
 
