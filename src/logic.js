@@ -131,7 +131,7 @@ define([
             }
             return [{
                 key: "logic-bad-path-warning",
-                level: "warning",
+                level: mug.WARNING,
                 message: (function () {
                     if (!unknowns.length) {
                         return "";

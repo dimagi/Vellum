@@ -1174,7 +1174,7 @@ define([
             if (current) {
                 current.addMessage(null, {
                     key: "javaRosa-output-value-type-error",
-                    level: "warning",
+                    level: mug.WARNING,
                     message: typeName + " nodes cannot be used in an " +
                         "output value. Please remove the output value for " +
                         "'" + path + "' or your form will have errors."

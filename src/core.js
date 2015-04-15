@@ -1571,7 +1571,7 @@ define([
             var fieldName = mug.p.getDefinition(property).lstring;
             mug.addMessage(property, {
                 key: "core-circular-reference-warning",
-                level: "warning",
+                level: mug.WARNING,
                 message: "The " + fieldName + " for a question " +
                     "is not allowed to reference the question itself. " +
                     "Please remove the " + refName + " from the " +

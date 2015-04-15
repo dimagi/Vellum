@@ -136,10 +136,13 @@ define([
 
             return this.messages.update(attr, {
                 key: "mug-" + attr + "-error",
-                level: "error",
+                level: this.ERROR,
                 message: message
             });
         },
+        // message levels
+        ERROR: "error",
+        WARNING: "warning",
         /**
          * Add a message for a property
          *
@@ -569,7 +572,7 @@ define([
                     }
                     mug.addMessage("nodeID", {
                         key: "mug-conflictedNodeId-warning",
-                        level: "warning",
+                        level: mug.WARNING,
                         message: message,
                         fixSerializationWarning: resolveConflictedNodeId
                     });

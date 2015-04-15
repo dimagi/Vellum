@@ -197,7 +197,7 @@ define([
             } else {
                 error = {
                     key: "commtrack-transfer-src-dest-error",
-                    level: "error",
+                    level: mug.ERROR,
                     message: "Transfer must have at least one of source " +
                              "case and destination case."
                 };

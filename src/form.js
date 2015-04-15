@@ -744,7 +744,7 @@ define([
                 // is this a good candidate for "info" message level?
                 mug.addMessage(null, {
                     key: 'form-odk-only-warning',
-                    level: 'warning',
+                    level: mug.WARNING,
                     message: mug.options.typeName + ' works on Android devices ' +
                         'and some feature phones; please test your specific ' +
                         'model to ensure that this question type is supported'
