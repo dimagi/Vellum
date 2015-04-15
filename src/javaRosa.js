@@ -466,7 +466,7 @@ define([
             $autoBoxLabel.prepend($autoBox);
             $autoBoxContainer.append($autoBoxLabel);
 
-            $uiElem.find('.controls')
+            $uiElem.find('.controls').not(".messages")
                 .addClass('fd-itextID-controls')
                 .before($autoBoxContainer);
 

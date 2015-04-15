@@ -127,16 +127,20 @@ define([
                     .find(".messages:last");
         };
 
-        widget.refreshMessages = function () {
-            widget.getMessagesContainer()
-                  .empty()
-                  .append(getMessages(mug, path));
+        widget.getMessages = function (mug, path) {
+            return getMessages(mug, path);
         };
 
-        mug.on("messages-changed", widget.refreshMessages, null, widget);
-        mug.on("teardown-mug-properties", function (e) {
-            e.mug.unbind(widget);
-        }, null, widget);
+        widget.refreshMessages = function () {
+            widget.getMessagesContainer()
+                .empty()
+                .append(widget.getMessages(mug, path));
+        };
+
+        mug.on("messages-changed",
+               function () { widget.refreshMessages(); }, null, widget);
+        mug.on("teardown-mug-properties",
+               function (e) { e.mug.unbind(widget); }, null, widget);
 
         widget.save = function () {
             mugValue(mug, widget.getValue());
@@ -371,7 +375,7 @@ define([
             .click(editFn);
 
         $uiElem.find('label').after(button);
-        $uiElem.find('.controls').css('margin-right', '60px');
+        $uiElem.find('.controls').not(".messages").css('margin-right', '60px');
         return $uiElem;
     };
     
