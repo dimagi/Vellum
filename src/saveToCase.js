@@ -443,69 +443,50 @@ define([
                 if (path !== basePath) {
                     mug = form.getMugByPath(basePath);
                     if (mug.__className === "SaveToCase") {
-                        if (/\/case\/create\/[\w_]*$/.test(path)) {
-                            var createAttr = _.last(path.split(/\/case\/create\//));
-                            if (createAttr) {
-                                if (!mug.p.create_property) {
-                                    mug.p.create_property = {};
-                                }
-                                mug.p.create_property[createAttr] = {
-                                    calculate: el.attr("calculate"),
-                                    relevant: el.attr("relevant")
-                                };
-                            }
-                            return;
+                        var matchRet = path.match(/\/case\/(create|update)\/([\w_]*)$/),
+                            action = matchRet[1],
+                            prop = matchRet[2],
+                            pKey;
+
+                        if (action === "create") {
+                            pKey = 'create_property';
+                        } else if (action === "update") {
+                            pKey = 'update_property';
                         }
-                        if (/\/case\/update\/[\w_]*$/.test(path)) {
-                            var updateAttr = _.last(path.split(/\/case\/update\//));
-                            if (updateAttr) {
-                                if (!mug.p.update_property) {
-                                    mug.p.update_property = {};
-                                }
-                                mug.p.update_property[updateAttr] = {
-                                    calculate: el.attr("calculate"),
-                                    relevant: el.attr("relevant")
-                                };
-                            }
+
+                        if (!mug.p[pKey]) {
+                            mug.p[pKey] = {};
                         }
-                        return;
-                    }
-                }
-                var closePath = path.replace(/\/case\/close$/, "");
-                if (path !== closePath) {
-                    mug = form.getMugByPath(closePath);
-                    if (mug.__className === "SaveToCase") {
-                        var closeAttr = /\/case\/close$/.test(path);
-                        if (closeAttr && mug.p.use_close) {
-                            mug.p.close_condition = el.attr('relevant');
-                        }
+                        mug.p[pKey][prop] = {
+                            calculate: el.attr("calculate"),
+                            relevant: el.attr("relevant")
+                        };
                         return;
                     }
                 }
 
-                var datePath = path.replace(/\/case\/@date_modified$/, "");
-                if (path !== datePath) {
-                    mug = form.getMugByPath(datePath);
-                    if (mug.__className === "SaveToCase") {
-                        mug.p.date_modified = el.attr('calculate');
-                        return;
+                var validAttrs = [
+                    { attr: 'close', mugProp: 'close_condition', elAttr: 'relevant' },
+                    { attr: '@date_modified', mugProp: 'date_modified', elAttr: 'calculate' },
+                    { attr: '@user_id', mugProp: 'user_id', elAttr: 'calculate' },
+                    { attr: '@case_id', mugProp: 'case_id', elAttr: 'calculate' },
+                ];
+
+                var attr = _.find(validAttrs, function (v) {
+                    var re = new RegExp("/case/" + v.attr + "$"),
+                        tmpPath = path.replace(re, "");
+                    if (path !== tmpPath) {
+                        mug = form.getMugByPath(tmpPath);
+                        if (mug.__className === "SaveToCase") {
+                            return true;
+                        }
                     }
-                }
-                var userPath = path.replace(/\/case\/@user_id/, "");
-                if (path !== userPath) {
-                    mug = form.getMugByPath(userPath);
-                    if (mug.__className === "SaveToCase") {
-                        mug.p.user_id = el.attr('calculate');
-                        return;
-                    }
-                }
-                var caseIdPath = path.replace(/\/case\/@case_id/, "");
-                if (path !== caseIdPath) {
-                    mug = form.getMugByPath(caseIdPath);
-                    if (mug.__className === "SaveToCase") {
-                        mug.p.case_id = el.attr('calculate');
-                        return;
-                    }
+                    return false;
+                });
+                
+                if (attr) {
+                    mug.p[attr.mugProp] = el.attr(attr.elAttr);
+                    return;
                 }
             }
             this.__callOld();
