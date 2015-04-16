@@ -8,6 +8,7 @@ define([
     'vellum/util',
     'vellum/widgets',
     'tpl!vellum/templates/widget_update_case',
+    'tpl!vellum/templates/widget_index_case',
     'vellum/core'
 ], function (
     form_,
@@ -18,7 +19,8 @@ define([
     Tree,
     util,
     widgets,
-    widget_update_case
+    widget_update_case,
+    widget_index_case
 ){
     function createsCase(mug) {
         return mug ? mug.p.use_create : false;
@@ -30,6 +32,10 @@ define([
 
     function updatesCase(mug) {
         return mug ? mug.p.use_update : false;
+    }
+
+    function indexesCase(mug) {
+        return mug ? mug.p.use_index : false;
     }
 
     function addSetValue(mug) {
@@ -89,6 +95,62 @@ define([
                     };
                 });
                 return currentValues;
+            };
+
+            widget.updateValue = function () {
+                var currentValues = widget.getValue();
+                if (!("" in currentValues)) {
+                    widget.kvInput.find('.btn').removeClass('hide');
+                    widget.kvInput.find('.fd-remove-update-property').removeClass('hide');
+                }
+                widget.save();
+            };
+
+            return widget;
+        },
+        indexCaseWidget = function (mug, options) {
+            var widget = propertyWidget(mug, options);
+
+            widget.setValue = function (value) {
+                value = _.isUndefined(value) ? {} : value;
+                widget.kvInput.html(widget_index_case({
+                    props: value
+                }));
+                widget.kvInput.find('input').bind('change keyup', function () {
+                    widget.handleChange();
+                });
+                widget.kvInput.find('.fd-add-index-property').click(function (e) {
+                    widget.refreshControl();
+                    e.preventDefault();
+                });
+                widget.kvInput.find('.fd-remove-index-property').click(function (e) {
+                    $(this).parent().parent().parent().remove();
+                    widget.refreshControl();
+                    widget.save();
+                    e.preventDefault();
+                });
+            };
+
+            widget.getValue = function () {
+                var currentValues = {};
+                _.each(widget.kvInput.find('.fd-index-property'), function (kvPair) {
+                    var $pair = $(kvPair);
+                    currentValues[$pair.find('.fd-index-property-name').val()] = {
+                        calculate: $pair.find('.fd-index-property-source').val(),
+                        case_type: $pair.find('.fd-index-property-case-type').val(),
+                        relationship: $pair.find('.fd-index-property-relationship').val(),
+                    };
+                });
+                return currentValues;
+            };
+
+            widget.updateValue = function () {
+                var currentValues = widget.getValue();
+                if (!("" in currentValues)) {
+                    widget.kvInput.find('.btn').removeClass('hide');
+                    widget.kvInput.find('.fd-remove-index-property').removeClass('hide');
+                }
+                widget.save();
             };
 
             return widget;
@@ -210,6 +272,32 @@ define([
                         }
                         return 'pass';
                     }
+                },
+                "use_index": {
+                    lstring: "Use Index",
+                    visibility: 'visible',
+                    presence: 'optional',
+                    widget: widgets.checkbox
+                },
+                "index_property": {
+                    lstring: "Index Properties",
+                    visibility: 'visible',
+                    presence: 'optional',
+                    widget: indexCaseWidget,
+                    validationFunc: function (mug) {
+                        if (mug.p.use_index) {
+                            var props = _.without(_.keys(mug.p.index_property), ""),
+                                invalidProps = _.filter(props, function(p) {
+                                    return !/[a-z_]*/.test(p);
+                                });
+
+                            if (invalidProps.length > 0) {
+                                return invalidProps.join(", ") + 
+                                    " are invalid properties";
+                            }
+                        }
+                        return 'pass';
+                    }
                 }
             },
             getExtraDataAttributes: function (mug) {
@@ -219,23 +307,26 @@ define([
                 };
             },
             dataChildFilter: function (children, mug) {
-                function simpleNode(name, children, dataValue) {
+                function simpleNode(name, children, dataAttributes) {
                     children = children ? children : [];
                     var node = new Tree.Node(children, {
                         getNodeID: function () { return name; },
                         p: {
-                            rawDataAttributes: null,
-                            dataValue: dataValue
+                            rawDataAttributes: null
                         },
-                        options: { }
+                        options: { 
+                            getExtraDataAttributes: function (mug) {
+                                return dataAttributes;
+                            }
+                        }
                     });
                     return node;
                 }
 
-                function makeColumns(properties) {
+                function makeColumns(properties, dataKeys) {
                     return _.map(properties, function(v, k) {
                         if (k) {
-                            return simpleNode(k);
+                            return simpleNode(k, [], _.pick(v, dataKeys));
                         }
                     });
                 }
@@ -251,6 +342,12 @@ define([
 
                 if (closesCase(mug)) {
                     actions.push(simpleNode('close'));
+                }
+
+                if (indexesCase(mug)) {
+                    actions.push(simpleNode('index', 
+                                            makeColumns(mug.p.index_property, 
+                                                        ['case_type', 'relationship'])));
                 }
 
                 return [new Tree.Node(actions, {
@@ -292,8 +389,11 @@ define([
                         relevant: mug.p.close_condition
                     });
                 }
+                if (indexesCase(mug)) {
+                    ret = ret.concat(generateBinds('index', mug.p.index_property));
+                }
 
-                if (createsCase(mug) || updatesCase(mug) || closesCase(mug)) {
+                if (createsCase(mug) || updatesCase(mug) || closesCase(mug) || indexesCase(mug)) {
                     ret.push({
                         nodeset: mug.absolutePath + "/case/@date_modified",
                         calculate: mug.p.date_modified,
@@ -317,7 +417,8 @@ define([
                 var case_ = $node.children(),
                     create = case_.find('create'),
                     close = case_.find('close'),
-                    update = case_.find('update');
+                    update = case_.find('update'),
+                    index = case_.find('index');
                 if (create && create.length !== 0) {
                     mug.p.use_create = true;
                 }
@@ -326,6 +427,17 @@ define([
                 }
                 if (close && close.length !== 0) {
                     mug.p.use_close = true;
+                }
+                if (index && index.length !== 0) {
+                    mug.p.use_index = true;
+                    mug.p.index_property = {};
+                    _.each(index.children(), function(child) {
+                        var prop = $(child);
+                        mug.p.index_property[prop.prop('tagName')] = {
+                            case_type: prop.attr('case_type'),
+                            relationship: prop.attr('relationship')
+                        };
+                    });
                 }
                 return $([]);
             }
@@ -374,7 +486,18 @@ define([
                     isCollapsed: function (mug) {
                         return !closesCase(mug);
                     },
-                }
+                },
+                {
+                    slug: "index",
+                    displayName: "Index",
+                    properties: [
+                        "use_index",
+                        "index_property",
+                    ],
+                    isCollapsed: function (mug) {
+                        return !indexesCase(mug);
+                    },
+                },
             ]
         };
 
@@ -423,7 +546,7 @@ define([
                 if (path !== basePath) {
                     mug = form.getMugByPath(basePath);
                     if (mug.__className === "SaveToCase") {
-                        var matchRet = path.match(/\/case\/(create|update)\/([\w_]*)$/),
+                        var matchRet = path.match(/\/case\/(create|update|index)\/([\w_]*)$/),
                             action = matchRet[1],
                             prop = matchRet[2],
                             pKey;
@@ -432,15 +555,20 @@ define([
                             pKey = 'create_property';
                         } else if (action === "update") {
                             pKey = 'update_property';
+                        } else if (action === "index") {
+                            pKey = 'index_property';
                         }
 
                         if (!mug.p[pKey]) {
                             mug.p[pKey] = {};
                         }
-                        mug.p[pKey][prop] = {
-                            calculate: el.attr("calculate"),
-                            relevant: el.attr("relevant")
-                        };
+                        if (!mug.p[pKey][prop]) {
+                            mug.p[pKey][prop] = {};
+                        }
+                        mug.p[pKey][prop].calculate =  el.attr("calculate");
+                        if (el.attr('relevant')) {
+                            mug.p[pKey][prop].relevant =  el.attr("relevant");
+                        }
                         return;
                     }
                 }

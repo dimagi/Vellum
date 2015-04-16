@@ -7,6 +7,7 @@ define([
     'text!static/saveToCase/create_property.xml',
     'text!static/saveToCase/close_property.xml',
     'text!static/saveToCase/update_property.xml',
+    'text!static/saveToCase/index_property.xml',
 ], function (
     util,
     chai,
@@ -15,7 +16,8 @@ define([
     saveToCase,
     CREATE_PROPERTY_XML,
     CLOSE_PROPERTY_XML,
-    UPDATE_PROPERTY_XML
+    UPDATE_PROPERTY_XML,
+    INDEX_PROPERTY_XML
 ) {
     var assert = chai.assert,
         call = util.call;
@@ -66,6 +68,23 @@ define([
             assert.equal(update.p.user_id, "/data/meta/userID");
             assert.equal(update.p.case_id, "/data/meta/caseID");
             util.assertXmlEqual(call("createXML"), UPDATE_PROPERTY_XML);
+        });
+
+        it("should load and save a index property", function () {
+            util.loadXML(INDEX_PROPERTY_XML);
+            var index = util.getMug("save_to_case");
+            assert.equal(index.p.use_index, true);
+            assert(_.isEqual(index.p.index_property, {
+                extension: {
+                    calculate: "/data/meta/caseID",
+                    case_type: "extension_case",
+                    relationship: "extension",
+                }
+            }));
+            assert.equal(index.p.date_modified, '/data/meta/timeEnd');
+            assert.equal(index.p.user_id, "/data/meta/userID");
+            assert.equal(index.p.case_id, "/data/meta/caseID");
+            util.assertXmlEqual(call("createXML"), INDEX_PROPERTY_XML);
         });
     });
 });
