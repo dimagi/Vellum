@@ -171,12 +171,6 @@ define([
                     visibility: 'visible',
                     presence: 'required',
                     widget: widgets.xPath,
-                    validationFunc: function (mug) {
-                        if (mug.p.date_modified === "") {
-                            return "Date Modified is required";
-                        }
-                        return 'pass';
-                    }
                 },
                 "user_id": {
                     lstring: "User ID",
@@ -187,14 +181,8 @@ define([
                 "case_id": {
                     lstring: "Case ID",
                     visibility: 'visible',
-                    presence: 'optional',
+                    presence: 'required',
                     widget: widgets.xPath,
-                    validationFunc: function (mug) {
-                        if (mug.p.case_id === "") {
-                            return "Case ID is required";
-                        }
-                        return 'pass';
-                    }
                 },
                 "use_create": {
                     lstring: "Create Case",
