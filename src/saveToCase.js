@@ -48,9 +48,6 @@ define([
         widget.kvInput = $('<div class="control-row" />').attr('name', id);
 
         widget.getControl = function () {
-            if (widget.isDisabled()) {
-                // todo
-            }
             return widget.kvInput;
         };
 
@@ -84,18 +81,6 @@ define([
                 };
             });
             return currentValues;
-        };
-
-        widget.save = function () {
-            this.mug.p[this.path] = this.getValue();
-        };
-
-        widget.getValidValues = function () {
-            var values = _.clone(widget.getValue());
-            if (values[""]) {
-                delete values[""];
-            }
-            return values;
         };
 
         widget.updateValue = function () {
