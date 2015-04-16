@@ -40,64 +40,59 @@ define([
         }
     }
 
-    var saveCasePropWidget = function (mug, options) {
-        var widget = widgets.normal(mug, options),
-            id = options.id;
+    var propertyWidget = function (mug, options) {
+            var widget = widgets.normal(mug, options),
+                id = options.id;
 
-        // todo make a style for this when vellum gets a facelift
-        widget.kvInput = $('<div class="control-row" />').attr('name', id);
+            widget.kvInput = $('<div class="control-row" />').attr('name', id);
 
-        widget.getControl = function () {
-            return widget.kvInput;
+            widget.getControl = function () {
+                return widget.kvInput;
+            };
+
+            widget.refreshControl = function () {
+                widget.setValue(widget.getValue());
+            };
+
+            return widget;
+        },
+        saveCasePropWidget = function (mug, options) {
+            var widget = propertyWidget(mug, options);
+
+            widget.setValue = function (value) {
+                value = _.isUndefined(value) ? {} : value;
+                widget.kvInput.html(widget_update_case({
+                    props: value
+                }));
+                widget.kvInput.find('input').bind('change keyup', function () {
+                    widget.handleChange();
+                });
+                widget.kvInput.find('.fd-add-update-property').click(function (e) {
+                    widget.refreshControl();
+                    e.preventDefault();
+                });
+                widget.kvInput.find('.fd-remove-update-property').click(function (e) {
+                    $(this).parent().parent().parent().remove();
+                    widget.refreshControl();
+                    widget.save();
+                    e.preventDefault();
+                });
+            };
+
+            widget.getValue = function () {
+                var currentValues = {};
+                _.each(widget.kvInput.find('.fd-update-property'), function (kvPair) {
+                    var $pair = $(kvPair);
+                    currentValues[$pair.find('.fd-update-property-name').val()] = {
+                        calculate: $pair.find('.fd-update-property-source').val(),
+                        relevant: $pair.find('.fd-update-property-relevant').val(),
+                    };
+                });
+                return currentValues;
+            };
+
+            return widget;
         };
-
-        widget.setValue = function (value) {
-            value = _.isUndefined(value) ? {} : value;
-            widget.kvInput.html(widget_update_case({
-                props: value
-            }));
-            widget.kvInput.find('input').bind('change keyup', function () {
-                widget.handleChange();
-            });
-            widget.kvInput.find('.fd-add-update-property').click(function (e) {
-                widget.refreshControl();
-                e.preventDefault();
-            });
-            widget.kvInput.find('.fd-remove-update-property').click(function (e) {
-                $(this).parent().parent().parent().remove();
-                widget.refreshControl();
-                widget.save();
-                e.preventDefault();
-            });
-        };
-
-        widget.getValue = function () {
-            var currentValues = {};
-            _.each(widget.kvInput.find('.fd-update-property'), function (kvPair) {
-                var $pair = $(kvPair);
-                currentValues[$pair.find('.fd-update-property-name').val()] = {
-                    calculate: $pair.find('.fd-update-property-source').val(),
-                    relevant: $pair.find('.fd-update-property-relevant').val(),
-                };
-            });
-            return currentValues;
-        };
-
-        widget.updateValue = function () {
-            var currentValues = widget.getValue();
-            if (!("" in currentValues)) {
-                widget.kvInput.find('.btn').removeClass('hide');
-                widget.kvInput.find('.fd-remove-update-property').removeClass('hide');
-            }
-            widget.save();
-        };
-
-        widget.refreshControl = function () {
-            widget.setValue(widget.getValue());
-        };
-
-        return widget;
-    };
 
     var CASE_XMLNS = "http://commcarehq.org/case/transaction/v2",
         saveToCaseMugOptions = {
