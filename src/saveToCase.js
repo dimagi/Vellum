@@ -157,6 +157,7 @@ define([
         };
 
     var CASE_XMLNS = "http://commcarehq.org/case/transaction/v2",
+        INVALID_PROP_REGEX = /[a-z_]+/,
         saveToCaseMugOptions = {
             typeName: 'Save to Case',
             isTypeChangeable: false,
@@ -204,7 +205,7 @@ define([
                                 illegalProps = _.difference(props, legal),
                                 requiredProps = _.intersection(props, required),
                                 invalidProps = _.filter(props, function(p) {
-                                    return !/[a-z_]*/.test(p);
+                                    return !INVALID_PROP_REGEX.test(p);
                                 });
 
                             if (requiredProps.length !== required.length) {
@@ -250,7 +251,7 @@ define([
                         if (mug.p.use_update) {
                             var props = _.without(_.keys(mug.p.update_property), ""),
                                 invalidProps = _.filter(props, function(p) {
-                                    return !/[a-z_]*/.test(p);
+                                    return !INVALID_PROP_REGEX.test(p);
                                 });
 
                             if (invalidProps.length > 0) {
@@ -276,7 +277,7 @@ define([
                         if (mug.p.use_index) {
                             var props = _.without(_.keys(mug.p.index_property), ""),
                                 invalidProps = _.filter(props, function(p) {
-                                    return !/[a-z_]*/.test(p);
+                                    return !INVALID_PROP_REGEX.test(p);
                                 });
 
                             if (invalidProps.length > 0) {
