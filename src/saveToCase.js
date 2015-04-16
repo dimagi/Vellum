@@ -532,59 +532,59 @@ define([
         parseBindElement: function (form, el, path) {
             var mug = form.getMugByPath(path);
             if (!mug) {
-                var basePath = path.replace(/\/case\/[\w_]*\/[\w_]*$/, "");
-                if (path !== basePath) {
+                var casePathRegex = /\/case\/((create|update|index)\/(\w+)|close|@date_modified|@user_id|@case_id)$/,
+                    matchRet = _.compact(path.match(casePathRegex));
+                if (matchRet.length > 0) {
+                    var basePath = path.replace(casePathRegex, "");
                     mug = form.getMugByPath(basePath);
-                    if (mug.__className === "SaveToCase") {
-                        var matchRet = path.match(/\/case\/(create|update|index)\/([\w_]*)$/),
-                            action = matchRet[1],
-                            prop = matchRet[2],
-                            pKey;
+                    if (mug && mug.__className === "SaveToCase") {
+                        if (matchRet.length === 4) {
+                            var prop = matchRet[3],
+                                pKey = {
+                                    create: "create_property",
+                                    update: "update_property",
+                                    index: "index_property",
+                                }[matchRet[2]];
 
-                        if (action === "create") {
-                            pKey = 'create_property';
-                        } else if (action === "update") {
-                            pKey = 'update_property';
-                        } else if (action === "index") {
-                            pKey = 'index_property';
-                        }
+                            if (!mug.p[pKey]) {
+                                mug.p[pKey] = {};
+                            }
+                            if (!mug.p[pKey][prop]) {
+                                mug.p[pKey][prop] = {};
+                            }
+                            mug.p[pKey][prop].calculate =  el.attr("calculate");
+                            if (el.attr('relevant')) {
+                                mug.p[pKey][prop].relevant =  el.attr("relevant");
+                            }
+                            return;
+                        } else if (matchRet.length === 2) {
+                            var attr = {
+                                close: {
+                                    mugProp: 'close_condition',
+                                    elAttr: 'relevant'
+                                },
+                                '@date_modified': {
+                                    mugProp: 'date_modified',
+                                    elAttr: 'calculate'
+                                },
+                                '@user_id': {
+                                    mugProp: 'user_id',
+                                    elAttr: 'calculate'
+                                },
+                                '@case_id': {
+                                    mugProp: 'case_id',
+                                    elAttr: 'calculate'
+                                },
+                            }[matchRet[1]];
 
-                        if (!mug.p[pKey]) {
-                            mug.p[pKey] = {};
+                            mug.p[attr.mugProp] = el.attr(attr.elAttr);
+                            return;
                         }
-                        if (!mug.p[pKey][prop]) {
-                            mug.p[pKey][prop] = {};
-                        }
-                        mug.p[pKey][prop].calculate =  el.attr("calculate");
-                        if (el.attr('relevant')) {
-                            mug.p[pKey][prop].relevant =  el.attr("relevant");
-                        }
+                        form.parseWarnings.push(
+                            "An error occurred when parsing bind node [" +
+                            path + "]. Please fix this.");
                         return;
                     }
-                }
-
-                var validAttrs = [
-                    { attr: 'close', mugProp: 'close_condition', elAttr: 'relevant' },
-                    { attr: '@date_modified', mugProp: 'date_modified', elAttr: 'calculate' },
-                    { attr: '@user_id', mugProp: 'user_id', elAttr: 'calculate' },
-                    { attr: '@case_id', mugProp: 'case_id', elAttr: 'calculate' },
-                ];
-
-                var attr = _.find(validAttrs, function (v) {
-                    var re = new RegExp("/case/" + v.attr + "$"),
-                        tmpPath = path.replace(re, "");
-                    if (path !== tmpPath) {
-                        mug = form.getMugByPath(tmpPath);
-                        if (mug.__className === "SaveToCase") {
-                            return true;
-                        }
-                    }
-                    return false;
-                });
-                
-                if (attr) {
-                    mug.p[attr.mugProp] = el.attr(attr.elAttr);
-                    return;
                 }
             }
             this.__callOld();
