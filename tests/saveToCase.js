@@ -8,6 +8,7 @@ define([
     'text!static/saveToCase/close_property.xml',
     'text!static/saveToCase/update_property.xml',
     'text!static/saveToCase/index_property.xml',
+    'text!static/saveToCase/create_2_property.xml',
 ], function (
     util,
     chai,
@@ -17,7 +18,8 @@ define([
     CREATE_PROPERTY_XML,
     CLOSE_PROPERTY_XML,
     UPDATE_PROPERTY_XML,
-    INDEX_PROPERTY_XML
+    INDEX_PROPERTY_XML,
+    CREATE_2_PROPERTY_XML
 ) {
     var assert = chai.assert,
         call = util.call;
@@ -85,6 +87,15 @@ define([
             assert.equal(index.p.user_id, "/data/meta/userID");
             assert.equal(index.p.case_id, "/data/meta/caseID");
             util.assertXmlEqual(call("createXML"), INDEX_PROPERTY_XML);
+        });
+
+        it("should load 2 create setvalues", function () {
+            util.loadXML(CREATE_2_PROPERTY_XML);
+            var create1 = util.getMug("create1"),
+                create2 = util.getMug("create2");
+            assert.equal(create1.p.case_id, "1");
+            assert.equal(create2.p.case_id, "2");
+            util.assertXmlEqual(call("createXML"), CREATE_2_PROPERTY_XML);
         });
     });
 });

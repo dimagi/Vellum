@@ -502,10 +502,11 @@ define([
             }
             var values = _.object(_.map(mug.form.getSetValues(), function (value) {
                     return [value.ref, value];
-                }));
+                })),
+                caseIdRegex = new RegExp(mug.p.nodeID + "/case/@case_id$");
 
             _.each(values, function(value) {
-                if (/case\/@case_id$/.test(value.ref)) {
+                if (caseIdRegex.test(value.ref)) {
                     mug.p.case_id = value.value;
                 }
             });
