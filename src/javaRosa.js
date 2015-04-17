@@ -41,7 +41,8 @@ define([
         RESERVED_ITEXT_CONTENT_TYPES = [
             'default', 'short', 'long', 'audio', 'video', 'image'
         ],
-        _nextItextItemKey = 1;
+        _nextItextItemKey = 1,
+        HELP_MARKDOWN;
 
     function ItextItem(options) {
         this.forms = options.forms || [];
@@ -318,7 +319,10 @@ define([
                     mug.p.hintItext = this.createItem();
                 }
                 if (!mug.p.helpItext && mug.spec.helpItext.presence !== "notallowed") {
-                    mug.p.helpItext = this.createItem();
+                    var help = mug.p.helpItext = this.createItem();
+                    if (HELP_MARKDOWN) {
+                        help.addForm('markdown');
+                    }
                 }
             }
             if (!mug.options.isControlOnly) {
@@ -539,6 +543,7 @@ define([
 
         block.getUIElement = function () {
             _.each(block.getForms(), function (form) {
+                if (form === "markdown") { return; }
                 var $formGroup = block.getFormGroupContainer(form);
                 _.each(block.languages, function (lang) {
                     var itextWidget = block.itextWidget(block.mug, lang, form, options);
@@ -1209,6 +1214,7 @@ define([
             this.data.javaRosa.ItextItem = ItextItem;
             this.data.javaRosa.ItextForm = ItextForm;
             this.data.javaRosa.ICONS = ICONS;
+            HELP_MARKDOWN = this.opts().features.help_markdown;
         },
         insertOutputRef: function (mug, target, path, dateFormat) {
             var output = getOutputRef(path, dateFormat),
@@ -1585,12 +1591,14 @@ define([
                         for (var k = 0; k < forms.length; k++) {
                             form = forms[k];
                             val = form.getValueOrDefault(lang);
-                            xmlWriter.writeStartElement("value");
-                            if(form.name !== "default") {
-                                xmlWriter.writeAttributeString('form', form.name);
+                            if (val) {
+                                xmlWriter.writeStartElement("value");
+                                if(form.name !== "default") {
+                                    xmlWriter.writeAttributeString('form', form.name);
+                                }
+                                xmlWriter.writeXML(xml.normalize(val));
+                                xmlWriter.writeEndElement();
                             }
-                            xmlWriter.writeXML(xml.normalize(val));
-                            xmlWriter.writeEndElement();
                         }
                         xmlWriter.writeEndElement();
                     }
@@ -1760,13 +1768,28 @@ define([
                 },
                 lstring: "Help Message",
                 widget: function (mug, options) {
-                    return itextLabelBlock(mug, $.extend(options, {
-                        itextType: "help",
-                        getItextByMug: function (mug) {
-                            return mug.p.helpItext;
-                        },
-                        displayName: "Help Message"
-                    }));
+                    var block = itextLabelBlock(mug, $.extend(options, {
+                            itextType: "help",
+                            getItextByMug: function (mug) {
+                                return mug.p.helpItext;
+                            },
+                            displayName: "Help Message"
+                        })).on('change', function() {
+                            if (!HELP_MARKDOWN) {
+                                return;
+                            }
+                            var mug = this.mug,
+                                helpItext = mug.p.helpItext,
+                                helpItextForm = helpItext.forms[0],
+                                markdownForms = _.find(helpItext.forms, function(itext) {
+                                    return itext.name === 'markdown';
+                                });
+                            if (markdownForms) {
+                                markdownForms.data = _.clone(helpItextForm.data);
+                            }
+                        });
+
+                    return block;
                 },
                 validationFunc: itextValidator("helpItext", "Help Message")
             };

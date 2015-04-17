@@ -797,6 +797,7 @@ require([
                         </text>\
                         <text id="question1-help">\
                             <value>question1 en help</value>\
+                            <value form="markdown">question1 en help</value>\
                             <value form="image">jr://file/commcare/image/help/data/question1.png</value>\
                             <value form="audio">jr://file/commcare/audio/help/data/question1.mp3</value>\
                             <value form="video">jr://file/commcare/video/help/data/question1.3gp</value>\
@@ -820,6 +821,7 @@ require([
                         </text>\
                         <text id="question1-help">\
                             <value>question1 hin help</value>\
+                            <value form="markdown">question1 hin help</value>\
                             <value form="image">jr://file/commcare/image/help/data/question1.png</value>\
                             <value form="audio">jr://file/commcare/audio/help/data/question1.mp3</value>\
                             <value form="video">jr://file/commcare/video/help/data/question1.3gp</value>\
