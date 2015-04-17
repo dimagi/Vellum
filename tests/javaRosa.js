@@ -518,16 +518,6 @@ require([
             assert.equal(hinLabel[0].selectionEnd, 15);
         });
 
-        _.each({group: GROUP_HELP_XML, select: SELECT1_HELP_XML}, function (XML, name) {
-            it("should not create duplicate <help> node on " + name, function () {
-                util.loadXML(XML);
-                var xml = call("createXML"),
-                    $xml = $(xml);
-                assert.strictEqual($xml.find("help").length, 1,
-                                   "wrong <help> node count\n" + xml);
-            });
-        });
-
         it("should rename itext item ID after move", function () {
             util.loadXML("");
             util.addQuestion("Select", "ns");
