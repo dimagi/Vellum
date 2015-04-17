@@ -312,15 +312,19 @@ define([
             isDisabled = input ? input.prop('disabled') : false;
 
         var button = $('<button />')
-            .addClass("fd-edit-button pull-right")
+            .addClass("fd-edit-button")
             .text("Edit")
             .stopLink()
             .addClass('btn')
             .attr('type', 'button')
             .prop('disabled', isDisabled)
+            .css('position', 'absolute')
+            .css('right', 0)
             .click(editFn);
 
-        $uiElem.find('label').after(button);
+        $uiElem.css('position', 'relative');
+        $uiElem.find('.controls').css('position', 'absolute').css('left', 0).css('right', 0);
+        $uiElem.find('.controls').after(button);
         $uiElem.find('.controls').css('margin-right', '60px');
         return $uiElem;
     };
