@@ -97,5 +97,12 @@ define([
             assert.equal(create2.p.case_id, "2");
             util.assertXmlEqual(call("createXML"), CREATE_2_PROPERTY_XML);
         });
+
+        it("should load and save a index property", function () {
+            util.loadXML(INDEX_PROPERTY_XML);
+            util.clickQuestion("save_to_case");
+            $('#fd-question-edit-update').find('.fd-add-property').click();
+            util.assertXmlEqual(call("createXML"), INDEX_PROPERTY_XML);
+        });
     });
 });
