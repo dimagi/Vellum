@@ -56,8 +56,25 @@ define([
                 return widget.input;
             };
 
-            widget.refreshControl = function () {
-                widget.setValue(widget.getValue());
+            widget.refreshControl = function() {
+                throw ("must be overridden");
+            };
+
+            widget.setValue = function (value) {
+                value = _.isUndefined(value) ? {} : value;
+                widget.refreshControl(value);
+            };
+
+            widget.removeProperty = function(e) {
+                $(this).parent().parent().parent().remove();
+                widget.refreshControl();
+                widget.save();
+                e.preventDefault();
+            };
+
+            widget.addProperty = function(e) {
+                widget.refreshControl();
+                e.preventDefault();
             };
 
             return widget;
@@ -65,24 +82,16 @@ define([
         saveCasePropWidget = function (mug, options) {
             var widget = propertyWidget(mug, options);
 
-            widget.setValue = function (value) {
-                value = _.isUndefined(value) ? {} : value;
+            widget.refreshControl = function (value) {
+                value = value ? value : widget.getValue();
                 widget.input.html(widget_update_case({
                     props: value
                 }));
                 widget.input.find('input').bind('change keyup', function () {
                     widget.handleChange();
                 });
-                widget.input.find('.fd-add-update-property').click(function (e) {
-                    widget.refreshControl();
-                    e.preventDefault();
-                });
-                widget.input.find('.fd-remove-update-property').click(function (e) {
-                    $(this).parent().parent().parent().remove();
-                    widget.refreshControl();
-                    widget.save();
-                    e.preventDefault();
-                });
+                widget.input.find('.fd-add-property').click(widget.addProperty);
+                widget.input.find('.fd-remove-property').click(widget.removeProperty);
             };
 
             widget.getValue = function () {
@@ -101,7 +110,7 @@ define([
                 var currentValues = widget.getValue();
                 if (!("" in currentValues)) {
                     widget.input.find('.btn').removeClass('hide');
-                    widget.input.find('.fd-remove-update-property').removeClass('hide');
+                    widget.input.find('.fd-remove-property').removeClass('hide');
                 }
                 widget.save();
             };
@@ -111,24 +120,16 @@ define([
         indexCaseWidget = function (mug, options) {
             var widget = propertyWidget(mug, options);
 
-            widget.setValue = function (value) {
-                value = _.isUndefined(value) ? {} : value;
+            widget.refreshControl = function (value) {
+                value = value ? value : widget.getValue();
                 widget.input.html(widget_index_case({
                     props: value
                 }));
                 widget.input.find('input').bind('change keyup', function () {
                     widget.handleChange();
                 });
-                widget.input.find('.fd-add-index-property').click(function (e) {
-                    widget.refreshControl();
-                    e.preventDefault();
-                });
-                widget.input.find('.fd-remove-index-property').click(function (e) {
-                    $(this).parent().parent().parent().remove();
-                    widget.refreshControl();
-                    widget.save();
-                    e.preventDefault();
-                });
+                widget.input.find('.fd-add-property').click(widget.addProperty);
+                widget.input.find('.fd-remove-property').click(widget.removeProperty);
             };
 
             widget.getValue = function () {
@@ -148,7 +149,7 @@ define([
                 var currentValues = widget.getValue();
                 if (!("" in currentValues)) {
                     widget.input.find('.btn').removeClass('hide');
-                    widget.input.find('.fd-remove-index-property').removeClass('hide');
+                    widget.input.find('.fd-remove-property').removeClass('hide');
                 }
                 widget.save();
             };
