@@ -48,7 +48,8 @@ define([
 
     var propertyWidget = function (mug, options) {
             var widget = widgets.normal(mug, options),
-                id = options.id;
+                id = options.id,
+                template = options.template;
 
             widget.input = $('<div class="control-row" />').attr('name', id);
 
@@ -56,9 +57,18 @@ define([
                 return widget.input;
             };
 
-            widget.refreshControl = function() {
-                throw ("must be overridden");
+            widget.refreshControl = function (value) {
+                value = value ? value : widget.getValue();
+                widget.input.html(template({
+                    props: value
+                }));
+                widget.input.find('input').bind('change keyup', function () {
+                    widget.handleChange();
+                });
+                widget.input.find('.fd-add-property').click(widget.addProperty);
+                widget.input.find('.fd-remove-property').click(widget.removeProperty);
             };
+
 
             widget.setValue = function (value) {
                 value = _.isUndefined(value) ? {} : value;
@@ -80,19 +90,8 @@ define([
             return widget;
         },
         saveCasePropWidget = function (mug, options) {
+            options.template = widget_update_case;
             var widget = propertyWidget(mug, options);
-
-            widget.refreshControl = function (value) {
-                value = value ? value : widget.getValue();
-                widget.input.html(widget_update_case({
-                    props: value
-                }));
-                widget.input.find('input').bind('change keyup', function () {
-                    widget.handleChange();
-                });
-                widget.input.find('.fd-add-property').click(widget.addProperty);
-                widget.input.find('.fd-remove-property').click(widget.removeProperty);
-            };
 
             widget.getValue = function () {
                 var currentValues = {};
@@ -118,19 +117,8 @@ define([
             return widget;
         },
         indexCaseWidget = function (mug, options) {
+            options.template = widget_index_case;
             var widget = propertyWidget(mug, options);
-
-            widget.refreshControl = function (value) {
-                value = value ? value : widget.getValue();
-                widget.input.html(widget_index_case({
-                    props: value
-                }));
-                widget.input.find('input').bind('change keyup', function () {
-                    widget.handleChange();
-                });
-                widget.input.find('.fd-add-property').click(widget.addProperty);
-                widget.input.find('.fd-remove-property').click(widget.removeProperty);
-            };
 
             widget.getValue = function () {
                 var currentValues = {};
