@@ -563,6 +563,7 @@ define([
             {
                 title: "Overwrite their work",
                 cssClasses: "btn-primary",
+                defaultButton: true,
                 action: function () {
                     $('#form-differences').hide();
                     send(formText, 'full');
@@ -673,9 +674,22 @@ define([
             $modal = $(modal_content({
                 title: title,
                 closeButtonTitle: closeButtonTitle
-            }));
+            })),
+            $body = $("body"),
+            keyup = function (event) {
+                if (event.keyCode === 27) {
+                    $modal.modal('hide');
+                }
+            };
+        $body.one("keyup", keyup);
+        $modal.on('hide', function () {
+            $body.off("keyup", keyup);
+        }).one("shown", function () {
+            $modal.find(".btn-default:last").focus();
+        });
 
         _.each(buttons, function (button) {
+            button.defaultButton = button.defaultButton || false;
             button.action = button.action || function () {
                 $modal.modal('hide');
             };
@@ -1509,9 +1523,11 @@ define([
 
         var _this = this;
         this.data.core.isAlertVisible = true;
+        if (!buttons.length) {
+            buttons.push({title: "OK", defaultButton: true});
+        }
 
-        var $modal = this.generateNewModal(
-            title, buttons, buttons.length ? false : "OK");
+        var $modal = this.generateNewModal(title, buttons, false);
 
         // store a reference to $modal on this so modal button actions can
         // reference it in order to hide it at the right point in time.  This is
@@ -1643,6 +1659,7 @@ define([
                     }, {
                         title: "Delete",
                         cssClasses: "btn-primary",
+                        defaultButton: true,
                         action: function () {
                             form.removeMugsFromForm(mugs);
                             _this.selectSomethingOrHideProperties(true);
@@ -1743,12 +1760,13 @@ define([
                 }, {
                     title: "Fix Automatically" + forAction,
                     cssClasses: 'btn-primary',
+                    defaultButton: true,
                     action: function () {
                         form.fixSerializationWarnings(warnings);
                         _this.data.core.$modal.modal('hide');
                         retry();
                         _this.refreshVisibleData();
-                    } 
+                    }
                 }
             ]);
             return false;
