@@ -62,7 +62,8 @@ define([
 
     function onPaste(opts) {
         var $focus = $(':focus');
-        if ($focus.length === 0 || $focus.parents('.fd-tree').length) {
+        if ($focus.length === 0 || $focus.parents('.fd-tree').length ||
+                                   $focus.is(hiddenTextarea)) {
             focusTextarea($focus);
             setTimeout(function () {
                 var pasteValue = unfocusTextarea($focus);
