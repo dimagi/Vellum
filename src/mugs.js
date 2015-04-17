@@ -665,7 +665,7 @@ define([
                     var message = null;
                     if (value) {
                         mug.p.set(attr, value);
-                        message = mug.getDisplayName() + " has the same " +
+                        message = "This question has the same " +
                             "Question ID as another question in the same " +
                             "group. Please choose a unique Question ID.";
                     } else {
