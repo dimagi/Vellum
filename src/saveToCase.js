@@ -313,11 +313,11 @@ define([
                 }
 
                 function makeColumns(properties, dataKeys) {
-                    return _.map(properties, function(v, k) {
+                    return _.chain(properties).map(function(v, k) {
                         if (k) {
                             return simpleNode(k, [], _.pick(v, dataKeys));
                         }
-                    });
+                    }).compact().value();
                 }
 
                 var actions = [];
@@ -357,13 +357,13 @@ define([
             getBindList: function (mug) {
                 var ret = [];
                 function generateBinds(action, properties) {
-                    return _.map(properties, function(v, k) {
+                    return _.chain(properties).omit("").map(function(v, k) {
                         return {
                             nodeset: mug.absolutePath + "/case/" + action + "/" + k,
                             calculate: v.calculate,
                             relevant: v.relevant
                         };
-                    });
+                    }).value();
                 }
 
                 if (createsCase(mug)) {
