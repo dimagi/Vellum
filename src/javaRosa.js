@@ -464,15 +464,16 @@ define([
         var _getUIElement = widget.getUIElement;
         widget.getUIElement = function () {
             var $uiElem = _getUIElement(),
-                $autoBoxContainer = $('<div />').addClass('pull-right fd-itextID-checkbox-container'),
+                $autoBoxContainer = $('<div />').addClass('fd-itextID-checkbox-container'),
                 $autoBoxLabel = $("<label />").text("auto?").addClass('checkbox');
 
             $autoBoxLabel.prepend($autoBox);
             $autoBoxContainer.append($autoBoxLabel);
+            $uiElem.css('position', 'relative');
 
             $uiElem.find('.controls')
                 .addClass('fd-itextID-controls')
-                .before($autoBoxContainer);
+                .after($autoBoxContainer);
 
             return $uiElem;
         };
