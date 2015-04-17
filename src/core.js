@@ -1634,7 +1634,25 @@ define([
             }));
         $baseToolbar.find('.fd-button-remove').click(function () {
             var mugs = _this.getCurrentlySelectedMug(true);
-            form.removeMugsFromForm(mugs);
+            if (mugs.length > 1) {
+                _this.alert(
+                    "Delete Questions?",
+                    "This cannot be undone.",
+                    [{
+                        title: "Cancel",
+                    }, {
+                        title: "Delete",
+                        cssClasses: "btn-primary",
+                        action: function () {
+                            form.removeMugsFromForm(mugs);
+                            _this.selectSomethingOrHideProperties(true);
+                            _this.data.core.$modal.modal('hide');
+                        }
+                    }]
+                );
+            } else {
+                form.removeMugsFromForm(mugs);
+            }
         });
         $baseToolbar.find('.fd-button-copy').click(function () {
             _this.ensureCurrentMugIsSaved(function () {
