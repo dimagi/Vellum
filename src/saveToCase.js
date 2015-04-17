@@ -50,10 +50,10 @@ define([
             var widget = widgets.normal(mug, options),
                 id = options.id;
 
-            widget.kvInput = $('<div class="control-row" />').attr('name', id);
+            widget.input = $('<div class="control-row" />').attr('name', id);
 
             widget.getControl = function () {
-                return widget.kvInput;
+                return widget.input;
             };
 
             widget.refreshControl = function () {
@@ -67,17 +67,17 @@ define([
 
             widget.setValue = function (value) {
                 value = _.isUndefined(value) ? {} : value;
-                widget.kvInput.html(widget_update_case({
+                widget.input.html(widget_update_case({
                     props: value
                 }));
-                widget.kvInput.find('input').bind('change keyup', function () {
+                widget.input.find('input').bind('change keyup', function () {
                     widget.handleChange();
                 });
-                widget.kvInput.find('.fd-add-update-property').click(function (e) {
+                widget.input.find('.fd-add-update-property').click(function (e) {
                     widget.refreshControl();
                     e.preventDefault();
                 });
-                widget.kvInput.find('.fd-remove-update-property').click(function (e) {
+                widget.input.find('.fd-remove-update-property').click(function (e) {
                     $(this).parent().parent().parent().remove();
                     widget.refreshControl();
                     widget.save();
@@ -87,7 +87,7 @@ define([
 
             widget.getValue = function () {
                 var currentValues = {};
-                _.each(widget.kvInput.find('.fd-update-property'), function (kvPair) {
+                _.each(widget.input.find('.fd-update-property'), function (kvPair) {
                     var $pair = $(kvPair);
                     currentValues[$pair.find('.fd-update-property-name').val()] = {
                         calculate: $pair.find('.fd-update-property-source').val(),
@@ -100,8 +100,8 @@ define([
             widget.updateValue = function () {
                 var currentValues = widget.getValue();
                 if (!("" in currentValues)) {
-                    widget.kvInput.find('.btn').removeClass('hide');
-                    widget.kvInput.find('.fd-remove-update-property').removeClass('hide');
+                    widget.input.find('.btn').removeClass('hide');
+                    widget.input.find('.fd-remove-update-property').removeClass('hide');
                 }
                 widget.save();
             };
@@ -113,17 +113,17 @@ define([
 
             widget.setValue = function (value) {
                 value = _.isUndefined(value) ? {} : value;
-                widget.kvInput.html(widget_index_case({
+                widget.input.html(widget_index_case({
                     props: value
                 }));
-                widget.kvInput.find('input').bind('change keyup', function () {
+                widget.input.find('input').bind('change keyup', function () {
                     widget.handleChange();
                 });
-                widget.kvInput.find('.fd-add-index-property').click(function (e) {
+                widget.input.find('.fd-add-index-property').click(function (e) {
                     widget.refreshControl();
                     e.preventDefault();
                 });
-                widget.kvInput.find('.fd-remove-index-property').click(function (e) {
+                widget.input.find('.fd-remove-index-property').click(function (e) {
                     $(this).parent().parent().parent().remove();
                     widget.refreshControl();
                     widget.save();
@@ -133,7 +133,7 @@ define([
 
             widget.getValue = function () {
                 var currentValues = {};
-                _.each(widget.kvInput.find('.fd-index-property'), function (kvPair) {
+                _.each(widget.input.find('.fd-index-property'), function (kvPair) {
                     var $pair = $(kvPair);
                     currentValues[$pair.find('.fd-index-property-name').val()] = {
                         calculate: $pair.find('.fd-index-property-source').val(),
@@ -147,8 +147,8 @@ define([
             widget.updateValue = function () {
                 var currentValues = widget.getValue();
                 if (!("" in currentValues)) {
-                    widget.kvInput.find('.btn').removeClass('hide');
-                    widget.kvInput.find('.fd-remove-index-property').removeClass('hide');
+                    widget.input.find('.btn').removeClass('hide');
+                    widget.input.find('.fd-remove-index-property').removeClass('hide');
                 }
                 widget.save();
             };
