@@ -466,13 +466,11 @@ define([
             var $uiElem = _getUIElement(),
                 $autoBoxContainer = $('<div />').addClass('fd-itextID-checkbox-container'),
                 $autoBoxLabel = $("<label />").text("auto?").addClass('checkbox');
-                $autoBoxContainer.css('position', 'absolute').css('right', 0);
 
             $autoBoxLabel.prepend($autoBox);
             $autoBoxContainer.append($autoBoxLabel);
-
             $uiElem.css('position', 'relative');
-            $uiElem.find('.controls').css('position', 'absolute').css('left', 0).css('right', 0);
+
             $uiElem.find('.controls')
                 .addClass('fd-itextID-controls')
                 .after($autoBoxContainer);
