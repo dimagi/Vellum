@@ -912,6 +912,8 @@ define([
         },
         spec: {
             hintLabel: { presence: "notallowed" },
+            hintItext: { presence: "notallowed" },
+            helpItext: { presence: "notallowed" },
             calculateAttr: { presence: "notallowed" },
             constraintAttr: { presence: "notallowed" },
             constraintMsgAttr: { presence: "notallowed" },
