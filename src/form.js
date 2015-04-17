@@ -823,37 +823,32 @@ define([
         },
         removeMugsFromForm: function (mugs) {
             function breakReferences(mug) {
-                if (!seen.hasOwnProperty(mug.ufid)) {
+                if (mug && !seen.hasOwnProperty(mug.ufid)) {
                     seen[mug.ufid] = null;
                     _this.updateLogicReferences(mug);
                 }
             }
             var _this = this,
                 seen = {},
-                ufids = {},
-                parents = {};
+                ufids = {};
             _.each(mugs, function (mug) {
-                parents[mug.ufid] = mug;
-                ufids[mug.ufid] = null;
-                _.each(_this.getDescendants(mug), function (child) {
-                    ufids[child.ufid] = null;
-                    if (parents.hasOwnProperty(child.ufid)) {
-                        delete parents[child.ufid];
-                    }
-                });
-            });
-            _.each(_.values(parents), function (mug) {
-                _this._removeMugFromForm(mug, false);
+                _this._removeMugFromForm(mug, ufids, false);
             });
             this._logicManager.forEachReferencingProperty(ufids, breakReferences);
         },
-        _removeMugFromForm: function(mug, isInternal) {
-            var fromTree = this.tree.getNodeFromMug(mug);
-            if (fromTree) {
-                var children = fromTree.getChildrenMugs();
+        _removeMugFromForm: function(mug, ufids, isInternal) {
+            if (ufids.hasOwnProperty(mug.ufid)) {
+                return; // already removed
+            }
+            ufids[mug.ufid] = null;
+            var node = this.tree.getNodeFromMug(mug);
+            if (node) {
+                var children = node.getChildrenMugs();
                 for (var i = 0; i < children.length; i++) {
-                    this._removeMugFromForm(children[i], true);
+                    this._removeMugFromForm(children[i], ufids, true);
                 }
+                delete this.mugMap[this.tree.getAbsolutePath(mug)];
+                this.tree.removeMug(mug);
             }
             if (this.enableInstanceRefCounting) {
                 this.instanceMetadata = _.filter(this.instanceMetadata, function (meta) {
@@ -861,8 +856,6 @@ define([
                 });
             }
             delete this.mugMap[mug.ufid];
-            delete this.mugMap[this.tree.getAbsolutePath(mug)];
-            this.tree.removeMug(mug);
             this.fire({
                 type: 'question-remove',
                 mug: mug,

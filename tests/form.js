@@ -8,6 +8,7 @@ define([
     'text!static/form/question-referencing-other.xml',
     'text!static/form/group-with-internal-refs.xml',
     'text!static/form/hidden-value-in-group.xml',
+    'text!static/form/nested-groups.xml',
     'text!static/form/select-questions.xml',
     'text!static/form/mismatch-tree-order.xml',
     'text!static/form/hidden-value-tree-order.xml'
@@ -21,6 +22,7 @@ define([
     QUESTION_REFERENCING_OTHER_XML,
     GROUP_WITH_INTERNAL_REFS_XML,
     HIDDEN_VALUE_IN_GROUP_XML,
+    NESTED_GROUPS_XML,
     SELECT_QUESTIONS,
     MISMATCH_TREE_ORDER_XML,
     HIDDEN_VALUE_TREE_ORDER
@@ -229,6 +231,20 @@ define([
                 "question6",
                 "question4"
             );
+        });
+
+        it("should delete nested groups", function() {
+            var form = util.loadXML(NESTED_GROUPS_XML),
+                mugs = util.clickQuestion("group1", "group1/group2");
+            form.removeMugsFromForm(mugs);
+            util.assertJSTreeState("");
+        });
+
+        it("should delete nested groups v2", function() {
+            var form = util.loadXML(NESTED_GROUPS_XML),
+                mugs = util.clickQuestion("group1", "group1/group2/group3");
+            form.removeMugsFromForm(mugs);
+            util.assertJSTreeState("");
         });
     });
 });

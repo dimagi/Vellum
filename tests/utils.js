@@ -202,15 +202,18 @@ define([
     }
 
     function clickQuestion() {
-        var ufids = _.map(arguments, function (path) {
-            var mug = getMug(path);
-            if (!(mug && mug.ufid)) {
-                throw new Error("mug not found: " + path);
-            }
-            return mug.ufid;
-        });
+        var mugs = [],
+            ufids = _.map(arguments, function (path) {
+                var mug = getMug(path);
+                if (!(mug && mug.ufid)) {
+                    throw new Error("mug not found: " + path);
+                }
+                mugs.push(mug);
+                return mug.ufid;
+            });
         call("jstree", "deselect_all", true);
         call("jstree", "select_node", ufids);
+        return mugs;
     }
 
     function selectAll() {
