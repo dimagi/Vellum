@@ -9,6 +9,7 @@ define([
     'vellum/widgets',
     'tpl!vellum/templates/widget_update_case',
     'tpl!vellum/templates/widget_index_case',
+    'tpl!vellum/templates/widget_save_to_case',
     'vellum/core'
 ], function (
     form_,
@@ -20,7 +21,8 @@ define([
     util,
     widgets,
     widget_update_case,
-    widget_index_case
+    widget_index_case,
+    widget_save_to_case
 ){
     function createsCase(mug) {
         return mug ? mug.p.use_create : false;
@@ -49,7 +51,7 @@ define([
     var propertyWidget = function (mug, options) {
             var widget = widgets.normal(mug, options),
                 id = options.id,
-                template = options.template;
+                internal_template = options.template;
 
             widget.input = $('<div class="control-row" />').attr('name', id);
 
@@ -59,7 +61,8 @@ define([
 
             widget.refreshControl = function (value) {
                 value = value ? value : widget.getValue();
-                widget.input.html(template({
+                widget.input.html(widget_save_to_case({
+                    internal_template: internal_template,
                     props: value
                 }));
                 widget.input.find('input').bind('change keyup', function () {
@@ -69,10 +72,18 @@ define([
                 widget.input.find('.fd-remove-property').click(widget.removeProperty);
             };
 
-
             widget.setValue = function (value) {
                 value = _.isUndefined(value) ? {} : value;
                 widget.refreshControl(value);
+            };
+
+            widget.updateValue = function () {
+                var currentValues = widget.getValue();
+                if (!("" in currentValues)) {
+                    widget.input.find('.btn').removeClass('hide');
+                    widget.input.find('.fd-remove-property').removeClass('hide');
+                }
+                widget.save();
             };
 
             widget.removeProperty = function(e) {
@@ -105,15 +116,6 @@ define([
                 return currentValues;
             };
 
-            widget.updateValue = function () {
-                var currentValues = widget.getValue();
-                if (!("" in currentValues)) {
-                    widget.input.find('.btn').removeClass('hide');
-                    widget.input.find('.fd-remove-property').removeClass('hide');
-                }
-                widget.save();
-            };
-
             return widget;
         },
         indexCaseWidget = function (mug, options) {
@@ -131,15 +133,6 @@ define([
                     };
                 });
                 return currentValues;
-            };
-
-            widget.updateValue = function () {
-                var currentValues = widget.getValue();
-                if (!("" in currentValues)) {
-                    widget.input.find('.btn').removeClass('hide');
-                    widget.input.find('.fd-remove-property').removeClass('hide');
-                }
-                widget.save();
             };
 
             return widget;
