@@ -566,6 +566,20 @@ require([
                    "double_trouble should not be valid");
         });
 
+        it("should warn about discarded languages", function () {
+            util.loadXML("");
+            paste([
+                ["id", "type", "labelItext:en-default", "labelItext:es-default", "labelItext:fr-default"],
+                ["/text", "Text", "english", "spanish", "french"],
+            ], ["Discarded languages: es, fr"]);
+            util.selectAll();
+            eq(mod.copy(), [
+                ["id", "type", "labelItext:en-default", "labelItext:hin-default"],
+                ["/text", "Text", "english", "english"],
+            ]);
+            assert(util.isTreeNodeValid("text"), util.getMessages("text"));
+        });
+
         // TODO test each mug spec item (don't forget exotic/plugin question types)
         // TODO test bad paste values
         // TODO find a case where, when copying multiple questions, one

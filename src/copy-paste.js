@@ -1,11 +1,13 @@
 define([
     'jquery',
     'underscore',
+    'vellum/mugs',
     'vellum/tsv',
     'vellum/core'
 ], function (
     $,
     _,
+    mugs,
     tsv
 ) {
     var PREAMBLE = ["Form Builder clip", "version 1"],
@@ -67,7 +69,13 @@ define([
                 // on chrome this gets called twice,
                 // the first time with a blank value
                 if (pasteValue) {
-                    opts.paste(pasteValue);
+                    var errors = opts.paste(pasteValue);
+                    if (errors.length) {
+                        vellum._resetMessages([{
+                            level: "parse-warning",
+                            message: errors,
+                        }]);
+                    }
                 }
             }, 0);
         }
@@ -216,11 +224,18 @@ define([
             mug = vellum.getCurrentlySelectedMug(),
             header = next(),
             row = next(),
-            errors = [],
+            errors = new mugs.MugMessages(),
             node = {id: null, mug: mug, parent: null},
             into = {into: 1, last: 1},
             later = [],
             values, pos, parent;
+        errors.add = function (message) {
+            errors.update(null, {
+                key: message,
+                level: mugs.ERROR,
+                message: message
+            });
+        };
         vellum.beforeBulkInsert(form);
         for (; row; row = next()) {
             try {
@@ -228,16 +243,16 @@ define([
                     return valuify(str);
                 }));
             } catch (err) {
-                errors.push("Unsupported paste format: " + row.join(", "));
+                errors.add("Unsupported paste format: " + row.join(", "));
                 continue;
             }
             if (!types.hasOwnProperty(values.type)) {
-                errors.push("Unknown question type: " + row.join(", "));
+                errors.add("Unknown question type: " + row.join(", "));
                 continue;
             }
             pos = getInsertTargetAndPosition(node, values);
             if (pos.hasOwnProperty("error")) {
-                errors.push(pos.error);
+                errors.add(pos.error);
                 continue;
             }
             if (pos.position === "after") {
@@ -247,14 +262,14 @@ define([
             } else {
                 // should never happen
                 if (pos.position === "last") { pos.position = "into"; }
-                errors.push("Cannot insert $1 $2 $3"
+                errors.add("Cannot insert $1 $2 $3"
                     .replace("$1", values.type) // TODO user-friendly type names
                     .replace("$2", pos.position)
                     .replace("$3", pos.mug.__className));
                 break;
             }
             mug = form.createQuestion(pos.mug, pos.position, values.type, true);
-            later.push(mug.deserialize(values));
+            later.push(mug.deserialize(values, errors));
             node = {
                 id: values.id,
                 mug: mug,
@@ -266,8 +281,7 @@ define([
         if (mug && pos) {
             vellum.setCurrentMug(mug);
         }
-        if (!window.mochaPhantomJS) { console.log(errors); } // for debugging only
-        return errors;
+        return errors.get();
     }
 
     $.vellum.plugin('copyPaste', {

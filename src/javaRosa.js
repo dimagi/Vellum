@@ -1693,7 +1693,7 @@ define([
                         data[name] = value.id;
                     }
                 };
-                options.deserialize = function (data, name, mug) {
+                options.deserialize = function (data, name, mug, errors) {
                     var item = mug.p[name],
                         found = false;
                     if (data[name]) {
@@ -1710,12 +1710,13 @@ define([
                         }
                     }
                     var dlang = item.itextModel.getDefaultLanguage(),
+                        languages = item.itextModel.languages,
                         nodeID = "";
                     if (data.id) {
                         // a little hacky, but it's a fallback default
                         nodeID = data.id.slice(data.id.lastIndexOf("/") + 1);
                     }
-                    _.each(item.itextModel.languages, function (lang) {
+                    _.each(languages, function (lang) {
                         var prelen = name.length + lang.length + 2,
                             regexp = new RegExp("^" +
                                                 RegExp.escape(name) + ":" +
@@ -1739,6 +1740,28 @@ define([
                     });
                     if (found && !data[name]) {
                         item.id = getDefaultItextId(mug, name.replace(/Itext$/, ""));
+                    }
+                    var WARNING_KEY = "javaRosa-discarded-languages-warning",
+                        langRE = new RegExp("^" + RegExp.escape(name) + ":(\\w+)-"),
+                        discardedLangs = _.filter(_.map(_.keys(data), function (key) {
+                            var match = key.match(langRE);
+                            if (match && languages.indexOf(match[1]) === -1) {
+                                return match[1];
+                            }
+                        }), _.identity);
+                    if (discardedLangs.length) {
+                        var msg = errors.get(null, WARNING_KEY);
+                        if (msg) {
+                            msg.langs = _.union(msg.langs, discardedLangs);
+                            msg.message = "Discarded languages: " + msg.langs.join(", ");
+                        } else {
+                            errors.update(null, {
+                                key: WARNING_KEY,
+                                level: mug.WARNING,
+                                langs: discardedLangs,
+                                message: "Discarded languages: " + discardedLangs.join(", ")
+                            });
+                        }
                     }
                 };
                 return options;

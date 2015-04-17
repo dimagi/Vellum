@@ -323,16 +323,19 @@ define([
         /**
          * Deserialize mug property data
          *
+         * @param data - An object containing mug property data.
+         * @param errors - A `MugMessages` object with a convenience
+         *      `add(message)` method for global errors.
          * @returns - An array of `Later` objects to be executed as the
          *      final step in deserializing a group of related mugs.
          */
-        deserialize: function (data) {
+        deserialize: function (data, errors) {
             var mug = this,
                 later = [];
             _.each(mug.spec, function (spec, key) {
                 if (spec.presence !== 'notallowed') {
                     if (spec.deserialize) {
-                        var value = spec.deserialize(data, key, mug);
+                        var value = spec.deserialize(data, key, mug, errors);
                         if (!_.isUndefined(value)) {
                             if (value instanceof Later) {
                                 later.push(value);
@@ -463,13 +466,29 @@ define([
             }
             return true;
         },
-        get: function (attr) {
+        /**
+         * Get messages
+         *
+         * @param attr - The attribute for which to get messages.
+         * @param key - (optional) The key of the message to get.
+         *      If this is given then the entire message object will be
+         *      returned; otherwise only message strings are returned.
+         * @returns - An array of message strings, or if the `key` param
+         *      is provided, the message object for the given key; null
+         *      if no message is found with the given key.
+         */
+        get: function (attr, key) {
             if (arguments.length) {
+                if (key) {
+                    return _.find(this.messages[attr || ""], function (msg) {
+                        return msg.key === key;
+                    }) || null;
+                }
                 return _.pluck(this.messages[attr || ""], "message");
             }
             return _.flatten(_.map(this.messages, function (messages) {
                 return _.pluck(messages, "message");
-            }), _.identity);
+            }));
         },
         /**
          * Execute a function for each message
@@ -1457,6 +1476,9 @@ define([
             }
         },
         MugTypesManager: MugTypesManager,
+        MugMessages: MugMessages,
+        WARNING: Mug.WARNING,
+        ERROR: Mug.ERROR,
         baseSpecs: baseSpecs
     };
 });
