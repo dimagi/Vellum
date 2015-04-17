@@ -293,6 +293,11 @@ define([
     function getMessages(mug) {
         var messages = [],
             last = null;
+        if (_.isString(mug)) {
+            var path = mug;
+            mug = getMug(path);
+            assert(mug, "mug not found: " + path);
+        }
         mug.messages.each(function (msg, attr) {
             if (attr !== last) {
                 messages.push(attr + ":");
@@ -353,6 +358,11 @@ define([
         collapseGroup: collapseGroup,
         getMessages: getMessages,
         isTreeNodeValid: function (mug) {
+            if (_.isString(mug)) {
+                var path = mug;
+                mug = getMug(path);
+                assert(mug, "mug not found: " + path);
+            }
             var $node = $("#vellum").find('#' + mug.ufid + ' > a');
             return $node.children(".fd-tree-valid-alert-icon").length === 0;
         }

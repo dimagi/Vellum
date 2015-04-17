@@ -554,6 +554,18 @@ require([
             ]);
         });
 
+        it("should show validation errors in tree after paste", function () {
+            util.loadXML("");
+            paste([
+                ["id", "type", "calculateAttr"],
+                ["/two", "DataBindOnly", "2"],
+                ["/double_trouble", "DataBindOnly", "/data/two * /data/trouble"],
+            ]);
+            assert(util.isTreeNodeValid("two"), util.getMessages("two"));
+            assert(!util.isTreeNodeValid("double_trouble"),
+                   "double_trouble should not be valid");
+        });
+
         // TODO test each mug spec item (don't forget exotic/plugin question types)
         // TODO test bad paste values
         // TODO find a case where, when copying multiple questions, one
