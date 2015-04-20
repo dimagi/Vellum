@@ -580,6 +580,26 @@ require([
             assert(util.isTreeNodeValid("text"), util.getMessages("text"));
         });
 
+        it("should paste and copy a model iteration repeat group", function () {
+            util.loadXML("");
+            paste([
+                ['id', 'type', 'labelItext:en-default', 'labelItext:hin-default', 'dataSource'],
+                ['/repeat/item', 'Repeat', 'repeat', 'repeat',
+                    '{"instance":' +
+                        '{"id":"products","src":"jr://commtrack:products"},' +
+                        '"idsQuery":"instance(\'products\')/products/product/@id"}'],
+            ]);
+            util.selectAll();
+            eq(mod.copy(), [
+                ['id', 'type', 'labelItext:en-default', 'labelItext:hin-default', 'dataSource'],
+                ['/repeat/item', 'Repeat', 'repeat', 'repeat',
+                    '{"instance":' +
+                        '{"id":"products","src":"jr://commtrack:products"},' +
+                        '"idsQuery":"instance(\'products\')/products/product/@id"}'],
+            ]);
+            assert(util.isTreeNodeValid("repeat/item"), util.getMessages("repeat/item"));
+        });
+
         // TODO test each mug spec item (don't forget exotic/plugin question types)
         // TODO test bad paste values
         // TODO find a case where, when copying multiple questions, one
