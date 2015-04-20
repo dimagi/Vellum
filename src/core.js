@@ -1256,13 +1256,16 @@ define([
      * Try insert into `refMug`, then after `refMug`, then after each of
      * `refMug`'s ancestors.
      *
+     * @param refMug - Mug relative to which to insert.
+     * @param qType - Type of question being inserted.
+     * @param after - (optional) Try insert after instead of into `refMug`.
      * @returns - `{mug: <refMug>, position: <position>}` or, if there is
      *      no valid insert position for the given question type, `null`.
      *      Valid positions: before, after, first, last, into (same as last).
      *      In practice position will be one of `"last"` or `"after"`.
      */
-    fn.getInsertTargetAndPosition = function (refMug, qType) {
-        var parent, childTypes, position = 'last';
+    fn.getInsertTargetAndPosition = function (refMug, qType, after) {
+        var parent, childTypes, position = after ? 'after' : 'last';
         while (refMug) {
             if (position === 'after') {
                 parent = refMug.parentMug;
@@ -1319,8 +1322,8 @@ define([
                                 refMug.__className + " not implemented");
             }
         } else if (position !== "into" && position !== "first" && position !== "last") {
-            throw new Error("validation of insert " + position + " " +
-                            refMug.__className + " not implemented");
+            throw new Error("validation of insert " + position +
+                            " root node not implemented");
             //return false;
         }
         return typeData[parentType].valid_children.indexOf(type) !== -1;

@@ -131,11 +131,13 @@ define([
     }
 
     function getInsertTargetAndPosition(node, values) {
-        var pos;
+        var pos, after;
         while (true) {
             if (!node.parent || values.id.startsWith(node.id + "/")) {
                 // node is the paste root or a possible parent (by path)
-                pos = vellum.getInsertTargetAndPosition(node.mug, values.type);
+                // insert after if path does not start with previous node path
+                after = node.id && !values.id.startsWith(node.id + "/");
+                pos = vellum.getInsertTargetAndPosition(node.mug, values.type, after);
                 break;
             }
             node = node.parent;

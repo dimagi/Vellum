@@ -345,6 +345,52 @@ require([
             ]);
         });
 
+        it("should paste three groups after text question", function () {
+            util.loadXML("");
+            paste([
+                ["id", "type", "labelItext:en-default", "labelItext:hin-default"],
+                ["/text", "Text", "text", "text"],
+            ]);
+            util.clickQuestion("text");
+            paste([
+                ["id", "type", "labelItext:en-default", "labelItext:hin-default"],
+                ["/group1", "Group", "group", "group"],
+                ["/group2", "Group", "group", "group"],
+                ["/group3", "Group", "group", "group"],
+            ]);
+            util.selectAll();
+            eq(mod.copy(), [
+                ["id", "type", "labelItext:en-default", "labelItext:hin-default"],
+                ["/text", "Text", "text", "text"],
+                ["/group1", "Group", "group", "group"],
+                ["/group2", "Group", "group", "group"],
+                ["/group3", "Group", "group", "group"],
+            ]);
+        });
+
+        it("should paste three groups into group", function () {
+            util.loadXML("");
+            paste([
+                ["id", "type", "labelItext:en-default", "labelItext:hin-default"],
+                ["/group", "Group", "group", "group"],
+            ]);
+            util.clickQuestion("group");
+            paste([
+                ["id", "type", "labelItext:en-default", "labelItext:hin-default"],
+                ["/group1", "Group", "group", "group"],
+                ["/group2", "Group", "group", "group"],
+                ["/group3", "Group", "group", "group"],
+            ]);
+            util.selectAll();
+            eq(mod.copy(), [
+                ["id", "type", "labelItext:en-default", "labelItext:hin-default"],
+                ["/group", "Group", "group", "group"],
+                ["/group/group1", "Group", "group", "group"],
+                ["/group/group2", "Group", "group", "group"],
+                ["/group/group3", "Group", "group", "group"],
+            ]);
+        });
+
         it("should resolve pasted question with conflicting question ID", function () {
             util.loadXML("");
             paste([
@@ -673,8 +719,6 @@ require([
         //      ALSO maybe find the converse: property serializes to null
         //      but that null value must be passed to mug.deserialize()
         //      (seems less likely that this is a thing)
-        // TODO paste sibling groups (should all end up being siblings,
-        //      not group2, group3, ... inside group1)
     });
 
     describe("The copy-paste string conversions should", function () {
