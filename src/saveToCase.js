@@ -514,19 +514,19 @@ define([
         parseBindElement: function (form, el, path) {
             var mug = form.getMugByPath(path);
             if (!mug) {
-                var casePathRegex = /\/case\/((create|update|index)\/(\w+)|close|@date_modified|@user_id|@case_id)$/,
-                    matchRet = _.compact(path.match(casePathRegex));
+                var casePathRegex = /\/case\/(?:(create|update|index)\/(\w+)|(close|@date_modified|@user_id|@case_id))$/,
+                    matchRet = path.match(casePathRegex);
                 if (matchRet.length > 0) {
                     var basePath = path.replace(casePathRegex, "");
                     mug = form.getMugByPath(basePath);
                     if (mug && mug.__className === "SaveToCase") {
-                        if (matchRet.length === 4) {
-                            var prop = matchRet[3],
+                        if (matchRet[2]) {
+                            var prop = matchRet[2],
                                 pKey = {
                                     create: "create_property",
                                     update: "update_property",
                                     index: "index_property",
-                                }[matchRet[2]];
+                                }[matchRet[1]];
 
                             if (!mug.p[pKey]) {
                                 mug.p[pKey] = {};
@@ -539,7 +539,7 @@ define([
                                 mug.p[pKey][prop].relevant =  el.attr("relevant");
                             }
                             return;
-                        } else if (matchRet.length === 2) {
+                        } else {
                             var attr = {
                                 close: {
                                     mugProp: 'close_condition',
@@ -557,7 +557,7 @@ define([
                                     mugProp: 'case_id',
                                     elAttr: 'calculate'
                                 },
-                            }[matchRet[1]];
+                            }[matchRet[3]];
 
                             mug.p[attr.mugProp] = el.attr(attr.elAttr);
                             return;
