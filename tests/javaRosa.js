@@ -13,7 +13,6 @@ require([
     'text!static/javaRosa/output-refs.xml',
     'text!static/javaRosa/outputref-with-inequality.xml',
     'text!static/javaRosa/text-with-constraint.xml',
-    'text!static/javaRosa/group-help.xml',
     'text!static/javaRosa/itext-item-rename.xml',
     'text!static/javaRosa/itext-item-rename-group-move.xml',
     'text!static/javaRosa/itext-item-non-auto-id.xml',
@@ -32,7 +31,6 @@ require([
     OUTPUT_REFS_XML,
     OUTPUTREF_WITH_INEQUALITY_XML,
     TEXT_WITH_CONSTRAINT_XML,
-    GROUP_HELP_XML,
     ITEXT_ITEM_RENAME_XML,
     ITEXT_ITEM_RENAME_GROUP_MOVE_XML,
     ITEXT_ITEM_NON_AUTO_ID_XML,
@@ -516,6 +514,13 @@ require([
             assert.equal(enLabel[0].selectionEnd, 11);
             assert.equal(hinLabel[0].selectionStart, 0);
             assert.equal(hinLabel[0].selectionEnd, 15);
+        });
+
+        it("should not create duplicate <help> node on select", function () {
+            util.loadXML(SELECT1_HELP_XML);
+            var xml = call("createXML"),
+                $xml = $(xml);
+            assert.strictEqual($xml.find("help").length, 1, "wrong <help> node count\n" + xml);
         });
 
         it("should rename itext item ID after move", function () {
