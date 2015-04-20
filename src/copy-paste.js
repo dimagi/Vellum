@@ -135,6 +135,11 @@ define([
         return rank + item;
     }
 
+    function nameOf(type) {
+        var mugType = vellum.data.core.mugTypes.allTypes[type];
+        return (mugType && mugType.typeName) || type;
+    }
+
     function getInsertTargetAndPosition(node, values) {
         var pos, after;
         while (true) {
@@ -150,11 +155,12 @@ define([
         if (!pos) {
             pos = {};
             if (!node.mug) {
-                pos.error = "Cannot insert " + values.type + " into tree root";
+                pos.error = "Cannot insert " +
+                            nameOf(values.type) + " into tree root";
             } else {
                 pos.error = "Cannot insert $1 into or after $2"
-                        .replace("$1", values.type)
-                        .replace("$2", node.mug.__className);
+                        .replace("$1", nameOf(values.type))
+                        .replace("$2", nameOf(node.mug.__className));
             }
         } else {
             // verify that item will be inserted inside the paste root
@@ -162,8 +168,8 @@ define([
                 if (!node.parent) {
                     // valid insertion point was outside of the paste root
                     pos.error = "Cannot insert $1 into $2"
-                        .replace("$1", values.type)
-                        .replace("$2", node.mug.parentMug.__className);
+                        .replace("$1", nameOf(values.type))
+                        .replace("$2", nameOf(node.mug.parentMug.__className));
                     break;
                 }
                 node = node.parent;
@@ -280,9 +286,9 @@ define([
                 // should never happen
                 if (pos.position === "last") { pos.position = "into"; }
                 errors.add("Cannot insert $1 $2 $3"
-                    .replace("$1", values.type) // TODO user-friendly type names
+                    .replace("$1", nameOf(values.type))
                     .replace("$2", pos.position)
-                    .replace("$3", pos.mug.__className));
+                    .replace("$3", nameOf(pos.mug.__className)));
                 break;
             }
             mug = form.createQuestion(pos.mug, pos.position, values.type, true);

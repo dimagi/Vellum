@@ -413,7 +413,7 @@ require([
             paste([
                 ["id", "type", "labelItext:en-default", "labelItext:hin-default"],
                 ["/select/item", "Item", "item1", "item1"],
-            ], ["Cannot insert Item into tree root"]);
+            ], ["Cannot insert Choice into tree root"]);
             util.selectAll();
             eq(mod.copy(), "");
         });
@@ -429,7 +429,7 @@ require([
             paste([
                 ["id", "type", "labelItext:en-default", "labelItext:hin-default"],
                 ["/text", "Text", "text", "text"],
-            ], ["Cannot insert Text into Select"]);
+            ], ["Cannot insert Text into Single Answer"]);
             util.selectAll();
             eq(mod.copy(), [
                 ["id", "type", "labelItext:en-default", "labelItext:hin-default"],
@@ -474,7 +474,7 @@ require([
             paste([
                 ["id", "type", "labelItext:en-default", "labelItext:hin-default"],
                 ["/select/item", "Item", "item1", "item1"],
-            ], ["Cannot insert Item into or after Text"]);
+            ], ["Cannot insert Choice into or after Text"]);
             util.selectAll();
             eq(mod.copy(), [
                 ["id", "type", "labelItext:en-default", "labelItext:hin-default"],
@@ -709,16 +709,6 @@ require([
             var id = "transfer[@type='tx']";
             assert(util.isTreeNodeValid(id), util.getMessages(id));
         });
-
-        // TODO test each mug spec item (don't forget exotic/plugin question types)
-        // TODO test bad paste values
-        // TODO find a case where, when copying multiple questions, one
-        //      ends up with a null value on a property that it did not
-        //      return from mug.serialize(), and should not be passed
-        //      to mug.deserialize().
-        //      ALSO maybe find the converse: property serializes to null
-        //      but that null value must be passed to mug.deserialize()
-        //      (seems less likely that this is a thing)
     });
 
     describe("The copy-paste string conversions should", function () {
