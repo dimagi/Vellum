@@ -600,6 +600,34 @@ require([
             assert(util.isTreeNodeValid("repeat/item"), util.getMessages("repeat/item"));
         });
 
+        it("should paste and copy an Android App Callout", function () {
+            util.loadXML("");
+            paste([
+                ["id", "type", "labelItext:en-default", "labelItext:hin-default", "intent"],
+                ["/app", "AndroidIntent", "app", "app", JSON.stringify({
+                    path: "app-id",
+                    xmlns: "commcare.org/xforms",
+                    extra: {key1:"val1", key2:"val2"},
+                    response: {key3: "val3"},
+                    unknownAttributes: {type: "robin"}
+                })],
+            ]);
+            util.selectAll();
+            eq(mod.copy(), [
+                ["id", "type", "labelItext:en-default", "labelItext:hin-default", "intent"],
+                ["/app", "AndroidIntent", "app", "app", JSON.stringify({
+                    path: "app-id",
+                    xmlns: "commcare.org/xforms",
+                    extra: {key1:"val1", key2:"val2"},
+                    response: {key3: "val3"},
+                    unknownAttributes: {type: "robin"}
+                })],
+            ]);
+            var messages = util.getMug("app").messages.get();
+            chai.expect(messages[0]).to.include("works on Android devices");
+            assert.equal(messages.length, 1, messages);
+        });
+
         // TODO test each mug spec item (don't forget exotic/plugin question types)
         // TODO test bad paste values
         // TODO find a case where, when copying multiple questions, one
