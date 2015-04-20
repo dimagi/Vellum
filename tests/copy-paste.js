@@ -628,6 +628,42 @@ require([
             assert.equal(messages.length, 1, messages);
         });
 
+        it("should paste and copy a Balance", function () {
+            util.loadXML("");
+            paste([
+                ["id", "type", "entityId", "entryId", "quantity", "sectionId"],
+                ["/bal", "Balance", "/case", "/product", "/qty", "/balance-id"],
+            ]);
+            util.loadXML(call("createXML"));
+            util.selectAll();
+            eq(mod.copy(), [
+                ["id", "type", "entityId", "entryId", "quantity",
+                    "rawDataAttributes", "sectionId"],
+                ["/bal", "Balance", "/case", "/product", "/qty",
+                    '{"entity-id":"","date":""}', "/balance-id"],
+            ]);
+            var id = "balance[@type='bal']";
+            assert(util.isTreeNodeValid(id), util.getMessages(id));
+        });
+
+        it("should paste and copy a Transfer", function () {
+            util.loadXML("");
+            paste([
+                ["id", "type", "dest", "entryId", "quantity", "sectionId", "src"],
+                ["/tx", "Transfer", "/dst", "/product", "/qty", "/balance", "/src"],
+            ]);
+            util.loadXML(call("createXML"));
+            util.selectAll();
+            eq(mod.copy(), [
+                ["id", "type", "dest", "entryId", "quantity",
+                    "rawDataAttributes", "sectionId", "src"],
+                ["/tx", "Transfer", "/dst", "/product", "/qty",
+                    '{"date":"","src":"","dest":""}', "/balance", "/src"],
+            ]);
+            var id = "transfer[@type='tx']";
+            assert(util.isTreeNodeValid(id), util.getMessages(id));
+        });
+
         // TODO test each mug spec item (don't forget exotic/plugin question types)
         // TODO test bad paste values
         // TODO find a case where, when copying multiple questions, one
