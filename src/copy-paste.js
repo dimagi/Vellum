@@ -29,9 +29,14 @@ define([
         hiddenTextarea.select();
     }
 
-    function unfocusTextarea($focus) {
+    function unfocusTextarea($focus, clear) {
         $focus.focus();
-        return hiddenTextarea.val();
+        var value = hiddenTextarea.val();
+        if (clear && value) {
+            // HACK fix intermittent multiple-paste on Chrome (timing related?)
+            hiddenTextarea.val("");
+        }
+        return value;
     }
 
     function onCut(opts) {
@@ -66,7 +71,7 @@ define([
                                    $focus.is(hiddenTextarea)) {
             focusTextarea($focus);
             setTimeout(function () {
-                var pasteValue = unfocusTextarea($focus);
+                var pasteValue = unfocusTextarea($focus, true);
                 // on chrome this gets called twice,
                 // the first time with a blank value
                 if (pasteValue) {

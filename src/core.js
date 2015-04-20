@@ -1653,7 +1653,7 @@ define([
             }));
         $baseToolbar.find('.fd-button-remove').click(function () {
             var mugs = _this.getCurrentlySelectedMug(true);
-            if (mugs.length > 1) {
+            if (mugs.length > 1 || (mugs.length && form.getChildren(mugs[0]).length)) {
                 _this.alert(
                     "Delete Questions?",
                     "This cannot be undone.",
