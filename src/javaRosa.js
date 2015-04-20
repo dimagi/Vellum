@@ -1020,7 +1020,7 @@ define([
                     var treeName = itextItem.get(widget.form, widget.language) || 
                             mug.form.vellum.getMugDisplayName(mug),
                         it = mug.p.labelItext;
-                    if (it && it.id && it.id === itextItem.id && widget.form === "default") {
+                    if (it && it.id === itextItem.id && widget.form === "default") {
                         mug.form.fire({
                             type: 'question-label-text-change',
                             mug: mug,
