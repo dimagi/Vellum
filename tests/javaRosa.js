@@ -13,7 +13,6 @@ require([
     'text!static/javaRosa/output-refs.xml',
     'text!static/javaRosa/outputref-with-inequality.xml',
     'text!static/javaRosa/text-with-constraint.xml',
-    'text!static/javaRosa/group-help.xml',
     'text!static/javaRosa/itext-item-rename.xml',
     'text!static/javaRosa/itext-item-rename-group-move.xml',
     'text!static/javaRosa/itext-item-non-auto-id.xml',
@@ -32,7 +31,6 @@ require([
     OUTPUT_REFS_XML,
     OUTPUTREF_WITH_INEQUALITY_XML,
     TEXT_WITH_CONSTRAINT_XML,
-    GROUP_HELP_XML,
     ITEXT_ITEM_RENAME_XML,
     ITEXT_ITEM_RENAME_GROUP_MOVE_XML,
     ITEXT_ITEM_NON_AUTO_ID_XML,
@@ -518,14 +516,11 @@ require([
             assert.equal(hinLabel[0].selectionEnd, 15);
         });
 
-        _.each({group: GROUP_HELP_XML, select: SELECT1_HELP_XML}, function (XML, name) {
-            it("should not create duplicate <help> node on " + name, function () {
-                util.loadXML(XML);
-                var xml = call("createXML"),
-                    $xml = $(xml);
-                assert.strictEqual($xml.find("help").length, 1,
-                                   "wrong <help> node count\n" + xml);
-            });
+        it("should not create duplicate <help> node on select", function () {
+            util.loadXML(SELECT1_HELP_XML);
+            var xml = call("createXML"),
+                $xml = $(xml);
+            assert.strictEqual($xml.find("help").length, 1, "wrong <help> node count\n" + xml);
         });
 
         it("should rename itext item ID after move", function () {
@@ -797,6 +792,7 @@ require([
                         </text>\
                         <text id="question1-help">\
                             <value>question1 en help</value>\
+                            <value form="markdown">question1 en help</value>\
                             <value form="image">jr://file/commcare/image/help/data/question1.png</value>\
                             <value form="audio">jr://file/commcare/audio/help/data/question1.mp3</value>\
                             <value form="video">jr://file/commcare/video/help/data/question1.3gp</value>\
@@ -820,6 +816,7 @@ require([
                         </text>\
                         <text id="question1-help">\
                             <value>question1 hin help</value>\
+                            <value form="markdown">question1 hin help</value>\
                             <value form="image">jr://file/commcare/image/help/data/question1.png</value>\
                             <value form="audio">jr://file/commcare/audio/help/data/question1.mp3</value>\
                             <value form="video">jr://file/commcare/video/help/data/question1.3gp</value>\

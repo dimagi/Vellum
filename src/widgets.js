@@ -374,8 +374,11 @@ define([
             .prop('disabled', isDisabled)
             .click(editFn);
 
-        $uiElem.find('label').after(button);
-        $uiElem.find('.controls').not(".messages").css('margin-right', '60px');
+        $uiElem.css('position', 'relative');
+        $uiElem.find('.controls').not('.messages')
+            .addClass('fd-edit-controls')
+            .css('margin-right', '60px')
+            .after(button);
         return $uiElem;
     };
     
