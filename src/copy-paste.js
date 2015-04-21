@@ -118,19 +118,22 @@ define([
     }
 
     function headerKey(item) {
-        var rank = "1",
+        var TYPE = 1,
+            LANG = 2,
+            FORM = 3,
+            rank = "1",
             itext = /^(.*)Itext(?::([^-]+)-(.*))?$/.exec(item);
         if (itext) {
             rank = "0"; // itext before other fields
             // label before all other itext types
-            if (itext[1] === "label") { itext[1] = "!"; }
-            if (itext[3] === "default") {
-                itext[3] = "!"; // default form before other forms
-            } else if (!itext[3]) {
-                itext[3] = "~"; // itext ID after forms
+            if (itext[TYPE] === "label") { itext[TYPE] = "!"; }
+            if (itext[FORM] === "default") {
+                itext[FORM] = "!"; // default form before other forms
+            } else if (!itext[FORM]) {
+                itext[FORM] = "~"; // itext ID after forms
             }
             // sort by itext type, then form, then language
-            item = itext[1] + " " + itext[3] + " " + itext[2];
+            item = itext[TYPE] + " " + itext[FORM] + " " + itext[LANG];
         }
         return rank + item;
     }
