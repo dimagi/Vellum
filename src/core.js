@@ -677,11 +677,11 @@ define([
             })),
             $body = $("body"),
             keyup = function (event) {
-                if (event.keyCode === 27) {
+                if (event.keyCode === 27) { // escape
                     $modal.modal('hide');
                 }
             };
-        $body.one("keyup", keyup);
+        $body.on("keyup", keyup);
         $modal.on('hide', function () {
             $body.off("keyup", keyup);
         }).one("shown", function () {
@@ -949,22 +949,24 @@ define([
     };
 
     /**
-     * Use only when absolutely necessary, or you're probably doing something
-     * wrong!
+     * Get currently selected mug or mugs
+     *
+     * This depends on the UI. Avoid using it unless there is no way to
+     * get the mug from other context.
+     *
+     * @param multiple - If false (default) get the first selected mug;
+     *      null if there is no selection. Otherwise get a (possibly
+     *      empty) list of selected mugs.
+     * @returns - A list of mugs, single mug, or null, depending on
+     *      parameters and the UI state.
      */
     fn.getCurrentlySelectedMug = function (multiple) {
         var selected = this.jstree('get_selected'),
-            form = this.data.core.form,
-            ret;
-
-        if (!selected.length) {
-            ret = null;
-        } else if (multiple) {
-            ret = _.map(selected, form.getMugByUFID.bind(form));
-        } else {
-            ret = form.getMugByUFID(selected[0]);
+            form = this.data.core.form;
+        if (multiple) {
+            return _.map(selected, form.getMugByUFID.bind(form));
         }
-        return ret;
+        return selected.length ? form.getMugByUFID(selected[0]) : null;
     };
 
     fn.getCurrentMugInput = function (propPath) {
