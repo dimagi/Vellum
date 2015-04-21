@@ -516,7 +516,7 @@ define([
             if (!mug) {
                 var casePathRegex = /\/case\/(?:(create|update|index)\/(\w+)|(close|@date_modified|@user_id|@case_id))$/,
                     matchRet = path.match(casePathRegex);
-                if (matchRet.length > 0) {
+                if (matchRet && matchRet.length > 0) {
                     var basePath = path.replace(casePathRegex, "");
                     mug = form.getMugByPath(basePath);
                     if (mug && mug.__className === "SaveToCase") {
