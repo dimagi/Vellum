@@ -12,6 +12,7 @@ require([
     'text!static/javaRosa/multi-line-trans.xml',
     'text!static/javaRosa/output-refs.xml',
     'text!static/javaRosa/outputref-with-inequality.xml',
+    'text!static/javaRosa/group-with-constraint.xml',
     'text!static/javaRosa/text-with-constraint.xml',
     'text!static/javaRosa/group-help.xml',
     'text!static/javaRosa/itext-item-rename.xml',
@@ -31,6 +32,7 @@ require([
     MULTI_LINE_TRANS_XML,
     OUTPUT_REFS_XML,
     OUTPUTREF_WITH_INEQUALITY_XML,
+    GROUP_WITH_CONSTRAINT_XML,
     TEXT_WITH_CONSTRAINT_XML,
     GROUP_HELP_XML,
     ITEXT_ITEM_RENAME_XML,
@@ -675,6 +677,16 @@ require([
             } finally {
                 mug.p.constraintAttr = before;
             }
+        });
+
+        it("should show and hide the validation message as appropriate", function() {
+            util.loadXML(GROUP_WITH_CONSTRAINT_XML);
+            $("[name='property-constraintAttr']").val('true()').change();
+            $("[name='itext-en-constraintMsg']").val('This is not possible').change();
+            assert($("[name='itext-en-constraintMsg']").is(":visible"));
+            $("[name='itext-en-constraintMsg']").val('').change();
+            $("[name='property-constraintAttr']").val('').change();
+            assert(!$("[name='itext-en-constraintMsg']").is(":visible"));
         });
     });
 
