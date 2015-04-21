@@ -1681,15 +1681,17 @@ define([
 
             function addSerializer(options) {
                 options.serialize = function (value, name, mug, data) {
+                    var hasText = false;
                     _.each(value.forms, function (form) {
                         if (!form.isEmpty()) {
+                            hasText = true;
                             _.each(value.itextModel.languages, function (lang) {
                                 var key = name + ":" + lang + "-" + form.name;
                                 data[key] = form.getValue(lang);
                             });
                         }
                     });
-                    if (!value.autoId && !_.isEmpty(data)) {
+                    if (hasText && !value.autoId) {
                         data[name] = value.id;
                     }
                 };
