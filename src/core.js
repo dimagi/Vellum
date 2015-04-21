@@ -1344,6 +1344,10 @@ define([
 
     fn.toggleConstraintItext = function (mug) {
         // todo: don't handle this one-off in the UI layer
+        var current = this.getCurrentlySelectedMug();
+        if (current && current.ufid !== mug.ufid) {
+	         return;
+        }
         var state = (mug.p.constraintMsgItext &&
                      (!mug.p.constraintMsgItext.isEmpty() ||
                       mug.p.constraintAttr)),
