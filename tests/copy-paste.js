@@ -600,6 +600,18 @@ require([
             ]);
         });
 
+        it("should not cut itemset (External Data)", function () {
+            util.loadXML("");
+            paste([
+                ["id", "type", "labelItext:en-default", "itemsetData"],
+                ["/select", "SelectDynamic", "select",
+                 '[{"instance":null,"nodeset":"/items","labelRef":"@name","valueRef":"@id"}]'],
+            ]);
+            util.clickQuestion("select/itemset");
+            eq(mod.cut(), "");
+            assert(util.getMug("select/itemset"), "itemset should not be cut");
+        });
+
         it("should show validation errors in tree after paste", function () {
             util.loadXML("");
             paste([

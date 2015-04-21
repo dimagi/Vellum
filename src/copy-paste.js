@@ -184,6 +184,7 @@ define([
         }
         var data = copy(),
             mugs = vellum.getCurrentlySelectedMug(true);
+        mugs = _.filter(mugs, function (mug) { return mug.options.isCopyable; });
         if (mugs && mugs.length) {
             vellum.data.core.form.removeMugsFromForm(mugs);
         }
@@ -225,6 +226,9 @@ define([
             form = mugs[0].form,
             rows = _.filter(_.flatten(_.map(mugs, serialize)), _.identity);
 
+        if (rows.length === 0) {
+            return "";
+        }
         header = ["id", "type"].concat(_.sortBy(header, headerKey));
         return tsv.tabDelimit([PREAMBLE, header].concat(_.map(rows, function (row) {
             return _.map(header, function (key) {
