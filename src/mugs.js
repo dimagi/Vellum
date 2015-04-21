@@ -308,13 +308,9 @@ define([
                     if (!_.isUndefined(value)) {
                         data[key] = value;
                     }
-                } else if (!(
-                                value === null ||
-                                value === "" ||
-                                _.isUndefined(value) ||
-                                (_.isEmpty(value) &&
-                                    (_.isObject(value) || _.isArray(value)))
-                           )) {
+                } else if (value && !(_.isEmpty(value) &&
+                                      (_.isObject(value) || _.isArray(value))
+                          )) {
                     data[key] = value;
                 }
             });
