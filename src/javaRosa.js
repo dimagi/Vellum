@@ -309,16 +309,23 @@ define([
             return this.updateForMug(mug, mug.getLabelValue());
         },
         updateForMug: function (mug, defaultLabelValue) {
+            function getPresence(itext) {
+                if (_.isFunction(itext.presence)) {
+                    return itext.presence(mug.options);
+                }
+                return itext.presence;
+            }
+
             // set default itext id/values
             if (!mug.options.isDataOnly) {
-                if (!mug.p.labelItext && mug.spec.labelItext.presence !== "notallowed") {
+                if (!mug.p.labelItext && getPresence(mug.spec.labelItext) !== "notallowed") {
                     var item = mug.p.labelItext = this.createItem();
                     item.set(defaultLabelValue);
                 }
-                if (!mug.p.hintItext && mug.spec.hintItext.presence !== "notallowed") {
+                if (!mug.p.hintItext && getPresence(mug.spec.hintItext) !== "notallowed") {
                     mug.p.hintItext = this.createItem();
                 }
-                if (!mug.p.helpItext && mug.spec.helpItext.presence !== "notallowed") {
+                if (!mug.p.helpItext && getPresence(mug.spec.helpItext) !== "notallowed") {
                     var help = mug.p.helpItext = this.createItem();
                     if (HELP_MARKDOWN) {
                         help.addForm('markdown');
