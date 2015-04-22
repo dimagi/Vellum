@@ -36,6 +36,56 @@ define([
             });
         });
 
+        it("should get and fix serialization errors for mugs with matching paths", function () {
+            var form = util.loadXML(""),
+                one = util.addQuestion("Text", "question"),
+                two = util.addQuestion("Text", "question");
+            assert.notEqual(one.absolutePath, two.absolutePath);
+            var errors = form.getSerializationWarnings();
+            assert.equal(errors.length, 1, "missing serialization error message");
+            assert.equal(errors[0].mug.ufid, two.ufid);
+
+            form.fixSerializationWarnings(errors);
+            assert.equal(one.p.nodeID, "question");
+            assert.notEqual(one.absolutePath, two.absolutePath);
+            assert.deepEqual(form.getSerializationWarnings(), []);
+        });
+
+        it("should retain expression meaning on rename matching path", function () {
+            var blue = util.addQuestion("Text", "blue"),
+                green = util.addQuestion("Text", "green"),
+                black = util.addQuestion("DataBindOnly", "black");
+            black.p.calculateAttr = "/data/blue + /data/green";
+            green.p.nodeID = "blue";
+            assert.notEqual(green.p.nodeID, "blue");
+            assert(!util.isTreeNodeValid(green), "expected validation error");
+
+            blue.p.nodeID = "orange";
+            assert.equal(green.p.nodeID, "blue");
+            assert.equal(black.p.calculateAttr, "/data/orange + /data/blue");
+            assert(util.isTreeNodeValid(blue), blue.getErrors().join("\n"));
+            assert(util.isTreeNodeValid(green), green.getErrors().join("\n"));
+            assert(util.isTreeNodeValid(black), black.getErrors().join("\n"));
+        });
+
+        it("should retain conflicted mug ID on move", function () {
+            var form = util.loadXML(""),
+                hid = util.addQuestion("DataBindOnly", "hid"),
+                text = util.addQuestion("Text", "text"),
+                group = util.addQuestion("Group", "group");
+            util.addQuestion("Text", "text");
+            hid.p.calculateAttr = "/data/text + /data/group/text";
+            form.moveMug(text, "into", group);
+            assert.notEqual(hid.p.calculateAttr, "/data/text + /data/group/text");
+            assert.notEqual(text.p.nodeID, "text");
+            assert(!util.isTreeNodeValid(text), "expected /data/text error");
+
+            form.moveMug(text, "into", null);
+            assert.equal(text.p.nodeID, "text");
+            assert.equal(hid.p.calculateAttr, "/data/text + /data/group/text");
+            assert(util.isTreeNodeValid(text), text.getErrors().join("\n"));
+        });
+
         it("should show warnings for broken references on delete mug", function () {
             util.loadXML(QUESTION_REFERENCING_OTHER_XML);
             var blue = call("getMugByPath", "/data/blue"),
@@ -84,7 +134,7 @@ define([
                 item1 = util.getMug("question1/item1"),
                 item2 = util.getMug("question2/item2");
             // should not throw an error
-            form.moveMug(item1, item2, 'before');
+            form.moveMug(item1, 'before', item2);
         });
 
         it("should update reference to hidden value in group", function () {
@@ -109,7 +159,7 @@ define([
 
             chai.expect(label.p.relevantAttr).to.include("/data/group/hidden");
             chai.expect(label.p.labelItext.defaultValue()).to.include("/data/group/hidden");
-            form.moveMug(hidden, null, "first");
+            form.moveMug(hidden, "first", null);
             assert.equal(hidden.absolutePath, "/data/hidden");
             chai.expect(label.p.relevantAttr).to.include("/data/hidden");
             chai.expect(label.p.labelItext.defaultValue()).to.include("/data/hidden");

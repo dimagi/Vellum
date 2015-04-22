@@ -18,7 +18,11 @@ define([
     var assert = chai.assert,
         savedForm = null,
         saveCount = 0;
-    
+
+    // monkey-patch chai to use ===/!== instead of ==/!= in assert.equal
+    assert.equal = assert.strictEqual;
+    assert.notEqual = assert.notStrictEqual;
+
     function xmlEqual(str1, str2) {
         var xml1 = EquivalentXml.xml(str1),
             xml2 = EquivalentXml.xml(str2);

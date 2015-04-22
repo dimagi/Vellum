@@ -11,6 +11,7 @@ define([
     'tpl!vellum/templates/edit_source',
     'tpl!vellum/templates/confirm_overwrite',
     'tpl!vellum/templates/control_group_stdInput',
+    'tpl!vellum/templates/form_errors_template',
     'tpl!vellum/templates/question_fieldset',
     'tpl!vellum/templates/question_type_changer',
     'tpl!vellum/templates/question_toolbar',
@@ -41,6 +42,7 @@ define([
     edit_source,
     confirm_overwrite,
     control_group_stdInput,
+    form_errors_template,
     question_fieldset,
     question_type_changer,
     question_toolbar,
@@ -408,10 +410,6 @@ define([
         var curMug = this.getCurrentlySelectedMug();
         if (curMug) {
             this.displayMugProperties(curMug);
-            if (this.data.core.unsavedDuplicateNodeId) {
-                this.getCurrentMugInput("nodeID")
-                    .val(this.data.core.unsavedDuplicateNodeId);
-            }
         }
     };
 
@@ -836,26 +834,6 @@ define([
                 should_activate: function () {
                     return _this.ensureCurrentMugIsSaved();
                 },
-                should_move: function (obj, par) {
-                    var form = _this.data.core.form,
-                        mug = (_.isArray(obj) ? obj[0] : obj).data.mug,
-                        nodeID = mug.p.nodeID,
-                        parent = this.get_node(par),
-                        parentMug = parent.data ? parent.data.mug : null;
-
-                    // disallow moving node if it would have the same ID as a sibling
-                    if (nodeID) {
-                        var childMug = form.getMugChildrenByNodeID(parentMug, nodeID)[0];
-                        if (childMug && childMug !== mug) {
-                            // setup state for alert
-                            _this.setUnsavedDuplicateNodeId(nodeID, true);
-                            // trigger alert
-                            _this.ensureCurrentMugIsSaved();
-                            return false;
-                        }
-                    }
-                    return true;
-                },
                 redraw_node: function (obj) {
                     var args = Array.prototype.slice.call(arguments),
                         node = this.parent.redraw_node.apply(this.inst, args);
@@ -896,7 +874,7 @@ define([
                 mug = form.getMugByUFID(data.node.id),
                 refMug = data.parent !== "#" ? form.getMugByUFID(data.parent) : null,
                 rel = _this.getRelativePosition(refMug, data.position);
-            form.moveMug(mug, rel.mug, rel.position);
+            form.moveMug(mug, rel.position, rel.mug);
             data.node.icon = mug.getIcon();
             _this.refreshCurrentMug();
         }).bind("deselect_all.jstree deselect_node.jstree", function (e, data) {
@@ -1090,75 +1068,17 @@ define([
             .addClass('disabled');
     };
 
-    fn.setUnsavedDuplicateNodeId = function (nodeId, forMove) {
-        this.data.core.unsavedDuplicateNodeId = nodeId;
-        this.data.core.duplicateIsForMove = forMove;
-    };
-
     // Attempt to guard against doing actions when there are unsaved or invalid
-    // pending changes. In the case of an invalid duplicate sibling ID, it tries
-    // to call 'callback' after the user automatically fixes the invalid state,
-    // if they choose, but in any case returns false immediately if the current
-    // mug is not saved, for use when this is called in response to a JSTree
-    // event that needs to immediately be decided whether to stop propagation
-    // of.
+    // pending changes.
     fn.ensureCurrentMugIsSaved = function (callback) {
-        callback = callback || function () {};
-
-        var _this = this,
-            mug = this.getCurrentlySelectedMug(),
-            duplicate = this.data.core.unsavedDuplicateNodeId,
-            duplicateIsForMove = this.data.core.duplicateIsForMove;
-
         if (this.data.core.hasXPathEditorChanged) {
             this.alert(
                 "Unsaved Changes in Editor",
                 "You have UNSAVED changes in the Expression Editor. " +
                 "Please save changes before continuing.");
             return false;
-        } else if (duplicate) {
-            var verb = duplicateIsForMove ? 'would have' : 'has',
-                newQuestionId = this.data.core.form.generate_question_id(duplicate);
-
-            this.alert(
-                "Duplicate Question ID",
-                "'" + duplicate + "' " + verb + " the same Question ID as " +
-                "another question in the same group. Please change '" + 
-                duplicate + "' to a unique Question ID before continuing.",
-                [
-                    {
-                        title: "Fix Manually",
-                        action: function () {
-                            // Since we just changed state to trigger this
-                            // message when calling ensureCurrentMugIsSaved()
-                            // when attempting a move, reset the state.  It will
-                            // be changed again if the same move is attempted.
-                            if (duplicateIsForMove) {
-                                _this.setUnsavedDuplicateNodeId(false);
-                            }
-                            _this.data.core.$modal.modal('hide');
-                            var input = _this.getCurrentMugInput("nodeID");
-                            if (input) {
-                                input.select().focus();
-                            }
-                        }
-                    },
-                    {
-                        title: "Automatically rename to '" + newQuestionId + "'",
-                        cssClasses: 'btn-primary',
-                        action: function () {
-                            mug.p.nodeID = newQuestionId;
-                            _this.setUnsavedDuplicateNodeId(false);
-                            _this.data.core.$modal.modal('hide');
-                            _this.refreshVisibleData();
-                            callback();
-                        } 
-                    }
-                
-                ]);
-            return false;
         } else {
-            callback();
+            (callback || function () {})();
             return true;
         }
     };
@@ -1317,20 +1237,8 @@ define([
             _this.refreshMugName(e.mug);
             _this.toggleConstraintItext(e.mug);
         }).on('mug-property-change', function (e) {
-            // The nodeID property for the current question successfully
-            // changed, so it wasn't caught as a duplicate, so remove any
-            // existing duplicate warning state.
-            if (e.property === 'nodeID') {
-                _this.setUnsavedDuplicateNodeId(false);
-            }
-
             _this.refreshMugName(e.mug);
             _this.toggleConstraintItext(e.mug);
-        }).on('question-move', function(e) {
-            if (e.mug.spec.dataParent &&
-                e.mug.spec.dataParent.validationFunc(e.mug) !== 'pass') {
-                e.mug.p.dataParent = undefined;
-            }
         });
     };
 
@@ -1659,8 +1567,11 @@ define([
         this.data.core.$modal = $modal;
 
         $modal.removeClass('fade');
-        $modal.find('.modal-body')
-            .append($('<p />').text(message));
+        if (message instanceof $) {
+            $modal.find('.modal-body').append(message);
+        } else {
+            $modal.find('.modal-body').append($('<p />').text(message));
+        }
         $modal
             .modal('show')
             .on('hide', function () {
@@ -1669,25 +1580,6 @@ define([
     };
 
     fn.showVisualValidation = function (mug) {
-        //function setValidationFailedIcon(li, showIcon, message) {
-            //var $li = $(li),
-                //exists = ($li.find('.fd-props-validate').length > 0);
-            //if (exists && showIcon) {
-                //$li.find('.fd-props-validate').attr("title", message).addClass("ui-icon");
-            //} else if (exists && !showIcon) {
-                //$li.find('.fd-props-validate').removeClass('ui-icon').attr("title", "");
-            //} else if (!exists && showIcon) {
-                //var icon = $('<span class="fd-props-validate ui-icon ui-icon-alert"></span>');
-                //icon.attr('title', message);
-                //$li.append(icon);
-            //}
-        //}
-
-        //function findInputByReference(blockName, elementName) {
-            // todo: make this work (it hasn't in a while)
-            //return $('#' + blockName + '-' + elementName);
-        //}
-
         // for now form warnings get reset every time validation gets called.
         this.data.core.form.clearErrors('form-warning');
       
@@ -1816,17 +1708,52 @@ define([
         return this.data.core.form.createXML();
     };
 
-    fn.validateAndSaveXForm = function (forceFullSave) {
+    fn.canSerializeXForm = function (forAction, retry) {
         var _this = this,
-            formText = this.createXML(),
-            isValidXML = true;
+            form = this.data.core.form,
+            displayLanguage = this.data.core.currentItextDisplayLanguage,
+            warnings = form.getSerializationWarnings();
+        if (warnings.length) {
+            var message = $(form_errors_template({
+                    errors: warnings,
+                    displayLanguage: displayLanguage
+                }));
+            forAction = forAction ? " and " + forAction : "";
+            this.alert("There are errors in the form", message, [
+                {
+                    title: "Fix Manually",
+                    action: function () {
+                        _this.data.core.$modal.modal('hide');
+                    }
+                }, {
+                    title: "Fix Automatically" + forAction,
+                    cssClasses: 'btn-primary',
+                    action: function () {
+                        form.fixSerializationWarnings(warnings);
+                        _this.data.core.$modal.modal('hide');
+                        retry();
+                        _this.refreshVisibleData();
+                    } 
+                }
+            ]);
+            return false;
+        }
+        return true;
+    };
 
+    fn.validateAndSaveXForm = function (forceFullSave) {
+        function retry() {
+            _this.validateAndSaveXForm(forceFullSave);
+        }
+        var _this = this;
+        if (!this.canSerializeXForm("Save", retry)) {
+            return; // validate/create XML failed
+        }
+        var formText = this.createXML();
         try {
             // ensure that form is valid XML; throws an error if not
             $.parseXML(formText);
         } catch (err) {
-            isValidXML = false;
-            formText = false;
             // something went wrong parsing, but maybe the user wants to save anyway
             // let's ask them with a scary message encouraging them not to.
             var theScaryWarning = "It looks like your form is not valid XML. This can " +
@@ -1844,11 +1771,10 @@ define([
                 },
                 'Form Validation Error');
             this._showConfirmDialog();
+            return;
         }
 
-        if (isValidXML) {
-            this.send(formText, forceFullSave ? 'full' : null);
-        }
+        this.send(formText, forceFullSave ? 'full' : null);
     };
         
     fn.send = function (formText, saveType) {
@@ -2107,8 +2033,8 @@ define([
         return mug.options.isTypeChangeable;
     };
 
-    fn.handleMugRename = function (form, mug, val, previous, currentPath, oldPath) {
-        form.handleMugRename(mug, val, previous, currentPath, oldPath);
+    fn.handleMugRename = function (form, mug, newId, oldId, newPath, oldPath, oldParent) {
+        form.handleMugRename(mug, newId, oldId, newPath, oldPath, oldParent);
     };
 
     fn.duplicateMugProperties = function(mug) {};

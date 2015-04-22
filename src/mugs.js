@@ -71,26 +71,42 @@ define([
         getAttrs: function () {
             return _.clone(this.__data);
         },
+        has: function (attr) {
+            return this.__data.hasOwnProperty(attr);
+        },
+        set: function (attr, val) {
+            // set or clear property without triggering events, unlike _set
+            if (arguments.length > 1) {
+                this.__data[attr] = val;
+            } else {
+                delete this.__data[attr];
+            }
+        },
         _get: function (attr) {
             return this.__data[attr];
         },
         _set: function (attr, val) {
             var spec = this.__spec[attr],
-                prev = this.__data[attr];
+                prev = this.__data[attr],
+                mug = this.__mug;
 
             if (!spec || val === prev ||
                 // only set attr if spec allows this attr, except if mug is a
                 // DataBindOnly (which all mugs are before the control block has
                 // been parsed).
                 (spec.presence === 'notallowed' &&
-                 this.__mug.__className !== 'DataBindOnly'))
+                 mug.__className !== 'DataBindOnly'))
             {
                 return;
             }
 
-            var callback = this.shouldChange(this.__mug, attr, val, prev);
+            var callback = this.shouldChange(mug, attr, val, prev);
             if (callback) {
-                this.__data[attr] = val;
+                if (spec.setter) {
+                    spec.setter(mug, attr, val);
+                } else {
+                    this.__data[attr] = val;
+                }
                 callback();
             }
         },
@@ -138,9 +154,32 @@ define([
                 visibility: 'visible',
                 presence: 'required',
                 lstring: 'Question ID',
+                setter: function (mug, attr, value) {
+                    mug.form.moveMug(mug, "rename", value);
+                },
+                mugValue: function (mug, value) {
+                    if (arguments.length === 1) {
+                        if (mug.p.has("conflictedNodeId")) {
+                            return mug.p.conflictedNodeId;
+                        }
+                        return mug.p.nodeID;
+                    }
+                    mug.p.nodeID = value;
+                },
+                widget: widgets.identifier,
                 validationFunc: function (mug) {
+                    var warnings = mug.getSerializationWarnings();
+                    if (warnings.length) {
+                        return _.map(warnings, function (err) {
+                            return err.message;
+                        }).join("\n");
+                    }
                     return validateElementName(mug.p.nodeID, "Question ID");
                 }
+            },
+            conflictedNodeId: {
+                visibility: 'hidden',
+                presence: 'optional'
             },
             dataValue: {
                 visibility: 'visible',
@@ -264,6 +303,11 @@ define([
                     return recFunc(mug.parentMug);
                 },
                 presence: 'optional',
+                setter: function (mug, attr, value) {
+                    var oldPath = mug.absolutePath;
+                    mug.p.set(attr, value);
+                    mug.form._updateMugPath(mug, oldPath);
+                },
                 widget: widgets.droppableText,
                 validationFunc: function(mug) {
                     var dataParent = mug.p.dataParent,
@@ -510,6 +554,51 @@ define([
         },
         getErrors: function () {
             return this.p.getErrors();
+        },
+        /**
+         * Get a list of form serialization warnings
+         *
+         * All warnings returned by this function should also be reported
+         * by the normal mug validation process. Serialization warnings
+         * can be ignored or fixed automatically, but the user may
+         * prefer to fix them manually.
+         *
+         * @returns - A list of warning objects, each having a `message`
+         * attribute describing the warning. This list can be passed to
+         * `fixSerializationWarnings` to automatically fix the warnings.
+         */
+        getSerializationWarnings: function () {
+            var dupId = this.p.conflictedNodeId;
+            if (!_.isUndefined(dupId)) {
+                return [{
+                    code: "conflictedNodeId",
+                    message: "'" + dupId + "' has the same Question ID as " +
+                        "another question in the same group. Please choose " +
+                        "a unique Question ID."
+                }];
+            }
+            return [];
+        },
+        /**
+         * Automatically fix serialization warnings
+         *
+         * No warnings should be reported by `getSerializationWarnings`
+         * after calling this function with the list of warnings
+         * returned by `getSerializationWarnings`.
+         *
+         * @param warnings - The list of warnings returned by
+         *                 `getSerializationWarnings`.
+         */
+        fixSerializationWarnings: function (warnings) {
+            var mug = this;
+            _.each(warnings, function (warning) {
+                if (warning.code === "conflictedNodeId") {
+                    // clear warning; mug already has copy-N-of-... ID
+                    mug.p.set("conflictedNodeId");
+                    return;
+                }
+                throw new Error("unknown warning: " + warning.code);
+            });
         },
         isValid: function () {
             return !this.getErrors().length;
@@ -825,6 +914,7 @@ define([
                 lstring: 'Choice Value',
                 visibility: 'visible',
                 presence: 'required',
+                widget: widgets.identifier,
                 validationFunc: function (mug) {
                     if (/\s/.test(mug.p.defaultValue)) {
                         return "Whitespace in values is not allowed.";
