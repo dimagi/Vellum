@@ -1,12 +1,14 @@
 define([
     'jquery',
     'underscore',
+    'tpl!vellum/templates/copy_paste_help',
     'vellum/mugs',
     'vellum/tsv',
     'vellum/core'
 ], function (
     $,
     _,
+    copy_paste_help,
     mugs,
     tsv
 ) {
@@ -337,6 +339,12 @@ define([
                     onPaste(opts);
                 }
             });
+        },
+        displayMultipleSelectionView: function () {
+            this.__callOld();
+            var isMac = /Mac/i.test(navigator.platform);
+            this.$f.find(".fd-props-content")
+                .html(copy_paste_help({"metachar": (isMac ? "\u2318" : "Ctrl+")}));
         }
     });
 

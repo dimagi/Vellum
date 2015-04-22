@@ -107,7 +107,6 @@ define(function () {
             objectMap: {}  // todo
         },
         plugins: [
-            'copyPaste',
             'itemset',
             'modeliteration',
             'commtrack'
