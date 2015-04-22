@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:orx="http://openrosa.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa" xmlns:vellum="http://commcarehq.org/xforms/vellum">
+	<h:head>
+		<h:title>Untitled Form</h:title>
+		<model>
+			<instance>
+				<data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/AB0BB100-747E-474C-B3A0-B965AEF2CA55" uiVersion="1" version="1" name="Untitled Form">
+					<markdown />
+				</data>
+			</instance>
+			<bind nodeset="/data/markdown" type="xsd:string" />
+			<itext>
+				<translation lang="en" default="">
+					<text id="markdown-label">
+						<value>markdown</value>
+					</text>
+					<text id="markdown-help">
+						<value>~special markdown~</value>
+						<value form="markdown">~special markdown~</value>
+					</text>
+				</translation>
+				<translation lang="hin">
+					<text id="markdown-label">
+						<value>markdown</value>
+					</text>
+					<text id="markdown-help">
+						<value>~special markdown~</value>
+						<value form="markdown">~special markdown~</value>
+					</text>
+				</translation>
+			</itext>
+		</model>
+	</h:head>
+	<h:body>
+		<input ref="/data/markdown">
+			<label ref="jr:itext('markdown-label')" />
+			<help ref="jr:itext('markdown-help')" />
+		</input>
+	</h:body>
+</h:html>
