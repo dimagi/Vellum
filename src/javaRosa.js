@@ -492,11 +492,7 @@ define([
                     (isSelectItem && e.property === "defaultValue"))) {
                 $input.val(autoGenerateId());
             }
-        }, null, widget);
-
-        mug.on("teardown-mug-properties", function (e) {
-            e.mug.unbind(widget);
-        }, null, widget);
+        }, null, "teardown-mug-properties");
 
         return widget;
     };
@@ -988,7 +984,7 @@ define([
                         widget.setValue("");
                     }
                 }
-            }, null, widget);
+            }, null, "teardown-mug-properties");
         }
 
         if (!widget.isDefaultLang) {
@@ -1005,7 +1001,7 @@ define([
                         widget.setValue("");
                     }
                 }
-            }, null, widget);
+            }, null, "teardown-mug-properties");
         }
 
         widget.fireChangeEvents = function () {
@@ -1043,12 +1039,7 @@ define([
             widget.setItextValue(widget.getValue());
         };
 
-        widget.mug.on("teardown-mug-properties", function (e) {
-            e.mug.unbind(widget);
-        }, null, widget);
-
         return widget;
-
     };
 
     var itextFormWidget = function (mug, language, form, options) {

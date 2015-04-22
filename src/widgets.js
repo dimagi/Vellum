@@ -139,9 +139,7 @@ define([
         };
 
         mug.on("messages-changed",
-               function () { widget.refreshMessages(); }, null, widget);
-        mug.on("teardown-mug-properties",
-               function (e) { e.mug.unbind(widget); }, null, widget);
+               function () { widget.refreshMessages(); }, null, "teardown-mug-properties");
 
         widget.save = function () {
             widget.mugValue(mug, widget.getValue());
@@ -206,12 +204,11 @@ define([
             super_updateValue();
         };
 
-        // this is torn down by `normal` teardown-mug-properties handler (above)
         mug.on("property-changed", function (e) {
             if (e.property === "conflictedNodeId") {
                 widget.setValue(widget.mugValue(mug));
             }
-        }, null, widget);
+        }, null, "teardown-mug-properties");
 
         return widget;
     };
