@@ -14,7 +14,7 @@
 			<instance id="ledger" src="jr://instance/ledgerdb" />
 			<instance id="products" src="jr://fixture/commtrack:products" />
 			<bind nodeset="/data/amount_received" type="xsd:int" />
-			<bind nodeset="/data/transfer[@type='trans-1']/entry/@quantity" calculate="/data/amount_received" />
+			<bind nodeset="/data/transfer[@type='trans-1']/entry/@quantity" calculate="/data/amount_received" relevant="true()" />
 			<setvalue event="xforms-ready" ref="/data/transfer[@type='trans-1']/entry/@id" value="instance('commcaresession')/session/data/product_id" />
 			<setvalue event="xforms-ready" ref="/data/transfer[@type='trans-1']/@src" value="instance('commcaresession')/session/data/case_id" />
 			<setvalue event="xforms-ready" ref="/data/transfer[@type='trans-1']/@dest" value="instance('casedb')/casedb/case[@case_id=instance('commcaresession')/session/data/case_id]/index/parent" />
