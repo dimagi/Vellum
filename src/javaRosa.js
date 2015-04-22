@@ -101,6 +101,11 @@ define([
                 this.forms.splice(index, 1);
             }
         },
+        cloneForm: function (cloneFrom, cloneTo) {
+            var newForm = this.getOrCreateForm(cloneFrom).clone();
+            newForm.name = cloneTo;
+            this.forms.push(newForm);
+        },
         get: function(form, language) {
             if (_.isUndefined(form) || form === null) {
                 form = "default";
@@ -309,20 +314,36 @@ define([
             return this.updateForMug(mug, mug.getLabelValue());
         },
         updateForMug: function (mug, defaultLabelValue) {
+            function getPresence(itext) {
+                if (_.isFunction(itext.presence)) {
+                    return itext.presence(mug.options);
+                }
+                return itext.presence;
+            }
+
+            function missingMarkdownForm(forms) {
+                return _.filter(forms, function(form) {
+                    return form.name === 'markdown';
+                }).length === 0;
+            }
+
             // set default itext id/values
             if (!mug.options.isDataOnly) {
-                if (!mug.p.labelItext && mug.spec.labelItext.presence !== "notallowed") {
+                if (!mug.p.labelItext && getPresence(mug.spec.labelItext) !== "notallowed") {
                     var item = mug.p.labelItext = this.createItem();
                     item.set(defaultLabelValue);
                 }
-                if (!mug.p.hintItext && mug.spec.hintItext.presence !== "notallowed") {
+                if (!mug.p.hintItext && getPresence(mug.spec.hintItext) !== "notallowed") {
                     mug.p.hintItext = this.createItem();
                 }
-                if (!mug.p.helpItext && mug.spec.helpItext.presence !== "notallowed") {
+                if (!mug.p.helpItext && getPresence(mug.spec.helpItext) !== "notallowed") {
                     var help = mug.p.helpItext = this.createItem();
                     if (HELP_MARKDOWN) {
-                        help.addForm('markdown');
+                        help.cloneForm('default', 'markdown');
                     }
+                } else if (HELP_MARKDOWN && mug.p.helpItext &&
+                           missingMarkdownForm(mug.p.helpItext.forms)) {
+                    mug.p.helpItext.cloneForm('default', 'markdown');
                 }
             }
             if (!mug.options.isControlOnly) {

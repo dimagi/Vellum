@@ -17,7 +17,9 @@ require([
     'text!static/javaRosa/itext-item-rename.xml',
     'text!static/javaRosa/itext-item-rename-group-move.xml',
     'text!static/javaRosa/itext-item-non-auto-id.xml',
-    'text!static/javaRosa/select1-help.xml'
+    'text!static/javaRosa/select1-help.xml',
+    'text!static/markdown/with-markdown.xml',
+    'text!static/markdown/no-markdown.xml'
 ], function (
     chai,
     $,
@@ -36,7 +38,9 @@ require([
     ITEXT_ITEM_RENAME_XML,
     ITEXT_ITEM_RENAME_GROUP_MOVE_XML,
     ITEXT_ITEM_NON_AUTO_ID_XML,
-    SELECT1_HELP_XML
+    SELECT1_HELP_XML,
+    WITH_MARKDOWN_XML,
+    NO_MARKDOWN_XML
 ) {
     var assert = chai.assert,
         call = util.call;
@@ -557,6 +561,11 @@ require([
                 $xml = $(xml);
             assert.strictEqual($xml.find("text#north-label").length, 2,
                                "wrong <text> node count\n" + xml);
+        });
+
+        it("should add markdown to existing help text", function() {
+            util.loadXML(NO_MARKDOWN_XML);
+            util.assertXmlEqual(call('createXML'), WITH_MARKDOWN_XML);
         });
 
         _.each(["hint", "help", "constraintMsg"], function (tag) {
