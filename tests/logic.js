@@ -39,20 +39,24 @@ require([
         });
 
         describe("should add validation error for", function () {
-            var text,
-                repeat,
-                properties = [
+            var properties = [
                     "relevantAttr",
                     "calculateAttr",
                     "constraintAttr",
                     "dataParent",
-                    "repeat_count"
-                ];
+                    "repeat_count",
+                    "filter",
+                ],
+                mugMap = {
+                    repeat_count: "repeat",
+                    filter: "select/itemset",
+                };
 
             before(function () {
                 util.loadXML("");
-                text = util.addQuestion("Text", "text");
-                repeat = util.addQuestion("Repeat", "repeat");
+                util.addQuestion("Text", "text");
+                util.addQuestion("SelectDynamic", "select");
+                util.addQuestion("Repeat", "repeat");
             });
 
             it("the same set of xpath references as util.XPATH_REFERENCES", function () {
@@ -61,7 +65,7 @@ require([
 
             _.each(properties, function (attr) {
                 it("invalid path in " + attr, function () {
-                    var mug = attr.startsWith("repeat") ? repeat : text;
+                    var mug = util.getMug(mugMap[attr] || "text");
                     assert(util.isTreeNodeValid(mug), util.getMessages(mug));
                     assert.deepEqual(mug.messages.get(attr), []);
 
