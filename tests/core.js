@@ -33,15 +33,6 @@ require([
             util.init({core: {onReady: function () { done(); }}});
         });
 
-        it("should show validation error on add question with duplicate path", function () {
-            var form = util.loadXML("");
-            util.addQuestion("Text", "question1");
-            var dup = util.addQuestion("Text", "question2");
-            dup.p.nodeID = "question1";
-            assert(form.vellum.ensureCurrentMugIsSaved(), "mug is not saved");
-            assert(!util.isTreeNodeValid(dup), "mug should not be valid");
-        });
-
         it("should display non-widget message", function () {
             util.loadXML("");
             var text = util.addQuestion("Text", "text"),
@@ -359,6 +350,32 @@ require([
                 );
                 done();
             }}});
+        });
+
+        describe("should", function () {
+            var form, dup;
+            before(function () {
+                form = util.loadXML("");
+                util.addQuestion("Text", "question1");
+                dup = util.addQuestion("Text", "question2");
+            });
+
+            it("show validation error on add question with duplicate path", function () {
+                dup.p.nodeID = "question1";
+                assert(form.vellum.ensureCurrentMugIsSaved(), "mug is not saved");
+                assert(!util.isTreeNodeValid(dup), "mug should not be valid");
+            });
+
+            it("reset question ID on dismiss duplicate path error", function () {
+                dup.p.nodeID = "question1";
+                var msg = dup.messages.get("nodeID", "mug-conflictedNodeId-warning");
+                assert(msg, "unexpected: validation error is missing");
+                dup.dropMessage("nodeID", "mug-conflictedNodeId-warning");
+                assert(util.isTreeNodeValid(dup), util.getMessages(dup));
+                assert.match(dup.p.nodeID, /^copy-\d+-of-question1$/);
+                assert(!dup.p.conflictedNodeId,
+                    "conflictedNodeId should not be set; got " + dup.p.conflictedNodeId);
+            });
         });
 
         describe("should show validation error on circular reference", function () {

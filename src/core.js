@@ -1337,7 +1337,7 @@ define([
         var _this = this;
         mug.on("messages-changed", function (event) {
             _this.setTreeValidationIcon(event.mug);
-        }, null, this.data.core);
+        }, null, null, this.data.core);
         return this.jstree("create_node",
             refMug ? "#" + refMug.ufid : "#",
             {
@@ -1411,10 +1411,7 @@ define([
         function refreshMessages() {
             $messages.empty().append(widgets.getMessages(mug, null));
         }
-        mug.on("messages-changed", refreshMessages, null, $messages);
-        mug.on("teardown-mug-properties", function () {
-            mug.unbind($messages);
-        }, null, $messages);
+        mug.on("messages-changed", refreshMessages, null, "teardown-mug-properties");
         refreshMessages();
 
         $props.show();

@@ -162,7 +162,11 @@ define([
             }
         },
         dropMessage: function (attr, key) {
+            var spec = this.spec[attr];
             this.addMessage(attr, {key: key});
+            if (spec && spec.dropMessage) {
+                spec.dropMessage(this, attr, key);
+            }
         },
         /**
          * Add many messages for many properties at once
@@ -265,7 +269,7 @@ define([
                 defaultLang = Itext.getDefaultLanguage(),
                 disp,
                 defaultDisp,
-                nodeID = this.getNodeID();
+                nodeID = this.p.conflictedNodeId || this.getNodeID();
 
             if (this.__className === "ReadOnly") {
                 return "Unknown (read-only) question type";
@@ -555,6 +559,11 @@ define([
                 widget: widgets.identifier,
                 validationFunc: function (mug) {
                     return validateElementName(mug.p.nodeID, "Question ID");
+                },
+                dropMessage: function (mug, attr, key) {
+                    if (attr === "nodeID" && key === "mug-conflictedNodeId-warning") {
+                        resolveConflictedNodeId(mug);
+                    }
                 }
             },
             conflictedNodeId: {

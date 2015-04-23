@@ -100,17 +100,18 @@ define([
         var path = options.widgetValuePath || options.path,
             inputID = 'property-' + path,
             disabled = options.disabled || false,
-            widget = base(mug, options),
-            mugValue = options.mugValue || function (mug, value) {
-                if (arguments.length === 1) {
-                    return mug.p[path];
-                }
-                mug.p[path] = value;
-            };
+            widget = base(mug, options);
+
+        widget.mugValue = options.mugValue || function (mug, value) {
+            if (arguments.length === 1) {
+                return mug.p[path];
+            }
+            mug.p[path] = value;
+        };
 
         widget.path = path;
         widget.definition = mug.p.getDefinition(options.path);
-        widget.currentValue = mugValue(mug);
+        widget.currentValue = widget.mugValue(mug);
         widget.id = inputID;
 
         widget.input = $("<input />")
@@ -138,12 +139,10 @@ define([
         };
 
         mug.on("messages-changed",
-               function () { widget.refreshMessages(); }, null, widget);
-        mug.on("teardown-mug-properties",
-               function (e) { e.mug.unbind(widget); }, null, widget);
+               function () { widget.refreshMessages(); }, null, "teardown-mug-properties");
 
         widget.save = function () {
-            mugValue(mug, widget.getValue());
+            widget.mugValue(mug, widget.getValue());
         };
 
         return widget;
@@ -204,6 +203,12 @@ define([
 
             super_updateValue();
         };
+
+        mug.on("property-changed", function (e) {
+            if (e.property === "conflictedNodeId") {
+                widget.setValue(widget.mugValue(mug));
+            }
+        }, null, "teardown-mug-properties");
 
         return widget;
     };
