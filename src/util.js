@@ -76,9 +76,10 @@ define([
     // Just run your object through this function to make it event aware.
     // Adapted from 'JavaScript: The Good Parts' chapter 5
     that.eventuality = function (that) {
-        var registry = {};
+        var registry = {},
+            unbinders = {};
         /**
-         * Fire event, calling all registered handlers and unbind `one` handlers
+         * Fire event, calling all registered handlers
          */
         that.fire = function (event) {
             var array,
@@ -101,39 +102,69 @@ define([
         };
         /**
          * Register an event handler to be called each time an event is fired.
+         *
+         * @param type - Event type string.
+         * @param method - Event handler method.
+         * @param parameters - Parameters to be passed to method. If null
+         *      or not provided, the event object itself will be passed.
+         * @param unbindOn - (optional) Event type on which to unbind
+         *      all handlers associated with `context`. To make a one-
+         *      shot, use the same value for this parameter as for
+         *      `type`.
+         * @param context - (optional) Context for `unbind`. The
+         *      default is `null`. The handler (and all other handlers
+         *      bound to the same context) will be unbound the next time
+         *      the `unbindOn` event fires or `this.unbind(context)` is
+         *      called, whichever happens first.
          */
-        that.on = function (type, method, parameters, bindingContext) {
+        that.on = function (type, method, parameters, unbindOn, context) {
+            if (arguments.length < 5) {
+                context = null;
+            }
             var handler = {
                 method: method,
                 parameters: parameters,
-                bindingContext: bindingContext || method
+                context: context
             };
             if (registry.hasOwnProperty(type)) {
                 registry[type].push(handler);
             } else {
                 registry[type] = [handler];
             }
+            if (unbindOn) {
+                if (!unbinders[unbindOn]) {
+                    unbinders[unbindOn] = [];
+                }
+                if (unbinders[unbindOn].indexOf(context) === -1) {
+                    unbinders[unbindOn].push(context);
+                    that.on(unbindOn, function () {
+                        that.unbind(context);
+                        unbinders[unbindOn] = _.filter(unbinders[unbindOn], function (cx) {
+                            return cx !== context;
+                        });
+                    }, null, null, context);
+                }
+            }
             return this;
         };
         /**
          * Unbind an event handler for a given binding context
          *
-         * @param bindingContext - the binding context or method that was
-         *        passed to `on`.
+         * @param context - the binding context that was passed to `on`.
          * @param type - optional event type. If undefined, all handlers
          *        for the given binding context will be unbound.
          */
-        that.unbind = function (bindingContext, type) {
+        that.unbind = function (context, type) {
             if (_.isUndefined(type)) {
                 registry = _.object(_.map(registry, function (handlers, type, reg) {
                     handlers = _.filter(handlers, function (handler) {
-                        return handler.bindingContext !== bindingContext;
+                        return handler.context !== context;
                     });
                     return [type, handlers];
                 }));
             } else if (registry.hasOwnProperty(type)) {
                 registry[type] = _.filter(registry[type], function (handler) {
-                    return handler.bindingContext !== bindingContext;
+                    return handler.context !== context;
                 });
             }
             return this;

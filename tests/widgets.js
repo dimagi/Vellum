@@ -55,12 +55,11 @@ require([
             input.closest(".control-group").find(".fd-edit-button").click();
 
             events.on("showXPathEditor", function () {
-                events.unbind(events); // unregister this event handler first
                 var text = $(".xpath-advanced").find("textarea").val();
                 $(".fd-xpath-cancel-button").click();
                 assert.equal(text, value, "textarea content should have newline");
                 done();
-            }, null, events);
+            }, null, "showXPathEditor");
         });
 
         it("xPath widget should escape newlines on save advanced mode", function (done) {
@@ -78,7 +77,6 @@ require([
             input.closest(".control-group").find(".fd-edit-button").click();
 
             events.on("showXPathEditor", function () {
-                events.unbind(events); // unregister this event handler first
                 var textarea = $(".xpath-advanced").find("textarea");
                 textarea.val(value).change();
                 $(".fd-xpath-save-button").click();
@@ -87,7 +85,7 @@ require([
                 assert.equal(input.val(), escaped, "input value not escaped");
                 assert.equal(hidden.p.calculateAttr, value, "wrong mug value");
                 done();
-            }, null, events);
+            }, null, "showXPathEditor");
         });
     });
 });
