@@ -382,7 +382,7 @@ define([
         }
 
         var button = $('<button />')
-            .addClass("fd-edit-button pull-right")
+            .addClass("fd-edit-button")
             .text("Edit")
             .stopLink()
             .addClass('btn')
@@ -390,7 +390,10 @@ define([
             .prop('disabled', isDisabled)
             .click(editFn);
 
-        $uiElem.find('label').after(button);
+        $uiElem.css('position', 'relative');
+        $uiElem.find('.controls')
+            .addClass('fd-edit-controls')
+            .after(button);
         $uiElem.find('.controls').css('margin-right', '60px');
         return $uiElem;
     };

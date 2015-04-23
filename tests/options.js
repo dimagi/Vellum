@@ -100,7 +100,8 @@ define(function () {
         },
         plugins: ['itemset', 'modeliteration', 'commtrack'],
         features: {
-            'group_in_field_list': true
+            'group_in_field_list': true,
+            'help_markdown': true
         }
     };
 

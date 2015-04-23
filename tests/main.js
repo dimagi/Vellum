@@ -147,11 +147,9 @@ require(['jquery', 'jquery.vellum'], function ($) {
             $('#vellum').empty().vellum($.extend(true, {}, options.options, {
                 core: {
                     saveUrl: function (data) {
-                        console.log("saving form:", data);
                         session.setItem("vellum.tests.main.lastSavedForm", data.xform);
                     },
                     patchUrl: function (data) {
-                        console.log("saving patch:", data);
                         // fake conflict to retry with saveUrl
                         return {status: 'conflict'};
                     },

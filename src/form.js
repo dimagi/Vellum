@@ -594,8 +594,7 @@ define([
             }
 
             this.updateAllLogicReferences(duplicate);
-
-            duplicate.unlinkItext();
+            this.vellum.duplicateMugProperties(duplicate);
 
             var children = this.getChildren(mug),
                 pathReplacements = [];

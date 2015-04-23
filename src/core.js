@@ -154,6 +154,9 @@ define([
                     return; // abort
                 }
                 _this.ensureCurrentMugIsSaved(function () {
+                    if (!_.isUndefined(window.analytics)) {
+                        window.analytics.track("Clicked Save in Formbuilder");
+                    }
                     _this.validateAndSaveXForm(forceFullSave);
                 });
             },
@@ -709,53 +712,6 @@ define([
             onClosed: function() {}
         });
     };
-        
-    fn._resetMessages = function (errors) {
-        var error, messages_div = this.$f.find('.fd-messages');
-        messages_div.empty();
-
-        function asArray(value) {
-            // TODO: I don't like this array business, should be refactored away
-            // to the callers.
-            if (typeof value === "string" || !(value instanceof Array)) {
-                // value is a string or not-an-array (so try turn it into a string)
-                value = ['' + value];
-            }
-            return value;
-        }
-
-        if (errors.length > 0) {
-            // Show message(s) from the last error only because multiple errors
-            // fill up the screen and thus impede usability.  TODO ideally the
-            // other errors would be accessible in some way.  Maybe hidden by
-            // default with a clickable indicator to show them?
-
-            error = errors[errors.length - 1];
-            messages_div
-                .html(alert_global({
-                    messageType: MESSAGE_TYPES[error.level],
-                    messages: asArray(error.message)
-                }))
-                .find('.alert').removeClass('hide').addClass('in');
-        }
-    };
-  
-    fn.warnOnCircularReference = function(property, form, mug, path, refName) {
-        if (path === "." && (
-            property === "relevantAttr" ||
-            property === "calculateAttr" ||
-            property === "label"
-        )) {
-            var fieldName = mug.p.getDefinition(property).lstring;
-            form.updateError({
-                level: "form-warning",
-                message: "The " + fieldName + " for a question " + 
-                    "is not allowed to reference the question itself. " + 
-                    "Please remove the " + refName + " from the " + fieldName +
-                    " or your form will have errors."
-            }, {updateUI: true});
-        }
-    };
 
     fn.handleDropFinish = function(target, sourceUid, mug) {
         var _this = this,
@@ -984,21 +940,6 @@ define([
         return true;
     };
 
-    fn.setTreeValidationIcon = function (mug) {
-        var node = mug.ufid && this.jstree("get_node", mug.ufid);
-        if (node) {
-            var errors = this.getErrors(mug);
-            if (errors.length) {
-                var msg = errors.join("<p>").replace(/"/g, "'");
-                node.data.errors = '<div class="fd-tree-valid-alert-icon ' +
-                    'icon-exclamation-triangle" title="' + msg + '"></div>';
-            } else {
-                node.data.errors = null;
-            }
-            this.jstree("redraw_node", node);
-        }
-    };
-
     fn.onFormChange = function (mug) {
         // Widget change events, in addition to form change events,
         // trigger mug validation and save button activation because
@@ -1110,8 +1051,8 @@ define([
         if (this.data.core.hasXPathEditorChanged) {
             this.alert(
                 "Unsaved Changes in Editor",
-                "You have UNSAVED changes in the Expression Editor. Please save "+
-                "changes before continuing.");
+                "You have UNSAVED changes in the Expression Editor. " +
+                "Please save changes before continuing.");
             return false;
         } else if (duplicate) {
             var verb = duplicateIsForMove ? 'would have' : 'has',
@@ -1341,6 +1282,10 @@ define([
 
     fn.toggleConstraintItext = function (mug) {
         // todo: don't handle this one-off in the UI layer
+        var current = this.getCurrentlySelectedMug();
+        if (current && current.ufid !== mug.ufid) {
+	         return;
+        }
         var state = (mug.p.constraintMsgItext &&
                      (!mug.p.constraintMsgItext.isEmpty() ||
                       mug.p.constraintAttr)),
@@ -1382,8 +1327,9 @@ define([
                 return true;
             } else {
                 // otherwise clear the Question Edit UI pane
-                this.hideContent();
                 this.jstree('deselect_all');
+                this.hideQuestionProperties();
+                this.$f.find('.fd-default-panel').removeClass('hide');
                 return false;
             }
         }
@@ -1399,6 +1345,9 @@ define([
                 _this.getCurrentlySelectedMug(), qType);
             if (!foo) {
                 throw new Error("cannot add " + qType + " at the current position");
+            }
+            if (!_.isUndefined(window.analytics)) {
+                window.analytics.track("Added a question");
             }
             mug = _this.data.core.form.createQuestion(foo.mug, foo.position, qType);
             var $firstInput = _this.$f.find(".fd-question-properties input:text:visible:first");
@@ -1693,9 +1642,71 @@ define([
         }
     };
 
+    fn.setTreeValidationIcon = function (mug) {
+        var node = mug.ufid && this.jstree("get_node", mug.ufid);
+        if (node) {
+            var errors = this.getErrors(mug);
+            if (errors.length) {
+                var msg = errors.join("<p>").replace(/"/g, "'");
+                node.data.errors = '<div class="fd-tree-valid-alert-icon ' +
+                    'icon-exclamation-triangle" title="' + msg + '"></div>';
+            } else {
+                node.data.errors = null;
+            }
+            this.jstree("redraw_node", node);
+        }
+    };
+
     fn.getErrors = function (mug) {
         return mug.getErrors().concat(
             this.data.core.form._logicManager.getErrors(mug));
+    };
+
+    fn._resetMessages = function (errors) {
+        var error, messages_div = this.$f.find('.fd-messages');
+        messages_div.empty();
+
+        function asArray(value) {
+            // TODO: I don't like this array business, should be refactored away
+            // to the callers.
+            if (typeof value === "string" || !(value instanceof Array)) {
+                // value is a string or not-an-array (so try turn it into a string)
+                value = ['' + value];
+            }
+            return value;
+        }
+
+        if (errors.length > 0) {
+            // Show message(s) from the last error only because multiple errors
+            // fill up the screen and thus impede usability.  TODO ideally the
+            // other errors would be accessible in some way.  Maybe hidden by
+            // default with a clickable indicator to show them?
+
+            error = errors[errors.length - 1];
+            messages_div
+                .html(alert_global({
+                    messageType: MESSAGE_TYPES[error.level],
+                    messages: asArray(error.message)
+                }))
+                .find('.alert').removeClass('hide').addClass('in');
+        }
+    };
+
+    fn.warnOnCircularReference = function(property, form, mug, path, refName) {
+        if (path === "." && (
+            property === "relevantAttr" ||
+            property === "calculateAttr" ||
+            property === "label"
+        )) {
+            var fieldName = mug.p.getDefinition(property).lstring;
+            form.updateError({
+                level: "form-warning",
+                message: "The " + fieldName + " for a question " + 
+                    "is not allowed to reference the question itself. " + 
+                    "Please remove the " + refName + " from the " + fieldName +
+                    " or your form will have errors."
+            }, {updateUI: true});
+        }
     };
 
     fn.getSectionDisplay = function (mug, options) {
@@ -1886,12 +1897,14 @@ define([
             success: function (data) {
                 if (saveType === 'patch') {
                     if (data.status === 'conflict') {
-                        /* todo: display diff and ask instead overwriting */
-                        // var diffHtml = dmp.diff_prettyHtml(
-                        //     dmp.diff_main(formText, data.xform)
-                        // );
-                        _this._hideConfirmDialog();
-                        _this.showOverwriteWarning(_this.send.bind(_this), formText, data.xform);
+                        if (_.isUndefined(data.xform)) {
+                            // unconditionally overwrite if no xform to compare
+                            _this.send(formText, 'full');
+                        } else {
+                            _this._hideConfirmDialog();
+                            _this.showOverwriteWarning(_this.send.bind(_this),
+                                                       formText, data.xform);
+                        }
                         return;
                     } else if (CryptoJS.SHA1(formText).toString() !== data.sha1) {
                         debug.error("sha1's didn't match");
@@ -2096,6 +2109,8 @@ define([
     fn.handleMugRename = function (form, mug, val, previous, currentPath, oldPath) {
         form.handleMugRename(mug, val, previous, currentPath, oldPath);
     };
+
+    fn.duplicateMugProperties = function(mug) {};
 
     fn.beforeSerialize = function () {};
 

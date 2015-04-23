@@ -260,14 +260,14 @@ define([
     function createHint(xmlWriter, mug) {
         var hintLabel = mug.p.hintLabel,
             hintItext = mug.p.hintItext;
-        if(hintLabel || (hintItext && hintItext.id)) {
+        if (hintLabel || (hintItext && !hintItext.isEmpty())) {
             xmlWriter.writeStartElement('hint');
-            if(hintLabel){
+            if (hintLabel) {
                 xmlWriter.writeString(hintLabel);
             }
-            if(hintItext.id){
+            if (hintItext && !hintItext.isEmpty()) {
                 var ref = "jr:itext('" + hintItext.id + "')";
-                xmlWriter.writeAttributeString('ref',ref);
+                xmlWriter.writeAttributeString('ref', ref);
             }
             xmlWriter.writeEndElement();
         }
@@ -275,12 +275,10 @@ define([
 
     function createHelp(xmlWriter, mug) {
         var helpItext = mug.p.helpItext;
-        if(helpItext && helpItext.id) {
+        if (helpItext && !helpItext.isEmpty()) {
             xmlWriter.writeStartElement('help');
-            if(helpItext.id){
-                var helpRef = "jr:itext('" + helpItext.id + "')";
-                xmlWriter.writeAttributeString('ref',helpRef);
-            }
+            var helpRef = "jr:itext('" + helpItext.id + "')";
+            xmlWriter.writeAttributeString('ref', helpRef);
             xmlWriter.writeEndElement();
         }
     }

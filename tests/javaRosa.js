@@ -12,12 +12,14 @@ require([
     'text!static/javaRosa/multi-line-trans.xml',
     'text!static/javaRosa/output-refs.xml',
     'text!static/javaRosa/outputref-with-inequality.xml',
+    'text!static/javaRosa/group-with-constraint.xml',
     'text!static/javaRosa/text-with-constraint.xml',
-    'text!static/javaRosa/group-help.xml',
     'text!static/javaRosa/itext-item-rename.xml',
     'text!static/javaRosa/itext-item-rename-group-move.xml',
     'text!static/javaRosa/itext-item-non-auto-id.xml',
-    'text!static/javaRosa/select1-help.xml'
+    'text!static/javaRosa/select1-help.xml',
+    'text!static/markdown/with-markdown.xml',
+    'text!static/markdown/no-markdown.xml'
 ], function (
     chai,
     $,
@@ -31,12 +33,14 @@ require([
     MULTI_LINE_TRANS_XML,
     OUTPUT_REFS_XML,
     OUTPUTREF_WITH_INEQUALITY_XML,
+    GROUP_WITH_CONSTRAINT_XML,
     TEXT_WITH_CONSTRAINT_XML,
-    GROUP_HELP_XML,
     ITEXT_ITEM_RENAME_XML,
     ITEXT_ITEM_RENAME_GROUP_MOVE_XML,
     ITEXT_ITEM_NON_AUTO_ID_XML,
-    SELECT1_HELP_XML
+    SELECT1_HELP_XML,
+    WITH_MARKDOWN_XML,
+    NO_MARKDOWN_XML
 ) {
     var assert = chai.assert,
         call = util.call;
@@ -312,7 +316,7 @@ require([
         it("should escape inequality operators in output ref", function () {
             util.loadXML(OUTPUTREF_WITH_INEQUALITY_XML);
             var mug = util.getMug("product");
-            assert.equal(mug.p.labelItext.get("en"),
+            assert.equal(mug.p.labelItext.get(),
                 '<output value="if(1 < 2 or 2 > 3 or 3 <= 3 or 4 >= 5, \'product\', \'other\')"/>');
             util.assertXmlEqual(
                 call('createXML'),
@@ -326,17 +330,17 @@ require([
             util.addQuestion("Text", "load-one");
             var label = util.addQuestion("Trigger", "label"),
                 text2 = util.addQuestion("Text", "text2");
-            label.p.labelItext.setDefaultValue('<output value="/data/load-one" />');
+            label.p.labelItext.set('<output value="/data/load-one" />');
             text2.p.nodeID = "load";
             text2.p.nodeID = "load-two";
-            assert.equal(label.p.labelItext.getValue("default", "en"), '<output value="/data/load-one" />');
+            assert.equal(label.p.labelItext.get(), '<output value="/data/load-one" />');
         });
 
         it("itext changes do not bleed back after copy", function (done) {
             util.init({core: {onReady: function () {
                 var mug = util.addQuestion("Text", "question"),
                     dup = mug.form.duplicateMug(mug);
-                dup.p.labelItext.setDefaultValue("q2");
+                dup.p.labelItext.set("q2");
 
                 util.saveAndReload(function () {
                     var mug = call("getMugByPath", "/data/question");
@@ -347,22 +351,21 @@ require([
         });
 
         it("itext changes do not bleed back from copy of copy", function (done) {
-            util.init({core: {onReady: function () {
-                var mug = util.addQuestion("Text", "question"),
-                    dup = mug.form.duplicateMug(mug),
-                    cpy = mug.form.duplicateMug(dup);
-                cpy.p.labelItext.setDefaultValue("copy");
+            util.loadXML("");
+            var mug = util.addQuestion("Text", "question"),
+                dup = mug.form.duplicateMug(mug),
+                cpy = mug.form.duplicateMug(dup);
+            cpy.p.labelItext.set("copy");
 
-                util.saveAndReload(function () {
-                    var mug = call("getMugByPath", "/data/question"),
-                        dup = call("getMugByPath", "/data/copy-1-of-question"),
-                        cpy = call("getMugByPath", "/data/copy-2-of-question");
-                    assert.equal(mug.p.labelItext.defaultValue(), "question");
-                    assert.equal(dup.p.labelItext.defaultValue(), "question");
-                    assert.equal(cpy.p.labelItext.defaultValue(), "copy");
-                    done();
-                });
-            }}});
+            util.saveAndReload(function () {
+                var mug = call("getMugByPath", "/data/question"),
+                    dup = call("getMugByPath", "/data/copy-1-of-question"),
+                    cpy = call("getMugByPath", "/data/copy-2-of-question");
+                assert.equal(mug.p.labelItext.defaultValue(), "question");
+                assert.equal(dup.p.labelItext.defaultValue(), "question");
+                assert.equal(cpy.p.labelItext.defaultValue(), "copy");
+                done();
+            });
         });
 
         it("drag question into label makes output ref in correct position", function (done) {
@@ -375,7 +378,7 @@ require([
                 target.val("test string").change();
                 vellum_util.setCaretPosition(target[0], 4);
                 call("handleDropFinish", target, sourceUid, mug1);
-                var val = mug2.p.labelItext.getValue('default', 'en');
+                var val = mug2.p.labelItext.get('default', 'en');
                 assert.equal(val, 'test<output value="/data/question1" /> string');
                 done();
             }}});
@@ -395,7 +398,7 @@ require([
                     ctrlKey: false
                 });
                 target.change();
-                var val = mug.p.labelItext.getValue('default', 'en');
+                var val = mug.p.labelItext.get('default', 'en');
                 assert.equal(val, 'question1  end');
                 done();
             }}});
@@ -415,7 +418,7 @@ require([
                     ctrlKey: false
                 });
                 target.change();
-                var val = mug.p.labelItext.getValue('default', 'en');
+                var val = mug.p.labelItext.get('default', 'en');
                 assert.equal(val, 'question1  end');
                 done();
             }}});
@@ -431,11 +434,13 @@ require([
                             q1 = util.call("getMugByPath", "/data/question1"),
                             itext = q1.p.labelItext;
 
-                        assert(itext.getValue('default', 'en').indexOf('"/data/question2/question3"') > 0,
-                            '"/data/question2/question3" not in ' + itext.getValue('default', 'en'));
+                        assert(itext.get().indexOf('"/data/question2/question3"') > 0,
+                            '"/data/question2/question3" not in ' + itext.get());
                         group.p.nodeID = "group";
-                        assert(itext.getValue('default', 'en').indexOf('"/data/group/question3"') > 0,
-                            '"/data/group/question3" not in ' + itext.getValue('default', 'en'));
+                        assert(itext.get('default', 'en').indexOf('"/data/group/question3"') > 0,
+                            '"/data/group/question3" not in ' + itext.get('default', 'en'));
+                        assert(itext.get('default', 'hin').indexOf('"/data/group/question3"') > 0,
+                            '"/data/group/question3" not in ' + itext.get('default', 'hin'));
 
                         done();
                     }
@@ -451,9 +456,9 @@ require([
                          'Second"" line\nThird line"\tHindu trans\n');
             jr.parseXLSItext(form, trans, Itext);
             var q1 = util.getMug("question1");
-            assert.equal(q1.p.labelItext.get("en"),
+            assert.equal(q1.p.labelItext.get("default", "en"),
                          'First "line\nSecond" line\nThird line');
-            assert.equal(q1.p.labelItext.get("hin"), 'Hindu trans');
+            assert.equal(q1.p.labelItext.get("default", "hin"), 'Hindu trans');
         });
 
         it("should generate bulk multi-line translation with user-friendly newlines", function () {
@@ -483,10 +488,10 @@ require([
                          'Second"" line\nThird line"\t\t\t\n');
             jr.parseXLSItext(form, trans, Itext);
             var q1 = util.getMug("question1");
-            assert.equal(q1.p.labelItext.get("en"),
+            assert.equal(q1.p.labelItext.get("default", "en"),
                          'First "line\nSecond" line\nThird line');
             // existing translation should be cleared
-            assert.equal(q1.p.labelItext.get("hin"), '');
+            assert.equal(q1.p.labelItext.get("default", "hin"), '');
             // non-existent form should not be added
             assert(!q1.p.labelItext.hasForm("audio"), "unexpected form: audio");
         });
@@ -517,14 +522,11 @@ require([
             assert.equal(hinLabel[0].selectionEnd, 15);
         });
 
-        _.each({group: GROUP_HELP_XML, select: SELECT1_HELP_XML}, function (XML, name) {
-            it("should not create duplicate <help> node on " + name, function () {
-                util.loadXML(XML);
-                var xml = call("createXML"),
-                    $xml = $(xml);
-                assert.strictEqual($xml.find("help").length, 1,
-                                   "wrong <help> node count\n" + xml);
-            });
+        it("should not create duplicate <help> node on select", function () {
+            util.loadXML(SELECT1_HELP_XML);
+            var xml = call("createXML"),
+                $xml = $(xml);
+            assert.strictEqual($xml.find("help").length, 1, "wrong <help> node count\n" + xml);
         });
 
         it("should rename itext item ID after move", function () {
@@ -559,6 +561,30 @@ require([
                 $xml = $(xml);
             assert.strictEqual($xml.find("text#north-label").length, 2,
                                "wrong <text> node count\n" + xml);
+        });
+
+        it("should add markdown to existing help text", function() {
+            util.loadXML(NO_MARKDOWN_XML);
+            util.assertXmlEqual(call('createXML'), WITH_MARKDOWN_XML);
+        });
+
+        _.each(["hint", "help", "constraintMsg"], function (tag) {
+            it("should not serialize empty " + tag + " itext item with non-empty id and autoId = true", function() {
+                util.loadXML("");
+                var mug = util.addQuestion("Text"),
+                    itext = mug.p[tag + "Itext"];
+                itext.id = tag;
+                itext.autoId = true;
+                var xml = call("createXML"),
+                    $xml = $(xml);
+                if (tag === "constraintMsg") {
+                    assert.strictEqual($xml.find("[jr\\:" + tag + "]").length, 0,
+                                       "wrong " + tag + " count\n" + xml);
+                } else {
+                    assert.strictEqual($xml.find(tag).length, 0,
+                                       "wrong <" + tag + "> node count\n" + xml);
+                }
+            });
         });
     });
 
@@ -598,26 +624,33 @@ require([
                 }
             });
 
-            it("should display " + property + " validation error for non-autoId itext", function() {
-                var itext = mug.p[property],
-                    spec = mug.spec[property];
-                itext.autoId = false;
-                assert(itext.id, property + ".id should have a value");
-                assert(spec.validationFunc(mug),
-                       property + " validation should produce an error");
-            });
-
-            it("should display " + property + " validation error for non-autoId itext with blank ID", function() {
+            it("should display " + property + " validation error for non-autoId non-empty itext with blank ID", function() {
                 var itext = mug.p[property],
                     spec = mug.spec[property],
-                    before = itext.id;
+                    before = [itext.id, itext.get()];
                 itext.autoId = false;
                 itext.id = "";
+                itext.set("not empty");
                 try {
-                    assert(spec.validationFunc(mug),
-                           property + " validation should produce an error");
+                    assert.notEqual(spec.validationFunc(mug), "pass", property);
                 } finally {
-                    itext.id = before;
+                    itext.id = before[0];
+                    itext.set(before[1]);
+                }
+            });
+
+            it("should not display " + property + " validation error for non-autoId empty itext with blank ID", function() {
+                var itext = mug.p[property],
+                    spec = mug.spec[property],
+                    before = [itext.id, itext.get()];
+                itext.autoId = false;
+                itext.id = "";
+                itext.set("");
+                try {
+                    assert.equal(spec.validationFunc(mug), "pass");
+                } finally {
+                    itext.id = before[0];
+                    itext.set(before[1]);
                 }
             });
 
@@ -658,6 +691,16 @@ require([
             } finally {
                 mug.p.constraintAttr = before;
             }
+        });
+
+        it("should show and hide the validation message as appropriate", function() {
+            util.loadXML(GROUP_WITH_CONSTRAINT_XML);
+            $("[name='property-constraintAttr']").val('true()').change();
+            $("[name='itext-en-constraintMsg']").val('This is not possible').change();
+            assert($("[name='itext-en-constraintMsg']").is(":visible"));
+            $("[name='itext-en-constraintMsg']").val('').change();
+            $("[name='property-constraintAttr']").val('').change();
+            assert(!$("[name='itext-en-constraintMsg']").is(":visible"));
         });
     });
 
@@ -770,6 +813,7 @@ require([
                         </text>\
                         <text id="question1-help">\
                             <value>question1 en help</value>\
+                            <value form="markdown">question1 en help</value>\
                             <value form="image">jr://file/commcare/image/help/data/question1.png</value>\
                             <value form="audio">jr://file/commcare/audio/help/data/question1.mp3</value>\
                             <value form="video">jr://file/commcare/video/help/data/question1.3gp</value>\
@@ -793,6 +837,7 @@ require([
                         </text>\
                         <text id="question1-help">\
                             <value>question1 hin help</value>\
+                            <value form="markdown">question1 hin help</value>\
                             <value form="image">jr://file/commcare/image/help/data/question1.png</value>\
                             <value form="audio">jr://file/commcare/audio/help/data/question1.mp3</value>\
                             <value form="video">jr://file/commcare/video/help/data/question1.3gp</value>\

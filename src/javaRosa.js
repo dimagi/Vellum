@@ -41,7 +41,8 @@ define([
         RESERVED_ITEXT_CONTENT_TYPES = [
             'default', 'short', 'long', 'audio', 'video', 'image'
         ],
-        _nextItextItemKey = 1;
+        _nextItextItemKey = 1,
+        HELP_MARKDOWN;
 
     function ItextItem(options) {
         this.forms = options.forms || [];
@@ -100,23 +101,57 @@ define([
                 this.forms.splice(index, 1);
             }
         },
-        get: function(lang, form) {
-            // convenience API
-            return this.getValue(_.isUndefined(form) ? "default" : form, lang);
+        cloneForm: function (cloneFrom, cloneTo) {
+            var newForm = this.getOrCreateForm(cloneFrom).clone();
+            newForm.name = cloneTo;
+            this.forms.push(newForm);
         },
-        getValue: function(form, language) {
-            // DEPRECATED use `get("lang")` or `get("lang", "form")`
+        get: function(form, language) {
+            if (_.isUndefined(form) || form === null) {
+                form = "default";
+            }
+            if (_.isUndefined(language) || language === null) {
+                language = this.itextModel.getDefaultLanguage();
+            }
             if (this.hasForm(form)) {
                 return this.getForm(form).getValue(language);
             }
         },
-        defaultValue: function() {
-            return this.getValue("default", 
-                this.itextModel.getDefaultLanguage());
+        /**
+         * Set the value of this item
+         *
+         * @param value - The value to set.
+         * @param form - The form for which a value should be set.
+         *        Defaults to `"default"` if not specified.
+         * @param language - The language to set. If not specified, the
+         *        default language will be unconditionally set to the
+         *        given value. Additionally, any other language whose
+         *        value is empty or matches the previous value of the
+         *        default language will be set to the new value.
+         */
+        set: function(value, form, language) {
+            if (_.isUndefined(form) || form === null) {
+                form = "default";
+            }
+            var itextForm = this.getOrCreateForm(form);
+            if (_.isUndefined(language) || language === null) {
+                language = this.itextModel.getDefaultLanguage();
+                var oldDefault = itextForm.getValue(language);
+                itextForm.setValue(language, value);
+                // also set each language that does not have a value
+                // or whose value matches the old default value
+                _.each(this.itextModel.languages, function (lang) {
+                    var old = itextForm.getValue(lang);
+                    if (!old || old === oldDefault) {
+                        itextForm.setValue(lang, value);
+                    }
+                });
+            } else {
+                itextForm.setValue(language, value);
+            }
         },
-        setDefaultValue: function(val) {
-            this.getOrCreateForm("default").setValue(
-                this.itextModel.getDefaultLanguage(), val);
+        defaultValue: function() {
+            return this.get();
         },
         isEmpty: function () {
             if (this.forms) {
@@ -279,23 +314,36 @@ define([
             return this.updateForMug(mug, mug.getLabelValue());
         },
         updateForMug: function (mug, defaultLabelValue) {
+            function getPresence(itext) {
+                if (_.isFunction(itext.presence)) {
+                    return itext.presence(mug.options);
+                }
+                return itext.presence;
+            }
+
+            function missingMarkdownForm(forms) {
+                return _.filter(forms, function(form) {
+                    return form.name === 'markdown';
+                }).length === 0;
+            }
+
             // set default itext id/values
             if (!mug.options.isDataOnly) {
-                // set label if not there
-                if (!mug.p.labelItext && 
-                    mug.spec.labelItext.presence !== "notallowed")
-                {
+                if (!mug.p.labelItext && getPresence(mug.spec.labelItext) !== "notallowed") {
                     var item = mug.p.labelItext = this.createItem();
-                    item.setDefaultValue(defaultLabelValue);
+                    item.set(defaultLabelValue);
                 }
-                // set hint if legal and not there
-                if (mug.spec.hintItext.presence !== "notallowed" &&
-                    !mug.p.hintItext) {
+                if (!mug.p.hintItext && getPresence(mug.spec.hintItext) !== "notallowed") {
                     mug.p.hintItext = this.createItem();
                 }
-                if (mug.spec.helpItext.presence !== "notallowed" &&
-                    !mug.p.helpItext) {
-                    mug.p.helpItext = this.createItem();
+                if (!mug.p.helpItext && getPresence(mug.spec.helpItext) !== "notallowed") {
+                    var help = mug.p.helpItext = this.createItem();
+                    if (HELP_MARKDOWN) {
+                        help.cloneForm('default', 'markdown');
+                    }
+                } else if (HELP_MARKDOWN && mug.p.helpItext &&
+                           missingMarkdownForm(mug.p.helpItext.forms)) {
+                    mug.p.helpItext.cloneForm('default', 'markdown');
                 }
             }
             if (!mug.options.isControlOnly) {
@@ -390,7 +438,7 @@ define([
             isSelectItem = mug.__className === "Item";
 
         function autoGenerateId() {
-            return mug.getItextAutoID(widget.path);
+            return getDefaultItextId(mug, widget.path);
         }
 
         function updateAutoId() {
@@ -437,15 +485,16 @@ define([
         var _getUIElement = widget.getUIElement;
         widget.getUIElement = function () {
             var $uiElem = _getUIElement(),
-                $autoBoxContainer = $('<div />').addClass('pull-right fd-itextID-checkbox-container'),
+                $autoBoxContainer = $('<div />').addClass('fd-itextID-checkbox-container'),
                 $autoBoxLabel = $("<label />").text("auto?").addClass('checkbox');
 
             $autoBoxLabel.prepend($autoBox);
             $autoBoxContainer.append($autoBoxLabel);
+            $uiElem.css('position', 'relative');
 
             $uiElem.find('.controls')
                 .addClass('fd-itextID-controls')
-                .before($autoBoxContainer);
+                .after($autoBoxContainer);
 
             return $uiElem;
         };
@@ -516,6 +565,7 @@ define([
 
         block.getUIElement = function () {
             _.each(block.getForms(), function (form) {
+                if (form === "markdown") { return; }
                 var $formGroup = block.getFormGroupContainer(form);
                 _.each(block.languages, function (lang) {
                     var itextWidget = block.itextWidget(block.mug, lang, form, options);
@@ -844,7 +894,7 @@ define([
             if (!lang) {
                 lang = widget.language;
             }
-            return itextItem && itextItem.getValue(widget.form, lang);
+            return itextItem && itextItem.get(widget.form, lang);
         };
 
         widget.setItextValue = function (value) {
@@ -854,7 +904,7 @@ define([
                     widget.mug.fire({
                         type: 'defaultLanguage-itext-changed',
                         form: widget.form,
-                        prevValue: itextItem.getValue(widget.form, widget.language),
+                        prevValue: itextItem.get(widget.form, widget.language),
                         value: value,
                         itextType: widget.itextType
                     });
@@ -988,7 +1038,7 @@ define([
             var allMugs = mug.form.getMugList();
             if (vellum.data.core.currentItextDisplayLanguage === widget.language) {
                 allMugs.map(function (mug) {
-                    var treeName = itextItem.getValue(widget.form, widget.language) || 
+                    var treeName = itextItem.get(widget.form, widget.language) || 
                             mug.form.vellum.getMugDisplayName(mug),
                         it = mug.p.labelItext;
                     if (it && it.id === itextItem.id && widget.form === "default") {
@@ -1109,7 +1159,7 @@ define([
 
         function makeRow(item, languages, forms) {
             return rowify(item.id, languages, forms, function (language, form) {
-                return item.hasForm(form) ? item.get(language, form) : "";
+                return item.hasForm(form) ? item.get(form, language) : "";
             });
         }
 
@@ -1177,20 +1227,6 @@ define([
         return getDefaultItextRoot(mug) + "-" + property;
     }
 
-    function setItextId(mug, propertyPath, id, unlink) {
-        var itext = mug.p[propertyPath];
-        if (id !== itext.id) {
-            if (unlink) {
-                itext = itext.clone();
-            }
-
-            itext.id = id;
-            // HACK to ensure property really changes
-            mug.p.__data[propertyPath] = null;
-            mug.p[propertyPath] = itext;
-        }
-    }
-
     $.vellum.plugin("javaRosa", {
         langs: ['en'],
         displayLanguage: 'en'
@@ -1200,6 +1236,7 @@ define([
             this.data.javaRosa.ItextItem = ItextItem;
             this.data.javaRosa.ItextForm = ItextForm;
             this.data.javaRosa.ICONS = ICONS;
+            HELP_MARKDOWN = this.opts().features.help_markdown;
         },
         insertOutputRef: function (mug, target, path, dateFormat) {
             var output = getOutputRef(path, dateFormat),
@@ -1458,12 +1495,7 @@ define([
                 if (labelItext.isEmpty()) {
                     //if no default Itext has been set, set it with the default label
                     var labelVal = xml.humanize(labelEl);
-                    if (labelVal) {
-                        labelItext.setDefaultValue(labelVal);
-                    } else {
-                        // or some sensible deafult
-                        labelItext.setDefaultValue(mug.getDefaultLabelValue());
-                    }
+                    labelItext.set(labelVal || mug.getDefaultLabelValue());
                 }
                 mug.p.labelItext = labelItext;
             }
@@ -1485,13 +1517,6 @@ define([
             this.__callOld();
             this.data.javaRosa.Itext.updateForExistingMug(mug);
         },
-        getMugByLabelItextID: function (itextID) {
-            var node = this.data.core.form.tree.rootNode.getSingleMatchingNode(function (value) {
-                return value && value.getItext() && value.getItext().id === itextID;
-            });
-
-            return node ? node.getValue() : null;
-        },
         handleMugRename: function (form, mug, newID, oldID, newPath, oldPath) {
             this.__callOld();
 
@@ -1504,9 +1529,7 @@ define([
                 }
             }
 
-            var _this = this,
-                itext = this.data.javaRosa.Itext,
-                oldPathRe,
+            var oldPathRe,
                 outputRe,
                 newRef,
                 change;
@@ -1519,7 +1542,7 @@ define([
                 oldPathRe = new RegExp(oldPath + '(?![\\w/-])', 'mg');
             }
 
-            forEachItextItem(form, function (item) {
+            forEachItextItem(form, function (item, mug) {
                 change = false;
                 _(item.forms).each(function (itForm) {
                     _(itForm.getOutputRefExpressions()).each(function (refs, lang) {
@@ -1527,7 +1550,10 @@ define([
                             if (ref.match(oldPathRe)) {
                                 newRef = ref.replace(oldPathRe, newPath);
                                 outputRe = new RegExp(getOutputRef(ref, true), 'mg');
-                                itForm.setValue(lang, itForm.data[lang].replace(outputRe, getOutputRef(newRef)));
+                                itForm.setValue(
+                                    lang,
+                                    itForm.getValue(lang)
+                                          .replace(outputRe, getOutputRef(newRef)));
                                 change = true;
                             }
                         });
@@ -1536,9 +1562,18 @@ define([
                 if (change) {
                     form.fire({
                         type: 'question-label-text-change',
-                        mug: _this.getMugByLabelItextID(item.id),
-                        text: item.getValue('default', itext.getDefaultLanguage())
+                        mug: mug, // TODO fire for other mugs referencing item
+                        text: item.get()
                     });
+                }
+            });
+        },
+        duplicateMugProperties: function (mug) {
+            this.__callOld();
+            _.each(ITEXT_PROPERTIES, function (path) {
+                var itext = mug.p[path];
+                if (itext && itext.autoId) {
+                    mug.p[path] = itext.clone();
                 }
             });
         },
@@ -1578,12 +1613,14 @@ define([
                         for (var k = 0; k < forms.length; k++) {
                             form = forms[k];
                             val = form.getValueOrDefault(lang);
-                            xmlWriter.writeStartElement("value");
-                            if(form.name !== "default") {
-                                xmlWriter.writeAttributeString('form', form.name);
+                            if (val) {
+                                xmlWriter.writeStartElement("value");
+                                if(form.name !== "default") {
+                                    xmlWriter.writeAttributeString('form', form.name);
+                                }
+                                xmlWriter.writeXML(xml.normalize(val));
+                                xmlWriter.writeEndElement();
                             }
-                            xmlWriter.writeXML(xml.normalize(val));
-                            xmlWriter.writeEndElement();
                         }
                         xmlWriter.writeEndElement();
                     }
@@ -1626,7 +1663,7 @@ define([
                     if (!hasItext && mug.spec[property].presence === 'required') {
                         return name + ' is required';
                     }
-                    if (itext && !itext.autoId) {
+                    if (itext && !itext.autoId && !itext.isEmpty()) {
                         // Itext ID validation
                         if (!itext.id) {
                             return name + " Itext ID is required";
@@ -1753,13 +1790,28 @@ define([
                 },
                 lstring: "Help Message",
                 widget: function (mug, options) {
-                    return itextLabelBlock(mug, $.extend(options, {
-                        itextType: "help",
-                        getItextByMug: function (mug) {
-                            return mug.p.helpItext;
-                        },
-                        displayName: "Help Message"
-                    }));
+                    var block = itextLabelBlock(mug, $.extend(options, {
+                            itextType: "help",
+                            getItextByMug: function (mug) {
+                                return mug.p.helpItext;
+                            },
+                            displayName: "Help Message"
+                        })).on('change', function() {
+                            if (!HELP_MARKDOWN) {
+                                return;
+                            }
+                            var mug = this.mug,
+                                helpItext = mug.p.helpItext,
+                                helpItextForm = helpItext.forms[0],
+                                markdownForms = _.find(helpItext.forms, function(itext) {
+                                    return itext.name === 'markdown';
+                                });
+                            if (markdownForms) {
+                                markdownForms.data = _.clone(helpItextForm.data);
+                            }
+                        });
+
+                    return block;
                 },
                 validationFunc: itextValidator("helpItext", "Help Message")
             };
@@ -1911,8 +1963,6 @@ define([
     });
 
     return {
-        getDefaultItextRoot: getDefaultItextRoot,
-        setItextId: setItextId,
         parseXLSItext: parseXLSItext,
         generateItextXLS: generateItextXLS
     };
