@@ -108,7 +108,8 @@ define(function () {
         },
         plugins: ['itemset', 'modeliteration', 'commtrack', 'saveToCase'],
         features: {
-            'group_in_field_list': true
+            'group_in_field_list': true,
+            'help_markdown': true
         }
     };
 

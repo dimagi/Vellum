@@ -35,6 +35,7 @@ define([
             assert.equal(trans.p.src.value, "instance('commcaresession')/session/data/case_id");
             assert.equal(trans.p.dest.value, "instance('casedb')/casedb/case[@case_id=instance('commcaresession')/session/data/case_id]/index/parent");
             assert.equal(trans.p.date.value, "today()");
+            assert.equal(trans.p.relevantAttr, "true()");
         });
 
         it("should create a transfer block", function () {
@@ -46,6 +47,7 @@ define([
             trans.p.entryId.value = "instance('commcaresession')/session/data/product_id";
             trans.p.src.value = "instance('commcaresession')/session/data/case_id";
             trans.p.dest.value = "instance('casedb')/casedb/case[@case_id=instance('commcaresession')/session/data/case_id]/index/parent";
+            trans.p.relevantAttr = "true()";
             trans.form.addInstanceIfNotExists({
                 id: "products",
                 src: "jr://fixture/commtrack:products"
@@ -65,6 +67,7 @@ define([
             assert.equal(bal.p.quantity, "/data/stock_amount");
             assert.equal(bal.p.entityId.value, "instance('commcaresession')/session/data/case_id");
             assert.equal(bal.p.entryId.value, "instance('commcaresession')/session/data/product_id");
+            assert.equal(bal.p.relevantAttr, "/data/stock_amount != 0");
         });
 
         it("should create a balance block", function () {
@@ -75,6 +78,7 @@ define([
             bal.p.quantity = "/data/stock_amount";
             bal.p.entityId.value = "instance('commcaresession')/session/data/case_id";
             bal.p.entryId.value = "instance('commcaresession')/session/data/product_id";
+            bal.p.relevantAttr = "/data/stock_amount != 0";
             bal.form.addInstanceIfNotExists({
                 id: "products",
                 src: "jr://fixture/commtrack:products"

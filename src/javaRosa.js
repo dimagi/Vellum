@@ -41,7 +41,8 @@ define([
         RESERVED_ITEXT_CONTENT_TYPES = [
             'default', 'short', 'long', 'audio', 'video', 'image'
         ],
-        _nextItextItemKey = 1;
+        _nextItextItemKey = 1,
+        HELP_MARKDOWN;
 
     function ItextItem(options) {
         this.forms = options.forms || [];
@@ -99,6 +100,11 @@ define([
             if (index !== -1) {
                 this.forms.splice(index, 1);
             }
+        },
+        cloneForm: function (cloneFrom, cloneTo) {
+            var newForm = this.getOrCreateForm(cloneFrom).clone();
+            newForm.name = cloneTo;
+            this.forms.push(newForm);
         },
         get: function(form, language) {
             if (_.isUndefined(form) || form === null) {
@@ -308,17 +314,36 @@ define([
             return this.updateForMug(mug, mug.getLabelValue());
         },
         updateForMug: function (mug, defaultLabelValue) {
+            function getPresence(itext) {
+                if (_.isFunction(itext.presence)) {
+                    return itext.presence(mug.options);
+                }
+                return itext.presence;
+            }
+
+            function missingMarkdownForm(forms) {
+                return _.filter(forms, function(form) {
+                    return form.name === 'markdown';
+                }).length === 0;
+            }
+
             // set default itext id/values
             if (!mug.options.isDataOnly) {
-                if (!mug.p.labelItext && mug.spec.labelItext.presence !== "notallowed") {
+                if (!mug.p.labelItext && getPresence(mug.spec.labelItext) !== "notallowed") {
                     var item = mug.p.labelItext = this.createItem();
                     item.set(defaultLabelValue);
                 }
-                if (!mug.p.hintItext && mug.spec.hintItext.presence !== "notallowed") {
+                if (!mug.p.hintItext && getPresence(mug.spec.hintItext) !== "notallowed") {
                     mug.p.hintItext = this.createItem();
                 }
-                if (!mug.p.helpItext && mug.spec.helpItext.presence !== "notallowed") {
-                    mug.p.helpItext = this.createItem();
+                if (!mug.p.helpItext && getPresence(mug.spec.helpItext) !== "notallowed") {
+                    var help = mug.p.helpItext = this.createItem();
+                    if (HELP_MARKDOWN) {
+                        help.cloneForm('default', 'markdown');
+                    }
+                } else if (HELP_MARKDOWN && mug.p.helpItext &&
+                           missingMarkdownForm(mug.p.helpItext.forms)) {
+                    mug.p.helpItext.cloneForm('default', 'markdown');
                 }
             }
             if (!mug.options.isControlOnly) {
@@ -460,15 +485,16 @@ define([
         var _getUIElement = widget.getUIElement;
         widget.getUIElement = function () {
             var $uiElem = _getUIElement(),
-                $autoBoxContainer = $('<div />').addClass('pull-right fd-itextID-checkbox-container'),
+                $autoBoxContainer = $('<div />').addClass('fd-itextID-checkbox-container'),
                 $autoBoxLabel = $("<label />").text("auto?").addClass('checkbox');
 
             $autoBoxLabel.prepend($autoBox);
             $autoBoxContainer.append($autoBoxLabel);
+            $uiElem.css('position', 'relative');
 
             $uiElem.find('.controls')
                 .addClass('fd-itextID-controls')
-                .before($autoBoxContainer);
+                .after($autoBoxContainer);
 
             return $uiElem;
         };
@@ -539,6 +565,7 @@ define([
 
         block.getUIElement = function () {
             _.each(block.getForms(), function (form) {
+                if (form === "markdown") { return; }
                 var $formGroup = block.getFormGroupContainer(form);
                 _.each(block.languages, function (lang) {
                     var itextWidget = block.itextWidget(block.mug, lang, form, options);
@@ -1179,7 +1206,9 @@ define([
 
     function getDefaultItextRoot(mug) {
         if (mug.__className === "Item") {
-            return getDefaultItextRoot(mug.parentMug) + "-" + mug.getNodeID();
+            var regex = new RegExp(util.invalidAttributeRegex.source, 'g');
+            return getDefaultItextRoot(mug.parentMug) + "-" +
+                mug.getNodeID().replace(regex, '_');
         } else {
             var path = mug.form.getAbsolutePath(mug, true);
             if (!path) {
@@ -1209,6 +1238,7 @@ define([
             this.data.javaRosa.ItextItem = ItextItem;
             this.data.javaRosa.ItextForm = ItextForm;
             this.data.javaRosa.ICONS = ICONS;
+            HELP_MARKDOWN = this.opts().features.help_markdown;
         },
         insertOutputRef: function (mug, target, path, dateFormat) {
             var output = getOutputRef(path, dateFormat),
@@ -1585,12 +1615,14 @@ define([
                         for (var k = 0; k < forms.length; k++) {
                             form = forms[k];
                             val = form.getValueOrDefault(lang);
-                            xmlWriter.writeStartElement("value");
-                            if(form.name !== "default") {
-                                xmlWriter.writeAttributeString('form', form.name);
+                            if (val) {
+                                xmlWriter.writeStartElement("value");
+                                if(form.name !== "default") {
+                                    xmlWriter.writeAttributeString('form', form.name);
+                                }
+                                xmlWriter.writeXML(xml.normalize(val));
+                                xmlWriter.writeEndElement();
                             }
-                            xmlWriter.writeXML(xml.normalize(val));
-                            xmlWriter.writeEndElement();
                         }
                         xmlWriter.writeEndElement();
                     }
@@ -1760,13 +1792,28 @@ define([
                 },
                 lstring: "Help Message",
                 widget: function (mug, options) {
-                    return itextLabelBlock(mug, $.extend(options, {
-                        itextType: "help",
-                        getItextByMug: function (mug) {
-                            return mug.p.helpItext;
-                        },
-                        displayName: "Help Message"
-                    }));
+                    var block = itextLabelBlock(mug, $.extend(options, {
+                            itextType: "help",
+                            getItextByMug: function (mug) {
+                                return mug.p.helpItext;
+                            },
+                            displayName: "Help Message"
+                        })).on('change', function() {
+                            if (!HELP_MARKDOWN) {
+                                return;
+                            }
+                            var mug = this.mug,
+                                helpItext = mug.p.helpItext,
+                                helpItextForm = helpItext.forms[0],
+                                markdownForms = _.find(helpItext.forms, function(itext) {
+                                    return itext.name === 'markdown';
+                                });
+                            if (markdownForms) {
+                                markdownForms.data = _.clone(helpItextForm.data);
+                            }
+                        });
+
+                    return block;
                 },
                 validationFunc: itextValidator("helpItext", "Help Message")
             };

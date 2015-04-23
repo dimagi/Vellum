@@ -12,12 +12,14 @@ require([
     'text!static/javaRosa/multi-line-trans.xml',
     'text!static/javaRosa/output-refs.xml',
     'text!static/javaRosa/outputref-with-inequality.xml',
+    'text!static/javaRosa/group-with-constraint.xml',
     'text!static/javaRosa/text-with-constraint.xml',
-    'text!static/javaRosa/group-help.xml',
     'text!static/javaRosa/itext-item-rename.xml',
     'text!static/javaRosa/itext-item-rename-group-move.xml',
     'text!static/javaRosa/itext-item-non-auto-id.xml',
-    'text!static/javaRosa/select1-help.xml'
+    'text!static/javaRosa/select1-help.xml',
+    'text!static/markdown/with-markdown.xml',
+    'text!static/markdown/no-markdown.xml'
 ], function (
     chai,
     $,
@@ -31,12 +33,14 @@ require([
     MULTI_LINE_TRANS_XML,
     OUTPUT_REFS_XML,
     OUTPUTREF_WITH_INEQUALITY_XML,
+    GROUP_WITH_CONSTRAINT_XML,
     TEXT_WITH_CONSTRAINT_XML,
-    GROUP_HELP_XML,
     ITEXT_ITEM_RENAME_XML,
     ITEXT_ITEM_RENAME_GROUP_MOVE_XML,
     ITEXT_ITEM_NON_AUTO_ID_XML,
-    SELECT1_HELP_XML
+    SELECT1_HELP_XML,
+    WITH_MARKDOWN_XML,
+    NO_MARKDOWN_XML
 ) {
     var assert = chai.assert,
         call = util.call;
@@ -518,14 +522,11 @@ require([
             assert.equal(hinLabel[0].selectionEnd, 15);
         });
 
-        _.each({group: GROUP_HELP_XML, select: SELECT1_HELP_XML}, function (XML, name) {
-            it("should not create duplicate <help> node on " + name, function () {
-                util.loadXML(XML);
-                var xml = call("createXML"),
-                    $xml = $(xml);
-                assert.strictEqual($xml.find("help").length, 1,
-                                   "wrong <help> node count\n" + xml);
-            });
+        it("should not create duplicate <help> node on select", function () {
+            util.loadXML(SELECT1_HELP_XML);
+            var xml = call("createXML"),
+                $xml = $(xml);
+            assert.strictEqual($xml.find("help").length, 1, "wrong <help> node count\n" + xml);
         });
 
         it("should rename itext item ID after move", function () {
@@ -562,6 +563,11 @@ require([
                                "wrong <text> node count\n" + xml);
         });
 
+        it("should add markdown to existing help text", function() {
+            util.loadXML(NO_MARKDOWN_XML);
+            util.assertXmlEqual(call('createXML'), WITH_MARKDOWN_XML);
+        });
+
         _.each(["hint", "help", "constraintMsg"], function (tag) {
             it("should not serialize empty " + tag + " itext item with non-empty id and autoId = true", function() {
                 util.loadXML("");
@@ -579,6 +585,13 @@ require([
                                        "wrong <" + tag + "> node count\n" + xml);
                 }
             });
+        });
+
+        it("should not allow apostrophes in item labels", function() {
+            util.addQuestion("Select", "select");
+            util.clickQuestion('select/item1');
+            $("[name='property-defaultValue']").val("blah ' blah").change();
+            assert.strictEqual($("[name='property-labelItext']").val(), 'select-blah___blah-labelItext');
         });
     });
 
@@ -685,6 +698,16 @@ require([
             } finally {
                 mug.p.constraintAttr = before;
             }
+        });
+
+        it("should show and hide the validation message as appropriate", function() {
+            util.loadXML(GROUP_WITH_CONSTRAINT_XML);
+            $("[name='property-constraintAttr']").val('true()').change();
+            $("[name='itext-en-constraintMsg']").val('This is not possible').change();
+            assert($("[name='itext-en-constraintMsg']").is(":visible"));
+            $("[name='itext-en-constraintMsg']").val('').change();
+            $("[name='property-constraintAttr']").val('').change();
+            assert(!$("[name='itext-en-constraintMsg']").is(":visible"));
         });
     });
 
@@ -797,6 +820,7 @@ require([
                         </text>\
                         <text id="question1-help">\
                             <value>question1 en help</value>\
+                            <value form="markdown">question1 en help</value>\
                             <value form="image">jr://file/commcare/image/help/data/question1.png</value>\
                             <value form="audio">jr://file/commcare/audio/help/data/question1.mp3</value>\
                             <value form="video">jr://file/commcare/video/help/data/question1.3gp</value>\
@@ -820,6 +844,7 @@ require([
                         </text>\
                         <text id="question1-help">\
                             <value>question1 hin help</value>\
+                            <value form="markdown">question1 hin help</value>\
                             <value form="image">jr://file/commcare/image/help/data/question1.png</value>\
                             <value form="audio">jr://file/commcare/audio/help/data/question1.mp3</value>\
                             <value form="video">jr://file/commcare/video/help/data/question1.3gp</value>\
