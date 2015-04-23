@@ -591,7 +591,7 @@ require([
             util.addQuestion("Select", "select");
             util.clickQuestion('select/item1');
             $("[name='property-defaultValue']").val("blah ' blah").change();
-            assert.strictEqual($("[name='property-labelItext']").val(), 'select-blah_-apos-_blah-labelItext');
+            assert.strictEqual($("[name='property-labelItext']").val(), 'select-blah___blah-labelItext');
         });
     });
 

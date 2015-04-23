@@ -1206,8 +1206,9 @@ define([
 
     function getDefaultItextRoot(mug) {
         if (mug.__className === "Item") {
+            var regex = new RegExp(util.invalidAttributeRegex.source, 'g');
             return getDefaultItextRoot(mug.parentMug) + "-" +
-                mug.getNodeID().replace(/'/g, '-apos-');
+                mug.getNodeID().replace(regex, '_');
         } else {
             var path = mug.form.getAbsolutePath(mug, true);
             if (!path) {

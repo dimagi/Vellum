@@ -60,12 +60,15 @@ define([
         return $(_.template($(selector).text(), params));
     };
     
+    that.validAttributeRegex = /^[^<&'"]$/;
+    that.invalidAttributeRegex = /[<&'"]/;
+
     /**
      * Check if value is a valid XML attribute value (additionally disallow all
      * ' and ")
      */
     that.isValidAttributeValue = function (value) {
-        return (/^[^<&'"]*$/).test(value);
+        return that.validAttributeRegex.test(value);
     };
     
     // Simple Event Framework
