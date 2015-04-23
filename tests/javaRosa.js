@@ -586,6 +586,13 @@ require([
                 }
             });
         });
+
+        it("should not allow apostrophes in item labels", function() {
+            util.addQuestion("Select", "select");
+            util.clickQuestion('select/item1');
+            $("[name='property-defaultValue']").val("blah ' blah").change();
+            assert.strictEqual($("[name='property-labelItext']").val(), 'select-blah_-apos-_blah-labelItext');
+        });
     });
 
     describe("The javaRosa plugin itext widgets", function() {

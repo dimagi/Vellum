@@ -1206,7 +1206,8 @@ define([
 
     function getDefaultItextRoot(mug) {
         if (mug.__className === "Item") {
-            return getDefaultItextRoot(mug.parentMug) + "-" + mug.getNodeID();
+            return getDefaultItextRoot(mug.parentMug) + "-" +
+                mug.getNodeID().replace(/'/g, '-apos-');
         } else {
             var path = mug.form.getAbsolutePath(mug, true);
             if (!path) {
