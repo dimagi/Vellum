@@ -11,6 +11,14 @@ define([
     edit_source,
     select_source
 ) {
+    var BLANK_FIXTURE = {
+        sourceUri: "",
+        defaultId: "No Lookup Table Found",
+        initialQuery: "",
+        name: '',
+        structure: {}
+    };
+
     var vellum, dataSources, cachedDataSources;
 
     function init(instance) {
@@ -22,6 +30,9 @@ define([
     }
 
     function cacheFixtures(data) {
+        if (data.length === 0) {
+            cachedDataSources.fixture[BLANK_FIXTURE.sourceUri] = BLANK_FIXTURE;
+        }
         _.each(data, function(fixture) {
             cachedDataSources.fixture[fixture.sourceUri] = fixture;
         });

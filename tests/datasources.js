@@ -54,5 +54,29 @@ require([
             clickQuestion('select1/itemset');
             assert.equal($('[name=property-itemsetData] option').first().text(), 'some-fixture-name');
         });
+
+
+        describe("", function() {
+            before(function(done) {
+                util.init({
+                    plugins: plugins,
+                    javaRosa: {langs: ['en']},
+                    core: {
+                        dataSources: [{
+                            key: 'fixture',
+                            endpoint: function () { return []; }
+                        }],
+                        onReady: done
+                    }
+                });
+            });
+
+            it("should not crash when no fixtures are passed", function () {
+                util.loadXML("");
+                util.addQuestion("SelectDynamic", "select1");
+                clickQuestion('select1/itemset');
+                assert(true);
+            });
+        });
     });
 });
