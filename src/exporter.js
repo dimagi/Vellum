@@ -56,7 +56,7 @@ define([
                 row.Question = form.getAbsolutePath(mug, true);
             } else {
                 row.Question = form.getAbsolutePath(mug.parentMug, true) +
-                                "-" + mug.p.defaultValue;
+                                "-" + mug.p.nodeID;
             }
             row.Type = mug.options.typeName;
 

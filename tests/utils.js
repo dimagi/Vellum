@@ -239,7 +239,7 @@ define([
                     return children[0];
                 }
                 for (var i = 0; i < children.length; i++) {
-                    if (children[i].p.defaultValue === nodeID) {
+                    if (children[i].p.nodeID === nodeID) {
                         return children[i];
                     }
                 }
