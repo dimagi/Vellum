@@ -25,6 +25,7 @@
 					</text>
 					<text id="default-help">
 						<value>help</value>
+						<value form="markdown">help</value>
 						<value form="audio">jr://file/commcare/audio/help/data/text.mp3</value>
 						<value form="image">jr://file/commcare/image/help/data/text.png</value>
 						<value form="video">jr://file/commcare/video/help/data/text.3gp</value>
@@ -48,6 +49,7 @@
 					</text>
 					<text id="default-help">
 						<value>help</value>
+						<value form="markdown">help</value>
 						<value form="audio">jr://file/commcare/audio/help/data/text.mp3</value>
 						<value form="image">jr://file/commcare/image/help/data/text.png</value>
 						<value form="video">jr://file/commcare/video/help/data/text.3gp</value>
