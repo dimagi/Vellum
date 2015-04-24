@@ -1222,8 +1222,9 @@ define([
                 return true;
             } else {
                 // otherwise clear the Question Edit UI pane
-                this.hideContentRight();
                 this.jstree('deselect_all');
+                this.hideQuestionProperties();
+                this.$f.find('.fd-default-panel').removeClass('hide');
                 return false;
             }
         }

@@ -352,6 +352,18 @@ require([
             }}});
         });
 
+        it("should display welcome message whenever there are no questions", function () {
+            util.loadXML("");
+            util.addQuestion("Text", "text1");
+            util.addQuestion("Text", "text2");
+
+            util.deleteQuestion("/data/text1");
+            assert(!$(".fd-default-panel").is(":visible"));
+            assert($(".fd-question-changer").is(":visible"));
+            util.deleteQuestion("/data/text2");
+            assert($(".fd-default-panel").is(":visible"));
+        });
+
         describe("should", function () {
             var form, dup;
             before(function () {
