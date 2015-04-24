@@ -51,18 +51,34 @@ define([
                 }
             ],
         },
+        basicSection = {
+            slug: "main",
+            displayName: "Basic",
+            help: {
+                title: "Basic",
+                text: "<p>The <strong>Question ID</strong> is an internal identifier for a question. " +
+                    "It does not appear on the phone. It is the name of the question in data exports.</p>" +
+                    "<p>Click through for more info.</p>",
+                link: "https://help.commcarehq.org/display/commcarepublic/Transactions",
+            },
+        },
+        logicSection = {
+            slug: "logic",
+            displayName: "Logic",
+            help: {
+                title: "Logic",
+                text: "Use logic to control when questions are asked and what answers are valid. " +
+                    "You can add logic to display a question based on a previous answer, to make " +
+                    "the question required or ensure the answer is in a valid range.",
+                link: "https://confluence.dimagi.com/display/commcarepublic/Common+Logic+and+Calculations"
+            },
+            properties: [
+                'relevantAttr',
+            ]
+        },
         sectionData = {
             Balance: [
-                {
-                    slug: "main",
-                    displayName: "Basic",
-                    help: {
-                        title: "Basic",
-                        text: "<p>The <strong>Question ID</strong> is an internal identifier for a question. " +
-                            "It does not appear on the phone. It is the name of the question in data exports.</p>" +
-                            "<p>Click through for more info.</p>",
-                        link: "https://help.commcarehq.org/display/commcarepublic/Transactions",
-                    },
+                _.extend(basicSection, {
                     properties: [
                         "nodeID",
                         "entityId",
@@ -70,19 +86,11 @@ define([
                         "entryId",
                         "quantity"
                     ],
-                }
+                }),
+                logicSection
             ],
             Transfer: [
-                {
-                    slug: "main",
-                    displayName: "Basic",
-                    help: {
-                        title: "Basic",
-                        text: "<p>The <strong>Question ID</strong> is an internal identifier for a question. " +
-                            "It does not appear on the phone. It is the name of the question in data exports.</p>" +
-                            "<p>Click through for more info.</p>",
-                        link: "https://help.commcarehq.org/display/commcarepublic/Transactions",
-                    },
+                _.extend(basicSection, {
                     properties: [
                         "nodeID",
                         "src",
@@ -91,7 +99,8 @@ define([
                         "entryId",
                         "quantity"
                     ],
-                }
+                }),
+                logicSection
             ]
         },
         baseTransactionOptions = {
@@ -122,7 +131,8 @@ define([
             getBindList: function (mug) {
                 return [{
                     nodeset: mug.absolutePath + "/entry/@quantity",
-                    calculate: mug.p.quantity
+                    calculate: mug.p.quantity,
+                    relevant: mug.p.relevantAttr
                 }];
             }
         },
@@ -184,6 +194,13 @@ define([
                     widget: widgets.xPath,
                     xpathType: "generic",
                     help: 'A reference to an integer question in this form.',
+                },
+                relevantAttr: {
+                    visibility: 'visible',
+                    presence: 'optional',
+                    widget: widgets.xPath,
+                    xpathType: "bool",
+                    lstring: 'Display Condition'
                 },
                 requiredAttr: { presence: "notallowed" },
                 constraintAttr: { presence : "notallowed" },
@@ -285,6 +302,13 @@ define([
                     xpathType: "generic",
                     help: 'A reference to an integer question in this form.',
                 },
+                relevantAttr: {
+                    visibility: 'visible',
+                    presence: 'optional',
+                    widget: widgets.xPath,
+                    xpathType: "bool",
+                    lstring: 'Display Condition'
+                },
                 requiredAttr: { presence: "notallowed" },
                 constraintAttr: { presence : "notallowed" },
                 calculateAttr: { presence: "notallowed" }
@@ -311,6 +335,7 @@ define([
                     mug = form.getMugByPath(basePath);
                     if (isTransaction(mug)) {
                         mug.p.quantity = el.attr("calculate");
+                        mug.p.relevantAttr = el.attr("relevant");
                         return;
                     }
                 }
