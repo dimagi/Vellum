@@ -535,8 +535,8 @@ require([
             util.addQuestion("Select", "ew");
             var north = util.getMug("ns/item1"),
                 south = util.getMug("ew/item1");
-            north.p.defaultValue = "north";
-            south.p.defaultValue = "south";
+            north.p.nodeID = "north";
+            south.p.nodeID = "south";
             north.form.moveMug(south, "after", north);
             util.assertXmlEqual(util.call("createXML"), ITEXT_ITEM_RENAME_XML,
                                 {normalize_xmlns: true});

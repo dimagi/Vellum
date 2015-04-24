@@ -204,7 +204,7 @@ define([
                 item2 = select.form.getChildren(select)[1];
             assert(util.isTreeNodeValid(item1), item1.getErrors().join("\n"));
             assert(util.isTreeNodeValid(item2), item2.getErrors().join("\n"));
-            item2.p.defaultValue = "item1";
+            item2.p.nodeID = "item1";
             assert(util.isTreeNodeValid(item1), "item1 should be valid");
             assert(!util.isTreeNodeValid(item2), "item2 should be invalid");
         });

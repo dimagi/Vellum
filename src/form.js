@@ -523,8 +523,7 @@ define([
                 conflictParent = mug.parentMug;
             }
 
-            // TODO make Item not a special case
-            if (mug.__className !== "Item") {
+            if (!mug.options.isControlOnly) {
                 if (this.findFirstMatchingChild(conflictParent, match)) {
                     mug.p.conflictedNodeId = newId;
                     newId = this.generate_question_id(newId, mug);
@@ -650,16 +649,10 @@ define([
 
             if (depth === 0) {
                 var nodeID = mug.p.nodeID;
-                if (nodeID) {
-                    if (duplicate.p.conflictedNodeId) {
-                        duplicate.p.conflictedNodeId = null;
-                    } else {
-                        duplicate.p.nodeID = this.generate_question_id(nodeID, mug);
-                    }
+                if (duplicate.p.conflictedNodeId) {
+                    duplicate.p.conflictedNodeId = null;
                 } else {
-                    var newItemValue = this.generate_question_id(
-                        mug.p.defaultValue);
-                    duplicate.p.defaultValue = newItemValue;
+                    duplicate.p.nodeID = this.generate_question_id(nodeID, mug);
                 }
                 
                 this.insertQuestion(duplicate, mug, 'after', true);
@@ -733,7 +726,7 @@ define([
             }
             if (mug.__className === "Item") {
                 var parent = refMug.__className === "Item" ? refMug.parentMug : refMug;
-                mug.p.defaultValue = this.generate_item_label(parent);
+                mug.p.nodeID = this.generate_item_label(parent);
             }
             this.insertQuestion(mug, refMug, position, isInternal);
             // should we fix broken references when nodeID is auto-generated?
@@ -903,7 +896,7 @@ define([
             do {
                 ret = 'item' + i++;
             } while (_.any(items, function (i) {
-                return i.p.defaultValue === ret;
+                return i.p.nodeID === ret;
             }));
             return ret;
         },

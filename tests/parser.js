@@ -89,7 +89,7 @@ require([
             var mug = call("getMugByPath", "/ClassroomObservationV3/Q0003"),
                 // HACK how to reference items in select?
                 item = mug._node_control.children[1].value;
-            assert.equal(item.p.defaultValue, 'other');
+            assert.equal(item.p.nodeID, 'other');
         });
 
         it("should load mugs with relative paths and label without itext", function () {

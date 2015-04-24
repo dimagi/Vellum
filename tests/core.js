@@ -104,7 +104,7 @@ require([
             util.init({core: { form: INCREMENT_ITEM_XML, onReady: function () {
                 util.clickQuestion("question1");
                 var item = util.addQuestion("Item");
-                assert.equal(item.p.defaultValue, "item3");
+                assert.equal(item.p.nodeID, "item3");
                 done();
             }}});
         });
@@ -113,7 +113,7 @@ require([
             util.init({core: { form: INCREMENT_ITEM_XML, onReady: function () {
                 util.clickQuestion("question1/item1");
                 var item = util.addQuestion("Item");
-                assert.equal(item.p.defaultValue, "item3");
+                assert.equal(item.p.nodeID, "item3");
                 done();
             }}});
         });

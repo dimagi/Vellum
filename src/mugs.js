@@ -243,8 +243,6 @@ define([
                 return label;
             } else if (nodeID) {
                 return nodeID;
-            } else if (this.__className === "Item") {
-                return this.p.defaultValue;
             }
         },
 
@@ -260,8 +258,11 @@ define([
                 return "";
             }
         },
+        /**
+         * deprecated
+         */
         getNodeID: function () {
-            return this.p.nodeID || this.p.defaultValue;
+            return this.p.nodeID;
         },
         getDisplayName: function (lang) {
             var itextItem = this.p.labelItext,
@@ -269,7 +270,7 @@ define([
                 defaultLang = Itext.getDefaultLanguage(),
                 disp,
                 defaultDisp,
-                nodeID = this.p.conflictedNodeId || this.getNodeID();
+                nodeID = this.p.conflictedNodeId || this.p.nodeID;
 
             if (this.__className === "ReadOnly") {
                 return "Unknown (read-only) question type";
@@ -1161,10 +1162,10 @@ define([
         writeControlHelp: false,
         writeControlRefAttr: null,
         writeCustomXML: function (xmlWriter, mug) {
-            var defaultValue = mug.p.defaultValue;
-            if (defaultValue) {
+            var value = mug.p.nodeID;
+            if (value) {
                 xmlWriter.writeStartElement('value');
-                xmlWriter.writeString(defaultValue);
+                xmlWriter.writeString(value);
                 xmlWriter.writeEndElement();
             }
         },
@@ -1172,31 +1173,21 @@ define([
         },
         spec: {
             nodeID: {
-                presence: 'notallowed',
-                serialize: function () {},
-                deserialize: function () {}
-            },
-            hintLabel: { presence: 'notallowed' },
-            hintItext: { presence: 'notallowed' },
-            helpItext: { presence: 'notallowed' },
-            defaultValue: {
                 lstring: 'Choice Value',
                 visibility: 'visible',
                 presence: 'required',
                 widget: widgets.identifier,
+                setter: null,
                 validationFunc: function (mug) {
-                    if (/\s/.test(mug.p.defaultValue)) {
+                    if (/\s/.test(mug.p.nodeID)) {
                         return "Whitespace in values is not allowed.";
                     }
                     if (mug.parentMug) {
-                        var num = 0;
-                        _.each(mug.form.getChildren(mug.parentMug), function(ele, index) {
-                            if (ele.p.defaultValue === mug.p.defaultValue) {
-                                num++;
-                            }
-                        });
-                        if (num > 1) {
-                            // TODO make this a warning instead of an error
+                        var siblings = mug.form.getChildren(mug.parentMug),
+                            dup = _.any(siblings, function(ele) {
+                                return ele !== mug && ele.p.nodeID === mug.p.nodeID;
+                            });
+                        if (dup) {
                             return "This choice value has been used in the same question";
                         }
                     }
@@ -1209,7 +1200,11 @@ define([
                 deserialize: function (data) {
                     return data.id && data.id.slice(data.id.lastIndexOf("/") + 1);
                 }
-            }
+            },
+            conflictedNodeId: { presence: 'notallowed' },
+            hintLabel: { presence: 'notallowed' },
+            hintItext: { presence: 'notallowed' },
+            helpItext: { presence: 'notallowed' },
         }
     });
 

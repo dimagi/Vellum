@@ -438,8 +438,7 @@ define([
     var iTextIDWidget = function (mug, options) {
         var widget = widgets.text(mug, options),
             $input = widget.input,
-            currentValue = null,
-            isSelectItem = mug.__className === "Item";
+            currentValue = null;
 
         function autoGenerateId() {
             return getDefaultItextId(mug, widget.path);
@@ -512,9 +511,7 @@ define([
         });
 
         mug.on("property-changed", function (e) {
-            if (getAutoMode() && (
-                    e.property === "nodeID" ||
-                    (isSelectItem && e.property === "defaultValue"))) {
+            if (getAutoMode() && e.property === "nodeID") {
                 $input.val(autoGenerateId());
             }
         }, null, "teardown-mug-properties");
@@ -825,11 +822,9 @@ define([
             .attr("name", widget.id)
             .attr("rows", "2")
             .addClass('input-block-level itext-widget-input')
-            .focus(function() {
-                this.select();
-            })
-            .on('change input', function (e) {
-                widget.handleChange();
+            .on('change input', function (e) { widget.handleChange(); })
+            .focus(function() { this.select(); })
+            .keyup(function (e) {
                 // workaround for webkit: http://stackoverflow.com/a/12114908
                 if (e.which === 9) {
                     this.select();

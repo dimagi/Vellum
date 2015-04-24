@@ -395,7 +395,7 @@ define([
                     mug = adaptItem(mug, form);
                     var value = xml.humanize($cEl.children('value'));
                     if (value) {
-                        mug.p.defaultValue = value;
+                        mug.p.nodeID = value;
                     }
                     return mug;
                 };
