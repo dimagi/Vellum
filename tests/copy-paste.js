@@ -630,6 +630,53 @@ require([
                    "double_trouble should not be valid");
         });
 
+        it("should not update broken references on paste into group", function () {
+            util.loadXML("");
+            paste([
+                ["id", "type", "labelItext:en-default"],
+                ["/group", "Group", "group"],
+            ]);
+            paste([
+                ["id", "type", "calculateAttr"],
+                ["/four", "DataBindOnly", "2 + /data/two"],
+            ]);
+            var four = util.getMug("group/four");
+            assert.equal(four.p.calculateAttr, "2 + /data/two");
+            assert(!util.isTreeNodeValid(four), "four should not be valid");
+        });
+
+        it("should update question references on paste into group", function () {
+            util.loadXML("");
+            paste([
+                ["id", "type", "labelItext:en-default"],
+                ["/group", "Group", "group"],
+            ]);
+            paste([
+                ["id", "type", "calculateAttr"],
+                ["/two", "DataBindOnly", "2"],
+                ["/four", "DataBindOnly", "2 + /data/two"],
+            ]);
+            var two = util.getMug("group/two");
+                four = util.getMug("group/four");
+            assert.equal(four.p.calculateAttr, "2 + /data/group/two");
+            assert(util.isTreeNodeValid(two), util.getMessages(two));
+            assert(util.isTreeNodeValid(four), util.getMessages(four));
+        });
+
+        it("should update question references on paste outside of group", function () {
+            util.loadXML("");
+            paste([
+                ["id", "type", "calculateAttr"],
+                ["/group/two", "DataBindOnly", "2"],
+                ["/group/four", "DataBindOnly", "2 + /data/group/two"],
+            ]);
+            var two = util.getMug("two");
+                four = util.getMug("four");
+            assert.equal(four.p.calculateAttr, "2 + /data/two");
+            assert(util.isTreeNodeValid(two), util.getMessages(two));
+            assert(util.isTreeNodeValid(four), util.getMessages(four));
+        });
+
         it("should warn about discarded languages", function () {
             util.loadXML("");
             paste([
