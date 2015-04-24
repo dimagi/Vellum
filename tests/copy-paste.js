@@ -509,8 +509,10 @@ require([
             // NOTE which one gets auto-renamed is somewhat arbitrary
             assert.equal(text.p.labelItext.autoId, true);
             assert.equal(text.p.labelItext.id, "text-label");
+            assert.equal(text.p.labelItext.get(), "auto");
             assert.equal(text2.p.labelItext.autoId, false);
             assert.equal(text2.p.labelItext.id, "text-label2");
+            assert.equal(text2.p.labelItext.get(), "non");
         });
 
         it("should fill empty itext forms", function () {
