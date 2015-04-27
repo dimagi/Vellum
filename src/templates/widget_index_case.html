@@ -1,0 +1,35 @@
+<% props[""] = {calculate: "", relevant: ""}; %>
+
+<% _.each(props, function (v, k) { %>
+  <div class="fd-index-property control-row clearfix" style="margin-bottom: 5px">
+    <div class="control-row">
+      <div class="span11">
+        <input class="fd-index-property-name input-block-level"
+               value="<%-k%>" type="text" placeholder="Case Name"/>
+      </div>
+      <div class="span1">
+        <a href="#" class="btn fd-remove-property btn-small btn-danger">
+          <i class="icon-remove"></i>
+        </a>
+      </div>
+    </div>
+    <div class="control-row">
+      <div class="span11">
+        <input class="fd-index-property-source input-block-level"
+               value="<%-v['calculate']%>" type="text" placeholder="Calculation" />
+      </div>
+    </div>
+    <div class="control-row">
+      <div class="span11">
+        <input class="fd-index-property-case-type input-block-level"
+               value="<%-v['caseType']%>" type="text" placeholder="Case Type"/>
+      </div>
+    </div>
+    <div class="control-row">
+      <div class="span11">
+        <input class="fd-index-property-relationship input-block-level"
+               value="<%-v['relationship']%>" type="text" placeholder="Relationship"/>
+      </div>
+    </div>
+  </div>
+<% }); %>
