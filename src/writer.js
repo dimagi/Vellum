@@ -241,7 +241,7 @@ define([
             labelRef = "jr:itext('" + labelItext.id + "')";
             // iID is optional so by extension Itext is optional.
             if (labelItext.isEmpty() &&
-                    mug.spec.labelItext.presence === 'optional') {
+                    mug.getPresence("labelItext") === 'optional') {
                 labelRef = '';
             }
         }

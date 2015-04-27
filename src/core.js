@@ -2077,7 +2077,7 @@ define([
             (_.isFunction(propDef.visibility) && !propDef.visibility(mug, propDef)) ||
             (_.isUndefined(propVal) &&
              (propDef.visibility === "visible_if_present" ||
-              propDef.presence === "notallowed")))
+              mug.getPresence(propPath) === "notallowed")))
         {
             return null;
         }
