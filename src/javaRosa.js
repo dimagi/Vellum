@@ -1604,7 +1604,7 @@ define([
             var Itext = this.data.javaRosa.Itext,
                 items = this.data.javaRosa.itextItemsFromBeforeSerialize,
                 languages = Itext.getLanguages(),
-                item, forms, form, lang, val;
+                item, forms, form, lang, val, writeMarkdown;
             if (languages.length > 0) {
                 xmlWriter.writeStartElement("itext");
                 for (var i = 0; i < languages.length; i++) {
@@ -1616,6 +1616,7 @@ define([
                     }
                     for (var j = 0; j < items.length; j++) {
                         item = items[j];
+                        writeMarkdown = item.hasMarkdown;
                         xmlWriter.writeStartElement("text");
                         xmlWriter.writeAttributeString("id", item.id);
                         forms = item.getForms();
@@ -1626,6 +1627,13 @@ define([
                             if(form.name !== "default") {
                                 xmlWriter.writeAttributeString('form', form.name);
                             }
+                            xmlWriter.writeXML(xml.normalize(val));
+                            xmlWriter.writeEndElement();
+                        }
+                        if (writeMarkdown) {
+                            val = forms[0].getValueOrDefault(lang);
+                            xmlWriter.writeStartElement("value");
+                            xmlWriter.writeAttributeString('form', 'markdown');
                             xmlWriter.writeXML(xml.normalize(val));
                             xmlWriter.writeEndElement();
                         }
