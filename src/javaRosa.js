@@ -1106,11 +1106,14 @@ define([
                 parent.addClass("has-markdown");
             }
             item.hasMarkdown = widget.markdownOff.is(":visible");
-            widget.markdownOutput.html(util.markdownFull(val));
+            widget.markdownOutput.html(util.markdownFull(val)).removeClass('hide');
         };
 
         widget.setValue = function (val) {
             super_setValue(val);
+            if (!val) {
+                widget.markdownOutput.addClass('hide');
+            }
             widget.markdownOutput.html(util.markdownFull(val));
         };
 
