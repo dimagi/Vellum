@@ -565,10 +565,6 @@ define([
             // that pertain to itext content
         };
 
-        function getMarkdownPreview(text) {
-            return $('<div>').html(util.markdownlite(text));
-        }
-
         block.getUIElement = function () {
             _.each(block.getForms(), function (form) {
                 var $formGroup = block.getFormGroupContainer(form);
@@ -582,7 +578,6 @@ define([
                         }
                     });
                     $formGroup.append(itextWidget.getUIElement());
-                    $formGroup.append(getMarkdownPreview(itextWidget.getValue()));
                 });
                 $blockUI.append($formGroup);
             });
@@ -595,6 +590,12 @@ define([
     var itextLabelBlock = function (mug, options) {
         var block = baseItextBlock(mug, options);
         block.itextWidget = itextLabelWidget;
+        return block;
+    };
+
+    var itextMarkdownBlock = function (mug, options) {
+        var block = baseItextBlock(mug, options);
+        block.itextWidget = itextMarkdownWidget;
         return block;
     };
 
@@ -1069,6 +1070,42 @@ define([
 
         return widget;
 
+    };
+
+    var itextMarkdownWidget = function (mug, language, form, options) {
+        options = options || {};
+        options.idSuffix = "-" + form;
+        var widget = itextLabelWidget(mug, language, form, options),
+            super_setValue = widget.setValue,
+            super_getUIElement = widget.getUIElement,
+            super_handleChange = widget.handleChange;
+
+        widget.markdownOutput = $('<div class="markdown-output">');
+
+        widget.handleChange = function() {
+            super_handleChange();
+            var val = widget.getValue();
+            if (/[-~*#[\]]+/.test(val)) {
+                widget.markdownOutput.html(util.markdownlite(val));
+            }
+        };
+
+        widget.setValue = function (val) {
+            super_setValue(val);
+            if (/[-~*#[\]]+/.test(val)) {
+                widget.markdownOutput.html(util.markdownlite(val));
+            }
+        };
+
+        widget.getUIElement = function() {
+            var elem = super_getUIElement();
+
+            elem.detach('.markdown-output');
+            elem.closest('.control-group').append(widget.markdownOutput);
+            return elem;
+        };
+
+        return widget;
     };
 
     var itextFormWidget = function (mug, language, form, options) {
@@ -1757,7 +1794,7 @@ define([
                 presence: 'optional',
                 lstring: "Label",
                 widget: function (mug, options) {
-                    return itextLabelBlock(mug, $.extend(options, {
+                    return itextMarkdownBlock(mug, $.extend(options, {
                         itextType: "label",
                         getItextByMug: function (mug) {
                             return mug.p.labelItext;
