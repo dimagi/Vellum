@@ -1083,7 +1083,7 @@ define([
             parent.toggleClass("has-markdown");
         };
 
-        widget.markdownOutput = $('<div class="markdown-output">');
+        widget.markdownOutput = $('<div>').addClass("controls well markdown-output");
         widget.markdownOff = $('<a href="#" class="turn-markdown-off markdown-trigger">i do not like this</a>').click(function() {
             var item = widget.getItextItem();
             item.hasMarkdown = false;
