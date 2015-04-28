@@ -48,6 +48,7 @@ define([
         this.forms = options.forms || [];
         this.id = options.id || "";
         this.autoId = _.isUndefined(options.autoId) ? true : options.autoId;
+        this.hasMarkdown = _.isUndefined(options.hasMarkdown) ? false : options.hasMarkdown;
         this.itextModel = options.itextModel;
         this.key = String(_nextItextItemKey++);
     }
@@ -57,7 +58,8 @@ define([
                 forms: _.map(this.forms, function (f) { return f.clone(); }),
                 id: this.id,
                 autoId: this.autoId,
-                itextModel: this.itextModel
+                itextModel: this.itextModel,
+                hasMarkdown: this.hasMarkdown
             });
             return item;
         },
@@ -294,7 +296,7 @@ define([
         /*
          * Create a new blank item
          */
-        createItem: function (id, autoId) {
+        createItem: function (id, autoId, hasMarkdown) {
             return new ItextItem({
                 id: id,
                 autoId: autoId,
@@ -302,7 +304,8 @@ define([
                 forms: [new ItextForm({
                     name: "default",
                     itextModel: this
-                })]
+                })],
+                hasMarkdown: hasMarkdown
             });
         },
         updateForNewMug: function(mug) {
@@ -557,6 +560,15 @@ define([
             return block.forms;
         };
 
+        block.refreshMessages = function () {
+            // does nothing for now since there are no validation errors
+            // that pertain to itext content
+        };
+
+        function getMarkdownPreview(text) {
+            return $('<div>').html(util.markdownlite(text));
+        }
+
         block.getUIElement = function () {
             _.each(block.getForms(), function (form) {
                 var $formGroup = block.getFormGroupContainer(form);
@@ -567,6 +579,7 @@ define([
                         block.fire("change");
                     });
                     $formGroup.append(itextWidget.getUIElement());
+                    $formGroup.append(getMarkdownPreview(itextWidget.getValue()));
                 });
                 $blockUI.append($formGroup);
             });
@@ -1384,6 +1397,9 @@ define([
                         var curForm = valEl.attr('form');
                         if(!curForm) {
                             curForm = "default";
+                        } else if (curForm === "markdown") {
+                            item.hasMarkdown = true;
+                            return;
                         }
                         item.getOrCreateForm(curForm)
                             .setValue(lang, xml.humanize(valEl));
