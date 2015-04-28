@@ -1084,13 +1084,13 @@ define([
         };
 
         widget.markdownOutput = $('<div>').addClass("controls well markdown-output");
-        widget.markdownOff = $('<a href="#" class="turn-markdown-off markdown-trigger">i do not like this</a>').click(function() {
+        widget.markdownOff = $('<a href="#" class="turn-markdown-off markdown-trigger">turn off markdown</a>').click(function() {
             var item = widget.getItextItem();
             item.hasMarkdown = false;
             widget.toggleMarkdown();
             return false;
         });
-        widget.markdownOn = $('<a href="#" class="turn-markdown-on markdown-trigger">give it back</a>').click(function() {
+        widget.markdownOn = $('<a href="#" class="turn-markdown-on markdown-trigger">turn on markdown</a>').click(function() {
             var item = widget.getItextItem();
             item.hasMarkdown = true;
             widget.toggleMarkdown();
