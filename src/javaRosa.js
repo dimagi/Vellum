@@ -577,6 +577,9 @@ define([
                     itextWidget.init();
                     itextWidget.on("change", function () {
                         block.fire("change");
+                        if (/[~*#[\]]+/.test(this.getItextValue(lang))) {
+                            this.getItextItem().hasMarkdown = true;
+                        }
                     });
                     $formGroup.append(itextWidget.getUIElement());
                     $formGroup.append(getMarkdownPreview(itextWidget.getValue()));
