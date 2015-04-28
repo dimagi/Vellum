@@ -67,6 +67,7 @@ requirejs.config({
         'swfobject': '../bower_components/MediaUploader/swfobject',
         'file-uploader': '../bower_components/MediaUploader/hqmedia.upload_controller',
         'jsdiff': '../bower_components/jsdiff/diff',
+        'markdown-it': '../bower_components/markdown-it/dist/markdown-it',
     },
     shim: {
         'codemirror': {
@@ -154,6 +155,9 @@ requirejs.config({
         },
         'jsdiff': {
             exports: 'JsDiff'
+        },
+        'markdown-it': {
+            exports: 'markdown-it'
         }
     },
     less: {
