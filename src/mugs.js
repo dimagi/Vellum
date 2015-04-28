@@ -114,6 +114,15 @@ define([
         getNodeID: function () {
             return this.p.nodeID || this.p.defaultValue;
         },
+        /**
+         * Get property presence (does this mug have the given property)
+         *
+         * Valid spec presence values are:
+         *  - 'required'
+         *  - 'optional'
+         *  - 'notallowed'
+         *  - a function returning one of the above values.
+         */
         getPresence: function (property) {
             var spec = this.spec[property];
             if (_.isUndefined(spec)) {
@@ -125,6 +134,52 @@ define([
                 return spec.presence(this);
             }
             return spec.presence;
+        },
+        /**
+         * Is the given property displayed with the mug's properties?
+         *
+         * Valid spec visibility values are:
+         *  - 'visible'
+         *  - 'visible_if_present'
+         *  - 'hidden'
+         *  - a function returning true (visible) or false (hidden)
+         *  - the name of another property, which means the given property
+         *    has the same visibility as the named property
+         *
+         * Properties with 'notallowed' presence are always hidden.
+         */
+        isVisible: function (property) {
+            if (this.getPresence(property) === "notallowed") {
+                // Suspect: prior to refactor, 'notallowed' presence translated
+                // to hidden only if the property value was undefined,
+                // meaning 'notallowed' was the same as 'visible_if_present'.
+                // This comment can be removed when we find that nothing broke.
+                return false;
+            }
+            var spec = this.spec[property],
+                vis = spec.visibility;
+            if (vis === "visible") {
+                return true;
+            }
+            if (vis === "visible_if_present") {
+                return !_.isUndefined(this.p[property]);
+            }
+            if (vis === "hidden") {
+                return false;
+            }
+            if (_.isFunction(vis)) {
+                return vis(this, spec);
+            }
+            if (this.spec.hasOwnProperty(vis)) {
+                // Suspect: prior to refactor, dependent visibility did not
+                // apply if the property had a value (i.e., was not undefined).
+                // This comment can be removed when we find that nothing broke.
+                return this.isVisible(vis);
+            }
+            throw new Error("unknown visibility: $1.spec.$2 = $3"
+                .replace("$1", this.__className)
+                .replace("$2", property)
+                .replace("$3", String(vis)));
         },
         getDisplayName: function (lang) {
             var itextItem = this.p.labelItext,
@@ -417,7 +472,7 @@ define([
         control: {
             appearance: {
                 deleteOnCopy: true,
-                visibility: 'optional',
+                visibility: 'visible',
                 presence: 'optional',
                 lstring: 'Appearance Attribute'
             },
