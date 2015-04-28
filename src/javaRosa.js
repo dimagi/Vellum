@@ -1106,12 +1106,12 @@ define([
                 parent.addClass("has-markdown");
             }
             item.hasMarkdown = widget.markdownOff.is(":visible");
-            widget.markdownOutput.html(util.markdownlite(val));
+            widget.markdownOutput.html(util.markdownFull(val));
         };
 
         widget.setValue = function (val) {
             super_setValue(val);
-            widget.markdownOutput.html(util.markdownlite(val));
+            widget.markdownOutput.html(util.markdownFull(val));
         };
 
         widget.getUIElement = function() {
@@ -1129,7 +1129,7 @@ define([
                 parent.addClass("markdown-ignorant");
             }
             if (/[-~*#[\]]+/.test(val)) {
-                widget.markdownOutput.html(util.markdownlite(val));
+                widget.markdownOutput.html(util.markdownFull(val));
                 widget.markdownOff.removeClass('hide');
             }
             return elem;

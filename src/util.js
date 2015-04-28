@@ -2,14 +2,18 @@ define([
     'json!langCodes',
     'underscore',
     'jsdiff',
+    'markdown-it',
     'jquery',
     'jquery.bootstrap-popout'
 ], function (
     langCodes,
     _,
     jsdiff,
+    markdown,
     $
 ) {
+    var md = markdown();
+
     RegExp.escape = function(s) {
         return s.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
     };
@@ -300,7 +304,11 @@ define([
                 "XML " + (opts.not ? "should not be equivalent" : "mismatch"));
         return patch;
     };
-        
+
+    that.markdownFull = function (text) {
+        return md.render(text);
+    };
+
     return that;
 });
 
