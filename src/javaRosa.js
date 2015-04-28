@@ -1084,13 +1084,13 @@ define([
         };
 
         widget.markdownOutput = $('<div class="markdown-output">');
-        widget.markdownOff = $('<a href="#" class="turn-markdown-off">i do not like this</a>').click(function() {
+        widget.markdownOff = $('<a href="#" class="turn-markdown-off markdown-trigger">i do not like this</a>').click(function() {
             var item = widget.getItextItem();
             item.hasMarkdown = false;
             widget.toggleMarkdown();
             return false;
         });
-        widget.markdownOn = $('<a href="#" class="turn-markdown-on">give it back</a>').click(function() {
+        widget.markdownOn = $('<a href="#" class="turn-markdown-on markdown-trigger">give it back</a>').click(function() {
             var item = widget.getItextItem();
             item.hasMarkdown = true;
             widget.toggleMarkdown();
@@ -1101,21 +1101,22 @@ define([
             super_handleChange();
             var val = widget.getValue(),
                 item = this.getItextItem();
-            item.hasMarkdown = widget.markdownOff.is(":visible");
-            if (item.hasMarkdown && /[-~*#[\]]+/.test(val)) {
-                widget.markdownOutput.html(util.markdownlite(val));
+            if (/[-~*#[\]]+/.test(val)) {
+                parent.removeClass("markdown-ignorant");
+                parent.addClass("has-markdown");
             }
+            item.hasMarkdown = widget.markdownOff.is(":visible");
+            widget.markdownOutput.html(util.markdownlite(val));
         };
 
         widget.setValue = function (val) {
             super_setValue(val);
-            if (/[-~*#[\]]+/.test(val)) {
-                widget.markdownOutput.html(util.markdownlite(val));
-            }
+            widget.markdownOutput.html(util.markdownlite(val));
         };
 
         widget.getUIElement = function() {
-            var elem = super_getUIElement();
+            var elem = super_getUIElement(),
+                val = widget.getValue();
 
             elem.detach('.markdown-output');
             elem.append(widget.markdownOutput);
@@ -1123,6 +1124,13 @@ define([
             elem.find('.control-label').append(widget.markdownOn);
             if (widget.getItextItem().hasMarkdown) {
                 parent.addClass("has-markdown");
+            }
+            else {
+                parent.addClass("markdown-ignorant");
+            }
+            if (/[-~*#[\]]+/.test(val)) {
+                widget.markdownOutput.html(util.markdownlite(val));
+                widget.markdownOff.removeClass('hide');
             }
             return elem;
         };
