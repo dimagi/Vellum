@@ -152,3 +152,28 @@
     margin: 4px auto 5px;
   }
 }
+
+.itext-block-container {
+    &.has-markdown {
+        .turn-markdown-off {
+            display: block;
+        }
+        .turn-markdown-on {
+          display: none;
+        }
+        .markdown-output {
+            display: block;
+        }
+    }
+    &:not(.has-markdown) {
+        .turn-markdown-off {
+            display: none;
+        }
+        .turn-markdown-on {
+            display: block;
+        }
+        .markdown-output {
+            display: none;
+        }
+    }
+}

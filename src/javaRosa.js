@@ -569,13 +569,11 @@ define([
             _.each(block.getForms(), function (form) {
                 var $formGroup = block.getFormGroupContainer(form);
                 _.each(block.languages, function (lang) {
-                    var itextWidget = block.itextWidget(block.mug, lang, form, options);
+                    var itextWidget = block.itextWidget(block.mug, lang, form,
+                                                        _.extend(options, {parent: $blockUI}));
                     itextWidget.init();
                     itextWidget.on("change", function () {
                         block.fire("change");
-                        if (/[~*#[\]]+/.test(this.getItextValue(lang))) {
-                            this.getItextItem().hasMarkdown = true;
-                        }
                     });
                     $formGroup.append(itextWidget.getUIElement());
                 });
@@ -1075,17 +1073,36 @@ define([
     var itextMarkdownWidget = function (mug, language, form, options) {
         options = options || {};
         options.idSuffix = "-" + form;
+        var parent = options.parent;
         var widget = itextLabelWidget(mug, language, form, options),
             super_setValue = widget.setValue,
             super_getUIElement = widget.getUIElement,
             super_handleChange = widget.handleChange;
 
+        widget.toggleMarkdown = function() {
+            parent.toggleClass("has-markdown");
+        };
+
         widget.markdownOutput = $('<div class="markdown-output">');
+        widget.markdownOff = $('<a href="#" class="turn-markdown-off">i do not like this</a>').click(function() {
+            var item = widget.getItextItem();
+            item.hasMarkdown = false;
+            widget.toggleMarkdown();
+            return false;
+        });
+        widget.markdownOn = $('<a href="#" class="turn-markdown-on">give it back</a>').click(function() {
+            var item = widget.getItextItem();
+            item.hasMarkdown = true;
+            widget.toggleMarkdown();
+            return false;
+        });
 
         widget.handleChange = function() {
             super_handleChange();
-            var val = widget.getValue();
-            if (/[-~*#[\]]+/.test(val)) {
+            var val = widget.getValue(),
+                item = this.getItextItem();
+            item.hasMarkdown = widget.markdownOff.is(":visible");
+            if (item.hasMarkdown && /[-~*#[\]]+/.test(val)) {
                 widget.markdownOutput.html(util.markdownlite(val));
             }
         };
@@ -1101,7 +1118,12 @@ define([
             var elem = super_getUIElement();
 
             elem.detach('.markdown-output');
-            elem.closest('.control-group').append(widget.markdownOutput);
+            elem.append(widget.markdownOutput);
+            elem.find('.control-label').append(widget.markdownOff);
+            elem.find('.control-label').append(widget.markdownOn);
+            if (widget.getItextItem().hasMarkdown) {
+                parent.addClass("has-markdown");
+            }
             return elem;
         };
 
