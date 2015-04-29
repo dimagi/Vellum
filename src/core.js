@@ -2059,26 +2059,8 @@ define([
     };
 
     function getWidgetClassAndOptions(propPath, mug) {
-        var propDef = mug.p.getDefinition(propPath),
-            propVal = mug.p[propPath];
-
-        // handle properties whose visibility depends on other properties'
-        // visibility (implied visible_if_present on the depending property
-        // takes precedence)
-        if (_.isUndefined(propVal) &&
-            propDef && propDef.visibility &&
-            mug.p.getDefinition(propDef.visibility) &&
-            !getWidgetClassAndOptions(propDef.visibility, mug))
-        {
-            return null;
-        }
-
-        if (!propDef || propDef.visibility === 'hidden' ||
-            (_.isFunction(propDef.visibility) && !propDef.visibility(mug, propDef)) ||
-            (_.isUndefined(propVal) &&
-             (propDef.visibility === "visible_if_present" ||
-              propDef.presence === "notallowed")))
-        {
+        var propDef = mug.p.getDefinition(propPath);
+        if (!propDef || !mug.isVisible(propPath)) {
             return null;
         }
         return {

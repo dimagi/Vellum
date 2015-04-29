@@ -279,13 +279,13 @@ define([
     function populateControlMug(mug, $cEl) {
         var labelEl = $cEl.children('label'),
             hintEl = $cEl.children('hint');
-        if (labelEl.length && mug.spec.label.presence !== 'notallowed') {
+        if (labelEl.length && mug.getPresence("label") !== 'notallowed') {
             var labelVal = xml.humanize(labelEl);
             if (labelVal) {
                 mug.p.label = labelVal;
             }
         }
-        if (hintEl.length && mug.spec.hintLabel.presence !== 'notallowed') {
+        if (hintEl.length && mug.getPresence("hintLabel") !== 'notallowed') {
             mug.p.hintLabel = xml.humanize(hintEl);
         }
     }
