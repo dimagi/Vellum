@@ -18,6 +18,7 @@ require([
     'text!static/javaRosa/itext-item-rename-group-move.xml',
     'text!static/javaRosa/itext-item-non-auto-id.xml',
     'text!static/javaRosa/select1-help.xml',
+    'text!static/javaRosa/no-label-text-one-lang.xml',
     'text!static/markdown/with-markdown.xml',
     'text!static/markdown/no-markdown.xml'
 ], function (
@@ -39,6 +40,7 @@ require([
     ITEXT_ITEM_RENAME_GROUP_MOVE_XML,
     ITEXT_ITEM_NON_AUTO_ID_XML,
     SELECT1_HELP_XML,
+    NO_LABEL_TEXT_ONE_LANG_XML,
     WITH_MARKDOWN_XML,
     NO_MARKDOWN_XML
 ) {
@@ -595,6 +597,31 @@ require([
         });
     });
 
+    describe("The javaRosaplugin with one language", function() {
+        before(function(done) {
+            util.init({
+                javaRosa: { langs: ['en'] },
+                core: {
+                    onReady: function () {
+                        done();
+                    }
+                }
+            });
+        });
+
+        it("should replace the default form with placeholder when cleared", function(){
+            util.loadXML("");
+            util.addQuestion('Trigger', 'label');
+            util.clickQuestion('label');
+            $('[name=itext-en-label]').val('blah').change();
+            $('.itext-block-label-add-form-image').click();
+            $('[name=itext-en-label]').val('').change();
+            util.assertXmlEqual(call("createXML"), 
+                                NO_LABEL_TEXT_ONE_LANG_XML,
+                                {normalize_xmlns: true});
+        });
+    });
+
     describe("The javaRosa plugin itext widgets", function() {
         before(function(done) {
             util.init({
@@ -709,6 +736,7 @@ require([
             $("[name='property-constraintAttr']").val('').change();
             assert(!$("[name='itext-en-constraintMsg']").is(":visible"));
         });
+
     });
 
     describe("The javaRosa plugin language selector", function() {
