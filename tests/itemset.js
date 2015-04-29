@@ -111,15 +111,6 @@ require([
                 assert($but.length === 0);
             });
 
-            it("allows copying a select with an itemset", function () {
-                util.loadXML(TEST_XML_1);
-                clickQuestion("question1");
-                var $but = $("button:contains(Copy)");
-                $but.click();
-
-                assert.equal(4, (call('createXML').match(/itemset/g) || []).length);
-            });
-
             it("shows validation error on navigate away from blank External Data", function () {
                 util.loadXML();
                 util.addQuestion("SelectDynamic", "select2");

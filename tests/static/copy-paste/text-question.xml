@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:orx="http://openrosa.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa" xmlns:vellum="http://commcarehq.org/xforms/vellum">
+	<h:head>
+		<h:title>Untitled Form</h:title>
+		<model>
+			<instance>
+				<data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/8DBFAFCF-D243-464F-8396-3417A69B4D2E" uiVersion="1" version="1" name="Untitled Form">
+					<txt />
+				</data>
+			</instance>
+			<bind nodeset="/data/txt" type="xsd:string" constraint="1 = 0" jr:constraintMsg="jr:itext('txt-constraintMsg')" relevant="x = y" required="true()" />
+			<itext>
+				<translation lang="en" default="">
+					<text id="txt-label">
+						<value>English Text</value>
+					</text>
+					<text id="txt-constraintMsg">
+						<value>Nope</value>
+					</text>
+				</translation>
+				<translation lang="hin">
+					<text id="txt-label">
+						<value>Hindi Text</value>
+					</text>
+					<text id="txt-constraintMsg">
+						<value>Nope</value>
+					</text>
+				</translation>
+			</itext>
+		</model>
+	</h:head>
+	<h:body>
+		<input ref="/data/txt">
+			<label ref="jr:itext('txt-label')" />
+		</input>
+	</h:body>
+</h:html>

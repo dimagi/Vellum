@@ -146,7 +146,7 @@ define([
                 return {
                     xmlns: LEDGER_XMLNS,
                     type: mug.p.nodeID,
-                    "entity-id": attrs.src || "",
+                    "entity-id": attrs["entity-id"] || "",
                     "section-id": mug.p.sectionId,
                     date: attrs.date || "",
                     "vellum:role": "Balance"
@@ -162,12 +162,21 @@ define([
                 addLedgerDBInstance(mug, form);
             },
             spec: {
-                xmlnsAttr: { presence: "optional" },
+                xmlnsAttr: {
+                    presence: "optional",
+                    serialize: function () {},
+                    deserialize: function () {}
+                },
+                nodeID: {
+                    serialize: serializeNodeId
+                },
                 entityId: {
                     lstring: 'Case',
                     visibility: 'visible',
                     presence: 'optional',
                     widget: setValueWidget,
+                    serialize: serializeValue,
+                    deserialize: deserializeValue,
                     xpathType: "generic",
                     help: 'XPath expression for the case ID associated with this balance.',
                 },
@@ -184,6 +193,8 @@ define([
                     visibility: 'visible',
                     presence: 'optional',
                     widget: setValueWidget,
+                    serialize: serializeValue,
+                    deserialize: deserializeValue,
                     xpathType: "generic",
                     help: 'A reference to a product ID, e.g., "/data/products/current_product"',
                 },
@@ -259,12 +270,21 @@ define([
                 addLedgerDBInstance(mug, form);
             },
             spec: {
-                xmlnsAttr: { presence: "optional" },
+                nodeID: {
+                    serialize: serializeNodeId
+                },
+                xmlnsAttr: {
+                    presence: "optional",
+                    serialize: function () {},
+                    deserialize: function () {}
+                },
                 src: {
                     lstring: 'Source Case',
                     visibility: 'visible',
                     presence: 'optional',
                     widget: setValueWidget,
+                    serialize: serializeValue,
+                    deserialize: deserializeValue,
                     xpathType: "generic",
                     help: 'XPath expression for the case ID issuing the transaction. Leave blank if unknown or not applicable.',
                     validationFunc: transferMugValidation,
@@ -274,6 +294,8 @@ define([
                     visibility: 'visible',
                     presence: 'optional',
                     widget: setValueWidget,
+                    serialize: serializeValue,
+                    deserialize: deserializeValue,
                     xpathType: "generic",
                     help: 'XPath expression for the case ID receiving the transaction. Leave blank if unknown or not applicable.',
                     validationFunc: transferMugValidation,
@@ -291,6 +313,8 @@ define([
                     visibility: 'visible',
                     presence: 'optional',
                     widget: setValueWidget,
+                    serialize: serializeValue,
+                    deserialize: deserializeValue,
                     xpathType: "generic",
                     help: 'A reference to a product ID, e.g., "/data/products/current_product"',
                 },
@@ -454,5 +478,20 @@ define([
         };
 
         return widget;
+    }
+
+    function serializeValue(value, key, mug) {
+        return value ? value.value : "";
+    }
+
+    function deserializeValue(data, key, mug) {
+        return {value: data[key] || ""};
+    }
+
+    function serializeNodeId(value, key, mug, data) {
+        var parent = mug.parentMug,
+            path = parent ?
+                mug.form.getAbsolutePath(parent, true) + "/" : "/";
+        data.id = path + mug.p.nodeID;
     }
 });

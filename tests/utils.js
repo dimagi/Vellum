@@ -43,10 +43,8 @@ define([
         if (!result) {
             actual = cleanForDiff(actual);
             expected = cleanForDiff(expected);
-            var patch = jsdiff.createPatch("", actual, expected, "actual", "expected");
-            patch = patch.replace(/^Index:/,
-                    "XML " + (opts.not ? "should not be equivalent" : "mismatch"));
-            assert(false, colorDiff(patch));
+            assertEqual(actual, expected,
+                "XML " + (opts.not ? "should not be equivalent" : "mismatch"));
         }
     }
 
@@ -72,11 +70,7 @@ define([
         }
         var expected = Array.prototype.slice.call(arguments).join("\n") + "\n",
             actual = repr(call("jstree", "get_node", "#")) + "\n";
-        if (expected !== actual) {
-            var patch = jsdiff.createPatch("", actual, expected, "actual", "expected");
-            patch = patch.replace(/^Index:/, "Unexpected jstree state");
-            assert(false, colorDiff(patch));
-        }
+        assertEqual(actual, expected, "Unexpected jstree state");
     }
 
     function assertTreeState(tree) {
@@ -95,9 +89,16 @@ define([
         }
         var expected = Array.prototype.slice.call(arguments, 1).join("\n") + "\n",
             actual = repr(tree.rootNode, 0) + "\n";
-        if (expected !== actual) {
+        assertEqual(actual, expected, "Unexpected tree state");
+    }
+
+    /**
+     * Assert equality, diff actual/expected if unequal
+     */
+    function assertEqual(actual, expected, message) {
+        if (actual !== expected) {
             var patch = jsdiff.createPatch("", actual, expected, "actual", "expected");
-            patch = patch.replace(/^Index:/, "Unexpected jstree state");
+            patch = patch.replace(/^Index:/, message || "Not equal:");
             assert(false, colorDiff(patch));
         }
     }
@@ -200,17 +201,23 @@ define([
         return data.core.form; // return the Form object
     }
 
-    function clickQuestion(path) {
-        var node, mug = getMug(path);
-        if (!(mug && mug.ufid)) {
-            throw new Error("mug not found: " + path);
-        }
-        node = $("#" + mug.ufid + "_anchor");
-        if (!node.length) {
-            throw new Error("tree node not found: " + path);
-        }
-        $(node).click();
-        return node;
+    function clickQuestion() {
+        var mugs = [],
+            ufids = _.map(arguments, function (path) {
+                var mug = getMug(path);
+                if (!(mug && mug.ufid)) {
+                    throw new Error("mug not found: " + path);
+                }
+                mugs.push(mug);
+                return mug.ufid;
+            });
+        call("jstree", "deselect_all", true);
+        call("jstree", "select_node", ufids);
+        return mugs;
+    }
+
+    function selectAll() {
+        call("jstree", "select_all");
     }
 
     /**
@@ -248,11 +255,16 @@ define([
         return mug;
     }
 
-    function deleteQuestion (path) {
-        var mug = getMug(path);
-        assert(mug, "mug not found: " + path);
-        call("getData").core.form.removeMugFromForm(mug);
-        assert(!getMug(path), "mug not removed: " + path);
+    function deleteQuestion () {
+        var mugs = _.map(arguments, function (path) {
+                var mug = getMug(path);
+                assert(mug, "mug not found: " + path);
+                return mug;
+            });
+        call("getData").core.form.removeMugsFromForm(mugs);
+        _.each(arguments, function (path) {
+            assert(!getMug(path), "mug not removed: " + path);
+        });
     }
 
     /**
@@ -284,6 +296,11 @@ define([
     function getMessages(mug) {
         var messages = [],
             last = null;
+        if (_.isString(mug)) {
+            var path = mug;
+            mug = getMug(path);
+            assert(mug, "mug not found: " + path);
+        }
         mug.messages.each(function (msg, attr) {
             if (attr !== last) {
                 messages.push(attr + ":");
@@ -304,6 +321,7 @@ define([
         },
         getMug: getMug,
         getInput: getInput,
+        assertEqual: assertEqual,
         assertInputCount: assertInputCount,
         assertXmlEqual: assertXmlEqual,
         assertXmlNotEqual: assertXmlNotEqual,
@@ -336,12 +354,18 @@ define([
             return mug;
         },
         clickQuestion: clickQuestion,
+        selectAll: selectAll,
         deleteQuestion: deleteQuestion,
         saveButtonEnabled: saveButtonEnabled,
         expandGroup: expandGroup,
         collapseGroup: collapseGroup,
         getMessages: getMessages,
         isTreeNodeValid: function (mug) {
+            if (_.isString(mug)) {
+                var path = mug;
+                mug = getMug(path);
+                assert(mug, "mug not found: " + path);
+            }
             var $node = $("#vellum").find('#' + mug.ufid + ' > a');
             return $node.children(".fd-tree-valid-alert-icon").length === 0;
         }

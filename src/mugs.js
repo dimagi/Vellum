@@ -17,12 +17,12 @@ define([
     /**
      * A question, containing data, bind, and control elements.
      */
-    function Mug(options, form, baseSpec, copyFromMug) {
+    function Mug(options, form, baseSpec, attrs) {
         var properties = null;
         util.eventuality(this);
 
-        if (copyFromMug) {
-            properties = _.object(_.map(copyFromMug.p.getAttrs(), function (val, key) {
+        if (attrs) {
+            properties = _.object(_.map(attrs, function (val, key) {
                 if (val && typeof val === "object") {
                     // avoid potential duplicate references (e.g., itext items)
                     if ($.isPlainObject(val)) {
@@ -300,6 +300,57 @@ define([
 
             return nodeID;
         },
+        serialize: function () {
+            var mug = this,
+                data = {type: mug.__className};
+            _.each(mug.spec, function (spec, key) {
+                if (spec.presence === "notallowed") {
+                    return;
+                }
+                var value = mug.p[key];
+                if (spec.serialize) {
+                    value = spec.serialize(value, key, mug, data);
+                    if (!_.isUndefined(value)) {
+                        data[key] = value;
+                    }
+                } else if (value && !(_.isEmpty(value) &&
+                                      (_.isObject(value) || _.isArray(value))
+                          )) {
+                    data[key] = value;
+                }
+            });
+            return data;
+        },
+        /**
+         * Deserialize mug property data
+         *
+         * @param data - An object containing mug property data.
+         * @param errors - A `MugMessages` object with a convenience
+         *      `add(message)` method for global errors.
+         * @returns - An array of `Later` objects to be executed as the
+         *      final step in deserializing a group of related mugs.
+         */
+        deserialize: function (data, errors) {
+            var mug = this,
+                later = [];
+            _.each(mug.spec, function (spec, key) {
+                if (spec.presence !== 'notallowed') {
+                    if (spec.deserialize) {
+                        var value = spec.deserialize(data, key, mug, errors);
+                        if (!_.isUndefined(value)) {
+                            if (value instanceof Later) {
+                                later.push(value);
+                            } else {
+                                mug.p[key] = value;
+                            }
+                        }
+                    } else if (data.hasOwnProperty(key)) {
+                        mug.p[key] = data[key];
+                    }
+                }
+            });
+            return later;
+        },
         teardownProperties: function () {
             this.fire({type: "teardown-mug-properties", mug: this});
         }
@@ -346,6 +397,10 @@ define([
         });
 
         return spec;
+    }
+
+    function Later(execute) {
+        this.execute = execute;
     }
 
     function MugMessages() {
@@ -412,13 +467,29 @@ define([
             }
             return true;
         },
-        get: function (attr) {
+        /**
+         * Get messages
+         *
+         * @param attr - The attribute for which to get messages.
+         * @param key - (optional) The key of the message to get.
+         *      If this is given then the entire message object will be
+         *      returned; otherwise only message strings are returned.
+         * @returns - An array of message strings, or if the `key` param
+         *      is provided, the message object for the given key; null
+         *      if no message is found with the given key.
+         */
+        get: function (attr, key) {
             if (arguments.length) {
+                if (key) {
+                    return _.find(this.messages[attr || ""], function (msg) {
+                        return msg.key === key;
+                    }) || null;
+                }
                 return _.pluck(this.messages[attr || ""], "message");
             }
             return _.flatten(_.map(this.messages, function (messages) {
                 return _.pluck(messages, "message");
-            }), _.identity);
+            }));
         },
         /**
          * Execute a function for each message
@@ -565,6 +636,32 @@ define([
                     if (attr === "nodeID" && key === "mug-conflictedNodeId-warning") {
                         resolveConflictedNodeId(mug);
                     }
+                },
+                serialize: function (value, key, mug, data) {
+                    data.id = mug.form.getAbsolutePath(mug, true);
+                },
+                deserialize: function (data, key, mug) {
+                    if (!data.id || data.id === mug.p.nodeID) {
+                        return mug.p.nodeID; // use default id
+                    }
+                    var id = data.id.slice(data.id.lastIndexOf("/") + 1) ||
+                             mug.form.generate_question_id(id, mug);
+                    if (data.conflictedNodeId) {
+                        // first set to value that is in expressions
+                        // to make associations in logic manager
+                        // NOTE obscure edge case: if (this temporary) id
+                        // conflicts with an existing question then expressions
+                        // will be associated with that question and the Later
+                        // assignment will not work.
+                        mug.p.nodeID = id;
+                        return new Later(function () {
+                            // after all other properties are deserialized,
+                            // assign conflicted ID to convert expressions
+                            // or setup new conflict
+                            mug.p.nodeID = data.conflictedNodeId;
+                        });
+                    }
+                    return id;
                 }
             },
             conflictedNodeId: {
@@ -574,7 +671,7 @@ define([
                     var message = null;
                     if (value) {
                         mug.p.set(attr, value);
-                        message = mug.getDisplayName() + " has the same " +
+                        message = "This question has the same " +
                             "Question ID as another question in the same " +
                             "group. Please choose a unique Question ID.";
                     } else {
@@ -586,12 +683,15 @@ define([
                         message: message,
                         fixSerializationWarning: resolveConflictedNodeId
                     });
+                },
+                deserialize: function () {
+                    // deserialization is done by nodeID
                 }
             },
             dataValue: {
                 visibility: 'visible',
                 presence: 'optional',
-                lstring: 'Default Data Value'
+                lstring: 'Default Data Value',
             },
             xmlnsAttr: {
                 visibility: 'visible',
@@ -600,7 +700,7 @@ define([
             },
             rawDataAttributes: {
                 presence: 'optional',
-                lstring: 'Extra Data Attributes'
+                lstring: 'Extra Data Attributes',
             },
 
             // BIND ELEMENT
@@ -660,7 +760,7 @@ define([
             // could use a key-value widget for this in the future
             rawBindAttributes: {
                 presence: 'optional',
-                lstring: 'Extra Bind Attributes'
+                lstring: 'Extra Bind Attributes',
             }
         },
 
@@ -689,7 +789,7 @@ define([
             },
             rawControlAttributes: {
                 presence: 'optional',
-                lstring: "Extra Control Attributes"
+                lstring: "Extra Control Attributes",
             },
             rawControlXML: {
                 presence: 'optional',
@@ -1092,6 +1192,13 @@ define([
                         }
                     }
                     return "pass";
+                },
+                serialize: function (value, key, mug, data) {
+                    var path = mug.form.getAbsolutePath(mug.parentMug, true);
+                    data.id = path + "/" + value;
+                },
+                deserialize: function (data) {
+                    return data.id && data.id.slice(data.id.lastIndexOf("/") + 1);
                 }
             },
             conflictedNodeId: { presence: 'notallowed' },
@@ -1137,8 +1244,6 @@ define([
         typeName: 'Multiple Answer',
         tagName: 'select',
         icon: 'fcc fcc-fd-multi-select',
-        init: function (mug, form) {
-        },
         spec: {
         },
         defaultOperator: "selected"
@@ -1148,8 +1253,6 @@ define([
         typeName: 'Single Answer',
         tagName: 'select1',
         icon: 'fcc fcc-fd-single-select',
-        init: function (mug, form) {
-        },
         defaultOperator: null
     });
 
@@ -1242,7 +1345,7 @@ define([
             },
             rawRepeatAttributes: {
                 presence: 'optional',
-                lstring: "Extra Repeat Attributes"
+                lstring: "Extra Repeat Attributes",
             }
         }
     });
@@ -1307,7 +1410,8 @@ define([
     MugTypesManager.prototype = {
         make: function (typeName, form, copyFrom) {
             var mugType = this.allTypes[typeName];
-            return new Mug(mugType, form, this.baseSpec, copyFrom);
+            var attrs = copyFrom ? copyFrom.p.getAttrs() : null;
+            return new Mug(mugType, form, this.baseSpec, attrs);
         },
         changeType: function (mug, typeName) {
             var form = mug.form,
@@ -1372,6 +1476,9 @@ define([
             }
         },
         MugTypesManager: MugTypesManager,
+        MugMessages: MugMessages,
+        WARNING: Mug.WARNING,
+        ERROR: Mug.ERROR,
         baseSpecs: baseSpecs
     };
 });

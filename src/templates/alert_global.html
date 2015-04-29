@@ -3,7 +3,7 @@
     <h4><% if (messageType.icon) { %><i class="<%=messageType.icon%>"></i> <% } %><%=messageType.title%></h4>
     <ul>
         <% _.each(messages, function (message) { %>
-        <li><%=message%></li>
+        <li><%-message%></li>
         <% }); %>
     </ul>
 </div>

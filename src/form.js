@@ -814,27 +814,34 @@ define([
             }
             return this.mugMap[path];
         },
-        removeMugFromForm: function (mug) {
+        removeMugsFromForm: function (mugs) {
             function breakReferences(mug) {
-                if (!seen.hasOwnProperty(mug.ufid)) {
+                if (mug && !seen.hasOwnProperty(mug.ufid)) {
                     seen[mug.ufid] = null;
                     _this.updateLogicReferences(mug);
                 }
             }
             var _this = this,
                 seen = {},
-                mugs = this.getDescendants(mug).concat([mug]),
-                ufids = _.object(_(mugs).map(function(mug) { return [mug.ufid, null]; }));
-            this._removeMugFromForm(mug, false);
+                ufids = {};
+            _.each(mugs, function (mug) {
+                _this._removeMugFromForm(mug, ufids, false);
+            });
             this._logicManager.forEachReferencingProperty(ufids, breakReferences);
         },
-        _removeMugFromForm: function(mug, isInternal) {
-            var fromTree = this.tree.getNodeFromMug(mug);
-            if (fromTree) {
-                var children = this.tree.getNodeFromMug(mug).getChildrenMugs();
+        _removeMugFromForm: function(mug, ufids, isInternal) {
+            if (ufids.hasOwnProperty(mug.ufid)) {
+                return; // already removed
+            }
+            ufids[mug.ufid] = null;
+            var node = this.tree.getNodeFromMug(mug);
+            if (node) {
+                var children = node.getChildrenMugs();
                 for (var i = 0; i < children.length; i++) {
-                    this._removeMugFromForm(children[i], true);
+                    this._removeMugFromForm(children[i], ufids, true);
                 }
+                delete this.mugMap[this.tree.getAbsolutePath(mug)];
+                this.tree.removeMug(mug);
             }
             if (this.enableInstanceRefCounting) {
                 this.instanceMetadata = _.filter(this.instanceMetadata, function (meta) {
@@ -842,44 +849,44 @@ define([
                 });
             }
             delete this.mugMap[mug.ufid];
-            delete this.mugMap[this.tree.getAbsolutePath(mug)];
-            this.tree.removeMug(mug);
             this.fire({
                 type: 'question-remove',
                 mug: mug,
                 isInternal: isInternal
             });
         },
-        questionIdCount: function (qId) {
-            var allMugs = this.getMugList(),
-                count = 0;
-            for (var i = 0; i < allMugs.length; i++) {
-                var mug = allMugs[i];
-                if (qId === mug.p.nodeID) {
-                    count++; 
-                }
+        isUniqueQuestionId: function (qId, mug) {
+            var mugs;
+            if (!mug) {
+                mugs = this.getMugList(); // check against entire form
+            } else {
+                var node = this.tree.getNodeFromMug(mug);
+                mugs = this.tree.getParentNode(node).getChildrenMugs();
             }
-            return count;
+            return !_.any(mugs, function (mug) { return mug.p.nodeID === qId; });
         },
 
         /**
-         * Generates a unique question ID (unique in this form) and
-         * returns it as a string.
+         * Generates a unique question ID
+         *
+         * @param question_id - a proposed question ID (may be empty)
+         * @param mug
          */
-        generate_question_id: function (question_id) {
+        generate_question_id: function (question_id, mug) {
             if (question_id) {
                 var match = /^copy-(\d+)-of-(.+)$/.exec(question_id) ;
                 if (match) {
                     question_id = match[2]; 
                 }
+                var new_id = question_id;
                 for (var i = 1;; i++) {
-                    var new_id = "copy-" + i + "-of-" + question_id;
-                    if (!this.questionIdCount(new_id)) {
+                    if (this.isUniqueQuestionId(new_id, mug)) {
                         return new_id; 
                     }
+                    new_id = "copy-" + i + "-of-" + question_id;
                 }
             } else {
-                return this._make_label('question');
+                return this._make_label('question', mug);
             }
         },
         generate_item_label: function (parentMug) {
@@ -896,12 +903,12 @@ define([
         /**
          * Private method for constructing unique questionIDs, labels for items, etc
          */
-        _make_label: function (prefixStr) {
+        _make_label: function (prefixStr, mug) {
             var ret;
             do {
                 ret = prefixStr + this.question_counter;
                 this.question_counter += 1;
-            } while (this.questionIdCount(ret));
+            } while (!this.isUniqueQuestionId(ret, mug));
             return ret;
         },
         getExportTSV: function () {

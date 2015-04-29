@@ -399,11 +399,13 @@ define([
      * times such as save, copy, paste, export translations, etc.
      *
      * @param form - the vellum instance's Form object.
-     * @param empty - if true, return empty items as well. Otherwise omit them.
-     * @returns - a list of Itext items.
+     * @param asObject - if true, return all items in an object keyed by id;
+     *                   otherwise return a list of non-empty Itext items.
+     * @returns - a list or object containing Itext items (see `asObject`).
      */
-    function getItextItemsFromMugs(form, empty) {
-        var ret = [],
+    function getItextItemsFromMugs(form, asObject) {
+        var empty = asObject,
+            items = [],
             byId = {},
             props = _.object(_.map(ITEXT_PROPERTIES, function (thing) {
                 return [thing, thing.replace("Itext", "")];
@@ -416,8 +418,8 @@ define([
                          getDefaultItextId(mug, props[property]) : item.id,
                     origId = id,
                     count = 2;
-                if (itemIsEmpty && byId.hasOwnProperty(id)) {
-                    // ignore empty item with duplicate ID
+                if (byId.hasOwnProperty(id) && (itemIsEmpty || item === byId[id])) {
+                    // ignore same or empty item with duplicate ID
                     return;
                 }
                 while (byId.hasOwnProperty(id)) {
@@ -425,10 +427,12 @@ define([
                 }
                 item.id = id;
                 byId[id] = item;
-                ret.push(item);
+                if (!asObject) {
+                    items.push(item);
+                }
             }
         });
-        return ret; 
+        return asObject ? byId : items;
     }
 
     var iTextIDWidget = function (mug, options) {
@@ -1116,7 +1120,6 @@ define([
         }
 
         var items = getItextItemsFromMugs(form, true);
-        items = _.object(_.map(items, function (item) { return [item.id, item]; }));
         cells = nextRow();
         while (cells) {
             // what's the point of creating items here?
@@ -1641,6 +1644,14 @@ define([
             this.__callOld();
             delete this.data.javaRosa.itextItemsFromBeforeSerialize;
         },
+        beforeBulkInsert: function (form) {
+            this.__callOld();
+            this.data.javaRosa.itextById = getItextItemsFromMugs(form, true);
+        },
+        afterBulkInsert: function () {
+            this.__callOld();
+            delete this.data.javaRosa.itextById;
+        },
         getMugTypes: function () {
             var types = this.__callOld(),
                 normal = types.normal;
@@ -1677,6 +1688,96 @@ define([
                 };
             }
 
+            function addSerializer(options) {
+                options.serialize = function (value, name, mug, data) {
+                    var hasText = false;
+                    _.each(value.forms, function (form) {
+                        if (!form.isEmpty()) {
+                            hasText = true;
+                            _.each(value.itextModel.languages, function (lang) {
+                                var key = name + ":" + lang + "-" + form.name;
+                                data[key] = form.getValue(lang);
+                            });
+                        }
+                    });
+                    if (hasText && !value.autoId) {
+                        data[name] = value.id;
+                    }
+                };
+                options.deserialize = function (data, name, mug, errors) {
+                    var item = mug.p[name],
+                        found = false;
+                    if (data[name]) {
+                        // non-autoId
+                        var itext = mug.form.vellum.data.javaRosa.itextById,
+                            id = data[name];
+                        if (itext.hasOwnProperty(id) && !itext[id].autoId) {
+                            mug.p[name] = item = itext[id];
+                        } else {
+                            item.id = data[name];
+                            item.autoId = false;
+                            // possibly (intentionally) overwrites autoId item
+                            itext[item.id] = item;
+                        }
+                    }
+                    var dlang = item.itextModel.getDefaultLanguage(),
+                        languages = item.itextModel.languages,
+                        nodeID = "";
+                    if (data.id) {
+                        // a little hacky, but it's a fallback default
+                        nodeID = data.id.slice(data.id.lastIndexOf("/") + 1);
+                    }
+                    _.each(languages, function (lang) {
+                        var prelen = name.length + lang.length + 2,
+                            regexp = new RegExp("^" +
+                                                RegExp.escape(name) + ":" +
+                                                RegExp.escape(lang) + "-"),
+                            seen = {};
+                        _.each(data, function (value, key) {
+                            if (regexp.test(key)) {
+                                var form = key.slice(prelen);
+                                if (!seen.hasOwnProperty(form)) {
+                                    seen[form] = true;
+                                    // set default value(s) for this form
+                                    var dkey = name + ":" + dlang + "-" + form;
+                                    item.set(data[dkey] || value || nodeID, form);
+                                }
+                                if (value) {
+                                    item.set(value, form, lang);
+                                }
+                                found = true;
+                            }
+                        });
+                    });
+                    if (found && !data[name]) {
+                        item.id = getDefaultItextId(mug, name.replace(/Itext$/, ""));
+                    }
+                    var WARNING_KEY = "javaRosa-discarded-languages-warning",
+                        langRE = new RegExp("^" + RegExp.escape(name) + ":(\\w+)-"),
+                        discardedLangs = _.filter(_.map(_.keys(data), function (key) {
+                            var match = key.match(langRE);
+                            if (match && languages.indexOf(match[1]) === -1) {
+                                return match[1];
+                            }
+                        }), _.identity);
+                    if (discardedLangs.length) {
+                        var msg = errors.get(null, WARNING_KEY);
+                        if (msg) {
+                            msg.langs = _.union(msg.langs, discardedLangs);
+                            msg.message = "Discarded languages: " + msg.langs.join(", ");
+                        } else {
+                            errors.update(null, {
+                                key: WARNING_KEY,
+                                level: mug.WARNING,
+                                langs: discardedLangs,
+                                message: "Discarded languages: " + discardedLangs.join(", ")
+                            });
+                        }
+                    }
+                };
+                return options;
+            }
+
             // DATA ELEMENT
             databind.keyAttr = {
                 visibility: 'visible',
@@ -1698,7 +1799,7 @@ define([
 
             // hide non-itext constraint message unless it's present
             databind.constraintMsgAttr.visibility = "visible_if_present";
-            databind.constraintMsgItext = {
+            databind.constraintMsgItext = addSerializer({
                 visibility: 'visible',
                 presence: function (mugOptions) {
                     return mugOptions.isSpecialGroup ? 'notallowed' : 'optional';
@@ -1719,8 +1820,8 @@ define([
                         return "Can't have a Validation Message Itext ID without a Validation Condition";
                     }
                     return itextValidator("constraintMsgItext", "Validation Message")(mug);
-                },
-            };
+                }
+            });
             // virtual property used to define a widget
             databind.constraintMsgItextID = {
                 visibility: 'constraintMsgItext',
@@ -1736,7 +1837,7 @@ define([
             control.label.visibility = "visible_if_present";
             control.hintLabel.visibility = "visible_if_present";
 
-            control.labelItext = {
+            control.labelItext = addSerializer({
                 visibility: 'visible',
                 presence: 'optional',
                 lstring: "Label",
@@ -1749,8 +1850,8 @@ define([
                         displayName: "Label"
                     }));
                 },
-                validationFunc: itextValidator("labelItext", "Label"),
-            };
+                validationFunc: itextValidator("labelItext", "Label")
+            });
             // virtual property used to define a widget
             control.labelItextID = {
                 visibility: 'labelItext',
@@ -1760,7 +1861,7 @@ define([
                 widgetValuePath: "labelItext"
             };
 
-            control.hintItext = {
+            control.hintItext = addSerializer({
                 visibility: 'visible',
                 presence: function (mugOptions) {
                     return mugOptions.isSpecialGroup ? 'notallowed' : 'optional';
@@ -1775,8 +1876,8 @@ define([
                         displayName: "Hint Message"
                     }));
                 },
-                validationFunc: itextValidator("hintItext", "Hint Message"),
-            };
+                validationFunc: itextValidator("hintItext", "Hint Message")
+            });
             // virtual property used to get a widget
             control.hintItextID = {
                 visibility: 'hintItext',
@@ -1785,7 +1886,7 @@ define([
                 widgetValuePath: "hintItext"
             };
 
-            control.helpItext = {
+            control.helpItext = addSerializer({
                 visibility: 'visible',
                 presence: function (mugOptions) {
                     return mugOptions.isSpecialGroup ? 'notallowed' : 'optional';
@@ -1816,7 +1917,7 @@ define([
                     return block;
                 },
                 validationFunc: itextValidator("helpItext", "Help Message")
-            };
+            });
             // virtual property used to get a widget
             control.helpItextID = {
                 visibility: 'helpItext',

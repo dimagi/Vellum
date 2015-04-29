@@ -561,6 +561,7 @@ define([
             {
                 title: "Overwrite their work",
                 cssClasses: "btn-primary",
+                defaultButton: true,
                 action: function () {
                     $('#form-differences').hide();
                     send(formText, 'full');
@@ -671,9 +672,22 @@ define([
             $modal = $(modal_content({
                 title: title,
                 closeButtonTitle: closeButtonTitle
-            }));
+            })),
+            $body = $("body"),
+            keyup = function (event) {
+                if (event.keyCode === 27) { // escape
+                    $modal.modal('hide');
+                }
+            };
+        $body.on("keyup", keyup);
+        $modal.on('hide', function () {
+            $body.off("keyup", keyup);
+        }).one("shown", function () {
+            $modal.find(".btn-default:last").focus();
+        });
 
         _.each(buttons, function (button) {
+            button.defaultButton = button.defaultButton || false;
             button.action = button.action || function () {
                 $modal.modal('hide');
             };
@@ -763,7 +777,7 @@ define([
             "core": {
                 data: [],
                 worker: false,
-                multiple: false, // single-item selection
+                multiple: true,
                 strings: {
                     'New node': this.opts().core.noTextString
                 },
@@ -805,9 +819,14 @@ define([
             // themeable items, which it would be hard to adapt the existing
             // selectors to if they didn't exist.
         }).bind("select_node.jstree", function (e, data) {
-            var mug = _this.data.core.form.getMugByUFID(data.node.id);
-            _this.displayMugProperties(mug);
-            _this.activateQuestionTypeGroup(mug);
+            var selected = _this.jstree('get_selected');
+            if (selected.length < 2) {
+                var mug = _this.data.core.form.getMugByUFID(data.node.id);
+                _this.displayMugProperties(mug);
+                _this.activateQuestionTypeGroup(mug);
+            } else {
+                _this.displayMultipleSelectionView();
+            }
         }).bind("open_node.jstree", function (e, data) {
             var mug = _this.data.core.form.getMugByUFID(data.node.id);
             _this.activateQuestionTypeGroup(mug);
@@ -928,19 +947,24 @@ define([
     };
 
     /**
-     * Use only when absolutely necessary, or you're probably doing something
-     * wrong!
+     * Get currently selected mug or mugs
+     *
+     * This depends on the UI. Avoid using it unless there is no way to
+     * get the mug from other context.
+     *
+     * @param multiple - If false (default) get the first selected mug;
+     *      null if there is no selection. Otherwise get a (possibly
+     *      empty) list of selected mugs.
+     * @returns - A list of mugs, single mug, or null, depending on
+     *      parameters and the UI state.
      */
-    fn.getCurrentlySelectedMug = function () {
+    fn.getCurrentlySelectedMug = function (multiple) {
         var selected = this.jstree('get_selected'),
-            ret;
-
-        if (!selected.length) {
-            ret = null;
-        } else {
-            ret = this.data.core.form.getMugByUFID(selected[0]);
+            form = this.data.core.form;
+        if (multiple) {
+            return _.map(selected, form.getMugByUFID.bind(form));
         }
-        return ret;
+        return selected.length ? form.getMugByUFID(selected[0]) : null;
     };
 
     fn.getCurrentMugInput = function (propPath) {
@@ -1017,7 +1041,7 @@ define([
 
                 if (formString) {
                     //re-enable all buttons and inputs in case they were disabled before.
-                    _this.enableUI();
+                    _this.showQuestionProperties();
                     if (updateSaveButton) {
                         _this.data.core.saveButton.fire('change');
                     }
@@ -1037,7 +1061,7 @@ define([
                 // todo: fix
                 //var showSourceButton = $('#fd-editsource-button');
                 //disable all buttons and inputs
-                _this.disableUI();
+                _this.hideQuestionProperties();
                 //enable the view source button so the form can be tweaked by
                 //hand.
                 //showSourceButton.button('enable');
@@ -1076,23 +1100,6 @@ define([
         }, this.opts().core.loadDelay);
     };
 
-    fn.disableUI = function () {
-        this.flipUI(false);
-    };
-
-    fn.enableUI = function () {
-        this.flipUI(true);
-    };
-
-    fn.flipUI = function (state) {
-        var $props = this.$f.find('.fd-question-properties');
-        if (state) {
-            $props.show();
-        } else {
-            $props.hide();
-        }
-    };
-        
     fn.loadXML = function (formXML, options) {
         var form, _this = this;
         _this.data.core.$tree.children().children().each(function (i, el) {
@@ -1144,8 +1151,7 @@ define([
                 _this.displayMugProperties(currentMug);
             }
             if (!e.isInternal) {
-                _this.jstree("deselect_all", true)
-                     .jstree('select_node', e.mug.ufid);
+                _this.setCurrentMug(e.mug);
             }
         }).on('change', function (e) {
             _this.onFormChange(e.mug);
@@ -1255,13 +1261,16 @@ define([
      * Try insert into `refMug`, then after `refMug`, then after each of
      * `refMug`'s ancestors.
      *
+     * @param refMug - Mug relative to which to insert.
+     * @param qType - Type of question being inserted.
+     * @param after - (optional) Try insert after instead of into `refMug`.
      * @returns - `{mug: <refMug>, position: <position>}` or, if there is
      *      no valid insert position for the given question type, `null`.
      *      Valid positions: before, after, first, last, into (same as last).
      *      In practice position will be one of `"last"` or `"after"`.
      */
-    fn.getInsertTargetAndPosition = function (refMug, qType) {
-        var parent, childTypes, position = 'last';
+    fn.getInsertTargetAndPosition = function (refMug, qType, after) {
+        var parent, childTypes, position = after ? 'after' : 'last';
         while (refMug) {
             if (position === 'after') {
                 parent = refMug.parentMug;
@@ -1318,8 +1327,8 @@ define([
                                 refMug.__className + " not implemented");
             }
         } else if (position !== "into" && position !== "first" && position !== "last") {
-            throw new Error("validation of insert " + position + " " +
-                            refMug.__className + " not implemented");
+            throw new Error("validation of insert " + position +
+                            " root node not implemented");
             //return false;
         }
         return typeData[parentType].valid_children.indexOf(type) !== -1;
@@ -1362,7 +1371,11 @@ define([
     fn.getMugByPath = function (path) {
         return this.data.core.form.getMugByPath(path);
     };
-    
+
+    fn.setCurrentMug = function (mug) {
+        this.jstree("deselect_all", true).jstree('select_node', mug.ufid);
+    };
+
     fn.displayMugProperties = function (mug) {
         var $props = this.$f.find('.fd-question-properties'),
             _getWidgetClassAndOptions = function (property) {
@@ -1373,18 +1386,10 @@ define([
         /* update display */
         $props.animate({}, 200);
 
-        this.showContent();
-        this.hideQuestionProperties();
+        this.showContentRight();
+        $props.hide();
 
-        if (this._propertiesMug) {
-            this._propertiesMug.teardownProperties();
-            try {
-                this._propertiesMug.validate();
-            } catch (err) {
-                // ignore error
-            }
-        }
-        this._propertiesMug = mug;
+        this._setPropertiesMug(mug);
         var $content = this.$f.find(".fd-props-content").empty(),
             sections = this.getSections(mug),
             $messages = $("<div class='messages' />");
@@ -1421,16 +1426,42 @@ define([
         this.toggleConstraintItext(mug);
     };
 
-    fn.hideQuestionProperties = function() {
-        this.disableUI();
+    fn._setPropertiesMug = function (mug) {
+        if (this._propertiesMug) {
+            this._propertiesMug.teardownProperties();
+            try {
+                this._propertiesMug.validate();
+            } catch (err) {
+                // ignore error
+            }
+        }
+        this._propertiesMug = mug;
     };
 
-    fn.showContent = function () {
+    fn.displayMultipleSelectionView = function () {
+        var mugs = this.getCurrentlySelectedMug(true);
+        this.showContentRight();
+        this.hideQuestionProperties();
+        this._setPropertiesMug(null);
+        this.$f.find('.fd-props-toolbar').html(this.getMugToolbar(mugs, true));
+        this.$f.find(".fd-props-content").empty();
+        this.showQuestionProperties();
+    };
+
+    fn.showContentRight = function () {
         this.$f.find('.fd-content-right').show();
     };
 
-    fn.hideContent = function () {
+    fn.hideContentRight = function () {
         this.$f.find('.fd-content-right').hide();
+    };
+
+    fn.showQuestionProperties = function () {
+        this.$f.find('.fd-question-properties').show();
+    };
+
+    fn.hideQuestionProperties = function () {
+        this.$f.find('.fd-question-properties').hide();
     };
 
     /**
@@ -1452,7 +1483,7 @@ define([
 
         $editor.find('.fd-head').text(options.headerText);
         options.DEBUG_MODE = DEBUG_MODE;
-        this.disableUI();
+        this.hideQuestionProperties();
 
         var done = options.done;
         options.done = function (val) {
@@ -1463,7 +1494,7 @@ define([
                 _this.refreshCurrentMug();
             } else {
                 $editor.hide();
-                _this.enableUI();
+                _this.showQuestionProperties();
             }
         };
         var change = options.change;
@@ -1495,9 +1526,11 @@ define([
 
         var _this = this;
         this.data.core.isAlertVisible = true;
+        if (!buttons.length) {
+            buttons.push({title: "OK", defaultButton: true});
+        }
 
-        var $modal = this.generateNewModal(
-            title, buttons, buttons.length ? false : "OK");
+        var $modal = this.generateNewModal(title, buttons, false);
 
         // store a reference to $modal on this so modal button actions can
         // reference it in order to hide it at the right point in time.  This is
@@ -1608,29 +1641,52 @@ define([
         return $sec;
     };
         
-    fn.getMugToolbar = function (mug) {
-        var _this = this;
-        var $baseToolbar = $(question_toolbar({
-            isDeleteable: this.isMugRemoveable(mug,
-                    this.data.core.form.getAbsolutePath(mug)),
-            isCopyable: mug.options.isCopyable
-        }));
+    fn.getMugToolbar = function (mug, multiselect) {
+        var _this = this,
+            form = this.data.core.form,
+            mugs = multiselect ? mug : [mug],
+            $baseToolbar = $(question_toolbar({
+                isDeleteable: _.every(mugs, function (mug) {
+                    return _this.isMugRemoveable(mug, form.getAbsolutePath(mug));
+                }),
+                isCopyable: !multiselect && mug.options.isCopyable
+            }));
         $baseToolbar.find('.fd-button-remove').click(function () {
-            var mug = _this.getCurrentlySelectedMug();
-            _this.data.core.form.removeMugFromForm(mug);
+            var mugs = _this.getCurrentlySelectedMug(true);
+            if (mugs.length > 1 || (mugs.length && form.getChildren(mugs[0]).length)) {
+                _this.alert(
+                    "Delete Questions?",
+                    "This cannot be undone.",
+                    [{
+                        title: "Cancel",
+                    }, {
+                        title: "Delete",
+                        cssClasses: "btn-primary",
+                        defaultButton: true,
+                        action: function () {
+                            form.removeMugsFromForm(mugs);
+                            _this.selectSomethingOrHideProperties(true);
+                            _this.data.core.$modal.modal('hide');
+                        }
+                    }]
+                );
+            } else {
+                form.removeMugsFromForm(mugs);
+            }
         });
         $baseToolbar.find('.fd-button-copy').click(function () {
             _this.ensureCurrentMugIsSaved(function () {
-                var duplicate = _this.data.core.form.duplicateMug(
-                    _this.getCurrentlySelectedMug());
-
-                _this.jstree("deselect_all", true)
-                     .jstree("select_node", duplicate.ufid);
+                _this.displayMultipleSelectionView();
+                var selected = _this.jstree("get_selected");
+                if (selected.length) {
+                    $("#" + selected[0] + " a").focus();
+                }
             });
         });
-        $baseToolbar.find('.btn-toolbar.pull-left')
-            .prepend(this.getQuestionTypeChanger(mug));
-
+        if (!multiselect) {
+            $baseToolbar.find('.btn-toolbar.pull-left')
+                .prepend(this.getQuestionTypeChanger(mug));
+        }
         return $baseToolbar;
     };
 
@@ -1707,12 +1763,13 @@ define([
                 }, {
                     title: "Fix Automatically" + forAction,
                     cssClasses: 'btn-primary',
+                    defaultButton: true,
                     action: function () {
                         form.fixSerializationWarnings(warnings);
                         _this.data.core.$modal.modal('hide');
                         retry();
                         _this.refreshVisibleData();
-                    } 
+                    }
                 }
             ]);
             return false;
@@ -2018,8 +2075,12 @@ define([
     fn.duplicateMugProperties = function(mug) {};
 
     fn.beforeSerialize = function () {};
-
     fn.afterSerialize = function () {};
+
+    fn.beforeBulkInsert = function (form) {};
+    fn.afterBulkInsert = function (form) {
+        this.refreshVisibleData();
+    };
 
     fn.parseDataElement = function (form, el, parentMug) {
         return parser.parseDataElement(form, el, parentMug);
