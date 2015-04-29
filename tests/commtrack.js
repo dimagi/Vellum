@@ -279,5 +279,11 @@ define([
             assert.equal($xml.find("instance[src='jr://instance/ledgerdb']").length, 1,
                          "ledger instance should be removed\n" + xml);
         });
+
+        it("should show 'Case' property for Balance", function () {
+            util.loadXML("");
+            util.addQuestion("Balance", "bal");
+            assert.equal($("[name=property-entityId]").length, 1);
+        });
     });
 });
