@@ -1605,14 +1605,12 @@ define([
                         for (var k = 0; k < forms.length; k++) {
                             form = forms[k];
                             val = form.getValueOrDefault(lang);
-                            if (val) {
-                                xmlWriter.writeStartElement("value");
-                                if(form.name !== "default") {
-                                    xmlWriter.writeAttributeString('form', form.name);
-                                }
-                                xmlWriter.writeXML(xml.normalize(val));
-                                xmlWriter.writeEndElement();
+                            xmlWriter.writeStartElement("value");
+                            if(form.name !== "default") {
+                                xmlWriter.writeAttributeString('form', form.name);
                             }
+                            xmlWriter.writeXML(xml.normalize(val));
+                            xmlWriter.writeEndElement();
                         }
                         xmlWriter.writeEndElement();
                     }
