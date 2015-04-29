@@ -119,6 +119,7 @@ define([
                 presence: 'optional',
                 widget: widgets.xPath,
                 xpathType: 'bool',
+                visibility: 'visible',
                 leftPlaceholder: '',
                 autocompleteSources: function() {
                     return datasources.autocompleteChoices(this.p.itemsetData.instance.src);

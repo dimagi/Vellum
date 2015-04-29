@@ -61,7 +61,7 @@ define([
         return $(_.template($(selector).text(), params));
     };
     
-    that.validAttributeRegex = /^[^<&'"]$/;
+    that.validAttributeRegex = /^[^<&'"]*$/;
     that.invalidAttributeRegex = /[<&'"]/;
 
     /**

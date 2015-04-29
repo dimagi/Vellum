@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:orx="http://openrosa.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa" xmlns:vellum="http://commcarehq.org/xforms/vellum">
+	<h:head>
+		<h:title>Untitled Form</h:title>
+		<model>
+			<instance>
+				<data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/E1B03643-109D-4DC6-9737-815E4401DE79" uiVersion="1" version="1" name="Untitled Form">
+					<name />
+					<create1 vellum:role="SaveToCase">
+						<c:case xmlns:c="http://commcarehq.org/case/transaction/v2" case_id="" date_modified="" user_id="">
+							<create>
+								<case_type />
+								<case_name />
+								<owner_id />
+							</create>
+						</c:case>
+					</create1>
+					<create2 vellum:role="SaveToCase">
+						<c:case xmlns:c="http://commcarehq.org/case/transaction/v2" case_id="" date_modified="" user_id="">
+							<create>
+								<case_type />
+								<case_name />
+								<owner_id />
+							</create>
+						</c:case>
+					</create2>
+				</data>
+			</instance>
+			<bind nodeset="/data/name" type="xsd:string" />
+			<bind nodeset="/data/create1/case/create/case_type" calculate="caseType" />
+			<bind nodeset="/data/create1/case/create/case_name" calculate="/data/name" />
+			<bind nodeset="/data/create1/case/create/owner_id" calculate="/data/meta/userID" />
+			<bind nodeset="/data/create1/case/@date_modified" calculate="/data/meta/timeEnd" type="xsd:dateTime" />
+			<bind nodeset="/data/create1/case/@user_id" calculate="/data/meta/userID" />
+			<bind nodeset="/data/create2/case/create/case_type" calculate="caseType" />
+			<bind nodeset="/data/create2/case/create/case_name" calculate="/data/name" />
+			<bind nodeset="/data/create2/case/create/owner_id" calculate="/data/meta/userID" />
+			<bind nodeset="/data/create2/case/@date_modified" calculate="/data/meta/timeEnd" type="xsd:dateTime" />
+			<bind nodeset="/data/create2/case/@user_id" calculate="/data/meta/userID" />
+			<setvalue event="xforms-ready" ref="/data/create1/case/@case_id" value="1" />
+			<setvalue event="xforms-ready" ref="/data/create2/case/@case_id" value="2" />
+			<itext>
+				<translation lang="en" default="">
+					<text id="name-label">
+						<value>name</value>
+					</text>
+				</translation>
+			</itext>
+		</model>
+	</h:head>
+	<h:body>
+		<input ref="/data/name">
+			<label ref="jr:itext('name-label')" />
+		</input>
+	</h:body>
+</h:html>

@@ -105,7 +105,8 @@ require(['jquery', 'jquery.vellum'], function ($) {
         'tests/itemset',
         'tests/tsv',
         'tests/xml',
-        'tests/datasources'
+        'tests/datasources',
+        'tests/saveToCase'
     ], function (
         options
     ) {
