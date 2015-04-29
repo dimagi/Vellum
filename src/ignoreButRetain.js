@@ -26,82 +26,6 @@ define([
     _,
     $
 ) {
-    function prependChild(element, child) {
-        if (element.firstElementChild) {
-            $(element).prepend($(child));
-        } else {
-            $(element).append($(child));
-        }
-    }
-
-    function getPathAndPosition(node) {
-        var origNode = node,
-            path = [],
-            position;
-        
-        position = getPreviousSiblingSelector(node);
-        node = node.parentElement;
-        
-        while (node) {   
-            path.unshift(getNodeIdentifierSelector(node));
-            node = node.parentElement;
-        }
-
-        var nodeXML = xmls.serializeToString(origNode)
-            // XMLSerializer adds xmlns to fragments, which we don't want.  This
-            // should only remove the xmlns from the root node, so if inner elements
-            // have an XMLNS, it will be preserved.
-                .replace(/xmlns="(.*?)"/, "");
-
-        return {
-            position: position,
-            path: path.join(" > "),
-            nodeXML: "\n" + nodeXML
-        };
-    }
-
-    function getPreviousSiblingSelector(node) {
-        var previousSibling = node.previousElementSibling;
-        if (previousSibling && previousSibling.tagName !== 'label') {
-            return getNodeIdentifierSelector(previousSibling);
-        } else {
-            return false;
-        }
-    }
-
-    function getNodeIdentifierSelector(node) {
-        var $node = $(node),
-            nodeset = $node.attr('nodeset'),
-            ref = $node.attr('ref'),
-            id = $node.attr('id'),
-            tagName = $node.prop('tagName').toLowerCase();
-
-        if (tagName === 'setvalue') {
-            return '[event="' + $node.attr('event') + '"]' +
-                   '[ref="' + ref + '"]';
-        } else if (nodeset) {
-            return '[nodeset="' + nodeset + '"]';
-        } else if (ref) {
-            return '[ref="' + ref + '"]';
-        } else if (id) {
-            return '[id="' + id + '"]';
-        } else {
-            // escape ':' in namespaced selector for jQuery selector usage
-            return node.nodeName.replace(":", "\\:");
-
-            // to have this be fully generic for a node with any path,
-            // we would have to add an :nth-child or even better :nth-of-type
-            // selector for intermediate nodes without a question ID but which
-            // could be at a level with multiple nodes with the same tag name.
-            // But this would have complex edge cases for when nodes at inner
-            // levels were added or deleted -- being able to recognize that a
-            // find failed and then retry with a different selector expression.
-            //
-            // For XForms and the ignored nodes that we expect to see, the
-            // current implementation is sufficient.
-        }
-    }
-
     var xmls = new XMLSerializer();
 
     $.vellum.plugin("ignore", {}, {
@@ -233,4 +157,80 @@ define([
             });
         }
     });
+
+    function prependChild(element, child) {
+        if (element.firstElementChild) {
+            $(element).prepend($(child));
+        } else {
+            $(element).append($(child));
+        }
+    }
+
+    function getPathAndPosition(node) {
+        var origNode = node,
+            path = [],
+            position;
+
+        position = getPreviousSiblingSelector(node);
+        node = node.parentElement;
+
+        while (node) {
+            path.unshift(getNodeIdentifierSelector(node));
+            node = node.parentElement;
+        }
+
+        var nodeXML = xmls.serializeToString(origNode)
+            // XMLSerializer adds xmlns to fragments, which we don't want.  This
+            // should only remove the xmlns from the root node, so if inner elements
+            // have an XMLNS, it will be preserved.
+                .replace(/xmlns="(.*?)"/, "");
+
+        return {
+            position: position,
+            path: path.join(" > "),
+            nodeXML: "\n" + nodeXML
+        };
+    }
+
+    function getPreviousSiblingSelector(node) {
+        var previousSibling = node.previousElementSibling;
+        if (previousSibling && previousSibling.tagName !== 'label') {
+            return getNodeIdentifierSelector(previousSibling);
+        } else {
+            return false;
+        }
+    }
+
+    function getNodeIdentifierSelector(node) {
+        var $node = $(node),
+            nodeset = $node.attr('nodeset'),
+            ref = $node.attr('ref'),
+            id = $node.attr('id'),
+            tagName = $node.prop('tagName').toLowerCase();
+
+        if (tagName === 'setvalue') {
+            return '[event="' + $node.attr('event') + '"]' +
+                   '[ref="' + ref + '"]';
+        } else if (nodeset) {
+            return '[nodeset="' + nodeset + '"]';
+        } else if (ref) {
+            return '[ref="' + ref + '"]';
+        } else if (id) {
+            return '[id="' + id + '"]';
+        } else {
+            // escape ':' in namespaced selector for jQuery selector usage
+            return node.nodeName.replace(":", "\\:");
+
+            // to have this be fully generic for a node with any path,
+            // we would have to add an :nth-child or even better :nth-of-type
+            // selector for intermediate nodes without a question ID but which
+            // could be at a level with multiple nodes with the same tag name.
+            // But this would have complex edge cases for when nodes at inner
+            // levels were added or deleted -- being able to recognize that a
+            // find failed and then retry with a different selector expression.
+            //
+            // For XForms and the ignored nodes that we expect to see, the
+            // current implementation is sufficient.
+        }
+    }
 });
