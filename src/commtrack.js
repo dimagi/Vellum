@@ -78,7 +78,7 @@ define([
         },
         sectionData = {
             Balance: [
-                _.extend(basicSection, {
+                _.extend({}, basicSection, {
                     properties: [
                         "nodeID",
                         "entityId",
@@ -90,7 +90,7 @@ define([
                 logicSection
             ],
             Transfer: [
-                _.extend(basicSection, {
+                _.extend({}, basicSection, {
                     properties: [
                         "nodeID",
                         "src",

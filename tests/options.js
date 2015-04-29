@@ -109,7 +109,8 @@ define(function () {
         plugins: [
             'itemset',
             'modeliteration',
-            'commtrack'
+            'commtrack',
+            'saveToCase',
         ],
         features: {
             'group_in_field_list': true,

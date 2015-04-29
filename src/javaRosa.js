@@ -314,13 +314,6 @@ define([
             return this.updateForMug(mug, mug.getLabelValue());
         },
         updateForMug: function (mug, defaultLabelValue) {
-            function getPresence(itext) {
-                if (_.isFunction(itext.presence)) {
-                    return itext.presence(mug.options);
-                }
-                return itext.presence;
-            }
-
             function missingMarkdownForm(forms) {
                 return _.filter(forms, function(form) {
                     return form.name === 'markdown';
@@ -329,14 +322,14 @@ define([
 
             // set default itext id/values
             if (!mug.options.isDataOnly) {
-                if (!mug.p.labelItext && getPresence(mug.spec.labelItext) !== "notallowed") {
+                if (!mug.p.labelItext && mug.getPresence("labelItext") !== "notallowed") {
                     var item = mug.p.labelItext = this.createItem();
                     item.set(defaultLabelValue);
                 }
-                if (!mug.p.hintItext && getPresence(mug.spec.hintItext) !== "notallowed") {
+                if (!mug.p.hintItext && mug.getPresence("hintItext") !== "notallowed") {
                     mug.p.hintItext = this.createItem();
                 }
-                if (!mug.p.helpItext && getPresence(mug.spec.helpItext) !== "notallowed") {
+                if (!mug.p.helpItext && mug.getPresence("helpItext") !== "notallowed") {
                     var help = mug.p.helpItext = this.createItem();
                     if (HELP_MARKDOWN) {
                         help.cloneForm('default', 'markdown');
@@ -348,7 +341,7 @@ define([
             }
             if (!mug.options.isControlOnly) {
                 // set constraint msg if legal and not there
-                if (mug.spec.constraintMsgItext.presence !== "notallowed" &&
+                if (mug.getPresence("constraintMsgItext") !== "notallowed" &&
                     !mug.p.constraintMsgItext) {
                     mug.p.constraintMsgItext = this.createItem();
                 }
@@ -567,7 +560,6 @@ define([
 
         block.getUIElement = function () {
             _.each(block.getForms(), function (form) {
-                if (form === "markdown") { return; }
                 var $formGroup = block.getFormGroupContainer(form);
                 _.each(block.languages, function (lang) {
                     var itextWidget = block.itextWidget(block.mug, lang, form, options);
@@ -1495,7 +1487,7 @@ define([
             var labelEl = controlElement.children('label'),
                 hintEl = controlElement.children('hint'),
                 helpEl = controlElement.children('help');
-            if (labelEl.length && mug.spec.label.presence !== 'notallowed') {
+            if (labelEl.length && mug.getPresence("label") !== 'notallowed') {
                 var labelItext = parseItextRef(labelEl, "label");
                 if (labelItext.isEmpty()) {
                     //if no default Itext has been set, set it with the default label
@@ -1504,10 +1496,10 @@ define([
                 }
                 mug.p.labelItext = labelItext;
             }
-            if (hintEl.length && mug.spec.hintLabel.presence !== 'notallowed') {
+            if (hintEl.length && mug.getPresence("hintLabel") !== 'notallowed') {
                 mug.p.hintItext = parseItextRef(hintEl, "hint");
             }
-            if (helpEl.length && mug.spec.label.presence !== 'notallowed') {
+            if (helpEl.length && mug.getPresence("label") !== 'notallowed') {
                 mug.p.helpItext = parseItextRef(helpEl, "help");
             }
             if (mug.p.constraintMsgAttr) {
@@ -1618,14 +1610,12 @@ define([
                         for (var k = 0; k < forms.length; k++) {
                             form = forms[k];
                             val = form.getValueOrDefault(lang);
-                            if (val) {
-                                xmlWriter.writeStartElement("value");
-                                if(form.name !== "default") {
-                                    xmlWriter.writeAttributeString('form', form.name);
-                                }
-                                xmlWriter.writeXML(xml.normalize(val));
-                                xmlWriter.writeEndElement();
+                            xmlWriter.writeStartElement("value");
+                            if(form.name !== "default") {
+                                xmlWriter.writeAttributeString('form', form.name);
                             }
+                            xmlWriter.writeXML(xml.normalize(val));
+                            xmlWriter.writeEndElement();
                         }
                         xmlWriter.writeEndElement();
                     }
@@ -1673,7 +1663,7 @@ define([
                 return function (mug) {
                     var itext = mug.p[property],
                         hasItext = itext && itext.hasHumanReadableItext();
-                    if (!hasItext && mug.spec[property].presence === 'required') {
+                    if (!hasItext && mug.getPresence(property) === 'required') {
                         return name + ' is required';
                     }
                     if (itext && !itext.autoId && !itext.isEmpty()) {
@@ -1801,8 +1791,8 @@ define([
             databind.constraintMsgAttr.visibility = "visible_if_present";
             databind.constraintMsgItext = addSerializer({
                 visibility: 'visible',
-                presence: function (mugOptions) {
-                    return mugOptions.isSpecialGroup ? 'notallowed' : 'optional';
+                presence: function (mug) {
+                    return mug.options.isSpecialGroup ? 'notallowed' : 'optional';
                 },
                 lstring: 'Validation Message',
                 widget: function (mug, options) {
@@ -1863,8 +1853,8 @@ define([
 
             control.hintItext = addSerializer({
                 visibility: 'visible',
-                presence: function (mugOptions) {
-                    return mugOptions.isSpecialGroup ? 'notallowed' : 'optional';
+                presence: function (mug) {
+                    return mug.options.isSpecialGroup ? 'notallowed' : 'optional';
                 },
                 lstring: "Hint Message",
                 widget: function (mug, options) {
@@ -1888,8 +1878,8 @@ define([
 
             control.helpItext = addSerializer({
                 visibility: 'visible',
-                presence: function (mugOptions) {
-                    return mugOptions.isSpecialGroup ? 'notallowed' : 'optional';
+                presence: function (mug) {
+                    return mug.options.isSpecialGroup ? 'notallowed' : 'optional';
                 },
                 lstring: "Help Message",
                 widget: function (mug, options) {
