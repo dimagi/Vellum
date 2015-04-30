@@ -5,12 +5,12 @@
 		<model>
 			<instance>
 				<data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/398C9010-61DC-42D3-8A85-B857AC3A9CA0" uiVersion="1" version="1" name="Untitled Form">
-					<question1 />
+					<question1/>
 				</data>
 			</instance>
-			<bind nodeset="/data/question1" type="xsd:string" />
-			<bind nodeset="/data/question1" vellum:ignore="retain" />
-			<bind nodeset="/data/question1" vellum:ignore="retain" />
+			<bind nodeset="/data/question1" type="xsd:string"/>
+			<bind nodeset="/data/question1" vellum:ignore="retain"/>
+			<bind nodeset="/data/question1" vellum:ignore="retain"/>
 			<itext>
 				<translation lang="en" default=""/>
 			</itext>

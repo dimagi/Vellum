@@ -251,8 +251,8 @@ define([
             });
             return dataTree;
         },
-        getBasePath: function () {
-            return "/" + this.tree.getRootNode().getID() + "/";
+        getBasePath: function (noSep) {
+            return "/" + this.tree.getRootNode().getID() + (noSep ? "" : "/");
         },
         fireChange: function (mug) {
             this.fire({
@@ -848,14 +848,17 @@ define([
                 return this._make_label('question');
             }
         },
-        generate_item_label: function (parentMug) {
-            var items = this.getChildren(parentMug),
+        generate_item_label: function (parentMug, name) {
+            var node = (parentMug ? this.tree.getNodeFromMug(parentMug)
+                                  : this.tree.rootNode),
+                items = node.getChildrenMugs(),
                 i = items.length + 1,
                 ret;
+            if (!name) { name = "item"; }
             do {
-                ret = 'item' + i++;
-            } while (_.any(items, function (i) {
-                return i.p.defaultValue === ret;
+                ret = name + i++;
+            } while (_.any(items, function (item) {
+                return item.getNodeID() === ret;
             }));
             return ret;
         },

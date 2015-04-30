@@ -21,12 +21,20 @@
 define([
     'underscore',
     'jquery',
+    'vellum/mugs',
+    'vellum/parser',
+    'vellum/util',
     'vellum/core'
 ], function (
     _,
-    $
+    $,
+    mugs,
+    parser,
+    util
 ) {
-    var xmls = new XMLSerializer();
+    var xmls = new XMLSerializer(),
+        MUG = "mug",
+        PARENT = "parent";
 
     $.vellum.plugin("ignore", {}, {
         loadXML: function (xmlStr, options) {
@@ -41,13 +49,33 @@ define([
                 xml = $(xmlDoc),
                 ignores = xml.find('[vellum\\:ignore="retain"]');
 
-            if (ignores.length === 0) {
+            this.data.ignore.active = ignores.length;
+            if (!this.data.ignore.active) {
                 // skip serialize
                 this.__callOld();
                 return;
             }
 
             options.enableInstanceRefCounting = false;
+            this.data.ignore.ignoredMugs = [];
+
+            var model = xml.find('h\\:html > h\\:head > model:first'),
+                instance = model.find('instance:first'),
+                body = xml.find('h\\:html > body:first');
+            _.each([model, instance, body], function (el) {
+                if (!el.length) {
+                    window.console.log("WARNING", el.selector, "not found");
+                }
+            });
+            ignores = ignores.not(function (i, el) {
+                var isDataOrControl = _.any($(el).parents(), function (parent) {
+                        return instance.is(parent) || body.is(parent);
+                    });
+                if (!isDataOrControl && el.nodeName === "bind") {
+                    return $(el).parent().is(model);
+                }
+                return isDataOrControl;
+            });
             ignores.each(function (i, el) {
                 _this.data.ignore.ignoredNodes.push(getPathAndPosition(el));
                 ignoredEls.push(el);
@@ -64,7 +92,7 @@ define([
         createXML: function () {
             var xmlStr = this.__callOld(),
                 ignoredNodes = this.data.ignore.ignoredNodes;
-            if (!ignoredNodes.length) {
+            if (!this.data.ignore.active) {
                 return xmlStr;
             }
 
@@ -82,26 +110,14 @@ define([
                 }
 
                 var parentNode = xml.find(node.path),
-                    appendNode = $.parseXML(node.nodeXML).childNodes[0];
+                    ignored = $($.parseXML(node.nodeXML).childNodes[0]),
+                    sibling = node.position && parentNode.find(node.position);
 
-                if (node.position) {
-                    var target = parentNode.find(node.position);
-                    if (target.length) {
-                        target.first().after($(appendNode));
-                    } else {
-                        // sibling node of ignored node got deleted, insert at
-                        // beginning
-                        prependChild(parentNode[0], appendNode);
-                    }
+                if (sibling && sibling.length) {
+                    sibling.first().after(ignored);
                 } else {
-                    var firstChild = parentNode.children().first();
-                    if (firstChild.length === 0 || firstChild[0].tagName !== 'label') {
-                        prependChild(parentNode[0], appendNode);
-                    } else {
-                        // make sure to insert after the <label> at the beginning of
-                        // a group, not before
-                        firstChild.after(appendNode);
-                    }
+                    // sibling was deleted, insert at end
+                    parentNode.append(ignored);
                 }
             });
 
@@ -114,56 +130,213 @@ define([
                     return count++ ? '' : match;
                 });
         },
+        getMugTypes: function () {
+            var types = this.__callOld();
+            types.normal.Ignored = IgnoredQuestion;
+            return types;
+        },
+        parseDataElement: function (form, el, parentMug) {
+            if (this.data.ignore.active) {
+                var $el = $(el);
+                if ($el.attr("vellum:ignore") === "retain") {
+                    var mug = form.mugTypes.make("Ignored", form);
+                    mug.p.nodeID = el.nodeName;
+                    mug.p.dataNode = $el;
+                    mug.p.rawDataAttributes = parser.getAttributes(el);
+                    this.data.ignore.ignoredMugs.push(mug);
+                    return mug;
+                }
+            }
+            return this.__callOld();
+        },
+        parseBindElement: function (form, el, path) {
+            if (this.data.ignore.active) {
+                var mug = form.getMugByPath(path);
+                if (!mug) {
+                    throw new Error("test: " + path)
+                    mug = findParent(path, form);
+                }
+                if ((mug && mug.__className === "Ignored") ||
+                    el.attr("vellum:ignore") === "retain")
+                {
+                    var basePath, relativeTo;
+                    if (mug && mug.__className === "Ignored") {
+                        basePath = mug.absolutePath;
+                        relativeTo = MUG;
+                    } else {
+                        var parent = null;
+                        if (mug) {
+                            parent = mug.options.isSpecialGroup ? mug : mug.parentMug;
+                        }
+                        mug = form.mugTypes.make("Ignored", form);
+                        mug.p.nodeID = form.generate_item_label(parent, "ignored--");
+                        form.tree.insertMug(mug, 'into', parent);
+                        // HACK fix abstraction broken by direct tree insert
+                        form._fixMugState(mug);
+                        basePath = parent ? parent.absolutePath : form.getBasePath(true);
+                        relativeTo = PARENT;
+                        this.data.ignore.ignoredMugs.push(mug);
+                    }
+                    mug.p.binds.push({
+                        path: path.startsWith(basePath) ?
+                                    path.slice(basePath.length) : path,
+                        relativeTo: path.startsWith(basePath) ? relativeTo : null,
+                        attrs: parser.getAttributes(el)
+                    });
+                    return;
+                }
+            }
+            this.__callOld();
+        },
+        getControlNodeAdaptorFactory: function (tagName) {
+            var getAdaptor = this.__callOld();
+            if (this.data.ignore.active) {
+                return function ($cEl) {
+                    if ($cEl.attr("vellum:ignore") === "retain") {
+                        var adapt = function (mug, form) {
+                            if (mug.__className === "Ignored") {
+                                restoreAttributes($cEl);
+                                mug.p.controlNode = serializeXML($cEl);
+                            } else {
+                                throw new Error("todo")
+                            }
+                            return mug;
+                        };
+                        adapt.skipPopulate = true;
+                        return adapt;
+                    } else {
+                        var args = Array.prototype.slice.call(arguments);
+                        return getAdaptor.apply(null, args);
+                    }
+                };
+            }
+            return getAdaptor;
+        },
+        getSections: function (mug) {
+            if (this.data.ignore.active && mug.__className === "Ignored") {
+                return [{
+                    slug: "advanced",
+                    type: "accordion",
+                    displayName: "Advanced",
+                    properties: [
+                        "nodeID",
+                    ],
+                    isCollapsed: true,
+                    help: {
+                        title: "Advanced",
+                        text: "This question represents advanced content " +
+                          "that is not supported by the form builder. Please " +
+                          "only change it if you have a specific need!"
+                    }
+                }];
+            }
+            return this.__callOld();
+        },
         handleMugRename: function (form, mug, newID, oldID, newPath, oldPath) {
             this.__callOld();
-
-            oldPath = oldPath ? RegExp.escape(oldPath) : oldPath;
-            var pathRegex = new RegExp(oldPath, 'g'),
-                idNameRegex = new RegExp('(> )?' + oldID + '( >)?', 'g'),
-                // this depends on itext ids being question ID + '-label' in order
-                // for node positions referencing a node with a label ID (e.g.,
-                // first label inside a group) to be correctly updated.  Not that
-                // bad of an assumption.
-                idRegex = new RegExp('(\'|")' + oldID + '(-label)?(\'|")', 'g');
-
-            var replaceIdInSelector = function (val) {
-                var replaced = false;
-                val = val.replace(idNameRegex, function (match) {
-                    if (match.indexOf(oldID) !== -1 && match.indexOf(newID) === -1)
-                    {
-                        replaced = true;
-                        return match.replace(oldID, newID);
-                    } else {
-                        return match;
-                    }
+            if (this.data.ignore.active) {
+                var oldEscaped = oldPath ? RegExp.escape(oldPath) : oldPath,
+                    pathRegex = new RegExp(oldEscaped + '(\\W|$)', 'g'),
+                    newPattern = newPath + "$1";
+                _.each(this.data.ignore.ignoredNodes, function (node) {
+                    node.nodeXML = node.nodeXML.replace(pathRegex, newPattern);
                 });
-                val = val.replace(idRegex, function (match) {
-                    if (!replaced && match.indexOf(oldID) !== -1 && 
-                        match.indexOf(newID) === -1)
-                    {
-                        return match.replace(oldID, newID);
-                    } else {
-                        return match;
+                _.each(this.data.ignore.ignoredMugs, function (mug) {
+                    if (mug.p.controlNode) {
+                        mug.p.controlNode =
+                            mug.p.controlNode.replace(pathRegex, newPattern);
                     }
+                    _.each(mug.p.binds, function (bind) {
+                        bind.attrs = _.object(_.map(bind.attrs, function (value, key) {
+                            return [key, value.replace(pathRegex, newPattern)];
+                        }));
+                    });
                 });
-                return val;
-            };
-            _.each(this.data.ignore.ignoredNodes, function (node) {
-                if (node.position) {
-                    node.position = replaceIdInSelector(node.position);
-                }
-                node.path = replaceIdInSelector(node.path);
-                node.nodeXML = node.nodeXML.replace(pathRegex, newPath);
-            });
+            }
         }
     });
 
-    function prependChild(element, child) {
-        if (element.firstElementChild) {
-            $(element).prepend($(child));
-        } else {
-            $(element).append($(child));
+    var IgnoredQuestion = {
+            typeName: "Ignored XML",
+            icon: 'icon-question-sign',
+            isTypeChangeable: false,
+            isRemoveable: false,
+            isCopyable: false,
+            init: function (mug) {
+                mug.p.binds = [];
+            },
+            getTagName: function (mug, nodeID) {
+                return mug.p.dataNode ? nodeID : null;
+            },
+            writeDataNodeXML: function (writer, mug) {
+                if (mug.p.dataNode && mug.p.dataNode.children().length) {
+                    writer.writeXML(mug.p.dataNode[0].innerHTML);
+                }
+            },
+            getBindList: function (mug) {
+                return _.map(mug.p.binds, function (bind) {
+                    var attrs = _.clone(bind.attrs),
+                        basePath = "";
+                    if (bind.relativeTo === MUG) {
+                        basePath = mug.absolutePath;
+                    } else if (bind.relativeTo === PARENT) {
+                        var parent = mug.parentMug
+                        basePath = parent ? parent.absolutePath :
+                                            mug.form.getBasePath(true);
+                    }
+                    attrs.nodeset = basePath + bind.path;
+                    return attrs;
+                });
+            },
+            writesOnlyCustomXML: true,
+            writeCustomXML: function (writer, mug) {
+                if (mug.p.controlNode) {
+                    writer.writeXML(mug.p.controlNode);
+                }
+            },
+            spec: {
+                label: { presence: 'notallowed' },
+                labelItext: { presence: 'notallowed' },
+                labelItextID: { presence: 'notallowed' },
+                hintLabel: { presence: 'notallowed' },
+                hintItext: { presence: 'notallowed' },
+                hintItextID: { presence: 'notallowed' },
+                helpItext: { presence: 'notallowed' },
+                helpItextID: { presence: 'notallowed' },
+                mediaItext: { presence: 'notallowed' },
+                otherItext: { presence: 'notallowed' },
+                appearance: { presence: 'notallowed' },
+            }
+        };
+
+    function findParent(path, form) {
+        var parent = null;
+        if (path && path.indexOf("/") > 0) {
+            do {
+                path = path.slice(0, path.lastIndexOf("/"));
+                parent = form.getMugByPath(path);
+            } while (path && !parent);
         }
+        return parent;
+    }
+
+    function restoreAttributes(el) {
+        if (el.length) {
+            _.each(el[0].poppedAttributes, function (value, attr) {
+                el.attr(attr, value);
+            });
+        }
+    }
+
+    function serializeXML(xml) {
+        var string = xmls.serializeToString(xml[0]),
+            i = string.indexOf(">");
+        if (i === -1) {
+            return string;
+        }
+        // remove xmlns attributes from the root node
+        return string.slice(0, i)
+                     .replace(/ xmlns(:.*?)?="(.*?)"/g, "") + string.slice(i);
     }
 
     function getPathAndPosition(node) {

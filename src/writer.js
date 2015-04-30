@@ -117,6 +117,9 @@ define([
         dataTree.walk(function (mug, nodeID, processChildren) {
             if (mug && mug.options.getTagName) {
                 nodeID = mug.options.getTagName(mug, nodeID);
+                if (nodeID === null) {
+                    return;
+                }
             }
             xmlWriter.writeStartElement(nodeID);
             if (!mug) {
@@ -142,6 +145,9 @@ define([
                 
                 if (dataValue){
                     xmlWriter.writeString(dataValue);
+                }
+                if (mug.options.writeDataNodeXML) {
+                    mug.options.writeDataNodeXML(xmlWriter, mug);
                 }
                 if (keyAttr){
                     xmlWriter.writeAttributeString("key", keyAttr);

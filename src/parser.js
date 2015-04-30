@@ -235,7 +235,7 @@ define([
             appearance = $cEl.popAttr('appearance'),
             adapt, mug = null;
 
-        var getAdaptor = form.vellum.data.core.controlNodeAdaptorMap[tagName];
+        var getAdaptor = form.vellum.getControlNodeAdaptorFactory(tagName);
         if (getAdaptor) {
             adapt = getAdaptor($cEl, appearance, form, parentMug);
         }

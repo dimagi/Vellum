@@ -5,6 +5,8 @@ define([
     'jquery',
     'text!static/ignoreButRetain/common.xml',
     'text!static/ignoreButRetain/common-ignored.xml',
+    'text!static/ignoreButRetain/delete-bug-after.xml',
+    'text!static/ignoreButRetain/delete-bug-before.xml',
     'text!static/ignoreButRetain/empty-parent.xml',
     'text!static/ignoreButRetain/ignore-in-head.xml',
     'text!static/ignoreButRetain/multiple-ignores.xml',
@@ -19,6 +21,8 @@ define([
     $,
     COMMON,
     COMMON_IGNORED,
+    DELETE_BUG_AFTER,
+    DELETE_BUG_BEFORE,
     EMPTY_PARENT,
     IGNORE_IN_HEAD,
     MULTIPLE_IGNORES,
@@ -41,17 +45,15 @@ define([
 
         var testXmlPair = function (rawXml, processedXml) {
             util.loadXML(rawXml);
-            assertXmlEqual(rawXml, call('createXML'));
+            assertXmlEqual(call('createXML'), rawXml);
 
             call('getData').ignore.ignoredNodes = [];
-            assertXmlEqual(processedXml, call('createXML'));
+            assertXmlEqual(call('createXML'), processedXml);
         };
 
-        it("ignores data, bind, body, and setvalue nodes with various edge cases (see XML)", 
-            function () {
-                testXmlPair(COMMON, COMMON_IGNORED);
-            }
-        );
+        it("ignores data, bind, body, and setvalue nodes with various edge cases (see XML)", function () {
+            testXmlPair(COMMON, COMMON_IGNORED);
+        });
 
         it("can insert ignored element into empty parent", function () {
             util.loadXML(EMPTY_PARENT);
@@ -85,5 +87,10 @@ define([
             assertXmlEqual(REFERENCED_RENAMED, call('createXML'));
         });
 
+        it("keeps relative position on delete sibling of ignored element", function () {
+            util.loadXML(DELETE_BUG_BEFORE);
+            util.deleteQuestion("delete-me");
+            assertXmlEqual(call('createXML'), DELETE_BUG_AFTER);
+        });
     });
 });
