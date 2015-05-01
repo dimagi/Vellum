@@ -688,10 +688,10 @@ require([
                     mug.p.constraintAttr = "x = y";
                 }
                 itext.autoId = false;
-                itext.id = "node-id-label-itext*[]";
+                itext.id = "node-id-label-itext'&";
                 itext.set("node-id-label-itext'&");
                 try {
-                    assert.equal(spec.validationFunc(mug), "pass");
+                    assert.notEqual(spec.validationFunc(mug), "pass", property);
                 } finally {
                     itext.id = before[0];
                     itext.set(before[1]);
