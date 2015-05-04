@@ -10,6 +10,7 @@ define([
     'text!static/ignoreButRetain/delete-bug-before.xml',
     'text!static/ignoreButRetain/empty-parent.xml',
     'text!static/ignoreButRetain/ignore-in-head.xml',
+    'text!static/ignoreButRetain/ignored-data-node.xml',
     'text!static/ignoreButRetain/ignored-tag-first.xml',
     'text!static/ignoreButRetain/multiple-ignores.xml',
     'text!static/ignoreButRetain/multi-match.xml',
@@ -29,6 +30,7 @@ define([
     DELETE_BUG_BEFORE,
     EMPTY_PARENT,
     IGNORE_IN_HEAD,
+    IGNORED_DATA_NODE,
     IGNORED_TAG_FIRST,
     MULTIPLE_IGNORES,
     MUTLI_MATCH,
@@ -112,6 +114,12 @@ define([
         it("should preserve data node children", function () {
             util.loadXML(CASE_WITH_UPDATE);
             assertXmlEqual(call('createXML'), CASE_WITH_UPDATE);
+        });
+
+        it("should ignore binds and controls associated with ignored data node", function () {
+            util.loadXML(IGNORED_DATA_NODE);
+            util.assertJSTreeState("question");
+            assertXmlEqual(call('createXML'), IGNORED_DATA_NODE);
         });
     });
 });

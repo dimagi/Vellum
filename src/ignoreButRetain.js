@@ -204,23 +204,28 @@ define([
         getControlNodeAdaptorFactory: function (tagName) {
             var getAdaptor = this.__callOld();
             if (this.data.ignore.active) {
-                return function ($cEl) {
-                    if ($cEl.attr("vellum:ignore") === "retain") {
-                        var adapt = function (mug, form) {
-                            if (mug.__className === "Ignored") {
-                                restoreAttributes($cEl);
-                                mug.p.controlNode = serializeXML($cEl);
-                            } else {
-                                throw new Error("todo")
-                            }
-                            return mug;
-                        };
-                        adapt.skipPopulate = true;
-                        return adapt;
-                    } else {
-                        var args = Array.prototype.slice.call(arguments);
-                        return getAdaptor.apply(null, args);
+                return function ($cEl, appearance, form, parentMug) {
+                    function adapt(mug, form) {
+                        if (mug.__className === "Ignored") {
+                            restoreAttributes($cEl);
+                            mug.p.controlNode = serializeXML($cEl);
+                        } else {
+                            throw new Error("todo")
+                        }
+                        return mug;
                     }
+                    adapt.skipPopulate = true;
+                    if ($cEl.attr("vellum:ignore") === "retain") {
+                        return adapt;
+                    }
+                    var path = parser.getPathFromControlElement(
+                                        $cEl, form, parentMug, true),
+                        mug = form.getMugByPath(path);
+                    if (mug && mug.__className === "Ignored") {
+                        return adapt;
+                    }
+                    var args = Array.prototype.slice.call(arguments);
+                    return getAdaptor.apply(null, args);
                 };
             }
             return getAdaptor;
@@ -384,7 +389,8 @@ define([
     }
 
     function getSiblingSelector(node, position) {
-        return getNodeIdentifierSelector(node[position + "ElementSibling"]);
+        var sel = getNodeIdentifierSelector(node[position + "ElementSibling"]);
+        return sel && sel + ", " + sel.replace(/\w+:([^:]*)$/, "$1");
     }
 
     function getNodeIdentifierSelector(node) {
@@ -408,8 +414,7 @@ define([
             return '[id="' + id + '"]';
         } else {
             // escape ':' in namespaced selector for jQuery selector usage
-            var name = node.nodeName.replace(":", "\\:");
-            return name + ", " + name.replace(/.*:([^:]*)$/, "$1");
+            return node.nodeName.replace(":", "\\:");
 
             // to have this be fully generic for a node with any path,
             // we would have to add an :nth-child or even better :nth-of-type

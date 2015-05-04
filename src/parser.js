@@ -485,18 +485,18 @@ define([
      * @param el - a jquery-wrapped xforms control element.
      * @return - a string of the ref/nodeset value
      */
-    function getPathFromControlElement(el, form, parentMug) {
+    function getPathFromControlElement(el, form, parentMug, noPop) {
         if(!el){
             return null;
         }
-        var path = el.popAttr('ref'),
+        var path = noPop ? el.attr('ref') : el.popAttr('ref'),
             nodeId, pathToTry;
         if(!path){
-            path = el.popAttr('nodeset');
+            path = noPop ? el.attr('nodeset') : el.popAttr('nodeset');
         }
         if (!path) {
             // attempt to support sloppy hand-written forms
-            nodeId = el.popAttr('bind');
+            nodeId = noPop ? el.attr('bind') : el.popAttr('bind');
             if (nodeId) {
                 pathToTry = processPath(nodeId);
                 if (!form.getMugByPath(pathToTry)) {
