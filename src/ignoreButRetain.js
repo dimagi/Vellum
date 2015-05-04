@@ -252,8 +252,8 @@ define([
         },
         handleMugRename: function (form, mug, newID, oldID, newPath, oldPath) {
             this.__callOld();
-            if (this.data.ignore.active) {
-                var oldEscaped = oldPath ? RegExp.escape(oldPath) : oldPath,
+            if (this.data.ignore.active && oldPath) {
+                var oldEscaped = RegExp.escape(oldPath),
                     pathRegex = new RegExp(oldEscaped + '(\\W|$)', 'g'),
                     newPattern = newPath + "$1";
                 _.each(this.data.ignore.ignoredNodes, function (node) {
