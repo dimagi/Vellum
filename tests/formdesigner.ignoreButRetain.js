@@ -9,6 +9,7 @@ define([
     'text!static/ignoreButRetain/delete-bug-before.xml',
     'text!static/ignoreButRetain/empty-parent.xml',
     'text!static/ignoreButRetain/ignore-in-head.xml',
+    'text!static/ignoreButRetain/ignored-tag-first.xml',
     'text!static/ignoreButRetain/multiple-ignores.xml',
     'text!static/ignoreButRetain/multi-match.xml',
     'text!static/ignoreButRetain/referenced-renamed.xml',
@@ -25,6 +26,7 @@ define([
     DELETE_BUG_BEFORE,
     EMPTY_PARENT,
     IGNORE_IN_HEAD,
+    IGNORED_TAG_FIRST,
     MULTIPLE_IGNORES,
     MUTLI_MATCH,
     REFERENCED_RENAMED,
@@ -71,6 +73,11 @@ define([
             assertXmlEqual(call('createXML'), IGNORE_IN_HEAD);
         });
 
+        it("preserves position when first tag in <HEAD> is ignored", function () {
+            util.loadXML(IGNORED_TAG_FIRST);
+            assertXmlEqual(call('createXML'), IGNORED_TAG_FIRST);
+        });
+
         it("handles multiple ignore nodes in a row", function () {
             testXmlPair(MULTIPLE_IGNORES, MULTIPLE_IGNORES);
         });
@@ -78,13 +85,13 @@ define([
         it("handles an ignore node's reference node being renamed", function () {
             util.loadXML(UNRENAMED);
             call('getMugByPath', '/data/question9').p.nodeID = 'question9a';
-            assertXmlEqual(RENAMED, call('createXML'));
+            assertXmlEqual(call('createXML'), RENAMED);
         });
 
         it("handles a node being renamed that's referenced in an ignore node's XML", function () {
             util.loadXML(REFERENCED_UNRENAMED);
             call('getMugByPath', '/data/question1').p.nodeID = 'foobar';
-            assertXmlEqual(REFERENCED_RENAMED, call('createXML'));
+            assertXmlEqual(call('createXML'), REFERENCED_RENAMED);
         });
 
         it("keeps relative position on delete sibling of ignored element", function () {

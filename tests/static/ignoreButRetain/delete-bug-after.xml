@@ -19,11 +19,11 @@
 					<text id="before-label">
 						<value>before</value>
 					</text>
-					<text id="after-label">
-						<value>after</value>
-					</text>
 					<text id="ignored-label" vellum:ignore="retain">
 						<value>ignored</value>
+					</text>
+					<text id="after-label">
+						<value>after</value>
 					</text>
 				</translation>
 			</itext>

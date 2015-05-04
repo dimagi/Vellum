@@ -111,10 +111,13 @@ define([
 
                 var parentNode = xml.find(node.path),
                     ignored = $($.parseXML(node.nodeXML).childNodes[0]),
-                    sibling = node.position && parentNode.find(node.position);
+                    prev = node.prev && parentNode.find(node.prev),
+                    next = node.next && parentNode.find(node.next);
 
-                if (sibling && sibling.length) {
-                    sibling.first().after(ignored);
+                if (prev && prev.length) {
+                    prev.first().after(ignored);
+                } else if (next && next.length) {
+                    next.first().before(ignored);
                 } else {
                     // sibling was deleted, insert at end
                     parentNode.append(ignored);
@@ -342,9 +345,10 @@ define([
     function getPathAndPosition(node) {
         var origNode = node,
             path = [],
-            position;
+            prev, next;
 
-        position = getPreviousSiblingSelector(node);
+        prev = getSiblingSelector(node, "previous");
+        next = getSiblingSelector(node, "next");
         node = node.parentElement;
 
         while (node) {
@@ -359,27 +363,26 @@ define([
                 .replace(/xmlns="(.*?)"/, "");
 
         return {
-            position: position,
+            prev: prev,
+            next: next,
             path: path.join(" > "),
             nodeXML: "\n" + nodeXML
         };
     }
 
-    function getPreviousSiblingSelector(node) {
-        var previousSibling = node.previousElementSibling;
-        if (previousSibling && previousSibling.tagName !== 'label') {
-            return getNodeIdentifierSelector(previousSibling);
-        } else {
-            return false;
-        }
+    function getSiblingSelector(node, position) {
+        return getNodeIdentifierSelector(node[position + "ElementSibling"]);
     }
 
     function getNodeIdentifierSelector(node) {
+        if (!node) {
+            return null;
+        }
         var $node = $(node),
             nodeset = $node.attr('nodeset'),
             ref = $node.attr('ref'),
             id = $node.attr('id'),
-            tagName = $node.prop('tagName').toLowerCase();
+            tagName = ($node.prop('tagName') || '').toLowerCase();
 
         if (tagName === 'setvalue') {
             return '[event="' + $node.attr('event') + '"]' +
@@ -392,7 +395,8 @@ define([
             return '[id="' + id + '"]';
         } else {
             // escape ':' in namespaced selector for jQuery selector usage
-            return node.nodeName.replace(":", "\\:");
+            var name = node.nodeName.replace(":", "\\:");
+            return name + ", " + name.replace(/.*:([^:]*)$/, "$1");
 
             // to have this be fully generic for a node with any path,
             // we would have to add an :nth-child or even better :nth-of-type

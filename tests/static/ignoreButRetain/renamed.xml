@@ -26,14 +26,14 @@
 					<text id="question9a-label">
 						<value>question9</value>
 					</text>
+					<text id="question10-label" vellum:ignore="retain">
+						<value>question10</value>
+					</text>
 					<text id="question11-label">
 						<value>question11</value>
 					</text>
 					<text id="question4-label" vellum:ignore="retain">
 						<value>question4</value>
-					</text>
-					<text id="question10-label" vellum:ignore="retain">
-						<value>question10</value>
 					</text>
 				</translation>
 			</itext>
