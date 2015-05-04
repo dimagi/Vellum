@@ -69,7 +69,11 @@ define([
             });
             ignores = ignores.not(function (i, el) {
                 var isDataOrControl = _.any($(el).parents(), function (parent) {
-                        return instance.is(parent) || body.is(parent);
+                        return instance.is(parent) || body.is(parent) ||
+                            _.any(ignores, function (ignored) {
+                                // exclude nested nodes ... O(n^2)
+                                return $(ignored).is(parent);
+                            });
                     });
                 if (!isDataOrControl && el.nodeName === "bind") {
                     return $(el).parent().is(model);

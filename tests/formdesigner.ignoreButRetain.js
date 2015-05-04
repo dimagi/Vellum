@@ -12,6 +12,7 @@ define([
     'text!static/ignoreButRetain/ignored-tag-first.xml',
     'text!static/ignoreButRetain/multiple-ignores.xml',
     'text!static/ignoreButRetain/multi-match.xml',
+    'text!static/ignoreButRetain/nested-ignored-nodes.xml',
     'text!static/ignoreButRetain/referenced-renamed.xml',
     'text!static/ignoreButRetain/referenced-unrenamed.xml',
     'text!static/ignoreButRetain/renamed.xml',
@@ -29,6 +30,7 @@ define([
     IGNORED_TAG_FIRST,
     MULTIPLE_IGNORES,
     MUTLI_MATCH,
+    NESTED_IGNORED_NODES,
     REFERENCED_RENAMED,
     REFERENCED_UNRENAMED,
     RENAMED,
@@ -98,6 +100,11 @@ define([
             util.loadXML(DELETE_BUG_BEFORE);
             util.deleteQuestion("delete-me");
             assertXmlEqual(call('createXML'), DELETE_BUG_AFTER);
+        });
+
+        it("should not duplicate nested ignored nodes", function () {
+            util.loadXML(NESTED_IGNORED_NODES);
+            assertXmlEqual(call('createXML'), NESTED_IGNORED_NODES);
         });
     });
 });
