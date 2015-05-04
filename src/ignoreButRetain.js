@@ -2,18 +2,17 @@
  * "Ignore but Retain" plugin.
  *
  * This plugin allows you to mark any node in an XForm's XML with
- * 'ignore="true"'.
+ * 'vellum:ignore="retain"'.
  *
- * Marked nodes will be removed from the XML before it's processed by Vellum,
- * and reinserted when Vellum writes out XML.  Crucially, marked nodes are
- * reinserted in the same position relative to the node that they originally
- * followed, as identified by that node's attribute which includes a question
- * ID.
+ * Marked nodes (with the exception of data, bind, and control nodes) will be
+ * removed from the XML before it's processed by Vellum, and reinserted when
+ * Vellum writes out XML. Data, bind, and control nodes are consumed by a
+ * special `Ignored` mug type and inserted into the question tree like other
+ * mugs. Ignored nodes are reinserted as close as possible to their original
+ * position relative to the nodes that were around them when the form was
+ * originally parsed.
  *
- * Question ID changes are handled.
- *
- * If a reference node for an ignore node is deleted by the user, then that node
- * will be lost.
+ * Most question ID and path changes are handled.
  *
  * Spec:
  * https://docs.google.com/document/d/12see6m3Lr6nVVgjfstS3oS6Vc1UT7l4bqYNRtDB-GXQ/
