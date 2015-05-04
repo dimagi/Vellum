@@ -10,6 +10,7 @@ define([
     'text!static/ignoreButRetain/delete-bug-before.xml',
     'text!static/ignoreButRetain/empty-parent.xml',
     'text!static/ignoreButRetain/ignore-in-head.xml',
+    'text!static/ignoreButRetain/ignored-binds-with-extra-path.xml',
     'text!static/ignoreButRetain/ignored-control-node.xml',
     'text!static/ignoreButRetain/ignored-data-node.xml',
     'text!static/ignoreButRetain/ignored-tag-first.xml',
@@ -31,6 +32,7 @@ define([
     DELETE_BUG_BEFORE,
     EMPTY_PARENT,
     IGNORE_IN_HEAD,
+    IGNORED_BINDS_WITH_EXTRA_PATH,
     IGNORED_CONTROL_NODE,
     IGNORED_DATA_NODE,
     IGNORED_TAG_FIRST,
@@ -122,6 +124,15 @@ define([
             util.loadXML(IGNORED_DATA_NODE);
             util.assertJSTreeState("question");
             assertXmlEqual(call('createXML'), IGNORED_DATA_NODE);
+        });
+
+        it("should ignore bind nodes with extra path elements", function () {
+            util.loadXML(IGNORED_BINDS_WITH_EXTRA_PATH);
+            util.assertJSTreeState(
+                "question",
+                "question2"
+            );
+            assertXmlEqual(call('createXML'), IGNORED_BINDS_WITH_EXTRA_PATH);
         });
 
         it("should ignore control node", function () {

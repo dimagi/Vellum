@@ -166,7 +166,6 @@ define([
             if (this.data.ignore.active) {
                 var mug = form.getMugByPath(path);
                 if (!mug) {
-                    throw new Error("test: " + path)
                     mug = findParent(path, form);
                 }
                 if ((mug && mug.__className === "Ignored") ||
@@ -302,7 +301,7 @@ define([
                     if (bind.relativeTo === MUG) {
                         basePath = mug.absolutePath;
                     } else if (bind.relativeTo === PARENT) {
-                        var parent = mug.parentMug
+                        var parent = mug.parentMug;
                         basePath = parent ? parent.absolutePath :
                                             mug.form.getBasePath(true);
                     }
@@ -332,12 +331,13 @@ define([
         };
 
     function findParent(path, form) {
-        var parent = null;
-        if (path && path.indexOf("/") > 0) {
-            do {
-                path = path.slice(0, path.lastIndexOf("/"));
+        var parent = null,
+            regex = /[\/[][^\/[]+$/;
+        while (!parent && path && regex.test(path)) {
+            path = path.replace(regex, "");
+            if (path) {
                 parent = form.getMugByPath(path);
-            } while (path && !parent);
+            }
         }
         return parent;
     }
