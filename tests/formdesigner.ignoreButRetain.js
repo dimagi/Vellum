@@ -3,6 +3,7 @@ define([
     'tests/utils',
     'chai',
     'jquery',
+    'text!static/ignoreButRetain/case-with-update.xml',
     'text!static/ignoreButRetain/common.xml',
     'text!static/ignoreButRetain/common-ignored.xml',
     'text!static/ignoreButRetain/delete-bug-after.xml',
@@ -21,6 +22,7 @@ define([
     util,
     chai,
     $,
+    CASE_WITH_UPDATE,
     COMMON,
     COMMON_IGNORED,
     DELETE_BUG_AFTER,
@@ -105,6 +107,11 @@ define([
         it("should not duplicate nested ignored nodes", function () {
             util.loadXML(NESTED_IGNORED_NODES);
             assertXmlEqual(call('createXML'), NESTED_IGNORED_NODES);
+        });
+
+        it("should preserve data node children", function () {
+            util.loadXML(CASE_WITH_UPDATE);
+            assertXmlEqual(call('createXML'), CASE_WITH_UPDATE);
         });
     });
 });

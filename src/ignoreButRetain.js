@@ -148,8 +148,14 @@ define([
                 if ($el.attr("vellum:ignore") === "retain") {
                     var mug = form.mugTypes.make("Ignored", form);
                     mug.p.nodeID = el.nodeName;
-                    mug.p.dataNode = $el;
                     mug.p.rawDataAttributes = parser.getAttributes(el);
+                    if ($el.children().length) {
+                        mug.p.dataNodeXML = serializeXML($el)
+                            // strip wrapper element
+                            .replace(/^<[^>]+>([^]*)<\/[^>]+>$/, "$1");
+                    } else {
+                        mug.p.dataNodeXML = "";
+                    }
                     this.data.ignore.ignoredMugs.push(mug);
                     return mug;
                 }
@@ -272,12 +278,15 @@ define([
             init: function (mug) {
                 mug.p.binds = [];
             },
+            parseDataNode: function (mug, node) {
+                return $([]);
+            },
             getTagName: function (mug, nodeID) {
-                return mug.p.dataNode ? nodeID : null;
+                return mug.p.rawDataAttributes ? nodeID : null;
             },
             writeDataNodeXML: function (writer, mug) {
-                if (mug.p.dataNode && mug.p.dataNode.children().length) {
-                    writer.writeXML(mug.p.dataNode[0].innerHTML);
+                if (mug.p.dataNodeXML) {
+                    writer.writeXML(mug.p.dataNodeXML);
                 }
             },
             getBindList: function (mug) {
