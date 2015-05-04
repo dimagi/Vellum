@@ -10,6 +10,7 @@ define([
     'text!static/ignoreButRetain/delete-bug-before.xml',
     'text!static/ignoreButRetain/empty-parent.xml',
     'text!static/ignoreButRetain/ignore-in-head.xml',
+    'text!static/ignoreButRetain/ignored-control-node.xml',
     'text!static/ignoreButRetain/ignored-data-node.xml',
     'text!static/ignoreButRetain/ignored-tag-first.xml',
     'text!static/ignoreButRetain/multiple-ignores.xml',
@@ -30,6 +31,7 @@ define([
     DELETE_BUG_BEFORE,
     EMPTY_PARENT,
     IGNORE_IN_HEAD,
+    IGNORED_CONTROL_NODE,
     IGNORED_DATA_NODE,
     IGNORED_TAG_FIRST,
     MULTIPLE_IGNORES,
@@ -120,6 +122,15 @@ define([
             util.loadXML(IGNORED_DATA_NODE);
             util.assertJSTreeState("question");
             assertXmlEqual(call('createXML'), IGNORED_DATA_NODE);
+        });
+
+        it("should ignore control node", function () {
+            util.loadXML(IGNORED_CONTROL_NODE);
+            util.assertJSTreeState(
+                "question",
+                "ignored--1"
+            );
+            assertXmlEqual(call('createXML'), IGNORED_CONTROL_NODE);
         });
     });
 });

@@ -181,8 +181,7 @@ define([
                         if (mug) {
                             parent = mug.options.isSpecialGroup ? mug : mug.parentMug;
                         }
-                        mug = form.mugTypes.make("Ignored", form);
-                        mug.p.nodeID = form.generate_item_label(parent, "ignored--");
+                        mug = makeIgnoredMug(form, parent);
                         form.tree.insertMug(mug, 'into', parent);
                         // HACK fix abstraction broken by direct tree insert
                         form._fixMugState(mug);
@@ -204,23 +203,25 @@ define([
         getControlNodeAdaptorFactory: function (tagName) {
             var getAdaptor = this.__callOld();
             if (this.data.ignore.active) {
+                var ignoredMugs = this.data.ignore.ignoredMugs;
                 return function ($cEl, appearance, form, parentMug) {
-                    function adapt(mug, form) {
-                        if (mug.__className === "Ignored") {
-                            restoreAttributes($cEl);
-                            mug.p.controlNode = serializeXML($cEl);
-                        } else {
-                            throw new Error("todo")
+                    function adapt() {
+                        if (!mug || mug.__className !== "Ignored") {
+                            mug = makeIgnoredMug(form, parentMug);
+                            ignoredMugs.push(mug);
                         }
+                        restoreAttributes($cEl);
+                        mug.p.controlNode = serializeXML($cEl);
                         return mug;
                     }
                     adapt.skipPopulate = true;
-                    if ($cEl.attr("vellum:ignore") === "retain") {
-                        return adapt;
-                    }
                     var path = parser.getPathFromControlElement(
                                         $cEl, form, parentMug, true),
                         mug = form.getMugByPath(path);
+                    if ($cEl.attr("vellum:ignore") === "retain") {
+                        adapt.ignoreDataNode = mug && mug.__className !== "Ignored";
+                        return adapt;
+                    }
                     if (mug && mug.__className === "Ignored") {
                         return adapt;
                     }
@@ -341,11 +342,15 @@ define([
         return parent;
     }
 
+    function makeIgnoredMug(form, parent) {
+        var mug = form.mugTypes.make("Ignored", form);
+        mug.p.nodeID = form.generate_item_label(parent, "ignored--", 1);
+        return mug;
+    }
+
     function restoreAttributes(el) {
-        if (el.length) {
-            _.each(el[0].poppedAttributes, function (value, attr) {
-                el.attr(attr, value);
-            });
+        if (el.length && el[0].poppedAttributes) {
+            el.attr(el[0].poppedAttributes);
         }
     }
 

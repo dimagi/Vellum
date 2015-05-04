@@ -848,13 +848,15 @@ define([
                 return this._make_label('question');
             }
         },
-        generate_item_label: function (parentMug, name) {
+        generate_item_label: function (parentMug, name, i) {
             var node = (parentMug ? this.tree.getNodeFromMug(parentMug)
                                   : this.tree.rootNode),
                 items = node.getChildrenMugs(),
-                i = items.length + 1,
                 ret;
             if (!name) { name = "item"; }
+            if (arguments.length < 3) {
+                i = items.length + 1;
+            }
             do {
                 ret = name + i++;
             } while (_.any(items, function (item) {
