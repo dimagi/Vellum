@@ -383,7 +383,7 @@ define([
                     return triggerAdaptor(appearance);
                 }
                 return function(mug, form) {
-                    var dataType = mug && mug.p.rawBindAttributes.type;
+                    var dataType = mug && mug.p.rawBindAttributes && mug.p.rawBindAttributes.type;
                     if (dataType) {
                         dataType = dataType.replace('xsd:',''); //strip out extraneous namespace
                         dataType = dataType.toLowerCase();

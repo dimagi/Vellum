@@ -6,7 +6,8 @@ require([
     'tests/utils',
     'vellum/parser',
     'text!static/parser/other_item.xml',
-    'text!static/parser/label-without-itext.xml'
+    'text!static/parser/label-without-itext.xml',
+    'text!static/parser/missing-bind.xml'
 ], function (
     chai,
     $,
@@ -14,7 +15,8 @@ require([
     util,
     parser,
     OTHER_ITEM_XML,
-    LABEL_WITHOUT_ITEXT_XML
+    LABEL_WITHOUT_ITEXT_XML,
+    MISSING_BIND_XML
 ) {
     var assert = chai.assert,
         call = util.call,
@@ -105,6 +107,9 @@ require([
             util.assertXmlNotEqual(call("createXML"), LABEL_WITHOUT_ITEXT_XML);
         });
 
+        it("should load question without bind element", function () {
+            util.loadXML(MISSING_BIND_XML);
+        });
     });
 
     var TEST_XML_1 = '' + 
