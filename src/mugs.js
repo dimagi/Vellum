@@ -88,20 +88,19 @@ define([
          * @returns - True if validation messages changed else false.
          */
         validate: function (attr) {
-            var mug = this,
-                changed;
-            this.form.updateLogicReferences(mug, attr);
-            if (attr) {
-                changed = mug._validate(attr);
-            } else {
-                _.each(_.keys(mug.p.__data), function (attr) {
-                    changed = changed || mug._validate(attr);
-                });
-            }
-            if (changed) {
-                this.fire({type: "messages-changed", mug: mug});
-            }
-            return changed;
+            var mug = this;
+            return this._withMessages(function () {
+                var changed = false;
+                mug.form.updateLogicReferences(mug, attr);
+                if (attr) {
+                    changed = mug._validate(attr);
+                } else {
+                    _.each(_.keys(mug.p.__data), function (attr) {
+                        changed = changed || mug._validate(attr);
+                    });
+                }
+                return changed;
+            });
         },
         _validate: function (attr) {
             var mug = this,
@@ -158,9 +157,10 @@ define([
          *          for the given property will be removed.
          */
         addMessage: function (attr, msg) {
-            if (this.messages.update(attr, msg)) {
-                this.fire({type: "messages-changed", mug: this});
-            }
+            var messages = this.messages;
+            this._withMessages(function () {
+                return messages.update(attr, msg);
+            });
         },
         dropMessage: function (attr, key) {
             var spec = this.spec[attr];
@@ -176,15 +176,36 @@ define([
          *          of message objects.
          */
         addMessages: function (messages) {
-            var mug = this,
-                changed = _.reduce(messages, function (m1, list, attr) {
+            var mug = this;
+            this._withMessages(function () {
+                return _.reduce(messages, function (m1, list, attr) {
                     return _.reduce(list, function (m2, msg) {
                         return mug.messages.update(attr, msg) || m2;
                     }, false) || m1;
                 }, false);
-            if (changed) {
-                this.fire({type: "messages-changed", mug: this});
+            });
+        },
+        _withMessages: function (func) {
+            var unset = _.isUndefined(this._messagesChanged),
+                changed = false;
+            if (unset) {
+                this._messagesChanged = false;
             }
+            try {
+                changed = func() || this._messagesChanged;
+                if (changed) {
+                    if (unset) {
+                        this.fire({type: "messages-changed", mug: this});
+                    } else {
+                        this._messagesChanged = true;
+                    }
+                }
+            } finally {
+                if (unset) {
+                    delete this._messagesChanged;
+                }
+            }
+            return changed;
         },
         /**
          * Get a list of error message strings

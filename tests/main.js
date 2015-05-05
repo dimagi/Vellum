@@ -90,6 +90,7 @@ require(['jquery', 'jquery.vellum'], function ($) {
         'tests/core',
         'tests/form',
         'tests/logic',
+        'tests/mugs',
         'tests/parser',
         'tests/questionTypes',
         'tests/exporter',
