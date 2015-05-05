@@ -665,13 +665,6 @@ define([
         }
     };
 
-    function validateElementName(value, displayName) {
-        if (!util.isValidElementName(value)) {
-            return value + " is not a legal " + displayName + ". Must start with a letter and contain only letters, numbers, and '-' or '_' characters.";
-        }
-        return "pass";
-    }
-
     function resolveConflictedNodeId(mug) {
         // clear warning; mug already has copy-N-of-... ID
         mug.p.conflictedNodeId = null;
@@ -698,7 +691,12 @@ define([
                 },
                 widget: widgets.identifier,
                 validationFunc: function (mug) {
-                    return validateElementName(mug.p.nodeID, "Question ID");
+                    if (!util.isValidElementName(mug.p.nodeID)) {
+                        return mug.p.nodeID + " is not a legal Question ID. " +
+                            "It must start with a letter and contain only " +
+                            "letters, numbers, and '-' or '_' characters.";
+                    }
+                    return "pass";
                 },
                 dropMessage: function (mug, attr, key) {
                     if (attr === "nodeID" && key === "mug-conflictedNodeId-warning") {
