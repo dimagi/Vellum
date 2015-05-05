@@ -125,6 +125,22 @@ define([
             assert.equal(msg[0].text, messages[0].message);
         });
 
+        it("should warn about top-level question named 'case'", function () {
+            util.loadXML("");
+            var mug = util.addQuestion("Text", "case");
+            assert(mug.messages.get("nodeID", "mug-nodeID-case-warning"),
+                "mug-nodeID-case-warning was expected but not present");
+            mug.p.nodeID = "the-case";
+            assert.equal(util.getMessages(mug), "");
+        });
+
+        it("should not warn about question named 'case' in group", function () {
+            util.loadXML("");
+            util.addQuestion("Group", "group");
+            var mug = util.addQuestion("Text", "case");
+            assert.equal(util.getMessages(mug), "");
+        });
+
         it("should add ODK warning to mug on create Audio question", function () {
             util.loadXML("");
             var mug = util.addQuestion("Audio"),

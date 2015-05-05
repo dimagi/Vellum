@@ -691,6 +691,16 @@ define([
                 },
                 widget: widgets.identifier,
                 validationFunc: function (mug) {
+                    var caseWarning = {
+                            key: "mug-nodeID-case-warning",
+                            level: mug.WARNING,
+                        };
+                    if (!mug.parentMug && mug.p.nodeID === "case") {
+                        caseWarning.message = "The ID 'case' may cause " +
+                            "problems with case management. It is " +
+                            "recommended to pick a different Question ID.";
+                    }
+                    mug.addMessage("nodeID", caseWarning);
                     if (!util.isValidElementName(mug.p.nodeID)) {
                         return mug.p.nodeID + " is not a legal Question ID. " +
                             "It must start with a letter and contain only " +
