@@ -154,8 +154,8 @@ define([
                     return; // abort
                 }
                 _this.ensureCurrentMugIsSaved(function () {
-                    if (!_.isUndefined(window.analytics)) {
-                        window.analytics.track("Clicked Save in Formbuilder");
+                    if (!_.isUndefined(window._kmq)) {
+                        window._kmq.push(["record", "Clicked Save in Formbuilder"]);
                     }
                     _this.validateAndSaveXForm(forceFullSave);
                 });
@@ -1346,8 +1346,8 @@ define([
             if (!foo) {
                 throw new Error("cannot add " + qType + " at the current position");
             }
-            if (!_.isUndefined(window.analytics)) {
-                window.analytics.track("Added a question");
+            if (!_.isUndefined(window._kmq)) {
+                window._kmq.push(["record", "Added a question"]);
             }
             mug = _this.data.core.form.createQuestion(foo.mug, foo.position, qType);
             var $firstInput = _this.$f.find(".fd-question-properties input:text:visible:first");
