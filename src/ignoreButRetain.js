@@ -60,7 +60,7 @@ define([
 
             var model = xml.find('h\\:html > h\\:head > model:first'),
                 instance = model.find('instance:first'),
-                body = xml.find('h\\:html > body:first');
+                body = xml.find('h\\:html > h\\:body:first, h\\:html > body:first');
             _.each([model, instance, body], function (el) {
                 if (!el.length) {
                     window.console.log("WARNING", el.selector, "not found");
