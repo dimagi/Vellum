@@ -734,45 +734,23 @@ define([
         tagName: 'upload',
         icon: 'fcc fcc-fd-audio-capture',
         isODKOnly: true,
+        mediaType: "audio/*", /* */
         canOutputValue: false,
         writeCustomXML: function (xmlWriter, mug) {
-            var mediaType = mug.p.mediaType;
-            if (mediaType) {
-                xmlWriter.writeAttributeString("mediatype", mediaType);
-            }
+            xmlWriter.writeAttributeString("mediatype", mug.options.mediaType);
         },
-        init: function (mug, form) {
-            mug.p.mediaType = "audio/*"; /* */
-        },
-        spec: {
-            mediaType: {
-                lstring: 'Media Type',
-                visibility: 'visible',
-                presence: 'required'
-            }
-        }
     });
 
     var Image = util.extend(Audio, {
         typeName: 'Image Capture',
         icon: 'icon-camera',
-        isODKOnly: true,
-        canOutputValue: false,
-        init: function (mug, form) {
-            Audio.init(mug, form);
-            mug.p.mediaType = "image/*"; /* */
-        }
+        mediaType: "image/*", /* */
     });
 
     var Video = util.extend(Audio, {
         typeName: 'Video Capture',
         icon: 'icon-facetime-video',
-        isODKOnly: true,
-        canOutputValue: false,
-        init: function (mug, form) {
-            Audio.init(mug, form);
-            mug.p.mediaType = "video/*"; /* */
-        }
+        mediaType: "video/*", /* */
     });
 
     var Signature = util.extend(Image, {
