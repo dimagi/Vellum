@@ -108,6 +108,30 @@ define([
             util.assertXmlEqual(call("createXML"), ATTACHMENT_PROPERTY_XML);
         });
 
+        _.each({
+            "inline attachments": {
+                inline_prop: {
+                    calculate: "/data/question1",
+                    from: "inline",
+                }
+            },
+            "from strings": {
+                from_strings: {
+                    calculate: "/data/question1",
+                    from: "blah"
+                }
+            }
+        }, function(v, k) {
+            it("should validate " + k, function() {
+                util.loadXML("");
+                var save = util.addQuestion("SaveToCase", "save"),
+                    spec = save.spec.attachment_property;
+                save.p.use_attachment = true;
+                save.p.attachment_property = v;
+                assert.notEqual(spec.validationFunc(save), "pass");
+            });
+        });
+
         it("should load 2 create setvalues", function () {
             util.loadXML(CREATE_2_PROPERTY_XML);
             var create1 = util.getMug("create1"),
