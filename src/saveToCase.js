@@ -307,18 +307,41 @@ define([
                     presence: 'optional',
                     widget: attachmentCaseWidget,
                     validationFunc: function (mug) {
-                        if (mug.p.use_attachment) {
-                            var props = _.without(_.keys(mug.p.attachment_property), ""),
-                                invalidProps = _.filter(props, function(p) {
-                                    return !VALID_PROP_REGEX.test(p);
-                                });
-
-                            if (invalidProps.length > 0) {
-                                return invalidProps.join(", ") + 
-                                    " are invalid properties";
-                            }
+                        if (!mug.p.use_attachment) {
+                            return "pass";
                         }
-                        return 'pass';
+
+                        var props = _.without(_.keys(mug.p.attachment_property), ""),
+                            invalidProps = _.filter(props, function(p) {
+                                return !VALID_PROP_REGEX.test(p);
+                            }),
+                            invalidFroms = _.filter(props, function(p) {
+                                return !_.contains(['local', 'remote', 'inline'],
+                                                   mug.p.attachment_property[p].from);
+                            }),
+                            invalidInlines = _.filter(props, function(p) {
+                                var prop = mug.p.attachment_property[p],
+                                    from = prop.from,
+                                    name = prop.name;
+                                return from === 'inline' && !name;
+                            });
+
+                        if (invalidProps.length > 0) {
+                            return invalidProps.join(", ") + 
+                                " are invalid properties";
+                        }
+
+                        if (invalidFroms.length > 0) {
+                            return "The from attribute must be one of: " + 
+                                "local, remote, or inline";
+                        }
+                        
+                        if (invalidInlines.length > 0) {
+                            return "Inlined attachments must have an " +
+                                "attachment name";
+                        }
+
+                        return "pass";
                     }
                 }
             },
