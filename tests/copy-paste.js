@@ -727,6 +727,18 @@ require([
             var id = "transfer[@type='tx']";
             assert(util.isTreeNodeValid(id), util.getMessages(id));
         });
+
+        it("should not overwrite manually typed question ID with copy-N-of-...", function () {
+            util.loadXML("");
+            paste([
+                ["id", "type", "labelItext:en-default"],
+                ["/text", "Text", "text"],
+                ["/text", "Text", "text"],
+            ]);
+            var input = $("[name=property-nodeID]");
+            input.val("other").change();
+            assert.equal(input.val(), "other");
+        });
     });
 
     describe("The copy-paste string conversions should", function () {
