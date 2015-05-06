@@ -9,6 +9,7 @@ define([
     'vellum/widgets',
     'tpl!vellum/templates/widget_update_case',
     'tpl!vellum/templates/widget_index_case',
+    'tpl!vellum/templates/widget_attachment_case',
     'tpl!vellum/templates/widget_save_to_case',
     'vellum/core'
 ], function (
@@ -22,6 +23,7 @@ define([
     widgets,
     widget_update_case,
     widget_index_case,
+    widget_attach_case,
     widget_save_to_case
 ){
     function createsCase(mug) {
@@ -38,6 +40,10 @@ define([
 
     function indexesCase(mug) {
         return mug ? mug.p.use_index : false;
+    }
+
+    function attachmentCase(mug) {
+        return mug ? mug.p.use_attachment : false;
     }
 
     function addSetValue(mug) {
@@ -130,6 +136,25 @@ define([
                         calculate: $pair.find('.fd-index-property-source').val(),
                         case_type: $pair.find('.fd-index-property-case-type').val(),
                         relationship: $pair.find('.fd-index-property-relationship').val(),
+                    };
+                });
+                return currentValues;
+            };
+
+            return widget;
+        },
+        attachmentCaseWidget = function (mug, options) {
+            options.template = widget_attach_case;
+            var widget = propertyWidget(mug, options);
+
+            widget.getValue = function () {
+                var currentValues = {};
+                _.each(widget.input.find('.fd-attachment-property'), function (kvPair) {
+                    var $pair = $(kvPair);
+                    currentValues[$pair.find('.fd-attachment-property-name').val()] = {
+                        calculate: $pair.find('.fd-attachment-property-source').val(),
+                        from: $pair.find('.fd-attachment-property-from').val(),
+                        name: $pair.find('.fd-attachment-name').val(),
                     };
                 });
                 return currentValues;
@@ -269,6 +294,32 @@ define([
                         }
                         return 'pass';
                     }
+                },
+                "use_attachment": {
+                    lstring: "Use Attachments",
+                    visibility: 'visible',
+                    presence: 'optional',
+                    widget: widgets.checkbox
+                },
+                "attachment_property": {
+                    lstring: "Attachment Properties",
+                    visibility: 'visible',
+                    presence: 'optional',
+                    widget: attachmentCaseWidget,
+                    validationFunc: function (mug) {
+                        if (mug.p.use_attachment) {
+                            var props = _.without(_.keys(mug.p.attachment_property), ""),
+                                invalidProps = _.filter(props, function(p) {
+                                    return !VALID_PROP_REGEX.test(p);
+                                });
+
+                            if (invalidProps.length > 0) {
+                                return invalidProps.join(", ") + 
+                                    " are invalid properties";
+                            }
+                        }
+                        return 'pass';
+                    }
                 }
             },
             getExtraDataAttributes: function (mug) {
@@ -321,6 +372,12 @@ define([
                                                         ['case_type', 'relationship'])));
                 }
 
+                if (attachmentCase(mug)) {
+                    actions.push(simpleNode('attachment', 
+                                            makeColumns(mug.p.attachment_property, 
+                                                        ['from', 'name'])));
+                }
+
                 return [new Tree.Node(actions, {
                     getNodeID: function () { return "c:case"; },
                     p: {rawDataAttributes: null},
@@ -363,8 +420,20 @@ define([
                 if (indexesCase(mug)) {
                     ret = ret.concat(generateBinds('index', mug.p.index_property));
                 }
+                if (attachmentCase(mug)) {
+                    ret = ret.concat(
+                        _.chain(mug.p.attachment_property)
+                         .omit("")
+                         .map(function(v, k) {
+                             return {
+                                 nodeset: mug.absolutePath + "/case/attachment/" + k + "/@src",
+                                 calculate: v.calculate
+                             };
+                         }).value()
+                    );
+                }
 
-                if (createsCase(mug) || updatesCase(mug) || closesCase(mug) || indexesCase(mug)) {
+                if (createsCase(mug) || updatesCase(mug) || closesCase(mug) || indexesCase(mug) || attachmentCase(mug)) {
                     ret.push({
                         nodeset: mug.absolutePath + "/case/@date_modified",
                         calculate: mug.p.date_modified,
@@ -389,7 +458,8 @@ define([
                     create = case_.find('create'),
                     close = case_.find('close'),
                     update = case_.find('update'),
-                    index = case_.find('index');
+                    index = case_.find('index'),
+                    attach = case_.find('attachment');
                 if (create && create.length !== 0) {
                     mug.p.use_create = true;
                 }
@@ -407,6 +477,19 @@ define([
                         mug.p.index_property[prop.prop('tagName')] = {
                             case_type: prop.attr('case_type'),
                             relationship: prop.attr('relationship')
+                        };
+                    });
+                }
+                if (attach && attach.length !== 0) {
+                    mug.p.use_attachment = true;
+                    if (!mug.p.attachment_property) {
+                        mug.p.attachment_property = {};
+                    }
+                    _.each(attach.children(), function(child) {
+                        var prop = $(child);
+                        mug.p.attachment_property[prop.prop('tagName')] = {
+                            from: prop.attr('from'),
+                            name: prop.attr('name')
                         };
                     });
                 }
@@ -469,6 +552,17 @@ define([
                         return !indexesCase(mug);
                     },
                 },
+                {
+                    slug: "attachment",
+                    displayName: "Attachments",
+                    properties: [
+                        "use_attachment",
+                        "attachment_property",
+                    ],
+                    isCollapsed: function (mug) {
+                        return !attachmentCase(mug);
+                    },
+                },
             ]
         };
 
@@ -515,9 +609,10 @@ define([
             var mug = form.getMugByPath(path);
             if (!mug) {
                 var casePathRegex = /\/case\/(?:(create|update|index)\/(\w+)|(close|@date_modified|@user_id|@case_id))$/,
-                    matchRet = path.match(casePathRegex);
+                    matchRet = path.match(casePathRegex),
+                    basePath;
                 if (matchRet && matchRet.length > 0) {
-                    var basePath = path.replace(casePathRegex, "");
+                    basePath = path.replace(casePathRegex, "");
                     mug = form.getMugByPath(basePath);
                     if (mug && mug.__className === "SaveToCase") {
                         if (matchRet[2]) {
@@ -526,6 +621,7 @@ define([
                                     create: "create_property",
                                     update: "update_property",
                                     index: "index_property",
+                                    attachment: "attachment_property",
                                 }[matchRet[1]];
 
                             if (!mug.p[pKey]) {
@@ -565,6 +661,25 @@ define([
                         form.parseWarnings.push(
                             "An error occurred when parsing bind node [" +
                             path + "]. Please fix this.");
+                        return;
+                    }
+                }
+                
+                var attachmentRegex = /\/case\/attachment\/(\w+)\/@src/,
+                    attachRet = path.match(attachmentRegex);
+                if (attachRet) {
+                    basePath = path.replace(attachmentRegex, "");
+                    mug = form.getMugByPath(basePath);
+                    if (mug && mug.__className === "SaveToCase") {
+                        var attachProperties = mug.p.attachment_property,
+                            nodeName = attachRet[1];
+                        if (!attachProperties) {
+                            attachProperties = {};
+                        }
+                        if (!attachProperties[nodeName]) {
+                            attachProperties[nodeName] = {};
+                        }
+                        mug.p.attachment_property[nodeName].calculate = el.attr('calculate');
                         return;
                     }
                 }
