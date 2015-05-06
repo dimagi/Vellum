@@ -2107,6 +2107,10 @@ define([
         return parser.parseBindElement(form, el, path);
     };
 
+    fn.getControlNodeAdaptorFactory = function (tagName) {
+        return this.data.core.controlNodeAdaptorMap[tagName];
+    };
+
     /**
      * Extension point for mug setup during control node parsing
      *

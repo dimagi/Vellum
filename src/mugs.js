@@ -617,6 +617,7 @@ define([
 
         // data node writer options
         getExtraDataAttributes: null, // function (mug) { return {...}; }
+        writeDataNodeXML: null,       // function (xmlWriter, mug) { ... }
 
         /**
          * Returns a list of objects containing bind element attributes

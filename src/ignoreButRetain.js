@@ -2,18 +2,17 @@
  * "Ignore but Retain" plugin.
  *
  * This plugin allows you to mark any node in an XForm's XML with
- * 'ignore="true"'.
+ * 'vellum:ignore="retain"'.
  *
- * Marked nodes will be removed from the XML before it's processed by Vellum,
- * and reinserted when Vellum writes out XML.  Crucially, marked nodes are
- * reinserted in the same position relative to the node that they originally
- * followed, as identified by that node's attribute which includes a question
- * ID.
+ * Marked nodes (with the exception of data, bind, and control nodes) will be
+ * removed from the XML before it's processed by Vellum, and reinserted when
+ * Vellum writes out XML. Data, bind, and control nodes are consumed by a
+ * special `Ignored` mug type and inserted into the question tree like other
+ * mugs. Ignored nodes are reinserted as close as possible to their original
+ * position relative to the nodes that were around them when the form was
+ * originally parsed.
  *
- * Question ID changes are handled.
- *
- * If a reference node for an ignore node is deleted by the user, then that node
- * will be lost.
+ * Most question ID and path changes are handled.
  *
  * Spec:
  * https://docs.google.com/document/d/12see6m3Lr6nVVgjfstS3oS6Vc1UT7l4bqYNRtDB-GXQ/
@@ -21,28 +20,360 @@
 define([
     'underscore',
     'jquery',
+    'vellum/mugs',
+    'vellum/parser',
+    'vellum/util',
     'vellum/core'
 ], function (
     _,
-    $
+    $,
+    mugs,
+    parser,
+    util
 ) {
-    function prependChild(element, child) {
-        if (element.firstElementChild) {
-            $(element).prepend($(child));
-        } else {
-            $(element).append($(child));
+    var xmls = new XMLSerializer(),
+        MUG = "mug",
+        PARENT = "parent";
+
+    $.vellum.plugin("ignore", {}, {
+        loadXML: function (xmlStr, options) {
+            this.data.ignore.ignoredNodes = [];
+            if (!xmlStr) {
+                this.__callOld();
+                return;
+            }
+            var _this = this,
+                ignoredEls = [],
+                xmlDoc = $.parseXML(xmlStr),
+                xml = $(xmlDoc),
+                ignores = xml.find('[vellum\\:ignore="retain"]');
+
+            this.data.ignore.active = ignores.length;
+            if (!this.data.ignore.active) {
+                // skip serialize
+                this.__callOld();
+                return;
+            }
+
+            options.enableInstanceRefCounting = false;
+            this.data.ignore.ignoredMugs = [];
+
+            var model = xml.find('h\\:html > h\\:head > model:first'),
+                instance = model.find('instance:first'),
+                body = xml.find('h\\:html > h\\:body:first, h\\:html > body:first');
+            _.each([model, instance, body], function (el) {
+                if (!el.length) {
+                    window.console.log("WARNING", el.selector, "not found");
+                }
+            });
+            ignores = ignores.not(function (i, el) {
+                var isDataOrControl = _.any($(el).parents(), function (parent) {
+                        return instance.is(parent) || body.is(parent) ||
+                            _.any(ignores, function (ignored) {
+                                // exclude nested nodes ... O(n^2)
+                                return $(ignored).is(parent);
+                            });
+                    });
+                if (!isDataOrControl && el.nodeName === "bind") {
+                    return $(el).parent().is(model);
+                }
+                return isDataOrControl;
+            });
+            ignores.each(function (i, el) {
+                _this.data.ignore.ignoredNodes.push(getPathAndPosition(el));
+                ignoredEls.push(el);
+            });
+
+            // do this last in case one ignore node follows another; it can still
+            // use the first one as its reference
+            _.each(ignoredEls, function (el) {
+                el.parentElement.removeChild(el);
+            });
+           
+            this.__callOld(xmls.serializeToString(xml[0]), options);
+        },
+        createXML: function () {
+            var xmlStr = this.__callOld(),
+                ignoredNodes = this.data.ignore.ignoredNodes;
+            if (!this.data.ignore.active) {
+                return xmlStr;
+            }
+
+            var xml = $($.parseXML(xmlStr));
+
+            _.each(ignoredNodes, function (node) {
+                if (node.path === "h\\:html > h\\:body") {
+                    // Something weird happens involving body since it's an HTML
+                    // tag, apparently.  But only when it's the terminal node in a
+                    // selector. Also behaves differently in FF and Chrome.
+                    node.path = "h\\:html > body, h\\:html > h\\:body";
+                } else if (node.path === "h\\:html > h\\:head") {
+                    // same as above?
+                    node.path = "h\\:html > head, h\\:html > h\\:head";
+                }
+
+                var parentNode = xml.find(node.path),
+                    ignored = $($.parseXML(node.nodeXML).childNodes[0]),
+                    prev = node.prev && parentNode.find(node.prev),
+                    next = node.next && parentNode.find(node.next);
+
+                if (prev && prev.length) {
+                    prev.first().after(ignored);
+                } else if (next && next.length) {
+                    next.first().before(ignored);
+                } else {
+                    // sibling was deleted, insert at end
+                    parentNode.append(ignored);
+                }
+            });
+
+            var count = 0;
+            return xmls.serializeToString(xml[0])
+                // firefox adds xmlns="" to fragments when adding them to the
+                // document
+                .replace(/ xmlns=""/g, '')
+                .replace(/ xmlns:vellum="(.+?)"/g, function (match) {
+                    return count++ ? '' : match;
+                });
+        },
+        getMugTypes: function () {
+            var types = this.__callOld();
+            types.normal.Ignored = IgnoredQuestion;
+            return types;
+        },
+        parseDataElement: function (form, el, parentMug) {
+            if (this.data.ignore.active) {
+                var $el = $(el);
+                if ($el.attr("vellum:ignore") === "retain") {
+                    var mug = form.mugTypes.make("Ignored", form);
+                    mug.p.nodeID = el.nodeName;
+                    mug.p.rawDataAttributes = parser.getAttributes(el);
+                    if ($el.children().length) {
+                        mug.p.dataNodeXML = serializeXML($el)
+                            // strip wrapper element
+                            .replace(/^<[^>]+>([^]*)<\/[^>]+>$/, "$1");
+                    } else {
+                        mug.p.dataNodeXML = "";
+                    }
+                    this.data.ignore.ignoredMugs.push(mug);
+                    return mug;
+                }
+            }
+            return this.__callOld();
+        },
+        parseBindElement: function (form, el, path) {
+            if (this.data.ignore.active) {
+                var mug = form.getMugByPath(path);
+                if (!mug) {
+                    mug = findParent(path, form);
+                }
+                if ((mug && mug.__className === "Ignored") ||
+                    el.attr("vellum:ignore") === "retain")
+                {
+                    var basePath, relativeTo;
+                    if (mug && mug.__className === "Ignored") {
+                        basePath = mug.absolutePath;
+                        relativeTo = MUG;
+                    } else {
+                        var parent = null;
+                        if (mug) {
+                            parent = mug.options.isSpecialGroup ? mug : mug.parentMug;
+                        }
+                        mug = makeIgnoredMug(form, parent);
+                        form.tree.insertMug(mug, 'into', parent);
+                        // HACK fix abstraction broken by direct tree insert
+                        form._fixMugState(mug);
+                        basePath = parent ? parent.absolutePath : form.getBasePath(true);
+                        relativeTo = PARENT;
+                        this.data.ignore.ignoredMugs.push(mug);
+                    }
+                    mug.p.binds.push({
+                        path: path.startsWith(basePath) ?
+                                    path.slice(basePath.length) : path,
+                        relativeTo: path.startsWith(basePath) ? relativeTo : null,
+                        attrs: parser.getAttributes(el)
+                    });
+                    return;
+                }
+            }
+            this.__callOld();
+        },
+        getControlNodeAdaptorFactory: function (tagName) {
+            var getAdaptor = this.__callOld();
+            if (this.data.ignore.active) {
+                var ignoredMugs = this.data.ignore.ignoredMugs;
+                return function ($cEl, appearance, form, parentMug) {
+                    function adapt() {
+                        if (!mug || mug.__className !== "Ignored") {
+                            mug = makeIgnoredMug(form, parentMug);
+                            ignoredMugs.push(mug);
+                        }
+                        restoreAttributes($cEl);
+                        mug.p.controlNode = serializeXML($cEl);
+                        return mug;
+                    }
+                    adapt.skipPopulate = true;
+                    var path = parser.getPathFromControlElement(
+                                        $cEl, form, parentMug, true),
+                        mug = form.getMugByPath(path);
+                    if ($cEl.attr("vellum:ignore") === "retain") {
+                        adapt.ignoreDataNode = mug && mug.__className !== "Ignored";
+                        return adapt;
+                    }
+                    if (mug && mug.__className === "Ignored") {
+                        return adapt;
+                    }
+                    var args = Array.prototype.slice.call(arguments);
+                    return getAdaptor.apply(null, args);
+                };
+            }
+            return getAdaptor;
+        },
+        getSections: function (mug) {
+            if (this.data.ignore.active && mug.__className === "Ignored") {
+                return [{
+                    slug: "advanced",
+                    type: "accordion",
+                    displayName: "Advanced",
+                    properties: [
+                        "nodeID",
+                    ],
+                    isCollapsed: true,
+                    help: {
+                        title: "Advanced",
+                        text: "This question represents advanced content " +
+                          "that is not supported by the form builder. Please " +
+                          "only change it if you have a specific need!"
+                    }
+                }];
+            }
+            return this.__callOld();
+        },
+        handleMugRename: function (form, mug, newID, oldID, newPath, oldPath) {
+            this.__callOld();
+            if (this.data.ignore.active && oldPath) {
+                var oldEscaped = RegExp.escape(oldPath),
+                    pathRegex = new RegExp(oldEscaped + '(\\W|$)', 'g'),
+                    newPattern = newPath + "$1";
+                _.each(this.data.ignore.ignoredNodes, function (node) {
+                    node.nodeXML = node.nodeXML.replace(pathRegex, newPattern);
+                });
+                _.each(this.data.ignore.ignoredMugs, function (mug) {
+                    if (mug.p.controlNode) {
+                        mug.p.controlNode =
+                            mug.p.controlNode.replace(pathRegex, newPattern);
+                    }
+                    _.each(mug.p.binds, function (bind) {
+                        bind.attrs = _.object(_.map(bind.attrs, function (value, key) {
+                            return [key, value.replace(pathRegex, newPattern)];
+                        }));
+                    });
+                });
+            }
         }
+    });
+
+    var IgnoredQuestion = {
+            typeName: "Ignored XML",
+            icon: 'icon-question-sign',
+            isTypeChangeable: false,
+            isRemoveable: false,
+            isCopyable: false,
+            init: function (mug) {
+                mug.p.binds = [];
+            },
+            parseDataNode: function (mug, node) {
+                return $([]);
+            },
+            getTagName: function (mug, nodeID) {
+                return mug.p.rawDataAttributes ? nodeID : null;
+            },
+            writeDataNodeXML: function (writer, mug) {
+                if (mug.p.dataNodeXML) {
+                    writer.writeXML(mug.p.dataNodeXML);
+                }
+            },
+            getBindList: function (mug) {
+                return _.map(mug.p.binds, function (bind) {
+                    var attrs = _.clone(bind.attrs),
+                        basePath = "";
+                    if (bind.relativeTo === MUG) {
+                        basePath = mug.absolutePath;
+                    } else if (bind.relativeTo === PARENT) {
+                        var parent = mug.parentMug;
+                        basePath = parent ? parent.absolutePath :
+                                            mug.form.getBasePath(true);
+                    }
+                    attrs.nodeset = basePath + bind.path;
+                    return attrs;
+                });
+            },
+            writesOnlyCustomXML: true,
+            writeCustomXML: function (writer, mug) {
+                if (mug.p.controlNode) {
+                    writer.writeXML(mug.p.controlNode);
+                }
+            },
+            spec: {
+                label: { presence: 'notallowed' },
+                labelItext: { presence: 'notallowed' },
+                labelItextID: { presence: 'notallowed' },
+                hintLabel: { presence: 'notallowed' },
+                hintItext: { presence: 'notallowed' },
+                hintItextID: { presence: 'notallowed' },
+                helpItext: { presence: 'notallowed' },
+                helpItextID: { presence: 'notallowed' },
+                mediaItext: { presence: 'notallowed' },
+                otherItext: { presence: 'notallowed' },
+                appearance: { presence: 'notallowed' },
+            }
+        };
+
+    function findParent(path, form) {
+        var parent = null,
+            regex = /[\/[][^\/[]+$/;
+        while (!parent && path && regex.test(path)) {
+            path = path.replace(regex, "");
+            if (path) {
+                parent = form.getMugByPath(path);
+            }
+        }
+        return parent;
+    }
+
+    function makeIgnoredMug(form, parent) {
+        var mug = form.mugTypes.make("Ignored", form);
+        mug.p.nodeID = form.generate_item_label(parent, "ignored--", 1);
+        return mug;
+    }
+
+    function restoreAttributes(el) {
+        if (el.length && el[0].poppedAttributes) {
+            el.attr(el[0].poppedAttributes);
+        }
+    }
+
+    function serializeXML(xml) {
+        var string = xmls.serializeToString(xml[0]),
+            i = string.indexOf(">");
+        if (i === -1) {
+            return string;
+        }
+        // remove xmlns attributes from the root node
+        return string.slice(0, i)
+                     .replace(/ xmlns(:.*?)?="(.*?)"/g, "") + string.slice(i);
     }
 
     function getPathAndPosition(node) {
         var origNode = node,
             path = [],
-            position;
-        
-        position = getPreviousSiblingSelector(node);
+            prev, next;
+
+        prev = getSiblingSelector(node, "previous");
+        next = getSiblingSelector(node, "next");
         node = node.parentElement;
-        
-        while (node) {   
+
+        while (node) {
             path.unshift(getNodeIdentifierSelector(node));
             node = node.parentElement;
         }
@@ -54,27 +385,27 @@ define([
                 .replace(/xmlns="(.*?)"/, "");
 
         return {
-            position: position,
+            prev: prev,
+            next: next,
             path: path.join(" > "),
             nodeXML: "\n" + nodeXML
         };
     }
 
-    function getPreviousSiblingSelector(node) {
-        var previousSibling = node.previousElementSibling;
-        if (previousSibling && previousSibling.tagName !== 'label') {
-            return getNodeIdentifierSelector(previousSibling);
-        } else {
-            return false;
-        }
+    function getSiblingSelector(node, position) {
+        var sel = getNodeIdentifierSelector(node[position + "ElementSibling"]);
+        return sel && sel + ", " + sel.replace(/\w+:([^:]*)$/, "$1");
     }
 
     function getNodeIdentifierSelector(node) {
+        if (!node) {
+            return null;
+        }
         var $node = $(node),
             nodeset = $node.attr('nodeset'),
             ref = $node.attr('ref'),
             id = $node.attr('id'),
-            tagName = $node.prop('tagName').toLowerCase();
+            tagName = ($node.prop('tagName') || '').toLowerCase();
 
         if (tagName === 'setvalue') {
             return '[event="' + $node.attr('event') + '"]' +
@@ -101,136 +432,4 @@ define([
             // current implementation is sufficient.
         }
     }
-
-    var xmls = new XMLSerializer();
-
-    $.vellum.plugin("ignore", {}, {
-        loadXML: function (xmlStr, options) {
-            this.data.ignore.ignoredNodes = [];
-            if (!xmlStr) {
-                this.__callOld();
-                return;
-            }
-            var _this = this,
-                ignoredEls = [],
-                xmlDoc = $.parseXML(xmlStr),
-                xml = $(xmlDoc),
-                ignores = xml.find('[vellum\\:ignore="retain"]');
-
-            if (ignores.length === 0) {
-                // skip serialize
-                this.__callOld();
-                return;
-            }
-
-            options.enableInstanceRefCounting = false;
-            ignores.each(function (i, el) {
-                _this.data.ignore.ignoredNodes.push(getPathAndPosition(el));
-                ignoredEls.push(el);
-            });
-
-            // do this last in case one ignore node follows another; it can still
-            // use the first one as its reference
-            _.each(ignoredEls, function (el) {
-                el.parentElement.removeChild(el);
-            });
-           
-            this.__callOld(xmls.serializeToString(xml[0]), options);
-        },
-        createXML: function () {
-            var xmlStr = this.__callOld(),
-                ignoredNodes = this.data.ignore.ignoredNodes;
-            if (!ignoredNodes.length) {
-                return xmlStr;
-            }
-
-            var xml = $($.parseXML(xmlStr));
-
-            _.each(ignoredNodes, function (node) {
-                if (node.path === "h\\:html > h\\:body") {
-                    // Something weird happens involving body since it's an HTML
-                    // tag, apparently.  But only when it's the terminal node in a
-                    // selector. Also behaves differently in FF and Chrome.
-                    node.path = "h\\:html > body, h\\:html > h\\:body";
-                } else if (node.path === "h\\:html > h\\:head") {
-                    // same as above?
-                    node.path = "h\\:html > head, h\\:html > h\\:head";
-                }
-
-                var parentNode = xml.find(node.path),
-                    appendNode = $.parseXML(node.nodeXML).childNodes[0];
-
-                if (node.position) {
-                    var target = parentNode.find(node.position);
-                    if (target.length) {
-                        target.first().after($(appendNode));
-                    } else {
-                        // sibling node of ignored node got deleted, insert at
-                        // beginning
-                        prependChild(parentNode[0], appendNode);
-                    }
-                } else {
-                    var firstChild = parentNode.children().first();
-                    if (firstChild.length === 0 || firstChild[0].tagName !== 'label') {
-                        prependChild(parentNode[0], appendNode);
-                    } else {
-                        // make sure to insert after the <label> at the beginning of
-                        // a group, not before
-                        firstChild.after(appendNode);
-                    }
-                }
-            });
-
-            var count = 0;
-            return xmls.serializeToString(xml[0])
-                // firefox adds xmlns="" to fragments when adding them to the
-                // document
-                .replace(/ xmlns=""/g, '')
-                .replace(/ xmlns:vellum="(.+?)"/g, function (match) {
-                    return count++ ? '' : match;
-                });
-        },
-        handleMugRename: function (form, mug, newID, oldID, newPath, oldPath) {
-            this.__callOld();
-
-            oldPath = oldPath ? RegExp.escape(oldPath) : oldPath;
-            var pathRegex = new RegExp(oldPath, 'g'),
-                idNameRegex = new RegExp('(> )?' + oldID + '( >)?', 'g'),
-                // this depends on itext ids being question ID + '-label' in order
-                // for node positions referencing a node with a label ID (e.g.,
-                // first label inside a group) to be correctly updated.  Not that
-                // bad of an assumption.
-                idRegex = new RegExp('(\'|")' + oldID + '(-label)?(\'|")', 'g');
-
-            var replaceIdInSelector = function (val) {
-                var replaced = false;
-                val = val.replace(idNameRegex, function (match) {
-                    if (match.indexOf(oldID) !== -1 && match.indexOf(newID) === -1)
-                    {
-                        replaced = true;
-                        return match.replace(oldID, newID);
-                    } else {
-                        return match;
-                    }
-                });
-                val = val.replace(idRegex, function (match) {
-                    if (!replaced && match.indexOf(oldID) !== -1 && 
-                        match.indexOf(newID) === -1)
-                    {
-                        return match.replace(oldID, newID);
-                    } else {
-                        return match;
-                    }
-                });
-                return val;
-            };
-            _.each(this.data.ignore.ignoredNodes, function (node) {
-                if (node.position) {
-                    node.position = replaceIdInSelector(node.position);
-                }
-                node.path = replaceIdInSelector(node.path);
-                node.nodeXML = node.nodeXML.replace(pathRegex, newPath);
-            });
-        }
-    });
 });
