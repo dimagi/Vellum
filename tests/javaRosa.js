@@ -688,6 +688,44 @@ require([
                 }
             });
 
+            it("should not display " + property + " validation error for non-autoId valid itext id", function() {
+                var itext = mug.p[property],
+                    spec = mug.spec[property],
+                    before = [itext.id, itext.get(), mug.p.constraintAttr];
+                if (property === "constraintMsgItext") {
+                    mug.p.constraintAttr = "x = y";
+                }
+                itext.autoId = false;
+                itext.id = "node-id-label-itext";
+                itext.set("node-id-label-itext");
+                try {
+                    assert.equal(spec.validationFunc(mug), "pass");
+                } finally {
+                    itext.id = before[0];
+                    itext.set(before[1]);
+                    mug.p.constraintAttr = before[2];
+                }
+            });
+
+            it("should display " + property + " validation error for non-autoId invalid itext id", function() {
+                var itext = mug.p[property],
+                    spec = mug.spec[property],
+                    before = [itext.id, itext.get(), mug.p.constraintAttr];
+                if (property === "constraintMsgItext") {
+                    mug.p.constraintAttr = "x = y";
+                }
+                itext.autoId = false;
+                itext.id = "node-id-label-itext'&";
+                itext.set("node-id-label-itext'&");
+                try {
+                    assert.notEqual(spec.validationFunc(mug), "pass", property);
+                } finally {
+                    itext.id = before[0];
+                    itext.set(before[1]);
+                    mug.p.constraintAttr = before[2];
+                }
+            });
+
             it("should not have " + property + "ID validator (it will not be invoked)", function() {
                 assert(!mug.spec[property + "ID"].validationFunc,
                        property + "ID virtual property validator will not be invoked");

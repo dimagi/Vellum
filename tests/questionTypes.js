@@ -348,6 +348,7 @@ require([
                     ["Image", "Select"],
                     ["Audio", "Select"],
                     ["Video", "Select"],
+                    ["Image", "Audio"],
                     ["PhoneNumber", "Text"],
                     ["Select", "Text"],
                     ["MSelect", "Text"],

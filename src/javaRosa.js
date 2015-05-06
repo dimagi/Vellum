@@ -417,6 +417,7 @@ define([
                 }
                 while (byId.hasOwnProperty(id)) {
                     id = origId + count;
+                    count++;
                 }
                 item.id = id;
                 byId[id] = item;
