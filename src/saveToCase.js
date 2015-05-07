@@ -27,23 +27,23 @@ define([
     widget_save_to_case
 ){
     function createsCase(mug) {
-        return mug ? mug.p.use_create : false;
+        return mug ? mug.p.useCreate : false;
     }
 
     function closesCase(mug) {
-        return mug ? mug.p.use_close : false;
+        return mug ? mug.p.useClose : false;
     }
 
     function updatesCase(mug) {
-        return mug ? mug.p.use_update : false;
+        return mug ? mug.p.useUpdate : false;
     }
 
     function indexesCase(mug) {
-        return mug ? mug.p.use_index : false;
+        return mug ? mug.p.useIndex : false;
     }
 
     function attachmentCase(mug) {
-        return mug ? mug.p.use_attachment : false;
+        return mug ? mug.p.useAttachment : false;
     }
 
     function addSetValue(mug) {
@@ -192,20 +192,20 @@ define([
                     presence: 'required',
                     widget: widgets.xPath,
                 },
-                "use_create": {
+                useCreate: {
                     lstring: "Create Case",
                     visibility: 'visible',
                     presence: 'optional',
                     widget: widgets.checkbox
                 },
-                "create_property": {
+                createProperty: {
                     lstring: "Properties To Create",
                     visibility: 'visible',
                     presence: 'optional',
                     widget: saveCasePropWidget,
                     validationFunc: function (mug) {
-                        if (mug.p.use_create) {
-                            var props = _.without(_.keys(mug.p.create_property), ""),
+                        if (mug.p.useCreate) {
+                            var props = _.without(_.keys(mug.p.createProperty), ""),
                                 required = ["case_type", "case_name"],
                                 optional = ["owner_id"],
                                 legal = _.union(required, optional),
@@ -231,32 +231,32 @@ define([
                         return 'pass';
                     }
                 },
-                "use_close": {
+                useClose: {
                     lstring: "Close Case",
                     visibility: 'visible',
                     presence: 'optional',
                     widget: widgets.checkbox
                 },
-                "close_condition": {
+                closeCondition: {
                     lstring: "Close Condition",
                     visibility: 'visible',
                     presence: 'optional',
                     widget: widgets.xPath
                 },
-                "use_update": {
+                useUpdate: {
                     lstring: "Update Case",
                     visibility: 'visible',
                     presence: 'optional',
                     widget: widgets.checkbox
                 },
-                "update_property": {
+                updateProperty: {
                     lstring: "Properties To Update",
                     visibility: 'visible',
                     presence: 'optional',
                     widget: saveCasePropWidget,
                     validationFunc: function (mug) {
-                        if (mug.p.use_update) {
-                            var props = _.without(_.keys(mug.p.update_property), ""),
+                        if (mug.p.useUpdate) {
+                            var props = _.without(_.keys(mug.p.updateProperty), ""),
                                 invalidProps = _.filter(props, function(p) {
                                     return !VALID_PROP_REGEX.test(p);
                                 });
@@ -269,20 +269,20 @@ define([
                         return 'pass';
                     }
                 },
-                "use_index": {
+                useIndex: {
                     lstring: "Use Index",
                     visibility: 'visible',
                     presence: 'optional',
                     widget: widgets.checkbox
                 },
-                "index_property": {
+                indexProperty: {
                     lstring: "Index Properties",
                     visibility: 'visible',
                     presence: 'optional',
                     widget: indexCaseWidget,
                     validationFunc: function (mug) {
-                        if (mug.p.use_index) {
-                            var props = _.without(_.keys(mug.p.index_property), ""),
+                        if (mug.p.useIndex) {
+                            var props = _.without(_.keys(mug.p.indexProperty), ""),
                                 invalidProps = _.filter(props, function(p) {
                                     return !VALID_PROP_REGEX.test(p);
                                 });
@@ -295,32 +295,32 @@ define([
                         return 'pass';
                     }
                 },
-                "use_attachment": {
+                useAttachment: {
                     lstring: "Use Attachments",
                     visibility: 'visible',
                     presence: 'optional',
                     widget: widgets.checkbox
                 },
-                "attachment_property": {
+                attachmentProperty: {
                     lstring: "Attachment Properties",
                     visibility: 'visible',
                     presence: 'optional',
                     widget: attachmentCaseWidget,
                     validationFunc: function (mug) {
-                        if (!mug.p.use_attachment) {
+                        if (!mug.p.useAttachment) {
                             return "pass";
                         }
 
-                        var props = _.without(_.keys(mug.p.attachment_property), ""),
+                        var props = _.without(_.keys(mug.p.attachmentProperty), ""),
                             invalidProps = _.filter(props, function(p) {
                                 return !VALID_PROP_REGEX.test(p);
                             }),
                             invalidFroms = _.filter(props, function(p) {
                                 return !_.contains(['local', 'remote', 'inline'],
-                                                   mug.p.attachment_property[p].from);
+                                                   mug.p.attachmentProperty[p].from);
                             }),
                             invalidInlines = _.filter(props, function(p) {
-                                var prop = mug.p.attachment_property[p],
+                                var prop = mug.p.attachmentProperty[p],
                                     from = prop.from,
                                     name = prop.name;
                                 return from === 'inline' && !name;
@@ -378,11 +378,11 @@ define([
 
                 var actions = [];
                 if (createsCase(mug)) {
-                    actions.push(simpleNode('create', makeColumns(mug.p.create_property)));
+                    actions.push(simpleNode('create', makeColumns(mug.p.createProperty)));
                 }
 
                 if (updatesCase(mug)) {
-                    actions.push(simpleNode('update', makeColumns(mug.p.update_property)));
+                    actions.push(simpleNode('update', makeColumns(mug.p.updateProperty)));
                 }
 
                 if (closesCase(mug)) {
@@ -391,13 +391,13 @@ define([
 
                 if (indexesCase(mug)) {
                     actions.push(simpleNode('index', 
-                                            makeColumns(mug.p.index_property, 
+                                            makeColumns(mug.p.indexProperty, 
                                                         ['case_type', 'relationship'])));
                 }
 
                 if (attachmentCase(mug)) {
                     actions.push(simpleNode('attachment', 
-                                            makeColumns(mug.p.attachment_property, 
+                                            makeColumns(mug.p.attachmentProperty, 
                                                         ['from', 'name'])));
                 }
 
@@ -429,23 +429,23 @@ define([
                 }
 
                 if (createsCase(mug)) {
-                    ret = ret.concat(generateBinds('create', mug.p.create_property));
+                    ret = ret.concat(generateBinds('create', mug.p.createProperty));
                 }
                 if (updatesCase(mug)) {
-                    ret = ret.concat(generateBinds('update', mug.p.update_property));
+                    ret = ret.concat(generateBinds('update', mug.p.updateProperty));
                 }
                 if (closesCase(mug)) {
                     ret.push({
                         nodeset: mug.absolutePath + "/case/close",
-                        relevant: mug.p.close_condition
+                        relevant: mug.p.closeCondition
                     });
                 }
                 if (indexesCase(mug)) {
-                    ret = ret.concat(generateBinds('index', mug.p.index_property));
+                    ret = ret.concat(generateBinds('index', mug.p.indexProperty));
                 }
                 if (attachmentCase(mug)) {
                     ret = ret.concat(
-                        _.chain(mug.p.attachment_property)
+                        _.chain(mug.p.attachmentProperty)
                          .omit("")
                          .map(function(v, k) {
                              return {
@@ -484,33 +484,33 @@ define([
                     index = case_.find('index'),
                     attach = case_.find('attachment');
                 if (create && create.length !== 0) {
-                    mug.p.use_create = true;
+                    mug.p.useCreate = true;
                 }
                 if (update && update.length !== 0) {
-                    mug.p.use_update = true;
+                    mug.p.useUpdate = true;
                 }
                 if (close && close.length !== 0) {
-                    mug.p.use_close = true;
+                    mug.p.useClose = true;
                 }
                 if (index && index.length !== 0) {
-                    mug.p.use_index = true;
-                    mug.p.index_property = {};
+                    mug.p.useIndex = true;
+                    mug.p.indexProperty = {};
                     _.each(index.children(), function(child) {
                         var prop = $(child);
-                        mug.p.index_property[prop.prop('tagName')] = {
+                        mug.p.indexProperty[prop.prop('tagName')] = {
                             case_type: prop.attr('case_type'),
                             relationship: prop.attr('relationship')
                         };
                     });
                 }
                 if (attach && attach.length !== 0) {
-                    mug.p.use_attachment = true;
-                    if (!mug.p.attachment_property) {
-                        mug.p.attachment_property = {};
+                    mug.p.useAttachment = true;
+                    if (!mug.p.attachmentProperty) {
+                        mug.p.attachmentProperty = {};
                     }
                     _.each(attach.children(), function(child) {
                         var prop = $(child);
-                        mug.p.attachment_property[prop.prop('tagName')] = {
+                        mug.p.attachmentProperty[prop.prop('tagName')] = {
                             from: prop.attr('from'),
                             name: prop.attr('name')
                         };
@@ -535,8 +535,8 @@ define([
                     slug: "create",
                     displayName: "Create",
                     properties: [
-                        "use_create",
-                        "create_property",
+                        "useCreate",
+                        "createProperty",
                     ],
                     isCollapsed: function (mug) {
                         return !createsCase(mug);
@@ -546,8 +546,8 @@ define([
                     slug: "update",
                     displayName: "Update",
                     properties: [
-                        "use_update",
-                        "update_property",
+                        "useUpdate",
+                        "updateProperty",
                     ],
                     isCollapsed: function (mug) {
                         return !updatesCase(mug);
@@ -557,8 +557,8 @@ define([
                     slug: "close",
                     displayName: "Close",
                     properties: [
-                        "use_close",
-                        "close_condition",
+                        "useClose",
+                        "closeCondition",
                     ],
                     isCollapsed: function (mug) {
                         return !closesCase(mug);
@@ -568,8 +568,8 @@ define([
                     slug: "index",
                     displayName: "Index",
                     properties: [
-                        "use_index",
-                        "index_property",
+                        "useIndex",
+                        "indexProperty",
                     ],
                     isCollapsed: function (mug) {
                         return !indexesCase(mug);
@@ -579,8 +579,8 @@ define([
                     slug: "attachment",
                     displayName: "Attachments",
                     properties: [
-                        "use_attachment",
-                        "attachment_property",
+                        "useAttachment",
+                        "attachmentProperty",
                     ],
                     isCollapsed: function (mug) {
                         return !attachmentCase(mug);
@@ -641,10 +641,10 @@ define([
                         if (matchRet[2]) {
                             var prop = matchRet[2],
                                 pKey = {
-                                    create: "create_property",
-                                    update: "update_property",
-                                    index: "index_property",
-                                    attachment: "attachment_property",
+                                    create: "createProperty",
+                                    update: "updateProperty",
+                                    index: "indexProperty",
+                                    attachment: "attachmentProperty",
                                 }[matchRet[1]];
 
                             if (!mug.p[pKey]) {
@@ -661,7 +661,7 @@ define([
                         } else {
                             var attr = {
                                 close: {
-                                    mugProp: 'close_condition',
+                                    mugProp: 'closeCondition',
                                     elAttr: 'relevant'
                                 },
                                 '@date_modified': {
@@ -694,7 +694,7 @@ define([
                     basePath = path.replace(attachmentRegex, "");
                     mug = form.getMugByPath(basePath);
                     if (mug && mug.__className === "SaveToCase") {
-                        var attachProperties = mug.p.attachment_property,
+                        var attachProperties = mug.p.attachmentProperty,
                             nodeName = attachRet[1];
                         if (!attachProperties) {
                             attachProperties = {};
@@ -702,7 +702,7 @@ define([
                         if (!attachProperties[nodeName]) {
                             attachProperties[nodeName] = {};
                         }
-                        mug.p.attachment_property[nodeName].calculate = el.attr('calculate');
+                        mug.p.attachmentProperty[nodeName].calculate = el.attr('calculate');
                         return;
                     }
                 }
