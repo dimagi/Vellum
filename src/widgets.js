@@ -335,15 +335,11 @@ define([
         $label.addClass('control-label');
         if (help) {
             var $help = $("<a />").attr({
-                "href": (help.url || "#"),
+                "href": "#",
                 "class": "fd-help",
-                "target": "_blank",
                 "data-title": labelText,
-                "data-content": help.text
+                "data-content": help.text + "<br><br><a target='_blank' href='" + help.url + "'>See more</a>",
             });
-            if (!help.url) {
-                $help.click(function (e) { e.preventDefault(); });
-            }
             $label.append($help);
         }
         uiElem.append($label);
