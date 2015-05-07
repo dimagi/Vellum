@@ -46,6 +46,11 @@ define([
         return mug ? mug.p.useAttachment : false;
     }
 
+    function usesCases(mug) {
+        return createsCase(mug) || closesCase(mug) || updatesCase(mug) ||
+            indexesCase(mug) || attachmentCase(mug);
+    }
+
     function addSetValue(mug) {
         var path = mug.absolutePath;
 
@@ -456,7 +461,7 @@ define([
                     );
                 }
 
-                if (createsCase(mug) || updatesCase(mug) || closesCase(mug) || indexesCase(mug) || attachmentCase(mug)) {
+                if (usesCases(mug)) {
                     ret.push({
                         nodeset: mug.absolutePath + "/case/@date_modified",
                         calculate: mug.p.date_modified,
@@ -688,7 +693,7 @@ define([
                     }
                 }
                 
-                var attachmentRegex = /\/case\/attachment\/(\w+)\/@src/,
+                var attachmentRegex = /\/case\/attachment\/(\w+)\/@src$/,
                     attachRet = path.match(attachmentRegex);
                 if (attachRet) {
                     basePath = path.replace(attachmentRegex, "");
