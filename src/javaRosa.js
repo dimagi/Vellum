@@ -41,8 +41,7 @@ define([
         RESERVED_ITEXT_CONTENT_TYPES = [
             'default', 'short', 'long', 'audio', 'video', 'image'
         ],
-        _nextItextItemKey = 1,
-        HELP_MARKDOWN;
+        _nextItextItemKey = 1;
 
     function ItextItem(options) {
         this.forms = options.forms || [];
@@ -317,12 +316,6 @@ define([
             return this.updateForMug(mug, mug.getLabelValue());
         },
         updateForMug: function (mug, defaultLabelValue) {
-            function missingMarkdownForm(forms) {
-                return _.filter(forms, function(form) {
-                    return form.name === 'markdown';
-                }).length === 0;
-            }
-
             // set default itext id/values
             if (!mug.options.isDataOnly) {
                 if (!mug.p.labelItext && mug.getPresence("labelItext") !== "notallowed") {
@@ -333,13 +326,7 @@ define([
                     mug.p.hintItext = this.createItem();
                 }
                 if (!mug.p.helpItext && mug.getPresence("helpItext") !== "notallowed") {
-                    var help = mug.p.helpItext = this.createItem();
-                    if (HELP_MARKDOWN) {
-                        help.cloneForm('default', 'markdown');
-                    }
-                } else if (HELP_MARKDOWN && mug.p.helpItext &&
-                           missingMarkdownForm(mug.p.helpItext.forms)) {
-                    mug.p.helpItext.cloneForm('default', 'markdown');
+                    mug.p.helpItext = this.createItem();
                 }
             }
             if (!mug.options.isControlOnly) {
@@ -1315,7 +1302,6 @@ define([
             this.data.javaRosa.ItextItem = ItextItem;
             this.data.javaRosa.ItextForm = ItextForm;
             this.data.javaRosa.ICONS = ICONS;
-            HELP_MARKDOWN = this.opts().features.help_markdown;
         },
         insertOutputRef: function (mug, target, path, dateFormat) {
             var output = getOutputRef(path, dateFormat),
@@ -1884,20 +1870,7 @@ define([
                                 return mug.p.helpItext;
                             },
                             displayName: "Help Message"
-                        })).on('change', function() {
-                            if (!HELP_MARKDOWN) {
-                                return;
-                            }
-                            var mug = this.mug,
-                                helpItext = mug.p.helpItext,
-                                helpItextForm = helpItext.forms[0],
-                                markdownForms = _.find(helpItext.forms, function(itext) {
-                                    return itext.name === 'markdown';
-                                });
-                            if (markdownForms) {
-                                markdownForms.data = _.clone(helpItextForm.data);
-                            }
-                        });
+                        }));
 
                     return block;
                 },
