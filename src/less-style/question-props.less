@@ -155,35 +155,30 @@
 
 .itext-block-container {
     &.has-markdown {
-        .turn-markdown-off {
+        .turn-markdown-off,
+        .markdown-output:not(:empty),
+        .fd-help {
             display: block;
         }
         .turn-markdown-on {
-          display: none;
-        }
-        .markdown-output:not(:empty) {
-            display: block;
+            display: none;
         }
     }
     &:not(.has-markdown) {
-        .turn-markdown-off {
-            display: none;
-        }
-        .turn-markdown-on {
-            display: block;
-        }
+        .turn-markdown-off,
         .markdown-output {
             display: none;
+        }
+        .turn-markdown-on,
+        .fd-help {
+            display: block;
         }
     }
     &.markdown-ignorant {
-        .turn-markdown-off {
-            display: none;
-        }
-        .turn-markdown-on {
-          display: none;
-        }
-        .markdown-output {
+        .turn-markdown-off,
+        .turn-markdown-on, 
+        .markdown-output,
+        .fd-help {
             display: none;
         }
     }

@@ -12,6 +12,7 @@ define([
     'tpl!vellum/templates/edit_source',
     'tpl!vellum/templates/language_selector',
     'tpl!vellum/templates/control_group',
+    'tpl!vellum/templates/markdown_help',
     'text!vellum/templates/button_remove.html',
     'vellum/widgets',
     'vellum/util',
@@ -26,6 +27,7 @@ define([
     edit_source,
     language_selector,
     control_group,
+    markdown_help,
     button_remove,
     widgets,
     util,
@@ -1116,8 +1118,7 @@ define([
 
             elem.detach('.markdown-output');
             elem.append(widget.markdownOutput);
-            elem.find('.control-label').append(widget.markdownOff);
-            elem.find('.control-label').append(widget.markdownOn);
+            elem.find('.control-label').append(markdown_help({title:options.lstring }));
             if (widget.getItextItem().hasMarkdown) {
                 parent.addClass("has-markdown");
             }
@@ -1129,13 +1130,6 @@ define([
                 widget.markdownOff.removeClass('hide');
             }
             return elem;
-        };
-
-        widget.getHelp = function() { 
-            return {
-                text: 'CommCare supports a subset of the Markdown annotation language',
-                url: 'https://confluence.dimagi.com/display/TDH/Markdown',
-            }; 
         };
 
         return widget;
