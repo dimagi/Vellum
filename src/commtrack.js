@@ -50,10 +50,42 @@ define([
                     path: "@date"
                 }
             ],
+            Dispense: [
+                {
+                    attr: "entryId",
+                    path: "entry/@id"
+                }, {
+                    attr: "src",
+                    path: "@src"
+                }, {
+                    attr: "date",
+                    path: "@date"
+                }
+            ],
+            Receive: [
+                {
+                    attr: "entryId",
+                    path: "entry/@id"
+                }, {
+                    attr: "dest",
+                    path: "@dest"
+                }, {
+                    attr: "date",
+                    path: "@date"
+                }
+            ],
         },
         basicSection = {
             slug: "main",
             displayName: "Basic",
+            properties: [
+                "nodeID",
+                "src",
+                "dest",
+                "sectionId",
+                "entryId",
+                "quantity"
+            ],
             help: {
                 title: "Basic",
                 text: "<p>The <strong>Question ID</strong> is an internal identifier for a question. " +
@@ -89,21 +121,11 @@ define([
                 }),
                 logicSection
             ],
-            Transfer: [
-                _.extend({}, basicSection, {
-                    properties: [
-                        "nodeID",
-                        "src",
-                        "dest",
-                        "sectionId",
-                        "entryId",
-                        "quantity"
-                    ],
-                }),
-                logicSection
-            ]
+            Transfer: [basicSection, logicSection],
+            Dispense: [basicSection, logicSection],
+            Receive: [basicSection, logicSection],
         },
-        baseTransactionOptions = {
+        baseTransactionOptions = util.extend(mugs.defaultOptions, {
             isDataOnly: true,
             isTypeChangeable: false,
             supportsDataNodeRole: true,
@@ -135,8 +157,8 @@ define([
                     relevant: mug.p.relevantAttr
                 }];
             }
-        },
-        balanceMugOptions = {
+        }),
+        balanceMugOptions = util.extend(baseTransactionOptions, {
             typeName: 'Balance',
             getTagName: function () { return "balance"; },
             getExtraDataAttributes: function (mug) {
@@ -148,8 +170,7 @@ define([
                     type: mug.p.nodeID,
                     "entity-id": attrs.src || "",
                     "section-id": mug.p.sectionId,
-                    date: attrs.date || "",
-                    "vellum:role": "Balance"
+                    date: attrs.date || ""
                 };
             },
             icon: 'fcc fcc-fd-hash',
@@ -206,14 +227,14 @@ define([
                 constraintAttr: { presence : "notallowed" },
                 calculateAttr: { presence: "notallowed" }
             }
-        },
+        }),
         transferMugValidation = function (mug) {
-            if (mug.p.dest.value || mug.p.src.value) {
+            if (mug.p.dest.value && mug.p.src.value) {
                 return 'pass';
             }
-            return 'Transfer must have at least one of source case and destination case.';
+            return 'Transfer must have both Source Case and Destination Case defined.';
         },
-        transferMugOptions = {
+        transferMugOptions = util.extend(baseTransactionOptions, {
             typeName: 'Transfer',
             getTagName: function () { return "transfer"; },
             getExtraDataAttributes: function (mug) {
@@ -225,14 +246,13 @@ define([
                         type: mug.p.nodeID,
                         date: raw.date || "",
                         "section-id": mug.p.sectionId,
-                        "vellum:role": "Transfer"
                     };
-                if ($.trim(mug.p.src.value)) {
+                if (mug.p.src && $.trim(mug.p.src.value)) {
                     attrs.src = raw.src || "";
                 } else {
                     delete raw.src;
                 }
-                if ($.trim(mug.p.dest.value)) {
+                if (mug.p.dest && $.trim(mug.p.dest.value)) {
                     attrs.dest = raw.dest || "";
                 } else {
                     delete raw.dest;
@@ -254,7 +274,7 @@ define([
                 src: {
                     lstring: 'Source Case',
                     visibility: 'visible',
-                    presence: 'optional',
+                    presence: 'required',
                     widget: setValueWidget,
                     xpathType: "generic",
                     help: 'XPath expression for the case ID issuing the transaction. Leave blank if unknown or not applicable.',
@@ -263,7 +283,7 @@ define([
                 dest: {
                     lstring: 'Destination Case',
                     visibility: 'visible',
-                    presence: 'optional',
+                    presence: 'required',
                     widget: setValueWidget,
                     xpathType: "generic",
                     help: 'XPath expression for the case ID receiving the transaction. Leave blank if unknown or not applicable.',
@@ -304,19 +324,74 @@ define([
                 constraintAttr: { presence : "notallowed" },
                 calculateAttr: { presence: "notallowed" }
             }
-        };
+        }),
+        dispenseMugOptions = util.extend(transferMugOptions, {
+            typeName: 'Dispense',
+            icon: 'fcc fcc-fd-door',
+            spec: {
+                src: {
+                    validationFunc: function (mug) {
+                        if (mug.p.src.value) {
+                            return 'pass';
+                        }
+                        return 'Receive must have a Source Case.';
+                    },
+                },
+                dest: { presence: "notallowed" },
+            }
+        }),
+        receiveMugOptions = util.extend(transferMugOptions, {
+            typeName: 'Receive',
+            icon: 'fcc fcc-fd-inbox',
+            spec: {
+                src: { presence: "notallowed" },
+                dest: {
+                    validationFunc: function (mug) {
+                        if (mug.p.dest.value) {
+                            return 'pass';
+                        }
+                        return 'Receive must have a Destination Case.';
+                    },
+                },
+            }
+        });
 
     $.vellum.plugin("commtrack", {}, {
         getAdvancedQuestions: function () {
-            return this.__callOld().concat(["Balance", "Transfer"]);
+            return this.__callOld().concat([
+                "Balance",
+                "Transfer",
+                "Dispense",
+                "Receive"
+            ]);
         },
         getMugTypes: function () {
             var types = this.__callOld();
-            types.normal.Balance = util.extend(
-                mugs.defaultOptions, baseTransactionOptions, balanceMugOptions);
-            types.normal.Transfer = util.extend(
-                mugs.defaultOptions, baseTransactionOptions, transferMugOptions);
+            types.normal.Balance = balanceMugOptions;
+            types.normal.Transfer = transferMugOptions;
+            types.normal.Dispense = dispenseMugOptions;
+            types.normal.Receive = receiveMugOptions;
             return types;
+        },
+        parseDataElement: function (form, el, parentMug, role) {
+            var tag = el.nodeName;
+            if (!role && (tag === "transfer" || tag === "balance") &&
+                    $(el).attr("xmlns") === LEDGER_XMLNS) {
+                if (tag === "transfer") {
+                    var $el = $(el);
+                    if (_.isUndefined($el.attr("src"))) {
+                        role = "Receive";
+                    } else if (_.isUndefined($el.attr("dest"))) {
+                        role = "Dispense";
+                    } else {
+                        role = "Transfer";
+                    }
+                } else {
+                    role = "Balance";
+                }
+                return this.__callOld(form, el, parentMug, role);
+            }
+            return this.__callOld();
         },
         parseBindElement: function (form, el, path) {
             var mug = form.getMugByPath(path);
@@ -365,7 +440,7 @@ define([
     });
 
     function isTransaction(mug) {
-        return mug && (mug.__className === "Balance" || mug.__className === "Transfer");
+        return mug && setvalueData.hasOwnProperty(mug.__className);
     }
 
     function isInRepeat(mug) {

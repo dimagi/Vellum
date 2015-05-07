@@ -128,15 +128,6 @@ define([
             assert.equal($xml.find("setvalue").length, 4, xml);
         });
 
-        it("transfer question should not be valid when src and dest are both empty", function () {
-            util.loadXML();
-            var trans = util.addQuestion("Transfer", "t1");
-            assert.strictEqual(trans.p.src.value, "");
-            assert.strictEqual(trans.p.dest.value, "");
-            assert(!util.isTreeNodeValid(trans),
-                "Transfer question with empty src and dest should be invalid");
-        });
-
         it("should create two transfer blocks with the same parent node", function () {
             util.loadXML();
             util.addQuestion("Transfer", "t1").p.src.value = "value";
@@ -148,11 +139,45 @@ define([
             assert.equal($xml.find("setvalue[ref='/data/transfer[@type=\\'t2\\']/@src']").length, 1, xml);
         });
 
-        it("transfer question should omit dest when empty", function () {
+        describe("transfer question", function () {
+            var trans;
+            before(function () {
+                util.loadXML();
+                trans = util.addQuestion("Transfer", "t1");
+            });
+
+            it("with missing src and dest should not be valid", function () {
+                trans.p.src.value = "";
+                trans.p.dest.value = "";
+                assert.notDeepEqual(trans.getErrors(), [],
+                    "Transfer with missing src should not be valid");
+            });
+
+            it("with missing src should not be valid", function () {
+                trans.p.src.value = "";
+                trans.p.dest.value = "something";
+                assert.notDeepEqual(trans.getErrors(), [],
+                    "Transfer with missing src should not be valid");
+            });
+
+            it("with missing dest should not be valid", function () {
+                trans.p.src.value = "something";
+                trans.p.dest.value = "";
+                assert.notDeepEqual(trans.getErrors(), [],
+                    "Transfer with missing dest should not be valid");
+            });
+
+            it("with both src and dest should be valid", function () {
+                trans.p.src.value = "something";
+                trans.p.dest.value = "something";
+                assert.deepEqual(trans.getErrors(), []);
+            });
+        });
+
+        it("dispense question should omit dest", function () {
             util.loadXML();
-            var trans = util.addQuestion("Transfer", "t1");
-            trans.p.src.value = "something";
-            trans.p.dest.value = "";
+            var mug = util.addQuestion("Dispense", "t1");
+            mug.p.src.value = "something";
             var xml = util.call("createXML"),
                 $xml = $(xml);
             assert.strictEqual($xml.find("transfer[type='t1']").attr("src"), "",
@@ -165,11 +190,10 @@ define([
                 "unexpected @dest setvalue:\n" + xml);
         });
 
-        it("transfer question should omit src when empty", function () {
+        it("receive question should omit src", function () {
             util.loadXML();
-            var trans = util.addQuestion("Transfer", "t1");
-            trans.p.src.value = "";
-            trans.p.dest.value = "something";
+            var mug = util.addQuestion("Receive", "t1");
+            mug.p.dest.value = "something";
             var xml = util.call("createXML"),
                 $xml = $(xml);
             assert.isUndefined($xml.find("transfer[type='t1']").attr("src"),
@@ -182,36 +206,26 @@ define([
                 "unexpected @dest setvalue:\n" + xml);
         });
 
-        it("transfer question should omit src when its value expression is removed", function () {
+        it("transfer block with src and dest should load as Transfer question", function () {
             util.loadXML(TRANSFER_BLOCK_XML);
-            var trans = util.getMug("transfer[@type='trans-1']");
-            trans.p.src.value = "";
-            var xml = util.call("createXML"),
-                $xml = $(xml);
-            assert.isUndefined($xml.find("transfer[type='trans-1']").attr("src"),
-                "unexpected transfer src attribute\n" + xml);
-            assert.strictEqual($xml.find("transfer[type='trans-1']").attr("dest"), "",
-                "unexpected transfer dest attribute\n" + xml);
-            assert.equal($xml.find("setvalue[ref='/data/transfer[@type=\\'trans-1\\']/@src']").length, 0,
-                "unexpected @src setvalue:\n" + xml);
-            assert.equal($xml.find("setvalue[ref='/data/transfer[@type=\\'trans-1\\']/@dest']").length, 1,
-                "unexpected @dest setvalue:\n" + xml);
+            var mug = util.getMug("transfer[@type='trans-1']");
+            assert.equal(mug.__className, "Transfer");
         });
 
-        it("transfer question should omit dest when its value expression is removed", function () {
-            util.loadXML(TRANSFER_BLOCK_XML);
-            var trans = util.getMug("transfer[@type='trans-1']");
-            trans.p.dest.value = "";
-            var xml = util.call("createXML"),
-                $xml = $(xml);
-            assert.strictEqual($xml.find("transfer[type='trans-1']").attr("src"), "",
-                "unexpected transfer src attribute\n" + xml);
-            assert.isUndefined($xml.find("transfer[type='trans-1']").attr("dest"),
-                "unexpected transfer dest attribute\n" + xml);
-            assert.equal($xml.find("setvalue[ref='/data/transfer[@type=\\'trans-1\\']/@src']").length, 1,
-                "unexpected @src setvalue:\n" + xml);
-            assert.equal($xml.find("setvalue[ref='/data/transfer[@type=\\'trans-1\\']/@dest']").length, 0,
-                "unexpected @dest setvalue:\n" + xml);
+        it("transfer block with dest only should load as Receive question", function () {
+            util.loadXML(TRANSFER_BLOCK_XML
+                            .replace(' src=""', '')
+                            .replace(/<setvalue [^>]*@src[^>]*\/>/, ''));
+            var mug = util.getMug("transfer[@type='trans-1']");
+            assert.equal(mug.__className, "Receive");
+        });
+
+        it("transfer block with src only should load as Dispense question", function () {
+            util.loadXML(TRANSFER_BLOCK_XML
+                            .replace(' dest=""', '')
+                            .replace(/<setvalue [^>]*@dest[^>]*\/>/, ''));
+            var mug = util.getMug("transfer[@type='trans-1']");
+            assert.equal(mug.__className, "Dispense");
         });
 
         it("should enable save button when a transfer's source or destination changes", function () {
@@ -222,7 +236,7 @@ define([
             assert(util.saveButtonEnabled(), "save button is disabled");
         });
 
-        _.each(["Balance", "Transfer"], function (type) {
+        _.each(["Balance", "Transfer", "Dispense", "Receive"], function (type) {
             it("should add ledger instance on add " + type + " question", function () {
                 util.loadXML("");
                 util.addQuestion(type, "question");

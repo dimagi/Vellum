@@ -2099,8 +2099,8 @@ define([
 
     fn.afterSerialize = function () {};
 
-    fn.parseDataElement = function (form, el, parentMug) {
-        return parser.parseDataElement(form, el, parentMug);
+    fn.parseDataElement = function (form, el, parentMug, role) {
+        return parser.parseDataElement(form, el, parentMug, role);
     };
 
     fn.parseBindElement = function (form, el, path) {
