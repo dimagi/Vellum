@@ -1063,7 +1063,8 @@ define([
         var widget = itextLabelWidget(mug, language, form, options),
             super_setValue = widget.setValue,
             super_getUIElement = widget.getUIElement,
-            super_handleChange = widget.handleChange;
+            super_handleChange = widget.handleChange,
+            wantsMarkdown = true;
 
         widget.toggleMarkdown = function() {
             parent.toggleClass("has-markdown");
@@ -1071,12 +1072,14 @@ define([
 
         widget.markdownOutput = $('<div>').addClass("controls well markdown-output");
         widget.markdownOff = $('<a href="#" class="turn-markdown-off markdown-trigger">turn off markdown</a>').click(function() {
+            wantsMarkdown = false;
             var item = widget.getItextItem();
             item.hasMarkdown = false;
             widget.toggleMarkdown();
             return false;
         });
         widget.markdownOn = $('<a href="#" class="turn-markdown-on markdown-trigger">turn on markdown</a>').click(function() {
+            wantsMarkdown = true;
             var item = widget.getItextItem();
             item.hasMarkdown = true;
             widget.toggleMarkdown();
@@ -1088,8 +1091,12 @@ define([
             var val = widget.getValue(),
                 item = this.getItextItem();
             if (/[~*#[\]]+|^-/m.test(val)) {
-                parent.removeClass("markdown-ignorant");
-                parent.addClass("has-markdown");
+                if (wantsMarkdown) {
+                    parent.removeClass("markdown-ignorant");
+                    parent.addClass("has-markdown");
+                }
+            } else if (!val) {
+                parent.removeClass("has-markdown");
             }
             item.hasMarkdown = widget.markdownOff.is(":visible");
             widget.markdownOutput.html(util.markdownFull(val)).removeClass('hide');
