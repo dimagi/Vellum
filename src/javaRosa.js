@@ -1059,7 +1059,6 @@ define([
 
     var itextMarkdownWidget = function (mug, language, form, options) {
         options = options || {};
-        options.idSuffix = "-" + form;
         var parent = options.parent;
         var widget = itextLabelWidget(mug, language, form, options),
             super_setValue = widget.setValue,
@@ -1088,7 +1087,7 @@ define([
             super_handleChange();
             var val = widget.getValue(),
                 item = this.getItextItem();
-            if (/[-~*#[\]]+/.test(val)) {
+            if (/[~*#[\]]+|^-/m.test(val)) {
                 parent.removeClass("markdown-ignorant");
                 parent.addClass("has-markdown");
             }
