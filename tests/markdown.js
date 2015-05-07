@@ -24,7 +24,7 @@ require([
         call = util.call,
         clickQuestion = util.clickQuestion;
 
-    describe("The markdwon widget", function () {
+    describe("The markdown widget", function () {
         function beforeFn(done) {
             util.init({
                 javaRosa: {langs: ['en', 'hin']},
@@ -40,9 +40,10 @@ require([
         });
 
         it("should write markdown if a form has markdown", function() {
+            util.loadXML("");
             var mug = util.addQuestion("Text", 'markdown_question');
             $('[name=itext-en-label]').val("**some markdown**").change();
-            util.assertXmlEqual(call('createXML'), SIMPLE_MARKDOWN_XML);
+            util.assertXmlEqual(call('createXML'), SIMPLE_MARKDOWN_XML, {normalize_xmlns: true});
         });
 
         it("should display markdown that includes markdown", function () {

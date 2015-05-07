@@ -1073,20 +1073,6 @@ define([
         };
 
         widget.markdownOutput = $('<div>').addClass("controls well markdown-output");
-        widget.markdownOff = $('<a href="#" class="turn-markdown-off markdown-trigger">turn off markdown</a>').click(function() {
-            wantsMarkdown = false;
-            var item = widget.getItextItem();
-            item.hasMarkdown = false;
-            widget.toggleMarkdown();
-            return false;
-        });
-        widget.markdownOn = $('<a href="#" class="turn-markdown-on markdown-trigger">turn on markdown</a>').click(function() {
-            wantsMarkdown = true;
-            var item = widget.getItextItem();
-            item.hasMarkdown = true;
-            widget.toggleMarkdown();
-            return false;
-        });
 
         widget.handleChange = function() {
             super_handleChange();
@@ -1119,6 +1105,22 @@ define([
             elem.detach('.markdown-output');
             elem.append(widget.markdownOutput);
             elem.find('.control-label').append(markdown_help({title:options.lstring }));
+
+            widget.markdownOff = elem.find('.turn-markdown-off').click(function() {
+                wantsMarkdown = false;
+                var item = widget.getItextItem();
+                item.hasMarkdown = false;
+                widget.toggleMarkdown();
+                return false;
+            });
+            widget.markdownOn = elem.find('.turn-markdown-on').click(function() {
+                wantsMarkdown = true;
+                var item = widget.getItextItem();
+                item.hasMarkdown = true;
+                widget.toggleMarkdown();
+                return false;
+            });
+
             if (widget.getItextItem().hasMarkdown) {
                 parent.addClass("has-markdown");
             }
