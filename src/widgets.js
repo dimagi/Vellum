@@ -331,8 +331,7 @@ define([
     var getUIElement = function($input, labelText, isDisabled, help) {
         var uiElem = $("<div />").addClass("widget control-group"),
             $controls = $('<div class="controls" />'),
-            $label = $("<div />").append($("<label />"));
-            $label.find("label").text(labelText);
+            $label = $('<div />').append($("<label />").text(labelText));
         $label.addClass('control-label');
         if (help) {
             var $help = $("<a />").attr({
