@@ -682,7 +682,8 @@ define([
                     }
                 });
 
-                $newItemForm.find('.controls').append($newItemInput);
+                $newItemForm.find('.controls').not('.messages')
+                    .append($newItemInput);
                 $modal
                     .find('.modal-body')
                     .append($newItemForm);
@@ -758,7 +759,9 @@ define([
             var $addFormControls = $(control_group({
                 label: block.displayName,
             }));
-            $addFormControls.addClass('new-itext-control-group').find('.controls').append(block.getAddFormButtons());
+            $addFormControls.addClass('new-itext-control-group')
+                .find('.controls').not('.messages')
+                .append(block.getAddFormButtons());
             $blockUI.prepend($addFormControls);
 
             var $formGroup = $blockUI.find('.itext-lang-group');

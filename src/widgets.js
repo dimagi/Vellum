@@ -113,6 +113,7 @@ define([
         widget.definition = mug.p.getDefinition(options.path);
         widget.currentValue = widget.mugValue(mug);
         widget.id = inputID;
+        widget.saving = false;
 
         widget.input = $("<input />")
             .attr("name", inputID)
@@ -142,7 +143,12 @@ define([
                function () { widget.refreshMessages(); }, null, "teardown-mug-properties");
 
         widget.save = function () {
-            widget.mugValue(mug, widget.getValue());
+            widget.saving = true;
+            try {
+                widget.mugValue(mug, widget.getValue());
+            } finally {
+                widget.saving = false;
+            }
         };
 
         return widget;
@@ -205,7 +211,7 @@ define([
         };
 
         mug.on("property-changed", function (e) {
-            if (e.property === "conflictedNodeId") {
+            if (e.property === "conflictedNodeId" && !widget.saving) {
                 widget.setValue(widget.mugValue(mug));
             }
         }, null, "teardown-mug-properties");
