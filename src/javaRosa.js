@@ -1124,6 +1124,13 @@ define([
             return elem;
         };
 
+        widget.getHelp = function() { 
+            return {
+                text: 'CommCare supports a subset of the Markdown annotation language',
+                url: 'https://confluence.dimagi.com/display/TDH/Markdown',
+            }; 
+        };
+
         return widget;
     };
 
