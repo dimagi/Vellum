@@ -299,7 +299,7 @@ define([
                         if (mug.p.src.value) {
                             return 'pass';
                         }
-                        return 'Receive must have a Source Case.';
+                        return 'Dispense must have a Source Case.';
                     },
                 },
                 dest: { presence: "notallowed" },
