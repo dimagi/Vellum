@@ -388,6 +388,9 @@ require([
                 map.Text = util.addQuestion("Text");
                 map.Select = util.addQuestion("Select");
                 map.SelectDynamic = util.addQuestion("SelectDynamic");
+                map.Transfer = util.addQuestion("Transfer");
+                map.Dispense = util.addQuestion("Dispense");
+                map.Receive = util.addQuestion("Receive");
             });
 
             test("Text", "Trigger", true);
@@ -398,6 +401,7 @@ require([
             test("Text", "MSelect", true);
             test("Text", "SelectDynamic");
             test("Text", "MSelectDynamic");
+            test("Text", "Transfer");
 
             test("Select", "MSelect", true);
             test("Select", "Text");
@@ -407,6 +411,14 @@ require([
             test("SelectDynamic", "MSelectDynamic", true);
             test("SelectDynamic", "Select");
             test("SelectDynamic", "MSelect");
+
+            test("Transfer", "Text");
+            test("Transfer", "Dispense", true);
+            test("Transfer", "Receive", true);
+            test("Dispense", "Transfer", true);
+            test("Dispense", "Receive", true);
+            test("Receive", "Transfer", true);
+            test("Receive", "Dispense", true);
         });
 
         describe("drag+drop should", function () {

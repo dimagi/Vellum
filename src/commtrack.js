@@ -22,6 +22,21 @@ define([
         LEDGER_INSTANCE_ID = "ledger",
         LEDGER_INSTANCE_URI = "jr://instance/ledgerdb",
         nextId = 0,
+        transferValues = [
+            {
+                attr: "entryId",
+                path: "entry/@id"
+            }, {
+                attr: "src",
+                path: "@src"
+            }, {
+                attr: "dest",
+                path: "@dest"
+            }, {
+                attr: "date",
+                path: "@date"
+            }
+        ],
         setvalueData = {
             Balance: [
                 {
@@ -35,45 +50,9 @@ define([
                     path: "@date"
                 }
             ],
-            Transfer: [
-                {
-                    attr: "entryId",
-                    path: "entry/@id"
-                }, {
-                    attr: "src",
-                    path: "@src"
-                }, {
-                    attr: "dest",
-                    path: "@dest"
-                }, {
-                    attr: "date",
-                    path: "@date"
-                }
-            ],
-            Dispense: [
-                {
-                    attr: "entryId",
-                    path: "entry/@id"
-                }, {
-                    attr: "src",
-                    path: "@src"
-                }, {
-                    attr: "date",
-                    path: "@date"
-                }
-            ],
-            Receive: [
-                {
-                    attr: "entryId",
-                    path: "entry/@id"
-                }, {
-                    attr: "dest",
-                    path: "@dest"
-                }, {
-                    attr: "date",
-                    path: "@date"
-                }
-            ],
+            Transfer: transferValues,
+            Dispense: transferValues,
+            Receive: transferValues,
         },
         basicSection = {
             slug: "main",
@@ -156,7 +135,44 @@ define([
                     calculate: mug.p.quantity,
                     relevant: mug.p.relevantAttr
                 }];
-            }
+            },
+            spec: {
+                date: {
+                    visibility: 'hidden',
+                    presence: 'optional',
+                },
+                sectionId: {
+                    lstring: 'Balance ID',
+                    visibility: 'visible',
+                    presence: 'optional',
+                    widget: widgets.text,
+                    help: 'The name of the balance you are tracking. ' + 
+                         'This is an internal identifier which does not appear on the phone.',
+                },
+                entryId: {
+                    lstring: 'Product',
+                    visibility: 'visible',
+                    presence: 'optional',
+                    widget: setValueWidget,
+                    xpathType: "generic",
+                    help: 'A reference to a product ID, e.g., "/data/products/current_product"',
+                },
+                quantity: {
+                    lstring: 'Quantity',
+                    visibility: 'visible',
+                    presence: 'optional',
+                    widget: widgets.xPath,
+                    xpathType: "generic",
+                    help: 'A reference to an integer question in this form.',
+                },
+                relevantAttr: {
+                    visibility: 'visible',
+                    presence: 'optional',
+                    widget: widgets.xPath,
+                    xpathType: "bool",
+                    lstring: 'Display Condition'
+                },
+            },
         }),
         balanceMugOptions = util.extend(baseTransactionOptions, {
             typeName: 'Balance',
@@ -192,37 +208,6 @@ define([
                     xpathType: "generic",
                     help: 'XPath expression for the case ID associated with this balance.',
                 },
-                sectionId: {
-                    lstring: 'Balance ID',
-                    visibility: 'visible',
-                    presence: 'optional',
-                    widget: widgets.text,
-                    help: 'The name of the balance you are tracking. ' + 
-                         'This is an internal identifier which does not appear on the phone.',
-                },
-                entryId: {
-                    lstring: 'Product',
-                    visibility: 'visible',
-                    presence: 'optional',
-                    widget: setValueWidget,
-                    xpathType: "generic",
-                    help: 'A reference to a product ID, e.g., "/data/products/current_product"',
-                },
-                quantity: {
-                    lstring: 'Quantity',
-                    visibility: 'visible',
-                    presence: 'optional',
-                    widget: widgets.xPath,
-                    xpathType: "generic",
-                    help: 'A reference to an integer question in this form.',
-                },
-                relevantAttr: {
-                    visibility: 'visible',
-                    presence: 'optional',
-                    widget: widgets.xPath,
-                    xpathType: "bool",
-                    lstring: 'Display Condition'
-                },
                 requiredAttr: { presence: "notallowed" },
                 constraintAttr: { presence : "notallowed" },
                 calculateAttr: { presence: "notallowed" }
@@ -237,6 +222,17 @@ define([
         transferMugOptions = util.extend(baseTransactionOptions, {
             typeName: 'Transfer',
             getTagName: function () { return "transfer"; },
+            isTypeChangeable: true,
+            typeChangeError: function (mug, typeName) {
+                if (typeName !== "Balance" && mug.__className !== "Balance" &&
+                        isTransaction(mug) &&
+                        isTransaction({__className: typeName})) {
+                    return "";
+                }
+                return "Cannot change $1 to $2"
+                        .replace("$1", mug.__className)
+                        .replace("$2", typeName);
+            },
             getExtraDataAttributes: function (mug) {
                 // HACK must happen before <setvalue> and "other" <instance> elements are written
                 prepareForWrite(mug);
@@ -288,37 +284,6 @@ define([
                     xpathType: "generic",
                     help: 'XPath expression for the case ID receiving the transaction. Leave blank if unknown or not applicable.',
                     validationFunc: transferMugValidation,
-                },
-                sectionId: {
-                    lstring: 'Balance ID',
-                    visibility: 'visible',
-                    presence: 'optional',
-                    widget: widgets.text,
-                    help: 'The name of the balance you are tracking. ' + 
-                         'This is an internal identifier which does not appear on the phone.',
-                },
-                entryId: {
-                    lstring: 'Product',
-                    visibility: 'visible',
-                    presence: 'optional',
-                    widget: setValueWidget,
-                    xpathType: "generic",
-                    help: 'A reference to a product ID, e.g., "/data/products/current_product"',
-                },
-                quantity: {
-                    lstring: 'Quantity',
-                    visibility: 'visible',
-                    presence: 'optional',
-                    widget: widgets.xPath,
-                    xpathType: "generic",
-                    help: 'A reference to an integer question in this form.',
-                },
-                relevantAttr: {
-                    visibility: 'visible',
-                    presence: 'optional',
-                    widget: widgets.xPath,
-                    xpathType: "bool",
-                    lstring: 'Display Condition'
                 },
                 requiredAttr: { presence: "notallowed" },
                 constraintAttr: { presence : "notallowed" },
@@ -462,19 +427,23 @@ define([
 
         // update <setvalue> refs
         _.each(setvalueData[mug.__className], function (data) {
-            var value = mug.p[data.attr];
-            if (!value.ref) {
-                mug.p[data.attr] = value = mug.form.addSetValue(
-                    event,
-                    path + "/" + data.path,
-                    value.value
-                );
-            } else {
-                value.ref = path + "/" + data.path;
-                value.event = event;
+            var value = mug.p[data.attr],
+                ref = path + "/" + data.path;
+            if (value) {
+                if (!value.ref) {
+                    mug.p[data.attr] = value = mug.form.addSetValue(
+                        event,
+                        ref,
+                        value.value
+                    );
+                } else {
+                    value.ref = ref;
+                    value.event = event;
+                }
             }
-            if (!$.trim(value.value)) {
-                drops[event + " " + value.ref] = true;
+            if (!value || !$.trim(value.value) ||
+                    mug.getPresence(data.attr) === "notallowed") {
+                drops[event + " " + ref] = true;
                 drops.enabled = true;
             }
         });
@@ -491,7 +460,7 @@ define([
         var setvaluesToRemove = {};
         _.each(setvalueData[mug.__className], function (data) {
             var value = mug.p[data.attr];
-            if (value._id) {
+            if (value && value._id) {
                 setvaluesToRemove[value._id] = true;
             }
         });

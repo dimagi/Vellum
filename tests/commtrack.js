@@ -299,5 +299,63 @@ define([
             util.addQuestion("Balance", "bal");
             assert.equal($("[name=property-entityId]").length, 1);
         });
+
+        describe("should properly encode", function () {
+            var map = {
+                    Transfer: TRANSFER_BLOCK_XML,
+                    Dispense: TRANSFER_BLOCK_XML
+                                .replace(' dest=""', '')
+                                .replace(/<setvalue [^>]*@dest[^>]*\/>/, ''),
+                    Receive: TRANSFER_BLOCK_XML
+                                .replace(' src=""', '')
+                                .replace(/<setvalue [^>]*@src[^>]*\/>/, ''),
+                };
+            _.each([
+                {from: "Transfer", to: "Dispense"},
+                {from: "Transfer", to: "Receive"},
+                {from: "Dispense", to: "Transfer"},
+                {from: "Dispense", to: "Receive"},
+                {from: "Receive", to: "Transfer"},
+                {from: "Receive", to: "Dispense"},
+            ], function (test) {
+                it(test.from + " changed to " + test.to, function () {
+                    util.loadXML(map[test.from]);
+                    var mug = util.getMug("transfer[@type='trans-1']"),
+                        hasSrc = test.to === "Transfer" || test.to === "Dispense",
+                        hasDest = test.to === "Transfer" || test.to === "Receive";
+                    assert.equal(mug.__className, test.from);
+                    call("changeMugType", mug, test.to);
+                    if (hasSrc) {
+                        mug.p.src.value = "instance('commcaresession')/session/data/case_id";
+                    }
+                    if (hasDest) {
+                        mug.p.dest.value = "instance('casedb')/casedb/case[@case_id=" +
+                            "instance('commcaresession')/session/data/case_id]/index/parent";
+                    }
+                    var xml = util.call("createXML"),
+                        $xml = $(xml);
+                    // Verifying by looking for values in XML rather than
+                    // comparing created XML to map[test.to] because order of
+                    // setvalues changes. This order changing thing may be a
+                    // problem because setvalue nodes are evaluated in document
+                    // order.
+                    assert.strictEqual($xml.find("transfer[type='trans-1']").attr("src"),
+                        hasSrc ? "" : undefined,
+                        "unexpected transfer src attribute\n" + xml);
+                    assert.strictEqual($xml.find("transfer[type='trans-1']").attr("dest"),
+                        hasDest ? "" : undefined,
+                        "unexpected transfer dest attribute\n" + xml);
+                    assert.equal($xml.find("setvalue[ref='/data/transfer[@type=\\'trans-1\\']/@src']").length,
+                        hasSrc ? 1 : 0,
+                        "unexpected @src setvalue:\n" + xml);
+                    assert.equal($xml.find("setvalue[ref='/data/transfer[@type=\\'trans-1\\']/@dest']").length,
+                        hasDest ? 1 : 0,
+                        "unexpected @dest setvalue:\n" + xml);
+                    util.loadXML(xml);
+                    mug = util.getMug("transfer[@type='trans-1']");
+                    assert.equal(mug.__className, test.to);
+                });
+            });
+        });
     });
 });
