@@ -1311,7 +1311,17 @@ define([
                 _this.setTreeValidationIcon(mug);
             }
         });
-        this.selectSomethingOrHideProperties(true);
+
+        var qId = window.location.hash.substr(1);
+        if (qId) {
+            var mug = _this.getMugByPath(qId);
+            if (mug) {
+                mug.select();
+            }
+        } else {
+            this.selectSomethingOrHideProperties(true);
+        }
+
     };
 
     fn.selectSomethingOrHideProperties = function (forceDeselect) {

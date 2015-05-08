@@ -219,7 +219,10 @@ define([
         },
         teardownProperties: function () {
             this.fire({type: "teardown-mug-properties", mug: this});
-        }
+        },
+        select: function() {
+            $('#' + this.ufid + '_anchor').click();
+        },
     };
 
     Object.defineProperty(Mug.prototype, "absolutePath", {
