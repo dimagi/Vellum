@@ -1,0 +1,35 @@
+<% props[""] = {calculate: "", relevant: ""}; %>
+
+<% _.each(props, function (v, k) { %>
+  <div class="fd-attachment-property control-row clearfix" style="margin-bottom: 5px">
+    <div class="control-row">
+      <div class="span11">
+        <input class="fd-attachment-property-name input-block-level"
+               value="<%-k%>" type="text" placeholder="Node Name"/>
+      </div>
+      <div class="span1">
+        <a href="#" class="btn fd-remove-property btn-small btn-danger">
+          <i class="icon-remove"></i>
+        </a>
+      </div>
+    </div>
+    <div class="control-row">
+      <div class="span11">
+        <input class="fd-attachment-property-source input-block-level"
+               value="<%-v['calculate']%>" type="text" placeholder="Source" />
+      </div>
+    </div>
+    <div class="control-row">
+      <div class="span11">
+        <input class="fd-attachment-property-from input-block-level"
+               value="<%-v['from']%>" type="text" placeholder="From"/>
+      </div>
+    </div>
+    <div class="control-row">
+      <div class="span11">
+        <input class="fd-attachment-name input-block-level"
+               value="<%-v['name']%>" type="text" placeholder="Attachment Name"/>
+      </div>
+    </div>
+  </div>
+<% }); %>
