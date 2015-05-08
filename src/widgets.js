@@ -486,7 +486,7 @@ define([
             var $link = $("<a />").attr({
                 "href": "#",
                 "data-title": labelText,
-                "data-content": help.text
+                "data-content": help.text + link
             });
             if (!help.url) {
                 $help.click(function (e) { e.preventDefault(); });
