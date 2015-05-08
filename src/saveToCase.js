@@ -701,9 +701,6 @@ define([
                     if (mug && mug.__className === "SaveToCase") {
                         var attachProperties = mug.p.attachmentProperty,
                             nodeName = attachRet[1];
-                        if (!attachProperties) {
-                            attachProperties = {};
-                        }
                         if (!attachProperties[nodeName]) {
                             attachProperties[nodeName] = {};
                         }
