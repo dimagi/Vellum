@@ -677,6 +677,7 @@ define([
                     parsed.steps[parsed.steps.length - 1].name = e.previous;
                     var oldPath = parsed.toXPath();
                     this.vellum.handleMugRename(this, mug, e.val, e.previous, currentPath, oldPath);
+                    window.location = '#' + currentPath;
                 }
             } else {
                 if (mug.p.getDefinition(e.property).widget === widgets.xPath ||
