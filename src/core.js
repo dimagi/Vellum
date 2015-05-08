@@ -1318,6 +1318,8 @@ define([
             var mug = _this.getMugByPath(qId);
             if (mug) {
                 mug.select();
+            } else {
+                this.selectSomethingOrHideProperties(true);
             }
         } else {
             this.selectSomethingOrHideProperties(true);
