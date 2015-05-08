@@ -830,6 +830,7 @@ define([
             var mug = _this.data.core.form.getMugByUFID(data.node.id);
             _this.displayMugProperties(mug);
             _this.activateQuestionTypeGroup(mug);
+            window.location.hash = '#' + mug.absolutePath;
         }).bind("open_node.jstree", function (e, data) {
             var mug = _this.data.core.form.getMugByUFID(data.node.id);
             _this.activateQuestionTypeGroup(mug);
