@@ -689,6 +689,7 @@ define([
         },
         spec: {
             readOnlyControl: {
+                visibility: "visible",
                 widget: widgets.readOnlyControl
             }
         }
