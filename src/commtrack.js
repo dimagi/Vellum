@@ -292,7 +292,7 @@ define([
         }),
         dispenseMugOptions = util.extend(transferMugOptions, {
             typeName: 'Dispense',
-            icon: 'fcc fcc-fd-door',
+            icon: 'icon-signout',
             spec: {
                 src: {
                     validationFunc: function (mug) {
@@ -307,7 +307,7 @@ define([
         }),
         receiveMugOptions = util.extend(transferMugOptions, {
             typeName: 'Receive',
-            icon: 'fcc fcc-fd-inbox',
+            icon: 'icon-signin',
             spec: {
                 src: { presence: "notallowed" },
                 dest: {
