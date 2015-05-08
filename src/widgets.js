@@ -334,16 +334,16 @@ define([
             $label = $("<label />").text(labelText);
         $label.addClass('control-label');
         if (help) {
-            var $help = $("<a />").attr({
-                "href": (help.url || "#"),
-                "class": "fd-help",
-                "target": "_blank",
-                "data-title": labelText,
-                "data-content": help.text
-            });
-            if (!help.url) {
-                $help.click(function (e) { e.preventDefault(); });
+            var link = "";
+            if (help.url) {
+                link = "<br><br><a href='" + help.url + "' target='_blank'>See more</a>";
             }
+            var $help = $("<a />").attr({
+                "href": "#",
+                "class": "fd-help",
+                "data-title": labelText,
+                "data-content": help.text + link
+            });
             $label.append($help);
         }
         uiElem.append($label);
