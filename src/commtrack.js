@@ -57,8 +57,7 @@ define([
             help: {
                 title: "Basic",
                 text: "<p>The <strong>Question ID</strong> is an internal identifier for a question. " +
-                    "It does not appear on the phone. It is the name of the question in data exports.</p>" +
-                    "<p>Click through for more info.</p>",
+                    "It does not appear on the phone. It is the name of the question in data exports.</p>",
                 link: "https://help.commcarehq.org/display/commcarepublic/Transactions",
             },
         },
