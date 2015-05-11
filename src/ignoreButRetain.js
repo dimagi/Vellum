@@ -224,7 +224,7 @@ define([
                         return adapt;
                     }
                     var args = Array.prototype.slice.call(arguments);
-                    return getAdaptor.apply(null, args);
+                    return getAdaptor && getAdaptor.apply(null, args);
                 };
             }
             return getAdaptor;
