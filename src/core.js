@@ -1506,7 +1506,7 @@ define([
         }
 
         $props.show();
-        this.$f.find('.fd-help').fdHelp();
+        this.$f.find('.fd-help a').fdHelp();
 
         this.toggleConstraintItext(mug);
         this.showVisualValidation(mug);
