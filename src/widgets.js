@@ -336,7 +336,7 @@ define([
         if (help) {
             var link = "";
             if (help.url) {
-                link = "<br><br><a href='" + help.url + "' target='_blank'>See more</a>";
+                link = "<p><a href='" + help.url + "' target='_blank'>See more</a></p>";
             }
             var $help = $("<a />").attr({
                 "href": "#",
