@@ -549,11 +549,6 @@ define([
             return block.forms;
         };
 
-        block.refreshMessages = function () {
-            // does nothing for now since there are no validation errors
-            // that pertain to itext content
-        };
-
         block.getUIElement = function () {
             _.each(block.getForms(), function (form) {
                 var $formGroup = block.getFormGroupContainer(form);
