@@ -5,36 +5,27 @@
 		<model>
 			<instance>
 				<data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/AB0BB100-747E-474C-B3A0-B965AEF2CA55" uiVersion="1" version="1" name="Untitled Form">
-					<markdown />
+					<markdown_question />
 				</data>
 			</instance>
-			<bind nodeset="/data/markdown" type="xsd:string" />
+			<bind nodeset="/data/markdown_question" type="xsd:string" />
 			<itext>
 				<translation lang="en" default="">
-					<text id="markdown-label">
-						<value>markdown</value>
-					</text>
-					<text id="markdown-help">
-						<value>~special markdown~</value>
-						<value form="markdown">~special markdown~</value>
+					<text id="markdown_question-label">
+						<value>**no markdown**</value>
 					</text>
 				</translation>
 				<translation lang="hin">
-					<text id="markdown-label">
-						<value>markdown</value>
-					</text>
-					<text id="markdown-help">
-						<value>~special markdown~</value>
-						<value form="markdown">~special markdown~</value>
+					<text id="markdown_question-label">
+						<value>**no markdown**</value>
 					</text>
 				</translation>
 			</itext>
 		</model>
 	</h:head>
 	<h:body>
-		<input ref="/data/markdown">
-			<label ref="jr:itext('markdown-label')" />
-			<help ref="jr:itext('markdown-help')" />
+		<input ref="/data/markdown_question">
+			<label ref="jr:itext('markdown_question-label')" />
 		</input>
 	</h:body>
 </h:html>
