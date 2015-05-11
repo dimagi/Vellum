@@ -292,6 +292,19 @@ define([
         return widget;
     };
 
+    var setValue = function (mug, options) {
+        var widget = xPath(mug, options),
+            super_handleChange = widget.handleChange;
+        widget.handleChange = function() {
+            super_handleChange();
+            mug.form.addSetValue(
+                "xforms-ready",
+                mug.absolutePath,
+                widget.getValue()
+            );
+        };
+        return widget;
+    };
     
     var readOnlyControl = function (mug, options) {
         options.id = "readonly-control";
@@ -364,6 +377,7 @@ define([
         xPath: xPath,
         baseKeyValue: baseKeyValue,
         readOnlyControl: readOnlyControl,
+        setValue: setValue,
         util: {
             getUIElementWithEditButton: getUIElementWithEditButton,
             getUIElement: getUIElement
