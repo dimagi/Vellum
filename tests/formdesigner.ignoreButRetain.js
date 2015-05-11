@@ -20,6 +20,7 @@ define([
     'text!static/ignoreButRetain/referenced-renamed.xml',
     'text!static/ignoreButRetain/referenced-unrenamed.xml',
     'text!static/ignoreButRetain/renamed.xml',
+    'text!static/ignoreButRetain/unknown-element.xml',
     'text!static/ignoreButRetain/unrenamed.xml'
 ], function (
     util,
@@ -42,6 +43,7 @@ define([
     REFERENCED_RENAMED,
     REFERENCED_UNRENAMED,
     RENAMED,
+    UNKNOWN_ELEMENT,
     UNRENAMED
 ) {
     var assertXmlEqual = util.assertXmlEqual,
@@ -142,6 +144,11 @@ define([
                 "ignored--1"
             );
             assertXmlEqual(call('createXML'), IGNORED_CONTROL_NODE);
+        });
+
+        it("should load form with unknown/un-ignored element", function () {
+            util.loadXML(UNKNOWN_ELEMENT);
+            assertXmlEqual(call('createXML'), UNKNOWN_ELEMENT);
         });
     });
 });

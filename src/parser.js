@@ -184,13 +184,13 @@ define([
         }
     }
 
-    function parseDataElement(form, el, parentMug) {
+    function parseDataElement(form, el, parentMug, role) {
         var $el = $(el),
             nodeID = el.nodeName, 
             nodeVal = $el.children().length ? null : $el.text(),
             extraXMLNS = $el.popAttr('xmlns') || null,
-            keyAttr = $el.popAttr('key') || null,
-            role = $el.attr('vellum:role');
+            keyAttr = $el.popAttr('key') || null;
+        role = role || $el.attr('vellum:role');
 
         if (role && form.mugTypes.allTypes.hasOwnProperty(role) &&
             form.mugTypes.allTypes[role].supportsDataNodeRole) {
