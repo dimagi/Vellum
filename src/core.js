@@ -2054,7 +2054,8 @@ define([
             "hintLabel",
             "constraintMsgAttr",
             "dataParent",
-            'appearance'
+            'appearance',
+            'setValue'
         ];
     };
 

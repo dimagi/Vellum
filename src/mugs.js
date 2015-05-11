@@ -466,7 +466,14 @@ define([
             rawBindAttributes: {
                 presence: 'optional',
                 lstring: 'Extra Bind Attributes'
-            }
+            },
+            setValue: {
+                visibility: 'visible',
+                presence: 'optional',
+                lstring: 'Default Value',
+                widget: widgets.setValue,
+                xpathType: 'generic',
+            },
         },
 
         control: {
