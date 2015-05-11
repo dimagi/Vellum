@@ -6,7 +6,7 @@
 			<instance>
 				<data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/DC38FCC5-930C-4385-AE6C-5B15ED1F95B1" uiVersion="1" version="1" name="Untitled Form">
 					<stock_amount />
-					<balance xmlns="http://commcarehq.org/ledger/v1" entity-id="" date="" section-id="stock" type="bal-0" vellum:role="Balance">
+					<balance xmlns="http://commcarehq.org/ledger/v1" entity-id="" date="" section-id="stock" type="bal-0">
 						<entry id="" quantity="" />
 					</balance>
 				</data>
