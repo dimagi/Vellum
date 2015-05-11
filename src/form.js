@@ -848,6 +848,9 @@ define([
                     return !meta.dropReference(mug);
                 });
             }
+            this.dropSetValues(function(setValue) {
+                return setValue.ref === mug.absolutePath;
+            });
             delete this.mugMap[mug.ufid];
             this.fire({
                 type: 'question-remove',
