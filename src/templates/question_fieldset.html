@@ -1,10 +1,9 @@
 <fieldset class="accordion-group fd-question-fieldset">
     <legend class="accordion-heading">
         <% if (help) { %>
-        <a href="#" class="fd-help pull-right"
+        <a href="<%=help.link%>" target="_blank" class="fd-help pull-right"
                 data-title="<%=help.title%>"
-                data-content="<%=help.text%><br><br><a
-                target='_blank' href='<%=help.link%>'>See more</a>"
+                data-content="<%=help.text%>"
                 data-placement="left">
         </a>
         <% } %>

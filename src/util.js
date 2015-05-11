@@ -30,7 +30,7 @@ define([
         // creates a help popover, requires twitter bootstrap
         this.append($('<i />').addClass('icon-question-sign'))
             .popout({
-                trigger: 'focus',
+                trigger: 'hover',
                 html: true
             });
         return this;
