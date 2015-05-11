@@ -53,7 +53,8 @@ define([
         "calculateAttr",
         "constraintAttr",
         "dataParent",
-        "repeat_count"
+        "repeat_count",
+        "setValue"
     ];
 
     that.getTemplateObject = function (selector, params) {

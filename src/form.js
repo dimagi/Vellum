@@ -680,6 +680,7 @@ define([
                 }
             } else {
                 if (mug.p.getDefinition(e.property).widget === widgets.xPath ||
+                    mug.p.getDefinition(e.property).widget === widgets.setValue ||
                     mug.p.getDefinition(e.property).widget === widgets.droppableText) {
                     this.updateAllLogicReferences(mug);
                 }
