@@ -791,6 +791,9 @@ define([
                 seen = {},
                 mugs = this.getDescendants(mug).concat([mug]),
                 ufids = _.object(_(mugs).map(function(mug) { return [mug.ufid, null]; }));
+            this.dropSetValues(function(setValue) {
+                return setValue.ref === mug.absolutePath;
+            });
             this._removeMugFromForm(mug, false);
             this._logicManager.forEachReferencingProperty(ufids, breakReferences);
         },
