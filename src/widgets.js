@@ -479,16 +479,20 @@ define([
             $label = $("<label />").text(labelText);
         $label.addClass('control-label');
         if (help) {
-            var $help = $("<a />").attr({
-                "href": (help.url || "#"),
-                "class": "fd-help",
-                "target": "_blank",
+            var link = "";
+            if (help.url) {
+                link = "<p><a href='" + help.url + "' target='_blank'>See more</a></p>";
+            }
+            var $link = $("<a />").attr({
+                "href": "#",
                 "data-title": labelText,
                 "data-content": help.text
             });
             if (!help.url) {
                 $help.click(function (e) { e.preventDefault(); });
             }
+            var $help = $("<div/>").addClass("fd-help");
+            $help.append($link);
             $label.append($help);
         }
         uiElem.append($label);
