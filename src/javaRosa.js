@@ -1869,7 +1869,7 @@ define([
                 },
                 lstring: "Help Message",
                 widget: function (mug, options) {
-                    var block = itextLabelBlock(mug, $.extend(options, {
+                    var block = itextMarkdownBlock(mug, $.extend(options, {
                             itextType: "help",
                             getItextByMug: function (mug) {
                                 return mug.p.helpItext;
