@@ -140,6 +140,8 @@ define([
                 date: {
                     visibility: 'hidden',
                     presence: 'optional',
+                    serialize: function () {},
+                    deserialize: function () {},
                 },
                 sectionId: {
                     lstring: 'Balance ID',

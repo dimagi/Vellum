@@ -177,6 +177,7 @@ define([
             it("with missing src and dest should not be valid", function () {
                 trans.p.src.value = "";
                 trans.p.dest.value = "";
+                trans.validate();
                 assert.notDeepEqual(trans.getErrors(), [],
                     "Transfer with missing src should not be valid");
             });
@@ -184,6 +185,7 @@ define([
             it("with missing src should not be valid", function () {
                 trans.p.src.value = "";
                 trans.p.dest.value = "something";
+                trans.validate();
                 assert.notDeepEqual(trans.getErrors(), [],
                     "Transfer with missing src should not be valid");
             });
@@ -191,6 +193,7 @@ define([
             it("with missing dest should not be valid", function () {
                 trans.p.src.value = "something";
                 trans.p.dest.value = "";
+                trans.validate();
                 assert.notDeepEqual(trans.getErrors(), [],
                     "Transfer with missing dest should not be valid");
             });
@@ -198,6 +201,7 @@ define([
             it("with both src and dest should be valid", function () {
                 trans.p.src.value = "something";
                 trans.p.dest.value = "something";
+                trans.validate();
                 assert.deepEqual(trans.getErrors(), []);
             });
         });
