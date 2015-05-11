@@ -1884,8 +1884,7 @@ define([
                     text: "<p>The <strong>Question ID</strong> is an internal identifier for a question. " +
                         "It does not appear on the phone. It is the name of the question in data exports.</p>" +
                         "<p>The <strong>Label</strong> is text that appears in the application. " +
-                        "This text will not appear in data exports.</p> " +
-                        "<p>Click through for more info.</p>",
+                        "This text will not appear in data exports.</p> ",
                     link: "https://confluence.dimagi.com/display/commcarepublic/Form+Builder"
                 }
             },
