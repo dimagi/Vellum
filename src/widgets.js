@@ -338,12 +338,13 @@ define([
             if (help.url) {
                 link = "<p><a href='" + help.url + "' target='_blank'>See more</a></p>";
             }
-            var $help = $("<a />").attr({
+            var $link = $("<a />").attr({
                 "href": "#",
-                "class": "fd-help",
                 "data-title": labelText,
                 "data-content": help.text + link
             });
+            var $help = $("<div/>").addClass("fd-help");
+            $help.append($link);
             $label.append($help);
         }
         uiElem.append($label);
