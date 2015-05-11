@@ -5,9 +5,9 @@
     </div>
     <div class="modal-body form form-horizontal">
         <div class="control-group">
-            <label class="control-label">
+            <div class="control-label">
                 Select New <%= mediaType %>
-            </label>
+            </div>
             <div class="controls">
                 <div class="hqm-select-files-container">
                     <button class="hqm-select btn btn-primary" type="button">Select File</button>
@@ -16,9 +16,9 @@
             </div>
         </div>
         <div class="control-group hqm-existing hide">
-            <label class="control-label">
+            <div class="control-label">
                 Current <%= mediaType %>
-            </label>
+            </div>
             <div class="controls">
             </div>
         </div>
@@ -26,7 +26,7 @@
             <fieldset class="hqm-sharing hide">
                 <legend>Multimedia Sharing Options</legend>
                 <div class="control-group">
-                    <label class="control-label" for="fd-mm-<%= mediaType %>-license">License</label>
+                    <div class="control-label" for="fd-mm-<%= mediaType %>-license">License</div>
                     <div class="controls">
                         <select name="license" id="fd-mm-<%= mediaType %>-license">
                             <option value="cc-nc">Creative Commons Attribution, Non-Commercial</option>
@@ -39,7 +39,7 @@
                     </div>
                 </div>
                 <div class="control-group">
-                    <label class="control-label" for="fd-mm-<%= mediaType %>-author">Author</label>
+                    <div class="control-label" for="fd-mm-<%= mediaType %>-author">Author</div>
                     <div class="controls">
                         <input type="text"
                                name="author"
@@ -48,7 +48,7 @@
                     </div>
                 </div>
                 <div class="control-group">
-                    <label class="control-label" for="fd-mm-<%= mediaType %>-attribution">Attribution Notes</label>
+                    <div class="control-label" for="fd-mm-<%= mediaType %>-attribution">Attribution Notes</div>
                     <div class="controls">
                         <textarea name="attribution-notes"
                                id="fd-mm-<%= mediaType %>-attribution"
