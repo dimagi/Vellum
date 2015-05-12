@@ -343,9 +343,22 @@ define([
         },
         displayMultipleSelectionView: function () {
             this.__callOld();
-            var isMac = /Mac/i.test(navigator.platform);
-            this.$f.find(".fd-props-content")
-                .html(copy_paste_help({"metachar": (isMac ? "\u2318" : "Ctrl+")}));
+            var _this = this,
+                isMac = /Mac/.test(navigator.platform),
+                html = $(copy_paste_help({"metachar": (isMac ? "\u2318" : "Ctrl+")})),
+                mugs = this.getCurrentlySelectedMug(true);
+            if (mugs.length === 1) {
+                var button = $('<button />')
+                    .text("< Return to Question")
+                    .stopLink()
+                    .addClass('btn')
+                    .attr('type', 'button')
+                    .click(function () {
+                        _this.displayMugProperties(mugs[0]);
+                    });
+                html.append(button);
+            }
+            this.$f.find(".fd-props-content").html(html);
         }
     });
 
