@@ -193,11 +193,9 @@ define([
         });
 
         dataTree.walk(function (mug, nodeID, processChildren) {
-            if(mug && mug.p.setValue) {
-                writeSetValue({
-                    event: 'xforms-ready',
-                    ref: mug.absolutePath,
-                    value: mug.p.setValue
+            if(mug && mug.options.getSetValues) {
+                _.each(mug.options.getSetValues(mug), function(setValue) {
+                    writeSetValue(setValue);
                 });
             }
             processChildren();
