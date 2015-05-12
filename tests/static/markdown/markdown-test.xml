@@ -19,7 +19,7 @@
 				<translation lang="en" default="">
 					<text id="markdown_question-label">
 						<value>some markdown</value>
-                      	<value form="markdown">**some markdown**</value>
+						<value form="markdown">**some markdown**</value>
 					</text>
 					<text id="no_markdown-label">
 						<value>just text</value>
@@ -29,13 +29,13 @@
 					</text>
 					<text id="escaped_markdown-label">
 						<value>**no markdown here either**</value>
-             			<value form="markdown">**\*\*no markdown here either\*\***</value>
+						<value form="markdown">**\*\*no markdown here either\*\***</value>
 					</text>
 				</translation>
 				<translation lang="hin">
 					<text id="markdown_question-label">
 						<value>some markdown</value>
-                       	<value form="markdown">**some markdown**</value>
+						<value form="markdown">**some markdown**</value>
 					</text>
 					<text id="no_markdown-label">
 						<value>just text</value>
@@ -45,7 +45,7 @@
 					</text>
 					<text id="escaped_markdown-label">
 						<value>**no markdown here either**</value>
-                      	<value form="markdown">**\*\*no markdown here either\*\***</value>
+						<value form="markdown">**\*\*no markdown here either\*\***</value>
 					</text>
 				</translation>
 			</itext>

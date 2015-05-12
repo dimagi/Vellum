@@ -1083,7 +1083,7 @@ define([
                 parent.removeClass("has-markdown");
             }
             item.hasMarkdown = markdownOff.is(":visible");
-            markdownOutput.html(util.markdownFull(val)).removeClass('hide');
+            markdownOutput.html(util.markdown(val)).removeClass('hide');
         };
 
         widget.setValue = function (val) {
@@ -1091,7 +1091,7 @@ define([
             if (!val) {
                 markdownOutput.addClass('hide');
             }
-            markdownOutput.html(util.markdownFull(val));
+            markdownOutput.html(util.markdown(val));
         };
 
         widget.getUIElement = function() {
@@ -1104,15 +1104,13 @@ define([
 
             markdownOff = elem.find('.turn-markdown-off').click(function() {
                 wantsMarkdown = false;
-                var item = widget.getItextItem();
-                item.hasMarkdown = false;
+                widget.getItextItem().hasMarkdown = false;
                 widget.toggleMarkdown();
                 return false;
             });
             markdownOn = elem.find('.turn-markdown-on').click(function() {
                 wantsMarkdown = true;
-                var item = widget.getItextItem();
-                item.hasMarkdown = true;
+                widget.getItextItem().hasMarkdown = true;
                 widget.toggleMarkdown();
                 return false;
             });
@@ -1124,7 +1122,7 @@ define([
                 parent.addClass("markdown-ignorant");
             }
             if (/[-~*#[\]]+/.test(val)) {
-                markdownOutput.html(util.markdownFull(val));
+                markdownOutput.html(util.markdown(val));
                 markdownOff.removeClass('hide');
             }
             return elem;
@@ -1668,7 +1666,7 @@ define([
             var Itext = this.data.javaRosa.Itext,
                 items = this.data.javaRosa.itextItemsFromBeforeSerialize,
                 languages = Itext.getLanguages(),
-                item, forms, form, lang, val, writeMarkdown;
+                item, forms, form, lang, val;
             if (languages.length > 0) {
                 xmlWriter.writeStartElement("itext");
                 for (var i = 0; i < languages.length; i++) {
@@ -1680,7 +1678,6 @@ define([
                     }
                     for (var j = 0; j < items.length; j++) {
                         item = items[j];
-                        writeMarkdown = item.hasMarkdown;
                         xmlWriter.writeStartElement("text");
                         xmlWriter.writeAttributeString("id", item.id);
                         forms = item.getForms();
@@ -1694,8 +1691,8 @@ define([
                             xmlWriter.writeXML(xml.normalize(val));
                             xmlWriter.writeEndElement();
                         }
-                        if (writeMarkdown) {
-                            val = forms[0].getValueOrDefault(lang);
+                        if (item.hasMarkdown) {
+                            val = item.get('default', lang);
                             xmlWriter.writeStartElement("value");
                             xmlWriter.writeAttributeString('form', 'markdown');
                             xmlWriter.writeXML(xml.normalize(val));

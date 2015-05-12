@@ -1,4 +1,3 @@
-/*jshint multistr: true */
 require([
     'tests/options',
     'tests/utils',
@@ -24,8 +23,6 @@ require([
     NO_MARKDOWN_XML,
     NO_MARKDOWN_STARS_XML
 ) {
-
-    // see note about controlling time in formdesigner.lock.js
     var assert = chai.assert,
         call = util.call;
 
@@ -94,14 +91,13 @@ require([
         });
 
         describe("when a user explicitly wants no markdown", function() {
-            function beforeFn(done) {
+            beforeEach(function (done) {
                 util.loadXML("");
                 util.addQuestion("Text", 'markdown_question');
                 $('[name=itext-en-label]').val("**no markdown**").change();
                 toggleMarkdown();
                 done();
-            }
-            beforeEach(beforeFn);
+            });
 
             it("should not show markdown when there are markdown characters", function() {
                 assert(!markdownVisible());

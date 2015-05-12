@@ -305,7 +305,7 @@ define([
         return patch;
     };
 
-    that.markdownFull = function (text) {
+    that.markdown = function (text) {
         return md.render(text);
     };
 
