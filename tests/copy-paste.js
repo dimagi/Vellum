@@ -326,6 +326,45 @@ require([
             ]);
             util.selectAll();
             eq(mod.copy(), [
+                ["id", "type", "labelItext:en-default", "labelItext:hin-default"],
+                ["/text", "Text", "text1", "text1"],
+                ["/copy-1-of-text", "Text", "text2", "text2"],
+            ]);
+        });
+
+        it("should auto-rename pasted question with duplicate id", function () {
+            util.loadXML("");
+            // setup
+            paste([
+                ["id", "type", "labelItext:en-default", "labelItext:hin-default"],
+                ["/text", "Text", "text1", "text1"],
+            ]);
+            // paste duplicate
+            paste([
+                ["id", "type", "labelItext:en-default", "labelItext:hin-default"],
+                ["/text", "Text", "text2", "text2"],
+            ]);
+            util.selectAll();
+            eq(mod.copy(), [
+                ["id", "type", "labelItext:en-default", "labelItext:hin-default"],
+                ["/text", "Text", "text1", "text1"],
+                ["/copy-1-of-text", "Text", "text2", "text2"],
+            ]);
+        });
+
+        it("should copoy conflicted question id", function () {
+            util.loadXML("");
+            paste([
+                ["id", "type", "labelItext:en-default", "labelItext:hin-default"],
+                ["/text", "Text", "text1", "text1"],
+                ["/other", "Text", "text2", "text2"],
+            ]);
+            var mug = util.getMug("other");
+            mug.p.nodeID = "text";
+            assert(mug.messages.get("nodeID", "mug-conflictedNodeId-warning"),
+                   "expected confict warning");
+            util.selectAll();
+            eq(mod.copy(), [
                 ["id", "type", "labelItext:en-default", "labelItext:hin-default", "conflictedNodeId"],
                 ["/text", "Text", "text1", "text1", "null"],
                 ["/copy-1-of-text", "Text", "text2", "text2", "text"],

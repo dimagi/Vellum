@@ -738,27 +738,28 @@ define([
                     data.id = mug.form.getAbsolutePath(mug, true);
                 },
                 deserialize: function (data, key, mug) {
-                    if (!data.id || data.id === mug.p.nodeID) {
-                        return mug.p.nodeID; // use default id
+                    if (data.id && data.id !== mug.p.nodeID) {
+                        mug.p.nodeID = data.id.slice(data.id.lastIndexOf("/") + 1) ||
+                                       mug.form.generate_question_id(null, mug);
+                        if (data.conflictedNodeId) {
+                            // Obscure edge case: if mug.p.nodeID conflicts with
+                            // an existing question then expressions will be
+                            // associated with that question and this Later
+                            // assignment will not restore those connections to
+                            // this mug.
+                            return new Later(function () {
+                                // after all other properties are deserialized,
+                                // assign conflicted ID to convert expressions
+                                // or setup new conflict
+                                mug.p.nodeID = data.conflictedNodeId;
+                            });
+                        }
                     }
-                    var id = data.id.slice(data.id.lastIndexOf("/") + 1) ||
-                             mug.form.generate_question_id(id, mug);
-                    if (data.conflictedNodeId) {
-                        // first set to value that is in expressions
-                        // to make associations in logic manager
-                        // NOTE obscure edge case: if (this temporary) id
-                        // conflicts with an existing question then expressions
-                        // will be associated with that question and the Later
-                        // assignment will not work.
-                        mug.p.nodeID = id;
-                        return new Later(function () {
-                            // after all other properties are deserialized,
-                            // assign conflicted ID to convert expressions
-                            // or setup new conflict
-                            mug.p.nodeID = data.conflictedNodeId;
-                        });
-                    }
-                    return id;
+                    return new Later(function () {
+                        if (mug.p.conflictedNodeId) {
+                            resolveConflictedNodeId(mug);
+                        }
+                    });
                 }
             },
             conflictedNodeId: {
