@@ -739,7 +739,6 @@ define([
                 }
             } else {
                 if (mug.p.getDefinition(e.property).widget === widgets.xPath ||
-                    mug.p.getDefinition(e.property).widget === widgets.setValue ||
                     mug.p.getDefinition(e.property).widget === widgets.droppableText) {
                     this.updateAllLogicReferences(mug);
                 }
@@ -874,9 +873,6 @@ define([
                     return !meta.dropReference(mug);
                 });
             }
-            this.dropSetValues(function(setValue) {
-                return setValue.ref === mug.absolutePath;
-            });
             delete this.mugMap[mug.ufid];
             this.fire({
                 type: 'question-remove',

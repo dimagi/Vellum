@@ -862,7 +862,7 @@ define([
                 visibility: 'visible',
                 presence: 'optional',
                 lstring: 'Default Value',
-                widget: widgets.setValue,
+                widget: widgets.xPath,
                 xpathType: 'generic',
             },
         },
