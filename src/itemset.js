@@ -123,7 +123,9 @@ define([
                 leftPlaceholder: '',
                 autocompleteSources: function() {
                     return datasources.autocompleteChoices(this.p.itemsetData.instance.src);
-                }
+                },
+                help: "This is an XPath expression that will filter the set " +
+                      "of choices from the lookup table",
             }
         }
     });
