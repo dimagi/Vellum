@@ -669,6 +669,33 @@ require([
                    "double_trouble should not be valid");
         });
 
+        it("should copy questions in tree order", function () {
+            util.loadXML("");
+            paste([
+                ["id", "type", "labelItext:en-default"],
+                ["/text1", "Text", "text1"],
+                ["/text2", "Text", "text2"],
+                ["/text3", "Text", "text3"],
+                ["/group", "Group", "group"],
+                ["/group/text1", "Text", "text1"],
+                ["/group/text2", "Text", "text2"],
+                ["/group/text3", "Text", "text3"],
+            ]);
+            util.clickQuestion(
+                "text3",
+                "group/text2",
+                "group/text1",
+                "text1"
+            );
+            eq(mod.copy(), [
+                ["id", "type", "labelItext:en-default", "labelItext:hin-default"],
+                ["/text1", "Text", "text1", "text1"],
+                ["/text3", "Text", "text3", "text3"],
+                ["/group/text1", "Text", "text1", "text1"],
+                ["/group/text2", "Text", "text2", "text2"],
+            ]);
+        });
+
         it("should warn about discarded languages", function () {
             util.loadXML("");
             paste([

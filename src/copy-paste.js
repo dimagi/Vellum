@@ -200,7 +200,7 @@ define([
         if (!_.isUndefined(window.analytics)) {
             window.analytics.track("Copy questions in form builder");
         }
-        var mugs = vellum.getCurrentlySelectedMug(true),
+        var mugs = vellum.getCurrentlySelectedMug(true, true),
             seen = {};
         if (!mugs || !mugs.length) { return ""; }
 
