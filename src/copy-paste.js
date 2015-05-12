@@ -200,7 +200,7 @@ define([
         if (!_.isUndefined(window.analytics)) {
             window.analytics.track("Copy questions in form builder");
         }
-        var mugs = vellum.getCurrentlySelectedMug(true),
+        var mugs = vellum.getCurrentlySelectedMug(true, true),
             seen = {};
         if (!mugs || !mugs.length) { return ""; }
 
@@ -330,7 +330,8 @@ define([
             $(document).on('cut copy paste keydown', function (e) {
                 if (e.type === 'cut' ||
                     e.metaKey && String.fromCharCode(e.keyCode) === 'X') {
-                    onCut(opts);
+                    // Disable cut until undo feature is implemented
+                    if (false) { onCut(opts); }
                 } else if (e.type === 'copy' ||
                     e.metaKey && String.fromCharCode(e.keyCode) === 'C') {
                     onCopy(opts);

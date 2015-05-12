@@ -955,13 +955,32 @@ define([
      * @param multiple - If false (default) get the first selected mug;
      *      null if there is no selection. Otherwise get a (possibly
      *      empty) list of selected mugs.
+     * @param treeOrder - If false (default) return mugs in the order they
+     *      were selected. Otherwise return them in the order they appear
+     *      in the tree. Ignored if `multiple` is false.
      * @returns - A list of mugs, single mug, or null, depending on
      *      parameters and the UI state.
      */
-    fn.getCurrentlySelectedMug = function (multiple) {
+    fn.getCurrentlySelectedMug = function (multiple, treeOrder) {
         var selected = this.jstree('get_selected'),
             form = this.data.core.form;
         if (multiple) {
+            if (treeOrder) {
+                var ids = _.object(_.map(selected, function (id) {
+                        return [id, true];
+                    })),
+                    count = selected.length,
+                    mugs = [];
+                form.tree.walk(function (mug, nodeID, processChildren) {
+                    if (mug && ids.hasOwnProperty(mug.ufid)) {
+                        mugs.push(mug);
+                    }
+                    if (mugs.length !== count) {
+                        processChildren();
+                    }
+                });
+                return mugs;
+            }
             return _.map(selected, form.getMugByUFID.bind(form));
         }
         return selected.length ? form.getMugByUFID(selected[0]) : null;

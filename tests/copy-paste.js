@@ -326,6 +326,45 @@ require([
             ]);
             util.selectAll();
             eq(mod.copy(), [
+                ["id", "type", "labelItext:en-default", "labelItext:hin-default"],
+                ["/text", "Text", "text1", "text1"],
+                ["/copy-1-of-text", "Text", "text2", "text2"],
+            ]);
+        });
+
+        it("should auto-rename pasted question with duplicate id", function () {
+            util.loadXML("");
+            // setup
+            paste([
+                ["id", "type", "labelItext:en-default", "labelItext:hin-default"],
+                ["/text", "Text", "text1", "text1"],
+            ]);
+            // paste duplicate
+            paste([
+                ["id", "type", "labelItext:en-default", "labelItext:hin-default"],
+                ["/text", "Text", "text2", "text2"],
+            ]);
+            util.selectAll();
+            eq(mod.copy(), [
+                ["id", "type", "labelItext:en-default", "labelItext:hin-default"],
+                ["/text", "Text", "text1", "text1"],
+                ["/copy-1-of-text", "Text", "text2", "text2"],
+            ]);
+        });
+
+        it("should copoy conflicted question id", function () {
+            util.loadXML("");
+            paste([
+                ["id", "type", "labelItext:en-default", "labelItext:hin-default"],
+                ["/text", "Text", "text1", "text1"],
+                ["/other", "Text", "text2", "text2"],
+            ]);
+            var mug = util.getMug("other");
+            mug.p.nodeID = "text";
+            assert(mug.messages.get("nodeID", "mug-conflictedNodeId-warning"),
+                   "expected confict warning");
+            util.selectAll();
+            eq(mod.copy(), [
                 ["id", "type", "labelItext:en-default", "labelItext:hin-default", "conflictedNodeId"],
                 ["/text", "Text", "text1", "text1", "null"],
                 ["/copy-1-of-text", "Text", "text2", "text2", "text"],
@@ -628,6 +667,33 @@ require([
             assert(util.isTreeNodeValid("two"), util.getMessages("two"));
             assert(!util.isTreeNodeValid("double_trouble"),
                    "double_trouble should not be valid");
+        });
+
+        it("should copy questions in tree order", function () {
+            util.loadXML("");
+            paste([
+                ["id", "type", "labelItext:en-default"],
+                ["/text1", "Text", "text1"],
+                ["/text2", "Text", "text2"],
+                ["/text3", "Text", "text3"],
+                ["/group", "Group", "group"],
+                ["/group/text1", "Text", "text1"],
+                ["/group/text2", "Text", "text2"],
+                ["/group/text3", "Text", "text3"],
+            ]);
+            util.clickQuestion(
+                "text3",
+                "group/text2",
+                "group/text1",
+                "text1"
+            );
+            eq(mod.copy(), [
+                ["id", "type", "labelItext:en-default", "labelItext:hin-default"],
+                ["/text1", "Text", "text1", "text1"],
+                ["/text3", "Text", "text3", "text3"],
+                ["/group/text1", "Text", "text1", "text1"],
+                ["/group/text2", "Text", "text2", "text2"],
+            ]);
         });
 
         it("should warn about discarded languages", function () {
