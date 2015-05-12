@@ -1064,6 +1064,18 @@ define([
             wantsMarkdown = true,
             markdownOff, markdownOn, markdownOutput;
 
+        function looksLikeMarkdown(val) {
+            /* Regex checks (in order):
+             * ordered lists
+             * unordered lists
+             * strikethrough
+             * headings
+             * italics/bold/bold italics
+             * links
+             */
+            return /^\d+\. |^\*|~~.+~~|# |\*{1,3}\S+\*{1,3}|\[.+\]\(\S+\)/m.test(val);
+        }
+
         widget.toggleMarkdown = function() {
             parent.toggleClass("has-markdown");
         };
@@ -1074,7 +1086,7 @@ define([
             super_handleChange();
             var val = widget.getValue(),
                 item = this.getItextItem();
-            if (/[~*#[\]]+|^-/m.test(val)) {
+            if (looksLikeMarkdown(val)) {
                 if (wantsMarkdown) {
                     parent.removeClass("markdown-ignorant");
                     parent.addClass("has-markdown");
@@ -1121,7 +1133,7 @@ define([
             else {
                 parent.addClass("markdown-ignorant");
             }
-            if (/[-~*#[\]]+/.test(val)) {
+            if (looksLikeMarkdown(val)) {
                 markdownOutput.html(util.markdown(val));
                 markdownOff.removeClass('hide');
             }
