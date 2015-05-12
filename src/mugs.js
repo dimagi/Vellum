@@ -862,6 +862,7 @@ define([
             hintLabel: { presence: 'notallowed' },
             hintItext: { presence: 'notallowed' },
             helpItext: { presence: 'notallowed' },
+            setValue: {presence: 'notallowed' },
             defaultValue: {
                 lstring: 'Choice Value',
                 visibility: 'visible',
@@ -893,7 +894,8 @@ define([
             mug.p.appearance = "minimal";
         },
         spec: {
-            dataValue: { presence: 'optional' }
+            dataValue: { presence: 'optional' },
+            setValue: { presence: 'notallowed' }
         }
     });
 
@@ -960,6 +962,7 @@ define([
             constraintMsgAttr: { presence: "notallowed" },
             dataValue: { presence: "notallowed" },
             requiredAttr: { presence: "notallowed" },
+            setValue: { presence: "notallowed" },
         }
     });
     
