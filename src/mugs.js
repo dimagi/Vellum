@@ -219,6 +219,12 @@ define([
         },
         teardownProperties: function () {
             this.fire({type: "teardown-mug-properties", mug: this});
+        },
+        isInRepeat: function() {
+            if (this.__className === "Repeat") { // HACK hard-coded class name
+                return true;
+            }
+            return this.parentMug && this.parentMug.isInRepeat();
         }
     };
 
@@ -654,6 +660,20 @@ define([
                 }
             });
             return attrs.nodeset ? [attrs] : [];
+        },
+
+        getSetValues: function (mug) {
+            var ret = [];
+
+            if (mug.p.setValue) {
+                ret = [{
+                    value: mug.p.setValue,
+                    event: mug.isInRepeat() ? 'jr-insert' : 'xforms-ready',
+                    ref: mug.absolutePath
+                }];
+            }
+
+            return ret;
         },
 
         // control node writer options
