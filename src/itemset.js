@@ -233,9 +233,13 @@ define([
             labelRef = refSelect("label_ref", "Label Field", false),
             valueRef = refSelect("value_ref", "Value Field", false);
 
+        function getChoices() {
+            return datasources.autocompleteChoices(widget.getValue().instance.src);
+        }
+
         function updateAutoComplete() {
             if (widget.getValue().instance) {
-                var sources = datasources.autocompleteChoices(widget.getValue().instance.src);
+                var sources = getChoices();
                 labelRef.addAutoComplete(sources, super_handleChange);
                 valueRef.addAutoComplete(sources, super_handleChange);
             }
@@ -260,7 +264,7 @@ define([
         widget.getValue = function () {
             var val = super_getValue();
             return {
-                instance: ($.trim(val.src) ? {id: val.id, src: val.src} : null),
+                instance: ($.trim(val.src) ? {id: val.id, src: val.src} : {id: null, src: null}),
                 nodeset: val.query,
                 labelRef: labelRef.val(),
                 valueRef: valueRef.val()
@@ -268,14 +272,24 @@ define([
         };
 
         widget.setValue = function (val) {
-            val = val || {};
+            var sources;
+            val = _.isEmpty(val) ? widget.getValue() : val;
             super_setValue({
                 id: (val.instance ? val.instance.id : ""),
                 src: (val.instance ? val.instance.src : ""),
                 query: val.nodeset
             });
+            if (!val.labelRef) {
+                sources = getChoices();
+                val.labelRef = sources[0];
+            }
+            if (!val.valueRef) {
+                sources = sources ? sources : getChoices();
+                val.valueRef = sources[0];
+            }
             labelRef.val(val.labelRef);
             valueRef.val(val.valueRef);
+            widget.save();
         };
 
         // initialize the auto complete sources after getValue is overridden
