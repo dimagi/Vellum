@@ -237,6 +237,7 @@ define([
 
         var widget = widgets.dropdown(mug, options), 
             super_getValue = widget.getValue,
+            super_setValue = widget.setValue,
             currentValue = null,
             input = widget.input,
             customXML = "Unrecognized lookup table. This form may have been changed outside the form builder";
@@ -252,12 +253,11 @@ define([
             currentValue = val;
             var jsonVal = val ? JSON.stringify(val) : '',
                 val2 = widget.equivalentOption(jsonVal);
-            if (val2) {
-                input.val(val2.value);
-            } else if (!_.isEqual(val, {id: "", src: "", query: undefined})) {
+            if (!val2 && !_.isEqual(val, {id: "", src: "", query: undefined})) {
                 widget.addOption(jsonVal, customXML);
-                input.val(jsonVal);
             }
+
+            super_setValue(jsonVal);
         }
 
         widget.getValue = local_getValue;
