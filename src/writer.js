@@ -180,12 +180,27 @@ define([
     };
 
     var createSetValues = function (dataTree, form, xmlWriter) {
-        _.each(form.getSetValues(), function (setValue) {
+        function writeSetValue(setValue) {
             xmlWriter.writeStartElement('setvalue');
             xmlWriter.writeAttributeString('event', setValue.event);
             xmlWriter.writeAttributeString('ref', setValue.ref);
             xmlWriter.writeAttributeString('value', setValue.value);
             xmlWriter.writeEndElement();
+        }
+
+        _.each(form.getSetValues(), function (setValue) {
+            writeSetValue(setValue);
+        });
+
+        dataTree.walk(function (mug, nodeID, processChildren) {
+            if(mug && mug.p.setValue) {
+                writeSetValue({
+                    event: 'xforms-ready',
+                    ref: mug.absolutePath,
+                    value: mug.p.setValue
+                });
+            }
+            processChildren();
         });
     };
 
