@@ -94,7 +94,6 @@ require([
         });
 
         describe("UI", function () {
-            before(beforeFn);
             it("preserves inner filters if you never change the data source", function () {
                 util.loadXML(INNER_FILTERS_XML);
                 clickQuestion("question2/itemset");
@@ -122,11 +121,32 @@ require([
                 assert.equal(4, (call('createXML').match(/itemset/g) || []).length);
             });
 
-            it ("uses a dropdown when the nodeset is known", function() {
+            it("uses a dropdown when the nodeset is known", function() {
                 util.loadXML(DROPDOWN_FIXTURE_XML);
                 clickQuestion("question2/itemset");
 
                 assert($('[name=property-itemsetData]').is('select'));
+            });
+
+            describe("with a custom fixture", function() {
+                it("should not warn on unrecognized values and labels", function() {
+                    util.loadXML(DROPDOWN_FIXTURE_XML);
+                    var mug = util.getMug('/data/question2/itemset');
+                    assert.strictEqual(mug.spec.itemsetData.validationFunc(mug), 'pass');
+                    mug.p.itemsetData.instance.src = "blah";
+                    assert.strictEqual(mug.spec.itemsetData.validationFunc(mug), 'pass');
+                });
+            });
+
+            describe("with recognized fixture", function() {
+                it("should warn on unrecognized values and labels", function() {
+                    util.loadXML(DROPDOWN_FIXTURE_XML);
+                    var mug = util.getMug('/data/question2/itemset');
+                    assert.strictEqual(mug.spec.itemsetData.validationFunc(mug), 'pass');
+                    clickQuestion("question2/itemset");
+                    $('[name=value_ref]').val('blah').change();
+                    assert.notStrictEqual(mug.spec.itemsetData.validationFunc(mug), 'pass');
+                });
             });
         });
     });

@@ -111,6 +111,18 @@ define([
                     if (!itemsetData.labelRef) {
                         return "Choice Label must be specified.";
                     }
+
+                    var possibleSrcs = _.map(datasources.getPossibleFixtures(), 
+                                             function(val) { return val.src; }),
+                        notCustom = _.contains(possibleSrcs, itemsetData.instance.src),
+                        choices = datasources.autocompleteChoices(itemsetData.instance.src);
+
+                    if (notCustom && !_.contains(choices, itemsetData.valueRef)) {
+                            return itemsetData.valueRef + " was not found in the fixture";
+                    } else if (notCustom && !_.contains(choices, itemsetData.labelRef)) {
+                            return itemsetData.labelRef + " was not found in the fixture";
+                    }
+
                     return 'pass';
                 }
             },

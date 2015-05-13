@@ -23,8 +23,8 @@
 		<select1 ref="/data/question2">
 			<label ref="jr:itext('question2-label')" />
             <itemset nodeset="instance('some-fixture')/some-fixture_list/some-fixture">
-				<label ref="case_name" />
-				<value ref="@case_id" />
+				<label ref="name" />
+				<value ref="@id" />
 			</itemset>
 		</select1>
 	</h:body>

@@ -275,6 +275,7 @@ define([
         init: init,
         advancedDataSourceWidget: advancedDataSourceWidget,
         fixtureWidget: fixtureWidget,
-        autocompleteChoices:autocompleteChoices
+        autocompleteChoices:autocompleteChoices,
+        getPossibleFixtures: getPossibleFixtures
     };
 });
