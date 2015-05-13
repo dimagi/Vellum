@@ -287,7 +287,7 @@ define([
             }
             if (!val.valueRef) {
                 sources = sources ? sources : getChoices();
-                val.valueRef = sources[0];
+                val.valueRef = sources.length > 0 ? sources[1] : sources[0];
             }
             labelRef.val(val.labelRef);
             valueRef.val(val.valueRef);
