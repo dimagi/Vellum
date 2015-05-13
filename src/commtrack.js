@@ -157,9 +157,9 @@ define([
                     lstring: 'Product',
                     visibility: 'visible',
                     presence: 'optional',
-                    widget: setValueWidget,
                     serialize: serializeValue,
                     deserialize: deserializeValue,
+                    widget: widgets.xPath,
                     xpathType: "generic",
                     help: 'A reference to a product ID, e.g., "/data/products/current_product"',
                 },
@@ -179,13 +179,30 @@ define([
                     lstring: 'Display Condition'
                 },
             },
+            getSetValues: function (mug) {
+                var path = mug.absolutePath,
+                    event = mug.isInRepeat(mug) ? "jr-insert" : "xforms-ready",
+                    ret = [];
+
+                _.each(setvalueData[mug.__className], function (data) {
+                    var value = mug.p[data.attr],
+                        ref = path + "/" + data.path;
+                    if (value) {
+                        ret.push({
+                            event: event,
+                            ref: ref,
+                            value: value
+                        });
+                    }
+                });
+
+                return ret;
+            },
         }),
         balanceMugOptions = util.extend(baseTransactionOptions, {
             typeName: 'Balance',
             getTagName: function () { return "balance"; },
             getExtraDataAttributes: function (mug) {
-                // HACK must happen before <setvalue> and "other" <instance> elements are written
-                prepareForWrite(mug);
                 var attrs = mug.p.rawDataAttributes || {};
                 return {
                     xmlns: LEDGER_XMLNS,
@@ -197,11 +214,11 @@ define([
             },
             icon: 'fcc fcc-fd-hash',
             init: function (mug, form) {
-                mug.p.entityId = {value: ""};
+                mug.p.entityId = "";
                 mug.p.sectionId = "";
-                mug.p.entryId = {value: ""};
+                mug.p.entryId = "";
                 mug.p.quantity = "";
-                mug.p.date = {value: "today()"};
+                mug.p.date = "today()";
                 addLedgerDBInstance(mug, form);
             },
             spec: {
@@ -217,9 +234,9 @@ define([
                     lstring: 'Case',
                     visibility: 'visible',
                     presence: 'optional',
-                    widget: setValueWidget,
                     serialize: serializeValue,
                     deserialize: deserializeValue,
+                    widget: widgets.xPath,
                     xpathType: "generic",
                     help: 'XPath expression for the case ID associated with this balance.',
                 },
@@ -230,7 +247,7 @@ define([
         }),
         transferMugValidation = function (mug) {
             var error = {key: "commtrack-transfer-src-dest-error", level: mug.ERROR};
-            if (!(mug.p.dest && mug.p.dest.value) || !(mug.p.src && mug.p.src.value)) {
+            if (!mug.p.dest || !mug.p.src) {
                 error.message = 'Transfer must have both Source Case and ' +
                                 'Destination Case defined.';
             }
@@ -252,8 +269,6 @@ define([
                         .replace("$2", typeName);
             },
             getExtraDataAttributes: function (mug) {
-                // HACK must happen before <setvalue> and "other" <instance> elements are written
-                prepareForWrite(mug);
                 var raw = mug.p.rawDataAttributes || {},
                     attrs = {
                         xmlns: LEDGER_XMLNS,
@@ -261,12 +276,12 @@ define([
                         date: raw.date || "",
                         "section-id": mug.p.sectionId,
                     };
-                if (mug.p.src && $.trim(mug.p.src.value)) {
+                if (mug.p.src && $.trim(mug.p.src)) {
                     attrs.src = raw.src || "";
                 } else {
                     delete raw.src;
                 }
-                if (mug.p.dest && $.trim(mug.p.dest.value)) {
+                if (mug.p.dest && $.trim(mug.p.dest)) {
                     attrs.dest = raw.dest || "";
                 } else {
                     delete raw.dest;
@@ -275,12 +290,12 @@ define([
             },
             icon: 'icon-exchange',
             init: function (mug, form) {
-                mug.p.src = {value: ""};
-                mug.p.dest = {value: ""};
+                mug.p.src = "";
+                mug.p.dest = "";
                 mug.p.sectionId = "";
-                mug.p.entryId = {value: ""};
+                mug.p.entryId = "";
                 mug.p.quantity = "";
-                mug.p.date = {value: "today()"};
+                mug.p.date = "today()";
                 addLedgerDBInstance(mug, form);
             },
             spec: {
@@ -296,9 +311,9 @@ define([
                     lstring: 'Source Case',
                     visibility: 'visible',
                     presence: 'required',
-                    widget: setValueWidget,
                     serialize: serializeValue,
                     deserialize: deserializeValue,
+                    widget: widgets.xPath,
                     xpathType: "generic",
                     help: 'XPath expression for the case ID issuing the transaction. Leave blank if unknown or not applicable.',
                     validationFunc: transferMugValidation,
@@ -307,9 +322,9 @@ define([
                     lstring: 'Destination Case',
                     visibility: 'visible',
                     presence: 'required',
-                    widget: setValueWidget,
                     serialize: serializeValue,
                     deserialize: deserializeValue,
+                    widget: widgets.xPath,
                     xpathType: "generic",
                     help: 'XPath expression for the case ID receiving the transaction. Leave blank if unknown or not applicable.',
                     validationFunc: transferMugValidation,
@@ -325,7 +340,7 @@ define([
             spec: {
                 src: {
                     validationFunc: function (mug) {
-                        if (mug.p.src.value) {
+                        if (mug.p.src) {
                             return 'pass';
                         }
                         return 'Dispense must have a Source Case.';
@@ -341,7 +356,7 @@ define([
                 src: { presence: "notallowed" },
                 dest: {
                     validationFunc: function (mug) {
-                        if (mug.p.dest.value) {
+                        if (mug.p.dest) {
                             return 'pass';
                         }
                         return 'Receive must have a Destination Case.';
@@ -404,20 +419,23 @@ define([
             }
             this.__callOld();
         },
-        handleMugParseFinish: function (mug) {
-            this.__callOld();
-            if (!isTransaction(mug)) {
-                return;
+        parseSetValue: function (form, el, path) {
+            var mug = form.getMugByPath(path);
+            if (!mug) {
+                var regex = /\/(entry\/@id|@entity-id|@date|@src|@dest)$/,
+                    basePath = path.replace(regex, "");
+                if (path !== basePath) {
+                    mug = form.getMugByPath(basePath);
+                    var setValue = _.find(setvalueData[mug.__className], function(sv) {
+                        return sv.path === path.match(regex)[1];
+                    }).attr;
+                    if (isTransaction(mug)) {
+                        mug.p[setValue] = el.attr("value");
+                        return;
+                    }
+                }
             }
-            var path = mug.absolutePath;
-            var values = _.object(_.map(mug.form.getSetValues(), function (value) {
-                    return [value.ref, value];
-                }));
-            _.each(setvalueData[mug.__className], function (data) {
-                mug.p[data.attr] = values[path + "/" + data.path] || {
-                    value: ""
-                };
-            });
+            this.__callOld();
         },
         getSections: function (mug) {
             if (sectionData.hasOwnProperty(mug.__className)) {
@@ -429,9 +447,6 @@ define([
         },
         loadXML: function () {
             this.__callOld();
-            this.data.core.form.on("question-remove", function (event) {
-                dropSetValues(event.mug);
-            });
         }
     });
 
@@ -439,88 +454,11 @@ define([
         return mug && setvalueData.hasOwnProperty(mug.__className);
     }
 
-    function isInRepeat(mug) {
-        if (mug.__className === "Repeat") { // HACK hard-coded class name
-            return true;
-        }
-        return mug.parentMug && isInRepeat(mug.parentMug);
-    }
-
     function addLedgerDBInstance(mug, form) {
         var data = {id: LEDGER_INSTANCE_ID, src: LEDGER_INSTANCE_URI};
         form.addInstanceIfNotExists(data, mug, "");
     }
 
-    function prepareForWrite(mug) {
-        var path = mug.absolutePath,
-            event = isInRepeat(mug) ? "jr-insert" : "xforms-ready",
-            drops = {};
-
-        // update <setvalue> refs
-        _.each(setvalueData[mug.__className], function (data) {
-            var value = mug.p[data.attr],
-                ref = path + "/" + data.path;
-            if (value) {
-                if (!value.ref) {
-                    mug.p[data.attr] = value = mug.form.addSetValue(
-                        event,
-                        ref,
-                        value.value
-                    );
-                } else {
-                    value.ref = ref;
-                    value.event = event;
-                }
-            }
-            if (!value || !$.trim(value.value) ||
-                    mug.getPresence(data.attr) === "notallowed") {
-                drops[event + " " + ref] = true;
-                drops.enabled = true;
-            }
-        });
-
-        if (drops.enabled) {
-            mug.form.dropSetValues(function (value) {
-                return drops.hasOwnProperty(value.event + " " + value.ref);
-            });
-        }
-    }
-
-    function dropSetValues(mug) {
-        // remove <setvalue> elements
-        var setvaluesToRemove = {};
-        _.each(setvalueData[mug.__className], function (data) {
-            var value = mug.p[data.attr];
-            if (value && value._id) {
-                setvaluesToRemove[value._id] = true;
-            }
-        });
-        if (!_.isEmpty(setvaluesToRemove)) {
-            mug.form.dropSetValues(function (value) {
-                return setvaluesToRemove.hasOwnProperty(value._id);
-            });
-        }
-    }
-
-    function setValueWidget(mug, options) {
-        var widget = widgets.xPath(mug, options),
-            _getValue = widget.getValue,
-            _setValue = widget.setValue,
-            _value = null;
-
-        widget.setValue = function (value) {
-            _value = value;
-            _setValue(value.value);
-        };
-
-        widget.getValue = function () {
-            var val = _value || {};
-            val.value = _getValue();
-            return val;
-        };
-
-        return widget;
-    }
 
     function serializeValue(value, key, mug) {
         return value ? value.value : "";
