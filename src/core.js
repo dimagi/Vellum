@@ -2096,6 +2096,10 @@ define([
         return parser.parseBindElement(form, el, path);
     };
 
+    fn.parseSetValue = function (form, el, path) {
+        return parser.parseSetValue(form, el, path);
+    };
+
     fn.getControlNodeAdaptorFactory = function (tagName) {
         return this.data.core.controlNodeAdaptorMap[tagName];
     };
