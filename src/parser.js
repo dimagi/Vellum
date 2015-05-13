@@ -223,19 +223,18 @@ define([
 
     function parseSetValue(form, el, path) {
         var mug = form.getMugByPath(path),
-            setValue = {
-                event: el.attr('event'),
-                ref: el.attr('ref'),
-                value: el.attr('value')
-            };
-        
-        if (!mug) {
-            form.addSetValue(setValue.event, setValue.ref, setValue.value);
+            event = el.attr('event'),
+            ref = el.attr('ref'),
+            value = el.attr('value');
+
+        // HACK: hardcoding these as that's what setValue will support for now
+        if (!mug || (event !== 'xforms-ready' && event !== 'jr-insert')) {
+            form.addSetValue(event, ref, value);
         } else {
-            mug.p.setValue = setValue.value;
+            mug.p.setValue = value;
         }
     }
-            
+
     var lookForNamespaced = function (element, reference) {
         // due to the fact that FF and Webkit store namespaced
         // values slightly differently, we have to look in 
