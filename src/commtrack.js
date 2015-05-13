@@ -363,7 +363,14 @@ define([
                     },
                 },
             }
-        });
+        }),
+        setValuePaths = _.chain(setvalueData)
+            .map(function (mugSetValues, mugClass) {
+                return _.map(mugSetValues, function(attrs) {
+                    return attrs.path;
+                });
+            }).flatten().uniq().value(),
+        setValueDataRegex = new RegExp("/(" + setValuePaths.join('|') + ")$");
 
     $.vellum.plugin("commtrack", {}, {
         getAdvancedQuestions: function () {
@@ -422,12 +429,11 @@ define([
         parseSetValue: function (form, el, path) {
             var mug = form.getMugByPath(path);
             if (!mug) {
-                var regex = /\/(entry\/@id|@entity-id|@date|@src|@dest)$/,
-                    basePath = path.replace(regex, "");
+                var basePath = path.replace(setValueDataRegex, "");
                 if (path !== basePath) {
                     mug = form.getMugByPath(basePath);
                     var setValue = _.find(setvalueData[mug.__className], function(sv) {
-                        return sv.path === path.match(regex)[1];
+                        return sv.path === path.match(setValueDataRegex)[1];
                     }).attr;
                     if (isTransaction(mug)) {
                         mug.p[setValue] = el.attr("value");
