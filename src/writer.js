@@ -37,13 +37,7 @@ define([
         
         createBindList(dataTree, xmlWriter);
         
-        _.each(form.getSetValues(), function (setValue) {
-            xmlWriter.writeStartElement('setvalue');
-            xmlWriter.writeAttributeString('event', setValue.event);
-            xmlWriter.writeAttributeString('ref', setValue.ref);
-            xmlWriter.writeAttributeString('value', setValue.value);
-            xmlWriter.writeEndElement();
-        });
+        createSetValues(dataTree, form, xmlWriter);
 
         form.vellum.contributeToModelXML(xmlWriter);
         
@@ -179,6 +173,29 @@ define([
                         }
                     });
                     xmlWriter.writeEndElement();
+                });
+            }
+            processChildren();
+        });
+    };
+
+    var createSetValues = function (dataTree, form, xmlWriter) {
+        function writeSetValue(setValue) {
+            xmlWriter.writeStartElement('setvalue');
+            xmlWriter.writeAttributeString('event', setValue.event);
+            xmlWriter.writeAttributeString('ref', setValue.ref);
+            xmlWriter.writeAttributeString('value', setValue.value);
+            xmlWriter.writeEndElement();
+        }
+
+        _.each(form.getSetValues(), function (setValue) {
+            writeSetValue(setValue);
+        });
+
+        dataTree.walk(function (mug, nodeID, processChildren) {
+            if(mug && mug.options.getSetValues) {
+                _.each(mug.options.getSetValues(mug), function(setValue) {
+                    writeSetValue(setValue);
                 });
             }
             processChildren();

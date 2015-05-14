@@ -219,6 +219,12 @@ define([
         },
         teardownProperties: function () {
             this.fire({type: "teardown-mug-properties", mug: this});
+        },
+        isInRepeat: function() {
+            if (this.__className === "Repeat") { // HACK hard-coded class name
+                return true;
+            }
+            return this.parentMug && this.parentMug.isInRepeat();
         }
     };
 
@@ -466,7 +472,14 @@ define([
             rawBindAttributes: {
                 presence: 'optional',
                 lstring: 'Extra Bind Attributes'
-            }
+            },
+            setValue: {
+                visibility: 'visible',
+                presence: 'optional',
+                lstring: 'Default Value',
+                widget: widgets.xPath,
+                xpathType: 'generic',
+            },
         },
 
         control: {
@@ -647,6 +660,20 @@ define([
                 }
             });
             return attrs.nodeset ? [attrs] : [];
+        },
+
+        getSetValues: function (mug) {
+            var ret = [];
+
+            if (mug.p.setValue) {
+                ret = [{
+                    value: mug.p.setValue,
+                    event: mug.isInRepeat() ? 'jr-insert' : 'xforms-ready',
+                    ref: mug.absolutePath
+                }];
+            }
+
+            return ret;
         },
 
         // control node writer options
@@ -855,6 +882,7 @@ define([
             hintLabel: { presence: 'notallowed' },
             hintItext: { presence: 'notallowed' },
             helpItext: { presence: 'notallowed' },
+            setValue: { presence: 'optional', visibility: 'hidden' },
             defaultValue: {
                 lstring: 'Choice Value',
                 visibility: 'visible',
@@ -886,7 +914,8 @@ define([
             mug.p.appearance = "minimal";
         },
         spec: {
-            dataValue: { presence: 'optional' }
+            dataValue: { presence: 'optional' },
+            setValue: { presence: 'optional', visibility: 'hidden' },
         }
     });
 
@@ -953,6 +982,7 @@ define([
             constraintMsgAttr: { presence: "notallowed" },
             dataValue: { presence: "notallowed" },
             requiredAttr: { presence: "notallowed" },
+            setValue: { presence: 'optional', visibility: 'hidden' },
         }
     });
     

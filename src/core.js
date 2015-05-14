@@ -2054,7 +2054,8 @@ define([
             "hintLabel",
             "constraintMsgAttr",
             "dataParent",
-            'appearance'
+            'appearance',
+            'setValue'
         ];
     };
 
@@ -2105,6 +2106,10 @@ define([
 
     fn.parseBindElement = function (form, el, path) {
         return parser.parseBindElement(form, el, path);
+    };
+
+    fn.parseSetValue = function (form, el, path) {
+        return parser.parseSetValue(form, el, path);
     };
 
     fn.getControlNodeAdaptorFactory = function (tagName) {

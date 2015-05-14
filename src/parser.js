@@ -70,13 +70,8 @@ define([
             title = head.children('h\\:title, title'),
             binds = head.find('bind'),
             instances = _getInstances(xml),
-            data = $(instances[0]).children();
-
-        xml.find('setvalue').each(function () {
-            var $this = $(this);
-            form.addSetValue(
-                $this.attr('event'), $this.attr('ref'), $this.attr('value'));
-        });
+            data = $(instances[0]).children(),
+            setValues = xml.find('setvalue');
 
         if($(xml).find('parsererror').length > 0) {
             throw 'PARSE ERROR!:' + $(xml).find('parsererror').find('div').html();
@@ -102,6 +97,8 @@ define([
        
         parseDataTree(form, data[0]);
         parseBindList(form, binds);
+
+        parseSetValues(form, setValues);
 
         var controls = xml.find('h\\:body, body').children();
         parseControlTree(form, controls);
@@ -221,7 +218,31 @@ define([
         mug.p.rawDataAttributes = getAttributes(el);
         return mug;
     }
-            
+
+    function parseSetValues(form, setValues) {
+        var rootNodeName = form.tree.getRootNode().getID();
+
+        setValues.each(function () {
+            var $el = $(this);
+            form.vellum.parseSetValue(
+                form, $el, processPath($el.attr('ref'), rootNodeName));
+        });
+    }
+
+    function parseSetValue(form, el, path) {
+        var mug = form.getMugByPath(path),
+            event = el.attr('event'),
+            ref = el.attr('ref'),
+            value = el.attr('value');
+
+        // HACK: hardcoding these as that's what setValue will support for now
+        if (!mug || (event !== 'xforms-ready' && event !== 'jr-insert')) {
+            form.addSetValue(event, ref, value);
+        } else {
+            mug.p.setValue = value;
+        }
+    }
+
     var lookForNamespaced = function (element, reference) {
         // due to the fact that FF and Webkit store namespaced
         // values slightly differently, we have to look in 
@@ -672,6 +693,7 @@ define([
         parseXForm: parseXForm,
         parseDataElement: parseDataElement,
         parseBindElement: parseBindElement,
+        parseSetValue: parseSetValue,
         populateControlMug: populateControlMug,
         getAttributes: getAttributes,
         getPathFromControlElement: getPathFromControlElement,
