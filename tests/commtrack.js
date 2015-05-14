@@ -133,8 +133,8 @@ define([
         it("transfer question should not be valid when src and dest are both empty", function () {
             util.loadXML();
             var trans = util.addQuestion("Transfer", "t1");
-            assert.strictEqual(trans.p.src.value, "");
-            assert.strictEqual(trans.p.dest.value, "");
+            assert.strictEqual(trans.p.src, "");
+            assert.strictEqual(trans.p.dest, "");
             trans.validate(); // normally called by widget.handleChange
             assert(!util.isTreeNodeValid(trans),
                 "Transfer question with empty src and dest should be invalid");
@@ -145,8 +145,8 @@ define([
         it("new transfer question should not have validation errors", function () {
             util.loadXML();
             var trans = util.addQuestion("Transfer", "t1");
-            assert.strictEqual(trans.p.src.value, "");
-            assert.strictEqual(trans.p.dest.value, "");
+            assert.strictEqual(trans.p.src, "");
+            assert.strictEqual(trans.p.dest, "");
             assert.deepEqual(util.getMessages(trans), "");
         });
 

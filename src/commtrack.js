@@ -157,8 +157,6 @@ define([
                     lstring: 'Product',
                     visibility: 'visible',
                     presence: 'optional',
-                    serialize: serializeValue,
-                    deserialize: deserializeValue,
                     widget: widgets.xPath,
                     xpathType: "generic",
                     help: 'A reference to a product ID, e.g., "/data/products/current_product"',
@@ -234,8 +232,6 @@ define([
                     lstring: 'Case',
                     visibility: 'visible',
                     presence: 'optional',
-                    serialize: serializeValue,
-                    deserialize: deserializeValue,
                     widget: widgets.xPath,
                     xpathType: "generic",
                     help: 'XPath expression for the case ID associated with this balance.',
@@ -311,8 +307,6 @@ define([
                     lstring: 'Source Case',
                     visibility: 'visible',
                     presence: 'required',
-                    serialize: serializeValue,
-                    deserialize: deserializeValue,
                     widget: widgets.xPath,
                     xpathType: "generic",
                     help: 'XPath expression for the case ID issuing the transaction.',
@@ -322,8 +316,6 @@ define([
                     lstring: 'Destination Case',
                     visibility: 'visible',
                     presence: 'required',
-                    serialize: serializeValue,
-                    deserialize: deserializeValue,
                     widget: widgets.xPath,
                     xpathType: "generic",
                     help: 'XPath expression for the case ID receiving the transaction.',
@@ -462,14 +454,6 @@ define([
         form.addInstanceIfNotExists(data, mug, "");
     }
 
-
-    function serializeValue(value, key, mug) {
-        return value ? value.value : "";
-    }
-
-    function deserializeValue(data, key, mug) {
-        return {value: data[key] || ""};
-    }
 
     function serializeNodeId(value, key, mug, data) {
         var parent = mug.parentMug,
