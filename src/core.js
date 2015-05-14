@@ -197,7 +197,6 @@ define([
         this.$f.empty().append(main_template);
 
         this._init_toolbar();
-        this._init_extra_tools();
         this._createJSTree();
         datasources.init(this);
     };
@@ -208,6 +207,7 @@ define([
             // Allow onReady to access vellum instance (mostly for tests)
             _this.opts().core.onReady.apply(_this);
         }
+        this._init_extra_tools();
         parser.init(this);
         this.loadXFormOrError(this.opts().core.form, function () {
             setTimeout(onReady, 0);

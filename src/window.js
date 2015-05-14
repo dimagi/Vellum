@@ -14,10 +14,19 @@ define([
                 opts = this.opts().windowManager,
                 adjustToWindow = function () { _this.adjustToWindow(); };
 
-            preventDoubleScrolling($('.fd-scrollable'));
+            preventDoubleScrolling(this.$f.find('.fd-scrollable'));
             $(window).resize(adjustToWindow);
             $(document).scroll(adjustToWindow);
-            setupDraggableContentDivider(adjustToWindow);
+            setupDraggableDivider(
+                this.$f.find('.fd-content-divider'),
+                this.$f.find('.fd-content-left'),
+                adjustToWindow
+            );
+            setupDraggableDivider(
+                this.$f.find('.fd-content-left-divider'),
+                this.$f.find('.fd-accessory-pane'),
+                adjustToWindow
+            );
 
             this.data.windowManager.offset = {
                 top: opts.topOffset || this.$f.offset().top-1,
@@ -27,6 +36,8 @@ define([
             this.data.windowManager.fullscreen = opts.fullscreen;
             this.data.windowManager.adjustToWindow = adjustToWindow;
 
+            // start with accessory pane collapsed
+            this.$f.find(".fd-accessory-pane").css("height", "0");
             this.adjustToWindow();
         },
         adjustToWindow: function () {
@@ -72,13 +83,24 @@ define([
 
             availableHorizSpace = $fdc.width();
 
-            var availableColumnSpace = availableVertSpace - $('.fd-toolbar').outerHeight(false),
-                panelHeight = Math.max(availableColumnSpace - 5, this.opts().windowManager.minHeight),
-                columnHeight = panelHeight - $('.fd-head').outerHeight(false),
-                treeHeight = columnHeight;
+            var toolbarHeight = this.$f.find('.fd-toolbar').outerHeight(false),
+                availableColumnSpace = availableVertSpace - toolbarHeight,
+                panelHeight = Math.max(availableColumnSpace,
+                                       this.opts().windowManager.minHeight),
+                columnHeight = panelHeight - this.$f.find('.fd-head').outerHeight(false),
+                treeHeight = columnHeight,
+                accessoryPane = this.$f.find(".fd-accessory-pane");
 
             $fdc.find('.fd-content').css('height', panelHeight + 'px');
 
+            if (accessoryPane.children().length) {
+                accessoryPane.show();
+                this.$f.find(".fd-content-left-divider").show();
+                treeHeight -= this.getAccessoryPaneHeight();
+            } else {
+                accessoryPane.hide();
+                this.$f.find(".fd-content-left-divider").hide();
+            }
             $fdc.find('.fd-content-left')
                 .find('.fd-scrollable').css('height', treeHeight + 'px');
 
@@ -92,6 +114,10 @@ define([
         getLeftWidth: function () {
             return 2 + this.$f.find('.fd-content-left').outerWidth(false) + 
                this.$f.find('.fd-content-divider').outerWidth(true);
+        },
+        getAccessoryPaneHeight: function () {
+            return 2 + this.$f.find('.fd-accessory-pane').outerHeight(false) +
+               this.$f.find('.fd-content-left-divider').outerHeight(true);
         },
         getCurrentTopOffset: function () {
             if (this.data.windowManager.fullscreen) {
@@ -158,12 +184,26 @@ define([
         });
     }
 
-    function setupDraggableContentDivider(adjustToWindow) {
-        $('.fd-content-divider').mousedown(function (mousedown) {
-            var $left = $('.fd-content-left'),
-                leftWidth = $left.width(),
+    function setupDraggableDivider($divider, $resizable, adjustToWindow) {
+        var pageVar, sizeVar, before, cursor;
+        if ($divider.hasClass("fd-content-vertical-divider")) {
+            before = $resizable.offset().left < $divider.offset().left;
+            pageVar = "pageX";
+            sizeVar = "width";
+            cursor = 'col-resize';
+        } else {
+            before = $resizable.offset().top < $divider.offset().top;
+            pageVar = "pageY";
+            sizeVar = "height";
+            cursor = 'row-resize';
+        }
+        var direction = before ? 1 : -1;
+        $divider.mousedown(function (mousedown) {
+            var size = $resizable[sizeVar](),
                 resize = function (mousemove) {
-                    $left.width(leftWidth + mousemove.pageX - mousedown.pageX);
+                    var distance = mousemove[pageVar] - mousedown[pageVar];
+                    $resizable[sizeVar](size + distance * direction);
+                    $resizable.resize();
                     adjustToWindow();
                 };
             $(window).disableSelection()
@@ -173,7 +213,7 @@ define([
                     $(this).off('mousemove', resize);
                 });
         }).hover(function (e) {
-            e.target.style.cursor = 'col-resize';
+            e.target.style.cursor = cursor;
         });
     }
 });

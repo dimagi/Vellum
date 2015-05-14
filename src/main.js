@@ -179,6 +179,7 @@ define([
     'vellum/intentManager',
     'vellum/itemset',
     'vellum/javaRosa',
+    'vellum/datasources',
     'vellum/lock',
     'vellum/commtrack',
     'vellum/modeliteration',

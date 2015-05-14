@@ -66,16 +66,19 @@ define([
     'underscore',
     'vellum/widgets',
     'vellum/util',
-    'tpl!vellum/templates/data_source_editor'
+    'tpl!vellum/templates/data_source_editor',
+    'tpl!vellum/templates/external_data_tree'
 ], function (
     $,
     _,
     widgets,
     util,
-    edit_source
+    edit_source,
+    external_data_tree
 ) {
     var vellum, dataSourcesEndpoint, dataCache, dataCallbacks;
 
+    // called during core init
     function init(instance) {
         vellum = instance;
         dataSourcesEndpoint = vellum.opts().core.dataSourcesEndpoint;
@@ -85,6 +88,51 @@ define([
     function reset() {
         dataCache = null;
         dataCallbacks = null;
+    }
+
+    // plugin adds an item to the Tools menu when enabled
+    $.vellum.plugin('datasources', {}, {
+        init: function () {
+            if (dataSources.length) {
+                initExternalDataTree();
+            }
+        },
+        getToolsMenuItems: function () {
+            var items = this.__callOld();
+            if (dataSources.length) {
+                items.push({
+                    name: "External Data",
+                    action: function (done) {
+                        toggleExternalDataTree(done);
+                    }
+                });
+            }
+            return items;
+        }
+    });
+
+    function initExternalDataTree($accessoryPane) {
+        var pane = vellum.$f.find(".fd-accessory-pane");
+        pane.append($(external_data_tree()));
+        pane.resize(function () {
+            if (pane.height() > 100) {
+                panelHeight = pane.height();
+            }
+        });
+    }
+
+    function toggleExternalDataTree(done) {
+        var pane = vellum.$f.find(".fd-accessory-pane");
+        if (pane.height()) {
+            pane.css("height", "0");
+            $(window).resize();
+        } else {
+            var tree = vellum.$f.find(".fd-tree"),
+                height = panelHeight || Math.min(tree.height() / 2, 200);
+            pane.css("height", height + "px");
+            $(window).resize();
+        }
+        done();
     }
 
     /**
