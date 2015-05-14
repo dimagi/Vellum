@@ -181,7 +181,7 @@ define([
             },
             getSetValues: function (mug) {
                 var path = mug.absolutePath,
-                    event = mug.isInRepeat(mug) ? "jr-insert" : "xforms-ready",
+                    event = mug.isInRepeat() ? "jr-insert" : "xforms-ready",
                     ret = [];
 
                 _.each(setvalueData[mug.__className], function (data) {
@@ -367,7 +367,7 @@ define([
         setValuePaths = _.chain(setvalueData)
             .map(function (mugSetValues, mugClass) {
                 return _.map(mugSetValues, function(attrs) {
-                    return attrs.path;
+                    return RegExp.escape(attrs.path);
                 });
             }).flatten().uniq().value(),
         setValueDataRegex = new RegExp("/(" + setValuePaths.join('|') + ")$");
@@ -432,10 +432,10 @@ define([
                 var basePath = path.replace(setValueDataRegex, "");
                 if (path !== basePath) {
                     mug = form.getMugByPath(basePath);
-                    var setValue = _.find(setvalueData[mug.__className], function(sv) {
-                        return sv.path === path.match(setValueDataRegex)[1];
-                    }).attr;
                     if (isTransaction(mug)) {
+                        var setValue = _.find(setvalueData[mug.__className], function(sv) {
+                            return sv.path === path.match(setValueDataRegex)[1];
+                        }).attr;
                         mug.p[setValue] = el.attr("value");
                         return;
                     }
@@ -451,9 +451,6 @@ define([
             }
             return this.__callOld();
         },
-        loadXML: function () {
-            this.__callOld();
-        }
     });
 
     function isTransaction(mug) {

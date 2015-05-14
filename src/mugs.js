@@ -1308,7 +1308,7 @@ define([
             hintLabel: { presence: 'notallowed' },
             hintItext: { presence: 'notallowed' },
             helpItext: { presence: 'notallowed' },
-            setValue: {presence: 'notallowed' },
+            setValue: { presence: 'optional', visibility: 'hidden' },
         }
     });
 
@@ -1321,7 +1321,7 @@ define([
         },
         spec: {
             dataValue: { presence: 'optional' },
-            setValue: { presence: 'notallowed' }
+            setValue: { presence: 'optional', visibility: 'hidden' },
         }
     });
 
@@ -1384,7 +1384,7 @@ define([
             constraintMsgAttr: { presence: "notallowed" },
             dataValue: { presence: "notallowed" },
             requiredAttr: { presence: "notallowed" },
-            setValue: { presence: "notallowed" },
+            setValue: { presence: 'optional', visibility: 'hidden' },
         }
     });
     
