@@ -290,7 +290,7 @@ define([
                     presence: 'required',
                     widget: widgets.xPath,
                     xpathType: "generic",
-                    help: 'XPath expression for the case ID issuing the transaction. Leave blank if unknown or not applicable.',
+                    help: 'XPath expression for the case ID issuing the transaction.',
                     validationFunc: transferMugValidation,
                 },
                 dest: {
@@ -299,7 +299,7 @@ define([
                     presence: 'required',
                     widget: widgets.xPath,
                     xpathType: "generic",
-                    help: 'XPath expression for the case ID receiving the transaction. Leave blank if unknown or not applicable.',
+                    help: 'XPath expression for the case ID receiving the transaction.',
                     validationFunc: transferMugValidation,
                 },
                 requiredAttr: { presence: "notallowed" },
