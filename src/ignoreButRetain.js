@@ -198,6 +198,42 @@ define([
             }
             this.__callOld();
         },
+        parseSetValue: function (form, el, path) {
+            if (this.data.ignore.active) {
+                var mug = form.getMugByPath(path);
+                if (!mug) {
+                    mug = findParent(path, form);
+                }
+                if ((mug && mug.__className === "Ignored") ||
+                    el.attr("vellum:ignore") === "retain")
+                {
+                    var basePath, relativeTo;
+                    if (mug && mug.__className === "Ignored") {
+                        basePath = mug.absolutePath;
+                        relativeTo = MUG;
+                    } else {
+                        var parent = null;
+                        if (mug) {
+                            parent = mug.options.isSpecialGroup ? mug : mug.parentMug;
+                        }
+                        mug = makeIgnoredMug(form, parent);
+                        form.tree.insertMug(mug, 'into', parent);
+                        // HACK fix abstraction broken by direct tree insert
+                        form._fixMugState(mug);
+                        basePath = parent ? parent.absolutePath : form.getBasePath(true);
+                        relativeTo = PARENT;
+                        this.data.ignore.ignoredMugs.push(mug);
+                    }
+                    mug.p.setValues.push({
+                        ref: el.attr('ref'),
+                        event: el.attr('event'),
+                        value: el.attr('value')
+                    });
+                    return;
+                }
+            }
+            this.__callOld();
+        },
         getControlNodeAdaptorFactory: function (tagName) {
             var getAdaptor = this.__callOld();
             if (this.data.ignore.active) {
@@ -281,6 +317,7 @@ define([
             isCopyable: false,
             init: function (mug) {
                 mug.p.binds = [];
+                mug.p.setValues = [];
             },
             parseDataNode: function (mug, node) {
                 return $([]);
@@ -306,6 +343,11 @@ define([
                     }
                     attrs.nodeset = basePath + bind.path;
                     return attrs;
+                });
+            },
+            getSetValues: function(mug) {
+                return _.map(mug.p.setValues, function(setValue) {
+                    return setValue;
                 });
             },
             writesOnlyCustomXML: true,
