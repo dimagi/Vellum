@@ -240,7 +240,7 @@ define([
             super_setValue = widget.setValue,
             currentValue = null,
             input = widget.input,
-            customXML = "Unrecognized lookup table. This form may have been changed outside the form builder";
+            customXML = "Lookup table was not found in the project";
 
         widget.addOptions(generateFixtureOptions());
 
