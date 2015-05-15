@@ -71,7 +71,7 @@ define([
             binds = head.find('bind'),
             instances = _getInstances(xml),
             data = $(instances[0]).children(),
-            setValues = xml.find('setvalue');
+            setValues = xml.find('model > setvalue');
 
         if($(xml).find('parsererror').length > 0) {
             throw 'PARSE ERROR!:' + $(xml).find('parsererror').find('div').html();
