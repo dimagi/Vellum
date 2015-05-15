@@ -369,6 +369,16 @@ define([
         this.$f.find('.fd-collapse-all').click(function() {
             _this.data.core.$tree.jstree("close_all");
         });
+
+        this.$f.find('.fd-button-copy').click(function () {
+            _this.ensureCurrentMugIsSaved(function () {
+                _this.displayMultipleSelectionView();
+                var selected = _this.jstree("get_selected");
+                if (selected.length) {
+                    $("#" + selected[0] + " a").focus();
+                }
+            });
+        });
     };
 
     fn.getToolsMenuItems = function () {
@@ -1665,7 +1675,7 @@ define([
             form = this.data.core.form,
             mugs = multiselect ? mug : [mug],
             $baseToolbar = $(question_toolbar({
-                isDeleteable: _.every(mugs, function (mug) {
+                isDeleteable: mugs && mugs.length && _.every(mugs, function (mug) {
                     return _this.isMugRemoveable(mug, form.getAbsolutePath(mug));
                 }),
                 isCopyable: !multiselect && mug.options.isCopyable
@@ -1692,15 +1702,6 @@ define([
             } else {
                 form.removeMugsFromForm(mugs);
             }
-        });
-        $baseToolbar.find('.fd-button-copy').click(function () {
-            _this.ensureCurrentMugIsSaved(function () {
-                _this.displayMultipleSelectionView();
-                var selected = _this.jstree("get_selected");
-                if (selected.length) {
-                    $("#" + selected[0] + " a").focus();
-                }
-            });
         });
         if (!multiselect) {
             $baseToolbar.find('.btn-toolbar.pull-left')
