@@ -76,7 +76,7 @@ define([
     edit_source,
     external_data_tree
 ) {
-    var vellum, dataSourcesEndpoint, dataCache, dataCallbacks;
+    var vellum, dataSourcesEndpoint, dataCache, dataCallbacks, panelHeight;
 
     // called during core init
     function init(instance) {
@@ -93,13 +93,13 @@ define([
     // plugin adds an item to the Tools menu when enabled
     $.vellum.plugin('datasources', {}, {
         init: function () {
-            if (dataSources.length) {
+            if (dataSourcesEndpoint) {
                 initExternalDataTree();
             }
         },
         getToolsMenuItems: function () {
             var items = this.__callOld();
-            if (dataSources.length) {
+            if (dataSourcesEndpoint) {
                 items.push({
                     name: "External Data",
                     action: function (done) {
@@ -117,7 +117,81 @@ define([
         pane.resize(function () {
             if (pane.height() > 100) {
                 panelHeight = pane.height();
+            } else if (pane.height() > 0) {
+                loadExternalData();
             }
+        });
+    }
+
+    var loadExternalData = function () {
+        // overwrite function with no-op (only call once)
+        loadExternalData = function () {};
+
+        // display spinner and begin loading...
+        var $container = vellum.$f.find(".fd-external-data-tree-container"),
+            $search = $container.find(".fd-search-box input"),
+            $tree = $container.find(".fd-external-data-tree"),
+            pending = false;
+        $tree.jstree({
+            core: {
+                data: function (node, callback) {
+                    var _this = this;
+                    getDataSources(function (data) {
+                        callback.call(_this, dataTreeJson(data));
+                    });
+                },
+                worker: false,
+                multiple: false,
+                check_callback: function(operation, node, parent, position, more) {
+                    return false;
+                }
+            },
+            search: {
+                show_only_matches: true
+            },
+            conditionalevents: {
+                should_activate: function () { return false; }
+            },
+            "plugins" : [ "themes", "conditionalevents", "search" ]
+        });
+        $search.keyup(function () {
+            if (pending) {
+                clearTimeout(pending);
+            }
+            pending = setTimeout(function () {
+                $tree.jstree(true).search($search.val());
+            }, 250);
+        });
+    };
+
+    function dataTreeJson(data) {
+        var MAX_OPEN_NODE = 50;
+        function node(parentPath, info) {
+            return function (item, name) {
+                var path = parentPath + "/" + name,
+                    children = _.map(item.structure, node(path, info));
+                return {
+                    id: path,
+                    icon: false,
+                    text: item.name || name,
+                    state: {opened: children.length <= MAX_OPEN_NODE},
+                    source: info,
+                    children: children
+                };
+            };
+        }
+        return _.map(data, function (source) {
+            var info = _.omit(source, "structure"),
+                path = source.initialQuery,
+                children = _.map(source.structure, node(path, info));
+            return {
+                id: path,
+                icon: false,
+                text: source.name,
+                state: {opened: children.length <= MAX_OPEN_NODE},
+                source: info,
+                children: children
+            };
         });
     }
 
@@ -131,14 +205,14 @@ define([
                 height = panelHeight || Math.min(tree.height() / 2, 200);
             pane.css("height", height + "px");
             $(window).resize();
+            loadExternalData();
         }
         done();
     }
 
     /**
-     * Asynchronously load data sources of the given type
+     * Asynchronously load data sources
      *
-     * @param type - The data source type (example: "fixture").
      * @param callback - A function to be called when the data sources
      *      have been loaded. This function should accept one argument,
      *      a list of data source objects.

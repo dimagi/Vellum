@@ -74,7 +74,7 @@ require([
                     plugins: plugins,
                     javaRosa: {langs: ['en']},
                     core: {
-                        dataSourcesEndpoint: function () { return []; },
+                        dataSourcesEndpoint: function (callback) { callback([]); },
                         onReady: done
                     }
                 });
