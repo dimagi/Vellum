@@ -118,9 +118,9 @@ define([
                         choices = datasources.autocompleteChoices(itemsetData.instance.src);
 
                     if (notCustom && !_.contains(choices, itemsetData.valueRef)) {
-                            return itemsetData.valueRef + " was not found in the fixture";
+                            return itemsetData.valueRef + " was not found in the lookup table";
                     } else if (notCustom && !_.contains(choices, itemsetData.labelRef)) {
-                            return itemsetData.labelRef + " was not found in the fixture";
+                            return itemsetData.labelRef + " was not found in the lookup table";
                     }
 
                     return 'pass';
