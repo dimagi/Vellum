@@ -139,7 +139,7 @@ define([
             assert(!util.isTreeNodeValid(trans),
                 "Transfer question with empty src and dest should be invalid");
             assert(trans.messages.get("src").length, "src should have messages");
-            assert(trans.messages.get("dest").length, "src should have messages");
+            assert(trans.messages.get("dest").length, "dest should have messages");
         });
 
         it("new transfer question should not have validation errors", function () {

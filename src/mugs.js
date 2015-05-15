@@ -96,7 +96,7 @@ define([
                     changed = mug._validate(attr);
                 } else {
                     _.each(_.keys(mug.p.__data), function (attr) {
-                        changed = changed || mug._validate(attr);
+                        changed = mug._validate(attr) || changed;
                     });
                 }
                 return changed;
