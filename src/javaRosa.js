@@ -892,6 +892,9 @@ define([
             var itextItem = widget.getItextItem();
             if (itextItem) {
                 if (widget.isDefaultLang) {
+                    if (!value) {
+                        value = widget.getPlaceholder();
+                    }
                     widget.mug.fire({
                         type: 'defaultLanguage-itext-changed',
                         form: widget.form,
