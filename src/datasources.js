@@ -239,7 +239,6 @@ define([
             super_getValue = widget.getValue,
             super_setValue = widget.setValue,
             currentValue = null,
-            input = widget.input,
             customXML = "Lookup table was not found in the project";
 
         widget.addOptions(generateFixtureOptions());
@@ -262,11 +261,6 @@ define([
 
         widget.getValue = local_getValue;
         widget.setValue = local_setValue;
-
-        widget.isDisabled = function () {
-            return input.find('option:selected').text() === customXML &&
-                   input.val() !== "";
-        };
 
         return widget;
     }
