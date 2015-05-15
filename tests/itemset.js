@@ -103,13 +103,6 @@ require([
                     call('createXML')
                 );
             });
-            
-            it("hides the copy button for itemsets", function () {
-                util.loadXML(TEST_XML_1);
-                clickQuestion("question1/itemset");
-                var $but = $("button:contains(Copy)");
-                assert($but.length === 0);
-            });
 
             it("shows validation error on navigate away from blank External Data", function () {
                 util.loadXML();
