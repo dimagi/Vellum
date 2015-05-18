@@ -891,6 +891,9 @@ define([
         widget.setItextValue = function (value) {
             var itextItem = widget.getItextItem();
             if (itextItem) {
+                if (!value) {
+                    value = widget.getPlaceholder();
+                }
                 if (widget.isDefaultLang) {
                     widget.mug.fire({
                         type: 'defaultLanguage-itext-changed',
@@ -1606,12 +1609,14 @@ define([
                         for (var k = 0; k < forms.length; k++) {
                             form = forms[k];
                             val = form.getValueOrDefault(lang);
-                            xmlWriter.writeStartElement("value");
-                            if(form.name !== "default") {
-                                xmlWriter.writeAttributeString('form', form.name);
+                            if (val) {
+                                xmlWriter.writeStartElement("value");
+                                if(form.name !== "default") {
+                                    xmlWriter.writeAttributeString('form', form.name);
+                                }
+                                xmlWriter.writeXML(xml.normalize(val));
+                                xmlWriter.writeEndElement();
                             }
-                            xmlWriter.writeXML(xml.normalize(val));
-                            xmlWriter.writeEndElement();
                         }
                         xmlWriter.writeEndElement();
                     }
