@@ -56,30 +56,30 @@ define([
     edit_source,
     select_source
 ) {
-    var BLANK_FIXTURE = {
-        sourceUri: "",
-        defaultId: "No Lookup Table Found",
-        initialQuery: "",
-        name: '',
-        structure: {}
+    var BLANKS = {
+        fixture: {
+            sourceUri: "",
+            defaultId: "No Lookup Table Found",
+            initialQuery: "",
+            name: '',
+            structure: {}
+        }
     };
 
-    var vellum, dataSources, cachedDataSources;
+    var vellum, dataSources, dataCache = {};
 
     function init(instance) {
         vellum = instance;
         dataSources = vellum.opts().core.dataSources || [];
-        cachedDataSources = {
-            fixture: {}
-        };
     }
 
-    function cacheFixtures(data) {
+    function cacheData(data, type) {
         if (data.length === 0) {
-            cachedDataSources.fixture[BLANK_FIXTURE.sourceUri] = BLANK_FIXTURE;
+            var blank = BLANKS[type] || {};
+            dataCache[type][blank.sourceUri || ""] = blank;
         }
-        _.each(data, function(fixture) {
-            cachedDataSources.fixture[fixture.sourceUri] = fixture;
+        _.each(data, function(item) {
+            dataCache[type][item.sourceUri] = item;
         });
     }
 
@@ -101,7 +101,7 @@ define([
             });
         }
 
-        return _.flatten(_.map(cachedDataSources.fixture, function(fixture) {
+        return _.flatten(_.map(dataCache.fixture, function(fixture) {
             var baseFixture = {
                 src: fixture.sourceUri,
                 id: fixture.defaultId,
@@ -138,11 +138,11 @@ define([
     }
 
     function autocompleteChoices(fixture_uri) {
-        return generateFixtureColumns(cachedDataSources.fixture[fixture_uri]);
+        return generateFixtureColumns(dataCache.fixture[fixture_uri]);
     }
 
     function getDataSources(type, callback) {
-        if (!_.isEmpty(cachedDataSources[type])) {
+        if (!_.isEmpty(dataCache[type])) {
             return;
         }
 
@@ -156,7 +156,7 @@ define([
                     type: 'GET',
                     url: source.endpoint,
                     dataType: 'json',
-                    success: function (data) { callback(data); },
+                    success: function (data) { callback(data, type); },
                     // TODO error handling
                     data: {},
                     async: false
@@ -284,7 +284,7 @@ define([
      *      setSource(source, mug) - Saves the source from the advanced editor
      */
     function fixtureWidget(mug, options, labelText) {
-        getDataSources('fixture', cacheFixtures);
+        getDataSources('fixture', cacheData);
 
         function local_getValue() {
             currentValue = JSON.parse(super_getValue());
@@ -346,7 +346,7 @@ define([
         init: init,
         advancedDataSourceWidget: advancedDataSourceWidget,
         fixtureWidget: fixtureWidget,
-        autocompleteChoices:autocompleteChoices,
+        autocompleteChoices: autocompleteChoices,
         getPossibleFixtures: getPossibleFixtures
     };
 });
