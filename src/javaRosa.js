@@ -891,10 +891,10 @@ define([
         widget.setItextValue = function (value) {
             var itextItem = widget.getItextItem();
             if (itextItem) {
+                if (!value) {
+                    value = widget.getPlaceholder();
+                }
                 if (widget.isDefaultLang) {
-                    if (!value) {
-                        value = widget.getPlaceholder();
-                    }
                     widget.mug.fire({
                         type: 'defaultLanguage-itext-changed',
                         form: widget.form,
