@@ -118,7 +118,8 @@ define([
                     (!mug.options.ignoreReferenceWarning || !mug.options.ignoreReferenceWarning(mug)) &&
                     _this.opts.allowedDataNodeReferences.indexOf(pathWithoutRoot) === -1 &&
                     !(property === "dataParent" && pathString === _this.form.getBasePath().slice(0,-1))) {
-                    error.message.push("The question '" + mug.p.nodeID + 
+                    var questionName = mug.p.nodeID ? mug.p.nodeID : mug.options.typeName;
+                    error.message.push("The question '" + questionName +
                         "' references an unknown question " + path.toXPath() + 
                         " in its " + mug.p.getDefinition(property).lstring + ".");
 
@@ -144,13 +145,10 @@ define([
             }        
         },
         updateAllReferences: function (mug) {
-            // avoid control-only nodes
-            if (mug.p.nodeID) {
-                for (var i = 0; i < util.XPATH_REFERENCES.length; i++) {
-                    var property = util.XPATH_REFERENCES[i];
-                    this.clearReferences(mug, property);
-                    this.addReferences(mug, property);
-                }
+            for (var i = 0; i < util.XPATH_REFERENCES.length; i++) {
+                var property = util.XPATH_REFERENCES[i];
+                this.clearReferences(mug, property);
+                this.addReferences(mug, property);
             }
         },
         /**

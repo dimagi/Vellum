@@ -2019,14 +2019,13 @@ define([
             "nodeID",
             "defaultValue",
             "label",
-            "readOnlyControl"
+            "readOnlyControl",
+            "itemsetData"
         ];
     };
 
     fn.getDataSourceProperties = function () {
-        return [
-            "itemsetData"
-        ];
+        return [ ];
     };
 
     fn.getMediaProperties = function () {
