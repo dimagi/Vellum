@@ -241,6 +241,30 @@ define([
             currentValue = null,
             customXML = "Lookup table was not found in the project";
 
+        if (options.hasAdvancedEditor) {
+            widget.getUIElement = function () {
+                var query = widgets.util.getUIElementWithEditButton(
+                        widgets.util.getUIElement(widget.input, labelText),
+                        function () {
+                            vellum.displaySecondaryEditor({
+                                source: local_getValue(),
+                                headerText: labelText,
+                                loadEditor: loadDataSourceEditor,
+                                done: function (source) {
+                                    if (!_.isUndefined(source)) {
+                                        local_setValue(source);
+                                        widget.handleChange();
+                                    }
+                                }
+                            });
+                        }
+                    );
+                query.find(".fd-edit-button").text("...");
+                query.find('.controls').css('margin-right', '48px');
+                return $("<div></div>").append(query);
+            };
+        }
+
         widget.addOptions(generateFixtureOptions());
 
         function local_getValue() {

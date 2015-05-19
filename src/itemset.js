@@ -45,7 +45,7 @@ define([
     debug
 ) {
     var mugTypes = mugs.baseMugTypes.normal,
-        Itemset, AdvancedItemset,
+        Itemset, isAdvancedItemsetEnabled,
         END_FILTER = /\[[^\[]*\]$/;
 
     Itemset = util.extend(mugs.defaultOptions, {
@@ -141,50 +141,15 @@ define([
             }
         }
     });
-    AdvancedItemset = util.extend(Itemset, {
-        typeName: 'External Data',
-        writeCustomXML: function (xmlWriter, mug) {
-            var data = mug.p.itemsetData;
-            xmlWriter.writeAttributeString(
-                'nodeset', data.nodeset || '');
-            xmlWriter.writeStartElement('label');
-            xmlWriter.writeAttributeString(
-                'ref', data.labelRef || '');
-            xmlWriter.writeEndElement();
-            xmlWriter.writeStartElement('value');
-            xmlWriter.writeAttributeString(
-                'ref', data.valueRef || '');
-            xmlWriter.writeEndElement();
-        },
-        spec: {
-            filter: { presence: 'notallowed' },
-            itemsetData: {
-                lstring: 'External Data',
-                visibility: 'visible_if_present',
-                presence: 'optional',
-                widget: advancedItemsetWidget,
-                validationFunc: function (mug) {
-                    var itemsetData = mug.p.itemsetData;
-                    if (!itemsetData.nodeset) {
-                        return "A data source must be selected.";
-                    }
-                    if (!itemsetData.valueRef) {
-                        return "Choice Value must be specified.";
-                    }
-                    if (!itemsetData.labelRef) {
-                        return "Choice Label must be specified.";
-                    }
-                    return 'pass';
-                }
-            }
-        }
-    });
 
     function afterDynamicSelectInsert(form, mug) {
         form.createQuestion(mug, 'into', "Itemset", true);
     }
 
     $.vellum.plugin("itemset", {}, {
+        init: function () {
+            isAdvancedItemsetEnabled = this.opts().features.advanced_itemsets;
+        },
         getSelectQuestions: function () {
             return this.__callOld().concat([
                 "SelectDynamic",
@@ -193,11 +158,7 @@ define([
         },
         getMugTypes: function () {
             var types = this.__callOld();
-            if (this.opts().features.advanced_itemsets) {
-                types.auxiliary.Itemset = AdvancedItemset;
-            } else {
-                types.auxiliary.Itemset = Itemset;
-            }
+            types.auxiliary.Itemset = Itemset;
             types.normal = $.extend(types.normal, {
                 "MSelectDynamic": util.extend(mugTypes.MSelect, {
                     typeName: 'Multiple Answer Lookup Table',
@@ -222,8 +183,7 @@ define([
         },
         updateControlNodeAdaptorMap: function (map) {
             this.__callOld();
-            var adaptItemset = parser.makeControlOnlyMugAdaptor('Itemset'),
-                use_advanced_itemsets = this.opts().features.advanced_itemsets;
+            var adaptItemset = parser.makeControlOnlyMugAdaptor('Itemset');
             map.itemset = function ($element, appearance, form, parentMug) {
                 var adapt = function (mug, form) {
                     if (parentMug.__className === 'Select') {
@@ -234,15 +194,12 @@ define([
                         debug.log("Unknown parent type: " + parentMug.__className);
                     }
                     mug = adaptItemset(mug, form);
-                    var nodeset = $element.popAttr('nodeset'), s, filter;
-                    if (!use_advanced_itemsets) {
-                        s = nodeset.search(END_FILTER);
-                        filter = s === -1 ? '' : nodeset.slice(s+1, -1);
-                        mug.p.filter = filter;
-                    }
+                    var nodeset = parseNodeset($element.popAttr('nodeset'));
+                    mug.p.filter = nodeset.filter;
                     mug.p.itemsetData = {
-                        instance: form.parseInstance(nodeset, mug, "itemsetData.instance"),
-                        nodeset: use_advanced_itemsets ? nodeset :nodeset.replace(END_FILTER, ''),
+                        instance: form.parseInstance(
+                                    nodeset.value, mug, "itemsetData.instance"),
+                        nodeset: nodeset.value,
                         labelRef: $element.children('label').attr('ref'),
                         valueRef: $element.children('value').attr('ref')
                     };
@@ -283,7 +240,21 @@ define([
         }
     }
 
+    function parseNodeset(nodeset) {
+        var i = nodeset.search(END_FILTER);
+        if (i !== -1) {
+            return {
+                value: nodeset.slice(0, i),
+                filter: nodeset.slice(i + 1, -1)
+            };
+        }
+        return {value: nodeset, filter: ''};
+    }
+
     function itemsetWidget(mug, options) {
+        if (isAdvancedItemsetEnabled) {
+            options = _.extend({}, options, {hasAdvancedEditor: true});
+        }
         var widget = datasources.fixtureWidget(mug, options, "Lookup Table"),
             super_getUIElement = widget.getUIElement,
             super_getValue = widget.getValue,
@@ -356,49 +327,6 @@ define([
 
         return widget;
     }
-
-    function advancedItemsetWidget(mug, options) {
-        var widget = datasources.advancedDataSourceWidget(mug, options, "Data Source"),
-            super_getUIElement = widget.getUIElement,
-            super_getValue = widget.getValue,
-            super_setValue = widget.setValue,
-            handleChange = widget.handleChange.bind(widget),
-            labelRef = refSelect("label_ref", "Choice Label", widget.isDisabled()),
-            valueRef = refSelect("value_ref", "Choice Value", widget.isDisabled());
-
-        labelRef.onChange(handleChange);
-        valueRef.onChange(handleChange);
-
-        widget.getUIElement = function () {
-            return super_getUIElement()
-                .append(labelRef.element)
-                .append(valueRef.element);
-        };
-
-        widget.getValue = function () {
-            var val = super_getValue();
-            return {
-                instance: ($.trim(val.src) ? {id: val.id, src: val.src} : null),
-                nodeset: val.query,
-                labelRef: labelRef.val(),
-                valueRef: valueRef.val()
-            };
-        };
-
-        widget.setValue = function (val) {
-            val = val || {};
-            super_setValue({
-                id: (val.instance ? val.instance.id : ""),
-                src: (val.instance ? val.instance.src : ""),
-                query: val.nodeset || ""
-            });
-            labelRef.val(val.labelRef);
-            valueRef.val(val.valueRef);
-        };
-
-        return widget;
-    }
-
 
     function refSelect(name, label, isDisabled) {
         var input = $("<input type='text' class='input-block-level'>");
