@@ -105,16 +105,6 @@ require([
                 );
             });
 
-            it("shows validation error on navigate away from blank External Data", function () {
-                util.loadXML();
-                util.addQuestion("SelectDynamic", "select2");
-                var itemset = util.getMug("select2/itemset");
-                clickQuestion("select2/itemset");
-                assert(util.isTreeNodeValid(itemset), "itemset should be valid");
-                clickQuestion("select2");
-                assert(!util.isTreeNodeValid(itemset), "itemset should not be valid");
-            });
-
             it("uses a dropdown when the nodeset is known", function() {
                 util.loadXML(DROPDOWN_FIXTURE_XML);
                 clickQuestion("question2/itemset");
