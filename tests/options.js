@@ -102,6 +102,7 @@ define(function () {
         features: {
             'group_in_field_list': true,
             'help_markdown': true
+            // 'advanced_itemsets': true
         }
     };
 

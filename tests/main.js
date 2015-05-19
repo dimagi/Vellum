@@ -103,6 +103,7 @@ require(['jquery', 'jquery.vellum'], function ($) {
         'tests/formdesigner.ignoreButRetain',
         'tests/formdesigner.lock',
         'tests/itemset',
+        'tests/advancedItemsets',
         'tests/tsv',
         'tests/xml',
         'tests/datasources',
