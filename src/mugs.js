@@ -365,7 +365,7 @@ define([
                 return "Unknown (read-only) question type";
             }
             if (this.__className === "Itemset") {
-                return "External Data";
+                return "Lookup Table Data";
             }
 
             if (!itextItem || lang === '_ids') {

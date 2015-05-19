@@ -110,7 +110,8 @@ define([
                 if (!refMug &&
                     (!mug.options.ignoreReferenceWarning || !mug.options.ignoreReferenceWarning(mug)) &&
                     _this.opts.allowedDataNodeReferences.indexOf(pathWithoutRoot) === -1 &&
-                    !(property === "dataParent" && pathString === _this.form.getBasePath().slice(0,-1))) {
+                    !(property === "dataParent" && pathString === _this.form.getBasePath().slice(0,-1)))
+                {
                     unknowns.push(xpath);
                 }
                 return {
@@ -147,19 +148,16 @@ define([
                 _this.clearReferences(mug, property);
                 messages[property] = _this.addReferences(mug, property);
             }
-            // avoid control-only nodes
-            if (mug.p.nodeID) {
-                var _this = this,
-                    messages = {};
-                if (property) {
-                    if (util.XPATH_REFERENCES.indexOf(property) !== -1) {
-                        update(property);
-                    }
-                } else {
-                    _.each(util.XPATH_REFERENCES, update);
+            var _this = this,
+                messages = {};
+            if (property) {
+                if (util.XPATH_REFERENCES.indexOf(property) !== -1) {
+                    update(property);
                 }
-                mug.addMessages(messages);
+            } else {
+                _.each(util.XPATH_REFERENCES, update);
             }
+            mug.addMessages(messages);
         },
         /**
          * Update references to a node with its new path. Used when a node is

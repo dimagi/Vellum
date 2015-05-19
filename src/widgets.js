@@ -268,9 +268,15 @@ define([
                 widget.getDisplayName(),
                 !!widget.isDisabled(),
                 widget.getHelp()
-            );
+            ), autocompleteSources;
+            if (_.isFunction(options.autocompleteSources)) {
+                autocompleteSources = options.autocompleteSources.bind(mug);
+            }
             return getUIElementWithEditButton(elem, function () {
                 widget.options.displayXPathEditor({
+                    leftPlaceholder: options.leftPlaceholder,
+                    rightPlaceholder: options.rightPlaceholder,
+                    leftAutoCompleteSources: autocompleteSources,
                     value: super_getValue(),
                     xpathType: widget.definition.xpathType,
                     done: function (val) {
@@ -357,7 +363,69 @@ define([
         return widget;
     };
 
-    
+    var dropdown = function (mug, options) {
+        var widget = normal(mug, options);
+        widget.input = $("<select />")
+            .attr("name", widget.id)
+            .addClass('input-block-level');
+
+        var input = widget.input;
+
+        widget.setValue = function (value) {
+            var val = widget.equivalentOption(value);
+            if (val) {
+                input.val(val.value);
+            } else {
+                widget.addOption(value, "Custom");
+                input.val(value);
+            }
+        };
+
+        widget.getValue = function () {
+            return input.val();
+        };
+
+        widget.updateValue = function () {
+            widget.save();
+        };
+
+        input.change(function () {
+            widget.handleChange();
+        });
+
+        widget.addOption = function (value, text) {
+            var option = $('<option />')
+                .attr('value', value)
+                .text(text);
+            this.input.append(option);
+        };
+
+        widget.addOptions = function (options) {
+            var _this = this;
+            _.forEach(options, function(option) {
+                _this.addOption(option.value, option.text);
+            });
+        };
+
+        widget.getOptions = function () {
+            return _.map(widget.input.find('option'), function(option) {
+                return {
+                    value: option.value,
+                    text: option.text
+                };
+            });
+        };
+
+        widget.equivalentOption = function (val) {
+            val = val ? JSON.parse(val) : '';
+            return _.find(widget.getOptions(), function (option) {
+                return _.isEqual(option.value ? JSON.parse(option.value) : '', val);
+            });
+        };
+
+        return widget;
+    };
+
     var readOnlyControl = function (mug, options) {
         options.id = "readonly-control";
         var widget = base(mug, options);
@@ -371,10 +439,12 @@ define([
 
         return widget;
     };
-   
-    var getUIElementWithEditButton = function($uiElem, editFn) {
-        var input = $uiElem.find('input'),
+
+    var getUIElementWithEditButton = function($uiElem, editFn, isDisabled) {
+        var input = $uiElem.find('input');
+        if (_.isUndefined(isDisabled)) {
             isDisabled = input ? input.prop('disabled') : false;
+        }
 
         var button = $('<button />')
             .addClass("fd-edit-button pull-right")
@@ -444,6 +514,7 @@ define([
         identifier: identifier,
         droppableText: droppableText,
         checkbox: checkbox,
+        dropdown: dropdown,
         xPath: xPath,
         baseKeyValue: baseKeyValue,
         readOnlyControl: readOnlyControl,
@@ -454,4 +525,3 @@ define([
         }
     };
 });
-

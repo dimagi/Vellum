@@ -2000,14 +2000,13 @@ define([
         return [
             "nodeID",
             "label",
-            "readOnlyControl"
+            "readOnlyControl",
+            "itemsetData"
         ];
     };
 
     fn.getDataSourceProperties = function () {
-        return [
-            "itemsetData"
-        ];
+        return [ ];
     };
 
     fn.getMediaProperties = function () {
