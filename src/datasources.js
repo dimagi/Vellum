@@ -56,58 +56,88 @@ define([
     edit_source,
     select_source
 ) {
-    var BLANKS = {
-        fixture: {
-            sourceUri: "",
-            defaultId: "No Lookup Table Found",
-            initialQuery: "",
-            name: '',
-            structure: {}
-        }
-    };
-
-    var vellum, dataSources, dataCache = {};
+    var vellum, dataSources,
+        dataCache = {},
+        dataCallbacks = {},
+        BLANKS = {
+            "": {
+                sourceUri: "",
+                defaultId: "No Data Found",
+                initialQuery: "",
+                name: '',
+                structure: {}
+            },
+            fixture: {
+                sourceUri: "",
+                defaultId: "No Lookup Table Found",
+                initialQuery: "",
+                name: '',
+                structure: {}
+            }
+        };
 
     function init(instance) {
         vellum = instance;
         dataSources = vellum.opts().core.dataSources || [];
     }
 
-    function cacheData(data, type) {
-        if (data.length === 0) {
-            var blank = BLANKS[type] || {};
-            dataCache[type][blank.sourceUri || ""] = blank;
-        }
-        _.each(data, function(item) {
-            dataCache[type][item.sourceUri] = item;
-        });
-    }
-
+    /**
+     * Asynchronously load data sources of the given type
+     *
+     * @param type - The data source type (example: "fixture").
+     * @param callback - A function to be called when the data sources
+     *      have been loaded. This function should accept two arguments:
+     *      data - {
+     *               <sourceUri1>: <data source 1 object>,
+     *               <sourceUri2>: <data source 2 object>,
+     *               ...
+     *             }
+     *      type - the data source type.
+     */
     function getDataSources(type, callback) {
-        if (!_.isEmpty(dataCache[type])) {
+        if (!_.isUndefined(dataCache[type])) {
+            callback(dataCache[type], type);
             return;
         }
-
-        var source = _.find(dataSources, function (src) {
-            return src.key === type;
-        });
-
-        if (source) {
-            if (_.isString(source.endpoint)) {
-                $.ajax({
-                    type: 'GET',
-                    url: source.endpoint,
-                    dataType: 'json',
-                    success: function (data) { callback(data, type); },
-                    // TODO error handling
-                    data: {},
-                    async: false
+        if (_.isUndefined(dataCallbacks[type])) {
+            function finish(data) {
+                dataCache[type] = {};
+                if (data.length === 0) {
+                    var blank = BLANKS[type] || BLANKS[""];
+                    dataCache[type][blank.sourceUri] = blank;
+                } else {
+                    _.each(data, function(item) {
+                        dataCache[type][item.sourceUri] = item;
+                    });
+                }
+                _.each(dataCallbacks[type], function (callback) {
+                    callback(dataCache[type], type);
                 });
+                delete dataCallbacks[type];
+            }
+            var source = _.find(dataSources, function (src) {
+                return src.key === type;
+            });
+            dataCallbacks[type] = [callback];
+            if (source) {
+                if (_.isString(source.endpoint)) {
+                    $.ajax({
+                        type: 'GET',
+                        url: source.endpoint,
+                        dataType: 'json',
+                        success: finish,
+                        // TODO error handling
+                        data: {},
+                        async: false
+                    });
+                } else {
+                    finish(source.endpoint());
+                }
             } else {
-                callback(source.endpoint());
+                finish([]);
             }
         } else {
-            callback([]);
+            dataCallbacks[type].push(callback);
         }
     }
 
@@ -229,8 +259,6 @@ define([
      *      setSource(source, mug) - Saves the source from the advanced editor
      */
     function fixtureWidget(mug, options, labelText) {
-        getDataSources('fixture', cacheData);
-
         function local_getValue() {
             currentValue = JSON.parse(super_getValue());
             return currentValue;
@@ -254,6 +282,12 @@ define([
             customXML = "Lookup table was not found in the project",
             getSource = options.getSource ? options.getSource : local_getValue,
             setSource = options.setSource ? options.setSource : local_setValue;
+
+        //widget.setOptionsLoading(); // TODO
+        getDataSources('fixture', function (data) {
+            var fixtures = getPossibleFixtures(data);
+            widget.addOptions(generateFixtureOptions(fixtures));
+        });
 
         if (options.hasAdvancedEditor) {
             widget.getUIElement = function () {
@@ -287,7 +321,7 @@ define([
         return widget;
     }
 
-    function getPossibleFixtures() {
+    function getPossibleFixtures(data) {
         function generateFixtureDefinitions(structure, baseFixture) {
             return _.map(structure, function(value, key) {
                 var ret = [],
@@ -305,7 +339,8 @@ define([
             });
         }
 
-        return _.flatten(_.map(dataCache.fixture, function(fixture) {
+        // HACK references dataCache.fixture, which is loaded asynchronously
+        return _.flatten(_.map(data || dataCache.fixture, function(fixture) {
             var baseFixture = {
                 src: fixture.sourceUri,
                 id: fixture.defaultId,
@@ -317,8 +352,8 @@ define([
         }));
     }
 
-    function generateFixtureOptions() {
-        return _.map(getPossibleFixtures(), function(fixture) {
+    function generateFixtureOptions(fixtures) {
+        return _.map(fixtures, function(fixture) {
             return {
                 value: JSON.stringify(_.omit(fixture, 'name')),
                 text: fixture.name
@@ -342,6 +377,11 @@ define([
     }
 
     function autocompleteChoices(fixture_uri) {
+        // HACK references dataCache.fixture, which is loaded asynchronously
+        // This seems wrong: fixture_uri references the root of the
+        // fixture structure, and options are generated from the root.
+        // However, the itemset may be referencing a non-root element
+        // and therefore the choices returned here will be incorrectly qualified.
         return generateFixtureColumns(dataCache.fixture[fixture_uri]);
     }
 

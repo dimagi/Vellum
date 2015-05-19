@@ -112,18 +112,19 @@ define([
                         return "Choice Label must be specified.";
                     }
 
-                    var possibleSrcs = _.map(datasources.getPossibleFixtures(), 
-                                             function(val) { return val.src; }),
-                        notCustom = _.contains(possibleSrcs, itemsetData.instance.src),
+                    var fixtures = datasources.getPossibleFixtures(),
+                        notCustom = _.some(fixtures, function (fixture) {
+                            return fixture.src === itemsetData.instance.src;
+                        }),
                         choices = datasources.autocompleteChoices(itemsetData.instance.src),
                         filterRegex = /\[[^\[]+]/g,
                         strippedValue = itemsetData.valueRef.replace(filterRegex, ""),
                         strippedLabel = itemsetData.labelRef.replace(filterRegex, "");
 
                     if (notCustom && !_.contains(choices, strippedValue)) {
-                            return itemsetData.valueRef + " was not found in the lookup table";
+                        return itemsetData.valueRef + " was not found in the lookup table";
                     } else if (notCustom && !_.contains(choices, strippedLabel)) {
-                            return itemsetData.labelRef + " was not found in the lookup table";
+                        return itemsetData.labelRef + " was not found in the lookup table";
                     }
 
                     return 'pass';
