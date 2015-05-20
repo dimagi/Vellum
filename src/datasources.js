@@ -234,11 +234,28 @@ define([
 
     /**
      * @param options - Optionally pass in:
+     *      hasAdvancedEditor - enable advanced editor if true
      *      getSource(mug) - Initializes the source for the advanced editor
      *      setSource(source, mug) - Saves the source from the advanced editor
      */
     function fixtureWidget(mug, options, labelText) {
         getDataSources('fixture', cacheFixtures);
+
+        function local_getValue() {
+            currentValue = JSON.parse(super_getValue());
+            return currentValue;
+        }
+
+        function local_setValue(val) {
+            currentValue = val;
+            var jsonVal = val ? JSON.stringify(val) : '',
+                val2 = widget.equivalentOption(jsonVal);
+            if (!val2 && !_.isEqual(val, {id: "", src: "", query: undefined})) {
+                widget.addOption(jsonVal, customXML);
+            }
+
+            super_setValue(jsonVal);
+        }
 
         var widget = widgets.dropdown(mug, options), 
             super_getValue = widget.getValue,
@@ -273,22 +290,6 @@ define([
         }
 
         widget.addOptions(generateFixtureOptions());
-
-        function local_getValue() {
-            currentValue = JSON.parse(super_getValue());
-            return currentValue;
-        }
-
-        function local_setValue(val) {
-            currentValue = val;
-            var jsonVal = val ? JSON.stringify(val) : '',
-                val2 = widget.equivalentOption(jsonVal);
-            if (!val2 && !_.isEqual(val, {id: "", src: "", query: undefined})) {
-                widget.addOption(jsonVal, customXML);
-            }
-
-            super_setValue(jsonVal);
-        }
 
         widget.getValue = local_getValue;
         widget.setValue = local_setValue;

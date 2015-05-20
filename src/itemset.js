@@ -252,8 +252,6 @@ define([
     }
 
     function itemsetWidget(mug, options) {
-        var super_setValue, super_getValue;
-
         if (isAdvancedItemsetEnabled) {
             options = _.extend({}, options, {hasAdvancedEditor: true});
             options.getSource = function (mug) {
@@ -274,12 +272,11 @@ define([
 
         var widget = datasources.fixtureWidget(mug, options, "Lookup Table"),
             super_getUIElement = widget.getUIElement,
+            super_getValue = widget.getValue,
+            super_setValue = widget.setValue,
             super_handleChange = widget.handleChange.bind(widget),
             labelRef = refSelect("label_ref", "Label Field", false),
             valueRef = refSelect("value_ref", "Value Field", false);
-
-        super_getValue = widget.getValue;
-        super_setValue = widget.setValue;
 
         function getChoices() {
             return datasources.autocompleteChoices(widget.getValue().instance.src);
