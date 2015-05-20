@@ -175,9 +175,20 @@ define([
                     pos.error = "Cannot insert $1 into $2"
                         .replace("$1", nameOf(values.type))
                         .replace("$2", nameOf(node.mug.parentMug.__className));
-                    break;
+                    return pos;
                 }
                 node = node.parent;
+            }
+            if (pos.position === "after") {
+                pos.parent = node.parent;
+            } else if (pos.position === "last" || pos.position === "into") {
+                pos.parent = node;
+            } else {
+                // should never happen
+                pos.error = "Cannot insert $1 $2 $3"
+                    .replace("$1", nameOf(values.type))
+                    .replace("$2", pos.position)
+                    .replace("$3", nameOf(pos.mug.__className));
             }
         }
         return pos;
@@ -258,9 +269,8 @@ define([
             row = next(),
             errors = new mugs.MugMessages(),
             node = {id: null, mug: mug, parent: null},
-            into = {into: 1, last: 1},
             later = [],
-            values, pos, parent;
+            values, pos;
         errors.add = function (message) {
             errors.update(null, {
                 key: message,
@@ -287,25 +297,12 @@ define([
                 errors.add(pos.error);
                 continue;
             }
-            if (pos.position === "after") {
-                parent = node.parent;
-            } else if (into.hasOwnProperty(pos.position)) {
-                parent = node;
-            } else {
-                // should never happen
-                if (pos.position === "last") { pos.position = "into"; }
-                errors.add("Cannot insert $1 $2 $3"
-                    .replace("$1", nameOf(values.type))
-                    .replace("$2", pos.position)
-                    .replace("$3", nameOf(pos.mug.__className)));
-                break;
-            }
             mug = form.createQuestion(pos.mug, pos.position, values.type, true);
             later.push(mug.deserialize(values, errors));
             node = {
                 id: values.id,
                 mug: mug,
-                parent: parent,
+                parent: pos.parent,
             };
         }
         _.each(_.flatten(later), function (f) { f.execute(); });

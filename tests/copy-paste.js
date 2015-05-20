@@ -352,7 +352,7 @@ require([
             ]);
         });
 
-        it("should copoy conflicted question id", function () {
+        it("should copy conflicted question id", function () {
             util.loadXML("");
             paste([
                 ["id", "type", "labelItext:en-default", "labelItext:hin-default"],
@@ -693,6 +693,46 @@ require([
                 ["/text3", "Text", "text3", "text3"],
                 ["/group/text1", "Text", "text1", "text1"],
                 ["/group/text2", "Text", "text2", "text2"],
+            ]);
+        });
+
+        it("should paste questions in tree order", function () {
+            util.loadXML("");
+            paste([
+                ["id", "type", "labelItext:en-default", "labelItext:hin-default"],
+                ["/question1", "Text", "question1", "question1"],
+                ["/question2", "Select", "question2", "question2"],
+                ["/question2/item1", "Item", "item1", "item1"],
+                ["/question2/item2", "Item", "item2", "item2"],
+                ["/question3", "Int", "question3", "question3"],
+                ["/question4", "Date", "question4", "question4"],
+                ["/question5", "DataBindOnly", "null", "null"],
+            ]);
+            util.clickQuestion(
+                "question1",
+                "question2",
+                "question3",
+                "question4",
+                "question5"
+            );
+            mod.paste(mod.copy());
+            util.selectAll();
+            eq(mod.copy(), [
+                ["id", "type", "labelItext:en-default", "labelItext:hin-default"],
+                ["/question1", "Text", "question1", "question1"],
+                ["/copy-1-of-question1", "Text", "question1", "question1"],
+                ["/copy-1-of-question2", "Select", "question2", "question2"],
+                ["/copy-1-of-question2/item1", "Item", "item1", "item1"],
+                ["/copy-1-of-question2/item2", "Item", "item2", "item2"],
+                ["/copy-1-of-question3", "Int", "question3", "question3"],
+                ["/copy-1-of-question4", "Date", "question4", "question4"],
+                ["/copy-1-of-question5", "DataBindOnly", "null", "null"],
+                ["/question2", "Select", "question2", "question2"],
+                ["/question2/item1", "Item", "item1", "item1"],
+                ["/question2/item2", "Item", "item2", "item2"],
+                ["/question3", "Int", "question3", "question3"],
+                ["/question4", "Date", "question4", "question4"],
+                ["/question5", "DataBindOnly", "null", "null"],
             ]);
         });
 
