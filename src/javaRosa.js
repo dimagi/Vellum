@@ -43,7 +43,8 @@ define([
         RESERVED_ITEXT_CONTENT_TYPES = [
             'default', 'short', 'long', 'audio', 'video', 'image'
         ],
-        _nextItextItemKey = 1;
+        _nextItextItemKey = 1,
+        NO_MARKDOWN_MUGS = ['Item'];
 
     function ItextItem(options) {
         this.forms = options.forms || [];
@@ -571,13 +572,11 @@ define([
 
     var itextLabelBlock = function (mug, options) {
         var block = baseItextBlock(mug, options);
-        block.itextWidget = itextLabelWidget;
-        return block;
-    };
-
-    var itextMarkdownBlock = function (mug, options) {
-        var block = baseItextBlock(mug, options);
-        block.itextWidget = itextMarkdownWidget;
+        if (_.contains(NO_MARKDOWN_MUGS, mug.__className)) {
+            block.itextWidget = itextLabelWidget;
+        } else {
+            block.itextWidget = itextMarkdownWidget;
+        }
         return block;
     };
 
@@ -1832,7 +1831,7 @@ define([
                 presence: 'optional',
                 lstring: "Label",
                 widget: function (mug, options) {
-                    return itextMarkdownBlock(mug, $.extend(options, {
+                    return itextLabelBlock(mug, $.extend(options, {
                         itextType: "label",
                         getItextByMug: function (mug) {
                             return mug.p.labelItext;
@@ -1883,7 +1882,7 @@ define([
                 },
                 lstring: "Help Message",
                 widget: function (mug, options) {
-                    var block = itextMarkdownBlock(mug, $.extend(options, {
+                    var block = itextLabelBlock(mug, $.extend(options, {
                             itextType: "help",
                             getItextByMug: function (mug) {
                                 return mug.p.helpItext;
