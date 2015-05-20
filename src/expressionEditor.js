@@ -1,5 +1,6 @@
 define([
     'jquery',
+    'underscore',
     'vellum/debugutil',
     'xpath',
     'xpathmodels',
@@ -9,6 +10,7 @@ define([
     'less!vellum/less-style/xpath-editor'
 ], function (
     $,
+    _,
     debug,
     xpath,
     xpathmodels,
@@ -59,6 +61,10 @@ define([
 
     function showXPathEditor($div, options) {
         var editorContent = $div;
+        options = _.defaults(options, {
+            leftPlaceholder: "Hint: drag a question here.",
+            rightPlaceholder: "Hint: drag a question here.",
+        });
 
         var getExpressionInput = function () {
             return $div.find(".fd-xpath-editor-text");
@@ -144,7 +150,9 @@ define([
             var newExpressionUIElement = function (expOp) {
 
                 var $expUI = $(xpath_expression({
-                    operationOpts: operationOpts
+                    operationOpts: operationOpts,
+                    leftPlaceholder: options.leftPlaceholder,
+                    rightPlaceholder: options.rightPlaceholder
                 }));
 
                 var getLeftQuestionInput = function () {
@@ -200,6 +208,24 @@ define([
                     // so we need to update the reference
                     populateQuestionInputBox(getRightQuestionInput(), expOp.right, expOp.left);
                 }
+
+                function autoSources(sources) {
+                    return {
+                        source: _.isFunction(sources) ? sources() : [],
+                        minLength: 0
+                    };
+                }
+
+                getLeftQuestionInput()
+                    .autocomplete(autoSources(options.leftAutoCompleteSources))
+                    .focus(function(e) {
+                        $(this).autocomplete('search', $(this).val());
+                    });
+                getRightQuestionInput()
+                    .autocomplete(autoSources(options.rightAutoCompleteSources))
+                    .focus(function(e) {
+                        $(this).autocomplete('search', $(this).val());
+                    });
                 return $expUI;
             };
 

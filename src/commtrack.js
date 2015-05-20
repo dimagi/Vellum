@@ -131,9 +131,11 @@ define([
             },
             getBindList: function (mug) {
                 return [{
+                    nodeset: mug.absolutePath,
+                    relevant: mug.p.relevantAttr,
+                }, {
                     nodeset: mug.absolutePath + "/entry/@quantity",
                     calculate: mug.p.quantity,
-                    relevant: mug.p.relevantAttr
                 }];
             },
             spec: {
@@ -366,10 +368,12 @@ define([
                     mug = form.getMugByPath(basePath);
                     if (isTransaction(mug)) {
                         mug.p.quantity = el.attr("calculate");
-                        mug.p.relevantAttr = el.attr("relevant");
                         return;
                     }
                 }
+            } else if (isTransaction(mug)) {
+                mug.p.relevantAttr = el.attr("relevant");
+                return;
             }
             this.__callOld();
         },

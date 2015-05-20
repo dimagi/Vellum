@@ -250,7 +250,7 @@ define([
     }
 
     function idsQueryDataSourceWidget(mug, options) {
-        var widget = datasources.dataSourceWidget(
+        var widget = datasources.advancedDataSourceWidget(
                                     mug, options, "Model Iteration ID Query"),
             super_getValue = widget.getValue,
             super_setValue = widget.setValue;

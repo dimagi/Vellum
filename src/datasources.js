@@ -11,14 +11,96 @@ define([
     edit_source,
     select_source
 ) {
-    var vellum, dataSources;
+    var BLANK_FIXTURE = {
+        sourceUri: "",
+        defaultId: "No Lookup Table Found",
+        initialQuery: "",
+        name: '',
+        structure: {}
+    };
+
+    var vellum, dataSources, cachedDataSources;
 
     function init(instance) {
         vellum = instance;
         dataSources = vellum.opts().core.dataSources || [];
+        cachedDataSources = {
+            fixture: {}
+        };
+    }
+
+    function cacheFixtures(data) {
+        if (data.length === 0) {
+            cachedDataSources.fixture[BLANK_FIXTURE.sourceUri] = BLANK_FIXTURE;
+        }
+        _.each(data, function(fixture) {
+            cachedDataSources.fixture[fixture.sourceUri] = fixture;
+        });
+    }
+
+    function getPossibleFixtures() {
+        function generateFixtureDefinitions(structure, baseFixture) {
+            return _.map(structure, function(value, key) {
+                var ret = [],
+                    newBaseFixture = {
+                        src: baseFixture.src,
+                        id: baseFixture.id,
+                        query: baseFixture.query + "/" + key
+                    };
+                newBaseFixture.name = baseFixture.name + " - " + (value.name || key);
+
+                if (!value.no_option) {
+                    ret = [newBaseFixture];
+                }
+                return ret.concat(generateFixtureDefinitions(value.structure, newBaseFixture));
+            });
+        }
+
+        return _.flatten(_.map(cachedDataSources.fixture, function(fixture) {
+            var baseFixture = {
+                src: fixture.sourceUri,
+                id: fixture.defaultId,
+                query: fixture.initialQuery,
+                name: fixture.name || fixture.defaultId
+            };
+
+            return [baseFixture].concat(generateFixtureDefinitions(fixture.structure, baseFixture));
+        }));
+    }
+
+    function generateFixtureOptions() {
+        return _.map(getPossibleFixtures(), function(fixture) {
+            return {
+                value: JSON.stringify(_.omit(fixture, 'name')),
+                text: fixture.name
+            };
+        });
+    }
+
+    function generateFixtureColumns(fixture) {
+        function generateColumns(structure) {
+            return _.map(structure, function(value, key) {
+                return [key].concat(_.map(generateColumns(value.structure), function(value) {
+                    return key + '/' + value;
+                }));
+            });
+        }
+
+        if (fixture) {
+            return _.flatten(generateColumns(fixture.structure));
+        }
+        return [];
+    }
+
+    function autocompleteChoices(fixture_uri) {
+        return generateFixtureColumns(cachedDataSources.fixture[fixture_uri]);
     }
 
     function getDataSources(type, callback) {
+        if (!_.isEmpty(cachedDataSources[type])) {
+            return;
+        }
+
         var source = _.find(dataSources, function (src) {
             return src.key === type;
         });
@@ -31,7 +113,8 @@ define([
                     dataType: 'json',
                     success: function (data) { callback(data); },
                     // TODO error handling
-                    data: {}
+                    data: {},
+                    async: false
                 });
             } else {
                 callback(source.endpoint());
@@ -39,82 +122,6 @@ define([
         } else {
             callback([]);
         }
-    }
-
-    function selectDataSource(callback) {
-        var $modal = vellum.generateNewModal("Select Data Source", [
-                {
-                    title: "Set Data Source",
-                    cssClasses: "btn-primary",
-                    action: function () {
-                        var sel = $source.find(":selected"),
-                            src = (sel && sel.data("source")) || {};
-                        callback({
-                            instance: {
-                                id: src.defaultId,
-                                src: src.sourceUri
-                            },
-                            idsQuery: $query.val(),
-                        });
-                        $modal.modal('hide');
-                    }
-                }
-            ]),
-            $exportForm = $(select_source({}));
-        $modal.find('.modal-body').html($exportForm);
-
-        var $type = $exportForm.find('[name=type-selector]'),
-            $source = $exportForm.find('[name=source-selector]'),
-            $query = $exportForm.find('[name=source-query]'),
-            $text = $exportForm.find('textarea');
-
-        $text.attr("disabled", "disabled");
-        $type.empty();
-        $type.append($("<option />").text("-- Select a source type --"));
-        _.each(dataSources, function(source) {
-            $type.append($("<option />").val(source.key).text(source.name));
-        });
-
-        function populate() {
-            var key = $type.val();
-            $source.empty();
-            if (!key) {
-                select();
-                return;
-            }
-            getDataSources(key, function (sources) {
-                $source.append($("<option />").text("-- Select a source --"));
-                _.each(sources, function (source) {
-                    $source.append($("<option />").data("source", source)
-                                                  .text(source.name));
-                });
-                select();
-            });
-        }
-
-        function select() {
-            var selected = $source.find(":selected"),
-                source = selected && selected.data("source");
-            if (source) {
-                $query.val("instance('{1}')/{2}"
-                    .replace("{1}", source.defaultId)
-                    .replace("{2}", source.rootNodeName)
-                );
-                $text.text([
-                    source.defaultId,
-                    source.sourceUri,
-                ].join("\n"));
-            } else {
-                $query.val("");
-                $text.text("");
-            }
-        }
-
-        $type.change(populate);
-        $source.change(select);
-
-        // display current values
-        $modal.modal('show');
     }
 
     /**
@@ -181,7 +188,7 @@ define([
         });
     }
 
-    function dataSourceWidget(mug, options, labelText) {
+    function advancedDataSourceWidget(mug, options, labelText) {
         var widget = widgets.text(mug, options),
             getUIElement = widgets.util.getUIElement,
             getUIElementWithEditButton = widgets.util.getUIElementWithEditButton,
@@ -225,11 +232,44 @@ define([
         return widget;
     }
 
+    function fixtureWidget(mug, options, labelText) {
+        getDataSources('fixture', cacheFixtures);
+
+        var widget = widgets.dropdown(mug, options), 
+            super_getValue = widget.getValue,
+            super_setValue = widget.setValue,
+            currentValue = null,
+            customXML = "Lookup table was not found in the project";
+
+        widget.addOptions(generateFixtureOptions());
+
+        function local_getValue() {
+            currentValue = JSON.parse(super_getValue());
+            return currentValue;
+        }
+
+        function local_setValue(val) {
+            currentValue = val;
+            var jsonVal = val ? JSON.stringify(val) : '',
+                val2 = widget.equivalentOption(jsonVal);
+            if (!val2 && !_.isEqual(val, {id: "", src: "", query: undefined})) {
+                widget.addOption(jsonVal, customXML);
+            }
+
+            super_setValue(jsonVal);
+        }
+
+        widget.getValue = local_getValue;
+        widget.setValue = local_setValue;
+
+        return widget;
+    }
+
     return {
         init: init,
-        getDataSources: getDataSources,
-        selectDataSource: selectDataSource,
-        dataSourceWidget: dataSourceWidget
+        advancedDataSourceWidget: advancedDataSourceWidget,
+        fixtureWidget: fixtureWidget,
+        autocompleteChoices:autocompleteChoices,
+        getPossibleFixtures: getPossibleFixtures
     };
-
 });

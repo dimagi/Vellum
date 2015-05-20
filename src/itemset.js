@@ -45,23 +45,20 @@ define([
     debug
 ) {
     var mugTypes = mugs.baseMugTypes.normal,
-        Itemset;
+        Itemset, AdvancedItemset,
+        END_FILTER = /\[[^\[]*\]$/;
 
     Itemset = util.extend(mugs.defaultOptions, {
         isControlOnly: true,
-        typeName: 'External Data',
+        typeName: 'Lookup Table Data',
         tagName: 'itemset',
-        icon: 'icon-circle-blank',
+        icon: 'icon-th',
         isTypeChangeable: false,
         // have to delete the parent select
         isRemoveable: false,
         isCopyable: false,
         getIcon: function (mug) {
-            if (mug.parentMug.__className === "SelectDynamic") {
-                return 'icon-circle-blank';
-            } else {
-                return 'icon-check-empty';
-            }
+            return 'icon-th';
         },
         init: function (mug, form, baseSpec) {
             mug.p.itemsetData = {};
@@ -69,9 +66,14 @@ define([
         writeControlLabel: false,
         writeControlRefAttr: null,
         writeCustomXML: function (xmlWriter, mug) {
-            var data = mug.p.itemsetData;
+            var data = mug.p.itemsetData,
+                nodeset = data.nodeset,
+                filter = mug.p.filter;
+            if (filter) {
+                nodeset += '[' + filter + ']';
+            }
             xmlWriter.writeAttributeString(
-                'nodeset', data.nodeset || '');
+                'nodeset', nodeset || '');
             xmlWriter.writeStartElement('label');
             xmlWriter.writeAttributeString(
                 'ref', data.labelRef || '');
@@ -94,9 +96,73 @@ define([
             otherItext: { presence: 'notallowed' },
             appearance: { presence: 'notallowed' },
             itemsetData: {
+                lstring: 'Lookup Table',
                 visibility: 'visible_if_present',
                 presence: 'optional',
                 widget: itemsetWidget,
+                validationFunc: function (mug) {
+                    var itemsetData = mug.p.itemsetData;
+                    if (!itemsetData.nodeset) {
+                        return "A data source must be selected.";
+                    }
+                    if (!itemsetData.valueRef) {
+                        return "Choice Value must be specified.";
+                    }
+                    if (!itemsetData.labelRef) {
+                        return "Choice Label must be specified.";
+                    }
+
+                    var possibleSrcs = _.map(datasources.getPossibleFixtures(), 
+                                             function(val) { return val.src; }),
+                        notCustom = _.contains(possibleSrcs, itemsetData.instance.src),
+                        choices = datasources.autocompleteChoices(itemsetData.instance.src);
+
+                    if (notCustom && !_.contains(choices, itemsetData.valueRef)) {
+                            return itemsetData.valueRef + " was not found in the lookup table";
+                    } else if (notCustom && !_.contains(choices, itemsetData.labelRef)) {
+                            return itemsetData.labelRef + " was not found in the lookup table";
+                    }
+
+                    return 'pass';
+                }
+            },
+            filter: {
+                lstring: 'Filter',
+                presence: 'optional',
+                widget: widgets.xPath,
+                xpathType: 'bool',
+                visibility: 'visible',
+                leftPlaceholder: '',
+                autocompleteSources: function() {
+                    return datasources.autocompleteChoices(this.p.itemsetData.instance.src);
+                },
+                help: "This is an XPath expression that will filter the set " +
+                      "of choices from the lookup table",
+            }
+        }
+    });
+    AdvancedItemset = util.extend(Itemset, {
+        typeName: 'External Data',
+        writeCustomXML: function (xmlWriter, mug) {
+            var data = mug.p.itemsetData;
+            xmlWriter.writeAttributeString(
+                'nodeset', data.nodeset || '');
+            xmlWriter.writeStartElement('label');
+            xmlWriter.writeAttributeString(
+                'ref', data.labelRef || '');
+            xmlWriter.writeEndElement();
+            xmlWriter.writeStartElement('value');
+            xmlWriter.writeAttributeString(
+                'ref', data.valueRef || '');
+            xmlWriter.writeEndElement();
+        },
+        spec: {
+            filter: { presence: 'notallowed' },
+            itemsetData: {
+                lstring: 'External Data',
+                visibility: 'visible_if_present',
+                presence: 'optional',
+                widget: advancedItemsetWidget,
                 validationFunc: function (mug) {
                     var itemsetData = mug.p.itemsetData;
                     if (!itemsetData.nodeset) {
@@ -127,10 +193,14 @@ define([
         },
         getMugTypes: function () {
             var types = this.__callOld();
-            types.auxiliary.Itemset = Itemset;
+            if (this.opts().features.advanced_itemsets) {
+                types.auxiliary.Itemset = AdvancedItemset;
+            } else {
+                types.auxiliary.Itemset = Itemset;
+            }
             types.normal = $.extend(types.normal, {
                 "MSelectDynamic": util.extend(mugTypes.MSelect, {
-                    typeName: 'Multiple Answer - Dynamic List',
+                    typeName: 'Multiple Answer Lookup Table',
                     typeChangeError: function (mug, typeName) {
                         return typeName === "SelectDynamic" ? "" : "Can only change to a dynamic single answer";
                     },
@@ -139,7 +209,7 @@ define([
                     afterInsert: afterDynamicSelectInsert,
                 }),
                 "SelectDynamic": util.extend(mugTypes.Select, {
-                    typeName: 'Single Answer - Dynamic List',
+                    typeName: 'Single Answer Lookup Table',
                     typeChangeError: function (mug, typeName) {
                         return typeName === "MSelectDynamic" ? "" : "Can only change to a dynamic multiple answer";
                     },
@@ -152,7 +222,8 @@ define([
         },
         updateControlNodeAdaptorMap: function (map) {
             this.__callOld();
-            var adaptItemset = parser.makeControlOnlyMugAdaptor('Itemset');
+            var adaptItemset = parser.makeControlOnlyMugAdaptor('Itemset'),
+                use_advanced_itemsets = this.opts().features.advanced_itemsets;
             map.itemset = function ($element, appearance, form, parentMug) {
                 var adapt = function (mug, form) {
                     if (parentMug.__className === 'Select') {
@@ -163,10 +234,15 @@ define([
                         debug.log("Unknown parent type: " + parentMug.__className);
                     }
                     mug = adaptItemset(mug, form);
-                    var nodeset = $element.popAttr('nodeset');
+                    var nodeset = $element.popAttr('nodeset'), s, filter;
+                    if (!use_advanced_itemsets) {
+                        s = nodeset.search(END_FILTER);
+                        filter = s === -1 ? '' : nodeset.slice(s+1, -1);
+                        mug.p.filter = filter;
+                    }
                     mug.p.itemsetData = {
                         instance: form.parseInstance(nodeset, mug, "itemsetData.instance"),
-                        nodeset: nodeset,
+                        nodeset: use_advanced_itemsets ? nodeset :nodeset.replace(END_FILTER, ''),
                         labelRef: $element.children('label').attr('ref'),
                         valueRef: $element.children('value').attr('ref')
                     };
@@ -184,6 +260,11 @@ define([
                     updateDataSource(mug, event.val, event.previous);
                 }
             });
+        },
+        getLogicProperties: function () {
+            var ret = this.__callOld();
+            ret.push('filter');
+            return ret;
         }
     });
 
@@ -203,7 +284,81 @@ define([
     }
 
     function itemsetWidget(mug, options) {
-        var widget = datasources.dataSourceWidget(mug, options, "Data Source"),
+        var widget = datasources.fixtureWidget(mug, options, "Lookup Table"),
+            super_getUIElement = widget.getUIElement,
+            super_getValue = widget.getValue,
+            super_setValue = widget.setValue,
+            super_handleChange = widget.handleChange.bind(widget),
+            labelRef = refSelect("label_ref", "Label Field", false),
+            valueRef = refSelect("value_ref", "Value Field", false);
+
+        function getChoices() {
+            return datasources.autocompleteChoices(widget.getValue().instance.src);
+        }
+
+        function updateAutoComplete() {
+            if (widget.getValue().instance) {
+                var sources = getChoices();
+                labelRef.addAutoComplete(sources, super_handleChange);
+                valueRef.addAutoComplete(sources, super_handleChange);
+            }
+        }
+
+        var local_handleChange = function() {
+            updateAutoComplete();
+            super_handleChange();
+        };
+
+        widget.handleChange = local_handleChange;
+
+        labelRef.onChange(super_handleChange);
+        valueRef.onChange(super_handleChange);
+
+        widget.getUIElement = function () {
+            return $('<div>').append(super_getUIElement())
+                .append(valueRef.element)
+                .append(labelRef.element);
+        };
+
+        widget.getValue = function () {
+            var val = super_getValue();
+            return {
+                instance: ($.trim(val.src) ? {id: val.id, src: val.src} : {id: null, src: null}),
+                nodeset: val.query,
+                labelRef: labelRef.val(),
+                valueRef: valueRef.val()
+            };
+        };
+
+        widget.setValue = function (val) {
+            var sources;
+            val = _.isEmpty(val) ? widget.getValue() : val;
+            super_setValue({
+                id: (val.instance ? val.instance.id : ""),
+                src: (val.instance ? val.instance.src : ""),
+                query: val.nodeset
+            });
+            if (!val.labelRef) {
+                sources = getChoices();
+                val.labelRef = sources[0];
+            }
+            if (!val.valueRef) {
+                sources = sources ? sources : getChoices();
+                val.valueRef = sources.length > 0 ? sources[1] : sources[0];
+            }
+            labelRef.val(val.labelRef);
+            valueRef.val(val.valueRef);
+            widget.save();
+        };
+
+        // initialize the auto complete sources after getValue is overridden
+        updateAutoComplete();
+
+        return widget;
+    }
+
+    function advancedItemsetWidget(mug, options) {
+        var widget = datasources.advancedDataSourceWidget(mug, options, "Data Source"),
             super_getUIElement = widget.getUIElement,
             super_getValue = widget.getValue,
             super_setValue = widget.setValue,
@@ -244,10 +399,22 @@ define([
         return widget;
     }
 
+
     function refSelect(name, label, isDisabled) {
         var input = $("<input type='text' class='input-block-level'>");
         input.attr("name", name);
         return {
+            addAutoComplete: function(sources, changeFunction) {
+                input.autocomplete({
+                    source: sources,
+                    minLength: 0,
+                    change: changeFunction,
+                    close: changeFunction
+                }).focus(function (e) {
+                    // populate the list
+                    $(this).autocomplete('search', $(this).val());
+                });
+            },
             element: widgets.util.getUIElement(input, label, isDisabled),
             val: function (value) {
                 if (_.isUndefined(value)) {
