@@ -1665,6 +1665,7 @@ define([
         },
         getMugSpec: function () {
             var spec = this.__callOld(),
+                that = this,
                 databind = spec.databind,
                 control = spec.control;
 
@@ -1721,7 +1722,10 @@ define([
                     }
                     var dlang = item.itextModel.getDefaultLanguage(),
                         languages = item.itextModel.languages,
-                        nodeID = "";
+                        nodeID = "",
+                        mmForms = {audio: 1, image: 1, video: 1},
+                        // HACK reach into media uploader options
+                        objectMap = that.data.uploader.objectMap || {};
                     if (data.id) {
                         // a little hacky, but it's a fallback default
                         nodeID = data.id.slice(data.id.lastIndexOf("/") + 1);
@@ -1743,6 +1747,17 @@ define([
                                 }
                                 if (value) {
                                     item.set(value, form, lang);
+                                    if (mmForms.hasOwnProperty(form) &&
+                                            !objectMap.hasOwnProperty(value)) {
+                                        // TODO make itext widgets display messages
+                                        // and then mug.addMessage(name, ...
+                                        mug.addMessage(null, {
+                                            key: "missing-multimedia-warning",
+                                            level: mug.WARNING,
+                                            message: "MultiMedia was not copied; " +
+                                                     "it must be uploaded separately."
+                                        });
+                                    }
                                 }
                                 found = true;
                             }
