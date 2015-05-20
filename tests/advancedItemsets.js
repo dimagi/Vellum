@@ -118,6 +118,31 @@ require([
 
                 assert.equal(4, (call('createXML').match(/itemset/g) || []).length);
             });
+
+            it("includes filter when in advanced mode", function() {
+                util.loadXML(TEST_XML_1);
+                clickQuestion("question1/itemset");
+                var mug = util.getMug("question1/itemset");
+                mug.p.filter = "'blah' = /data/question2";
+                $("button:contains(...)").click();
+                assert($('[name=query]').val().indexOf(mug.p.filter) > 1);
+            });
+
+            it("changes filter when in advanced mode", function() {
+                util.loadXML(TEST_XML_1);
+                clickQuestion("question1/itemset");
+
+                var mug = util.getMug("question1/itemset");
+                mug.p.filter = "'blah' = /data/question2";
+                $("button:contains(...)").click();
+
+                var query = $('[name=query]').val();
+                $('[name=query]').val(query.replace(/question2/, "no_question")).change();
+                $('.fd-data-source-save-button').click();
+
+                assert.strictEqual($('[name=property-filter]').val(),
+                                   "'blah' = /data/no_question");
+            });
         });
     });
 });

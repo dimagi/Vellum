@@ -252,16 +252,34 @@ define([
     }
 
     function itemsetWidget(mug, options) {
+        var super_setValue, super_getValue;
+
         if (isAdvancedItemsetEnabled) {
             options = _.extend({}, options, {hasAdvancedEditor: true});
+            options.getSource = function (mug) {
+                var val = super_getValue();
+                if (mug.p.filter) {
+                    val.query += "[" + mug.p.filter + "]";
+                }
+                return val;
+            };
+            options.setSource = function (source, mug) {
+                var val = source,
+                    nodeset = parseNodeset(source.query);
+                val.query = nodeset.value;
+                mug.p.filter = nodeset.filter;
+                super_setValue(val);
+            };
         }
+
         var widget = datasources.fixtureWidget(mug, options, "Lookup Table"),
             super_getUIElement = widget.getUIElement,
-            super_getValue = widget.getValue,
-            super_setValue = widget.setValue,
             super_handleChange = widget.handleChange.bind(widget),
             labelRef = refSelect("label_ref", "Label Field", false),
             valueRef = refSelect("value_ref", "Value Field", false);
+
+        super_getValue = widget.getValue;
+        super_setValue = widget.setValue;
 
         function getChoices() {
             return datasources.autocompleteChoices(widget.getValue().instance.src);
