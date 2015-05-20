@@ -463,6 +463,15 @@ require([
             assert.equal(q1.p.labelItext.get("default", "hin"), 'Hindu trans');
         });
 
+        it("should not get stuck on bulk update non-existent questions", function () {
+            var form = util.loadXML(""),
+                Itext = util.call("getData").javaRosa.Itext,
+                trans = ('label\tdefault-en\tdefault-hin\n' +
+                         'question1-label\tlabel\tHindu trans\n');
+            jr.parseXLSItext(form, trans, Itext);
+            assert(!util.getMug("question1"), "question1 should not exist");
+        });
+
         it("should generate bulk multi-line translation with user-friendly newlines", function () {
             var form = util.loadXML(MULTI_LINE_TRANS_XML),
                 Itext = util.call("getData").javaRosa.Itext;
