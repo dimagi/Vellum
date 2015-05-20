@@ -669,6 +669,17 @@ require([
                    "double_trouble should not be valid");
         });
 
+        it("should show warning on paste missing multimedia", function () {
+            util.loadXML("");
+            paste([
+                ["id", "type", "labelItext:en-audio"],
+                ["/text", "Text", "jr://file/commcare/audio/data/question1.mp3"],
+            ]);
+            var mug = util.getMug("text");
+            assert(mug.messages.get(null, "missing-multimedia-warning"),
+                   "text should have missing-multimedia-warning");
+        });
+
         it("should copy questions in tree order", function () {
             util.loadXML("");
             paste([
@@ -845,7 +856,37 @@ require([
             input.val("other").change();
             assert.equal(input.val(), "other");
         });
+
+        describe("with multimedia", function () {
+            before(function (done) {
+                util.init({
+                    javaRosa: { langs: ['en', 'hin'] },
+                    uploader: { objectMap: {
+                        "jr://file/commcare/audio/data/question1.mp3": true
+                    }},
+                    core: {
+                        onReady: function () {
+                            assert(this.isPluginEnabled("copyPaste"),
+                                   "copyPaste plugin should be enabled");
+                            done();
+                        }
+                    }
+                });
+            });
+
+            it("should not show warning on paste existing multimedia", function () {
+                util.loadXML("");
+                paste([
+                    ["id", "type", "labelItext:en-audio"],
+                    ["/text", "Text", "jr://file/commcare/audio/data/question1.mp3"],
+                ]);
+                var messages = util.getMessages("text");
+                assert(!messages, messages);
+            });
+        });
     });
+
+
 
     describe("The copy-paste string conversions should", function () {
         function test(value, string) {
