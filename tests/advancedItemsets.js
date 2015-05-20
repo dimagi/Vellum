@@ -102,22 +102,6 @@ require([
                     call('createXML')
                 );
             });
-            
-            it("hides the copy button for itemsets", function () {
-                util.loadXML(TEST_XML_1);
-                clickQuestion("question1/itemset");
-                var $but = $("button:contains(Copy)");
-                assert($but.length === 0);
-            });
-
-            it("allows copying a select with an itemset", function () {
-                util.loadXML(TEST_XML_1);
-                clickQuestion("question1");
-                var $but = $("button:contains(Copy)");
-                $but.click();
-
-                assert.equal(4, (call('createXML').match(/itemset/g) || []).length);
-            });
 
             it("includes filter when in advanced mode", function() {
                 util.loadXML(TEST_XML_1);
