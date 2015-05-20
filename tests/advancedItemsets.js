@@ -1,4 +1,3 @@
-/*jshint multistr: true */
 require([
     'tests/options',
     'tests/utils',
@@ -21,7 +20,6 @@ require([
     INNER_FILTERS_XML
 ) {
 
-    // see note about controlling time in formdesigner.lock.js
     var assert = chai.assert,
         call = util.call,
         clickQuestion = util.clickQuestion,
