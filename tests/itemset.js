@@ -34,7 +34,8 @@ require([
             util.init({
                 plugins: plugins,
                 javaRosa: {langs: ['en']},
-                core: {onReady: done}
+                core: {onReady: done},
+                features: {advanced_itemsets: false},
             });
         }
         before(beforeFn);

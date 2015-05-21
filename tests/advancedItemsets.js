@@ -1,4 +1,3 @@
-/*jshint multistr: true */
 require([
     'tests/options',
     'tests/utils',
@@ -21,7 +20,6 @@ require([
     INNER_FILTERS_XML
 ) {
 
-    // see note about controlling time in formdesigner.lock.js
     var assert = chai.assert,
         call = util.call,
         clickQuestion = util.clickQuestion,
@@ -119,6 +117,31 @@ require([
                 $but.click();
 
                 assert.equal(4, (call('createXML').match(/itemset/g) || []).length);
+            });
+
+            it("includes filter when in advanced mode", function() {
+                util.loadXML(TEST_XML_1);
+                clickQuestion("question1/itemset");
+                var mug = util.getMug("question1/itemset");
+                mug.p.filter = "'blah' = /data/question2";
+                $("button:contains(...)").click();
+                assert($('[name=query]').val().indexOf(mug.p.filter) > 1);
+            });
+
+            it("changes filter when in advanced mode", function() {
+                util.loadXML(TEST_XML_1);
+                clickQuestion("question1/itemset");
+
+                var mug = util.getMug("question1/itemset");
+                mug.p.filter = "'blah' = /data/question2";
+                $("button:contains(...)").click();
+
+                var query = $('[name=query]').val();
+                $('[name=query]').val(query.replace(/question2/, "no_question")).change();
+                $('.fd-data-source-save-button').click();
+
+                assert.strictEqual($('[name=property-filter]').val(),
+                                   "'blah' = /data/no_question");
             });
         });
     });
