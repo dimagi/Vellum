@@ -1815,6 +1815,14 @@ define([
                 lstring: "JR Preload Param"
             };
 
+            function validateConstraintMsgAttr(mug) {
+                var itext = mug.p.constraintMsgItext;
+                if (!mug.p.constraintAttr && itext && !itext.isEmpty()) {
+                    return 'You cannot have a Validation Error Message ' +
+                           'with no Validation Condition!';
+                }
+                return 'pass';
+            }
             // hide non-itext constraint message unless it's present
             databind.constraintMsgAttr.visibility = "visible_if_present";
             databind.constraintMsgItext = addSerializer({
@@ -1838,9 +1846,21 @@ define([
                     if (!mug.p.constraintAttr && itext && itext.id && !itext.autoId) {
                         return "Can't have a Validation Message Itext ID without a Validation Condition";
                     }
-                    return itextValidator("constraintMsgItext", "Validation Message")(mug);
+                    var result = itextValidator("constraintMsgItext", "Validation Message")(mug);
+                    if (result === "pass") {
+                        result = validateConstraintMsgAttr(mug);
+                    }
+                    return result;
                 }
             });
+            var super_constraintAttr_validate = databind.constraintAttr.validationFunc;
+            databind.constraintAttr.validationFunc = function (mug) {
+                var result = super_constraintAttr_validate(mug);
+                if (result === "pass") {
+                    result = validateConstraintMsgAttr(mug);
+                }
+                return result;
+            };
             // virtual property used to define a widget
             databind.constraintMsgItextID = {
                 visibility: 'constraintMsgItext',

@@ -823,6 +823,9 @@ define([
             constraintAttr: {
                 visibility: 'visible',
                 presence: 'optional',
+                validationFunc: function (mug) {
+                    return baseSpecs.databind.constraintMsgAttr.validationFunc(mug);
+                },
                 widget: widgets.xPath,
                 xpathType: "bool",
                 lstring: 'Validation Condition'
@@ -832,13 +835,8 @@ define([
                 visibility: 'visible',
                 presence: 'optional',
                 validationFunc : function (mug) {
-                    var hasConstraint = mug.p.constraintAttr,
-                        constraintMsgItext = mug.p.constraintMsgItext,
-                        hasConstraintMsg = (mug.p.constraintMsgAttr || 
-                                            (constraintMsgItext &&
-                                             !constraintMsgItext.isEmpty()));
-                    if (hasConstraintMsg && !hasConstraint) {
-                        return 'ERROR: You cannot have a Validation Error Message with no Validation Condition!';
+                    if (mug.p.constraintMsgAttr && !mug.p.constraintAttr) {
+                        return 'You cannot have a Validation Error Message with no Validation Condition!';
                     } else {
                         return 'pass';
                     }
