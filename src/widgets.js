@@ -286,8 +286,8 @@ define([
                         }
                     }
                 });
-                if (typeof window.ga !== "undefined") {
-                    window.ga('send', 'event', 'Form Builder', 'Logic', options.lstring);
+                if (window.analytics) {
+                    window.analytics.usage('Form Builder', 'Logic', options.lstring);
                 }
             }, !!widget.isDisabled());
         };

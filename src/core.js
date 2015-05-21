@@ -156,8 +156,8 @@ define([
                     return; // abort
                 }
                 _this.ensureCurrentMugIsSaved(function () {
-                    if (!_.isUndefined(window.analytics)) {
-                        window.analytics.track("Clicked Save in form builder");
+                    if (window.analytics) {
+                        window.analytics.workflow("Clicked Save in form builder");
                     }
                     _this.validateAndSaveXForm(forceFullSave);
                 });
@@ -175,8 +175,8 @@ define([
         setTimeout(setFullscreenIcon, 0);
         this.data.core.$fullscreenButton = $('<button class="btn"><i/></button>').click(function (e) {
             e.preventDefault();
-            if (typeof window.ga !== "undefined") {
-                window.ga('send', 'event', 'Form Builder', 'Full Screen Mode',
+            if (window.analytics) {
+                window.analytics.usage('Form Builder', 'Full Screen Mode',
                           _this.opts().core.formId);
             }
             if (_this.data.windowManager.fullscreen) {
@@ -371,6 +371,10 @@ define([
         });
 
         this.$f.find('.fd-button-copy').click(function () {
+            if (window.analytics) {
+                window.analytics.usage("Copy Paste", "Copy Button");
+                window.analytics.workflow("Clicked Copy Button in form builder");
+            }
             _this.ensureCurrentMugIsSaved(function () {
                 _this.displayMultipleSelectionView();
                 var selected = _this.jstree("get_selected");
@@ -1270,8 +1274,8 @@ define([
             if (!foo) {
                 throw new Error("cannot add " + qType + " at the current position");
             }
-            if (!_.isUndefined(window.analytics)) {
-                window.analytics.track("Added question in form builder");
+            if (window.analytics) {
+                window.analytics.workflow("Added question in form builder");
             }
             mug = _this.data.core.form.createQuestion(foo.mug, foo.position, qType);
             var $firstInput = _this.$f.find(".fd-question-properties input:text:visible:first");
