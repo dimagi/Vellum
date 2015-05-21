@@ -1792,6 +1792,7 @@ define([
                             });
                         }
                     }
+                    mug.validate(name);
                 };
                 return options;
             }
