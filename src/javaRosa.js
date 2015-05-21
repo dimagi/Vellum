@@ -536,7 +536,8 @@ define([
             // none
         };
 
-        var $blockUI = $("<div />")
+        var $messages = $("<div />").addClass("controls").addClass("messages"),
+            $blockUI = $("<div />")
             .addClass('itext-block-container')
             .addClass("itext-block-" + block.itextType);
 
@@ -555,9 +556,16 @@ define([
         };
 
         block.refreshMessages = function () {
-            // does nothing for now since there are no validation errors
-            // that pertain to itext content
+            // TODO improve this to display each message beside the
+            // form and language to which it applies
+            if (options.messagesPath) {
+                var messages = widgets.getMessages(mug, options.messagesPath);
+                $messages.empty().append(messages);
+            }
         };
+
+        mug.on("messages-changed",
+               function () { block.refreshMessages(); }, null, "teardown-mug-properties");
 
         block.getUIElement = function () {
             _.each(block.getForms(), function (form) {
@@ -572,6 +580,7 @@ define([
                 });
                 $blockUI.append($formGroup);
             });
+            $blockUI.append($messages);
             return $blockUI;
         };
 
@@ -1746,9 +1755,7 @@ define([
                                     item.set(value, form, lang);
                                     if (mmForms.hasOwnProperty(form) &&
                                             !objectMap.hasOwnProperty(value)) {
-                                        // TODO make itext widgets display messages
-                                        // and then mug.addMessage(name, ...
-                                        mug.addMessage(null, {
+                                        mug.addMessage(name, {
                                             key: "missing-multimedia-warning",
                                             level: mug.WARNING,
                                             message: "MultiMedia was not copied; " +
@@ -1819,6 +1826,7 @@ define([
                 widget: function (mug, options) {
                     return itextLabelBlock(mug, $.extend(options, {
                         itextType: "constraintMsg",
+                        messagesPath: "constraintMsgItext",
                         getItextByMug: function (mug) {
                             return mug.p.constraintMsgItext;
                         },
@@ -1855,6 +1863,7 @@ define([
                 widget: function (mug, options) {
                     return itextLabelBlock(mug, $.extend(options, {
                         itextType: "label",
+                        messagesPath: "labelItext",
                         getItextByMug: function (mug) {
                             return mug.p.labelItext;
                         },
@@ -1881,6 +1890,7 @@ define([
                 widget: function (mug, options) {
                     return itextLabelBlock(mug, $.extend(options, {
                         itextType: "hint",
+                        messagesPath: "hintItext",
                         getItextByMug: function (mug) {
                             return mug.p.hintItext;
                         },
@@ -1906,6 +1916,7 @@ define([
                 widget: function (mug, options) {
                     var block = itextLabelBlock(mug, $.extend(options, {
                             itextType: "help",
+                            messagesPath: "helpItext",
                             getItextByMug: function (mug) {
                                 return mug.p.helpItext;
                             },
