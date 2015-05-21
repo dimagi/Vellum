@@ -216,7 +216,7 @@ define([
          * this to drop "info" messages.
          */
         getErrors: function () {
-            return this.messages.get();
+            return _.uniq(this.messages.get());
         },
         /**
          * Get a list of form serialization warnings
