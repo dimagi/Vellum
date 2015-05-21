@@ -1204,9 +1204,7 @@ define([
 
         var items = getItextItemsFromMugs(form, true);
         items = _.object(_.map(items, function (item) { return [item.id, item]; }));
-        cells = nextRow();
-        while (cells) {
-            // what's the point of creating items here?
+        for (cells = nextRow(); cells; cells = nextRow()) {
             item = items[cells[0]];
             if (!item) {
                 // TODO alert user that row was skipped
@@ -1222,7 +1220,6 @@ define([
                     }
                 }
             }
-            cells = nextRow();
         }
         Itext.fire("change");
     };
