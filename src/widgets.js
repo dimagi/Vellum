@@ -492,8 +492,11 @@ define([
     };
 
     function getMessages(mug, path) {
-        var $messages = $();
+        var $messages = $(),
+            seen = {};
         mug.messages.each(path, function (msg) {
+            if (seen.hasOwnProperty(msg.message)) { return; }
+            seen[msg.message] = true;
             var html = $(widget_control_message({
                     msg: msg,
                     html: /\n/.test(msg.message) ?

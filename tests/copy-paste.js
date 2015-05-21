@@ -676,7 +676,7 @@ require([
                 ["/text", "Text", "jr://file/commcare/audio/data/question1.mp3"],
             ]);
             var mug = util.getMug("text");
-            assert(mug.messages.get(null, "missing-multimedia-warning"),
+            assert(mug.messages.get("labelItext", "missing-multimedia-warning"),
                    "text should have missing-multimedia-warning");
         });
 
