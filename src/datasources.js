@@ -83,64 +83,6 @@ define([
         });
     }
 
-    function getPossibleFixtures() {
-        function generateFixtureDefinitions(structure, baseFixture) {
-            return _.map(structure, function(value, key) {
-                var ret = [],
-                    newBaseFixture = {
-                        src: baseFixture.src,
-                        id: baseFixture.id,
-                        query: baseFixture.query + "/" + key
-                    };
-                newBaseFixture.name = baseFixture.name + " - " + (value.name || key);
-
-                if (!value.no_option) {
-                    ret = [newBaseFixture];
-                }
-                return ret.concat(generateFixtureDefinitions(value.structure, newBaseFixture));
-            });
-        }
-
-        return _.flatten(_.map(dataCache.fixture, function(fixture) {
-            var baseFixture = {
-                src: fixture.sourceUri,
-                id: fixture.defaultId,
-                query: fixture.initialQuery,
-                name: fixture.name || fixture.defaultId
-            };
-
-            return [baseFixture].concat(generateFixtureDefinitions(fixture.structure, baseFixture));
-        }));
-    }
-
-    function generateFixtureOptions() {
-        return _.map(getPossibleFixtures(), function(fixture) {
-            return {
-                value: JSON.stringify(_.omit(fixture, 'name')),
-                text: fixture.name
-            };
-        });
-    }
-
-    function generateFixtureColumns(fixture) {
-        function generateColumns(structure) {
-            return _.map(structure, function(value, key) {
-                return [key].concat(_.map(generateColumns(value.structure), function(value) {
-                    return key + '/' + value;
-                }));
-            });
-        }
-
-        if (fixture) {
-            return _.flatten(generateColumns(fixture.structure));
-        }
-        return [];
-    }
-
-    function autocompleteChoices(fixture_uri) {
-        return generateFixtureColumns(dataCache.fixture[fixture_uri]);
-    }
-
     function getDataSources(type, callback) {
         if (!_.isEmpty(dataCache[type])) {
             return;
@@ -277,6 +219,9 @@ define([
         return widget;
     }
 
+    // -------------------------------------------------------------------------
+    // The following are functions related to "fixture" type data sources only
+
     /**
      * @param options - Optionally pass in:
      *      hasAdvancedEditor - enable advanced editor if true
@@ -341,6 +286,66 @@ define([
 
         return widget;
     }
+
+    function getPossibleFixtures() {
+        function generateFixtureDefinitions(structure, baseFixture) {
+            return _.map(structure, function(value, key) {
+                var ret = [],
+                    newBaseFixture = {
+                        src: baseFixture.src,
+                        id: baseFixture.id,
+                        query: baseFixture.query + "/" + key
+                    };
+                newBaseFixture.name = baseFixture.name + " - " + (value.name || key);
+
+                if (!value.no_option) {
+                    ret = [newBaseFixture];
+                }
+                return ret.concat(generateFixtureDefinitions(value.structure, newBaseFixture));
+            });
+        }
+
+        return _.flatten(_.map(dataCache.fixture, function(fixture) {
+            var baseFixture = {
+                src: fixture.sourceUri,
+                id: fixture.defaultId,
+                query: fixture.initialQuery,
+                name: fixture.name || fixture.defaultId
+            };
+
+            return [baseFixture].concat(generateFixtureDefinitions(fixture.structure, baseFixture));
+        }));
+    }
+
+    function generateFixtureOptions() {
+        return _.map(getPossibleFixtures(), function(fixture) {
+            return {
+                value: JSON.stringify(_.omit(fixture, 'name')),
+                text: fixture.name
+            };
+        });
+    }
+
+    function generateFixtureColumns(fixture) {
+        function generateColumns(structure) {
+            return _.map(structure, function(value, key) {
+                return [key].concat(_.map(generateColumns(value.structure), function(value) {
+                    return key + '/' + value;
+                }));
+            });
+        }
+
+        if (fixture) {
+            return _.flatten(generateColumns(fixture.structure));
+        }
+        return [];
+    }
+
+    function autocompleteChoices(fixture_uri) {
+        return generateFixtureColumns(dataCache.fixture[fixture_uri]);
+    }
+
+    // -------------------------------------------------------------------------
 
     return {
         init: init,
