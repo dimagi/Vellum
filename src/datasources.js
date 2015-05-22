@@ -47,34 +47,20 @@ define([
     'jquery',
     'underscore',
     'vellum/widgets',
+    'vellum/util',
     'tpl!vellum/templates/data_source_editor',
     'tpl!vellum/templates/select_data_source'
 ], function (
     $,
     _,
     widgets,
+    util,
     edit_source,
     select_source
 ) {
     var vellum, dataSources,
         dataCache = {},
-        dataCallbacks = {},
-        BLANKS = {
-            "": {
-                sourceUri: "",
-                defaultId: "No Data Found",
-                initialQuery: "",
-                name: '',
-                structure: {}
-            },
-            fixture: {
-                sourceUri: "",
-                defaultId: "No Lookup Table Found",
-                initialQuery: "",
-                name: '',
-                structure: {}
-            }
-        };
+        dataCallbacks = {};
 
     function init(instance) {
         vellum = instance;
@@ -103,8 +89,13 @@ define([
             function finish(data) {
                 dataCache[type] = {};
                 if (data.length === 0) {
-                    var blank = BLANKS[type] || BLANKS[""];
-                    dataCache[type][blank.sourceUri] = blank;
+                    dataCache[type][""] = {
+                        sourceUri: "",
+                        defaultId: "",
+                        initialQuery: "",
+                        name: "Not Found",
+                        structure: {}
+                    };
                 } else {
                     _.each(data, function(item) {
                         dataCache[type][item.sourceUri] = item;
@@ -126,7 +117,10 @@ define([
                         url: source.endpoint,
                         dataType: 'json',
                         success: finish,
-                        // TODO error handling
+                        error: function (jqXHR, errorType, exc) {
+                            finish([]);
+                            window.console.log(util.formatExc(exc || errorType));
+                        }
                         data: {},
                         async: false
                     });
