@@ -264,7 +264,8 @@ define([
         }
         var types = vellum.data.core.mugTypes.allTypes,
             form = vellum.data.core.form,
-            mug = vellum.getCurrentlySelectedMug(),
+            selected = vellum.getCurrentlySelectedMug(true, true),
+            mug = selected.length ? selected[selected.length - 1] : null,
             header = next(),
             row = next(),
             errors = new mugs.MugMessages(),
