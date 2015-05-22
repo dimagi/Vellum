@@ -17,28 +17,32 @@
  *          defaultId: string (used in instance definition)
  *          intialQuery: string (used in nodeset)
  *          name: string (text in the dropdown)
- *          structure: nested dictionary of attributes
+ *          structure: nested dictionary of elements and attributes
  *          {
- *              attribute1: {
+ *              element: {
  *                  structure: {
- *                      inner-attribute1: {
+ *                      inner-element: {
  *                          no_option: boolean (does not show up in the dropdown)
  *                      }
  *                  }
- *              }
+ *              },
+ *              @attribute: { }
  *          }
  *      }
  * ]
  *
+ * elements can be nested indefinitely with structure keys describing inner 
+ *     elements and attributes
+ *
  * The result of that would be (if used in an itemset):
- * <instance src=sourceUri id=defaultId>
- * ...
- * <itemset nodeset=initialQuery />
+ *     <instance src=sourceUri id=defaultId>
+ *     ...
+ *     <itemset nodeset=initialQuery />
  *
  *
  * The dropdown would have options:
- * name (would have output as above)
- * name - attribute1 (would change nodeset to initialQuery/attribute1
+ *     name (would have output as above)
+ *     name - element (would change nodeset to initialQuery/element)
  */
 define([
     'jquery',
