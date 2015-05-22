@@ -975,7 +975,7 @@ define([
         var selected = this.jstree('get_selected'),
             form = this.data.core.form;
         if (multiple) {
-            if (treeOrder) {
+            if (treeOrder && selected.length > 1) {
                 var ids = _.object(_.map(selected, function (id) {
                         return [id, true];
                     })),

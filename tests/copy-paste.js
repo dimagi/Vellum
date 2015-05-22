@@ -731,6 +731,12 @@ require([
             eq(mod.copy(), [
                 ["id", "type", "labelItext:en-default", "labelItext:hin-default"],
                 ["/question1", "Text", "question1", "question1"],
+                ["/question2", "Select", "question2", "question2"],
+                ["/question2/item1", "Item", "item1", "item1"],
+                ["/question2/item2", "Item", "item2", "item2"],
+                ["/question3", "Int", "question3", "question3"],
+                ["/question4", "Date", "question4", "question4"],
+                ["/question5", "DataBindOnly", "null", "null"],
                 ["/copy-1-of-question1", "Text", "question1", "question1"],
                 ["/copy-1-of-question2", "Select", "question2", "question2"],
                 ["/copy-1-of-question2/item1", "Item", "item1", "item1"],
@@ -738,12 +744,6 @@ require([
                 ["/copy-1-of-question3", "Int", "question3", "question3"],
                 ["/copy-1-of-question4", "Date", "question4", "question4"],
                 ["/copy-1-of-question5", "DataBindOnly", "null", "null"],
-                ["/question2", "Select", "question2", "question2"],
-                ["/question2/item1", "Item", "item1", "item1"],
-                ["/question2/item2", "Item", "item2", "item2"],
-                ["/question3", "Int", "question3", "question3"],
-                ["/question4", "Date", "question4", "question4"],
-                ["/question5", "DataBindOnly", "null", "null"],
             ]);
         });
 
