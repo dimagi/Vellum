@@ -21,9 +21,7 @@
  *          {
  *              element: {
  *                  structure: {
- *                      inner-element: {
- *                          no_option: boolean (does not show up in the dropdown)
- *                      }
+ *                      inner-element: { }
  *                  }
  *              },
  *              @attribute: { }
