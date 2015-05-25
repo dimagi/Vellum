@@ -2,7 +2,7 @@ define([
     'json!langCodes',
     'underscore',
     'jsdiff',
-    'markdown-it',
+    'vellum/markdown',
     'jquery',
     'jquery.bootstrap-popout'
 ], function (
@@ -12,8 +12,6 @@ define([
     markdown,
     $
 ) {
-    var md = markdown();
-
     RegExp.escape = function(s) {
         return s.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
     };
@@ -306,9 +304,7 @@ define([
         return patch;
     };
 
-    that.markdown = function (text) {
-        return md.render(text);
-    };
+    that.markdown = markdown;
 
     return that;
 });
