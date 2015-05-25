@@ -622,8 +622,8 @@ define([
                 duplicate = foo[0],
                 pathReplacements = foo[1];
 
-            if (typeof window.ga !== "undefined") {
-                window.ga('send', 'event', 'Form Builder', 'Copy', duplicate.options.typeName);
+            if (window.analytics) {
+                window.analytics.usage('Form Builder', 'Copy', duplicate.options.typeName);
             }
 
             for (var i = 0; i < pathReplacements.length; i++) {
