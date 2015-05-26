@@ -90,12 +90,14 @@ require(['jquery', 'jquery.vellum'], function ($) {
         'tests/core',
         'tests/form',
         'tests/logic',
+        'tests/mugs',
         'tests/parser',
         'tests/questionTypes',
         'tests/exporter',
         'tests/widgets',
         'tests/writer',
         'tests/commtrack',
+        'tests/copy-paste',
         'tests/javaRosa',
         'tests/modeliteration',
         'tests/intentManager',
@@ -116,6 +118,7 @@ require(['jquery', 'jquery.vellum'], function ($) {
         function runTests() {
             function showTestResults() {
                 $(".sidebar .nav #resultsTab a").click();
+                return false;
             }
             if (window.mochaPhantomJS) {
                 mochaPhantomJS.run();

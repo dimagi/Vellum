@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:orx="http://openrosa.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa" xmlns:vellum="http://commcarehq.org/xforms/vellum">
+	<h:head>
+		<h:title>Untitled Form</h:title>
+		<model>
+			<instance>
+				<data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/3760D84C-832E-48D0-80A8-FC206F09A767" uiVersion="1" version="1" name="Untitled Form">
+					<box />
+					<fox />
+				</data>
+			</instance>
+			<bind nodeset="/data/box" />
+			<bind nodeset="/data/fox" />
+			<itext>
+				<translation lang="en" default="">
+					<text id="box-label">
+						<value>In a box?</value>
+					</text>
+					<text id="yes-label">
+						<value>Yes</value>
+					</text>
+					<text id="no-label">
+						<value>No</value>
+					</text>
+					<text id="fox-label">
+						<value>With a fox?</value>
+					</text>
+				</translation>
+				<translation lang="hin">
+					<text id="box-label">
+						<value>In a box?</value>
+					</text>
+					<text id="yes-label">
+						<value>Yes</value>
+					</text>
+					<text id="no-label">
+						<value>No</value>
+					</text>
+					<text id="fox-label">
+						<value>With a fox?</value>
+					</text>
+				</translation>
+			</itext>
+		</model>
+	</h:head>
+	<h:body>
+		<select1 ref="/data/box">
+			<label ref="jr:itext('box-label')" />
+			<item>
+				<label ref="jr:itext('yes-label')" />
+				<value>yes</value>
+			</item>
+			<item>
+				<label ref="jr:itext('no-label')" />
+				<value>no</value>
+			</item>
+		</select1>
+		<select1 ref="/data/fox">
+			<label ref="jr:itext('fox-label')" />
+			<item>
+				<label ref="jr:itext('yes-label')" />
+				<value>yes</value>
+			</item>
+			<item>
+				<label ref="jr:itext('no-label')" />
+				<value>no</value>
+			</item>
+		</select1>
+	</h:body>
+</h:html>

@@ -8,6 +8,7 @@ define([
     'text!static/form/question-referencing-other.xml',
     'text!static/form/group-with-internal-refs.xml',
     'text!static/form/hidden-value-in-group.xml',
+    'text!static/form/nested-groups.xml',
     'text!static/form/select-questions.xml',
     'text!static/form/mismatch-tree-order.xml',
     'text!static/form/hidden-value-tree-order.xml'
@@ -21,6 +22,7 @@ define([
     QUESTION_REFERENCING_OTHER_XML,
     GROUP_WITH_INTERNAL_REFS_XML,
     HIDDEN_VALUE_IN_GROUP_XML,
+    NESTED_GROUPS_XML,
     SELECT_QUESTIONS,
     MISMATCH_TREE_ORDER_XML,
     HIDDEN_VALUE_TREE_ORDER
@@ -36,6 +38,57 @@ define([
             });
         });
 
+        it("should get and fix serialization errors for mugs with matching paths", function () {
+            var form = util.loadXML(""),
+                one = util.addQuestion("Text", "question"),
+                two = util.addQuestion("Text", "question");
+            assert.notEqual(one.absolutePath, two.absolutePath);
+            var errors = form.getSerializationWarnings();
+            assert.equal(errors.length, 1, "missing serialization error message");
+            assert.equal(errors[0].mug.ufid, two.ufid);
+
+            form.fixSerializationWarnings(errors);
+            assert.equal(one.p.nodeID, "question");
+            assert.notEqual(one.absolutePath, two.absolutePath);
+            errors = form.getSerializationWarnings();
+            assert.deepEqual(errors, [], JSON.stringify(errors));
+        });
+
+        it("should retain expression meaning on rename matching path", function () {
+            var blue = util.addQuestion("Text", "blue"),
+                green = util.addQuestion("Text", "green"),
+                black = util.addQuestion("DataBindOnly", "black");
+            black.p.calculateAttr = "/data/blue + /data/green";
+            green.p.nodeID = "blue";
+            assert.notEqual(green.p.nodeID, "blue");
+            assert(!util.isTreeNodeValid(green), "expected validation error");
+
+            blue.p.nodeID = "orange";
+            assert.equal(green.p.nodeID, "blue");
+            assert.equal(black.p.calculateAttr, "/data/orange + /data/blue");
+            assert(util.isTreeNodeValid(blue), blue.getErrors().join("\n"));
+            assert(util.isTreeNodeValid(green), green.getErrors().join("\n"));
+            assert(util.isTreeNodeValid(black), black.getErrors().join("\n"));
+        });
+
+        it("should retain conflicted mug ID on move", function () {
+            var form = util.loadXML(""),
+                hid = util.addQuestion("DataBindOnly", "hid"),
+                text = util.addQuestion("Text", "text"),
+                group = util.addQuestion("Group", "group");
+            util.addQuestion("Text", "text");
+            hid.p.calculateAttr = "/data/text + /data/group/text";
+            form.moveMug(text, "into", group);
+            assert.notEqual(hid.p.calculateAttr, "/data/text + /data/group/text");
+            assert.notEqual(text.p.nodeID, "text");
+            assert(!util.isTreeNodeValid(text), "expected /data/text error");
+
+            form.moveMug(text, "into", null);
+            assert.equal(text.p.nodeID, "text");
+            assert.equal(hid.p.calculateAttr, "/data/text + /data/group/text");
+            assert(util.isTreeNodeValid(text), text.getErrors().join("\n"));
+        });
+
         it("should show warnings for broken references on delete mug", function () {
             util.loadXML(QUESTION_REFERENCING_OTHER_XML);
             var blue = call("getMugByPath", "/data/blue"),
@@ -44,7 +97,7 @@ define([
             assert(util.isTreeNodeValid(green), "sanity check failed: green is invalid");
             assert(util.isTreeNodeValid(black), "sanity check failed: black is invalid");
             util.clickQuestion("blue");
-            blue.form.removeMugFromForm(blue);
+            blue.form.removeMugsFromForm([blue]);
             assert(util.isTreeNodeValid(green), "green should be valid");
             assert(!util.isTreeNodeValid(black), "black should not be valid");
         });
@@ -53,11 +106,46 @@ define([
             util.loadXML(QUESTION_REFERENCING_OTHER_XML);
             var blue = call("getMugByPath", "/data/blue"),
                 black = call("getMugByPath", "/data/black");
-            blue.form.removeMugFromForm(blue);
+            blue.form.removeMugsFromForm([blue]);
             assert(!util.isTreeNodeValid(black), "black should not be valid");
             blue = util.addQuestion("Text", "blue");
-            assert(util.isTreeNodeValid(black),
-                   "black should be valid after blue is added");
+            assert(util.isTreeNodeValid(black), util.getMessages(black));
+        });
+
+        it("should show duplicate question ID warning inline", function () {
+            util.loadXML("");
+            util.addQuestion("Text", "text");
+            var text = util.addQuestion("Text", "text"),
+                messages = text.messages.get("nodeID");
+            assert.equal(messages.length, 1, messages.join("\n"));
+            // UI dependent, possibly fragile
+            var div = $("[name=property-nodeID]").closest(".control-group"),
+                msg = div.find(".messages").children();
+            assert.equal(msg.length, messages.length, msg.text());
+            assert.equal(msg[0].text, messages[0].message);
+        });
+
+        it("should warn about top-level question named 'case'", function () {
+            util.loadXML("");
+            var mug = util.addQuestion("Text", "case");
+            assert(mug.messages.get("nodeID", "mug-nodeID-case-warning"),
+                "mug-nodeID-case-warning was expected but not present");
+            mug.p.nodeID = "the-case";
+            assert.equal(util.getMessages(mug), "");
+        });
+
+        it("should not warn about question named 'case' in group", function () {
+            util.loadXML("");
+            util.addQuestion("Group", "group");
+            var mug = util.addQuestion("Text", "case");
+            assert.equal(util.getMessages(mug), "");
+        });
+
+        it("should add ODK warning to mug on create Audio question", function () {
+            util.loadXML("");
+            var mug = util.addQuestion("Audio"),
+                messages = util.getMessages(mug);
+            chai.expect(messages).to.include("Android");
         });
 
         it("should preserve internal references in copied group", function () {
@@ -84,7 +172,7 @@ define([
                 item1 = util.getMug("question1/item1"),
                 item2 = util.getMug("question2/item2");
             // should not throw an error
-            form.moveMug(item1, item2, 'before');
+            form.moveMug(item1, 'before', item2);
         });
 
         it("should update reference to hidden value in group", function () {
@@ -109,7 +197,7 @@ define([
 
             chai.expect(label.p.relevantAttr).to.include("/data/group/hidden");
             chai.expect(label.p.labelItext.defaultValue()).to.include("/data/group/hidden");
-            form.moveMug(hidden, null, "first");
+            form.moveMug(hidden, "first", null);
             assert.equal(hidden.absolutePath, "/data/hidden");
             chai.expect(label.p.relevantAttr).to.include("/data/hidden");
             chai.expect(label.p.labelItext.defaultValue()).to.include("/data/hidden");
@@ -130,9 +218,9 @@ define([
             var select = util.addQuestion("Select", 'select'),
                 item1 = select.form.getChildren(select)[0],
                 item2 = select.form.getChildren(select)[1];
-            assert(util.isTreeNodeValid(item1), "sanity check failed: item1 is invalid");
-            assert(util.isTreeNodeValid(item2), "sanity check failed: item2 is invalid");
-            item2.p.defaultValue = "item1";
+            assert(util.isTreeNodeValid(item1), item1.getErrors().join("\n"));
+            assert(util.isTreeNodeValid(item2), item2.getErrors().join("\n"));
+            item2.p.nodeID = "item1";
             assert(util.isTreeNodeValid(item1), "item1 should be valid");
             assert(!util.isTreeNodeValid(item2), "item2 should be invalid");
         });
@@ -159,6 +247,20 @@ define([
                 "question6",
                 "question4"
             );
+        });
+
+        it("should delete nested groups", function() {
+            var form = util.loadXML(NESTED_GROUPS_XML),
+                mugs = util.clickQuestion("group1", "group1/group2");
+            form.removeMugsFromForm(mugs);
+            util.assertJSTreeState("");
+        });
+
+        it("should delete nested groups v2", function() {
+            var form = util.loadXML(NESTED_GROUPS_XML),
+                mugs = util.clickQuestion("group1", "group1/group2/group3");
+            form.removeMugsFromForm(mugs);
+            util.assertJSTreeState("");
         });
     });
 });

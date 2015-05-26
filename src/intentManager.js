@@ -13,10 +13,11 @@ define([
     $
 ) {
     "use strict";
+    var DEFAULT_XMLNS = "http://opendatakit.org/xforms";
     function makeODKXIntentTag (form, nodeID, path) {
         return new ODKXIntentTag(form, {
             path: path || "",
-            xmlns: "http://opendatakit.org/xforms",
+            xmlns: DEFAULT_XMLNS,
             extra: {},
             response: {},
             unknownAttributes: {},
@@ -225,7 +226,53 @@ define([
             androidIntentAppId: {
                 lstring: 'Intent ID',
                 visibility: 'visible',
-                widget: androidIntentAppId
+                widget: androidIntentAppId,
+                serialize: function (value, key, mug, data) {
+                    function dropBlank(item) {
+                        item = _.clone(item);
+                        if (item[""] === "") {
+                            delete item[""];
+                        }
+                        return item;
+                    }
+                    var keys = {
+                            "path": _.identity,
+                            "xmlns": function (v) { return v !== DEFAULT_XMLNS ? v : null; },
+                            "extra": dropBlank,
+                            "response": dropBlank,
+                            "unknownAttributes": _.identity,
+                        },
+                        tag = mug.intentTag,
+                        values = {};
+                    if (tag) {
+                        _.each(keys, function (valueOf, attr) {
+                            var val = valueOf(tag.getAttr(attr));
+                            if (!_.isEmpty(val)) {
+                                values[attr] = val;
+                            }
+                        });
+                        if (!_.isEmpty(values)) {
+                            data.intent = values;
+                        }
+                    }
+                },
+                deserialize: function (data, key, mug) {
+                    var tag = makeODKXIntentTag(mug.form, mug.p.nodeID, null);
+                    if (data.intent) {
+                        _.each([
+                            "path",
+                            "xmlns",
+                            "extra",
+                            "response",
+                            "unknownAttributes"
+                        ], function (attr) {
+                            if (!_.isEmpty(data.intent[attr])) {
+                                tag.setAttr(attr, data.intent[attr]);
+                            }
+                        });
+                    }
+                    mug.intentTag = tag;
+                }
             },
             androidIntentExtra: {
                 lstring: 'Extra',

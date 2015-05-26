@@ -106,9 +106,6 @@ define([
         var controls = xml.find('h\\:body, body').children();
         parseControlTree(form, controls);
 
-        // wire the event handlers for all the mugs in the tree
-        var allMugs = form.getMugList();
-
         var i;
         // update parse error and warn information in the model/UI
         if (form.parseErrors) {
@@ -128,11 +125,6 @@ define([
                 });
             }
         }
-        
-        // populate the LogicManager with initial path data
-        allMugs.map(function (mug) {
-            form.updateAllLogicReferences(mug);
-        });
 
         form.isLoadingXForm = false;
         return form;
@@ -403,7 +395,7 @@ define([
                     mug = adaptItem(mug, form);
                     var value = xml.humanize($cEl.children('value'));
                     if (value) {
-                        mug.p.defaultValue = value;
+                        mug.p.nodeID = value;
                     }
                     return mug;
                 };
