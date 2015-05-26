@@ -143,8 +143,23 @@ define([
     });
 
     function afterDynamicSelectInsert(form, mug) {
-        form.createQuestion(mug, 'into', "Itemset", true);
+        return form.createQuestion(mug, 'into', "Itemset", true);
     }
+
+    var itemsetDataSpec = {
+            presence: 'optional',
+            visibility: 'hidden',
+            serialize: function (value, key, mug, data) {
+                var children = mug.form.getChildren(mug);
+                return _.pluck(_.pluck(children, "p"), key);
+            },
+            deserialize: function (data, key, mug) {
+                _.each(data[key], function (value) {
+                    var itemset = afterDynamicSelectInsert(mug.form, mug);
+                    itemset.p[key] = value;
+                });
+            }
+        };
 
     $.vellum.plugin("itemset", {}, {
         init: function () {
@@ -168,6 +183,9 @@ define([
                     validChildTypes: ["Itemset"],
                     maxChildren: 1,
                     afterInsert: afterDynamicSelectInsert,
+                    spec: {
+                        itemsetData: itemsetDataSpec,
+                    }
                 }),
                 "SelectDynamic": util.extend(mugTypes.Select, {
                     typeName: 'Single Answer Lookup Table',
@@ -176,7 +194,10 @@ define([
                     },
                     validChildTypes: ["Itemset"],
                     maxChildren: 1,
-                    afterInsert: afterDynamicSelectInsert
+                    afterInsert: afterDynamicSelectInsert,
+                    spec: {
+                        itemsetData: itemsetDataSpec,
+                    }
                 })
             });
             return types;

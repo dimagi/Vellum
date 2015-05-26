@@ -196,7 +196,8 @@ define([
     'vellum/saveToCase',
     'vellum/uploader',
     'vellum/window',
-    'vellum/polyfills'
+    'vellum/polyfills',
+    'vellum/copy-paste'
     // end buildmain.py delimiter
 ], function () {
     // adds $.vellum as a side-effect

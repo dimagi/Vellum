@@ -1,3 +1,47 @@
+/**
+ * Asynchronously loads data sources from vellum.opts().core.dataSources
+ * Currently only supports fixtures
+ *
+ * Format in opts:
+ * dataSources: [
+ *     {
+ *          key: string : data source name (fixture, case, products...)
+ *          endpoint: function or string (URL)
+ *     }
+ * ]
+ *
+ * The endpoint function (or URL) should return the following format:
+ * [
+ *      {
+ *          sourceUri: string (used in the instance definition)
+ *          defaultId: string (used in instance definition)
+ *          intialQuery: string (used in nodeset)
+ *          name: string (text in the dropdown)
+ *          structure: nested dictionary of elements and attributes
+ *          {
+ *              element: {
+ *                  structure: {
+ *                      inner-element: { }
+ *                  }
+ *              },
+ *              @attribute: { }
+ *          }
+ *      }
+ * ]
+ *
+ * elements can be nested indefinitely with structure keys describing inner 
+ *     elements and attributes
+ *
+ * The result of that would be (if used in an itemset):
+ *     <instance src=sourceUri id=defaultId>
+ *     ...
+ *     <itemset nodeset=initialQuery />
+ *
+ *
+ * The dropdown would have options:
+ *     name (would have output as above)
+ *     name - element (would change nodeset to initialQuery/element)
+ */
 define([
     'jquery',
     'underscore',

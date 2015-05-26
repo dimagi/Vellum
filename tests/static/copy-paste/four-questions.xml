@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:orx="http://openrosa.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa" xmlns:vellum="http://commcarehq.org/xforms/vellum">
+	<h:head>
+		<h:title>Untitled Form</h:title>
+		<model>
+			<instance>
+				<data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/3760D84C-832E-48D0-80A8-FC206F09A767" uiVersion="1" version="1" name="Untitled Form">
+					<label />
+					<group>
+						<text />
+						<choice />
+					</group>
+					<likes />
+				</data>
+			</instance>
+			<bind nodeset="/data/label" />
+			<bind nodeset="/data/group" />
+			<bind nodeset="/data/group/text" type="xsd:string" />
+			<bind nodeset="/data/group/choice" />
+			<bind nodeset="/data/likes" calculate="if(/data/group/choice = 'true', 1, 0)" />
+			<itext>
+				<translation lang="en" default="">
+					<text id="label-label">
+						<value>This is English</value>
+					</text>
+					<text id="group-label">
+						<value>Group</value>
+					</text>
+					<text id="text-label">
+						<value>text with image</value>
+						<value form="image">jr://file/commcare/image/data/en-text.png</value>
+					</text>
+					<text id="group/choice-label">
+						<value>Do you like it?</value>
+					</text>
+					<text id="group/choice-true-label">
+						<value>Yes</value>
+					</text>
+					<text id="group/choice-false-label">
+						<value>No</value>
+					</text>
+				</translation>
+				<translation lang="hin">
+					<text id="label-label">
+						<value>This is Hindi</value>
+					</text>
+					<text id="group-label">
+						<value>Group</value>
+					</text>
+					<text id="text-label">
+						<value>ひらがな</value>
+						<value form="image">jr://file/commcare/image/data/hin-text.png</value>
+					</text>
+					<text id="group/choice-label">
+						<value>Do you like it?</value>
+					</text>
+					<text id="group/choice-true-label">
+						<value>Yes</value>
+					</text>
+					<text id="group/choice-false-label">
+						<value>No</value>
+					</text>
+				</translation>
+			</itext>
+		</model>
+	</h:head>
+	<h:body>
+		<trigger ref="/data/label" appearance="minimal">
+			<label ref="jr:itext('label-label')" />
+		</trigger>
+		<group ref="/data/group">
+			<label ref="jr:itext('group-label')" />
+			<input ref="/data/group/text">
+				<label ref="jr:itext('text-label')" />
+			</input>
+			<select1 ref="/data/group/choice">
+				<label ref="jr:itext('group/choice-label')" />
+				<item>
+					<label ref="jr:itext('group/choice-true-label')" />
+					<value>true</value>
+				</item>
+				<item>
+					<label ref="jr:itext('group/choice-false-label')" />
+					<value>false</value>
+				</item>
+			</select1>
+		</group>
+	</h:body>
+</h:html>
