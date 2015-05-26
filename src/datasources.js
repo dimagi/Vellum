@@ -232,16 +232,14 @@ define([
         return widget;
     }
 
+    /**
+     * @param options - Optionally pass in:
+     *      hasAdvancedEditor - enable advanced editor if true
+     *      getSource(mug) - Initializes the source for the advanced editor
+     *      setSource(source, mug) - Saves the source from the advanced editor
+     */
     function fixtureWidget(mug, options, labelText) {
         getDataSources('fixture', cacheFixtures);
-
-        var widget = widgets.dropdown(mug, options), 
-            super_getValue = widget.getValue,
-            super_setValue = widget.setValue,
-            currentValue = null,
-            customXML = "Lookup table was not found in the project";
-
-        widget.addOptions(generateFixtureOptions());
 
         function local_getValue() {
             currentValue = JSON.parse(super_getValue());
@@ -258,6 +256,40 @@ define([
 
             super_setValue(jsonVal);
         }
+
+        var widget = widgets.dropdown(mug, options), 
+            super_getValue = widget.getValue,
+            super_setValue = widget.setValue,
+            currentValue = null,
+            customXML = "Lookup table was not found in the project",
+            getSource = options.getSource ? options.getSource : local_getValue,
+            setSource = options.setSource ? options.setSource : local_setValue;
+
+        if (options.hasAdvancedEditor) {
+            widget.getUIElement = function () {
+                var query = widgets.util.getUIElementWithEditButton(
+                        widgets.util.getUIElement(widget.input, labelText),
+                        function () {
+                            vellum.displaySecondaryEditor({
+                                source: getSource(mug),
+                                headerText: labelText,
+                                loadEditor: loadDataSourceEditor,
+                                done: function (source) {
+                                    if (!_.isUndefined(source)) {
+                                        setSource(source, mug);
+                                        widget.handleChange();
+                                    }
+                                }
+                            });
+                        }
+                    );
+                query.find(".fd-edit-button").text("...");
+                query.find('.controls').css('margin-right', '48px');
+                return $("<div></div>").append(query);
+            };
+        }
+
+        widget.addOptions(generateFixtureOptions());
 
         widget.getValue = local_getValue;
         widget.setValue = local_setValue;

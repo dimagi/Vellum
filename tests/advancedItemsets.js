@@ -1,4 +1,3 @@
-/*jshint multistr: true */
 require([
     'tests/options',
     'tests/utils',
@@ -8,8 +7,7 @@ require([
     'vellum/itemset',
     'vellum/form',
     'text!static/itemset/test1.xml',
-    'text!static/itemset/inner-filters.xml',
-    'text!static/itemset/dropdown-fixture.xml'
+    'text!static/itemset/inner-filters.xml'
 ], function (
     options,
     util,
@@ -19,23 +17,21 @@ require([
     itemset,
     form,
     TEST_XML_1,
-    INNER_FILTERS_XML,
-    DROPDOWN_FIXTURE_XML
+    INNER_FILTERS_XML
 ) {
 
-    // see note about controlling time in formdesigner.lock.js
     var assert = chai.assert,
         call = util.call,
         clickQuestion = util.clickQuestion,
         plugins = _.union(util.options.options.plugins || [], ["itemset"]);
 
-    describe("The Dynamic Itemset plugin", function () {
+    describe("The Advanced Itemset plugin", function () {
         function beforeFn(done) {
             util.init({
                 plugins: plugins,
                 javaRosa: {langs: ['en']},
                 core: {onReady: done},
-                features: {advanced_itemsets: false},
+                features: {advanced_itemsets: true}
             });
         }
         before(beforeFn);
@@ -95,6 +91,7 @@ require([
         });
 
         describe("UI", function () {
+            before(beforeFn);
             it("preserves inner filters if you never change the data source", function () {
                 util.loadXML(INNER_FILTERS_XML);
                 clickQuestion("question2/itemset");
@@ -105,33 +102,46 @@ require([
                     call('createXML')
                 );
             });
-
-            it("uses a dropdown when the nodeset is known", function() {
-                util.loadXML(DROPDOWN_FIXTURE_XML);
-                clickQuestion("question2/itemset");
-
-                assert($('[name=property-itemsetData]').is('select'));
+            
+            it("hides the copy button for itemsets", function () {
+                util.loadXML(TEST_XML_1);
+                clickQuestion("question1/itemset");
+                var $but = $("button:contains(Copy)");
+                assert($but.length === 0);
             });
 
-            describe("with a custom fixture", function() {
-                it("should not warn on unrecognized values and labels", function() {
-                    util.loadXML(DROPDOWN_FIXTURE_XML);
-                    var mug = util.getMug('/data/question2/itemset');
-                    assert.strictEqual(mug.spec.itemsetData.validationFunc(mug), 'pass');
-                    mug.p.itemsetData.instance.src = "blah";
-                    assert.strictEqual(mug.spec.itemsetData.validationFunc(mug), 'pass');
-                });
+            it("allows copying a select with an itemset", function () {
+                util.loadXML(TEST_XML_1);
+                clickQuestion("question1");
+                var $but = $("button:contains(Copy)");
+                $but.click();
+
+                assert.equal(4, (call('createXML').match(/itemset/g) || []).length);
             });
 
-            describe("with recognized fixture", function() {
-                it("should warn on unrecognized values and labels", function() {
-                    util.loadXML(DROPDOWN_FIXTURE_XML);
-                    var mug = util.getMug('/data/question2/itemset');
-                    assert.strictEqual(mug.spec.itemsetData.validationFunc(mug), 'pass');
-                    clickQuestion("question2/itemset");
-                    $('[name=value_ref]').val('blah').change();
-                    assert.notStrictEqual(mug.spec.itemsetData.validationFunc(mug), 'pass');
-                });
+            it("includes filter when in advanced mode", function() {
+                util.loadXML(TEST_XML_1);
+                clickQuestion("question1/itemset");
+                var mug = util.getMug("question1/itemset");
+                mug.p.filter = "'blah' = /data/question2";
+                $("button:contains(...)").click();
+                assert($('[name=query]').val().indexOf(mug.p.filter) > 1);
+            });
+
+            it("changes filter when in advanced mode", function() {
+                util.loadXML(TEST_XML_1);
+                clickQuestion("question1/itemset");
+
+                var mug = util.getMug("question1/itemset");
+                mug.p.filter = "'blah' = /data/question2";
+                $("button:contains(...)").click();
+
+                var query = $('[name=query]').val();
+                $('[name=query]').val(query.replace(/question2/, "no_question")).change();
+                $('.fd-data-source-save-button').click();
+
+                assert.strictEqual($('[name=property-filter]').val(),
+                                   "'blah' = /data/no_question");
             });
         });
     });

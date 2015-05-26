@@ -45,7 +45,7 @@ define([
     debug
 ) {
     var mugTypes = mugs.baseMugTypes.normal,
-        Itemset,
+        Itemset, isAdvancedItemsetEnabled,
         END_FILTER = /\[[^\[]*\]$/;
 
     Itemset = util.extend(mugs.defaultOptions, {
@@ -162,6 +162,9 @@ define([
         };
 
     $.vellum.plugin("itemset", {}, {
+        init: function () {
+            isAdvancedItemsetEnabled = this.opts().features.advanced_itemsets;
+        },
         getSelectQuestions: function () {
             return this.__callOld().concat([
                 "SelectDynamic",
@@ -212,16 +215,15 @@ define([
                         debug.log("Unknown parent type: " + parentMug.__className);
                     }
                     mug = adaptItemset(mug, form);
-                    var nodeset = $element.popAttr('nodeset'),
-                        s = nodeset.search(END_FILTER),
-                        filter = s === -1 ? '' : nodeset.slice(s+1, -1);
+                    var nodeset = parseNodeset($element.popAttr('nodeset'));
+                    mug.p.filter = nodeset.filter;
                     mug.p.itemsetData = {
-                        instance: form.parseInstance(nodeset, mug, "itemsetData.instance"),
-                        nodeset: nodeset.replace(END_FILTER, ''),
+                        instance: form.parseInstance(
+                                    nodeset.value, mug, "itemsetData.instance"),
+                        nodeset: nodeset.value,
                         labelRef: $element.children('label').attr('ref'),
                         valueRef: $element.children('value').attr('ref')
                     };
-                    mug.p.filter = filter;
                     return mug;
                 };
                 adapt.ignoreDataNode = true;
@@ -259,7 +261,36 @@ define([
         }
     }
 
+    function parseNodeset(nodeset) {
+        var i = nodeset.search(END_FILTER);
+        if (i !== -1) {
+            return {
+                value: nodeset.slice(0, i),
+                filter: nodeset.slice(i + 1, -1)
+            };
+        }
+        return {value: nodeset, filter: ''};
+    }
+
     function itemsetWidget(mug, options) {
+        if (isAdvancedItemsetEnabled) {
+            options = _.extend({}, options, {hasAdvancedEditor: true});
+            options.getSource = function (mug) {
+                var val = super_getValue();
+                if (mug.p.filter) {
+                    val.query += "[" + mug.p.filter + "]";
+                }
+                return val;
+            };
+            options.setSource = function (source, mug) {
+                var val = source,
+                    nodeset = parseNodeset(source.query);
+                val.query = nodeset.value;
+                mug.p.filter = nodeset.filter;
+                super_setValue(val);
+            };
+        }
+
         var widget = datasources.fixtureWidget(mug, options, "Lookup Table"),
             super_getUIElement = widget.getUIElement,
             super_getValue = widget.getValue,
