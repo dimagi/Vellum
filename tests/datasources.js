@@ -16,20 +16,38 @@ require([
     itemset,
     form
 ) {
-
-    // see note about controlling time in formdesigner.lock.js
     var assert = chai.assert,
         clickQuestion = util.clickQuestion,
         plugins = _.union(util.options.options.plugins || [], ["itemset"]),
-        NUM_FIXTURE_OPTIONS = 3, // Will need to change as tests/options is updated
-        NUM_OPTIONS = NUM_FIXTURE_OPTIONS; 
+        FIXTURE_DATA = [{
+            sourceUri: "jr://fixture/item-list:some-fixture",
+            defaultId: "some-fixture",
+            initialQuery: "instance('some-fixture')/some-fixture_list/some-fixture",
+            name: 'some-fixture-name',
+            structure: {
+                "inner-attribute": {
+                    structure: {
+                        "extra-inner-attribute": {}
+                    }
+                },
+                "@id": {no_option: true},
+                name: {no_option: true}
+            }
+        }];
 
     describe("The data source widget", function () {
         function beforeFn(done) {
             util.init({
                 plugins: plugins,
                 javaRosa: {langs: ['en']},
-                core: {onReady: done}
+                core: {
+                    dataSources: [{
+                        key: "fixture",
+                        name: "Lookup Table",
+                        endpoint: function () { return FIXTURE_DATA; }
+                    }],
+                    onReady: done
+                }
             });
         }
         before(beforeFn);
@@ -38,23 +56,14 @@ require([
             util.loadXML("");
             util.addQuestion("SelectDynamic", "select1");
             clickQuestion('select1/itemset');
-            assert.equal($('[name=property-itemsetData] option').size(), NUM_OPTIONS);
+            var opts = $('[name=property-itemsetData] option'),
+                text = function (opt) { return opt.text; };
+            assert.equal(_.map(opts, text).join("\n"), [
+                "some-fixture-name",
+                "some-fixture-name - inner-attribute",
+                "some-fixture-name - inner-attribute - extra-inner-attribute",
+            ].join("\n"));
         });
-
-        it("does not show options with no_option specified", function() {
-            util.loadXML("");
-            util.addQuestion("SelectDynamic", "select1");
-            clickQuestion('select1/itemset');
-            assert.equal($('[name=property-itemsetData] option').size(), NUM_OPTIONS);
-        });
-
-        it("displays pretty names specified with name attribute", function() {
-            util.loadXML("");
-            util.addQuestion("SelectDynamic", "select1");
-            clickQuestion('select1/itemset');
-            assert.equal($('[name=property-itemsetData] option').first().text(), 'some-fixture-name');
-        });
-
 
         describe("", function() {
             before(function(done) {
