@@ -67,6 +67,8 @@ requirejs.config({
         'swfobject': '../bower_components/MediaUploader/swfobject',
         'file-uploader': '../bower_components/MediaUploader/hqmedia.upload_controller',
         'jsdiff': '../bower_components/jsdiff/diff',
+        'caretjs': '../bower_components/Caret.js/dist/jquery.caret',
+        'atjs': '../bower_components/At.js/dist/js/jquery.atwho'
     },
     shim: {
         'codemirror': {
@@ -154,6 +156,14 @@ requirejs.config({
         },
         'jsdiff': {
             exports: 'JsDiff'
+        },
+        'caretjs': {
+            deps: ['jquery'],
+            exports: 'caretjs'
+        },
+        'atjs': {
+            deps: ['jquery', 'caretjs', 'css!../bower_components/At.js/dist/css/jquery.atwho'],
+            exports: 'atjs'
         }
     },
     less: {
