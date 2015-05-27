@@ -23,6 +23,7 @@
  *                  structure: {
  *                      inner-element: { }
  *                  }
+ *                  name: "Element" (the text used in dropdown for this element)
  *              },
  *              @attribute: { }
  *          }
@@ -40,7 +41,7 @@
  *
  * The dropdown would have options:
  *     name (would have output as above)
- *     name - element (would change nodeset to initialQuery/element)
+ *     name - Element (would change nodeset to initialQuery/element)
  */
 define([
     'jquery',
