@@ -58,13 +58,17 @@ define([
     edit_source,
     select_source
 ) {
-    var vellum, dataSources,
-        dataCache = {},
-        dataCallbacks = {};
+    var vellum, dataSources, dataCache, dataCallbacks;
 
     function init(instance) {
         vellum = instance;
         dataSources = vellum.opts().core.dataSources || [];
+        reset();
+    }
+
+    function reset() {
+        dataCache = {};
+        dataCallbacks = {};
     }
 
     /**
@@ -85,53 +89,54 @@ define([
             callback(dataCache[type], type);
             return;
         }
-        if (_.isUndefined(dataCallbacks[type])) {
-            function finish(data) {
-                dataCache[type] = {};
-                if (data.length === 0) {
-                    dataCache[type][""] = {
-                        sourceUri: "",
-                        defaultId: "",
-                        initialQuery: "",
-                        name: "Not Found",
-                        structure: {}
-                    };
-                } else {
-                    _.each(data, function(item) {
-                        dataCache[type][item.sourceUri] = item;
-                    });
-                }
-                _.each(dataCallbacks[type], function (callback) {
-                    callback(dataCache[type], type);
-                });
-                delete dataCallbacks[type];
-            }
-            var source = _.find(dataSources, function (src) {
-                return src.key === type;
-            });
-            dataCallbacks[type] = [callback];
-            if (source) {
-                if (_.isString(source.endpoint)) {
-                    $.ajax({
-                        type: 'GET',
-                        url: source.endpoint,
-                        dataType: 'json',
-                        success: finish,
-                        error: function (jqXHR, errorType, exc) {
-                            finish([]);
-                            window.console.log(util.formatExc(exc || errorType));
-                        }
-                        data: {},
-                        async: false
-                    });
-                } else {
-                    finish(source.endpoint());
-                }
+        if (!_.isUndefined(dataCallbacks[type])) {
+            dataCallbacks[type].push(callback);
+            return;
+        }
+
+        function finish(data) {
+            dataCache[type] = {};
+            if (data.length === 0) {
+                dataCache[type][""] = {
+                    sourceUri: "",
+                    defaultId: "",
+                    initialQuery: "",
+                    name: "Not Found",
+                    structure: {}
+                };
             } else {
-                finish([]);
+                _.each(data, function(item) {
+                    dataCache[type][item.sourceUri] = item;
+                });
+            }
+            _.each(dataCallbacks[type], function (callback) {
+                callback(dataCache[type], type);
+            });
+            delete dataCallbacks[type];
+        }
+        var source = _.find(dataSources, function (src) {
+            return src.key === type;
+        });
+        dataCallbacks[type] = [callback];
+        if (source) {
+            if (_.isString(source.endpoint)) {
+                $.ajax({
+                    type: 'GET',
+                    url: source.endpoint,
+                    dataType: 'json',
+                    success: finish,
+                    error: function (jqXHR, errorType, exc) {
+                        finish([]);
+                        window.console.log(util.formatExc(exc || errorType));
+                    },
+                    data: {},
+                    async: false
+                });
+            } else {
+                source.endpoint(finish);
             }
         } else {
-            dataCallbacks[type].push(callback);
+            finish([]);
         }
     }
 
@@ -248,39 +253,60 @@ define([
 
     /**
      * @param options - Optionally pass in:
+     *      onOptionsLoaded - callback called when options are loaded
      *      hasAdvancedEditor - enable advanced editor if true
      *      getSource(mug) - Initializes the source for the advanced editor
      *      setSource(source, mug) - Saves the source from the advanced editor
      */
     function fixtureWidget(mug, options, labelText) {
+        var CUSTOM_XML = "Lookup table was not found in the project",
+            EMPTY_VALUE = JSON.stringify({src: "", id: "", query: ""});
+
+        function isEmptyValue(val) {
+            return !val || _.all(_.map(val, _.isEmpty));
+        }
+
         function local_getValue() {
-            currentValue = JSON.parse(super_getValue());
-            return currentValue;
+            return JSON.parse(super_getValue());
         }
 
         function local_setValue(val) {
-            currentValue = val;
-            var jsonVal = val ? JSON.stringify(val) : '',
-                val2 = widget.equivalentOption(jsonVal);
-            if (!val2 && !_.isEqual(val, {id: "", src: "", query: undefined})) {
-                widget.addOption(jsonVal, customXML);
+            var jsonVal = EMPTY_VALUE;
+            if (!isEmptyValue(val)) {
+                jsonVal = JSON.stringify(val);
+                if (!widget.equivalentOption(jsonVal)) {
+                    widget.addOption(jsonVal, CUSTOM_XML);
+                }
             }
-
             super_setValue(jsonVal);
+            hasValue = true;
         }
 
         var widget = widgets.dropdown(mug, options), 
             super_getValue = widget.getValue,
             super_setValue = widget.setValue,
-            currentValue = null,
-            customXML = "Lookup table was not found in the project",
             getSource = options.getSource ? options.getSource : local_getValue,
-            setSource = options.setSource ? options.setSource : local_setValue;
+            setSource = options.setSource ? options.setSource : local_setValue,
+            hasValue = false;
 
-        //widget.setOptionsLoading(); // TODO
+        widget.addOption(EMPTY_VALUE, "Loading...");
         getDataSources('fixture', function (data) {
+            var value;
+            if (hasValue) {
+                value = local_getValue();
+            }
+            widget.clearOptions();
             var fixtures = getPossibleFixtures(data);
             widget.addOptions(generateFixtureOptions(fixtures));
+            if (hasValue && !isEmptyValue(value)) {
+                local_setValue(value);
+            } else if (fixtures && fixtures.length) {
+                // default to first option
+                local_setValue(_.omit(fixtures[0], 'name'));
+            }
+            if (options.onOptionsLoaded) {
+                options.onOptionsLoaded();
+            }
         });
 
         if (options.hasAdvancedEditor) {
@@ -306,8 +332,6 @@ define([
                 return $("<div></div>").append(query);
             };
         }
-
-        widget.addOptions(generateFixtureOptions());
 
         widget.getValue = local_getValue;
         widget.setValue = local_setValue;
@@ -376,6 +400,9 @@ define([
         // fixture structure, and options are generated from the root.
         // However, the itemset may be referencing a non-root element
         // and therefore the choices returned here will be incorrectly qualified.
+        if (!dataCache.fixture || !dataCache.fixture[fixture_uri]) {
+            return [];
+        }
         return generateFixtureColumns(dataCache.fixture[fixture_uri]);
     }
 
@@ -383,6 +410,7 @@ define([
 
     return {
         init: init,
+        reset: reset,
         advancedDataSourceWidget: advancedDataSourceWidget,
         fixtureWidget: fixtureWidget,
         autocompleteChoices: autocompleteChoices,

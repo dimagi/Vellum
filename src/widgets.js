@@ -407,6 +407,10 @@ define([
             });
         };
 
+        widget.clearOptions = function () {
+            this.input.empty();
+        };
+
         widget.getOptions = function () {
             return _.map(widget.input.find('option'), function(option) {
                 return {
