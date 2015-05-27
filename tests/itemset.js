@@ -165,6 +165,15 @@ require([
                     label.val(label.val() + "[filter]").change();
                     assert.strictEqual(mug.spec.itemsetData.validationFunc(mug), 'pass');
                 });
+
+                it("should not warn on inner filters", function() {
+                    util.loadXML(DROPDOWN_FIXTURE_XML);
+                    var mug = util.getMug('/data/question2/itemset');
+                    assert.strictEqual(mug.spec.itemsetData.validationFunc(mug), 'pass');
+                    clickQuestion("question2/itemset");
+                    $('[name=label_ref]').val("inner-attribute[filter1]/extra-inner-attribute[filter2]").change();
+                    assert.strictEqual(mug.spec.itemsetData.validationFunc(mug), 'pass');
+                });
             });
         });
     });

@@ -116,8 +116,9 @@ define([
                                              function(val) { return val.src; }),
                         notCustom = _.contains(possibleSrcs, itemsetData.instance.src),
                         choices = datasources.autocompleteChoices(itemsetData.instance.src),
-                        strippedValue = itemsetData.valueRef.replace(/(\[.+])+/, ""),
-                        strippedLabel = itemsetData.labelRef.replace(/(\[.+])+/, "");
+                        filterRegex = /\[[^\[]+]/g,
+                        strippedValue = itemsetData.valueRef.replace(filterRegex, ""),
+                        strippedLabel = itemsetData.labelRef.replace(filterRegex, "");
 
                     if (notCustom && !_.contains(choices, strippedValue)) {
                             return itemsetData.valueRef + " was not found in the lookup table";
