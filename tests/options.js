@@ -108,6 +108,7 @@ define(function () {
             'group_in_field_list': true,
             'help_markdown': true,
             'advanced_itemsets': true,
+            'experimental_ui': true,
         }
     };
 
