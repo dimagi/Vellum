@@ -255,6 +255,7 @@ define([
     };
 
     return {
-        LogicManager: LogicManager
+        LogicManager: LogicManager,
+        LogicExpression: LogicExpression
     };
 });

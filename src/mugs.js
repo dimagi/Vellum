@@ -4,7 +4,8 @@ define([
     'vellum/tree',
     'vellum/javaRosa', // TODO move all Itext stuff to javaRosa and remove this
     'vellum/widgets',
-    'vellum/util'
+    'vellum/util',
+    'vellum/logic'
 ], function (
     $,
     _,
@@ -12,7 +13,7 @@ define([
     jr,
     widgets,
     util,
-    undefined
+    logic
 ) {
     /**
      * A question, containing data, bind, and control elements.
@@ -870,6 +871,16 @@ define([
                 lstring: 'Default Value',
                 widget: widgets.xPath,
                 xpathType: 'generic',
+                validationFunc: function (mug) {
+                    var paths = new logic.LogicExpression(mug.p.setValue).getPaths();
+
+                    if (paths.length) {
+                        return "You are referencing a node in this form. " +
+                               "This can cause errors in the form";
+                    }
+
+                    return 'pass';
+                }
             },
         },
 
