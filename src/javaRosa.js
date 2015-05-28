@@ -42,7 +42,8 @@ define([
             'default', 'short', 'long', 'audio', 'video', 'image'
         ],
         _nextItextItemKey = 1,
-        HELP_MARKDOWN;
+        HELP_MARKDOWN,
+        EXPERIMENTAL_UI;
 
     function ItextItem(options) {
         this.forms = options.forms || [];
@@ -837,6 +838,34 @@ define([
             });
 
         if (options.path === 'labelItext') {
+            if (EXPERIMENTAL_UI) {
+                $input.atwho({
+                    at: "#form",
+                    data: _.chain(mug.form.getMugList())
+                           .map(function(mug) {
+                                return {
+                                    id: mug.ufid,
+                                    name: mug.form.getAbsolutePath(mug, true),
+                                    path: mug.absolutePath
+                                };
+                            })
+                            .filter(function(choice) { return choice.name; })
+                            .value(),
+                    displayTpl: '<li>${name}</li>',
+                    insertTpl: '<output value="${path}" />',
+                    limit: 100,
+                    maxLen: 30,
+                    callbacks: {
+                        matcher: function(flag, subtext) {
+                            var match, regexp;
+                            regexp = new RegExp('(\\s+|^)' + flag + '([\\w_/]*)$', 'gi');
+                            match = regexp.exec(subtext);
+                            return match ? match[2] : null;
+                        }
+                    }
+                });
+            }
+
             $input.addClass('jstree-drop');
             $input.keydown(function (e) {
                 // deletion of entire output ref in one go
@@ -1247,6 +1276,7 @@ define([
             this.data.javaRosa.ItextForm = ItextForm;
             this.data.javaRosa.ICONS = ICONS;
             HELP_MARKDOWN = this.opts().features.help_markdown;
+            EXPERIMENTAL_UI = this.opts().features.experimental_ui;
         },
         insertOutputRef: function (mug, target, path, dateFormat) {
             var output = getOutputRef(path, dateFormat),
