@@ -30,18 +30,21 @@
  *      }
  * ]
  *
- * elements can be nested indefinitely with structure keys describing inner 
- *     elements and attributes
+ * Elements can be nested indefinitely with structure keys describing inner
+ * elements and attributes.
  *
  * The result of that would be (if used in an itemset):
+ *
  *     <instance src=sourceUri id=defaultId>
  *     ...
  *     <itemset nodeset=initialQuery />
  *
  *
  * The dropdown would have options:
- *     name (would have output as above)
- *     name - Element (would change nodeset to initialQuery/element)
+ *
+ *     name             (nodeset: initialQuery)
+ *     name - Element   (nodeset: initialQuery/element)
+ *
  */
 define([
     'jquery',
