@@ -839,8 +839,20 @@ define([
 
         if (options.path === 'labelItext') {
             if (EXPERIMENTAL_UI) {
-                var at_opts = {
+                $input.atwho({
+                    at: "#form",
+                    data: _.chain(mug.form.getMugList())
+                           .map(function(mug) {
+                                return {
+                                    id: mug.ufid,
+                                    name: mug.form.getAbsolutePath(mug, true),
+                                    path: mug.absolutePath
+                                };
+                            })
+                            .filter(function(choice) { return choice.name; })
+                            .value(),
                     displayTpl: '<li>${name}</li>',
+                    insertTpl: '<output value="${path}" />',
                     limit: 10,
                     maxLen: 30,
                     callbacks: {
@@ -851,34 +863,7 @@ define([
                             return match ? match[2] : null;
                         }
                     }
-                },
-                validMugs = _.chain(mug.form.getMugList())
-                             .map(function(mug) {
-                                 return {
-                                     id: mug.ufid,
-                                     name: mug.form.getAbsolutePath(mug, true),
-                                     path: mug.absolutePath,
-                                     type: mug.options.typeName,
-                                 };
-                             })
-                             .filter(function(choice) { return choice.name; })
-                             .value(),
-                dateMugs = _.filter(validMugs, function(mug) {
-                    return mug.type === "Date";
                 });
-                $input.atwho(_.extend(at_opts, {
-                    at: "#form",
-                    data: validMugs,
-                    insertTpl: '<output value="${path}" />',
-                })).atwho(_.extend(at_opts, {
-                    at: "#date",
-                    data: dateMugs,
-                    insertTpl: '<output value="format-date(date(${path}), \'%d/%n/%y\')" />',
-                })).atwho(_.extend(at_opts, {
-                    at: "#fulldate",
-                    data: dateMugs,
-                    insertTpl: '<output value="format-date(date(${path}),  \'%a, %b %e, %Y\')" />',
-                }));
             }
 
             $input.addClass('jstree-drop');
