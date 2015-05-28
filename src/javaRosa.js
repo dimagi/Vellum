@@ -840,12 +840,12 @@ define([
         if (options.path === 'labelItext') {
             if (EXPERIMENTAL_UI) {
                 $input.atwho({
-                    at: "#form",
+                    at: "#",
                     data: _.chain(mug.form.getMugList())
                            .map(function(mug) {
                                 return {
                                     id: mug.ufid,
-                                    name: mug.form.getAbsolutePath(mug, true),
+                                    name: "form" + mug.form.getAbsolutePath(mug, true),
                                     path: mug.absolutePath
                                 };
                             })
