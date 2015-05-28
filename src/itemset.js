@@ -115,11 +115,14 @@ define([
                     var possibleSrcs = _.map(datasources.getPossibleFixtures(), 
                                              function(val) { return val.src; }),
                         notCustom = _.contains(possibleSrcs, itemsetData.instance.src),
-                        choices = datasources.autocompleteChoices(itemsetData.instance.src);
+                        choices = datasources.autocompleteChoices(itemsetData.instance.src),
+                        filterRegex = /\[[^\[]+]/g,
+                        strippedValue = itemsetData.valueRef.replace(filterRegex, ""),
+                        strippedLabel = itemsetData.labelRef.replace(filterRegex, "");
 
-                    if (notCustom && !_.contains(choices, itemsetData.valueRef)) {
+                    if (notCustom && !_.contains(choices, strippedValue)) {
                             return itemsetData.valueRef + " was not found in the lookup table";
-                    } else if (notCustom && !_.contains(choices, itemsetData.labelRef)) {
+                    } else if (notCustom && !_.contains(choices, strippedLabel)) {
                             return itemsetData.labelRef + " was not found in the lookup table";
                     }
 
