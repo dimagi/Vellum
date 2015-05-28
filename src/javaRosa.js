@@ -853,7 +853,7 @@ define([
                             .value(),
                     displayTpl: '<li>${name}</li>',
                     insertTpl: '<output value="${path}" />',
-                    limit: 100,
+                    limit: 10,
                     maxLen: 30,
                     callbacks: {
                         matcher: function(flag, subtext) {
