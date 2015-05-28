@@ -280,6 +280,8 @@ define([
             pos = sel.text.length;
         } else if (typeof ctrl.selectionStart !== 'undefined') {
             pos = ctrl.selectionStart;
+        } else if (_.contains(ctrl.classList, "fake-textarea")) {
+            return $(ctrl).caret('pos');
         }
         return pos;
     };
@@ -303,9 +305,12 @@ define([
     that.insertTextAtCursor = function (jqctrl, text, select) {
         var ctrl = jqctrl[0],
             pos = that.getCaretPosition(ctrl),
-            front = ctrl.value.substring(0, pos),
-            back = ctrl.value.substring(pos, ctrl.value.length),
-            start = select ? pos : pos + text.length;
+            fakeText = _.contains(ctrl.classList, "fake-textarea"),
+            content = fakeText ? jqctrl.val() : ctrl.value,
+            start = select ? pos : pos + text.length,
+            front = content.substring(0, pos),
+            back = content.substring(pos, content.length);
+
         jqctrl.val(front + text + back).change();
         pos = pos + text.length;
         that.setCaretPosition(ctrl, start, pos);
