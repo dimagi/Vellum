@@ -793,7 +793,7 @@ define([
                 }
             },
             dataValue: {
-                visibility: 'visible',
+                visibility: 'visible_if_present',
                 presence: 'optional',
                 lstring: 'Default Data Value',
             },
