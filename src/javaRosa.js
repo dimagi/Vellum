@@ -843,9 +843,13 @@ define([
                     at: "#",
                     data: _.chain(mug.form.getMugList())
                            .map(function(mug) {
+                                var path = mug.form.getAbsolutePath(mug, true);
+                                if (path) {
+                                    path = "form" + path;
+                                }
                                 return {
                                     id: mug.ufid,
-                                    name: "form" + mug.form.getAbsolutePath(mug, true),
+                                    name: path,
                                     path: mug.absolutePath
                                 };
                             })
