@@ -824,16 +824,14 @@ define([
         options.id = id;
 
         var widget = widgets.base(mug, options);
-        var $input = $("<textarea></textarea>")
+        var $input = $("<div contenteditable>")
             .attr("name", widget.id)
-            .attr("rows", "2")
-            .addClass('input-block-level itext-widget-input')
+            .addClass('fake-textarea input-block-level itext-widget-input')
             .on('change input', function (e) { widget.handleChange(); })
-            .focus(function() { this.select(); })
             .keyup(function (e) {
                 // workaround for webkit: http://stackoverflow.com/a/12114908
                 if (e.which === 9) {
-                    this.select();
+                    this.focus();
                 }
             });
 
@@ -1017,7 +1015,7 @@ define([
         };
 
         widget.setValue = function (val) {
-            $input.val(val);
+            $input.text(val);
         };
 
         widget.setPlaceholder = function (val) {
@@ -1025,7 +1023,7 @@ define([
         };
 
         widget.getValue = function () {
-            return $input.val();
+            return $input.text();
         };
 
         widget.getPlaceholder = function () {
