@@ -828,6 +828,9 @@ define([
             .attr("name", widget.id)
             .addClass('fake-textarea input-block-level itext-widget-input')
             .on('change input', function (e) { widget.handleChange(); })
+            .focus(function () {
+                util.setCaretPosition(this, 0, widget.getValue().length);
+            })
             .keyup(function (e) {
                 // workaround for webkit: http://stackoverflow.com/a/12114908
                 if (e.which === 9) {
