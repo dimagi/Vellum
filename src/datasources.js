@@ -111,7 +111,7 @@ define([
         }
     });
 
-    function initExternalDataTree($accessoryPane) {
+    function initExternalDataTree() {
         var pane = vellum.$f.find(".fd-accessory-pane");
         pane.append($(external_data_tree()));
         pane.resize(function () {
@@ -152,7 +152,7 @@ define([
             conditionalevents: {
                 should_activate: function () { return false; }
             },
-            "plugins" : [ "themes", "conditionalevents", "search" ]
+            "plugins" : [ "themes", "conditionalevents", "dnd", "search" ]
         });
         $search.keyup(function () {
             if (pending) {
@@ -168,30 +168,31 @@ define([
         var MAX_OPEN_NODE = 50;
         function node(parentPath, info) {
             return function (item, name) {
-                var path = parentPath + "/" + name,
+                var path = parentPath ? (parentPath + "/" + name) : name,
                     children = _.map(item.structure, node(path, info));
                 return {
-                    id: path,
                     icon: false,
                     text: item.name || name,
                     state: {opened: children.length <= MAX_OPEN_NODE},
-                    source: info,
-                    children: children
+                    children: children,
+                    data: {
+                        handleDrop: function (target) {
+                            var widget = widgets.util.getWidget(target, vellum),
+                                id = widget.addInstanceRef({
+                                    id: info.id,
+                                    src: info.uri
+                                }),
+                                query = widget.mug.form.updateInstanceQuery(path, id);
+                            vellum.handleDropFinish(target, query);
+                        }
+                    }
                 };
             };
         }
         return _.map(data, function (source) {
             var info = _.omit(source, "structure"),
-                path = source.initialQuery,
-                children = _.map(source.structure, node(path, info));
-            return {
-                id: path,
-                icon: false,
-                text: source.name,
-                state: {opened: children.length <= MAX_OPEN_NODE},
-                source: info,
-                children: children
-            };
+                path = "instance('" + source.id + "')" + source.path;
+            return node(null, info)(source, path);
         });
     }
 
@@ -324,6 +325,10 @@ define([
         $ui.find('.fd-data-source-cancel-button').click(function () {
             done();
         });
+
+        if (options.onLoad) {
+            options.onLoad($ui);
+        }
     }
 
     function advancedDataSourceWidget(mug, options, labelText) {
@@ -342,6 +347,9 @@ define([
                             source: local_getValue(),
                             headerText: labelText,
                             loadEditor: loadDataSourceEditor,
+                            onLoad: function ($ui) {
+                                widgets.util.setWidget($ui, widget);
+                            },
                             done: function (source) {
                                 if (!_.isUndefined(source)) {
                                     local_setValue(source);
@@ -535,6 +543,7 @@ define([
         init: init,
         reset: reset,
         getDataSources: getDataSources,
+        loadExternalData: loadExternalData,
         advancedDataSourceWidget: advancedDataSourceWidget,
         fixtureWidget: fixtureWidget,
         autocompleteChoices: autocompleteChoices,

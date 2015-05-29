@@ -1399,7 +1399,7 @@ define([
             $messages.appendTo($content);
         }
         function refreshMessages() {
-            $messages.empty().append(widgets.getMessages(mug, null));
+            $messages.empty().append(widgets.util.getMessages(mug, null));
         }
         mug.on("messages-changed", refreshMessages, null, "teardown-mug-properties");
         refreshMessages();
@@ -1619,7 +1619,9 @@ define([
             elemWidget.on("change", function () {
                 _this.onFormChange(mug);
             });
-            $fieldsetContent.append(elemWidget.getUIElement());
+            var $ui = elemWidget.getUIElement();
+            widgets.util.setWidget($ui, elemWidget);
+            $fieldsetContent.append($ui);
             elemWidget.refreshMessages();
         });
         return $sec;

@@ -561,7 +561,7 @@ define([
             // TODO improve this to display each message beside the
             // form and language to which it applies
             if (options.messagesPath) {
-                var messages = widgets.getMessages(mug, options.messagesPath);
+                var messages = widgets.util.getMessages(mug, options.messagesPath);
                 $messages.empty().append(messages);
             }
         };
@@ -579,7 +579,9 @@ define([
                     itextWidget.on("change", function () {
                         block.fire("change");
                     });
-                    $formGroup.append(itextWidget.getUIElement());
+                    var $ui = itextWidget.getUIElement();
+                    widgets.util.setWidget($ui, itextWidget);
+                    $formGroup.append($ui);
                 });
                 $blockUI.append($formGroup);
             });
@@ -761,7 +763,9 @@ define([
                 itextWidget.on("change", function () {
                     block.fire("change");
                 });
-                $groupContainer.append(itextWidget.getUIElement());
+                var $ui = itextWidget.getUIElement();
+                widgets.util.setWidget($ui, itextWidget);
+                $groupContainer.append($ui);
             });
             $blockUI.find('.new-itext-control-group').after($groupContainer);
             $groupContainer.before(block.getDeleteFormButton(form));
