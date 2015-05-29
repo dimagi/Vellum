@@ -188,15 +188,11 @@ define([
             xmlWriter.writeEndElement();
         }
 
-        _.each(form.getSetValues(), function (setValue) {
-            writeSetValue(setValue);
-        });
+        _.each(form.getSetValues(), writeSetValue);
 
         dataTree.walk(function (mug, nodeID, processChildren) {
             if(mug && mug.options.getSetValues) {
-                _.each(mug.options.getSetValues(mug), function(setValue) {
-                    writeSetValue(setValue);
-                });
+                _.each(mug.options.getSetValues(mug), writeSetValue);
             }
             processChildren();
         });

@@ -346,9 +346,7 @@ define([
                 });
             },
             getSetValues: function(mug) {
-                return _.map(mug.p.setValues, function(setValue) {
-                    return setValue;
-                });
+                return mug.p.setValues;
             },
             writesOnlyCustomXML: true,
             writeCustomXML: function (writer, mug) {
