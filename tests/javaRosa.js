@@ -326,14 +326,14 @@ require([
         });
 
         it("drag question into label makes output ref in correct position", function () {
+            util.loadXML("");
             var mug1 = util.addQuestion("Text", "question1"),
                 mug2 = util.addQuestion("Text", "question2");
 
-            var target = $("[name='itext-en-label']"),
-                sourceUid = mug1.ufid;
+            var target = $("[name='itext-en-label']");
             target.val("test string").change();
             vellum_util.setCaretPosition(target[0], 4);
-            call("handleDropFinish", target, sourceUid, mug1);
+            call("handleDropFinish", target, mug1.absolutePath, mug1);
             var val = mug2.p.labelItext.get('default', 'en');
             assert.equal(val, 'test<output value="/data/question1" /> string');
         });

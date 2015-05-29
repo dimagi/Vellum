@@ -697,12 +697,11 @@ define([
         $(".fd-form-saving").remove();
     };
 
-    fn.handleDropFinish = function(target, sourceUid, mug) {
+    fn.handleDropFinish = function(target, path, mug) {
         var _this = this,
             ops = target.closest(".xpath-expression-row").find(".op-select");
 
         if (target) {
-            var path = _this.mugToXPathReference(mug);
             // the .change fires the validation controls
             target.val(target.val() + path).change();
 
@@ -714,7 +713,7 @@ define([
                 );
             }
 
-            if (_this.data.core.currentlyEditedProperty) {
+            if (mug && _this.data.core.currentlyEditedProperty) {
                 _this.warnOnCircularReference(
                     _this.data.core.currentlyEditedProperty,
                     _this.data.core.form,
@@ -867,12 +866,14 @@ define([
     }).on("dnd_stop.vakata.jstree", function (e, data) {
         var vellum = $(data.data.obj.context).vellum("get"),
             target = $(data.event.target),
-            inst = $.jstree.reference(target),
-            sourceUid, mug;
+            inst = $.jstree.reference(target);
         if (!inst && target.hasClass("jstree-drop") && vellum === target.vellum("get")) {
-            sourceUid = data.data.nodes[0];
-            mug = vellum.data.core.form.getMugByUFID(sourceUid);
-            vellum.handleDropFinish(target, sourceUid, mug);
+            if (data.data.origin) {
+                var node = data.data.origin.get_node(data.data.nodes[0]);
+                if (node.data && node.data.handleDrop) {
+                    node.data.handleDrop(target);
+                }
+            }
         }
     });
 
@@ -904,10 +905,13 @@ define([
     fn.checkMove = function (srcId, srcType, dstId, dstType, position) {
         var form = this.data.core.form,
             targetMug = form.getMugByUFID(dstId),
-            sourceMug = form.getMugByUFID(srcId),
-            locked = !this.isMugPathMoveable(sourceMug.absolutePath);
+            sourceMug = form.getMugByUFID(srcId);
+        if (!sourceMug) {
+            return false;
+        }
         if (position === 'inside') { position = 'into'; } // normalize for Vellum
 
+        var locked = !this.isMugPathMoveable(sourceMug.absolutePath);
         if (locked) {
             if (position === 'into' || position === 'last' || position === 'first') {
                 return sourceMug.parentMug === targetMug;
@@ -1327,7 +1331,13 @@ define([
             {
                 text: this.getMugDisplayName(mug),
                 type: mug.__className,
-                data: { mug: mug },
+                data: {
+                    mug: mug,
+                    handleDrop: function (target) {
+                        var path = _this.mugToXPathReference(mug);
+                        _this.handleDropFinish(target, path, mug);
+                    }
+                },
                 li_attr: {
                     id: mug.ufid,
                     rel: mug.__className
