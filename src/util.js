@@ -290,15 +290,23 @@ define([
         if (end === null || end === undefined) {
             end = start;
         }
+        var range;
         if (ctrl.setSelectionRange) {
             ctrl.focus();
             ctrl.setSelectionRange(start, end);
         } else if (ctrl.createTextRange) {
-            var range = ctrl.createTextRange();
+            range = ctrl.createTextRange();
             range.collapse(true);
             range.moveStart('character', start);
             range.moveEnd('character', end);
             range.select();
+        } else if (ctrl) {
+            range = document.createRange();
+            var sel = window.getSelection();
+            range.setStart(ctrl.childNodes[0], start);
+            range.setEnd(ctrl.childNodes[0], end);
+            sel.removeAllRanges();
+            sel.addRange(range);
         }
     };
 
