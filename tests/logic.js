@@ -46,7 +46,7 @@ require([
                     "dataParent",
                     "repeat_count",
                     "filter",
-                    "setValue"
+                    "defaultValue"
                 ],
                 mugMap = {
                     repeat_count: "repeat",

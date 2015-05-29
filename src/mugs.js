@@ -865,14 +865,14 @@ define([
                 presence: 'optional',
                 lstring: 'Extra Bind Attributes'
             },
-            setValue: {
+            defaultValue: {
                 visibility: 'visible',
                 presence: 'optional',
                 lstring: 'Default Value',
                 widget: widgets.xPath,
                 xpathType: 'generic',
                 validationFunc: function (mug) {
-                    var paths = new logic.LogicExpression(mug.p.setValue).getPaths();
+                    var paths = new logic.LogicExpression(mug.p.defaultValue).getPaths();
 
                     if (paths.length) {
                         return "You are referencing a node in this form. " +
@@ -1072,9 +1072,9 @@ define([
         getSetValues: function (mug) {
             var ret = [];
 
-            if (mug.p.setValue) {
+            if (mug.p.defaultValue) {
                 ret = [{
-                    value: mug.p.setValue,
+                    value: mug.p.defaultValue,
                     event: mug.isInRepeat() ? 'jr-insert' : 'xforms-ready',
                     ref: mug.absolutePath
                 }];
@@ -1319,7 +1319,7 @@ define([
             hintLabel: { presence: 'notallowed' },
             hintItext: { presence: 'notallowed' },
             helpItext: { presence: 'notallowed' },
-            setValue: { presence: 'optional', visibility: 'hidden' },
+            defaultValue: { presence: 'optional', visibility: 'hidden' },
         }
     });
 
@@ -1332,7 +1332,7 @@ define([
         },
         spec: {
             dataValue: { presence: 'optional' },
-            setValue: { presence: 'optional', visibility: 'hidden' },
+            defaultValue: { presence: 'optional', visibility: 'hidden' },
         }
     });
 
@@ -1395,7 +1395,7 @@ define([
             constraintMsgAttr: { presence: "notallowed" },
             dataValue: { presence: "notallowed" },
             requiredAttr: { presence: "notallowed" },
-            setValue: { presence: 'optional', visibility: 'hidden' },
+            defaultValue: { presence: 'optional', visibility: 'hidden' },
         }
     });
     

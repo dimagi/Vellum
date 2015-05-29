@@ -231,7 +231,7 @@ define([
         if (!mug || (event !== 'xforms-ready' && event !== 'jr-insert')) {
             form.addSetValue(event, ref, value);
         } else {
-            mug.p.setValue = value;
+            mug.p.defaultValue = value;
         }
     }
 

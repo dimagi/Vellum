@@ -59,7 +59,7 @@ define([
         "dataParent",
         "repeat_count",
         "filter",
-        "setValue"
+        "defaultValue"
     ];
 
     that.getTemplateObject = function (selector, params) {

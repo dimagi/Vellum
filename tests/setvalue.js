@@ -25,7 +25,7 @@ define([
         it("should be associated with the correct mug on form load", function() {
             util.loadXML(SET_VALUE_XML);
             var text = util.getMug('text');
-            assert.strictEqual(text.p.setValue, 'blah');
+            assert.strictEqual(text.p.defaultValue, 'blah');
         });
 
         it("should have event jr-insert when added into repeat", function() {
@@ -34,7 +34,7 @@ define([
             var text = util.addQuestion("Text", 'text'),
                 form, setvalue;
 
-            text.p.setValue = 'blah';
+            text.p.defaultValue = 'blah';
 
             form = call("createXML");
             setvalue = $($.parseXML(form)).find('setvalue');
@@ -49,7 +49,7 @@ define([
             var text = util.addQuestion("Text", 'text'),
                 form, setvalue;
 
-            text.p.setValue = 'blah';
+            text.p.defaultValue = 'blah';
 
             form = call("createXML");
             setvalue = $($.parseXML(form)).find('setvalue');
@@ -72,16 +72,16 @@ define([
             util.loadXML("");
             util.addQuestion("Text", 'text1');
             var text2 = util.addQuestion("Text", 'text2');
-            text2.p.setValue = '/data/text1';
-            assert.notStrictEqual(text2.spec.setValue.validationFunc(text2), 'pass');
+            text2.p.defaultValue = '/data/text1';
+            assert.notStrictEqual(text2.spec.defaultValue.validationFunc(text2), 'pass');
         });
 
         it("should not warn when referencing a case", function() {
             util.loadXML("");
             util.addQuestion("Text", 'text1');
             var text2 = util.addQuestion("Text", 'text2');
-            text2.p.setValue = "instance('casedb')/case/attribute";
-            assert.strictEqual(text2.spec.setValue.validationFunc(text2), 'pass');
+            text2.p.defaultValue = "instance('casedb')/case/attribute";
+            assert.strictEqual(text2.spec.defaultValue.validationFunc(text2), 'pass');
         });
     });
 });

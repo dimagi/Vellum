@@ -2033,13 +2033,13 @@ define([
         return [
             "dataSource",
             "dataValue",
+            'defaultValue',
             "xmlnsAttr",
             "label",
             "hintLabel",
             "constraintMsgAttr",
             "dataParent",
             'appearance',
-            'setValue'
         ];
     };
 
