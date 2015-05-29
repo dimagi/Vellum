@@ -857,7 +857,7 @@ define([
                             .filter(function(choice) { return choice.name; })
                             .value(),
                     displayTpl: '<li>${name}</li>',
-                    insertTpl: '<output value="${path}" />',
+                    insertTpl: '&lt;output value="${path}" /&gt;',
                     limit: 10,
                     maxLen: 30,
                     callbacks: {
