@@ -719,31 +719,6 @@ define([
                 this.fireChange(mug);
             }.bind(this);
         },
-        handleMugPropertyChange: function (mug, e) {
-            if (e.property === 'nodeID') {
-                var currentPath = this.getAbsolutePath(mug),
-                    valid = true,
-                    parsed;
-                try {
-                    parsed = xpath.parse(currentPath);
-                    if (_.isUndefined(parsed.steps)) {
-                        valid = false;
-                    }
-                } catch (err) {
-                    valid = false;
-                }
-                if (valid) {
-                    parsed.steps[parsed.steps.length - 1].name = e.previous;
-                    var oldPath = parsed.toXPath();
-                    this.vellum.handleMugRename(this, mug, e.val, e.previous, currentPath, oldPath);
-                }
-            } else {
-                if (mug.p.getDefinition(e.property).widget === widgets.xPath ||
-                    mug.p.getDefinition(e.property).widget === widgets.droppableText) {
-                    this.updateAllLogicReferences(mug);
-                }
-            }
-        },
         createQuestion: function (refMug, position, newMugType, isInternal) {
             var mug = this.mugTypes.make(newMugType, this);
             if (!mug.options.isControlOnly) {
