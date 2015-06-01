@@ -504,7 +504,7 @@ define([
             var html = $(widget_control_message({
                     msg: msg,
                     html: /\n/.test(msg.message) ?
-                            util.markdownlite(msg.message) : ""
+                            util.markdown(msg.message) : ""
                 }));
             html.find("button.close").click(function () {
                 mug.dropMessage(path, msg.key);
