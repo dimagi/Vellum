@@ -25,6 +25,7 @@ define([
     };
 
     function markdown(text) {
+        text = text.replace(/\\\\n/g, '\n');
         return md.render(text);
     }
 
