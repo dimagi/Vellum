@@ -41,7 +41,7 @@
         "xpath": "dimagi/js-xpath",
         "bootstrap-better-typeahead": "ptnplanet/Bootstrap-Better-Typeahead",
         "jsdiff": "kpdecker/jsdiff",
-        "divPlaceholder": "sprucemedia/jQuery.divPlaceholder.js"
+        "jQuery.divPlaceholder": "sprucemedia/jQuery.divPlaceholder.js"
     },
     "devDependencies": {
         "equivalent-xml-js": "mwhite/equivalent-xml-js#master",
