@@ -76,7 +76,8 @@ define([
     edit_source,
     external_data_tree
 ) {
-    var vellum, dataSourcesEndpoint, dataCache, dataCallbacks, panelHeight;
+    var vellum, dataSourcesEndpoint, dataCache, dataCallbacks, panelHeight,
+        isDataTreeLoaded;
 
     // called during core init
     function init(instance) {
@@ -88,6 +89,7 @@ define([
     function reset() {
         dataCache = null;
         dataCallbacks = null;
+        isDataTreeLoaded = false;
     }
 
     // plugin adds an item to the Tools menu when enabled
@@ -124,8 +126,8 @@ define([
     }
 
     var loadExternalData = function () {
-        // overwrite function with no-op (only call once)
-        loadExternalData = function () {};
+        if (isDataTreeLoaded) { return; }
+        isDataTreeLoaded = true;
 
         // display spinner and begin loading...
         var $container = vellum.$f.find(".fd-external-data-tree-container"),
