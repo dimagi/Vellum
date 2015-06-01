@@ -264,47 +264,43 @@ require([
             assert(util.saveButtonEnabled(), "save button is disabled");
         });
 
-        it("should update output refs when question ids change", function (done) {
-            util.init({core: {onReady: function () {
-                util.addQuestion("Text", "question1");
-                util.addQuestion("Text", "question2");
-                $("[name='itext-en-label']").val('<output value="/data/question1" /> a ' +
-                    '<output value="/data/question1"/> b ' +
-                    '<output value="/data/question1"></output> c ' +
-                    '<output value="/data/question1" ></output> d ' +
-                    '<output value="if(/data/question1 = \'\', \'\', format-date(date(/data/question1), \'%a%b%c\'))" />').change();
-                $("[name='itext-hin-label']").val('<output value="/data/question1"></output>').change();
-                util.clickQuestion("question1");
-                $("[name='property-nodeID']").val('first_question').change();
+        it("should update output refs when question ids change", function () {
+            util.loadXML("");
+            util.addQuestion("Text", "question1");
+            util.addQuestion("Text", "question2");
+            $("[name='itext-en-label']").val('<output value="/data/question1" /> a ' +
+                '<output value="/data/question1"/> b ' +
+                '<output value="/data/question1"></output> c ' +
+                '<output value="/data/question1" ></output> d ' +
+                '<output value="if(/data/question1 = \'\', \'\', format-date(date(/data/question1), \'%a%b%c\'))" />').change();
+            $("[name='itext-hin-label']").val('<output value="/data/question1"></output>').change();
+            util.clickQuestion("question1");
+            $("[name='property-nodeID']").val('first_question').change();
 
-                util.assertXmlEqual(
-                    call('createXML'),
-                    util.xmlines(TEST_XML_4),
-                    {normalize_xmlns: true}
-                );
-                done();
-            }}});
+            util.assertXmlEqual(
+                call('createXML'),
+                util.xmlines(TEST_XML_4),
+                {normalize_xmlns: true}
+            );
         });
 
-        it("should only update exact output ref matches when question ids change", function (done) {
-            util.init({core: {onReady: function () {
-                util.addQuestion("Text", "question1");
-                util.addQuestion("Text", "question2");
-                $("[name='itext-en-label']").val('<output value="/data/question1" /> ' +
-                    '<output value="/data/question11" /> ' +
-                    '<output value="/data/question1/b" /> ' +
-                    '<output value="/data/question1b" /> ').change();
-                $("[name='itext-hin-label']").val('question2').change();
-                util.clickQuestion("question1");
-                $("[name='property-nodeID']").val('first_question').change();
+        it("should only update exact output ref matches when question ids change", function () {
+            util.loadXML("");
+            util.addQuestion("Text", "question1");
+            util.addQuestion("Text", "question2");
+            $("[name='itext-en-label']").val('<output value="/data/question1" /> ' +
+                '<output value="/data/question11" /> ' +
+                '<output value="/data/question1/b" /> ' +
+                '<output value="/data/question1b" /> ').change();
+            $("[name='itext-hin-label']").val('question2').change();
+            util.clickQuestion("question1");
+            $("[name='property-nodeID']").val('first_question').change();
 
-                util.assertXmlEqual(
-                    call('createXML'),
-                    OUTPUT_REFS_XML,
-                    {normalize_xmlns: true}
-                );
-                done();
-            }}});
+            util.assertXmlEqual(
+                call('createXML'),
+                OUTPUT_REFS_XML,
+                {normalize_xmlns: true}
+            );
         });
 
         it("should escape inequality operators in output ref", function () {

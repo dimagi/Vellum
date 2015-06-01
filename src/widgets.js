@@ -115,8 +115,10 @@ define([
         widget.id = inputID;
         widget.saving = false;
 
-        widget.input = $("<input />")
+        widget.input = $("<div />")
+            .addClass('fake-input')
             .attr("name", inputID)
+            .attr("contenteditable", true)
             .prop('disabled', disabled);
 
         widget.getControl = function () {
@@ -157,7 +159,7 @@ define([
     var text = function (mug, options) {
         var widget = normal(mug, options),
             input = widget.input;
-        input.attr("type", "text").addClass('input-block-level');
+        input.addClass('input-block-level');
 
         widget.setValue = function (value) {
             if (value) {
@@ -234,7 +236,10 @@ define([
     var checkbox = function (mug, options) {
         var widget = normal(mug, options),
             input = widget.input;
-        input.attr("type", "checkbox");
+        input = widget.input = $('<input>')
+            .attr("type", "checkbox")
+            .attr("name", widget.id)
+            .attr('disabled', options.disabled);
 
         widget.setValue = function (value) {
             input.prop("checked", value);
