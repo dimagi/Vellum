@@ -4,7 +4,8 @@ define([
     'vellum/tree',
     'vellum/javaRosa', // TODO move all Itext stuff to javaRosa and remove this
     'vellum/widgets',
-    'vellum/util'
+    'vellum/util',
+    'vellum/logic'
 ], function (
     $,
     _,
@@ -12,7 +13,7 @@ define([
     jr,
     widgets,
     util,
-    undefined
+    logic
 ) {
     /**
      * A question, containing data, bind, and control elements.
@@ -442,6 +443,12 @@ define([
         },
         teardownProperties: function () {
             this.fire({type: "teardown-mug-properties", mug: this});
+        },
+        isInRepeat: function() {
+            if (this.__className === "Repeat") { // HACK hard-coded class name
+                return true;
+            }
+            return this.parentMug && this.parentMug.isInRepeat();
         }
     };
 
@@ -787,7 +794,7 @@ define([
                 }
             },
             dataValue: {
-                visibility: 'visible',
+                visibility: 'visible_if_present',
                 presence: 'optional',
                 lstring: 'Default Data Value',
             },
@@ -856,8 +863,25 @@ define([
             // could use a key-value widget for this in the future
             rawBindAttributes: {
                 presence: 'optional',
-                lstring: 'Extra Bind Attributes',
-            }
+                lstring: 'Extra Bind Attributes'
+            },
+            defaultValue: {
+                visibility: 'visible',
+                presence: 'optional',
+                lstring: 'Default Value',
+                widget: widgets.xPath,
+                xpathType: 'generic',
+                validationFunc: function (mug) {
+                    var paths = new logic.LogicExpression(mug.p.defaultValue).getPaths();
+
+                    if (paths.length) {
+                        return "You are referencing a node in this form. " +
+                               "This can cause errors in the form";
+                    }
+
+                    return 'pass';
+                }
+            },
         },
 
         control: {
@@ -1043,6 +1067,20 @@ define([
                 }
             });
             return attrs.nodeset ? [attrs] : [];
+        },
+
+        getSetValues: function (mug) {
+            var ret = [];
+
+            if (mug.p.defaultValue) {
+                ret = [{
+                    value: mug.p.defaultValue,
+                    event: mug.isInRepeat() ? 'jr-insert' : 'xforms-ready',
+                    ref: mug.absolutePath
+                }];
+            }
+
+            return ret;
         },
 
         // control node writer options
@@ -1281,6 +1319,7 @@ define([
             hintLabel: { presence: 'notallowed' },
             hintItext: { presence: 'notallowed' },
             helpItext: { presence: 'notallowed' },
+            defaultValue: { presence: 'optional', visibility: 'hidden' },
         }
     });
 
@@ -1292,7 +1331,8 @@ define([
             mug.p.appearance = "minimal";
         },
         spec: {
-            dataValue: { presence: 'optional' }
+            dataValue: { presence: 'optional' },
+            defaultValue: { presence: 'optional', visibility: 'hidden' },
         }
     });
 
@@ -1355,6 +1395,7 @@ define([
             constraintMsgAttr: { presence: "notallowed" },
             dataValue: { presence: "notallowed" },
             requiredAttr: { presence: "notallowed" },
+            defaultValue: { presence: 'optional', visibility: 'hidden' },
         }
     });
     

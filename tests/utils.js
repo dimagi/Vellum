@@ -5,6 +5,8 @@ define([
     'jsdiff',
     'underscore',
     'jquery',
+    'vellum/tsv',
+    'vellum/copy-paste',
     'jquery.jstree',
     'jquery.vellum'
 ], function (
@@ -13,11 +15,14 @@ define([
     EquivalentXml,
     jsdiff,
     _,
-    $
+    $,
+    tsv,
+    copypaste
 ) {
     var assert = chai.assert,
         savedForm = null,
-        saveCount = 0;
+        saveCount = 0,
+        PASTE_HEADER = ["Form Builder clip", "version 1"];
 
     // monkey-patch chai to use ===/!== instead of ==/!= in assert.equal
     assert.equal = assert.strictEqual;
@@ -201,6 +206,14 @@ define([
         return data.core.form; // return the Form object
     }
 
+    function paste(rows, errors, print) {
+        if (!_.isString(rows)) {
+            rows = tsv.tabDelimit([PASTE_HEADER].concat(rows));
+        }
+        if (print) { window.console.log(rows); } // debugging helper
+        assert.deepEqual(copypaste.paste(rows), errors || []);
+    }
+
     function clickQuestion() {
         var mugs = [],
             ufids = _.map(arguments, function (path) {
@@ -353,6 +366,7 @@ define([
             });
             return mug;
         },
+        paste: paste,
         clickQuestion: clickQuestion,
         selectAll: selectAll,
         deleteQuestion: deleteQuestion,

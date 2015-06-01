@@ -76,11 +76,11 @@ define(function () {
                 {
                     key: "case",
                     name: "Cases",
-                    endpoint: function () { return [INSTANCES[0]]; }
+                    endpoint: function (callback) { callback([INSTANCES[0]]); }
                 }, {
                     key: "fixture",
-                    name: "Fixtures",
-                    endpoint: function () { return INSTANCES.slice(1); }
+                    name: "Lookup Tables",
+                    endpoint: function (callback) { callback(INSTANCES.slice(1)); }
                 }
             ],
             saveType: "patch",
@@ -108,6 +108,7 @@ define(function () {
             'group_in_field_list': true,
             'help_markdown': true,
             'advanced_itemsets': true,
+            'experimental_ui': true,
         }
     };
 

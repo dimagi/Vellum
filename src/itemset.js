@@ -112,15 +112,20 @@ define([
                         return "Choice Label must be specified.";
                     }
 
-                    var possibleSrcs = _.map(datasources.getPossibleFixtures(), 
-                                             function(val) { return val.src; }),
-                        notCustom = _.contains(possibleSrcs, itemsetData.instance.src),
-                        choices = datasources.autocompleteChoices(itemsetData.instance.src);
+                    // HACK accessing async-loaded data; it may not be here yet
+                    var fixtures = datasources.getPossibleFixtures(),
+                        notCustom = _.some(fixtures, function (fixture) {
+                            return fixture.src === itemsetData.instance.src;
+                        }),
+                        choices = datasources.autocompleteChoices(itemsetData.instance.src),
+                        filterRegex = /\[[^\[]+]/g,
+                        strippedValue = itemsetData.valueRef.replace(filterRegex, ""),
+                        strippedLabel = itemsetData.labelRef.replace(filterRegex, "");
 
-                    if (notCustom && !_.contains(choices, itemsetData.valueRef)) {
-                            return itemsetData.valueRef + " was not found in the lookup table";
-                    } else if (notCustom && !_.contains(choices, itemsetData.labelRef)) {
-                            return itemsetData.labelRef + " was not found in the lookup table";
+                    if (notCustom && !_.contains(choices, strippedValue)) {
+                        return itemsetData.valueRef + " was not found in the lookup table";
+                    } else if (notCustom && !_.contains(choices, strippedLabel)) {
+                        return itemsetData.labelRef + " was not found in the lookup table";
                     }
 
                     return 'pass';
@@ -134,6 +139,8 @@ define([
                 visibility: 'visible',
                 leftPlaceholder: '',
                 autocompleteSources: function() {
+                    // HACK accessing async-loaded data; it may not be here yet
+                    // TODO convert to callback; setup auto-complete when data is ready
                     return datasources.autocompleteChoices(this.p.itemsetData.instance.src);
                 },
                 help: "This is an XPath expression that will filter the set " +
@@ -273,8 +280,48 @@ define([
     }
 
     function itemsetWidget(mug, options) {
+        function isEmptyValue(value) {
+            return !value || _.all(_.map(value, _.isEmpty));
+        }
+
+        function updateAutoComplete() {
+            var choices = datasources.autocompleteChoices(super_getValue().src);
+            labelRef.addAutoComplete(choices, super_handleChange);
+            valueRef.addAutoComplete(choices, super_handleChange);
+            return choices;
+        }
+
+        function onOptionsLoaded() {
+            optionsLoaded = true;
+            if (canUpdateAutoComplete) {
+                // cannot do this until widget is fully initialized
+                // because updateAutoComplete() calls super_getValue()
+                var choices = updateAutoComplete();
+                if (choices && choices.length && isEmptyValue(current.value)) {
+                    if (_.contains(choices, "name")) {
+                        labelRef.val("name");
+                    } else {
+                        labelRef.val(choices[0]);
+                    }
+                    if (_.contains(choices, "@id")) {
+                        valueRef.val("@id");
+                    } else {
+                        valueRef.val(choices.length > 1 ? choices[1] : choices[0]);
+                    }
+                    if (current.hasOwnProperty("value")) {
+                        // HACK push async-loaded default value to the mug.
+                        // This should not be done in UI (widget) code.
+                        // TODO kick off async load options in SelectDynamic mug
+                        // init and clean up related hacks.
+                        super_handleChange();
+                    }
+                }
+            }
+        }
+
+        options = _.extend({}, options, {onOptionsLoaded: onOptionsLoaded});
         if (isAdvancedItemsetEnabled) {
-            options = _.extend({}, options, {hasAdvancedEditor: true});
+            options.hasAdvancedEditor = true;
             options.getSource = function (mug) {
                 var val = super_getValue();
                 if (mug.p.filter) {
@@ -291,32 +338,21 @@ define([
             };
         }
 
-        var widget = datasources.fixtureWidget(mug, options, "Lookup Table"),
+        var current = {},
+            optionsLoaded = false,
+            canUpdateAutoComplete = false,
+            widget = datasources.fixtureWidget(mug, options, "Lookup Table"),
             super_getUIElement = widget.getUIElement,
             super_getValue = widget.getValue,
             super_setValue = widget.setValue,
-            super_handleChange = widget.handleChange.bind(widget),
+            super_handleChange = widget.handleChange,
             labelRef = refSelect("label_ref", "Label Field", false),
             valueRef = refSelect("value_ref", "Value Field", false);
 
-        function getChoices() {
-            return datasources.autocompleteChoices(widget.getValue().instance.src);
-        }
-
-        function updateAutoComplete() {
-            if (widget.getValue().instance) {
-                var sources = getChoices();
-                labelRef.addAutoComplete(sources, super_handleChange);
-                valueRef.addAutoComplete(sources, super_handleChange);
-            }
-        }
-
-        var local_handleChange = function() {
+        widget.handleChange = function() {
             updateAutoComplete();
             super_handleChange();
         };
-
-        widget.handleChange = local_handleChange;
 
         labelRef.onChange(super_handleChange);
         valueRef.onChange(super_handleChange);
@@ -338,28 +374,29 @@ define([
         };
 
         widget.setValue = function (val) {
-            var sources;
-            val = _.isEmpty(val) ? widget.getValue() : val;
+            var hasValue = current.hasOwnProperty("value");
+            current.value = val;
+            if (optionsLoaded && !hasValue && isEmptyValue(val)) {
+                // ignore first call (during core widget init) to retain the
+                // default value that was set when options were loaded
+                super_handleChange();
+                return;
+            }
+            val = _.isEmpty(val) ? {instance: {}} : val;
             super_setValue({
                 id: (val.instance ? val.instance.id : ""),
                 src: (val.instance ? val.instance.src : ""),
-                query: val.nodeset
+                query: val.nodeset || ""
             });
-            if (!val.labelRef) {
-                sources = getChoices();
-                val.labelRef = sources[0];
-            }
-            if (!val.valueRef) {
-                sources = sources ? sources : getChoices();
-                val.valueRef = sources.length > 0 ? sources[1] : sources[0];
-            }
             labelRef.val(val.labelRef);
             valueRef.val(val.valueRef);
-            widget.save();
         };
 
-        // initialize the auto complete sources after getValue is overridden
-        updateAutoComplete();
+        canUpdateAutoComplete = true;
+        if (optionsLoaded) {
+            // call again to update auto-complete and set defaults
+            onOptionsLoaded();
+        }
 
         return widget;
     }
