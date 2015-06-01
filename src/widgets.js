@@ -1,10 +1,12 @@
 define([
     'tpl!vellum/templates/widget_control_keyvalue',
+    'tpl!vellum/templates/widget_control_message',
     'underscore',
     'jquery',
     'vellum/util'
 ], function (
     widget_control_keyvalue,
+    widget_control_message,
     _,
     $,
     util
@@ -56,33 +58,29 @@ define([
             return null;
         };
 
+        widget.refreshMessages = function () {
+            // placeholder to be overridden by widgets that inherit from base
+        };
+
         widget.handleChange = function () {
             widget.updateValue();
-            options.afterChange();
+            // TODO make all widgets that inherit from base set path
+            if (widget.path) {
+                // Widget change events, in addition to mug property
+                // setters, trigger mug validation because some mug
+                // property values have sub-properties that do not
+                // trigger mug property change events when they are
+                // changed. util.BoundPropertyMap is a possible
+                // alternative, but has its own set of complexities
+                // (binding event handlers to mug property values).
+                mug.validate(widget.path);
+            }
             widget.fire("change");
         };
 
         widget.updateValue = function () {
             // When a widget's value changes, do whatever work you need to in 
             // the model/UI to make sure we are in a consistent state.
-            
-            var isID = (['nodeID', 'defaultValue'].indexOf(widget.path) !== -1),
-                val = widget.getValue();
-
-            if (isID && val.indexOf(' ') !== -1) { 
-                // attempt to sanitize nodeID and choice values
-                // TODO, still may allow some bad values
-                widget.setValue(val.replace(/\s/g, '_'));
-            }
-            
-            //short circuit the mug property changing process for when the
-            //nodeID is changed to empty-string (i.e. when the user backspaces
-            //the whole value).  This allows us to keep a reference to everything
-            //and rename smoothly to the new value the user will ultimately enter.
-            if (isID && val === "") {
-                return;
-            }
-            
             widget.save();
         };
 
@@ -104,10 +102,18 @@ define([
             disabled = options.disabled || false,
             widget = base(mug, options);
 
+        widget.mugValue = options.mugValue || function (mug, value) {
+            if (arguments.length === 1) {
+                return mug.p[path];
+            }
+            mug.p[path] = value;
+        };
+
         widget.path = path;
         widget.definition = mug.p.getDefinition(options.path);
-        widget.currentValue = mug.p[path];
+        widget.currentValue = widget.mugValue(mug);
         widget.id = inputID;
+        widget.saving = false;
 
         widget.input = $("<input />")
             .attr("name", inputID)
@@ -117,9 +123,34 @@ define([
             return widget.input; 
         };
 
-        widget.save = function () {
-            this.mug.p[this.path] = this.getValue();
+        widget.getMessagesContainer = function () {
+            return widget.getControl()
+                    .closest(".widget.control-group")
+                    .find(".messages:last");
         };
+
+        widget.getMessages = function (mug, path) {
+            return getMessages(mug, path);
+        };
+
+        widget.refreshMessages = function () {
+            widget.getMessagesContainer()
+                .empty()
+                .append(widget.getMessages(mug, path));
+        };
+
+        mug.on("messages-changed",
+               function () { widget.refreshMessages(); }, null, "teardown-mug-properties");
+
+        widget.save = function () {
+            widget.saving = true;
+            try {
+                widget.mugValue(mug, widget.getValue());
+            } finally {
+                widget.saving = false;
+            }
+        };
+
         return widget;
     };
 
@@ -155,6 +186,39 @@ define([
         return widget;
     };
 
+    var identifier = function (mug, options) {
+        var widget = text(mug, options),
+            super_updateValue = widget.updateValue;
+
+        widget.updateValue = function () {
+            var val = widget.getValue();
+
+            if (val.indexOf(' ') !== -1) {
+                // attempt to sanitize nodeID and choice values
+                // TODO, still may allow some bad values
+                widget.setValue(val.replace(/\s/g, '_'));
+            }
+
+            //short circuit the mug property changing process for when the
+            //nodeID is changed to empty-string (i.e. when the user backspaces
+            //the whole value).  This allows us to keep a reference to everything
+            //and rename smoothly to the new value the user will ultimately enter.
+            if (val === "") {
+                return;
+            }
+
+            super_updateValue();
+        };
+
+        mug.on("property-changed", function (e) {
+            if (e.property === "conflictedNodeId" && !widget.saving) {
+                widget.setValue(widget.mugValue(mug));
+            }
+        }, null, "teardown-mug-properties");
+
+        return widget;
+    };
+
     var droppableText = function (mug, options) {
         var widget = text(mug, options);
         widget.input.addClass('jstree-drop')
@@ -165,6 +229,7 @@ define([
 
         return widget;
     };
+    droppableText.hasLogicReferences = true;
 
     var checkbox = function (mug, options) {
         var widget = normal(mug, options),
@@ -186,9 +251,8 @@ define([
     };
 
     var xPath = function (mug, options) {
-        var widget = text(mug, options);
-
-        var super_getValue = widget.getValue,
+        var widget = text(mug, options),
+            super_getValue = widget.getValue,
             super_setValue = widget.setValue;
         widget.getValue = function() {
             var val = super_getValue();
@@ -222,14 +286,15 @@ define([
                         }
                     }
                 });
-                if (typeof window.ga !== "undefined") {
-                    window.ga('send', 'event', 'Form Builder', 'Logic', options.lstring);
+                if (window.analytics) {
+                    window.analytics.usage('Form Builder', 'Logic', options.lstring);
                 }
             }, !!widget.isDisabled());
         };
 
         return widget;
     };
+    xPath.hasLogicReferences = true;
 
     var baseKeyValue = function (mug, options) {
         var widget = base(mug, options),
@@ -342,6 +407,10 @@ define([
             });
         };
 
+        widget.clearOptions = function () {
+            this.input.empty();
+        };
+
         widget.getOptions = function () {
             return _.map(widget.input.find('option'), function(option) {
                 return {
@@ -382,7 +451,7 @@ define([
         }
 
         var button = $('<button />')
-            .addClass("fd-edit-button")
+            .addClass("fd-edit-button pull-right")
             .text("Edit")
             .stopLink()
             .addClass('btn')
@@ -391,16 +460,17 @@ define([
             .click(editFn);
 
         $uiElem.css('position', 'relative');
-        $uiElem.find('.controls')
+        $uiElem.find('.controls').not('.messages')
             .addClass('fd-edit-controls')
+            .css('margin-right', '60px')
             .after(button);
-        $uiElem.find('.controls').css('margin-right', '60px');
         return $uiElem;
     };
     
     var getUIElement = function($input, labelText, isDisabled, help) {
         var uiElem = $("<div />").addClass("widget control-group"),
             $controls = $('<div class="controls" />'),
+            $messages = $('<div class="controls messages" />'),
             $label = $('<div />').append($("<label />").text(labelText));
         $label.addClass('control-label');
         if (help) {
@@ -422,23 +492,44 @@ define([
         $input.prop('disabled', !!isDisabled);
         $controls.append($input);
         uiElem.append($controls);
+        uiElem.append($messages);
         return uiElem;
     };
+
+    function getMessages(mug, path) {
+        var $messages = $(),
+            seen = {};
+        mug.messages.each(path, function (msg) {
+            if (seen.hasOwnProperty(msg.message)) { return; }
+            seen[msg.message] = true;
+            var html = $(widget_control_message({
+                    msg: msg,
+                    html: /\n/.test(msg.message) ?
+                            util.markdownlite(msg.message) : ""
+                }));
+            html.find("button.close").click(function () {
+                mug.dropMessage(path, msg.key);
+            });
+            $messages = $messages.add(html);
+        });
+        return $messages;
+    }
 
     return {
         base: base,
         normal: normal,
         text: text,
+        identifier: identifier,
         droppableText: droppableText,
         checkbox: checkbox,
         dropdown: dropdown,
         xPath: xPath,
         baseKeyValue: baseKeyValue,
         readOnlyControl: readOnlyControl,
+        getMessages: getMessages,
         util: {
             getUIElementWithEditButton: getUIElementWithEditButton,
             getUIElement: getUIElement
         }
     };
 });
-

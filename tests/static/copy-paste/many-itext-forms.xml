@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:orx="http://openrosa.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa" xmlns:vellum="http://commcarehq.org/xforms/vellum">
+	<h:head>
+		<h:title>Untitled Form</h:title>
+		<model>
+			<instance>
+				<data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/ABC48248-64D6-4E47-9473-8C6DB669E9DA" uiVersion="1" version="1" name="Untitled Form">
+					<text />
+				</data>
+			</instance>
+			<bind nodeset="/data/text" type="xsd:string" constraint="1 = 0" jr:constraintMsg="jr:itext('text-constraintMsg')" />
+			<itext>
+				<translation lang="en" default="">
+					<text id="default-label">
+						<value>default</value>
+						<value form="audio">jr://file/commcare/audio/data/text.mp3</value>
+						<value form="custom">custom</value>
+						<value form="image">jr://file/commcare/image/data/text.png</value>
+						<value form="long">long</value>
+						<value form="short">short</value>
+						<value form="video">jr://file/commcare/video/data/text.3gp</value>
+					</text>
+					<text id="default-hint">
+						<value>hint</value>
+					</text>
+					<text id="default-help">
+						<value>help</value>
+						<value form="audio">jr://file/commcare/audio/help/data/text.mp3</value>
+						<value form="image">jr://file/commcare/image/help/data/text.png</value>
+						<value form="video">jr://file/commcare/video/help/data/text.3gp</value>
+					</text>
+					<text id="text-constraintMsg">
+						<value>valid</value>
+					</text>
+				</translation>
+				<translation lang="hin">
+					<text id="default-label">
+						<value>default</value>
+						<value form="audio">jr://file/commcare/audio/data/text.mp3</value>
+						<value form="custom">custom</value>
+						<value form="image">jr://file/commcare/image/data/text.png</value>
+						<value form="long">long</value>
+						<value form="short">short</value>
+						<value form="video">jr://file/commcare/video/data/text.3gp</value>
+					</text>
+					<text id="default-hint">
+						<value>hint</value>
+					</text>
+					<text id="default-help">
+						<value>help</value>
+						<value form="audio">jr://file/commcare/audio/help/data/text.mp3</value>
+						<value form="image">jr://file/commcare/image/help/data/text.png</value>
+						<value form="video">jr://file/commcare/video/help/data/text.3gp</value>
+					</text>
+					<text id="text-constraintMsg">
+						<value>valid</value>
+					</text>
+				</translation>
+			</itext>
+		</model>
+	</h:head>
+	<h:body>
+		<input ref="/data/text">
+			<label ref="jr:itext('default-label')" />
+			<hint ref="jr:itext('default-hint')">hint label</hint>
+			<help ref="jr:itext('default-help')" />
+		</input>
+	</h:body>
+</h:html>

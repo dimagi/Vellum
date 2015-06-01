@@ -68,6 +68,8 @@ requirejs.config({
         'file-uploader': '../bower_components/MediaUploader/hqmedia.upload_controller',
         'jsdiff': '../bower_components/jsdiff/diff',
         'markdown-it': '../bower_components/markdown-it/dist/markdown-it',
+        'caretjs': '../bower_components/Caret.js/dist/jquery.caret',
+        'atjs': '../bower_components/At.js/dist/js/jquery.atwho'
     },
     shim: {
         'codemirror': {
@@ -158,6 +160,14 @@ requirejs.config({
         },
         'markdown-it': {
             exports: 'markdown-it'
+        },
+        'caretjs': {
+            deps: ['jquery'],
+            exports: 'caretjs'
+        },
+        'atjs': {
+            deps: ['jquery', 'caretjs', 'css!../bower_components/At.js/dist/css/jquery.atwho'],
+            exports: 'atjs'
         }
     },
     less: {
@@ -196,7 +206,8 @@ define([
     'vellum/saveToCase',
     'vellum/uploader',
     'vellum/window',
-    'vellum/polyfills'
+    'vellum/polyfills',
+    'vellum/copy-paste'
     // end buildmain.py delimiter
 ], function () {
     // adds $.vellum as a side-effect
