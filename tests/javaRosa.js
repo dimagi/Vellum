@@ -275,7 +275,7 @@ require([
                 '<output value="if(/data/question1 = \'\', \'\', format-date(date(/data/question1), \'%a%b%c\'))" />').change();
             $("[name='itext-hin-label']").text('<output value="/data/question1"></output>').change();
             util.clickQuestion("question1");
-            $("[name='property-nodeID']").val('first_question').change();
+            $("[name='property-nodeID']").text('first_question').change();
 
             util.assertXmlEqual(
                 call('createXML'),
@@ -294,7 +294,7 @@ require([
                 '<output value="/data/question1b" /> ').change();
             $("[name='itext-hin-label']").text('question2').change();
             util.clickQuestion("question1");
-            $("[name='property-nodeID']").val('first_question').change();
+            $("[name='property-nodeID']").text('first_question').change();
 
             util.assertXmlEqual(
                 call('createXML'),
@@ -595,8 +595,8 @@ require([
         it("should not allow apostrophes in item labels", function() {
             util.addQuestion("Select", "select");
             util.clickQuestion('select/item1');
-            $("[name='property-nodeID']").val("blah ' blah").change();
-            assert.strictEqual($("[name='property-labelItext']").val(), 'select-blah___blah-labelItext');
+            $("[name='property-nodeID']").text("blah ' blah").change();
+            assert.strictEqual($("[name='property-labelItext']").text(), 'select-blah___blah-labelItext');
         });
     });
 
@@ -770,11 +770,11 @@ require([
 
         it("should show and hide the validation message as appropriate", function() {
             util.loadXML(GROUP_WITH_CONSTRAINT_XML);
-            $("[name='property-constraintAttr']").val('true()').change();
-            $("[name='itext-en-constraintMsg']").val('This is not possible').change();
+            $("[name='property-constraintAttr']").text('true()').change();
+            $("[name='itext-en-constraintMsg']").text('This is not possible').change();
             assert($("[name='itext-en-constraintMsg']").is(":visible"));
-            $("[name='itext-en-constraintMsg']").val('').change();
-            $("[name='property-constraintAttr']").val('').change();
+            $("[name='itext-en-constraintMsg']").text('').change();
+            $("[name='property-constraintAttr']").text('').change();
             assert(!$("[name='itext-en-constraintMsg']").is(":visible"));
         });
 

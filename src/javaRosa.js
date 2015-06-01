@@ -499,7 +499,7 @@ define([
 
         widget.input.keyup(function () {
             // turn off auto-mode if the id is ever manually overridden
-            var newVal = $(this).val();
+            var newVal = $(this).text();
             if (newVal !== autoGenerateId()) {
                 setAutoMode(false);
             }
@@ -507,7 +507,7 @@ define([
 
         mug.on("property-changed", function (e) {
             if (getAutoMode() && e.property === "nodeID") {
-                $input.val(autoGenerateId());
+                $input.text(autoGenerateId());
             }
         }, null, "teardown-mug-properties");
 

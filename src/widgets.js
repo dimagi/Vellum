@@ -115,7 +115,8 @@ define([
         widget.id = inputID;
         widget.saving = false;
 
-        widget.input = $("<input />")
+        widget.input = $("<div contenteditable />")
+            .addClass('fake-input')
             .attr("name", inputID)
             .prop('disabled', disabled);
 
@@ -157,7 +158,7 @@ define([
     var text = function (mug, options) {
         var widget = normal(mug, options),
             input = widget.input;
-        input.attr("type", "text").addClass('input-block-level');
+        input.addClass('input-block-level');
 
         widget.setValue = function (value) {
             if (value) {
@@ -166,8 +167,8 @@ define([
             }
 
             var position = util.getCaretPosition(input[0]);
-            var oldvalue = input.val();
-            input.val(value);
+            var oldvalue = input.text();
+            input.text(value);
 
             // If this input has focus and value hasn't changed much,
             // keep the cursor in the same position
@@ -177,7 +178,7 @@ define([
         };
 
         widget.getValue = function() {
-            return input.val().replace(/&#10;/g, '\n');
+            return input.text().replace(/&#10;/g, '\n');
         };
 
         input.bind("change input", function () {
@@ -234,7 +235,10 @@ define([
     var checkbox = function (mug, options) {
         var widget = normal(mug, options),
             input = widget.input;
-        input.attr("type", "checkbox");
+        input = widget.input = $('<input>')
+            .attr("type", "checkbox")
+            .attr("name", widget.id)
+            .attr('disabled', options.disabled);
 
         widget.setValue = function (value) {
             input.prop("checked", value);

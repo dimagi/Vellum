@@ -49,7 +49,7 @@ require([
             });
             util.clickQuestion("/data/hidden");
             var input = $("[name=property-calculateAttr]");
-            assert.equal(input.val(), escaped);
+            assert.equal(input.text(), escaped);
 
             // click Edit button
             input.closest(".control-group").find(".fd-edit-button").click();
@@ -82,7 +82,7 @@ require([
                 $(".fd-xpath-save-button").click();
 
                 var input = $("[name=property-calculateAttr]");
-                assert.equal(input.val(), escaped, "input value not escaped");
+                assert.equal(input.text(), escaped, "input value not escaped");
                 assert.equal(hidden.p.calculateAttr, value, "wrong mug value");
                 done();
             }, null, "showXPathEditor");
