@@ -33,10 +33,10 @@ define([
             var trans = util.getMug("transfer[@type='trans-1']");
             assert.equal(trans.p.sectionId, "stock");
             assert.equal(trans.p.quantity, "/data/amount_received");
-            assert.equal(trans.p.entryId.value, "instance('commcaresession')/session/data/product_id");
-            assert.equal(trans.p.src.value, "instance('commcaresession')/session/data/case_id");
-            assert.equal(trans.p.dest.value, "instance('casedb')/casedb/case[@case_id=instance('commcaresession')/session/data/case_id]/index/parent");
-            assert.equal(trans.p.date.value, "today()");
+            assert.equal(trans.p.entryId, "instance('commcaresession')/session/data/product_id");
+            assert.equal(trans.p.src, "instance('commcaresession')/session/data/case_id");
+            assert.equal(trans.p.dest, "instance('casedb')/casedb/case[@case_id=instance('commcaresession')/session/data/case_id]/index/parent");
+            assert.equal(trans.p.date, "today()");
             assert.equal(trans.p.relevantAttr, "true()");
         });
 
@@ -46,9 +46,9 @@ define([
             var trans = util.addQuestion("Transfer", "trans-1");
             trans.p.sectionId = "stock";
             trans.p.quantity = "/data/amount_received";
-            trans.p.entryId.value = "instance('commcaresession')/session/data/product_id";
-            trans.p.src.value = "instance('commcaresession')/session/data/case_id";
-            trans.p.dest.value = "instance('casedb')/casedb/case[@case_id=instance('commcaresession')/session/data/case_id]/index/parent";
+            trans.p.entryId = "instance('commcaresession')/session/data/product_id";
+            trans.p.src = "instance('commcaresession')/session/data/case_id";
+            trans.p.dest = "instance('casedb')/casedb/case[@case_id=instance('commcaresession')/session/data/case_id]/index/parent";
             trans.p.relevantAttr = "true()";
             trans.form.addInstanceIfNotExists({
                 id: "products",
@@ -67,8 +67,8 @@ define([
             var bal = util.getMug("balance[@type='bal-0']");
             assert.equal(bal.p.sectionId, "stock");
             assert.equal(bal.p.quantity, "/data/stock_amount");
-            assert.equal(bal.p.entityId.value, "instance('commcaresession')/session/data/case_id");
-            assert.equal(bal.p.entryId.value, "instance('commcaresession')/session/data/product_id");
+            assert.equal(bal.p.entityId, "instance('commcaresession')/session/data/case_id");
+            assert.equal(bal.p.entryId, "instance('commcaresession')/session/data/product_id");
             assert.equal(bal.p.relevantAttr, "/data/stock_amount != 0");
         });
 
@@ -78,8 +78,8 @@ define([
             var bal = util.addQuestion("Balance", "bal-0");
             bal.p.sectionId = "stock";
             bal.p.quantity = "/data/stock_amount";
-            bal.p.entityId.value = "instance('commcaresession')/session/data/case_id";
-            bal.p.entryId.value = "instance('commcaresession')/session/data/product_id";
+            bal.p.entityId = "instance('commcaresession')/session/data/case_id";
+            bal.p.entryId = "instance('commcaresession')/session/data/product_id";
             bal.p.relevantAttr = "/data/stock_amount != 0";
             bal.form.addInstanceIfNotExists({
                 id: "products",
@@ -99,9 +99,9 @@ define([
             var trans = util.addQuestion("Transfer", "trans");
             trans.p.sectionId = "stock";
             trans.p.quantity = "1";
-            trans.p.entryId.value = "3";
-            trans.p.src.value = "src";
-            trans.p.dest.value = "dst";
+            trans.p.entryId = "3";
+            trans.p.src = "src";
+            trans.p.dest = "dst";
             var xml = $(util.call("createXML")),
                 qty = xml.find("bind[calculate=1]"),
                 entry = xml.find("setvalue[value=3]"),
@@ -133,8 +133,8 @@ define([
         it("transfer question should not be valid when src and dest are both empty", function () {
             util.loadXML();
             var trans = util.addQuestion("Transfer", "t1");
-            assert.strictEqual(trans.p.src.value, "");
-            assert.strictEqual(trans.p.dest.value, "");
+            assert.strictEqual(trans.p.src, "");
+            assert.strictEqual(trans.p.dest, "");
             trans.validate(); // normally called by widget.handleChange
             assert(!util.isTreeNodeValid(trans),
                 "Transfer question with empty src and dest should be invalid");
@@ -145,8 +145,8 @@ define([
         it("new transfer question should not have validation errors", function () {
             util.loadXML();
             var trans = util.addQuestion("Transfer", "t1");
-            assert.strictEqual(trans.p.src.value, "");
-            assert.strictEqual(trans.p.dest.value, "");
+            assert.strictEqual(trans.p.src, "");
+            assert.strictEqual(trans.p.dest, "");
             assert.deepEqual(util.getMessages(trans), "");
         });
 
@@ -158,8 +158,8 @@ define([
 
         it("should create two transfer blocks with the same parent node", function () {
             util.loadXML();
-            util.addQuestion("Transfer", "t1").p.src.value = "value";
-            util.addQuestion("Transfer", "t2").p.src.value = "value";
+            util.addQuestion("Transfer", "t1").p.src = "value";
+            util.addQuestion("Transfer", "t2").p.src = "value";
             var xml = util.call("createXML"),
                 $xml = $(xml);
             assert.equal($xml.find("transfer").length, 2, xml);
@@ -175,32 +175,32 @@ define([
             });
 
             it("with missing src and dest should not be valid", function () {
-                trans.p.src.value = "";
-                trans.p.dest.value = "";
+                trans.p.src = "";
+                trans.p.dest = "";
                 trans.validate();
                 assert.notDeepEqual(trans.getErrors(), [],
                     "Transfer with missing src should not be valid");
             });
 
             it("with missing src should not be valid", function () {
-                trans.p.src.value = "";
-                trans.p.dest.value = "something";
+                trans.p.src = "";
+                trans.p.dest = "something";
                 trans.validate();
                 assert.notDeepEqual(trans.getErrors(), [],
                     "Transfer with missing src should not be valid");
             });
 
             it("with missing dest should not be valid", function () {
-                trans.p.src.value = "something";
-                trans.p.dest.value = "";
+                trans.p.src = "something";
+                trans.p.dest = "";
                 trans.validate();
                 assert.notDeepEqual(trans.getErrors(), [],
                     "Transfer with missing dest should not be valid");
             });
 
             it("with both src and dest should be valid", function () {
-                trans.p.src.value = "something";
-                trans.p.dest.value = "something";
+                trans.p.src = "something";
+                trans.p.dest = "something";
                 trans.validate();
                 assert.deepEqual(trans.getErrors(), []);
             });
@@ -209,7 +209,7 @@ define([
         it("dispense question should omit dest", function () {
             util.loadXML();
             var mug = util.addQuestion("Dispense", "t1");
-            mug.p.src.value = "something";
+            mug.p.src = "something";
             var xml = util.call("createXML"),
                 $xml = $(xml);
             assert.strictEqual($xml.find("transfer[type='t1']").attr("src"), "",
@@ -225,7 +225,7 @@ define([
         it("receive question should omit src", function () {
             util.loadXML();
             var mug = util.addQuestion("Receive", "t1");
-            mug.p.dest.value = "something";
+            mug.p.dest = "something";
             var xml = util.call("createXML"),
                 $xml = $(xml);
             assert.isUndefined($xml.find("transfer[type='t1']").attr("src"),
@@ -358,10 +358,10 @@ define([
                     assert.equal(mug.__className, test.from);
                     call("changeMugType", mug, test.to);
                     if (hasSrc) {
-                        mug.p.src.value = "instance('commcaresession')/session/data/case_id";
+                        mug.p.src = "instance('commcaresession')/session/data/case_id";
                     }
                     if (hasDest) {
-                        mug.p.dest.value = "instance('casedb')/casedb/case[@case_id=" +
+                        mug.p.dest = "instance('casedb')/casedb/case[@case_id=" +
                             "instance('commcaresession')/session/data/case_id]/index/parent";
                     }
                     var xml = util.call("createXML"),
