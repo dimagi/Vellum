@@ -20,7 +20,7 @@ define([
             width: 0,
             height: 0
         }).css(offScreen).appendTo('body'),
-        isMac;
+        isMac = /Mac/.test(navigator.platform);
 
     function focusTextarea($focus, value) {
         if ($focus.length === 0) {
@@ -330,14 +330,9 @@ define([
         init: function () {
             var opts = this.opts().copyPaste;
             vellum = this;
-            isMac = /Mac/.test(navigator.platform);
 
             function copyModifierKeyPressed(event) {
-                if (isMac && event.metaKey) {
-                    return true;
-                }
-
-                return event.ctrlKey;
+                return (isMac && event.metaKey) || (!isMac && event.ctrlKey);
             }
 
             // Firefox only fires copy/paste when it thinks it's appropriate
