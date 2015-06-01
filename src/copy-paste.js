@@ -19,7 +19,8 @@ define([
             position: 'absolute',
             width: 0,
             height: 0
-        }).css(offScreen).appendTo('body');
+        }).css(offScreen).appendTo('body'),
+        isMac = /Mac/.test(navigator.platform);
 
     function focusTextarea($focus, value) {
         if ($focus.length === 0) {
@@ -329,27 +330,34 @@ define([
         init: function () {
             var opts = this.opts().copyPaste;
             vellum = this;
+
+            function copyModifierKeyPressed(event) {
+                return (isMac && event.metaKey) || (!isMac && event.ctrlKey);
+            }
+
             // Firefox only fires copy/paste when it thinks it's appropriate
             // Chrome doesn't fire copy/paste after key down has changed the focus
             // So we need implement both copy/paste as catching keystrokes Ctrl+C/V
             $(document).on('cut copy paste keydown', function (e) {
                 if (e.type === 'cut' ||
-                    e.metaKey && String.fromCharCode(e.keyCode) === 'X') {
+                    copyModifierKeyPressed(e) &&
+                    String.fromCharCode(e.keyCode) === 'X') {
                     // Disable cut until undo feature is implemented
                     if (false) { onCut(opts); }
                 } else if (e.type === 'copy' ||
-                    e.metaKey && String.fromCharCode(e.keyCode) === 'C') {
+                           copyModifierKeyPressed(e) &&
+                           String.fromCharCode(e.keyCode) === 'C') {
                     onCopy(opts);
                 } else if (e.type === 'paste' ||
-                           e.metaKey && String.fromCharCode(e.keyCode) === 'V') {
+                           copyModifierKeyPressed(e) &&
+                           String.fromCharCode(e.keyCode) === 'V') {
                     onPaste(opts);
                 }
             });
         },
         displayMultipleSelectionView: function () {
             this.__callOld();
-            var isMac = /Mac/.test(navigator.platform),
-                html = $(copy_paste_help({"metachar": (isMac ? "\u2318" : "Ctrl+")}));
+            var html = $(copy_paste_help({"metachar": (isMac ? "\u2318" : "Ctrl+")}));
             this.$f.find(".fd-props-content").html(html);
         }
     });
