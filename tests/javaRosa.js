@@ -57,7 +57,7 @@ require([
 
         it("should not show itext errors when there is text in any language", function (done) {
             util.loadXML(TEST_XML_1);
-            $("textarea[name=itext-en-constraintMsg]").val("").change();
+            $("[name=itext-en-constraintMsg]").text("").change();
             util.saveAndReload(function () {
                 // there should be no errors on load
                 // todo: this should inspect the model, not UI
