@@ -269,48 +269,48 @@ require([
                         clickQuestion("question1");
                         addAllForms();
                         $("[name='itext-en-label']")
-                            .text('question1 en label').change();
+                            .val('question1 en label').change();
                         $("[name='itext-hin-label']")
-                            .text('question1 hin label').change();
+                            .val('question1 hin label').change();
                         $("[name='itext-en-constraintMsg']")
-                            .text('question1 en validation').change();
+                            .val('question1 en validation').change();
                         $("[name='itext-hin-constraintMsg']")
-                            .text('question1 hin validation').change();
+                            .val('question1 hin validation').change();
                         $("[name='itext-en-hint']")
-                            .text('question1 en hint').change();
+                            .val('question1 en hint').change();
                         $("[name='itext-hin-hint']")
-                            .text('question1 hin hint').change();
+                            .val('question1 hin hint').change();
                         $("[name='itext-en-help']")
-                            .text('question1 en help').change();
+                            .val('question1 en help').change();
                         $("[name='itext-hin-help']")
-                            .text('question1 hin help').change();
+                            .val('question1 hin help').change();
                         $("[name='itext-en-label-long']")
-                            .text("question1 en long").change();
+                            .val("question1 en long").change();
                         $("[name='itext-hin-label-long']")
-                            .text("question1 hin long").change();
+                            .val("question1 hin long").change();
                         $("[name='itext-en-label-short']")
-                            .text("question1 en short").change();
+                            .val("question1 en short").change();
                         $("[name='itext-hin-label-short']")
-                            .text("question1 hin short").change();
+                            .val("question1 hin short").change();
                         $("[name='itext-en-label-custom']")
-                            .text("question1 en custom").change();
+                            .val("question1 en custom").change();
                         $("[name='itext-hin-label-custom']")
-                            .text("question1 hin custom").change();
+                            .val("question1 hin custom").change();
 
                         clickQuestion("question3/item1");
                         addAllForms();
                         $("[name='itext-en-label-long']")
-                            .text("item1 long en").change();
+                            .val("item1 long en").change();
                         $("[name='itext-hin-label-long']")
-                            .text("item1 long hin").change();
+                            .val("item1 long hin").change();
                         $("[name='itext-en-label-short']")
-                            .text("item1 short en").change();
+                            .val("item1 short en").change();
                         $("[name='itext-hin-label-short']")
-                            .text("item1 short hin").change();
+                            .val("item1 short hin").change();
                         $("[name='itext-en-label-custom']")
-                            .text("item1 custom en").change();
+                            .val("item1 custom en").change();
                         $("[name='itext-hin-label-custom']")
-                            .text("item1 custom hin").change();
+                            .val("item1 custom hin").change();
 
                         clickQuestion("question22/question23/question7");
                         $("[name='intent-app-id']").val("app_id").change();

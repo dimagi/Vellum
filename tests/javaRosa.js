@@ -88,20 +88,20 @@ require([
                 $(".btn:contains(custom)").click();
                 $(".fd-modal-generic-container").find("input").val("custom");
                 $(".fd-modal-generic-container").find(".btn:contains(Add)").click();
-                $("[name='itext-en-label']").text('question1 en label').change();
-                $("[name='itext-hin-label']").text('question1 hin label').change();
-                $("[name='itext-en-constraintMsg']").text('question1 en validation').change();
-                $("[name='itext-hin-constraintMsg']").text('question1 hin validation').change();
-                $("[name='itext-en-hint']").text('question1 en hint').change();
-                $("[name='itext-hin-hint']").text('question1 hin hint').change();
-                $("[name='itext-en-help']").text('question1 en help').change();
-                $("[name='itext-hin-help']").text('question1 hin help').change();
-                $("[name='itext-en-label-long']").text("question1 en long").change();
-                $("[name='itext-hin-label-long']").text("question1 hin long").change();
-                $("[name='itext-en-label-short']").text("question1 en short").change();
-                $("[name='itext-hin-label-short']").text("question1 hin short").change();
-                $("[name='itext-en-label-custom']").text("question1 en custom").change();
-                $("[name='itext-hin-label-custom']").text("question1 hin custom").change();
+                $("[name='itext-en-label']").val('question1 en label').change();
+                $("[name='itext-hin-label']").val('question1 hin label').change();
+                $("[name='itext-en-constraintMsg']").val('question1 en validation').change();
+                $("[name='itext-hin-constraintMsg']").val('question1 hin validation').change();
+                $("[name='itext-en-hint']").val('question1 en hint').change();
+                $("[name='itext-hin-hint']").val('question1 hin hint').change();
+                $("[name='itext-en-help']").val('question1 en help').change();
+                $("[name='itext-hin-help']").val('question1 hin help').change();
+                $("[name='itext-en-label-long']").val("question1 en long").change();
+                $("[name='itext-hin-label-long']").val("question1 hin long").change();
+                $("[name='itext-en-label-short']").val("question1 en short").change();
+                $("[name='itext-hin-label-short']").val("question1 hin short").change();
+                $("[name='itext-en-label-custom']").val("question1 en custom").change();
+                $("[name='itext-hin-label-custom']").val("question1 hin custom").change();
 
                 util.assertXmlEqual(
                     call('createXML'),
@@ -139,17 +139,17 @@ require([
             util.clickQuestion("question1");
             var enLabel = $("[name='itext-en-label']"),
                 hinLabel = $("[name='itext-hin-label']");
-            enLabel.text("English").change();
-            assert.equal(enLabel.text(), "English");
-            assert.equal(hinLabel.text(), "");
+            enLabel.val("English").change();
+            assert.equal(enLabel.val(), "English");
+            assert.equal(hinLabel.val(), "");
             assert.equal(hinLabel.attr("data-placeholder"), "English");
 
             util.clickQuestion("temp");
             util.clickQuestion("question1");
             enLabel = $("[name='itext-en-label']");
             hinLabel = $("[name='itext-hin-label']");
-            assert.equal(enLabel.text(), "English");
-            assert.equal(hinLabel.text(), "");
+            assert.equal(enLabel.val(), "English");
+            assert.equal(hinLabel.val(), "");
             assert.equal(hinLabel.attr("data-placeholder"), "English");
         });
 
@@ -180,15 +180,15 @@ require([
             util.clickQuestion("text");
             var enItext = $("[name='itext-en-constraintMsg']"),
                 hinItext = $("[name='itext-hin-constraintMsg']");
-            hinItext.text("").change();
-            assert.equal(enItext.text(), "English");
-            assert.equal(hinItext.text(), "");
+            hinItext.val("").change();
+            assert.equal(enItext.val(), "English");
+            assert.equal(hinItext.val(), "");
             assert.equal(hinItext.attr("data-placeholder"), "English");
             assert(!enItext.attr("data-placeholder"), enItext.attr("data-placeholder"));
 
-            enItext.text("").change();
-            assert.equal(enItext.text(), "");
-            assert.equal(hinItext.text(), "");
+            enItext.val("").change();
+            assert.equal(enItext.val(), "");
+            assert.equal(hinItext.val(), "");
             assert(!enItext.attr("data-placeholder"), enItext.attr("data-placeholder"));
             assert(!hinItext.attr("data-placeholder"), hinItext.attr("data-placeholder"));
         });
@@ -198,8 +198,8 @@ require([
             var group = util.addQuestion("Group", "group");
             util.addQuestion("Text", "question2");
             util.clickQuestion("group/question2");
-            $("[name='itext-en-label']").text('english').change();
-            $("[name='itext-hin-label']").text('hindi').change();
+            $("[name='itext-en-label']").val('english').change();
+            $("[name='itext-hin-label']").val('hindi').change();
             util.collapseGroup(group);
             assert.equal($(".fd-question-tree .jstree-anchor").length, 1);
             $(".fd-question-tree-lang select").val('hin').change();
@@ -212,7 +212,7 @@ require([
             var q1 = util.addQuestion("Text");
             util.addQuestion("Text");
             util.clickQuestion("question1");
-            $("[name='itext-en-label']").text("English").change();
+            $("[name='itext-en-label']").val("English").change();
             q1.p.nodeID = "newid";
 
             util.clickQuestion("question2");
@@ -220,8 +220,8 @@ require([
 
             var enLabel = $("[name='itext-en-label']"),
                 hinLabel = $("[name='itext-hin-label']");
-            assert.equal(enLabel.text(), "English");
-            assert.equal(hinLabel.text(), "");
+            assert.equal(enLabel.val(), "English");
+            assert.equal(hinLabel.val(), "");
             assert.equal(hinLabel.attr("data-placeholder"), "English");
         });
 
@@ -229,21 +229,21 @@ require([
             util.loadXML("");
             util.addQuestion("Text", "question1");
             util.clickQuestion("question1");
-            $("[name='itext-en-label']").text('english').change();
+            $("[name='itext-en-label']").val('english').change();
             var treeSelector = ".fd-question-tree .jstree-anchor";
 
             assert.equal($(treeSelector).text(), "english");
             $(".fd-question-tree-lang select").val('hin').change();
             assert.equal($(treeSelector).text(), "english [en]");
-            $("[name='itext-hin-label']").text('hindi').change();
+            $("[name='itext-hin-label']").val('hindi').change();
             assert.equal($(treeSelector).text(), "hindi");
         });
 
         it("non-labelItext widget should contain value on load", function () {
             util.loadXML(TEXT_WITH_CONSTRAINT_XML);
             util.clickQuestion("text");
-            assert.equal($("[name='itext-en-constraintMsg']").text(), "English");
-            assert.equal($("[name='itext-hin-constraintMsg']").text(), "Hindi");
+            assert.equal($("[name='itext-en-constraintMsg']").val(), "English");
+            assert.equal($("[name='itext-hin-constraintMsg']").val(), "Hindi");
         });
 
         it("should enable save button on itext label change", function () {
@@ -251,7 +251,7 @@ require([
             util.saveButtonEnabled(false);
             util.clickQuestion("question1");
             assert(!util.saveButtonEnabled(), "click should not cause change");
-            $("[name='itext-en-label']").text("new").change();
+            $("[name='itext-en-label']").val("new").change();
             assert(util.saveButtonEnabled(), "save button is disabled");
         });
 
@@ -268,15 +268,14 @@ require([
             util.loadXML("");
             util.addQuestion("Text", "question1");
             util.addQuestion("Text", "question2");
-            $("[name='itext-en-label']").text('<output value="/data/question1" /> a ' +
+            $("[name='itext-en-label']").val('<output value="/data/question1" /> a ' +
                 '<output value="/data/question1"/> b ' +
                 '<output value="/data/question1"></output> c ' +
                 '<output value="/data/question1" ></output> d ' +
                 '<output value="if(/data/question1 = \'\', \'\', format-date(date(/data/question1), \'%a%b%c\'))" />').change();
-            $("[name='itext-hin-label']").text('<output value="/data/question1"></output>').change();
+            $("[name='itext-hin-label']").val('<output value="/data/question1"></output>').change();
             util.clickQuestion("question1");
-            $("[name='property-nodeID']").text('first_question').change();
-
+            $("[name='property-nodeID']").val('first_question').change();
             util.assertXmlEqual(
                 call('createXML'),
                 util.xmlines(TEST_XML_4),
@@ -288,13 +287,13 @@ require([
             util.loadXML("");
             util.addQuestion("Text", "question1");
             util.addQuestion("Text", "question2");
-            $("[name='itext-en-label']").text('<output value="/data/question1" /> ' +
+            $("[name='itext-en-label']").val('<output value="/data/question1" /> ' +
                 '<output value="/data/question11" /> ' +
                 '<output value="/data/question1/b" /> ' +
                 '<output value="/data/question1b" /> ').change();
-            $("[name='itext-hin-label']").text('question2').change();
+            $("[name='itext-hin-label']").val('question2').change();
             util.clickQuestion("question1");
-            $("[name='property-nodeID']").text('first_question').change();
+            $("[name='property-nodeID']").val('first_question').change();
 
             util.assertXmlEqual(
                 call('createXML'),
@@ -358,36 +357,40 @@ require([
             });
         });
 
-        it("drag question into label makes output ref in correct position", function () {
-            util.loadXML("");
-            var mug1 = util.addQuestion("Text", "question1"),
-                mug2 = util.addQuestion("Text", "question2");
+        it("drag question into label makes output ref in correct position", function (done) {
+            util.init({core: {onReady: function () {
+                var mug1 = util.addQuestion("Text", "question1"),
+                    mug2 = util.addQuestion("Text", "question2");
 
-            var target = $("[name='itext-en-label']"),
-                sourceUid = mug1.ufid;
-            target.text("test string").change();
-            vellum_util.setCaretPosition(target[0], 4);
-            call("handleDropFinish", target, sourceUid, mug1);
-            var val = mug2.p.labelItext.get('default', 'en');
-            assert.equal(val, 'test<output value="/data/question1" /> string');
+                var target = $("[name='itext-en-label']"),
+                    sourceUid = mug1.ufid;
+                target.val("test string").change();
+                vellum_util.setCaretPosition(target[0], 4);
+                call("handleDropFinish", target, sourceUid, mug1);
+                var val = mug2.p.labelItext.get('default', 'en');
+                assert.equal(val, 'test<output value="/data/question1" /> string');
+                done();
+            }}});
         });
 
-        it("output ref deleted with single backspace", function () {
-            util.loadXML("");
-            var mug = util.addQuestion("Text", "question1");
+        it("output ref deleted with single backspace", function (done) {
+            util.init({core: {onReady: function () {
+                var mug = util.addQuestion("Text", "question1");
 
-            var target = $("[name='itext-en-label']");
-            target.text('question1 <output value="/data/question2" /> end').change();
-            vellum_util.setCaretPosition(target[0], 44);
+                var target = $("[name='itext-en-label']");
+                target.val('question1 <output value="/data/question2" /> end').change();
+                vellum_util.setCaretPosition(target[0], 44);
 
-            target.trigger({
-                type: "keydown",
-                which: 8,
-                ctrlKey: false
-            });
-            target.change();
-            var val = mug.p.labelItext.get('default', 'en');
-            assert.equal(val, 'question1  end');
+                target.trigger({
+                    type: "keydown",
+                    which: 8,
+                    ctrlKey: false
+                });
+                target.change();
+                var val = mug.p.labelItext.get('default', 'en');
+                assert.equal(val, 'question1  end');
+                done();
+            }}});
         });
 
         it("output ref deleted with single delete keypress", function () {
@@ -395,7 +398,7 @@ require([
             var mug = util.addQuestion("Text", "question1");
 
             var target = $("[name='itext-en-label']");
-            target.text('question1 <output value="/data/question2" /> end').change();
+            target.val('question1 <output value="/data/question2" /> end').change();
             vellum_util.setCaretPosition(target[0], 10);
 
             target.trigger({
@@ -515,12 +518,14 @@ require([
             util.clickQuestion("question1");
             var enLabel = $("[name='itext-en-label']"),
                 hinLabel = $("[name='itext-hin-label']");
-            enLabel.text("test string").change();
+            enLabel.val("test string").change();
             enLabel.focus();
             var selection = window.getSelection().getRangeAt(0);
             assert.equal(selection.startOffset, 0);
             assert.equal(selection.endOffset, 11);
             hinLabel.text("hin test string").change();
+
+            hinLabel.val("hin test string").change();
             hinLabel.focus();
             selection = window.getSelection().getRangeAt(0);
             assert.equal(selection.startOffset, 0);
@@ -795,13 +800,13 @@ require([
             var $dropdown = $(".fd-question-tree-lang select");
             var treeSelector = ".fd-question-tree .jstree-anchor";
 
-            $("[name='itext-en-label']").text('x').change();
+            $("[name='itext-en-label']").val('x').change();
             assert.equal($(treeSelector).text(), "x");
-            $("[name='itext-en-label']").text('').change();
+            $("[name='itext-en-label']").val('').change();
             assert.equal($(treeSelector).text(), "question1");
 
             $dropdown.val('en').change();
-            $("[name='itext-en-label']").text('english').change();
+            $("[name='itext-en-label']").val('english').change();
             assert.equal($(treeSelector).text(), "english");
             $dropdown.val('_ids').change();
             assert.equal($dropdown.find("option").length, 2);
