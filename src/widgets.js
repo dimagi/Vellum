@@ -159,7 +159,9 @@ define([
     var text = function (mug, options) {
         var widget = normal(mug, options),
             input = widget.input;
-        input.addClass('input-block-level');
+        input.addClass('input-block-level').focus(function() {
+            util.setCaretPosition(this, 0, widget.getValue().length);
+        });
 
         widget.setValue = function (value) {
             if (value) {
