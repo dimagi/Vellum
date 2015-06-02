@@ -57,7 +57,7 @@ require([
 
         it("should not show itext errors when there is text in any language", function (done) {
             util.loadXML(TEST_XML_1);
-            $("textarea[name=itext-en-constraintMsg]").val("").change();
+            $("[name=itext-en-constraintMsg]").val("").change();
             util.saveAndReload(function () {
                 // there should be no errors on load
                 // todo: this should inspect the model, not UI
@@ -521,12 +521,16 @@ require([
                 hinLabel = $("[name='itext-hin-label']");
             enLabel.val("test string").change();
             enLabel.focus();
+
+            var selection = window.getSelection().getRangeAt(0);
+            assert.equal(selection.startOffset, 0);
+            assert.equal(selection.endOffset, 11);
+
             hinLabel.val("hin test string").change();
             hinLabel.focus();
-            assert.equal(enLabel[0].selectionStart, 0);
-            assert.equal(enLabel[0].selectionEnd, 11);
-            assert.equal(hinLabel[0].selectionStart, 0);
-            assert.equal(hinLabel[0].selectionEnd, 15);
+            selection = window.getSelection().getRangeAt(0);
+            assert.equal(selection.startOffset, 0);
+            assert.equal(selection.endOffset, 15);
         });
 
         it("should not create duplicate <help> node on select", function () {
