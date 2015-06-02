@@ -826,6 +826,7 @@ define([
         var widget = widgets.base(mug, options);
         var $input = $("<div contenteditable=true>")
             .attr("name", widget.id)
+            .css('min-height', '3em')
             .addClass('fake-textarea input-block-level itext-widget-input')
             .on('change input', function (e) { widget.handleChange(); })
             .focus(function () {
