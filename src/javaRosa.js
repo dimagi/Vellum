@@ -499,7 +499,7 @@ define([
 
         widget.input.keyup(function () {
             // turn off auto-mode if the id is ever manually overridden
-            var newVal = $(this).text();
+            var newVal = $(this).val();
             if (newVal !== autoGenerateId()) {
                 setAutoMode(false);
             }
@@ -507,7 +507,7 @@ define([
 
         mug.on("property-changed", function (e) {
             if (getAutoMode() && e.property === "nodeID") {
-                $input.text(autoGenerateId());
+                $input.val(autoGenerateId());
             }
         }, null, "teardown-mug-properties");
 
@@ -1018,7 +1018,7 @@ define([
         };
 
         widget.setValue = function (val) {
-            $input.text(val);
+            $input.val(val);
         };
 
         widget.setPlaceholder = function (val) {
@@ -1026,7 +1026,7 @@ define([
         };
 
         widget.getValue = function () {
-            return $input.text();
+            return $input.val();
         };
 
         widget.getPlaceholder = function () {

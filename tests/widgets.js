@@ -49,13 +49,13 @@ require([
             });
             util.clickQuestion("/data/hidden");
             var input = $("[name=property-calculateAttr]");
-            assert.equal(input.text(), escaped);
+            assert.equal(input.val(), escaped);
 
             // click Edit button
             input.closest(".control-group").find(".fd-edit-button").click();
 
             events.on("showXPathEditor", function () {
-                var text = $(".xpath-advanced").find(".fake-textarea").text();
+                var text = $(".xpath-advanced").find(".fake-textarea").val();
                 $(".fd-xpath-cancel-button").click();
                 assert.equal(text, value, "textarea content should have newline");
                 done();
@@ -78,11 +78,11 @@ require([
 
             events.on("showXPathEditor", function () {
                 var textarea = $(".xpath-advanced").find(".fake-textarea");
-                textarea.text(value).change();
+                textarea.val(value).change();
                 $(".fd-xpath-save-button").click();
 
                 var input = $("[name=property-calculateAttr]");
-                assert.equal(input.text(), escaped, "input value not escaped");
+                assert.equal(input.val(), escaped, "input value not escaped");
                 assert.equal(hidden.p.calculateAttr, value, "wrong mug value");
                 done();
             }, null, "showXPathEditor");

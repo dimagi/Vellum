@@ -518,12 +518,12 @@ require([
             util.clickQuestion("question1");
             var enLabel = $("[name='itext-en-label']"),
                 hinLabel = $("[name='itext-hin-label']");
+
             enLabel.val("test string").change();
             enLabel.focus();
             var selection = window.getSelection().getRangeAt(0);
             assert.equal(selection.startOffset, 0);
             assert.equal(selection.endOffset, 11);
-            hinLabel.val("hin test string").change();
 
             hinLabel.val("hin test string").change();
             hinLabel.focus();

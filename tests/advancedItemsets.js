@@ -124,7 +124,7 @@ require([
                 $('[name=query]').val(query.replace(/question2/, "no_question")).change();
                 $('.fd-data-source-save-button').click();
 
-                assert.strictEqual($('[name=property-filter]').text(),
+                assert.strictEqual($('[name=property-filter]').val(),
                                    "'blah' = /data/no_question");
             });
         });

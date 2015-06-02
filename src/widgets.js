@@ -167,8 +167,8 @@ define([
             }
 
             var position = util.getCaretPosition(input[0]);
-            var oldvalue = input.text();
-            input.text(value);
+            var oldvalue = input.val();
+            input.val(value);
 
             // If this input has focus and value hasn't changed much,
             // keep the cursor in the same position
@@ -178,7 +178,7 @@ define([
         };
 
         widget.getValue = function() {
-            return input.text().replace(/&#10;/g, '\n');
+            return input.val().replace(/&#10;/g, '\n');
         };
 
         input.bind("change input", function () {

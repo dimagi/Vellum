@@ -314,16 +314,12 @@ define([
         var ctrl = jqctrl[0],
             pos = that.getCaretPosition(ctrl),
             fakeText = _.contains(ctrl.classList, "fake-textarea"),
-            content = fakeText ? jqctrl.text() : ctrl.value,
+            content = fakeText ? jqctrl.val() : ctrl.value,
             start = select ? pos : pos + text.length,
             front = content.substring(0, pos),
             back = content.substring(pos, content.length);
 
-        if (fakeText) {
-            jqctrl.text(front + text + back).change();
-        } else {
-            jqctrl.val(front + text + back).change();
-        }
+        jqctrl.val(front + text + back).change();
         pos = pos + text.length;
         that.setCaretPosition(ctrl, start, pos);
     };
