@@ -46,7 +46,12 @@
  * ]
  *
  * Elements can be nested indefinitely with structure keys describing inner
- * elements and attributes.
+ * elements and attributes. Any element that has a `structure` key may also
+ * have a `subsets` key, which defines structure specific to a subset of the
+ * elements at that level of the tree. The structure of a subset is merged
+ * with the unfiltered element structure, which means that all elements and
+ * attributes available in the unfiltered element are also avaliable in the
+ * filtered subset.
  *
  * The result of that would be (if used in an itemset):
  *

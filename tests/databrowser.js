@@ -22,18 +22,31 @@ require([
             id: "casedb",
             uri: "jr://instance/casedb",
             path: "/cases/case",
+            name: 'Cases',
             structure: {
-                "element": {
-                    structure: {
-                        "inner-element": {}
-                    }
-                },
                 "@case_id": {},
                 "@case_type": {},
-                name: {},
-                dob: {},
-                num_children: {},
-            }
+                case_name: {},
+            },
+            subsets: [{
+                name: "Mother",
+                filter: "[@case_type='mother']",
+                structure: {
+                    edd: {},
+                    children: {
+                        structure: {
+                            child_id: {}
+                        }
+                    }
+                }
+            }, {
+                name: "Child",
+                filter: "[@case_type='child']",
+                structure: {
+                    "@mother_id": {},
+                    dob: {},
+                }
+            }]
         }];
 
     describe("The data tree", function () {
