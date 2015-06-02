@@ -46,7 +46,6 @@ requirejs.config({
         'jquery.bootstrap': '../lib/bootstrap',
         'jquery.bootstrap-popout': '../lib/bootstrap-popout',
         'jquery.bootstrap-better-typeahead': '../bower_components/bootstrap-better-typeahead/js/bootstrap-better-typeahead',
-        'divPlaceholder': '../bower_components/jQuery.divPlaceholder/src/jQuery.divPlaceholder',
         'underscore': '../bower_components/underscore/underscore',
         'XMLWriter': '../bower_components/XMLWriter/XMLWriter',
 
@@ -108,10 +107,6 @@ requirejs.config({
         },
         'jquery.bootstrap-better-typeahead': {
             deps: ['jquery.bootstrap']
-        },
-        'divPlaceholder': {
-            deps: ['jquery', 'css!../bower_components/jQuery.divPlaceholder/src/jQuery.divPlaceholder'],
-            exports: 'divPlaceholder'
         },
         'underscore': {
             exports: '_'
