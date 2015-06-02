@@ -171,3 +171,9 @@
     resize: both;
     width: 400px;
 }
+
+[contenteditable]:empty:before{
+  content: attr(placeholder);
+  color: #999999;
+  display: block; /* For Firefox */
+}

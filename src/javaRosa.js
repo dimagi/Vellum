@@ -1022,7 +1022,7 @@ define([
         };
 
         widget.setPlaceholder = function (val) {
-            $input.attr("data-placeholder", val);
+            $input.attr("placeholder", val);
         };
 
         widget.getValue = function () {
@@ -1030,7 +1030,7 @@ define([
         };
 
         widget.getPlaceholder = function () {
-            return $input.attr('data-placeholder');
+            return $input.attr('placeholder');
         };
 
         widget.getDefaultValue = function () {

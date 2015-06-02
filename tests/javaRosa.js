@@ -119,18 +119,18 @@ require([
             var enLabel = $("[name='itext-en-label']"),
                 hinLabel = $("[name='itext-hin-label']");
             assert.equal(enLabel.val(), "");
-            assert.equal(enLabel.attr("data-placeholder"), "question1");
+            assert.equal(enLabel.attr("placeholder"), "question1");
             assert.equal(hinLabel.val(), "");
-            assert.equal(hinLabel.attr("data-placeholder"), "question1");
+            assert.equal(hinLabel.attr("placeholder"), "question1");
 
             util.clickQuestion("temp");
             util.clickQuestion("question1");
             enLabel = $("[name='itext-en-label']");
             hinLabel = $("[name='itext-hin-label']");
             assert.equal(enLabel.val(), "");
-            assert.equal(enLabel.attr("data-placeholder"), "question1");
+            assert.equal(enLabel.attr("placeholder"), "question1");
             assert.equal(hinLabel.val(), "");
-            assert.equal(hinLabel.attr("data-placeholder"), "question1");
+            assert.equal(hinLabel.attr("placeholder"), "question1");
         });
 
         it("itext widget should show placeholder when value matches default language value", function () {
@@ -142,7 +142,7 @@ require([
             enLabel.val("English").change();
             assert.equal(enLabel.val(), "English");
             assert.equal(hinLabel.val(), "");
-            assert.equal(hinLabel.attr("data-placeholder"), "English");
+            assert.equal(hinLabel.attr("placeholder"), "English");
 
             util.clickQuestion("temp");
             util.clickQuestion("question1");
@@ -150,7 +150,7 @@ require([
             hinLabel = $("[name='itext-hin-label']");
             assert.equal(enLabel.val(), "English");
             assert.equal(hinLabel.val(), "");
-            assert.equal(hinLabel.attr("data-placeholder"), "English");
+            assert.equal(hinLabel.attr("placeholder"), "English");
         });
 
         it("itext widget should show placeholder when empty", function () {
@@ -161,18 +161,18 @@ require([
                 hinLabel = $("[name='itext-hin-label']");
             enLabel.val("").change();
             assert.equal(enLabel.val(), "");
-            assert.equal(enLabel.attr("data-placeholder"), "question1");
+            assert.equal(enLabel.attr("placeholder"), "question1");
             assert.equal(hinLabel.val(), "");
-            assert.equal(hinLabel.attr("data-placeholder"), "question1");
+            assert.equal(hinLabel.attr("placeholder"), "question1");
 
             util.clickQuestion("temp");
             util.clickQuestion("question1");
             enLabel = $("[name='itext-en-label']");
             hinLabel = $("[name='itext-hin-label']");
             assert.equal(enLabel.val(), "");
-            assert.equal(enLabel.attr("data-placeholder"), "question1");
+            assert.equal(enLabel.attr("placeholder"), "question1");
             assert.equal(hinLabel.val(), "");
-            assert.equal(hinLabel.attr("data-placeholder"), "question1");
+            assert.equal(hinLabel.attr("placeholder"), "question1");
         });
 
         it("non-labelItext widget should show placeholder for non-default language", function () {
@@ -183,14 +183,14 @@ require([
             hinItext.val("").change();
             assert.equal(enItext.val(), "English");
             assert.equal(hinItext.val(), "");
-            assert.equal(hinItext.attr("data-placeholder"), "English");
-            assert(!enItext.attr("data-placeholder"), enItext.attr("data-placeholder"));
+            assert.equal(hinItext.attr("placeholder"), "English");
+            assert(!enItext.attr("placeholder"), enItext.attr("placeholder"));
 
             enItext.val("").change();
             assert.equal(enItext.val(), "");
             assert.equal(hinItext.val(), "");
-            assert(!enItext.attr("data-placeholder"), enItext.attr("data-placeholder"));
-            assert(!hinItext.attr("data-placeholder"), hinItext.attr("data-placeholder"));
+            assert(!enItext.attr("placeholder"), enItext.attr("placeholder"));
+            assert(!hinItext.attr("placeholder"), hinItext.attr("placeholder"));
         });
 
         it("should display correct language for question that was collapsed when language changed", function () {
@@ -222,7 +222,7 @@ require([
                 hinLabel = $("[name='itext-hin-label']");
             assert.equal(enLabel.val(), "English");
             assert.equal(hinLabel.val(), "");
-            assert.equal(hinLabel.attr("data-placeholder"), "English");
+            assert.equal(hinLabel.attr("placeholder"), "English");
         });
 
         it("tree should note when default language is being displayed instead of selected language", function() {

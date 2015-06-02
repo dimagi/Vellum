@@ -31,7 +31,6 @@ define([
     'jquery.bootstrap',
     'jquery.fancybox',  // only thing we use fancybox for is its spinner, no actual display of anything
     'jquery-ui',  // used for buttons in Edit Source XML, and dialogs
-    'divPlaceholder',
     'caretjs',
     'atjs'
 ], function (
