@@ -208,6 +208,7 @@ define([
     'vellum/uploader',
     'vellum/window',
     'vellum/polyfills',
+    'vellum/jquery-extensions',
     'vellum/copy-paste'
     // end buildmain.py delimiter
 ], function () {
