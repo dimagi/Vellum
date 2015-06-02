@@ -57,12 +57,12 @@ require([
 
         it("should not show itext errors when there is text in any language", function (done) {
             util.loadXML(TEST_XML_1);
-            $("[name=itext-en-constraintMsg]").text("").change();
+            $("[name=itext-en-constraintMsg]").val("").change();
             util.saveAndReload(function () {
                 // there should be no errors on load
                 // todo: this should inspect the model, not UI
                 var errors = $(".alert-block");
-                assert.equal(errors.length, 0, errors.text());
+                assert.equal(errors.length, 0, errors.val());
                 done();
             });
         });
@@ -523,7 +523,7 @@ require([
             var selection = window.getSelection().getRangeAt(0);
             assert.equal(selection.startOffset, 0);
             assert.equal(selection.endOffset, 11);
-            hinLabel.text("hin test string").change();
+            hinLabel.val("hin test string").change();
 
             hinLabel.val("hin test string").change();
             hinLabel.focus();
@@ -600,8 +600,8 @@ require([
         it("should not allow apostrophes in item labels", function() {
             util.addQuestion("Select", "select");
             util.clickQuestion('select/item1');
-            $("[name='property-nodeID']").text("blah ' blah").change();
-            assert.strictEqual($("[name='property-labelItext']").text(), 'select-blah___blah-labelItext');
+            $("[name='property-nodeID']").val("blah ' blah").change();
+            assert.strictEqual($("[name='property-labelItext']").val(), 'select-blah___blah-labelItext');
         });
     });
 
@@ -775,11 +775,11 @@ require([
 
         it("should show and hide the validation message as appropriate", function() {
             util.loadXML(GROUP_WITH_CONSTRAINT_XML);
-            $("[name='property-constraintAttr']").text('true()').change();
-            $("[name='itext-en-constraintMsg']").text('This is not possible').change();
+            $("[name='property-constraintAttr']").val('true()').change();
+            $("[name='itext-en-constraintMsg']").val('This is not possible').change();
             assert($("[name='itext-en-constraintMsg']").is(":visible"));
-            $("[name='itext-en-constraintMsg']").text('').change();
-            $("[name='property-constraintAttr']").text('').change();
+            $("[name='itext-en-constraintMsg']").val('').change();
+            $("[name='property-constraintAttr']").val('').change();
             assert(!$("[name='itext-en-constraintMsg']").is(":visible"));
         });
 
