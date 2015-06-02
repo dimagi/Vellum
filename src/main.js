@@ -181,6 +181,7 @@ define([
     'vellum/javaRosa',
     'vellum/datasources',
     'vellum/lock',
+    'vellum/databrowser',
     'vellum/commtrack',
     'vellum/modeliteration',
     'vellum/saveToCase',

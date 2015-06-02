@@ -7,7 +7,6 @@ require([
     'underscore',
     'vellum/datasources',
     'vellum/itemset',
-    'vellum/form'
 ], function (
     options,
     util,
@@ -15,8 +14,7 @@ require([
     $,
     _,
     datasources,
-    itemset,
-    form
+    itemset
 ) {
     var assert = chai.assert,
         clickQuestion = util.clickQuestion,
@@ -200,49 +198,5 @@ require([
                 assert.equal(data.find("option:selected").text(), "outer - inner");
             });
         });
-    });
-
-    describe("The data tree", function () {
-        var dataTree;
-        before(function (done) {
-            util.init({
-                plugins: plugins,
-                javaRosa: {langs: ['en']},
-                core: {
-                    dataSourcesEndpoint: function (callback) { callback(FIXTURE_DATA); },
-                    onReady: function () {
-                        var _this = this;
-                        datasources.getDataSources(function () {
-                            datasources.loadExternalData();
-                            dataTree = _this.$f.find(".fd-external-data-tree").jstree(true);
-                            done();
-                        });
-                    }
-                }
-            });
-        });
-
-        function getInstanceId(form, src) {
-            var meta = _.find(form.instanceMetadata, function (meta) {
-                return meta.attributes.src === src;
-            });
-            return meta ? meta.attributes.id : null;
-        }
-
-        it("should add ref with instance on drag/drop", function() {
-            util.loadXML("");
-            var mug = util.addQuestion("DataBindOnly", "mug"),
-                node = dataTree.get_node(dataTree.get_node("#").children[0]),
-                calc = $("[name=property-calculateAttr]"),
-                uri = FIXTURE_DATA[0].uri;
-            assert.equal(getInstanceId(mug.form, uri), null);
-            assert.equal(calc.length, 1);
-            node.data.handleDrop(calc);
-            assert.equal(mug.p.calculateAttr,
-                "instance('some-fixture')/some-fixture_list/some-fixture");
-            assert.equal(getInstanceId(mug.form, uri), "some-fixture");
-        });
-
-        // TODO should remove instance when expression ref is removed
     });
 });

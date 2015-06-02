@@ -20,7 +20,6 @@ define([
             'lock',
             'ignore',
             'uploader',
-            'datasources', // must init before windowManager
             'windowManager',
             'copyPaste',
         ];

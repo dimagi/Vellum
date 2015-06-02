@@ -95,6 +95,7 @@ define(["underscore"], function (_) {
             objectMap: {}  // todo
         },
         plugins: [
+            'databrowser',
             'itemset',
             'modeliteration',
             'commtrack',
