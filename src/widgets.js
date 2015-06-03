@@ -160,7 +160,7 @@ define([
         var widget = normal(mug, options),
             input = widget.input;
         input.addClass('input-block-level').focus(function() {
-            util.setCaretPosition(this, 0, widget.getValue().length);
+            util.setCaretPosition(this, 0, input.val().length);
         });
 
         widget.setValue = function (value) {
@@ -201,7 +201,7 @@ define([
             .addClass('fake-textarea input-block-level itext-widget-input')
             .on('change input', function (e) { widget.handleChange(); })
             .focus(function () {
-                util.setCaretPosition(this, 0, widget.getValue().length);
+                util.setCaretPosition(this, 0, $(this).val().length);
             })
             .keyup(function (e) {
                 // workaround for webkit: http://stackoverflow.com/a/12114908

@@ -435,10 +435,6 @@ define([
             $input = widget.input,
             currentValue = null;
 
-        $input.focus(function() {
-            util.setCaretPosition(this, 0, $input.text().length);
-        });
-
         function autoGenerateId() {
             return getDefaultItextId(mug, widget.path);
         }
