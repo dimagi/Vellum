@@ -29,27 +29,22 @@ require([
         pluginsWithoutItemset = _(util.options.options.plugins || []).without("itemset");
 
     describe("Vellum core", function () {
-        it("should not allow adding questions with matching paths", function (done) {
-            util.init({
-                core: {
-                    onReady: function () {
-                        var dup;
-                        util.addQuestion("Text", "question1");
-                        dup = util.addQuestion("Text", "question2");
-                        dup.p.nodeID = "question1";
+        before(function (done) {
+            util.init({core: {onReady: function () { done(); }}});
+        });
 
-                        // TODO fix tight coupling of this functionality with UI
-                        // HACK prevent modal alert in UI
-                        this.data.core.isAlertVisible = true;
-
-                        assert(!this.ensureCurrentMugIsSaved(),
-                               "save should fail with duplicate question ID");
-
-                        this.data.core.isAlertVisible = false;
-                        done();
-                    }
-                }
+        it("should display non-widget message", function () {
+            util.loadXML("");
+            var text = util.addQuestion("Text", "text"),
+                msg = "Test non-widget message.";
+            text.addMessage(null, {
+                key: "testing-1-2-3",
+                level: "error",
+                message: msg
             });
+            var div = $(".fd-content-right").find(".messages");
+            chai.expect(util.getMessages(text)).to.include(msg);
+            chai.expect(div.text()).to.include(msg);
         });
 
         it("should load form with save button in 'saved' state", function (done) {
@@ -109,7 +104,7 @@ require([
             util.init({core: { form: INCREMENT_ITEM_XML, onReady: function () {
                 util.clickQuestion("question1");
                 var item = util.addQuestion("Item");
-                assert.equal(item.p.defaultValue, "item3");
+                assert.equal(item.p.nodeID, "item3");
                 done();
             }}});
         });
@@ -118,7 +113,7 @@ require([
             util.init({core: { form: INCREMENT_ITEM_XML, onReady: function () {
                 util.clickQuestion("question1/item1");
                 var item = util.addQuestion("Item");
-                assert.equal(item.p.defaultValue, "item3");
+                assert.equal(item.p.nodeID, "item3");
                 done();
             }}});
         });
@@ -367,6 +362,52 @@ require([
             assert($(".fd-question-changer").is(":visible"));
             util.deleteQuestion("/data/text2");
             assert($(".fd-default-panel").is(":visible"));
+        });
+
+        describe("should", function () {
+            var form, dup;
+            before(function () {
+                form = util.loadXML("");
+                util.addQuestion("Text", "question1");
+                dup = util.addQuestion("Text", "question2");
+            });
+
+            it("show validation error on add question with duplicate path", function () {
+                dup.p.nodeID = "question1";
+                assert(form.vellum.ensureCurrentMugIsSaved(), "mug is not saved");
+                assert(!util.isTreeNodeValid(dup), "mug should not be valid");
+            });
+
+            it("reset question ID on dismiss duplicate path error", function () {
+                dup.p.nodeID = "question1";
+                var msg = dup.messages.get("nodeID", "mug-conflictedNodeId-warning");
+                assert(msg, "unexpected: validation error is missing");
+                dup.dropMessage("nodeID", "mug-conflictedNodeId-warning");
+                assert(util.isTreeNodeValid(dup), util.getMessages(dup));
+                assert.match(dup.p.nodeID, /^copy-\d+-of-question1$/);
+                assert(!dup.p.conflictedNodeId,
+                    "conflictedNodeId should not be set; got " + dup.p.conflictedNodeId);
+            });
+        });
+
+        describe("should show validation error on circular reference", function () {
+            var mug;
+            before(function () {
+                util.loadXML("");
+                mug = util.addQuestion("Text", "text");
+            });
+
+            _.each(["relevantAttr", "calculateAttr", "label"], function (attr) {
+                it("in " + attr, function () {
+                    assert.deepEqual(mug.messages.get(attr), []);
+                    mug.form.vellum.warnOnCircularReference(
+                        attr, mug.form, mug, ".", "period");
+                    assert.equal(mug.messages.get(attr).length, 1,
+                                 util.getMessages(mug));
+                    mug.dropMessage(attr, "core-circular-reference-warning");
+                    assert.deepEqual(mug.messages.get(attr), []);
+                });
+            });
         });
 
         describe("type changer", function () {

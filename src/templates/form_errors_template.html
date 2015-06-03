@@ -1,0 +1,12 @@
+<ul>
+<% _.each(errors, function (error) { %>
+    <li>
+        <%= error.mug.getDisplayName(displayLanguage) %>
+        <ul>
+        <% _.each(error.errors, function (error) { %>
+            <li><%= error.message %></li>
+        <% }); %>
+        </ul>
+    </li>
+<% }); %>
+</ul>

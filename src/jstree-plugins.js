@@ -23,7 +23,7 @@ define([
     "use strict";
     $.jstree.defaults.conditionalevents = {
         should_activate: function () { return true; },
-        should_move: function () { return true; },
+        //should_move: function () { return true; },
         redraw_node: function () {
             var args = Array.prototype.slice.call(arguments);
             return this.parent.redraw_node.apply(this.inst, args);
@@ -36,12 +36,12 @@ define([
                 parent.activate_node.apply(this, args);
             }
         };
-        this.move_node = function () {
-            var args = Array.prototype.slice.call(arguments);
-            if(this.settings.conditionalevents.should_move.apply(this, args)) {
-                parent.move_node.apply(this, args);
-            }
-        };
+        //this.move_node = function () {
+        //    var args = Array.prototype.slice.call(arguments);
+        //    if(this.settings.conditionalevents.should_move.apply(this, args)) {
+        //        parent.move_node.apply(this, args);
+        //    }
+        //};
         this.redraw_node = function () {
             var args = Array.prototype.slice.call(arguments),
                 base = {inst: this, parent: parent};

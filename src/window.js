@@ -13,60 +13,10 @@ define([
                 opts = this.opts().windowManager,
                 adjustToWindow = function () { _this.adjustToWindow(); };
 
-            $('.fd-scrollable').on('DOMMouseScroll mousewheel', function (ev) {
-                /*
-                 * Copied from http://jsfiddle.net/TroyAlford/4wrxq/1/
-                 *
-                 * if your mouse is over the one of vellum's scrollable sections
-                 * and you use your mouse wheel (or touchpad, etc.) to scroll
-                 * you no longer start scrolling the window when the pane reaches the top/bottom
-                 *
-                 * up/down keys still have double scrolling behavior,
-                 * and you can still click the up down arrows on either scroll bar
-                 * for OS's that have that (i.e. most except macs)
-                 */
-                var $this = $(this),
-                    scrollTop = this.scrollTop,
-                    scrollHeight = this.scrollHeight,
-                    height = $this.height(),
-                    delta = ev.originalEvent.wheelDelta,
-                    up = delta > 0;
-
-                var prevent = function() {
-                    ev.stopPropagation();
-                    ev.preventDefault();
-                    ev.returnValue = false;
-                    return false;
-                };
-
-                if (!up && -delta > scrollHeight - height - scrollTop) {
-                    // Scrolling down, but this will take us past the bottom.
-                    $this.scrollTop(scrollHeight);
-                    return prevent();
-                } else if (up && delta > scrollTop) {
-                    // Scrolling up, but this will take us past the top.
-                    $this.scrollTop(0);
-                    return prevent();
-                }
-            });
-
+            preventDoubleScrolling($('.fd-scrollable'));
             $(window).resize(adjustToWindow);
             $(document).scroll(adjustToWindow);
-
-            $('.fd-content-divider').mousedown(function (mousedown) {
-                var $left = $('.fd-content-left');
-                var leftWidth = $left.width();
-                var resize = function (mousemove) {
-                    $left.width(leftWidth + mousemove.pageX - mousedown.pageX);
-                    adjustToWindow();
-                };
-                $(window).disableSelection().on('mousemove', resize).one('mouseup', function () {
-                    $(this).enableSelection();
-                    $(this).off('mousemove', resize);
-                });
-            }).hover(function (e) {
-                e.target.style.cursor = 'col-resize';
-            });
+            setupDraggableContentDivider(adjustToWindow);
 
             this.data.windowManager.offset = {
                 top: opts.topOffset || this.$f.offset().top-1,
@@ -84,9 +34,9 @@ define([
             }
 
             var availableVertSpace = $(window).height() - this.getCurrentTopOffset(),
-            availableHorizSpace,
-            position = (this.getCurrentTopOffset() === 0) ? 'fixed' : 'static',
-            $fdc = this.$f.find('.fd-ui-container');
+                availableHorizSpace,
+                position = (this.getCurrentTopOffset() === 0) ? 'fixed' : 'static',
+                $fdc = this.$f.find('.fd-ui-container');
             if (this.data.windowManager.fullscreen) {
                 $fdc.parent().css({height: null, width: null});
                 $fdc.css({height: null, width: null});
@@ -116,29 +66,27 @@ define([
             $fdc.css('height', availableVertSpace + 'px');
 
             $fdc.css('width', $fdc.parent().width())
-            .css('position', position)
-            .css('left', this.getCurrentLeftOffset() + 'px');
+                .css('position', position)
+                .css('left', this.getCurrentLeftOffset() + 'px');
 
             availableHorizSpace = $fdc.width();
 
             var availableColumnSpace = availableVertSpace - $('.fd-toolbar').outerHeight(false),
-            panelHeight, columnHeight, treeHeight;
-
-            panelHeight = Math.max(availableColumnSpace - 5, this.opts().windowManager.minHeight);
-            columnHeight = panelHeight - $('.fd-head').outerHeight(false);
-            treeHeight = columnHeight;
+                panelHeight = Math.max(availableColumnSpace - 5, this.opts().windowManager.minHeight),
+                columnHeight = panelHeight - $('.fd-head').outerHeight(false),
+                treeHeight = columnHeight;
 
             $fdc.find('.fd-content').css('height', panelHeight + 'px');
 
             $fdc.find('.fd-content-left')
-            .find('.fd-scrollable').css('height', treeHeight + 'px');
+                .find('.fd-scrollable').css('height', treeHeight + 'px');
 
             $fdc.find('.fd-content-right')
-            .css('width', availableHorizSpace - this.getLeftWidth() + 'px')
-            .find('.fd-scrollable.full').css('height', columnHeight + 'px');
+                .css('width', availableHorizSpace - this.getLeftWidth() + 'px')
+                .find('.fd-scrollable.full').css('height', columnHeight + 'px');
 
             $fdc.find('.fd-props-scrollable')
-            .css('height', columnHeight - $fdc.find('.fd-props-toolbar').outerHeight(true) + 'px');
+                .css('height', columnHeight - $fdc.find('.fd-props-toolbar').outerHeight(true) + 'px');
         },
         getLeftWidth: function () {
             return 2 + this.$f.find('.fd-content-left').outerWidth(false) + 
@@ -170,4 +118,61 @@ define([
             return Math.min(offsetLeft - scrollLeft, offsetLeft);
         }
     });
+
+    function preventDoubleScrolling($scrollable) {
+        $scrollable.on('DOMMouseScroll mousewheel', function (ev) {
+            /*
+             * Copied from http://jsfiddle.net/TroyAlford/4wrxq/1/
+             *
+             * if your mouse is over the one of vellum's scrollable sections
+             * and you use your mouse wheel (or touchpad, etc.) to scroll
+             * you no longer start scrolling the window when the pane reaches the top/bottom
+             *
+             * up/down keys still have double scrolling behavior,
+             * and you can still click the up down arrows on either scroll bar
+             * for OS's that have that (i.e. most except macs)
+             */
+            var $this = $(this),
+                scrollTop = this.scrollTop,
+                scrollHeight = this.scrollHeight,
+                height = $this.height(),
+                delta = ev.originalEvent.wheelDelta,
+                up = delta > 0,
+                prevent = function() {
+                    ev.stopPropagation();
+                    ev.preventDefault();
+                    ev.returnValue = false;
+                    return false;
+                };
+
+            if (!up && -delta > scrollHeight - height - scrollTop) {
+                // Scrolling down, but this will take us past the bottom.
+                $this.scrollTop(scrollHeight);
+                return prevent();
+            } else if (up && delta > scrollTop) {
+                // Scrolling up, but this will take us past the top.
+                $this.scrollTop(0);
+                return prevent();
+            }
+        });
+    }
+
+    function setupDraggableContentDivider(adjustToWindow) {
+        $('.fd-content-divider').mousedown(function (mousedown) {
+            var $left = $('.fd-content-left'),
+                leftWidth = $left.width(),
+                resize = function (mousemove) {
+                    $left.width(leftWidth + mousemove.pageX - mousedown.pageX);
+                    adjustToWindow();
+                };
+            $(window).disableSelection()
+                .on('mousemove', resize)
+                .one('mouseup', function () {
+                    $(this).enableSelection();
+                    $(this).off('mousemove', resize);
+                });
+        }).hover(function (e) {
+            e.target.style.cursor = 'col-resize';
+        });
+    }
 });

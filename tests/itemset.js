@@ -1,10 +1,10 @@
-/*jshint multistr: true */
 require([
     'tests/options',
     'tests/utils',
     'chai',
     'jquery',
     'underscore',
+    'vellum/datasources',
     'vellum/itemset',
     'vellum/form',
     'text!static/itemset/test1.xml',
@@ -16,14 +16,13 @@ require([
     chai,
     $,
     _,
+    datasources,
     itemset,
     form,
     TEST_XML_1,
     INNER_FILTERS_XML,
     DROPDOWN_FIXTURE_XML
 ) {
-
-    // see note about controlling time in formdesigner.lock.js
     var assert = chai.assert,
         call = util.call,
         clickQuestion = util.clickQuestion,
@@ -39,6 +38,7 @@ require([
             });
         }
         before(beforeFn);
+        beforeEach(datasources.reset);
 
         it("adds a new instance node to the form when necessary", function () {
             util.loadXML(TEST_XML_1);
@@ -79,6 +79,31 @@ require([
                    "cases instance should have been renamed/merged:\n" + xml);
         });
 
+        it("should select first lookup table for new itemset", function () {
+            util.loadXML("");
+            util.addQuestion("SelectDynamic", "select");
+            // HACK must click on the itemset node to start async load, which
+            // eventually sets the default value if everything goes well.
+            util.clickQuestion("select/itemset");
+            var mug = util.getMug('select/itemset');
+            mug.validate();
+            assert.equal(util.getMessages(mug), "");
+        });
+
+        it("should load dynamic select without errors", function () {
+            util.loadXML(TEST_XML_1);
+            var mug = util.getMug('question1/itemset');
+            mug.validate();
+            assert.equal(util.getMessages(mug), "");
+        });
+
+        it("should not trigger change on click itemset", function () {
+            util.loadXML(TEST_XML_1);
+            util.saveButtonEnabled(false);
+            clickQuestion('question1/itemset');
+            assert(!util.saveButtonEnabled(), "save button should not be enabled");
+        });
+
         describe("parsing and serializing", function () {
             before(beforeFn);
             it("preserves XML with itemsets in <select>s", function () {
@@ -104,22 +129,6 @@ require([
                     INNER_FILTERS_XML.replace('case_name', 'dummy'),
                     call('createXML')
                 );
-            });
-            
-            it("hides the copy button for itemsets", function () {
-                util.loadXML(TEST_XML_1);
-                clickQuestion("question1/itemset");
-                var $but = $("button:contains(Copy)");
-                assert($but.length === 0);
-            });
-
-            it("allows copying a select with an itemset", function () {
-                util.loadXML(TEST_XML_1);
-                clickQuestion("question1");
-                var $but = $("button:contains(Copy)");
-                $but.click();
-
-                assert.equal(4, (call('createXML').match(/itemset/g) || []).length);
             });
 
             it("uses a dropdown when the nodeset is known", function() {
@@ -147,6 +156,35 @@ require([
                     clickQuestion("question2/itemset");
                     $('[name=value_ref]').val('blah').change();
                     assert.notStrictEqual(mug.spec.itemsetData.validationFunc(mug), 'pass');
+                });
+
+                it("should not warn on values with a filter attached", function() {
+                    util.loadXML(DROPDOWN_FIXTURE_XML);
+                    var mug = util.getMug('/data/question2/itemset');
+                    assert.strictEqual(mug.spec.itemsetData.validationFunc(mug), 'pass');
+                    clickQuestion("question2/itemset");
+                    var value = $('[name=value_ref]');
+                    value.val(value.val() + "[filter]").change();
+                    assert.strictEqual(mug.spec.itemsetData.validationFunc(mug), 'pass');
+                });
+
+                it("should not warn on labels with a filter attached", function() {
+                    util.loadXML(DROPDOWN_FIXTURE_XML);
+                    var mug = util.getMug('/data/question2/itemset');
+                    assert.strictEqual(mug.spec.itemsetData.validationFunc(mug), 'pass');
+                    clickQuestion("question2/itemset");
+                    var label = $('[name=label_ref]');
+                    label.val(label.val() + "[filter]").change();
+                    assert.strictEqual(mug.spec.itemsetData.validationFunc(mug), 'pass');
+                });
+
+                it("should not warn on inner filters", function() {
+                    util.loadXML(DROPDOWN_FIXTURE_XML);
+                    var mug = util.getMug('/data/question2/itemset');
+                    assert.strictEqual(mug.spec.itemsetData.validationFunc(mug), 'pass');
+                    clickQuestion("question2/itemset");
+                    $('[name=label_ref]').val("inner-attribute[filter1]/extra-inner-attribute[filter2]").change();
+                    assert.strictEqual(mug.spec.itemsetData.validationFunc(mug), 'pass');
                 });
             });
         });

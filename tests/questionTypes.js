@@ -481,5 +481,14 @@ require([
             util.clickQuestion("question1");
             assert.ok($(changerSelector + " .change-question:not([data-qtype*='Select'])").length > 0);
         });
+
+        it("should show error on delete validation condition but not message", function() {
+            util.loadXML("");
+            var text = util.addQuestion("Text", "text");
+            text.p.constraintAttr = "a = b";
+            text.p.constraintMsgItext.set("A != B");
+            text.p.constraintAttr = "";
+            assert(!util.isTreeNodeValid(text), "question should not be valid");
+        });
     });
 });

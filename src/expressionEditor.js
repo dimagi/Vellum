@@ -361,8 +361,8 @@ define([
             editorContent.empty().append($xpathUI);
 
             $xpathUI.find('.fd-xpath-show-advanced-button').click(function () {
-                if (typeof window.ga !== "undefined") {
-                    window.ga('send', 'event', 'Form Builder', 'Edit Expression',
+                if (window.analytics) {
+                    window.analytics.usage('Form Builder', 'Edit Expression',
                               'Show Advanced Mode');
                 }
 

@@ -194,7 +194,7 @@ require([
                 btn.click();
                 assert.equal(
                     btn.next().find('li:contains("Cannot Change Question Type")').length,
-                    !bool);
+                    +!bool);
             }
             it("shows the type changer for type-changeable questions", function () {
                 testTypeChangeable(true);

@@ -48,41 +48,33 @@ require([
         call = util.call;
 
     describe("The javaRosa plugin with multiple languages", function () {
-        it("should not show itext errors when there is text in any language", function (done) {
+        before(function (done) {
             util.init({
                 javaRosa: {langs: ['en', 'hin']},
-                core: {
-                    form: TEST_XML_1, 
-                    onReady: function () {
-                        $("textarea[name=itext-en-constraintMsg]").val("").change();
-                        util.saveAndReload(function () {
-                            // there should be no errors on load
-                            // todo: this should inspect the model, not UI
-                            var errors = $(".alert-block");
-                            assert.equal(errors.length, 0, errors.text());
-                            done();
-                        });
-                    }
-                }
+                core: {onReady: function () { done(); }}
             });
         });
 
-        it("should show warning on load for with unknown language", function (done) {
-            util.init({
-                javaRosa: {langs: ['en', 'hin']},
-                core: {
-                    form: TEST_XML_3,
-                    onReady: function () {
-                        // todo: this should inspect the model, not UI
-                        var errors = $(".alert-block"),
-                            text = errors.text();
-                        assert.equal(errors.length, 1, text);
-                        assert(text.indexOf("You have languages in your form that are not specified") > -1, text);
-                        assert(text.indexOf("page: es.") > -1, text);
-                        done();
-                    }
-                }
+        it("should not show itext errors when there is text in any language", function (done) {
+            util.loadXML(TEST_XML_1);
+            $("textarea[name=itext-en-constraintMsg]").val("").change();
+            util.saveAndReload(function () {
+                // there should be no errors on load
+                // todo: this should inspect the model, not UI
+                var errors = $(".alert-block");
+                assert.equal(errors.length, 0, errors.text());
+                done();
             });
+        });
+
+        it("should show warning on load for with unknown language", function () {
+            util.loadXML(TEST_XML_3, null, /You have languages in your form/);
+            // todo: this should inspect the model, not UI
+            var errors = $(".alert-block"),
+                text = errors.text();
+            assert.equal(errors.length, 1, text);
+            assert(text.indexOf("You have languages in your form that are not specified") > -1, text);
+            assert(text.indexOf("page: es.") > -1, text);
         });
 
         it("should preserve itext values on load + save", function (done) {
@@ -406,24 +398,22 @@ require([
             }}});
         });
 
-        it("output ref deleted with single delete keypress", function (done) {
-            util.init({core: {onReady: function () {
-                var mug = util.addQuestion("Text", "question1");
+        it("output ref deleted with single delete keypress", function () {
+            util.loadXML("");
+            var mug = util.addQuestion("Text", "question1");
 
-                var target = $("[name='itext-en-label']");
-                target.val('question1 <output value="/data/question2" /> end').change();
-                vellum_util.setCaretPosition(target[0], 10);
+            var target = $("[name='itext-en-label']");
+            target.val('question1 <output value="/data/question2" /> end').change();
+            vellum_util.setCaretPosition(target[0], 10);
 
-                target.trigger({
-                    type: "keydown",
-                    which: 46,
-                    ctrlKey: false
-                });
-                target.change();
-                var val = mug.p.labelItext.get('default', 'en');
-                assert.equal(val, 'question1  end');
-                done();
-            }}});
+            target.trigger({
+                type: "keydown",
+                which: 46,
+                ctrlKey: false
+            });
+            target.change();
+            var val = mug.p.labelItext.get('default', 'en');
+            assert.equal(val, 'question1  end');
         });
 
         it("should update output ref on group rename", function (done) {
@@ -448,6 +438,16 @@ require([
                     }
                 }
             });
+        });
+
+        it("should add warning on add Audio output ref to itext", function () {
+            util.loadXML("");
+            var audio = util.addQuestion("Audio", "audio"),
+                text = util.addQuestion("Text", "text"),
+                target = $("[name='itext-en-label']");
+            call("handleDropFinish", target, audio.ufid, audio);
+            chai.expect(util.getMessages(text))
+                .to.include("Audio Capture nodes cannot be used in an output value");
         });
 
         it("should bulk update multi-line translation", function () {
@@ -546,9 +546,9 @@ require([
             util.addQuestion("Select", "ew");
             var north = util.getMug("ns/item1"),
                 south = util.getMug("ew/item1");
-            north.p.defaultValue = "north";
-            south.p.defaultValue = "south";
-            north.form.moveMug(south, north, "after");
+            north.p.nodeID = "north";
+            south.p.nodeID = "south";
+            north.form.moveMug(south, "after", north);
             util.assertXmlEqual(util.call("createXML"), ITEXT_ITEM_RENAME_XML,
                                 {normalize_xmlns: true});
         });
@@ -558,7 +558,7 @@ require([
             var green = util.addQuestion("Group", "green"),
                 blue = util.addQuestion("Group", "blue");
             util.addQuestion("Text", "text");
-            blue.form.moveMug(blue, green, "before");
+            blue.form.moveMug(blue, "before", green);
             util.assertXmlEqual(util.call("createXML"),
                                 ITEXT_ITEM_RENAME_GROUP_MOVE_XML,
                                 {normalize_xmlns: true});
@@ -601,7 +601,7 @@ require([
         it("should not allow apostrophes in item labels", function() {
             util.addQuestion("Select", "select");
             util.clickQuestion('select/item1');
-            $("[name='property-defaultValue']").val("blah ' blah").change();
+            $("[name='property-nodeID']").val("blah ' blah").change();
             assert.strictEqual($("[name='property-labelItext']").val(), 'select-blah___blah-labelItext');
         });
     });

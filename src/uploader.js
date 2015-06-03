@@ -120,7 +120,7 @@ define([
 
         widget.getUIElement = function () {
             $uiElem = _getParentUIElement();
-            var $controlBlock = $uiElem.find('.controls'),
+            var $controlBlock = $uiElem.find('.controls').not(".messages"),
                 $uploadContainer = $('<div />')
                     .addClass('fd-mm-upload-container');
             $controlBlock.empty()
