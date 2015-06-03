@@ -190,6 +190,62 @@ define([
         return widget;
     };
 
+    var multilineText = function (mug, options) {
+        // TODO: make this inherit from normal
+        // normal adds property- to all ids (make javarosa accept that)
+        var widget = base(mug, options);
+
+        widget.input = $("<div />")
+            .attr("contenteditable", true)
+            .attr("name", widget.id)
+            .addClass('fake-textarea input-block-level itext-widget-input')
+            .on('change input', function (e) { widget.handleChange(); })
+            .focus(function () {
+                util.setCaretPosition(this, 0, widget.getValue().length);
+            })
+            .keyup(function (e) {
+                // workaround for webkit: http://stackoverflow.com/a/12114908
+                if (e.which === 9) {
+                    this.focus();
+                }
+            });
+
+        widget.getControl = function () {
+            return widget.input;
+        };
+
+        widget.setValue = function (val) {
+            widget.input.val(val);
+        };
+
+        widget.setPlaceholder = function (val) {
+            widget.input.attr("placeholder", val);
+        };
+
+        widget.getValue = function () {
+            return widget.input.val();
+        };
+
+        widget.getPlaceholder = function () {
+            return widget.input.attr('placeholder');
+        };
+
+        widget.getDefaultValue = function () {
+            return null;
+        };
+
+        widget.save = function () {
+            widget.saving = true;
+            try {
+                widget.mugValue(mug, widget.getValue());
+            } finally {
+                widget.saving = false;
+            }
+        };
+
+        return widget;
+    };
+
     var identifier = function (mug, options) {
         var widget = text(mug, options),
             super_updateValue = widget.updateValue;
@@ -525,6 +581,7 @@ define([
         base: base,
         normal: normal,
         text: text,
+        multilineText: multilineText,
         identifier: identifier,
         droppableText: droppableText,
         checkbox: checkbox,
