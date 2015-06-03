@@ -280,6 +280,8 @@ define([
             pos = sel.text.length;
         } else if (typeof ctrl.selectionStart !== 'undefined') {
             pos = ctrl.selectionStart;
+        } else if (_.contains(ctrl.classList, "fake-textarea")) {
+            return $(ctrl).caret('pos');
         }
         return pos;
     };
@@ -288,24 +290,35 @@ define([
         if (end === null || end === undefined) {
             end = start;
         }
+        var range;
         if (ctrl.setSelectionRange) {
             ctrl.focus();
             ctrl.setSelectionRange(start, end);
         } else if (ctrl.createTextRange) {
-            var range = ctrl.createTextRange();
+            range = ctrl.createTextRange();
             range.collapse(true);
             range.moveStart('character', start);
             range.moveEnd('character', end);
             range.select();
+        } else if (ctrl && ctrl.childNodes.length) {
+            range = document.createRange();
+            var sel = window.getSelection();
+            range.setStart(ctrl.childNodes[0], start);
+            range.setEnd(ctrl.childNodes[0], end);
+            sel.removeAllRanges();
+            sel.addRange(range);
         }
     };
 
     that.insertTextAtCursor = function (jqctrl, text, select) {
         var ctrl = jqctrl[0],
             pos = that.getCaretPosition(ctrl),
-            front = ctrl.value.substring(0, pos),
-            back = ctrl.value.substring(pos, ctrl.value.length),
-            start = select ? pos : pos + text.length;
+            fakeText = _.contains(ctrl.classList, "fake-textarea"),
+            content = fakeText ? jqctrl.val() : ctrl.value,
+            start = select ? pos : pos + text.length,
+            front = content.substring(0, pos),
+            back = content.substring(pos, content.length);
+
         jqctrl.val(front + text + back).change();
         pos = pos + text.length;
         that.setCaretPosition(ctrl, start, pos);

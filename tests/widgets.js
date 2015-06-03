@@ -55,7 +55,7 @@ require([
             input.closest(".control-group").find(".fd-edit-button").click();
 
             events.on("showXPathEditor", function () {
-                var text = $(".xpath-advanced").find("textarea").val();
+                var text = $(".xpath-advanced").find(".fake-textarea").val();
                 $(".fd-xpath-cancel-button").click();
                 assert.equal(text, value, "textarea content should have newline");
                 done();
@@ -77,7 +77,7 @@ require([
             input.closest(".control-group").find(".fd-edit-button").click();
 
             events.on("showXPathEditor", function () {
-                var textarea = $(".xpath-advanced").find("textarea");
+                var textarea = $(".xpath-advanced").find(".fake-textarea");
                 textarea.val(value).change();
                 $(".fd-xpath-save-button").click();
 
