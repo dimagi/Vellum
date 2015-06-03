@@ -466,7 +466,7 @@ define([
                 {
                     title: 'Continue',
                     action: function() {
-                        $modal.modal('hide')
+                        $modal.modal('hide');
                         _this.showSourceInModal(done);
                     }
                 },
@@ -474,7 +474,7 @@ define([
                     title: 'Abort',
                     cssClasses: "btn-primary",
                     action: function() {
-                        $modal.modal('hide')
+                        $modal.modal('hide');
                     }
                 }
             ], false);
