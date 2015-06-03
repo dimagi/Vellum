@@ -300,7 +300,7 @@ define([
             range.moveStart('character', start);
             range.moveEnd('character', end);
             range.select();
-        } else if (ctrl) {
+        } else if (ctrl && ctrl.childNodes.length) {
             range = document.createRange();
             var sel = window.getSelection();
             range.setStart(ctrl.childNodes[0], start);
