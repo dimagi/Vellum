@@ -696,8 +696,7 @@ define([
             $modal = $(modal_content({
                 title: title,
                 closeButtonTitle: closeButtonTitle
-            })),
-            $body = $("body");
+            }));
         $modal.one("shown", function () {
             $modal.find(".btn-default:last").focus();
         });
