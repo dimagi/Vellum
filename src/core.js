@@ -469,15 +469,7 @@ define([
 
     fn.showSourceXMLDialog = function (done) {
         var _this = this;
-        
-        function onContinue () {
-            _this._hideConfirmDialog();
-            _this.showSourceInModal(done);
-        }
-
-        function onAbort () {
-            _this._hideConfirmDialog();
-        }
+ 
         function validateMug(mug) {
             mug.validate();
             return !mug.getErrors().length;
@@ -485,10 +477,26 @@ define([
         // todo: should this also show up for saving? Did it at some point in
         // the past?
         if (!this.data.core.form.isFormValid(validateMug)) {
-            var msg = "There are validation errors in the form.  Do you want to continue anyway? WARNING:" +
-                      "The form will not be valid and likely not perform correctly on your device!";
-            this.setDialogInfo(msg, 'Continue', onContinue, 'Abort', onAbort);
-            this._showConfirmDialog();
+            var $modal = this.generateNewModal("Error", [
+                {
+                    title: 'Continue',
+                    action: function() {
+                        $modal.modal('hide');
+                        _this.showSourceInModal(done);
+                    }
+                },
+                {
+                    title: 'Abort',
+                    cssClasses: "btn-primary",
+                    action: function() {
+                        $modal.modal('hide');
+                    }
+                }
+            ], false);
+            var content = "There are validation errors in the form.  Do you want to continue anyway?";
+            content += "<br><br>WARNING: The form will not be valid and likely not perform correctly on your device!";
+            $modal.find(".modal-body").html(content);
+            $modal.modal('show');
         } else {
             this.showSourceInModal(done);
         }
