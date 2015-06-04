@@ -697,16 +697,8 @@ define([
                 title: title,
                 closeButtonTitle: closeButtonTitle
             })),
-            $body = $("body"),
-            keyup = function (event) {
-                if (event.keyCode === 27) { // escape
-                    $modal.modal('hide');
-                }
-            };
-        $body.on("keyup", keyup);
-        $modal.on('hide', function () {
-            $body.off("keyup", keyup);
-        }).one("shown", function () {
+            $body = $("body");
+        $modal.one("shown", function () {
             $modal.find(".btn-default:last").focus();
         });
 
@@ -1915,33 +1907,19 @@ define([
     };
 
     fn.showWaitingDialog = function (msg) {
-        var dial = $('.fd-dialog-confirm'), contentStr;
         if (!msg || typeof msg !== 'string') {
             msg = 'Saving form to server...';
         }
-        dial.empty();
-        dial.dialog("destroy");
-        dial.dialog({
-            modal: true,
-            autoOpen: false,
-            buttons : {},
-            closeOnEscape: false,
-            open: function(event) {
-                // where in the DOM are these?
-                $(".ui-dialog-titlebar-close").hide();
-            },
-            close: function(event) {
-                $(".ui-dialog-titlebar-close").show();
-            },
-            title: "Processing..."
-        });
-        contentStr = '<p><span class="fd-message">' + msg + 
-            '</span><div class="fd-form-saving-anim"></div></p>';
-        dial.append(contentStr);
-        dial.find('.fd-form-saving-anim').append(
-            '<span class="fd-form-saving-img"></span>');
 
-        this._showConfirmDialog();
+        var $modal = this.generateNewModal("Processing...", [], false);
+        $modal.find(".modal-body").html(msg + "<span class='fd-form-saving-img'></span>");
+        $modal.find(".close").hide();
+        $modal.find(".modal-footer").hide();
+        $modal.modal({
+            show: true,
+            backdrop: 'static',
+            keyboard: false,
+        });
     };
 
     fn.getSections = function (mug) {
