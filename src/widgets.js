@@ -284,13 +284,16 @@ define([
                             super_setValue(val);
                             widget.handleChange();
                         }
-                    }
+                    },
+                    form: mug.form
                 });
                 if (window.analytics) {
                     window.analytics.usage('Form Builder', 'Logic', options.lstring);
                 }
             }, !!widget.isDisabled());
         };
+
+        util.questionAutoComplete(widget.input, mug.form);
 
         return widget;
     };

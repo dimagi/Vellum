@@ -2,6 +2,7 @@ define([
     'jquery',
     'underscore',
     'vellum/debugutil',
+    'vellum/util',
     'xpath',
     'xpathmodels',
     'tpl!vellum/templates/xpath_validation_errors',
@@ -12,6 +13,7 @@ define([
     $,
     _,
     debug,
+    util,
     xpath,
     xpathmodels,
     xpath_validation_errors,
@@ -226,6 +228,14 @@ define([
                     .focus(function(e) {
                         $(this).autocomplete('search', $(this).val());
                     });
+
+                if (!options.leftAutoCompleteSources) {
+                    util.questionAutoComplete(getLeftQuestionInput(), options.form);
+                }
+                if (!options.rightAutoCompleteSources) {
+                    util.questionAutoComplete(getRightQuestionInput(), options.form);
+                }
+
                 return $expUI;
             };
 
@@ -327,6 +337,7 @@ define([
         // toggle simple/advanced mode
         var showAdvancedMode = function (text, showNotice) {
             getExpressionInput().val(text);
+            util.questionAutoComplete(getExpressionInput(), options.form);
             getExpressionPane().empty();
 
             $div.find(".xpath-advanced").removeClass('hide');

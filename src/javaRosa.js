@@ -839,35 +839,8 @@ define([
 
         if (options.path === 'labelItext') {
             if (EXPERIMENTAL_UI) {
-                $input.atwho({
-                    at: "#",
-                    data: _.chain(mug.form.getMugList())
-                           .map(function(mug) {
-                                var path = mug.form.getAbsolutePath(mug, true);
-                                if (path) {
-                                    path = "form" + path;
-                                }
-                                return {
-                                    id: mug.ufid,
-                                    name: path,
-                                    path: mug.absolutePath
-                                };
-                            })
-                            .filter(function(choice) { return choice.name; })
-                            .value(),
-                    displayTpl: '<li>${name}</li>',
-                    insertTpl: '<output value="${path}" />',
-                    limit: 10,
-                    maxLen: 30,
-                    callbacks: {
-                        matcher: function(flag, subtext) {
-                            var match, regexp;
-                            regexp = new RegExp('(\\s+|^)' + flag + '([\\w_/]*)$', 'gi');
-                            match = regexp.exec(subtext);
-                            return match ? match[2] : null;
-                        }
-                    }
-                });
+                util.questionAutoComplete($input, mug.form,
+                                         '<output value="${name}" />');
             }
 
             $input.addClass('jstree-drop');

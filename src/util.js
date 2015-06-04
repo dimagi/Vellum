@@ -373,6 +373,33 @@ define([
         return div.html();
     };
 
+    that.questionAutoComplete = function (input, form, insertTpl) {
+        input.atwho({
+            at: "/data/",
+            data: _.chain(form.getMugList())
+                   .map(function(mug) {
+                        return {
+                            id: mug.ufid,
+                            name: mug.absolutePath,
+                        };
+                    })
+                    .filter(function(choice) { return choice.name; })
+                    .value(),
+            displayTpl: '<li>${name}</li>',
+            insertTpl: insertTpl || '${name}',
+            limit: 10,
+            maxLen: 30,
+            callbacks: {
+                matcher: function(flag, subtext) {
+                    var match, regexp;
+                    regexp = new RegExp('(\\s+|^)' + flag + '([\\w_/]*)$', 'gi');
+                    match = regexp.exec(subtext);
+                    return match ? match[2] : null;
+                }
+            }
+        });
+    };
+
     return that;
 });
 
