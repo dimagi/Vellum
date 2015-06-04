@@ -1,22 +1,19 @@
 /**
- * Asynchronously loads data sources from vellum.opts().core.dataSources
+ * Asynchronously loads data sources from vellum.opts().core.dataSourcesEndpoint
  * Currently only supports fixtures
  *
  * Format in opts:
- * dataSources: [
- *     {
- *          key: string : data source name (fixture, case, products...)
- *          endpoint: function or string (URL)
- *     }
- * ]
+ * dataSourcesEndpoint: function(callback) or string (URL)
  *
- * The endpoint function (or URL) should return the following format:
+ * The endpoint function receives a callback argument. It should call the
+ * `callback` with a list of the following structure (for a URL, the response
+ * should be JSON in this format):
  * [
  *      {
  *          sourceUri: string (used in the instance definition)
  *          defaultId: string (used in instance definition)
  *          intialQuery: string (used in nodeset)
- *          name: string (text in the dropdown)
+ *          name: string (human readable name)
  *          structure: nested dictionary of elements and attributes
  *          {
  *              element: {
@@ -27,7 +24,8 @@
  *              },
  *              @attribute: { }
  *          }
- *      }
+ *      },
+ *      ...
  * ]
  *
  * Elements can be nested indefinitely with structure keys describing inner
@@ -59,17 +57,17 @@ define([
     util,
     edit_source
 ) {
-    var vellum, dataSources, dataCache, dataCallbacks;
+    var vellum, dataSourcesEndpoint, dataCache, dataCallbacks;
 
     function init(instance) {
         vellum = instance;
-        dataSources = vellum.opts().core.dataSources || [];
+        dataSourcesEndpoint = vellum.opts().core.dataSourcesEndpoint;
         reset();
     }
 
     function reset() {
-        dataCache = {};
-        dataCallbacks = {};
+        dataCache = null;
+        dataCallbacks = null;
     }
 
     /**
@@ -77,28 +75,27 @@ define([
      *
      * @param type - The data source type (example: "fixture").
      * @param callback - A function to be called when the data sources
-     *      have been loaded. This function should accept two arguments:
+     *      have been loaded. This function should accept one argument:
      *      data - {
      *               <sourceUri1>: <data source 1 object>,
      *               <sourceUri2>: <data source 2 object>,
      *               ...
      *             }
-     *      type - the data source type.
      */
-    function getDataSources(type, callback) {
-        if (!_.isUndefined(dataCache[type])) {
-            callback(dataCache[type], type);
+    function getDataSources(callback) {
+        if (dataCache) {
+            callback(dataCache);
             return;
         }
-        if (!_.isUndefined(dataCallbacks[type])) {
-            dataCallbacks[type].push(callback);
+        if (dataCallbacks) {
+            dataCallbacks.push(callback);
             return;
         }
 
         function finish(data) {
-            dataCache[type] = {};
+            dataCache = {};
             if (data.length === 0) {
-                dataCache[type][""] = {
+                dataCache[""] = {
                     sourceUri: "",
                     defaultId: "",
                     initialQuery: "",
@@ -107,23 +104,20 @@ define([
                 };
             } else {
                 _.each(data, function(item) {
-                    dataCache[type][item.sourceUri] = item;
+                    dataCache[item.sourceUri] = item;
                 });
             }
-            _.each(dataCallbacks[type], function (callback) {
-                callback(dataCache[type], type);
+            _.each(dataCallbacks, function (callback) {
+                callback(dataCache);
             });
-            delete dataCallbacks[type];
+            dataCallbacks = null;
         }
-        var source = _.find(dataSources, function (src) {
-            return src.key === type;
-        });
-        dataCallbacks[type] = [callback];
-        if (source) {
-            if (_.isString(source.endpoint)) {
+        dataCallbacks = [callback];
+        if (dataSourcesEndpoint) {
+            if (_.isString(dataSourcesEndpoint)) {
                 $.ajax({
                     type: 'GET',
-                    url: source.endpoint,
+                    url: dataSourcesEndpoint,
                     dataType: 'json',
                     success: finish,
                     error: function (jqXHR, errorType, exc) {
@@ -134,7 +128,7 @@ define([
                     async: false
                 });
             } else {
-                source.endpoint(finish);
+                dataSourcesEndpoint(finish);
             }
         } else {
             finish([]);
@@ -291,8 +285,11 @@ define([
             hasValue = false;
 
         widget.addOption(EMPTY_VALUE, "Loading...");
-        getDataSources('fixture', function (data) {
+        getDataSources(function (data) {
             var value;
+            if (options.dataSourcesFilter) {
+                data = options.dataSourcesFilter(data);
+            }
             if (hasValue) {
                 value = local_getValue();
             }
@@ -358,8 +355,9 @@ define([
             });
         }
 
-        // HACK references dataCache.fixture, which is loaded asynchronously
-        return _.flatten(_.map(data || dataCache.fixture, function(fixture) {
+        // HACK references dataCache, which is loaded asynchronously
+        // TODO filter for itemsets
+        return _.flatten(_.map(data || dataCache, function(fixture) {
             var baseFixture = {
                 src: fixture.sourceUri,
                 id: fixture.defaultId,
@@ -396,15 +394,15 @@ define([
     }
 
     function autocompleteChoices(fixture_uri) {
-        // HACK references dataCache.fixture, which is loaded asynchronously
+        // HACK references dataCache, which is loaded asynchronously
         // This seems wrong: fixture_uri references the root of the
         // fixture structure, and options are generated from the root.
         // However, the itemset may be referencing a non-root element
         // and therefore the choices returned here will be incorrectly qualified.
-        if (!dataCache.fixture || !dataCache.fixture[fixture_uri]) {
+        if (!dataCache || !dataCache[fixture_uri]) {
             return [];
         }
-        return generateFixtureColumns(dataCache.fixture[fixture_uri]);
+        return generateFixtureColumns(dataCache[fixture_uri]);
     }
 
     // -------------------------------------------------------------------------

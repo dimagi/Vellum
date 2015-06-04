@@ -43,11 +43,7 @@ require([
                 plugins: plugins,
                 javaRosa: {langs: ['en']},
                 core: {
-                    dataSources: [{
-                        key: "fixture",
-                        name: "Lookup Table",
-                        endpoint: function (callback) { callback(FIXTURE_DATA); }
-                    }],
+                    dataSourcesEndpoint: function (callback) { callback(FIXTURE_DATA); },
                     onReady: done
                 }
             });
@@ -73,10 +69,7 @@ require([
                     plugins: plugins,
                     javaRosa: {langs: ['en']},
                     core: {
-                        dataSources: [{
-                            key: 'fixture',
-                            endpoint: function () { return []; }
-                        }],
+                        dataSourcesEndpoint: function () { return []; },
                         onReady: done
                     }
                 });
@@ -97,10 +90,7 @@ require([
                     plugins: plugins,
                     javaRosa: {langs: ['en']},
                     core: {
-                        dataSources: [{
-                            key: 'fixture',
-                            endpoint: function (cb) { callback = cb; }
-                        }],
+                        dataSourcesEndpoint: function (cb) { callback = cb; },
                         onReady: done
                     }
                 });

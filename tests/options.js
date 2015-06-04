@@ -1,7 +1,5 @@
-define(function () {
-    var INSTANCES = [
-        {
-            name: "All Cases",
+define(["underscore"], function (_) {
+    var dataSources = [{
             sourceUri: "jr://instance/casedb",
             defaultId: "casedb",
             rootNodeName: "casedb",
@@ -38,8 +36,7 @@ define(function () {
                     ]
                 }
             ],
-        },
-        {
+        }, {
             sourceUri: "jr://fixture/item-list:some-fixture",
             defaultId: "some-fixture",
             initialQuery: "instance('some-fixture')/some-fixture_list/some-fixture",
@@ -57,9 +54,8 @@ define(function () {
                     no_option: true
                 }
             }
-        }
-    ];
-    
+        }];
+
     var OPTIONS = {
         core: {
             loadDelay: 0,
@@ -72,23 +68,20 @@ define(function () {
                 "meta/timeStart",
                 "meta/timeEnd"
             ],
-            dataSources: [
-                {
-                    key: "case",
-                    name: "Cases",
-                    endpoint: function (callback) { callback([INSTANCES[0]]); }
-                }, {
-                    key: "fixture",
-                    name: "Lookup Tables",
-                    endpoint: function (callback) { callback(INSTANCES.slice(1)); }
-                }
-            ],
+            dataSourcesEndpoint: function (callback) { callback(dataSources); },
             saveType: "patch",
             saveUrl: function (data) {}
         },
         javaRosa: {
             langs: ['en', 'hin'],
             displayLanguage: 'en'
+        },
+        itemset: {
+            dataSourcesFilter: function (sources) {
+                return _.filter(sources, function (source) {
+                    return source.defaultId !== "casedb";
+                });
+            }
         },
         uploader: {
             uploadUrls: {
@@ -113,7 +106,6 @@ define(function () {
     };
 
     return {
-        options: OPTIONS,
-        instances: INSTANCES
+        options: OPTIONS
     };
 });

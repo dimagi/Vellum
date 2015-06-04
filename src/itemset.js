@@ -43,7 +43,7 @@ define([
     debug
 ) {
     var mugTypes = mugs.baseMugTypes.normal,
-        Itemset, isAdvancedItemsetEnabled,
+        Itemset, isAdvancedItemsetEnabled, opts,
         END_FILTER = /\[[^\[]*\]$/;
 
     Itemset = util.extend(mugs.defaultOptions, {
@@ -168,6 +168,7 @@ define([
 
     $.vellum.plugin("itemset", {}, {
         init: function () {
+            opts = this.opts().itemset;
             isAdvancedItemsetEnabled = this.opts().features.advanced_itemsets;
         },
         getSelectQuestions: function () {
@@ -317,7 +318,10 @@ define([
             }
         }
 
-        options = _.extend({}, options, {onOptionsLoaded: onOptionsLoaded});
+        options = _.extend({}, options, {
+            onOptionsLoaded: onOptionsLoaded,
+            dataSourcesFilter: opts.dataSourcesFilter,
+        });
         if (isAdvancedItemsetEnabled) {
             options.hasAdvancedEditor = true;
             options.getSource = function (mug) {
