@@ -285,7 +285,8 @@ define([
                             widget.handleChange();
                         }
                     },
-                    form: mug.form
+                    form: mug.form,
+                    questionType: options.path,
                 });
                 if (window.analytics) {
                     window.analytics.usage('Form Builder', 'Logic', options.lstring);
@@ -293,7 +294,8 @@ define([
             }, !!widget.isDisabled());
         };
 
-        util.questionAutoComplete(widget.input, mug.form);
+        util.questionAutoComplete(widget.input, mug.form,
+                                  {property: options.path});
 
         return widget;
     };

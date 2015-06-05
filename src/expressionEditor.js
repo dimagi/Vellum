@@ -80,6 +80,10 @@ define([
         var getTopLevelJoinSelect = function () {
             return $(editorContent.find(".top-level-join-select")[0]);
         };
+        var addAutoComplete = function (input) {
+            util.questionAutoComplete(input, options.form,
+                                      {property: options.path});
+        };
 
         var getExpressionFromSimpleMode = function () {
             // basic
@@ -230,10 +234,10 @@ define([
                     });
 
                 if (!options.leftAutoCompleteSources) {
-                    util.questionAutoComplete(getLeftQuestionInput(), options.form);
+                    addAutoComplete(getLeftQuestionInput());
                 }
                 if (!options.rightAutoCompleteSources) {
-                    util.questionAutoComplete(getRightQuestionInput(), options.form);
+                    addAutoComplete(getRightQuestionInput());
                 }
 
                 return $expUI;
@@ -337,7 +341,7 @@ define([
         // toggle simple/advanced mode
         var showAdvancedMode = function (text, showNotice) {
             getExpressionInput().val(text);
-            util.questionAutoComplete(getExpressionInput(), options.form);
+            addAutoComplete(getExpressionInput());
             getExpressionPane().empty();
 
             $div.find(".xpath-advanced").removeClass('hide');
