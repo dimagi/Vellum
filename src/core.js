@@ -1792,7 +1792,7 @@ define([
             _this.showWaitingModal();
         });
         $(document).ajaxStop(function () {
-            _this.$f.find('.fd-modal-generic-container .modal').modal("hide");
+            _this.closeModal();
         });
 
         if (saveType === 'patch') {
