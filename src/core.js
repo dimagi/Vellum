@@ -443,12 +443,12 @@ define([
         }
         // todo: should this also show up for saving? Did it at some point in
         // the past?
-        if (!this.data.core.form.isFormValid(validateMug)) {
-            var $modal = this.generateNewModal("Error", [
+        if (!_this.data.core.form.isFormValid(validateMug)) {
+            var $modal = _this.generateNewModal("Error", [
                 {
                     title: 'Continue',
                     action: function() {
-                        $modal.modal('hide');
+                        _this.closeModal();
                         _this.showSourceInModal(done);
                     }
                 },
@@ -456,7 +456,7 @@ define([
                     title: 'Abort',
                     cssClasses: "btn-primary",
                     action: function() {
-                        $modal.modal('hide');
+                        _this.closeModal();
                     }
                 }
             ], false);
@@ -465,7 +465,7 @@ define([
             $modal.find(".modal-body").html(content);
             $modal.modal('show');
         } else {
-            this.showSourceInModal(done);
+            _this.showSourceInModal(done);
         }
     };
 
@@ -545,9 +545,9 @@ define([
     };
 
     fn.showOverwriteWarning = function(send, formText, serverForm) {
-        var $modal, $overwriteForm;
+        var $modal, $overwriteForm, _this = this;
 
-        $modal = this.generateNewModal("Lost work warning", [
+        $modal = _this.generateNewModal("Lost work warning", [
             {
                 title: "Overwrite their work",
                 cssClasses: "btn-primary",
@@ -555,7 +555,7 @@ define([
                 action: function () {
                     $('#form-differences').hide();
                     send(formText, 'full');
-                    $modal.modal('hide');
+                    _this.closeModal();
                 }
             },
             {
@@ -649,8 +649,7 @@ define([
     };
 
     fn.closeModal = function () {
-        var $modalContainer = this.$f.find('.fd-modal-generic-container');
-        $modalContainer.find(".modal").modal("hide");
+        this.$f.find('.fd-modal-generic-container .modal').modal('hide');
     };
     
     fn.generateNewModal = function (title, buttons, closeButtonTitle) {
@@ -663,10 +662,11 @@ define([
             return button;
         });
 
-        var $modalContainer = this.$f.find('.fd-modal-generic-container');
+        var _this = this,
+            $modalContainer = _this.$f.find('.fd-modal-generic-container');
 
         // Close any existing modal - multiple modals is a bad state
-        this.closeModal();
+        _this.closeModal();
 
         var $modal = $(modal_content({
                 title: title,
@@ -679,7 +679,7 @@ define([
         _.each(buttons, function (button) {
             button.defaultButton = button.defaultButton || false;
             button.action = button.action || function () {
-                $modal.modal('hide');
+                _this.closeModal();
             };
             $modal.find('.modal-footer').prepend(
                 $(modal_button(button)).click(button.action));
@@ -1760,13 +1760,13 @@ define([
                     title: 'Fix the problem (recommended)',
                     cssClasses: "btn-primary",
                     action: function() {
-                        $modal.modal('hide');
+                        _this.closeModal();
                     },
                 },
                 {
                     title: 'Save anyway',
                     action: function() {
-                        $modal.modal('hide');
+                        _this.closeModal();
                         _this.send(formText, forceFullSave ? 'full' : null);
                     },
                 },
