@@ -1043,7 +1043,6 @@ define([
                     _this.$f.find('.fd-default-panel').removeClass('hide');
                 }
                 $.fancybox.hideActivity();
-                done();
             } catch (e) {
                 // hack: don't display the whole invalid XML block if it
                 // was a parse error
@@ -1062,9 +1061,9 @@ define([
                 _this.data.core.failedLoadXML = formString;
 
                 $.fancybox.hideActivity();
-                done();
                 throw e;
             }
+            done();
         }, this.opts().core.loadDelay);
     };
 
