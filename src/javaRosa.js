@@ -2102,12 +2102,12 @@ define([
                 {
                     name: "Edit Bulk Translations",
                     action: function (done) {
-                        _this.showItextDialog(done);
+                        _this.showItextModal(done);
                     }
                 }
             ]);
         },
-        showItextDialog: function (done) {
+        showItextModal: function (done) {
             var vellum = this,
                 $modal, $updateForm, $textarea,
                 Itext = vellum.data.javaRosa.Itext,
