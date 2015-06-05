@@ -30,7 +30,7 @@ define([
     'jquery.jstree',
     'jquery.bootstrap',
     'jquery.fancybox',  // only thing we use fancybox for is its spinner, no actual display of anything
-    'jquery-ui',  // used for buttons in Edit Source XML, and dialogs
+    'jquery-ui',  // used for autocomplete
     'caretjs',
     'atjs'
 ], function (
@@ -201,7 +201,6 @@ define([
         this._init_toolbar();
         this._init_extra_tools();
         this._createJSTree();
-        this._init_modal_dialogs();
         this._setup_fancybox();
         datasources.init(this);
     };
@@ -435,38 +434,6 @@ define([
             this.data.javaRosa.Itext.getDefaultLanguage());
     };
 
-    fn._showConfirmDialog = function () {
-        $('.fd-dialog-confirm').dialog("open");
-    };
-
-    fn._hideConfirmDialog = function () {
-        $('.fd-dialog-confirm').dialog("close");
-    };
-
-    /**
-     * Set the values for the Confirm Modal Dialog
-     * (box that pops up that has a confirm and cancel button)
-     */
-    fn.setDialogInfo = function (message, confButName, confFunction,
-                                 cancelButName, cancelButFunction, title) {
-        title = title || "";
-        var buttons = {},
-            $dial = $('.fd-dialog-confirm'), contentStr;
-        buttons[confButName] = confFunction;
-        buttons[cancelButName] = cancelButFunction;
-
-        $dial.empty();
-        contentStr = '<p>' +
-                '<span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>' +
-                '<span class="fd-message">These items will be permanently deleted and cannot be recovered. Are you sure?</span></p>';
-        $dial.append(contentStr);
-        if (!message || typeof(message) !== "string") {
-            message = "";
-        }
-        $dial.find('.fd-message').text(message);
-        $dial.dialog("option", {buttons: buttons, "title": title});
-    };
-
     fn.showSourceXMLDialog = function (done) {
         var _this = this;
  
@@ -680,6 +647,11 @@ define([
             $modalBody.find("input:first").focus().select();
         });
     };
+
+    fn.closeModal = function () {
+        var $modalContainer = this.$f.find('.fd-modal-generic-container');
+        $modalContainer.find(".modal").modal("hide");
+    };
     
     fn.generateNewModal = function (title, buttons, closeButtonTitle) {
         if (typeof closeButtonTitle === "undefined") {
@@ -694,7 +666,7 @@ define([
         var $modalContainer = this.$f.find('.fd-modal-generic-container');
 
         // Close any existing modal - multiple modals is a bad state
-        $modalContainer.find(".modal").modal("hide");
+        this.closeModal();
 
         var $modal = $(modal_content({
                 title: title,
@@ -716,22 +688,6 @@ define([
         return $modal;
     };
 
-    fn._init_modal_dialogs = function () {
-        this.$f.find('.fd-dialog-confirm').dialog({
-            resizable: false,
-            modal: true,
-            buttons: {
-                "Confirm": function() {
-                    $(this).dialog("close");
-                },
-                "Cancel": function() {
-                    $(this).dialog("close");
-                }
-            },
-            autoOpen: false
-        });
-    };
-        
     fn._setup_fancybox = function () {
         $.fancybox.init();
         this.$f.find("a.inline").fancybox({
@@ -1873,7 +1829,7 @@ define([
                             // unconditionally overwrite if no xform to compare
                             _this.send(formText, 'full');
                         } else {
-                            _this._hideConfirmDialog();
+                            _this.closeModal();
                             _this.showOverwriteWarning(_this.send.bind(_this),
                                                        formText, data.xform);
                         }
@@ -1882,8 +1838,8 @@ define([
                         debug.error("sha1's didn't match");
                         _this.send(formText, 'full');
                     }
+                    _this.closeModal();
                 }
-                _this._hideConfirmDialog();
                 _this.opts().core.onFormSave(data);
                 _this.data.core.lastSavedXForm = formText;
             }
