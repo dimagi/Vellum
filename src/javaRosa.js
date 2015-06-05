@@ -839,8 +839,9 @@ define([
 
         if (options.path === 'labelItext') {
             if (EXPERIMENTAL_UI) {
-                util.questionAutoComplete($input, mug.form,
-                                         '<output value="${name}" />');
+                util.questionAutoComplete($input, mug.form, {
+                    insertTpl: '<output value="${name}" />'
+                });
             }
 
             $input.addClass('jstree-drop');

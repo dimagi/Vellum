@@ -373,7 +373,11 @@ define([
         return div.html();
     };
 
-    that.questionAutoComplete = function (input, form, insertTpl) {
+    that.questionAutoComplete = function (input, form, options) {
+        options = _.extend(options || {}, {
+            insertTpl: '${name}'
+        });
+
         input.atwho({
             at: "/data/",
             data: _.chain(form.getMugList())
@@ -386,7 +390,7 @@ define([
                     .filter(function(choice) { return choice.name; })
                     .value(),
             displayTpl: '<li>${name}</li>',
-            insertTpl: insertTpl || '${name}',
+            insertTpl: options.insertTpl,
             limit: 10,
             maxLen: 30,
             callbacks: {
@@ -395,7 +399,7 @@ define([
                     regexp = new RegExp('(\\s+|^)' + flag + '([\\w_/]*)$', 'gi');
                     match = regexp.exec(subtext);
                     return match ? match[2] : null;
-                }
+                },
             }
         });
     };
