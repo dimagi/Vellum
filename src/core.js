@@ -514,7 +514,6 @@ define([
                 action: function () {
                     codeMirror.save();
                     _this.loadXFormOrError($textarea.val(), function () {
-                        $modal.modal('hide');
                         done();
                     }, true);
                 }
@@ -692,8 +691,12 @@ define([
             return button;
         });
 
-        var $modalContainer = this.$f.find('.fd-modal-generic-container'),
-            $modal = $(modal_content({
+        var $modalContainer = this.$f.find('.fd-modal-generic-container');
+
+        // Close any existing modal - multiple modals is a bad state
+        $modalContainer.find(".modal").modal("hide");
+
+        var $modal = $(modal_content({
                 title: title,
                 closeButtonTitle: closeButtonTitle
             }));
@@ -1083,6 +1086,7 @@ define([
                     _this.$f.find('.fd-default-panel').removeClass('hide');
                 }
                 $.fancybox.hideActivity();
+                done();
             } catch (e) {
                 // hack: don't display the whole invalid XML block if it
                 // was a parse error
@@ -1091,46 +1095,19 @@ define([
                     msg = "Parsing Error. Please check that your form is valid XML.";
                 }
 
-                // this button doesn't seem to actually exist
-                // todo: fix
-                //var showSourceButton = $('#fd-editsource-button');
-                //disable all buttons and inputs
                 _this.hideQuestionProperties();
-                //enable the view source button so the form can be tweaked by
-                //hand.
-                //showSourceButton.button('enable');
 
-                _this.setDialogInfo(msg, 
-                    'ok', function() {
-                        _this._hideConfirmDialog();
-                    }, 
-                    'cancel', function(){
-                        _this._hideConfirmDialog();
-                    });
-                _this._showConfirmDialog();
-                
+                var $modal = _this.generateNewModal("Error", [], "OK");
+                $modal.find(".modal-body").text(msg);
+                $modal.modal('show');
+
                 _this.data.core.formLoadingFailed = true;
                 _this.data.core.failedLoadXML = formString;
 
-                // ok to hard code this because it's public
-                var validator_url = "https://www.commcarehq.org/formtranslate/";
-                
-                msg = "We're sorry. The form builder cannot load your form.  You " +
-                    "can edit your form directly by clicking the \"Edit Source" +
-                    "XML\" button or go back to download your form. <br>" +
-                    "It is likely that your form contains errors.  You can " + 
-                    "check to see if your form is valid by pasting your" +
-                    "entire form into the " + '<a href="' + validator_url +
-                    '" target="_blank">Form Validator</a>';
-
-                //_this.data.core.form.updateError({
-                    //message: msg,
-                    //level: "error"
-                //});
                 $.fancybox.hideActivity();
+                done();
                 throw e;
             }
-            done();
         }, this.opts().core.loadDelay);
     };
 
