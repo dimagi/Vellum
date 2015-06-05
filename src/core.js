@@ -1838,8 +1838,8 @@ define([
                         debug.error("sha1's didn't match");
                         _this.send(formText, 'full');
                     }
-                    _this.closeModal();
                 }
+                _this.closeModal();
                 _this.opts().core.onFormSave(data);
                 _this.data.core.lastSavedXForm = formText;
             }
