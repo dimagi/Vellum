@@ -30,7 +30,7 @@ define([
     'jquery.jstree',
     'jquery.bootstrap',
     'jquery.fancybox',  // only thing we use fancybox for is its spinner, no actual display of anything
-    'jquery-ui',  // used for buttons in Edit Source XML, and dialogs
+    'jquery-ui',  // used for autocomplete
     'caretjs',
     'atjs'
 ], function (
@@ -201,7 +201,6 @@ define([
         this._init_toolbar();
         this._init_extra_tools();
         this._createJSTree();
-        this._init_modal_dialogs();
         this._setup_fancybox();
         datasources.init(this);
     };
@@ -393,19 +392,19 @@ define([
             {
                 name: "Export Form Contents",
                 action: function (done) {
-                    _this.showExportDialog(done);
+                    _this.showExportModal(done);
                 }
             },
             {
                 name: "Edit Source XML",
                 action: function (done) {
-                    _this.showSourceXMLDialog(done);
+                    _this.showSourceXMLModal(done);
                 }
             },
             {
                 name: "Form Properties",
                 action: function (done) {
-                    _this.showFormPropertiesDialog(done);
+                    _this.showFormPropertiesModal(done);
                 }
             }
         ];
@@ -435,39 +434,7 @@ define([
             this.data.javaRosa.Itext.getDefaultLanguage());
     };
 
-    fn._showConfirmDialog = function () {
-        $('.fd-dialog-confirm').dialog("open");
-    };
-
-    fn._hideConfirmDialog = function () {
-        $('.fd-dialog-confirm').dialog("close");
-    };
-
-    /**
-     * Set the values for the Confirm Modal Dialog
-     * (box that pops up that has a confirm and cancel button)
-     */
-    fn.setDialogInfo = function (message, confButName, confFunction,
-                                 cancelButName, cancelButFunction, title) {
-        title = title || "";
-        var buttons = {},
-            $dial = $('.fd-dialog-confirm'), contentStr;
-        buttons[confButName] = confFunction;
-        buttons[cancelButName] = cancelButFunction;
-
-        $dial.empty();
-        contentStr = '<p>' +
-                '<span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>' +
-                '<span class="fd-message">These items will be permanently deleted and cannot be recovered. Are you sure?</span></p>';
-        $dial.append(contentStr);
-        if (!message || typeof(message) !== "string") {
-            message = "";
-        }
-        $dial.find('.fd-message').text(message);
-        $dial.dialog("option", {buttons: buttons, "title": title});
-    };
-
-    fn.showSourceXMLDialog = function (done) {
+    fn.showSourceXMLModal = function (done) {
         var _this = this;
  
         function validateMug(mug) {
@@ -476,12 +443,12 @@ define([
         }
         // todo: should this also show up for saving? Did it at some point in
         // the past?
-        if (!this.data.core.form.isFormValid(validateMug)) {
-            var $modal = this.generateNewModal("Error", [
+        if (!_this.data.core.form.isFormValid(validateMug)) {
+            var $modal = _this.generateNewModal("Error", [
                 {
                     title: 'Continue',
                     action: function() {
-                        $modal.modal('hide');
+                        _this.closeModal();
                         _this.showSourceInModal(done);
                     }
                 },
@@ -489,16 +456,16 @@ define([
                     title: 'Abort',
                     cssClasses: "btn-primary",
                     action: function() {
-                        $modal.modal('hide');
+                        _this.closeModal();
                     }
                 }
-            ], false);
+            ], false, "icon-warning-sign");
             var content = "There are validation errors in the form.  Do you want to continue anyway?";
             content += "<br><br>WARNING: The form will not be valid and likely not perform correctly on your device!";
             $modal.find(".modal-body").html(content);
             $modal.modal('show');
         } else {
-            this.showSourceInModal(done);
+            _this.showSourceInModal(done);
         }
     };
 
@@ -514,7 +481,6 @@ define([
                 action: function () {
                     codeMirror.save();
                     _this.loadXFormOrError($textarea.val(), function () {
-                        $modal.modal('hide');
                         done();
                     }, true);
                 }
@@ -560,7 +526,7 @@ define([
         });
     };
 
-    fn.showExportDialog = function(done) {
+    fn.showExportModal = function(done) {
         var $modal,
             $exportForm;
 
@@ -579,9 +545,9 @@ define([
     };
 
     fn.showOverwriteWarning = function(send, formText, serverForm) {
-        var $modal, $overwriteForm;
+        var $modal, $overwriteForm, _this = this;
 
-        $modal = this.generateNewModal("Lost work warning", [
+        $modal = _this.generateNewModal("Lost work warning", [
             {
                 title: "Overwrite their work",
                 cssClasses: "btn-primary",
@@ -589,7 +555,7 @@ define([
                 action: function () {
                     $('#form-differences').hide();
                     send(formText, 'full');
-                    $modal.modal('hide');
+                    _this.closeModal();
                 }
             },
             {
@@ -616,7 +582,7 @@ define([
                     $modal.find('.btn-info').attr('disabled', 'disabled');
                 }
             }
-        ], "Cancel");
+        ], "Cancel", "icon-warning-sign");
 
         var diff = util.xmlDiff(formText, serverForm);
 
@@ -632,7 +598,7 @@ define([
         $modal.modal('show');
     };
         
-    fn.showFormPropertiesDialog = function () {
+    fn.showFormPropertiesModal = function () {
         // moved over just for display purposes, apparently the original
         // wasn't working perfectly, so this is a todo
         var _this = this,
@@ -681,8 +647,12 @@ define([
             $modalBody.find("input:first").focus().select();
         });
     };
+
+    fn.closeModal = function () {
+        this.$f.find('.fd-modal-generic-container .modal').modal('hide');
+    };
     
-    fn.generateNewModal = function (title, buttons, closeButtonTitle) {
+    fn.generateNewModal = function (title, buttons, closeButtonTitle, headerIcon) {
         if (typeof closeButtonTitle === "undefined") {
             closeButtonTitle = "Close";
         }
@@ -692,10 +662,16 @@ define([
             return button;
         });
 
-        var $modalContainer = this.$f.find('.fd-modal-generic-container'),
-            $modal = $(modal_content({
+        var _this = this,
+            $modalContainer = _this.$f.find('.fd-modal-generic-container');
+
+        // Close any existing modal - multiple modals is a bad state
+        _this.closeModal();
+
+        var $modal = $(modal_content({
                 title: title,
-                closeButtonTitle: closeButtonTitle
+                closeButtonTitle: closeButtonTitle,
+                headerIcon: headerIcon,
             }));
         $modal.one("shown", function () {
             $modal.find(".btn-default:last").focus();
@@ -704,7 +680,7 @@ define([
         _.each(buttons, function (button) {
             button.defaultButton = button.defaultButton || false;
             button.action = button.action || function () {
-                $modal.modal('hide');
+                _this.closeModal();
             };
             $modal.find('.modal-footer').prepend(
                 $(modal_button(button)).click(button.action));
@@ -713,22 +689,6 @@ define([
         return $modal;
     };
 
-    fn._init_modal_dialogs = function () {
-        this.$f.find('.fd-dialog-confirm').dialog({
-            resizable: false,
-            modal: true,
-            buttons: {
-                "Confirm": function() {
-                    $(this).dialog("close");
-                },
-                "Cancel": function() {
-                    $(this).dialog("close");
-                }
-            },
-            autoOpen: false
-        });
-    };
-        
     fn._setup_fancybox = function () {
         $.fancybox.init();
         this.$f.find("a.inline").fancybox({
@@ -1091,42 +1051,15 @@ define([
                     msg = "Parsing Error. Please check that your form is valid XML.";
                 }
 
-                // this button doesn't seem to actually exist
-                // todo: fix
-                //var showSourceButton = $('#fd-editsource-button');
-                //disable all buttons and inputs
                 _this.hideQuestionProperties();
-                //enable the view source button so the form can be tweaked by
-                //hand.
-                //showSourceButton.button('enable');
 
-                _this.setDialogInfo(msg, 
-                    'ok', function() {
-                        _this._hideConfirmDialog();
-                    }, 
-                    'cancel', function(){
-                        _this._hideConfirmDialog();
-                    });
-                _this._showConfirmDialog();
-                
+                var $modal = _this.generateNewModal("Error", [], "OK", "icon-warning-sign");
+                $modal.find(".modal-body").text(msg);
+                $modal.modal('show');
+
                 _this.data.core.formLoadingFailed = true;
                 _this.data.core.failedLoadXML = formString;
 
-                // ok to hard code this because it's public
-                var validator_url = "https://www.commcarehq.org/formtranslate/";
-                
-                msg = "We're sorry. The form builder cannot load your form.  You " +
-                    "can edit your form directly by clicking the \"Edit Source" +
-                    "XML\" button or go back to download your form. <br>" +
-                    "It is likely that your form contains errors.  You can " + 
-                    "check to see if your form is valid by pasting your" +
-                    "entire form into the " + '<a href="' + validator_url +
-                    '" target="_blank">Form Validator</a>';
-
-                //_this.data.core.form.updateError({
-                    //message: msg,
-                    //level: "error"
-                //});
                 $.fancybox.hideActivity();
                 throw e;
             }
@@ -1564,7 +1497,7 @@ define([
             buttons.push({title: "OK", defaultButton: true});
         }
 
-        var $modal = this.generateNewModal(title, buttons, false);
+        var $modal = this.generateNewModal(title, buttons, false, "icon-warning-sign");
 
         // store a reference to $modal on this so modal button actions can
         // reference it in order to hide it at the right point in time.  This is
@@ -1822,16 +1755,24 @@ define([
                 "Characters to look out for are <, >, and &. You can still save, but " +
                 "you CANNOT LOAD THIS FORM again until you fix the XML by hand. " +
                 "What would you like to do?";
-            _this.setDialogInfo(theScaryWarning,
-                'Fix the problem (recommended)', function () {
-                    $(this).dialog("close");
+            var $modal = _this.generateNewModal("Form Validation Error", [
+                {
+                    title: 'Fix the problem (recommended)',
+                    cssClasses: "btn-primary",
+                    action: function() {
+                        _this.closeModal();
+                    },
                 },
-                'Save anyway', function () {
-                    $(this).dialog("close");
-                    _this.send(formText, forceFullSave ? 'full' : null);
+                {
+                    title: 'Save anyway',
+                    action: function() {
+                        _this.closeModal();
+                        _this.send(formText, forceFullSave ? 'full' : null);
+                    },
                 },
-                'Form Validation Error');
-            this._showConfirmDialog();
+            ], false, "icon-warning-sign");
+            $modal.find(".modal-body").html(theScaryWarning);
+            $modal.modal('show');
             return;
         }
 
@@ -1848,10 +1789,10 @@ define([
         var url = saveType === 'patch' ?  opts.patchUrl : opts.saveUrl;
 
         $(document).ajaxStart(function () {
-            _this.showWaitingDialog();
+            _this.showWaitingModal();
         });
         $(document).ajaxStop(function () {
-            _this.$f.find('.fd-modal-generic-container .modal').modal("hide");
+            _this.closeModal();
         });
 
         if (saveType === 'patch') {
@@ -1888,7 +1829,7 @@ define([
                             // unconditionally overwrite if no xform to compare
                             _this.send(formText, 'full');
                         } else {
-                            _this._hideConfirmDialog();
+                            _this.closeModal();
                             _this.showOverwriteWarning(_this.send.bind(_this),
                                                        formText, data.xform);
                         }
@@ -1898,14 +1839,14 @@ define([
                         _this.send(formText, 'full');
                     }
                 }
-                _this._hideConfirmDialog();
+                _this.closeModal();
                 _this.opts().core.onFormSave(data);
                 _this.data.core.lastSavedXForm = formText;
             }
         });
     };
 
-    fn.showWaitingDialog = function (msg) {
+    fn.showWaitingModal = function (msg) {
         if (!msg || typeof msg !== 'string') {
             msg = 'Saving form to server...';
         }
