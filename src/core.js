@@ -392,19 +392,19 @@ define([
             {
                 name: "Export Form Contents",
                 action: function (done) {
-                    _this.showExportDialog(done);
+                    _this.showExportModal(done);
                 }
             },
             {
                 name: "Edit Source XML",
                 action: function (done) {
-                    _this.showSourceXMLDialog(done);
+                    _this.showSourceXMLModal(done);
                 }
             },
             {
                 name: "Form Properties",
                 action: function (done) {
-                    _this.showFormPropertiesDialog(done);
+                    _this.showFormPropertiesModal(done);
                 }
             }
         ];
@@ -434,7 +434,7 @@ define([
             this.data.javaRosa.Itext.getDefaultLanguage());
     };
 
-    fn.showSourceXMLDialog = function (done) {
+    fn.showSourceXMLModal = function (done) {
         var _this = this;
  
         function validateMug(mug) {
@@ -526,7 +526,7 @@ define([
         });
     };
 
-    fn.showExportDialog = function(done) {
+    fn.showExportModal = function(done) {
         var $modal,
             $exportForm;
 
@@ -598,7 +598,7 @@ define([
         $modal.modal('show');
     };
         
-    fn.showFormPropertiesDialog = function () {
+    fn.showFormPropertiesModal = function () {
         // moved over just for display purposes, apparently the original
         // wasn't working perfectly, so this is a todo
         var _this = this,
@@ -1789,7 +1789,7 @@ define([
         var url = saveType === 'patch' ?  opts.patchUrl : opts.saveUrl;
 
         $(document).ajaxStart(function () {
-            _this.showWaitingDialog();
+            _this.showWaitingModal();
         });
         $(document).ajaxStop(function () {
             _this._hideConfirmDialog();
@@ -1846,7 +1846,7 @@ define([
         });
     };
 
-    fn.showWaitingDialog = function (msg) {
+    fn.showWaitingModal = function (msg) {
         if (!msg || typeof msg !== 'string') {
             msg = 'Saving form to server...';
         }
