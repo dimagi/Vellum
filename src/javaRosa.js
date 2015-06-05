@@ -42,8 +42,7 @@ define([
             'default', 'short', 'long', 'audio', 'video', 'image'
         ],
         _nextItextItemKey = 1,
-        HELP_MARKDOWN,
-        EXPERIMENTAL_UI;
+        HELP_MARKDOWN;
 
     function ItextItem(options) {
         this.forms = options.forms || [];
@@ -838,13 +837,11 @@ define([
             });
 
         if (options.path === 'labelItext') {
-            if (EXPERIMENTAL_UI) {
-                util.questionAutoComplete($input, mug.form, {
-                    category: "Output Value",
-                    insertTpl: '<output value="${name}" />',
-                    property: "labelItext",
-                });
-            }
+            util.questionAutoComplete($input, mug.form, {
+                category: "Output Value",
+                insertTpl: '<output value="${name}" />',
+                property: "labelItext",
+            });
 
             $input.addClass('jstree-drop');
             $input.keydown(function (e) {
@@ -1256,7 +1253,6 @@ define([
             this.data.javaRosa.ItextForm = ItextForm;
             this.data.javaRosa.ICONS = ICONS;
             HELP_MARKDOWN = this.opts().features.help_markdown;
-            EXPERIMENTAL_UI = this.opts().features.experimental_ui;
         },
         insertOutputRef: function (mug, target, path, dateFormat) {
             var output = getOutputRef(path, dateFormat),
