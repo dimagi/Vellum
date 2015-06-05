@@ -459,7 +459,7 @@ define([
                         _this.closeModal();
                     }
                 }
-            ], false);
+            ], false, "icon-warning-sign");
             var content = "There are validation errors in the form.  Do you want to continue anyway?";
             content += "<br><br>WARNING: The form will not be valid and likely not perform correctly on your device!";
             $modal.find(".modal-body").html(content);
@@ -582,7 +582,7 @@ define([
                     $modal.find('.btn-info').attr('disabled', 'disabled');
                 }
             }
-        ], "Cancel");
+        ], "Cancel", "icon-warning-sign");
 
         var diff = util.xmlDiff(formText, serverForm);
 
@@ -652,7 +652,7 @@ define([
         this.$f.find('.fd-modal-generic-container .modal').modal('hide');
     };
     
-    fn.generateNewModal = function (title, buttons, closeButtonTitle) {
+    fn.generateNewModal = function (title, buttons, closeButtonTitle, headerIcon) {
         if (typeof closeButtonTitle === "undefined") {
             closeButtonTitle = "Close";
         }
@@ -670,7 +670,8 @@ define([
 
         var $modal = $(modal_content({
                 title: title,
-                closeButtonTitle: closeButtonTitle
+                closeButtonTitle: closeButtonTitle,
+                headerIcon: headerIcon,
             }));
         $modal.one("shown", function () {
             $modal.find(".btn-default:last").focus();
@@ -1053,7 +1054,7 @@ define([
 
                 _this.hideQuestionProperties();
 
-                var $modal = _this.generateNewModal("Error", [], "OK");
+                var $modal = _this.generateNewModal("Error", [], "OK", "icon-warning-sign");
                 $modal.find(".modal-body").text(msg);
                 $modal.modal('show');
 
@@ -1497,7 +1498,7 @@ define([
             buttons.push({title: "OK", defaultButton: true});
         }
 
-        var $modal = this.generateNewModal(title, buttons, false);
+        var $modal = this.generateNewModal(title, buttons, false, "icon-warning-sign");
 
         // store a reference to $modal on this so modal button actions can
         // reference it in order to hide it at the right point in time.  This is
@@ -1770,7 +1771,7 @@ define([
                         _this.send(formText, forceFullSave ? 'full' : null);
                     },
                 },
-            ], false);
+            ], false, "icon-warning-sign");
             $modal.find(".modal-body").html(theScaryWarning);
             $modal.modal('show');
             return;
