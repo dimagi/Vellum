@@ -80,8 +80,8 @@ define([
         var getTopLevelJoinSelect = function () {
             return $(editorContent.find(".top-level-join-select")[0]);
         };
-        var addAutoComplete = function (input) {
-            util.questionAutoComplete(input, options.form,
+        var addAutocomplete = function (input) {
+            util.questionAutocomplete(input, options.form,
                                       {property: options.path});
         };
 
@@ -223,21 +223,21 @@ define([
                 }
 
                 getLeftQuestionInput()
-                    .autocomplete(autoSources(options.leftAutoCompleteSources))
+                    .autocomplete(autoSources(options.leftAutocompleteSources))
                     .focus(function(e) {
                         $(this).autocomplete('search', $(this).val());
                     });
                 getRightQuestionInput()
-                    .autocomplete(autoSources(options.rightAutoCompleteSources))
+                    .autocomplete(autoSources(options.rightAutocompleteSources))
                     .focus(function(e) {
                         $(this).autocomplete('search', $(this).val());
                     });
 
-                if (!options.leftAutoCompleteSources) {
-                    addAutoComplete(getLeftQuestionInput());
+                if (!options.leftAutocompleteSources) {
+                    addAutocomplete(getLeftQuestionInput());
                 }
-                if (!options.rightAutoCompleteSources) {
-                    addAutoComplete(getRightQuestionInput());
+                if (!options.rightAutocompleteSources) {
+                    addAutocomplete(getRightQuestionInput());
                 }
 
                 return $expUI;
@@ -341,7 +341,7 @@ define([
         // toggle simple/advanced mode
         var showAdvancedMode = function (text, showNotice) {
             getExpressionInput().val(text);
-            addAutoComplete(getExpressionInput());
+            addAutocomplete(getExpressionInput());
             getExpressionPane().empty();
 
             $div.find(".xpath-advanced").removeClass('hide');

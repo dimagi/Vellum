@@ -373,7 +373,7 @@ define([
         return div.html();
     };
 
-    that.questionAutoComplete = function (input, form, options) {
+    that.questionAutocomplete = function (input, form, options) {
         options = _.defaults(options || {}, {
             category: 'Question Reference',
             insertTpl: '${name}',
