@@ -116,7 +116,7 @@ define([
         widget.saving = false;
 
         widget.input = $("<div />")
-            .addClass('fake-input')
+            .addClass('fd-input')
             .attr("name", inputID)
             .attr("contenteditable", true)
             .prop('disabled', disabled);
@@ -198,7 +198,7 @@ define([
         widget.input = $("<div />")
             .attr("contenteditable", true)
             .attr("name", widget.id)
-            .addClass('fake-textarea input-block-level itext-widget-input')
+            .addClass('fd-textarea input-block-level itext-widget-input')
             .on('change input', function (e) { widget.handleChange(); })
             .focus(function () {
                 util.setCaretPosition(this, 0, $(this).val().length);
