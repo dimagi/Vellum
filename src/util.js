@@ -374,8 +374,10 @@ define([
     };
 
     that.questionAutoComplete = function (input, form, options) {
-        options = _.extend(options || {}, {
-            insertTpl: '${name}'
+        options = _.defaults(options || {}, {
+            category: 'Question Reference',
+            insertTpl: '${name}',
+            property: '',
         });
 
         input.atwho({
@@ -400,6 +402,14 @@ define([
                     match = regexp.exec(subtext);
                     return match ? match[2] : null;
                 },
+                beforeInsert: function(value, $li) {
+                    if (window.analytics) {
+                        window.analytics.usage(options.category,
+                                               "Autocomplete",
+                                               options.property);
+                    }
+                    return value;
+                }
             }
         });
     };

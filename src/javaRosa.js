@@ -840,7 +840,9 @@ define([
         if (options.path === 'labelItext') {
             if (EXPERIMENTAL_UI) {
                 util.questionAutoComplete($input, mug.form, {
-                    insertTpl: '<output value="${name}" />'
+                    category: "Output Value",
+                    insertTpl: '<output value="${name}" />',
+                    property: "labelItext",
                 });
             }
 
@@ -1288,13 +1290,22 @@ define([
                     var menu = $(menuHtml);
                     $('body').append(menu);
                     menu.find('li a').click(function () {
-                        _this.insertOutputRef(mug, target, path, $(this).data('format'));
+                        var dateFormat = $(this).data('format');
+                        _this.insertOutputRef(mug, target, path, dateFormat);
+                        if (window.analytics) {
+                            window.analytics.usage(
+                                "Output Value", "Drag and Drop", dateFormat
+                            );
+                        }
                         menu.remove();
                     });
                     var e = window.event;
                     menu.css({'top': e.clientY, 'left': e.clientX}).show();
                 } else {
                     _this.insertOutputRef(mug, target, path);
+                    if (window.analytics) {
+                        window.analytics.usage("Output Value", "Drag and Drop");
+                    }
                 }
             } else {
                 _this.__callOld();
