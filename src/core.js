@@ -1792,7 +1792,7 @@ define([
             _this.showWaitingModal();
         });
         $(document).ajaxStop(function () {
-            _this._hideConfirmDialog();
+            _this.$f.find('.fd-modal-generic-container .modal').modal("hide");
         });
 
         if (saveType === 'patch') {
