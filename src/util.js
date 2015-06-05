@@ -32,6 +32,10 @@ define([
         return this;
     };
 
+    function isFormBuilderInput(input) {
+        return _.intersection(input.classList, ["fd-textarea", "fd-input"]).length > 0;
+    }
+
     var that = {};
 
     // deep extend
@@ -280,7 +284,7 @@ define([
             pos = sel.text.length;
         } else if (typeof ctrl.selectionStart !== 'undefined') {
             pos = ctrl.selectionStart;
-        } else if (_.contains(ctrl.classList, "fd-textarea")) {
+        } else if (isFormBuilderInput(ctrl)) {
             return $(ctrl).caret('pos');
         }
         return pos;
@@ -313,8 +317,8 @@ define([
     that.insertTextAtCursor = function (jqctrl, text, select) {
         var ctrl = jqctrl[0],
             pos = that.getCaretPosition(ctrl),
-            notInput = _.contains(ctrl.classList, "fd-textarea"),
-            content = notInput ? jqctrl.val() : ctrl.value,
+            fdInput = isFormBuilderInput(ctrl),
+            content = fdInput ? jqctrl.val() : ctrl.value,
             start = select ? pos : pos + text.length,
             front = content.substring(0, pos),
             back = content.substring(pos, content.length);
