@@ -413,7 +413,7 @@ define([
                     callbacks: {
                         filter: function(query, data, searchKey) {
                             return _.filter(data, function(item) {
-                                return item.name.indexOf(query) != -1 && item.name !== query;
+                                return item.name.indexOf(query) !== -1 && item.name !== query;
                             });
                         },
                         matcher: function(flag, subtext, should_startWithSpace) {
