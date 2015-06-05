@@ -402,8 +402,9 @@ define([
     }
 
     function refSelect(name, label, isDisabled) {
-        var input = $("<input type='text' class='input-block-level'>");
-        input.attr("name", name);
+        var input = $("<div>").attr('contenteditable', true)
+                              .attr('name', name)
+                              .addClass('fd-input input-block-level');
         return {
             addAutoComplete: function(sources, changeFunction) {
                 input.autocomplete({
