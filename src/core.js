@@ -1799,16 +1799,24 @@ define([
                 "Characters to look out for are <, >, and &. You can still save, but " +
                 "you CANNOT LOAD THIS FORM again until you fix the XML by hand. " +
                 "What would you like to do?";
-            _this.setDialogInfo(theScaryWarning,
-                'Fix the problem (recommended)', function () {
-                    $(this).dialog("close");
+            var $modal = _this.generateNewModal("Form Validation Error", [
+                {
+                    title: 'Fix the problem (recommended)',
+                    cssClasses: "btn-primary",
+                    action: function() {
+                        $modal.modal('hide');
+                    },
                 },
-                'Save anyway', function () {
-                    $(this).dialog("close");
-                    _this.send(formText, forceFullSave ? 'full' : null);
+                {
+                    title: 'Save anyway',
+                    action: function() {
+                        $modal.modal('hide');
+                        _this.send(formText, forceFullSave ? 'full' : null);
+                    },
                 },
-                'Form Validation Error');
-            this._showConfirmDialog();
+            ], false);
+            $modal.find(".modal-body").html(theScaryWarning);
+            $modal.modal('show');
             return;
         }
 
