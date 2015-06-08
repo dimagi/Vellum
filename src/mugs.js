@@ -1379,6 +1379,7 @@ define([
         isSpecialGroup: true,
         isNestableGroup: true,
         isTypeChangeable: false,
+        canHaveBlankLabel: true,
         possibleDataParent: true,
         canOutputValue: false,
         controlNodeChildren: function ($node) {

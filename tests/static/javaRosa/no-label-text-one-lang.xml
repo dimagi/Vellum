@@ -6,14 +6,22 @@
 			<instance>
 				<data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/0423112D-4950-4768-B59F-A4E4616FF73D" uiVersion="1" version="1" name="Untitled Form">
 					<label />
+					<group>
+						<text />
+					</group>
 				</data>
 			</instance>
 			<bind nodeset="/data/label" />
+			<bind nodeset="/data/group" />
+			<bind nodeset="/data/group/text" type="xsd:string" />
 			<itext>
 				<translation lang="en" default="">
 					<text id="label-label">
 						<value>label</value>
 						<value form="image">jr://file/commcare/image/data/label.png</value>
+					</text>
+					<text id="group/text-label">
+						<value>text</value>
 					</text>
 				</translation>
 			</itext>
@@ -23,5 +31,10 @@
 		<trigger ref="/data/label" appearance="minimal">
 			<label ref="jr:itext('label-label')" />
 		</trigger>
+		<group ref="/data/group">
+			<input ref="/data/group/text">
+				<label ref="jr:itext('group/text-label')" />
+			</input>
+		</group>
 	</h:body>
 </h:html>
