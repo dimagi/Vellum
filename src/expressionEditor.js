@@ -48,9 +48,11 @@ define([
         }
     };
     function addOp(expr, value, label) {
+        value = xpathmodels.expressionTypeEnumToXPathLiteral(value);
         simpleExpressions[value] = expr;
         operationOpts.push([label, value]);
     }
+
     addOp(BinOpHandler, expTypes.EQ, "is equal to");
     addOp(BinOpHandler, expTypes.NEQ, "is not equal to");
     addOp(BinOpHandler, expTypes.LT, "is less than");
