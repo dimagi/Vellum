@@ -406,6 +406,7 @@ define([
         input.attr("name", name);
         return {
             addAutoComplete: function(sources, changeFunction) {
+                var selectedValue = "";
                 input.atwho({
                     at: "",
                     data: sources,
@@ -420,7 +421,13 @@ define([
                         matcher: function(flag, subtext, should_startWithSpace) {
                             return input.val();
                         },
+                        beforeInsert: function(value, $li) {
+                            selectedValue = value;
+                        },
                     }
+                });
+                input.on("inserted.atwho", function(event, $li, otherEvent) {
+                    input.val(selectedValue);
                 });
                 input.on("blur change", function() {
                     if (_.isFunction(changeFunction)) {
