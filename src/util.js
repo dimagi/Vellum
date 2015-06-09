@@ -434,6 +434,7 @@ define([
         })
         .on("inserted.atwho", function (atwhoEvent, $li, browserEvent) {
             var _this = $(this);
+            _this.find(".atwho-inserted").attr("contenteditable", false);
             _this.find(".atwho-inserted [data-mug-type=Date]").popover({
                 template: '<div class="popover"><div class="arrow"></div><div class="popover-inner"><div class="popover-content"><p></p></div></div></div>',
                 html: true,
