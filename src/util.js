@@ -2,12 +2,14 @@ define([
     'json!langCodes',
     'underscore',
     'jsdiff',
+    'vellum/markdown',
     'jquery',
     'jquery.bootstrap-popout'
 ], function (
     langCodes,
     _,
     jsdiff,
+    markdown,
     $
 ) {
     RegExp.escape = function(s) {
@@ -26,7 +28,7 @@ define([
         // creates a help popover, requires twitter bootstrap
         this.append($('<i />').addClass('icon-question-sign'))
             .popout({
-                trigger: 'hover',
+                trigger: 'focus',
                 html: true
             });
         return this;
@@ -337,6 +339,8 @@ define([
                 "XML " + (opts.not ? "should not be equivalent" : "mismatch"));
         return patch;
     };
+
+    that.markdown = markdown;
 
     that.markdownlite = function (text) {
         // escape html characters and convert

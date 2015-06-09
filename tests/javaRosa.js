@@ -18,9 +18,7 @@ require([
     'text!static/javaRosa/itext-item-rename-group-move.xml',
     'text!static/javaRosa/itext-item-non-auto-id.xml',
     'text!static/javaRosa/select1-help.xml',
-    'text!static/javaRosa/no-label-text-one-lang.xml',
-    'text!static/markdown/with-markdown.xml',
-    'text!static/markdown/no-markdown.xml'
+    'text!static/javaRosa/no-label-text-one-lang.xml'
 ], function (
     chai,
     $,
@@ -40,9 +38,7 @@ require([
     ITEXT_ITEM_RENAME_GROUP_MOVE_XML,
     ITEXT_ITEM_NON_AUTO_ID_XML,
     SELECT1_HELP_XML,
-    NO_LABEL_TEXT_ONE_LANG_XML,
-    WITH_MARKDOWN_XML,
-    NO_MARKDOWN_XML
+    NO_LABEL_TEXT_ONE_LANG_XML
 ) {
     var assert = chai.assert,
         call = util.call;
@@ -574,11 +570,6 @@ require([
                                "wrong <text> node count\n" + xml);
         });
 
-        it("should add markdown to existing help text", function() {
-            util.loadXML(NO_MARKDOWN_XML);
-            util.assertXmlEqual(call('createXML'), WITH_MARKDOWN_XML);
-        });
-
         _.each(["hint", "help", "constraintMsg"], function (tag) {
             it("should not serialize empty " + tag + " itext item with non-empty id and autoId = true", function() {
                 util.loadXML("");
@@ -895,7 +886,6 @@ require([
                         </text>\
                         <text id="question1-help">\
                             <value>question1 en help</value>\
-                            <value form="markdown">question1 en help</value>\
                             <value form="image">jr://file/commcare/image/help/data/question1.png</value>\
                             <value form="audio">jr://file/commcare/audio/help/data/question1.mp3</value>\
                             <value form="video">jr://file/commcare/video/help/data/question1.3gp</value>\
@@ -919,7 +909,6 @@ require([
                         </text>\
                         <text id="question1-help">\
                             <value>question1 hin help</value>\
-                            <value form="markdown">question1 hin help</value>\
                             <value form="image">jr://file/commcare/image/help/data/question1.png</value>\
                             <value form="audio">jr://file/commcare/audio/help/data/question1.mp3</value>\
                             <value form="video">jr://file/commcare/video/help/data/question1.3gp</value>\

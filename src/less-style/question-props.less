@@ -62,9 +62,9 @@
     height: 25px;
     display: block;
     font-size: @baseFontSize*1.5;
-    padding: 5px;
+    padding: 3px 0;
 
-    &:hover {
+    a:hover {
       text-decoration: none;
       font-size: @baseFontSize*2;
       color: @green;
@@ -151,6 +151,42 @@
     display: block;
     margin: 4px auto 5px;
   }
+}
+
+.itext-block-container {
+    &.has-markdown {
+        .turn-markdown-off,
+        .markdown-output:not(:empty),
+        .fd-help {
+            display: block;
+        }
+        .turn-markdown-on {
+            display: none;
+        }
+    }
+    &:not(.has-markdown) {
+        .turn-markdown-off,
+        .markdown-output {
+            display: none;
+        }
+        .turn-markdown-on,
+        .fd-help {
+            display: block;
+        }
+    }
+    &.markdown-ignorant {
+        .turn-markdown-off,
+        .turn-markdown-on, 
+        .markdown-output,
+        .fd-help {
+            display: none;
+        }
+    }
+}
+
+.markdown-output {
+    margin-top: 10px;
+    margin-bottom: 0px;
 }
 
 .fd-copy-paste-help .row {

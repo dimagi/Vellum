@@ -471,19 +471,20 @@ define([
         var uiElem = $("<div />").addClass("widget control-group"),
             $controls = $('<div class="controls" />'),
             $messages = $('<div class="controls messages" />'),
-            $label = $("<label />").text(labelText);
+            $label = $('<div />').append($("<label />").text(labelText));
         $label.addClass('control-label');
         if (help) {
-            var $help = $("<a />").attr({
-                "href": (help.url || "#"),
-                "class": "fd-help",
-                "target": "_blank",
-                "data-title": labelText,
-                "data-content": help.text
-            });
-            if (!help.url) {
-                $help.click(function (e) { e.preventDefault(); });
+            var link = "";
+            if (help.url) {
+                link = "<p><a href='" + help.url + "' target='_blank'>See more</a></p>";
             }
+            var $link = $("<a />").attr({
+                "href": "#",
+                "data-title": labelText,
+                "data-content": help.text + link
+            });
+            var $help = $("<div/>").addClass("fd-help");
+            $help.append($link);
             $label.append($help);
         }
         uiElem.append($label);

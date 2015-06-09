@@ -12,6 +12,7 @@ define([
     'tpl!vellum/templates/edit_source',
     'tpl!vellum/templates/language_selector',
     'tpl!vellum/templates/control_group',
+    'tpl!vellum/templates/markdown_help',
     'text!vellum/templates/button_remove.html',
     'vellum/widgets',
     'vellum/util',
@@ -26,6 +27,7 @@ define([
     edit_source,
     language_selector,
     control_group,
+    markdown_help,
     button_remove,
     widgets,
     util,
@@ -42,13 +44,14 @@ define([
             'default', 'short', 'long', 'audio', 'video', 'image'
         ],
         _nextItextItemKey = 1,
-        HELP_MARKDOWN,
+        NO_MARKDOWN_MUGS = ['Item'],
         EXPERIMENTAL_UI;
 
     function ItextItem(options) {
         this.forms = options.forms || [];
         this.id = options.id || "";
         this.autoId = _.isUndefined(options.autoId) ? true : options.autoId;
+        this.hasMarkdown = _.isUndefined(options.hasMarkdown) ? false : options.hasMarkdown;
         this.itextModel = options.itextModel;
         this.key = String(_nextItextItemKey++);
     }
@@ -58,7 +61,8 @@ define([
                 forms: _.map(this.forms, function (f) { return f.clone(); }),
                 id: this.id,
                 autoId: this.autoId,
-                itextModel: this.itextModel
+                itextModel: this.itextModel,
+                hasMarkdown: this.hasMarkdown
             });
             return item;
         },
@@ -295,7 +299,7 @@ define([
         /*
          * Create a new blank item
          */
-        createItem: function (id, autoId) {
+        createItem: function (id, autoId, hasMarkdown) {
             return new ItextItem({
                 id: id,
                 autoId: autoId,
@@ -303,7 +307,8 @@ define([
                 forms: [new ItextForm({
                     name: "default",
                     itextModel: this
-                })]
+                })],
+                hasMarkdown: hasMarkdown
             });
         },
         updateForNewMug: function(mug) {
@@ -315,12 +320,6 @@ define([
             return this.updateForMug(mug, mug.getLabelValue());
         },
         updateForMug: function (mug, defaultLabelValue) {
-            function missingMarkdownForm(forms) {
-                return _.filter(forms, function(form) {
-                    return form.name === 'markdown';
-                }).length === 0;
-            }
-
             // set default itext id/values
             if (!mug.options.isDataOnly) {
                 if (!mug.p.labelItext && mug.getPresence("labelItext") !== "notallowed") {
@@ -331,13 +330,7 @@ define([
                     mug.p.hintItext = this.createItem();
                 }
                 if (!mug.p.helpItext && mug.getPresence("helpItext") !== "notallowed") {
-                    var help = mug.p.helpItext = this.createItem();
-                    if (HELP_MARKDOWN) {
-                        help.cloneForm('default', 'markdown');
-                    }
-                } else if (HELP_MARKDOWN && mug.p.helpItext &&
-                           missingMarkdownForm(mug.p.helpItext.forms)) {
-                    mug.p.helpItext.cloneForm('default', 'markdown');
+                    mug.p.helpItext = this.createItem();
                 }
             }
             if (!mug.options.isControlOnly) {
@@ -572,7 +565,8 @@ define([
             _.each(block.getForms(), function (form) {
                 var $formGroup = block.getFormGroupContainer(form);
                 _.each(block.languages, function (lang) {
-                    var itextWidget = block.itextWidget(block.mug, lang, form, options);
+                    var itextWidget = block.itextWidget(block.mug, lang, form,
+                                                        _.extend(options, {parent: $blockUI}));
                     itextWidget.init();
                     itextWidget.on("change", function () {
                         block.fire("change");
@@ -590,7 +584,11 @@ define([
 
     var itextLabelBlock = function (mug, options) {
         var block = baseItextBlock(mug, options);
-        block.itextWidget = itextLabelWidget;
+        if (_.contains(NO_MARKDOWN_MUGS, mug.__className)) {
+            block.itextWidget = itextLabelWidget;
+        } else {
+            block.itextWidget = itextMarkdownWidget;
+        }
         return block;
     };
 
@@ -1103,6 +1101,95 @@ define([
         return widget;
     };
 
+    var itextMarkdownWidget = function (mug, language, form, options) {
+        options = options || {};
+        var parent = options.parent;
+        var widget = itextLabelWidget(mug, language, form, options),
+            super_setValue = widget.setValue,
+            super_getUIElement = widget.getUIElement,
+            super_handleChange = widget.handleChange,
+            wantsMarkdown = true,
+            markdownOff, markdownOn, markdownOutput;
+
+        function looksLikeMarkdown(val) {
+            /* Regex checks (in order):
+             * ordered lists
+             * unordered lists
+             * strikethrough
+             * headings
+             * italics/bold/bold italics
+             * links
+             */
+            return /^\d+\. |^\*|~~.+~~|# |\*{1,3}\S+\*{1,3}|\[.+\]\(\S+\)/m.test(val);
+        }
+
+        widget.toggleMarkdown = function() {
+            parent.toggleClass("has-markdown");
+        };
+
+        markdownOutput = $('<div>').addClass("controls well markdown-output");
+
+        widget.handleChange = function() {
+            super_handleChange();
+            var val = widget.getValue(),
+                item = this.getItextItem();
+            if (looksLikeMarkdown(val)) {
+                if (wantsMarkdown) {
+                    parent.removeClass("markdown-ignorant");
+                    parent.addClass("has-markdown");
+                }
+            } else if (!val) {
+                parent.removeClass("has-markdown");
+            }
+            item.hasMarkdown = markdownOff.is(":visible");
+            markdownOutput.html(util.markdown(val)).removeClass('hide');
+        };
+
+        widget.setValue = function (val) {
+            super_setValue(val);
+            if (!val) {
+                markdownOutput.addClass('hide');
+            }
+            markdownOutput.html(util.markdown(val));
+        };
+
+        widget.getUIElement = function() {
+            var elem = super_getUIElement(),
+                val = widget.getValue();
+
+            elem.detach('.markdown-output');
+            elem.append(markdownOutput);
+            elem.find('.control-label').append(markdown_help({title:options.lstring }));
+
+            markdownOff = elem.find('.turn-markdown-off').click(function() {
+                wantsMarkdown = false;
+                widget.getItextItem().hasMarkdown = false;
+                widget.toggleMarkdown();
+                return false;
+            });
+            markdownOn = elem.find('.turn-markdown-on').click(function() {
+                wantsMarkdown = true;
+                widget.getItextItem().hasMarkdown = true;
+                widget.toggleMarkdown();
+                return false;
+            });
+
+            if (widget.getItextItem().hasMarkdown) {
+                parent.addClass("has-markdown");
+            }
+            else {
+                parent.addClass("markdown-ignorant");
+            }
+            if (looksLikeMarkdown(val)) {
+                markdownOutput.html(util.markdown(val));
+                markdownOff.removeClass('hide');
+            }
+            return elem;
+        };
+
+        return widget;
+    };
+
     var itextFormWidget = function (mug, language, form, options) {
         options = options || {};
         options.idSuffix = "-" + form;
@@ -1279,7 +1366,6 @@ define([
             this.data.javaRosa.ItextItem = ItextItem;
             this.data.javaRosa.ItextForm = ItextForm;
             this.data.javaRosa.ICONS = ICONS;
-            HELP_MARKDOWN = this.opts().features.help_markdown;
             EXPERIMENTAL_UI = this.opts().features.experimental_ui;
         },
         insertOutputRef: function (mug, target, path, dateFormat) {
@@ -1435,6 +1521,9 @@ define([
                         var curForm = valEl.attr('form');
                         if(!curForm) {
                             curForm = "default";
+                        } else if (curForm === "markdown") {
+                            item.hasMarkdown = true;
+                            return;
                         }
                         item.getOrCreateForm(curForm)
                             .setValue(lang, xml.humanize(valEl));
@@ -1665,6 +1754,13 @@ define([
                                 xmlWriter.writeXML(xml.normalize(val));
                                 xmlWriter.writeEndElement();
                             }
+                        }
+                        if (item.hasMarkdown) {
+                            val = item.get('default', lang);
+                            xmlWriter.writeStartElement("value");
+                            xmlWriter.writeAttributeString('form', 'markdown');
+                            xmlWriter.writeXML(xml.normalize(val));
+                            xmlWriter.writeEndElement();
                         }
                         xmlWriter.writeEndElement();
                     }
@@ -1976,20 +2072,7 @@ define([
                                 return mug.p.helpItext;
                             },
                             displayName: "Help Message"
-                        })).on('change', function() {
-                            if (!HELP_MARKDOWN) {
-                                return;
-                            }
-                            var mug = this.mug,
-                                helpItext = mug.p.helpItext,
-                                helpItextForm = helpItext.forms[0],
-                                markdownForms = _.find(helpItext.forms, function(itext) {
-                                    return itext.name === 'markdown';
-                                });
-                            if (markdownForms) {
-                                markdownForms.data = _.clone(helpItextForm.data);
-                            }
-                        });
+                        }));
 
                     return block;
                 },
