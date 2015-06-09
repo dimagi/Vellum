@@ -826,6 +826,7 @@ define([
         var widget = widgets.base(mug, options);
         var $input = $("<textarea></textarea>")
             .attr("name", widget.id)
+            .attr("id", widget.id)
             .attr("rows", "2")
             .addClass('input-block-level itext-widget-input')
             .on('change input', function (e) { widget.handleChange(); })
