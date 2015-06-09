@@ -357,7 +357,19 @@ define([
         },
         displayMultipleSelectionView: function () {
             this.__callOld();
-            var html = $(copy_paste_help({"metachar": (isMac ? "\u2318" : "Ctrl+")}));
+            var html = $(copy_paste_help({"metachar": (isMac ? "\u2318" : "Ctrl+")})),
+                showCopyArea = html.find(".show-copy-area"),
+                copyArea = html.find(".copy-area"),
+                insertQuestions = html.find(".insert-questions");
+            showCopyArea.click(function () {
+                showCopyArea.hide();
+                copyArea.parent().removeClass("hide");
+                copyArea.val(copy()).focus().select();
+                insertQuestions.removeClass("hide").click(function () {
+                    paste(copyArea.val());
+                });
+                return false;
+            });
             this.$f.find(".fd-props-content").html(html);
         }
     });
