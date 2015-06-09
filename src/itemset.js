@@ -410,6 +410,7 @@ define([
                     at: "",
                     data: sources,
                     maxLen: Infinity,
+                    suffix: "",
                     callbacks: {
                         filter: function(query, data, searchKey) {
                             return _.filter(data, function(item) {
@@ -422,7 +423,6 @@ define([
                     }
                 });
                 input.on("blur change", function() {
-                    input.val(input.val().trim());
                     if (_.isFunction(changeFunction)) {
                         changeFunction();
                     }
