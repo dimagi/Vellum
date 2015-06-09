@@ -1,11 +1,13 @@
 define([
     'json!langCodes',
+    'references',
     'underscore',
     'jsdiff',
     'jquery',
-    'jquery.bootstrap-popout'
+    'jquery.bootstrap-popout',
 ], function (
     langCodes,
+    references,
     _,
     jsdiff,
     $
@@ -404,12 +406,13 @@ define([
                         return {
                             id: mug.ufid,
                             name: mug.absolutePath,
+                            reference: references.reference(mug, {}),
                         };
                     })
                     .filter(function(choice) { return choice.name; })
                     .value(),
             displayTpl: '<li>${name}</li>',
-            insertTpl: options.insertTpl,
+            insertTpl: "${reference}",
             limit: 10,
             maxLen: 30,
             callbacks: {
@@ -428,6 +431,23 @@ define([
                     return value;
                 }
             }
+        })
+        .on("inserted.atwho", function (atwhoEvent, $li, browserEvent) {
+            var _this = $(this);
+            _this.find(".atwho-inserted [data-mug-type=Date]").popover({
+                template: '<div class="popover"><div class="arrow"></div><div class="popover-inner"><div class="popover-content"><p></p></div></div></div>',
+                html: true,
+                content: "<select><option value='1'>MM/DD/YY</option><option value='2'>DD/MM/YY</option></select>",
+                placement: "bottom",
+            });
+
+            _this.find(".atwho-inserted .close").click(function() {
+                this.closest('.atwho-inserted').remove();
+            });
+
+            _this.click(function() {
+                _this.atwho('hide');
+            });
         });
 
         mug.on("teardown-mug-properties", function () {
