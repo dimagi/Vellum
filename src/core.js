@@ -825,6 +825,7 @@ define([
             data.node.icon = mug.getIcon();
             _this.refreshCurrentMug();
         }).bind("deselect_all.jstree deselect_node.jstree", function (e, data) {
+            $('.atwho-container').remove();
             _this.resetQuestionTypeGroups();
         }).bind('model.jstree', function (e, data) {
             // Dynamically update node icons. This is unnecessary for
