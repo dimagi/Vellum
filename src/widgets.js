@@ -117,6 +117,7 @@ define([
 
         widget.input = $("<input />")
             .attr("name", inputID)
+            .attr("id", inputID)
             .prop('disabled', disabled);
 
         widget.getControl = function () {
