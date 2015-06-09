@@ -398,7 +398,7 @@ define([
             callbacks: {
                 matcher: function(flag, subtext) {
                     var match, regexp;
-                    regexp = new RegExp('(\\s+|^)' + flag + '([\\w_/]*)$', 'gi');
+                    regexp = new RegExp('(\\s+|^)' + RegExp.escape(flag) + '([\\w_/]*)$', 'gi');
                     match = regexp.exec(subtext);
                     return match ? match[2] : null;
                 },
