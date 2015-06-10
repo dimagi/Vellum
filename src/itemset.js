@@ -284,19 +284,19 @@ define([
             return !value || _.all(_.map(value, _.isEmpty));
         }
 
-        function updateAutoComplete() {
+        function updateAutocomplete() {
             var choices = datasources.autocompleteChoices(super_getValue().src);
-            labelRef.addAutoComplete(choices, super_handleChange);
-            valueRef.addAutoComplete(choices, super_handleChange);
+            labelRef.addAutocomplete(choices, super_handleChange);
+            valueRef.addAutocomplete(choices, super_handleChange);
             return choices;
         }
 
         function onOptionsLoaded() {
             optionsLoaded = true;
-            if (canUpdateAutoComplete) {
+            if (canUpdateAutocomplete) {
                 // cannot do this until widget is fully initialized
-                // because updateAutoComplete() calls super_getValue()
-                var choices = updateAutoComplete();
+                // because updateAutocomplete() calls super_getValue()
+                var choices = updateAutocomplete();
                 if (choices && choices.length && isEmptyValue(current.value)) {
                     if (_.contains(choices, "name")) {
                         labelRef.val("name");
@@ -340,7 +340,7 @@ define([
 
         var current = {},
             optionsLoaded = false,
-            canUpdateAutoComplete = false,
+            canUpdateAutocomplete = false,
             widget = datasources.fixtureWidget(mug, options, "Lookup Table"),
             super_getUIElement = widget.getUIElement,
             super_getValue = widget.getValue,
@@ -350,7 +350,7 @@ define([
             valueRef = refSelect("value_ref", "Value Field", false);
 
         widget.handleChange = function() {
-            updateAutoComplete();
+            updateAutocomplete();
             super_handleChange();
         };
 
@@ -392,7 +392,7 @@ define([
             valueRef.val(val.valueRef);
         };
 
-        canUpdateAutoComplete = true;
+        canUpdateAutocomplete = true;
         if (optionsLoaded) {
             // call again to update auto-complete and set defaults
             onOptionsLoaded();
@@ -406,15 +406,34 @@ define([
                               .attr('name', name)
                               .addClass('fd-input input-block-level');
         return {
-            addAutoComplete: function(sources, changeFunction) {
-                input.autocomplete({
-                    source: sources,
-                    minLength: 0,
-                    change: changeFunction,
-                    close: changeFunction
-                }).focus(function (e) {
-                    // populate the list
-                    $(this).autocomplete('search', $(this).val());
+            addAutocomplete: function(sources, changeFunction) {
+                var selectedValue = "";
+                input.atwho({
+                    at: "",
+                    data: sources,
+                    maxLen: Infinity,
+                    suffix: "",
+                    callbacks: {
+                        filter: function(query, data, searchKey) {
+                            return _.filter(data, function(item) {
+                                return item.name.indexOf(query) !== -1 && item.name !== query;
+                            });
+                        },
+                        matcher: function(flag, subtext, should_startWithSpace) {
+                            return input.val();
+                        },
+                        beforeInsert: function(value, $li) {
+                            selectedValue = value;
+                        },
+                    }
+                });
+                input.on("inserted.atwho", function(event, $li, otherEvent) {
+                    input.val(selectedValue);
+                });
+                input.on("blur change", function() {
+                    if (_.isFunction(changeFunction)) {
+                        changeFunction();
+                    }
                 });
             },
             element: widgets.util.getUIElement(input, label, isDisabled),

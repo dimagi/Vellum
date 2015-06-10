@@ -390,6 +390,51 @@ define([
         return div.html();
     };
 
+    that.questionAutocomplete = function (input, mug, options) {
+        options = _.defaults(options || {}, {
+            category: 'Question Reference',
+            insertTpl: '${name}',
+            property: '',
+        });
+
+        input.atwho({
+            at: "/data/",
+            data: _.chain(mug.form.getMugList())
+                   .map(function(mug) {
+                        return {
+                            id: mug.ufid,
+                            name: mug.absolutePath,
+                        };
+                    })
+                    .filter(function(choice) { return choice.name; })
+                    .value(),
+            displayTpl: '<li>${name}</li>',
+            insertTpl: options.insertTpl,
+            limit: 10,
+            maxLen: 30,
+            callbacks: {
+                matcher: function(flag, subtext) {
+                    var match, regexp;
+                    regexp = new RegExp('(\\s+|^)' + RegExp.escape(flag) + '([\\w_/]*)$', 'gi');
+                    match = regexp.exec(subtext);
+                    return match ? match[2] : null;
+                },
+                beforeInsert: function(value, $li) {
+                    if (window.analytics) {
+                        window.analytics.usage(options.category,
+                                               "Autocomplete",
+                                               options.property);
+                    }
+                    return value;
+                }
+            }
+        });
+
+        mug.on("teardown-mug-properties", function () {
+            input.atwho('destroy');
+        }, null, "teardown-mug-properties");
+    };
+
     return that;
 });
 

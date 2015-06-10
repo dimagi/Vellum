@@ -51,15 +51,13 @@ define([
     'underscore',
     'vellum/widgets',
     'vellum/util',
-    'tpl!vellum/templates/data_source_editor',
-    'tpl!vellum/templates/select_data_source'
+    'tpl!vellum/templates/data_source_editor'
 ], function (
     $,
     _,
     widgets,
     util,
-    edit_source,
-    select_source
+    edit_source
 ) {
     var vellum, dataSources, dataCache, dataCallbacks;
 
