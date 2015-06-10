@@ -173,10 +173,7 @@ define([
         if (old) {
             old.destroy();
 
-            // clean up modal dialog artifacts
-            $('.fd-dialog-confirm').dialog("destroy");
-            $('body > div.ui-dialog, ' +
-              'body > div.modal, ' +
+            $('body > div.modal, ' +
               'body > div.modal-backdrop').remove();
         }
         vellum.empty().vellum(vellum_options);
