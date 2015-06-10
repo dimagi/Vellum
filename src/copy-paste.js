@@ -20,7 +20,9 @@ define([
             width: 0,
             height: 0
         }).css(offScreen).appendTo('body'),
-        isMac = /Mac/.test(navigator.platform);
+        isMac = /Mac/.test(navigator.platform),
+        isChrome = /Chrome/.test(navigator.userAgent),
+        isSafari = /Safari/.test(navigator.userAgent) && !isChrome;
 
     function focusTextarea($focus, value) {
         if ($focus.length === 0) {
@@ -357,20 +359,33 @@ define([
         },
         displayMultipleSelectionView: function () {
             this.__callOld();
+            function showCopyPasteBox() {
+                copyPasteHelp.hide();
+                copyPasteBox.removeClass("hide");
+                copyPasteArea.val(copy(true));
+            }
             var html = $(copy_paste_help({"metachar": (isMac ? "\u2318" : "Ctrl+")})),
-                showCopyArea = html.find(".show-copy-area"),
-                copyArea = html.find(".copy-area"),
-                insertQuestions = html.find(".insert-questions");
-            showCopyArea.click(function () {
-                showCopyArea.hide();
-                copyArea.parent().removeClass("hide");
-                copyArea.val(copy()).focus().select();
-                insertQuestions.removeClass("hide").click(function () {
-                    paste(copyArea.val());
-                });
-                return false;
+                copyPasteHelp = html.find(".copy-paste-help"),
+                copyPasteBox = html.find(".copy-paste-box"),
+                copyPasteArea = copyPasteBox.find("textarea");
+            if (isSafari) {
+                // HACK show textarea for copy/paste because the hidden
+                // textarea dance doesn't work in Safari
+                showCopyPasteBox();
+            }
+            html.find(".insert-questions").click(function () {
+                paste(copyPasteArea.val());
             });
             this.$f.find(".fd-props-content").html(html);
+            if (isSafari) {
+                copyPasteArea.focus().select();
+            } else {
+                // hidden feature: show copy/paste box on click help div
+                copyPasteHelp.click(function () {
+                    showCopyPasteBox();
+                    copyPasteArea.focus().select();
+                });
+            }
         }
     });
 

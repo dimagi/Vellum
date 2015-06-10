@@ -1,19 +1,30 @@
 <div class="fd-copy-paste-help">
     <h3>Copying and Pasting Questions</h3>
-    These actions are available via the browser's Edit menu, and you can also use:
-    <div class="row">
-        <div class="span3">
-            <h1><%=metachar%>C</h1>
-            <span>for copy</span>
+    <div class="copy-paste-help">
+        These actions are available via the browser's Edit menu, and you can also use:
+        <div class="row">
+            <div class="span3">
+                <h1><%=metachar%>C</h1>
+                <span>for copy</span>
+            </div>
+            <!--div class="span3">
+                <h1><%=metachar%>X</h1>
+                <span>for cut</span>
+            </div-->
+            <div class="span3">
+                <h1><%=metachar%>V</h1>
+                <span>for paste</span>
+            </div>
         </div>
-        <!--div class="span3">
-            <h1><%=metachar%>X</h1>
-            <span>for cut</span>
-        </div-->
-        <div class="span3">
-            <h1><%=metachar%>V</h1>
-            <span>for paste</span>
-        </div>
+    </div>
+    <div class="copy-paste-box hide">
+        <p>
+            Copy from or Paste into this text box:
+            <textarea style="width: 100%; height: 100px;"></textarea>
+        </p>
+        <p>
+            <button class="btn insert-questions">Insert Questions</button>
+        </p>
     </div>
     <h3>Selecting Multiple Questions</h3>
     <div class="row">
@@ -26,14 +37,4 @@
     </div>
     <h3>Other Tips</h3>
     <p>Questions can be copied between forms, and even to other apps.</p>
-    <div>
-        <button class="btn show-copy-area">Alternative Method: Plain Text Copy/Paste</button>
-        <p class="hide">
-            Copy from or paste into this text box:
-            <textarea class="copy-area" style="width: 100%; height: 100px;"></textarea>
-        </p>
-        <p>
-            <button class="btn insert-questions hide">Insert Questions</button>
-        </p>
-    </div>
 </div>
