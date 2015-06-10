@@ -481,6 +481,7 @@ define([
                 action: function () {
                     codeMirror.save();
                     _this.loadXFormOrError($textarea.val(), function () {
+                        $modal.modal('hide');
                         done();
                     }, true);
                 }
