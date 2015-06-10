@@ -372,13 +372,9 @@ define([
                 // HACK show textarea for copy/paste because the hidden
                 // textarea dance doesn't work in Safari
                 showCopyPasteBox();
-            }
-            html.find(".insert-questions").click(function () {
-                paste(copyPasteArea.val());
-            });
-            this.$f.find(".fd-props-content").html(html);
-            if (isSafari) {
-                copyPasteArea.focus().select();
+                setTimeout(function () {
+                    copyPasteArea.focus().select();
+                }, 1);
             } else {
                 // hidden feature: show copy/paste box on click help div
                 copyPasteHelp.click(function () {
@@ -386,6 +382,21 @@ define([
                     copyPasteArea.focus().select();
                 });
             }
+            copyPasteArea.focus(function () {
+                copyPasteArea.select().mouseup(function() {
+                    copyPasteArea.off('mouseup');
+                    return false;
+                });
+            }).keyup(function (e) {
+                // workaround for webkit: http://stackoverflow.com/a/12114908
+                if(e.which === 9) {
+                    copyPasteArea.select();
+                }
+            });
+            html.find(".insert-questions").click(function () {
+                paste(copyPasteArea.val());
+            });
+            this.$f.find(".fd-props-content").html(html);
         }
     });
 
