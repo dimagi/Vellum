@@ -284,19 +284,19 @@ define([
             return !value || _.all(_.map(value, _.isEmpty));
         }
 
-        function updateAutoComplete() {
+        function updateAutocomplete() {
             var choices = datasources.autocompleteChoices(super_getValue().src);
-            labelRef.addAutoComplete(choices, super_handleChange);
-            valueRef.addAutoComplete(choices, super_handleChange);
+            labelRef.addAutocomplete(choices, super_handleChange);
+            valueRef.addAutocomplete(choices, super_handleChange);
             return choices;
         }
 
         function onOptionsLoaded() {
             optionsLoaded = true;
-            if (canUpdateAutoComplete) {
+            if (canUpdateAutocomplete) {
                 // cannot do this until widget is fully initialized
-                // because updateAutoComplete() calls super_getValue()
-                var choices = updateAutoComplete();
+                // because updateAutocomplete() calls super_getValue()
+                var choices = updateAutocomplete();
                 if (choices && choices.length && isEmptyValue(current.value)) {
                     if (_.contains(choices, "name")) {
                         labelRef.val("name");
@@ -340,7 +340,7 @@ define([
 
         var current = {},
             optionsLoaded = false,
-            canUpdateAutoComplete = false,
+            canUpdateAutocomplete = false,
             widget = datasources.fixtureWidget(mug, options, "Lookup Table"),
             super_getUIElement = widget.getUIElement,
             super_getValue = widget.getValue,
@@ -350,7 +350,7 @@ define([
             valueRef = refSelect("value_ref", "Value Field", false);
 
         widget.handleChange = function() {
-            updateAutoComplete();
+            updateAutocomplete();
             super_handleChange();
         };
 
@@ -392,7 +392,7 @@ define([
             valueRef.val(val.valueRef);
         };
 
-        canUpdateAutoComplete = true;
+        canUpdateAutocomplete = true;
         if (optionsLoaded) {
             // call again to update auto-complete and set defaults
             onOptionsLoaded();
@@ -405,7 +405,7 @@ define([
         var input = $("<input type='text' class='input-block-level'>");
         input.attr("name", name);
         return {
-            addAutoComplete: function(sources, changeFunction) {
+            addAutocomplete: function(sources, changeFunction) {
                 input.autocomplete({
                     source: sources,
                     minLength: 0,

@@ -2,6 +2,7 @@ define([
     'jquery',
     'underscore',
     'vellum/debugutil',
+    'vellum/util',
     'xpath',
     'xpathmodels',
     'tpl!vellum/templates/xpath_validation_errors',
@@ -12,6 +13,7 @@ define([
     $,
     _,
     debug,
+    util,
     xpath,
     xpathmodels,
     xpath_validation_errors,
@@ -79,6 +81,10 @@ define([
         };
         var getTopLevelJoinSelect = function () {
             return $(editorContent.find(".top-level-join-select")[0]);
+        };
+        var addAutocomplete = function (input) {
+            util.questionAutocomplete(input, options.form,
+                                      {property: options.path});
         };
 
         var getExpressionFromSimpleMode = function () {
@@ -219,15 +225,23 @@ define([
                 }
 
                 getLeftQuestionInput()
-                    .autocomplete(autoSources(options.leftAutoCompleteSources))
+                    .autocomplete(autoSources(options.leftAutocompleteSources))
                     .focus(function(e) {
                         $(this).autocomplete('search', $(this).val());
                     });
                 getRightQuestionInput()
-                    .autocomplete(autoSources(options.rightAutoCompleteSources))
+                    .autocomplete(autoSources(options.rightAutocompleteSources))
                     .focus(function(e) {
                         $(this).autocomplete('search', $(this).val());
                     });
+
+                if (!options.leftAutocompleteSources) {
+                    addAutocomplete(getLeftQuestionInput());
+                }
+                if (!options.rightAutocompleteSources) {
+                    addAutocomplete(getRightQuestionInput());
+                }
+
                 return $expUI;
             };
 
@@ -329,6 +343,7 @@ define([
         // toggle simple/advanced mode
         var showAdvancedMode = function (text, showNotice) {
             getExpressionInput().val(text);
+            addAutocomplete(getExpressionInput());
             getExpressionPane().empty();
 
             $div.find(".xpath-advanced").removeClass('hide');

@@ -709,6 +709,14 @@ define([
             // the .change fires the validation controls
             target.val(target.val() + path).change();
 
+            if (window.analytics) {
+                window.analytics.usage(
+                    "Question Reference",
+                    "Drag and Drop",
+                    _this.data.core.currentlyEditedProperty
+                );
+            }
+
             if (_this.data.core.currentlyEditedProperty) {
                 _this.warnOnCircularReference(
                     _this.data.core.currentlyEditedProperty,
