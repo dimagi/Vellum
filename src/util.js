@@ -373,7 +373,9 @@ define([
         return div.html();
     };
 
-    that.questionAutocomplete = function (input, form, options) {
+    that.questionAutocomplete = function (input, mug, options) {
+        var inputID = input[0].id;
+
         options = _.defaults(options || {}, {
             category: 'Question Reference',
             insertTpl: '${name}',
@@ -382,7 +384,7 @@ define([
 
         input.atwho({
             at: "/data/",
-            data: _.chain(form.getMugList())
+            data: _.chain(mug.form.getMugList())
                    .map(function(mug) {
                         return {
                             id: mug.ufid,
@@ -412,6 +414,12 @@ define([
                 }
             }
         });
+
+        mug.on("teardown-mug-properties", function () {
+            if (inputID) {
+                $('#atwho-ground-' + inputID).parent().remove();
+            }
+        }, null, "teardown-mug-properties");
     };
 
     return that;
