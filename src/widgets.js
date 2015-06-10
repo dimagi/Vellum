@@ -117,6 +117,7 @@ define([
 
         widget.input = $("<input />")
             .attr("name", inputID)
+            .attr("id", inputID)
             .prop('disabled', disabled);
 
         widget.getControl = function () {
@@ -276,7 +277,7 @@ define([
                 widget.options.displayXPathEditor({
                     leftPlaceholder: options.leftPlaceholder,
                     rightPlaceholder: options.rightPlaceholder,
-                    leftAutoCompleteSources: autocompleteSources,
+                    leftAutocompleteSources: autocompleteSources,
                     value: super_getValue(),
                     xpathType: widget.definition.xpathType,
                     done: function (val) {
@@ -284,13 +285,17 @@ define([
                             super_setValue(val);
                             widget.handleChange();
                         }
-                    }
+                    },
+                    form: mug.form,
                 });
                 if (window.analytics) {
                     window.analytics.usage('Form Builder', 'Logic', options.lstring);
                 }
             }, !!widget.isDisabled());
         };
+
+        util.questionAutocomplete(widget.input, mug.form,
+                                  {property: options.path});
 
         return widget;
     };

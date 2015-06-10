@@ -709,6 +709,14 @@ define([
             // the .change fires the validation controls
             target.val(target.val() + path).change();
 
+            if (window.analytics) {
+                window.analytics.usage(
+                    "Question Reference",
+                    "Drag and Drop",
+                    _this.data.core.currentlyEditedProperty
+                );
+            }
+
             if (_this.data.core.currentlyEditedProperty) {
                 _this.warnOnCircularReference(
                     _this.data.core.currentlyEditedProperty,
@@ -825,6 +833,7 @@ define([
             data.node.icon = mug.getIcon();
             _this.refreshCurrentMug();
         }).bind("deselect_all.jstree deselect_node.jstree", function (e, data) {
+            $('.atwho-container').remove();
             _this.resetQuestionTypeGroups();
         }).bind('model.jstree', function (e, data) {
             // Dynamically update node icons. This is unnecessary for

@@ -42,8 +42,7 @@ define([
             'default', 'short', 'long', 'audio', 'video', 'image'
         ],
         _nextItextItemKey = 1,
-        HELP_MARKDOWN,
-        EXPERIMENTAL_UI;
+        HELP_MARKDOWN;
 
     function ItextItem(options) {
         this.forms = options.forms || [];
@@ -826,6 +825,7 @@ define([
         var widget = widgets.base(mug, options);
         var $input = $("<textarea></textarea>")
             .attr("name", widget.id)
+            .attr("id", widget.id)
             .attr("rows", "2")
             .addClass('input-block-level itext-widget-input')
             .on('change input', function (e) { widget.handleChange(); })
@@ -838,37 +838,11 @@ define([
             });
 
         if (options.path === 'labelItext') {
-            if (EXPERIMENTAL_UI) {
-                $input.atwho({
-                    at: "#",
-                    data: _.chain(mug.form.getMugList())
-                           .map(function(mug) {
-                                var path = mug.form.getAbsolutePath(mug, true);
-                                if (path) {
-                                    path = "form" + path;
-                                }
-                                return {
-                                    id: mug.ufid,
-                                    name: path,
-                                    path: mug.absolutePath
-                                };
-                            })
-                            .filter(function(choice) { return choice.name; })
-                            .value(),
-                    displayTpl: '<li>${name}</li>',
-                    insertTpl: '<output value="${path}" />',
-                    limit: 10,
-                    maxLen: 30,
-                    callbacks: {
-                        matcher: function(flag, subtext) {
-                            var match, regexp;
-                            regexp = new RegExp('(\\s+|^)' + flag + '([\\w_/]*)$', 'gi');
-                            match = regexp.exec(subtext);
-                            return match ? match[2] : null;
-                        }
-                    }
-                });
-            }
+            util.questionAutocomplete($input, mug.form, {
+                category: "Output Value",
+                insertTpl: '<output value="${name}" />',
+                property: "labelItext",
+            });
 
             $input.addClass('jstree-drop');
             $input.keydown(function (e) {
@@ -1280,7 +1254,6 @@ define([
             this.data.javaRosa.ItextForm = ItextForm;
             this.data.javaRosa.ICONS = ICONS;
             HELP_MARKDOWN = this.opts().features.help_markdown;
-            EXPERIMENTAL_UI = this.opts().features.experimental_ui;
         },
         insertOutputRef: function (mug, target, path, dateFormat) {
             var output = getOutputRef(path, dateFormat),
@@ -1314,13 +1287,22 @@ define([
                     var menu = $(menuHtml);
                     $('body').append(menu);
                     menu.find('li a').click(function () {
-                        _this.insertOutputRef(mug, target, path, $(this).data('format'));
+                        var dateFormat = $(this).data('format');
+                        _this.insertOutputRef(mug, target, path, dateFormat);
+                        if (window.analytics) {
+                            window.analytics.usage(
+                                "Output Value", "Drag and Drop", dateFormat
+                            );
+                        }
                         menu.remove();
                     });
                     var e = window.event;
                     menu.css({'top': e.clientY, 'left': e.clientX}).show();
                 } else {
                     _this.insertOutputRef(mug, target, path);
+                    if (window.analytics) {
+                        window.analytics.usage("Output Value", "Drag and Drop");
+                    }
                 }
             } else {
                 _this.__callOld();
