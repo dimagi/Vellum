@@ -406,14 +406,33 @@ define([
         input.attr("name", name);
         return {
             addAutocomplete: function(sources, changeFunction) {
-                input.autocomplete({
-                    source: sources,
-                    minLength: 0,
-                    change: changeFunction,
-                    close: changeFunction
-                }).focus(function (e) {
-                    // populate the list
-                    $(this).autocomplete('search', $(this).val());
+                var selectedValue = "";
+                input.atwho({
+                    at: "",
+                    data: sources,
+                    maxLen: Infinity,
+                    suffix: "",
+                    callbacks: {
+                        filter: function(query, data, searchKey) {
+                            return _.filter(data, function(item) {
+                                return item.name.indexOf(query) !== -1 && item.name !== query;
+                            });
+                        },
+                        matcher: function(flag, subtext, should_startWithSpace) {
+                            return input.val();
+                        },
+                        beforeInsert: function(value, $li) {
+                            selectedValue = value;
+                        },
+                    }
+                });
+                input.on("inserted.atwho", function(event, $li, otherEvent) {
+                    input.val(selectedValue);
+                });
+                input.on("blur change", function() {
+                    if (_.isFunction(changeFunction)) {
+                        changeFunction();
+                    }
                 });
             },
             element: widgets.util.getUIElement(input, label, isDisabled),
