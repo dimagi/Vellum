@@ -801,10 +801,12 @@ define([
             // plugin needs to stay enabled because it adds CSS selectors to
             // themeable items, which it would be hard to adapt the existing
             // selectors to if they didn't exist.
-        }).bind("select_node.jstree", function (e, data) {
+        }).bind("select_node.jstree deselect_node.jstree", function (e, data) {
             var selected = _this.jstree('get_selected');
-            if (selected.length < 2) {
-                var mug = _this.data.core.form.getMugByUFID(data.node.id);
+            if (!selected.length) {
+                _this.hideQuestionProperties();
+            } else if (selected.length < 2) {
+                var mug = _this.data.core.form.getMugByUFID(selected[0]);
                 _this.displayMugProperties(mug);
                 _this.activateQuestionTypeGroup(mug);
             } else {

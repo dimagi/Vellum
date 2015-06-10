@@ -20,7 +20,9 @@ define([
             width: 0,
             height: 0
         }).css(offScreen).appendTo('body'),
-        isMac = /Mac/.test(navigator.platform);
+        isMac = /Mac/.test(navigator.platform),
+        isChrome = /Chrome/.test(navigator.userAgent),
+        isSafari = /Safari/.test(navigator.userAgent) && !isChrome;
 
     function focusTextarea($focus, value) {
         if ($focus.length === 0) {
@@ -357,7 +359,43 @@ define([
         },
         displayMultipleSelectionView: function () {
             this.__callOld();
-            var html = $(copy_paste_help({"metachar": (isMac ? "\u2318" : "Ctrl+")}));
+            function showCopyPasteBox() {
+                copyPasteHelp.hide();
+                copyPasteBox.removeClass("hide");
+                copyPasteArea.val(copy(true));
+            }
+            var html = $(copy_paste_help({"metachar": (isMac ? "\u2318" : "Ctrl+")})),
+                copyPasteHelp = html.find(".copy-paste-help"),
+                copyPasteBox = html.find(".copy-paste-box"),
+                copyPasteArea = copyPasteBox.find("textarea");
+            if (isSafari) {
+                // HACK show textarea for copy/paste because the hidden
+                // textarea dance doesn't work in Safari
+                showCopyPasteBox();
+                setTimeout(function () {
+                    copyPasteArea.focus().select();
+                }, 1);
+            } else {
+                // hidden feature: show copy/paste box on click help div
+                copyPasteHelp.click(function () {
+                    showCopyPasteBox();
+                    copyPasteArea.focus().select();
+                });
+            }
+            copyPasteArea.focus(function () {
+                copyPasteArea.select().mouseup(function() {
+                    copyPasteArea.off('mouseup');
+                    return false;
+                });
+            }).keyup(function (e) {
+                // workaround for webkit: http://stackoverflow.com/a/12114908
+                if(e.which === 9) { // tab
+                    copyPasteArea.select();
+                }
+            });
+            html.find(".insert-questions").click(function () {
+                paste(copyPasteArea.val());
+            });
             this.$f.find(".fd-props-content").html(html);
         }
     });
