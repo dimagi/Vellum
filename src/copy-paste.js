@@ -389,7 +389,7 @@ define([
                 });
             }).keyup(function (e) {
                 // workaround for webkit: http://stackoverflow.com/a/12114908
-                if(e.which === 9) {
+                if(e.which === 9) { // tab
                     copyPasteArea.select();
                 }
             });
