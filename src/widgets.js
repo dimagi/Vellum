@@ -286,7 +286,6 @@ define([
                         }
                     },
                     form: mug.form,
-                    questionType: options.path,
                 });
                 if (window.analytics) {
                     window.analytics.usage('Form Builder', 'Logic', options.lstring);
