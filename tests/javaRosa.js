@@ -621,9 +621,13 @@ require([
         it("should replace the default form with placeholder when cleared", function(){
             util.loadXML("");
             util.addQuestion('Trigger', 'label');
+            util.addQuestion('Group', 'group');
+            util.addQuestion('Text', 'text');
             util.clickQuestion('label');
             $('[name=itext-en-label]').val('blah').change();
             $('.itext-block-label-add-form-image').click();
+            $('[name=itext-en-label]').val('').change();
+            util.clickQuestion('group');
             $('[name=itext-en-label]').val('').change();
             util.assertXmlEqual(call("createXML"), 
                                 NO_LABEL_TEXT_ONE_LANG_XML,
