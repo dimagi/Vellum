@@ -374,8 +374,6 @@ define([
     };
 
     that.questionAutocomplete = function (input, mug, options) {
-        var inputID = input[0].id;
-
         options = _.defaults(options || {}, {
             category: 'Question Reference',
             insertTpl: '${name}',
@@ -416,9 +414,7 @@ define([
         });
 
         mug.on("teardown-mug-properties", function () {
-            if (inputID) {
-                $('#atwho-ground-' + inputID).parent().remove();
-            }
+            input.atwho('destroy');
         }, null, "teardown-mug-properties");
     };
 
