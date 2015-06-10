@@ -39,6 +39,8 @@
 .fd-question-fieldset {
   border: none;
   position: relative;
+  min-width: 0px; /* for chrome */
+  display: table-column; /* for firefox */
 
   .accordion-heading {
     margin-bottom: 0;
