@@ -838,7 +838,7 @@ define([
             });
 
         if (options.path === 'labelItext') {
-            util.questionAutocomplete($input, mug.form, {
+            util.questionAutocomplete($input, mug, {
                 category: "Output Value",
                 insertTpl: '<output value="${name}" />',
                 property: "labelItext",

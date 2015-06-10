@@ -83,7 +83,7 @@ define([
             return $(editorContent.find(".top-level-join-select")[0]);
         };
         var addAutocomplete = function (input) {
-            util.questionAutocomplete(input, options.form,
+            util.questionAutocomplete(input, options.mug,
                                       {property: options.path});
         };
 
