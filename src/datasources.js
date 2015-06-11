@@ -92,12 +92,8 @@ define([
      *
      * @param type - The data source type (example: "fixture").
      * @param callback - A function to be called when the data sources
-     *      have been loaded. This function should accept one argument:
-     *      data - {
-     *               <sourceUri1>: <data source 1 object>,
-     *               <sourceUri2>: <data source 2 object>,
-     *               ...
-     *             }
+     *      have been loaded. This function should accept one argument,
+     *      a list of data source objects.
      */
     function getDataSources(callback) {
         if (dataCache) {
@@ -110,20 +106,13 @@ define([
         }
 
         function finish(data) {
-            dataCache = {};
-            if (data.length === 0) {
-                dataCache[""] = {
-                    id: "",
-                    uri: "",
-                    path: "",
-                    name: "Not Found",
-                    structure: {}
-                };
-            } else {
-                _.each(data, function(item) {
-                    dataCache[item.uri] = item;
-                });
-            }
+            dataCache = data.length ? data : [{
+                id: "",
+                uri: "",
+                path: "",
+                name: "Not Found",
+                structure: {}
+            }];
             _.each(dataCallbacks, function (callback) {
                 callback(dataCache);
             });
@@ -306,8 +295,6 @@ define([
             var value;
             if (options.dataSourcesFilter) {
                 data = options.dataSourcesFilter(data);
-                // TODO remove when data is a list
-                data = _.object(_.map(data, function (d) { return [d.uri, d]; }));
             }
             if (hasValue) {
                 value = local_getValue();
@@ -322,7 +309,7 @@ define([
                 local_setValue(_.omit(fixtures[0], 'name'));
             }
             if (options.onOptionsLoaded) {
-                options.onOptionsLoaded();
+                options.onOptionsLoaded(data);
             }
         });
 
@@ -374,9 +361,7 @@ define([
             });
         }
 
-        // HACK references dataCache, which is loaded asynchronously
-        // TODO filter for itemsets
-        return _.flatten(_.map(data || dataCache, function(fixture) {
+        return _.flatten(_.map(data, function(fixture) {
             var baseFixture = {
                 id: fixture.id,
                 src: fixture.uri,
@@ -412,16 +397,15 @@ define([
         return [];
     }
 
-    function autocompleteChoices(fixture_uri) {
-        // HACK references dataCache, which is loaded asynchronously
+    function autocompleteChoices(data, fixtureUri) {
         // This seems wrong: fixture_uri references the root of the
         // fixture structure, and options are generated from the root.
         // However, the itemset may be referencing a non-root element
         // and therefore the choices returned here will be incorrectly qualified.
-        if (!dataCache || !dataCache[fixture_uri]) {
-            return [];
-        }
-        return generateFixtureColumns(dataCache[fixture_uri]);
+        var fixture = _.find(data, function (source) {
+            return source.uri === fixtureUri;
+        });
+        return fixture ? generateFixtureColumns(fixture) : [];
     }
 
     // -------------------------------------------------------------------------
@@ -429,6 +413,7 @@ define([
     return {
         init: init,
         reset: reset,
+        getDataSources: getDataSources,
         advancedDataSourceWidget: advancedDataSourceWidget,
         fixtureWidget: fixtureWidget,
         autocompleteChoices: autocompleteChoices,
