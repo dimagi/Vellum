@@ -77,39 +77,37 @@ require([
             assert(text.indexOf("page: es.") > -1, text);
         });
 
-        it("should preserve itext values on load + save", function (done) {
-            util.init({core: {onReady: function () {
-                util.addQuestion("Text", "question1");
-                $(".btn:contains(image)").click();
-                $(".btn:contains(audio)").click();
-                $(".btn:contains(video)").click();
-                $(".btn:contains(long)").click();
-                $(".btn:contains(short)").click();
-                $(".btn:contains(custom)").click();
-                $(".fd-modal-generic-container").find("input").val("custom");
-                $(".fd-modal-generic-container").find(".btn:contains(Add)").click();
-                $("[name='itext-en-label']").val('question1 en label').change();
-                $("[name='itext-hin-label']").val('question1 hin label').change();
-                $("[name='itext-en-constraintMsg']").val('question1 en validation').change();
-                $("[name='itext-hin-constraintMsg']").val('question1 hin validation').change();
-                $("[name='itext-en-hint']").val('question1 en hint').change();
-                $("[name='itext-hin-hint']").val('question1 hin hint').change();
-                $("[name='itext-en-help']").val('question1 en help').change();
-                $("[name='itext-hin-help']").val('question1 hin help').change();
-                $("[name='itext-en-label-long']").val("question1 en long").change();
-                $("[name='itext-hin-label-long']").val("question1 hin long").change();
-                $("[name='itext-en-label-short']").val("question1 en short").change();
-                $("[name='itext-hin-label-short']").val("question1 hin short").change();
-                $("[name='itext-en-label-custom']").val("question1 en custom").change();
-                $("[name='itext-hin-label-custom']").val("question1 hin custom").change();
+        it("should preserve itext values on load + save", function () {
+            util.loadXML("");
+            util.addQuestion("Text", "question1");
+            $(".btn:contains(image)").click();
+            $(".btn:contains(audio)").click();
+            $(".btn:contains(video)").click();
+            $(".btn:contains(long)").click();
+            $(".btn:contains(short)").click();
+            $(".btn:contains(custom)").click();
+            $(".fd-modal-generic-container").find("input").val("custom");
+            $(".fd-modal-generic-container").find(".btn:contains(Add)").click();
+            $("[name='itext-en-label']").val('question1 en label').change();
+            $("[name='itext-hin-label']").val('question1 hin label').change();
+            $("[name='itext-en-constraintMsg']").val('question1 en validation').change();
+            $("[name='itext-hin-constraintMsg']").val('question1 hin validation').change();
+            $("[name='itext-en-hint']").val('question1 en hint').change();
+            $("[name='itext-hin-hint']").val('question1 hin hint').change();
+            $("[name='itext-en-help']").val('question1 en help').change();
+            $("[name='itext-hin-help']").val('question1 hin help').change();
+            $("[name='itext-en-label-long']").val("question1 en long").change();
+            $("[name='itext-hin-label-long']").val("question1 hin long").change();
+            $("[name='itext-en-label-short']").val("question1 en short").change();
+            $("[name='itext-hin-label-short']").val("question1 hin short").change();
+            $("[name='itext-en-label-custom']").val("question1 en custom").change();
+            $("[name='itext-hin-label-custom']").val("question1 hin custom").change();
 
-                util.assertXmlEqual(
-                    call('createXML'),
-                    util.xmlines(TEST_XML_2),
-                    {normalize_xmlns: true}
-                );
-                done();
-            }}});
+            util.assertXmlEqual(
+                call('createXML'),
+                util.xmlines(TEST_XML_2),
+                {normalize_xmlns: true}
+            );
         });
 
         it("itext widget should show placeholder when value is node ID (any language)", function () {
@@ -264,47 +262,43 @@ require([
             assert(util.saveButtonEnabled(), "save button is disabled");
         });
 
-        it("should update output refs when question ids change", function (done) {
-            util.init({core: {onReady: function () {
-                util.addQuestion("Text", "question1");
-                util.addQuestion("Text", "question2");
-                $("[name='itext-en-label']").val('<output value="/data/question1" /> a ' +
-                    '<output value="/data/question1"/> b ' +
-                    '<output value="/data/question1"></output> c ' +
-                    '<output value="/data/question1" ></output> d ' +
-                    '<output value="if(/data/question1 = \'\', \'\', format-date(date(/data/question1), \'%a%b%c\'))" />').change();
-                $("[name='itext-hin-label']").val('<output value="/data/question1"></output>').change();
-                util.clickQuestion("question1");
-                $("[name='property-nodeID']").val('first_question').change();
+        it("should update output refs when question ids change", function () {
+            util.loadXML("");
+            util.addQuestion("Text", "question1");
+            util.addQuestion("Text", "question2");
+            $("[name='itext-en-label']").val('<output value="/data/question1" /> a ' +
+                '<output value="/data/question1"/> b ' +
+                '<output value="/data/question1"></output> c ' +
+                '<output value="/data/question1" ></output> d ' +
+                '<output value="if(/data/question1 = \'\', \'\', format-date(date(/data/question1), \'%a%b%c\'))" />').change();
+            $("[name='itext-hin-label']").val('<output value="/data/question1"></output>').change();
+            util.clickQuestion("question1");
+            $("[name='property-nodeID']").val('first_question').change();
 
-                util.assertXmlEqual(
-                    call('createXML'),
-                    util.xmlines(TEST_XML_4),
-                    {normalize_xmlns: true}
-                );
-                done();
-            }}});
+            util.assertXmlEqual(
+                call('createXML'),
+                util.xmlines(TEST_XML_4),
+                {normalize_xmlns: true}
+            );
         });
 
-        it("should only update exact output ref matches when question ids change", function (done) {
-            util.init({core: {onReady: function () {
-                util.addQuestion("Text", "question1");
-                util.addQuestion("Text", "question2");
-                $("[name='itext-en-label']").val('<output value="/data/question1" /> ' +
-                    '<output value="/data/question11" /> ' +
-                    '<output value="/data/question1/b" /> ' +
-                    '<output value="/data/question1b" /> ').change();
-                $("[name='itext-hin-label']").val('question2').change();
-                util.clickQuestion("question1");
-                $("[name='property-nodeID']").val('first_question').change();
+        it("should only update exact output ref matches when question ids change", function () {
+            util.loadXML("");
+            util.addQuestion("Text", "question1");
+            util.addQuestion("Text", "question2");
+            $("[name='itext-en-label']").val('<output value="/data/question1" /> ' +
+                '<output value="/data/question11" /> ' +
+                '<output value="/data/question1/b" /> ' +
+                '<output value="/data/question1b" /> ').change();
+            $("[name='itext-hin-label']").val('question2').change();
+            util.clickQuestion("question1");
+            $("[name='property-nodeID']").val('first_question').change();
 
-                util.assertXmlEqual(
-                    call('createXML'),
-                    OUTPUT_REFS_XML,
-                    {normalize_xmlns: true}
-                );
-                done();
-            }}});
+            util.assertXmlEqual(
+                call('createXML'),
+                OUTPUT_REFS_XML,
+                {normalize_xmlns: true}
+            );
         });
 
         it("should escape inequality operators in output ref", function () {
@@ -330,21 +324,19 @@ require([
             assert.equal(label.p.labelItext.get(), '<output value="/data/load-one" />');
         });
 
-        it("itext changes do not bleed back after copy", function (done) {
-            util.init({core: {onReady: function () {
-                var mug = util.addQuestion("Text", "question"),
-                    dup = mug.form.duplicateMug(mug);
-                dup.p.labelItext.set("q2");
+        it("itext changes do not bleed back after copy", function () {
+            util.loadXML("");
+            var mug = util.addQuestion("Text", "question"),
+                dup = mug.form.duplicateMug(mug);
+            dup.p.labelItext.set("q2");
 
-                util.saveAndReload(function () {
-                    var mug = call("getMugByPath", "/data/question");
-                    assert.equal(mug.p.labelItext.defaultValue(), "question");
-                    done();
-                });
-            }}});
+            util.saveAndReload(function () {
+                var mug = call("getMugByPath", "/data/question");
+                assert.equal(mug.p.labelItext.defaultValue(), "question");
+            });
         });
 
-        it("itext changes do not bleed back from copy of copy", function (done) {
+        it("itext changes do not bleed back from copy of copy", function () {
             util.loadXML("");
             var mug = util.addQuestion("Text", "question"),
                 dup = mug.form.duplicateMug(mug),
@@ -358,44 +350,38 @@ require([
                 assert.equal(mug.p.labelItext.defaultValue(), "question");
                 assert.equal(dup.p.labelItext.defaultValue(), "question");
                 assert.equal(cpy.p.labelItext.defaultValue(), "copy");
-                done();
             });
         });
 
-        it("drag question into label makes output ref in correct position", function (done) {
-            util.init({core: {onReady: function () {
-                var mug1 = util.addQuestion("Text", "question1"),
-                    mug2 = util.addQuestion("Text", "question2");
+        it("drag question into label makes output ref in correct position", function () {
+            var mug1 = util.addQuestion("Text", "question1"),
+                mug2 = util.addQuestion("Text", "question2");
 
-                var target = $("[name='itext-en-label']"),
-                    sourceUid = mug1.ufid;
-                target.val("test string").change();
-                vellum_util.setCaretPosition(target[0], 4);
-                call("handleDropFinish", target, sourceUid, mug1);
-                var val = mug2.p.labelItext.get('default', 'en');
-                assert.equal(val, 'test<output value="/data/question1" /> string');
-                done();
-            }}});
+            var target = $("[name='itext-en-label']"),
+                sourceUid = mug1.ufid;
+            target.val("test string").change();
+            vellum_util.setCaretPosition(target[0], 4);
+            call("handleDropFinish", target, sourceUid, mug1);
+            var val = mug2.p.labelItext.get('default', 'en');
+            assert.equal(val, 'test<output value="/data/question1" /> string');
         });
 
-        it("output ref deleted with single backspace", function (done) {
-            util.init({core: {onReady: function () {
-                var mug = util.addQuestion("Text", "question1");
+        it("output ref deleted with single backspace", function () {
+            util.loadXML("");
+            var mug = util.addQuestion("Text", "question1");
 
-                var target = $("[name='itext-en-label']");
-                target.val('question1 <output value="/data/question2" /> end').change();
-                vellum_util.setCaretPosition(target[0], 44);
+            var target = $("[name='itext-en-label']");
+            target.val('question1 <output value="/data/question2" /> end').change();
+            vellum_util.setCaretPosition(target[0], 44);
 
-                target.trigger({
-                    type: "keydown",
-                    which: 8,
-                    ctrlKey: false
-                });
-                target.change();
-                var val = mug.p.labelItext.get('default', 'en');
-                assert.equal(val, 'question1  end');
-                done();
-            }}});
+            target.trigger({
+                type: "keydown",
+                which: 8,
+                ctrlKey: false
+            });
+            target.change();
+            var val = mug.p.labelItext.get('default', 'en');
+            assert.equal(val, 'question1  end');
         });
 
         it("output ref deleted with single delete keypress", function () {
@@ -416,28 +402,19 @@ require([
             assert.equal(val, 'question1  end');
         });
 
-        it("should update output ref on group rename", function (done) {
-            util.init({
-                javaRosa: {langs: ['en', 'hin']},
-                core: {
-                    form: OUTPUTREF_GROUP_RENAME_XML,
-                    onReady: function () {
-                        var group = util.call("getMugByPath", "/data/question2"),
-                            q1 = util.call("getMugByPath", "/data/question1"),
-                            itext = q1.p.labelItext;
+        it("should update output ref on group rename", function () {
+            util.loadXML(OUTPUTREF_GROUP_RENAME_XML);
+            var group = util.call("getMugByPath", "/data/question2"),
+                q1 = util.call("getMugByPath", "/data/question1"),
+                itext = q1.p.labelItext;
 
-                        assert(itext.get().indexOf('"/data/question2/question3"') > 0,
-                            '"/data/question2/question3" not in ' + itext.get());
-                        group.p.nodeID = "group";
-                        assert(itext.get('default', 'en').indexOf('"/data/group/question3"') > 0,
-                            '"/data/group/question3" not in ' + itext.get('default', 'en'));
-                        assert(itext.get('default', 'hin').indexOf('"/data/group/question3"') > 0,
-                            '"/data/group/question3" not in ' + itext.get('default', 'hin'));
-
-                        done();
-                    }
-                }
-            });
+            assert(itext.get().indexOf('"/data/question2/question3"') > 0,
+                '"/data/question2/question3" not in ' + itext.get());
+            group.p.nodeID = "group";
+            assert(itext.get('default', 'en').indexOf('"/data/group/question3"') > 0,
+                '"/data/group/question3" not in ' + itext.get('default', 'en'));
+            assert(itext.get('default', 'hin').indexOf('"/data/group/question3"') > 0,
+                '"/data/group/question3" not in ' + itext.get('default', 'hin'));
         });
 
         it("should add warning on add Audio output ref to itext", function () {
