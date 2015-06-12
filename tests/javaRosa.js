@@ -19,6 +19,10 @@ require([
     'text!static/javaRosa/itext-item-non-auto-id.xml',
     'text!static/javaRosa/select1-help.xml',
     'text!static/javaRosa/no-label-text-one-lang.xml',
+    'text!static/javaRosa/test-xml-1.xml',
+    'text!static/javaRosa/test-xml-2.xml',
+    'text!static/javaRosa/test-xml-3.xml',
+    'text!static/javaRosa/test-xml-4.xml',
     'text!static/markdown/with-markdown.xml',
     'text!static/markdown/no-markdown.xml'
 ], function (
@@ -41,6 +45,10 @@ require([
     ITEXT_ITEM_NON_AUTO_ID_XML,
     SELECT1_HELP_XML,
     NO_LABEL_TEXT_ONE_LANG_XML,
+    TEST_XML_1,
+    TEST_XML_2,
+    TEST_XML_3,
+    TEST_XML_4,
     WITH_MARKDOWN_XML,
     NO_MARKDOWN_XML
 ) {
@@ -791,226 +799,4 @@ require([
             assert.equal($(treeSelector).text(), "question1");
         });
     });
-
-    var TEST_XML_1 = '' + 
-    '<?xml version="1.0" encoding="UTF-8" ?>\
-    <h:html xmlns:h="http://www.w3.org/1999/xhtml"\
-            xmlns:orx="http://openrosa.org/jr/xforms"\
-            xmlns="http://www.w3.org/2002/xforms"\
-            xmlns:xsd="http://www.w3.org/2001/XMLSchema"\
-            xmlns:jr="http://openrosa.org/javarosa"\
-            xmlns:vellum="http://commcarehq.org/xforms/vellum">\
-        <h:head>\
-            <h:title>Untitled Form</h:title>\
-            <model>\
-                <instance>\
-                    <data xmlns:jrm="http://dev.commcarehq.org/jr/xforms"\
-                          xmlns="http://openrosa.org/formdesigner/8D6CF8A5-4396-45C3-9D05-64C3FD97A5D0"\
-                          uiVersion="1"\
-                          version="1"\
-                          name="Untitled Form">\
-                        <question1 />\
-                    </data>\
-                </instance>\
-                <bind nodeset="/data/question1"\
-                      type="xsd:string"\
-                      constraint="1"\
-                      jr:constraintMsg="jr:itext(\'question1-constraintMsg\')" />\
-                <itext>\
-                    <translation lang="en" default="">\
-                        <text id="question1-label">\
-                            <value>question1</value>\
-                        </text>\
-                    </translation>\
-                    <translation lang="hin">\
-                        <text id="question1-constraintMsg">\
-                            <value>xyz</value>\
-                        </text>\
-                    </translation>\
-                </itext>\
-            </model>\
-        </h:head>\
-        <h:body>\
-            <input ref="/data/question1">\
-                <label ref="jr:itext(\'question1-label\')" />\
-            </input>\
-        </h:body>\
-    </h:html>';
-
-    var TEST_XML_2 = '' + 
-    '<h:html xmlns:h="http://www.w3.org/1999/xhtml"\
-             xmlns:orx="http://openrosa.org/jr/xforms"\
-             xmlns="http://www.w3.org/2002/xforms"\
-             xmlns:xsd="http://www.w3.org/2001/XMLSchema"\
-             xmlns:jr="http://openrosa.org/javarosa"\
-             xmlns:vellum="http://commcarehq.org/xforms/vellum">\
-        <h:head>\
-            <h:title>Untitled Form</h:title>\
-            <model>\
-                <instance>\
-                    <data xmlns:jrm="http://dev.commcarehq.org/jr/xforms"\
-                          xmlns="http://openrosa.org/formdesigner/8D6CF8A5-4396-45C3-9D05-64C3FD97A5D0"\
-                          uiVersion="1" version="1" name="Untitled Form">\
-                        <question1/>\
-                    </data>\
-                </instance>\
-                <bind nodeset="/data/question1" type="xsd:string"\
-                      jr:constraintMsg="jr:itext(\'question1-constraintMsg\')"/>\
-                <itext>\
-                    <translation lang="en" default="">\
-                        <text id="question1-label">\
-                            <value>question1 en label</value>\
-                            <value form="image">jr://file/commcare/image/data/question1.png</value>\
-                            <value form="audio">jr://file/commcare/audio/data/question1.mp3</value>\
-                            <value form="video">jr://file/commcare/video/data/question1.3gp</value>\
-                            <value form="long">question1 en long</value>\
-                            <value form="short">question1 en short</value>\
-                            <value form="custom">question1 en custom</value>\
-                        </text>\
-                        <text id="question1-hint">\
-                            <value>question1 en hint</value>\
-                        </text>\
-                        <text id="question1-help">\
-                            <value>question1 en help</value>\
-                            <value form="markdown">question1 en help</value>\
-                            <value form="image">jr://file/commcare/image/help/data/question1.png</value>\
-                            <value form="audio">jr://file/commcare/audio/help/data/question1.mp3</value>\
-                            <value form="video">jr://file/commcare/video/help/data/question1.3gp</value>\
-                        </text>\
-                        <text id="question1-constraintMsg">\
-                            <value>question1 en validation</value>\
-                        </text>\
-                    </translation>\
-                    <translation lang="hin">\
-                        <text id="question1-label">\
-                            <value>question1 hin label</value>\
-                            <value form="image">jr://file/commcare/image/data/question1.png</value>\
-                            <value form="audio">jr://file/commcare/audio/data/question1.mp3</value>\
-                            <value form="video">jr://file/commcare/video/data/question1.3gp</value>\
-                            <value form="long">question1 hin long</value>\
-                            <value form="short">question1 hin short</value>\
-                            <value form="custom">question1 hin custom</value>\
-                        </text>\
-                        <text id="question1-hint">\
-                            <value>question1 hin hint</value>\
-                        </text>\
-                        <text id="question1-help">\
-                            <value>question1 hin help</value>\
-                            <value form="markdown">question1 hin help</value>\
-                            <value form="image">jr://file/commcare/image/help/data/question1.png</value>\
-                            <value form="audio">jr://file/commcare/audio/help/data/question1.mp3</value>\
-                            <value form="video">jr://file/commcare/video/help/data/question1.3gp</value>\
-                        </text>\
-                        <text id="question1-constraintMsg">\
-                            <value>question1 hin validation</value>\
-                        </text>\
-                    </translation>\
-                </itext>\
-            </model>\
-        </h:head>\
-        <h:body>\
-            <input ref="/data/question1">\
-                <label ref="jr:itext(\'question1-label\')"/>\
-                <hint ref="jr:itext(\'question1-hint\')"/>\
-                <help ref="jr:itext(\'question1-help\')"/>\
-            </input>\
-        </h:body>\
-    </h:html>';
-
-    var TEST_XML_3 = '' +
-    '<?xml version="1.0" encoding="UTF-8" ?>\
-    <h:html xmlns:h="http://www.w3.org/1999/xhtml"\
-            xmlns:orx="http://openrosa.org/jr/xforms"\
-            xmlns="http://www.w3.org/2002/xforms"\
-            xmlns:xsd="http://www.w3.org/2001/XMLSchema"\
-            xmlns:jr="http://openrosa.org/javarosa"\
-            xmlns:vellum="http://commcarehq.org/xforms/vellum">\
-        <h:head>\
-            <h:title>Untitled Form</h:title>\
-            <model>\
-                <instance>\
-                    <data xmlns:jrm="http://dev.commcarehq.org/jr/xforms"\
-                          xmlns="http://openrosa.org/formdesigner/8D6CF8A5-4396-45C3-9D05-64C3FD97A5D0"\
-                          uiVersion="1"\
-                          version="1"\
-                          name="Untitled Form">\
-                        <question1 />\
-                    </data>\
-                </instance>\
-                <bind nodeset="/data/question1" type="xsd:string" />\
-                <itext>\
-                    <translation lang="en" default="">\
-                        <text id="question1-label">\
-                            <value>question1</value>\
-                        </text>\
-                    </translation>\
-                    <translation lang="hin">\
-                        <text id="question1-label">\
-                            <value>xyz</value>\
-                        </text>\
-                    </translation>\
-                    <translation lang="es">\
-                        <text id="question1-label">\
-                            <value>Spanish!</value>\
-                        </text>\
-                    </translation>\
-                </itext>\
-            </model>\
-        </h:head>\
-        <h:body>\
-            <input ref="/data/question1">\
-                <label ref="jr:itext(\'question1-label\')" />\
-            </input>\
-        </h:body>\
-    </h:html>';
-
-    var TEST_XML_4 = '' +
-    '<h:html xmlns:h="http://www.w3.org/1999/xhtml"\
-             xmlns:orx="http://openrosa.org/jr/xforms"\
-             xmlns="http://www.w3.org/2002/xforms"\
-             xmlns:xsd="http://www.w3.org/2001/XMLSchema"\
-             xmlns:jr="http://openrosa.org/javarosa"\
-             xmlns:vellum="http://commcarehq.org/xforms/vellum">\
-        <h:head>\
-            <h:title>Untitled Form</h:title>\
-            <model>\
-                <instance>\
-                    <data xmlns:jrm="http://dev.commcarehq.org/jr/xforms"\
-                          xmlns="http://openrosa.org/formdesigner/8D6CF8A5-4396-45C3-9D05-64C3FD97A5D0"\
-                          uiVersion="1" version="1" name="Untitled Form">\
-                        <first_question/>\
-                        <question2/>\
-                    </data>\
-                </instance>\
-                <bind nodeset="/data/first_question" type="xsd:string"/>\
-                <bind nodeset="/data/question2" type="xsd:string"/>\
-                <itext>\
-                    <translation lang="en" default="">\
-                        <text id="first_question-label">\
-                            <value>first_question</value>\
-                        </text>\
-                        <text id="question2-label">\
-                            <value><output value="/data/first_question" /> a <output value="/data/first_question" /> b <output value="/data/first_question" /> c <output value="/data/first_question" /> d <output value="if(/data/first_question = \'\', \'\', format-date(date(/data/first_question), \'%a%b%c\'))" /></value>\
-                        </text>\
-                    </translation>\
-                    <translation lang="hin">\
-                        <text id="first_question-label">\
-                            <value>first_question</value>\
-                        </text>\
-                        <text id="question2-label">\
-                            <value><output value="/data/first_question" /></value>\
-                        </text>\
-                    </translation>\
-                </itext>\
-            </model>\
-        </h:head>\
-        <h:body>\
-            <input ref="/data/first_question">\
-                <label ref="jr:itext(\'first_question-label\')"/>\
-            </input>\
-            <input ref="/data/question2">\
-                <label ref="jr:itext(\'question2-label\')"/>\
-            </input>\
-        </h:body>\
-    </h:html>';
 });
