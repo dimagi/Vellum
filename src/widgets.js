@@ -489,7 +489,7 @@ define([
                 "data-content": help.text + link
             });
             if (!help.url) {
-                $help.click(function (e) { e.preventDefault(); });
+                $link.click(function (e) { e.preventDefault(); });
             }
             var $help = $("<div/>").addClass("fd-help");
             $help.append($link);
