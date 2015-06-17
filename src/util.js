@@ -373,6 +373,31 @@ define([
         return div.html();
     };
 
+    that.dropdownAutocomplete = function (input, sources) {
+        input.atwho({
+            at: "",
+            data: sources,
+            maxLen: Infinity,
+            suffix: "",
+            tabSelectsMatch: false,
+            callbacks: {
+                filter: function(query, data, searchKey) {
+                    return _.filter(data, function(item) {
+                        return item.name.indexOf(query) !== -1;
+                    });
+                },
+                matcher: function(flag, subtext, should_startWithSpace) {
+                    return input.val();
+                },
+                beforeInsert: function(value, $li) {
+                    input.data("selected-value", value);
+                },
+            }
+        }).on("inserted.atwho", function(event, $li, otherEvent) {
+            input.val(input.data("selected-value"));
+        });
+    };
+
     that.questionAutocomplete = function (input, mug, options) {
         options = _.defaults(options || {}, {
             category: 'Question Reference',

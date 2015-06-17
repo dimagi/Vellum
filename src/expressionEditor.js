@@ -82,9 +82,14 @@ define([
         var getTopLevelJoinSelect = function () {
             return $(editorContent.find(".top-level-join-select")[0]);
         };
-        var addAutocomplete = function (input) {
-            util.questionAutocomplete(input, options.mug,
-                                      {property: options.path});
+        var addAutocomplete = function (input, sources) {
+            if (sources) {
+                util.dropdownAutocomplete(input, sources);
+            }
+            else {
+                util.questionAutocomplete(input, options.mug,
+                                          {property: options.path});
+            }
         };
 
         var getExpressionFromSimpleMode = function () {
@@ -217,30 +222,8 @@ define([
                     populateQuestionInputBox(getRightQuestionInput(), expOp.right, expOp.left);
                 }
 
-                function autoSources(sources) {
-                    return {
-                        source: _.isFunction(sources) ? sources() : [],
-                        minLength: 0
-                    };
-                }
-
-                getLeftQuestionInput()
-                    .autocomplete(autoSources(options.leftAutocompleteSources))
-                    .focus(function(e) {
-                        $(this).autocomplete('search', $(this).val());
-                    });
-                getRightQuestionInput()
-                    .autocomplete(autoSources(options.rightAutocompleteSources))
-                    .focus(function(e) {
-                        $(this).autocomplete('search', $(this).val());
-                    });
-
-                if (!options.leftAutocompleteSources) {
-                    addAutocomplete(getLeftQuestionInput());
-                }
-                if (!options.rightAutocompleteSources) {
-                    addAutocomplete(getRightQuestionInput());
-                }
+                addAutocomplete(getLeftQuestionInput(), options.leftAutocompleteSources);
+                addAutocomplete(getRightQuestionInput(), options.rightAutocompleteSources);
 
                 return $expUI;
             };
