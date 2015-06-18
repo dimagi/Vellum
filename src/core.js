@@ -1802,9 +1802,6 @@ define([
         $(document).ajaxStart(function () {
             _this.showWaitingModal();
         });
-        $(document).ajaxStop(function () {
-            _this.closeModal();
-        });
 
         if (saveType === 'patch') {
             var diff_match_patch = require('diff-match-patch'),
