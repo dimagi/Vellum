@@ -40,7 +40,6 @@ requirejs.config({
         'CryptoJS': '../lib/sha1',
         'diff-match-patch': '../lib/diff_match_patch',
         'jquery': '../bower_components/jquery/dist/jquery',
-        'jquery-ui': '../bower_components/jquery-ui/jquery-ui',
         'jquery.jstree': '../bower_components/jstree/dist/jstree',
         'jquery.fancybox': '../lib/fancybox/jquery.fancybox-1.3.4',
         'jquery.bootstrap': '../lib/bootstrap',
@@ -85,10 +84,6 @@ requirejs.config({
             exports: 'diff_match_patch'
         },
 
-        'jquery-ui': {
-            deps: ['jquery', 'css!../bower_components/jquery-ui/themes/redmond/jquery-ui'],
-            exports: '$.fn.autocomplete'
-        },
         'jquery.jstree': {
             deps: ['jquery', 'css!../bower_components/jstree/dist/themes/default/style'],
             exports: '$.fn.jstree'
@@ -182,10 +177,6 @@ if (window.jQuery) {
     }
     if (window.jQuery.fn.popout) {
         define('jquery.bootstrap-popout', [], function () {});
-    }
-
-    if (window.jQuery.fn.datepicker) {
-        define('jquery-ui', [], function () {});
     }
 }
 

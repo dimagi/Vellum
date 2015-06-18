@@ -64,11 +64,7 @@
             name: 'global-deps',
             include: [
                 'jquery',
-                'jquery-ui',
                 'jquery.bootstrap',
-
-                // shim plugin dependencies don't get automatically included
-                'css/css!../bower_components/jquery-ui/themes/redmond/jquery-ui'
             ],
             exclude: [
                 'exclude'
