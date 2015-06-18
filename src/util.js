@@ -13,7 +13,7 @@ define([
     RegExp.escape = function(s) {
         return s.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
     };
-    
+
     $.fn.stopLink = function() {
         // stops anchor tags from clicking through
         this.click(function (e) {
@@ -373,14 +373,57 @@ define([
         return div.html();
     };
 
-    that.questionAutocomplete = function (input, mug, options) {
+    /**
+     * Turn a given input into an autocomplete, which will be populated
+     * with a given set of options and will also accept free text.
+     * 
+     * @param $input - jQuery object, the input to turn into an autocomplete
+     * @param sources - An array of strings with which to populate the autocomplete
+     */
+    that.dropdownAutocomplete = function ($input, sources) {
+        $input.atwho({
+            at: "",
+            data: sources,
+            maxLen: Infinity,
+            suffix: "",
+            tabSelectsMatch: false,
+            callbacks: {
+                filter: function(query, data, searchKey) {
+                    return _.filter(data, function(item) {
+                        return item.name.indexOf(query) !== -1;
+                    });
+                },
+                matcher: function(flag, subtext, should_startWithSpace) {
+                    return $input.val();
+                },
+                beforeInsert: function(value, $li) {
+                    $input.data("selected-value", value);
+                },
+            }
+        }).on("inserted.atwho", function(event, $li, otherEvent) {
+            $input.val($input.data("selected-value"));
+        });
+    };
+
+    /**
+     * Alter a given input so that when a user enters the string "/data/",
+     * they get an autocomplete of all questions in the form.
+     *
+     * @param $input - jQuery object, the input to modify
+     * @param mug - current mug
+     * @param options - Hash of options for autocomplete behavior:
+     *                  category: sent to analytics
+     *                  insertTpl: string to add to input when question is selected
+     *                  property: sent to analytics
+     */
+    that.questionAutocomplete = function ($input, mug, options) {
         options = _.defaults(options || {}, {
             category: 'Question Reference',
             insertTpl: '${name}',
             property: '',
         });
 
-        input.atwho({
+        $input.atwho({
             at: "/data/",
             data: _.chain(mug.form.getMugList())
                    .map(function(mug) {
@@ -415,7 +458,7 @@ define([
         });
 
         mug.on("teardown-mug-properties", function () {
-            input.atwho('destroy');
+            $input.atwho('destroy');
         }, null, "teardown-mug-properties");
     };
 
