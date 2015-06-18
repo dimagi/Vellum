@@ -412,6 +412,7 @@ define([
                     data: sources,
                     maxLen: Infinity,
                     suffix: "",
+                    tabSelectsMatch: false,
                     callbacks: {
                         filter: function(query, data, searchKey) {
                             return _.filter(data, function(item) {
