@@ -420,6 +420,7 @@ define([
             insertTpl: options.insertTpl,
             limit: 10,
             maxLen: 30,
+            tabSelectsMatch: false,
             callbacks: {
                 matcher: function(flag, subtext) {
                     var match, regexp;
