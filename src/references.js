@@ -18,7 +18,7 @@ define([
         var span = $('<span>')
             .attr('contenteditable', false)
             .attr('data-mug-type', ref.type)
-            .addClass('label label-success')
+            .addClass('label label-datanode label-datanode-internal')
             .append(icon)
             .append(" " + ref.path + " ")
             .append($("<button class='close'>").html("&times;"));
