@@ -1,0 +1,79 @@
+//label datanode
+.label-datanode {
+  text-shadow: none;
+  line-height: 25px;
+  padding: 0 6px;
+  font-size: 12px;
+  &:hover {
+    cursor: pointer;
+    color: #ffffff;
+    .close {
+      opacity: 0.6;
+    }
+  }
+
+  .close {
+    color: @cc-light-cool-accent-low;
+    opacity: 0.4;
+    font-weight: 500;
+    line-height: 20px;
+    padding-left: 5px;
+    &:hover {
+      opacity: 0.9;
+    }
+  }
+  .fcc {
+    padding: 0 3px;
+  }
+}
+
+.label-datanode-internal {
+  color: @cc-light-cool-accent-low;
+  background-color: @cc-light-cool-accent-hi;
+  .close {
+    color: @cc-light-cool-accent-low;
+  }
+  &:hover {
+    background-color: @cc-light-cool-accent-mid;
+    .close {
+      color: @cc-light-cool-accent-hi;
+    }
+  }
+}
+
+.label-datanode-external {
+  color: @cc-neutral-low;
+  background-color: darken(@cc-bg, 5%);
+  .close {
+    color: @cc-neutral-low;
+  }
+  &:hover {
+    background-color: @cc-neutral-mid;
+    .close {
+      color: @cc-neutral-hi;
+    }
+  }
+}
+
+.datanode-tree-bubble {
+  font-size: 11px;
+  color: #ffffff;
+  line-height: 18px;
+  display: inline-block;
+  padding: 0px 5px;
+  border-radius: 3px;
+
+  .fcc {
+    font-size: 9px;
+  }
+}
+
+.datanode-tree-bubble-internal {
+  color: @cc-light-cool-accent-low;
+  background-color: @cc-light-cool-accent-hi;
+}
+
+.datanode-tree-bubble-external {
+  color: @cc-neutral-low;
+  background-color: @cc-bg;
+}
