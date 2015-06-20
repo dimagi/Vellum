@@ -12,7 +12,7 @@
 			<itext>
 				<translation lang="en" default="">
 					<text id="label-label">
-						<value>label</value>
+						<value></value>
 						<value form="image">jr://file/commcare/image/data/label.png</value>
 					</text>
 				</translation>
