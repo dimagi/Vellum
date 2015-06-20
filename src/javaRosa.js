@@ -1503,8 +1503,15 @@ define([
                         var curForm = valEl.attr('form');
                         if(!curForm) {
                             curForm = "default";
+                            if (item.hasMarkdown) {
+                                return; // value already set below
+                            }
                         } else if (curForm === "markdown") {
+                            // the default and markdown forms will always be
+                            // the same
                             item.hasMarkdown = true;
+                            item.getOrCreateForm("default")
+                                .setValue(lang, xml.humanize(valEl));
                             return;
                         }
                         item.getOrCreateForm(curForm)
