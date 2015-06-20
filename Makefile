@@ -32,9 +32,6 @@ _rjs:
 	# TODO do we need a blank line between the files? doesn't seem like it after initial test
 	cat _build/src/local-deps.css _build/src/main-components.css > _build/style.css
 	rm _build/src/local-deps.css _build/src/main-components.css
-	# for some reason relative image paths are wrong, so move stuff around
-	# necessary iff global-deps includes any CSS
-	#mv _build/src/global-deps.css _build/src/images _build/
 	echo "$(VERSION)" > _build/version.txt
 	(`npm bin`/bower list || `npm bin`/bower list --offline) | \
 		grep -Ev "^(Vellum|bower) " > _build/bower_components/manifest.txt
