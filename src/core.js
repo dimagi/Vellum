@@ -1057,8 +1057,6 @@ define([
 
                 _this.data.core.formLoadingFailed = true;
                 _this.data.core.failedLoadXML = formString;
-
-                _this.closeModal();
                 throw e;
             }
             done();
