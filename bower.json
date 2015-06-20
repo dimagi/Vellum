@@ -31,7 +31,7 @@
         "require-css": "~0.1.5",
         "requirejs-tpl": "jfparadis/requirejs-tpl",
         "requirejs-plugins": "~1.0.2",
-        "At.js": "1.2.0",
+        "At.js": "1.3.0",
         "Caret.js": "0.2.2",
 
         "jstree": "vakata/jstree#110b6681ffd5fc7206c27ea174d87ce1b348776d",

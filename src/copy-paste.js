@@ -201,7 +201,7 @@ define([
         var data = copy(true),
             mugs = vellum.getCurrentlySelectedMug(true);
         if (window.analytics) {
-            window.analytics.usage("Copy Paste", "Cut", "# questions selected", mugs.length);
+            window.analytics.usage("Copy Paste", "Cut", mugs.length);
             window.analytics.workflow("Cut questions in form builder");
         }
         mugs = _.filter(mugs, function (mug) { return mug.options.isCopyable; });
@@ -215,7 +215,7 @@ define([
         var mugs = vellum.getCurrentlySelectedMug(true, true),
             seen = {};
         if (window.analytics && !skip_analytics) {
-            window.analytics.usage("Copy Paste", "Copy", "# questions selected", mugs.length);
+            window.analytics.usage("Copy Paste", "Copy", mugs.length);
             window.analytics.workflow("Copy questions in form builder");
         }
         if (!mugs || !mugs.length) { return ""; }
@@ -319,7 +319,7 @@ define([
             vellum.setCurrentMug(mug);
         }
         if (window.analytics) {
-            window.analytics.usage("Copy Paste", "Paste", "# questions pasted", pasted);
+            window.analytics.usage("Copy Paste", "Paste", pasted);
         }
         return errors.get();
     }
