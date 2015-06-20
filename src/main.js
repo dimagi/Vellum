@@ -42,7 +42,6 @@ requirejs.config({
         'jquery': '../bower_components/jquery/dist/jquery',
         'jquery-ui': '../bower_components/jquery-ui/jquery-ui',
         'jquery.jstree': '../bower_components/jstree/dist/jstree',
-        'jquery.fancybox': '../lib/fancybox/jquery.fancybox-1.3.4',
         'jquery.bootstrap': '../lib/bootstrap',
         'jquery.bootstrap-popout': '../lib/bootstrap-popout',
         'jquery.bootstrap-better-typeahead': '../bower_components/bootstrap-better-typeahead/js/bootstrap-better-typeahead',
@@ -92,10 +91,6 @@ requirejs.config({
         'jquery.jstree': {
             deps: ['jquery', 'css!../bower_components/jstree/dist/themes/default/style'],
             exports: '$.fn.jstree'
-        },
-        'jquery.fancybox': {
-            deps: ['jquery', 'css!../lib/fancybox/jquery.fancybox-1.3.4'],
-            exports: '$.fn.fancybox'
         },
         'jquery.bootstrap': {
             deps: ['jquery'],

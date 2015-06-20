@@ -115,7 +115,6 @@
             include: [
                 'underscore',
                 'jquery.jstree',
-                'jquery.fancybox',
                 'jquery.bootstrap-popout',
                 'jquery.bootstrap-better-typeahead',
                 'save-button',
@@ -125,7 +124,6 @@
                 // https://github.com/guybedford/require-less/issues/48
                 'css/css!../lib/codemirror/codemirror',
                 'css/css!../bower_components/jstree/dist/themes/default/style',
-                'css/css!../lib/fancybox/jquery.fancybox-1.3.4',
                 'css/css!yui-combo',
                 'css/css!../bower_components/At.js/dist/css/jquery.atwho'
             ],

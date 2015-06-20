@@ -29,7 +29,6 @@ define([
     'less!vellum/less-style/main',
     'jquery.jstree',
     'jquery.bootstrap',
-    'jquery.fancybox',  // only thing we use fancybox for is its spinner, no actual display of anything
     'jquery-ui',  // used for autocomplete
     'caretjs',
     'atjs'
@@ -201,7 +200,6 @@ define([
         this._init_toolbar();
         this._init_extra_tools();
         this._createJSTree();
-        this._setup_fancybox();
         datasources.init(this);
     };
 
@@ -690,17 +688,6 @@ define([
         return $modal;
     };
 
-    fn._setup_fancybox = function () {
-        $.fancybox.init();
-        this.$f.find("a.inline").fancybox({
-            hideOnOverlayClick: false,
-            hideOnContentClick: false,
-            enableEscapeButton: false,
-            showCloseButton : true,
-            onClosed: function() {}
-        });
-    };
-
     fn.handleDropFinish = function(target, sourceUid, mug) {
         var _this = this,
             ops = target.closest(".xpath-expression-row").find(".op-select");
@@ -1032,7 +1019,7 @@ define([
         done = done || function () {};
         var _this = this;
 
-        $.fancybox.showActivity();
+        _this.showWaitingModal("Loading...");
         //wait for the spinner to come up.
         window.setTimeout(function () {
             //universal flag for indicating that there's something wrong enough
@@ -1053,7 +1040,7 @@ define([
                 } else {
                     _this.$f.find('.fd-default-panel').removeClass('hide');
                 }
-                $.fancybox.hideActivity();
+                _this.closeModal();
             } catch (e) {
                 // hack: don't display the whole invalid XML block if it
                 // was a parse error
@@ -1071,7 +1058,7 @@ define([
                 _this.data.core.formLoadingFailed = true;
                 _this.data.core.failedLoadXML = formString;
 
-                $.fancybox.hideActivity();
+                _this.closeModal();
                 throw e;
             }
             done();
