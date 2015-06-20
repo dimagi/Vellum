@@ -913,9 +913,6 @@ define([
         widget.setItextValue = function (value) {
             var itextItem = widget.getItextItem();
             if (itextItem) {
-                if (!value) {
-                    value = widget.getPlaceholder();
-                }
                 if (widget.isDefaultLang) {
                     widget.mug.fire({
                         type: 'defaultLanguage-itext-changed',
@@ -961,10 +958,9 @@ define([
                 var value = widget.getItextValue(),
                     placeholder = widget.hasNodeIdPlaceholder ? widget.mug.p.nodeID : "";
                 if (!widget.isDefaultLang) {
-                    placeholder = widget.getItextValue(widget.defaultLang) || placeholder;
+                    placeholder = widget.getItextValue(widget.defaultLang);
                 }
-                widget.setPlaceholder(placeholder);
-                widget.setValue(value && value !== placeholder ? value : "");
+                widget.setValue(value ? value : placeholder);
             }
         };
 
@@ -992,16 +988,8 @@ define([
             $input.val(val);
         };
 
-        widget.setPlaceholder = function (val) {
-            $input.attr("placeholder", val);
-        };
-
         widget.getValue = function () {
             return $input.val();
-        };
-
-        widget.getPlaceholder = function () {
-            return $input.attr('placeholder');
         };
 
         widget.getDefaultValue = function () {
@@ -1011,10 +999,9 @@ define([
         if (widget.hasNodeIdPlaceholder && widget.isDefaultLang) {
             widget.mug.on('property-changed', function (e) {
                 if (e.property === "nodeID") {
-                    widget.setPlaceholder(e.val);
                     if (widget.getItextValue() === e.previous || !widget.getValue()) {
                         widget.setItextValue(e.val);
-                        widget.setValue("");
+                        widget.setValue(e.val);
                     }
                 }
             }, null, "teardown-mug-properties");
@@ -1027,11 +1014,10 @@ define([
                     if (!placeholder && widget.hasNodeIdPlaceholder) {
                         placeholder = widget.mug.p.nodeID;
                     }
-                    widget.setPlaceholder(placeholder);
                     if (widget.getItextValue() === e.prevValue || !widget.getValue()) {
                         // Make sure all the defaults keep in sync.
                         widget.setItextValue(placeholder);
-                        widget.setValue("");
+                        widget.setValue(placeholder);
                     }
                 }
             }, null, "teardown-mug-properties");
