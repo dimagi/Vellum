@@ -51,6 +51,12 @@ require([
             assert(mug.p.labelItext.hasMarkdown);
         });
 
+        it("should use the markdown form when there are conflicting strings", function() {
+            util.loadXML(MARKDOWN_TEST_XML);
+            var mug = util.getMug('/data/markdown_question');
+            assert.strictEqual(mug.p.labelItext.get(), "**some markdown**");
+        });
+
         describe("when a user has not defined markdown usage", function() {
             it("should not show markdown with nothing in the text", function() {
                 util.loadXML("");
