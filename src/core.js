@@ -1051,6 +1051,7 @@ define([
 
                 _this.hideQuestionProperties();
 
+                _this.closeModal();
                 var $modal = _this.generateNewModal("Error", [], "OK", "icon-warning-sign");
                 $modal.find(".modal-body").text(msg);
                 $modal.modal('show');
