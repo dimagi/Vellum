@@ -64,7 +64,7 @@
             name: 'global-deps',
             include: [
                 'jquery',
-                'jquery.bootstrap',
+                'jquery.bootstrap'
             ],
             exclude: [
                 'exclude'
