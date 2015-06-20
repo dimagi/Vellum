@@ -44,7 +44,6 @@ requirejs.config({
         'jquery.fancybox': '../lib/fancybox/jquery.fancybox-1.3.4',
         'jquery.bootstrap': '../lib/bootstrap',
         'jquery.bootstrap-popout': '../lib/bootstrap-popout',
-        'jquery.bootstrap-better-typeahead': '../bower_components/bootstrap-better-typeahead/js/bootstrap-better-typeahead',
         'underscore': '../bower_components/underscore/underscore',
         'XMLWriter': '../bower_components/XMLWriter/XMLWriter',
 
@@ -99,9 +98,6 @@ requirejs.config({
         'jquery.bootstrap-popout': {
             deps: ['jquery.bootstrap'],
             exports: '$.fn.popout'
-        },
-        'jquery.bootstrap-better-typeahead': {
-            deps: ['jquery.bootstrap']
         },
         'underscore': {
             exports: '_'
@@ -172,9 +168,6 @@ if (window.jQuery) {
     define('jquery', [], function() {
         return window.jQuery;
     });
-    if (window.jQuery.fn.typeahead) {
-        define('jquery.bootstrap', [], function () {});
-    }
     if (window.jQuery.fn.popout) {
         define('jquery.bootstrap-popout', [], function () {});
     }

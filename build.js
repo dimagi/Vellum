@@ -113,7 +113,6 @@
                 'jquery.jstree',
                 'jquery.fancybox',
                 'jquery.bootstrap-popout',
-                'jquery.bootstrap-better-typeahead',
                 'save-button',
 
                 // shim plugin dependencies don't automatically get included
