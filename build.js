@@ -10,7 +10,7 @@
     optimize: 'uglify2',
     uglify2: {
         output: {
-            'ascii-only': true
+            'ascii_only': true
         }
     },
     preserveLicenseComments: false,
