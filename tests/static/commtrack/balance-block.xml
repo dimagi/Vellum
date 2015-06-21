@@ -6,7 +6,7 @@
 			<instance>
 				<data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/DC38FCC5-930C-4385-AE6C-5B15ED1F95B1" uiVersion="1" version="1" name="Untitled Form">
 					<stock_amount />
-					<balance xmlns="http://commcarehq.org/ledger/v1" entity-id="" date="" section-id="stock" type="bal-0" vellum:role="Balance">
+					<balance xmlns="http://commcarehq.org/ledger/v1" entity-id="" date="" section-id="stock" type="bal-0">
 						<entry id="" quantity="" />
 					</balance>
 				</data>
@@ -14,6 +14,7 @@
 			<instance id="ledger" src="jr://instance/ledgerdb" />
 			<instance id="products" src="jr://fixture/commtrack:products" />
 			<bind nodeset="/data/stock_amount" type="xsd:int" />
+			<bind nodeset="/data/balance[@type='bal-0']" relevant="/data/stock_amount != 0" />
 			<bind nodeset="/data/balance[@type='bal-0']/entry/@quantity" calculate="/data/stock_amount" />
 			<setvalue event="xforms-ready" ref="/data/balance[@type='bal-0']/entry/@id" value="instance('commcaresession')/session/data/product_id" />
 			<setvalue event="xforms-ready" ref="/data/balance[@type='bal-0']/@entity-id" value="instance('commcaresession')/session/data/case_id" />

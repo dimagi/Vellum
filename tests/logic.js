@@ -2,46 +2,83 @@
 require([
     'chai',
     'jquery',
-    'tests/utils'
+    'underscore',
+    'tests/utils',
+    'vellum/util'
 ], function (
     chai,
     $,
-    util
+    _,
+    util,
+    vellumUtil
 ) {
     var assert = chai.assert,
         call = util.call;
 
     describe("The logic manager", function () {
-        it("should update expressions when a question ID changes", function (done) {
-            util.init({
-                core: {
-                    form: TEST_XML_1, 
-                    onReady: function () {
-                        call("getMugByPath", "/data/question1").p.nodeID = 'question';
-                        var relevantAttr = call(
-                            "getMugByPath", "/data/question2").p.relevantAttr;
-                        assert.equal("/data/question = 1", relevantAttr);
-                        done();
-                    }
-                }
-            });
+        before(function (done) {
+            util.init({core: {onReady: function () { done(); }}});
         });
 
-        it("should not update expressions for model iteration", function (done) {
-            util.init({
-                core: {
-                    form: "", 
-                    onReady: function () {
-                        var repeat = util.addQuestion("Repeat", "product");
-                        repeat.p.dataSource = {
-                            instance: {id: "products", src: "jr://fixture/commtrack:products"},
-                            idsQuery: "instance('products')/products/product/@id"
-                        };
-                        call("createXML");
-                        assert(util.isTreeNodeValid(repeat), "repeat should be valid");
-                        done();
-                    }
-                }
+        it("should update expressions when a question ID changes", function () {
+            util.loadXML(TEST_XML_1);
+            util.getMug("question1").p.nodeID = 'question';
+            var mug = util.getMug("/data/question2");
+            assert.equal("/data/question = 1", mug.p.relevantAttr);
+        });
+
+        it("should not update expressions for model iteration", function () {
+            util.loadXML("");
+            var repeat = util.addQuestion("Repeat", "product");
+            repeat.p.dataSource = {
+                instance: {id: "products", src: "jr://fixture/commtrack:products"},
+                idsQuery: "instance('products')/products/product/@id"
+            };
+            call("createXML");
+            assert(util.isTreeNodeValid(repeat), "repeat should be valid");
+        });
+
+        describe("should add validation error for", function () {
+            var properties = [
+                    "relevantAttr",
+                    "calculateAttr",
+                    "constraintAttr",
+                    "dataParent",
+                    "repeat_count",
+                    "filter",
+                    "defaultValue"
+                ],
+                mugMap = {
+                    repeat_count: "repeat",
+                    filter: "select/itemset",
+                };
+
+            before(function () {
+                util.loadXML("");
+                util.addQuestion("Text", "text");
+                util.addQuestion("SelectDynamic", "select");
+                util.addQuestion("Repeat", "repeat");
+            });
+
+            it("the same set of xpath references as util.XPATH_REFERENCES", function () {
+                assert.deepEqual(vellumUtil.XPATH_REFERENCES, properties);
+            });
+
+            _.each(properties, function (attr) {
+                it("invalid path in " + attr, function () {
+                    var mug = util.getMug(mugMap[attr] || "text");
+                    assert(util.isTreeNodeValid(mug), util.getMessages(mug));
+                    assert.deepEqual(mug.messages.get(attr), []);
+
+                    mug.p[attr] = "/data/unknown";
+                    assert(!util.isTreeNodeValid(mug), "mug should not be valid");
+                    assert(mug.messages.get(attr).length,
+                           attr + " should have messages");
+
+                    mug.p[attr] = "";
+                    assert(util.isTreeNodeValid(mug), util.getMessages(mug));
+                    assert.deepEqual(mug.messages.get(attr), []);
+                });
             });
         });
     });

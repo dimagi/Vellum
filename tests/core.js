@@ -29,27 +29,22 @@ require([
         pluginsWithoutItemset = _(util.options.options.plugins || []).without("itemset");
 
     describe("Vellum core", function () {
-        it("should not allow adding questions with matching paths", function (done) {
-            util.init({
-                core: {
-                    onReady: function () {
-                        var dup;
-                        util.addQuestion("Text", "question1");
-                        dup = util.addQuestion("Text", "question2");
-                        dup.p.nodeID = "question1";
+        before(function (done) {
+            util.init({core: {onReady: function () { done(); }}});
+        });
 
-                        // TODO fix tight coupling of this functionality with UI
-                        // HACK prevent modal alert in UI
-                        this.data.core.isAlertVisible = true;
-
-                        assert(!this.ensureCurrentMugIsSaved(),
-                               "save should fail with duplicate question ID");
-
-                        this.data.core.isAlertVisible = false;
-                        done();
-                    }
-                }
+        it("should display non-widget message", function () {
+            util.loadXML("");
+            var text = util.addQuestion("Text", "text"),
+                msg = "Test non-widget message.";
+            text.addMessage(null, {
+                key: "testing-1-2-3",
+                level: "error",
+                message: msg
             });
+            var div = $(".fd-content-right").find(".messages");
+            chai.expect(util.getMessages(text)).to.include(msg);
+            chai.expect(div.text()).to.include(msg);
         });
 
         it("should load form with save button in 'saved' state", function (done) {
@@ -80,60 +75,50 @@ require([
             });
         });
 
-        it("should update child references on group rename", function (done) {
-            util.init({core: { form: GROUP_RENAME_XML, onReady: function () {
-                var group = call("getMugByPath", "/data/group"),
-                    q1 = call("getMugByPath", "/data/group/question1"),
-                    q2 = call("getMugByPath", "/data/question2");
-                group.p.nodeID = "g8";
-                assert.equal(q1.form.getAbsolutePath(q1), "/data/g8/question1");
-                assert.equal(q2.p.relevantAttr,
-                    "/data/g8/question1 = 'valley girl' and /data/g8/question2 = 'dude'");
-                done();
-            }}});
+        it("should update child references on group rename", function () {
+            util.loadXML(GROUP_RENAME_XML);
+            var group = call("getMugByPath", "/data/group"),
+                q1 = call("getMugByPath", "/data/group/question1"),
+                q2 = call("getMugByPath", "/data/question2");
+            group.p.nodeID = "g8";
+            assert.equal(q1.form.getAbsolutePath(q1), "/data/g8/question1");
+            assert.equal(q2.p.relevantAttr,
+                "/data/g8/question1 = 'valley girl' and /data/g8/question2 = 'dude'");
         });
 
-        it("should show warning icons on invalid questions", function (done) {
-            util.init({core: { form: INVALID_QUESTIONS_XML, onReady: function () {
-                var q0 = call("getMugByPath", "/data/q0"),
-                    q1 = call("getMugByPath", "/data/q1"),
-                    h1 = call("getMugByPath", "/data/h1");
-                assert(util.isTreeNodeValid(q0), "q0 is invalid: sanity check failed");
-                assert(!util.isTreeNodeValid(q1), "q1 should not be valid");
-                assert(!util.isTreeNodeValid(h1), "h1 should not be valid");
-                done();
-            }}});
+        it("should show warning icons on invalid questions", function () {
+            util.loadXML(INVALID_QUESTIONS_XML);
+            var q0 = call("getMugByPath", "/data/q0"),
+                q1 = call("getMugByPath", "/data/q1"),
+                h1 = call("getMugByPath", "/data/h1");
+            assert(util.isTreeNodeValid(q0), "q0 is invalid: sanity check failed");
+            assert(!util.isTreeNodeValid(q1), "q1 should not be valid");
+            assert(!util.isTreeNodeValid(h1), "h1 should not be valid");
         });
 
-        it("should increment item value on insert new select item as child of select", function (done) {
-            util.init({core: { form: INCREMENT_ITEM_XML, onReady: function () {
-                util.clickQuestion("question1");
-                var item = util.addQuestion("Item");
-                assert.equal(item.p.defaultValue, "item3");
-                done();
-            }}});
+        it("should increment item value on insert new select item as child of select", function () {
+            util.loadXML(INCREMENT_ITEM_XML);
+            util.clickQuestion("question1");
+            var item = util.addQuestion("Item");
+            assert.equal(item.p.nodeID, "item3");
         });
 
-        it("should increment item value on insert new select item after sibling item", function (done) {
-            util.init({core: { form: INCREMENT_ITEM_XML, onReady: function () {
-                util.clickQuestion("question1/item1");
-                var item = util.addQuestion("Item");
-                assert.equal(item.p.defaultValue, "item3");
-                done();
-            }}});
+        it("should increment item value on insert new select item after sibling item", function () {
+            util.loadXML(INCREMENT_ITEM_XML);
+            util.clickQuestion("question1/item1");
+            var item = util.addQuestion("Item");
+            assert.equal(item.p.nodeID, "item3");
         });
 
-        it("should add hidden value in repeat group", function (done) {
-            util.init({core: {onReady: function () {
-                util.addQuestion("Repeat", "repeat");
-                util.addQuestion.bind({prevId: "repeat"})("Text", "text");
-                util.addQuestion.bind({prevId: "repeat"})("DataBindOnly", "hidden");
-                util.assertXmlEqual(
-                            call('createXML'),
-                            HIDDEN_VALUE_IN_REPEAT_XML,
-                            {normalize_xmlns: true});
-                done();
-            }}});
+        it("should add hidden value in repeat group", function () {
+            util.loadXML("");
+            util.addQuestion("Repeat", "repeat");
+            util.addQuestion.bind({prevId: "repeat"})("Text", "text");
+            util.addQuestion.bind({prevId: "repeat"})("DataBindOnly", "hidden");
+            util.assertXmlEqual(
+                        call('createXML'),
+                        HIDDEN_VALUE_IN_REPEAT_XML,
+                        {normalize_xmlns: true});
         });
 
         it("should add question outside of collapsed group (ref group)", function () {
@@ -228,121 +213,109 @@ require([
                 "wrong selected mug: " + (selected && selected.p.nodeID));
         });
 
-        it("should load hidden value in repeat group", function (done) {
-            util.init({core: {form: HIDDEN_VALUE_IN_REPEAT_XML, onReady: function () {
-                util.assertJSTreeState(
-                    "repeat",
-                    "  text",
-                    "  hidden"
-                );
-                done();
-            }}});
+        it("should load hidden value in repeat group", function () {
+            util.loadXML(HIDDEN_VALUE_IN_REPEAT_XML);
+            util.assertJSTreeState(
+                "repeat",
+                "  text",
+                "  hidden"
+            );
         });
 
-        it("should load hidden values interspersed with other questions", function (done) {
-            util.init({core: {form: HIDDEN_AMONG_QUESTIONS_XML, onReady: function () {
-                util.assertJSTreeState(
-                    "hidden1",
-                    "select1",
-                    "  item1",
-                    "  item2",
-                    "hidden2",
-                    "select2",
-                    "  item1",
-                    "  item2",
-                    "hidden3",
-                    "group",
-                    "  hidden4",
-                    "  text3",
-                    "  hidden5",
-                    "  text4",
-                    "  hidden6",
-                    "hidden7",
-                    "text5",
-                    "hidden8"
-                );
-                done();
-            }}});
+        it("should load hidden values interspersed with other questions", function () {
+            util.loadXML(HIDDEN_AMONG_QUESTIONS_XML);
+            util.assertJSTreeState(
+                "hidden1",
+                "select1",
+                "  item1",
+                "  item2",
+                "hidden2",
+                "select2",
+                "  item1",
+                "  item2",
+                "hidden3",
+                "group",
+                "  hidden4",
+                "  text3",
+                "  hidden5",
+                "  text4",
+                "  hidden6",
+                "hidden7",
+                "text5",
+                "hidden8"
+            );
         });
 
-        it("should add hidden value at end of group", function (done) {
-            util.init({core: {form: INSERT_QUESTIONS_XML, onReady: function () {
-                util.addQuestion.bind({prevId: "hidden1"})("DataBindOnly", "hiddenA");
-                util.addQuestion.bind({prevId: "group/hidden2"})("DataBindOnly", "hiddenB");
-                util.assertJSTreeState(
-                    "text1",
-                    "text2",
-                    "group",
-                    "  text3",
-                    "  text4",
-                    "  hidden2",
-                    "  hiddenB",
-                    "text5",
-                    "hidden1",
-                    "hiddenA"
-                );
-                done();
-            }}});
+        it("should add hidden value at end of group", function () {
+            util.loadXML(INSERT_QUESTIONS_XML);
+            util.addQuestion.bind({prevId: "hidden1"})("DataBindOnly", "hiddenA");
+            util.addQuestion.bind({prevId: "group/hidden2"})("DataBindOnly", "hiddenB");
+            util.assertJSTreeState(
+                "text1",
+                "text2",
+                "group",
+                "  text3",
+                "  text4",
+                "  hidden2",
+                "  hiddenB",
+                "text5",
+                "hidden1",
+                "hiddenA"
+            );
         });
 
-        it("should add hidden value among other questions", function (done) {
-            util.init({core: {form: INSERT_QUESTIONS_XML, onReady: function () {
-                util.addQuestion.bind({prevId: "text1"})("DataBindOnly", "hiddenA");
-                util.addQuestion.bind({prevId: "group/text3"})("DataBindOnly", "hiddenB");
-                util.assertJSTreeState(
-                    "text1",
-                    "hiddenA",
-                    "text2",
-                    "group",
-                    "  text3",
-                    "  hiddenB",
-                    "  text4",
-                    "  hidden2",
-                    "text5",
-                    "hidden1"
-                );
-                done();
-            }}});
+        it("should add hidden value among other questions", function () {
+            util.loadXML(INSERT_QUESTIONS_XML);
+            util.addQuestion.bind({prevId: "text1"})("DataBindOnly", "hiddenA");
+            util.addQuestion.bind({prevId: "group/text3"})("DataBindOnly", "hiddenB");
+            util.assertJSTreeState(
+                "text1",
+                "hiddenA",
+                "text2",
+                "group",
+                "  text3",
+                "  hiddenB",
+                "  text4",
+                "  hidden2",
+                "text5",
+                "hidden1"
+            );
         });
 
-        it("should add question after selected question", function (done) {
-            util.init({core: {form: INSERT_QUESTIONS_XML, onReady: function () {
-                util.addQuestion.bind({prevId: "text1"})("Text", "textA");
-                util.addQuestion.bind({prevId: "group/text3"})("Text", "textB");
-                util.assertJSTreeState(
-                    "text1",
-                    "textA",
-                    "text2",
-                    "group",
-                    "  text3",
-                    "  textB",
-                    "  text4",
-                    "  hidden2",
-                    "text5",
-                    "hidden1"
-                );
-                done();
-            }}});
+        it("should add question after selected question", function () {
+            util.loadXML(INSERT_QUESTIONS_XML);
+            util.addQuestion.bind({prevId: "text1"})("Text", "textA");
+            util.addQuestion.bind({prevId: "group/text3"})("Text", "textB");
+            util.assertJSTreeState(
+                "text1",
+                "textA",
+                "text2",
+                "group",
+                "  text3",
+                "  textB",
+                "  text4",
+                "  hidden2",
+                "text5",
+                "hidden1"
+            );
         });
 
-        it("should add question after hidden value", function (done) {
-            util.init({core: {form: INSERT_QUESTIONS_XML, onReady: function () {
-                util.addQuestion.bind({prevId: "hidden1"})("Text", "textA");
-                util.addQuestion.bind({prevId: "group/hidden2"})("Text", "textB");
-                util.assertJSTreeState(
-                    "text1",
-                    "text2",
-                    "group",
-                    "  text3",
-                    "  text4",
-                    "  hidden2",
-                    "  textB",
-                    "text5",
-                    "hidden1",
-                    "textA"
-                );
-                done();
-            }}});
+        it("should add question after hidden value", function () {
+            util.loadXML(INSERT_QUESTIONS_XML);
+            util.addQuestion.bind({prevId: "hidden1"})("Text", "textA");
+            util.addQuestion.bind({prevId: "group/hidden2"})("Text", "textB");
+            util.assertJSTreeState(
+                "text1",
+                "text2",
+                "group",
+                "  text3",
+                "  text4",
+                "  hidden2",
+                "  textB",
+                "text5",
+                "hidden1",
+                "textA"
+            );
         });
 
         it("should add question after sole hidden value", function (done) {
@@ -355,6 +328,64 @@ require([
                 );
                 done();
             }}});
+        });
+
+        it("should display welcome message whenever there are no questions", function () {
+            util.loadXML("");
+            util.addQuestion("Text", "text1");
+            util.addQuestion("Text", "text2");
+
+            util.deleteQuestion("/data/text1");
+            assert(!$(".fd-default-panel").is(":visible"));
+            assert($(".fd-question-changer").is(":visible"));
+            util.deleteQuestion("/data/text2");
+            assert($(".fd-default-panel").is(":visible"));
+        });
+
+        describe("should", function () {
+            var form, dup;
+            before(function () {
+                form = util.loadXML("");
+                util.addQuestion("Text", "question1");
+                dup = util.addQuestion("Text", "question2");
+            });
+
+            it("show validation error on add question with duplicate path", function () {
+                dup.p.nodeID = "question1";
+                assert(form.vellum.ensureCurrentMugIsSaved(), "mug is not saved");
+                assert(!util.isTreeNodeValid(dup), "mug should not be valid");
+            });
+
+            it("reset question ID on dismiss duplicate path error", function () {
+                dup.p.nodeID = "question1";
+                var msg = dup.messages.get("nodeID", "mug-conflictedNodeId-warning");
+                assert(msg, "unexpected: validation error is missing");
+                dup.dropMessage("nodeID", "mug-conflictedNodeId-warning");
+                assert(util.isTreeNodeValid(dup), util.getMessages(dup));
+                assert.match(dup.p.nodeID, /^copy-\d+-of-question1$/);
+                assert(!dup.p.conflictedNodeId,
+                    "conflictedNodeId should not be set; got " + dup.p.conflictedNodeId);
+            });
+        });
+
+        describe("should show validation error on circular reference", function () {
+            var mug;
+            before(function () {
+                util.loadXML("");
+                mug = util.addQuestion("Text", "text");
+            });
+
+            _.each(["relevantAttr", "calculateAttr", "label"], function (attr) {
+                it("in " + attr, function () {
+                    assert.deepEqual(mug.messages.get(attr), []);
+                    mug.form.vellum.warnOnCircularReference(
+                        attr, mug.form, mug, ".", "period");
+                    assert.equal(mug.messages.get(attr).length, 1,
+                                 util.getMessages(mug));
+                    mug.dropMessage(attr, "core-circular-reference-warning");
+                    assert.deepEqual(mug.messages.get(attr), []);
+                });
+            });
         });
 
         describe("type changer", function () {
@@ -376,6 +407,9 @@ require([
                 map.Text = util.addQuestion("Text");
                 map.Select = util.addQuestion("Select");
                 map.SelectDynamic = util.addQuestion("SelectDynamic");
+                map.Transfer = util.addQuestion("Transfer");
+                map.Dispense = util.addQuestion("Dispense");
+                map.Receive = util.addQuestion("Receive");
             });
 
             test("Text", "Trigger", true);
@@ -386,6 +420,7 @@ require([
             test("Text", "MSelect", true);
             test("Text", "SelectDynamic");
             test("Text", "MSelectDynamic");
+            test("Text", "Transfer");
 
             test("Select", "MSelect", true);
             test("Select", "Text");
@@ -395,6 +430,14 @@ require([
             test("SelectDynamic", "MSelectDynamic", true);
             test("SelectDynamic", "Select");
             test("SelectDynamic", "MSelect");
+
+            test("Transfer", "Text");
+            test("Transfer", "Dispense", true);
+            test("Transfer", "Receive", true);
+            test("Dispense", "Transfer", true);
+            test("Dispense", "Receive", true);
+            test("Receive", "Transfer", true);
+            test("Receive", "Dispense", true);
         });
 
         describe("drag+drop should", function () {

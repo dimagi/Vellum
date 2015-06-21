@@ -45,23 +45,20 @@ define([
     debug
 ) {
     var mugTypes = mugs.baseMugTypes.normal,
-        Itemset;
+        Itemset, isAdvancedItemsetEnabled,
+        END_FILTER = /\[[^\[]*\]$/;
 
     Itemset = util.extend(mugs.defaultOptions, {
         isControlOnly: true,
-        typeName: 'External Data',
+        typeName: 'Lookup Table Data',
         tagName: 'itemset',
-        icon: 'icon-circle-blank',
+        icon: 'icon-th',
         isTypeChangeable: false,
         // have to delete the parent select
         isRemoveable: false,
         isCopyable: false,
         getIcon: function (mug) {
-            if (mug.parentMug.__className === "SelectDynamic") {
-                return 'icon-circle-blank';
-            } else {
-                return 'icon-check-empty';
-            }
+            return 'icon-th';
         },
         init: function (mug, form, baseSpec) {
             mug.p.itemsetData = {};
@@ -69,9 +66,14 @@ define([
         writeControlLabel: false,
         writeControlRefAttr: null,
         writeCustomXML: function (xmlWriter, mug) {
-            var data = mug.p.itemsetData;
+            var data = mug.p.itemsetData,
+                nodeset = data.nodeset,
+                filter = mug.p.filter;
+            if (filter) {
+                nodeset += '[' + filter + ']';
+            }
             xmlWriter.writeAttributeString(
-                'nodeset', data.nodeset || '');
+                'nodeset', nodeset || '');
             xmlWriter.writeStartElement('label');
             xmlWriter.writeAttributeString(
                 'ref', data.labelRef || '');
@@ -94,6 +96,7 @@ define([
             otherItext: { presence: 'notallowed' },
             appearance: { presence: 'notallowed' },
             itemsetData: {
+                lstring: 'Lookup Table',
                 visibility: 'visible_if_present',
                 presence: 'optional',
                 widget: itemsetWidget,
@@ -108,17 +111,67 @@ define([
                     if (!itemsetData.labelRef) {
                         return "Choice Label must be specified.";
                     }
+
+                    // HACK accessing async-loaded data; it may not be here yet
+                    var fixtures = datasources.getPossibleFixtures(),
+                        notCustom = _.some(fixtures, function (fixture) {
+                            return fixture.src === itemsetData.instance.src;
+                        }),
+                        choices = datasources.autocompleteChoices(itemsetData.instance.src),
+                        filterRegex = /\[[^\[]+]/g,
+                        strippedValue = itemsetData.valueRef.replace(filterRegex, ""),
+                        strippedLabel = itemsetData.labelRef.replace(filterRegex, "");
+
+                    if (notCustom && !_.contains(choices, strippedValue)) {
+                        return itemsetData.valueRef + " was not found in the lookup table";
+                    } else if (notCustom && !_.contains(choices, strippedLabel)) {
+                        return itemsetData.labelRef + " was not found in the lookup table";
+                    }
+
                     return 'pass';
                 }
+            },
+            filter: {
+                lstring: 'Filter',
+                presence: 'optional',
+                widget: widgets.xPath,
+                xpathType: 'bool',
+                visibility: 'visible',
+                leftPlaceholder: '',
+                autocompleteSources: function() {
+                    // HACK accessing async-loaded data; it may not be here yet
+                    // TODO convert to callback; setup auto-complete when data is ready
+                    return datasources.autocompleteChoices(this.p.itemsetData.instance.src);
+                },
+                help: "This is an XPath expression that will filter the set " +
+                      "of choices from the lookup table",
             }
         }
     });
 
     function afterDynamicSelectInsert(form, mug) {
-        form.createQuestion(mug, 'into', "Itemset", true);
+        return form.createQuestion(mug, 'into', "Itemset", true);
     }
 
+    var itemsetDataSpec = {
+            presence: 'optional',
+            visibility: 'hidden',
+            serialize: function (value, key, mug, data) {
+                var children = mug.form.getChildren(mug);
+                return _.pluck(_.pluck(children, "p"), key);
+            },
+            deserialize: function (data, key, mug) {
+                _.each(data[key], function (value) {
+                    var itemset = afterDynamicSelectInsert(mug.form, mug);
+                    itemset.p[key] = value;
+                });
+            }
+        };
+
     $.vellum.plugin("itemset", {}, {
+        init: function () {
+            isAdvancedItemsetEnabled = this.opts().features.advanced_itemsets;
+        },
         getSelectQuestions: function () {
             return this.__callOld().concat([
                 "SelectDynamic",
@@ -130,22 +183,28 @@ define([
             types.auxiliary.Itemset = Itemset;
             types.normal = $.extend(types.normal, {
                 "MSelectDynamic": util.extend(mugTypes.MSelect, {
-                    typeName: 'Multiple Answer - Dynamic List',
+                    typeName: 'Multiple Answer Lookup Table',
                     typeChangeError: function (mug, typeName) {
                         return typeName === "SelectDynamic" ? "" : "Can only change to a dynamic single answer";
                     },
                     validChildTypes: ["Itemset"],
                     maxChildren: 1,
                     afterInsert: afterDynamicSelectInsert,
+                    spec: {
+                        itemsetData: itemsetDataSpec,
+                    }
                 }),
                 "SelectDynamic": util.extend(mugTypes.Select, {
-                    typeName: 'Single Answer - Dynamic List',
+                    typeName: 'Single Answer Lookup Table',
                     typeChangeError: function (mug, typeName) {
                         return typeName === "MSelectDynamic" ? "" : "Can only change to a dynamic multiple answer";
                     },
                     validChildTypes: ["Itemset"],
                     maxChildren: 1,
-                    afterInsert: afterDynamicSelectInsert
+                    afterInsert: afterDynamicSelectInsert,
+                    spec: {
+                        itemsetData: itemsetDataSpec,
+                    }
                 })
             });
             return types;
@@ -163,10 +222,12 @@ define([
                         debug.log("Unknown parent type: " + parentMug.__className);
                     }
                     mug = adaptItemset(mug, form);
-                    var nodeset = $element.popAttr('nodeset');
+                    var nodeset = parseNodeset($element.popAttr('nodeset'));
+                    mug.p.filter = nodeset.filter;
                     mug.p.itemsetData = {
-                        instance: form.parseInstance(nodeset, mug, "itemsetData.instance"),
-                        nodeset: nodeset,
+                        instance: form.parseInstance(
+                                    nodeset.value, mug, "itemsetData.instance"),
+                        nodeset: nodeset.value,
                         labelRef: $element.children('label').attr('ref'),
                         valueRef: $element.children('value').attr('ref')
                     };
@@ -184,6 +245,11 @@ define([
                     updateDataSource(mug, event.val, event.previous);
                 }
             });
+        },
+        getLogicProperties: function () {
+            var ret = this.__callOld();
+            ret.push('filter');
+            return ret;
         }
     });
 
@@ -202,28 +268,105 @@ define([
         }
     }
 
+    function parseNodeset(nodeset) {
+        var i = nodeset.search(END_FILTER);
+        if (i !== -1) {
+            return {
+                value: nodeset.slice(0, i),
+                filter: nodeset.slice(i + 1, -1)
+            };
+        }
+        return {value: nodeset, filter: ''};
+    }
+
     function itemsetWidget(mug, options) {
-        var widget = datasources.dataSourceWidget(mug, options, "Data Source"),
+        function isEmptyValue(value) {
+            return !value || _.all(_.map(value, _.isEmpty));
+        }
+
+        function updateAutocomplete() {
+            var choices = datasources.autocompleteChoices(super_getValue().src);
+            labelRef.addAutocomplete(choices, super_handleChange);
+            valueRef.addAutocomplete(choices, super_handleChange);
+            return choices;
+        }
+
+        function onOptionsLoaded() {
+            optionsLoaded = true;
+            if (canUpdateAutocomplete) {
+                // cannot do this until widget is fully initialized
+                // because updateAutocomplete() calls super_getValue()
+                var choices = updateAutocomplete();
+                if (choices && choices.length && isEmptyValue(current.value)) {
+                    if (_.contains(choices, "name")) {
+                        labelRef.val("name");
+                    } else {
+                        labelRef.val(choices[0]);
+                    }
+                    if (_.contains(choices, "@id")) {
+                        valueRef.val("@id");
+                    } else {
+                        valueRef.val(choices.length > 1 ? choices[1] : choices[0]);
+                    }
+                    if (current.hasOwnProperty("value")) {
+                        // HACK push async-loaded default value to the mug.
+                        // This should not be done in UI (widget) code.
+                        // TODO kick off async load options in SelectDynamic mug
+                        // init and clean up related hacks.
+                        super_handleChange();
+                    }
+                }
+            }
+        }
+
+        options = _.extend({}, options, {onOptionsLoaded: onOptionsLoaded});
+        if (isAdvancedItemsetEnabled) {
+            options.hasAdvancedEditor = true;
+            options.getSource = function (mug) {
+                var val = super_getValue();
+                if (mug.p.filter) {
+                    val.query += "[" + mug.p.filter + "]";
+                }
+                return val;
+            };
+            options.setSource = function (source, mug) {
+                var val = source,
+                    nodeset = parseNodeset(source.query);
+                val.query = nodeset.value;
+                mug.p.filter = nodeset.filter;
+                super_setValue(val);
+            };
+        }
+
+        var current = {},
+            optionsLoaded = false,
+            canUpdateAutocomplete = false,
+            widget = datasources.fixtureWidget(mug, options, "Lookup Table"),
             super_getUIElement = widget.getUIElement,
             super_getValue = widget.getValue,
             super_setValue = widget.setValue,
-            handleChange = widget.handleChange.bind(widget),
-            labelRef = refSelect("label_ref", "Choice Label", widget.isDisabled()),
-            valueRef = refSelect("value_ref", "Choice Value", widget.isDisabled());
+            super_handleChange = widget.handleChange,
+            labelRef = refSelect("label_ref", "Label Field", false),
+            valueRef = refSelect("value_ref", "Value Field", false);
 
-        labelRef.onChange(handleChange);
-        valueRef.onChange(handleChange);
+        widget.handleChange = function() {
+            updateAutocomplete();
+            super_handleChange();
+        };
+
+        labelRef.onChange(super_handleChange);
+        valueRef.onChange(super_handleChange);
 
         widget.getUIElement = function () {
-            return super_getUIElement()
-                .append(labelRef.element)
-                .append(valueRef.element);
+            return $('<div>').append(super_getUIElement())
+                .append(valueRef.element)
+                .append(labelRef.element);
         };
 
         widget.getValue = function () {
             var val = super_getValue();
             return {
-                instance: ($.trim(val.src) ? {id: val.id, src: val.src} : null),
+                instance: ($.trim(val.src) ? {id: val.id, src: val.src} : {id: null, src: null}),
                 nodeset: val.query,
                 labelRef: labelRef.val(),
                 valueRef: valueRef.val()
@@ -231,7 +374,15 @@ define([
         };
 
         widget.setValue = function (val) {
-            val = val || {};
+            var hasValue = current.hasOwnProperty("value");
+            current.value = val;
+            if (optionsLoaded && !hasValue && isEmptyValue(val)) {
+                // ignore first call (during core widget init) to retain the
+                // default value that was set when options were loaded
+                super_handleChange();
+                return;
+            }
+            val = _.isEmpty(val) ? {instance: {}} : val;
             super_setValue({
                 id: (val.instance ? val.instance.id : ""),
                 src: (val.instance ? val.instance.src : ""),
@@ -241,6 +392,12 @@ define([
             valueRef.val(val.valueRef);
         };
 
+        canUpdateAutocomplete = true;
+        if (optionsLoaded) {
+            // call again to update auto-complete and set defaults
+            onOptionsLoaded();
+        }
+
         return widget;
     }
 
@@ -248,6 +405,14 @@ define([
         var input = $("<input type='text' class='input-block-level'>");
         input.attr("name", name);
         return {
+            addAutocomplete: function(sources, changeFunction) {
+                util.dropdownAutocomplete(input, sources);
+                input.on("blur change", function() {
+                    if (_.isFunction(changeFunction)) {
+                        changeFunction();
+                    }
+                });
+            },
             element: widgets.util.getUIElement(input, label, isDisabled),
             val: function (value) {
                 if (_.isUndefined(value)) {

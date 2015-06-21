@@ -348,6 +348,7 @@ require([
                     ["Image", "Select"],
                     ["Audio", "Select"],
                     ["Video", "Select"],
+                    ["Image", "Audio"],
                     ["PhoneNumber", "Text"],
                     ["Select", "Text"],
                     ["MSelect", "Text"],
@@ -425,21 +426,18 @@ require([
             });
         });
 
-        it("question type change survives save + load", function (done) {
-            function test() {
-                addQuestion("Text", "question");
-                var mug = call("getMugByPath", "/data/question");
+        it("question type change survives save + load", function () {
+            util.loadXML("");
+            addQuestion("Text", "question");
+            var mug = call("getMugByPath", "/data/question");
 
-                call("changeMugType", mug, "Trigger");
+            call("changeMugType", mug, "Trigger");
 
-                util.saveAndReload(function () {
-                    // verify type change
-                    mug = call("getMugByPath", "/data/question");
-                    assert.equal(mug.__className, "Trigger");
-                    done();
-                });
-            }
-            util.init({core: {onReady: test}});
+            util.saveAndReload(function () {
+                // verify type change
+                mug = call("getMugByPath", "/data/question");
+                assert.equal(mug.__className, "Trigger");
+            });
         });
 
         it("should allow user to view longs but not add them", function() {
@@ -479,6 +477,15 @@ require([
             util.deleteQuestion("question1/item2");
             util.clickQuestion("question1");
             assert.ok($(changerSelector + " .change-question:not([data-qtype*='Select'])").length > 0);
+        });
+
+        it("should show error on delete validation condition but not message", function() {
+            util.loadXML("");
+            var text = util.addQuestion("Text", "text");
+            text.p.constraintAttr = "a = b";
+            text.p.constraintMsgItext.set("A != B");
+            text.p.constraintAttr = "";
+            assert(!util.isTreeNodeValid(text), "question should not be valid");
         });
     });
 });

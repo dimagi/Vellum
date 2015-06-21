@@ -82,10 +82,6 @@ define([
     }
 
     LogicManager.prototype = {
-        getErrors: function (mug) {
-            return _.pluck(
-                _.values(this.errors[mug.ufid] || {}), 'message');
-        },
         clearReferences: function (mug, property) {
             this.all = this.all.filter(function (elem) { 
                 return elem.mug !== mug.ufid || elem.property !== property;
@@ -100,58 +96,68 @@ define([
                     return p.initial_context ===
                         xpathmodels.XPathInitialContextEnum.ROOT; 
                 }),
-                error = {
-                    level: "form-warning",
-                    key: mug.ufid + "-" + property + "-badpath",
-                    message: []
-                };
+                unknowns = [];
 
             // append item for each mug referenced (by absolute path) in mug's
             // property value
             this.all = this.all.concat(paths.map(function (path) {
                 var pathString = path.pathWithoutPredicates(),
                     pathWithoutRoot = pathString.substring(1 + pathString.indexOf('/', 1)),
-                    refMug = _this.form.getMugByPath(pathString);
+                    refMug = _this.form.getMugByPath(pathString),
+                    xpath = path.toXPath();
 
                 // last part is hack to allow root node in data parents
                 if (!refMug &&
                     (!mug.options.ignoreReferenceWarning || !mug.options.ignoreReferenceWarning(mug)) &&
                     _this.opts.allowedDataNodeReferences.indexOf(pathWithoutRoot) === -1 &&
-                    !(property === "dataParent" && pathString === _this.form.getBasePath().slice(0,-1))) {
-                    error.message.push("The question '" + mug.p.nodeID + 
-                        "' references an unknown question " + path.toXPath() + 
-                        " in its " + mug.p.getDefinition(property).lstring + ".");
-
+                    !(property === "dataParent" && pathString === _this.form.getBasePath().slice(0,-1)))
+                {
+                    unknowns.push(xpath);
                 }
                 return {
                     mug: mug.ufid, // mug with property value referencing refMug
                     ref: refMug ? refMug.ufid : "", // referenced Mug
                     property: property,
-                    path: path.toXPath(), // path to refMug
+                    path: xpath, // path to refMug
                     sourcePath: _this.form.getAbsolutePath(mug)
                 };      
             }));
-           
-            if (error.message.length > 0) {
+            if (unknowns.length > 0) {
                 if (!this.errors[mug.ufid]) {
                     this.errors[mug.ufid] = {};
                 }
-                this.errors[mug.ufid][property] = error;
-            } else {
-                if (this.errors[mug.ufid]) {
-                    delete this.errors[mug.ufid][property];
-                }
-            }        
-        },
-        updateAllReferences: function (mug) {
-            // avoid control-only nodes
-            if (mug.p.nodeID) {
-                for (var i = 0; i < util.XPATH_REFERENCES.length; i++) {
-                    var property = util.XPATH_REFERENCES[i];
-                    this.clearReferences(mug, property);
-                    this.addReferences(mug, property);
-                }
+                this.errors[mug.ufid][property] = true;
+            } else if (this.errors[mug.ufid]) {
+                delete this.errors[mug.ufid][property];
             }
+            return [{
+                key: "logic-bad-path-warning",
+                level: mug.WARNING,
+                message: (function () {
+                    if (!unknowns.length) {
+                        return "";
+                    } else if (unknowns.length === 1) {
+                        return "Unknown question: " + unknowns[0];
+                    }
+                    return "Unknown questions:\n- " + unknowns.join("\n- ");
+                })()
+            }];
+        },
+        updateReferences: function (mug, property) {
+            function update(property) {
+                _this.clearReferences(mug, property);
+                messages[property] = _this.addReferences(mug, property);
+            }
+            var _this = this,
+                messages = {};
+            if (property) {
+                if (util.XPATH_REFERENCES.indexOf(property) !== -1) {
+                    update(property);
+                }
+            } else {
+                _.each(util.XPATH_REFERENCES, update);
+            }
+            mug.addMessages(messages);
         },
         /**
          * Update references to a node with its new path. Used when a node is
@@ -192,7 +198,8 @@ define([
                     orig = expr.getText();
                 expr.updatePath(paths[0], paths[1]);
                 if (orig !== expr.getText()) {
-                    mug.p[property] = expr.getText();
+                    // update without triggering validation/events
+                    mug.p.set(property, expr.getText());
                 }
             }
             this.forEachReferencingProperty(data, updatePath, subtree);
@@ -204,9 +211,12 @@ define([
          * references.
          */
         forEachBrokenReference: function(func) {
-            _.each(this.errors, function (errorsByProperty, ufid) {
-                if (_.find(errorsByProperty, function(error) { return error; })) {
-                    func(this.form.getMugByUFID(ufid));
+            _.each(_.keys(this.errors), function (ufid) {
+                var mug = this.form.getMugByUFID(ufid);
+                if (mug) {
+                    func(mug);
+                } else {
+                    delete this.errors[ufid];
                 }
             }, this);
         },
@@ -245,6 +255,7 @@ define([
     };
 
     return {
-        LogicManager: LogicManager
+        LogicManager: LogicManager,
+        LogicExpression: LogicExpression
     };
 });

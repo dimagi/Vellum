@@ -119,6 +119,17 @@ define([
                 mug.p.dataSourceChanged = false;
             },
             spec: {
+                nodeID: {
+                    deserialize: function (data, key, mug) {
+                        var deserialize = mugs.baseSpecs.databind.nodeID.deserialize;
+                        if (data.dataSource) {
+                            var id = data.id.slice(0, data.id.lastIndexOf("/")) || data.id,
+                                copy = _.extend({}, data, {id: id});
+                            return deserialize(copy, key, mug);
+                        }
+                        return deserialize(data, key, mug);
+                    }
+                },
                 repeat_count: _.extend({}, oldRepeat.spec.repeat_count, {
                     visibility: function (mug) {
                         return !mug.p.dataSource.idsQuery;
@@ -250,7 +261,7 @@ define([
     }
 
     function idsQueryDataSourceWidget(mug, options) {
-        var widget = datasources.dataSourceWidget(
+        var widget = datasources.advancedDataSourceWidget(
                                     mug, options, "Model Iteration ID Query"),
             super_getValue = widget.getValue,
             super_setValue = widget.setValue;
@@ -300,6 +311,7 @@ define([
         if (Boolean(value && value.idsQuery) !== Boolean(previous && previous.idsQuery)) {
             var nodeID = mug.p.nodeID,
                 currentPath = mug.form.getAbsolutePath(mug),
+                oldParent = mug.parentMug,
                 oldPath;
             if (value && value.idsQuery) {
                 oldPath = currentPath.replace(/\/item$/, "");
@@ -310,7 +322,7 @@ define([
                 }
             }
             mug.form.vellum.handleMugRename(
-                mug.form, mug, nodeID, nodeID, currentPath, oldPath);
+                mug.form, mug, nodeID, nodeID, currentPath, oldPath, oldParent);
         }
     }
 

@@ -1,0 +1,35 @@
+<div class="fd-copy-paste-help">
+    <h3>Copying and Pasting Questions</h3>
+    <div class="copy-paste-help">
+        These actions are available via the browser's Edit menu, and you can also use:
+        <div class="row">
+            <div class="span3">
+                <h1><%=metachar%>C</h1>
+                <span>for copy</span>
+            </div>
+            <!--div class="span3">
+                <h1><%=metachar%>X</h1>
+                <span>for cut</span>
+            </div-->
+            <div class="span3">
+                <h1><%=metachar%>V</h1>
+                <span>for paste</span>
+            </div>
+        </div>
+    </div>
+    <div class="copy-paste-box hide">
+        <p>Copy from or Paste into this text box: <textarea></textarea></p>
+        <p><button class="btn insert-questions">Insert Questions</button></p>
+    </div>
+    <h3>Selecting Multiple Questions</h3>
+    <div class="row">
+        Hold <strong><%
+            if (metachar[metachar.length - 1] === "+") {
+                %><%=metachar.slice(0, -1)%><%
+            } else {
+                %><%=metachar%><%
+            } %></strong> and click on each question.
+    </div>
+    <h3>Other Tips</h3>
+    <p>Questions can be copied between forms, and even to other apps.</p>
+</div>

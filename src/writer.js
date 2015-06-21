@@ -37,13 +37,7 @@ define([
         
         createBindList(dataTree, xmlWriter);
         
-        _.each(form.getSetValues(), function (setValue) {
-            xmlWriter.writeStartElement('setvalue');
-            xmlWriter.writeAttributeString('event', setValue.event);
-            xmlWriter.writeAttributeString('ref', setValue.ref);
-            xmlWriter.writeAttributeString('value', setValue.value);
-            xmlWriter.writeEndElement();
-        });
+        createSetValues(dataTree, form, xmlWriter);
 
         form.vellum.contributeToModelXML(xmlWriter);
         
@@ -117,6 +111,9 @@ define([
         dataTree.walk(function (mug, nodeID, processChildren) {
             if (mug && mug.options.getTagName) {
                 nodeID = mug.options.getTagName(mug, nodeID);
+                if (nodeID === null) {
+                    return;
+                }
             }
             xmlWriter.writeStartElement(nodeID);
             if (!mug) {
@@ -142,6 +139,9 @@ define([
                 
                 if (dataValue){
                     xmlWriter.writeString(dataValue);
+                }
+                if (mug.options.writeDataNodeXML) {
+                    mug.options.writeDataNodeXML(xmlWriter, mug);
                 }
                 if (keyAttr){
                     xmlWriter.writeAttributeString("key", keyAttr);
@@ -174,6 +174,25 @@ define([
                     });
                     xmlWriter.writeEndElement();
                 });
+            }
+            processChildren();
+        });
+    };
+
+    var createSetValues = function (dataTree, form, xmlWriter) {
+        function writeSetValue(setValue) {
+            xmlWriter.writeStartElement('setvalue');
+            xmlWriter.writeAttributeString('event', setValue.event);
+            xmlWriter.writeAttributeString('ref', setValue.ref);
+            xmlWriter.writeAttributeString('value', setValue.value);
+            xmlWriter.writeEndElement();
+        }
+
+        _.each(form.getSetValues(), writeSetValue);
+
+        dataTree.walk(function (mug, nodeID, processChildren) {
+            if(mug && mug.options.getSetValues) {
+                _.each(mug.options.getSetValues(mug), writeSetValue);
             }
             processChildren();
         });
@@ -241,7 +260,7 @@ define([
             labelRef = "jr:itext('" + labelItext.id + "')";
             // iID is optional so by extension Itext is optional.
             if (labelItext.isEmpty() &&
-                    mug.spec.labelItext.presence === 'optional') {
+                    mug.getPresence("labelItext") === 'optional') {
                 labelRef = '';
             }
         }

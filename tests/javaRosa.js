@@ -17,7 +17,14 @@ require([
     'text!static/javaRosa/itext-item-rename.xml',
     'text!static/javaRosa/itext-item-rename-group-move.xml',
     'text!static/javaRosa/itext-item-non-auto-id.xml',
-    'text!static/javaRosa/select1-help.xml'
+    'text!static/javaRosa/select1-help.xml',
+    'text!static/javaRosa/no-label-text-one-lang.xml',
+    'text!static/javaRosa/test-xml-1.xml',
+    'text!static/javaRosa/test-xml-2.xml',
+    'text!static/javaRosa/test-xml-3.xml',
+    'text!static/javaRosa/test-xml-4.xml',
+    'text!static/markdown/with-markdown.xml',
+    'text!static/markdown/no-markdown.xml'
 ], function (
     chai,
     $,
@@ -36,82 +43,79 @@ require([
     ITEXT_ITEM_RENAME_XML,
     ITEXT_ITEM_RENAME_GROUP_MOVE_XML,
     ITEXT_ITEM_NON_AUTO_ID_XML,
-    SELECT1_HELP_XML
+    SELECT1_HELP_XML,
+    NO_LABEL_TEXT_ONE_LANG_XML,
+    TEST_XML_1,
+    TEST_XML_2,
+    TEST_XML_3,
+    TEST_XML_4,
+    WITH_MARKDOWN_XML,
+    NO_MARKDOWN_XML
 ) {
     var assert = chai.assert,
         call = util.call;
 
     describe("The javaRosa plugin with multiple languages", function () {
+        before(function (done) {
+            util.init({
+                javaRosa: {langs: ['en', 'hin']},
+                core: {onReady: function () { done(); }}
+            });
+        });
+
         it("should not show itext errors when there is text in any language", function (done) {
-            util.init({
-                javaRosa: {langs: ['en', 'hin']},
-                core: {
-                    form: TEST_XML_1, 
-                    onReady: function () {
-                        $("textarea[name=itext-en-constraintMsg]").val("").change();
-                        util.saveAndReload(function () {
-                            // there should be no errors on load
-                            // todo: this should inspect the model, not UI
-                            var errors = $(".alert-block");
-                            assert.equal(errors.length, 0, errors.text());
-                            done();
-                        });
-                    }
-                }
-            });
-        });
-
-        it("should show warning on load for with unknown language", function (done) {
-            util.init({
-                javaRosa: {langs: ['en', 'hin']},
-                core: {
-                    form: TEST_XML_3,
-                    onReady: function () {
-                        // todo: this should inspect the model, not UI
-                        var errors = $(".alert-block"),
-                            text = errors.text();
-                        assert.equal(errors.length, 1, text);
-                        assert(text.indexOf("You have languages in your form that are not specified") > -1, text);
-                        assert(text.indexOf("page: es.") > -1, text);
-                        done();
-                    }
-                }
-            });
-        });
-
-        it("should preserve itext values on load + save", function (done) {
-            util.init({core: {onReady: function () {
-                util.addQuestion("Text", "question1");
-                $(".btn:contains(image)").click();
-                $(".btn:contains(audio)").click();
-                $(".btn:contains(video)").click();
-                $(".btn:contains(long)").click();
-                $(".btn:contains(short)").click();
-                $(".btn:contains(custom)").click();
-                $(".fd-modal-generic-container").find("input").val("custom");
-                $(".fd-modal-generic-container").find(".btn:contains(Add)").click();
-                $("[name='itext-en-label']").val('question1 en label').change();
-                $("[name='itext-hin-label']").val('question1 hin label').change();
-                $("[name='itext-en-constraintMsg']").val('question1 en validation').change();
-                $("[name='itext-hin-constraintMsg']").val('question1 hin validation').change();
-                $("[name='itext-en-hint']").val('question1 en hint').change();
-                $("[name='itext-hin-hint']").val('question1 hin hint').change();
-                $("[name='itext-en-help']").val('question1 en help').change();
-                $("[name='itext-hin-help']").val('question1 hin help').change();
-                $("[name='itext-en-label-long']").val("question1 en long").change();
-                $("[name='itext-hin-label-long']").val("question1 hin long").change();
-                $("[name='itext-en-label-short']").val("question1 en short").change();
-                $("[name='itext-hin-label-short']").val("question1 hin short").change();
-                $("[name='itext-en-label-custom']").val("question1 en custom").change();
-                $("[name='itext-hin-label-custom']").val("question1 hin custom").change();
-
-                util.assertXmlEqual(
-                    call('createXML'),
-                    util.xmlines(TEST_XML_2),
-                    {normalize_xmlns: true}
-                );
+            util.loadXML(TEST_XML_1);
+            $("textarea[name=itext-en-constraintMsg]").val("").change();
+            util.saveAndReload(function () {
+                // there should be no errors on load
+                // todo: this should inspect the model, not UI
+                var errors = $(".alert-block");
+                assert.equal(errors.length, 0, errors.text());
                 done();
-            }}});
+            });
+        });
+
+        it("should show warning on load for with unknown language", function () {
+            util.loadXML(TEST_XML_3, null, /You have languages in your form/);
+            // todo: this should inspect the model, not UI
+            var errors = $(".alert-block"),
+                text = errors.text();
+            assert.equal(errors.length, 1, text);
+            assert(text.indexOf("You have languages in your form that are not specified") > -1, text);
+            assert(text.indexOf("page: es.") > -1, text);
+        });
+
+        it("should preserve itext values on load + save", function () {
+            util.loadXML("");
+            util.addQuestion("Text", "question1");
+            $(".btn:contains(image)").click();
+            $(".btn:contains(audio)").click();
+            $(".btn:contains(video)").click();
+            $(".btn:contains(long)").click();
+            $(".btn:contains(short)").click();
+            $(".btn:contains(custom)").click();
+            $(".fd-modal-generic-container").find("input").val("custom");
+            $(".fd-modal-generic-container").find(".btn:contains(Add)").click();
+            $("[name='itext-en-label']").val('question1 en label').change();
+            $("[name='itext-hin-label']").val('question1 hin label').change();
+            $("[name='itext-en-constraintMsg']").val('question1 en validation').change();
+            $("[name='itext-hin-constraintMsg']").val('question1 hin validation').change();
+            $("[name='itext-en-hint']").val('question1 en hint').change();
+            $("[name='itext-hin-hint']").val('question1 hin hint').change();
+            $("[name='itext-en-help']").val('question1 en help').change();
+            $("[name='itext-hin-help']").val('question1 hin help').change();
+            $("[name='itext-en-label-long']").val("question1 en long").change();
+            $("[name='itext-hin-label-long']").val("question1 hin long").change();
+            $("[name='itext-en-label-short']").val("question1 en short").change();
+            $("[name='itext-hin-label-short']").val("question1 hin short").change();
+            $("[name='itext-en-label-custom']").val("question1 en custom").change();
+            $("[name='itext-hin-label-custom']").val("question1 hin custom").change();
+
+            util.assertXmlEqual(
+                call('createXML'),
+                util.xmlines(TEST_XML_2),
+                {normalize_xmlns: true}
+            );
         });
 
         it("itext widget should show placeholder when value is node ID (any language)", function () {
@@ -266,47 +270,43 @@ require([
             assert(util.saveButtonEnabled(), "save button is disabled");
         });
 
-        it("should update output refs when question ids change", function (done) {
-            util.init({core: {onReady: function () {
-                util.addQuestion("Text", "question1");
-                util.addQuestion("Text", "question2");
-                $("[name='itext-en-label']").val('<output value="/data/question1" /> a ' +
-                    '<output value="/data/question1"/> b ' +
-                    '<output value="/data/question1"></output> c ' +
-                    '<output value="/data/question1" ></output> d ' +
-                    '<output value="if(/data/question1 = \'\', \'\', format-date(date(/data/question1), \'%a%b%c\'))" />').change();
-                $("[name='itext-hin-label']").val('<output value="/data/question1"></output>').change();
-                util.clickQuestion("question1");
-                $("[name='property-nodeID']").val('first_question').change();
+        it("should update output refs when question ids change", function () {
+            util.loadXML("");
+            util.addQuestion("Text", "question1");
+            util.addQuestion("Text", "question2");
+            $("[name='itext-en-label']").val('<output value="/data/question1" /> a ' +
+                '<output value="/data/question1"/> b ' +
+                '<output value="/data/question1"></output> c ' +
+                '<output value="/data/question1" ></output> d ' +
+                '<output value="if(/data/question1 = \'\', \'\', format-date(date(/data/question1), \'%a%b%c\'))" />').change();
+            $("[name='itext-hin-label']").val('<output value="/data/question1"></output>').change();
+            util.clickQuestion("question1");
+            $("[name='property-nodeID']").val('first_question').change();
 
-                util.assertXmlEqual(
-                    call('createXML'),
-                    util.xmlines(TEST_XML_4),
-                    {normalize_xmlns: true}
-                );
-                done();
-            }}});
+            util.assertXmlEqual(
+                call('createXML'),
+                util.xmlines(TEST_XML_4),
+                {normalize_xmlns: true}
+            );
         });
 
-        it("should only update exact output ref matches when question ids change", function (done) {
-            util.init({core: {onReady: function () {
-                util.addQuestion("Text", "question1");
-                util.addQuestion("Text", "question2");
-                $("[name='itext-en-label']").val('<output value="/data/question1" /> ' +
-                    '<output value="/data/question11" /> ' +
-                    '<output value="/data/question1/b" /> ' +
-                    '<output value="/data/question1b" /> ').change();
-                $("[name='itext-hin-label']").val('question2').change();
-                util.clickQuestion("question1");
-                $("[name='property-nodeID']").val('first_question').change();
+        it("should only update exact output ref matches when question ids change", function () {
+            util.loadXML("");
+            util.addQuestion("Text", "question1");
+            util.addQuestion("Text", "question2");
+            $("[name='itext-en-label']").val('<output value="/data/question1" /> ' +
+                '<output value="/data/question11" /> ' +
+                '<output value="/data/question1/b" /> ' +
+                '<output value="/data/question1b" /> ').change();
+            $("[name='itext-hin-label']").val('question2').change();
+            util.clickQuestion("question1");
+            $("[name='property-nodeID']").val('first_question').change();
 
-                util.assertXmlEqual(
-                    call('createXML'),
-                    OUTPUT_REFS_XML,
-                    {normalize_xmlns: true}
-                );
-                done();
-            }}});
+            util.assertXmlEqual(
+                call('createXML'),
+                OUTPUT_REFS_XML,
+                {normalize_xmlns: true}
+            );
         });
 
         it("should escape inequality operators in output ref", function () {
@@ -332,21 +332,19 @@ require([
             assert.equal(label.p.labelItext.get(), '<output value="/data/load-one" />');
         });
 
-        it("itext changes do not bleed back after copy", function (done) {
-            util.init({core: {onReady: function () {
-                var mug = util.addQuestion("Text", "question"),
-                    dup = mug.form.duplicateMug(mug);
-                dup.p.labelItext.set("q2");
+        it("itext changes do not bleed back after copy", function () {
+            util.loadXML("");
+            var mug = util.addQuestion("Text", "question"),
+                dup = mug.form.duplicateMug(mug);
+            dup.p.labelItext.set("q2");
 
-                util.saveAndReload(function () {
-                    var mug = call("getMugByPath", "/data/question");
-                    assert.equal(mug.p.labelItext.defaultValue(), "question");
-                    done();
-                });
-            }}});
+            util.saveAndReload(function () {
+                var mug = call("getMugByPath", "/data/question");
+                assert.equal(mug.p.labelItext.defaultValue(), "question");
+            });
         });
 
-        it("itext changes do not bleed back from copy of copy", function (done) {
+        it("itext changes do not bleed back from copy of copy", function () {
             util.loadXML("");
             var mug = util.addQuestion("Text", "question"),
                 dup = mug.form.duplicateMug(mug),
@@ -360,88 +358,81 @@ require([
                 assert.equal(mug.p.labelItext.defaultValue(), "question");
                 assert.equal(dup.p.labelItext.defaultValue(), "question");
                 assert.equal(cpy.p.labelItext.defaultValue(), "copy");
-                done();
             });
         });
 
-        it("drag question into label makes output ref in correct position", function (done) {
-            util.init({core: {onReady: function () {
-                var mug1 = util.addQuestion("Text", "question1"),
-                    mug2 = util.addQuestion("Text", "question2");
+        it("drag question into label makes output ref in correct position", function () {
+            var mug1 = util.addQuestion("Text", "question1"),
+                mug2 = util.addQuestion("Text", "question2");
 
-                var target = $("[name='itext-en-label']"),
-                    sourceUid = mug1.ufid;
-                target.val("test string").change();
-                vellum_util.setCaretPosition(target[0], 4);
-                call("handleDropFinish", target, sourceUid, mug1);
-                var val = mug2.p.labelItext.get('default', 'en');
-                assert.equal(val, 'test<output value="/data/question1" /> string');
-                done();
-            }}});
+            var target = $("[name='itext-en-label']"),
+                sourceUid = mug1.ufid;
+            target.val("test string").change();
+            vellum_util.setCaretPosition(target[0], 4);
+            call("handleDropFinish", target, sourceUid, mug1);
+            var val = mug2.p.labelItext.get('default', 'en');
+            assert.equal(val, 'test<output value="/data/question1" /> string');
         });
 
-        it("output ref deleted with single backspace", function (done) {
-            util.init({core: {onReady: function () {
-                var mug = util.addQuestion("Text", "question1");
+        it("output ref deleted with single backspace", function () {
+            util.loadXML("");
+            var mug = util.addQuestion("Text", "question1");
 
-                var target = $("[name='itext-en-label']");
-                target.val('question1 <output value="/data/question2" /> end').change();
-                vellum_util.setCaretPosition(target[0], 44);
+            var target = $("[name='itext-en-label']");
+            target.val('question1 <output value="/data/question2" /> end').change();
+            vellum_util.setCaretPosition(target[0], 44);
 
-                target.trigger({
-                    type: "keydown",
-                    which: 8,
-                    ctrlKey: false
-                });
-                target.change();
-                var val = mug.p.labelItext.get('default', 'en');
-                assert.equal(val, 'question1  end');
-                done();
-            }}});
-        });
-
-        it("output ref deleted with single delete keypress", function (done) {
-            util.init({core: {onReady: function () {
-                var mug = util.addQuestion("Text", "question1");
-
-                var target = $("[name='itext-en-label']");
-                target.val('question1 <output value="/data/question2" /> end').change();
-                vellum_util.setCaretPosition(target[0], 10);
-
-                target.trigger({
-                    type: "keydown",
-                    which: 46,
-                    ctrlKey: false
-                });
-                target.change();
-                var val = mug.p.labelItext.get('default', 'en');
-                assert.equal(val, 'question1  end');
-                done();
-            }}});
-        });
-
-        it("should update output ref on group rename", function (done) {
-            util.init({
-                javaRosa: {langs: ['en', 'hin']},
-                core: {
-                    form: OUTPUTREF_GROUP_RENAME_XML,
-                    onReady: function () {
-                        var group = util.call("getMugByPath", "/data/question2"),
-                            q1 = util.call("getMugByPath", "/data/question1"),
-                            itext = q1.p.labelItext;
-
-                        assert(itext.get().indexOf('"/data/question2/question3"') > 0,
-                            '"/data/question2/question3" not in ' + itext.get());
-                        group.p.nodeID = "group";
-                        assert(itext.get('default', 'en').indexOf('"/data/group/question3"') > 0,
-                            '"/data/group/question3" not in ' + itext.get('default', 'en'));
-                        assert(itext.get('default', 'hin').indexOf('"/data/group/question3"') > 0,
-                            '"/data/group/question3" not in ' + itext.get('default', 'hin'));
-
-                        done();
-                    }
-                }
+            target.trigger({
+                type: "keydown",
+                which: 8,
+                ctrlKey: false
             });
+            target.change();
+            var val = mug.p.labelItext.get('default', 'en');
+            assert.equal(val, 'question1  end');
+        });
+
+        it("output ref deleted with single delete keypress", function () {
+            util.loadXML("");
+            var mug = util.addQuestion("Text", "question1");
+
+            var target = $("[name='itext-en-label']");
+            target.val('question1 <output value="/data/question2" /> end').change();
+            vellum_util.setCaretPosition(target[0], 10);
+
+            target.trigger({
+                type: "keydown",
+                which: 46,
+                ctrlKey: false
+            });
+            target.change();
+            var val = mug.p.labelItext.get('default', 'en');
+            assert.equal(val, 'question1  end');
+        });
+
+        it("should update output ref on group rename", function () {
+            util.loadXML(OUTPUTREF_GROUP_RENAME_XML);
+            var group = util.call("getMugByPath", "/data/question2"),
+                q1 = util.call("getMugByPath", "/data/question1"),
+                itext = q1.p.labelItext;
+
+            assert(itext.get().indexOf('"/data/question2/question3"') > 0,
+                '"/data/question2/question3" not in ' + itext.get());
+            group.p.nodeID = "group";
+            assert(itext.get('default', 'en').indexOf('"/data/group/question3"') > 0,
+                '"/data/group/question3" not in ' + itext.get('default', 'en'));
+            assert(itext.get('default', 'hin').indexOf('"/data/group/question3"') > 0,
+                '"/data/group/question3" not in ' + itext.get('default', 'hin'));
+        });
+
+        it("should add warning on add Audio output ref to itext", function () {
+            util.loadXML("");
+            var audio = util.addQuestion("Audio", "audio"),
+                text = util.addQuestion("Text", "text"),
+                target = $("[name='itext-en-label']");
+            call("handleDropFinish", target, audio.ufid, audio);
+            chai.expect(util.getMessages(text))
+                .to.include("Audio Capture nodes cannot be used in an output value");
         });
 
         it("should bulk update multi-line translation", function () {
@@ -455,6 +446,15 @@ require([
             assert.equal(q1.p.labelItext.get("default", "en"),
                          'First "line\nSecond" line\nThird line');
             assert.equal(q1.p.labelItext.get("default", "hin"), 'Hindu trans');
+        });
+
+        it("should not get stuck on bulk update non-existent questions", function () {
+            var form = util.loadXML(""),
+                Itext = util.call("getData").javaRosa.Itext,
+                trans = ('label\tdefault-en\tdefault-hin\n' +
+                         'question1-label\tlabel\tHindu trans\n');
+            jr.parseXLSItext(form, trans, Itext);
+            assert(!util.getMug("question1"), "question1 should not exist");
         });
 
         it("should generate bulk multi-line translation with user-friendly newlines", function () {
@@ -531,9 +531,9 @@ require([
             util.addQuestion("Select", "ew");
             var north = util.getMug("ns/item1"),
                 south = util.getMug("ew/item1");
-            north.p.defaultValue = "north";
-            south.p.defaultValue = "south";
-            north.form.moveMug(south, north, "after");
+            north.p.nodeID = "north";
+            south.p.nodeID = "south";
+            north.form.moveMug(south, "after", north);
             util.assertXmlEqual(util.call("createXML"), ITEXT_ITEM_RENAME_XML,
                                 {normalize_xmlns: true});
         });
@@ -543,7 +543,7 @@ require([
             var green = util.addQuestion("Group", "green"),
                 blue = util.addQuestion("Group", "blue");
             util.addQuestion("Text", "text");
-            blue.form.moveMug(blue, green, "before");
+            blue.form.moveMug(blue, "before", green);
             util.assertXmlEqual(util.call("createXML"),
                                 ITEXT_ITEM_RENAME_GROUP_MOVE_XML,
                                 {normalize_xmlns: true});
@@ -557,6 +557,11 @@ require([
                 $xml = $(xml);
             assert.strictEqual($xml.find("text#north-label").length, 2,
                                "wrong <text> node count\n" + xml);
+        });
+
+        it("should add markdown to existing help text", function() {
+            util.loadXML(NO_MARKDOWN_XML);
+            util.assertXmlEqual(call('createXML'), WITH_MARKDOWN_XML);
         });
 
         _.each(["hint", "help", "constraintMsg"], function (tag) {
@@ -576,6 +581,38 @@ require([
                                        "wrong <" + tag + "> node count\n" + xml);
                 }
             });
+        });
+
+        it("should not allow apostrophes in item labels", function() {
+            util.addQuestion("Select", "select");
+            util.clickQuestion('select/item1');
+            $("[name='property-nodeID']").val("blah ' blah").change();
+            assert.strictEqual($("[name='property-labelItext']").val(), 'select-blah___blah-labelItext');
+        });
+    });
+
+    describe("The javaRosaplugin with one language", function() {
+        before(function(done) {
+            util.init({
+                javaRosa: { langs: ['en'] },
+                core: {
+                    onReady: function () {
+                        done();
+                    }
+                }
+            });
+        });
+
+        it("should replace the default form with placeholder when cleared", function(){
+            util.loadXML("");
+            util.addQuestion('Trigger', 'label');
+            util.clickQuestion('label');
+            $('[name=itext-en-label]').val('blah').change();
+            $('.itext-block-label-add-form-image').click();
+            $('[name=itext-en-label]').val('').change();
+            util.assertXmlEqual(call("createXML"), 
+                                NO_LABEL_TEXT_ONE_LANG_XML,
+                                {normalize_xmlns: true});
         });
     });
 
@@ -645,6 +682,44 @@ require([
                 }
             });
 
+            it("should not display " + property + " validation error for non-autoId valid itext id", function() {
+                var itext = mug.p[property],
+                    spec = mug.spec[property],
+                    before = [itext.id, itext.get(), mug.p.constraintAttr];
+                if (property === "constraintMsgItext") {
+                    mug.p.constraintAttr = "x = y";
+                }
+                itext.autoId = false;
+                itext.id = "node-id-label-itext";
+                itext.set("node-id-label-itext");
+                try {
+                    assert.equal(spec.validationFunc(mug), "pass");
+                } finally {
+                    itext.id = before[0];
+                    itext.set(before[1]);
+                    mug.p.constraintAttr = before[2];
+                }
+            });
+
+            it("should display " + property + " validation error for non-autoId invalid itext id", function() {
+                var itext = mug.p[property],
+                    spec = mug.spec[property],
+                    before = [itext.id, itext.get(), mug.p.constraintAttr];
+                if (property === "constraintMsgItext") {
+                    mug.p.constraintAttr = "x = y";
+                }
+                itext.autoId = false;
+                itext.id = "node-id-label-itext'&";
+                itext.set("node-id-label-itext'&");
+                try {
+                    assert.notEqual(spec.validationFunc(mug), "pass", property);
+                } finally {
+                    itext.id = before[0];
+                    itext.set(before[1]);
+                    mug.p.constraintAttr = before[2];
+                }
+            });
+
             it("should not have " + property + "ID validator (it will not be invoked)", function() {
                 assert(!mug.spec[property + "ID"].validationFunc,
                        property + "ID virtual property validator will not be invoked");
@@ -693,6 +768,7 @@ require([
             $("[name='property-constraintAttr']").val('').change();
             assert(!$("[name='itext-en-constraintMsg']").is(":visible"));
         });
+
     });
 
     describe("The javaRosa plugin language selector", function() {
@@ -723,226 +799,4 @@ require([
             assert.equal($(treeSelector).text(), "question1");
         });
     });
-
-    var TEST_XML_1 = '' + 
-    '<?xml version="1.0" encoding="UTF-8" ?>\
-    <h:html xmlns:h="http://www.w3.org/1999/xhtml"\
-            xmlns:orx="http://openrosa.org/jr/xforms"\
-            xmlns="http://www.w3.org/2002/xforms"\
-            xmlns:xsd="http://www.w3.org/2001/XMLSchema"\
-            xmlns:jr="http://openrosa.org/javarosa"\
-            xmlns:vellum="http://commcarehq.org/xforms/vellum">\
-        <h:head>\
-            <h:title>Untitled Form</h:title>\
-            <model>\
-                <instance>\
-                    <data xmlns:jrm="http://dev.commcarehq.org/jr/xforms"\
-                          xmlns="http://openrosa.org/formdesigner/8D6CF8A5-4396-45C3-9D05-64C3FD97A5D0"\
-                          uiVersion="1"\
-                          version="1"\
-                          name="Untitled Form">\
-                        <question1 />\
-                    </data>\
-                </instance>\
-                <bind nodeset="/data/question1"\
-                      type="xsd:string"\
-                      constraint="1"\
-                      jr:constraintMsg="jr:itext(\'question1-constraintMsg\')" />\
-                <itext>\
-                    <translation lang="en" default="">\
-                        <text id="question1-label">\
-                            <value>question1</value>\
-                        </text>\
-                    </translation>\
-                    <translation lang="hin">\
-                        <text id="question1-constraintMsg">\
-                            <value>xyz</value>\
-                        </text>\
-                    </translation>\
-                </itext>\
-            </model>\
-        </h:head>\
-        <h:body>\
-            <input ref="/data/question1">\
-                <label ref="jr:itext(\'question1-label\')" />\
-            </input>\
-        </h:body>\
-    </h:html>';
-
-    var TEST_XML_2 = '' + 
-    '<h:html xmlns:h="http://www.w3.org/1999/xhtml"\
-             xmlns:orx="http://openrosa.org/jr/xforms"\
-             xmlns="http://www.w3.org/2002/xforms"\
-             xmlns:xsd="http://www.w3.org/2001/XMLSchema"\
-             xmlns:jr="http://openrosa.org/javarosa"\
-             xmlns:vellum="http://commcarehq.org/xforms/vellum">\
-        <h:head>\
-            <h:title>Untitled Form</h:title>\
-            <model>\
-                <instance>\
-                    <data xmlns:jrm="http://dev.commcarehq.org/jr/xforms"\
-                          xmlns="http://openrosa.org/formdesigner/8D6CF8A5-4396-45C3-9D05-64C3FD97A5D0"\
-                          uiVersion="1" version="1" name="Untitled Form">\
-                        <question1/>\
-                    </data>\
-                </instance>\
-                <bind nodeset="/data/question1" type="xsd:string"\
-                      jr:constraintMsg="jr:itext(\'question1-constraintMsg\')"/>\
-                <itext>\
-                    <translation lang="en" default="">\
-                        <text id="question1-label">\
-                            <value>question1 en label</value>\
-                            <value form="image">jr://file/commcare/image/data/question1.png</value>\
-                            <value form="audio">jr://file/commcare/audio/data/question1.mp3</value>\
-                            <value form="video">jr://file/commcare/video/data/question1.3gp</value>\
-                            <value form="long">question1 en long</value>\
-                            <value form="short">question1 en short</value>\
-                            <value form="custom">question1 en custom</value>\
-                        </text>\
-                        <text id="question1-hint">\
-                            <value>question1 en hint</value>\
-                        </text>\
-                        <text id="question1-help">\
-                            <value>question1 en help</value>\
-                            <value form="markdown">question1 en help</value>\
-                            <value form="image">jr://file/commcare/image/help/data/question1.png</value>\
-                            <value form="audio">jr://file/commcare/audio/help/data/question1.mp3</value>\
-                            <value form="video">jr://file/commcare/video/help/data/question1.3gp</value>\
-                        </text>\
-                        <text id="question1-constraintMsg">\
-                            <value>question1 en validation</value>\
-                        </text>\
-                    </translation>\
-                    <translation lang="hin">\
-                        <text id="question1-label">\
-                            <value>question1 hin label</value>\
-                            <value form="image">jr://file/commcare/image/data/question1.png</value>\
-                            <value form="audio">jr://file/commcare/audio/data/question1.mp3</value>\
-                            <value form="video">jr://file/commcare/video/data/question1.3gp</value>\
-                            <value form="long">question1 hin long</value>\
-                            <value form="short">question1 hin short</value>\
-                            <value form="custom">question1 hin custom</value>\
-                        </text>\
-                        <text id="question1-hint">\
-                            <value>question1 hin hint</value>\
-                        </text>\
-                        <text id="question1-help">\
-                            <value>question1 hin help</value>\
-                            <value form="markdown">question1 hin help</value>\
-                            <value form="image">jr://file/commcare/image/help/data/question1.png</value>\
-                            <value form="audio">jr://file/commcare/audio/help/data/question1.mp3</value>\
-                            <value form="video">jr://file/commcare/video/help/data/question1.3gp</value>\
-                        </text>\
-                        <text id="question1-constraintMsg">\
-                            <value>question1 hin validation</value>\
-                        </text>\
-                    </translation>\
-                </itext>\
-            </model>\
-        </h:head>\
-        <h:body>\
-            <input ref="/data/question1">\
-                <label ref="jr:itext(\'question1-label\')"/>\
-                <hint ref="jr:itext(\'question1-hint\')"/>\
-                <help ref="jr:itext(\'question1-help\')"/>\
-            </input>\
-        </h:body>\
-    </h:html>';
-
-    var TEST_XML_3 = '' +
-    '<?xml version="1.0" encoding="UTF-8" ?>\
-    <h:html xmlns:h="http://www.w3.org/1999/xhtml"\
-            xmlns:orx="http://openrosa.org/jr/xforms"\
-            xmlns="http://www.w3.org/2002/xforms"\
-            xmlns:xsd="http://www.w3.org/2001/XMLSchema"\
-            xmlns:jr="http://openrosa.org/javarosa"\
-            xmlns:vellum="http://commcarehq.org/xforms/vellum">\
-        <h:head>\
-            <h:title>Untitled Form</h:title>\
-            <model>\
-                <instance>\
-                    <data xmlns:jrm="http://dev.commcarehq.org/jr/xforms"\
-                          xmlns="http://openrosa.org/formdesigner/8D6CF8A5-4396-45C3-9D05-64C3FD97A5D0"\
-                          uiVersion="1"\
-                          version="1"\
-                          name="Untitled Form">\
-                        <question1 />\
-                    </data>\
-                </instance>\
-                <bind nodeset="/data/question1" type="xsd:string" />\
-                <itext>\
-                    <translation lang="en" default="">\
-                        <text id="question1-label">\
-                            <value>question1</value>\
-                        </text>\
-                    </translation>\
-                    <translation lang="hin">\
-                        <text id="question1-label">\
-                            <value>xyz</value>\
-                        </text>\
-                    </translation>\
-                    <translation lang="es">\
-                        <text id="question1-label">\
-                            <value>Spanish!</value>\
-                        </text>\
-                    </translation>\
-                </itext>\
-            </model>\
-        </h:head>\
-        <h:body>\
-            <input ref="/data/question1">\
-                <label ref="jr:itext(\'question1-label\')" />\
-            </input>\
-        </h:body>\
-    </h:html>';
-
-    var TEST_XML_4 = '' +
-    '<h:html xmlns:h="http://www.w3.org/1999/xhtml"\
-             xmlns:orx="http://openrosa.org/jr/xforms"\
-             xmlns="http://www.w3.org/2002/xforms"\
-             xmlns:xsd="http://www.w3.org/2001/XMLSchema"\
-             xmlns:jr="http://openrosa.org/javarosa"\
-             xmlns:vellum="http://commcarehq.org/xforms/vellum">\
-        <h:head>\
-            <h:title>Untitled Form</h:title>\
-            <model>\
-                <instance>\
-                    <data xmlns:jrm="http://dev.commcarehq.org/jr/xforms"\
-                          xmlns="http://openrosa.org/formdesigner/8D6CF8A5-4396-45C3-9D05-64C3FD97A5D0"\
-                          uiVersion="1" version="1" name="Untitled Form">\
-                        <first_question/>\
-                        <question2/>\
-                    </data>\
-                </instance>\
-                <bind nodeset="/data/first_question" type="xsd:string"/>\
-                <bind nodeset="/data/question2" type="xsd:string"/>\
-                <itext>\
-                    <translation lang="en" default="">\
-                        <text id="first_question-label">\
-                            <value>first_question</value>\
-                        </text>\
-                        <text id="question2-label">\
-                            <value><output value="/data/first_question" /> a <output value="/data/first_question" /> b <output value="/data/first_question" /> c <output value="/data/first_question" /> d <output value="if(/data/first_question = \'\', \'\', format-date(date(/data/first_question), \'%a%b%c\'))" /></value>\
-                        </text>\
-                    </translation>\
-                    <translation lang="hin">\
-                        <text id="first_question-label">\
-                            <value>first_question</value>\
-                        </text>\
-                        <text id="question2-label">\
-                            <value><output value="/data/first_question" /></value>\
-                        </text>\
-                    </translation>\
-                </itext>\
-            </model>\
-        </h:head>\
-        <h:body>\
-            <input ref="/data/first_question">\
-                <label ref="jr:itext(\'first_question-label\')"/>\
-            </input>\
-            <input ref="/data/question2">\
-                <label ref="jr:itext(\'question2-label\')"/>\
-            </input>\
-        </h:body>\
-    </h:html>';
 });

@@ -1,6 +1,8 @@
 define([
     'jquery',
+    'underscore',
     'vellum/debugutil',
+    'vellum/util',
     'xpath',
     'xpathmodels',
     'tpl!vellum/templates/xpath_validation_errors',
@@ -9,7 +11,9 @@ define([
     'less!vellum/less-style/xpath-editor'
 ], function (
     $,
+    _,
     debug,
+    util,
     xpath,
     xpathmodels,
     xpath_validation_errors,
@@ -46,9 +50,11 @@ define([
         }
     };
     function addOp(expr, value, label) {
+        value = xpathmodels.expressionTypeEnumToXPathLiteral(value);
         simpleExpressions[value] = expr;
         operationOpts.push([label, value]);
     }
+
     addOp(BinOpHandler, expTypes.EQ, "is equal to");
     addOp(BinOpHandler, expTypes.NEQ, "is not equal to");
     addOp(BinOpHandler, expTypes.LT, "is less than");
@@ -59,6 +65,10 @@ define([
 
     function showXPathEditor($div, options) {
         var editorContent = $div;
+        options = _.defaults(options, {
+            leftPlaceholder: "Hint: drag a question here.",
+            rightPlaceholder: "Hint: drag a question here.",
+        });
 
         var getExpressionInput = function () {
             return $div.find(".fd-xpath-editor-text");
@@ -71,6 +81,15 @@ define([
         };
         var getTopLevelJoinSelect = function () {
             return $(editorContent.find(".top-level-join-select")[0]);
+        };
+        var addAutocomplete = function (input, sources) {
+            if (sources) {
+                util.dropdownAutocomplete(input, sources);
+            }
+            else {
+                util.questionAutocomplete(input, options.mug,
+                                          {property: options.path});
+            }
         };
 
         var getExpressionFromSimpleMode = function () {
@@ -144,7 +163,9 @@ define([
             var newExpressionUIElement = function (expOp) {
 
                 var $expUI = $(xpath_expression({
-                    operationOpts: operationOpts
+                    operationOpts: operationOpts,
+                    leftPlaceholder: options.leftPlaceholder,
+                    rightPlaceholder: options.rightPlaceholder
                 }));
 
                 var getLeftQuestionInput = function () {
@@ -200,6 +221,10 @@ define([
                     // so we need to update the reference
                     populateQuestionInputBox(getRightQuestionInput(), expOp.right, expOp.left);
                 }
+
+                addAutocomplete(getLeftQuestionInput(), options.leftAutocompleteSources);
+                addAutocomplete(getRightQuestionInput(), options.rightAutocompleteSources);
+
                 return $expUI;
             };
 
@@ -301,6 +326,7 @@ define([
         // toggle simple/advanced mode
         var showAdvancedMode = function (text, showNotice) {
             getExpressionInput().val(text);
+            addAutocomplete(getExpressionInput());
             getExpressionPane().empty();
 
             $div.find(".xpath-advanced").removeClass('hide');
@@ -335,8 +361,8 @@ define([
             editorContent.empty().append($xpathUI);
 
             $xpathUI.find('.fd-xpath-show-advanced-button').click(function () {
-                if (typeof window.ga !== "undefined") {
-                    window.ga('send', 'event', 'Form Builder', 'Edit Expression',
+                if (window.analytics) {
+                    window.analytics.usage('Form Builder', 'Edit Expression',
                               'Show Advanced Mode');
                 }
 

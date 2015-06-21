@@ -13,7 +13,7 @@ define([
     RegExp.escape = function(s) {
         return s.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
     };
-    
+
     $.fn.stopLink = function() {
         // stops anchor tags from clicking through
         this.click(function (e) {
@@ -26,7 +26,7 @@ define([
         // creates a help popover, requires twitter bootstrap
         this.append($('<i />').addClass('icon-question-sign'))
             .popout({
-                trigger: 'hover',
+                trigger: 'focus',
                 html: true
             });
         return this;
@@ -48,33 +48,43 @@ define([
         that.langCodeToName[lang.two] = name;
     });
 
+    that.formatExc = function (error) {
+        return error && error.stack ? error.stack : String(error);
+    };
+
     that.XPATH_REFERENCES = [
         "relevantAttr",
         "calculateAttr",
         "constraintAttr",
         "dataParent",
-        "repeat_count"
+        "repeat_count",
+        "filter",
+        "defaultValue"
     ];
 
     that.getTemplateObject = function (selector, params) {
         return $(_.template($(selector).text(), params));
     };
     
+    that.validAttributeRegex = /^[^<&'"]*$/;
+    that.invalidAttributeRegex = /[<&'"]/;
+
     /**
      * Check if value is a valid XML attribute value (additionally disallow all
      * ' and ")
      */
     that.isValidAttributeValue = function (value) {
-        return (/^[^<&'"]*$/).test(value);
+        return that.validAttributeRegex.test(value);
     };
     
     // Simple Event Framework
     // Just run your object through this function to make it event aware.
     // Adapted from 'JavaScript: The Good Parts' chapter 5
     that.eventuality = function (that) {
-        var registry = {};
+        var registry = {},
+            unbinders = {};
         /**
-         * Fire event, calling all registered handlers and unbind `one` handlers
+         * Fire event, calling all registered handlers
          */
         that.fire = function (event) {
             var array,
@@ -97,39 +107,69 @@ define([
         };
         /**
          * Register an event handler to be called each time an event is fired.
+         *
+         * @param type - Event type string.
+         * @param method - Event handler method.
+         * @param parameters - Parameters to be passed to method. If null
+         *      or not provided, the event object itself will be passed.
+         * @param unbindOn - (optional) Event type on which to unbind
+         *      all handlers associated with `context`. To make a one-
+         *      shot, use the same value for this parameter as for
+         *      `type`.
+         * @param context - (optional) Context for `unbind`. The
+         *      default is `null`. The handler (and all other handlers
+         *      bound to the same context) will be unbound the next time
+         *      the `unbindOn` event fires or `this.unbind(context)` is
+         *      called, whichever happens first.
          */
-        that.on = function (type, method, parameters, bindingContext) {
+        that.on = function (type, method, parameters, unbindOn, context) {
+            if (arguments.length < 5) {
+                context = null;
+            }
             var handler = {
                 method: method,
                 parameters: parameters,
-                bindingContext: bindingContext || method
+                context: context
             };
             if (registry.hasOwnProperty(type)) {
                 registry[type].push(handler);
             } else {
                 registry[type] = [handler];
             }
+            if (unbindOn) {
+                if (!unbinders[unbindOn]) {
+                    unbinders[unbindOn] = [];
+                }
+                if (unbinders[unbindOn].indexOf(context) === -1) {
+                    unbinders[unbindOn].push(context);
+                    that.on(unbindOn, function () {
+                        that.unbind(context);
+                        unbinders[unbindOn] = _.filter(unbinders[unbindOn], function (cx) {
+                            return cx !== context;
+                        });
+                    }, null, null, context);
+                }
+            }
             return this;
         };
         /**
          * Unbind an event handler for a given binding context
          *
-         * @param bindingContext - the binding context or method that was
-         *        passed to `on`.
+         * @param context - the binding context that was passed to `on`.
          * @param type - optional event type. If undefined, all handlers
          *        for the given binding context will be unbound.
          */
-        that.unbind = function (bindingContext, type) {
+        that.unbind = function (context, type) {
             if (_.isUndefined(type)) {
                 registry = _.object(_.map(registry, function (handlers, type, reg) {
                     handlers = _.filter(handlers, function (handler) {
-                        return handler.bindingContext !== bindingContext;
+                        return handler.context !== context;
                     });
                     return [type, handlers];
                 }));
             } else if (registry.hasOwnProperty(type)) {
                 registry[type] = _.filter(registry[type], function (handler) {
-                    return handler.bindingContext !== bindingContext;
+                    return handler.context !== context;
                 });
             }
             return this;
@@ -297,7 +337,131 @@ define([
                 "XML " + (opts.not ? "should not be equivalent" : "mismatch"));
         return patch;
     };
-        
+
+    that.markdownlite = function (text) {
+        // escape html characters and convert
+        // - groups of "- ..." to <ul><li>...</li><li>...</li>...</ul>
+        // - normal lines to <p>line</p>
+        function terminateList() {
+            if (list) {
+                div.append(list);
+                list = null;
+            }
+        }
+        var div = $("<div />"),
+            list = null,
+            trimmed;
+        _.each(text.split("\n"), function (line) {
+            trimmed = line.trim();
+            if (trimmed) {
+                if (trimmed.startsWith("- ")) {
+                    // list item
+                    if (!list) {
+                        list = $("<ul>");
+                    }
+                    list.append($("<li>").text(trimmed.slice(2)));
+                } else {
+                    terminateList();
+                    div.append($("<p>").text(line));
+                }
+            } else {
+                terminateList();
+                // ignore blank line
+            }
+        });
+        terminateList();
+        return div.html();
+    };
+
+    /**
+     * Turn a given input into an autocomplete, which will be populated
+     * with a given set of options and will also accept free text.
+     * 
+     * @param $input - jQuery object, the input to turn into an autocomplete
+     * @param sources - An array of strings with which to populate the autocomplete
+     */
+    that.dropdownAutocomplete = function ($input, sources) {
+        $input.atwho({
+            at: "",
+            data: sources,
+            maxLen: Infinity,
+            suffix: "",
+            tabSelectsMatch: false,
+            callbacks: {
+                filter: function(query, data, searchKey) {
+                    return _.filter(data, function(item) {
+                        return item.name.indexOf(query) !== -1;
+                    });
+                },
+                matcher: function(flag, subtext, should_startWithSpace) {
+                    return $input.val();
+                },
+                beforeInsert: function(value, $li) {
+                    $input.data("selected-value", value);
+                },
+            }
+        }).on("inserted.atwho", function(event, $li, otherEvent) {
+            $input.val($input.data("selected-value"));
+        });
+    };
+
+    /**
+     * Alter a given input so that when a user enters the string "/data/",
+     * they get an autocomplete of all questions in the form.
+     *
+     * @param $input - jQuery object, the input to modify
+     * @param mug - current mug
+     * @param options - Hash of options for autocomplete behavior:
+     *                  category: sent to analytics
+     *                  insertTpl: string to add to input when question is selected
+     *                  property: sent to analytics
+     */
+    that.questionAutocomplete = function ($input, mug, options) {
+        options = _.defaults(options || {}, {
+            category: 'Question Reference',
+            insertTpl: '${name}',
+            property: '',
+        });
+
+        $input.atwho({
+            at: "/data/",
+            data: _.chain(mug.form.getMugList())
+                   .map(function(mug) {
+                        return {
+                            id: mug.ufid,
+                            name: mug.absolutePath,
+                        };
+                    })
+                    .filter(function(choice) { return choice.name; })
+                    .value(),
+            displayTpl: '<li>${name}</li>',
+            insertTpl: options.insertTpl,
+            limit: 10,
+            maxLen: 30,
+            tabSelectsMatch: false,
+            callbacks: {
+                matcher: function(flag, subtext) {
+                    var match, regexp;
+                    regexp = new RegExp('(\\s+|^)' + RegExp.escape(flag) + '([\\w_/]*)$', 'gi');
+                    match = regexp.exec(subtext);
+                    return match ? match[2] : null;
+                },
+                beforeInsert: function(value, $li) {
+                    if (window.analytics) {
+                        window.analytics.usage(options.category,
+                                               "Autocomplete",
+                                               options.property);
+                    }
+                    return value;
+                }
+            }
+        });
+
+        mug.on("teardown-mug-properties", function () {
+            $input.atwho('destroy');
+        }, null, "teardown-mug-properties");
+    };
+
     return that;
 });
 

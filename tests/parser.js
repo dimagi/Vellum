@@ -6,7 +6,8 @@ require([
     'tests/utils',
     'vellum/parser',
     'text!static/parser/other_item.xml',
-    'text!static/parser/label-without-itext.xml'
+    'text!static/parser/label-without-itext.xml',
+    'text!static/parser/missing-bind.xml'
 ], function (
     chai,
     $,
@@ -14,7 +15,8 @@ require([
     util,
     parser,
     OTHER_ITEM_XML,
-    LABEL_WITHOUT_ITEXT_XML
+    LABEL_WITHOUT_ITEXT_XML,
+    MISSING_BIND_XML
 ) {
     var assert = chai.assert,
         call = util.call,
@@ -69,17 +71,10 @@ require([
             });
         });
 
-        it("should not drop newlines in calculate conditions", function (done) {
-            util.init({
-                core: {
-                    form: TEST_XML_2,
-                    onReady: function () {
-                        var mug = call("getMugByPath", "/data/question1");
-                        assert.equal(mug.p.calculateAttr, 'concat("Line 1","\nLine 2")');
-                        done();
-                    }
-                }
-            });
+        it("should not drop newlines in calculate conditions", function () {
+            util.loadXML(TEST_XML_2);
+            var mug = call("getMugByPath", "/data/question1");
+            assert.equal(mug.p.calculateAttr, 'concat("Line 1","\nLine 2")');
         });
 
         var ignoreWarnings = /Form (JRM namespace|does not have a (Name|(UI)?Version))/;
@@ -89,7 +84,7 @@ require([
             var mug = call("getMugByPath", "/ClassroomObservationV3/Q0003"),
                 // HACK how to reference items in select?
                 item = mug._node_control.children[1].value;
-            assert.equal(item.p.defaultValue, 'other');
+            assert.equal(item.p.nodeID, 'other');
         });
 
         it("should load mugs with relative paths and label without itext", function () {
@@ -105,6 +100,9 @@ require([
             util.assertXmlNotEqual(call("createXML"), LABEL_WITHOUT_ITEXT_XML);
         });
 
+        it("should load question without bind element", function () {
+            util.loadXML(MISSING_BIND_XML);
+        });
     });
 
     var TEST_XML_1 = '' + 

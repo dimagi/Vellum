@@ -70,13 +70,8 @@ define([
             title = head.children('h\\:title, title'),
             binds = head.find('bind'),
             instances = _getInstances(xml),
-            data = $(instances[0]).children();
-
-        xml.find('setvalue').each(function () {
-            var $this = $(this);
-            form.addSetValue(
-                $this.attr('event'), $this.attr('ref'), $this.attr('value'));
-        });
+            data = $(instances[0]).children(),
+            setValues = head.find('> model > setvalue');
 
         if($(xml).find('parsererror').length > 0) {
             throw 'PARSE ERROR!:' + $(xml).find('parsererror').find('div').html();
@@ -103,11 +98,10 @@ define([
         parseDataTree(form, data[0]);
         parseBindList(form, binds);
 
+        parseSetValues(form, setValues);
+
         var controls = xml.find('h\\:body, body').children();
         parseControlTree(form, controls);
-
-        // wire the event handlers for all the mugs in the tree
-        var allMugs = form.getMugList();
 
         var i;
         // update parse error and warn information in the model/UI
@@ -128,11 +122,6 @@ define([
                 });
             }
         }
-        
-        // populate the LogicManager with initial path data
-        allMugs.map(function (mug) {
-            form.updateAllLogicReferences(mug);
-        });
 
         form.isLoadingXForm = false;
         return form;
@@ -192,13 +181,13 @@ define([
         }
     }
 
-    function parseDataElement(form, el, parentMug) {
+    function parseDataElement(form, el, parentMug, role) {
         var $el = $(el),
             nodeID = el.nodeName, 
             nodeVal = $el.children().length ? null : $el.text(),
             extraXMLNS = $el.popAttr('xmlns') || null,
-            keyAttr = $el.popAttr('key') || null,
-            role = $el.attr('vellum:role');
+            keyAttr = $el.popAttr('key') || null;
+        role = role || $el.attr('vellum:role');
 
         if (role && form.mugTypes.allTypes.hasOwnProperty(role) &&
             form.mugTypes.allTypes[role].supportsDataNodeRole) {
@@ -221,7 +210,31 @@ define([
         mug.p.rawDataAttributes = getAttributes(el);
         return mug;
     }
-            
+
+    function parseSetValues(form, setValues) {
+        var rootNodeName = form.tree.getRootNode().getID();
+
+        setValues.each(function () {
+            var $el = $(this);
+            form.vellum.parseSetValue(
+                form, $el, processPath($el.attr('ref'), rootNodeName));
+        });
+    }
+
+    function parseSetValue(form, el, path) {
+        var mug = form.getMugByPath(path),
+            event = el.attr('event'),
+            ref = el.attr('ref'),
+            value = el.attr('value');
+
+        // HACK: hardcoding these as that's what setValue will support for now
+        if (!mug || (event !== 'xforms-ready' && event !== 'jr-insert')) {
+            form.addSetValue(event, ref, value);
+        } else {
+            mug.p.defaultValue = value;
+        }
+    }
+
     var lookForNamespaced = function (element, reference) {
         // due to the fact that FF and Webkit store namespaced
         // values slightly differently, we have to look in 
@@ -235,7 +248,7 @@ define([
             appearance = $cEl.popAttr('appearance'),
             adapt, mug = null;
 
-        var getAdaptor = form.vellum.data.core.controlNodeAdaptorMap[tagName];
+        var getAdaptor = form.vellum.getControlNodeAdaptorFactory(tagName);
         if (getAdaptor) {
             adapt = getAdaptor($cEl, appearance, form, parentMug);
         }
@@ -279,13 +292,13 @@ define([
     function populateControlMug(mug, $cEl) {
         var labelEl = $cEl.children('label'),
             hintEl = $cEl.children('hint');
-        if (labelEl.length && mug.spec.label.presence !== 'notallowed') {
+        if (labelEl.length && mug.getPresence("label") !== 'notallowed') {
             var labelVal = xml.humanize(labelEl);
             if (labelVal) {
                 mug.p.label = labelVal;
             }
         }
-        if (hintEl.length && mug.spec.hintLabel.presence !== 'notallowed') {
+        if (hintEl.length && mug.getPresence("hintLabel") !== 'notallowed') {
             mug.p.hintLabel = xml.humanize(hintEl);
         }
     }
@@ -383,7 +396,7 @@ define([
                     return triggerAdaptor(appearance);
                 }
                 return function(mug, form) {
-                    var dataType = mug && mug.p.rawBindAttributes.type;
+                    var dataType = mug && mug.p.rawBindAttributes && mug.p.rawBindAttributes.type;
                     if (dataType) {
                         dataType = dataType.replace('xsd:',''); //strip out extraneous namespace
                         dataType = dataType.toLowerCase();
@@ -403,7 +416,7 @@ define([
                     mug = adaptItem(mug, form);
                     var value = xml.humanize($cEl.children('value'));
                     if (value) {
-                        mug.p.defaultValue = value;
+                        mug.p.nodeID = value;
                     }
                     return mug;
                 };
@@ -485,18 +498,18 @@ define([
      * @param el - a jquery-wrapped xforms control element.
      * @return - a string of the ref/nodeset value
      */
-    function getPathFromControlElement(el, form, parentMug) {
+    function getPathFromControlElement(el, form, parentMug, noPop) {
         if(!el){
             return null;
         }
-        var path = el.popAttr('ref'),
+        var path = noPop ? el.attr('ref') : el.popAttr('ref'),
             nodeId, pathToTry;
         if(!path){
-            path = el.popAttr('nodeset');
+            path = noPop ? el.attr('nodeset') : el.popAttr('nodeset');
         }
         if (!path) {
             // attempt to support sloppy hand-written forms
-            nodeId = el.popAttr('bind');
+            nodeId = noPop ? el.attr('bind') : el.popAttr('bind');
             if (nodeId) {
                 pathToTry = processPath(nodeId);
                 if (!form.getMugByPath(pathToTry)) {
@@ -672,6 +685,7 @@ define([
         parseXForm: parseXForm,
         parseDataElement: parseDataElement,
         parseBindElement: parseBindElement,
+        parseSetValue: parseSetValue,
         populateControlMug: populateControlMug,
         getAttributes: getAttributes,
         getPathFromControlElement: getPathFromControlElement,

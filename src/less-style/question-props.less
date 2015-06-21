@@ -39,6 +39,8 @@
 .fd-question-fieldset {
   border: none;
   position: relative;
+  min-width: 0px; /* for chrome */
+  display: table-column; /* for firefox */
 
   .accordion-heading {
     margin-bottom: 0;
@@ -62,11 +64,10 @@
     height: 25px;
     display: block;
     font-size: @baseFontSize*1.5;
-    padding: 5px;
+    padding: 3px 0;
 
-    &:hover {
+    a:hover {
       text-decoration: none;
-      font-size: @baseFontSize*2;
       color: @green;
     }
   }
@@ -151,4 +152,19 @@
     display: block;
     margin: 4px auto 5px;
   }
+}
+
+.fd-copy-paste-help {
+  .row {
+    padding: 0 2em;
+    margin-bottom: 2em;
+  }
+  .copy-paste-box textarea {
+    width: 100%;
+    height: 100px;
+  }
+}
+
+.atwho-container .atwho-view {
+  overflow: hidden;
 }
