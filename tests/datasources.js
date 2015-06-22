@@ -22,9 +22,9 @@ require([
         clickQuestion = util.clickQuestion,
         plugins = _.union(util.options.options.plugins || [], ["itemset"]),
         FIXTURE_DATA = [{
-            sourceUri: "jr://fixture/item-list:some-fixture",
-            defaultId: "some-fixture",
-            initialQuery: "instance('some-fixture')/some-fixture_list/some-fixture",
+            id: "some-fixture",
+            uri: "jr://fixture/item-list:some-fixture",
+            path: "/some-fixture_list/some-fixture",
             name: 'some-fixture-name',
             structure: {
                 "inner-attribute": {
@@ -140,9 +140,9 @@ require([
                 util.addQuestion("SelectDynamic", "select");
                 clickQuestion('select/itemset');
                 callback([{
-                    sourceUri: "foo://",
-                    defaultId: "bar",
-                    initialQuery: "root",
+                    id: "bar",
+                    uri: "jr://fixture/foo",
+                    path: "root",
                     name: "outer",
                     structure: {
                         "@id": {},
@@ -156,7 +156,8 @@ require([
                     },
                 }]);
                 var data = $('[name=property-itemsetData]');
-                assert.equal(data.val(), '{"src":"foo://","id":"bar","query":"root"}');
+                assert.equal(data.val(),
+                    '{"id":"bar","src":"jr://fixture/foo","query":"instance(\'bar\')root"}');
                 assert.equal(data.find("option:selected").text(), "outer");
                 assert.equal($('[name=value_ref]').val(), '@id');
                 assert.equal($('[name=label_ref]').val(), 'name');
@@ -167,14 +168,15 @@ require([
                 util.paste([
                     ["id", "type", "itemsetData"],
                     ["select", "SelectDynamic",
-                     '[{"instance":{"src":"foo://","id":"bar","query":"instance(\'bar\')"},' +
-                     '"nodeset":"root/inner","labelRef":"name","valueRef":"@id"}]'],
+                     '[{"instance":{"id":"bar",' +
+                     '"src":"jr://fixture/foo","query":"instance(\'bar\')root/inner"},' +
+                     '"nodeset":"instance(\'bar\')root/inner","labelRef":"name","valueRef":"@id"}]'],
                 ]);
                 clickQuestion('select/itemset');
                 callback([{
-                    sourceUri: "foo://",
-                    defaultId: "bar",
-                    initialQuery: "root",
+                    id: "bar",
+                    uri: "jr://fixture/foo",
+                    path: "root",
                     name: "outer",
                     structure: {
                         "@id": {},
@@ -188,7 +190,8 @@ require([
                     },
                 }]);
                 var data = $('[name=property-itemsetData]');
-                assert.equal(data.val(), '{"src":"foo://","id":"bar","query":"root/inner"}');
+                assert.equal(data.val(),
+                    '{"id":"bar","src":"jr://fixture/foo","query":"instance(\'bar\')root/inner"}');
                 assert.equal(data.find("option:selected").text(), "outer - inner");
             });
         });

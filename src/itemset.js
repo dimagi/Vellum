@@ -284,7 +284,8 @@ define([
         }
 
         function updateAutocomplete() {
-            var choices = datasources.autocompleteChoices(super_getValue().src);
+            var value = super_getValue(),
+                choices = datasources.autocompleteChoices(value ? value.src : "");
             labelRef.addAutocomplete(choices, super_handleChange);
             valueRef.addAutocomplete(choices, super_handleChange);
             return choices;

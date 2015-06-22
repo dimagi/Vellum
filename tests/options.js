@@ -1,45 +1,47 @@
 define(["underscore"], function (_) {
-    var dataSources = [{
-            sourceUri: "jr://instance/casedb",
-            defaultId: "casedb",
-            rootNodeName: "casedb",
-            levels: [
-                {
-                    nodeName: "case",
-                    properties: [
-                        {
-                            id: 'case_name'
-                        },
-                        {
-                            id: '@case_id'
-                        }
-                    ],
-                    subsets: [
-                        {
-                            name: "mother Cases",
-                            selector: "@case_type='mother'",
-                            properties: [
-                                {
-                                    id: 'edd' 
-                                }
-                            ]
-                        },
-                        {
-                            name: "child Cases",
-                            selector: "@case_type = 'child'",
-                            properties: [
-                                {
-                                    id: 'dob'
-                                }
-                            ]
-                        }
-                    ]
-                }
-            ],
+    var dataSources = [
+        {
+            id: "commcaresession",
+            uri: "jr://instance/session",
+            path: "/session/data",
+            name: 'Session',
+            structure: {
+                "case_id": {
+                    reference: {
+                        source: "casedb",
+                        subset: "child",
+                        key: "@case_id",
+                    },
+                },
+            },
         }, {
-            sourceUri: "jr://fixture/item-list:some-fixture",
-            defaultId: "some-fixture",
-            initialQuery: "instance('some-fixture')/some-fixture_list/some-fixture",
+            id: "casedb",
+            uri: "jr://instance/casedb",
+            path: "/cases/case",
+            name: 'Cases',
+            structure: {
+                name: {},
+            },
+            subsets: [{
+                id: "mother",
+                key: "@case_type",
+                structure: {
+                    edd: {},
+                }
+            }, {
+                id: "child",
+                key: "@case_type",
+                structure: {
+                    dob: {},
+                },
+                related: {
+                    parent: "mother",
+                },
+            }]
+        }, {
+            id: "some-fixture",
+            uri: "jr://fixture/item-list:some-fixture",
+            path: "/some-fixture_list/some-fixture",
             name: 'some-fixture-name',
             structure: {
                 "inner-attribute": {
@@ -54,7 +56,8 @@ define(["underscore"], function (_) {
                     no_option: true
                 }
             }
-        }];
+        }
+    ];
 
     var OPTIONS = {
         core: {
@@ -79,7 +82,7 @@ define(["underscore"], function (_) {
         itemset: {
             dataSourcesFilter: function (sources) {
                 return _.filter(sources, function (source) {
-                    return source.defaultId !== "casedb";
+                    return !source.uri || /^jr:\/\/fixture\//.test(source.uri);
                 });
             }
         },

@@ -10,9 +10,9 @@
  * should be JSON in this format):
  * [
  *      {
- *          sourceUri: string (used in the instance definition)
- *          defaultId: string (used in instance definition)
- *          intialQuery: string (used in nodeset)
+ *          id: string (used in instance definition)
+ *          uri: string (used in the instance definition)
+ *          path: string (used in nodeset)
  *          name: string (human readable name)
  *          structure: nested dictionary of elements and attributes
  *          {
@@ -22,8 +22,25 @@
  *                  }
  *                  name: "Element" (the text used in dropdown for this element)
  *              },
+ *              ref-element: {
+ *                  reference: {
+ *                      source: string (optional data source id, defaults to this data source)
+ *                      subset: string (optional subset id)
+ *                      key: string (referenced property)
+ *                  }
+ *              },
  *              @attribute: { }
- *          }
+ *          },
+ *          subsets: [{
+ *              id: string (unique identifier for this subset)
+ *              key: string (unique identifier property name)
+ *              name: string (human readable name)
+ *              structure: { ... }
+ *              related: {
+ *                  string (relationship): string (related subset name),
+ *                  ...
+ *              }
+ *          }]
  *      },
  *      ...
  * ]
@@ -33,15 +50,15 @@
  *
  * The result of that would be (if used in an itemset):
  *
- *     <instance src=sourceUri id=defaultId>
+ *     <instance src="{source.uri}" id="{source.id}">
  *     ...
- *     <itemset nodeset=initialQuery />
+ *     <itemset nodeset="instance('{source.id}'){source.path}" />
  *
  *
  * The dropdown would have options:
  *
- *     name             (nodeset: initialQuery)
- *     name - Element   (nodeset: initialQuery/element)
+ *     name             (nodeset: instance('{source.id}'){source.path})
+ *     name - Element   (nodeset: instance('{source.id}'){source.path}/element)
  *
  */
 define([
@@ -96,15 +113,15 @@ define([
             dataCache = {};
             if (data.length === 0) {
                 dataCache[""] = {
-                    sourceUri: "",
-                    defaultId: "",
-                    initialQuery: "",
+                    id: "",
+                    uri: "",
+                    path: "",
                     name: "Not Found",
                     structure: {}
                 };
             } else {
                 _.each(data, function(item) {
-                    dataCache[item.sourceUri] = item;
+                    dataCache[item.uri] = item;
                 });
             }
             _.each(dataCallbacks, function (callback) {
@@ -289,6 +306,8 @@ define([
             var value;
             if (options.dataSourcesFilter) {
                 data = options.dataSourcesFilter(data);
+                // TODO remove when data is a list
+                data = _.object(_.map(data, function (d) { return [d.uri, d]; }));
             }
             if (hasValue) {
                 value = local_getValue();
@@ -342,11 +361,11 @@ define([
             return _.map(structure, function(value, key) {
                 var ret = [],
                     newBaseFixture = {
-                        src: baseFixture.src,
                         id: baseFixture.id,
-                        query: baseFixture.query + "/" + key
+                        src: baseFixture.src,
+                        query: baseFixture.query + "/" + key,
+                        name: baseFixture.name + " - " + (value.name || key),
                     };
-                newBaseFixture.name = baseFixture.name + " - " + (value.name || key);
 
                 if (!value.no_option) {
                     ret = [newBaseFixture];
@@ -359,10 +378,10 @@ define([
         // TODO filter for itemsets
         return _.flatten(_.map(data || dataCache, function(fixture) {
             var baseFixture = {
-                src: fixture.sourceUri,
-                id: fixture.defaultId,
-                query: fixture.initialQuery,
-                name: fixture.name || fixture.defaultId
+                id: fixture.id,
+                src: fixture.uri,
+                query: "instance('" + fixture.id + "')" + fixture.path,
+                name: fixture.name || fixture.id
             };
 
             return [baseFixture].concat(generateFixtureDefinitions(fixture.structure, baseFixture));
