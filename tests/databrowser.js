@@ -19,34 +19,43 @@ require([
     var assert = chai.assert,
         plugins = _.union(util.options.options.plugins || [], ["databrowser"]),
         CASE_DATA = [{
+            id: "commcaresession",
+            uri: "jr://instance/session",
+            path: "/session/data",
+            name: 'Session',
+            structure: {
+                "case_id": {
+                    reference: {
+                        source: "casedb",
+                        subset: "child",
+                        key: "@case_id",
+                    },
+                },
+            },
+        }, {
             id: "casedb",
             uri: "jr://instance/casedb",
             path: "/cases/case",
             name: 'Cases',
             structure: {
-                "@case_id": {},
-                "@case_type": {},
-                case_name: {},
+                name: {},
             },
             subsets: [{
-                name: "Mother",
-                filter: "[@case_type='mother']",
+                id: "mother",
+                key: "@case_type",
                 structure: {
                     edd: {},
-                    children: {
-                        structure: {
-                            child_id: {}
-                        }
-                    }
                 }
             }, {
-                name: "Child",
-                filter: "[@case_type='child']",
+                id: "child",
+                key: "@case_type",
                 structure: {
-                    "@mother_id": {},
                     dob: {},
-                }
-            }]
+                },
+                related: {
+                    parent: "mother",
+                },
+            }],
         }];
 
     describe("The data tree", function () {
@@ -79,16 +88,20 @@ require([
         it("should add ref with instance on drag/drop", function() {
             util.loadXML("");
             var mug = util.addQuestion("DataBindOnly", "mug"),
-                node = dataTree.get_node(dataTree.get_node("#").children[0]),
                 calc = $("[name=property-calculateAttr]"),
-                uri = CASE_DATA[0].uri;
-            assert.equal(getInstanceId(mug.form, uri), null);
+                sessionUri = CASE_DATA[0].uri,
+                casedbUri = CASE_DATA[1].uri,
+                where = "@case_id=instance('commcaresession')/session/data/case_id";
+            assert.equal(getInstanceId(mug.form, sessionUri), null);
+            assert.equal(getInstanceId(mug.form, casedbUri), null);
             assert.equal(calc.length, 1);
-            node.data.handleDrop(calc);
-            assert.equal(mug.p.calculateAttr, "instance('casedb')/cases/case");
-            assert.equal(getInstanceId(mug.form, uri), "casedb");
+            util.findNode(dataTree, "dob").data.handleDrop(calc);
+            assert.equal(mug.p.calculateAttr,
+                         "instance('casedb')/cases/case[" + where + "]/dob");
+            assert.equal(getInstanceId(mug.form, sessionUri), "commcaresession");
+            assert.equal(getInstanceId(mug.form, casedbUri), "casedb");
         });
 
-        // TODO should remove instance when expression ref is removed
+        // TODO should remove instances when expression ref is removed
     });
 });
