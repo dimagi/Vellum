@@ -948,13 +948,18 @@ define([
                 widget.setValue(defaultValue);
                 widget.handleChange();
             } else {
-                var value = widget.getItextValue(),
-                    placeholder = widget.hasNodeIdPlaceholder ? widget.mug.p.nodeID : "";
-                if (!widget.isDefaultLang) {
-                    placeholder = widget.getItextValue(widget.defaultLang);
+                var value = widget.getItextValue();
+
+                if (!_.isString(value)) {
+                    if (!widget.isDefaultLang) {
+                        value = widget.getItextValue(widget.defaultLang);
+                    } else {
+                        value = widget.hasNodeIdPlaceholder ? widget.mug.p.nodeID : "";
+                    }
                 }
-                widget.setItextValue(!_.isUndefined(value) ? value : placeholder);
-                widget.setValue(!_.isUndefined(value) ? value : placeholder);
+
+                widget.setItextValue(value);
+                widget.setValue(value);
             }
         };
 
@@ -1005,7 +1010,7 @@ define([
             widget.mug.on('defaultLanguage-itext-changed', function (e) {
                 if (e.form === widget.form && e.itextType === widget.itextType) {
                     var placeholder = e.value;
-                    if (_.isUndefined(placeholder) && widget.hasNodeIdPlaceholder) {
+                    if (!_.isString(placeholder) && widget.hasNodeIdPlaceholder) {
                         placeholder = widget.mug.p.nodeID;
                     }
                     if (widget.getItextValue() === e.prevValue) {
