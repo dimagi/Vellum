@@ -562,7 +562,7 @@ require([
             });
         });
 
-        it("should replace the default form with placeholder when cleared", function(){
+        it("should allow a value to be blank", function(){
             util.loadXML("");
             util.addQuestion('Trigger', 'label');
             util.clickQuestion('label');

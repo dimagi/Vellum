@@ -1009,14 +1009,14 @@ define([
         if (!widget.isDefaultLang) {
             widget.mug.on('defaultLanguage-itext-changed', function (e) {
                 if (e.form === widget.form && e.itextType === widget.itextType) {
-                    var placeholder = e.value;
-                    if (!_.isString(placeholder) && widget.hasNodeIdAsDefault) {
-                        placeholder = widget.mug.p.nodeID;
+                    var value = e.value;
+                    if (!_.isString(value) && widget.hasNodeIdAsDefault) {
+                        value = widget.mug.p.nodeID;
                     }
                     if (widget.getItextValue() === e.prevValue) {
                         // Make sure all the defaults keep in sync.
-                        widget.setItextValue(placeholder);
-                        widget.setValue(placeholder);
+                        widget.setItextValue(value);
+                        widget.setValue(value);
                     }
                 }
             }, null, "teardown-mug-properties");
