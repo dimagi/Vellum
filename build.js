@@ -64,11 +64,7 @@
             name: 'global-deps',
             include: [
                 'jquery',
-                'jquery-ui',
-                'jquery.bootstrap',
-
-                // shim plugin dependencies don't get automatically included
-                'css/css!../bower_components/jquery-ui/themes/redmond/jquery-ui'
+                'jquery.bootstrap'
             ],
             exclude: [
                 'exclude'
@@ -117,7 +113,6 @@
                 'jquery.jstree',
                 'jquery.fancybox',
                 'jquery.bootstrap-popout',
-                'jquery.bootstrap-better-typeahead',
                 'save-button',
 
                 // shim plugin dependencies don't automatically get included

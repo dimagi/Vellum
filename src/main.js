@@ -40,12 +40,10 @@ requirejs.config({
         'CryptoJS': '../lib/sha1',
         'diff-match-patch': '../lib/diff_match_patch',
         'jquery': '../bower_components/jquery/dist/jquery',
-        'jquery-ui': '../bower_components/jquery-ui/jquery-ui',
         'jquery.jstree': '../bower_components/jstree/dist/jstree',
         'jquery.fancybox': '../lib/fancybox/jquery.fancybox-1.3.4',
         'jquery.bootstrap': '../lib/bootstrap',
         'jquery.bootstrap-popout': '../lib/bootstrap-popout',
-        'jquery.bootstrap-better-typeahead': '../bower_components/bootstrap-better-typeahead/js/bootstrap-better-typeahead',
         'underscore': '../bower_components/underscore/underscore',
         'XMLWriter': '../bower_components/XMLWriter/XMLWriter',
 
@@ -85,10 +83,6 @@ requirejs.config({
             exports: 'diff_match_patch'
         },
 
-        'jquery-ui': {
-            deps: ['jquery', 'css!../bower_components/jquery-ui/themes/redmond/jquery-ui'],
-            exports: '$.fn.autocomplete'
-        },
         'jquery.jstree': {
             deps: ['jquery', 'css!../bower_components/jstree/dist/themes/default/style'],
             exports: '$.fn.jstree'
@@ -104,9 +98,6 @@ requirejs.config({
         'jquery.bootstrap-popout': {
             deps: ['jquery.bootstrap'],
             exports: '$.fn.popout'
-        },
-        'jquery.bootstrap-better-typeahead': {
-            deps: ['jquery.bootstrap']
         },
         'underscore': {
             exports: '_'
@@ -177,15 +168,8 @@ if (window.jQuery) {
     define('jquery', [], function() {
         return window.jQuery;
     });
-    if (window.jQuery.fn.typeahead) {
-        define('jquery.bootstrap', [], function () {});
-    }
     if (window.jQuery.fn.popout) {
         define('jquery.bootstrap-popout', [], function () {});
-    }
-
-    if (window.jQuery.fn.datepicker) {
-        define('jquery-ui', [], function () {});
     }
 }
 

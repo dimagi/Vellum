@@ -28,16 +28,10 @@ _rjs:
 	cp bower_components/jstree/dist/themes/default/*.png \
 	   bower_components/jstree/dist/themes/default/*.gif \
 	   _build/bower_components/jstree/dist/themes/default
-	mkdir -p _build/bower_components/jquery-ui/themes/redmond/images
-	cp bower_components/jquery-ui/themes/redmond/images/*.png \
-	   bower_components/jquery-ui/themes/redmond/images/*.gif \
-	   _build/bower_components/jquery-ui/themes/redmond/images
 # combine CSS files (and adjust location for relative image paths)
 	# TODO do we need a blank line between the files? doesn't seem like it after initial test
 	cat _build/src/local-deps.css _build/src/main-components.css > _build/style.css
 	rm _build/src/local-deps.css _build/src/main-components.css
-	# for some reason relative image paths are wrong, so move stuff around
-	mv _build/src/global-deps.css _build/src/images _build/
 	echo "$(VERSION)" > _build/version.txt
 	(`npm bin`/bower list || `npm bin`/bower list --offline) | \
 		grep -Ev "^(Vellum|bower) " > _build/bower_components/manifest.txt
