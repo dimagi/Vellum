@@ -8,6 +8,11 @@
     removeCombined: true,
     skipDirOptimize: true,
     optimize: 'uglify2',
+    uglify2: {
+        output: {
+            'ascii_only': true
+        }
+    },
     preserveLicenseComments: false,
     // Separate CSS because relative URLs (images) within the CSS do not load
     // properly in a production environment.
