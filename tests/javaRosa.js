@@ -114,24 +114,7 @@ require([
             );
         });
 
-        it("itext widget should show placeholder when value is node ID (any language)", function () {
-            util.loadXML(TEST_XML_1);
-            util.addQuestion("Text", "temp");
-            util.clickQuestion("question1");
-            var enLabel = $("[name='itext-en-label']"),
-                hinLabel = $("[name='itext-hin-label']");
-            assert.equal(enLabel.val(), "question1");
-            assert.equal(hinLabel.val(), "question1");
-
-            util.clickQuestion("temp");
-            util.clickQuestion("question1");
-            enLabel = $("[name='itext-en-label']");
-            hinLabel = $("[name='itext-hin-label']");
-            assert.equal(enLabel.val(), "question1");
-            assert.equal(hinLabel.val(), "question1");
-        });
-
-        it("itext widget should show placeholder when value matches default language value", function () {
+        it("itext widget should change as default language value changes when equal", function () {
             util.loadXML(TEST_XML_1);
             util.addQuestion("Text", "temp");
             util.clickQuestion("question1");
@@ -149,7 +132,7 @@ require([
             assert.equal(hinLabel.val(), "English");
         });
 
-        it("itext widget should show placeholder when empty", function () {
+        it("itext widget should be blank when empty", function () {
             util.loadXML(TEST_XML_1);
             util.addQuestion("Text", "temp");
             util.clickQuestion("question1");
@@ -167,7 +150,7 @@ require([
             assert.equal(hinLabel.val(), "");
         });
 
-        it("non-labelItext widget should show placeholder for non-default language", function () {
+        it("non-labelItext widget should allow non default language to be blank", function () {
             util.loadXML(TEXT_WITH_CONSTRAINT_XML);
             util.clickQuestion("text");
             var enItext = $("[name='itext-en-constraintMsg']"),
