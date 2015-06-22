@@ -891,7 +891,7 @@ define([
         widget.defaultLang = Itext.getDefaultLanguage();
         widget.isDefaultLang = widget.language === widget.defaultLang;
         widget.isSyncedWithDefaultLang = false;
-        widget.hasNodeIdPlaceholder = options.path === 'labelItext';
+        widget.hasNodeIdAsDefault = options.path === 'labelItext';
 
         widget.getControl = function () {
             return $input;
@@ -954,7 +954,7 @@ define([
                     if (!widget.isDefaultLang) {
                         value = widget.getItextValue(widget.defaultLang);
                     } else {
-                        value = widget.hasNodeIdPlaceholder ? widget.mug.p.nodeID : "";
+                        value = widget.hasNodeIdAsDefault ? widget.mug.p.nodeID : "";
                     }
                 }
 
@@ -995,7 +995,7 @@ define([
             return null;
         };
 
-        if (widget.hasNodeIdPlaceholder && widget.isDefaultLang) {
+        if (widget.hasNodeIdAsDefault && widget.isDefaultLang) {
             widget.mug.on('property-changed', function (e) {
                 if (e.property === "nodeID") {
                     if (widget.getItextValue() === e.previous || !widget.getValue()) {
@@ -1010,7 +1010,7 @@ define([
             widget.mug.on('defaultLanguage-itext-changed', function (e) {
                 if (e.form === widget.form && e.itextType === widget.itextType) {
                     var placeholder = e.value;
-                    if (!_.isString(placeholder) && widget.hasNodeIdPlaceholder) {
+                    if (!_.isString(placeholder) && widget.hasNodeIdAsDefault) {
                         placeholder = widget.mug.p.nodeID;
                     }
                     if (widget.getItextValue() === e.prevValue) {
