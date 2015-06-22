@@ -1799,9 +1799,7 @@ define([
 
         var url = saveType === 'patch' ?  opts.patchUrl : opts.saveUrl;
 
-        $(document).ajaxStart(function () {
-            _this.showWaitingModal();
-        });
+        _this.showWaitingModal();
 
         if (saveType === 'patch') {
             var diff_match_patch = require('diff-match-patch'),
@@ -1837,7 +1835,6 @@ define([
                             // unconditionally overwrite if no xform to compare
                             _this.send(formText, 'full');
                         } else {
-                            _this.closeModal();
                             _this.showOverwriteWarning(_this.send.bind(_this),
                                                        formText, data.xform);
                         }
