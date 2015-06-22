@@ -822,30 +822,17 @@ define([
         }
         options.id = id;
 
-        var widget = widgets.base(mug, options);
-        var $input = $("<textarea></textarea>")
-            .attr("name", widget.id)
-            .attr("id", widget.id)
-            .attr("rows", "2")
-            .addClass('input-block-level itext-widget-input')
-            .on('change input', function (e) { widget.handleChange(); })
-            .focus(function() { this.select(); })
-            .keyup(function (e) {
-                // workaround for webkit: http://stackoverflow.com/a/12114908
-                if (e.which === 9) {
-                    this.select();
-                }
-            });
+        var widget = widgets.multilineText(mug, options);
 
         if (options.path === 'labelItext') {
-            util.questionAutocomplete($input, mug, {
+            util.questionAutocomplete(widget.input, mug, {
                 category: "Output Value",
-                insertTpl: '<output value="${name}" />',
+                insertTpl: '&lt;output value="${name}" /',
                 property: "labelItext",
             });
 
-            $input.addClass('jstree-drop');
-            $input.keydown(function (e) {
+            widget.input.addClass('jstree-drop');
+            widget.input.keydown(function (e) {
                 // deletion of entire output ref in one go
                 if (e && e.which === 8 || e.which === 46) {
                     var control = widget.getControl()[0],
@@ -894,10 +881,6 @@ define([
         widget.isDefaultLang = widget.language === widget.defaultLang;
         widget.isSyncedWithDefaultLang = false;
         widget.hasNodeIdPlaceholder = options.path === 'labelItext';
-
-        widget.getControl = function () {
-            return $input;
-        };
 
         widget.getItextItem = function () {
             // Make sure the real itextItem is being updated at all times, not a stale one.
@@ -988,26 +971,6 @@ define([
 
         widget.toggleDefaultLangSync = function (val) {
             widget.isSyncedWithDefaultLang = !val && !widget.isDefaultLang;
-        };
-
-        widget.setValue = function (val) {
-            $input.val(val);
-        };
-
-        widget.setPlaceholder = function (val) {
-            $input.attr("placeholder", val);
-        };
-
-        widget.getValue = function () {
-            return $input.val();
-        };
-
-        widget.getPlaceholder = function () {
-            return $input.attr('placeholder');
-        };
-
-        widget.getDefaultValue = function () {
-            return null;
         };
 
         if (widget.hasNodeIdPlaceholder && widget.isDefaultLang) {

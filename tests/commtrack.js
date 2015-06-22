@@ -264,7 +264,7 @@ define([
             util.loadXML(TRANSFER_BLOCK_XML);
             util.saveButtonEnabled(false);
             util.clickQuestion("transfer[@type='trans-1']");
-            $("input[name='property-dest']").change();
+            $("[name='property-dest']").change();
             assert(util.saveButtonEnabled(), "save button is disabled");
         });
 

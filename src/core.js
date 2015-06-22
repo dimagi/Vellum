@@ -861,7 +861,7 @@ define([
             inst = $.jstree.reference(target);
         if (!inst && target.vellum("get") === source.vellum("get")) {
             // only when not dragging inside the tree
-            if (target.hasClass("jstree-drop")) {
+            if (target.hasClass("jstree-drop") || target.parents('.jstree-drop').length > 0) {
                 data.helper.find('.jstree-icon').removeClass('jstree-er').addClass('jstree-ok');
             } else {
                 data.helper.find('.jstree-icon').removeClass('jstree-ok').addClass('jstree-er');

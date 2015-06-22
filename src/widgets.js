@@ -115,8 +115,10 @@ define([
         widget.id = inputID;
         widget.saving = false;
 
-        widget.input = $("<input />")
+        widget.input = $("<div />")
+            .addClass('fd-input')
             .attr("name", inputID)
+            .attr("contenteditable", true)
             .attr("id", inputID)
             .prop('disabled', disabled);
 
@@ -158,7 +160,9 @@ define([
     var text = function (mug, options) {
         var widget = normal(mug, options),
             input = widget.input;
-        input.attr("type", "text").addClass('input-block-level');
+        input.addClass('input-block-level').focus(function() {
+            util.setCaretPosition(this, 0, input.val().length);
+        });
 
         widget.setValue = function (value) {
             if (value) {
@@ -184,6 +188,62 @@ define([
         input.bind("change input", function () {
             widget.handleChange();
         });
+        return widget;
+    };
+
+    var multilineText = function (mug, options) {
+        // TODO: make this inherit from normal
+        // normal adds property- to all ids (make javarosa accept that)
+        var widget = base(mug, options);
+
+        widget.input = $("<div />")
+            .attr("contenteditable", true)
+            .attr("name", widget.id)
+            .addClass('fd-textarea input-block-level itext-widget-input')
+            .on('change input', function (e) { widget.handleChange(); })
+            .focus(function () {
+                util.setCaretPosition(this, 0, $(this).val().length);
+            })
+            .keyup(function (e) {
+                // workaround for webkit: http://stackoverflow.com/a/12114908
+                if (e.which === 9) {
+                    this.focus();
+                }
+            });
+
+        widget.getControl = function () {
+            return widget.input;
+        };
+
+        widget.setValue = function (val) {
+            widget.input.val(val);
+        };
+
+        widget.setPlaceholder = function (val) {
+            widget.input.attr("placeholder", val);
+        };
+
+        widget.getValue = function () {
+            return widget.input.val();
+        };
+
+        widget.getPlaceholder = function () {
+            return widget.input.attr('placeholder');
+        };
+
+        widget.getDefaultValue = function () {
+            return null;
+        };
+
+        widget.save = function () {
+            widget.saving = true;
+            try {
+                widget.mugValue(mug, widget.getValue());
+            } finally {
+                widget.saving = false;
+            }
+        };
+
         return widget;
     };
 
@@ -235,7 +295,10 @@ define([
     var checkbox = function (mug, options) {
         var widget = normal(mug, options),
             input = widget.input;
-        input.attr("type", "checkbox");
+        input = widget.input = $('<input>')
+            .attr("type", "checkbox")
+            .attr("name", widget.id)
+            .attr('disabled', options.disabled);
 
         widget.setValue = function (value) {
             input.prop("checked", value);
@@ -527,6 +590,7 @@ define([
         base: base,
         normal: normal,
         text: text,
+        multilineText: multilineText,
         identifier: identifier,
         droppableText: droppableText,
         checkbox: checkbox,
