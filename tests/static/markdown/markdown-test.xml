@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:orx="http://openrosa.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa" xmlns:vellum="http://commcarehq.org/xforms/vellum">
+	<h:head>
+		<h:title>Untitled Form</h:title>
+		<model>
+			<instance>
+				<data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/565C9D13-E3BE-4055-B272-5A5C69688FAD" uiVersion="1" version="1" name="Untitled Form">
+					<markdown_question />
+					<no_markdown />
+					<markdown_but_not />
+					<escaped_markdown />
+				</data>
+			</instance>
+			<bind nodeset="/data/markdown_question" type="xsd:string" />
+			<bind nodeset="/data/no_markdown" type="xsd:string" />
+			<bind nodeset="/data/markdown_but_not" type="xsd:string" />
+			<bind nodeset="/data/escaped_markdown" type="xsd:string" />
+			<itext>
+				<translation lang="en" default="">
+					<text id="markdown_question-label">
+						<value>some markdown</value>
+						<value form="markdown">**some markdown**</value>
+					</text>
+					<text id="no_markdown-label">
+						<value>just text</value>
+					</text>
+					<text id="markdown_but_not-label">
+						<value>**no markdown here**</value>
+					</text>
+					<text id="escaped_markdown-label">
+						<value>**no markdown here either**</value>
+						<value form="markdown">**\*\*no markdown here either\*\***</value>
+					</text>
+				</translation>
+				<translation lang="hin">
+					<text id="markdown_question-label">
+						<value>some markdown</value>
+						<value form="markdown">**some markdown**</value>
+					</text>
+					<text id="no_markdown-label">
+						<value>just text</value>
+					</text>
+					<text id="markdown_but_not-label">
+						<value>**no markdown here**</value>
+					</text>
+					<text id="escaped_markdown-label">
+						<value>**no markdown here either**</value>
+						<value form="markdown">**\*\*no markdown here either\*\***</value>
+					</text>
+				</translation>
+			</itext>
+		</model>
+	</h:head>
+	<h:body>
+		<input ref="/data/markdown_question">
+			<label ref="jr:itext('markdown_question-label')" />
+		</input>
+		<input ref="/data/no_markdown">
+			<label ref="jr:itext('no_markdown-label')" />
+		</input>
+		<input ref="/data/markdown_but_not">
+			<label ref="jr:itext('markdown_but_not-label')" />
+		</input>
+		<input ref="/data/escaped_markdown">
+			<label ref="jr:itext('escaped_markdown-label')" />
+		</input>
+	</h:body>
+</h:html>

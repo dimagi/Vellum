@@ -22,9 +22,7 @@ require([
     'text!static/javaRosa/test-xml-1.xml',
     'text!static/javaRosa/test-xml-2.xml',
     'text!static/javaRosa/test-xml-3.xml',
-    'text!static/javaRosa/test-xml-4.xml',
-    'text!static/markdown/with-markdown.xml',
-    'text!static/markdown/no-markdown.xml'
+    'text!static/javaRosa/test-xml-4.xml'
 ], function (
     chai,
     $,
@@ -48,9 +46,7 @@ require([
     TEST_XML_1,
     TEST_XML_2,
     TEST_XML_3,
-    TEST_XML_4,
-    WITH_MARKDOWN_XML,
-    NO_MARKDOWN_XML
+    TEST_XML_4
 ) {
     var assert = chai.assert,
         call = util.call;
@@ -557,11 +553,6 @@ require([
                 $xml = $(xml);
             assert.strictEqual($xml.find("text#north-label").length, 2,
                                "wrong <text> node count\n" + xml);
-        });
-
-        it("should add markdown to existing help text", function() {
-            util.loadXML(NO_MARKDOWN_XML);
-            util.assertXmlEqual(call('createXML'), WITH_MARKDOWN_XML);
         });
 
         _.each(["hint", "help", "constraintMsg"], function (tag) {

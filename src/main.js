@@ -65,6 +65,7 @@ requirejs.config({
         'swfobject': '../bower_components/MediaUploader/swfobject',
         'file-uploader': '../bower_components/MediaUploader/hqmedia.upload_controller',
         'jsdiff': '../bower_components/jsdiff/diff',
+        'markdown-it': '../bower_components/markdown-it/dist/markdown-it',
         'caretjs': '../bower_components/Caret.js/dist/jquery.caret',
         'atjs': '../bower_components/At.js/dist/js/jquery.atwho'
     },
@@ -147,6 +148,9 @@ requirejs.config({
         },
         'jsdiff': {
             exports: 'JsDiff'
+        },
+        'markdown-it': {
+            exports: 'markdown-it'
         },
         'caretjs': {
             deps: ['jquery'],

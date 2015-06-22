@@ -476,7 +476,7 @@ define([
         var uiElem = $("<div />").addClass("widget control-group"),
             $controls = $('<div class="controls" />'),
             $messages = $('<div class="controls messages" />'),
-            $label = $("<label />").text(labelText);
+            $label = $('<div />').append($("<label />").text(labelText));
         $label.addClass('control-label');
         if (help) {
             var link = "";
@@ -513,7 +513,7 @@ define([
             var html = $(widget_control_message({
                     msg: msg,
                     html: /\n/.test(msg.message) ?
-                            util.markdownlite(msg.message) : ""
+                            util.markdown(msg.message) : ""
                 }));
             html.find("button.close").click(function () {
                 mug.dropMessage(path, msg.key);
