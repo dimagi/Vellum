@@ -948,19 +948,13 @@ define([
                 widget.setValue(defaultValue);
                 widget.handleChange();
             } else {
-                var itextItem = widget.getItextItem();
-
-                if (!itextItem) {
-                    widget.setValue("");
-                    return;
-                }
-
                 var value = widget.getItextValue(),
                     placeholder = widget.hasNodeIdPlaceholder ? widget.mug.p.nodeID : "";
                 if (!widget.isDefaultLang) {
                     placeholder = widget.getItextValue(widget.defaultLang);
                 }
-                widget.setValue(value ? value : placeholder);
+                widget.setItextValue(!_.isUndefined(value) ? value : placeholder);
+                widget.setValue(!_.isUndefined(value) ? value : placeholder);
             }
         };
 
@@ -1011,10 +1005,10 @@ define([
             widget.mug.on('defaultLanguage-itext-changed', function (e) {
                 if (e.form === widget.form && e.itextType === widget.itextType) {
                     var placeholder = e.value;
-                    if (!placeholder && widget.hasNodeIdPlaceholder) {
+                    if (_.isUndefined(placeholder) && widget.hasNodeIdPlaceholder) {
                         placeholder = widget.mug.p.nodeID;
                     }
-                    if (widget.getItextValue() === e.prevValue || !widget.getValue()) {
+                    if (widget.getItextValue() === e.prevValue) {
                         // Make sure all the defaults keep in sync.
                         widget.setItextValue(placeholder);
                         widget.setValue(placeholder);
