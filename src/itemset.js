@@ -28,9 +28,7 @@ define([
     'vellum/mugs',
     'vellum/parser',
     'vellum/util',
-    'vellum/debugutil',
-    'vellum/core',
-    'jquery.bootstrap-better-typeahead'
+    'vellum/debugutil'
 ], function (
     _,
     $,

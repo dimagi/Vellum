@@ -30,7 +30,6 @@ define([
     'jquery.jstree',
     'jquery.bootstrap',
     'jquery.fancybox',  // only thing we use fancybox for is its spinner, no actual display of anything
-    'jquery-ui',  // used for autocomplete
     'caretjs',
     'atjs'
 ], function (
