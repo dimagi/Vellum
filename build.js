@@ -8,6 +8,11 @@
     removeCombined: true,
     skipDirOptimize: true,
     optimize: 'uglify2',
+    uglify2: {
+        output: {
+            'ascii_only': true
+        }
+    },
     preserveLicenseComments: false,
     // Separate CSS because relative URLs (images) within the CSS do not load
     // properly in a production environment.
@@ -64,11 +69,7 @@
             name: 'global-deps',
             include: [
                 'jquery',
-                'jquery-ui',
-                'jquery.bootstrap',
-
-                // shim plugin dependencies don't get automatically included
-                'css/css!../bower_components/jquery-ui/themes/redmond/jquery-ui'
+                'jquery.bootstrap'
             ],
             exclude: [
                 'exclude'
@@ -116,7 +117,6 @@
                 'underscore',
                 'jquery.jstree',
                 'jquery.bootstrap-popout',
-                'jquery.bootstrap-better-typeahead',
                 'save-button',
 
                 // shim plugin dependencies don't automatically get included

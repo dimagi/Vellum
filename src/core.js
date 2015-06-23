@@ -29,7 +29,6 @@ define([
     'less!vellum/less-style/main',
     'jquery.jstree',
     'jquery.bootstrap',
-    'jquery-ui',  // used for autocomplete
     'caretjs',
     'atjs'
 ], function (
@@ -1795,10 +1794,6 @@ define([
         saveType = saveType || opts.saveType;
 
         var url = saveType === 'patch' ?  opts.patchUrl : opts.saveUrl;
-
-        $(document).ajaxStart(function () {
-            _this._showPageSpinner();
-        });
 
         if (saveType === 'patch') {
             var diff_match_patch = require('diff-match-patch'),
