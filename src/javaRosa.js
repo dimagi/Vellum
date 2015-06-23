@@ -1011,6 +1011,7 @@ define([
                 if (e.form === widget.form && e.itextType === widget.itextType) {
                     var value = e.value;
                     if (!_.isString(value) && widget.hasNodeIdAsDefault) {
+                        // branch not taken in browser. left here fore tests
                         value = widget.mug.p.nodeID;
                     }
                     if (widget.getItextValue() === e.prevValue) {
