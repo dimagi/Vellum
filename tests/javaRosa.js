@@ -543,6 +543,7 @@ require([
         });
 
         it("should not allow apostrophes in item labels", function() {
+            util.loadXML("");
             util.addQuestion("Select", "select");
             util.clickQuestion('select/item1');
             $("[name='property-nodeID']").val("blah ' blah").change();
