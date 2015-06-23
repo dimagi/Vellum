@@ -1795,6 +1795,8 @@ define([
 
         var url = saveType === 'patch' ?  opts.patchUrl : opts.saveUrl;
 
+        _this._showPageSpinner();
+
         if (saveType === 'patch') {
             var diff_match_patch = require('diff-match-patch'),
                 dmp = new diff_match_patch();
