@@ -1009,15 +1009,10 @@ define([
         if (!widget.isDefaultLang) {
             widget.mug.on('defaultLanguage-itext-changed', function (e) {
                 if (e.form === widget.form && e.itextType === widget.itextType) {
-                    var value = e.value;
-                    if (!_.isString(value) && widget.hasNodeIdAsDefault) {
-                        // branch not taken in browser. left here for tests
-                        value = widget.mug.p.nodeID;
-                    }
                     if (widget.getItextValue() === e.prevValue) {
                         // Make sure all the defaults keep in sync.
-                        widget.setItextValue(value);
-                        widget.setValue(value);
+                        widget.setItextValue(e.value);
+                        widget.setValue(e.value);
                     }
                 }
             }, null, "teardown-mug-properties");
