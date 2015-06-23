@@ -688,6 +688,16 @@ define([
         return $modal;
     };
 
+    fn._showPageSpinner = function() {
+        var spinner = $("<div><div><div></div></div></div>");
+        spinner.addClass("fd-form-saving");
+        $('body').append(spinner);
+    };
+
+    fn._hidePageSpinner = function() {
+        $(".fd-form-saving").remove();
+    };
+
     fn.handleDropFinish = function(target, sourceUid, mug) {
         var _this = this,
             ops = target.closest(".xpath-expression-row").find(".op-select");
@@ -1019,7 +1029,7 @@ define([
         done = done || function () {};
         var _this = this;
 
-        _this.showWaitingModal("Loading...");
+        _this._showPageSpinner();
         //wait for the spinner to come up.
         window.setTimeout(function () {
             //universal flag for indicating that there's something wrong enough
@@ -1040,7 +1050,7 @@ define([
                 } else {
                     _this.$f.find('.fd-default-panel').removeClass('hide');
                 }
-                _this.closeModal();
+                fn._hidePageSpinner();
             } catch (e) {
                 // hack: don't display the whole invalid XML block if it
                 // was a parse error
@@ -1051,13 +1061,14 @@ define([
 
                 _this.hideQuestionProperties();
 
-                _this.closeModal();
                 var $modal = _this.generateNewModal("Error", [], "OK", "icon-warning-sign");
                 $modal.find(".modal-body").text(msg);
                 $modal.modal('show');
 
                 _this.data.core.formLoadingFailed = true;
                 _this.data.core.failedLoadXML = formString;
+
+                _this._hidePageSpinner();
                 throw e;
             }
             done();
@@ -1786,7 +1797,7 @@ define([
         var url = saveType === 'patch' ?  opts.patchUrl : opts.saveUrl;
 
         $(document).ajaxStart(function () {
-            _this.showWaitingModal();
+            _this._showPageSpinner();
         });
 
         if (saveType === 'patch') {
@@ -1823,7 +1834,7 @@ define([
                             // unconditionally overwrite if no xform to compare
                             _this.send(formText, 'full');
                         } else {
-                            _this.closeModal();
+                            _this._hidePageSpinner();
                             _this.showOverwriteWarning(_this.send.bind(_this),
                                                        formText, data.xform);
                         }
@@ -1833,26 +1844,10 @@ define([
                         _this.send(formText, 'full');
                     }
                 }
-                _this.closeModal();
+                _this._hidePageSpinner();
                 _this.opts().core.onFormSave(data);
                 _this.data.core.lastSavedXForm = formText;
             }
-        });
-    };
-
-    fn.showWaitingModal = function (msg) {
-        if (!msg || typeof msg !== 'string') {
-            msg = 'Saving form to server...';
-        }
-
-        var $modal = this.generateNewModal("Processing...", [], false);
-        $modal.find(".modal-body").html(msg + "<span class='fd-form-saving-img'></span>");
-        $modal.find(".close").hide();
-        $modal.find(".modal-footer").hide();
-        $modal.modal({
-            show: true,
-            backdrop: 'static',
-            keyboard: false,
         });
     };
 
