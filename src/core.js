@@ -1050,7 +1050,7 @@ define([
                 } else {
                     _this.$f.find('.fd-default-panel').removeClass('hide');
                 }
-                fn._hidePageSpinner();
+                _this._hidePageSpinner();
             } catch (e) {
                 // hack: don't display the whole invalid XML block if it
                 // was a parse error
