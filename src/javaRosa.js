@@ -53,6 +53,7 @@ define([
         this.hasMarkdown = _.isUndefined(options.hasMarkdown) ? false : options.hasMarkdown;
         this.itextModel = options.itextModel;
         this.key = String(_nextItextItemKey++);
+        this.refCount = 1;
     }
     ItextItem.prototype = {
         clone: function () {
@@ -436,6 +437,13 @@ define([
             setAutoMode(true);
         }
 
+        function unlinkSharedItext() {
+            if (currentValue.refCount > 1) {
+                currentValue.refCount--;
+                currentValue = currentValue.clone();
+            }
+        }
+
         var _setValue = widget.setValue;
 
         widget.setValue = function (value) {
@@ -459,6 +467,7 @@ define([
 
         $autoBox.change(function () {
             if ($(this).prop('checked')) {
+                unlinkSharedItext();
                 updateAutoId();
                 widget.handleChange();
             }
@@ -1495,6 +1504,7 @@ define([
                     var item = itextMap[id];
                     if (!item || !itextMap.hasOwnProperty(id)) {
                         item = Itext.createItem(id);
+                        item.refCount = 0;
                         itextMap[id] = item;
                     }
 
@@ -1598,6 +1608,7 @@ define([
                         if (!auto) {
                             item.autoId = false;
                         }
+                        item.refCount++;
                         return item;
                     }
                 }
@@ -1838,6 +1849,7 @@ define([
                             id = data[name];
                         if (itext.hasOwnProperty(id) && !itext[id].autoId) {
                             mug.p[name] = item = itext[id];
+                            item.refCount++;
                         } else {
                             item.id = data[name];
                             item.autoId = false;

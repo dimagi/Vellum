@@ -555,6 +555,25 @@ require([
                                "wrong <text> node count\n" + xml);
         });
 
+        it("should unlink auto itext id from other questions with shared itext", function () {
+            util.loadXML(ITEXT_ITEM_NON_AUTO_ID_XML);
+            assert.equal($(ITEXT_ITEM_NON_AUTO_ID_XML).find("text#south-label").length, 0,
+                         "wrong <text#south> node count\n" + ITEXT_ITEM_NON_AUTO_ID_XML);
+            util.clickQuestion("south");
+            var controls = $("[name='property-labelItext']").closest(".control-group"),
+                autobox = controls.find("input[type=checkbox]");
+            autobox.prop("checked", true).change();
+            $("[name='itext-en-label']").val("south").change();
+            assert.equal(util.getMug("north").p.labelItext.get(), "north");
+            assert.equal(util.getMug("south").p.labelItext.get(), "south");
+            var xml = call("createXML"),
+                $xml = $(xml);
+            assert.equal($xml.find("text#north-label").length, 2,
+                         "wrong <text#north> node count\n" + xml);
+            assert.equal($xml.find("text#south-label").length, 2,
+                         "wrong <text#south> node count\n" + xml);
+        });
+
         _.each(["hint", "help", "constraintMsg"], function (tag) {
             it("should not serialize empty " + tag + " itext item with non-empty id and autoId = true", function() {
                 util.loadXML("");
