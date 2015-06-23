@@ -548,6 +548,17 @@ require([
             $("[name='property-nodeID']").val("blah ' blah").change();
             assert.strictEqual($("[name='property-labelItext']").val(), 'select-blah___blah-labelItext');
         });
+
+        it("should not change with node id when blank", function() {
+            util.loadXML("");
+            util.addQuestion("Text", "text");
+            util.clickQuestion("text");
+            $('[name=itext-en-label]').val('').change();
+            $('[name=itext-hin-label]').val('').change();
+            $('[name=property-nodeID]').val('nodeid').change();
+            assert.strictEqual($('[name=itext-en-label]').val(), '');
+            assert.strictEqual($('[name=itext-hin-label]').val(), '');
+        });
     });
 
     describe("The javaRosaplugin with one language", function() {

@@ -998,7 +998,7 @@ define([
         if (widget.hasNodeIdAsDefault && widget.isDefaultLang) {
             widget.mug.on('property-changed', function (e) {
                 if (e.property === "nodeID") {
-                    if (widget.getItextValue() === e.previous || !widget.getValue()) {
+                    if (widget.getItextValue() === e.previous) {
                         widget.setItextValue(e.val);
                         widget.setValue(e.val);
                     }
