@@ -130,8 +130,7 @@ define([
                         finish([]);
                         window.console.log(util.formatExc(exc || errorType));
                     },
-                    data: {},
-                    async: false
+                    data: {}
                 });
             } else {
                 dataSourcesEndpoint(finish);
