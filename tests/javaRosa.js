@@ -114,28 +114,7 @@ require([
             );
         });
 
-        it("itext widget should show placeholder when value is node ID (any language)", function () {
-            util.loadXML(TEST_XML_1);
-            util.addQuestion("Text", "temp");
-            util.clickQuestion("question1");
-            var enLabel = $("[name='itext-en-label']"),
-                hinLabel = $("[name='itext-hin-label']");
-            assert.equal(enLabel.val(), "");
-            assert.equal(enLabel.attr("placeholder"), "question1");
-            assert.equal(hinLabel.val(), "");
-            assert.equal(hinLabel.attr("placeholder"), "question1");
-
-            util.clickQuestion("temp");
-            util.clickQuestion("question1");
-            enLabel = $("[name='itext-en-label']");
-            hinLabel = $("[name='itext-hin-label']");
-            assert.equal(enLabel.val(), "");
-            assert.equal(enLabel.attr("placeholder"), "question1");
-            assert.equal(hinLabel.val(), "");
-            assert.equal(hinLabel.attr("placeholder"), "question1");
-        });
-
-        it("itext widget should show placeholder when value matches default language value", function () {
+        it("itext widget should change as default language value changes when equal", function () {
             util.loadXML(TEST_XML_1);
             util.addQuestion("Text", "temp");
             util.clickQuestion("question1");
@@ -143,19 +122,17 @@ require([
                 hinLabel = $("[name='itext-hin-label']");
             enLabel.val("English").change();
             assert.equal(enLabel.val(), "English");
-            assert.equal(hinLabel.val(), "");
-            assert.equal(hinLabel.attr("placeholder"), "English");
+            assert.equal(hinLabel.val(), "English");
 
             util.clickQuestion("temp");
             util.clickQuestion("question1");
             enLabel = $("[name='itext-en-label']");
             hinLabel = $("[name='itext-hin-label']");
             assert.equal(enLabel.val(), "English");
-            assert.equal(hinLabel.val(), "");
-            assert.equal(hinLabel.attr("placeholder"), "English");
+            assert.equal(hinLabel.val(), "English");
         });
 
-        it("itext widget should show placeholder when empty", function () {
+        it("itext widget should be blank when empty", function () {
             util.loadXML(TEST_XML_1);
             util.addQuestion("Text", "temp");
             util.clickQuestion("question1");
@@ -163,21 +140,17 @@ require([
                 hinLabel = $("[name='itext-hin-label']");
             enLabel.val("").change();
             assert.equal(enLabel.val(), "");
-            assert.equal(enLabel.attr("placeholder"), "question1");
             assert.equal(hinLabel.val(), "");
-            assert.equal(hinLabel.attr("placeholder"), "question1");
 
             util.clickQuestion("temp");
             util.clickQuestion("question1");
             enLabel = $("[name='itext-en-label']");
             hinLabel = $("[name='itext-hin-label']");
             assert.equal(enLabel.val(), "");
-            assert.equal(enLabel.attr("placeholder"), "question1");
             assert.equal(hinLabel.val(), "");
-            assert.equal(hinLabel.attr("placeholder"), "question1");
         });
 
-        it("non-labelItext widget should show placeholder for non-default language", function () {
+        it("non-labelItext widget should allow non default language to be blank", function () {
             util.loadXML(TEXT_WITH_CONSTRAINT_XML);
             util.clickQuestion("text");
             var enItext = $("[name='itext-en-constraintMsg']"),
@@ -185,14 +158,10 @@ require([
             hinItext.val("").change();
             assert.equal(enItext.val(), "English");
             assert.equal(hinItext.val(), "");
-            assert.equal(hinItext.attr("placeholder"), "English");
-            assert(!enItext.attr("placeholder"), enItext.attr("placeholder"));
 
             enItext.val("").change();
             assert.equal(enItext.val(), "");
             assert.equal(hinItext.val(), "");
-            assert(!enItext.attr("placeholder"), enItext.attr("placeholder"));
-            assert(!hinItext.attr("placeholder"), hinItext.attr("placeholder"));
         });
 
         it("should display correct language for question that was collapsed when language changed", function () {
@@ -223,8 +192,7 @@ require([
             var enLabel = $("[name='itext-en-label']"),
                 hinLabel = $("[name='itext-hin-label']");
             assert.equal(enLabel.val(), "English");
-            assert.equal(hinLabel.val(), "");
-            assert.equal(hinLabel.attr("placeholder"), "English");
+            assert.equal(hinLabel.val(), "English");
         });
 
         it("tree should note when default language is being displayed instead of selected language", function() {
@@ -594,10 +562,22 @@ require([
         });
 
         it("should not allow apostrophes in item labels", function() {
+            util.loadXML("");
             util.addQuestion("Select", "select");
             util.clickQuestion('select/item1');
             $("[name='property-nodeID']").val("blah ' blah").change();
             assert.strictEqual($("[name='property-labelItext']").val(), 'select-blah___blah-labelItext');
+        });
+
+        it("should not change with node id when blank", function() {
+            util.loadXML("");
+            util.addQuestion("Text", "text");
+            util.clickQuestion("text");
+            $('[name=itext-en-label]').val('').change();
+            $('[name=itext-hin-label]').val('').change();
+            $('[name=property-nodeID]').val('nodeid').change();
+            assert.strictEqual($('[name=itext-en-label]').val(), '');
+            assert.strictEqual($('[name=itext-hin-label]').val(), '');
         });
     });
 
@@ -613,7 +593,7 @@ require([
             });
         });
 
-        it("should replace the default form with placeholder when cleared", function(){
+        it("should allow a value to be blank", function(){
             util.loadXML("");
             util.addQuestion('Trigger', 'label');
             util.clickQuestion('label');

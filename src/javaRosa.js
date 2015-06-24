@@ -900,7 +900,7 @@ define([
         widget.defaultLang = Itext.getDefaultLanguage();
         widget.isDefaultLang = widget.language === widget.defaultLang;
         widget.isSyncedWithDefaultLang = false;
-        widget.hasNodeIdPlaceholder = options.path === 'labelItext';
+        widget.hasNodeIdAsDefault = options.path === 'labelItext';
 
         widget.getControl = function () {
             return $input;
@@ -922,9 +922,6 @@ define([
         widget.setItextValue = function (value) {
             var itextItem = widget.getItextItem();
             if (itextItem) {
-                if (!value) {
-                    value = widget.getPlaceholder();
-                }
                 if (widget.isDefaultLang) {
                     widget.mug.fire({
                         type: 'defaultLanguage-itext-changed',
@@ -960,20 +957,18 @@ define([
                 widget.setValue(defaultValue);
                 widget.handleChange();
             } else {
-                var itextItem = widget.getItextItem();
+                var value = widget.getItextValue();
 
-                if (!itextItem) {
-                    widget.setValue("");
-                    return;
+                if (!_.isString(value)) {
+                    if (!widget.isDefaultLang) {
+                        value = widget.getItextValue(widget.defaultLang);
+                    } else {
+                        value = widget.hasNodeIdAsDefault ? widget.mug.p.nodeID : "";
+                    }
                 }
 
-                var value = widget.getItextValue(),
-                    placeholder = widget.hasNodeIdPlaceholder ? widget.mug.p.nodeID : "";
-                if (!widget.isDefaultLang) {
-                    placeholder = widget.getItextValue(widget.defaultLang) || placeholder;
-                }
-                widget.setPlaceholder(placeholder);
-                widget.setValue(value && value !== placeholder ? value : "");
+                widget.setItextValue(value);
+                widget.setValue(value);
             }
         };
 
@@ -1001,29 +996,20 @@ define([
             $input.val(val);
         };
 
-        widget.setPlaceholder = function (val) {
-            $input.attr("placeholder", val);
-        };
-
         widget.getValue = function () {
             return $input.val();
-        };
-
-        widget.getPlaceholder = function () {
-            return $input.attr('placeholder');
         };
 
         widget.getDefaultValue = function () {
             return null;
         };
 
-        if (widget.hasNodeIdPlaceholder && widget.isDefaultLang) {
+        if (widget.hasNodeIdAsDefault && widget.isDefaultLang) {
             widget.mug.on('property-changed', function (e) {
                 if (e.property === "nodeID") {
-                    widget.setPlaceholder(e.val);
-                    if (widget.getItextValue() === e.previous || !widget.getValue()) {
+                    if (widget.getItextValue() === e.previous) {
                         widget.setItextValue(e.val);
-                        widget.setValue("");
+                        widget.setValue(e.val);
                     }
                 }
             }, null, "teardown-mug-properties");
@@ -1032,15 +1018,10 @@ define([
         if (!widget.isDefaultLang) {
             widget.mug.on('defaultLanguage-itext-changed', function (e) {
                 if (e.form === widget.form && e.itextType === widget.itextType) {
-                    var placeholder = e.value;
-                    if (!placeholder && widget.hasNodeIdPlaceholder) {
-                        placeholder = widget.mug.p.nodeID;
-                    }
-                    widget.setPlaceholder(placeholder);
-                    if (widget.getItextValue() === e.prevValue || !widget.getValue()) {
+                    if (widget.getItextValue() === e.prevValue) {
                         // Make sure all the defaults keep in sync.
-                        widget.setItextValue(placeholder);
-                        widget.setValue("");
+                        widget.setItextValue(e.value);
+                        widget.setValue(e.value);
                     }
                 }
             }, null, "teardown-mug-properties");
@@ -1746,14 +1727,12 @@ define([
                         for (var k = 0; k < forms.length; k++) {
                             form = forms[k];
                             val = form.getValueOrDefault(lang);
-                            if (val) {
-                                xmlWriter.writeStartElement("value");
-                                if(form.name !== "default") {
-                                    xmlWriter.writeAttributeString('form', form.name);
-                                }
-                                xmlWriter.writeXML(xml.normalize(val));
-                                xmlWriter.writeEndElement();
+                            xmlWriter.writeStartElement("value");
+                            if(form.name !== "default") {
+                                xmlWriter.writeAttributeString('form', form.name);
                             }
+                            xmlWriter.writeXML(xml.normalize(val));
+                            xmlWriter.writeEndElement();
                         }
                         if (item.hasMarkdown) {
                             val = item.get('default', lang);
