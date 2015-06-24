@@ -41,7 +41,6 @@ requirejs.config({
         'diff-match-patch': '../lib/diff_match_patch',
         'jquery': '../bower_components/jquery/dist/jquery',
         'jquery.jstree': '../bower_components/jstree/dist/jstree',
-        'jquery.fancybox': '../lib/fancybox/jquery.fancybox-1.3.4',
         'jquery.bootstrap': '../lib/bootstrap',
         'jquery.bootstrap-popout': '../lib/bootstrap-popout',
         'underscore': '../bower_components/underscore/underscore',
@@ -87,10 +86,6 @@ requirejs.config({
         'jquery.jstree': {
             deps: ['jquery', 'css!../bower_components/jstree/dist/themes/default/style'],
             exports: '$.fn.jstree'
-        },
-        'jquery.fancybox': {
-            deps: ['jquery', 'css!../lib/fancybox/jquery.fancybox-1.3.4'],
-            exports: '$.fn.fancybox'
         },
         'jquery.bootstrap': {
             deps: ['jquery'],

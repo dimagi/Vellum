@@ -29,7 +29,6 @@ define([
     'less!vellum/less-style/main',
     'jquery.jstree',
     'jquery.bootstrap',
-    'jquery.fancybox',  // only thing we use fancybox for is its spinner, no actual display of anything
     'caretjs',
     'atjs'
 ], function (
@@ -200,7 +199,6 @@ define([
         this._init_toolbar();
         this._init_extra_tools();
         this._createJSTree();
-        this._setup_fancybox();
         datasources.init(this);
     };
 
@@ -689,15 +687,14 @@ define([
         return $modal;
     };
 
-    fn._setup_fancybox = function () {
-        $.fancybox.init();
-        this.$f.find("a.inline").fancybox({
-            hideOnOverlayClick: false,
-            hideOnContentClick: false,
-            enableEscapeButton: false,
-            showCloseButton : true,
-            onClosed: function() {}
-        });
+    var showPageSpinner = function() {
+        var spinner = $("<div><div><div></div></div></div>");
+        spinner.addClass("fd-form-saving");
+        $('body').append(spinner);
+    };
+
+    var hidePageSpinner = function() {
+        $(".fd-form-saving").remove();
     };
 
     fn.handleDropFinish = function(target, sourceUid, mug) {
@@ -1031,7 +1028,7 @@ define([
         done = done || function () {};
         var _this = this;
 
-        $.fancybox.showActivity();
+        showPageSpinner();
         //wait for the spinner to come up.
         window.setTimeout(function () {
             //universal flag for indicating that there's something wrong enough
@@ -1052,7 +1049,7 @@ define([
                 } else {
                     _this.$f.find('.fd-default-panel').removeClass('hide');
                 }
-                $.fancybox.hideActivity();
+                hidePageSpinner();
             } catch (e) {
                 // hack: don't display the whole invalid XML block if it
                 // was a parse error
@@ -1070,7 +1067,7 @@ define([
                 _this.data.core.formLoadingFailed = true;
                 _this.data.core.failedLoadXML = formString;
 
-                $.fancybox.hideActivity();
+                hidePageSpinner();
                 throw e;
             }
             done();
@@ -1798,7 +1795,7 @@ define([
 
         var url = saveType === 'patch' ?  opts.patchUrl : opts.saveUrl;
 
-        _this.showWaitingModal();
+        showPageSpinner();
 
         if (saveType === 'patch') {
             var diff_match_patch = require('diff-match-patch'),
@@ -1834,6 +1831,7 @@ define([
                             // unconditionally overwrite if no xform to compare
                             _this.send(formText, 'full');
                         } else {
+                            hidePageSpinner();
                             _this.showOverwriteWarning(_this.send.bind(_this),
                                                        formText, data.xform);
                         }
@@ -1843,26 +1841,10 @@ define([
                         _this.send(formText, 'full');
                     }
                 }
-                _this.closeModal();
+                hidePageSpinner();
                 _this.opts().core.onFormSave(data);
                 _this.data.core.lastSavedXForm = formText;
             }
-        });
-    };
-
-    fn.showWaitingModal = function (msg) {
-        if (!msg || typeof msg !== 'string') {
-            msg = 'Saving form to server...';
-        }
-
-        var $modal = this.generateNewModal("Processing...", [], false);
-        $modal.find(".modal-body").html(msg + "<span class='fd-form-saving-img'></span>");
-        $modal.find(".close").hide();
-        $modal.find(".modal-footer").hide();
-        $modal.modal({
-            show: true,
-            backdrop: 'static',
-            keyboard: false,
         });
     };
 
