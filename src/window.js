@@ -94,14 +94,19 @@ define([
             $fdc.find('.fd-content').css('height', panelHeight + 'px');
 
             if (accessoryPane.children().length) {
+                var accessoryHeight = accessoryPane.outerHeight(false);
+                treeHeight -= 2 + accessoryHeight +
+                    this.$f.find('.fd-content-left-divider').outerHeight(true);
+                accessoryPane.find(".fd-scrollable")
+                             .css('height', accessoryHeight + 'px');
                 accessoryPane.show();
                 this.$f.find(".fd-content-left-divider").show();
-                treeHeight -= this.getAccessoryPaneHeight();
             } else {
                 accessoryPane.hide();
                 this.$f.find(".fd-content-left-divider").hide();
             }
             $fdc.find('.fd-content-left')
+                .find('.fd-tree')
                 .find('.fd-scrollable').css('height', treeHeight + 'px');
 
             $fdc.find('.fd-content-right')
@@ -114,10 +119,6 @@ define([
         getLeftWidth: function () {
             return 2 + this.$f.find('.fd-content-left').outerWidth(false) + 
                this.$f.find('.fd-content-divider').outerWidth(true);
-        },
-        getAccessoryPaneHeight: function () {
-            return 2 + this.$f.find('.fd-accessory-pane').outerHeight(false) +
-               this.$f.find('.fd-content-left-divider').outerHeight(true);
         },
         getCurrentTopOffset: function () {
             if (this.data.windowManager.fullscreen) {
@@ -216,4 +217,8 @@ define([
             e.target.style.cursor = cursor;
         });
     }
+
+    return {
+        preventDoubleScrolling: preventDoubleScrolling
+    };
 });

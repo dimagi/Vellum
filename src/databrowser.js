@@ -6,12 +6,14 @@ define([
     'underscore',
     'vellum/datasources',
     'vellum/widgets',
+    'vellum/window',
     'tpl!vellum/templates/external_data_tree',
 ], function (
     $,
     _,
     datasources,
     widgets,
+    window_,
     external_data_tree
 ) {
     var panelHeight, isDataTreeLoaded;
@@ -30,6 +32,7 @@ define([
                     initDataBrowser(vellum);
                 }
             });
+            window_.preventDoubleScrolling(pane.find(".fd-scrollable"));
         },
         getToolsMenuItems: function () {
             var vellum = this,
@@ -121,7 +124,7 @@ define([
                     structure = source.structure;
                 }
             }
-            tree.branches = _.map(structure, node(path, info));
+            tree.branches = _.sortBy(_.map(structure, node(path, info)), "text");
             return tree;
         }
         function handleDrop(path, info, target) {
@@ -142,7 +145,8 @@ define([
             var source = sources.commcaresession,
                 info = _.omit(source, "structure"),
                 path = "instance('" + source.id + "')" + source.path;
-            nodes.push(node(null, info)(source, path));
+            // do not show Session node for now
+            nodes = node(null, info)(source, path).children;
         }
         return nodes;
     }
