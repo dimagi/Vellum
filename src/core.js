@@ -687,13 +687,13 @@ define([
         return $modal;
     };
 
-    fn._showPageSpinner = function() {
+    var showPageSpinner = function() {
         var spinner = $("<div><div><div></div></div></div>");
         spinner.addClass("fd-form-saving");
         $('body').append(spinner);
     };
 
-    fn._hidePageSpinner = function() {
+    var hidePageSpinner = function() {
         $(".fd-form-saving").remove();
     };
 
@@ -1028,7 +1028,7 @@ define([
         done = done || function () {};
         var _this = this;
 
-        _this._showPageSpinner();
+        showPageSpinner();
         //wait for the spinner to come up.
         window.setTimeout(function () {
             //universal flag for indicating that there's something wrong enough
@@ -1049,7 +1049,7 @@ define([
                 } else {
                     _this.$f.find('.fd-default-panel').removeClass('hide');
                 }
-                _this._hidePageSpinner();
+                hidePageSpinner();
             } catch (e) {
                 // hack: don't display the whole invalid XML block if it
                 // was a parse error
@@ -1067,7 +1067,7 @@ define([
                 _this.data.core.formLoadingFailed = true;
                 _this.data.core.failedLoadXML = formString;
 
-                _this._hidePageSpinner();
+                hidePageSpinner();
                 throw e;
             }
             done();
@@ -1795,7 +1795,7 @@ define([
 
         var url = saveType === 'patch' ?  opts.patchUrl : opts.saveUrl;
 
-        _this._showPageSpinner();
+        showPageSpinner();
 
         if (saveType === 'patch') {
             var diff_match_patch = require('diff-match-patch'),
@@ -1831,7 +1831,7 @@ define([
                             // unconditionally overwrite if no xform to compare
                             _this.send(formText, 'full');
                         } else {
-                            _this._hidePageSpinner();
+                            hidePageSpinner();
                             _this.showOverwriteWarning(_this.send.bind(_this),
                                                        formText, data.xform);
                         }
@@ -1841,7 +1841,7 @@ define([
                         _this.send(formText, 'full');
                     }
                 }
-                _this._hidePageSpinner();
+                hidePageSpinner();
                 _this.opts().core.onFormSave(data);
                 _this.data.core.lastSavedXForm = formText;
             }
