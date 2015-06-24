@@ -819,6 +819,18 @@ define([
         return block;
     };
 
+    var itextMediaConstraintBlock = function (mug, options) {
+        var block = itextConfigurableBlock(mug, options);
+
+        block.getForms = function () {
+            return _.intersection(block.activeForms, block.forms);
+        };
+
+        block.itextWidget = itextMediaWidget('/constraint' + mug.form.getBasePath());
+
+        return block;
+    };
+
     var itextLabelWidget = function (mug, language, form, options) {
         var vellum = mug.form.vellum,
             Itext = vellum.data.javaRosa.Itext,
@@ -1980,6 +1992,24 @@ define([
                 widget: iTextIDWidget,
                 widgetValuePath: "constraintMsgItext"
             };
+            databind.constraintMediaIText = function (mugOptions) {
+                return mugOptions.isSpecialGroup ? undefined : {
+                    visibility: 'constraintMsgItext',
+                    presence: 'optional',
+                    lstring: 'Add Validation Media',
+                    widget: function (mug, options) {
+                        return itextMediaConstraintBlock(mug, $.extend(options, {
+                            displayName: "Add Validation Media",
+                            itextType: "constraintMsg",
+                            getItextByMug: function (mug) {
+                                return mug.p.constraintMsgItext;
+                            },
+                            forms: SUPPORTED_MEDIA_TYPES,
+                            formToIcon: ICONS
+                        }));
+                    }
+                };
+            };
 
             // CONTROL ELEMENT
             
@@ -2134,6 +2164,13 @@ define([
             var ret = this.__callOld();
             ret.splice(
                 1 + ret.indexOf('constraintAttr'), 0, 'constraintMsgItext');
+            return ret;
+        },
+        getMediaProperties: function() {
+            var ret = this.__callOld();
+            ret = ret.concat([
+                'constraintMediaIText',
+            ]);
             return ret;
         },
         getAdvancedProperties: function () {
