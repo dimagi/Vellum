@@ -353,7 +353,7 @@ define([
                         name: baseFixture.name + " - " + (value.name || key),
                     };
 
-                if (!value.no_option) {
+                if (!(_.isEmpty(value.structure) || value.no_option)) {
                     ret = [newBaseFixture];
                 }
                 return ret.concat(generateFixtureDefinitions(value.structure, newBaseFixture));

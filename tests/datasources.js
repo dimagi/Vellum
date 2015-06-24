@@ -29,11 +29,16 @@ require([
             structure: {
                 "inner-attribute": {
                     structure: {
-                        "extra-inner-attribute": {}
+                        "extra-inner-attribute": {
+                            structure: {
+                                "@id": {},
+                                name: {}
+                            }
+                        }
                     }
                 },
-                "@id": {no_option: true},
-                name: {no_option: true}
+                "@id": {},
+                name: {}
             }
         }];
 
