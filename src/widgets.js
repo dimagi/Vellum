@@ -270,17 +270,17 @@ define([
                     !!widget.isDisabled(),
                     widget.getHelp()
                 ),
-                autocompleteSources;
-            if (options.autocompleteSources) {
-                autocompleteSources = function () {
-                    return options.autocompleteSources(mug);
+                autocompleteChoices;
+            if (options.autocompleteChoices) {
+                autocompleteChoices = function () {
+                    return options.autocompleteChoices(mug);
                 };
             }
             return getUIElementWithEditButton(elem, function () {
                 widget.options.displayXPathEditor({
                     leftPlaceholder: options.leftPlaceholder,
                     rightPlaceholder: options.rightPlaceholder,
-                    leftAutocompleteSources: autocompleteSources,
+                    leftAutocompleteChoices: autocompleteChoices,
                     value: super_getValue(),
                     xpathType: widget.definition.xpathType,
                     done: function (val) {

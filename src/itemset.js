@@ -136,7 +136,7 @@ define([
                 xpathType: 'bool',
                 visibility: 'visible',
                 leftPlaceholder: '',
-                autocompleteSources: function(mug) {
+                autocompleteChoices: function(mug) {
                     var sources = getDataSources(),
                         src = mug.p.itemsetData.instance.src;
                     return datasources.autocompleteChoices(sources, src);
