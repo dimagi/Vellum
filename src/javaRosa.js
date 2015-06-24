@@ -793,7 +793,11 @@ define([
 
     var itextMediaBlock = function (mug, options) {
         var block = itextConfigurableBlock(mug, options),
-            pathPrefix = options.pathPrefix || "";
+            pathPrefix = options.pathPrefix;
+
+        if(!_.isString(options.pathPrefix)) {
+            pathPrefix = '/' + options.itextType;
+        }
 
         block.getForms = function () {
             return _.intersection(block.activeForms, block.forms);
@@ -1978,7 +1982,6 @@ define([
                         return itextMediaBlock(mug, $.extend(options, {
                             displayName: "Add Validation Media",
                             itextType: "constraintMsg",
-                            pathPrefix: "/constraint",
                             getItextByMug: function (mug) {
                                 return mug.p.constraintMsgItext;
                             },
@@ -2103,6 +2106,7 @@ define([
                         return itextMediaBlock(mug, $.extend(options, {
                             displayName: "Add Multimedia",
                             itextType: "label",
+                            pathPrefix: "",
                             getItextByMug: function (mug) {
                                 return mug.p.labelItext;
                             },
@@ -2122,7 +2126,6 @@ define([
                         return itextMediaBlock(mug, $.extend(options, {
                             displayName: "Add Help Media",
                             itextType: "help",
-                            pathPrefix: "/help",
                             getItextByMug: function (mug) {
                                 return mug.p.helpItext;
                             },
