@@ -792,7 +792,8 @@ define([
     };
 
     var itextMediaBlock = function (mug, options) {
-        var block = itextConfigurableBlock(mug, options);
+        var block = itextConfigurableBlock(mug, options),
+            pathPrefix = options.pathPrefix || "";
 
         block.getForms = function () {
             return _.intersection(block.activeForms, block.forms);
@@ -802,31 +803,7 @@ define([
         // only hand-made forms will ever end up with a different
         // ID (the ability to set it in the UI has been broken for
         // a while), it seemed ok to make it just 'data'
-        block.itextWidget = itextMediaWidget(mug.form.getBasePath());
-
-        return block;
-    };
-
-    var itextMediaHelpBlock = function (mug, options) {
-        var block = itextConfigurableBlock(mug, options);
-
-        block.getForms = function () {
-            return _.intersection(block.activeForms, block.forms);
-        };
-
-        block.itextWidget = itextMediaWidget('/help' + mug.form.getBasePath());
-
-        return block;
-    };
-
-    var itextMediaConstraintBlock = function (mug, options) {
-        var block = itextConfigurableBlock(mug, options);
-
-        block.getForms = function () {
-            return _.intersection(block.activeForms, block.forms);
-        };
-
-        block.itextWidget = itextMediaWidget('/constraint' + mug.form.getBasePath());
+        block.itextWidget = itextMediaWidget(pathPrefix + mug.form.getBasePath());
 
         return block;
     };
@@ -1998,9 +1975,10 @@ define([
                     presence: 'optional',
                     lstring: 'Add Validation Media',
                     widget: function (mug, options) {
-                        return itextMediaConstraintBlock(mug, $.extend(options, {
+                        return itextMediaBlock(mug, $.extend(options, {
                             displayName: "Add Validation Media",
                             itextType: "constraintMsg",
+                            pathPrefix: "/constraint",
                             getItextByMug: function (mug) {
                                 return mug.p.constraintMsgItext;
                             },
@@ -2141,9 +2119,10 @@ define([
                     presence: 'optional',
                     lstring: 'Add Help Media',
                     widget: function (mug, options) {
-                        return itextMediaHelpBlock(mug, $.extend(options, {
+                        return itextMediaBlock(mug, $.extend(options, {
                             displayName: "Add Help Media",
                             itextType: "help",
+                            pathPrefix: "/help",
                             getItextByMug: function (mug) {
                                 return mug.p.helpItext;
                             },
