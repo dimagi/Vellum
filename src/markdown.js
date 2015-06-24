@@ -1,7 +1,9 @@
 define([
-    'markdown-it'
+    'markdown-it',
+    'underscore'
 ], function(
-    markdownIt
+    markdownIt,
+    _
 ) {
     var md = markdownIt('zero')
              .enable(['link', 'emphasis', 'strikethrough', 'heading', 'list']),
@@ -25,8 +27,11 @@ define([
     };
 
     function markdown(text) {
-        text = text.replace(/\\\\n/g, '\n');
-        return md.render(text);
+        if (_.isString(text)) {
+            text = text.replace(/\\\\n/g, '\n');
+            return md.render(text);
+        }
+        return "";
     }
 
     return markdown;
