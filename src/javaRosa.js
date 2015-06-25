@@ -2150,9 +2150,7 @@ define([
         },
         getMediaProperties: function() {
             var ret = this.__callOld();
-            ret = ret.concat([
-                'constraintMediaIText',
-            ]);
+            ret.push('constraintMediaIText');
             return ret;
         },
         getAdvancedProperties: function () {
