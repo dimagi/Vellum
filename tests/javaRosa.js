@@ -22,7 +22,8 @@ require([
     'text!static/javaRosa/test-xml-1.xml',
     'text!static/javaRosa/test-xml-2.xml',
     'text!static/javaRosa/test-xml-3.xml',
-    'text!static/javaRosa/test-xml-4.xml'
+    'text!static/javaRosa/test-xml-4.xml',
+    'text!static/javaRosa/non-default-lang-first.xml'
 ], function (
     chai,
     $,
@@ -46,7 +47,8 @@ require([
     TEST_XML_1,
     TEST_XML_2,
     TEST_XML_3,
-    TEST_XML_4
+    TEST_XML_4,
+    NON_DEFAULT_LANG_FIRST_XML
 ) {
     var assert = chai.assert,
         call = util.call;
@@ -56,6 +58,19 @@ require([
             util.init({
                 javaRosa: {langs: ['en', 'hin']},
                 core: {onReady: function () { done(); }}
+            });
+        });
+
+        describe("and non default language is first", function () {
+            before(function (done) {
+                util.init({
+                    javaRosa: {langs: ['hin', 'en']},
+                    core: {onReady: function () { done(); }}
+                });
+            });
+
+            it("should load xml", function() {
+                util.loadXML(NON_DEFAULT_LANG_FIRST_XML);
             });
         });
 
