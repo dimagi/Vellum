@@ -174,6 +174,21 @@ require(['jquery', 'jquery.vellum'], function ($) {
             load(session.getItem("vellum.tests.main.lastSavedForm") || "");
         });
         load(""); // load empty form on initial page load
+
+        function handleFileSelect(evt) {
+            var file = evt.target.files[0],
+                reader = new FileReader();
+
+            // Closure to capture the file information.
+            reader.onload = (function(theFile) {
+                return function(e) {
+                    load(e.target.result);
+                };
+            })(file);
+
+            reader.readAsText(file);
+        }
+        document.getElementById('file').addEventListener('change', handleFileSelect, false);
     });
 });
 
