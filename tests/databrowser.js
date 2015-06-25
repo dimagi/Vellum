@@ -85,7 +85,7 @@ require([
             return meta ? meta.attributes.id : null;
         }
 
-        it("should add ref with instance on drag/drop", function() {
+        it("should add ref with instances on drag/drop", function() {
             util.loadXML("");
             var mug = util.addQuestion("DataBindOnly", "mug"),
                 calc = $("[name=property-calculateAttr]"),
@@ -98,6 +98,25 @@ require([
             util.findNode(dataTree, "dob").data.handleDrop(calc);
             assert.equal(mug.p.calculateAttr,
                          "instance('casedb')/cases/case[" + where + "]/dob");
+            assert.equal(getInstanceId(mug.form, sessionUri), "commcaresession");
+            assert.equal(getInstanceId(mug.form, casedbUri), "casedb");
+        });
+
+        it("should add parent ref with instances on drag/drop", function() {
+            util.loadXML("");
+            var mug = util.addQuestion("DataBindOnly", "mug"),
+                calc = $("[name=property-calculateAttr]"),
+                sessionUri = CASE_DATA[0].uri,
+                casedbUri = CASE_DATA[1].uri,
+                where_session = "@case_id=instance('commcaresession')/session/data/case_id",
+                where_parent = "@case_id=instance('casedb')/cases/case[" +
+                                where_session + "]/index/parent";
+            assert.equal(getInstanceId(mug.form, sessionUri), null);
+            assert.equal(getInstanceId(mug.form, casedbUri), null);
+            assert.equal(calc.length, 1);
+            util.findNode(dataTree, "edd").data.handleDrop(calc);
+            assert.equal(mug.p.calculateAttr,
+                         "instance('casedb')/cases/case[" + where_parent + "]/edd");
             assert.equal(getInstanceId(mug.form, sessionUri), "commcaresession");
             assert.equal(getInstanceId(mug.form, casedbUri), "casedb");
         });

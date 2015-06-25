@@ -103,28 +103,44 @@ define([
             };
         }
         function getTree(item, id, path, info) {
-            var structure = item.structure,
-                ref = item.reference,
-                tree = {name: item.name || id};
-            if (!structure && ref) {
-                var source = sources[ref.source || info.id];
+            var tree = {name: item.name || id},
+                source = item;
+            if (!item.structure && item.reference) {
+                var ref = item.reference;
+                source = sources[ref.source || info.id];
                 if (source) {
                     info = _.extend(_.omit(source, "structure"), {_parent: info});
                     path = "instance('" + source.id + "')" + source.path +
                            "[" + ref.key + "=" + path + "]";
                     if (source.subsets && ref.subset) {
-                        source = _.find(source.subsets, function (subset) {
-                            return subset.id === ref.subset;
-                        }) || source;
+                        // magic: match key: "@case_type"
+                        source = _.findWhere(
+                            source.subsets,
+                            {id: ref.subset, key: "@case_type"}
+                        ) || source;
                     }
                     var name = source.name || source.id;
                     if (name) {
                         tree.name = tree.name + " (" + name + ")";
                     }
-                    structure = source.structure;
                 }
             }
-            tree.branches = _.sortBy(_.map(structure, node(path, info)), "text");
+            tree.branches = _.chain(source && source.structure)
+                .map(node(path, info))
+                .sortBy("text")
+                .value();
+            if (source && source.related) {
+                tree.branches = _.chain(source.related)
+                    .map(function (subset, relation) {
+                        // magic: reference key: @case_id
+                        var item = {reference: {subset: subset, key: "@case_id"}};
+                        // magic: append "/index" to path
+                        return node(path + "/index", info)(item, relation);
+                    })
+                    .sortBy("text")
+                    .value()
+                    .concat(tree.branches);
+            }
             return tree;
         }
         function handleDrop(path, info, target) {
