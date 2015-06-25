@@ -961,7 +961,7 @@ define([
 
                 if (!_.isString(value)) {
                     if (!widget.isDefaultLang) {
-                        value = widget.getItextValue(widget.defaultLang);
+                        value = widget.getItextValue(widget.defaultLang) || "";
                     } else {
                         value = widget.hasNodeIdAsDefault ? widget.mug.p.nodeID : "";
                     }
