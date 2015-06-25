@@ -23,24 +23,6 @@ define([
         instance.updateControlNodeAdaptorMap(data.controlNodeAdaptorMap);
     }
 
-    $.fn.popAttr = function (name) {
-        var removed = false,
-            val = this.attr(name);
-        try {
-            this.removeAttr(name);
-            removed = true;
-        } catch (e) {
-            // catch InvalidCharacterError due to \: in attribute name
-        }
-        if (removed && !_.isUndefined(val)) {
-            if (!this[0].poppedAttributes) {
-                this[0].poppedAttributes = {};
-            }
-            this[0].poppedAttributes[name] = val;
-        }
-        return val;
-    };
-
     function getAttributes (element) {
         var attributes = $(element)[0].attributes,
             attrMap = {};

@@ -4,7 +4,8 @@ define([
     'jsdiff',
     'vellum/markdown',
     'jquery',
-    'jquery.bootstrap-popout'
+    'jquery.bootstrap-popout',
+    'vellum/jquery-extensions'
 ], function (
     langCodes,
     _,
@@ -14,24 +15,6 @@ define([
 ) {
     RegExp.escape = function(s) {
         return s.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
-    };
-
-    $.fn.stopLink = function() {
-        // stops anchor tags from clicking through
-        this.click(function (e) {
-            e.preventDefault();
-        });
-        return this;
-    };
-
-    $.fn.fdHelp = function () {
-        // creates a help popover, requires twitter bootstrap
-        this.append($('<i />').addClass('icon-question-sign'))
-            .popout({
-                trigger: 'focus',
-                html: true
-            });
-        return this;
     };
 
     var that = {};
