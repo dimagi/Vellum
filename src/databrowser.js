@@ -59,10 +59,15 @@ define([
         $tree.jstree({
             core: {
                 data: function (node, callback) {
-                    var _this = this;
-                    datasources.getDataSources(function (data) {
-                        callback.call(_this, dataTreeJson(data, vellum));
-                    });
+                    if (node.data && node.data.getNodes) {
+                        // load children of deferred node
+                        callback.call(this, node.data.getNodes());
+                    } else {
+                        var _this = this;
+                        datasources.getDataSources(function (data) {
+                            callback.call(_this, dataTreeJson(data, vellum));
+                        });
+                    }
                 },
                 worker: false,
                 multiple: false,
@@ -96,9 +101,13 @@ define([
                 return {
                     icon: false,
                     text: tree.name,
-                    state: {opened: tree.branches.length <= MAX_OPEN_NODE},
-                    children: tree.branches,
-                    data: {handleDrop: _.partial(handleDrop, path, info)}
+                    state: {opened: tree.nodes !== true &&
+                                    tree.nodes.length <= MAX_OPEN_NODE},
+                    children: tree.nodes,
+                    data: {
+                        handleDrop: _.partial(handleDrop, path, info),
+                        getNodes: tree.getNodes,
+                    }
                 };
             };
         }
@@ -123,14 +132,25 @@ define([
                     if (name) {
                         tree.name = tree.name + " (" + name + ")";
                     }
+                    if (seen.hasOwnProperty(source.id)) {
+                        // defer to prevent infinite loop
+                        tree.nodes = true;
+                        tree.getNodes = _.partial(getNodes, source, path, info);
+                        return tree;
+                    }
+                    seen[source.id] = true;
                 }
             }
-            tree.branches = _.chain(source && source.structure)
+            tree.nodes = getNodes(source, path, info);
+            return tree;
+        }
+        function getNodes(source, path, info) {
+            var nodes = _.chain(source && source.structure)
                 .map(node(path, info))
                 .sortBy("text")
                 .value();
             if (source && source.related) {
-                tree.branches = _.chain(source.related)
+                nodes = _.chain(source.related)
                     .map(function (subset, relation) {
                         // magic: reference key: @case_id
                         var item = {reference: {subset: subset, key: "@case_id"}};
@@ -139,9 +159,9 @@ define([
                     })
                     .sortBy("text")
                     .value()
-                    .concat(tree.branches);
+                    .concat(nodes);
             }
-            return tree;
+            return nodes;
         }
         function handleDrop(path, info, target) {
             var widget = widgets.util.getWidget(target, vellum);
@@ -156,7 +176,8 @@ define([
         }
         var MAX_OPEN_NODE = 50,
             sources = _.indexBy(data, "id"),
-            nodes = [];
+            nodes = [],
+            seen = {};
         if (sources.commcaresession) {
             var source = sources.commcaresession,
                 info = _.omit(source, "structure"),

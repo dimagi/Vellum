@@ -45,6 +45,9 @@ require([
                 key: "@case_type",
                 structure: {
                     edd: {},
+                },
+                related: {
+                    "first-child": "child",
                 }
             }, {
                 id: "child",
@@ -85,7 +88,7 @@ require([
             return meta ? meta.attributes.id : null;
         }
 
-        it("should add ref with instances on drag/drop", function() {
+        it("should add ref on drag/drop", function() {
             util.loadXML("");
             var mug = util.addQuestion("DataBindOnly", "mug"),
                 calc = $("[name=property-calculateAttr]"),
@@ -102,21 +105,44 @@ require([
             assert.equal(getInstanceId(mug.form, casedbUri), "casedb");
         });
 
-        it("should add parent ref with instances on drag/drop", function() {
+        it("should add parent ref on drag/drop", function() {
             util.loadXML("");
             var mug = util.addQuestion("DataBindOnly", "mug"),
                 calc = $("[name=property-calculateAttr]"),
                 sessionUri = CASE_DATA[0].uri,
                 casedbUri = CASE_DATA[1].uri,
-                where_session = "@case_id=instance('commcaresession')/session/data/case_id",
-                where_parent = "@case_id=instance('casedb')/cases/case[" +
-                                where_session + "]/index/parent";
+                whereSession = "@case_id=instance('commcaresession')/session/data/case_id",
+                whereParent = "@case_id=instance('casedb')/cases/case[" +
+                              whereSession + "]/index/parent";
             assert.equal(getInstanceId(mug.form, sessionUri), null);
             assert.equal(getInstanceId(mug.form, casedbUri), null);
             assert.equal(calc.length, 1);
             util.findNode(dataTree, "edd").data.handleDrop(calc);
             assert.equal(mug.p.calculateAttr,
-                         "instance('casedb')/cases/case[" + where_parent + "]/edd");
+                         "instance('casedb')/cases/case[" + whereParent + "]/edd");
+            assert.equal(getInstanceId(mug.form, sessionUri), "commcaresession");
+            assert.equal(getInstanceId(mug.form, casedbUri), "casedb");
+        });
+
+        it("should add recursive ref on drag/drop", function() {
+            util.loadXML("");
+            var mug = util.addQuestion("DataBindOnly", "mug"),
+                calc = $("[name=property-calculateAttr]"),
+                sessionUri = CASE_DATA[0].uri,
+                casedbUri = CASE_DATA[1].uri,
+                whereSession = "@case_id=instance('commcaresession')/session/data/case_id",
+                whereParent = "@case_id=instance('casedb')/cases/case[" +
+                              whereSession + "]/index/parent",
+                whereChild = "@case_id=instance('casedb')/cases/case[" +
+                             whereParent + "]/index/first-child";
+            assert.equal(getInstanceId(mug.form, sessionUri), null);
+            assert.equal(getInstanceId(mug.form, casedbUri), null);
+            assert.equal(calc.length, 1);
+            var node = util.findNode(dataTree, "first-child (child)");
+            dataTree.open_node(node);
+            util.findNode(dataTree, "dob", node).data.handleDrop(calc);
+            assert.equal(mug.p.calculateAttr,
+                         "instance('casedb')/cases/case[" + whereChild + "]/dob");
             assert.equal(getInstanceId(mug.form, sessionUri), "commcaresession");
             assert.equal(getInstanceId(mug.form, casedbUri), "casedb");
         });

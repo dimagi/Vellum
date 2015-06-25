@@ -27,6 +27,9 @@ define(["underscore"], function (_) {
                 key: "@case_type",
                 structure: {
                     edd: {},
+                },
+                related: {
+                    "first-child": "child",
                 }
             }, {
                 id: "child",
