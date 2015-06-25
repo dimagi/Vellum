@@ -425,8 +425,8 @@ require([
             var form = util.loadXML(MULTI_LINE_TRANS_XML),
                 Itext = util.call("getData").javaRosa.Itext;
             assert.equal(jr.generateItextXLS(form, Itext),
-                         'label\tdefault-en\tdefault-hin\t' +
-                         'audio-en\taudio-hin\timage-en\timage-hin\tvideo-en\tvideo-hin\n' +
+                         'label\tdefault_en\tdefault_hin\t' +
+                         'audio_en\taudio_hin\timage_en\timage_hin\tvideo_en\tvideo_hin\n' +
                          'question1-label\t"First ""line\nSecond"" line\nThird line"\t' +
                          'Hindu trans\t\t\t\t\t\t');
         });
@@ -435,8 +435,8 @@ require([
             var form = util.loadXML(MULTI_LANG_TRANS_XML),
                 Itext = util.call("getData").javaRosa.Itext;
             assert.equal(jr.generateItextXLS(form, Itext),
-                         'label\tdefault-en\tdefault-hin\taudio-en\taudio-hin\t' +
-                         'image-en\timage-hin\tvideo-en\tvideo-hin\n' +
+                         'label\tdefault_en\tdefault_hin\taudio_en\taudio_hin\t' +
+                         'image_en\timage_hin\tvideo_en\tvideo_hin\n' +
                          'text-label\t"""Text"\t"""Text"\t\t\t\t\t\t');
         });
 

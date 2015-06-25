@@ -1251,7 +1251,7 @@ define([
 
         function makeHeadings(languages, forms) {
             return rowify("label", languages, forms, function (language, form) {
-                return form + '-' + language;
+                return form + '_' + language;
             });
         }
 
