@@ -1202,7 +1202,7 @@ define([
 
         if (header) {
             header = _.map(header, function (val) {
-                var formlang = val.split("-");
+                var formlang = val.split(/[-_]/);
                 if (forms.indexOf(formlang[0]) === -1 ||
                         languages.indexOf(formlang[1]) === -1) {
                     return null;
