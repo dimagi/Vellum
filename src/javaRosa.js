@@ -1289,6 +1289,16 @@ define([
         }
     }
 
+    function insertOutputRef(vellum, target, path, mug, dateFormat) {
+        var output = getOutputRef(path, dateFormat),
+            form = vellum.data.core.form;
+        util.insertTextAtCursor(target, output, true);
+        if (mug) {
+            vellum.warnOnCircularReference('label', form, mug, path, 'output value');
+            warnOnNonOutputableValue(form, mug, path);
+        }
+    }
+
     function getDefaultItextRoot(mug) {
         if (mug.__className === "Item") {
             var regex = new RegExp(util.invalidAttributeRegex.source, 'g');
@@ -1324,22 +1334,14 @@ define([
             this.data.javaRosa.ItextForm = ItextForm;
             this.data.javaRosa.ICONS = ICONS;
         },
-        insertOutputRef: function (mug, target, path, dateFormat) {
-            var output = getOutputRef(path, dateFormat),
-                form = this.data.core.form;
-            util.insertTextAtCursor(target, output, true);
-            this.warnOnCircularReference('label', form, mug, path, 'output value');
-            warnOnNonOutputableValue(form, mug, path);
-        },
-        handleDropFinish: function (target, sourceUid, mug) {
+        handleDropFinish: function (target, path, mug) {
             var inItext = target &&
                 target.attr('name') &&
                 target.attr('name').lastIndexOf('itext-', 0) === 0,
                 _this = this;
 
             if (inItext) {
-                var path = this.mugToXPathReference(mug),
-                    mugType = mug.options.typeName;
+                var mugType = mug && mug.options.typeName;
                 if (mugType === 'Date') {
                     var formatOptions = {
                         "": "No Formatting",
@@ -1357,7 +1359,7 @@ define([
                     $('body').append(menu);
                     menu.find('li a').click(function () {
                         var dateFormat = $(this).data('format');
-                        _this.insertOutputRef(mug, target, path, dateFormat);
+                        insertOutputRef(_this, target, path, mug, dateFormat);
                         if (window.analytics) {
                             window.analytics.usage(
                                 "Output Value", "Drag and Drop", dateFormat
@@ -1368,7 +1370,7 @@ define([
                     var e = window.event;
                     menu.css({'top': e.clientY, 'left': e.clientX}).show();
                 } else {
-                    _this.insertOutputRef(mug, target, path);
+                    insertOutputRef(_this, target, path, mug);
                     if (window.analytics) {
                         window.analytics.usage("Output Value", "Drag and Drop");
                     }
