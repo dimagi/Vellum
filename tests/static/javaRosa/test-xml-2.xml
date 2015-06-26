@@ -38,6 +38,9 @@
 					</text>
 					<text id="question1-constraintMsg">
 						<value>question1 en validation</value>
+						<value form="image">jr://file/commcare/image/constraintMsg/data/question1.png</value>
+						<value form="audio">jr://file/commcare/audio/constraintMsg/data/question1.mp3</value>
+						<value form="video">jr://file/commcare/video/constraintMsg/data/question1.3gp</value>
 					</text>
 				</translation>
 				<translation lang="hin">
@@ -61,6 +64,9 @@
 					</text>
 					<text id="question1-constraintMsg">
 						<value>question1 hin validation</value>
+						<value form="image">jr://file/commcare/image/constraintMsg/data/question1.png</value>
+						<value form="audio">jr://file/commcare/audio/constraintMsg/data/question1.mp3</value>
+						<value form="video">jr://file/commcare/video/constraintMsg/data/question1.3gp</value>
 					</text>
 				</translation>
 			</itext>

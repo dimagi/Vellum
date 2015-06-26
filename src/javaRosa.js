@@ -792,7 +792,12 @@ define([
     };
 
     var itextMediaBlock = function (mug, options) {
-        var block = itextConfigurableBlock(mug, options);
+        var block = itextConfigurableBlock(mug, options),
+            pathPrefix = options.pathPrefix;
+
+        if(!_.isString(options.pathPrefix)) {
+            pathPrefix = '/' + options.itextType;
+        }
 
         block.getForms = function () {
             return _.intersection(block.activeForms, block.forms);
@@ -802,19 +807,7 @@ define([
         // only hand-made forms will ever end up with a different
         // ID (the ability to set it in the UI has been broken for
         // a while), it seemed ok to make it just 'data'
-        block.itextWidget = itextMediaWidget(mug.form.getBasePath());
-
-        return block;
-    };
-
-    var itextMediaHelpBlock = function (mug, options) {
-        var block = itextConfigurableBlock(mug, options);
-
-        block.getForms = function () {
-            return _.intersection(block.activeForms, block.forms);
-        };
-
-        block.itextWidget = itextMediaWidget('/help' + mug.form.getBasePath());
+        block.itextWidget = itextMediaWidget(pathPrefix + mug.form.getBasePath());
 
         return block;
     };
@@ -1980,6 +1973,24 @@ define([
                 widget: iTextIDWidget,
                 widgetValuePath: "constraintMsgItext"
             };
+            databind.constraintMediaIText = function (mugOptions) {
+                return mugOptions.isSpecialGroup ? undefined : {
+                    visibility: 'constraintMsgItext',
+                    presence: 'optional',
+                    lstring: 'Add Validation Media',
+                    widget: function (mug, options) {
+                        return itextMediaBlock(mug, $.extend(options, {
+                            displayName: "Add Validation Media",
+                            itextType: "constraintMsg",
+                            getItextByMug: function (mug) {
+                                return mug.p.constraintMsgItext;
+                            },
+                            forms: SUPPORTED_MEDIA_TYPES,
+                            formToIcon: ICONS
+                        }));
+                    }
+                };
+            };
 
             // CONTROL ELEMENT
             
@@ -2095,6 +2106,7 @@ define([
                         return itextMediaBlock(mug, $.extend(options, {
                             displayName: "Add Multimedia",
                             itextType: "label",
+                            pathPrefix: "",
                             getItextByMug: function (mug) {
                                 return mug.p.labelItext;
                             },
@@ -2111,7 +2123,7 @@ define([
                     presence: 'optional',
                     lstring: 'Add Help Media',
                     widget: function (mug, options) {
-                        return itextMediaHelpBlock(mug, $.extend(options, {
+                        return itextMediaBlock(mug, $.extend(options, {
                             displayName: "Add Help Media",
                             itextType: "help",
                             getItextByMug: function (mug) {
@@ -2134,6 +2146,11 @@ define([
             var ret = this.__callOld();
             ret.splice(
                 1 + ret.indexOf('constraintAttr'), 0, 'constraintMsgItext');
+            return ret;
+        },
+        getMediaProperties: function() {
+            var ret = this.__callOld();
+            ret.push('constraintMediaIText');
             return ret;
         },
         getAdvancedProperties: function () {
