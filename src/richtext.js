@@ -37,7 +37,17 @@ define([
         };
 
         widget.getValue = function () {
-            return editor.getData();
+            var rawData = editor.getData(),
+                el = $('<div>');
+            rawData = rawData.replace(/(<\/?p>)/ig,"");
+            rawData = rawData.replace(/(<br ?\/?>)/ig,"\n");
+            el = el.html(rawData);
+            el.find('.atwho-inserted .label').unwrap();
+            el.find('.label-datanode').replaceWith(function() {
+                return $(this).attr('value');
+            });
+
+            return el.html();
         };
 
         widget.getDefaultValue = function () {
