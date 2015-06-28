@@ -33,7 +33,18 @@ define([
         };
 
         widget.setValue = function (val) {
-            editor.setData(val);
+            var el = $('<div>').html(val);
+            el.find('output').replaceWith(function() {
+                var value = $(this).attr('value');
+                return $('<span>').addClass('label label-datanode label-datanode-internal')
+                                  .attr({
+                                    contenteditable: false,
+                                    draggable: true,
+                                    value: "<output value='" + value +
+                                        "' />"
+                                  }).text(value);
+            });
+            editor.setData(el.html());
         };
 
         widget.getValue = function () {
