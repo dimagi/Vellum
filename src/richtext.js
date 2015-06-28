@@ -18,47 +18,21 @@ define([
             .attr("contenteditable", true)
             .attr("name", widget.id)
             .addClass('fd-textarea input-block-level itext-widget-input')
-            .on('change input', function (e) { widget.handleChange(); })
-            .keyup(function (e) {
-                // workaround for webkit: http://stackoverflow.com/a/12114908
-                if (e.which === 9) {
-                    this.focus();
-                }
-            }).ckeditor();
+            .ckeditor();
         var editor = widget.input.ckeditor().editor;
-        widget.input.on('change', function () { widget.handleChange(); });
+        widget.input.on('change input', function () { widget.handleChange(); });
+        editor.on('change dataReady', function () { widget.handleChange(); });
 
         widget.getControl = function () {
             return widget.input;
         };
 
         widget.setValue = function (val) {
-            var el = $('<div>').html(val);
-            el.find('output').replaceWith(function() {
-                var value = $(this).attr('value');
-                return $('<span>').addClass('label label-datanode label-datanode-internal')
-                                  .attr({
-                                    contenteditable: false,
-                                    draggable: true,
-                                    value: "<output value='" + value +
-                                        "' />"
-                                  }).text(value);
-            });
-            editor.setData(el.html());
+            editor.setData(toRichText(val, mug.form));
         };
 
         widget.getValue = function () {
-            var rawData = editor.getData(),
-                el = $('<div>');
-            rawData = rawData.replace(/(<\/?p>)/ig,"");
-            rawData = rawData.replace(/(<br ?\/?>)/ig,"\n");
-            el = el.html(rawData);
-            el.find('.atwho-inserted .label').unwrap();
-            el.find('.label-datanode').replaceWith(function() {
-                return $(this).attr('value');
-            });
-
-            return el.html();
+            return fromRichText(editor.getData());
         };
 
         widget.getDefaultValue = function () {
@@ -76,8 +50,40 @@ define([
 
         return widget;
     };
+
+    var fromRichText = function(val) {
+        var el = $('<div>');
+        val = val.replace(/(<\/?p>)/ig,"");
+        val = val.replace(/(<br ?\/?>)/ig,"\n");
+        el = el.html(val);
+        el.find('.atwho-inserted .label').unwrap();
+        el.find('.label-datanode').replaceWith(function() {
+            return $(this).attr('value');
+        });
+
+        return el.html();
+    };
+
+    var toRichText = function(val, form) {
+        val = val.replace('&lt;', '<').replace('&gt;', '>');
+        var el = $('<div>').html(val);
+        el.find('output').replaceWith(function() {
+            var value = $(this).attr('value');
+                icon = form.getMugByPath(value).options.icon;
+            return $('<span>').addClass('label label-datanode label-datanode-internal')
+                              .attr({
+                                contenteditable: false,
+                                draggable: true,
+                                value: "<output value='" + value +
+                                    "' />"
+                              }).append($('<i>').addClass(icon).html('&nbsp;')).append(value);
+        });
+        return el.html();
+    };
     
     return {
         richtext: richtext,
+        fromRichText: fromRichText,
+        toRichText: toRichText
     };
 });

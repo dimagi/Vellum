@@ -1290,6 +1290,7 @@ define([
     function insertOutputRef(vellum, target, path, mug, dateFormat) {
         var output = getOutputRef(path, dateFormat),
             form = vellum.data.core.form;
+        target.ckeditor().editor.insertHtml(richtext.toRichText(output, form));
         util.insertTextAtCursor(target, output, true);
         if (mug) {
             warnOnCircularReference('label', mug, path, 'output value', target.attr('name'));
