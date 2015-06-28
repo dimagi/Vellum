@@ -18,6 +18,7 @@ define([
     'vellum/util',
     'vellum/tsv',
     'vellum/xml',
+    'vellum/richtext',
     'vellum/core'
 ], function (
     _,
@@ -32,7 +33,8 @@ define([
     widgets,
     util,
     tsv,
-    xml
+    xml,
+    richtext
 ) {
     var SUPPORTED_MEDIA_TYPES = ['image', 'audio', 'video'],
         DEFAULT_EXTENSIONS = {
@@ -824,13 +826,13 @@ define([
         }
         options.id = id;
 
-        var widget = widgets.multilineText(mug, options),
+        var widget = richtext.richtext(mug, options),
             $input = widget.input;
 
         if (options.path === 'labelItext') {
             util.questionAutocomplete($input, mug, {
                 category: "Output Value",
-                insertTpl: '<output value="${name}" />',
+                insertTpl: '<span class="label label-success" contenteditable=false draggable=true value=\'<output value="${name}" />\'>${name}</span>',
                 property: "labelItext",
             });
 
