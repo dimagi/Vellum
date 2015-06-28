@@ -832,7 +832,7 @@ define([
         if (options.path === 'labelItext') {
             util.questionAutocomplete($input, mug, {
                 category: "Output Value",
-                insertTpl: '<span class="label label-datanode label-datanode-internal" contenteditable=false draggable=true value=\'<output value="${name}" />\'><i class="${icon}" />${name}</span>',
+                insertTpl: '<span class="label label-datanode label-datanode-internal" contenteditable=false draggable=true value=\'<output value="${name}" />\'><i class="${icon}">&nbsp;</i>${name}</span>',
                 property: "labelItext",
             });
 
