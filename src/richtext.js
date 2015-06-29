@@ -63,28 +63,31 @@ define([
         return el.html();
     };
 
+    function replaceOuputRef(form, value, withClose) {
+        var v = value.split('/'),
+            dispValue = v[v.length-1],
+            mug = form.getMugByPath(value),
+            icon = mug ? mug.options.icon: 'fcc fcc-flower',
+            datanodeClass = mug ? 'label-datanode-internal' : 'label-datanode-external',
+            richText = $('<span>').addClass('label label-datanode')
+                          .addClass(datanodeClass)
+                          .attr({
+                            contenteditable: false,
+                            draggable: true,
+                            value: "<output value=\"" + value +
+                                "\" />"
+                          }).append($('<i>').addClass(icon).html('&nbsp;')).append(dispValue);
+        if (withClose) {
+            richText.append($("<button>").addClass('close').html("&times;"));
+        }
+        return richText;
+    }
+
     var toRichHtml = function (val, form, withClose) {
         val = val.replace('&lt;', '<').replace('&gt;', '>');
         var el = $('<div>').html(val);
         el.find('output').replaceWith(function() {
-            var value = $(this).attr('value'),
-                v = value.split('/'),
-                dispValue = v[v.length-1],
-                mug = form.getMugByPath(value),
-                icon = mug ? mug.options.icon: 'fcc fcc-flower',
-                datanodeClass = mug ? 'label-datanode-internal' : 'label-datanode-external',
-                richText = $('<span>').addClass('label label-datanode')
-                              .addClass(datanodeClass)
-                              .attr({
-                                contenteditable: false,
-                                draggable: true,
-                                value: "<output value='" + value +
-                                    "' />"
-                              }).append($('<i>').addClass(icon).html('&nbsp;')).append(dispValue);
-                if (withClose) {
-                    richText.append($("<button>").addClass('close').html("&times;"));
-                }
-            return richText;
+            return replaceOuputRef(form, $(this).attr('value'), withClose);
         });
         return el.html().replace(/\r\n|\r|\n/ig, '<br />');
     };
@@ -93,24 +96,7 @@ define([
         val = val.replace('&lt;', '<').replace('&gt;', '>');
         var el = $('<div>').html(val);
         el.find('output').replaceWith(function() {
-            var value = $(this).attr('value'),
-                v = value.split('/'),
-                dispValue = v[v.length-1],
-                mug = form.getMugByPath(value),
-                icon = mug ? mug.options.icon: 'fcc fcc-flower',
-                datanodeClass = mug ? 'label-datanode-internal' : 'label-datanode-external',
-                richText = $('<span>').addClass('label label-datanode')
-                              .addClass(datanodeClass)
-                              .attr({
-                                contenteditable: false,
-                                draggable: true,
-                                value: "<output value=\"" + value +
-                                    "\" />"
-                              }).append($('<i>').addClass(icon).html('&nbsp;')).append(dispValue);
-                if (withClose) {
-                    richText.append($("<button>").addClass('close').html("&times;"));
-                }
-            return richText;
+            return replaceOuputRef(form, $(this).attr('value'), withClose);
         });
         return el.html();
     };
