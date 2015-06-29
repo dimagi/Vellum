@@ -28,7 +28,7 @@ define([
         };
 
         widget.setValue = function (val) {
-            editor.setData(toRichText(val, mug.form));
+            editor.setData(toRichText(val, mug.form, true));
         };
 
         widget.getValue = function () {
@@ -64,19 +64,23 @@ define([
         return el.html();
     };
 
-    var toRichText = function(val, form) {
+    var toRichText = function(val, form, withClose) {
         val = val.replace('&lt;', '<').replace('&gt;', '>');
         var el = $('<div>').html(val);
         el.find('output').replaceWith(function() {
-            var value = $(this).attr('value');
-                icon = form.getMugByPath(value).options.icon;
-            return $('<span>').addClass('label label-datanode label-datanode-internal')
+            var value = $(this).attr('value'),
+                icon = form.getMugByPath(value).options.icon,
+                richText = $('<span>').addClass('label label-datanode label-datanode-internal')
                               .attr({
                                 contenteditable: false,
                                 draggable: true,
                                 value: "<output value='" + value +
                                     "' />"
                               }).append($('<i>').addClass(icon).html('&nbsp;')).append(value);
+                if (withClose) {
+                    richText.append($("<button>").addClass('close').html("&times;"));
+                }
+            return richText;
         });
         return el.html();
     };
