@@ -21,7 +21,7 @@ define([
             .ckeditor();
         var editor = widget.input.ckeditor().editor;
         widget.input.on('change input', function () { widget.handleChange(); });
-        editor.on('change dataReady', function () { widget.handleChange(); });
+        editor.on('change dataReady afterInsertHtml', function () { widget.handleChange(); });
 
         widget.getControl = function () {
             return widget.input;
