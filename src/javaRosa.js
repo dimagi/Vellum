@@ -1857,8 +1857,8 @@ define([
                                 if (!seen.hasOwnProperty(form)) {
                                     seen[form] = true;
                                     // set default value(s) for this form
-                                    var dkey = name + ":" + dlang + "-" + form;
-                                    item.set(data[dkey] || value || nodeID, form);
+                                    var dval = data[name + ":" + dlang + "-" + form];
+                                    item.set(dval !== undefined ? dval : value, form);
                                 }
                                 if (value) {
                                     item.set(value, form, lang);
