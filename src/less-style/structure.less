@@ -143,8 +143,16 @@
 .fd-head {
   background: @blue;
   font-weight: normal !important;
-  padding: 2px 0 !important;
-  font-size: @baseFontSize*1.1 !important;
+  text-transform: uppercase;
+  text-align: left;
+  width: 100%;
+  > h2 {
+    font-size: @baseFontSize * 0.8  ;
+    padding: 1px 12px 0;
+    margin: 0;
+    font-weight: normal;
+    line-height: 23px;
+  }
 }
 
 .fd-form-actions {
