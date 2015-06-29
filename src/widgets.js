@@ -93,6 +93,16 @@ define([
                                 !!widget.isDisabled(), widget.getHelp());
         };
 
+        widget.addInstanceRef = function (attrs, property) {
+            if (!property) {
+                property = widget.path;
+                if (!property) {
+                    throw new Error("widget has no path: " + widget);
+                }
+            }
+            return mug.form.addInstanceIfNotExists(attrs, mug, property);
+        };
+
         return widget;
     };
 
@@ -264,13 +274,17 @@ define([
         };
 
         widget.getUIElement = function () {
-            var elem = getUIElement(
-                    widget.getControl(),
+            var control = widget.getControl(),
+                elem = getUIElement(
+                    control,
                     widget.getDisplayName(),
                     !!widget.isDisabled(),
                     widget.getHelp()
                 ),
                 autocompleteChoices;
+            if (widget.definition.xpathType === "generic") {
+                control.addClass('jstree-drop');
+            }
             if (options.autocompleteChoices) {
                 autocompleteChoices = function () {
                     return options.autocompleteChoices(mug);
@@ -283,6 +297,7 @@ define([
                     leftAutocompleteChoices: autocompleteChoices,
                     value: super_getValue(),
                     xpathType: widget.definition.xpathType,
+                    onLoad: function ($ui) { setWidget($ui, widget); },
                     done: function (val) {
                         if (val !== false) {
                             super_setValue(val);
@@ -526,6 +541,24 @@ define([
         return $messages;
     }
 
+    function getWidget(input, vellum) {
+        var obj = input,
+            widget;
+        while (obj && obj.length) {
+            widget = obj.data("vellum_widget");
+            if (widget && vellum === obj.vellum("get")) {
+                return widget;
+            }
+            obj = obj.parent();
+        }
+        return null;
+    }
+
+    function setWidget($el, widget) {
+        $el.data("vellum_widget", widget);
+        return $el;
+    }
+
     return {
         base: base,
         normal: normal,
@@ -537,8 +570,10 @@ define([
         xPath: xPath,
         baseKeyValue: baseKeyValue,
         readOnlyControl: readOnlyControl,
-        getMessages: getMessages,
         util: {
+            getWidget: getWidget,
+            setWidget: setWidget,
+            getMessages: getMessages,
             getUIElementWithEditButton: getUIElementWithEditButton,
             getUIElement: getUIElement
         }

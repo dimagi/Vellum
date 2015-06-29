@@ -197,7 +197,6 @@ define([
         this.$f.empty().append(main_template);
 
         this._init_toolbar();
-        this._init_extra_tools();
         this._createJSTree();
         datasources.init(this);
     };
@@ -208,6 +207,7 @@ define([
             // Allow onReady to access vellum instance (mostly for tests)
             _this.opts().core.onReady.apply(_this);
         }
+        this._init_extra_tools();
         parser.init(this);
         this.loadXFormOrError(this.opts().core.form, function () {
             setTimeout(onReady, 0);
@@ -1399,7 +1399,7 @@ define([
             $messages.appendTo($content);
         }
         function refreshMessages() {
-            $messages.empty().append(widgets.getMessages(mug, null));
+            $messages.empty().append(widgets.util.getMessages(mug, null));
         }
         mug.on("messages-changed", refreshMessages, null, "teardown-mug-properties");
         refreshMessages();
@@ -1619,7 +1619,9 @@ define([
             elemWidget.on("change", function () {
                 _this.onFormChange(mug);
             });
-            $fieldsetContent.append(elemWidget.getUIElement());
+            var $ui = elemWidget.getUIElement();
+            widgets.util.setWidget($ui, elemWidget);
+            $fieldsetContent.append($ui);
             elemWidget.refreshMessages();
         });
         return $sec;
