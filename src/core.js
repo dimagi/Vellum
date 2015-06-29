@@ -24,6 +24,7 @@ define([
     'vellum/datasources',
     'vellum/util',
     'vellum/debugutil',
+    'vellum/richtext',
     'vellum/base',
     'vellum/jstree-plugins',
     'less!vellum/less-style/main',
@@ -54,7 +55,8 @@ define([
     parser,
     datasources,
     util,
-    debug
+    debug,
+    richtext
 ) {
     
     // Load these modules in the background after all runtime dependencies have
@@ -452,9 +454,9 @@ define([
     };
 
     fn.getMugDisplayName = function (mug) {
-        return mug.getDisplayName(
+        return richtext.toRichText(mug.getDisplayName(
             this.data.core.currentItextDisplayLanguage || 
-            this.data.javaRosa.Itext.getDefaultLanguage());
+            this.data.javaRosa.Itext.getDefaultLanguage()), this.data.core.form);
     };
 
     fn.showSourceXMLModal = function (done) {
@@ -1169,8 +1171,8 @@ define([
         });
     };
 
-    fn.refreshMugName = function (mug) {
-        var name = this.getMugDisplayName(mug);
+    fn.refreshMugName = function (mug, displayLang) {
+        var name = richtext.toRichText(this.getMugDisplayName(mug), this.data.core.form);
         if (name !== this.jstree("get_text", mug.ufid)) {
             this.jstree('rename_node', mug.ufid, name);
         }
