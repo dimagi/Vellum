@@ -27,12 +27,38 @@ define(["underscore"], function (_) {
                 key: "@case_type",
                 structure: {
                     edd: {},
+                },
+                related: {
+                    "first-child": "child",
                 }
             }, {
                 id: "child",
                 key: "@case_type",
                 structure: {
                     dob: {},
+                    f_0762: {},
+                    f_1065: {},
+                    f_1089: {},
+                    f_2685: {},
+                    f_2841: {},
+                    f_3017: {},
+                    f_3280: {},
+                    f_3291: {},
+                    f_3605: {},
+                    f_4021: {},
+                    f_4793: {},
+                    f_5683: {},
+                    f_6103: {},
+                    f_6542: {},
+                    f_6819: {},
+                    f_6912: {},
+                    f_7346: {},
+                    f_7541: {},
+                    f_8612: {},
+                    f_8967: {},
+                    f_8970: {},
+                    f_9147: {},
+                    f_9814: {},
                 },
                 related: {
                     parent: "mother",
@@ -95,6 +121,7 @@ define(["underscore"], function (_) {
             objectMap: {}  // todo
         },
         plugins: [
+            'databrowser',
             'itemset',
             'modeliteration',
             'commtrack',

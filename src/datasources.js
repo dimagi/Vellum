@@ -46,7 +46,12 @@
  * ]
  *
  * Elements can be nested indefinitely with structure keys describing inner
- * elements and attributes.
+ * elements and attributes. Any element that has a `structure` key may also
+ * have a `subsets` key, which defines structure specific to a subset of the
+ * elements at that level of the tree. The structure of a subset is merged
+ * with the unfiltered element structure, which means that all elements and
+ * attributes available in the unfiltered element are also avaliable in the
+ * filtered subset.
  *
  * The result of that would be (if used in an itemset):
  *
@@ -76,6 +81,7 @@ define([
 ) {
     var vellum, dataSourcesEndpoint, dataCache, dataCallbacks;
 
+    // called during core init
     function init(instance) {
         vellum = instance;
         dataSourcesEndpoint = vellum.opts().core.dataSourcesEndpoint;
@@ -88,9 +94,8 @@ define([
     }
 
     /**
-     * Asynchronously load data sources of the given type
+     * Asynchronously load data sources
      *
-     * @param type - The data source type (example: "fixture").
      * @param callback - A function to be called when the data sources
      *      have been loaded. This function should accept one argument,
      *      a list of data source objects.
@@ -202,6 +207,10 @@ define([
         $ui.find('.fd-data-source-cancel-button').click(function () {
             done();
         });
+
+        if (options.onLoad) {
+            options.onLoad($ui);
+        }
     }
 
     function advancedDataSourceWidget(mug, options, labelText) {
@@ -220,6 +229,9 @@ define([
                             source: local_getValue(),
                             headerText: labelText,
                             loadEditor: loadDataSourceEditor,
+                            onLoad: function ($ui) {
+                                widgets.util.setWidget($ui, widget);
+                            },
                             done: function (source) {
                                 if (!_.isUndefined(source)) {
                                     local_setValue(source);

@@ -7,7 +7,6 @@ require([
     'underscore',
     'vellum/datasources',
     'vellum/itemset',
-    'vellum/form'
 ], function (
     options,
     util,
@@ -15,8 +14,7 @@ require([
     $,
     _,
     datasources,
-    itemset,
-    form
+    itemset
 ) {
     var assert = chai.assert,
         clickQuestion = util.clickQuestion,
@@ -74,7 +72,7 @@ require([
                     plugins: plugins,
                     javaRosa: {langs: ['en']},
                     core: {
-                        dataSourcesEndpoint: function () { return []; },
+                        dataSourcesEndpoint: function (callback) { callback([]); },
                         onReady: done
                     }
                 });

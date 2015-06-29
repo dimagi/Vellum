@@ -414,10 +414,14 @@ define([
             $xpathUI.find('.fd-xpath-cancel-button').click(function () {
                 done(false);
             });
+            return $xpathUI;
         };
 
-        initXPathEditor();
+        var $xpathUI = initXPathEditor();
         updateXPathEditor(options);
+        if (options.onLoad) {
+            options.onLoad($xpathUI);
+        }
     }
 
     return {

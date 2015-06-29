@@ -23,9 +23,15 @@
   width: 30%;
 }
 
-.fd-content-divider {
+.fd-content-vertical-divider {
   width: 5px;
   margin: 0 1px;
+  background: @navbarBackground;
+}
+
+.fd-content-horizontal-divider {
+  height: 5px;
+  margin: 1px 0;
   background: @navbarBackground;
 }
 
@@ -34,6 +40,11 @@
   overflow-x: hidden;
   overflow-y: auto;
   height: @containerHeight;
+}
+
+.fd-accessory-pane {
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .fd-message {

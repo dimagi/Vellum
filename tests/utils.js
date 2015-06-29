@@ -321,7 +321,7 @@ define([
         return messages.join("\n");
     }
 
-    function findNode(tree, predicate) {
+    function findNode(tree, predicate, node) {
         if (_.isString(predicate)) {
             var text = predicate;
             predicate = function (node) {
@@ -341,7 +341,7 @@ define([
             }
             return null;
         }
-        return find(tree.get_node("#"));
+        return find(node || tree.get_node("#"));
     }
 
     return {

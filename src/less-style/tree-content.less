@@ -28,6 +28,29 @@
   text-align: center;
 }
 
+.fd-search-box {
+  position: relative;
+  padding: @gridGutterWidth/2 @gridGutterWidth;
+  background-color: @navbarBackground;
+  > input {
+    border-radius: 1em;
+    text-indent: 1.5em;
+    width: 100%;
+    height: 2em;
+    box-sizing : border-box;
+  }
+  > .icon-search {
+    position: absolute;
+    top: @gridGutterWidth/2+6px;
+    left: @gridGutterWidth+7px;
+    color: #777;
+  }
+}
+
+.fd-search-icon {
+  font-size: 1.2em;
+}
+
 .fd-question-tree-actions {
   text-align: center;
   > div { padding-top: @gridGutterWidth/2; }

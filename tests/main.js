@@ -110,6 +110,7 @@ require(['jquery', 'jquery.vellum'], function ($) {
         'tests/saveToCase',
         'tests/markdown',
         'tests/datasources',
+        'tests/databrowser',
         'tests/saveToCase',
         'tests/setvalue',
     ], function (
