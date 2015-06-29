@@ -28,7 +28,7 @@ define([
         };
 
         widget.setValue = function (val) {
-            editor.setData(toRichText(val, mug.form, true));
+            editor.setData(toRichHtml(val, mug.form, true));
         };
 
         widget.getValue = function () {
@@ -53,8 +53,7 @@ define([
 
     var fromRichText = function(val) {
         var el = $('<div>');
-        val = val.replace(/(<\/?p>)/ig,"");
-        val = val.replace(/(<br ?\/?>)/ig,"\n");
+        val = val.replace(/(<p>)/ig,"").replace(/<\/p>/ig, "\r\n").replace(/(<br ?\/?>)/ig,"\n");
         el = el.html(val);
         el.find('.atwho-inserted .label').unwrap();
         el.find('.label-datanode').replaceWith(function() {
@@ -62,6 +61,27 @@ define([
         });
 
         return el.html();
+    };
+
+    var toRichHtml = function (val, form, withClose) {
+        val = val.replace('&lt;', '<').replace('&gt;', '>');
+        var el = $('<div>').html(val);
+        el.find('output').replaceWith(function() {
+            var value = $(this).attr('value'),
+                icon = form.getMugByPath(value).options.icon,
+                richText = $('<span>').addClass('label label-datanode label-datanode-internal')
+                              .attr({
+                                contenteditable: false,
+                                draggable: true,
+                                value: "<output value='" + value +
+                                    "' />"
+                              }).append($('<i>').addClass(icon).html('&nbsp;')).append(value);
+                if (withClose) {
+                    richText.append($("<button>").addClass('close').html("&times;"));
+                }
+            return richText;
+        });
+        return el.html().replace(/\r\n|\r|\n/ig, '<br />');
     };
 
     var toRichText = function(val, form, withClose) {
