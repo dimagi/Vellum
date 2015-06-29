@@ -82,9 +82,9 @@ define([
         var getTopLevelJoinSelect = function () {
             return $(editorContent.find(".top-level-join-select")[0]);
         };
-        var addAutocomplete = function (input, sources) {
-            if (sources) {
-                util.dropdownAutocomplete(input, sources);
+        var addAutocomplete = function (input, choices) {
+            if (choices) {
+                util.dropdownAutocomplete(input, choices);
             }
             else {
                 util.questionAutocomplete(input, options.mug,
@@ -222,8 +222,8 @@ define([
                     populateQuestionInputBox(getRightQuestionInput(), expOp.right, expOp.left);
                 }
 
-                addAutocomplete(getLeftQuestionInput(), options.leftAutocompleteSources);
-                addAutocomplete(getRightQuestionInput(), options.rightAutocompleteSources);
+                addAutocomplete(getLeftQuestionInput(), options.leftAutocompleteChoices);
+                addAutocomplete(getRightQuestionInput(), options.rightAutocompleteChoices);
 
                 return $expUI;
             };

@@ -44,8 +44,7 @@ define([
     };
     
     function processInstance(instance) {
-        instance.defaultId = instance.defaultId || convertToId(instance.sourceUri);
-        instance.id = instance.defaultId;
+        instance.id = instance.id || convertToId(instance.uri);
         _.each(instance.levels, function (level) {
             var i = 1,
                 mappedSubsets = {};
@@ -188,7 +187,7 @@ define([
         }
         return that;
     };
-    var INSTANCE_REGEXP = /^instance\((['"])([^'"]+)\1\)/i;
+    var INSTANCE_REGEXP = /(^)instance\((['"])([^'"]+)\2\)/i;
 
     function Form (opts, vellum, mugTypes) {
         var _this = this;
@@ -312,7 +311,7 @@ define([
             var match = query.match(INSTANCE_REGEXP),
                 instance = null;
             if (match) {
-                var instanceId = match[2],
+                var instanceId = match[3],
                     meta = this._referenceInstance(instanceId, mug, property);
                 if (meta) {
                     instance = _.clone(meta.attributes);
@@ -336,8 +335,13 @@ define([
          * There might be edge cases where a user is entering a
          * custom instance and query and does not want this.
          */
-        updateInstanceQuery: function (query, instanceId) {
-            return query.replace(INSTANCE_REGEXP, "instance('" + instanceId + "')");
+        updateInstanceQuery: function (query, instanceId, oldId) {
+            var regexp = INSTANCE_REGEXP;
+            if (oldId) {
+                regexp = new RegExp("(^|\W)instance\\((['\"])" +
+                                    RegExp.escape(oldId) + "\2\\)", "ig");
+            }
+            return query.replace(regexp, "$1instance('" + instanceId + "')");
         },
         /**
          * Drop instance reference, possibly removing the instance

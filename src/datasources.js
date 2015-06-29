@@ -1,22 +1,19 @@
 /**
- * Asynchronously loads data sources from vellum.opts().core.dataSources
+ * Asynchronously loads data sources from vellum.opts().core.dataSourcesEndpoint
  * Currently only supports fixtures
  *
  * Format in opts:
- * dataSources: [
- *     {
- *          key: string : data source name (fixture, case, products...)
- *          endpoint: function or string (URL)
- *     }
- * ]
+ * dataSourcesEndpoint: function(callback) or string (URL)
  *
- * The endpoint function (or URL) should return the following format:
+ * The endpoint function receives a callback argument. It should call the
+ * `callback` with a list of the following structure (for a URL, the response
+ * should be JSON in this format):
  * [
  *      {
- *          sourceUri: string (used in the instance definition)
- *          defaultId: string (used in instance definition)
- *          intialQuery: string (used in nodeset)
- *          name: string (text in the dropdown)
+ *          id: string (used in instance definition)
+ *          uri: string (used in the instance definition)
+ *          path: string (used in nodeset)
+ *          name: string (human readable name)
  *          structure: nested dictionary of elements and attributes
  *          {
  *              element: {
@@ -25,9 +22,27 @@
  *                  }
  *                  name: "Element" (the text used in dropdown for this element)
  *              },
+ *              ref-element: {
+ *                  reference: {
+ *                      source: string (optional data source id, defaults to this data source)
+ *                      subset: string (optional subset id)
+ *                      key: string (referenced property)
+ *                  }
+ *              },
  *              @attribute: { }
- *          }
- *      }
+ *          },
+ *          subsets: [{
+ *              id: string (unique identifier for this subset)
+ *              key: string (unique identifier property name)
+ *              name: string (human readable name)
+ *              structure: { ... }
+ *              related: {
+ *                  string (relationship): string (related subset name),
+ *                  ...
+ *              }
+ *          }]
+ *      },
+ *      ...
  * ]
  *
  * Elements can be nested indefinitely with structure keys describing inner
@@ -35,15 +50,15 @@
  *
  * The result of that would be (if used in an itemset):
  *
- *     <instance src=sourceUri id=defaultId>
+ *     <instance src="{source.uri}" id="{source.id}">
  *     ...
- *     <itemset nodeset=initialQuery />
+ *     <itemset nodeset="instance('{source.id}'){source.path}" />
  *
  *
  * The dropdown would have options:
  *
- *     name             (nodeset: initialQuery)
- *     name - Element   (nodeset: initialQuery/element)
+ *     name             (nodeset: instance('{source.id}'){source.path})
+ *     name - Element   (nodeset: instance('{source.id}'){source.path}/element)
  *
  */
 define([
@@ -59,17 +74,17 @@ define([
     util,
     edit_source
 ) {
-    var vellum, dataSources, dataCache, dataCallbacks;
+    var vellum, dataSourcesEndpoint, dataCache, dataCallbacks;
 
     function init(instance) {
         vellum = instance;
-        dataSources = vellum.opts().core.dataSources || [];
+        dataSourcesEndpoint = vellum.opts().core.dataSourcesEndpoint;
         reset();
     }
 
     function reset() {
-        dataCache = {};
-        dataCallbacks = {};
+        dataCache = null;
+        dataCallbacks = null;
     }
 
     /**
@@ -77,64 +92,48 @@ define([
      *
      * @param type - The data source type (example: "fixture").
      * @param callback - A function to be called when the data sources
-     *      have been loaded. This function should accept two arguments:
-     *      data - {
-     *               <sourceUri1>: <data source 1 object>,
-     *               <sourceUri2>: <data source 2 object>,
-     *               ...
-     *             }
-     *      type - the data source type.
+     *      have been loaded. This function should accept one argument,
+     *      a list of data source objects.
      */
-    function getDataSources(type, callback) {
-        if (!_.isUndefined(dataCache[type])) {
-            callback(dataCache[type], type);
+    function getDataSources(callback) {
+        if (dataCache) {
+            callback(dataCache);
             return;
         }
-        if (!_.isUndefined(dataCallbacks[type])) {
-            dataCallbacks[type].push(callback);
+        if (dataCallbacks) {
+            dataCallbacks.push(callback);
             return;
         }
 
         function finish(data) {
-            dataCache[type] = {};
-            if (data.length === 0) {
-                dataCache[type][""] = {
-                    sourceUri: "",
-                    defaultId: "",
-                    initialQuery: "",
-                    name: "Not Found",
-                    structure: {}
-                };
-            } else {
-                _.each(data, function(item) {
-                    dataCache[type][item.sourceUri] = item;
-                });
-            }
-            _.each(dataCallbacks[type], function (callback) {
-                callback(dataCache[type], type);
+            dataCache = data.length ? data : [{
+                id: "",
+                uri: "",
+                path: "",
+                name: "Not Found",
+                structure: {}
+            }];
+            _.each(dataCallbacks, function (callback) {
+                callback(dataCache);
             });
-            delete dataCallbacks[type];
+            dataCallbacks = null;
         }
-        var source = _.find(dataSources, function (src) {
-            return src.key === type;
-        });
-        dataCallbacks[type] = [callback];
-        if (source) {
-            if (_.isString(source.endpoint)) {
+        dataCallbacks = [callback];
+        if (dataSourcesEndpoint) {
+            if (_.isString(dataSourcesEndpoint)) {
                 $.ajax({
                     type: 'GET',
-                    url: source.endpoint,
+                    url: dataSourcesEndpoint,
                     dataType: 'json',
                     success: finish,
                     error: function (jqXHR, errorType, exc) {
                         finish([]);
                         window.console.log(util.formatExc(exc || errorType));
                     },
-                    data: {},
-                    async: false
+                    data: {}
                 });
             } else {
-                source.endpoint(finish);
+                dataSourcesEndpoint(finish);
             }
         } else {
             finish([]);
@@ -291,8 +290,11 @@ define([
             hasValue = false;
 
         widget.addOption(EMPTY_VALUE, "Loading...");
-        getDataSources('fixture', function (data) {
+        getDataSources(function (data) {
             var value;
+            if (options.dataSourcesFilter) {
+                data = options.dataSourcesFilter(data);
+            }
             if (hasValue) {
                 value = local_getValue();
             }
@@ -306,7 +308,7 @@ define([
                 local_setValue(_.omit(fixtures[0], 'name'));
             }
             if (options.onOptionsLoaded) {
-                options.onOptionsLoaded();
+                options.onOptionsLoaded(data);
             }
         });
 
@@ -345,26 +347,25 @@ define([
             return _.map(structure, function(value, key) {
                 var ret = [],
                     newBaseFixture = {
-                        src: baseFixture.src,
                         id: baseFixture.id,
-                        query: baseFixture.query + "/" + key
+                        src: baseFixture.src,
+                        query: baseFixture.query + "/" + key,
+                        name: baseFixture.name + " - " + (value.name || key),
                     };
-                newBaseFixture.name = baseFixture.name + " - " + (value.name || key);
 
-                if (!value.no_option) {
+                if (!(_.isEmpty(value.structure) || value.no_option)) {
                     ret = [newBaseFixture];
                 }
                 return ret.concat(generateFixtureDefinitions(value.structure, newBaseFixture));
             });
         }
 
-        // HACK references dataCache.fixture, which is loaded asynchronously
-        return _.flatten(_.map(data || dataCache.fixture, function(fixture) {
+        return _.flatten(_.map(data, function(fixture) {
             var baseFixture = {
-                src: fixture.sourceUri,
-                id: fixture.defaultId,
-                query: fixture.initialQuery,
-                name: fixture.name || fixture.defaultId
+                id: fixture.id,
+                src: fixture.uri,
+                query: "instance('" + fixture.id + "')" + fixture.path,
+                name: fixture.name || fixture.id
             };
 
             return [baseFixture].concat(generateFixtureDefinitions(fixture.structure, baseFixture));
@@ -395,16 +396,15 @@ define([
         return [];
     }
 
-    function autocompleteChoices(fixture_uri) {
-        // HACK references dataCache.fixture, which is loaded asynchronously
+    function autocompleteChoices(data, fixtureUri) {
         // This seems wrong: fixture_uri references the root of the
         // fixture structure, and options are generated from the root.
         // However, the itemset may be referencing a non-root element
         // and therefore the choices returned here will be incorrectly qualified.
-        if (!dataCache.fixture || !dataCache.fixture[fixture_uri]) {
-            return [];
-        }
-        return generateFixtureColumns(dataCache.fixture[fixture_uri]);
+        var fixture = _.find(data, function (source) {
+            return source.uri === fixtureUri;
+        });
+        return fixture ? generateFixtureColumns(fixture) : [];
     }
 
     // -------------------------------------------------------------------------
@@ -412,6 +412,7 @@ define([
     return {
         init: init,
         reset: reset,
+        getDataSources: getDataSources,
         advancedDataSourceWidget: advancedDataSourceWidget,
         fixtureWidget: fixtureWidget,
         autocompleteChoices: autocompleteChoices,

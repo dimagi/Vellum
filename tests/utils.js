@@ -321,6 +321,29 @@ define([
         return messages.join("\n");
     }
 
+    function findNode(tree, predicate) {
+        if (_.isString(predicate)) {
+            var text = predicate;
+            predicate = function (node) {
+                return node.text === text;
+            };
+        }
+        function find(node) {
+            var i, len, result;
+            if (predicate(node)) {
+                return node;
+            }
+            for (i = 0, len = node.children.length; i < len; i++) {
+                result = find(tree.get_node(node.children[i]));
+                if (result) {
+                    return result;
+                }
+            }
+            return null;
+        }
+        return find(tree.get_node("#"));
+    }
+
     return {
         options: options,
         init: init,
@@ -371,6 +394,7 @@ define([
         expandGroup: expandGroup,
         collapseGroup: collapseGroup,
         getMessages: getMessages,
+        findNode: findNode,
         isTreeNodeValid: function (mug) {
             if (_.isString(mug)) {
                 var path = mug;

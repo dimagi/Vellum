@@ -327,15 +327,15 @@ define([
 
     /**
      * Turn a given input into an autocomplete, which will be populated
-     * with a given set of options and will also accept free text.
+     * with a given set of choices and will also accept free text.
      * 
      * @param $input - jQuery object, the input to turn into an autocomplete
-     * @param sources - An array of strings with which to populate the autocomplete
+     * @param choices - An array of strings with which to populate the autocomplete
      */
-    that.dropdownAutocomplete = function ($input, sources) {
+    that.dropdownAutocomplete = function ($input, choices) {
         $input.atwho({
             at: "",
-            data: sources,
+            data: choices,
             maxLen: Infinity,
             suffix: "",
             tabSelectsMatch: false,

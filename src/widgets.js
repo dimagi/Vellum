@@ -265,19 +265,22 @@ define([
 
         widget.getUIElement = function () {
             var elem = getUIElement(
-                widget.getControl(),
-                widget.getDisplayName(),
-                !!widget.isDisabled(),
-                widget.getHelp()
-            ), autocompleteSources;
-            if (_.isFunction(options.autocompleteSources)) {
-                autocompleteSources = options.autocompleteSources.bind(mug);
+                    widget.getControl(),
+                    widget.getDisplayName(),
+                    !!widget.isDisabled(),
+                    widget.getHelp()
+                ),
+                autocompleteChoices;
+            if (options.autocompleteChoices) {
+                autocompleteChoices = function () {
+                    return options.autocompleteChoices(mug);
+                };
             }
             return getUIElementWithEditButton(elem, function () {
                 widget.options.displayXPathEditor({
                     leftPlaceholder: options.leftPlaceholder,
                     rightPlaceholder: options.rightPlaceholder,
-                    leftAutocompleteSources: autocompleteSources,
+                    leftAutocompleteChoices: autocompleteChoices,
                     value: super_getValue(),
                     xpathType: widget.definition.xpathType,
                     done: function (val) {

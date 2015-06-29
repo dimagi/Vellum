@@ -43,7 +43,7 @@ define([
     debug
 ) {
     var mugTypes = mugs.baseMugTypes.normal,
-        Itemset, isAdvancedItemsetEnabled,
+        Itemset, isAdvancedItemsetEnabled, opts,
         END_FILTER = /\[[^\[]*\]$/;
 
     Itemset = util.extend(mugs.defaultOptions, {
@@ -110,12 +110,12 @@ define([
                         return "Choice Label must be specified.";
                     }
 
-                    // HACK accessing async-loaded data; it may not be here yet
-                    var fixtures = datasources.getPossibleFixtures(),
+                    var sources = getDataSources(),
+                        fixtures = datasources.getPossibleFixtures(sources),
                         notCustom = _.some(fixtures, function (fixture) {
                             return fixture.src === itemsetData.instance.src;
                         }),
-                        choices = datasources.autocompleteChoices(itemsetData.instance.src),
+                        choices = datasources.autocompleteChoices(sources, itemsetData.instance.src),
                         filterRegex = /\[[^\[]+]/g,
                         strippedValue = itemsetData.valueRef.replace(filterRegex, ""),
                         strippedLabel = itemsetData.labelRef.replace(filterRegex, "");
@@ -136,10 +136,10 @@ define([
                 xpathType: 'bool',
                 visibility: 'visible',
                 leftPlaceholder: '',
-                autocompleteSources: function() {
-                    // HACK accessing async-loaded data; it may not be here yet
-                    // TODO convert to callback; setup auto-complete when data is ready
-                    return datasources.autocompleteChoices(this.p.itemsetData.instance.src);
+                autocompleteChoices: function(mug) {
+                    var sources = getDataSources(),
+                        src = mug.p.itemsetData.instance.src;
+                    return datasources.autocompleteChoices(sources, src);
                 },
                 help: "This is an XPath expression that will filter the set " +
                       "of choices from the lookup table",
@@ -168,6 +168,7 @@ define([
 
     $.vellum.plugin("itemset", {}, {
         init: function () {
+            opts = this.opts().itemset;
             isAdvancedItemsetEnabled = this.opts().features.advanced_itemsets;
         },
         getSelectQuestions: function () {
@@ -277,24 +278,39 @@ define([
         return {value: nodeset, filter: ''};
     }
 
+    function getDataSources() {
+        // HACK synchronously get asynchronously loaded data (if available)
+        var sources = [];
+        datasources.getDataSources(function (data) {
+            // will execute synchronously if data sources have been loaded
+            if (opts.dataSourcesFilter) {
+                data = opts.dataSourcesFilter(data);
+            }
+            sources = data;
+        });
+        return sources;
+    }
+
     function itemsetWidget(mug, options) {
         function isEmptyValue(value) {
             return !value || _.all(_.map(value, _.isEmpty));
         }
 
-        function updateAutocomplete() {
-            var choices = datasources.autocompleteChoices(super_getValue().src);
+        function updateAutocomplete(data) {
+            var value = super_getValue(),
+                choices = datasources.autocompleteChoices(data, value ? value.src : "");
             labelRef.addAutocomplete(choices, super_handleChange);
             valueRef.addAutocomplete(choices, super_handleChange);
             return choices;
         }
 
-        function onOptionsLoaded() {
+        function onOptionsLoaded(data) {
+            dataSources = data;
             optionsLoaded = true;
             if (canUpdateAutocomplete) {
                 // cannot do this until widget is fully initialized
                 // because updateAutocomplete() calls super_getValue()
-                var choices = updateAutocomplete();
+                var choices = updateAutocomplete(data);
                 if (choices && choices.length && isEmptyValue(current.value)) {
                     if (_.contains(choices, "name")) {
                         labelRef.val("name");
@@ -317,7 +333,10 @@ define([
             }
         }
 
-        options = _.extend({}, options, {onOptionsLoaded: onOptionsLoaded});
+        options = _.extend({}, options, {
+            onOptionsLoaded: onOptionsLoaded,
+            dataSourcesFilter: opts.dataSourcesFilter,
+        });
         if (isAdvancedItemsetEnabled) {
             options.hasAdvancedEditor = true;
             options.getSource = function (mug) {
@@ -337,6 +356,7 @@ define([
         }
 
         var current = {},
+            dataSources = [],
             optionsLoaded = false,
             canUpdateAutocomplete = false,
             widget = datasources.fixtureWidget(mug, options, "Lookup Table"),
@@ -348,7 +368,7 @@ define([
             valueRef = refSelect("value_ref", "Value Field", false);
 
         widget.handleChange = function() {
-            updateAutocomplete();
+            updateAutocomplete(dataSources);
             super_handleChange();
         };
 
@@ -393,7 +413,7 @@ define([
         canUpdateAutocomplete = true;
         if (optionsLoaded) {
             // call again to update auto-complete and set defaults
-            onOptionsLoaded();
+            onOptionsLoaded(dataSources);
         }
 
         return widget;

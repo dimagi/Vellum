@@ -1,48 +1,47 @@
-define(function () {
-    var INSTANCES = [
+define(["underscore"], function (_) {
+    var dataSources = [
         {
-            name: "All Cases",
-            sourceUri: "jr://instance/casedb",
-            defaultId: "casedb",
-            rootNodeName: "casedb",
-            levels: [
-                {
-                    nodeName: "case",
-                    properties: [
-                        {
-                            id: 'case_name'
-                        },
-                        {
-                            id: '@case_id'
-                        }
-                    ],
-                    subsets: [
-                        {
-                            name: "mother Cases",
-                            selector: "@case_type='mother'",
-                            properties: [
-                                {
-                                    id: 'edd' 
-                                }
-                            ]
-                        },
-                        {
-                            name: "child Cases",
-                            selector: "@case_type = 'child'",
-                            properties: [
-                                {
-                                    id: 'dob'
-                                }
-                            ]
-                        }
-                    ]
+            id: "commcaresession",
+            uri: "jr://instance/session",
+            path: "/session/data",
+            name: 'Session',
+            structure: {
+                "case_id": {
+                    reference: {
+                        source: "casedb",
+                        subset: "child",
+                        key: "@case_id",
+                    },
+                },
+            },
+        }, {
+            id: "casedb",
+            uri: "jr://instance/casedb",
+            path: "/cases/case",
+            name: 'Cases',
+            structure: {
+                name: {},
+            },
+            subsets: [{
+                id: "mother",
+                key: "@case_type",
+                structure: {
+                    edd: {},
                 }
-            ],
-        },
-        {
-            sourceUri: "jr://fixture/item-list:some-fixture",
-            defaultId: "some-fixture",
-            initialQuery: "instance('some-fixture')/some-fixture_list/some-fixture",
+            }, {
+                id: "child",
+                key: "@case_type",
+                structure: {
+                    dob: {},
+                },
+                related: {
+                    parent: "mother",
+                },
+            }]
+        }, {
+            id: "some-fixture",
+            uri: "jr://fixture/item-list:some-fixture",
+            path: "/some-fixture_list/some-fixture",
             name: 'some-fixture-name',
             structure: {
                 "inner-attribute": {
@@ -59,7 +58,7 @@ define(function () {
             }
         }
     ];
-    
+
     var OPTIONS = {
         core: {
             loadDelay: 0,
@@ -72,23 +71,20 @@ define(function () {
                 "meta/timeStart",
                 "meta/timeEnd"
             ],
-            dataSources: [
-                {
-                    key: "case",
-                    name: "Cases",
-                    endpoint: function (callback) { callback([INSTANCES[0]]); }
-                }, {
-                    key: "fixture",
-                    name: "Lookup Tables",
-                    endpoint: function (callback) { callback(INSTANCES.slice(1)); }
-                }
-            ],
+            dataSourcesEndpoint: function (callback) { callback(dataSources); },
             saveType: "patch",
             saveUrl: function (data) {}
         },
         javaRosa: {
             langs: ['en', 'hin'],
             displayLanguage: 'en'
+        },
+        itemset: {
+            dataSourcesFilter: function (sources) {
+                return _.filter(sources, function (source) {
+                    return !source.uri || /^jr:\/\/fixture\//.test(source.uri);
+                });
+            }
         },
         uploader: {
             uploadUrls: {
@@ -113,7 +109,6 @@ define(function () {
     };
 
     return {
-        options: OPTIONS,
-        instances: INSTANCES
+        options: OPTIONS
     };
 });
