@@ -18,17 +18,29 @@
     <div class="fd-row">
         <div class="fd-content fd-content-left">
            <div class="fd-tree">
-                <div class="fd-head"><h2>Question Tree</h2></div>
-                <div class="fd-scrollable fd-scrollable-tree">
-                    <div class="fd-question-tree-lang"></div>
-                    <div class="fd-panel-toolbar fd-question-tree-actions">
-                        <div class="btn-group">
-                            <button type="button" class="btn fd-expand-all"><i class="icon-double-angle-down"></i> Expand All</button>
-                            <button type="button" class="btn fd-collapse-all"><i class="icon-double-angle-right"></i> Collapse All</button>
-                        </div>
-                        <div class="btn-group">
-                            <button type="button" class="btn fd-button-copy" tabindex="-1"><i class="icon-copy"></i> Copy</button>
-                        </div>
+                <div class="fd-head">
+                    <h2>Questions</h2>
+                    <div class="fd-questions-menu-container">
+                        <a class="dropdown-toggle"
+                           data-toggle="dropdown"
+                           href="#"
+                           id="fd-questions-dropdown-menu-toggle">
+                            <i class="icon icon-reorder"></i>
+                            <i class="icon icon-caret-down"></i>
+                        </a>
+                        <ul id="fd-questions-dropdown-menu"
+                            class="dropdown-menu"
+                            role="menu">
+                            <li><a class="fd-button-copy"><i class="icon-copy"></i> Copy</a></li>
+                            <li><a class="fd-expand-all"><i class="icon-double-angle-down"></i> Expand All</a></li>
+                            <li><a class="fd-collapse-all"><i class="icon-double-angle-right"></i> Collapse All</a></li>
+                            <li class="divider"></li>
+                            <li class="nav-header">Display</li>
+                            <!-- todo: do this properly <li><div class="fd-question-tree-lang"></div></li> -->
+                            <li><a tabindex="-1" href="#"><i class="icon icon-ok"></i> English</a></li>
+                            <li><a tabindex="-1" href="#">Deutsch</a></li>
+                            <li><a tabindex="-1" href="#">Question ID</a></li>
+                        </ul>
                     </div>
                     <div class="fd-question-tree"></div>
                 </div>
