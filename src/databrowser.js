@@ -16,14 +16,13 @@ define([
     window_,
     external_data_tree
 ) {
-    var panelHeight, isDataTreeLoaded;
+    var panelHeight;
 
     // plugin adds an item to the Tools menu when enabled
     $.vellum.plugin('databrowser', {}, {
         init: function () {
             var vellum = this,
                 pane = this.$f.find(".fd-accessory-pane");
-            isDataTreeLoaded = false;
             pane.append($(external_data_tree()));
             pane.resize(function () {
                 if (pane.height() > 100) {
@@ -48,15 +47,11 @@ define([
         }
     });
 
-    var initDataBrowser = function (vellum) {
-        if (isDataTreeLoaded) { return; }
-        isDataTreeLoaded = true;
-
+    var initDataBrowser = _.once(function (vellum) {
         // display spinner and begin loading...
         var $container = vellum.$f.find(".fd-external-data-tree-container"),
             $search = $container.find(".fd-search-box input"),
-            $tree = $container.find(".fd-external-data-tree"),
-            pending = false;
+            $tree = $container.find(".fd-external-data-tree");
         $tree.jstree({
             core: {
                 data: function (node, callback) {
@@ -84,15 +79,10 @@ define([
             },
             "plugins" : [ "themes", "conditionalevents", "dnd", "search" ]
         });
-        $search.keyup(function () {
-            if (pending) {
-                clearTimeout(pending);
-            }
-            pending = setTimeout(function () {
-                $tree.jstree(true).search($search.val());
-            }, 250);
-        });
-    };
+        $search.keyup(_.debounce(function () {
+            $tree.jstree(true).search($search.val());
+        }, 250));
+    });
 
     function dataTreeJson(data, vellum) {
         function node(parentPath, info) {
