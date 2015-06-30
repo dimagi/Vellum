@@ -48,6 +48,10 @@ define([
             }
         };
 
+        mug.on('teardown-mug-properties', function() {
+            editor.destroy();
+        });
+
         return widget;
     };
 
