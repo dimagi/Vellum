@@ -20,7 +20,7 @@ define([
             .addClass('fd-textarea input-block-level itext-widget-input')
             .ckeditor();
         var editor = widget.input.ckeditor().editor;
-        widget.input.on('change input', function () { widget.handleChange(); });
+        widget.input.on('change input afterInsertHtml', function () { widget.handleChange(); });
         editor.on('change dataReady afterInsertHtml', function () { widget.handleChange(); });
 
         widget.getControl = function () {
