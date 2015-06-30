@@ -1845,6 +1845,9 @@ define([
                         // a little hacky, but it's a fallback default
                         nodeID = data.id.slice(data.id.lastIndexOf("/") + 1);
                     }
+                    function str(val) {
+                        return val === null || val === undefined ? "" : String(val);
+                    }
                     _.each(languages, function (lang) {
                         var prelen = name.length + lang.length + 2,
                             regexp = new RegExp("^" +
@@ -1857,20 +1860,19 @@ define([
                                 if (!seen.hasOwnProperty(form)) {
                                     seen[form] = true;
                                     // set default value(s) for this form
-                                    var dval = data[name + ":" + dlang + "-" + form];
-                                    item.set(dval !== undefined ? dval : value, form);
+                                    var dkey = name + ":" + dlang + "-" + form;
+                                    item.set(data.hasOwnProperty(dkey) ?
+                                             str(data[dkey]) : str(value), form);
                                 }
-                                if (value) {
-                                    item.set(value, form, lang);
-                                    if (mmForms.hasOwnProperty(form) &&
-                                            !objectMap.hasOwnProperty(value)) {
-                                        mug.addMessage(name, {
-                                            key: "missing-multimedia-warning",
-                                            level: mug.WARNING,
-                                            message: "MultiMedia was not copied; " +
-                                                     "it must be uploaded separately."
-                                        });
-                                    }
+                                item.set(str(value), form, lang);
+                                if (value && mmForms.hasOwnProperty(form) &&
+                                        !objectMap.hasOwnProperty(value)) {
+                                    mug.addMessage(name, {
+                                        key: "missing-multimedia-warning",
+                                        level: mug.WARNING,
+                                        message: "MultiMedia was not copied; " +
+                                                 "it must be uploaded separately."
+                                    });
                                 }
                                 found = true;
                             }

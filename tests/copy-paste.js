@@ -550,7 +550,7 @@ require([
             assert.equal(text2.p.labelItext.get(), "non");
         });
 
-        it("should fill non-existent, but not empty, itext forms", function () {
+        it("should not fill empty itext forms", function () {
             util.loadXML("");
             paste([
                 ["id", "type", "labelItext:en-default"],
@@ -565,7 +565,7 @@ require([
                 ["/text1", "Text", "Label", "Label"],
                 ["/text2", "Text", "null", "null"],
                 ["/text3", "Text", "null", "null"],
-                ["/text4", "Text", "text4", "text4"],
+                ["/text4", "Text", "null", "null"],
             ]);
         });
 
@@ -628,7 +628,7 @@ require([
             eq(mod.copy(), [
                 ["id", "type", "labelItext:en-default", "labelItext:hin-default"],
                 ["/text1", "Text", "text", "text"],
-                ["/text2", "Text", "text2", "text2"],
+                ["/text2", "Text", "null", "null"],
             ]);
         });
 
