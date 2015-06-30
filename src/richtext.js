@@ -49,7 +49,9 @@ define([
         };
 
         mug.on('teardown-mug-properties', function() {
-            editor.destroy();
+            if (editor) {
+                editor.destroy();
+            }
         });
 
         return widget;
