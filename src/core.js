@@ -716,7 +716,6 @@ define([
             if (mug && _this.data.core.currentlyEditedProperty) {
                 _this.warnOnCircularReference(
                     _this.data.core.currentlyEditedProperty,
-                    _this.data.core.form,
                     mug,
                     path,
                     'period');
@@ -1580,7 +1579,7 @@ define([
         }
     };
 
-    fn.warnOnCircularReference = function(property, form, mug, path, refName) {
+    fn.warnOnCircularReference = function(property, mug, path, refName) {
         // TODO do this in the logic manager
         if (path === "." && (
             property === "relevantAttr" ||
