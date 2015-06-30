@@ -33,6 +33,7 @@ define([
                 }
             });
             window_.preventDoubleScrolling(pane.find(".fd-scrollable"));
+            datasources.getDataSources(function () {});
         },
         getToolsMenuItems: function () {
             var vellum = this,
