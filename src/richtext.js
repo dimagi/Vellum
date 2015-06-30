@@ -12,27 +12,41 @@ define([
     ckeditor.config.allowedContent = true;
 
     var richtext = function(mug, options) {
-        var widget = widgets.base(mug, options);
+        var widget = widgets.base(mug, options), editor;
 
         widget.input = $("<div />")
             .attr("contenteditable", true)
             .attr("name", widget.id)
-            .addClass('fd-textarea input-block-level itext-widget-input')
-            .ckeditor();
-        var editor = widget.input.ckeditor().editor;
-        widget.input.on('change input afterInsertHtml', function () { widget.handleChange(); });
-        editor.on('change dataReady afterInsertHtml', function () { widget.handleChange(); });
+            .addClass('fd-textarea input-block-level itext-widget-input');
+
+        widget.input.ckeditor().promise.then(function() {
+            editor = widget.input.ckeditor().editor;
+
+            mug.on('teardown-mug-properties', function() {
+                if (editor) {
+                    editor.destroy();
+                }
+            });
+
+            editor.on('change', function() {widget.handleChange(); });
+        });
 
         widget.getControl = function () {
             return widget.input;
         };
 
         widget.setValue = function (val) {
-            editor.setData(toRichHtml(val, mug.form, true));
+            widget.input.ckeditor().promise.then(function() {
+                editor.setData(toRichHtml(val, mug.form, true));
+            });
         };
 
         widget.getValue = function () {
-            return fromRichText(editor.getData());
+            var val = "";
+            widget.input.ckeditor().promise.then(function() {
+                val = fromRichText(editor.getData());
+            });
+            return val;
         };
 
         widget.getDefaultValue = function () {
@@ -47,12 +61,6 @@ define([
                 widget.saving = false;
             }
         };
-
-        mug.on('teardown-mug-properties', function() {
-            if (editor) {
-                editor.destroy();
-            }
-        });
 
         return widget;
     };
