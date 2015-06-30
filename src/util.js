@@ -382,12 +382,12 @@ define([
                         return {
                             id: mug.ufid,
                             name: mug.absolutePath,
-                            displayTpl: '<i class="' + mug.options.icon + '" /> ' + mug.absolutePath,
+                            icon: mug.options.icon,
                         };
                     })
                     .filter(function(choice) { return choice.name; })
                     .value(),
-            displayTpl: '<li>${displayTpl}</li>',
+            displayTpl: '<li><i class="${icon}" /> ${name}</li>',
             insertTpl: options.insertTpl,
             limit: 10,
             maxLen: 30,
