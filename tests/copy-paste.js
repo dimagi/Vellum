@@ -550,7 +550,7 @@ require([
             assert.equal(text2.p.labelItext.get(), "non");
         });
 
-        it("should fill empty itext forms", function () {
+        it("should not fill empty itext forms", function () {
             util.loadXML("");
             paste([
                 ["id", "type", "labelItext:en-default"],
@@ -563,13 +563,13 @@ require([
             eq(mod.copy(), [
                 ["id", "type", "labelItext:en-default", "labelItext:hin-default"],
                 ["/text1", "Text", "Label", "Label"],
-                ["/text2", "Text", "text2", "text2"],
-                ["/text3", "Text", "text3", "text3"],
-                ["/text4", "Text", "text4", "text4"],
+                ["/text2", "Text", "null", "null"],
+                ["/text3", "Text", "null", "null"],
+                ["/text4", "Text", "null", "null"],
             ]);
         });
 
-        it("should fill empty default itext forms", function () {
+        it("should not fill empty default itext forms", function () {
             util.loadXML("");
             paste([
                 ["id", "type", "labelItext:en-default", "labelItext:hin-default"],
@@ -578,7 +578,28 @@ require([
             util.selectAll();
             eq(mod.copy(), [
                 ["id", "type", "labelItext:en-default", "labelItext:hin-default"],
-                ["/text", "Text", "Label", "Label"],
+                ["/text", "Text", "", "Label"],
+            ]);
+        });
+
+        it("should not paste defaults into empty itext items", function () {
+            util.loadXML("");
+            paste([
+                ["id", "type", "labelItext:en-default", "labelItext:hin-default",
+                    "constraintMsgItext:en-default",
+                    "constraintMsgItext:hin-default",
+                    "constraintAttr"],
+                ["/text1", "Text", "text1", "text1", "validate", "validate", "x = y"],
+                ["/text2", "Text", "text2", "text2", "null", "null", "null"],
+            ]);
+            util.selectAll();
+            eq(mod.copy(), [
+                ["id", "type", "labelItext:en-default", "labelItext:hin-default",
+                    "constraintMsgItext:en-default",
+                    "constraintMsgItext:hin-default",
+                    "constraintAttr"],
+                ["/text1", "Text", "text1", "text1", "validate", "validate", "x = y"],
+                ["/text2", "Text", "text2", "text2", "null", "null", "null"],
             ]);
         });
 
@@ -607,7 +628,7 @@ require([
             eq(mod.copy(), [
                 ["id", "type", "labelItext:en-default", "labelItext:hin-default"],
                 ["/text1", "Text", "text", "text"],
-                ["/text2", "Text", "text2", "text2"],
+                ["/text2", "Text", "null", "null"],
             ]);
         });
 
