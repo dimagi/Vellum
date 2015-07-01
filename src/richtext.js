@@ -1,14 +1,14 @@
 define([
     'jquery',
-    'ckeditor',
     'vellum/widgets',
+    'ckeditor',
     'ckeditor-jquery'
 ], function(
     $,
-    ckeditor,
-    widgets
+    widgets,
+    CKEDITOR
 ) {
-    ckeditor.config.allowedContent = true;
+    CKEDITOR.config.allowedContent = true;
 
     var richtext = function(mug, options) {
         var widget = widgets.base(mug, options), editor;
