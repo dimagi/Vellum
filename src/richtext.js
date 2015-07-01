@@ -23,12 +23,15 @@ define([
             editor = widget.input.ckeditor().editor;
 
             mug.on('teardown-mug-properties', function() {
+                removePopovers(widget.input);
                 if (editor) {
                     editor.destroy();
                 }
             });
 
             editor.on('change', function() {widget.handleChange(); });
+            editor.on('afterInsertHtml', function (e) { addPopovers(widget.input); });
+            editor.on('dataReady', function (e) { addPopovers(widget.input); });
         });
 
         widget.getControl = function () {
@@ -95,6 +98,26 @@ define([
             richText.append($("<button>").addClass('close').html("&times;"));
         }
         return richText;
+    }
+
+    function addPopovers(input) {
+        input.find('[contenteditable=false]').each(function () {
+            var $this = $(this),
+                value = $this.attr('value').match('output value="(.*)"')[1];
+            $this.popout('destroy');
+            $this.popout({
+                title: '',
+                content: value,
+                template: '<div contenteditable="false" class="popover"><div class="arrow"></div><div class="popover-inner"><div class="popover-content"><p></p></div></div></div>',
+                placement: 'bottom'
+            });
+        });
+    }
+
+    function removePopovers(input) {
+        input.find('[contenteditable=false]').each(function () {
+            $(this).popout('destroy');
+        });
     }
 
     var toRichHtml = function (val, form, withClose) {
