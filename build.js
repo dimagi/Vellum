@@ -118,6 +118,8 @@
                 'jquery.jstree',
                 'jquery.bootstrap-popout',
                 'save-button',
+                'ckeditor',
+                'ckeditor-jquery',
 
                 // shim plugin dependencies don't automatically get included
                 // NOTE less! and css! cannot be combined in the same module
