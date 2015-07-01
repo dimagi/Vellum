@@ -8,7 +8,7 @@ define([
     ckeditor,
     widgets
 ) {
-    ckeditor.config.removePlugins = 'toolbar';
+    ckeditor.config.removePlugins = 'toolbar,pastefromword,pastetext,liststyle,tabletools,contextmenu';
     ckeditor.config.allowedContent = true;
 
     var richtext = function(mug, options) {
