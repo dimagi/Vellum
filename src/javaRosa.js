@@ -44,7 +44,7 @@ define([
             'default', 'short', 'long', 'audio', 'video', 'image'
         ],
         _nextItextItemKey = 1,
-        NO_MARKDOWN_MUGS = ['Item'];
+        NO_MARKDOWN_MUGS = ['Item', 'Group', 'FieldList', 'Repeat'];
 
     function ItextItem(options) {
         this.forms = options.forms || [];
