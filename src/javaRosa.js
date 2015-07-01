@@ -1298,7 +1298,7 @@ define([
             form = vellum.data.core.form;
         util.insertTextAtCursor(target, output, true);
         if (mug) {
-            vellum.warnOnCircularReference('label', form, mug, path, 'output value');
+            vellum.warnOnCircularReference('label', mug, path, 'output value');
             warnOnNonOutputableValue(form, mug, path);
         }
     }
