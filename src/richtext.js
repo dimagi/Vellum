@@ -29,8 +29,14 @@ define([
             });
 
             editor.on('change', function() { widget.handleChange(); });
-            editor.on('afterInsertHtml', function (e) { addPopovers(widget.input); });
-            editor.on('dataReady', function (e) { addPopovers(widget.input); });
+            editor.on('afterInsertHtml', function (e) {
+                addCloseButton(widget, widget.input);
+                addPopovers(widget.input);
+            });
+            editor.on('dataReady', function (e) {
+                addCloseButton(widget, widget.input);
+                addPopovers(widget.input);
+            });
         });
 
         widget.getControl = function () {
@@ -114,6 +120,18 @@ define([
     function removePopovers(input) {
         input.find('[contenteditable=false]').each(function () {
             $(this).popout('hide');
+        });
+    }
+
+    function addCloseButton(widget, input) {
+        input.find('[contenteditable=false]').each(function () {
+            var _this = this;
+            $(this).find('.close').click(function() {
+                $(_this).popout('hide');
+                _this.remove();
+                widget.handleChange();
+                return false;
+            });
         });
     }
 
