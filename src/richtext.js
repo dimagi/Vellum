@@ -8,7 +8,6 @@ define([
     ckeditor,
     widgets
 ) {
-    ckeditor.config.removePlugins = 'toolbar,pastefromword,pastetext,liststyle,tabletools,contextmenu';
     ckeditor.config.allowedContent = true;
 
     var richtext = function(mug, options) {
@@ -29,7 +28,7 @@ define([
                 }
             });
 
-            editor.on('change', function() {widget.handleChange(); });
+            editor.on('change', function() { widget.handleChange(); });
             editor.on('afterInsertHtml', function (e) { addPopovers(widget.input); });
             editor.on('dataReady', function (e) { addPopovers(widget.input); });
         });
@@ -74,7 +73,7 @@ define([
         el = el.html(val);
         el.find('.atwho-inserted .label').unwrap();
         el.find('.label-datanode').replaceWith(function() {
-            return $(this).attr('value');
+            return $(this).attr('data-value');
         });
 
         return el.html();
@@ -91,8 +90,7 @@ define([
                           .attr({
                             contenteditable: false,
                             draggable: true,
-                            value: "<output value=\"" + value +
-                                "\" />"
+                            'data-value': "<output value=\"" + value + "\" />"
                           }).append($('<i>').addClass(icon).html('&nbsp;')).append(dispValue);
         if (withClose) {
             richText.append($("<button>").addClass('close').html("&times;"));
@@ -103,20 +101,19 @@ define([
     function addPopovers(input) {
         input.find('[contenteditable=false]').each(function () {
             var $this = $(this),
-                value = $this.attr('value').match('output value="(.*)"')[1];
-            $this.popout('destroy');
+                value = $this.attr('data-value').match('output value="(.*)"')[1];
             $this.popout({
                 title: '',
                 content: value,
                 template: '<div contenteditable="false" class="popover"><div class="arrow"></div><div class="popover-inner"><div class="popover-content"><p></p></div></div></div>',
-                placement: 'bottom'
+                placement: 'bottom',
             });
         });
     }
 
     function removePopovers(input) {
         input.find('[contenteditable=false]').each(function () {
-            $(this).popout('destroy');
+            $(this).popout('hide');
         });
     }
 
@@ -124,7 +121,7 @@ define([
         val = val.replace('&lt;', '<').replace('&gt;', '>');
         var el = $('<div>').html(val);
         el.find('output').replaceWith(function() {
-            return replaceOuputRef(form, $(this).attr('value'), withClose);
+            return replaceOuputRef(form, this.attributes.value.value, withClose);
         });
         return el.html().replace(/\r\n|\r|\n/ig, '<br />');
     };
@@ -133,7 +130,7 @@ define([
         val = val.replace('&lt;', '<').replace('&gt;', '>');
         var el = $('<div>').html(val);
         el.find('output').replaceWith(function() {
-            return replaceOuputRef(form, $(this).attr('value'), withClose);
+            return replaceOuputRef(form, this.attributes.value.value, withClose);
         });
         return el.html();
     };
