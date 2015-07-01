@@ -37,6 +37,12 @@ define([
                 addCloseButton(widget, widget.input);
                 addPopovers(widget.input);
             });
+
+        });
+        widget.input.on('inserted.atwho', function(atwhoEvent, $li, browserEvent) {
+            $(this).find('atwho-inserted').children().unwrap();
+            addCloseButton(widget, widget.input);
+            addPopovers(widget.input);
         });
 
         widget.getControl = function () {

@@ -398,8 +398,6 @@ define([
                     return value;
                 }
             }
-        }).on('inserted.atwho', function(atwhoEvent, $li, browserEvent) {
-            $(this).find('atwho-inserted').children().unwrap();
         });
 
         mug.on("teardown-mug-properties", function () {
