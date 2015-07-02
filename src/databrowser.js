@@ -7,14 +7,14 @@ define([
     'vellum/datasources',
     'vellum/widgets',
     'vellum/window',
-    'tpl!vellum/templates/external_data_tree',
+    'tpl!vellum/templates/external_sources_tree',
 ], function (
     $,
     _,
     datasources,
     widgets,
     window_,
-    external_data_tree
+    external_sources_tree
 ) {
     var panelHeight;
 
@@ -23,7 +23,7 @@ define([
         init: function () {
             var vellum = this,
                 pane = this.$f.find(".fd-accessory-pane");
-            pane.append($(external_data_tree()));
+            pane.append($(external_sources_tree()));
             pane.resize(function () {
                 if (pane.height() > 100) {
                     panelHeight = pane.height();
