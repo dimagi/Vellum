@@ -33,25 +33,17 @@ define([
             });
             window_.preventDoubleScrolling(pane.find(".fd-scrollable"));
             datasources.getDataSources(function () {});
-        },
-        getToolsMenuItems: function () {
-            var vellum = this,
-                items = this.__callOld();
-            items.push({
-                name: "External Data",
-                action: function (done) {
-                    toggleExternalDataTree(vellum, done);
-                }
-            });
-            return items;
+            pane.parent().find(".fd-external-sources-divider > a")
+                .removeAttr("href")
+                .clickExceptAfterDrag(_.partial(toggleExternalDataTree, vellum));
         }
     });
 
     var initDataBrowser = _.once(function (vellum) {
         // display spinner and begin loading...
-        var $container = vellum.$f.find(".fd-external-data-tree-container"),
-            $search = $container.find(".fd-search-box input"),
-            $tree = $container.find(".fd-external-data-tree");
+        var $container = vellum.$f.find(".fd-external-sources-container"),
+            $search = $container.find(".fd-external-resource-search input"),
+            $tree = $container.find(".fd-external-sources-tree");
         $tree.jstree({
             core: {
                 data: function (node, callback) {
@@ -179,7 +171,7 @@ define([
         return nodes;
     }
 
-    function toggleExternalDataTree(vellum, done) {
+    function toggleExternalDataTree(vellum) {
         var pane = vellum.$f.find(".fd-accessory-pane");
         if (pane.height()) {
             pane.css("height", "0");
@@ -191,7 +183,6 @@ define([
             $(window).resize();
             initDataBrowser(vellum);
         }
-        done();
     }
 
     return {

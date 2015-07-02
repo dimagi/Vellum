@@ -61,7 +61,7 @@ require([
             }],
         }];
 
-    describe("The data tree", function () {
+    describe("The data browser", function () {
         var dataTree;
         before(function (done) {
             util.init({
@@ -73,7 +73,7 @@ require([
                         var _this = this;
                         datasources.getDataSources(function () {
                             databrowser.initDataBrowser(_this);
-                            dataTree = _this.$f.find(".fd-external-data-tree").jstree(true);
+                            dataTree = _this.$f.find(".fd-external-sources-tree").jstree(true);
                             done();
                         });
                     }

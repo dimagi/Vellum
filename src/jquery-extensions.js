@@ -39,6 +39,28 @@ define([
         return this;
     };
 
+    $.fn.clickExceptAfterDrag = function (callback) {
+        var $el = $(this);
+        callback.currentXY = [];
+        function move(e) {
+            callback.currentXY = [e.pageX, e.pageY];
+            $el.off("mousemove", move);
+        }
+        function up(e) {
+            var a = callback.currentXY[0] - e.pageX,
+                b = callback.currentXY[1] - e.pageY,
+                c = Math.sqrt(a*a + b*b);
+            if (c < 3) {
+                callback(e);
+            }
+            $el.off("mouseup", up);
+        }
+        $el.on("mousedown", function (e) {
+            move(e);
+            $el.on("mousemove", move).on("mouseup", up);
+        });
+    };
+
     if (!$.fn.disableSelection) {
         // stolen from jquery-ui
         // https://github.com/jquery/jquery-ui/blob/c2224bf/ui/core.js#L299-L315
