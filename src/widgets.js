@@ -197,6 +197,38 @@ define([
         return widget;
     };
 
+    var multilineText = function (mug, options) {
+        var widget = base(mug, options);
+
+        widget.input = $("<textarea></textarea>")
+            .attr("name", widget.id)
+            .attr("id", widget.id)
+            .attr("rows", "2")
+            .addClass('input-block-level itext-widget-input')
+            .on('change input', function (e) { widget.handleChange(); })
+            .focus(function() { this.select(); })
+            .keyup(function (e) {
+                // workaround for webkit: http://stackoverflow.com/a/12114908
+                if (e.which === 9) {
+                    this.select();
+                }
+            });
+
+        widget.getControl = function () { 
+            return widget.input;
+        };
+
+        widget.setValue = function (val) {
+            widget.input.val(val);
+        };
+
+        widget.getValue = function () {
+            return widget.input.val();
+        };
+
+        return widget;
+    };
+
     var identifier = function (mug, options) {
         var widget = text(mug, options),
             super_updateValue = widget.updateValue;
@@ -563,6 +595,7 @@ define([
         base: base,
         normal: normal,
         text: text,
+        multilineText: multilineText,
         identifier: identifier,
         droppableText: droppableText,
         checkbox: checkbox,
