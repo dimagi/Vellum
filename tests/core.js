@@ -30,7 +30,10 @@ require([
 
     describe("Vellum core", function () {
         before(function (done) {
-            util.init({core: {onReady: function () { done(); }}});
+            util.init({
+                core: {onReady: function () { done(); }},
+                features: {'experimental_ui': false},
+            });
         });
 
         it("should display non-widget message", function () {
@@ -55,13 +58,15 @@ require([
                         assert.equal(this.data.core.saveButton.state, "saved");
                         done();
                     }
-                }
+                },
+                features: {'experimental_ui': false},
             });
         });
 
         it("should allow mug rename with itemset in form when the itemset plugin is disabled", function (done) {
             util.init({
                 plugins: pluginsWithoutItemset,
+                features: {'experimental_ui': false},
                 core: {
                     form: TEST_XML_1,
                     onReady: function () {
@@ -329,7 +334,10 @@ require([
                             "text"
                         );
                         done();
-            }}});
+                    }
+                },
+                features: {'experimental_ui': false},
+            });
         });
 
         it("should display welcome message whenever there are no questions", function () {
@@ -424,7 +432,13 @@ require([
 
         describe("drag+drop should", function () {
             var mugs;
-            before(function () {
+
+            before(function (done) {
+                util.init({
+                    core: {onready: function() {done();}},
+                    features: {'experimental_ui': false},
+                });
+
                 util.loadXML(INSERT_QUESTIONS_XML);
                 util.addQuestion.bind({prevId: "text2"})("Repeat", "repeat");
                 mugs = {

@@ -34,7 +34,8 @@ require([
                                "itemset plugin should be enabled");
                         done();
                     }
-                }
+                },
+                features: {'experimental_ui': false},
             });
         });
 
@@ -47,7 +48,8 @@ require([
                                "itemset plugin should be disabled");
                         done();
                     }
-                }
+                },
+                features: {'experimental_ui': false},
             });
         });
 
@@ -67,7 +69,8 @@ require([
                                      "instance('states')/state_list/state");
                         done();
                     }
-                }
+                },
+                features: {'experimental_ui': false},
             });
         });
 
