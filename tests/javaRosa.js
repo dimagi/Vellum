@@ -188,7 +188,7 @@ require([
             $("[name='itext-hin-label']").val('hindi').change();
             util.collapseGroup(group);
             assert.equal($(".fd-question-tree .jstree-anchor").length, 1);
-            $(".fd-question-tree-lang select").val('hin').change();
+            $(".fd-question-tree-display").val('hin').change();
             util.expandGroup(group);
             assert.equal($(".fd-question-tree .jstree-anchor:last").text(), "hindi");
         });
@@ -218,7 +218,7 @@ require([
             var treeSelector = ".fd-question-tree .jstree-anchor";
 
             assert.equal($(treeSelector).text(), "english");
-            $(".fd-question-tree-lang select").val('hin').change();
+            $(".fd-question-tree-display").val('hin').change();
             assert.equal($(treeSelector).text(), "english [en]");
             $("[name='itext-hin-label']").val('hindi').change();
             assert.equal($(treeSelector).text(), "hindi");
@@ -788,7 +788,7 @@ require([
             util.loadXML("");
             util.addQuestion("Text", "question1");
             util.clickQuestion("question1");
-            var $dropdown = $(".fd-question-tree-lang select");
+            var $display = $(".fd-question-tree-display");
             var treeSelector = ".fd-question-tree .jstree-anchor";
 
             $("[name='itext-en-label']").val('x').change();
@@ -796,11 +796,10 @@ require([
             $("[name='itext-en-label']").val('').change();
             assert.equal($(treeSelector).text(), "question1");
 
-            $dropdown.val('en').change();
+            $display.val('en').change();
             $("[name='itext-en-label']").val('english').change();
             assert.equal($(treeSelector).text(), "english");
-            $dropdown.val('_ids').change();
-            assert.equal($dropdown.find("option").length, 2);
+            $display.val('_ids').change();
             assert.equal($(treeSelector).text(), "question1");
         });
     });

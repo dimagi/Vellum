@@ -1390,10 +1390,11 @@ define([
         },
         _makeLanguageSelectorDropdown: function () {
             var _this = this,
-                langList,
                 langs = this.data.javaRosa.Itext.getLanguages(),
-                fullLangs,
-                $langSelector;
+                $menu = this.$f.find('#fd-questions-dropdown-menu'),
+                $items,
+                $input,
+                fullLangs;
 
             fullLangs = _.map(langs, function (lang) {
                 return {
@@ -1409,19 +1410,21 @@ define([
             if (fullLangs.length < 2) {
                 return;
             }
-
-            $langSelector = $(language_selector({
-                languages: fullLangs
-            }));
-
-            langList = $langSelector.find('select');
-            langList.change(function () {
-                _this._changeTreeDisplayLanguage($(this).val());
+            $menu.append($(language_selector({languages: fullLangs})).html());
+            $items = $menu.find(".fd-display-item");
+            $items.click(function (e) {
+                $input.val($(this).data("code")).change();
+                e.preventDefault();
             });
 
-            langList.val(this.data.core.currentItextDisplayLanguage);
-
-            this.$f.find('.fd-question-tree-lang').html($langSelector);
+            $input = $menu.parent().find('.fd-question-tree-display');
+            $input.change(function () {
+                var code = $input.val();
+                _this._changeTreeDisplayLanguage(code);
+                $items.removeClass("selected")
+                      .filter("[data-code=" + code + "]").addClass("selected");
+            });
+            $input.val(this.data.core.currentItextDisplayLanguage).change();
         },
         _changeTreeDisplayLanguage: function (lang) {
             var _this = this,
