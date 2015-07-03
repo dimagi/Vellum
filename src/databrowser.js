@@ -16,19 +16,21 @@ define([
     window_,
     external_sources_tree
 ) {
-    var panelHeight;
+    var fn = {},
+        panelHeight;
 
     // plugin adds an item to the Tools menu when enabled
     $.vellum.plugin('databrowser', {}, {
         init: function () {
             var vellum = this,
                 pane = this.$f.find(".fd-accessory-pane");
+            fn.initDataBrowser = _.once(_initDataBrowser);
             pane.append($(external_sources_tree()));
             pane.resize(function () {
                 if (pane.height() > 100) {
                     panelHeight = pane.height();
                 } else if (pane.height() > 0) {
-                    initDataBrowser(vellum);
+                    fn.initDataBrowser(vellum);
                 }
             });
             window_.preventDoubleScrolling(pane.find(".fd-scrollable"));
@@ -39,7 +41,7 @@ define([
         }
     });
 
-    var initDataBrowser = _.once(function (vellum) {
+    function _initDataBrowser(vellum) {
         // display spinner and begin loading...
         var $container = vellum.$f.find(".fd-external-sources-container"),
             $search = $container.find(".fd-external-resource-search input"),
@@ -74,7 +76,7 @@ define([
         $search.keyup(_.debounce(function () {
             $tree.jstree(true).search($search.val());
         }, 250));
-    });
+    }
 
     function dataTreeJson(data, vellum) {
         function node(parentPath, info) {
@@ -183,11 +185,9 @@ define([
                 height = panelHeight || Math.min(tree.height() / 2, 200);
             pane.css("height", height + "px");
             $(window).resize();
-            initDataBrowser(vellum);
+            fn.initDataBrowser(vellum);
         }
     }
 
-    return {
-        initDataBrowser: initDataBrowser,
-    };
+    return fn;
 });
