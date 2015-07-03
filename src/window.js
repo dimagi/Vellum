@@ -94,11 +94,13 @@ define([
             $fdc.find('.fd-content').css('height', panelHeight + 'px');
 
             if (accessoryPane.children().length) {
-                var accessoryHeight = accessoryPane.outerHeight(false);
+                var accessoryHeight = accessoryPane.outerHeight(false),
+                    accessoryScrollableHeight = accessoryHeight -
+                        accessoryPane.find('.fd-head').outerHeight(true);
                 treeHeight -= 2 + accessoryHeight +
                     this.$f.find('.fd-content-left-divider').outerHeight(true);
                 accessoryPane.find(".fd-scrollable")
-                             .css('height', accessoryHeight + 'px');
+                             .css('height', accessoryScrollableHeight + 'px');
                 accessoryPane.show();
                 this.$f.find(".fd-content-left-divider").show();
             } else {
