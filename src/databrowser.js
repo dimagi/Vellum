@@ -82,8 +82,10 @@ define([
                 var path = parentPath ? (parentPath + "/" + id) : id,
                     tree = getTree(item, id, path, info);
                 return {
-                    icon: false,
                     text: tree.name,
+                    icon: tree.nodes === true || tree.nodes.length ?
+                            "fcc fcc-fd-external-case" :
+                            "fcc fcc-fd-external-case-data",
                     state: {opened: tree.nodes !== true &&
                                     tree.nodes.length <= MAX_OPEN_NODE},
                     children: tree.nodes,
