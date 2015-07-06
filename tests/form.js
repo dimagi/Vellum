@@ -262,5 +262,24 @@ define([
             form.removeMugsFromForm(mugs);
             util.assertJSTreeState("");
         });
+
+        it("should not drop referenced instance on delete dynamic select", function() {
+            var form = util.loadXML("");
+            util.paste([
+                ["id", "type", "labelItext:en-default", "calculateAttr", "itemsetData"],
+                ["/hidden", "DataBindOnly", "null",
+                 "instance('some-fixture')/some-fixture_list/some-fixture/@id", "null"],
+                ["/select", "SelectDynamic", "select", "null",
+                    '[{"instance":{"id":"some-fixture",' +
+                                    '"src":"jr://fixture/item-list:some-fixture"},' +
+                    '"nodeset":"instance(\'some-fixture\')/some-fixture_list/some-fixture",' +
+                    '"labelRef":"name","valueRef":"@id"}]']
+            ]);
+            util.deleteQuestion("select");
+            var xml = form.createXML(),
+                $xml = $(xml);
+            assert.equal($xml.find("instance[id='some-fixture']").length, 1,
+                "some-fixture instance not found\n" + xml);
+        });
     });
 });

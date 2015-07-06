@@ -263,9 +263,10 @@ define([
          * Add an instance if it is not already on the form
          *
          * @param attrs - Instance attributes. The `src` attribute is used to
-         *          match other instances on the form, and is required. The
-         *          instance will be unconditionally added and it's id returned
-         *          if the instance has no `src` attribute.
+         *          match other instances on the form, and is required. A
+         *          matching instance will be found by `id` if the instance
+         *          has no `src` attribute. If no matching instance is found,
+         *          a new instance will be added with a unique `id`.
          * @param mug - (optional) The mug with which this query is associated.
          *          This and the next parameter are used for instance ref
          *          counting. If omitted, ref counting will be disabled for the
@@ -274,18 +275,49 @@ define([
          * @returns - The `id` of the added or already-existing instance.
          */
         addInstanceIfNotExists: function (attrs, mug, property) {
-            if (attrs.src === null || _.isUndefined(attrs.src)) {
-                // no ref counting for instances without a `src` since they cannot be dropped
-                this.instanceMetadata.push(InstanceMetadata({
-                    src: attrs.src,
-                    id: attrs.id
-                }));
-                return attrs.id;
+            function getUniqueId(id, ids) {
+                var temp = (id || "data") + "-",
+                    num = 1;
+                if (!ids) {
+                    ids = _.indexBy(this_.instanceMetadata, function (m) {
+                        return m.attributes.id;
+                    });
+                }
+                while (!id || ids.hasOwnProperty(id)) {
+                    id = temp + num;
+                    num++;
+                }
+                return id;
             }
-
-            var meta = _.find(this.instanceMetadata, function (m) {
+            var this_ = this,
+                meta;
+            if (attrs.src !== null && attrs.src !== undefined) {
+                meta = _.find(this.instanceMetadata, function (m) {
                     return m.attributes.src === attrs.src;
                 });
+                if (!meta) {
+                    // attrs.src not found, try to find by id
+                    var ids = _.indexBy(this.instanceMetadata, function (m) {
+                            return m.attributes.id;
+                        });
+                    meta = attrs.id && ids.hasOwnProperty(attrs.id) ? ids[attrs.id] : null;
+                    if (meta && (meta.attributes.src === null ||
+                                 meta.attributes.src === undefined)) {
+                        // assign new src to instance with no src
+                        meta.attributes.src = attrs.src;
+                    } else {
+                        // assign unique id to attrs (will create new meta)
+                        attrs = _.clone(attrs);
+                        attrs.id = getUniqueId(attrs.id, ids);
+                        meta = null;
+                    }
+                }
+            } else if (attrs.id !== null && attrs.id !== undefined) {
+                // attrs has no src, find by id
+                meta = _.find(this.instanceMetadata, function (m) {
+                    return m.attributes.id === attrs.id;
+                });
+            }
             if (!meta) {
                 this.instanceMetadata.push(InstanceMetadata({
                     src: attrs.src,
@@ -312,19 +344,25 @@ define([
                 instance = null;
             if (match) {
                 var instanceId = match[3],
-                    meta = this._referenceInstance(instanceId, mug, property);
+                    meta = this.referenceInstance(instanceId, mug, property);
                 if (meta) {
                     instance = _.clone(meta.attributes);
                 }
             }
             return instance;
         },
-        _referenceInstance: function (id, mug, property) {
-            var meta = _.find(this.instanceMetadata, function (meta) {
-                    return meta.attributes.id === id;
-                });
-            if (meta && this.enableInstanceRefCounting) {
-                meta.addReference(mug, property);
+        referenceInstance: function (id, mug, property) {
+            function idMatch(meta) {
+                return meta.attributes.id === id;
+            }
+            var meta = _.find(this.instanceMetadata, idMatch);
+            if (this.enableInstanceRefCounting) {
+                if (meta) {
+                    meta.addReference(mug, property);
+                } else {
+                    id = this.addInstanceIfNotExists({id: id}, mug, property);
+                    meta = _.find(this.instanceMetadata, idMatch);
+                }
             }
             return meta || null;
         },
@@ -365,6 +403,17 @@ define([
                 }
             }
             return false;
+        },
+        /**
+         * Drop all instance references from the given mug/property
+         */
+        dropAllInstanceReferences: function (mug, property, keepInstance) {
+            _.each(this.instanceMetadata, function (meta) {
+                if (meta.attributes.src &&
+                        meta.dropReference(mug, property) && !keepInstance) {
+                    this.instanceMetadata = _.without(this.instanceMetadata, meta);
+                }
+            });
         },
         // todo: update references on rename
         addSetValue: function (event, ref, value) {

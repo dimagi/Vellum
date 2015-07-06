@@ -1,10 +1,12 @@
 define([
     'xpath',
     'xpathmodels',
+    'jquery',
     'underscore'
 ], function (
     xpath,
     xpathmodels,
+    $,
     _
 ) {
     var XPATH_REFERENCES = [
@@ -19,22 +21,29 @@ define([
 
     function LogicExpression (exprText) {
         this._text = exprText || "";
-        
-        this.valid = false;
-        if (exprText) {
+        if ($.trim(exprText)) {
             try {
                 this.parsed = xpath.parse(exprText);
-                this.valid = true;
             } catch (err) {
-                // nothing to do
+                this.parsed = null;
+                this.error = err;
             }
         } else {
-            this.empty = true;
+            this.parsed = null;
         }
     }
     LogicExpression.prototype = {
-        getPaths: function () {
-            var paths = [];
+        analyze: function () {
+            var paths = [],
+                absolutePaths = [],
+                ROOT = xpathmodels.XPathInitialContextEnum.ROOT,
+                RELATIVE = xpathmodels.XPathInitialContextEnum.RELATIVE,
+                EXPR = xpathmodels.XPathInitialContextEnum.EXPR,
+                predicates;
+            this.paths = paths;
+            this.absolutePaths = absolutePaths;
+            this.instanceRefs = {};
+            this.referencesSelf = false;
             if (this.parsed) {
                 var queue = [this.parsed], 
                     node, i, children;
@@ -42,6 +51,23 @@ define([
                     node = queue.shift();
                     if (node instanceof xpathmodels.XPathPathExpr) {
                         paths.push(node);
+                        if (node.initial_context === ROOT) {
+                            absolutePaths.push(node);
+                        } else if (node.initial_context === RELATIVE &&
+                                   node.steps.length === 1 &&
+                                   node.steps[0].axis === 'self') {
+                            this.referencesSelf = true;
+                        } else if (node.initial_context === EXPR) {
+                            if (!this._addInstanceRef(node.filter.expr)) {
+                                queue.push(node.filter.expr);
+                            }
+                            predicates = node.filter.predicates;
+                            for (i = 0; i < predicates.length; i++) {
+                                queue.push(predicates[i]);
+                            }
+                        }
+                    } else if (node instanceof xpathmodels.XPathFuncExpr) {
+                        this._addInstanceRef(node);
                     }
                     children = node.getChildren();
                     for (i = 0; i < children.length; i++) {
@@ -49,12 +75,26 @@ define([
                     }
                 }
             }
-            return paths;
+        },
+        _addInstanceRef: function (expr) {
+            if (expr.id === "instance" && expr.args.length === 1 &&
+                    expr.args[0] instanceof xpathmodels.XPathStringLiteral) {
+                var id = expr.args[0].value;
+                this.instanceRefs[id] = null;
+                return true;
+            }
+            return false;
+        },
+        getPaths: function () {
+            if (!this.paths) {
+                this.analyze();
+            }
+            return this.paths;
         },
         updatePath: function (from, to) {
             var paths = this.getPaths(),
                 path;
-            
+
             var replacePathInfo = function (source, destination) {
                 // copies information from source to destination in place,
                 // resulting in mutating destination while preserving the 
@@ -72,7 +112,7 @@ define([
             }
         },
         getText: function () {
-            if (this.valid) {
+            if (this._text && this.parsed) {
                 return this.parsed.toXPath();
             } else {
                 return this._text;
@@ -91,6 +131,7 @@ define([
 
     LogicManager.prototype = {
         clearReferences: function (mug, property) {
+            mug.form.dropAllInstanceReferences(mug, property, true);
             this.all = this.all.filter(function (elem) { 
                 return elem.mug !== mug.ufid || elem.property !== property;
             });
@@ -98,18 +139,15 @@ define([
         addReferences: function (mug, property) {
             // get absolute paths from mug property's value
             var _this = this,
+                form = mug.form,
                 expr = new LogicExpression(mug.p[property]),
-                paths = expr.getPaths(),
-                referencesSelf = _.any(paths, function(p) {
-                    return p.initial_context === xpathmodels.XPathInitialContextEnum.RELATIVE &&
-                       p.steps.length === 1 && p.steps[0].axis === 'self';
-                }),
                 unknowns = [],
                 messages = [],
                 warning = "",
                 propertyName = mug.spec[property] ? mug.spec[property].lstring : property;
 
-            if (referencesSelf && _.contains(NO_SELF_REFERENCES, property)) {
+            expr.analyze();
+            if (expr.referencesSelf && _.contains(NO_SELF_REFERENCES, property)) {
                 warning = "The " + propertyName + " for a question " +
                     "is not allowed to reference the question itself. " +
                     "Please remove the . from the " +
@@ -122,25 +160,19 @@ define([
                 message: warning
             });
 
-            paths = paths.filter(function (p) {
-                // currently we don't do anything with relative paths
-                return p.initial_context ===
-                    xpathmodels.XPathInitialContextEnum.ROOT;
-            });
-
             // append item for each mug referenced (by absolute path) in mug's
             // property value
-            this.all = this.all.concat(paths.map(function (path) {
+            this.all = this.all.concat(expr.absolutePaths.map(function (path) {
                 var pathString = path.pathWithoutPredicates(),
                     pathWithoutRoot = pathString.substring(1 + pathString.indexOf('/', 1)),
-                    refMug = _this.form.getMugByPath(pathString),
+                    refMug = form.getMugByPath(pathString),
                     xpath = path.toXPath();
 
                 // last part is hack to allow root node in data parents
                 if (!refMug &&
                     (!mug.options.ignoreReferenceWarning || !mug.options.ignoreReferenceWarning(mug)) &&
                     _this.opts.allowedDataNodeReferences.indexOf(pathWithoutRoot) === -1 &&
-                    !(property === "dataParent" && pathString === _this.form.getBasePath().slice(0,-1)))
+                    !(property === "dataParent" && pathString === form.getBasePath().slice(0,-1)))
                 {
                     unknowns.push(xpath);
                 }
@@ -149,9 +181,12 @@ define([
                     ref: refMug ? refMug.ufid : "", // referenced Mug
                     property: property,
                     path: xpath, // path to refMug
-                    sourcePath: _this.form.getAbsolutePath(mug)
+                    sourcePath: form.getAbsolutePath(mug)
                 };      
             }));
+            _.each(expr.instanceRefs, function (ignore, id) {
+                form.referenceInstance(id, mug, property);
+            });
             if (unknowns.length > 0) {
                 if (!this.errors[mug.ufid]) {
                     this.errors[mug.ufid] = {};
