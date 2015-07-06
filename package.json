@@ -7,13 +7,13 @@
         "Michael White <m@mwhite.info>"
     ],
     "license": "MIT",
-    "homepage": "https://github.com/dimagi/Vellum",
+    "homepage": "https://github.com/mwhite/Vellum",
     "keywords": [
         "XForms"
     ],
     "repository": {
         "type": "git",
-        "url": "https://github.com/dimagi/Vellum.git"
+        "url": "https://github.com/mwhite/Vellum.git"
     },
     "devDependencies": {
         "bower": "~1.3.3",
@@ -21,7 +21,7 @@
         "jshint": ">=1.1.0",
         "mocha": ">=1.9.0",
         "mocha-istanbul": ">=0.2.0",
-        "mocha-phantomjs": "~3.5.3",
+        "mocha-phantomjs": "*",
         "http-server": "*",
         "phantomjs": "~1.9.1",
 
