@@ -1404,6 +1404,7 @@ define([
         refreshMessages();
 
         $props.show();
+        this.data.windowManager.adjustToWindow();
         this.$f.find('.fd-help a').fdHelp();
 
         this.toggleConstraintItext(mug);
