@@ -375,15 +375,24 @@ require([
                 mug = util.addQuestion("Text", "text");
             });
 
-            _.each(["relevantAttr", "calculateAttr", "label"], function (attr) {
+            function testValidationError (attr, property) {
+                property = property || attr;
+                assert.deepEqual(mug.messages.get(attr), []);
+                mug.form.vellum.warnOnCircularReference(attr, mug, ".", "period", property);
+                assert.equal(mug.messages.get(property).length, 1,
+                             util.getMessages(mug));
+                mug.dropMessage(property, "core-circular-reference-warning");
+                assert.deepEqual(mug.messages.get(attr), []);
+            }
+
+            _.each(["relevantAttr", "calculateAttr"], function (attr) {
                 it("in " + attr, function () {
-                    assert.deepEqual(mug.messages.get(attr), []);
-                    mug.form.vellum.warnOnCircularReference(attr, mug, ".", "period");
-                    assert.equal(mug.messages.get(attr).length, 1,
-                                 util.getMessages(mug));
-                    mug.dropMessage(attr, "core-circular-reference-warning");
-                    assert.deepEqual(mug.messages.get(attr), []);
+                    testValidationError(attr);
                 });
+            });
+
+            it("in label", function () {
+                testValidationError('label', 'itext-en-label');
             });
         });
 

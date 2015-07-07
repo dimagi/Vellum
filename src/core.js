@@ -1585,15 +1585,16 @@ define([
         }
     };
 
-    fn.warnOnCircularReference = function(property, mug, path, refName) {
+    fn.warnOnCircularReference = function(property, mug, path, refName, propName) {
         // TODO do this in the logic manager
+        var isLabel = property === 'label';
         if (path === "." && (
             property === "relevantAttr" ||
             property === "calculateAttr" ||
-            property === "label"
+            isLabel
         )) {
             var fieldName = mug.p.getDefinition(property).lstring;
-            mug.addMessage(property, {
+            mug.addMessage(isLabel ? propName : property, {
                 key: "core-circular-reference-warning",
                 level: mug.WARNING,
                 message: "The " + fieldName + " for a question " +

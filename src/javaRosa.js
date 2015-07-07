@@ -560,10 +560,11 @@ define([
         block.refreshMessages = function () {
             // TODO improve this to display each message beside the
             // form and language to which it applies
-            if (options.messagesPath) {
-                var messages = widgets.util.getMessages(mug, options.messagesPath);
-                $messages.empty().append(messages);
-            }
+            _.each(block.languages, function(lang) {
+                var name = 'itext-' + lang + '-' + block.itextType,
+                    messages = widgets.util.getMessages(mug, name);
+                $('[name='+name+']').parent().parent().find('.messages').empty().append(messages);
+            });
         };
 
         mug.on("messages-changed",
@@ -1271,7 +1272,7 @@ define([
             form = vellum.data.core.form;
         util.insertTextAtCursor(target, output, true);
         if (mug) {
-            vellum.warnOnCircularReference('label', mug, path, 'output value');
+            vellum.warnOnCircularReference('label', mug, path, 'output value', target.attr('name'));
             warnOnNonOutputableValue(form, mug, path);
         }
     }
