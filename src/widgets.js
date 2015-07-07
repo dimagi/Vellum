@@ -108,7 +108,7 @@ define([
 
     var normal = function(mug, options) {
         var path = options.widgetValuePath || options.path,
-            inputID = 'property-' + path,
+            inputID = options.id || 'property-' + path,
             disabled = options.disabled || false,
             widget = base(mug, options);
 
@@ -198,7 +198,7 @@ define([
     };
 
     var multilineText = function (mug, options) {
-        var widget = base(mug, options);
+        var widget = normal(mug, options);
 
         widget.input = $("<textarea></textarea>")
             .attr("name", widget.id)
