@@ -15,8 +15,6 @@ define([
                 adjustToWindow = function () { _this.adjustToWindow(); };
 
             preventDoubleScrolling(this.$f.find('.fd-scrollable'));
-            $(window).resize(adjustToWindow);
-            $(document).scroll(adjustToWindow);
             setupDraggableDivider(
                 this.$f.find('.fd-content-divider'),
                 this.$f.find('.fd-content-left'),
@@ -38,6 +36,9 @@ define([
 
             // start with accessory pane collapsed
             this.$f.find(".fd-accessory-pane").css("height", "0");
+            $(window).resize(adjustToWindow);
+            $(document).scroll(adjustToWindow);
+            $(document).ready(adjustToWindow);
             this.adjustToWindow();
         },
         adjustToWindow: function () {
