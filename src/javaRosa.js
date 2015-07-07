@@ -872,9 +872,6 @@ define([
             });
         }
 
-        // future proof for when widgets.base sets path
-        widget.path = widget.path || options.path;
-
         widget.displayName = options.displayName;
         widget.itextType = options.itextType;
         widget.form = form || "default";
