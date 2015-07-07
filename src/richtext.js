@@ -40,7 +40,7 @@ define([
 
         });
         widget.input.on('inserted.atwho', function(atwhoEvent, $li, browserEvent) {
-            $(this).find('atwho-inserted').children().unwrap();
+            $(this).find('.atwho-inserted').children().unwrap();
             addCloseButton(widget, widget.input);
             addPopovers(widget.input);
         });
