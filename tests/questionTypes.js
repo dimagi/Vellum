@@ -51,7 +51,7 @@ require([
                     // TODO add more input counts for each question type
                     calculateAttr: 0,
                     constraintAttr: 1,
-                    requiredAttr: 1,
+                    requiredAttr: 0,
                     relevantAttr: 1
                 }
             }, {
