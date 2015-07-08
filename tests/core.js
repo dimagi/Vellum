@@ -377,12 +377,12 @@ require([
 
             function testValidationError (attr, property) {
                 property = property || attr;
-                assert.deepEqual(mug.messages.get(attr), []);
+                assert.deepEqual(mug.messages.get(property), []);
                 mug.form.vellum.warnOnCircularReference(attr, mug, ".", "period", property);
                 assert.equal(mug.messages.get(property).length, 1,
                              util.getMessages(mug));
                 mug.dropMessage(property, "core-circular-reference-warning");
-                assert.deepEqual(mug.messages.get(attr), []);
+                assert.deepEqual(mug.messages.get(property), []);
             }
 
             _.each(["relevantAttr", "calculateAttr"], function (attr) {
