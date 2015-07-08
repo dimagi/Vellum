@@ -558,11 +558,10 @@ define([
         };
 
         block.refreshMessages = function () {
-            _.each(block.languages, function(lang) {
-                var name = 'itext-' + lang + '-' + block.itextType,
-                    messages = widgets.util.getMessages(mug, name);
-                $('[name='+name+']').parent().parent().find('.messages').empty().append(messages);
-            });
+            if (options.messagesPath) {
+                var messages = widgets.util.getMessages(mug, options.messagesPath);
+                $messages.empty().append(messages);
+            }
         };
 
         mug.on("messages-changed",
@@ -1025,6 +1024,12 @@ define([
                     }
                 });
             }
+        };
+
+        widget.refreshMessages = function () {
+            widget.getMessagesContainer()
+                .empty()
+                .append(widget.getMessages(mug, widget.id));
         };
 
         widget.save = function () {
