@@ -603,6 +603,29 @@ require([
             ]);
         });
 
+        it("should not paste empty itext media forms", function () {
+            util.loadXML("");
+            paste([
+                ["id", "type", "labelItext:en-default", "labelItext:hin-default",
+                    "labelItext:en-image", "labelItext:hin-image"],
+                ["/text1", "Text", "text1", "text1", "jr://...", "jr://..."],
+                ["/text2", "Text", "text2", "text2", "null", "null"],
+            ]);
+            util.clickQuestion("text1");
+            var $uploader = $(".fd-mm-upload-container:visible");
+            assert($uploader.length, "text1 media uploader should be visible");
+            util.clickQuestion("text2");
+            $uploader = $(".fd-mm-upload-container:visible");
+            assert.equal($uploader.length, 0, "text2 media uploader should be hidden");
+            util.selectAll();
+            eq(mod.copy(), [
+                ["id", "type", "labelItext:en-default", "labelItext:hin-default",
+                    "labelItext:en-image", "labelItext:hin-image"],
+                ["/text1", "Text", "text1", "text1", "jr://...", "jr://..."],
+                ["/text2", "Text", "text2", "text2", "null", "null"],
+            ]);
+        });
+
         it("should ignore extra cells in header row", function () {
             util.loadXML("");
             paste(tsv.tabDelimit([

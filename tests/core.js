@@ -378,8 +378,7 @@ require([
             _.each(["relevantAttr", "calculateAttr", "label"], function (attr) {
                 it("in " + attr, function () {
                     assert.deepEqual(mug.messages.get(attr), []);
-                    mug.form.vellum.warnOnCircularReference(
-                        attr, mug.form, mug, ".", "period");
+                    mug.form.vellum.warnOnCircularReference(attr, mug, ".", "period");
                     assert.equal(mug.messages.get(attr).length, 1,
                                  util.getMessages(mug));
                     mug.dropMessage(attr, "core-circular-reference-warning");

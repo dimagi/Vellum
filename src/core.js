@@ -742,7 +742,6 @@ define([
             if (mug && _this.data.core.currentlyEditedProperty) {
                 _this.warnOnCircularReference(
                     _this.data.core.currentlyEditedProperty,
-                    _this.data.core.form,
                     mug,
                     path,
                     'period');
@@ -835,12 +834,18 @@ define([
                 _this.displayMultipleSelectionView();
             }
         }).bind("open_node.jstree", function (e, data) {
+            if (window.event && window.event.altKey) {
+                _this.jstree("open_all", data.node);
+            }
             var mug = _this.data.core.form.getMugByUFID(data.node.id);
             _this.activateQuestionTypeGroup(mug);
             _this.data.core.form.getDescendants(mug).map(function(descendant) {
                 _this.refreshMugName(descendant);
             });
         }).bind("close_node.jstree", function (e, data) {
+            if (window.event && window.event.altKey) {
+                _this.jstree("close_all", data.node);
+            }
             var selected = _this.jstree('get_selected'),
                 sel = selected.length && _this.jstree('get_node', selected[0]);
             if (sel && _.contains(sel.parents, data.node.id)) {
@@ -1606,7 +1611,7 @@ define([
         }
     };
 
-    fn.warnOnCircularReference = function(property, form, mug, path, refName) {
+    fn.warnOnCircularReference = function(property, mug, path, refName) {
         // TODO do this in the logic manager
         if (path === "." && (
             property === "relevantAttr" ||

@@ -44,7 +44,7 @@ define([
             'default', 'short', 'long', 'audio', 'video', 'image'
         ],
         _nextItextItemKey = 1,
-        NO_MARKDOWN_MUGS = ['Item'];
+        NO_MARKDOWN_MUGS = ['Item', 'Group', 'FieldList', 'Repeat'];
 
     function ItextItem(options) {
         this.forms = options.forms || [];
@@ -1298,7 +1298,7 @@ define([
             form = vellum.data.core.form;
         util.insertTextAtCursor(target, output, true);
         if (mug) {
-            vellum.warnOnCircularReference('label', form, mug, path, 'output value');
+            vellum.warnOnCircularReference('label', mug, path, 'output value');
             warnOnNonOutputableValue(form, mug, path);
         }
     }
@@ -1841,7 +1841,7 @@ define([
                     var dlang = item.itextModel.getDefaultLanguage(),
                         languages = item.itextModel.languages,
                         nodeID = "",
-                        mmForms = {audio: 1, image: 1, video: 1},
+                        mmForms = _.object(SUPPORTED_MEDIA_TYPES, SUPPORTED_MEDIA_TYPES),
                         // HACK reach into media uploader options
                         objectMap = that.data.uploader.objectMap || {};
                     if (data.id) {
@@ -1851,6 +1851,11 @@ define([
                     function str(val) {
                         return val === null || val === undefined ? "" : String(val);
                     }
+                    var isEmptyForm = _.memoize(function (form) {
+                        return !_.find(languages, function (lang) {
+                            return data[name + ":" + lang + "-" + form];
+                        });
+                    });
                     _.each(languages, function (lang) {
                         var prelen = name.length + lang.length + 2,
                             regexp = new RegExp("^" +
@@ -1859,7 +1864,12 @@ define([
                             seen = {};
                         _.each(data, function (value, key) {
                             if (regexp.test(key)) {
-                                var form = key.slice(prelen);
+                                var form = key.slice(prelen),
+                                    isMM = mmForms.hasOwnProperty(form);
+                                if (isMM && !value && isEmptyForm(form)) {
+                                    // Skip empty multimedia form.
+                                    return;
+                                }
                                 if (!seen.hasOwnProperty(form)) {
                                     seen[form] = true;
                                     // set default value(s) for this form
@@ -1868,8 +1878,7 @@ define([
                                              str(data[dkey]) : str(value), form);
                                 }
                                 item.set(str(value), form, lang);
-                                if (value && mmForms.hasOwnProperty(form) &&
-                                        !objectMap.hasOwnProperty(value)) {
+                                if (isMM && !objectMap.hasOwnProperty(value)) {
                                     mug.addMessage(name, {
                                         key: "missing-multimedia-warning",
                                         level: mug.WARNING,
