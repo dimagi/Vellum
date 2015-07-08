@@ -558,8 +558,6 @@ define([
         };
 
         block.refreshMessages = function () {
-            // TODO improve this to display each message beside the
-            // form and language to which it applies
             _.each(block.languages, function(lang) {
                 var name = 'itext-' + lang + '-' + block.itextType,
                     messages = widgets.util.getMessages(mug, name);
