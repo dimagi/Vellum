@@ -11,7 +11,7 @@ define([
     CKEDITOR.config.allowedContent = true;
 
     var richtext = function(mug, options) {
-        var widget = widgets.base(mug, options), editor;
+        var widget = widgets.normal(mug, options), editor;
 
         widget.input = $("<div />")
             .attr("contenteditable", true)
@@ -39,6 +39,7 @@ define([
             });
 
         });
+
         widget.input.on('inserted.atwho', function(atwhoEvent, $li, browserEvent) {
             $(this).find('.atwho-inserted').children().unwrap();
             addCloseButton(widget, widget.input);
@@ -61,19 +62,6 @@ define([
                 val = fromRichText(editor.getData());
             });
             return val;
-        };
-
-        widget.getDefaultValue = function () {
-            return null;
-        };
-
-        widget.save = function () {
-            widget.saving = true;
-            try {
-                widget.mugValue(mug, widget.getValue());
-            } finally {
-                widget.saving = false;
-            }
         };
 
         return widget;
