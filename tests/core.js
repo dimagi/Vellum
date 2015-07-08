@@ -375,7 +375,9 @@ require([
                 mug = util.addQuestion("Text", "text");
             });
 
-            function testValidationError (attr, property) {
+            it("in label", function () {
+                var attr = 'label',
+                    property = 'itext-en-label';
                 property = property || attr;
                 assert.deepEqual(mug.messages.get(property), []);
                 mug.form.vellum.warnOnCircularReference(attr, mug, ".", "period", property);
@@ -383,16 +385,6 @@ require([
                              util.getMessages(mug));
                 mug.dropMessage(property, "core-circular-reference-warning");
                 assert.deepEqual(mug.messages.get(property), []);
-            }
-
-            _.each(["relevantAttr", "calculateAttr"], function (attr) {
-                it("in " + attr, function () {
-                    testValidationError(attr);
-                });
-            });
-
-            it("in label", function () {
-                testValidationError('label', 'itext-en-label');
             });
         });
 
