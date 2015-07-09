@@ -1,14 +1,22 @@
 define([
-    'vellum/util',
     'xpath',
     'xpathmodels',
     'underscore'
 ], function (
-    util,
     xpath,
     xpathmodels,
     _
 ) {
+    var XPATH_REFERENCES = [
+        "relevantAttr",
+        "calculateAttr",
+        "constraintAttr",
+        "dataParent",
+        "repeat_count",
+        "filter",
+        "defaultValue"
+    ], NO_SELF_REFERENCES = _.without(XPATH_REFERENCES, 'constraintAttr');
+
     function LogicExpression (exprText) {
         this._text = exprText || "";
         
@@ -101,7 +109,7 @@ define([
                 warning = "",
                 propertyName = mug.spec[property] ? mug.spec[property].lstring : property;
 
-            if (referencesSelf) {
+            if (referencesSelf && _.contains(NO_SELF_REFERENCES, property)) {
                 warning = "The " + propertyName + " for a question " +
                     "is not allowed to reference the question itself. " +
                     "Please remove the . from the " +
@@ -174,11 +182,11 @@ define([
             var _this = this,
                 messages = {};
             if (property) {
-                if (util.XPATH_REFERENCES.indexOf(property) !== -1) {
+                if (XPATH_REFERENCES.indexOf(property) !== -1) {
                     update(property);
                 }
             } else {
-                _.each(util.XPATH_REFERENCES, update);
+                _.each(XPATH_REFERENCES, update);
             }
             mug.addMessages(messages);
         },
@@ -279,6 +287,7 @@ define([
 
     return {
         LogicManager: LogicManager,
-        LogicExpression: LogicExpression
+        LogicExpression: LogicExpression,
+        XPATH_REFERENCES: XPATH_REFERENCES,
     };
 });
