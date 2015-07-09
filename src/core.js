@@ -1496,7 +1496,7 @@ define([
         var _this = this,
             $editor = this.$f.find('.fd-xpath-editor');
 
-        $editor.find('.fd-head').text(options.headerText);
+        $editor.find('.fd-head h2').text(options.headerText);
         options.DEBUG_MODE = DEBUG_MODE;
         this.hideQuestionProperties();
 
