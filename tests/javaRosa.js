@@ -774,6 +774,21 @@ require([
             assert(!$("[name='itext-en-constraintMsg']").is(":visible"));
         });
 
+        it("should show a validation error when dropping a self reference", function() {
+            util.loadXML("");
+            var mug = util.addQuestion("Text", "question1"),
+                property = 'itext-en-label';
+            util.clickQuestion("question1");
+
+            assert.deepEqual(mug.messages.get(property), []);
+            mug.form.vellum.handleDropFinish($('[name='+property+']'), '.', mug);
+            assert.equal(mug.messages.get(property).length, 1,
+                         util.getMessages(mug));
+
+                mug.dropMessage(property, "core-circular-reference-warning");
+                assert.deepEqual(mug.messages.get(property), []);
+        });
+
     });
 
     describe("The javaRosa plugin language selector", function() {
