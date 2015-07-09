@@ -1270,12 +1270,27 @@ define([
         }
     }
 
+    function warnOnCircularReference(property, mug, path, refName, propName) {
+        // TODO track output refs in logic manager
+        if (path === "." && property === 'label') {
+            var fieldName = mug.p.getDefinition(property).lstring;
+            mug.addMessage(propName, {
+                key: "core-circular-reference-warning",
+                level: mug.WARNING,
+                message: "The " + fieldName + " for a question " +
+                    "is not allowed to reference the question itself. " +
+                    "Please remove the " + refName + " from the " +
+                    fieldName +" or your form will have errors."
+            });
+        }
+    }
+
     function insertOutputRef(vellum, target, path, mug, dateFormat) {
         var output = getOutputRef(path, dateFormat),
             form = vellum.data.core.form;
         util.insertTextAtCursor(target, output, true);
         if (mug) {
-            vellum.warnOnCircularReference('label', mug, path, 'output value', target.attr('name'));
+            warnOnCircularReference('label', mug, path, 'output value', target.attr('name'));
             warnOnNonOutputableValue(form, mug, path);
         }
     }

@@ -1604,21 +1604,6 @@ define([
         }
     };
 
-    fn.warnOnCircularReference = function(property, mug, path, refName, propName) {
-        // TODO track output refs in logic manager
-        if (path === "." && property === 'label') {
-            var fieldName = mug.p.getDefinition(property).lstring;
-            mug.addMessage(propName, {
-                key: "core-circular-reference-warning",
-                level: mug.WARNING,
-                message: "The " + fieldName + " for a question " +
-                    "is not allowed to reference the question itself. " +
-                    "Please remove the " + refName + " from the " +
-                    fieldName +" or your form will have errors."
-            });
-        }
-    };
-
     fn.getSectionDisplay = function (mug, options) {
         var _this = this,
             $sec = $(question_fieldset({
