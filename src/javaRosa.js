@@ -558,8 +558,6 @@ define([
         };
 
         block.refreshMessages = function () {
-            // TODO improve this to display each message beside the
-            // form and language to which it applies
             if (options.messagesPath) {
                 var messages = widgets.util.getMessages(mug, options.messagesPath);
                 $messages.empty().append(messages);
@@ -826,20 +824,8 @@ define([
         }
         options.id = id;
 
-        var widget = widgets.base(mug, options);
-        var $input = $("<textarea></textarea>")
-            .attr("name", widget.id)
-            .attr("id", widget.id)
-            .attr("rows", "2")
-            .addClass('input-block-level itext-widget-input')
-            .on('change input', function (e) { widget.handleChange(); })
-            .focus(function() { this.select(); })
-            .keyup(function (e) {
-                // workaround for webkit: http://stackoverflow.com/a/12114908
-                if (e.which === 9) {
-                    this.select();
-                }
-            });
+        var widget = widgets.multilineText(mug, options),
+            $input = widget.input;
 
         if (options.path === 'labelItext') {
             util.questionAutocomplete($input, mug, {
@@ -884,9 +870,6 @@ define([
             });
         }
 
-        // future proof for when widgets.base sets path
-        widget.path = widget.path || options.path;
-
         widget.displayName = options.displayName;
         widget.itextType = options.itextType;
         widget.form = form || "default";
@@ -898,10 +881,6 @@ define([
         widget.isDefaultLang = widget.language === widget.defaultLang;
         widget.isSyncedWithDefaultLang = false;
         widget.hasNodeIdAsDefault = options.path === 'labelItext';
-
-        widget.getControl = function () {
-            return $input;
-        };
 
         widget.getItextItem = function () {
             // Make sure the real itextItem is being updated at all times, not a stale one.
@@ -989,14 +968,6 @@ define([
             widget.isSyncedWithDefaultLang = !val && !widget.isDefaultLang;
         };
 
-        widget.setValue = function (val) {
-            $input.val(val);
-        };
-
-        widget.getValue = function () {
-            return $input.val();
-        };
-
         widget.getDefaultValue = function () {
             return null;
         };
@@ -1053,6 +1024,12 @@ define([
                     }
                 });
             }
+        };
+
+        widget.refreshMessages = function () {
+            widget.getMessagesContainer()
+                .empty()
+                .append(widget.getMessages(mug, widget.id));
         };
 
         widget.save = function () {
@@ -1298,7 +1275,7 @@ define([
             form = vellum.data.core.form;
         util.insertTextAtCursor(target, output, true);
         if (mug) {
-            vellum.warnOnCircularReference('label', mug, path, 'output value');
+            vellum.warnOnCircularReference('label', mug, path, 'output value', target.attr('name'));
             warnOnNonOutputableValue(form, mug, path);
         }
     }

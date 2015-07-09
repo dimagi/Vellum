@@ -79,6 +79,21 @@ require([
                     assert(util.isTreeNodeValid(mug), util.getMessages(mug));
                     assert.deepEqual(mug.messages.get(attr), []);
                 });
+
+                it("self referencing path in " + attr, function () {
+                    var mug = util.getMug(mugMap[attr] || "text");
+                    assert(util.isTreeNodeValid(mug), util.getMessages(mug));
+                    assert.deepEqual(mug.messages.get(attr), []);
+
+                    mug.p[attr] = ".";
+                    assert(!util.isTreeNodeValid(mug), "mug should not be valid");
+                    assert(mug.messages.get(attr).length,
+                           attr + " should have messages");
+
+                    mug.p[attr] = "";
+                    assert(util.isTreeNodeValid(mug), util.getMessages(mug));
+                    assert.deepEqual(mug.messages.get(attr), []);
+                });
             });
         });
     });

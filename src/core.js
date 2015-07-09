@@ -712,14 +712,6 @@ define([
                     _this.data.core.currentlyEditedProperty
                 );
             }
-
-            if (mug && _this.data.core.currentlyEditedProperty) {
-                _this.warnOnCircularReference(
-                    _this.data.core.currentlyEditedProperty,
-                    mug,
-                    path,
-                    'period');
-            }
         }
 
         if (mug && ops && mug.options.defaultOperator) {
@@ -1585,15 +1577,11 @@ define([
         }
     };
 
-    fn.warnOnCircularReference = function(property, mug, path, refName) {
-        // TODO do this in the logic manager
-        if (path === "." && (
-            property === "relevantAttr" ||
-            property === "calculateAttr" ||
-            property === "label"
-        )) {
+    fn.warnOnCircularReference = function(property, mug, path, refName, propName) {
+        // TODO track output refs in logic manager
+        if (path === "." && property === 'label') {
             var fieldName = mug.p.getDefinition(property).lstring;
-            mug.addMessage(property, {
+            mug.addMessage(propName, {
                 key: "core-circular-reference-warning",
                 level: mug.WARNING,
                 message: "The " + fieldName + " for a question " +

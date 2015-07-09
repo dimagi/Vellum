@@ -91,12 +91,34 @@ define([
             // get absolute paths from mug property's value
             var _this = this,
                 expr = new LogicExpression(mug.p[property]),
-                paths = expr.getPaths().filter(function (p) {
-                    // currently we don't do anything with relative paths
-                    return p.initial_context ===
-                        xpathmodels.XPathInitialContextEnum.ROOT; 
+                paths = expr.getPaths(),
+                referencesSelf = _.any(paths, function(p) {
+                    return p.initial_context === xpathmodels.XPathInitialContextEnum.RELATIVE &&
+                       p.steps.length === 1 && p.steps[0].axis === 'self';
                 }),
-                unknowns = [];
+                unknowns = [],
+                messages = [],
+                warning = "",
+                propertyName = mug.spec[property] ? mug.spec[property].lstring : property;
+
+            if (referencesSelf) {
+                warning = "The " + propertyName + " for a question " +
+                    "is not allowed to reference the question itself. " +
+                    "Please remove the . from the " +
+                    propertyName +" or your form will have errors.";
+            }
+
+            messages.push({
+                key: "core-circular-reference-warning",
+                level: mug.WARNING,
+                message: warning
+            });
+
+            paths = paths.filter(function (p) {
+                // currently we don't do anything with relative paths
+                return p.initial_context ===
+                    xpathmodels.XPathInitialContextEnum.ROOT;
+            });
 
             // append item for each mug referenced (by absolute path) in mug's
             // property value
@@ -130,7 +152,7 @@ define([
             } else if (this.errors[mug.ufid]) {
                 delete this.errors[mug.ufid][property];
             }
-            return [{
+            messages.push({
                 key: "logic-bad-path-warning",
                 level: mug.WARNING,
                 message: (function () {
@@ -141,7 +163,8 @@ define([
                     }
                     return "Unknown questions:\n- " + unknowns.join("\n- ");
                 })()
-            }];
+            });
+            return messages;
         },
         updateReferences: function (mug, property) {
             function update(property) {
