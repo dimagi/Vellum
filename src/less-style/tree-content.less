@@ -7,6 +7,7 @@
 }
 
 .fd-question-tree.jstree {
+  margin: 5px 0;
   background: @white;
 }
 
@@ -26,6 +27,14 @@
   padding: @gridGutterWidth/2;
   background-color: @navbarBackground;
   text-align: center;
+}
+
+.fd-display-item i.icon-ok {
+  display: none;
+}
+
+.fd-display-item.selected i.icon-ok {
+  display: inline-block;
 }
 
 .fd-search-box {
@@ -82,4 +91,55 @@
 
 #jstree-marker {
   z-index:10000000
+}
+
+.fd-external-resource-search {
+  background-color: @cc-bg;
+  margin-bottom: 5px;
+  > form {
+    position: relative;
+    padding: 0px @contentPaddingVellum;
+    margin: 0;
+    i {
+      line-height: 36px;
+    }
+  }
+}
+
+.fd-search-control {
+  position: absolute;
+  top: 5px;
+  margin-left: 18px;
+  width: 100%;
+}
+
+.fd-head-external-sources {
+  background-color: @cc-neutral-low;
+  z-index: 0;
+}
+
+.fd-external-sources-tree .jstree-anchor {
+  color: @cc-neutral-low;
+  &.jstree-clicked {
+    background-color: @cc-bg;
+    .box-shadow(0px 0px 4px fade(@cc-neutral-mid, 80%));
+  }
+
+  > .jstree-icon {
+    color: @cc-neutral-mid;
+  }
+}
+
+.fd-external-sources-divider {
+  background-color: @cc-bg;
+
+  > a {
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-image: url('../images/ellipsis.png');
+    background-size: auto 40%;
+    display: block;
+    width: 100%;
+    height: 15px;
+  }
 }

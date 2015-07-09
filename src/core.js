@@ -6,7 +6,7 @@ define([
     'underscore',
     'xpathmodels',
     'jquery',
-    'text!vellum/templates/main.html',
+    'tpl!vellum/templates/main',
     'tpl!vellum/templates/question_type_group',
     'tpl!vellum/templates/edit_source',
     'tpl!vellum/templates/confirm_overwrite',
@@ -67,6 +67,8 @@ define([
             'vellum/expressionEditor',
         ], function () {});
     }, 0);
+
+    var isMac = /Mac/.test(navigator.platform);
 
     var DEBUG_MODE = false;
     xpathmodels.DEBUG_MODE = DEBUG_MODE;
@@ -193,8 +195,23 @@ define([
 
         this.data.core.lastSavedXForm = this.opts().core.form;
 
+        var ctrl = "Ctrl+",
+            alt = "Alt+";
+        if (isMac) {
+            ctrl = "\u2318";
+            alt = "\u2325";
+        }
         this.$f.addClass('formdesigner');
-        this.$f.empty().append(main_template);
+        this.$f.empty().append(main_template({ctrl: ctrl, alt: alt}));
+        $(document).on("keydown", function (e) {
+            var ctrlKey = (isMac && e.metaKey) || (!isMac && e.ctrlKey),
+                metaKey = (isMac && e.ctrlKey) || (!isMac && e.metaKey),
+                key = (ctrlKey ? "Ctrl+" : "") +
+                      (e.altKey ? "Alt+" : "") + 
+                      (e.shiftKey ? "Shift+" : "") +
+                      (metaKey ? "Meta+" : "") + e.keyCode;
+            (hotkeys[key] || _.identity).call(_this, e);
+        });
 
         this._init_toolbar();
         this._createJSTree();
@@ -212,6 +229,15 @@ define([
         this.loadXFormOrError(this.opts().core.form, function () {
             setTimeout(onReady, 0);
         });
+    };
+
+    var hotkeys = {
+        "Ctrl+Alt+187" /* = */: function () {
+            this.data.core.$tree.jstree("open_all");
+        },
+        "Ctrl+Alt+189" /* - */: function () {
+            this.data.core.$tree.jstree("close_all");
+        },
     };
 
     fn.getMugTypes = function () {
@@ -1463,7 +1489,7 @@ define([
         var _this = this,
             $editor = this.$f.find('.fd-xpath-editor');
 
-        $editor.find('.fd-head').text(options.headerText);
+        $editor.find('.fd-head h2').text(options.headerText);
         options.DEBUG_MODE = DEBUG_MODE;
         this.hideQuestionProperties();
 

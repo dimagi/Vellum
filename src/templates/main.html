@@ -18,44 +18,57 @@
     <div class="fd-row">
         <div class="fd-content fd-content-left">
             <div class="fd-tree">
-                <div class="fd-head">Question Tree</div>
-                <div class="fd-scrollable fd-scrollable-tree">
-                    <div class="fd-question-tree-lang"></div>
-                    <div class="fd-panel-toolbar fd-question-tree-actions">
-                        <div class="btn-group">
-                            <button type="button" class="btn fd-expand-all"><i class="icon-double-angle-down"></i> Expand All</button>
-                            <button type="button" class="btn fd-collapse-all"><i class="icon-double-angle-right"></i> Collapse All</button>
-                        </div>
-                        <div class="btn-group">
-                            <button type="button" class="btn fd-button-copy" tabindex="-1"><i class="icon-copy"></i> Copy</button>
-                        </div>
+                <div class="fd-head">
+                    <h2>Questions</h2>
+                    <div class="fd-questions-menu-container">
+                        <a class="dropdown-toggle"
+                           data-toggle="dropdown"
+                           href="#"
+                           id="fd-questions-dropdown-menu-toggle">
+                            <i class="icon icon-reorder"></i>
+                            <i class="icon icon-caret-down"></i>
+                        </a>
+                        <ul id="fd-questions-dropdown-menu"
+                            class="dropdown-menu"
+                            role="menu">
+                            <li><a class="fd-button-copy"><i class="icon-copy"></i> Copy<span class="hotkey"><%-ctrl%>C</span></a></li>
+                            <li><a class="fd-expand-all"><i class="icon-double-angle-down"></i> Expand All<span class="hotkey"><%-ctrl%><%-alt%>=</span></a></li>
+                            <li><a class="fd-collapse-all"><i class="icon-double-angle-right"></i> Collapse All<span class="hotkey"><%-ctrl%><%-alt%>-</span></a></li>
+                        </ul>
+                        <input type="hidden" class="fd-question-tree-display" />
                     </div>
+                </div>
+                <div class="fd-scrollable fd-scrollable-tree">
                     <div class="fd-question-tree"></div>
+                    <div class="hide fd-default-panel fd-default-qtree">
+                        <h2>New Form</h2>
+                        <p class="lead">Please add questions above.</p>
+                        <p>Clicking the <i class="fcc fcc-fd-text"></i> button is a good place to start.</p>
+                        <p>Need help? <a href="https://wiki.commcarehq.org/display/commcarepublic/Application+Building" target="_blank">View our documentation</a>.</p>
+                    </div>
                 </div>
             </div>
-            <div class="fd-content-left-divider fd-content-horizontal-divider"></div>
+            <div class="fd-external-sources-divider fd-content-left-divider">
+                <a href="#"></a>
+            </div>
             <div class="fd-accessory-pane"></div>
         </div>
         <div class="fd-content fd-content-divider fd-content-vertical-divider"></div>
         <div class="fd-content fd-content-right">
             <div class="fd-column fd-question-properties">
-                <div class="fd-head">Question Properties</div>
+                <div class="fd-head"><h2>Question Properties</h2></div>
                 <div class="fd-panel-toolbar fd-props-toolbar"></div>
                 <div class="fd-scrollable fd-props-scrollable">
                     <form class="form form-horizontal fd-props-content"></form>
                 </div>
             </div>
             <div class="fd-xpath-editor fd-column">
-                <div class="fd-head">Expression Editor</div>
+                <div class="fd-head"><h2>Expression Editor</h2></div>
                 <div class="fd-scrollable full">
                     <div class="fd-xpath-editor-content"></div>
                 </div>
             </div>
             <div class="fd-column hide fd-default-panel">
-                <div class="well">
-                    <h2>Welcome to your new form!</h2>
-                    <p><i class="icon-arrow-left"></i> Please add a question to get started.</p>
-                </div>
             </div>
         </div>
 

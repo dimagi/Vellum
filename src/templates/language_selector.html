@@ -1,11 +1,11 @@
-<div class="fd-lang-display-selector form form-inline">
-    <label>Display:
-    <select class="input-medium">
-        <% _.each(languages, function(language) { %>
-        <option value="<%=language.code%>"<% if (language.selected) { %> selected="selected"<% } %>>
-            <%=language.name%><% if (language.name !== language.code && language.code !== '_ids') { %> (<%=language.code%>) <% } %>
-        </option>
-        <% }); %>
-    </select>
-    </label>
-</div>
+<ul>
+    <li class="divider"></li>
+    <li class="nav-header">Display</li>
+    <% _.each(languages, function(language) { %>
+    <li><a tabindex="-1" href="#" class="fd-display-item" data-code="<%-language.code%>"><i class="icon icon-ok"></i><%-language.name%><%
+        if (language.name !== language.code && language.code !== '_ids') {
+            %> (<%-language.code%>)<%
+        }
+        %></a></li><%
+    }); %>
+</ul>

@@ -152,14 +152,51 @@
 }
 
 .fd-head {
-  background: @blue;
+  background-color: @cc-brand-low;
   font-weight: normal !important;
-  padding: 2px 0 !important;
-  font-size: @baseFontSize*1.1 !important;
+  text-align: left;
+  width: 100%;
+  position: relative;
+  z-index: 1;
+
+  > h2 {
+    font-size: @baseFontSize * 0.8  ;
+    padding: 1px @contentPaddingVellum 0;
+    margin: 0;
+    font-weight: normal;
+    line-height: 23px;
+    text-transform: uppercase;
+  }
+}
+
+.fd-questions-menu-container {
+  position: absolute;
+  right: 0px;
+  top: 0px;
+  line-height: 23px;
+  font-size: @baseFontSize * 0.9;
+  a {
+    color: @white;
+    display: block;
+    padding: 0 @contentPaddingVellum;
+
+    &:hover {
+      text-decoration: none;
+      background-color: @cc-brand-mid;
+    }
+  }
+}
+
+#fd-questions-dropdown-menu a {
+  min-width: 170px;
+  > .hotkey {
+    float: right;
+    display: inline-block;
+  }
 }
 
 .fd-form-actions {
-  padding-right: @gridGutterWidth;
+  padding-right: @contentPaddingVellum;
   > div {
     display: inline-block;
   }
@@ -168,6 +205,9 @@
 .fd-save-button {
   > .pull-right {
     float: none; // HACK HACK HACK The javascript from main.js is causing issues.
+  }
+  .btn {
+    width: 70px;
   }
 }
 

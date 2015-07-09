@@ -7,55 +7,45 @@ define([
     'vellum/datasources',
     'vellum/widgets',
     'vellum/window',
-    'tpl!vellum/templates/external_data_tree',
+    'tpl!vellum/templates/external_sources_tree',
 ], function (
     $,
     _,
     datasources,
     widgets,
     window_,
-    external_data_tree
+    external_sources_tree
 ) {
-    var panelHeight, isDataTreeLoaded;
+    var fn = {},
+        panelHeight;
 
     // plugin adds an item to the Tools menu when enabled
     $.vellum.plugin('databrowser', {}, {
         init: function () {
             var vellum = this,
                 pane = this.$f.find(".fd-accessory-pane");
-            isDataTreeLoaded = false;
-            pane.append($(external_data_tree()));
+            fn.initDataBrowser = _.once(_initDataBrowser);
+            pane.append($(external_sources_tree()));
             pane.resize(function () {
                 if (pane.height() > 100) {
                     panelHeight = pane.height();
                 } else if (pane.height() > 0) {
-                    initDataBrowser(vellum);
+                    fn.initDataBrowser(vellum);
                 }
             });
             window_.preventDoubleScrolling(pane.find(".fd-scrollable"));
-        },
-        getToolsMenuItems: function () {
-            var vellum = this,
-                items = this.__callOld();
-            items.push({
-                name: "External Data",
-                action: function (done) {
-                    toggleExternalDataTree(vellum, done);
-                }
-            });
-            return items;
+            datasources.getDataSources(function () {});
+            pane.parent().find(".fd-external-sources-divider > a")
+                .removeAttr("href")
+                .clickExceptAfterDrag(_.partial(toggleExternalDataTree, vellum));
         }
     });
 
-    var initDataBrowser = function (vellum) {
-        if (isDataTreeLoaded) { return; }
-        isDataTreeLoaded = true;
-
+    function _initDataBrowser(vellum) {
         // display spinner and begin loading...
-        var $container = vellum.$f.find(".fd-external-data-tree-container"),
-            $search = $container.find(".fd-search-box input"),
-            $tree = $container.find(".fd-external-data-tree"),
-            pending = false;
+        var $container = vellum.$f.find(".fd-external-sources-container"),
+            $search = $container.find(".fd-external-resource-search input"),
+            $tree = $container.find(".fd-external-sources-tree");
         $tree.jstree({
             core: {
                 data: function (node, callback) {
@@ -83,15 +73,10 @@ define([
             },
             "plugins" : [ "themes", "conditionalevents", "dnd", "search" ]
         });
-        $search.keyup(function () {
-            if (pending) {
-                clearTimeout(pending);
-            }
-            pending = setTimeout(function () {
-                $tree.jstree(true).search($search.val());
-            }, 250);
-        });
-    };
+        $search.keyup(_.debounce(function () {
+            $tree.jstree(true).search($search.val());
+        }, 250));
+    }
 
     function dataTreeJson(data, vellum) {
         function node(parentPath, info) {
@@ -99,8 +84,10 @@ define([
                 var path = parentPath ? (parentPath + "/" + id) : id,
                     tree = getTree(item, id, path, info);
                 return {
-                    icon: false,
                     text: tree.name,
+                    icon: tree.nodes === true || tree.nodes.length ?
+                            "fcc fcc-fd-external-case" :
+                            "fcc fcc-fd-external-case-data",
                     state: {opened: tree.nodes !== true &&
                                     tree.nodes.length <= MAX_OPEN_NODE},
                     children: tree.nodes,
@@ -188,7 +175,7 @@ define([
         return nodes;
     }
 
-    function toggleExternalDataTree(vellum, done) {
+    function toggleExternalDataTree(vellum) {
         var pane = vellum.$f.find(".fd-accessory-pane");
         if (pane.height()) {
             pane.css("height", "0");
@@ -198,12 +185,9 @@ define([
                 height = panelHeight || Math.min(tree.height() / 2, 200);
             pane.css("height", height + "px");
             $(window).resize();
-            initDataBrowser(vellum);
+            fn.initDataBrowser(vellum);
         }
-        done();
     }
 
-    return {
-        initDataBrowser: initDataBrowser,
-    };
+    return fn;
 });
