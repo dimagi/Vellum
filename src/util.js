@@ -37,16 +37,6 @@ define([
         return error && error.stack ? error.stack : String(error);
     };
 
-    that.XPATH_REFERENCES = [
-        "relevantAttr",
-        "calculateAttr",
-        "constraintAttr",
-        "dataParent",
-        "repeat_count",
-        "filter",
-        "defaultValue"
-    ];
-
     that.getTemplateObject = function (selector, params) {
         return $(_.template($(selector).text(), params));
     };

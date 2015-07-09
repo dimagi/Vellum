@@ -4,13 +4,13 @@ require([
     'jquery',
     'underscore',
     'tests/utils',
-    'vellum/util'
+    'vellum/logic'
 ], function (
     chai,
     $,
     _,
     util,
-    vellumUtil
+    logic
 ) {
     var assert = chai.assert,
         call = util.call;
@@ -48,6 +48,7 @@ require([
                     "filter",
                     "defaultValue"
                 ],
+                no_self_props = _.without(properties, "constraintAttr"),
                 mugMap = {
                     repeat_count: "repeat",
                     filter: "select/itemset",
@@ -60,8 +61,8 @@ require([
                 util.addQuestion("Repeat", "repeat");
             });
 
-            it("the same set of xpath references as util.XPATH_REFERENCES", function () {
-                assert.deepEqual(vellumUtil.XPATH_REFERENCES, properties);
+            it("the same set of xpath references as logic.XPATH_REFERENCES", function () {
+                assert.deepEqual(logic.XPATH_REFERENCES, properties);
             });
 
             _.each(properties, function (attr) {
@@ -80,6 +81,9 @@ require([
                     assert.deepEqual(mug.messages.get(attr), []);
                 });
 
+            });
+
+            _.each(no_self_props, function(attr) {
                 it("self referencing path in " + attr, function () {
                     var mug = util.getMug(mugMap[attr] || "text");
                     assert(util.isTreeNodeValid(mug), util.getMessages(mug));
