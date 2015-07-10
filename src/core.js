@@ -1165,9 +1165,8 @@ define([
         });
     };
 
-    fn.refreshMugName = function (mug, displayLang) {
-        displayLang = displayLang || this.data.core.currentItextDisplayLanguage;
-        var name = mug.getDisplayName(displayLang);
+    fn.refreshMugName = function (mug) {
+        var name = this.getMugDisplayName(mug);
         if (name !== this.jstree("get_text", mug.ufid)) {
             this.jstree('rename_node', mug.ufid, name);
         }
