@@ -289,5 +289,6 @@ define([
         LogicManager: LogicManager,
         LogicExpression: LogicExpression,
         XPATH_REFERENCES: XPATH_REFERENCES,
+        NO_SELF_REFERENCES: NO_SELF_REFERENCES,
     };
 });

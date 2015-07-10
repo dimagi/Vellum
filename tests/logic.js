@@ -48,7 +48,8 @@ require([
                     "filter",
                     "defaultValue"
                 ],
-                no_self_props = _.without(properties, "constraintAttr"),
+                canSelfRef = ["constraintAttr"],
+                noSelfProps = _.difference(properties, canSelfRef),
                 mugMap = {
                     repeat_count: "repeat",
                     filter: "select/itemset",
@@ -61,42 +62,47 @@ require([
                 util.addQuestion("Repeat", "repeat");
             });
 
-            it("the same set of xpath references as logic.XPATH_REFERENCES", function () {
+            it("the same set of xpath references as logic module", function () {
                 assert.deepEqual(logic.XPATH_REFERENCES, properties);
+                assert.deepEqual(logic.NO_SELF_REFERENCES, noSelfProps);
             });
+
+            function testReference(attr, value, bad) {
+                var mug = util.getMug(mugMap[attr] || "text");
+                assert(util.isTreeNodeValid(mug), util.getMessages(mug));
+                assert.deepEqual(mug.messages.get(attr), []);
+
+                mug.p[attr] = value;
+                if (bad) {
+                    assert(!util.isTreeNodeValid(mug), "mug should not be valid");
+                    assert(mug.messages.get(attr).length,
+                           attr + " should have messages");
+                } else {
+                    assert(util.isTreeNodeValid(mug), "mug should be valid");
+                    assert(mug.messages.get(attr).length === 0,
+                           attr + " should not have messages");
+                }
+
+                mug.p[attr] = "";
+                assert(util.isTreeNodeValid(mug), util.getMessages(mug));
+                assert.deepEqual(mug.messages.get(attr), []);
+            }
 
             _.each(properties, function (attr) {
                 it("invalid path in " + attr, function () {
-                    var mug = util.getMug(mugMap[attr] || "text");
-                    assert(util.isTreeNodeValid(mug), util.getMessages(mug));
-                    assert.deepEqual(mug.messages.get(attr), []);
-
-                    mug.p[attr] = "/data/unknown";
-                    assert(!util.isTreeNodeValid(mug), "mug should not be valid");
-                    assert(mug.messages.get(attr).length,
-                           attr + " should have messages");
-
-                    mug.p[attr] = "";
-                    assert(util.isTreeNodeValid(mug), util.getMessages(mug));
-                    assert.deepEqual(mug.messages.get(attr), []);
+                    testReference(attr, '/data/unknown', true);
                 });
-
             });
 
-            _.each(no_self_props, function(attr) {
+            _.each(noSelfProps, function(attr) {
                 it("self referencing path in " + attr, function () {
-                    var mug = util.getMug(mugMap[attr] || "text");
-                    assert(util.isTreeNodeValid(mug), util.getMessages(mug));
-                    assert.deepEqual(mug.messages.get(attr), []);
+                    testReference(attr, '.', true);
+                });
+            });
 
-                    mug.p[attr] = ".";
-                    assert(!util.isTreeNodeValid(mug), "mug should not be valid");
-                    assert(mug.messages.get(attr).length,
-                           attr + " should have messages");
-
-                    mug.p[attr] = "";
-                    assert(util.isTreeNodeValid(mug), util.getMessages(mug));
-                    assert.deepEqual(mug.messages.get(attr), []);
+            _.each(canSelfRef, function(attr) {
+                it("self referencing path in " + attr, function () {
+                    testReference(attr, '.', false);
                 });
             });
         });
