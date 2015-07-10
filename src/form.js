@@ -211,6 +211,7 @@ define([
             _this.fireChange(e.mug);
         });
         this.instanceMetadata = [InstanceMetadata({})];
+        this.knownInstances = {}; // {<instance id>: <instance src>}
         this.enableInstanceRefCounting = opts.enableInstanceRefCounting;
         this.errors = [];
         this.question_counter = 1;
@@ -263,10 +264,10 @@ define([
          * Add an instance if it is not already on the form
          *
          * @param attrs - Instance attributes. The `src` attribute is used to
-         *          match other instances on the form, and is required. A
-         *          matching instance will be found by `id` if the instance
-         *          has no `src` attribute. If no matching instance is found,
-         *          a new instance will be added with a unique `id`.
+         *          match other instances on the form. A matching instance will
+         *          be found by `id` if the instance has no `src` attribute.
+         *          If no matching instance is found, a new instance will be
+         *          added with a unique `id`.
          * @param mug - (optional) The mug with which this query is associated.
          *          This and the next parameter are used for instance ref
          *          counting. If omitted, ref counting will be disabled for the
@@ -278,20 +279,14 @@ define([
             function getUniqueId(id, ids) {
                 var temp = (id || "data") + "-",
                     num = 1;
-                if (!ids) {
-                    ids = _.indexBy(this_.instanceMetadata, function (m) {
-                        return m.attributes.id;
-                    });
-                }
                 while (!id || ids.hasOwnProperty(id)) {
                     id = temp + num;
                     num++;
                 }
                 return id;
             }
-            var this_ = this,
-                meta;
-            if (attrs.src !== null && attrs.src !== undefined) {
+            var meta;
+            if (attrs.src) {
                 meta = _.find(this.instanceMetadata, function (m) {
                     return m.attributes.src === attrs.src;
                 });
@@ -301,9 +296,9 @@ define([
                             return m.attributes.id;
                         });
                     meta = attrs.id && ids.hasOwnProperty(attrs.id) ? ids[attrs.id] : null;
-                    if (meta && (meta.attributes.src === null ||
-                                 meta.attributes.src === undefined)) {
-                        // assign new src to instance with no src
+                    if (meta && meta.internal) {
+                        // assign new src to internal instance
+                        meta.internal = false;
                         meta.attributes.src = attrs.src;
                     } else {
                         // assign unique id to attrs (will create new meta)
@@ -311,18 +306,33 @@ define([
                         attrs.id = getUniqueId(attrs.id, ids);
                         meta = null;
                     }
+                    this.knownInstances[attrs.id] = attrs.src;
                 }
-            } else if (attrs.id !== null && attrs.id !== undefined) {
+            } else if (attrs.id) {
                 // attrs has no src, find by id
                 meta = _.find(this.instanceMetadata, function (m) {
                     return m.attributes.id === attrs.id;
                 });
+                if (meta) {
+                    if (meta.internal && this.knownInstances.hasOwnProperty(attrs.id)) {
+                        meta.internal = false;
+                        meta.attributes.src = this.knownInstances[attrs.id];
+                    }
+                } else if (this.knownInstances.hasOwnProperty(attrs.id)) {
+                    attrs.src = this.knownInstances[attrs.id];
+                }
+            } else {
+                throw new Error("unsupported: non-primary instance without id or src");
             }
             if (!meta) {
-                this.instanceMetadata.push(InstanceMetadata({
+                meta = InstanceMetadata({
                     src: attrs.src,
                     id: attrs.id
-                }, null, mug || null, property));
+                }, null, mug || null, property);
+                if (!attrs.src) {
+                    meta.internal = true;
+                }
+                this.instanceMetadata.push(meta);
                 return attrs.id;
             } else if (this.enableInstanceRefCounting) {
                 meta.addReference(mug, property);
@@ -382,6 +392,29 @@ define([
             return query.replace(regexp, "$1instance('" + instanceId + "')");
         },
         /**
+         * Update internal record of instances known by this form
+         *
+         * @param map - an object mapping instance IDs to instance sources.
+         *      If not given, update the form's internal known instances
+         *      using instance metadata in the form.
+         */
+        updateKnownInstances: function (map) {
+            var instances = this.knownInstances;
+            if (map) {
+                _.each(map, function (src, id) {
+                    if (src && !instances.hasOwnProperty(id)) {
+                        instances[id] = src;
+                    }
+                });
+            } else {
+                _.each(this.instanceMetadata, function (meta) {
+                    if (meta.attributes.id && meta.attributes.src) {
+                        instances[meta.attributes.id] = meta.attributes.src;
+                    }
+                });
+            }
+        },
+        /**
          * Drop instance reference, possibly removing the instance
          *
          * @param src - The instance `src` attribute value.
@@ -407,12 +440,9 @@ define([
         /**
          * Drop all instance references from the given mug/property
          */
-        dropAllInstanceReferences: function (mug, property, keepInstance) {
-            _.each(this.instanceMetadata, function (meta) {
-                if (meta.attributes.src &&
-                        meta.dropReference(mug, property) && !keepInstance) {
-                    this.instanceMetadata = _.without(this.instanceMetadata, meta);
-                }
+        dropAllInstanceReferences: function (mug, property) {
+            this.instanceMetadata = _.filter(this.instanceMetadata, function (meta) {
+                return !meta.dropReference(mug, property);
             });
         },
         // todo: update references on rename

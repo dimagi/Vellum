@@ -2,6 +2,7 @@ define([
     'tests/utils',
     'chai',
     'jquery',
+    'underscore',
     'vellum/form',
     'vellum/tree',
     'text!static/form/alternate-root-node-name.xml',
@@ -16,6 +17,7 @@ define([
     util,
     chai,
     $,
+    _,
     form_,
     Tree,
     ALTERNATE_ROOT_NODE_NAME_XML,
@@ -263,6 +265,11 @@ define([
             util.assertJSTreeState("");
         });
 
+        function getInstanceSrc(id, form) {
+            var $xml = $(_.isString(form) ? form : form.createXML());
+            return $xml.find("instance[id='" + id + "']").attr("src");
+        }
+
         it("should not drop referenced instance on delete dynamic select", function() {
             var form = util.loadXML("");
             util.paste([
@@ -271,15 +278,49 @@ define([
                  "instance('some-fixture')/some-fixture_list/some-fixture/@id", "null"],
                 ["/select", "SelectDynamic", "select", "null",
                     '[{"instance":{"id":"some-fixture",' +
-                                    '"src":"jr://fixture/item-list:some-fixture"},' +
+                                  '"src":"jr://fixture/item-list:some-fixture"},' +
                     '"nodeset":"instance(\'some-fixture\')/some-fixture_list/some-fixture",' +
                     '"labelRef":"name","valueRef":"@id"}]']
             ]);
             util.deleteQuestion("select");
-            var xml = form.createXML(),
-                $xml = $(xml);
-            assert.equal($xml.find("instance[id='some-fixture']").length, 1,
+            var xml = form.createXML();
+            assert.equal(getInstanceSrc("some-fixture", form),
+                         "jr://fixture/item-list:some-fixture",
+                         "some-fixture instance not found\n" + xml);
+        });
+
+        it("should drop instance on delete last reference", function() {
+            var form = util.loadXML("");
+            util.paste([
+                ["id", "type", "calculateAttr", "instances"],
+                ["/hidden", "DataBindOnly",
+                 "instance('some-fixture')/some-fixture_list/some-fixture/@id",
+                 '{"some-fixture":"jr://fixture/item-list:some-fixture"}'],
+            ]);
+            assert.equal(getInstanceSrc("some-fixture", form),
+                         "jr://fixture/item-list:some-fixture");
+            util.deleteQuestion("hidden");
+            var xml = form.createXML();
+            assert.equal(getInstanceSrc("some-fixture", xml), undefined,
                 "some-fixture instance not found\n" + xml);
+        });
+
+        it("should maintain instance on delete and re-add last reference", function() {
+            var form = util.loadXML("");
+            util.paste([
+                ["id", "type", "calculateAttr", "instances"],
+                ["/hidden", "DataBindOnly",
+                 "instance('some-fixture')/some-fixture_list/some-fixture/@id",
+                 '{"some-fixture":"jr://fixture/item-list:some-fixture"}'],
+            ]);
+            util.deleteQuestion("hidden");
+            assert.equal(getInstanceSrc("some-fixture", form), undefined);
+            var hid = util.addQuestion("DataBindOnly", "hid");
+            hid.p.calculateAttr = "instance('some-fixture')/some-fixture_list/some-fixture/@id";
+            var xml = form.createXML();
+            assert.equal(getInstanceSrc("some-fixture", form),
+                         "jr://fixture/item-list:some-fixture",
+                         "some-fixture instance not found\n" + xml);
         });
     });
 });

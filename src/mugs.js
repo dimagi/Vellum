@@ -695,6 +695,13 @@ define([
         }
     };
 
+    function deserializeXPath(data, key, mug) {
+        if (data.hasOwnProperty("instances") && !_.isEmpty(data.instances)) {
+            mug.form.updateKnownInstances(data.instances);
+        }
+        return data[key];
+    }
+
     function resolveConflictedNodeId(mug) {
         // clear warning; mug already has copy-N-of-... ID
         mug.p.conflictedNodeId = null;
@@ -816,6 +823,7 @@ define([
                 presence: 'optional',
                 widget: widgets.xPath,
                 xpathType: "bool",
+                deserialize: deserializeXPath,
                 lstring: 'Display Condition'
             },
             calculateAttr: {
@@ -827,6 +835,7 @@ define([
                 presence: 'optional',
                 widget: widgets.xPath,
                 xpathType: "generic",
+                deserialize: deserializeXPath,
                 lstring: 'Calculate Condition'
             },
             constraintAttr: {
@@ -837,6 +846,7 @@ define([
                 },
                 widget: widgets.xPath,
                 xpathType: "bool",
+                deserialize: deserializeXPath,
                 lstring: 'Validation Condition'
             },
             // non-itext constraint message
@@ -873,6 +883,7 @@ define([
                 lstring: 'Default Value',
                 widget: widgets.xPath,
                 xpathType: 'generic',
+                deserialize: deserializeXPath,
                 validationFunc: function (mug) {
                     var paths = new logic.LogicExpression(mug.p.defaultValue).getPaths();
                     paths = _.filter(paths, function (path) {

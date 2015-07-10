@@ -46,7 +46,7 @@ define([
             this.referencesSelf = false;
             if (this.parsed) {
                 var queue = [this.parsed], 
-                    node, i, children;
+                    node, i, children, j;
                 while (queue.length > 0) {
                     node = queue.shift();
                     if (node instanceof xpathmodels.XPathPathExpr) {
@@ -72,6 +72,12 @@ define([
                     children = node.getChildren();
                     for (i = 0; i < children.length; i++) {
                         queue.push(children[i]);
+                        if (children[i].predicates && children[i].predicates.length) {
+                            predicates = children[i].predicates;
+                            for (j = 0; j < predicates.length; j++) {
+                                queue.push(predicates[j]);
+                            }
+                        }
                     }
                 }
             }

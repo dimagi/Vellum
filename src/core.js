@@ -1118,6 +1118,14 @@ define([
             _this._resetMessages(_this.data.core.form.errors);
             _this._populateTree();
         }
+        datasources.getDataSources(function (data) {
+            form.updateKnownInstances(
+                _.chain(data)
+                 .map(function (source) { return [source.id, source.uri]; })
+                 .object()
+                 .value()
+            );
+        });
 
         form.on('question-type-change', function (e) {
             _this.jstree("set_type", e.mug.ufid, e.qType);

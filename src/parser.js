@@ -70,6 +70,7 @@ define([
                 $(instance).children()
             ); 
         });
+        form.updateKnownInstances();
         
         // TODO! adapt
         if(data.length === 0) {
