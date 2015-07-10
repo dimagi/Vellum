@@ -409,8 +409,14 @@ define([
     };
 
     var xPath = function (mug, options) {
-        var widget = text(mug, options),
-            super_getValue = widget.getValue,
+        var widget;
+        if (mug.options.richtext) {
+            options.singleLine = true;
+            widget = richtext(mug, options);
+        } else {
+            widget = text(mug, options);
+        }
+        var super_getValue = widget.getValue,
             super_setValue = widget.setValue;
         widget.getValue = function() {
             var val = super_getValue();
@@ -459,8 +465,10 @@ define([
             }, !!widget.isDisabled());
         };
 
-        util.questionAutocomplete(widget.input, mug,
-                                  {property: options.path});
+        util.questionAutocomplete(widget.input, mug, {
+            property: options.path,
+            insertTpl: '<span class="label label-datanode label-datanode-internal" contenteditable=false draggable=true data-value=\'&lt;output value="${name}" /&gt;\'><i class="${icon}">&nbsp;</i>${name}<i class="close">&times;</i></span>',
+        });
 
         return widget;
     };
