@@ -1,6 +1,7 @@
 define([
     'jquery',
     'underscore',
+    'xpathmodels',
     'vellum/tree',
     'vellum/javaRosa', // TODO move all Itext stuff to javaRosa and remove this
     'vellum/widgets',
@@ -9,6 +10,7 @@ define([
 ], function (
     $,
     _,
+    xpathmodels,
     Tree,
     jr,
     widgets,
@@ -873,12 +875,13 @@ define([
                 xpathType: 'generic',
                 validationFunc: function (mug) {
                     var paths = new logic.LogicExpression(mug.p.defaultValue).getPaths();
-
+                    paths = _.filter(paths, function (path) {
+                        return path.initial_context !== xpathmodels.XPathInitialContextEnum.EXPR;
+                    });
                     if (paths.length) {
                         return "You are referencing a node in this form. " +
                                "This can cause errors in the form";
                     }
-
                     return 'pass';
                 }
             },
