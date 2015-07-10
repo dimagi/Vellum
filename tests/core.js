@@ -319,14 +319,16 @@ require([
         });
 
         it("should add question after sole hidden value", function (done) {
-            util.init({core: {onReady: function () {
-                util.addQuestion("DataBindOnly", "hidden");
-                util.addQuestion.bind({prevId: "hidden"})("Text", "text");
-                util.assertJSTreeState(
-                    "hidden",
-                    "text"
-                );
-                done();
+            util.init({
+                core: {
+                    onReady: function () {
+                        util.addQuestion("DataBindOnly", "hidden");
+                        util.addQuestion.bind({prevId: "hidden"})("Text", "text");
+                        util.assertJSTreeState(
+                            "hidden",
+                            "text"
+                        );
+                        done();
             }}});
         });
 
@@ -422,22 +424,20 @@ require([
 
         describe("drag+drop should", function () {
             var mugs;
-            before(function (done) {
-                util.init({core: {form: INSERT_QUESTIONS_XML, onReady: function () {
-                    util.addQuestion.bind({prevId: "text2"})("Repeat", "repeat");
-                    mugs = {
-                        text1: call("getMugByPath", "/data/text1"),
-                        text2: call("getMugByPath", "/data/text2"),
-                        repeat: call("getMugByPath", "/data/repeat"),
-                        group: call("getMugByPath", "/data/group"),
-                        text3: call("getMugByPath", "/data/group/text3"),
-                        text4: call("getMugByPath", "/data/group/text4"),
-                        hidden2: call("getMugByPath", "/data/group/hidden2"),
-                        text5: call("getMugByPath", "/data/text5"),
-                        hidden1: call("getMugByPath", "/data/hidden1")
-                    };
-                    done();
-                }}});
+            before(function () {
+                util.loadXML(INSERT_QUESTIONS_XML);
+                util.addQuestion.bind({prevId: "text2"})("Repeat", "repeat");
+                mugs = {
+                    text1: call("getMugByPath", "/data/text1"),
+                    text2: call("getMugByPath", "/data/text2"),
+                    repeat: call("getMugByPath", "/data/repeat"),
+                    group: call("getMugByPath", "/data/group"),
+                    text3: call("getMugByPath", "/data/group/text3"),
+                    text4: call("getMugByPath", "/data/group/text4"),
+                    hidden2: call("getMugByPath", "/data/group/hidden2"),
+                    text5: call("getMugByPath", "/data/text5"),
+                    hidden1: call("getMugByPath", "/data/hidden1")
+                };
             });
 
             var check_move_data = [
