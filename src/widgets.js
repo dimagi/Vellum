@@ -254,7 +254,9 @@ define([
         function addPopovers(input) {
             input.find('[contenteditable=false]').each(function () {
                 var $this = $(this),
-                    value = $this.attr('data-value').match('output value="(.*)"')[1];
+                    datavalue = $this.attr('data-value'),
+                    match = datavalue.match('output value="(.*)"'),
+                    value = match ? match[1] : $this.attr('data-value');
                 $this.popout({
                     title: '',
                     content: value,
