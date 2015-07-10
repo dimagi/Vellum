@@ -4,6 +4,7 @@ define([
     'underscore',
     'jquery',
     'vellum/util',
+    'vellum/logic',
     'ckeditor',
     'ckeditor-jquery'
 ], function (
@@ -12,6 +13,7 @@ define([
     _,
     $,
     util,
+    logic,
     CKEDITOR
 ) {
     CKEDITOR.config.allowedContent = true;
@@ -338,7 +340,7 @@ define([
             widget.input.ckeditor().promise.then(function() {
                 val = fromRichText(editor.getData());
             });
-            return val;
+            return val.replace('&nbsp;', ' ').trim();
         };
 
         return widget;
@@ -467,7 +469,7 @@ define([
 
         util.questionAutocomplete(widget.input, mug, {
             property: options.path,
-            insertTpl: '<span class="label label-datanode label-datanode-internal" contenteditable=false draggable=true data-value=\'&lt;output value="${name}" /&gt;\'><i class="${icon}">&nbsp;</i>${name}<i class="close">&times;</i></span>',
+            insertTpl: '<span class="label label-datanode label-datanode-internal" contenteditable=false draggable=true data-value="${name}"><i class="${icon}">&nbsp;</i>${name}<i class="close">&times;</i></span>',
         });
 
         return widget;
@@ -714,19 +716,23 @@ define([
         return $el;
     }
 
-    function replaceOuputRef(form, value, withClose) {
+    function replaceOuputRef(form, value, withClose, noOutput) {
+        var template = "<output value=\"" + value + "\" />";
+        if (noOutput) {
+            template = value;
+        }
         var v = value.split('/'),
             dispValue = v[v.length-1],
             mug = form.getMugByPath(value),
             icon = mug ? mug.options.icon: 'fcc fcc-flower',
             datanodeClass = mug ? 'label-datanode-internal' : 'label-datanode-external',
             richText = $('<span>').addClass('label label-datanode')
-        .addClass(datanodeClass)
-        .attr({
-            contenteditable: false,
-            draggable: true,
-            'data-value': "<output value=\"" + value + "\" />"
-        }).append($('<i>').addClass(icon).html('&nbsp;')).append(dispValue);
+                .addClass(datanodeClass)
+                .attr({
+                    contenteditable: false,
+                    draggable: true,
+                    'data-value': template
+                }).append($('<i>').addClass(icon).html('&nbsp;')).append(dispValue);
         if (withClose) {
             richText.append($("<button>").addClass('close').html("&times;"));
         }
@@ -734,10 +740,15 @@ define([
     }
 
     function toRichText(val, form, withClose) {
+        if (!val) {return "";}
         val = val.replace('&lt;', '<').replace('&gt;', '>');
         var el = $('<div>').html(val);
         el.find('output').replaceWith(function() {
             return replaceOuputRef(form, this.attributes.value.value, withClose);
+        });
+        var paths = new logic.LogicExpression(val).getPaths();
+        _.each(paths, function(path) {
+            el.html(el.html().replace(path.toXPath(), $('<div>').append(replaceOuputRef(form, path.toXPath(), withClose, true)).html()));
         });
         return el.html();
     }
