@@ -18,7 +18,6 @@ define([
     'vellum/util',
     'vellum/tsv',
     'vellum/xml',
-    'vellum/richtext',
     'vellum/core'
 ], function (
     _,
@@ -33,8 +32,7 @@ define([
     widgets,
     util,
     tsv,
-    xml,
-    richtext
+    xml
 ) {
     var SUPPORTED_MEDIA_TYPES = ['image', 'audio', 'video'],
         DEFAULT_EXTENSIONS = {
@@ -829,12 +827,13 @@ define([
         options.id = id;
 
         if (EXPERIMENTAL_UI) {
-            widget = richtext.richtext(mug, options);
+            widget = widgets.richtext(mug, options);
         } else {
             widget = widgets.multilineText(mug, options);
         }
 
         var $input = widget.input;
+        $input.addClass('itext-widget-input');
 
         if (options.path === 'labelItext') {
             util.questionAutocomplete($input, mug, {
@@ -1300,7 +1299,7 @@ define([
         var output = getOutputRef(path, dateFormat),
             form = vellum.data.core.form;
         if (EXPERIMENTAL_UI) {
-            target.ckeditor().editor.insertHtml(richtext.toRichText(output, form, true), 'text');
+            target.ckeditor().editor.insertHtml(widgets.util.toRichText(output, form, true), 'text');
         } else {
             util.insertTextAtCursor(target, output, true);
         }

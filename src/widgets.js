@@ -3,14 +3,19 @@ define([
     'tpl!vellum/templates/widget_control_message',
     'underscore',
     'jquery',
-    'vellum/util'
+    'vellum/util',
+    'ckeditor',
+    'ckeditor-jquery'
 ], function (
     widget_control_keyvalue,
     widget_control_message,
     _,
     $,
-    util
+    util,
+    CKEDITOR
 ) {
+    CKEDITOR.config.allowedContent = true;
+
     var base = function(mug, options) {
         // set properties shared by all widgets
         var widget = {};
@@ -224,6 +229,116 @@ define([
 
         widget.getValue = function () {
             return widget.input.val();
+        };
+
+        return widget;
+    };
+
+    var richtext = function(mug, options) {
+        var widget = normal(mug, options), editor;
+
+        function fromRichText(val) {
+            var el = $('<div>');
+            val = val.replace(/(<p>)/ig,"").replace(/<\/p>/ig, "\r\n").replace(/(<br ?\/?>)/ig,"\n");
+            el = el.html(val);
+            el.find('.atwho-inserted .label').unwrap();
+            el.find('.label-datanode').replaceWith(function() {
+                return $(this).attr('data-value');
+            });
+
+            return el.html();
+        }
+
+        function addPopovers(input) {
+            input.find('[contenteditable=false]').each(function () {
+                var $this = $(this),
+                    value = $this.attr('data-value').match('output value="(.*)"')[1];
+                $this.popout({
+                    title: '',
+                    content: value,
+                    template: '<div contenteditable="false" class="popover"><div class="arrow"></div><div class="popover-inner"><div class="popover-content"><p></p></div></div></div>',
+                    placement: 'bottom',
+                });
+            });
+        }
+
+        function removePopovers(input) {
+            input.find('[contenteditable=false]').each(function () {
+                $(this).popout('hide');
+            });
+        }
+
+        function addCloseButton(widget, input) {
+            input.find('[contenteditable=false]').each(function () {
+                var _this = this;
+                $(this).find('.close').click(function() {
+                    $(_this).popout('hide');
+                    _this.remove();
+                    widget.handleChange();
+                    return false;
+                });
+            });
+        }
+
+        function toRichHtml(val, form, withClose) {
+            return toRichText(val, form, withClose).replace(/\r\n|\r|\n/ig, '<br />');
+        }
+
+
+        widget.input = $("<div />")
+            .attr("contenteditable", true)
+            .attr("name", widget.id)
+            .addClass('input-block-level jstree-drop');
+        if (options.singleLine) {
+            widget.input.addClass('fd-input');
+        } else {
+            widget.input.addClass('fd-textarea');
+        }
+
+        widget.input.ckeditor().promise.then(function() {
+            editor = widget.input.ckeditor().editor;
+
+            mug.on('teardown-mug-properties', function() {
+                removePopovers(widget.input);
+                if (editor) {
+                    editor.destroy();
+                }
+            });
+
+            editor.on('change', function() { widget.handleChange(); });
+            editor.on('afterInsertHtml', function (e) {
+                addCloseButton(widget, widget.input);
+                addPopovers(widget.input);
+            });
+            editor.on('dataReady', function (e) {
+                addCloseButton(widget, widget.input);
+                addPopovers(widget.input);
+            });
+
+        });
+
+        widget.input.on('inserted.atwho', function(atwhoEvent, $li, browserEvent) {
+            $(this).find('.atwho-inserted').children().unwrap();
+            addCloseButton(widget, widget.input);
+            addPopovers(widget.input);
+        });
+
+        widget.getControl = function () {
+            return widget.input;
+        };
+
+        widget.setValue = function (val) {
+            widget.input.ckeditor().promise.then(function() {
+                editor.setData(toRichHtml(val, mug.form, true));
+            });
+        };
+
+        widget.getValue = function () {
+            var val = "";
+            widget.input.ckeditor().promise.then(function() {
+                val = fromRichText(editor.getData());
+            });
+            return val;
         };
 
         return widget;
@@ -591,11 +706,41 @@ define([
         return $el;
     }
 
+    function replaceOuputRef(form, value, withClose) {
+        var v = value.split('/'),
+            dispValue = v[v.length-1],
+            mug = form.getMugByPath(value),
+            icon = mug ? mug.options.icon: 'fcc fcc-flower',
+            datanodeClass = mug ? 'label-datanode-internal' : 'label-datanode-external',
+            richText = $('<span>').addClass('label label-datanode')
+        .addClass(datanodeClass)
+        .attr({
+            contenteditable: false,
+            draggable: true,
+            'data-value': "<output value=\"" + value + "\" />"
+        }).append($('<i>').addClass(icon).html('&nbsp;')).append(dispValue);
+        if (withClose) {
+            richText.append($("<button>").addClass('close').html("&times;"));
+        }
+        return richText;
+    }
+
+    function toRichText(val, form, withClose) {
+        val = val.replace('&lt;', '<').replace('&gt;', '>');
+        var el = $('<div>').html(val);
+        el.find('output').replaceWith(function() {
+            return replaceOuputRef(form, this.attributes.value.value, withClose);
+        });
+        return el.html();
+    }
+    
+
     return {
         base: base,
         normal: normal,
         text: text,
         multilineText: multilineText,
+        richtext: richtext,
         identifier: identifier,
         droppableText: droppableText,
         checkbox: checkbox,
@@ -608,7 +753,8 @@ define([
             setWidget: setWidget,
             getMessages: getMessages,
             getUIElementWithEditButton: getUIElementWithEditButton,
-            getUIElement: getUIElement
+            getUIElement: getUIElement,
+            toRichText: toRichText,
         }
     };
 });

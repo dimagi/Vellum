@@ -24,7 +24,6 @@ define([
     'vellum/datasources',
     'vellum/util',
     'vellum/debugutil',
-    'vellum/richtext',
     'vellum/base',
     'vellum/jstree-plugins',
     'less!vellum/less-style/main',
@@ -55,8 +54,7 @@ define([
     parser,
     datasources,
     util,
-    debug,
-    richtext
+    debug
 ) {
     
     // Load these modules in the background after all runtime dependencies have
@@ -457,7 +455,7 @@ define([
         var val = mug.getDisplayName(this.data.core.currentItextDisplayLanguage || 
             this.data.javaRosa.Itext.getDefaultLanguage());
         if (this.opts().features.experimental_ui) {
-            val = richtext.toRichText(val, this.data.core.form);
+            val = widgets.util.toRichText(val, this.data.core.form);
         }
         return val;
     };
