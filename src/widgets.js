@@ -413,7 +413,7 @@ define([
     };
 
     var xPath = function (mug, options) {
-        var widget;
+        var widget, insertTpl;
         if (mug.options.richtext) {
             options.singleLine = true;
             widget = richtext(mug, options);
@@ -468,10 +468,14 @@ define([
                 }
             }, !!widget.isDisabled());
         };
+        
+        if (mug.options.richtext) {
+            insertTpl = '<span class="label label-datanode label-datanode-internal" contenteditable=false draggable=true data-value="${name}"><i class="${icon}">&nbsp;</i>${name}<i class="close">&times;</i></span>';
+        }
 
         util.questionAutocomplete(widget.input, mug, {
             property: options.path,
-            insertTpl: '<span class="label label-datanode label-datanode-internal" contenteditable=false draggable=true data-value="${name}"><i class="${icon}">&nbsp;</i>${name}<i class="close">&times;</i></span>',
+            insertTpl: insertTpl,
         });
 
         return widget;

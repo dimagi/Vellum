@@ -836,14 +836,12 @@ define([
         $input.addClass('itext-widget-input');
 
         if (options.path === 'labelItext') {
-            util.questionAutocomplete($input, mug, {
-                category: "Output Value",
-                insertTpl: '<span class="label label-datanode label-datanode-internal" contenteditable=false draggable=true data-value=\'&lt;output value="${name}" /&gt;\'><i class="${icon}">&nbsp;</i>${name}<i class="close">&times;</i></span>',
-                property: "labelItext",
-            });
-
+            var insertTpl = '<output value="${name}" />';
             $input.addClass('jstree-drop');
-            if (!EXPERIMENTAL_UI) {
+
+            if (EXPERIMENTAL_UI) {
+                insertTpl = '<span class="label label-datanode label-datanode-internal" contenteditable=false draggable=true data-value=\'&lt;output value="${name}" /&gt;\'><i class="${icon}">&nbsp;</i>${name}<i class="close">&times;</i></span>';
+            } else { 
                 $input.keydown(function (e) {
                     // deletion of entire output ref in one go
                     if (e && e.which === 8 || e.which === 46) {
@@ -878,6 +876,13 @@ define([
                     }
                 });
             }
+
+            util.questionAutocomplete($input, mug, {
+                category: "Output Value",
+                insertTpl: insertTpl,
+                property: "labelItext",
+            });
+
         }
 
         widget.displayName = options.displayName;
