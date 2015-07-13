@@ -833,7 +833,6 @@ define([
         }
 
         var $input = widget.input;
-        $input.addClass('itext-widget-input');
 
         if (options.path === 'labelItext') {
             var insertTpl = '<output value="${name}" />';
