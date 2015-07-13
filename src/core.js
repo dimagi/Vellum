@@ -1172,8 +1172,8 @@ define([
         });
     };
 
-    fn.refreshMugName = function (mug, displayLang) {
-        var name = richtext.toRichText(this.getMugDisplayName(mug), this.data.core.form);
+    fn.refreshMugName = function (mug) {
+        var name = this.getMugDisplayName(mug);
         if (name !== this.jstree("get_text", mug.ufid)) {
             this.jstree('rename_node', mug.ufid, name);
         }
