@@ -204,7 +204,7 @@ define([
             .attr("name", widget.id)
             .attr("id", widget.id)
             .attr("rows", "2")
-            .addClass('input-block-level itext-widget-input')
+            .addClass('input-block-level')
             .on('change input', function (e) { widget.handleChange(); })
             .focus(function() { this.select(); })
             .keyup(function (e) {
