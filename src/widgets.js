@@ -730,7 +730,7 @@ define([
         var v = value.split('/'),
             dispValue = v[v.length-1],
             mug = form.getMugByPath(value),
-            icon = mug ? mug.options.icon: 'fcc fcc-flower',
+            icon = mug ? mug.options.icon: 'fcc fcc-fd-external-case',
             datanodeClass = mug ? 'label-datanode-internal' : 'label-datanode-external',
             richText = $('<span>').addClass('label label-datanode')
                 .addClass(datanodeClass)
