@@ -260,7 +260,10 @@ define([
                 $this.popout({
                     title: '',
                     content: value,
-                    template: '<div contenteditable="false" class="popover"><div class="arrow"></div><div class="popover-inner"><div class="popover-content"><p></p></div></div></div>',
+                    template: '<div contenteditable="false" class="popover">' +
+                        '<div class="arrow"></div>' +
+                        '<div class="popover-inner">' +
+                        '<div class="popover-content"><p></p></div></div></div>',
                     placement: 'bottom',
                 });
             });
@@ -287,7 +290,6 @@ define([
         function toRichHtml(val, form, withClose) {
             return toRichText(val, form, withClose).replace(/\r\n|\r|\n/ig, '<br />');
         }
-
 
         widget.input = $("<div />")
             .attr("contenteditable", true)
@@ -470,7 +472,11 @@ define([
         };
         
         if (mug.options.richtext) {
-            insertTpl = '<span class="label label-datanode label-datanode-internal" contenteditable=false draggable=true data-value="${name}"><i class="${icon}">&nbsp;</i>${name}<i class="close">&times;</i></span>';
+            insertTpl = '<span ' +
+                'class="label label-datanode label-datanode-internal" ' +
+                'contenteditable=false draggable=true data-value="${name}">' +
+                '<i class="${icon}">&nbsp;</i>${name}' +
+                '<i class="close">&times;</i></span>';
         }
 
         util.questionAutocomplete(widget.input, mug, {
@@ -754,11 +760,12 @@ define([
         });
         var paths = new logic.LogicExpression(val).getPaths();
         _.each(paths, function(path) {
-            el.html(el.html().replace(path.toXPath(), $('<div>').append(replaceOuputRef(form, path.toXPath(), withClose, true)).html()));
+            var newPath = replaceOuputRef(form, path.toXPath(), withClose, true);
+            el.html(el.html().replace(path.toXPath(),
+                                      $('<div>').append(newPath).html()));
         });
         return el.html();
     }
-    
 
     return {
         base: base,
