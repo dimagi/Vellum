@@ -265,9 +265,11 @@ define([
             util.assertJSTreeState("");
         });
 
-        function getInstanceSrc(id, form) {
-            var $xml = $(_.isString(form) ? form : form.createXML());
-            return $xml.find("instance[id='" + id + "']").attr("src");
+        function assertInstanceSrc(id, form, expect, message) {
+            var xml = _.isString(form) ? form : form.createXML(),
+                $xml = $(xml),
+                result = $xml.find("instance[id='" + id + "']").attr("src");
+            assert.equal(result, expect, message ? message + "\n" + xml : "");
         }
 
         it("should not drop referenced instance on delete dynamic select", function() {
@@ -283,10 +285,9 @@ define([
                     '"labelRef":"name","valueRef":"@id"}]']
             ]);
             util.deleteQuestion("select");
-            var xml = form.createXML();
-            assert.equal(getInstanceSrc("some-fixture", form),
-                         "jr://fixture/item-list:some-fixture",
-                         "some-fixture instance not found\n" + xml);
+            assertInstanceSrc("some-fixture", form,
+                "jr://fixture/item-list:some-fixture",
+                "some-fixture instance not found");
         });
 
         it("should drop instance on delete last reference", function() {
@@ -297,12 +298,11 @@ define([
                  "instance('some-fixture')/some-fixture_list/some-fixture/@id",
                  '{"some-fixture":"jr://fixture/item-list:some-fixture"}'],
             ]);
-            assert.equal(getInstanceSrc("some-fixture", form),
-                         "jr://fixture/item-list:some-fixture");
+            assertInstanceSrc("some-fixture", form,
+                "jr://fixture/item-list:some-fixture");
             util.deleteQuestion("hidden");
-            var xml = form.createXML();
-            assert.equal(getInstanceSrc("some-fixture", xml), undefined,
-                "some-fixture instance not found\n" + xml);
+            assertInstanceSrc("some-fixture", form, undefined,
+                "some-fixture instance not found");
         });
 
         it("should maintain instance on delete and re-add last reference", function() {
@@ -314,13 +314,66 @@ define([
                  '{"some-fixture":"jr://fixture/item-list:some-fixture"}'],
             ]);
             util.deleteQuestion("hidden");
-            assert.equal(getInstanceSrc("some-fixture", form), undefined);
+            assertInstanceSrc("some-fixture", form, undefined);
             var hid = util.addQuestion("DataBindOnly", "hid");
             hid.p.calculateAttr = "instance('some-fixture')/some-fixture_list/some-fixture/@id";
-            var xml = form.createXML();
-            assert.equal(getInstanceSrc("some-fixture", form),
-                         "jr://fixture/item-list:some-fixture",
-                         "some-fixture instance not found\n" + xml);
+            assertInstanceSrc("some-fixture", form,
+                "jr://fixture/item-list:some-fixture",
+                "some-fixture instance not found");
+        });
+
+        describe("instance tracker", function () {
+            var form, mug, prop = "calculateAttr";
+            before(function () {
+                form = util.loadXML("");
+                mug = util.addQuestion("DataBindOnly", "hid");
+                prop = "calculateAttr";
+                form.addInstanceIfNotExists(
+                        {id: "old", src: "old://"}, mug, "relevantAttr");
+                form.addInstanceIfNotExists({id: "blank"}, mug, "relevantAttr");
+                form.updateKnownInstances({"known": "known://"});
+            });
+
+            _.each([
+                // [attrs, expectId, expectSrc]
+                [{id: "new0", src: null}, "new0", undefined],
+                [{id: "new1", src: "new://1"}, "new1", "src"],
+                [{id: "new2", src: "old://"}, "old", "src"],
+                [{id: "old", src: null}, "old", "old://"],
+                [{id: "old", src: "new://3"}, "old-1", "src"],
+                [{id: "old", src: "old://"}, "old", "src"],
+                [{id: "any", src: "old://"}, "old", "src"],
+                [{id: "known", src: null}, "known", "known://"],
+                [{id: "blank", src: "blank://"}, "blank", "src"],
+                [{id: null, src: "new://5"}, "data-1", "src"],
+                //[{id: null, src: null}, "data-1", "src"],     Error!
+            ], function (item) {
+                var attrs = item[0],
+                    expectId = item[1],
+                    expectSrc = item[2] === "src" ? attrs.src : item[2];
+                it("should add instance " + JSON.stringify(attrs) + " -> " +
+                        expectId + ": " + expectSrc, function () {
+                    assertInstanceSrc(expectId, form,
+                        expectId === "old" ? expectSrc : undefined);
+                    var result = form.addInstanceIfNotExists(attrs, mug, prop);
+                    if (_.isRegExp(expectId)) {
+                        chai.expect(result).to.match(expectId);
+                    } else {
+                        assert.equal(result, expectId);
+                    }
+                    assertInstanceSrc(expectId, form, expectSrc,
+                        expectId + " instance not found");
+                    form.dropAllInstanceReferences(mug, prop);
+                    if (expectId === "old" || expectId === "blank") {
+                        assertInstanceSrc(expectId, form, expectSrc,
+                            expectId + " instance should be removed");
+                    } else {
+                        assertInstanceSrc(expectId, form, undefined,
+                            expectId + " instance should be removed");
+                    }
+                });
+            });
+
         });
     });
 });
