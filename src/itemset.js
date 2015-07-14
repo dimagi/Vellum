@@ -116,6 +116,9 @@ define([
                     var itemsetData = mug.p.itemsetData;
                     if (!itemsetData.nodeset) {
                         return "A data source must be selected.";
+                    } else {
+                        mug.form.updateLogicReferences(
+                            mug, "itemsetData", itemsetData.nodeset);
                     }
                     if (!itemsetData.valueRef) {
                         return "Choice Value must be specified.";
@@ -251,7 +254,7 @@ define([
                     mug.p.filter = nodeset.filter;
                     mug.p.itemsetData = {
                         instance: form.parseInstance(
-                                    nodeset.value, mug, "itemsetData.instance"),
+                                    nodeset.value, mug, "itemsetData"),
                         nodeset: nodeset.value,
                         labelRef: $element.children('label').attr('ref'),
                         valueRef: $element.children('value').attr('ref')

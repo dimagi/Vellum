@@ -344,6 +344,10 @@ define([
          *
          * This adds a reference to the instance if found.
          *
+         * TODO eliminate this method after refactoring callers to not
+         * use it (there can be more than one instance reference in an
+         * XPath query, so this doesn't make much sense).
+         *
          * @param query - A query string, which may start with "instance(...)"
          * @param mug - The mug with which this query is associated.
          * @param property - (optional) The mug property name for the query.
@@ -421,9 +425,17 @@ define([
         updateKnownInstances: function (map) {
             var instances = this.knownInstances;
             if (map) {
+                var metas = _.indexBy(this.instanceMetadata, function (m) {
+                    return m.attributes.id;
+                });
                 _.each(map, function (src, id) {
                     if (src && !instances.hasOwnProperty(id)) {
                         instances[id] = src;
+                        var meta = metas[id];
+                        if (meta && meta.internal) {
+                            meta.internal = false;
+                            meta.attributes.src = src;
+                        }
                     }
                 });
             } else {
@@ -781,8 +793,8 @@ define([
 
             return [duplicate, pathReplacements];
         },
-        updateLogicReferences: function (mug, property) {
-            this._logicManager.updateReferences(mug, property);
+        updateLogicReferences: function (mug, property, value) {
+            this._logicManager.updateReferences(mug, property, value);
         },
         /**
          * Determine if a mug property should change

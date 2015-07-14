@@ -12,6 +12,8 @@
 				</data>
 			</instance>
 			<instance id="ledger" src="jr://instance/ledgerdb" />
+			<instance id="commcaresession" src="jr://instance/session" />
+			<instance id="casedb" src="jr://instance/casedb" />
 			<instance id="products" src="jr://fixture/commtrack:products" />
 			<bind nodeset="/data/amount_received" type="xsd:int" />
 			<bind nodeset="/data/transfer[@type='trans-1']" relevant="true()" />

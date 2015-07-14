@@ -140,6 +140,12 @@ define([
                     visibility: 'visible_if_present',
                     presence: 'optional',
                     widget: idsQueryDataSourceWidget,
+                    validationFunc: function (mug) {
+                        if (mug.p.dataSource.idsQuery) {
+                            mug.form.updateLogicReferences(
+                                mug, "dataSource", mug.p.dataSource.idsQuery);
+                        }
+                    },
                     serialize: function (value, key, mug, data) {
                         if (value && value.idsQuery) {
                             return {idsQuery:
@@ -250,7 +256,7 @@ define([
             });
             if (mug.p.dataSource.idsQuery) {
                 mug.p.dataSource.instance = mug.form.parseInstance(
-                        mug.p.dataSource.idsQuery, mug, "dataSource.instance");
+                        mug.p.dataSource.idsQuery, mug, "dataSource");
             } else {
                 // keep paths consistent for malformed model repeat with
                 // missing IDs query. this XPath returns the empty set
