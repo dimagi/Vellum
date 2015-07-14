@@ -309,7 +309,7 @@ define([
                 if (editor) {
                     editor.destroy();
                 }
-            });
+            }, null, "teardown-mug-properties");
 
             editor.on('change', function() { widget.handleChange(); });
             editor.on('afterInsertHtml', function (e) {
