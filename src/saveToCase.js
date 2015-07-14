@@ -184,18 +184,24 @@ define([
                     visibility: 'visible',
                     presence: 'required',
                     widget: widgets.xPath,
+                    serialize: mugs.serializeXPath,
+                    deserialize: mugs.deserializeXPath,
                 },
                 "user_id": {
                     lstring: "User ID",
                     visibility: 'visible',
                     presence: 'optional',
-                    widget: widgets.xPath
+                    widget: widgets.xPath,
+                    serialize: mugs.serializeXPath,
+                    deserialize: mugs.deserializeXPath,
                 },
                 "case_id": {
                     lstring: "Case ID",
                     visibility: 'visible',
                     presence: 'required',
                     widget: widgets.xPath,
+                    serialize: mugs.serializeXPath,
+                    deserialize: mugs.deserializeXPath,
                 },
                 useCreate: {
                     lstring: "Create Case",
@@ -246,7 +252,9 @@ define([
                     lstring: "Close Condition",
                     visibility: 'visible',
                     presence: 'optional',
-                    widget: widgets.xPath
+                    widget: widgets.xPath,
+                    serialize: mugs.serializeXPath,
+                    deserialize: mugs.deserializeXPath,
                 },
                 useUpdate: {
                     lstring: "Update Case",

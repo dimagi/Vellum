@@ -140,6 +140,23 @@ define([
                     visibility: 'visible_if_present',
                     presence: 'optional',
                     widget: idsQueryDataSourceWidget,
+                    serialize: function (value, key, mug, data) {
+                        if (value && value.idsQuery) {
+                            return {idsQuery:
+                                mugs.serializeXPath(value.idsQuery, key, mug, data)};
+                        }
+                    },
+                    deserialize: function (data, key, mug) {
+                        var value = mugs.deserializeXPath(data, key, mug) || {};
+                        if (value && value.instance &&
+                                     value.instance.id && value.instance.src) {
+                            // legacy serialization format
+                            var instances = {};
+                            instances[value.instance.id] = value.instance.src;
+                            mug.form.updateKnownInstances(instances);
+                        }
+                        return {idsQuery: value.idsQuery};
+                    }
                 }
             },
             ignoreReferenceWarning: function(mug) {

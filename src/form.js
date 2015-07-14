@@ -361,6 +361,26 @@ define([
             }
             return instance;
         },
+        /**
+         * Parse query and get a mapping of instance id: src
+         *
+         * @param query - A query string, which may contain "instance(...)"
+         * @param mug - The mug with which this query is associated.
+         * @param property - (optional) The mug property name for the query.
+         * @reutrns - {<id>: <src>, ...}
+         */
+        parseInstanceRefs: function (query, mug, property) {
+            var expr = new logic.LogicExpression(query),
+                knownInstances = this.knownInstances,
+                instances = {};
+            expr.analyze();
+            _.each(expr.instanceRefs, function (ignore, id) {
+                if (knownInstances.hasOwnProperty(id) && knownInstances[id]) {
+                    instances[id] = knownInstances[id];
+                }
+            });
+            return instances;
+        },
         referenceInstance: function (id, mug, property) {
             function idMatch(meta) {
                 return meta.attributes.id === id;

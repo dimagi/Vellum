@@ -695,6 +695,17 @@ define([
         }
     };
 
+    /**
+     * Add instances referenced to serialized data
+     */
+    function serializeXPath(value, key, mug, data) {
+        if (value && /\binstance\(/.test(value)) {
+            data.instances = _.extend(data.instances || {},
+                                      mug.form.parseInstanceRefs(value));
+        }
+        return value || undefined;
+    }
+
     function deserializeXPath(data, key, mug) {
         if (data.hasOwnProperty("instances") && !_.isEmpty(data.instances)) {
             mug.form.updateKnownInstances(data.instances);
@@ -823,6 +834,7 @@ define([
                 presence: 'optional',
                 widget: widgets.xPath,
                 xpathType: "bool",
+                serialize: serializeXPath,
                 deserialize: deserializeXPath,
                 lstring: 'Display Condition'
             },
@@ -835,6 +847,7 @@ define([
                 presence: 'optional',
                 widget: widgets.xPath,
                 xpathType: "generic",
+                serialize: serializeXPath,
                 deserialize: deserializeXPath,
                 lstring: 'Calculate Condition'
             },
@@ -846,6 +859,7 @@ define([
                 },
                 widget: widgets.xPath,
                 xpathType: "bool",
+                serialize: serializeXPath,
                 deserialize: deserializeXPath,
                 lstring: 'Validation Condition'
             },
@@ -883,6 +897,7 @@ define([
                 lstring: 'Default Value',
                 widget: widgets.xPath,
                 xpathType: 'generic',
+                serialize: serializeXPath,
                 deserialize: deserializeXPath,
                 validationFunc: function (mug) {
                     var paths = new logic.LogicExpression(mug.p.defaultValue).getPaths();
@@ -1613,6 +1628,8 @@ define([
         MugMessages: MugMessages,
         WARNING: Mug.WARNING,
         ERROR: Mug.ERROR,
-        baseSpecs: baseSpecs
+        baseSpecs: baseSpecs,
+        deserializeXPath: deserializeXPath,
+        serializeXPath: serializeXPath,
     };
 });
