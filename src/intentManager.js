@@ -146,39 +146,18 @@ define([
         };
         return that;
     };
-    
+
     function androidIntentAppId(mug, options) {
-        options.id = "intent-app-id";
-        var widget = widgets.base(mug, options);
+        var widget = widgets.text(mug, options),
+            input = widget.input;
 
-        widget.definition = mug.p.getDefinition('androidIntentAppId');
+        input.attr('placeholder', 'Insert Android Application ID');
         widget.currentValue = (mug.intentTag) ? mug.intentTag.getAttr('path') : "";
-        
-        var input = $("<input />")
-            .attr("name", widget.id)
-            .attr("type", "text")
-            .attr('placeholder', 'Insert Android Application ID');
-
-        widget.getControl = function () {
-            if (widget.isDisabled()) {
-                input.prop('disabled', true);
-            }
-            return input;
-        };
-
-        widget.setValue = function (value) {
-            input.val(value);
-        };
-
-        widget.getValue = function() {
-            return input.val();
-        };
 
         widget.updateValue = function () {
             widget.mug.intentTag.setAttr('path', widget.getValue());
         };
 
-        input.bind("change keyup", widget.updateValue);
         return widget;
     }
 

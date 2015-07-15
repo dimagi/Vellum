@@ -310,7 +310,7 @@ require([
                             .val("item1 custom hin").change();
 
                         clickQuestion("question22/question23/question7");
-                        $("[name='intent-app-id']").val("app_id").change();
+                        $("[name='property-androidIntentAppId']").val("app_id").change();
                         $("[name='intent-extra'] .fd-kv-key").val('key1').change();
                         $("[name='intent-extra'] .fd-kv-val").val('value1').change();
                         $("[name='intent-response'] .fd-kv-key").val('key2').change();
