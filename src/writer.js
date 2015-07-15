@@ -100,7 +100,7 @@ define([
         if (!instanceMetadata.internal) {
             writer.writeStartElement('instance');
             _writeInstanceAttributes(writer, instanceMetadata);
-            if (instanceMetadata.children) {
+            if (instanceMetadata.children.length) {
                 // seriously, this is what you have to do
                 // HT: http://stackoverflow.com/questions/652763/jquery-object-to-string
                 writer.writeXML($('<div>').append(instanceMetadata.children).clone().html());
