@@ -268,7 +268,7 @@ define([
         function assertInstanceSrc(id, form, expect, message) {
             var xml = _.isString(form) ? form : form.createXML(),
                 $xml = $(xml),
-                result = $xml.find("instance[id='" + id + "']").attr("src");
+                result = $xml.find("model > instance[id='" + id + "']").attr("src");
             assert.equal(result, expect, message ? message + "\n" + xml : "");
         }
 
