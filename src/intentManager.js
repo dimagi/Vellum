@@ -16,11 +16,11 @@ define([
     var DEFAULT_XMLNS = "http://opendatakit.org/xforms",
         unmappedIntentTags = {},
         INTENT_SPECIFIC_SPECS = [
-                "androidIntentAppId",
-                "androidIntentExtra",
-                "androidIntentResponse",
-                "unknownAttrs",
-                "intentXmlns",
+            "androidIntentAppId",
+            "androidIntentExtra",
+            "androidIntentResponse",
+            "unknownAttrs",
+            "intentXmlns",
         ];
 
     function makeODKXIntentTag (nodeID, appID) {
@@ -118,22 +118,19 @@ define([
             writeXML(xmlWriter, tag);
         });
 
-        var intents,
-        getIntentMugs = function(node) {
+        function getIntentMugs(node) {
             var mug = node.getValue();
             if (!mug || node.isRootNode) {
                 return null;
             }
             if (mug.options.dataType === 'intent') {
-                return mug;
+                writeXML(xmlWriter, mug.p);
             } else {
                 return null;
             }
-        };
-        intents = tree.treeMap(getIntentMugs);
-        intents.map(function (intentMug) {
-            writeXML(xmlWriter, intentMug.p);
-        });
+        }
+
+        tree.treeMap(getIntentMugs);
     }
 
     function androidIntentAppId(mug, options) {
