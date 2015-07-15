@@ -14,11 +14,18 @@ define([
 ) {
     "use strict";
     var DEFAULT_XMLNS = "http://opendatakit.org/xforms",
-        unmappedIntentTags = {};
+        unmappedIntentTags = {},
+        INTENT_SPECIFIC_SPECS = [
+                "androidIntentAppId",
+                "androidIntentExtra",
+                "androidIntentResponse",
+                "unknownAttrs",
+                "intentXmlns",
+    ];
 
-    function makeODKXIntentTag (nodeID, path) {
+    function makeODKXIntentTag (nodeID, appID) {
         return {
-            androidIntentAppId: path || "",
+            androidIntentAppId: appID || "",
             intentXmlns: DEFAULT_XMLNS,
             androidIntentExtra: {},
             androidIntentResponse: {},
@@ -88,31 +95,20 @@ define([
         });
     }
 
-    function getParsedIntentTagWithID (nodeID) {
-        var intentTag = null;
-        _.each(unmappedIntentTags, function (tag) {
-            if (tag.nodeID === nodeID) {
-                intentTag = tag;
-            }
-        });
-        return intentTag;
-    }
-
     function syncMugWithIntent (mug) {
         // called when initializing a mug from a parsed form
         if (mug.__className === "AndroidIntent") {
             var nodeID = mug.p.nodeID,
-                tag = getParsedIntentTagWithID(nodeID);
+                tag = _.findWhere(unmappedIntentTags, {nodeID: nodeID});
+
             if (!tag) {
-                var path = (mug.intentTag) ? mug.intentTag.androidIntentAppId : null;
-                tag = makeODKXIntentTag(nodeID, path);
+                tag = makeODKXIntentTag(nodeID, null);
             }
-            mug.intentTag = tag;
-            mug.p.androidIntentAppId = tag.androidIntentAppId;
-            mug.p.androidIntentExtra = tag.androidIntentExtra;
-            mug.p.androidIntentResponse = tag.androidIntentResponse;
-            mug.p.unknownAttrs = tag.unknownAttrs;
-            mug.p.intentXmlns = tag.intentXmlns;
+
+            _.each(INTENT_SPECIFIC_SPECS, function (key) {
+                mug.p[key] = tag[key];
+            });
+
             delete unmappedIntentTags[tag.nodeID];
         }
     }
@@ -157,7 +153,6 @@ define([
         icon: 'icon-vellum-android-intent',
         isODKOnly: true,
         isTypeChangeable: false,
-        intentTag: null,
         init: function (mug, form) {
             mug.p.intentXmlns = mug.p.intentXmlns || DEFAULT_XMLNS;
         },
@@ -229,13 +224,7 @@ define([
             return types;
         },
         getMainProperties: function () {
-            return this.__callOld().concat([
-                "androidIntentAppId",
-                "androidIntentExtra",
-                "androidIntentResponse",
-                "unknownAttrs",
-                "intentXmlns",
-            ]);
+            return this.__callOld().concat(INTENT_SPECIFIC_SPECS);
         }
     });
 });
