@@ -189,7 +189,7 @@ define([
             $(window).resize();
         } else {
             var tree = vellum.$f.find(".fd-tree"),
-                height = panelHeight || Math.min(tree.height() / 2, 200);
+                height = panelHeight || tree.height() * 0.45;
             pane.css("height", height + "px");
             $(window).resize();
             fn.initDataBrowser(vellum);
