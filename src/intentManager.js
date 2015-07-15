@@ -133,13 +133,6 @@ define([
         tree.treeMap(getIntentMugs);
     }
 
-    function androidIntentAppId(mug, options) {
-        var widget = widgets.text(mug, options),
-            input = widget.input;
-        input.attr('placeholder', 'Insert Android Application ID');
-        return widget;
-    }
-
     function serializeAttrs(value, key, mug, data) {
         data[key] = _.omit(mug.p[key], "");
     }
@@ -158,7 +151,8 @@ define([
             androidIntentAppId: {
                 lstring: 'Intent ID',
                 visibility: 'visible',
-                widget: androidIntentAppId,
+                widget: widgets.text,
+                placeholder: 'Insert Android Application ID',
             },
             androidIntentExtra: {
                 lstring: 'Extra',
@@ -173,10 +167,8 @@ define([
                 serialize: serializeAttrs,
             },
             unknownAttrs: {
-                lstring: 'Unknown',
                 visibility: 'hidden',
                 presence: 'optional',
-                widget: widgets.baseKeyValue,
                 serialize: serializeAttrs,
             },
             intentXmlns: {

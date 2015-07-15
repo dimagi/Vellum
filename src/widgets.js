@@ -168,6 +168,10 @@ define([
             input = widget.input;
         input.attr("type", "text").addClass('input-block-level');
 
+        if (options.placeholder) {
+            input.attr('placeholder', options.placeholder);
+        }
+
         widget.setValue = function (value) {
             if (value) {
                 // <input> converts newlines to spaces; this preserves them
