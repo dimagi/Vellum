@@ -158,7 +158,6 @@ define([
         options.id = "intent-extra";
         var widget = widgets.baseKeyValue(mug, options);
         widget.currentValue = (mug.intentTag) ? mug.intentTag.getAttr('extra') : {};
-        widget.definition = mug.p.getDefinition('androidIntentExtra');
 
         widget.save = function () {
             if (widget.mug.intentTag) {
@@ -173,7 +172,6 @@ define([
         options.id = "intent-response";
         var widget = widgets.baseKeyValue(mug, options);
         widget.currentValue = (mug.intentTag) ? mug.intentTag.getAttr('response') : {};
-        widget.definition = mug.p.getDefinition('androidIntentResponse');
 
         widget.save = function () {
             if (widget.mug.intentTag) {

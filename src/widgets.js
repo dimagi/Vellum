@@ -354,7 +354,7 @@ define([
     var baseKeyValue = function (mug, options) {
         var widget = base(mug, options),
             id = options.id;
-        widget.definition = {};
+        widget.definition = mug.p.getDefinition(options.path);
 
         // todo make a style for this when vellum gets a facelift
         widget.kvInput = $('<div class="control-row" />').attr('name', id);
