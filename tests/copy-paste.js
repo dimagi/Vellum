@@ -824,25 +824,29 @@ require([
         it("should paste and copy an Android App Callout", function () {
             util.loadXML("");
             paste([
-                ["id", "type", "labelItext:en-default", "labelItext:hin-default", "intent"],
-                ["/app", "AndroidIntent", "app", "app", JSON.stringify({
-                    path: "app-id",
-                    xmlns: "commcare.org/xforms",
-                    extra: {key1:"val1", key2:"val2"},
-                    response: {key3: "val3"},
-                    unknownAttributes: {type: "robin"}
-                })],
+                ["id", "type", "labelItext:en-default", "labelItext:hin-default",
+                    "intentXmlns", "androidIntentAppId",
+                    "androidIntentExtra",
+                    "androidIntentResponse",
+                    "unknownAttrs"],
+                ["/app", "AndroidIntent", "app", "app",
+                    "commcare.org/xforms", "app-id",
+                    JSON.stringify({key1:"val1", key2:"val2"}),
+                    JSON.stringify({key3: "val3"}),
+                    JSON.stringify({type: "robin"})]
             ]);
             util.selectAll();
             eq(mod.copy(), [
-                ["id", "type", "labelItext:en-default", "labelItext:hin-default", "intent"],
-                ["/app", "AndroidIntent", "app", "app", JSON.stringify({
-                    path: "app-id",
-                    xmlns: "commcare.org/xforms",
-                    extra: {key1:"val1", key2:"val2"},
-                    response: {key3: "val3"},
-                    unknownAttributes: {type: "robin"}
-                })],
+                ["id", "type", "labelItext:en-default", "labelItext:hin-default",
+                    "androidIntentAppId",
+                    "androidIntentExtra",
+                    "androidIntentResponse",
+                    "intentXmlns", "unknownAttrs"],
+                ["/app", "AndroidIntent", "app", "app",
+                    "app-id",
+                    JSON.stringify({key1:"val1", key2:"val2"}),
+                    JSON.stringify({key3: "val3"}),
+                    "commcare.org/xforms", JSON.stringify({type: "robin"})]
             ]);
             var messages = util.getMug("app").messages.get();
             chai.expect(messages[0]).to.include("works on Android devices");
