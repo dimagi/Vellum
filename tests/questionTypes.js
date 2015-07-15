@@ -33,13 +33,10 @@ require([
                 type: 'Text',
                 nodeId: 'question1',
                 attrs: {
-                    keyAttr: 'jr preload key value',
                     dataValue: 'default data value',
                     constraintAttr: '/data/question20 = 2',
                     relevantAttr: '/data/question20',
                     requiredAttr: true,
-                    preload: "jr preload",
-                    preloadParams: "jr preload param"
                 },
                 inputs: {
                     calculateAttr: 0
