@@ -350,6 +350,7 @@ define([
     xPath.hasLogicReferences = true;
 
     var baseKeyValue = function (mug, options) {
+        // todo: make this inherit from normal
         var widget = base(mug, options),
             path = options.widgetValuePath || options.path,
             id = options.id || 'property-' + path;
@@ -393,7 +394,7 @@ define([
             });
         };
 
-         function getValues() {
+        function getValues() {
             var currentValues = {};
             _.each(widget.kvInput.find('.fd-kv-pair'), function (kvPair) {
                 var $pair = $(kvPair);
@@ -403,11 +404,7 @@ define([
         }
 
         widget.getValue = function() {
-            var values = _.clone(getValues());
-            if (!values[""]) {
-                delete values[""];
-            }
-            return values;
+            return _.omit(getValues(), "");
         };
 
         widget.updateValue = function () {

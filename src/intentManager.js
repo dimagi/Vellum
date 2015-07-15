@@ -21,7 +21,7 @@ define([
                 "androidIntentResponse",
                 "unknownAttrs",
                 "intentXmlns",
-    ];
+        ];
 
     function makeODKXIntentTag (nodeID, appID) {
         return {
@@ -72,25 +72,24 @@ define([
     function parseIntentTagsFromHead(tags) {
         unmappedIntentTags = {};
         _.each(tags, function (tagXML) {
-            var $tag, tagId, newTag, xmlns;
+            var $tag, tagId, newTag;
             $tag = $(tagXML);
 
             tagId = $tag.attr('id');
             newTag = makeODKXIntentTag(tagId, $tag.attr('class'));
 
-            xmlns = $tag.attr('xmlns:odkx');
-            newTag.xmlns = xmlns || newTag.intentXmlns;
+            newTag.xmlns = $tag.attr('xmlns:odkx') || newTag.intentXmlns;
             newTag.androidIntentExtra = parseInnerTags($tag, 'extra');
             newTag.androidIntentResponse = parseInnerTags($tag, 'response');
-            var unknowns = newTag.unknownAttrs;
-            _.each(tagXML.attributes, function (attr) {
-                if (attr.nodeName !== 'id' &&
-                    attr.nodeName !== 'class' &&
-                        attr.nodeName !== 'xmlns:odkx')
-                    {
-                        unknowns[attr.nodeName] = attr.nodeValue;
-                    }
-            });
+
+            _.chain(tagXML.attributes)
+             .filter(function(attr) {
+                 return !_.contains(['id', 'class', 'xmlns:odk'], attr.nodeName);
+             })
+             .each(function(attr) {
+                 newTag.unknownAttrs[attr.nodeName] = attr.nodeValue;
+             });
+
             unmappedIntentTags[tagId] = newTag;
         });
     }
@@ -144,6 +143,10 @@ define([
         return widget;
     }
 
+    function serializeAttrs(value, key, mug, data) {
+        data[key] = _.omit(mug.p[key], "");
+    }
+
     var AndroidIntent = util.extend(mugs.defaultOptions, {
         typeName: 'Android App Callout',
         dataType: 'intent',
@@ -164,26 +167,20 @@ define([
                 lstring: 'Extra',
                 visibility: 'visible',
                 widget: widgets.baseKeyValue,
-                serialize: function (value, key, mug, data) {
-                    data.androidIntentExtra = _.omit(mug.p.androidIntentExtra, "");
-                }
+                serialize: serializeAttrs,
             },
             androidIntentResponse: {
                 lstring: 'Response',
                 visibility: 'visible',
                 widget: widgets.baseKeyValue,
-                serialize: function (value, key, mug, data) {
-                    data.androidIntentResponse = _.omit(mug.p.androidIntentResponse, "");
-                }
+                serialize: serializeAttrs,
             },
             unknownAttrs: {
                 lstring: 'Unknown',
                 visibility: 'hidden',
                 presence: 'optional',
                 widget: widgets.baseKeyValue,
-                serialize: function (value, key, mug, data) {
-                    data.unknownAttrs = _.omit(mug.p.unknownAttrs, "");
-                }
+                serialize: serializeAttrs,
             },
             intentXmlns: {
                 visibility: 'hidden',
