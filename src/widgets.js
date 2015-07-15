@@ -353,8 +353,18 @@ define([
 
     var baseKeyValue = function (mug, options) {
         var widget = base(mug, options),
-            id = options.id;
+            path = options.widgetValuePath || options.path,
+            id = options.id || 'property-' + path;
         widget.definition = mug.p.getDefinition(options.path);
+
+        widget.mugValue = options.mugValue || function (mug, value) {
+            if (arguments.length === 1) {
+                return mug.p[path];
+            }
+            mug.p[path] = value;
+        };
+
+        widget.currentValue = widget.mugValue(mug);
 
         // todo make a style for this when vellum gets a facelift
         widget.kvInput = $('<div class="control-row" />').attr('name', id);
@@ -385,18 +395,18 @@ define([
             });
         };
 
-        widget.getValue = function () {
+         function getValues() {
             var currentValues = {};
             _.each(widget.kvInput.find('.fd-kv-pair'), function (kvPair) {
                 var $pair = $(kvPair);
                 currentValues[$pair.find('.fd-kv-key').val()] = $pair.find('.fd-kv-val').val();
             });
             return currentValues;
-        };
+        }
 
-        widget.getValidValues = function () {
-            var values = _.clone(widget.getValue());
-            if (values[""]) {
+        widget.getValue = function() {
+            var values = _.clone(getValues());
+            if (!values[""]) {
                 delete values[""];
             }
             return values;
@@ -413,6 +423,15 @@ define([
 
         widget.refreshControl = function () {
             widget.setValue(widget.getValue());
+        };
+
+        widget.save = function () {
+            widget.saving = true;
+            try {
+                widget.mugValue(mug, widget.getValue());
+            } finally {
+                widget.saving = false;
+            }
         };
 
         return widget;
