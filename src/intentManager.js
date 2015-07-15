@@ -15,30 +15,16 @@ define([
     "use strict";
     var DEFAULT_XMLNS = "http://opendatakit.org/xforms";
     function makeODKXIntentTag (nodeID, path) {
-        return new ODKXIntentTag({
-            path: path || "",
-            xmlns: DEFAULT_XMLNS,
-            extra: {},
-            response: {},
-            unknownAttributes: {},
-            initialNodeID: nodeID
-        });
+        return {
+            androidIntentAppId: path || "",
+            intentXmlns: DEFAULT_XMLNS,
+            androidIntentExtra: {},
+            androidIntentResponse: {},
+            unknownAttrs: {},
+            nodeID: nodeID
+        };
     }
-    function ODKXIntentTag(data) {
-        this._data = data || {};
-    }
-    ODKXIntentTag.prototype = {
-        setAttr: function (name, val) {
-            this._data[name] = val;
-        },
-        getAttr: function (name, default_) {
-            if (name in this._data) {
-                return this._data[name];
-            } else {
-                return default_;
-            }
-        }
-    };
+
     var parseInnerTags = function (tagObj, innerTag) {
         var store = {};
         _.each(tagObj.find(innerTag), function (inner) {
@@ -59,19 +45,18 @@ define([
             });
         }
     };
-    ODKXIntentTag.prototype.writeXML = function (xmlWriter, mug) {
+    function writeXML(xmlWriter, properties) {
         xmlWriter.writeStartElement('odkx:intent');
-        xmlWriter.writeAttributeString("xmlns:odkx", mug ? mug.p.intentXmlns : this.getAttr('xmlns'));
-        xmlWriter.writeAttributeString("id", mug ? mug.p.nodeID : this.getAttr('initialNodeID'));
-        xmlWriter.writeAttributeString("class", mug ? mug.p.androidIntentAppId : this.getAttr('path'));
-        var unknown = mug ? mug.p.unknownAttrs : this.getAttr('unknownAttributes');
-        _.each(unknown, function (value, name) {
+        xmlWriter.writeAttributeString("xmlns:odkx", properties.intentXmlns);
+        xmlWriter.writeAttributeString("id", properties.nodeID);
+        xmlWriter.writeAttributeString("class", properties.androidIntentAppId);
+        _.each(properties.unknownAttrs, function (value, name) {
             xmlWriter.writeAttributeString(name, value);
         });
-        writeInnerTagXML(xmlWriter, 'extra', mug ? mug.p.androidIntentExtra : this.getAttr('extra'));
-        writeInnerTagXML(xmlWriter, 'response', mug ? mug.p.androidIntentResponse : this.getAttr('response'));
+        writeInnerTagXML(xmlWriter, 'extra', properties.androidIntentExtra);
+        writeInnerTagXML(xmlWriter, 'response', properties.androidIntentResponse);
         xmlWriter.writeEndElement('odkx:intent');
-    };
+    }
 
     var intentManager = function () {
         var that = {};
@@ -86,10 +71,10 @@ define([
                 newTag = makeODKXIntentTag(tagId, $tag.attr('class'));
 
                 xmlns = $tag.attr('xmlns:odkx');
-                newTag.setAttr('xmlns', xmlns || newTag.getAttr('xmlns'));
-                newTag.setAttr('extra', parseInnerTags($tag, 'extra'));
-                newTag.setAttr('response', parseInnerTags($tag, 'response'));
-                var unknowns = newTag.getAttr('unknownAttributes');
+                newTag.xmlns = xmlns || newTag.intentXmlns;
+                newTag.androidIntentExtra = parseInnerTags($tag, 'extra');
+                newTag.androidIntentResponse = parseInnerTags($tag, 'response');
+                var unknowns = newTag.unknownAttrs;
                 _.each(tagXML.attributes, function (attr) {
                     if (attr.nodeName !== 'id' &&
                         attr.nodeName !== 'class' &&
@@ -105,7 +90,7 @@ define([
         that.getParsedIntentTagWithID = function (nodeID) {
             var intentTag = null;
             _.each(that.unmappedIntentTags, function (tag) {
-                if (tag.getAttr('initialNodeID') === nodeID) {
+                if (tag.nodeID === nodeID) {
                     intentTag = tag;
                 }
             });
@@ -118,23 +103,23 @@ define([
                 var nodeID = mug.p.nodeID,
                     tag = that.getParsedIntentTagWithID(nodeID);
                 if (!tag) {
-                    var path = (mug.intentTag) ? mug.intentTag.getAttr('path') : null;
+                    var path = (mug.intentTag) ? mug.intentTag.androidIntentAppId : null;
                     tag = makeODKXIntentTag(nodeID, path);
                 }
                 mug.intentTag = tag;
-                mug.p.androidIntentAppId = tag.getAttr('path');
-                mug.p.androidIntentExtra = tag.getAttr('extra');
-                mug.p.androidIntentResponse = tag.getAttr('response');
-                mug.p.unknownAttrs = tag.getAttr('unknownAttributes');
-                mug.p.intentXmlns = tag.getAttr('xmlns');
-                delete that.unmappedIntentTags[tag.getAttr('initialNodeID')];
+                mug.p.androidIntentAppId = tag.androidIntentAppId;
+                mug.p.androidIntentExtra = tag.androidIntentExtra;
+                mug.p.androidIntentResponse = tag.androidIntentResponse;
+                mug.p.unknownAttrs = tag.unknownAttrs;
+                mug.p.intentXmlns = tag.intentXmlns;
+                delete that.unmappedIntentTags[tag.nodeID];
             }
         };
 
         that.writeIntentXML = function (xmlWriter, tree) {
             // make sure any leftover intent tags are still kept
             _.each(that.unmappedIntentTags, function (tag) {
-               tag.writeXML(xmlWriter, null);
+               writeXML(xmlWriter, tag);
             });
 
             var intents,
@@ -152,7 +137,7 @@ define([
             intents = tree.treeMap(getIntentMugs);
             if (intents.length > 0) {
                 intents.map(function (intentMug) {
-                    intentMug.intentTag.writeXML(xmlWriter, intentMug);
+                    writeXML(xmlWriter, intentMug.p);
                 });
             }
         };
