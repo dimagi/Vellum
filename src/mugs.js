@@ -1061,8 +1061,6 @@ define([
                 relevant: mug.p.relevantAttr,
                 required: util.createXPathBoolFromJS(mug.p.requiredAttr),
                 calculate: mug.p.calculateAttr,
-                "jr:preload": mug.p.preload,
-                "jr:preloadParams": mug.p.preloadParams
             };
             _.each(mug.p.rawBindAttributes, function (value, key) {
                 if (!attrs.hasOwnProperty(key) || _.isUndefined(attrs[key])) {

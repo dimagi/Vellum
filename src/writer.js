@@ -134,7 +134,6 @@ define([
                 }
 
                 var dataValue = mug.p.dataValue,
-                    keyAttr = mug.p.keyAttr,
                     xmlnsAttr = mug.p.xmlnsAttr;
                 
                 if (dataValue){
@@ -142,9 +141,6 @@ define([
                 }
                 if (mug.options.writeDataNodeXML) {
                     mug.options.writeDataNodeXML(xmlWriter, mug);
-                }
-                if (keyAttr){
-                    xmlWriter.writeAttributeString("key", keyAttr);
                 }
                 if (xmlnsAttr){
                     xmlWriter.writeAttributeString("xmlns", xmlnsAttr);
