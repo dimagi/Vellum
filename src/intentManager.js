@@ -14,8 +14,8 @@ define([
 ) {
     "use strict";
     var DEFAULT_XMLNS = "http://opendatakit.org/xforms";
-    function makeODKXIntentTag (form, nodeID, path) {
-        return new ODKXIntentTag(form, {
+    function makeODKXIntentTag (nodeID, path) {
+        return new ODKXIntentTag({
             path: path || "",
             xmlns: DEFAULT_XMLNS,
             extra: {},
@@ -24,18 +24,12 @@ define([
             initialNodeID: nodeID
         });
     }
-    function ODKXIntentTag(form, data) {
-        this._form = form;
+    function ODKXIntentTag(data) {
         this._data = data || {};
     }
     ODKXIntentTag.prototype = {
         setAttr: function (name, val) {
             this._data[name] = val;
-            if (this._form) {
-                this._form.fire({
-                    type: 'change'
-                });
-            }
         },
         getAttr: function (name, default_) {
             if (name in this._data) {
@@ -89,7 +83,7 @@ define([
                 $tag = $(tagXML);
 
                 tagId = $tag.attr('id');
-                newTag = makeODKXIntentTag(null, tagId, $tag.attr('class'));
+                newTag = makeODKXIntentTag(tagId, $tag.attr('class'));
 
                 xmlns = $tag.attr('xmlns:odkx');
                 newTag.setAttr('xmlns', xmlns || newTag.getAttr('xmlns'));
@@ -125,10 +119,9 @@ define([
                     tag = that.getParsedIntentTagWithID(nodeID);
                 if (!tag) {
                     var path = (mug.intentTag) ? mug.intentTag.getAttr('path') : null;
-                    tag = makeODKXIntentTag(mug.form, nodeID, path);
+                    tag = makeODKXIntentTag(nodeID, path);
                 }
                 mug.intentTag = tag;
-                mug.intentTag._form = mug.form;
                 mug.p.androidIntentAppId = tag.getAttr('path');
                 mug.p.androidIntentExtra = tag.getAttr('extra');
                 mug.p.androidIntentResponse = tag.getAttr('response');
