@@ -51,11 +51,11 @@ define([
             });
         }
     };
-    ODKXIntentTag.prototype.writeXML = function (xmlWriter, currentNodeID) {
+    ODKXIntentTag.prototype.writeXML = function (xmlWriter, mug) {
         xmlWriter.writeStartElement('odkx:intent');
         xmlWriter.writeAttributeString("xmlns:odkx", this.getAttr('xmlns'));
-        xmlWriter.writeAttributeString("id", currentNodeID || this.getAttr('initialNodeID'));
-        xmlWriter.writeAttributeString("class", this.getAttr('path'));
+        xmlWriter.writeAttributeString("id", mug ? mug.p.nodeID : this.getAttr('initialNodeID'));
+        xmlWriter.writeAttributeString("class", mug ? mug.p.androidIntentAppId : this.getAttr('path'));
         _.each(this.getAttr('unknownAttributes'), function (value, name) {
             xmlWriter.writeAttributeString(name, value);
         });
@@ -114,6 +114,7 @@ define([
                 }
                 mug.intentTag = tag;
                 mug.intentTag._form = mug.form;
+                mug.p.androidIntentAppId = tag.getAttr('path');
                 delete that.unmappedIntentTags[tag.getAttr('initialNodeID')];
             }
         };
@@ -139,8 +140,7 @@ define([
             intents = tree.treeMap(getIntentMugs);
             if (intents.length > 0) {
                 intents.map(function (intentMug) {
-                    intentMug.intentTag.writeXML(
-                        xmlWriter, intentMug.p.nodeID);
+                    intentMug.intentTag.writeXML(xmlWriter, intentMug);
                 });
             }
         };
@@ -150,14 +150,7 @@ define([
     function androidIntentAppId(mug, options) {
         var widget = widgets.text(mug, options),
             input = widget.input;
-
         input.attr('placeholder', 'Insert Android Application ID');
-        widget.currentValue = (mug.intentTag) ? mug.intentTag.getAttr('path') : "";
-
-        widget.updateValue = function () {
-            widget.mug.intentTag.setAttr('path', widget.getValue());
-        };
-
         return widget;
     }
 
