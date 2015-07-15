@@ -162,7 +162,10 @@ define([
             vellum.handleDropFinish(target, path);
         }
         var MAX_OPEN_NODE = 50,
-            sources = _.indexBy(data, "id"),
+            sources = _.chain(data)
+                .map(function (src) { return [src.id, src]; })
+                .object()
+                .value(),
             nodes = [],
             seen = {};
         if (sources.commcaresession) {

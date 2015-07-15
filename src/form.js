@@ -292,9 +292,10 @@ define([
                 });
                 if (!meta) {
                     // attrs.src not found, try to find by id
-                    var ids = _.indexBy(this.instanceMetadata, function (m) {
-                            return m.attributes.id;
-                        });
+                    var ids = _.chain(this.instanceMetadata)
+                        .map(function (m) { return [m.attributes.id, m]; })
+                        .object()
+                        .value();
                     meta = attrs.id && ids.hasOwnProperty(attrs.id) ? ids[attrs.id] : null;
                     if (meta && meta.internal) {
                         // assign new src to internal instance
@@ -425,9 +426,10 @@ define([
         updateKnownInstances: function (map) {
             var instances = this.knownInstances;
             if (map) {
-                var metas = _.indexBy(this.instanceMetadata, function (m) {
-                    return m.attributes.id;
-                });
+                var metas = _.chain(this.instanceMetadata)
+                    .map(function (m) { return [m.attributes.id, m]; })
+                    .object()
+                    .value();
                 _.each(map, function (src, id) {
                     if (src && !instances.hasOwnProperty(id)) {
                         instances[id] = src;
