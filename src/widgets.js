@@ -70,9 +70,7 @@ define([
                 // setters, trigger mug validation because some mug
                 // property values have sub-properties that do not
                 // trigger mug property change events when they are
-                // changed. util.BoundPropertyMap is a possible
-                // alternative, but has its own set of complexities
-                // (binding event handlers to mug property values).
+                // changed. 
                 mug.validate(widget.path);
             }
             widget.fire("change");

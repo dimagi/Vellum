@@ -25,11 +25,25 @@ define([
         });
     }
     function ODKXIntentTag(form, data) {
-        util.BoundPropertyMap.call(this, form, data);
+        this._form = form;
+        this._data = data || {};
     }
-    ODKXIntentTag.prototype = Object.create(util.BoundPropertyMap.prototype);
-    ODKXIntentTag.prototype.clone = function () {
-        return new ODKXIntentTag(this._form, this._data);
+    ODKXIntentTag.prototype = {
+        setAttr: function (name, val) {
+            this._data[name] = val;
+            if (this._form) {
+                this._form.fire({
+                    type: 'change'
+                });
+            }
+        },
+        getAttr: function (name, default_) {
+            if (name in this._data) {
+                return this._data[name];
+            } else {
+                return default_;
+            }
+        }
     };
     var parseInnerTags = function (tagObj, innerTag) {
         var store = {};
