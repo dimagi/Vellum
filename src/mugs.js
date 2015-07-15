@@ -695,6 +695,24 @@ define([
         }
     };
 
+    /**
+     * Add instances referenced to serialized data
+     */
+    function serializeXPath(value, key, mug, data) {
+        if (value && /\binstance\(/.test(value)) {
+            data.instances = _.extend(data.instances || {},
+                                      mug.form.parseInstanceRefs(value));
+        }
+        return value || undefined;
+    }
+
+    function deserializeXPath(data, key, mug) {
+        if (data.hasOwnProperty("instances") && !_.isEmpty(data.instances)) {
+            mug.form.updateKnownInstances(data.instances);
+        }
+        return data[key];
+    }
+
     function resolveConflictedNodeId(mug) {
         // clear warning; mug already has copy-N-of-... ID
         mug.p.conflictedNodeId = null;
@@ -816,6 +834,8 @@ define([
                 presence: 'optional',
                 widget: widgets.xPath,
                 xpathType: "bool",
+                serialize: serializeXPath,
+                deserialize: deserializeXPath,
                 lstring: 'Display Condition'
             },
             calculateAttr: {
@@ -827,6 +847,8 @@ define([
                 presence: 'optional',
                 widget: widgets.xPath,
                 xpathType: "generic",
+                serialize: serializeXPath,
+                deserialize: deserializeXPath,
                 lstring: 'Calculate Condition'
             },
             constraintAttr: {
@@ -837,6 +859,8 @@ define([
                 },
                 widget: widgets.xPath,
                 xpathType: "bool",
+                serialize: serializeXPath,
+                deserialize: deserializeXPath,
                 lstring: 'Validation Condition'
             },
             // non-itext constraint message
@@ -873,6 +897,8 @@ define([
                 lstring: 'Default Value',
                 widget: widgets.xPath,
                 xpathType: 'generic',
+                serialize: serializeXPath,
+                deserialize: deserializeXPath,
                 validationFunc: function (mug) {
                     var paths = new logic.LogicExpression(mug.p.defaultValue).getPaths();
                     paths = _.filter(paths, function (path) {
@@ -1600,6 +1626,8 @@ define([
         MugMessages: MugMessages,
         WARNING: Mug.WARNING,
         ERROR: Mug.ERROR,
-        baseSpecs: baseSpecs
+        baseSpecs: baseSpecs,
+        deserializeXPath: deserializeXPath,
+        serializeXPath: serializeXPath,
     };
 });

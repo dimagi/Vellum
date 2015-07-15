@@ -697,6 +697,34 @@ require([
             assert(util.getMug("select/itemset"), "itemset should not be cut");
         });
 
+        it("should copy dynamic select with itemset data and instance", function () {
+            var data = [
+                ["id", "type", "labelItext:en-default", "labelItext:hin-default", "instances", "itemsetData"],
+                ["/select", "SelectDynamic", "select", "select", '{"foo":"jr://foo"}',
+                 '[{"instance":{"id":"foo","src":"jr://foo"},' +
+                   '"nodeset":"instance(\'foo\')/foo/items","labelRef":"@name","valueRef":"@id"}]'],
+            ];
+            util.loadXML("");
+            paste(data);
+            util.selectAll();
+            eq(mod.copy(), data);
+        });
+
+        it("should copy dynamic select with itemset data and filter", function () {
+            var data = [
+                ["id", "type", "labelItext:en-default", "labelItext:hin-default", "filter", "instances", "itemsetData"],
+                ["/select", "SelectDynamic", "select", "select",
+                 '["type = instance(\'fum\')/fum/@type"]',
+                 '{"foo":"jr://foo","fum":"jr://fum"}',
+                 '[{"instance":{"id":"foo","src":"jr://foo"},' +
+                   '"nodeset":"instance(\'foo\')/foo/items","labelRef":"@name","valueRef":"@id"}]'],
+            ];
+            util.loadXML("");
+            paste(data);
+            util.selectAll();
+            eq(mod.copy(), data);
+        });
+
         it("should show validation errors in tree after paste", function () {
             util.loadXML("");
             paste([
@@ -802,6 +830,20 @@ require([
         });
 
         it("should paste and copy a model iteration repeat group", function () {
+            var data = [
+                ['id', 'type', 'labelItext:en-default', 'labelItext:hin-default', 'dataSource', 'instances'],
+                ['/repeat/item', 'Repeat', 'repeat', 'repeat',
+                    '{"idsQuery":"instance(\'products\')/products/product/@id"}',
+                    '{"products":"jr://commtrack:products"}'],
+            ];
+            util.loadXML("");
+            paste(data);
+            util.selectAll();
+            eq(mod.copy(), data);
+            assert(util.isTreeNodeValid("repeat/item"), util.getMessages("repeat/item"));
+        });
+
+        it("should paste (legacy format) and copy a model iteration repeat group", function () {
             util.loadXML("");
             paste([
                 ['id', 'type', 'labelItext:en-default', 'labelItext:hin-default', 'dataSource'],
@@ -812,11 +854,10 @@ require([
             ]);
             util.selectAll();
             eq(mod.copy(), [
-                ['id', 'type', 'labelItext:en-default', 'labelItext:hin-default', 'dataSource'],
+                ['id', 'type', 'labelItext:en-default', 'labelItext:hin-default', 'dataSource', 'instances'],
                 ['/repeat/item', 'Repeat', 'repeat', 'repeat',
-                    '{"instance":' +
-                        '{"id":"products","src":"jr://commtrack:products"},' +
-                        '"idsQuery":"instance(\'products\')/products/product/@id"}'],
+                    '{"idsQuery":"instance(\'products\')/products/product/@id"}',
+                    '{"products":"jr://commtrack:products"}'],
             ]);
             assert(util.isTreeNodeValid("repeat/item"), util.getMessages("repeat/item"));
         });
