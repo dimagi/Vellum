@@ -132,11 +132,9 @@ define([
             }
         };
         intents = tree.treeMap(getIntentMugs);
-        if (intents.length > 0) {
-            intents.map(function (intentMug) {
-                writeXML(xmlWriter, intentMug.p);
-            });
-        }
+        intents.map(function (intentMug) {
+            writeXML(xmlWriter, intentMug.p);
+        });
     }
 
     function androidIntentAppId(mug, options) {
