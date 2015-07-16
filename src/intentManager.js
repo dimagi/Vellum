@@ -14,7 +14,6 @@ define([
 ) {
     "use strict";
     var DEFAULT_XMLNS = "http://opendatakit.org/xforms",
-        unmappedIntentTags = {},
         INTENT_SPECIFIC_SPECS = [
             "androidIntentAppId",
             "androidIntentExtra",
@@ -69,8 +68,9 @@ define([
         xmlWriter.writeEndElement('odkx:intent');
     }
 
-    function parseIntentTagsFromHead(tags) {
-        unmappedIntentTags = {};
+    function parseIntentTags(tags) {
+        var intentTags = {};
+
         _.each(tags, function (tagXML) {
             var $tag, tagId, newTag;
             $tag = $(tagXML);
@@ -90,15 +90,17 @@ define([
                  newTag.unknownAttrs[attr.nodeName] = attr.nodeValue;
              });
 
-            unmappedIntentTags[tagId] = newTag;
+            intentTags[tagId] = newTag;
         });
+
+        return intentTags;
     }
 
-    function syncMugWithIntent (mug) {
+    function syncMugWithIntent (tags, mug) {
         // called when initializing a mug from a parsed form
         if (mug.__className === "AndroidIntent") {
             var nodeID = mug.p.nodeID,
-                tag = _.findWhere(unmappedIntentTags, {nodeID: nodeID});
+                tag = _.findWhere(tags, {nodeID: nodeID});
 
             if (!tag) {
                 tag = makeODKXIntentTag(nodeID, null);
@@ -108,11 +110,11 @@ define([
                 mug.p[key] = tag[key];
             });
 
-            delete unmappedIntentTags[tag.nodeID];
+            delete tags[tag.nodeID];
         }
     }
 
-    function writeIntentXML (xmlWriter, tree) {
+    function writeIntentXML (unmappedIntentTags, xmlWriter, tree) {
         // make sure any leftover intent tags are still kept
         _.each(unmappedIntentTags, function (tag) {
             writeXML(xmlWriter, tag);
@@ -188,22 +190,23 @@ define([
 
     $.vellum.plugin("intents", {}, {
         loadXML: function (xml) {
-            parseIntentTagsFromHead($(xml).find('h\\:head, head')
-                                    .children("odkx\\:intent, intent"));
+            this.data.intents.unmappedIntentTags = parseIntentTags(
+                $(xml).find('h\\:head, head').children("odkx\\:intent, intent")
+            );
             this.__callOld();
         },
         contributeToHeadXML: function (xmlWriter, form) {
             this.__callOld();
-            writeIntentXML(xmlWriter, form.tree);
+            writeIntentXML(this.data.intents.unmappedIntentTags, xmlWriter, form.tree);
         },
         handleNewMug: function (mug) {
             var ret = this.__callOld();
-            syncMugWithIntent(mug);
+            syncMugWithIntent(this.data.intents.unmappedIntentTags, mug);
             return ret;
         },
         handleMugParseFinish: function (mug) {
             this.__callOld();
-            syncMugWithIntent(mug);
+            syncMugWithIntent(this.data.intents.unmappedIntentTags, mug);
         },
         getMugTypes: function () {
             var types = this.__callOld();
