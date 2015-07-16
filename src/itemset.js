@@ -1,22 +1,3 @@
-// Knockout might help make some of the binding here more maintainable.
-// Hopefully its not too hard to follow.
-
-// I chose to use regex parsing of nodeset filter conditions because it was fast
-// and I knew it would work, but we might want to switch to using the XPath
-// JISON parser if it can handle parsing nodesets with filter conditions in a
-// way that lets us test equality minus whitespace, quotes, etc.  For instance,
-// it currently prevents you from referencing instances with filter conditions
-// of their own in a filter condition.
-
-// I chose not to use the property/widget framework for each individual widget
-// because it seemed like the interactions between the different properties
-// would require a lot of complicated code to make it work with that framework.
-// It might be a good idea to flesh out the BoundPropertyMap thing using ES5
-// properties and then have some sort of formal system for mapping model objects
-// with nested properties to UI objects with nested properties.
-
-// It would be nice to convert the instance definition storage to use
-// first-class abstractions rather than simple hashes.
 define([
     'underscore',
     'jquery',
