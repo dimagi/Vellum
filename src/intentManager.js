@@ -134,7 +134,10 @@ define([
     }
 
     function serializeAttrs(value, key, mug, data) {
-        data[key] = _.omit(mug.p[key], "");
+        data[key] = _.clone(mug.p[key]);
+        if (data[key][""] === "") {
+            delete data[key][""];
+        }
     }
 
     var AndroidIntent = util.extend(mugs.defaultOptions, {
