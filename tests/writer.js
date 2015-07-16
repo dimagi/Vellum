@@ -24,7 +24,8 @@ require([
                     onReady: function () {
                         done();
                     }
-                }
+                },
+                features: {'experimental_ui': false},
             });
         });
 

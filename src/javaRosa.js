@@ -44,7 +44,8 @@ define([
             'default', 'short', 'long', 'audio', 'video', 'image'
         ],
         _nextItextItemKey = 1,
-        NO_MARKDOWN_MUGS = ['Item', 'Group', 'FieldList', 'Repeat'];
+        NO_MARKDOWN_MUGS = ['Item', 'Group', 'FieldList', 'Repeat'],
+        EXPERIMENTAL_UI;
 
     function ItextItem(options) {
         this.forms = options.forms || [];
@@ -818,56 +819,74 @@ define([
         var vellum = mug.form.vellum,
             Itext = vellum.data.javaRosa.Itext,
             // todo: id->class
-            id = "itext-" + language + "-" + options.itextType;
+            id = "itext-" + language + "-" + options.itextType,
+            widget;
         if (options.idSuffix) {
             id = id + options.idSuffix;
         }
         options.id = id;
 
-        var widget = widgets.multilineText(mug, options),
-            $input = widget.input;
+        if (EXPERIMENTAL_UI) {
+            widget = widgets.richtext(mug, options);
+        } else {
+            widget = widgets.multilineText(mug, options);
+        }
+
+        var $input = widget.input;
 
         if (options.path === 'labelItext') {
+            var insertTpl = '<output value="${name}" />';
+            $input.addClass('jstree-drop');
+
+            if (EXPERIMENTAL_UI) {
+                insertTpl = '<span ' +
+                    'class="label label-datanode label-datanode-internal" ' +
+                    'contenteditable=false draggable=true ' +
+                    'data-value=\'&lt;output value="${name}" /&gt;\'>' +
+                    '<i class="${icon}">&nbsp;</i>${name}'+
+                    '<i class="close">&times;</i></span>';
+            } else { 
+                $input.keydown(function (e) {
+                    // deletion of entire output ref in one go
+                    if (e && e.which === 8 || e.which === 46) {
+                        var control = widget.getControl()[0],
+                            pos = util.getCaretPosition(control),
+                            val = widget.getValue(),
+                            outputBegin = '<output',
+                            outputEnd = '/>',
+                            start,
+                            end,
+                            match;
+                        if (e.which === 8) {
+                            match = val.substr(pos - 2, 2);
+                            if (match === outputEnd) {
+                                start = val.lastIndexOf(outputBegin, pos);
+                                end = pos;
+                            }
+                        } else if (e.which === 46) {
+                            match = val.substr(pos, outputBegin.length);
+                            if (match === outputBegin) {
+                                end = val.indexOf(outputEnd, pos);
+                                end = end === -1 ? end : end + 2;
+                                start = pos;
+                            }
+                        }
+                        if (start || end && start !== -1 && end !== -1) {
+                            var noRef = val.slice(0, start) + val.slice(end, val.length);
+                            widget.setValue(noRef);
+                            util.setCaretPosition(control, start);
+                            e.preventDefault();
+                        }
+                    }
+                });
+            }
+
             util.questionAutocomplete($input, mug, {
                 category: "Output Value",
-                insertTpl: '<output value="${name}" />',
+                insertTpl: insertTpl,
                 property: "labelItext",
             });
 
-            $input.addClass('jstree-drop');
-            $input.keydown(function (e) {
-                // deletion of entire output ref in one go
-                if (e && e.which === 8 || e.which === 46) {
-                    var control = widget.getControl()[0],
-                        pos = util.getCaretPosition(control),
-                        val = widget.getValue(),
-                        outputBegin = '<output',
-                        outputEnd = '/>',
-                        start,
-                        end,
-                        match;
-                    if (e.which === 8) {
-                        match = val.substr(pos - 2, 2);
-                        if (match === outputEnd) {
-                            start = val.lastIndexOf(outputBegin, pos);
-                            end = pos;
-                        }
-                    } else if (e.which === 46) {
-                        match = val.substr(pos, outputBegin.length);
-                        if (match === outputBegin) {
-                            end = val.indexOf(outputEnd, pos);
-                            end = end === -1 ? end : end + 2;
-                            start = pos;
-                        }
-                    }
-                    if (start || end && start !== -1 && end !== -1) {
-                        var noRef = val.slice(0, start) + val.slice(end, val.length);
-                        widget.setValue(noRef);
-                        util.setCaretPosition(control, start);
-                        e.preventDefault();
-                    }
-                }
-            });
         }
 
         widget.displayName = options.displayName;
@@ -1288,7 +1307,11 @@ define([
     function insertOutputRef(vellum, target, path, mug, dateFormat) {
         var output = getOutputRef(path, dateFormat),
             form = vellum.data.core.form;
-        util.insertTextAtCursor(target, output, true);
+        if (EXPERIMENTAL_UI) {
+            target.ckeditor().editor.insertHtml(widgets.util.toRichText(output, form, true), 'text');
+        } else {
+            util.insertTextAtCursor(target, output, true);
+        }
         if (mug) {
             warnOnCircularReference('label', mug, path, 'output value', target.attr('name'));
             warnOnNonOutputableValue(form, mug, path);
@@ -1329,6 +1352,7 @@ define([
             this.data.javaRosa.ItextItem = ItextItem;
             this.data.javaRosa.ItextForm = ItextForm;
             this.data.javaRosa.ICONS = ICONS;
+            EXPERIMENTAL_UI = this.opts().features.experimental_ui;
         },
         handleDropFinish: function (target, path, mug) {
             var inItext = target &&

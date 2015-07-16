@@ -452,9 +452,12 @@ define([
     };
 
     fn.getMugDisplayName = function (mug) {
-        return mug.getDisplayName(
-            this.data.core.currentItextDisplayLanguage || 
+        var val = mug.getDisplayName(this.data.core.currentItextDisplayLanguage || 
             this.data.javaRosa.Itext.getDefaultLanguage());
+        if (this.opts().features.experimental_ui) {
+            val = widgets.util.toRichText(val, this.data.core.form);
+        }
+        return val;
     };
 
     fn.showSourceXMLModal = function (done) {
@@ -880,7 +883,7 @@ define([
             inst = $.jstree.reference(target);
         if (!inst && target.vellum("get") === source.vellum("get")) {
             // only when not dragging inside the tree
-            if (target.hasClass("jstree-drop")) {
+            if (target.hasClass("jstree-drop")  || target.parents('.jstree-drop').length > 0) {
                 data.helper.find('.jstree-icon').removeClass('jstree-er').addClass('jstree-ok');
             } else {
                 data.helper.find('.jstree-icon').removeClass('jstree-ok').addClass('jstree-er');
@@ -890,10 +893,14 @@ define([
         var vellum = $(data.data.obj.context).vellum("get"),
             target = $(data.event.target),
             inst = $.jstree.reference(target);
-        if (!inst && target.hasClass("jstree-drop") && vellum === target.vellum("get")) {
+
+        if (!inst && (target.hasClass("jstree-drop") || target.parents('.jstree-drop').length > 0) && vellum === target.vellum("get")) {
             if (data.data.origin) {
                 var node = data.data.origin.get_node(data.data.nodes[0]);
                 if (node.data && node.data.handleDrop) {
+                    if (!target.hasClass('jstree-drop')) {
+                        target = target.parents('.jstree-drop');
+                    }
                     node.data.handleDrop(target);
                 }
             }

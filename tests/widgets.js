@@ -35,7 +35,8 @@ require([
                                "modeliteration plugin should be enabled");
                         done();
                     }
-                }
+                },
+                features: {experimental_ui: false},
             });
         });
 

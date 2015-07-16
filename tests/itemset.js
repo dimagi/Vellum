@@ -34,7 +34,10 @@ require([
                 plugins: plugins,
                 javaRosa: {langs: ['en']},
                 core: {onReady: done},
-                features: {advanced_itemsets: false},
+                features: {
+                    advanced_itemsets: false,
+                    experimental_ui: false
+                },
             });
         }
         before(beforeFn);
