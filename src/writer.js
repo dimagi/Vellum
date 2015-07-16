@@ -32,7 +32,7 @@ define([
         
         // other instances
         for (var i = 1; i < form.instanceMetadata.length; i++) {
-            _writeInstance(xmlWriter, form.instanceMetadata[i], true);
+            _writeInstance(xmlWriter, form.instanceMetadata[i]);
         }
         
         createBindList(dataTree, xmlWriter);
@@ -95,16 +95,18 @@ define([
             }
         }
     };
-    
-    var _writeInstance = function (writer, instanceMetadata, manualChildren) {
-        writer.writeStartElement('instance');
-        _writeInstanceAttributes(writer, instanceMetadata);
-        if (manualChildren && instanceMetadata.children) {
-            // seriously, this is what you have to do
-            // HT: http://stackoverflow.com/questions/652763/jquery-object-to-string
-            writer.writeXML($('<div>').append(instanceMetadata.children).clone().html());
+
+    var _writeInstance = function (writer, instanceMetadata) {
+        if (!instanceMetadata.internal) {
+            writer.writeStartElement('instance');
+            _writeInstanceAttributes(writer, instanceMetadata);
+            if (instanceMetadata.children.length) {
+                // seriously, this is what you have to do
+                // HT: http://stackoverflow.com/questions/652763/jquery-object-to-string
+                writer.writeXML($('<div>').append(instanceMetadata.children).clone().html());
+            }
+            writer.writeEndElement();
         }
-        writer.writeEndElement(); 
     };
 
     var createDataBlock = function (form, dataTree, xmlWriter) {

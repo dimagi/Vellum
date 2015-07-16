@@ -98,10 +98,27 @@ define([
                 visibility: 'visible_if_present',
                 presence: 'optional',
                 widget: itemsetWidget,
+                serialize: function (value, key, mug, data) {
+                    value.nodeset = mugs.serializeXPath(value.nodeset, key, mug, data);
+                    return value;
+                },
+                deserialize: function (data, key, mug) {
+                    var value = mugs.deserializeXPath(data, key, mug);
+                    if (value && value.instance &&
+                                 value.instance.id && value.instance.src) {
+                        var instances = {};
+                        instances[value.instance.id] = value.instance.src;
+                        mug.form.updateKnownInstances(instances);
+                    }
+                    return value;
+                },
                 validationFunc: function (mug) {
                     var itemsetData = mug.p.itemsetData;
                     if (!itemsetData.nodeset) {
                         return "A data source must be selected.";
+                    } else {
+                        mug.form.updateLogicReferences(
+                            mug, "itemsetData", itemsetData.nodeset);
                     }
                     if (!itemsetData.valueRef) {
                         return "Choice Value must be specified.";
@@ -134,6 +151,8 @@ define([
                 presence: 'optional',
                 widget: widgets.xPath,
                 xpathType: 'bool',
+                serialize: mugs.serializeXPath,
+                deserialize: mugs.deserializeXPath,
                 visibility: 'visible',
                 leftPlaceholder: '',
                 autocompleteChoices: function(mug) {
@@ -155,13 +174,21 @@ define([
             presence: 'optional',
             visibility: 'hidden',
             serialize: function (value, key, mug, data) {
-                var children = mug.form.getChildren(mug);
-                return _.pluck(_.pluck(children, "p"), key);
+                value = _.chain(mug.form.getChildren(mug))
+                    .map(function (child) {
+                        return child.spec[key].serialize(child.p[key], key, child, data);
+                    })
+                    .filter(_.identity)
+                    .value();
+                return !_.isEmpty(value) ? value : undefined;
             },
             deserialize: function (data, key, mug) {
-                _.each(data[key], function (value) {
-                    var itemset = afterDynamicSelectInsert(mug.form, mug);
-                    itemset.p[key] = value;
+                _.each(data[key], function (value, i) {
+                    var children = mug.form.getChildren(mug),
+                        itemset = children[i] || afterDynamicSelectInsert(mug.form, mug),
+                        dat = _.clone(data);
+                    dat[key] = value;
+                    itemset.p[key] = itemset.spec[key].deserialize(dat, key, itemset);
                 });
             }
         };
@@ -191,6 +218,7 @@ define([
                     afterInsert: afterDynamicSelectInsert,
                     spec: {
                         itemsetData: itemsetDataSpec,
+                        filter: itemsetDataSpec,
                     }
                 }),
                 "SelectDynamic": util.extend(mugTypes.Select, {
@@ -203,6 +231,7 @@ define([
                     afterInsert: afterDynamicSelectInsert,
                     spec: {
                         itemsetData: itemsetDataSpec,
+                        filter: itemsetDataSpec,
                     }
                 })
             });
@@ -225,7 +254,7 @@ define([
                     mug.p.filter = nodeset.filter;
                     mug.p.itemsetData = {
                         instance: form.parseInstance(
-                                    nodeset.value, mug, "itemsetData.instance"),
+                                    nodeset.value, mug, "itemsetData"),
                         nodeset: nodeset.value,
                         labelRef: $element.children('label').attr('ref'),
                         valueRef: $element.children('value').attr('ref')

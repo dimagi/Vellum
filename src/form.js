@@ -211,6 +211,7 @@ define([
             _this.fireChange(e.mug);
         });
         this.instanceMetadata = [InstanceMetadata({})];
+        this.knownInstances = {}; // {<instance id>: <instance src>}
         this.enableInstanceRefCounting = opts.enableInstanceRefCounting;
         this.errors = [];
         this.question_counter = 1;
@@ -263,9 +264,10 @@ define([
          * Add an instance if it is not already on the form
          *
          * @param attrs - Instance attributes. The `src` attribute is used to
-         *          match other instances on the form, and is required. The
-         *          instance will be unconditionally added and it's id returned
-         *          if the instance has no `src` attribute.
+         *          match other instances on the form. A matching instance will
+         *          be found by `id` if the instance has no `src` attribute.
+         *          If no matching instance is found, a new instance will be
+         *          added with a unique `id`.
          * @param mug - (optional) The mug with which this query is associated.
          *          This and the next parameter are used for instance ref
          *          counting. If omitted, ref counting will be disabled for the
@@ -274,23 +276,64 @@ define([
          * @returns - The `id` of the added or already-existing instance.
          */
         addInstanceIfNotExists: function (attrs, mug, property) {
-            if (attrs.src === null || _.isUndefined(attrs.src)) {
-                // no ref counting for instances without a `src` since they cannot be dropped
-                this.instanceMetadata.push(InstanceMetadata({
-                    src: attrs.src,
-                    id: attrs.id
-                }));
-                return attrs.id;
+            function getUniqueId(id, ids) {
+                var temp = (id || "data") + "-",
+                    num = 1;
+                while (!id || ids.hasOwnProperty(id)) {
+                    id = temp + num;
+                    num++;
+                }
+                return id;
             }
-
-            var meta = _.find(this.instanceMetadata, function (m) {
+            var meta;
+            if (attrs.src) {
+                meta = _.find(this.instanceMetadata, function (m) {
                     return m.attributes.src === attrs.src;
                 });
+                if (!meta) {
+                    // attrs.src not found, try to find by id
+                    var ids = _.chain(this.instanceMetadata)
+                        .map(function (m) { return [m.attributes.id, m]; })
+                        .object()
+                        .value();
+                    meta = attrs.id && ids.hasOwnProperty(attrs.id) ? ids[attrs.id] : null;
+                    if (meta && meta.internal) {
+                        // assign new src to internal instance
+                        meta.internal = false;
+                        meta.attributes.src = attrs.src;
+                    } else {
+                        // assign unique id to attrs (will create new meta)
+                        attrs = _.clone(attrs);
+                        attrs.id = getUniqueId(attrs.id, ids);
+                        meta = null;
+                    }
+                    this.knownInstances[attrs.id] = attrs.src;
+                }
+            } else if (attrs.id) {
+                // attrs has no src, find by id
+                meta = _.find(this.instanceMetadata, function (m) {
+                    return m.attributes.id === attrs.id;
+                });
+                if (meta) {
+                    if (meta.internal && this.knownInstances.hasOwnProperty(attrs.id)) {
+                        meta.internal = false;
+                        meta.attributes.src = this.knownInstances[attrs.id];
+                    }
+                } else if (this.knownInstances.hasOwnProperty(attrs.id)) {
+                    attrs.src = this.knownInstances[attrs.id];
+                }
+            } else {
+                throw new Error("unsupported: non-primary instance without id or src");
+            }
             if (!meta) {
-                this.instanceMetadata.push(InstanceMetadata({
+                meta = InstanceMetadata({
                     src: attrs.src,
                     id: attrs.id
-                }, null, mug || null, property));
+                }, null, mug || null, property);
+                if (!attrs.src) {
+                    meta.internal = true;
+                }
+                this.instanceMetadata.push(meta);
                 return attrs.id;
             } else if (this.enableInstanceRefCounting) {
                 meta.addReference(mug, property);
@@ -302,6 +345,10 @@ define([
          *
          * This adds a reference to the instance if found.
          *
+         * TODO eliminate this method after refactoring callers to not
+         * use it (there can be more than one instance reference in an
+         * XPath query, so this doesn't make much sense).
+         *
          * @param query - A query string, which may start with "instance(...)"
          * @param mug - The mug with which this query is associated.
          * @param property - (optional) The mug property name for the query.
@@ -312,19 +359,45 @@ define([
                 instance = null;
             if (match) {
                 var instanceId = match[3],
-                    meta = this._referenceInstance(instanceId, mug, property);
+                    meta = this.referenceInstance(instanceId, mug, property);
                 if (meta) {
                     instance = _.clone(meta.attributes);
                 }
             }
             return instance;
         },
-        _referenceInstance: function (id, mug, property) {
-            var meta = _.find(this.instanceMetadata, function (meta) {
-                    return meta.attributes.id === id;
-                });
-            if (meta && this.enableInstanceRefCounting) {
-                meta.addReference(mug, property);
+        /**
+         * Parse query and get a mapping of instance id: src
+         *
+         * @param query - A query string, which may contain "instance(...)"
+         * @param mug - The mug with which this query is associated.
+         * @param property - (optional) The mug property name for the query.
+         * @reutrns - {<id>: <src>, ...}
+         */
+        parseInstanceRefs: function (query, mug, property) {
+            var expr = new logic.LogicExpression(query),
+                knownInstances = this.knownInstances,
+                instances = {};
+            expr.analyze();
+            _.each(expr.instanceRefs, function (ignore, id) {
+                if (knownInstances.hasOwnProperty(id) && knownInstances[id]) {
+                    instances[id] = knownInstances[id];
+                }
+            });
+            return instances;
+        },
+        referenceInstance: function (id, mug, property) {
+            function idMatch(meta) {
+                return meta.attributes.id === id;
+            }
+            var meta = _.find(this.instanceMetadata, idMatch);
+            if (this.enableInstanceRefCounting) {
+                if (meta) {
+                    meta.addReference(mug, property);
+                } else {
+                    id = this.addInstanceIfNotExists({id: id}, mug, property);
+                    meta = _.find(this.instanceMetadata, idMatch);
+                }
             }
             return meta || null;
         },
@@ -342,6 +415,38 @@ define([
                                     RegExp.escape(oldId) + "\2\\)", "ig");
             }
             return query.replace(regexp, "$1instance('" + instanceId + "')");
+        },
+        /**
+         * Update internal record of instances known by this form
+         *
+         * @param map - an object mapping instance IDs to instance sources.
+         *      If not given, update the form's internal known instances
+         *      using instance metadata in the form.
+         */
+        updateKnownInstances: function (map) {
+            var instances = this.knownInstances;
+            if (map) {
+                var metas = _.chain(this.instanceMetadata)
+                    .map(function (m) { return [m.attributes.id, m]; })
+                    .object()
+                    .value();
+                _.each(map, function (src, id) {
+                    if (src && !instances.hasOwnProperty(id)) {
+                        instances[id] = src;
+                        var meta = metas[id];
+                        if (meta && meta.internal) {
+                            meta.internal = false;
+                            meta.attributes.src = src;
+                        }
+                    }
+                });
+            } else {
+                _.each(this.instanceMetadata, function (meta) {
+                    if (meta.attributes.id && meta.attributes.src) {
+                        instances[meta.attributes.id] = meta.attributes.src;
+                    }
+                });
+            }
         },
         /**
          * Drop instance reference, possibly removing the instance
@@ -365,6 +470,14 @@ define([
                 }
             }
             return false;
+        },
+        /**
+         * Drop all instance references from the given mug/property
+         */
+        dropAllInstanceReferences: function (mug, property) {
+            this.instanceMetadata = _.filter(this.instanceMetadata, function (meta) {
+                return !meta.dropReference(mug, property);
+            });
         },
         // todo: update references on rename
         addSetValue: function (event, ref, value) {
@@ -682,8 +795,8 @@ define([
 
             return [duplicate, pathReplacements];
         },
-        updateLogicReferences: function (mug, property) {
-            this._logicManager.updateReferences(mug, property);
+        updateLogicReferences: function (mug, property, value) {
+            this._logicManager.updateReferences(mug, property, value);
         },
         /**
          * Determine if a mug property should change
