@@ -19,9 +19,7 @@ define(["underscore"], function (_) {
             uri: "jr://instance/casedb",
             path: "/cases/case",
             name: 'Cases',
-            structure: {
-                name: {},
-            },
+            structure: {},
             subsets: [{
                 id: "mother",
                 key: "@case_type",
@@ -65,14 +63,14 @@ define(["underscore"], function (_) {
                 },
             }]
         }, {
-            id: "some-fixture",
-            uri: "jr://fixture/item-list:some-fixture",
-            path: "/some-fixture_list/some-fixture",
-            name: 'some-fixture-name',
+            id: "fish",
+            uri: "jr://fixture/item-list:fish",
+            path: "/fishes/fish",
+            name: 'Fish',
             structure: {
-                "inner-attribute": {
+                "features": {
                     structure: {
-                        "extra-inner-attribute": {}
+                        "fins": {}
                     }
                 },
                 "@id": {

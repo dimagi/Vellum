@@ -8,7 +8,7 @@
 					<question2 />
 				</data>
 			</instance>
-			<instance id="some-fixture" src="jr://fixture/item-list:some-fixture" />
+			<instance id="fish" src="jr://fixture/item-list:fish" />
 			<bind nodeset="/data/question2" />
 			<itext>
 				<translation lang="en" default="">
@@ -22,7 +22,7 @@
 	<h:body>
 		<select1 ref="/data/question2">
 			<label ref="jr:itext('question2-label')" />
-            <itemset nodeset="instance('some-fixture')/some-fixture_list/some-fixture">
+            <itemset nodeset="instance('fish')/fishes/fish">
 				<label ref="name" />
 				<value ref="@id" />
 			</itemset>
