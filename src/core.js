@@ -877,10 +877,14 @@ define([
     $(document).on("dnd_move.vakata.jstree", function (e, data) {
         var source = $(data.data.obj.context),
             target = $(data.event.target),
-            inst = $.jstree.reference(target);
+            inst = $.jstree.reference(target),
+            node = null;
         if (!inst && target.vellum("get") === source.vellum("get")) {
             // only when not dragging inside the tree
-            if (target.hasClass("jstree-drop")) {
+            if (data.data.origin) {
+                node = data.data.origin.get_node(data.data.nodes[0]);
+            }
+            if (target.hasClass("jstree-drop") && node && node.data && node.data.handleDrop) {
                 data.helper.find('.jstree-icon').removeClass('jstree-er').addClass('jstree-ok');
             } else {
                 data.helper.find('.jstree-icon').removeClass('jstree-ok').addClass('jstree-er');
