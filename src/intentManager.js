@@ -100,11 +100,7 @@ define([
         // called when initializing a mug from a parsed form
         if (mug.__className === "AndroidIntent") {
             var nodeID = mug.p.nodeID,
-                tag = _.findWhere(tags, {nodeID: nodeID});
-
-            if (!tag) {
-                tag = makeODKXIntentTag(nodeID, null);
-            }
+                tag = tags.hasOwnProperty(nodeID) ? tags[nodeID] : makeODKXIntentTag(nodeID);
 
             _.each(INTENT_SPECIFIC_SPECS, function (key) {
                 mug.p[key] = tag[key];
