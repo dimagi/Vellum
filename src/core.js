@@ -1840,6 +1840,9 @@ define([
             url: url,
             data: data,
             dataType: 'json',
+            error: function() {
+                hidePageSpinner();
+            },
             success: function (data) {
                 if (saveType === 'patch') {
                     if (data.status === 'conflict') {
