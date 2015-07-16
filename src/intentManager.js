@@ -18,7 +18,7 @@ define([
             "androidIntentAppId",
             "androidIntentExtra",
             "androidIntentResponse",
-            "unknownAttrs",
+            "unknownAttributes",
             "intentXmlns",
         ];
 
@@ -28,7 +28,7 @@ define([
             intentXmlns: DEFAULT_XMLNS,
             androidIntentExtra: {},
             androidIntentResponse: {},
-            unknownAttrs: {},
+            unknownAttributes: {},
             nodeID: nodeID
         };
     }
@@ -60,7 +60,7 @@ define([
         xmlWriter.writeAttributeString("xmlns:odkx", properties.intentXmlns);
         xmlWriter.writeAttributeString("id", properties.nodeID);
         xmlWriter.writeAttributeString("class", properties.androidIntentAppId);
-        _.each(properties.unknownAttrs, function (value, name) {
+        _.each(properties.unknownAttributes, function (value, name) {
             xmlWriter.writeAttributeString(name, value);
         });
         writeInnerTagXML(xmlWriter, 'extra', properties.androidIntentExtra);
@@ -87,7 +87,7 @@ define([
                  return !_.contains(['id', 'class', 'xmlns:odk'], attr.nodeName);
              })
              .each(function(attr) {
-                 newTag.unknownAttrs[attr.nodeName] = attr.nodeValue;
+                 newTag.unknownAttributes[attr.nodeName] = attr.nodeValue;
              });
 
             intentTags[tagId] = newTag;
@@ -155,7 +155,7 @@ define([
                             ["intentXmlns", "xmlns"],
                             ["androidIntentExtra", "extra"],
                             ["androidIntentResponse", "response"],
-                            ["unknownAttrs", "unknownAttributes"],
+                            ["unknownAttributes", "unknownAttributes"],
                         ], function (keys) {
                             var attr = keys[0], key = keys[1];
                             if (!_.isEmpty(data.intent[key])) {
@@ -179,7 +179,7 @@ define([
                 widget: widgets.baseKeyValue,
                 serialize: serializeAttrs,
             },
-            unknownAttrs: {
+            unknownAttributes: {
                 visibility: 'hidden',
                 presence: 'optional',
                 serialize: serializeAttrs,
