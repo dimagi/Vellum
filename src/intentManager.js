@@ -147,6 +147,25 @@ define([
                 visibility: 'visible',
                 widget: widgets.text,
                 placeholder: 'Insert Android Application ID',
+                deserialize: function (data, key, mug) {
+                    if (data.intent) {
+                        // support old format for now
+                        mug.p.androidIntentAppId = data.intent.path || "";
+                        _.each([
+                            ["intentXmlns", "xmlns"],
+                            ["androidIntentExtra", "extra"],
+                            ["androidIntentResponse", "response"],
+                            ["unknownAttrs", "unknownAttributes"],
+                        ], function (keys) {
+                            var attr = keys[0], key = keys[1];
+                            if (!_.isEmpty(data.intent[key])) {
+                                mug.p[attr] = data.intent[key];
+                            }
+                        });
+                    } else {
+                        mug.p[key] = data[key];
+                    }
+                }
             },
             androidIntentExtra: {
                 lstring: 'Extra',
@@ -168,7 +187,7 @@ define([
             intentXmlns: {
                 visibility: 'hidden',
                 presence: 'optional',
-                lstring: "Special Intent XMLNS attribute"
+                lstring: "Special Intent XMLNS attribute",
             }
         },
         // todo: move to spec system
