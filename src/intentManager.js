@@ -116,19 +116,12 @@ define([
             writeXML(xmlWriter, tag);
         });
 
-        function getIntentMugs(node) {
+        tree.treeMap(function(node) {
             var mug = node.getValue();
-            if (!mug || node.isRootNode) {
-                return null;
-            }
-            if (mug.options.dataType === 'intent') {
+            if (mug && mug.options.dataType === 'intent') {
                 writeXML(xmlWriter, mug.p);
-            } else {
-                return null;
             }
-        }
-
-        tree.treeMap(getIntentMugs);
+        });
     }
 
     function serializeAttrs(value, key, mug, data) {
