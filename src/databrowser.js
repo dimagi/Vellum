@@ -97,8 +97,14 @@ define([
 
     function dataTreeJson(data, vellum) {
         function node(parentPath, info) {
+            var getPath = parentPath;
+            if (_.isString(parentPath)) {
+                getPath = function (id) { return parentPath + "/" + id; };
+            } else if (!_.isFunction(parentPath)) {
+                throw new Error("invalid parentPath: " + String(parentPath));
+            }
             return function (item, id) {
-                var path = parentPath ? (parentPath + "/" + id) : id,
+                var path = getPath(id, item),
                     tree = getTree(item, id, path, info);
                 return {
                     text: tree.name,
@@ -122,7 +128,7 @@ define([
                 var ref = item.reference;
                 source = sources[ref.source || info.id];
                 if (source) {
-                    info = _.extend(_.omit(source, "structure"), {_parent: info});
+                    info = getInfo(source, info);
                     path = "instance('" + source.id + "')" + source.path +
                            "[" + ref.key + "=" + path + "]";
                     if (source.subsets && ref.subset) {
@@ -165,34 +171,43 @@ define([
                     .value()
                     .concat(nodes);
             }
+            if (source && source.subsets) {
+                var getPath = function (id, sub) {
+                    return path + "[" + sub.key + "='" + id + "']";
+                };
+                nodes = _.map(source.subsets, function (sub) {
+                    return node(getPath, getInfo(sub, info))(sub, sub.id);
+                }).concat(nodes);
+            }
             return nodes;
+        }
+        function getInfo(item, parent) {
+            return {id: item.id, uri: item.uri, parent: parent};
         }
         function handleDrop(path, info, target) {
             var widget = widgets.util.getWidget(target, vellum);
             while (info) {
-                var id = widget.addInstanceRef({id: info.id, src: info.uri});
-                if (id !== info.id) {
-                    path = widget.mug.form.updateInstanceQuery(path, id, info.id);
+                if (info.uri) {
+                    var id = widget.addInstanceRef({id: info.id, src: info.uri});
+                    if (id !== info.id) {
+                        path = widget.mug.form.updateInstanceQuery(path, id, info.id);
+                    }
                 }
-                info = info._parent;
+                info = info.parent;
             }
             vellum.handleDropFinish(target, path);
         }
-        var MAX_OPEN_NODE = 50,
+        var MAX_OPEN_NODE = 10,
             sources = _.chain(data)
                 .map(function (src) { return [src.id, src]; })
                 .object()
                 .value(),
-            nodes = [],
             seen = {};
-        if (sources.commcaresession) {
-            var source = sources.commcaresession,
-                info = _.omit(source, "structure"),
+        return _.map(data, function (source) {
+            var info = getInfo(source),
                 path = "instance('" + source.id + "')" + source.path;
-            // do not show Session node for now
-            nodes = node(null, info)(source, path).children;
-        }
-        return nodes;
+            return node(_.identity, info)(source, path);
+        });
     }
 
     function toggleExternalDataTree(vellum) {
