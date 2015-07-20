@@ -11,6 +11,7 @@ define([
     'text!vellum/templates/multimedia_existing_image.html',
     'text!vellum/templates/multimedia_existing_audio.html',
     'text!vellum/templates/multimedia_existing_video.html',
+    'text!vellum/templates/multimedia_existing_text.html',
     'tpl!vellum/templates/multimedia_nomedia',
     'text!vellum/templates/multimedia_block.html',
     'vellum/core'
@@ -27,6 +28,7 @@ define([
     multimedia_existing_image,
     multimedia_existing_audio,
     multimedia_existing_video,
+    multimedia_existing_text,
     multimedia_nomedia,
     multimedia_block
 ) {
@@ -35,7 +37,7 @@ define([
     var SUPPORTED_EXTENSIONS = {
         image: [
             {
-                'description': 'Images',
+                'description': 'Image',
                 'extensions': '*.jpg;*.png;*.gif'
             }
         ],
@@ -50,22 +52,31 @@ define([
                 'description': 'Video',
                 'extensions': '*.3gp;*.mp4'
             }
-        ]
+        ],
+        text: [
+            {
+                'description': 'HTML',
+                'extensions': '*.html'
+            }
+        ],
     },
         PREVIEW_TEMPLATES = {
         image: multimedia_existing_image,
         audio: multimedia_existing_audio,
-        video: multimedia_existing_video
+        video: multimedia_existing_video,
+        text:  multimedia_existing_text,
     },
         SLUG_TO_CLASS = {
         image: 'CommCareImage',
         audio: 'CommCareAudio',
-        video: 'CommCareVideo'
+        video: 'CommCareVideo',
+        text:  'CommCareMultimedia',
     },
         SLUG_TO_UPLOADER_SLUG = {
         image: 'fd_hqimage',
         audio: 'fd_hqaudio',
-        video: 'fd_hqvideo'
+        video: 'fd_hqvideo',
+        text:  'fd_hqtext',
     };
 
     // These functions were extracted out when separating the uploader code from
@@ -110,8 +121,9 @@ define([
     var addUploaderToWidget = function (widget, objectMap, uploadControls) {
         widget.mediaRef = multimediaReference(
             widget.form, objectMap, uploadControls);
-    
-        var $input = widget.getControl(),
+
+        var getValue = widget.getItextValue || widget.getValue,
+            $input = widget.getControl(),
             $uiElem = $('<div />'),
             _getParentUIElement = widget.getUIElement,
             $previewContainer = $('<div />')
@@ -168,9 +180,9 @@ define([
         widget.handleUploadComplete = function (event, data, objectMap) {
             if (data.ref && data.ref.path) {
                 var newExtension = '.' + data.ref.path.split('.').pop().toLowerCase(),
-                    oldExtension = '.' + widget.getItextValue().split('.').pop().toLowerCase();
+                    oldExtension = '.' + getValue().split('.').pop().toLowerCase();
                 if (newExtension !== oldExtension) {
-                    var currentPath = widget.getItextValue().replace(/\.[^/.]+$/, newExtension);
+                    var currentPath = getValue().replace(/\.[^/.]+$/, newExtension);
                     widget.getControl().val(currentPath);
                     widget.handleChange();
                 }
@@ -191,16 +203,16 @@ define([
         };
 
         widget.updateReference = function () {
-            var currentPath = widget.getItextValue();
+            var currentPath = getValue();
             $uiElem.attr('data-hqmediapath', currentPath);
             widget.mediaRef.updateRef(currentPath);
         };
     };
 
     var getPreviewUI = function (widget, objectMap, ICONS) {
-        var currentPath = widget.getItextValue(),
+        var currentPath = widget.getItextValue ? widget.getItextValue() : widget.getValue(),
             previewHtml;
-        if (!currentPath && !widget.isDefaultLang) {
+        if (!currentPath && !widget.isDefaultLang && currentPath !== widget.getValue()) {
             currentPath = widget.getItextItem().get(widget.form, widget.defaultLang);
         }
         if (currentPath in objectMap) {
@@ -217,12 +229,12 @@ define([
     };
 
     var getUploadButtonUI = function (widget, objectMap) {
-        var currentPath = widget.getItextValue(),
+        var currentPath = widget.getItextValue ? widget.getItextValue() : widget.getValue(),
             $uploadBtn;
         $uploadBtn = $(multimedia_upload_trigger({
             multimediaExists: currentPath in objectMap,
             uploaderId: SLUG_TO_UPLOADER_SLUG[widget.form],
-            mediaType: widget.form
+            mediaType: SUPPORTED_EXTENSIONS[widget.form][0].description
         }));
         $uploadBtn.click(function () {
             widget.mediaRef.updateController();
@@ -240,7 +252,8 @@ define([
         uploadUrls: {
             image: false,
             audio: false,
-            video: false
+            video: false,
+            text: false
         },
     }, {
         init: function () {
@@ -278,6 +291,13 @@ define([
                         mediaType: 'video',
                         sessionid: sessionid,
                         uploadUrl: uploadUrls.video,
+                        swfUrl: swfUrl
+                    }),
+                    'text': this.initUploadController({
+                        uploaderSlug: 'fd_hqtext',
+                        mediaType: 'text',
+                        sessionid: sessionid,
+                        uploadUrl: uploadUrls.text,
                         swfUrl: swfUrl
                     })
                 };
