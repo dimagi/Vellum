@@ -517,6 +517,22 @@ define([
         return widget;
     };
 
+    var media = function (mug, options) {
+        var widget = normal(mug, options);
+        widget.form = "text";
+
+        widget.getValue = function() {
+            return widget.input.val();
+        };
+
+        widget.setValue = function(val) {
+            return widget.input.val(val);
+        };
+
+        widget.mug.form.vellum.initWidget(widget);
+        return widget;
+    };
+
     var getUIElementWithEditButton = function($uiElem, editFn, isDisabled) {
         var input = $uiElem.find('input');
         if (_.isUndefined(isDisabled)) {
@@ -621,6 +637,7 @@ define([
         xPath: xPath,
         baseKeyValue: baseKeyValue,
         readOnlyControl: readOnlyControl,
+        media: media,
         util: {
             getWidget: getWidget,
             setWidget: setWidget,
