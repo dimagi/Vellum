@@ -5,6 +5,7 @@ define([
     'jquery',
     'underscore',
     'vellum/datasources',
+    'vellum/util',
     'vellum/widgets',
     'vellum/window',
     'tpl!vellum/templates/external_sources_tree',
@@ -12,6 +13,7 @@ define([
     $,
     _,
     datasources,
+    util,
     widgets,
     window_,
     external_sources_tree
@@ -61,7 +63,16 @@ define([
                     } else {
                         var _this = this;
                         datasources.getDataSources(function (data) {
-                            callback.call(_this, dataTreeJson(data, vellum));
+                            var result;
+                            try {
+                                result = dataTreeJson(data, vellum);
+                            } catch (err) {
+                                result = [{
+                                    text: util.formatExc(err),
+                                    icon: false
+                                }];
+                            }
+                            callback.call(_this, result);
                         });
                     }
                 },
