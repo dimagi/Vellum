@@ -1161,7 +1161,7 @@ define([
             _this.handleNewMug(e.mug, e.refMug, e.position);
             var currentMug = _this.getCurrentlySelectedMug();
             if (e.mug && e.mug.parentMug && e.mug.parentMug === currentMug) {
-                _this.displayMugProperties(currentMug);
+                _this.displayMugProperties(currentMug, true);
             }
             if (!e.isInternal) {
                 _this.setCurrentMug(e.mug);
@@ -1244,7 +1244,7 @@ define([
         return true;
     };
         
-    fn.addQuestion = function (qType) {
+    fn.addQuestion = function (qType, callback) {
         var _this = this,
             mug;
         this.ensureCurrentMugIsSaved(function () {
@@ -1257,10 +1257,7 @@ define([
                 window.analytics.workflow("Added question in form builder");
             }
             mug = _this.data.core.form.createQuestion(foo.mug, foo.position, qType);
-            var $firstInput = _this.$f.find(".fd-question-properties input:text:visible:first");
-            if ($firstInput.length) {
-                $firstInput.focus().select();
-            }
+            if (callback) { callback(mug); }
         });
         // the returned value will be `undefined` if ensureCurrentMugIsSaved
         // had to defer for user feedback
@@ -1394,7 +1391,7 @@ define([
         this.jstree("deselect_all", true).jstree('select_node', mug.ufid);
     };
 
-    fn.displayMugProperties = function (mug) {
+    fn.displayMugProperties = function (mug, focusFirstInput) {
         var $props = this.$f.find('.fd-question-properties'),
             _getWidgetClassAndOptions = function (property) {
                 return getWidgetClassAndOptions(property, mug);
@@ -1443,6 +1440,12 @@ define([
         this.$f.find('.fd-help a').fdHelp();
 
         this.toggleConstraintItext(mug);
+        if (focusFirstInput) {
+            var $firstInput = this.$f.find(".fd-question-properties input:text:visible:first");
+            if ($firstInput.length) {
+                $firstInput.focus().select();
+            }
+        }
     };
 
     fn._setPropertiesMug = function (mug) {

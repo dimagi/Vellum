@@ -5,6 +5,7 @@ define(["underscore"], function (_) {
             uri: "jr://instance/session",
             path: "/session/data",
             name: 'Session',
+            scalar: true, // experimental/idea
             structure: {
                 "case_id": {
                     reference: {
@@ -13,13 +14,18 @@ define(["underscore"], function (_) {
                         key: "@case_id",
                     },
                 },
-            },
+            }
         }, {
             id: "casedb",
             uri: "jr://instance/casedb",
             path: "/cases/case",
             name: 'Cases',
+            mutable: true,
             structure: {},
+            indices: [
+                // experimental/idea
+                {keys: ["@case_id"]},
+            ],
             subsets: [{
                 id: "mother",
                 key: "@case_type",

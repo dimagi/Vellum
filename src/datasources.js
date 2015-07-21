@@ -14,6 +14,7 @@
  *          uri: string (used in the instance definition)
  *          path: string (used in nodeset)
  *          name: string (human readable name)
+ *          scalar: boolean (true if source contains a single record)
  *          structure: nested dictionary of elements and attributes
  *          {
  *              element: {

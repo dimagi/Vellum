@@ -86,9 +86,29 @@ define([
                 show_only_matches: true
             },
             conditionalevents: {
-                should_activate: function () { return false; }
+                should_activate: function (node, event) {
+                    setTimeout(function () {
+                        var x = event.pageX,
+                            y = event.pageY;
+                        $tree.jstree(true).show_contextmenu(node, x, y, event);
+                    }, 0);
+                    return false;
+                }
             },
-            "plugins" : [ "themes", "conditionalevents", "dnd", "search" ]
+            contextmenu: {
+                select_node: false,
+                show_at_node: false,
+                items: function (node) { return {
+                    repeat: getRepeatItem(node, vellum)
+                }; }
+            },
+            "plugins" : [
+                "themes",
+                "conditionalevents",
+                "contextmenu",
+                "dnd",
+                "search"
+            ]
         });
         $search.keyup(_.debounce(function () {
             $tree.jstree(true).search($search.val());
@@ -115,6 +135,7 @@ define([
                                     tree.nodes.length <= MAX_OPEN_NODE},
                     children: tree.nodes,
                     data: {
+                        path: path,
                         handleDrop: _.partial(handleDrop, path, info),
                         getNodes: tree.getNodes,
                     }
@@ -186,15 +207,12 @@ define([
         }
         function handleDrop(path, info, target) {
             var widget = widgets.util.getWidget(target, vellum);
-            while (info) {
-                if (info.uri) {
-                    var id = widget.addInstanceRef({id: info.id, src: info.uri});
-                    if (id !== info.id) {
-                        path = widget.mug.form.updateInstanceQuery(path, id, info.id);
-                    }
-                }
-                info = info.parent;
+            if (!widget) {
+                throw new Error("cannot find widget for target: " + target);
+            } else if (!widget.path) {
+                throw new Error("widget has no path: " + widget.id);
             }
+            path = addInstanceRefs(widget.mug, widget.path, path, info);
             vellum.handleDropFinish(target, path);
         }
         var MAX_OPEN_NODE = 10,
@@ -208,6 +226,37 @@ define([
                 path = "instance('" + source.id + "')" + source.path;
             return node(_.identity, info)(source, path);
         });
+    }
+
+    function addInstanceRefs(mug, property, xpath, info) {
+        var form = mug.form;
+        while (info) {
+            if (info.uri) {
+                var attrs = {id: info.id, src: info.uri},
+                    id = form.addInstanceIfNotExists(attrs, mug, property);
+                if (id !== info.id) {
+                    xpath = form.updateInstanceQuery(xpath, id, info.id);
+                }
+            }
+            info = info.parent;
+        }
+        return xpath;
+    }
+
+    function getRepeatItem(node, vellum) {
+        function action() {
+            vellum.addQuestion("Repeat", function (mug) {
+                var path = node.data.path;
+                path = addInstanceRefs(mug, "dataSource", path, node.data.info);
+                mug.p.dataSource = { idsQuery: path };
+                vellum.displayMugProperties(mug, true);
+            });
+        }
+        return {
+            label: "Repeat for each " + node.text,
+            icon: "icon-retweet",
+            action: action,
+        };
     }
 
     function toggleExternalDataTree(vellum) {
