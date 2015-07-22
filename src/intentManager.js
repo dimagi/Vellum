@@ -262,6 +262,14 @@ define([
             types.normal.PrintIntent = PrintIntent;
             return types;
         },
+        getAdvancedQuestions: function () {
+            var ret = this.__callOld();
+            ret.push("AndroidIntent");
+            if (this.opts().features.printing) {
+                ret.push("PrintIntent");
+            }
+            return ret;
+        },
         getMainProperties: function () {
             return this.__callOld().concat(INTENT_SPECIFIC_SPECS);
         }
