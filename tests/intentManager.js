@@ -48,6 +48,11 @@ define([
             it("should write the same as parse", function() {
                 util.assertXmlEqual(call('createXML'), PRINTING_INTENT_XML);
             });
+
+            it("should correctly parse filename", function() {
+                assert.strictEqual(util.getMug('/data/print_data').p.docTemplate,
+                                   'jr://file/commcare/doc/data/print_data.doc');
+            });
         });
     });
 });
