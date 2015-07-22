@@ -362,7 +362,8 @@ define([
             "Geopoint",
             "Barcode",
             "Secret",
-            "AndroidIntent"
+            "AndroidIntent",
+            "PrintIntent"
         ];
     };
 

@@ -16,6 +16,7 @@ define([
     var DEFAULT_XMLNS = "http://opendatakit.org/xforms",
         INTENT_SPECIFIC_SPECS = [
             "androidIntentAppId",
+            "docTemplate",
             "androidIntentExtra",
             "androidIntentResponse",
             "unknownAttributes",
@@ -64,6 +65,11 @@ define([
             xmlWriter.writeAttributeString(name, value);
         });
         writeInnerTagXML(xmlWriter, 'extra', properties.androidIntentExtra);
+        if (properties.docTemplate) {
+            writeInnerTagXML(xmlWriter, 'extra', {
+                'cc:print_template_reference': properties.docTemplate
+            });
+        }
         writeInnerTagXML(xmlWriter, 'response', properties.androidIntentResponse);
         xmlWriter.writeEndElement('odkx:intent');
     }
@@ -98,15 +104,31 @@ define([
 
     function syncMugWithIntent (tags, mug) {
         // called when initializing a mug from a parsed form
-        if (mug.__className === "AndroidIntent") {
+        if (mug.__className === "AndroidIntent" ||
+            mug.__className === "PrintIntent") {
             var nodeID = mug.p.nodeID,
                 tag = tags.hasOwnProperty(nodeID) ? tags[nodeID] : makeODKXIntentTag(nodeID);
 
             _.each(INTENT_SPECIFIC_SPECS, function (key) {
-                mug.p[key] = tag[key];
+                if (!mug.p[key]) {
+                    mug.p[key] = tag[key];
+                }
             });
 
             delete tags[tag.nodeID];
+        }
+
+        if (mug.p.androidIntentAppId === "org.commcare.dalvik.action.PRINT") {
+            mug.form.changeMugType(mug, 'PrintIntent');
+        }
+
+        if (mug.__className === "PrintIntent") {
+            if (mug.p.androidIntentExtra['cc:print_template_reference']) {
+                mug.p.docTemplate = mug.p.androidIntentExtra['cc:print_template_reference'];
+                delete mug.p.androidIntentExtra['cc:print_template_reference'];
+            } else {
+                mug.p.docTemplate = "jr://file/commcare/html/" + mug.p.nodeID+ ".html";
+            }
         }
     }
 
@@ -196,6 +218,24 @@ define([
         }
     });
 
+    var PrintIntent = util.extend(AndroidIntent, {
+        typeName: 'Print',
+        icon: 'icon-print',
+        init: function (mug, form) {
+            AndroidIntent.init(mug, form);
+            mug.p.androidIntentAppId = "org.commcare.dalvik.action.PRINT";
+        },
+        spec: {
+            docTemplate: {
+                lstring: 'Document Template',
+                visibility: 'visible',
+                widget: widgets.media,
+            },
+            androidIntentAppId: { visibility: 'hidden' },
+            androidIntentResponse: { visibility: 'hidden' },
+        }
+    });
+
     $.vellum.plugin("intents", {}, {
         loadXML: function (xml) {
             this.data.intents.unmappedIntentTags = parseIntentTags(
@@ -219,6 +259,7 @@ define([
         getMugTypes: function () {
             var types = this.__callOld();
             types.normal.AndroidIntent = AndroidIntent;
+            types.normal.PrintIntent = PrintIntent;
             return types;
         },
         getMainProperties: function () {
