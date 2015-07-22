@@ -127,7 +127,7 @@ define([
                 mug.p.docTemplate = mug.p.androidIntentExtra['cc:print_template_reference'];
                 delete mug.p.androidIntentExtra['cc:print_template_reference'];
             } else {
-                mug.p.docTemplate = "jr://file/commcare/html/" + mug.p.nodeID+ ".html";
+                mug.p.docTemplate = "jr://file/commcare/text/" + mug.p.nodeID+ ".html";
             }
         }
     }
