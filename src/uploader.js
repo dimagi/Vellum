@@ -210,9 +210,10 @@ define([
     };
 
     var getPreviewUI = function (widget, objectMap, ICONS) {
-        var currentPath = widget.getItextValue ? widget.getItextValue() : widget.getValue(),
+        var javarosa = _.isFunction(widget.getItextValue),
+            currentPath = javarosa ? widget.getItextValue() : widget.getValue(),
             previewHtml;
-        if (!currentPath && !widget.isDefaultLang && currentPath !== widget.getValue()) {
+        if (!javarosa && !currentPath && !widget.isDefaultLang) {
             currentPath = widget.getItextItem().get(widget.form, widget.defaultLang);
         }
         if (currentPath in objectMap) {
