@@ -454,7 +454,7 @@ define([
     fn.getMugDisplayName = function (mug) {
         var val = mug.getDisplayName(this.data.core.currentItextDisplayLanguage || 
             this.data.javaRosa.Itext.getDefaultLanguage());
-        if (this.opts().features.experimental_ui) {
+        if (this.opts().features.rich_text) {
             val = widgets.util.toRichText(val, this.data.core.form);
         }
         return val;

@@ -58,14 +58,14 @@ require([
             util.init({
                 javaRosa: {langs: ['en', 'hin']},
                 core: {onReady: function () { done(); }},
-                features: {'experimental_ui': false},
+                features: {'rich_text': false},
             });
         });
 
         describe("and non default language is first", function () {
             before(function (done) {
                 util.init({
-                features: {'experimental_ui': false},
+                features: {'rich_text': false},
                     javaRosa: {langs: ['hin', 'en']},
                     core: {onReady: function () { done(); }}
                 });
@@ -601,7 +601,7 @@ require([
     describe("The javaRosaplugin with one language", function() {
         before(function(done) {
             util.init({
-                features: {'experimental_ui': false},
+                features: {'rich_text': false},
                 javaRosa: { langs: ['en'] },
                 core: {
                     onReady: function () {
@@ -627,7 +627,7 @@ require([
     describe("The javaRosa plugin itext widgets", function() {
         before(function(done) {
             util.init({
-                features: {'experimental_ui': false},
+                features: {'rich_text': false},
                 javaRosa: { langs: ['en'] },
                 core: {
                     onReady: function () {
@@ -798,7 +798,7 @@ require([
     describe("The javaRosa plugin language selector", function() {
         before(function(done) {
             util.init({
-                features: {'experimental_ui': false},
+                features: {'rich_text': false},
                 javaRosa: { langs: ['en'] },
                 core: {onReady: done}
             });

@@ -19,7 +19,7 @@ require([
         before(function (done) {
             util.init({
                 core: {onReady: function () { done(); }},
-                features: {'experimental_ui': false},
+                features: {'rich_text': false},
             });
         });
 

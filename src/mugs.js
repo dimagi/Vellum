@@ -1507,7 +1507,7 @@ define([
         var _this = this,
             // Nestable Field List not supported in CommCare before v2.16
             group_in_field_list = opts.features.group_in_field_list,
-            experimental_ui = opts.features.experimental_ui;
+            rich_text = opts.features.rich_text;
 
         this.auxiliaryTypes = mugTypes.auxiliary;
         this.normalTypes = mugTypes.normal;
@@ -1556,7 +1556,7 @@ define([
 
         _.each(this.allTypes, function (Mug, name) {
             Mug.__className = name;
-            Mug.richtext = experimental_ui;
+            Mug.richtext = rich_text;
 
             // set on this for easy access
             _this[name] = Mug;

@@ -25,7 +25,7 @@ require([
                         done();
                     }
                 },
-                features: {'experimental_ui': false},
+                features: {'rich_text': false},
             });
         });
 
