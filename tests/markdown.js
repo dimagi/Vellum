@@ -41,7 +41,7 @@ require([
             util.init({
                 javaRosa: {langs: ['en', 'hin']},
                 core: {onReady: done},
-                features: {experimental_ui: false},
+                features: {rich_text: false},
             });
         }
         before(beforeFn);

@@ -83,7 +83,7 @@ require([
 
     function beforeFn(done) {
         util.init({
-            features: {'experimental_ui': false},
+            features: {'rich_text': false},
             javaRosa: {langs: ['en']},
             core: {
                 onReady: function () {

@@ -181,7 +181,7 @@ require([
                             done();
                         }
                     },
-                    features: {'experimental_ui': false }
+                    features: {'rich_text': false }
                 });
             });
 
@@ -242,7 +242,7 @@ require([
             // - automatic adding of choices when you add a select
             // - automatic generation of media paths for regular questions and choices
             util.init({
-                features: {'experimental_ui': false },
+                features: {'rich_text': false },
                 core: {
                     form: null,
                     onReady: function () {
@@ -369,7 +369,7 @@ require([
 
             before(function (done) {
                 util.init({
-                    features: {'experimental_ui': false },
+                    features: {'rich_text': false },
                     core: {
                         onReady: function () {
                             done();

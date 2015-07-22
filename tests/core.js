@@ -32,7 +32,7 @@ require([
         before(function (done) {
             util.init({
                 core: {onReady: function () { done(); }},
-                features: {'experimental_ui': false},
+                features: {'rich_text': false},
             });
         });
 
@@ -59,14 +59,14 @@ require([
                         done();
                     }
                 },
-                features: {'experimental_ui': false},
+                features: {'rich_text': false},
             });
         });
 
         it("should allow mug rename with itemset in form when the itemset plugin is disabled", function (done) {
             util.init({
                 plugins: pluginsWithoutItemset,
-                features: {'experimental_ui': false},
+                features: {'rich_text': false},
                 core: {
                     form: TEST_XML_1,
                     onReady: function () {
@@ -336,7 +336,7 @@ require([
                         done();
                     }
                 },
-                features: {'experimental_ui': false},
+                features: {'rich_text': false},
             });
         });
 

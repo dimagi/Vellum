@@ -49,7 +49,7 @@ require([
                     dataSourcesEndpoint: function (callback) { callback(FIXTURE_DATA); },
                     onReady: done
                 },
-                features: {experimental_ui: false},
+                features: {rich_text: false},
             });
         }
         before(beforeFn);
@@ -76,7 +76,7 @@ require([
                         dataSourcesEndpoint: function (callback) { callback([]); },
                         onReady: done
                     },
-                    features: {experimental_ui: false},
+                    features: {rich_text: false},
                 });
             });
 
@@ -98,7 +98,7 @@ require([
                         dataSourcesEndpoint: function (cb) { callback = cb; },
                         onReady: done
                     },
-                    features: {experimental_ui: false},
+                    features: {rich_text: false},
                 });
             });
             beforeEach(function () {
