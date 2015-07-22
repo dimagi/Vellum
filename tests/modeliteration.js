@@ -281,6 +281,21 @@ require([
             });
         });
 
+        it("should change instance when idsQuery changes", function () {
+            var form = util.loadXML(FIXTURE_REPEAT_XML),
+                repeat = util.getMug("product/item");
+            form.updateKnownInstances({"foo": "jr://foo"});
+            repeat.p.dataSource = {
+                idsQuery: "instance('foo')/products/product/@id"
+            };
+            var xml = call('createXML'),
+                $xml = $(xml);
+            assert($xml.find("instance[id=foo]").length,
+                   "foo instance not found:\n" + xml);
+            assert.equal($xml.find("instance[id=products]").length, 0,
+                   "somefixture instance not found:\n" + xml);
+        });
+
         it("should sync instance name with existing instance", function () {
             util.loadXML(FIXTURE_REPEAT_XML);
             var repeat = util.getMug("product/item"),

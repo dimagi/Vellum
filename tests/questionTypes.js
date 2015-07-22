@@ -33,13 +33,10 @@ require([
                 type: 'Text',
                 nodeId: 'question1',
                 attrs: {
-                    keyAttr: 'jr preload key value',
                     dataValue: 'default data value',
                     constraintAttr: '/data/question20 = 2',
                     relevantAttr: '/data/question20',
                     requiredAttr: true,
-                    preload: "jr preload",
-                    preloadParams: "jr preload param"
                 },
                 inputs: {
                     calculateAttr: 0
@@ -315,11 +312,11 @@ require([
                             .val("item1 custom hin").change();
 
                         clickQuestion("question22/question23/question7");
-                        $("[name='intent-app-id']").val("app_id").change();
-                        $("[name='intent-extra'] .fd-kv-key").val('key1').change();
-                        $("[name='intent-extra'] .fd-kv-val").val('value1').change();
-                        $("[name='intent-response'] .fd-kv-key").val('key2').change();
-                        $("[name='intent-response'] .fd-kv-val").val('value2').change();
+                        $("[name='property-androidIntentAppId']").val("app_id").change();
+                        $("[name='property-androidIntentExtra'] .fd-kv-key").val('key1').change();
+                        $("[name='property-androidIntentExtra'] .fd-kv-val").val('value1').change();
+                        $("[name='property-androidIntentResponse'] .fd-kv-key").val('key2').change();
+                        $("[name='property-androidIntentResponse'] .fd-kv-val").val('value2').change();
                         util.assertXmlEqual(
                             call('createXML'),
                             TEST_XML

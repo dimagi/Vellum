@@ -70,6 +70,7 @@ define([
                 $(instance).children()
             ); 
         });
+        form.updateKnownInstances();
         
         // TODO! adapt
         if(data.length === 0) {
@@ -167,8 +168,7 @@ define([
         var $el = $(el),
             nodeID = el.nodeName, 
             nodeVal = $el.children().length ? null : $el.text(),
-            extraXMLNS = $el.popAttr('xmlns') || null,
-            keyAttr = $el.popAttr('key') || null;
+            extraXMLNS = $el.popAttr('xmlns') || null;
         role = role || $el.attr('vellum:role');
 
         if (role && form.mugTypes.allTypes.hasOwnProperty(role) &&
@@ -184,9 +184,6 @@ define([
 
         if (extraXMLNS && (extraXMLNS !== form.formUuid)) {
             mug.p.xmlnsAttr = extraXMLNS;
-        }
-        if (keyAttr) {
-            mug.p.keyAttr = keyAttr;
         }
         // add arbitrary attributes
         mug.p.rawDataAttributes = getAttributes(el);
@@ -626,8 +623,6 @@ define([
             constraintAttr: el.popAttr('constraint'),
             constraintMsgAttr: lookForNamespaced(el, "constraintMsg"),
             requiredAttr: parseBoolAttributeValue(el.popAttr('required')),
-            preload: lookForNamespaced(el, "preload"),
-            preloadParams: lookForNamespaced(el, "preloadParams")
         };
 
         var raw = attrs.rawBindAttributes = getAttributes(el);

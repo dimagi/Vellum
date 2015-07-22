@@ -43,7 +43,7 @@ require([
         before(beforeFn);
         beforeEach(datasources.reset);
 
-        it("adds a new instance node to the form when necessary", function () {
+        it("adds a new instance to the form", function () {
             util.loadXML(TEST_XML_1);
             var itemset = util.getMug("question1/itemset");
             itemset.p.itemsetData = {
@@ -56,6 +56,24 @@ require([
             var xml = call('createXML'),
                 $xml = $(xml);
             assert($xml.find("instance[id=somefixture]").length,
+                   "somefixture instance not found:\n" + xml);
+        });
+
+        it("changes instance when nodeset changes", function () {
+            var form = util.loadXML(TEST_XML_1),
+                itemset = util.getMug("question1/itemset");
+            form.updateKnownInstances({"foo": "jr://foo"});
+            itemset.p.itemsetData = {
+                nodeset: "instance('foo')/some/items",
+                labelRef: "label",
+                valueRef: "value",
+            };
+
+            var xml = call('createXML'),
+                $xml = $(xml);
+            assert($xml.find("instance[id=foo]").length,
+                   "foo instance not found:\n" + xml);
+            assert.equal($xml.find("instance[id=casedb]").length, 0,
                    "somefixture instance not found:\n" + xml);
         });
 

@@ -1,8 +1,6 @@
 /*
  * A Vellum plugin to support JavaRosa extensions to the XForm spec,
  * particularly IText.
- *
- * Also adds specs for the JavaRosa preload attributes.
  */
 define([
     'underscore',
@@ -1936,25 +1934,6 @@ define([
                 return options;
             }
 
-            // DATA ELEMENT
-            databind.keyAttr = {
-                visibility: 'visible',
-                presence: 'optional',
-                lstring: 'JR:Preload key value'
-            };
-
-            // BIND ELEMENT
-            databind.preload = {
-                visibility: 'visible',
-                presence: 'optional',
-                lstring: "JR Preload"
-            };
-            databind.preloadParams = {
-                visibility: 'visible',
-                presence: 'optional',
-                lstring: "JR Preload Param"
-            };
-
             function validateConstraintMsgAttr(mug) {
                 var itext = mug.p.constraintMsgItext;
                 if (!mug.p.constraintAttr && itext && !itext.isEmpty()) {
@@ -2191,12 +2170,6 @@ define([
         },
         getAdvancedProperties: function () {
             var ret = this.__callOld();
-            ret.splice(
-                1 + ret.indexOf('xmlnsAttr'), 0,
-                'keyAttr',
-                'preload',
-                'preloadParams'
-            );
 
             ret = ret.concat([
                 'labelItextID',

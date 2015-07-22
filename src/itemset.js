@@ -1,22 +1,3 @@
-// Knockout might help make some of the binding here more maintainable.
-// Hopefully its not too hard to follow.
-
-// I chose to use regex parsing of nodeset filter conditions because it was fast
-// and I knew it would work, but we might want to switch to using the XPath
-// JISON parser if it can handle parsing nodesets with filter conditions in a
-// way that lets us test equality minus whitespace, quotes, etc.  For instance,
-// it currently prevents you from referencing instances with filter conditions
-// of their own in a filter condition.
-
-// I chose not to use the property/widget framework for each individual widget
-// because it seemed like the interactions between the different properties
-// would require a lot of complicated code to make it work with that framework.
-// It might be a good idea to flesh out the BoundPropertyMap thing using ES5
-// properties and then have some sort of formal system for mapping model objects
-// with nested properties to UI objects with nested properties.
-
-// It would be nice to convert the instance definition storage to use
-// first-class abstractions rather than simple hashes.
 define([
     'underscore',
     'jquery',
@@ -98,10 +79,27 @@ define([
                 visibility: 'visible_if_present',
                 presence: 'optional',
                 widget: itemsetWidget,
+                serialize: function (value, key, mug, data) {
+                    value.nodeset = mugs.serializeXPath(value.nodeset, key, mug, data);
+                    return value;
+                },
+                deserialize: function (data, key, mug) {
+                    var value = mugs.deserializeXPath(data, key, mug);
+                    if (value && value.instance &&
+                                 value.instance.id && value.instance.src) {
+                        var instances = {};
+                        instances[value.instance.id] = value.instance.src;
+                        mug.form.updateKnownInstances(instances);
+                    }
+                    return value;
+                },
                 validationFunc: function (mug) {
                     var itemsetData = mug.p.itemsetData;
                     if (!itemsetData.nodeset) {
                         return "A data source must be selected.";
+                    } else {
+                        mug.form.updateLogicReferences(
+                            mug, "itemsetData", itemsetData.nodeset);
                     }
                     if (!itemsetData.valueRef) {
                         return "Choice Value must be specified.";
@@ -134,6 +132,8 @@ define([
                 presence: 'optional',
                 widget: widgets.xPath,
                 xpathType: 'bool',
+                serialize: mugs.serializeXPath,
+                deserialize: mugs.deserializeXPath,
                 visibility: 'visible',
                 leftPlaceholder: '',
                 autocompleteChoices: function(mug) {
@@ -155,13 +155,21 @@ define([
             presence: 'optional',
             visibility: 'hidden',
             serialize: function (value, key, mug, data) {
-                var children = mug.form.getChildren(mug);
-                return _.pluck(_.pluck(children, "p"), key);
+                value = _.chain(mug.form.getChildren(mug))
+                    .map(function (child) {
+                        return child.spec[key].serialize(child.p[key], key, child, data);
+                    })
+                    .filter(_.identity)
+                    .value();
+                return !_.isEmpty(value) ? value : undefined;
             },
             deserialize: function (data, key, mug) {
-                _.each(data[key], function (value) {
-                    var itemset = afterDynamicSelectInsert(mug.form, mug);
-                    itemset.p[key] = value;
+                _.each(data[key], function (value, i) {
+                    var children = mug.form.getChildren(mug),
+                        itemset = children[i] || afterDynamicSelectInsert(mug.form, mug),
+                        dat = _.clone(data);
+                    dat[key] = value;
+                    itemset.p[key] = itemset.spec[key].deserialize(dat, key, itemset);
                 });
             }
         };
@@ -191,6 +199,7 @@ define([
                     afterInsert: afterDynamicSelectInsert,
                     spec: {
                         itemsetData: itemsetDataSpec,
+                        filter: itemsetDataSpec,
                     }
                 }),
                 "SelectDynamic": util.extend(mugTypes.Select, {
@@ -203,6 +212,7 @@ define([
                     afterInsert: afterDynamicSelectInsert,
                     spec: {
                         itemsetData: itemsetDataSpec,
+                        filter: itemsetDataSpec,
                     }
                 })
             });
@@ -225,7 +235,7 @@ define([
                     mug.p.filter = nodeset.filter;
                     mug.p.itemsetData = {
                         instance: form.parseInstance(
-                                    nodeset.value, mug, "itemsetData.instance"),
+                                    nodeset.value, mug, "itemsetData"),
                         nodeset: nodeset.value,
                         labelRef: $element.children('label').attr('ref'),
                         valueRef: $element.children('value').attr('ref')

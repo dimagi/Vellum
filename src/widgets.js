@@ -77,9 +77,7 @@ define([
                 // setters, trigger mug validation because some mug
                 // property values have sub-properties that do not
                 // trigger mug property change events when they are
-                // changed. util.BoundPropertyMap is a possible
-                // alternative, but has its own set of complexities
-                // (binding event handlers to mug property values).
+                // changed. 
                 mug.validate(widget.path);
             }
             widget.fire("change");
@@ -176,6 +174,10 @@ define([
         var widget = normal(mug, options),
             input = widget.input;
         input.attr("type", "text").addClass('input-block-level');
+
+        if (options.placeholder) {
+            input.attr('placeholder', options.placeholder);
+        }
 
         widget.setValue = function (value) {
             if (value) {
@@ -489,9 +491,20 @@ define([
     xPath.hasLogicReferences = true;
 
     var baseKeyValue = function (mug, options) {
+        // todo: make this inherit from normal
         var widget = base(mug, options),
-            id = options.id;
-        widget.definition = {};
+            path = options.widgetValuePath || options.path,
+            id = options.id || 'property-' + path;
+        widget.definition = mug.p.getDefinition(options.path);
+
+        widget.mugValue = options.mugValue || function (mug, value) {
+            if (arguments.length === 1) {
+                return mug.p[path];
+            }
+            mug.p[path] = value;
+        };
+
+        widget.currentValue = widget.mugValue(mug);
 
         // todo make a style for this when vellum gets a facelift
         widget.kvInput = $('<div class="control-row" />').attr('name', id);
@@ -522,21 +535,17 @@ define([
             });
         };
 
-        widget.getValue = function () {
+        function getValues() {
             var currentValues = {};
             _.each(widget.kvInput.find('.fd-kv-pair'), function (kvPair) {
                 var $pair = $(kvPair);
                 currentValues[$pair.find('.fd-kv-key').val()] = $pair.find('.fd-kv-val').val();
             });
             return currentValues;
-        };
+        }
 
-        widget.getValidValues = function () {
-            var values = _.clone(widget.getValue());
-            if (values[""]) {
-                delete values[""];
-            }
-            return values;
+        widget.getValue = function() {
+            return _.omit(getValues(), "");
         };
 
         widget.updateValue = function () {
@@ -550,6 +559,15 @@ define([
 
         widget.refreshControl = function () {
             widget.setValue(widget.getValue());
+        };
+
+        widget.save = function () {
+            widget.saving = true;
+            try {
+                widget.mugValue(mug, widget.getValue());
+            } finally {
+                widget.saving = false;
+            }
         };
 
         return widget;

@@ -219,33 +219,6 @@ define([
         return that.getOneOrFail(_(list).filter(func), infoMsg);
     };
     
-    // a wrapper for object properties that triggers the form change event when
-    // sub-properties are changed
-    that.BoundPropertyMap = function (form, data) {
-        this._form = form;
-        this._data = data || {};
-    };
-    that.BoundPropertyMap.prototype = {
-        clone: function () {
-            return new that.BoundPropertyMap(this._form, this._data);
-        },
-        setAttr: function (name, val) {
-            this._data[name] = val;
-            if (this._form) {
-                this._form.fire({
-                    type: 'change'
-                });
-            }
-        },
-        getAttr: function (name, default_) {
-            if (name in this._data) {
-                return this._data[name];
-            } else {
-                return default_;
-            }
-        }
-    };
-
     that.getCaretPosition = function (ctrl) {
         var pos = 0;
         if (ctrl.createTextRange) {

@@ -16,6 +16,6 @@
 		</model>
 	</h:head>
 	<h:body>
-		<unknown ref="/data/question">
+		<unknown ref="/data/question" />
 	</h:body>
 </h:html>

@@ -62,9 +62,8 @@ require([
                         var mug = call("getMugByPath", "/data/state");
                         assert.equal(mug.__className, "Select");
                         var xml = call("createXML"),
-                            doc = $($.parseXML(xml)),
-                            instance = '<instance id="states" src="jr://fixture/item-list:state"></instance>';
-                        assert.operator(xml.indexOf(instance), ">", -1);
+                            doc = $($.parseXML(xml));
+                        assert.equal(doc.find("instance[id=states]").length, 1, xml);
                         assert.equal(doc.find('itemset').attr('nodeset'),
                                      "instance('states')/state_list/state");
                         done();

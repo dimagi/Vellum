@@ -140,6 +140,29 @@ define([
                     visibility: 'visible_if_present',
                     presence: 'optional',
                     widget: idsQueryDataSourceWidget,
+                    validationFunc: function (mug) {
+                        if (mug.p.dataSource.idsQuery) {
+                            mug.form.updateLogicReferences(
+                                mug, "dataSource", mug.p.dataSource.idsQuery);
+                        }
+                    },
+                    serialize: function (value, key, mug, data) {
+                        if (value && value.idsQuery) {
+                            return {idsQuery:
+                                mugs.serializeXPath(value.idsQuery, key, mug, data)};
+                        }
+                    },
+                    deserialize: function (data, key, mug) {
+                        var value = mugs.deserializeXPath(data, key, mug) || {};
+                        if (value && value.instance &&
+                                     value.instance.id && value.instance.src) {
+                            // legacy serialization format
+                            var instances = {};
+                            instances[value.instance.id] = value.instance.src;
+                            mug.form.updateKnownInstances(instances);
+                        }
+                        return {idsQuery: value.idsQuery};
+                    }
                 }
             },
             ignoreReferenceWarning: function(mug) {
@@ -233,7 +256,7 @@ define([
             });
             if (mug.p.dataSource.idsQuery) {
                 mug.p.dataSource.instance = mug.form.parseInstance(
-                        mug.p.dataSource.idsQuery, mug, "dataSource.instance");
+                        mug.p.dataSource.idsQuery, mug, "dataSource");
             } else {
                 // keep paths consistent for malformed model repeat with
                 // missing IDs query. this XPath returns the empty set

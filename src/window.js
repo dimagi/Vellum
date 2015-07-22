@@ -35,7 +35,6 @@ define([
             this.data.windowManager.adjustToWindow = adjustToWindow;
 
             // start with accessory pane collapsed
-            this.$f.find(".fd-accessory-pane").css("height", "0");
             $(window).resize(adjustToWindow);
             $(document).scroll(adjustToWindow);
             $(document).ready(adjustToWindow);
@@ -203,10 +202,11 @@ define([
         }
         var direction = before ? 1 : -1;
         $divider.mousedown(function (mousedown) {
-            var size = $resizable[sizeVar](),
+            var minSize = $resizable.data("min-size") || 0,
+                size = $resizable[sizeVar](),
                 resize = function (mousemove) {
                     var distance = mousemove[pageVar] - mousedown[pageVar];
-                    $resizable[sizeVar](size + distance * direction);
+                    $resizable[sizeVar](Math.max(size + distance * direction, minSize));
                     $resizable.resize();
                     adjustToWindow();
                 };

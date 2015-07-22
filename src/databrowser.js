@@ -23,21 +23,27 @@ define([
     $.vellum.plugin('databrowser', {}, {
         init: function () {
             var vellum = this,
-                pane = this.$f.find(".fd-accessory-pane");
+                pane = this.$f.find(".fd-accessory-pane"),
+                head, headHeight;
             fn.initDataBrowser = _.once(_initDataBrowser);
             pane.append($(external_sources_tree()));
-            pane.resize(function () {
-                if (pane.height() > 100) {
-                    panelHeight = pane.height();
-                } else if (pane.height() > 0) {
-                    fn.initDataBrowser(vellum);
-                }
-            });
+            head = pane.find(".fd-head-external-sources");
+            headHeight = head.outerHeight(true) || 0;
+            pane.data("min-size", headHeight)
+                .height(headHeight)
+                .resize(function () {
+                    if (pane.height() > 100) {
+                        panelHeight = pane.height();
+                    } else if (pane.height() > headHeight) {
+                        fn.initDataBrowser(vellum);
+                    }
+                });
             window_.preventDoubleScrolling(pane.find(".fd-scrollable"));
             datasources.getDataSources(function () {});
-            pane.parent().find(".fd-external-sources-divider > a")
-                .removeAttr("href")
-                .clickExceptAfterDrag(_.partial(toggleExternalDataTree, vellum));
+            var toggle = _.partial(toggleExternalDataTree, vellum);
+            pane.parent().find(".fd-external-sources-divider")
+                .clickExceptAfterDrag(toggle);
+            head.click(toggle);
         }
     });
 
@@ -162,7 +168,10 @@ define([
             vellum.handleDropFinish(target, path);
         }
         var MAX_OPEN_NODE = 50,
-            sources = _.indexBy(data, "id"),
+            sources = _.chain(data)
+                .map(function (src) { return [src.id, src]; })
+                .object()
+                .value(),
             nodes = [],
             seen = {};
         if (sources.commcaresession) {
@@ -176,13 +185,14 @@ define([
     }
 
     function toggleExternalDataTree(vellum) {
-        var pane = vellum.$f.find(".fd-accessory-pane");
-        if (pane.height()) {
-            pane.css("height", "0");
+        var pane = vellum.$f.find(".fd-accessory-pane"),
+            headHeight = pane.find(".fd-head-external-sources").outerHeight(true);
+        if (pane.height() > headHeight) {
+            pane.css("height", headHeight + "px");
             $(window).resize();
         } else {
             var tree = vellum.$f.find(".fd-tree"),
-                height = panelHeight || Math.min(tree.height() / 2, 200);
+                height = panelHeight || tree.height() * 0.45;
             pane.css("height", height + "px");
             $(window).resize();
             fn.initDataBrowser(vellum);
