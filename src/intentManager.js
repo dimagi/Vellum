@@ -21,7 +21,8 @@ define([
             "androidIntentResponse",
             "unknownAttributes",
             "intentXmlns",
-        ];
+        ],
+        refreshCurrentMug;
 
     function makeODKXIntentTag (nodeID, appID) {
         return {
@@ -153,6 +154,33 @@ define([
         }
     }
 
+    function printTemplate(mug, options) {
+        var widget = widgets.media(mug, options),
+            uploadComplete = widget.handleUploadComplete,
+            field_regex = /{{\s*(.+)\s*}}/gm;
+
+        widget.handleUploadComplete = function (event, data, objectMap) {
+            mug.p.androidIntentExtra = {};
+            var html = data.text,
+                match = field_regex.exec(html);
+
+            while (match) {
+                _.each(match.splice(1), function(field) {
+                    mug.p.androidIntentExtra[field] = field;
+                });
+                match = field_regex.exec(html);
+            }
+
+            uploadComplete(event, data, objectMap);
+
+            // hack: need to refresh the current mug because we change a
+            // different property in this widget
+            refreshCurrentMug();
+        };
+
+        return widget;
+    }
+
     var AndroidIntent = util.extend(mugs.defaultOptions, {
         typeName: 'Android App Callout',
         dataType: 'intent',
@@ -229,7 +257,7 @@ define([
             docTemplate: {
                 lstring: 'Document Template',
                 visibility: 'visible',
-                widget: widgets.media,
+                widget: printTemplate,
             },
             androidIntentAppId: { visibility: 'hidden' },
             androidIntentResponse: { visibility: 'hidden' },
@@ -237,6 +265,9 @@ define([
     });
 
     $.vellum.plugin("intents", {}, {
+        init: function() {
+            refreshCurrentMug = this.refreshCurrentMug.bind(this);
+        },
         loadXML: function (xml) {
             this.data.intents.unmappedIntentTags = parseIntentTags(
                 $(xml).find('h\\:head, head').children("odkx\\:intent, intent")
