@@ -17,6 +17,7 @@ define([
     CKEDITOR
 ) {
     CKEDITOR.config.allowedContent = true;
+    CKEDITOR.config.customConfig = '';
 
     var base = function(mug, options) {
         // set properties shared by all widgets
