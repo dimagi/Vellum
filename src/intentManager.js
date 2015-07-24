@@ -154,22 +154,27 @@ define([
         }
     }
 
+    function parseFields (html) {
+        var field_regex = /{{\s*([^}\s]+)\s*}}/gm,
+            match = field_regex.exec(html),
+            fields = {};
+
+        while (match) {
+            _.each(match.splice(1), function(field) {
+                fields[field] = field;
+            });
+            match = field_regex.exec(html);
+        }
+
+        return fields;
+    }
+
     function printTemplate(mug, options) {
         var widget = widgets.media(mug, options),
-            uploadComplete = widget.handleUploadComplete,
-            field_regex = /{{\s*(.+)\s*}}/gm;
+            uploadComplete = widget.handleUploadComplete;
 
         widget.handleUploadComplete = function (event, data, objectMap) {
-            mug.p.androidIntentExtra = {};
-            var html = data.text,
-                match = field_regex.exec(html);
-
-            while (match) {
-                _.each(match.splice(1), function(field) {
-                    mug.p.androidIntentExtra[field] = field;
-                });
-                match = field_regex.exec(html);
-            }
+            mug.p.androidIntentExtra = parseFields(data.text);
 
             uploadComplete(event, data, objectMap);
 
@@ -305,4 +310,10 @@ define([
             return this.__callOld().concat(INTENT_SPECIFIC_SPECS);
         }
     });
+
+    return {
+        test: {
+            parseFields: parseFields,
+        }
+    };
 });

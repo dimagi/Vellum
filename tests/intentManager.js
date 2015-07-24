@@ -3,6 +3,7 @@ define([
     'chai',
     'underscore',
     'jquery',
+    'vellum/intentManager',
     'text!static/intentManager/intent-with-unknown-attrs.xml',
     'text!static/intentManager/intent-with-no-mug.xml',
     'text!static/intentManager/printing-intent.xml'
@@ -11,6 +12,7 @@ define([
     chai,
     _,
     $,
+    intentManager,
     INTENT_WITH_UNKNOWN_ATTRS_XML,
     INTENT_WITH_NO_MUG_XML,
     PRINTING_INTENT_XML
@@ -52,6 +54,36 @@ define([
             it("should correctly parse filename", function() {
                 assert.strictEqual(util.getMug('/data/print_data').p.docTemplate,
                                    'jr://file/commcare/doc/data/print_data.doc');
+            });
+        });
+
+        describe("field parsing", function() {
+            var tests = [
+                ['{{ } }}', {}],
+                ['{{field1}}', { field1: 'field1' }],
+                ['{{ field1 }}', { field1: 'field1' }],
+                ['field1 }}', {}],
+                ['{{ field1', {}],
+                ['field1', {}],
+                ['{{ field1 }} {{ field2 }}', {
+                    field1: 'field1',
+                    field2: 'field2',
+                }],
+                ['{{ field1 }}\n{{ field2 }}', {
+                    field1: 'field1',
+                    field2: 'field2',
+                }],
+                ['{{ field1 }}\n{{ field2 }} {{ field3 }}', {
+                    field1: 'field1',
+                    field2: 'field2',
+                    field3: 'field3',
+                }],
+            ];
+
+            _.each(tests, function(testcase) {
+                it(testcase[0] + " should be parsed as " + JSON.stringify(testcase[1]), function() {
+                    assert.deepEqual(intentManager.test.parseFields(testcase[0]), testcase[1]);
+                });
             });
         });
     });
