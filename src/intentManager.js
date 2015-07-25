@@ -21,7 +21,8 @@ define([
             "androidIntentResponse",
             "unknownAttributes",
             "intentXmlns",
-        ];
+        ],
+        refreshCurrentMug;
 
     function makeODKXIntentTag (nodeID, appID) {
         return {
@@ -153,6 +154,38 @@ define([
         }
     }
 
+    function parseFields (html) {
+        var field_regex = /{{\s*([^}\s]+)\s*}}/gm,
+            match = field_regex.exec(html),
+            fields = {};
+
+        while (match) {
+            _.each(match.splice(1), function(field) {
+                fields[field] = field;
+            });
+            match = field_regex.exec(html);
+        }
+
+        return fields;
+    }
+
+    function printTemplate(mug, options) {
+        var widget = widgets.media(mug, options),
+            uploadComplete = widget.handleUploadComplete;
+
+        widget.handleUploadComplete = function (event, data, objectMap) {
+            mug.p.androidIntentExtra = parseFields(data.text);
+
+            uploadComplete(event, data, objectMap);
+
+            // hack: need to refresh the current mug because we change a
+            // different property in this widget
+            refreshCurrentMug();
+        };
+
+        return widget;
+    }
+
     var AndroidIntent = util.extend(mugs.defaultOptions, {
         typeName: 'Android App Callout',
         dataType: 'intent',
@@ -229,7 +262,7 @@ define([
             docTemplate: {
                 lstring: 'Document Template',
                 visibility: 'visible',
-                widget: widgets.media,
+                widget: printTemplate,
             },
             androidIntentAppId: { visibility: 'hidden' },
             androidIntentResponse: { visibility: 'hidden' },
@@ -237,6 +270,9 @@ define([
     });
 
     $.vellum.plugin("intents", {}, {
+        init: function() {
+            refreshCurrentMug = this.refreshCurrentMug.bind(this);
+        },
         loadXML: function (xml) {
             this.data.intents.unmappedIntentTags = parseIntentTags(
                 $(xml).find('h\\:head, head').children("odkx\\:intent, intent")
@@ -274,4 +310,10 @@ define([
             return this.__callOld().concat(INTENT_SPECIFIC_SPECS);
         }
     });
+
+    return {
+        test: {
+            parseFields: parseFields,
+        }
+    };
 });
