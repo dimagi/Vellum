@@ -165,7 +165,7 @@ define([
                 }
                 info = info._parent;
             }
-            vellum.handleDropFinish(target, path);
+            vellum.handleDropFinish(target, path, widget.mug);
         }
         var MAX_OPEN_NODE = 50,
             sources = _.chain(data)
