@@ -731,7 +731,11 @@ define([
 
         if (target) {
             // the .change fires the validation controls
-            target.val(target.val() + path).change();
+            if (this.opts().features.rich_text) {
+                target.ckeditor().editor.insertHtml(widgets.util.toRichText(path, mug.form, true));
+            } else {
+                target.val(target.val() + path).change();
+            }
 
             if (window.analytics) {
                 window.analytics.usage(
