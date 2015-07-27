@@ -242,18 +242,6 @@ define([
     var richtext = function(mug, options) {
         var widget = normal(mug, options), editor;
 
-        function fromRichText(val) {
-            var el = $('<div>');
-            val = val.replace(/(<p>)/ig,"").replace(/<\/p>/ig, "\r\n").replace(/(<br ?\/?>)/ig,"\n");
-            el = el.html(val);
-            el.find('.atwho-inserted .label').unwrap();
-            el.find('.label-datanode').replaceWith(function() {
-                return $(this).attr('data-value');
-            });
-
-            return el.html();
-        }
-
         function addPopovers(input) {
             input.find('[contenteditable=false]').each(function () {
                 var $this = $(this),
@@ -797,7 +785,7 @@ define([
 
     function toRichText(val, form, withClose) {
         if (!val) {return "";}
-        val = val.replace('&lt;', '<').replace('&gt;', '>');
+        val = val.replace('&lt;', '<').replace('&gt;', '>').replace('&nbsp;', ' ');
         var el = $('<div>').html(val);
         el.find('output').replaceWith(function() {
             return replaceOuputRef(form, this.attributes.value.value, withClose);
@@ -810,6 +798,19 @@ define([
         });
         return el.html();
     }
+
+    function fromRichText(val) {
+        var el = $('<div>');
+        val = val.replace(/(<p>)/ig,"").replace(/<\/p>/ig, "\r\n").replace(/(<br ?\/?>)/ig,"\n").replace('&nbsp;', ' ').replace('\n', ' ');
+        el = el.html(val);
+        el.find('.atwho-inserted .label').unwrap();
+        el.find('.label-datanode').replaceWith(function() {
+            return $(this).attr('data-value');
+        });
+
+        return el.text();
+    }
+
 
     return {
         base: base,
@@ -832,6 +833,7 @@ define([
             getUIElementWithEditButton: getUIElementWithEditButton,
             getUIElement: getUIElement,
             toRichText: toRichText,
+            fromRichText: fromRichText,
         }
     };
 });

@@ -1531,6 +1531,7 @@ define([
 
     fn.displayXPathEditor = function(options) {
         options.headerText = "Expression Editor";
+        options.rich_text = this.opts().features.rich_text;
         options.loadEditor = function($div, options) {
             require(['vellum/expressionEditor'], function (expressionEditor) {
                 expressionEditor.showXPathEditor($div, options);
