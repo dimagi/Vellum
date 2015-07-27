@@ -741,7 +741,7 @@ define([
             mug = form.getMugByPath(value);
 
         // only support absolute paths at the moment
-        if (!mug && !/instance\(\)/.test(value)) {
+        if (!mug && !/instance\(/.test(value)) {
             return value;
         }
 
