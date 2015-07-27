@@ -5,7 +5,7 @@ define([
     'vellum/util',
     'xpath',
     'xpathmodels',
-    'widgets',
+    'vellum/widgets',
     'tpl!vellum/templates/xpath_validation_errors',
     'tpl!vellum/templates/xpath_expression',
     'tpl!vellum/templates/xpath',
