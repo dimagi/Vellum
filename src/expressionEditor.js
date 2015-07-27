@@ -5,6 +5,7 @@ define([
     'vellum/util',
     'xpath',
     'xpathmodels',
+    'widgets',
     'tpl!vellum/templates/xpath_validation_errors',
     'tpl!vellum/templates/xpath_expression',
     'tpl!vellum/templates/xpath',
@@ -16,6 +17,7 @@ define([
     util,
     xpath,
     xpathmodels,
+    widgets,
     xpath_validation_errors,
     xpath_expression,
     xpath_tpl
@@ -71,7 +73,11 @@ define([
         });
 
         var getExpressionInput = function () {
-            return $div.find(".fd-xpath-editor-text");
+            if (options.rich_text) {
+                return $div.find(".fd-xpath-editor-text").ckeditor().editor;
+            } else {
+                return $div.find(".fd-xpath-editor-text");
+            }
         };
         var getValidationSummary = function () {
             return $div.find(".fd-xpath-validation-summary");
@@ -87,8 +93,19 @@ define([
                 util.dropdownAutocomplete(input, choices);
             }
             else {
-                util.questionAutocomplete(input, options.mug,
-                                          {property: options.path});
+                var insertTpl = '${name}';
+                if (options.rich_text) {
+                    insertTpl = '<span ' +
+                        'class="label label-datanode label-datanode-internal" ' +
+                        'contenteditable=false draggable=true ' +
+                        'data-value=\'${name}\'>' +
+                        '<i class="${icon}">&nbsp;</i>${name}'+
+                        '<i class="close">&times;</i></span>';
+                }
+                util.questionAutocomplete(input, options.mug, {
+                    property: options.path,
+                    insertTpl: insertTpl
+                });
             }
         };
 
@@ -120,7 +137,11 @@ define([
         var getExpressionFromUI = function () {
             if ($div.find(".xpath-simple").hasClass('hide')) {
                 // advanced
-                return getExpressionInput().val();
+                if (options.rich_text) {
+                    return widgets.util.fromRichText(getExpressionInput().getData());
+                } else {
+                    return getExpressionInput().val();
+                }
             } else {
                 return getExpressionFromSimpleMode();
             }
@@ -325,8 +346,12 @@ define([
 
         // toggle simple/advanced mode
         var showAdvancedMode = function (text, showNotice) {
-            getExpressionInput().val(text);
-            addAutocomplete(getExpressionInput());
+            if (options.rich_text) {
+                getExpressionInput().setData(widgets.util.toRichText(text, options.mug.form, true));
+            } else {
+                getExpressionInput().val(text);
+            }
+            addAutocomplete($div.find(".fd-xpath-editor-text"));
             getExpressionPane().empty();
 
             $div.find(".xpath-advanced").removeClass('hide');
@@ -352,11 +377,18 @@ define([
         };
 
         var initXPathEditor = function() {
+            var tag = 'textarea', tagArgs = 'rows="5"';
+            if (options.rich_text) {
+                tag = 'div';
+                tagArgs = 'contenteditable="true"';
+            }
             var $xpathUI = $(xpath_tpl({
                 topLevelJoinOpts: [
                     ["True when ALL of the expressions are true.", expTypes.AND],
                     ["True when ANY of the expressions are true.", expTypes.OR]
-                ]
+                ],
+                tag: tag,
+                tagArgs: tagArgs,
             }));
             editorContent.empty().append($xpathUI);
 
@@ -371,7 +403,13 @@ define([
             });
 
             $xpathUI.find('.fd-xpath-show-simple-button').click(function () {
-                showSimpleMode(getExpressionInput().val());
+                var val;
+                if (options.rich_text) {
+                    val = widgets.util.fromRichText(getExpressionInput().getData());
+                } else {
+                    val = getExpressionInput().val();
+                }
+                showSimpleMode(val);
             });
 
             $xpathUI.find('.fd-add-exp').click(function () {
@@ -389,7 +427,11 @@ define([
 
             $xpathUI.find('.fd-xpath-save-button').click(function() {
                 var uiExpression  = getExpressionFromUI();
-                getExpressionInput().val(uiExpression);
+                if (options.rich_text) {
+                    getExpressionInput().setData(widgets.util.toRichText(uiExpression, options.mug.form, true));
+                } else {
+                    getExpressionInput().val(uiExpression);
+                }
                 var results = validate(uiExpression),
                     hasInstance = uiExpression.match('instance\\(');
                 if (results[0] || hasInstance) {
