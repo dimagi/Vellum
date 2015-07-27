@@ -24,7 +24,8 @@ require([
                     onReady: function () {
                         done();
                     }
-                }
+                },
+                features: {'rich_text': false},
             });
         });
 

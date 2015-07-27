@@ -24,6 +24,7 @@ require([
     describe("Control elements with different data parents", function() {
         before(function (done) {
             util.init({
+                features: {'rich_text': false},
                 javaRosa: {langs: ['en']},
                 core: {onReady: done}
             });

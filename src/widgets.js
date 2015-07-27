@@ -3,14 +3,22 @@ define([
     'tpl!vellum/templates/widget_control_message',
     'underscore',
     'jquery',
-    'vellum/util'
+    'vellum/util',
+    'vellum/logic',
+    'ckeditor',
+    'ckeditor-jquery'
 ], function (
     widget_control_keyvalue,
     widget_control_message,
     _,
     $,
-    util
+    util,
+    logic,
+    CKEDITOR
 ) {
+    CKEDITOR.config.allowedContent = true;
+    CKEDITOR.config.customConfig = '';
+
     var base = function(mug, options) {
         // set properties shared by all widgets
         var widget = {};
@@ -231,6 +239,108 @@ define([
         return widget;
     };
 
+    var richtext = function(mug, options) {
+        var widget = normal(mug, options), editor;
+
+        function addPopovers(input) {
+            input.find('[contenteditable=false]').each(function () {
+                var $this = $(this),
+                    datavalue = $this.attr('data-value'),
+                    match = datavalue.match('output value="(.*)"'),
+                    value = match ? match[1] : $this.attr('data-value');
+                $this.popout({
+                    title: '',
+                    content: value,
+                    template: '<div contenteditable="false" class="popover">' +
+                        '<div class="arrow"></div>' +
+                        '<div class="popover-inner">' +
+                        '<div class="popover-content"><p></p></div></div></div>',
+                    placement: 'bottom',
+                });
+            });
+        }
+
+        function removePopovers(input) {
+            input.find('[contenteditable=false]').each(function () {
+                $(this).popout('hide');
+            });
+        }
+
+        function addCloseButton(widget, input) {
+            input.find('[contenteditable=false]').each(function () {
+                var _this = this;
+                $(this).find('.close').click(function() {
+                    $(_this).popout('hide');
+                    _this.remove();
+                    widget.handleChange();
+                    return false;
+                });
+            });
+        }
+
+        function toRichHtml(val, form, withClose) {
+            return toRichText(val, form, withClose).replace(/\r\n|\r|\n/ig, '<br />');
+        }
+
+        widget.input = $("<div />")
+            .attr("contenteditable", true)
+            .attr("name", widget.id)
+            .addClass('input-block-level jstree-drop');
+        if (options.singleLine) {
+            widget.input.addClass('fd-input');
+        } else {
+            widget.input.addClass('fd-textarea');
+        }
+
+        widget.input.ckeditor().promise.then(function() {
+            editor = widget.input.ckeditor().editor;
+
+            mug.on('teardown-mug-properties', function() {
+                removePopovers(widget.input);
+                if (editor) {
+                    editor.destroy();
+                }
+            }, null, "teardown-mug-properties");
+
+            editor.on('change', function() { widget.handleChange(); });
+            editor.on('afterInsertHtml', function (e) {
+                addCloseButton(widget, widget.input);
+                addPopovers(widget.input);
+            });
+            editor.on('dataReady', function (e) {
+                addCloseButton(widget, widget.input);
+                addPopovers(widget.input);
+            });
+
+        });
+
+        widget.input.on('inserted.atwho', function(atwhoEvent, $li, browserEvent) {
+            $(this).find('.atwho-inserted').children().unwrap();
+            addCloseButton(widget, widget.input);
+            addPopovers(widget.input);
+        });
+
+        widget.getControl = function () {
+            return widget.input;
+        };
+
+        widget.setValue = function (val) {
+            widget.input.ckeditor().promise.then(function() {
+                editor.setData(toRichHtml(val, mug.form, true));
+            });
+        };
+
+        widget.getValue = function () {
+            var val = "";
+            widget.input.ckeditor().promise.then(function() {
+                val = fromRichText(editor.getData());
+            });
+            return val.replace('&nbsp;', ' ').trim();
+        };
+
+        return widget;
+    };
+
     var identifier = function (mug, options) {
         var widget = text(mug, options),
             super_updateValue = widget.updateValue;
@@ -296,8 +406,14 @@ define([
     };
 
     var xPath = function (mug, options) {
-        var widget = text(mug, options),
-            super_getValue = widget.getValue,
+        var widget, insertTpl;
+        if (mug.options.richtext) {
+            options.singleLine = true;
+            widget = richtext(mug, options);
+        } else {
+            widget = text(mug, options);
+        }
+        var super_getValue = widget.getValue,
             super_setValue = widget.setValue;
         widget.getValue = function() {
             var val = super_getValue();
@@ -345,9 +461,19 @@ define([
                 }
             }, !!widget.isDisabled());
         };
+        
+        if (mug.options.richtext) {
+            insertTpl = '<span ' +
+                'class="label label-datanode label-datanode-internal" ' +
+                'contenteditable=false draggable=true data-value="${name}">' +
+                '<i class="${icon}">&nbsp;</i>${name}' +
+                '<i class="close">&times;</i></span>';
+        }
 
-        util.questionAutocomplete(widget.input, mug,
-                                  {property: options.path});
+        util.questionAutocomplete(widget.input, mug, {
+            property: options.path,
+            insertTpl: insertTpl,
+        });
 
         return widget;
     };
@@ -625,11 +751,71 @@ define([
         return $el;
     }
 
+    function replaceOuputRef(form, value, withClose, noOutput) {
+        var v = value.split('/'),
+            dispValue = v[v.length-1],
+            mug = form.getMugByPath(value);
+
+        // only support absolute paths at the moment
+        if (!mug && !/instance\(/.test(value)) {
+            return value;
+        }
+
+        var template = "<output value=\"" + value + "\" />";
+        if (noOutput) {
+            template = value;
+        }
+
+        var icon = mug ? mug.options.icon: 'fcc fcc-fd-external-case',
+            datanodeClass = mug ? 'label-datanode-internal' : 'label-datanode-external',
+            richText = $('<span>').addClass('label label-datanode')
+                .addClass(datanodeClass)
+                .attr({
+                    contenteditable: false,
+                    draggable: true,
+                    'data-value': template
+                }).append($('<i>').addClass(icon).html('&nbsp;')).append(dispValue);
+        if (withClose) {
+            richText.append($("<button>").addClass('close').html("&times;"));
+        }
+        return richText;
+    }
+
+    function toRichText(val, form, withClose) {
+        if (!val) {return "";}
+        val = val.replace('&lt;', '<').replace('&gt;', '>').replace('&nbsp;', ' ');
+        var el = $('<div>').html(val);
+        el.find('output').replaceWith(function() {
+            return replaceOuputRef(form, this.attributes.value.value, withClose);
+        });
+        var paths = new logic.LogicExpression(val).getPaths();
+        _.each(paths, function(path) {
+            var newPath = replaceOuputRef(form, path.toXPath(), withClose, true);
+            el.html(el.html().replace(path.toXPath(),
+                                      $('<div>').append(newPath).html()));
+        });
+        return el.html();
+    }
+
+    function fromRichText(val) {
+        var el = $('<div>');
+        val = val.replace(/(<p>)/ig,"").replace(/<\/p>/ig, "\r\n").replace(/(<br ?\/?>)/ig,"\n").replace('&nbsp;', ' ').replace('\n', ' ');
+        el = el.html(val);
+        el.find('.atwho-inserted .label').unwrap();
+        el.find('.label-datanode').replaceWith(function() {
+            return $(this).attr('data-value');
+        });
+
+        return el.text();
+    }
+
+
     return {
         base: base,
         normal: normal,
         text: text,
         multilineText: multilineText,
+        richtext: richtext,
         identifier: identifier,
         droppableText: droppableText,
         checkbox: checkbox,
@@ -643,7 +829,9 @@ define([
             setWidget: setWidget,
             getMessages: getMessages,
             getUIElementWithEditButton: getUIElementWithEditButton,
-            getUIElement: getUIElement
+            getUIElement: getUIElement,
+            toRichText: toRichText,
+            fromRichText: fromRichText,
         }
     };
 });

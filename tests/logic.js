@@ -17,7 +17,10 @@ require([
 
     describe("The logic manager", function () {
         before(function (done) {
-            util.init({core: {onReady: function () { done(); }}});
+            util.init({
+                core: {onReady: function () { done(); }},
+                features: {'rich_text': false},
+            });
         });
 
         it("should update expressions when a question ID changes", function () {

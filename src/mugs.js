@@ -387,7 +387,13 @@ define([
                 if (lang !== defaultLang && disp === defaultDisp) {
                     disp += " [" + defaultLang + "]";
                 }
-                return $('<div>').text(disp).html();
+                if (this.options.richtext) {
+                    disp = disp.replace(/(<\/?p>)/ig,"");
+                    disp = disp.replace(/[\r\n|\n|\r]/ig," ");
+                    return $('<div>').html(disp).html();
+                } else {
+                    return $('<div>').text(disp).html();
+                }
             }
 
             return nodeID;
@@ -1500,7 +1506,8 @@ define([
     function MugTypesManager(baseSpec, mugTypes, opts) {
         var _this = this,
             // Nestable Field List not supported in CommCare before v2.16
-            group_in_field_list = opts.features.group_in_field_list;
+            group_in_field_list = opts.features.group_in_field_list,
+            rich_text = opts.features.rich_text;
 
         this.auxiliaryTypes = mugTypes.auxiliary;
         this.normalTypes = mugTypes.normal;
@@ -1549,6 +1556,7 @@ define([
 
         _.each(this.allTypes, function (Mug, name) {
             Mug.__className = name;
+            Mug.richtext = rich_text;
 
             // set on this for easy access
             _this[name] = Mug;

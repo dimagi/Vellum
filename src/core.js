@@ -451,9 +451,12 @@ define([
     };
 
     fn.getMugDisplayName = function (mug) {
-        return mug.getDisplayName(
-            this.data.core.currentItextDisplayLanguage || 
+        var val = mug.getDisplayName(this.data.core.currentItextDisplayLanguage || 
             this.data.javaRosa.Itext.getDefaultLanguage());
+        if (this.opts().features.rich_text) {
+            val = widgets.util.toRichText(val, this.data.core.form);
+        }
+        return val;
     };
 
     fn.showSourceXMLModal = function (done) {
@@ -728,7 +731,11 @@ define([
 
         if (target) {
             // the .change fires the validation controls
-            target.val(target.val() + path).change();
+            if (this.opts().features.rich_text) {
+                target.ckeditor().editor.insertHtml(widgets.util.toRichText(path, mug.form, true));
+            } else {
+                target.val(target.val() + path).change();
+            }
 
             if (window.analytics) {
                 window.analytics.usage(
@@ -879,7 +886,7 @@ define([
             inst = $.jstree.reference(target);
         if (!inst && target.vellum("get") === source.vellum("get")) {
             // only when not dragging inside the tree
-            if (target.hasClass("jstree-drop")) {
+            if (target.hasClass("jstree-drop")  || target.parents('.jstree-drop').length > 0) {
                 data.helper.find('.jstree-icon').removeClass('jstree-er').addClass('jstree-ok');
             } else {
                 data.helper.find('.jstree-icon').removeClass('jstree-ok').addClass('jstree-er');
@@ -889,10 +896,14 @@ define([
         var vellum = $(data.data.obj.context).vellum("get"),
             target = $(data.event.target),
             inst = $.jstree.reference(target);
-        if (!inst && target.hasClass("jstree-drop") && vellum === target.vellum("get")) {
+
+        if (!inst && (target.hasClass("jstree-drop") || target.parents('.jstree-drop').length > 0) && vellum === target.vellum("get")) {
             if (data.data.origin) {
                 var node = data.data.origin.get_node(data.data.nodes[0]);
                 if (node.data && node.data.handleDrop) {
+                    if (!target.hasClass('jstree-drop')) {
+                        target = target.parents('.jstree-drop');
+                    }
                     node.data.handleDrop(target);
                 }
             }
@@ -1524,6 +1535,7 @@ define([
 
     fn.displayXPathEditor = function(options) {
         options.headerText = "Expression Editor";
+        options.rich_text = this.opts().features.rich_text;
         options.loadEditor = function($div, options) {
             require(['vellum/expressionEditor'], function (expressionEditor) {
                 expressionEditor.showXPathEditor($div, options);

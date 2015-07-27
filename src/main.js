@@ -66,7 +66,9 @@ requirejs.config({
         'jsdiff': '../bower_components/jsdiff/diff',
         'markdown-it': '../bower_components/markdown-it/dist/markdown-it',
         'caretjs': '../bower_components/Caret.js/dist/jquery.caret',
-        'atjs': '../bower_components/At.js/dist/js/jquery.atwho'
+        'atjs': '../bower_components/At.js/dist/js/jquery.atwho',
+        'ckeditor': '../lib/ckeditor/ckeditor',
+        'ckeditor-jquery': '../lib/ckeditor/adapters/jquery'
     },
     shim: {
         'codemirror': {
@@ -154,6 +156,13 @@ requirejs.config({
         'atjs': {
             deps: ['jquery', 'caretjs', 'css!../bower_components/At.js/dist/css/jquery.atwho'],
             exports: 'atjs'
+        },
+        'ckeditor': {
+            exports: 'CKEDITOR'
+        },
+        'ckeditor-jquery': {
+            deps: ['jquery', 'ckeditor'],
+            exports: '$.fn.ckeditor'
         }
     },
     less: {
