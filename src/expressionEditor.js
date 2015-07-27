@@ -115,8 +115,15 @@ define([
             var expressionParts = [];
             var joinType = getTopLevelJoinSelect().val();
             pane.children().each(function() {
-                var left = $($(this).find(".left-question")[0]).val();
-                var right = $($(this).find(".right-question")[0]).val();
+                var left, right;
+                if (options.rich_text) {
+                    left = widgets.util.fromRichText($($(this).find(".left-question")[0]).ckeditor().editor.getData());
+                    right = widgets.util.fromRichText($($(this).find(".right-question")[0]).ckeditor().editor.getData());
+                } else {
+                    left = $($(this).find(".left-question")[0]).val();
+                    right = $($(this).find(".right-question")[0]).val();
+                }
+
                 // ignore empty expressions
                 if (left === "" && right === "") {
                     return;
@@ -182,11 +189,19 @@ define([
             };
 
             var newExpressionUIElement = function (expOp) {
+                var tag = 'input', tagArgs = '';
+
+                if (options.rich_text) {
+                    tag = 'div';
+                    tagArgs = 'contenteditable="true"';
+                }
 
                 var $expUI = $(xpath_expression({
                     operationOpts: operationOpts,
                     leftPlaceholder: options.leftPlaceholder,
-                    rightPlaceholder: options.rightPlaceholder
+                    rightPlaceholder: options.rightPlaceholder,
+                    tag: tag,
+                    tagArgs: tagArgs,
                 }));
 
                 var getLeftQuestionInput = function () {
@@ -199,9 +214,15 @@ define([
 
                 var validateExpression = function(item) {
                     options.change();
+                    var le, re;
 
-                    var le = getLeftQuestionInput().val(),
+                    if (options.rich_text) {
+                        le = getLeftQuestionInput().ckeditor().editor.getData();
+                        re = getRightQuestionInput().ckeditor().editor.getData();
+                    } else {
+                        le = getLeftQuestionInput().val();
                         re = getRightQuestionInput().val();
+                    }
 
                     $expUI.find('.validation-results').addClass('hide');
 
@@ -213,7 +234,11 @@ define([
                 };
 
                 var populateQuestionInputBox = function (input, expr, pairedExpr) {
-                    input.val(expr.toXPath());
+                    if (options.rich_text) {
+                        input.ckeditor().editor.setData(widgets.util.toRichText(expr.toXPath(), options.mug.form, true));
+                    } else {
+                        input.val(expr.toXPath());
+                    }
                 };
 
                 // add event handlers to validate the inputs
