@@ -761,14 +761,21 @@ define([
     }
 
     function replaceOuputRef(form, value, withClose, noOutput) {
+        var v = value.split('/'),
+            dispValue = v[v.length-1],
+            mug = form.getMugByPath(value);
+
+        // only support absolute paths at the moment
+        if (!mug && !/instance\(\)/.test(value)) {
+            return value;
+        }
+
         var template = "<output value=\"" + value + "\" />";
         if (noOutput) {
             template = value;
         }
-        var v = value.split('/'),
-            dispValue = v[v.length-1],
-            mug = form.getMugByPath(value),
-            icon = mug ? mug.options.icon: 'fcc fcc-fd-external-case',
+
+        var icon = mug ? mug.options.icon: 'fcc fcc-fd-external-case',
             datanodeClass = mug ? 'label-datanode-internal' : 'label-datanode-external',
             richText = $('<span>').addClass('label label-datanode')
                 .addClass(datanodeClass)
