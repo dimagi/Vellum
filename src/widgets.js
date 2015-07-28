@@ -760,34 +760,53 @@ define([
         return $el;
     }
 
-    function replaceOuputRef(form, value, withClose, noOutput) {
-        var v = value.split('/'),
-            dispValue = v[v.length-1],
-            mug = form.getMugByPath(value);
+    /**
+     * @param path can be:
+     *   form: /data/group/text
+     *   instance: instance('blah')/blah_list/blah
+     */
+    function getBubblesDisplayValue(path) {
+        var steps = new logic.LogicExpression(path).getPaths()[0].steps
+            dispValue = steps[steps.length-1].name;
+        return dispValue;
+    }
 
-        // only support absolute paths at the moment
-        if (!mug && !/instance\(/.test(value)) {
-            return value;
-        }
-
-        var template = "<output value=\"" + value + "\" />";
-        if (noOutput) {
-            template = value;
-        }
-
-        var icon = mug ? mug.options.icon: 'fcc fcc-fd-external-case',
+    /**
+     * Make a xpath bubble
+     *
+     * @param withClose - boolean include the close button
+     *
+     * @param templateFn - function(xpath) returns what the bubble should be
+     *                     transcribed to in XML
+     *
+     * @returns jquery object of the bubble
+     */
+    function makeBubble(form, xpath, withClose, templateFn) {
+        var mug = form.getMugByPath(xpath),
+            dispValue = getBubblesDisplayValue(xpath),
             datanodeClass = mug ? 'label-datanode-internal' : 'label-datanode-external',
-            richText = $('<span>').addClass('label label-datanode')
-                .addClass(datanodeClass)
+            iconClass = mug ? mug.options.icon : 'fcc fcc-fd-external-case',
+            icon = $('<i>').addClass(iconClass).html('&nbsp;'),
+            bubble = $('<span>').addClass('label label-datanode ' + datanodeClass)
                 .attr({
                     contenteditable: false,
                     draggable: true,
-                    'data-value': template
-                }).append($('<i>').addClass(icon).html('&nbsp;')).append(dispValue);
+                    'data-value': templateFn(xpath)
+                }).append(icon).append(dispValue);
+
         if (withClose) {
-            richText.append($("<button>").addClass('close').html("&times;"));
+            bubble.append($("<button>").addClass('close').html("&times;"));
         }
-        return richText;
+
+        return bubble;
+    }
+
+    function replaceOuputRef(form, value, withClose, noOutput) {
+        function simple(xpath) { return xpath; }
+        function outputValue(xpath) { return "<output value=\"" + value + "\" />"; }
+
+        var templateFn = noOutput ? simple : outputValue;
+        return makeBubble(form, value, withClose, templateFn);
     }
 
     function toRichText(val, form, withClose) {
