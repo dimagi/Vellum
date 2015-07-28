@@ -818,6 +818,11 @@ define([
         function simple(xpath) { return xpath; }
         function outputValue(xpath) { return "<output value=\"" + value + "\" />"; }
 
+        // only support absolute path right now
+        if (!form.getMugByPath(value) && !/instance\(/.test(value)) {
+            return value;
+        }
+
         var templateFn = noOutput ? simple : outputValue;
         return makeBubble(form, value, withClose, templateFn);
     }
