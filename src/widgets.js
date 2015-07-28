@@ -808,7 +808,7 @@ define([
 
     function fromRichText(val) {
         var el = $('<div>');
-        val = val.replace(/(<p>)/ig,"").replace(/<\/p>/ig, "\r\n").replace(/(<br ?\/?>)/ig,"\n").replace('&nbsp;', ' ').replace('\n', ' ');
+        val = val.replace(/(<p>)/ig,"").replace(/<\/p>/ig, "\n").replace(/(<br ?\/?>)/ig,"\n").replace('&nbsp;', ' ').replace('\n', ' ');
         el = el.html(val);
         el.find('.atwho-inserted .label').unwrap();
         el.find('.label-datanode').replaceWith(function() {
