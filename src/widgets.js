@@ -766,7 +766,7 @@ define([
      *   instance: instance('blah')/blah_list/blah
      */
     function getBubblesDisplayValue(path) {
-        var steps = new logic.LogicExpression(path).getPaths()[0].steps
+        var steps = new logic.LogicExpression(path).getPaths()[0].steps,
             dispValue = steps[steps.length-1].name;
         return dispValue;
     }
@@ -881,6 +881,7 @@ define([
             getUIElement: getUIElement,
             toRichText: toRichText,
             fromRichText: fromRichText,
+            replaceOuputRef: replaceOuputRef
         }
     };
 });
