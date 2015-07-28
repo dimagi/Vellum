@@ -35,6 +35,53 @@ define([
         };
     }
 
+    function intentAppIdWidget(mug, options) {
+        var widget = widgets.text(mug, options),
+            input = widget.input,
+            opts = options.vellum.opts().intents,
+            tempSelect = $('<select style="width: 100%" />')
+                .attr("name", widget.id + "-template")
+                .addClass('span3 input-block-level')
+                .append($("<option />").attr("value", "").text("")),
+            templates = {},
+            control = $('<div class="control-row row" />')
+                .append($('<div class="span6" />').append(input))
+                .append($('<div class="span2 control-label">Template</div>'))
+                .append($('<div class="span4" />').append(tempSelect));
+
+        _.each(opts && opts.templates, function (temp) {
+            tempSelect.append($("<option />")
+                .attr("value", temp.id)
+                .text(temp.name));
+            templates[temp.id] = temp;
+        });
+
+        tempSelect.change(function () {
+            var id = tempSelect.val();
+            input.val(id).change();
+            if (id && templates.hasOwnProperty(id)) {
+                var container = input.parents(".fd-props-content").first();
+                _.each({
+                    extra: "[name=property-androidIntentExtra]",
+                    response: "[name=property-androidIntentResponse]",
+                }, function (name, key) {
+                    if (templates[id].hasOwnProperty(key)) {
+                        var target = container.find(name),
+                            widg = widgets.util.getWidget(target, options.vellum);
+                        widg.setValue(templates[id][key]);
+                        widg.handleChange();
+                    }
+                });
+            }
+        });
+
+        widget.getControl = function () {
+            return control;
+        };
+
+        return widget;
+    }
+
     var parseInnerTags = function (tagObj, innerTag) {
         var store = {};
         _.each(tagObj.find(innerTag), function (inner) {
@@ -200,7 +247,7 @@ define([
             androidIntentAppId: {
                 lstring: 'Intent ID',
                 visibility: 'visible',
-                widget: widgets.text,
+                widget: intentAppIdWidget,
                 placeholder: 'Insert Android Application ID',
                 deserialize: function (data, key, mug) {
                     if (data.intent) {

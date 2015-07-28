@@ -99,11 +99,36 @@ define(["underscore"], function (_) {
             ],
             dataSourcesEndpoint: function (callback) { callback(dataSources); },
             saveType: "patch",
-            saveUrl: function (data) {}
+            saveUrl: function (data) {},
         },
         javaRosa: {
             langs: ['en', 'hin'],
             displayLanguage: 'en'
+        },
+        intents: {
+            templates: [
+                {
+                    name: "Area Mapper",
+                    id: "com.richard.lu.areamapper",
+                    extra: {ext: "value"},
+                    response: {
+                        r1: "x",
+                        r2: "y",
+                        r3: "z",
+                        r4: "",
+                    },
+                },
+                {
+                    name: "Barcode Scanner",
+                    id: "com.google.zxing.client.android.SCAN",
+                    extra: {},
+                    response: {},
+                },
+                {
+                    name: "Breath Counter",
+                    id: "org.commcare.respiratory.BREATHCOUNT",
+                },
+            ],
         },
         itemset: {
             dataSourcesFilter: function (sources) {
