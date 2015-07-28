@@ -16,11 +16,13 @@ define([
     var DEFAULT_XMLNS = "http://opendatakit.org/xforms",
         INTENT_SPECIFIC_SPECS = [
             "androidIntentAppId",
+            "docTemplate",
             "androidIntentExtra",
             "androidIntentResponse",
             "unknownAttributes",
             "intentXmlns",
-        ];
+        ],
+        refreshCurrentMug;
 
     function makeODKXIntentTag (nodeID, appID) {
         return {
@@ -64,6 +66,11 @@ define([
             xmlWriter.writeAttributeString(name, value);
         });
         writeInnerTagXML(xmlWriter, 'extra', properties.androidIntentExtra);
+        if (properties.docTemplate) {
+            writeInnerTagXML(xmlWriter, 'extra', {
+                'cc:print_template_reference': properties.docTemplate
+            });
+        }
         writeInnerTagXML(xmlWriter, 'response', properties.androidIntentResponse);
         xmlWriter.writeEndElement('odkx:intent');
     }
@@ -98,15 +105,31 @@ define([
 
     function syncMugWithIntent (tags, mug) {
         // called when initializing a mug from a parsed form
-        if (mug.__className === "AndroidIntent") {
+        if (mug.__className === "AndroidIntent" ||
+            mug.__className === "PrintIntent") {
             var nodeID = mug.p.nodeID,
                 tag = tags.hasOwnProperty(nodeID) ? tags[nodeID] : makeODKXIntentTag(nodeID);
 
             _.each(INTENT_SPECIFIC_SPECS, function (key) {
-                mug.p[key] = tag[key];
+                if (!mug.p[key]) {
+                    mug.p[key] = tag[key];
+                }
             });
 
             delete tags[tag.nodeID];
+        }
+
+        if (mug.p.androidIntentAppId === "org.commcare.dalvik.action.PRINT") {
+            mug.form.changeMugType(mug, 'PrintIntent');
+        }
+
+        if (mug.__className === "PrintIntent") {
+            if (mug.p.androidIntentExtra['cc:print_template_reference']) {
+                mug.p.docTemplate = mug.p.androidIntentExtra['cc:print_template_reference'];
+                delete mug.p.androidIntentExtra['cc:print_template_reference'];
+            } else {
+                mug.p.docTemplate = "jr://file/commcare/text/" + mug.p.nodeID+ ".html";
+            }
         }
     }
 
@@ -129,6 +152,38 @@ define([
         if (data[key][""] === "") {
             delete data[key][""];
         }
+    }
+
+    function parseFields (html) {
+        var field_regex = /{{\s*([^}\s]+)\s*}}/gm,
+            match = field_regex.exec(html),
+            fields = {};
+
+        while (match) {
+            _.each(match.splice(1), function(field) {
+                fields[field] = field;
+            });
+            match = field_regex.exec(html);
+        }
+
+        return fields;
+    }
+
+    function printTemplate(mug, options) {
+        var widget = widgets.media(mug, options),
+            uploadComplete = widget.handleUploadComplete;
+
+        widget.handleUploadComplete = function (event, data, objectMap) {
+            mug.p.androidIntentExtra = parseFields(data.text);
+
+            uploadComplete(event, data, objectMap);
+
+            // hack: need to refresh the current mug because we change a
+            // different property in this widget
+            refreshCurrentMug();
+        };
+
+        return widget;
     }
 
     var AndroidIntent = util.extend(mugs.defaultOptions, {
@@ -196,7 +251,28 @@ define([
         }
     });
 
+    var PrintIntent = util.extend(AndroidIntent, {
+        typeName: 'Print',
+        icon: 'icon-print',
+        init: function (mug, form) {
+            AndroidIntent.init(mug, form);
+            mug.p.androidIntentAppId = "org.commcare.dalvik.action.PRINT";
+        },
+        spec: {
+            docTemplate: {
+                lstring: 'Document Template',
+                visibility: 'visible',
+                widget: printTemplate,
+            },
+            androidIntentAppId: { visibility: 'hidden' },
+            androidIntentResponse: { visibility: 'hidden' },
+        }
+    });
+
     $.vellum.plugin("intents", {}, {
+        init: function() {
+            refreshCurrentMug = this.refreshCurrentMug.bind(this);
+        },
         loadXML: function (xml) {
             this.data.intents.unmappedIntentTags = parseIntentTags(
                 $(xml).find('h\\:head, head').children("odkx\\:intent, intent")
@@ -219,10 +295,25 @@ define([
         getMugTypes: function () {
             var types = this.__callOld();
             types.normal.AndroidIntent = AndroidIntent;
+            types.normal.PrintIntent = PrintIntent;
             return types;
+        },
+        getAdvancedQuestions: function () {
+            var ret = this.__callOld();
+            ret.push("AndroidIntent");
+            if (this.opts().features.printing) {
+                ret.push("PrintIntent");
+            }
+            return ret;
         },
         getMainProperties: function () {
             return this.__callOld().concat(INTENT_SPECIFIC_SPECS);
         }
     });
+
+    return {
+        test: {
+            parseFields: parseFields,
+        }
+    };
 });

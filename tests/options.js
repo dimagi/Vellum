@@ -132,6 +132,7 @@ define(["underscore"], function (_) {
             'help_markdown': true,
             'advanced_itemsets': true,
             'experimental_ui': true,
+            'printing': true,
         }
     };
 
