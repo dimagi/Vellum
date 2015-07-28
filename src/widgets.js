@@ -782,12 +782,25 @@ define([
      * @returns jquery object of the bubble
      */
     function makeBubble(form, xpath, withClose, templateFn) {
-        var mug = form.getMugByPath(xpath),
+        function _parseXPath(xpath, form) {
+            if (/instance\('casedb'\)/.test(xpath)) {
+                return ['label-datanode-external', 'fcc fcc-fd-external-case'];
+            }
+
+            if (form) {
+                var mug = form.getMugByPath(xpath);
+                if (mug) {
+                    return ['label-datanode-internal', mug.options.icon];
+                }
+            }
+
+            return ['label-datanode-external', 'fcc fcc-help'];
+        }
+
+        var bubbleClasses = _parseXPath(xpath, form),
             dispValue = getBubblesDisplayValue(xpath),
-            datanodeClass = mug ? 'label-datanode-internal' : 'label-datanode-external',
-            iconClass = mug ? mug.options.icon : 'fcc fcc-fd-external-case',
-            icon = $('<i>').addClass(iconClass).html('&nbsp;'),
-            bubble = $('<span>').addClass('label label-datanode ' + datanodeClass)
+            icon = $('<i>').addClass(bubbleClasses[1]).html('&nbsp;'),
+            bubble = $('<span>').addClass('label label-datanode ' + bubbleClasses[0])
                 .attr({
                     contenteditable: false,
                     draggable: true,
