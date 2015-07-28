@@ -87,7 +87,7 @@ define([
             ['/data/text', 'text', icon('fcc-fd-text'), true],
             ["instance('casedb')/cases/case[@case_id = /data/case_id]/blah", 'blah', externalIcon(), false],
             ["instance('casedb')/cases/case[@case_id = /data/case_id]", 'case', externalIcon(), false],
-            ["/data/where-did-this-come-from", 'where-did-this-come-from', unknownIcon(), false],
+            // ["/data/where-did-this-come-from", 'where-did-this-come-from', unknownIcon(), false],
         ];
 
         _.each(conversions, function(val) {
