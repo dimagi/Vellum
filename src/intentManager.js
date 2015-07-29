@@ -4,13 +4,15 @@ define([
     'vellum/util',
     'underscore',
     'jquery',
+    'tpl!vellum/templates/intent_templates',
     'vellum/core'
 ], function (
     mugs,
     widgets,
     util,
     _,
-    $
+    $,
+    intent_templates
 ) {
     "use strict";
     var DEFAULT_XMLNS = "http://opendatakit.org/xforms",
@@ -33,6 +35,44 @@ define([
             unknownAttributes: {},
             nodeID: nodeID
         };
+    }
+
+    function intentAppIdWidget(mug, options) {
+        var widget = widgets.text(mug, options),
+            input = widget.input,
+            opts = options.vellum.opts().intents,
+            tempMenu = $(intent_templates({templates: opts && opts.templates || []})),
+            templates = _.object(_.map(opts && opts.templates, function (temp) {
+                return [temp.id, temp];
+            })),
+            control = $('<div class="control-row row" />')
+                .append($('<div class="span8" />').append(input))
+                .append($('<div class="span4" />').append(tempMenu));
+
+        tempMenu.find('.dropdown-menu a').click(function (e) {
+            e.preventDefault();
+            var id = $(this).data("id");
+            input.val(id).change();
+            if (id && templates.hasOwnProperty(id)) {
+                var container = input.parents(".fd-props-content").first();
+                _.each({
+                    extra: "[name=property-androidIntentExtra]",
+                    response: "[name=property-androidIntentResponse]",
+                }, function (name, key) {
+                    var value = templates[id].hasOwnProperty(key) ? templates[id][key] : {},
+                        target = container.find(name),
+                        kvwidget = widgets.util.getWidget(target, options.vellum);
+                    kvwidget.setValue(value);
+                    kvwidget.handleChange();
+                });
+            }
+        });
+
+        widget.getControl = function () {
+            return control;
+        };
+
+        return widget;
     }
 
     var parseInnerTags = function (tagObj, innerTag) {
@@ -200,7 +240,7 @@ define([
             androidIntentAppId: {
                 lstring: 'Intent ID',
                 visibility: 'visible',
-                widget: widgets.text,
+                widget: intentAppIdWidget,
                 placeholder: 'Insert Android Application ID',
                 deserialize: function (data, key, mug) {
                     if (data.intent) {
