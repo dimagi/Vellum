@@ -52,7 +52,7 @@ define([
     }
 
     function externalIcon () { return icon('fcc-fd-external-case'); }
-    function unknownIcon () { return icon('fcc-help'); }
+    // function unknownIcon () { return icon('fcc-help'); }
 
     function bubbleSpan(xpath, internal, templateFn) {
         var span = $('<span>').addClass('label label-datanode').attr({

@@ -133,13 +133,13 @@ define([
             before(function(done) {
                 util.init({
                     intents: {templates: templates},
-                    features: {'experimental_ui': false},
+                    features: {'rich_text': false},
                     core: {onReady: function () {
                         vellum = this;
                         mug = util.addQuestion("AndroidIntent", "intent");
                         util.clickQuestion("intent");
                         done();
-                    }}
+                    }},
                 });
             });
 
