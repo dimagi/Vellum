@@ -4,13 +4,15 @@ define([
     'vellum/util',
     'underscore',
     'jquery',
+    'tpl!vellum/templates/intent_templates',
     'vellum/core'
 ], function (
     mugs,
     widgets,
     util,
     _,
-    $
+    $,
+    intent_templates
 ) {
     "use strict";
     var DEFAULT_XMLNS = "http://opendatakit.org/xforms",
@@ -39,25 +41,17 @@ define([
         var widget = widgets.text(mug, options),
             input = widget.input,
             opts = options.vellum.opts().intents,
-            tempSelect = $('<select style="width: 100%" />')
-                .attr("name", widget.id + "-template")
-                .addClass('span3 input-block-level')
-                .append($("<option />").attr("value", "").text("")),
-            templates = {},
+            tempMenu = $(intent_templates({templates: opts && opts.templates || []})),
+            templates = _.object(_.map(opts && opts.templates, function (temp) {
+                return [temp.id, temp];
+            })),
             control = $('<div class="control-row row" />')
-                .append($('<div class="span6" />').append(input))
-                .append($('<div class="span2 control-label">Template</div>'))
-                .append($('<div class="span4" />').append(tempSelect));
+                .append($('<div class="span8" />').append(input))
+                .append($('<div class="span4" />').append(tempMenu));
 
-        _.each(opts && opts.templates, function (temp) {
-            tempSelect.append($("<option />")
-                .attr("value", temp.id)
-                .text(temp.name));
-            templates[temp.id] = temp;
-        });
-
-        tempSelect.change(function () {
-            var id = tempSelect.val();
+        tempMenu.find('.dropdown-menu a').click(function (e) {
+            e.preventDefault();
+            var id = $(this).data("id");
             input.val(id).change();
             if (id && templates.hasOwnProperty(id)) {
                 var container = input.parents(".fd-props-content").first();
@@ -65,12 +59,11 @@ define([
                     extra: "[name=property-androidIntentExtra]",
                     response: "[name=property-androidIntentResponse]",
                 }, function (name, key) {
-                    if (templates[id].hasOwnProperty(key)) {
-                        var target = container.find(name),
-                            widg = widgets.util.getWidget(target, options.vellum);
-                        widg.setValue(templates[id][key]);
-                        widg.handleChange();
-                    }
+                    var value = templates[id].hasOwnProperty(key) ? templates[id][key] : {},
+                        target = container.find(name),
+                        kvwidget = widgets.util.getWidget(target, options.vellum);
+                    kvwidget.setValue(value);
+                    kvwidget.handleChange();
                 });
             }
         });

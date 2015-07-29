@@ -1,0 +1,15 @@
+<div class="btn-group pull-right">
+    <a href="#" class="btn dropdown-toggle current-question" data-toggle="dropdown">
+        <i class="icon-vellum-android-intent"></i> Templates
+        <span class="caret"></span>
+    </a>
+    <ul class="dropdown-menu">
+        <% _.each(templates, function (temp) { %>
+        <li>
+            <a data-id="<%- temp.id %>" href="#">
+                <% if (temp.icon) { %><i class="<%- temp.icon %>"></i><% } %> <%- temp.name %>
+            </a>
+        </li>
+        <% }); %>
+    </ul>
+</div>

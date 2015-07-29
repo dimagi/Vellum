@@ -108,6 +108,7 @@ define(["underscore"], function (_) {
         intents: {
             templates: [
                 {
+                    icon: "icon-map-marker",
                     name: "Area Mapper",
                     id: "com.richard.lu.areamapper",
                     extra: {ext: "value"},
@@ -119,12 +120,14 @@ define(["underscore"], function (_) {
                     },
                 },
                 {
+                    icon: "icon-barcode",
                     name: "Barcode Scanner",
                     id: "com.google.zxing.client.android.SCAN",
                     extra: {},
                     response: {},
                 },
                 {
+                    icon: "icon-vellum-android-intent",
                     name: "Breath Counter",
                     id: "org.commcare.respiratory.BREATHCOUNT",
                 },

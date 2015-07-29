@@ -64,6 +64,7 @@ define([
                 mug,
                 templates =  [
                     {
+                        icon: "icon-map-marker",
                         name: "Area Mapper",
                         id: "com.richard.lu.areamapper",
                         extra: {ext: "value"},
@@ -75,12 +76,14 @@ define([
                         },
                     },
                     {
+                        icon: "icon-barcode",
                         name: "Barcode Scanner",
                         id: "com.google.zxing.client.android.SCAN",
                         extra: {},
                         response: {},
                     },
                     {
+                        icon: "icon-vellum-android-intent",
                         name: "Breath Counter",
                         id: "org.commcare.respiratory.BREATHCOUNT",
                     },
@@ -97,25 +100,20 @@ define([
                 });
             });
 
-            it("should select empty template by default", function () {
+            it("should not select a template by default", function () {
                 assert.equal($("[name=property-androidIntentAppId]").val(), "");
-                assert.equal($("[name=property-androidIntentAppId-template]").val(), "");
             });
 
             _.each(templates, function (temp) {
                 it("should have " + temp.name + " template", function () {
-                    $("[name=property-androidIntentAppId-template]").val(temp.id).change();
+                    $("a[data-id='" + temp.id + "']").click();
                     assert.equal($("[name=property-androidIntentAppId]").val(), temp.id);
-                    if (temp.extra) {
-                        var extra = widgets.util.getWidget(
-                                $("[name=property-androidIntentExtra]"), vellum);
-                        assert.deepEqual(extra.getValue(), temp.extra);
-                    }
-                    if (temp.response) {
-                        var response = widgets.util.getWidget(
-                                $("[name=property-androidIntentResponse]"), vellum);
-                        assert.deepEqual(response.getValue(), temp.response);
-                    }
+                    var extra = widgets.util.getWidget(
+                            $("[name=property-androidIntentExtra]"), vellum),
+                        response = widgets.util.getWidget(
+                            $("[name=property-androidIntentResponse]"), vellum);
+                    assert.deepEqual(extra.getValue(), temp.extra || {});
+                    assert.deepEqual(response.getValue(), temp.response || {});
                 });
             });
         });
