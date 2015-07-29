@@ -23,6 +23,7 @@ define([
     $.vellum.plugin('databrowser', {}, {
         init: function () {
             var vellum = this,
+                tree = this.$f.find(".fd-tree"),
                 pane = this.$f.find(".fd-accessory-pane"),
                 head, headHeight;
             fn.initDataBrowser = _.once(_initDataBrowser);
@@ -30,14 +31,13 @@ define([
             head = pane.find(".fd-head-external-sources");
             headHeight = head.outerHeight(true) || 0;
             pane.data("min-size", headHeight)
-                .height(headHeight)
+                .height(tree.height() * 0.45)
                 .resize(function () {
-                    if (pane.height() > 100) {
+                    if (pane.height() > headHeight + 100) {
                         panelHeight = pane.height();
-                    } else if (pane.height() > headHeight) {
-                        fn.initDataBrowser(vellum);
                     }
                 });
+            fn.initDataBrowser(vellum);
             window_.preventDoubleScrolling(pane.find(".fd-scrollable"));
             datasources.getDataSources(function () {});
             var toggle = _.partial(toggleExternalDataTree, vellum);

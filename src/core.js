@@ -1628,6 +1628,7 @@ define([
             $fieldsetContent = $sec.find('.fd-fieldset-content');
         options.properties.map(function (prop) {
             var elemWidget = prop.widget(mug, $.extend(prop.options, {
+                vellum: _this,
                 displayXPathEditor: function (options) {
                     _this.data.core.currentlyEditedProperty = prop.options.path;
                     _this.displayXPathEditor(options);
