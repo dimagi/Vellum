@@ -78,19 +78,27 @@ define([
     var parseInnerTags = function (tagObj, innerTag) {
         var store = {};
         _.each(tagObj.find(innerTag), function (inner) {
-            var $innerTag = $(inner);
-            store[$innerTag.attr('key')] = $innerTag.attr('ref');
+            var $innerTag = $(inner),
+                key = $innerTag.attr('key');
+            if (key === 'cc:print_template_reference') {
+                store[key] = $innerTag.text();
+            } else {
+                store[key] = $innerTag.attr('ref');
+            }
         });
         return store;
     };
 
-    var writeInnerTagXML = function(xmlWriter, innerTag, store) {
+    var writeInnerTagXML = function(xmlWriter, innerTag, store, value) {
         if (store) {
             _.each(store, function (ref, key) {
                 if (key) {
                     xmlWriter.writeStartElement(innerTag);
                     xmlWriter.writeAttributeString("key", key);
                     xmlWriter.writeAttributeString("ref", ref);
+                    if (value) {
+                        xmlWriter.writeXML(value);
+                    }
                     xmlWriter.writeEndElement();
                 }
             });
@@ -108,8 +116,8 @@ define([
         writeInnerTagXML(xmlWriter, 'extra', properties.androidIntentExtra);
         if (properties.docTemplate) {
             writeInnerTagXML(xmlWriter, 'extra', {
-                'cc:print_template_reference': properties.docTemplate
-            });
+                'cc:print_template_reference': '.'
+            }, properties.docTemplate);
         }
         writeInnerTagXML(xmlWriter, 'response', properties.androidIntentResponse);
         xmlWriter.writeEndElement('odkx:intent');
