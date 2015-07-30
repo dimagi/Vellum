@@ -217,23 +217,6 @@ define([
         return fields;
     }
 
-    function printTemplate(mug, options) {
-        var widget = widgets.media(mug, options),
-            uploadComplete = widget.handleUploadComplete;
-
-        widget.handleUploadComplete = function (event, data, objectMap) {
-            mug.p.androidIntentExtra = parseFields(data.text);
-
-            uploadComplete(event, data, objectMap);
-
-            // hack: need to refresh the current mug because we change a
-            // different property in this widget
-            refreshCurrentMug();
-        };
-
-        return widget;
-    }
-
     var AndroidIntent = util.extend(mugs.defaultOptions, {
         typeName: 'Android App Callout',
         dataType: 'intent',
@@ -310,7 +293,7 @@ define([
             docTemplate: {
                 lstring: 'Document Template',
                 visibility: 'visible',
-                widget: printTemplate,
+                widget: widgets.media,
             },
             androidIntentAppId: { visibility: 'hidden' },
             androidIntentResponse: { visibility: 'hidden' },
