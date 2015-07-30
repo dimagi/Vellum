@@ -886,7 +886,6 @@ define([
             getUIElement: getUIElement,
             toRichText: toRichText,
             fromRichText: fromRichText,
-            replaceOuputRef: replaceOuputRef
         }
     };
 });
