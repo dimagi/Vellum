@@ -422,8 +422,7 @@ define([
         };
 
         widget.updateValue = function () {
-            var currentValues = widget.getValue();
-            if (!("" in currentValues)) {
+            if (!getValues().hasOwnProperty("")) {
                 widget.kvInput.find('.btn').removeClass('hide');
                 widget.kvInput.find('.fd-kv-remove-pair').removeClass('hide');
             }
