@@ -40,6 +40,47 @@ define([
             util.assertXmlEqual(util.call("createXML"), INTENT_WITH_NO_MUG_XML);
         });
 
+        describe("with multiple response pairs with matching keys", function () {
+            var mug, xml, $xml;
+            before(function () {
+                util.loadXML("");
+                mug = util.addQuestion("AndroidIntent", "intent");
+                mug.p.androidIntentResponse = {name: ["/data/node1", "/data/node2"]};
+                xml = util.call("createXML");
+                $xml = $(xml);
+            });
+
+            it("should show all pairs in UI", function () {
+                util.clickQuestion("intent");
+                assert.equal($(".fd-kv-key[value=name]").length, 2);
+                assert.deepEqual(
+                    $(".fd-kv-key[value=name]").map(function (i, el) {
+                        return $(el).parent().parent().find(".fd-kv-val").val();
+                    }).toArray(),
+                    ["/data/node1", "/data/node2"]
+                );
+            });
+
+            it("should write multiple response nodes in XML", function () {
+                var responses = $xml.find("response[key=name]");
+                assert.equal(responses.length, 2, xml);
+                assert.deepEqual(
+                    responses.map(function (i, node) {
+                        return $(node).attr("ref");
+                    }).toArray(),
+                    ["/data/node1", "/data/node2"], xml
+                );
+            });
+
+            it("should load generated XML", function () {
+                util.loadXML(xml);
+                assert.deepEqual(
+                    util.getMug("intent").p.androidIntentResponse,
+                    {name: ["/data/node1", "/data/node2"]}
+                );
+            });
+        });
+
         describe("printing mug", function() {
             before(function() {
                 util.loadXML(PRINTING_INTENT_XML);
