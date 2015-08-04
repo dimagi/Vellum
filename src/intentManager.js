@@ -79,11 +79,21 @@ define([
         var store = {};
         _.each(tagObj.find(innerTag), function (inner) {
             var $innerTag = $(inner),
-                key = $innerTag.attr('key');
+                key = $innerTag.attr('key'),
+                value;
             if (key === 'cc:print_template_reference') {
-                store[key] = $innerTag.text();
+                value = $innerTag.text();
             } else {
-                store[key] = $innerTag.attr('ref');
+                value = $innerTag.attr('ref');
+            }
+            if (store.hasOwnProperty(key)) {
+                if (_.isArray(store[key])) {
+                    store[key].push(value);
+                } else {
+                    store[key] = [store[key], value];
+                }
+            } else {
+                store[key] = value;
             }
         });
         return store;
@@ -93,13 +103,15 @@ define([
         if (store) {
             _.each(store, function (ref, key) {
                 if (key) {
-                    xmlWriter.writeStartElement(innerTag);
-                    xmlWriter.writeAttributeString("key", key);
-                    xmlWriter.writeAttributeString("ref", ref);
-                    if (value) {
-                        xmlWriter.writeXML(value);
-                    }
-                    xmlWriter.writeEndElement();
+                    _.each(_.isArray(ref) ? ref : [ref], function (ref) {
+                        xmlWriter.writeStartElement(innerTag);
+                        xmlWriter.writeAttributeString("key", key);
+                        xmlWriter.writeAttributeString("ref", ref);
+                        if (value) {
+                            xmlWriter.writeXML(value);
+                        }
+                        xmlWriter.writeEndElement();
+                    });
                 }
             });
         }
