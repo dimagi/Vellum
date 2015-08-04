@@ -381,7 +381,7 @@ define([
 
         widget.setValue = function (value) {
             widget.kvInput.html(widget_control_keyvalue({
-                pairs: value
+                pairs: _.clone(value)
             }));
             widget.kvInput.find('input').bind('change keyup', function () {
                 widget.handleChange();
@@ -401,8 +401,18 @@ define([
         function getValues() {
             var currentValues = {};
             _.each(widget.kvInput.find('.fd-kv-pair'), function (kvPair) {
-                var $pair = $(kvPair);
-                currentValues[$pair.find('.fd-kv-key').val()] = $pair.find('.fd-kv-val').val();
+                var $pair = $(kvPair),
+                    key = $pair.find('.fd-kv-key').val(),
+                    value = $pair.find('.fd-kv-val').val();
+                if (currentValues.hasOwnProperty(key)) {
+                    if (_.isArray(currentValues[key])) {
+                        currentValues[key].push(value);
+                    } else {
+                        currentValues[key] = [currentValues[key], value];
+                    }
+                } else {
+                    currentValues[key] = value;
+                }
             });
             return currentValues;
         }
@@ -412,8 +422,7 @@ define([
         };
 
         widget.updateValue = function () {
-            var currentValues = widget.getValue();
-            if (!("" in currentValues)) {
+            if (!getValues().hasOwnProperty("")) {
                 widget.kvInput.find('.btn').removeClass('hide');
                 widget.kvInput.find('.fd-kv-remove-pair').removeClass('hide');
             }
