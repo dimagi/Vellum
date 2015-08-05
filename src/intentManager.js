@@ -81,11 +81,7 @@ define([
             var $innerTag = $(inner),
                 key = $innerTag.attr('key'),
                 value;
-            if (key === 'cc:print_template_reference') {
-                value = $innerTag.text();
-            } else {
-                value = $innerTag.attr('ref');
-            }
+            value = $innerTag.attr('ref');
             if (store.hasOwnProperty(key)) {
                 if (_.isArray(store[key])) {
                     store[key].push(value);
@@ -99,7 +95,7 @@ define([
         return store;
     };
 
-    var writeInnerTagXML = function(xmlWriter, innerTag, store, value) {
+    var writeInnerTagXML = function(xmlWriter, innerTag, store) {
         if (store) {
             _.each(store, function (ref, key) {
                 if (key) {
@@ -107,9 +103,6 @@ define([
                         xmlWriter.writeStartElement(innerTag);
                         xmlWriter.writeAttributeString("key", key);
                         xmlWriter.writeAttributeString("ref", ref);
-                        if (value) {
-                            xmlWriter.writeXML(value);
-                        }
                         xmlWriter.writeEndElement();
                     });
                 }
@@ -128,8 +121,8 @@ define([
         writeInnerTagXML(xmlWriter, 'extra', properties.androidIntentExtra);
         if (properties.docTemplate) {
             writeInnerTagXML(xmlWriter, 'extra', {
-                'cc:print_template_reference': '.'
-            }, properties.docTemplate);
+                'cc:print_template_reference': "'" + properties.docTemplate + "'"
+            });
         }
         writeInnerTagXML(xmlWriter, 'response', properties.androidIntentResponse);
         xmlWriter.writeEndElement('odkx:intent');
@@ -185,7 +178,7 @@ define([
 
         if (mug.__className === "PrintIntent") {
             if (mug.p.androidIntentExtra['cc:print_template_reference']) {
-                mug.p.docTemplate = mug.p.androidIntentExtra['cc:print_template_reference'];
+                mug.p.docTemplate = mug.p.androidIntentExtra['cc:print_template_reference'].replace(/^'|'$/g, '');
                 delete mug.p.androidIntentExtra['cc:print_template_reference'];
             } else {
                 mug.p.docTemplate = "jr://file/commcare/text/" + mug.p.nodeID+ ".html";

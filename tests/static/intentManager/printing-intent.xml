@@ -24,7 +24,7 @@
 		</model>
 		<odkx:intent xmlns:odkx="http://opendatakit.org/xforms" id="print_data" class="org.commcare.dalvik.action.PRINT">
 			<extra key="text" ref="/data/text" />
-			<extra key="cc:print_template_reference" ref=".">jr://file/commcare/doc/data/print_data.doc</extra>
+			<extra key="cc:print_template_reference" ref="'jr://file/commcare/doc/data/print_data.doc'" />
 		</odkx:intent>
 	</h:head>
 	<h:body>
