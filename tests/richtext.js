@@ -113,5 +113,9 @@ define([
                 assert.strictEqual(widgets.util.fromRichText(bubble), val[0]);
             });
         });
+
+        it("blah", function() {
+            assert.strictEqual("blah\nblah\n", widgets.util.fromRichText("<p>blah<br />blah</p>"));
+        });
     });
 });
