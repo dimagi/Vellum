@@ -829,23 +829,21 @@ define([
 
     function toRichText(val, form, withClose) {
         if (!val) {return "";}
-        val = val.replace('&lt;', '<').replace('&gt;', '>').replace('&nbsp;', ' ').replace(/ /g, '');
+        val = val.replace('&lt;', '<').replace('&gt;', '>').replace('&nbsp;', ' ');
         var el = $('<div>').html(val);
         el.find('output').replaceWith(function() {
             return replaceOuputRef(form, this.attributes.value.value, withClose);
         });
         var l = new logic.LogicExpression(val),
             paths = _.chain(l.getPaths())
-                     .map(function(path) {
-                         return path.toXPath().replace(/ /g, '');
-                     })
+                     .map(function(path) { return path.toXPath(); })
                      .filter(function(path) {
                          return !/^instance\('commcaresession'\)/.test(path);
                      }).value();
 
         _.each(paths, function(path) {
             var newPath = replaceOuputRef(form, path, withClose, true);
-            el.html(el.html().replace(path,
+            el.html(el.html().replace(new RegExp(RegExp.escape(path).replace(/ /g, '\\s*')),
                                       $('<div>').append(newPath).html()));
         });
         return el.html();

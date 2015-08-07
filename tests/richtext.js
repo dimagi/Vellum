@@ -73,26 +73,27 @@ define([
         return bubbleSpan(xpath, internal, templateFn).append(icon).append(dispValue);
     }
 
-    // function outputValueTemplateFn(path) {
-    //     return '<output value="' + path + '" />';
-    // }
+    function outputValueTemplateFn(path) {
+        return '<output value="' + path + '" />';
+    }
 
-    // function makeOutputValue(xpath, dispValue, icon, internal) {
-    //     return makeBubble(xpath, dispValue, icon, internal, outputValueTemplateFn);
-    // }
+    function makeOutputValue(xpath, dispValue, icon, internal) {
+        return makeBubble(xpath, dispValue, icon, internal, outputValueTemplateFn);
+    }
 
     function wrapWithDiv(el) { return $('<div>').append(el); }
 
     describe("Rich text utilities", function() {
         // path, display value, icon
-        var conversions = [
+        var simpleConversions = [
             ['/data/text', 'text', icon('fcc-fd-text'), true],
-            ["instance('casedb')/cases/case[@case_id=/data/case_id]/blah", 'blah', externalIcon(), false],
-            ["instance('casedb')/cases/case[@case_id=/data/case_id]", 'case', externalIcon(), false],
+            ["instance('casedb')/cases/case[@case_id = /data/case_id]/blah", 'blah', externalIcon(), false],
+            ["instance('casedb')/cases/case[@case_id = /data/case_id]", 'case', externalIcon(), false],
+            ["instance('casedb')/cases/case[@case_id = instance('commcaresession')/session/data/case_id]", 'case', externalIcon(), false],
             // ["/data/where-did-this-come-from", 'where-did-this-come-from', unknownIcon(), false],
         ];
 
-        _.each(conversions, function(val) {
+        _.each(simpleConversions, function(val) {
             it("from text to html: " + val[0], function() {
                 assert.strictEqual(
                     wrapWithDiv(widgets.util.toRichText(val[0], formShim)).html(),
@@ -100,13 +101,13 @@ define([
                 );
             });
 
-            // it("from text to html with output value: " + val[0], function() {
-            //     assert.strictEqual(
-            //         wrapWithDiv(widgets.util.toRichText(formShim, outputValueTemplateFn(val[0]))).html(),
-            //         wrapWithDiv(makeOutputValue(val[0], val[1], val[2], val[3])).html()
-            //     );
-            // });
-            //
+            it("from text to html with output value: " + val[0], function() {
+                assert.strictEqual(
+                    wrapWithDiv(widgets.util.toRichText(outputValueTemplateFn(val[0]), formShim)).html(),
+                    wrapWithDiv(makeOutputValue(val[0], val[1], val[2], val[3])).html()
+                );
+            });
+
             it("from html to text: " + val[0], function() {
                 var bubble = $('<div>').append(makeBubble(val[0], val[1], val[2], val[3])).html();
                 assert.strictEqual(widgets.util.fromRichText(bubble), val[0]);
