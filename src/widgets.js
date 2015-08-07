@@ -816,7 +816,7 @@ define([
 
     function replaceOuputRef(form, value, withClose, noOutput) {
         function simple(xpath) { return xpath; }
-        function outputValue(xpath) { return "<output value=\"" + value + "\" />"; }
+        function outputValue(xpath) { return "<output value=\"" + xpath + "\" />"; }
 
         // only support absolute path right now
         if (!form.getMugByPath(value) && !/instance\(/.test(value)) {
@@ -858,7 +858,7 @@ define([
             return $(this).attr('data-value');
         });
 
-        return el.text();
+        return el.html();
     }
 
 
