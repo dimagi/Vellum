@@ -732,7 +732,7 @@ define([
         if (target) {
             // the .change fires the validation controls
             if (this.opts().features.rich_text) {
-                target.ckeditor().editor.insertHtml(widgets.util.toRichText(path, _this.data.core.form, true));
+                target.ckeditor().editor.insertHtml(widgets.util.toRichText(path, _this.data.core.form, true) + " ");
             } else {
                 target.val(target.val() + path).change();
             }
