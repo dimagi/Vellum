@@ -176,7 +176,9 @@ define([
             isDataOnly: true,
             supportsDataNodeRole: true,
             icon: 'icon-save',
-            init: function (mug, form) {},
+            init: function (mug, form) {
+                mug.p.date_modified = mug.p.date_modified || '/data/meta/timeEnd';
+            },
             spec: {
                 xmlnsAttr: { presence: "optional" },
                 "date_modified": {
