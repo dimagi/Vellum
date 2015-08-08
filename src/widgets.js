@@ -302,6 +302,15 @@ define([
                 }
             }, null, "teardown-mug-properties");
 
+            mug.form.on('question-remove', function(e) {
+                if (e.mug.ufid === mug.ufid) {
+                    removePopovers(widget.input);
+                    if (editor) {
+                        editor.destroy();
+                    }
+                }
+            });
+
             editor.on('change', function() { widget.handleChange(); });
             editor.on('afterInsertHtml', function (e) {
                 addCloseButton(widget, widget.input);
