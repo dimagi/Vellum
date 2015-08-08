@@ -204,6 +204,10 @@ define([
                     tagArgs: tagArgs,
                 }));
 
+                if (options.rich_text) {
+                    $expUI.find('.fd-input').ckeditor();
+                }
+
                 var getLeftQuestionInput = function () {
                     return $($expUI.find(".left-question")[0]);
                 };
@@ -481,6 +485,7 @@ define([
             $xpathUI.find('.fd-xpath-cancel-button').click(function () {
                 done(false);
             });
+
             return $xpathUI;
         };
 
