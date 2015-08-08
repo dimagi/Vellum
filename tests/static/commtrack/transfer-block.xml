@@ -21,7 +21,7 @@
 			<setvalue event="xforms-ready" ref="/data/transfer[@type='trans-1']/entry/@id" value="instance('commcaresession')/session/data/product_id" />
 			<setvalue event="xforms-ready" ref="/data/transfer[@type='trans-1']/@src" value="instance('commcaresession')/session/data/case_id" />
 			<setvalue event="xforms-ready" ref="/data/transfer[@type='trans-1']/@dest" value="instance('casedb')/casedb/case[@case_id=instance('commcaresession')/session/data/case_id]/index/parent" />
-			<setvalue event="xforms-ready" ref="/data/transfer[@type='trans-1']/@date" value="today()" />
+			<setvalue event="xforms-ready" ref="/data/transfer[@type='trans-1']/@date" value="/data/meta/timeEnd" />
 			<itext>
 				<translation lang="en" default="">
 					<text id="amount_received-label">
