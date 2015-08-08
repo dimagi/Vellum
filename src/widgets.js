@@ -320,7 +320,14 @@ define([
                 addCloseButton(widget, widget.input);
                 addPopovers(widget.input);
             });
-
+            editor.on('focus', function() {
+                var text = widget.input,
+                    selection = window.getSelection(),
+                    range = document.createRange();
+                range.selectNodeContents(text[0]);
+                selection.removeAllRanges();
+                selection.addRange(range);
+            });
         });
 
         widget.input.on('inserted.atwho', function(atwhoEvent, $li, browserEvent) {
