@@ -12,7 +12,7 @@
 			</instance>
 			<instance src="jr://instance/ledgerdb" id="ledger"></instance>
 			<bind nodeset="/data/transfer[@type='trans']/entry/@quantity" />
-			<setvalue event="xforms-ready" ref="/data/transfer[@type='trans']/@date" value="today()" />
+			<setvalue event="xforms-ready" ref="/data/transfer[@type='trans']/@date" value="/data/meta/timeEnd" />
 			<itext>
 				<translation lang="en" default="" />
 			</itext>

@@ -38,7 +38,7 @@
         "XMLWriter": "dimagi/XMLWriter#master",
         "MediaUploader": "dimagi/MediaUploader#master",
         "xpath": "dimagi/js-xpath",
-        "jsdiff": "kpdecker/jsdiff",
+        "jsdiff": "~1",
         "markdown-it": "~4.2.0"
     },
     "devDependencies": {
