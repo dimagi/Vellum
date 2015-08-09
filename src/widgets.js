@@ -782,7 +782,7 @@ define([
      *   instance: instance('blah')/blah_list/blah
      */
     function getBubblesDisplayValue(path) {
-        var steps = new logic.LogicExpression(path).getPaths()[0].steps,
+        var steps = new logic.LogicExpression(path).getTopLevelPaths()[0].steps,
             dispValue = steps[steps.length-1].name;
         return dispValue;
     }
@@ -851,7 +851,7 @@ define([
             return replaceOuputRef(form, this.attributes.value.value, withClose);
         });
         var l = new logic.LogicExpression(val),
-            paths = _.chain(l.getPaths())
+            paths = _.chain(l.getTopLevelPaths())
                      .map(function(path) { return path.toXPath(); })
                      .filter(function(path) {
                          return !/^instance\('commcaresession'\)/.test(path);

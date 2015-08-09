@@ -90,6 +90,7 @@ define([
             ["instance('casedb')/cases/case[@case_id = /data/case_id]/blah", 'blah', externalIcon(), false],
             ["instance('casedb')/cases/case[@case_id = /data/case_id]", 'case', externalIcon(), false],
             ["instance('casedb')/cases/case[@case_id = instance('commcaresession')/session/data/case_id]", 'case', externalIcon(), false],
+            ["instance('casedb')/cases/case[@case_id = instance('casedb')/cases/case[@case_id = instance('commcaresession')/session/data/case_id]/index/parent]/edd", 'edd', externalIcon(), false]
             // ["/data/where-did-this-come-from", 'where-did-this-come-from', unknownIcon(), false],
         ];
 
