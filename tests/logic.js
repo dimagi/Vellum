@@ -177,6 +177,56 @@ require([
         });
     });
 
+    describe("Logic expression", function() {
+        var expressions = [
+            [
+                "instance('casedb')/cases/case/property",
+                ["instance('casedb')/cases/case/property"],
+                ["instance('casedb')/cases/case/property"],
+            ],
+            [
+                "instance('casedb')/cases/case/property[@case_id = /data/caseid]",
+                ["instance('casedb')/cases/case/property[@case_id = /data/caseid]", "@case_id", "/data/caseid"],
+                ["instance('casedb')/cases/case/property"],
+            ],
+            [
+                "instance('casedb')/cases/case/property[@case_id = /data/caseid] = /data/other_caseid",
+                ["instance('casedb')/cases/case/property[@case_id = /data/caseid]", "@case_id", "/data/caseid", "/data/other_caseid"],
+                ["instance('casedb')/cases/case/property", "/data/other_caseid"],
+            ],
+            [
+                "selected(instance('casedb')/cases/case/property[@case_id = /data/caseid])",
+                ["instance('casedb')/cases/case/property[@case_id = /data/caseid]", "@case_id", "/data/caseid"],
+                ["instance('casedb')/cases/case/property"],
+            ],
+            [
+                "(instance('casedb')/cases/case/property[@case_id = /data/caseid] = /data/other_caseid) and (/other/thing = /this/thing)",
+                ["instance('casedb')/cases/case/property[@case_id = /data/caseid]", "@case_id", "/data/caseid", "/data/other_caseid", "/other/thing", "/this/thing"],
+                ["instance('casedb')/cases/case/property", "/data/other_caseid", "/other/thing", "this/thing"],
+            ],
+        ];
+
+        _.each(expressions, function(expr) {
+            var logicExpr = new logic.LogicExpression(expr[0]);
+
+            it("should return all paths", function() {
+                assert(
+                    _.chain(logicExpr.getPaths())
+                     .map(function(expr) { return expr.toXPath(); })
+                     .difference(expr[1])
+                     .value().length === 0);
+            });
+
+            it("should return top level paths", function() {
+                assert(
+                    _.chain(logicExpr.getTopLevelPaths())
+                     .map(function(expr) { return expr.toXPath(); })
+                     .difference(expr[1])
+                     .value().length === 0);
+            });
+        });
+    });
+
     var TEST_XML_1 = '' + 
     '<?xml version="1.0" encoding="UTF-8" ?>\
     <h:html xmlns:h="http://www.w3.org/1999/xhtml"\
