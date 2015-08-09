@@ -36,6 +36,7 @@ define([
         analyze: function () {
             var paths = [],
                 absolutePaths = [],
+                topLevelPaths = [],
                 ROOT = xpathmodels.XPathInitialContextEnum.ROOT,
                 RELATIVE = xpathmodels.XPathInitialContextEnum.RELATIVE,
                 EXPR = xpathmodels.XPathInitialContextEnum.EXPR,
@@ -44,13 +45,22 @@ define([
             this.absolutePaths = absolutePaths;
             this.instanceRefs = {};
             this.referencesSelf = false;
+            this.topLevelPaths = topLevelPaths;
             if (this.parsed) {
-                var queue = [this.parsed], 
-                    node, i, children, j;
+                var queue = [{xpath: this.parsed, insideFilter: false}],
+                    node, i, children, j, k, insideFilter;
                 while (queue.length > 0) {
-                    node = queue.shift();
+                    k = queue.shift();
+                    node = k.xpath;
+                    insideFilter = k.insideFilter;
                     if (node instanceof xpathmodels.XPathPathExpr) {
                         paths.push(node);
+                        if (!insideFilter) {
+                            topLevelPaths.push(node);
+                        }
+
+                        insideFilter = true;
+
                         if (node.initial_context === ROOT) {
                             absolutePaths.push(node);
                         } else if (node.initial_context === RELATIVE &&
@@ -59,11 +69,17 @@ define([
                             this.referencesSelf = true;
                         } else if (node.initial_context === EXPR) {
                             if (!this._addInstanceRef(node.filter.expr)) {
-                                queue.push(node.filter.expr);
+                                queue.push({
+                                    xpath: node.filter.expr,
+                                    insideFilter: insideFilter
+                                });
                             }
                             predicates = node.filter.predicates;
                             for (i = 0; i < predicates.length; i++) {
-                                queue.push(predicates[i]);
+                                queue.push({
+                                    xpath: predicates[i],
+                                    insideFilter: insideFilter
+                                });
                             }
                         }
                     } else if (node instanceof xpathmodels.XPathFuncExpr) {
@@ -71,11 +87,17 @@ define([
                     }
                     children = node.getChildren();
                     for (i = 0; i < children.length; i++) {
-                        queue.push(children[i]);
+                        queue.push({
+                            xpath: children[i],
+                            insideFilter: insideFilter
+                        });
                         if (children[i].predicates && children[i].predicates.length) {
                             predicates = children[i].predicates;
                             for (j = 0; j < predicates.length; j++) {
-                                queue.push(predicates[j]);
+                                queue.push({
+                                    xpath: predicates[j],
+                                    insideFilter: insideFilter
+                                });
                             }
                         }
                     }
@@ -96,6 +118,12 @@ define([
                 this.analyze();
             }
             return this.paths;
+        },
+        getTopLevelPaths: function () {
+            if (!this.topLevelPaths) {
+                this.analyze();
+            }
+            return this.topLevelPaths;
         },
         updatePath: function (from, to) {
             var paths = this.getPaths(),
