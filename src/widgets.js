@@ -278,10 +278,6 @@ define([
             });
         }
 
-        function toRichHtml(val, form, withClose) {
-            return toRichText(val, form, withClose).replace(/\r\n|\r|\n/ig, '<br />');
-        }
-
         widget.input = $("<div />")
             .attr("contenteditable", true)
             .attr("name", widget.id)
@@ -342,7 +338,7 @@ define([
 
         widget.setValue = function (val) {
             widget.input.ckeditor().promise.then(function() {
-                editor.setData(toRichHtml(val, mug.form, true));
+                editor.setData(toRichText(val, mug.form, true));
             });
         };
 
