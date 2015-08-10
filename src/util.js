@@ -346,6 +346,7 @@ define([
                         return {
                             id: mug.ufid,
                             name: mug.absolutePath,
+                            questionId: mug.p.nodeID,
                             icon: mug.options.icon,
                         };
                     })

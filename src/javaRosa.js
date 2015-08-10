@@ -841,7 +841,7 @@ define([
                     'class="label label-datanode label-datanode-internal" ' +
                     'contenteditable=false draggable=true ' +
                     'data-value=\'&lt;output value="${name}" /&gt;\'>' +
-                    '<i class="${icon}">&nbsp;</i>${name}'+
+                    '<i class="${icon}">&nbsp;</i>${questionId}'+
                     '<i class="close">&times;</i></span>';
             } else { 
                 $input.keydown(function (e) {
