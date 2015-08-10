@@ -192,37 +192,49 @@ require([
             [
                 "instance('casedb')/cases/case/property[@case_id = /data/caseid] = /data/other_caseid",
                 ["instance('casedb')/cases/case/property[@case_id = /data/caseid]", "@case_id", "/data/caseid", "/data/other_caseid"],
-                ["instance('casedb')/cases/case/property", "/data/other_caseid"],
+                ["instance('casedb')/cases/case/property[@case_id = /data/caseid]", "/data/other_caseid"],
+            ],
+            [
+                "instance('casedb')/cases/case[@case_id = instance('casedb')/cases/case[@case_id = instance('commcaresession')/session/data/case_id]/index/parent]/edd = /data/other_caseid",
+                [
+                    "instance('casedb')/cases/case[@case_id = instance('casedb')/cases/case[@case_id = instance('commcaresession')/session/data/case_id]/index/parent]/edd",
+                    "@case_id",
+                    "instance('casedb')/cases/case[@case_id = instance('commcaresession')/session/data/case_id]/index/parent",
+                    "instance('commcaresession')/session/data/case_id",
+                    "/data/other_caseid"
+                ],
+                ["instance('casedb')/cases/case[@case_id = instance('casedb')/cases/case[@case_id = instance('commcaresession')/session/data/case_id]/index/parent]/edd", "/data/other_caseid"],
             ],
             [
                 "selected(instance('casedb')/cases/case/property[@case_id = /data/caseid])",
                 ["instance('casedb')/cases/case/property[@case_id = /data/caseid]", "@case_id", "/data/caseid"],
-                ["instance('casedb')/cases/case/property"],
+                ["instance('casedb')/cases/case/property[@case_id = /data/caseid]"],
             ],
             [
                 "(instance('casedb')/cases/case/property[@case_id = /data/caseid] = /data/other_caseid) and (/other/thing = /this/thing)",
                 ["instance('casedb')/cases/case/property[@case_id = /data/caseid]", "@case_id", "/data/caseid", "/data/other_caseid", "/other/thing", "/this/thing"],
-                ["instance('casedb')/cases/case/property", "/data/other_caseid", "/other/thing", "this/thing"],
+                ["instance('casedb')/cases/case/property[@case_id = /data/caseid]", "/data/other_caseid", "/other/thing", "/this/thing"],
+            ],
+            [
+                "/data/text1 = /data/text2",
+                ["/data/text1", "/data/text2"],
+                ["/data/text1", "/data/text2"],
             ],
         ];
 
         _.each(expressions, function(expr) {
             var logicExpr = new logic.LogicExpression(expr[0]);
 
-            it("should return all paths", function() {
-                assert(
-                    _.chain(logicExpr.getPaths())
-                     .map(function(expr) { return expr.toXPath(); })
-                     .difference(expr[1])
-                     .value().length === 0);
+            it("should return all paths: " + expr[0], function() {
+                var paths = _.map(logicExpr.getPaths(), getPath);
+                assert.deepEqual(_.difference(paths, expr[1]), []);
+                assert.deepEqual(_.difference(expr[1], paths), []);
             });
 
-            it("should return top level paths", function() {
-                assert(
-                    _.chain(logicExpr.getTopLevelPaths())
-                     .map(function(expr) { return expr.toXPath(); })
-                     .difference(expr[1])
-                     .value().length === 0);
+            it("should return top level paths: " + expr[0], function() {
+                var paths = _.map(logicExpr.getTopLevelPaths(), getPath);
+                assert.deepEqual(_.difference(paths, expr[2]), []);
+                assert.deepEqual(_.difference(expr[2], paths), []);
             });
         });
     });
