@@ -42,6 +42,9 @@ define([
                 return {
                     "/data/text": {
                         options: { icon: 'fcc fcc-fd-text' },
+                    },
+                    "/data/othertext": {
+                        options: { icon: 'fcc fcc-fd-text' },
                     }
                 }[path];
             }
@@ -84,34 +87,60 @@ define([
     function wrapWithDiv(el) { return $('<div>').append(el); }
 
     describe("Rich text utilities", function() {
-        // path, display value, icon
-        var simpleConversions = [
-            ['/data/text', 'text', icon('fcc-fd-text'), true],
-            ["instance('casedb')/cases/case[@case_id = /data/case_id]/blah", 'blah', externalIcon(), false],
-            ["instance('casedb')/cases/case[@case_id = /data/case_id]", 'case', externalIcon(), false],
-            ["instance('casedb')/cases/case[@case_id = instance('commcaresession')/session/data/case_id]", 'case', externalIcon(), false],
-            ["instance('casedb')/cases/case[@case_id = instance('casedb')/cases/case[@case_id = instance('commcaresession')/session/data/case_id]/index/parent]/edd", 'edd', externalIcon(), false]
-            // ["/data/where-did-this-come-from", 'where-did-this-come-from', unknownIcon(), false],
-        ];
+        describe("simple conversions", function() {
+            // path, display value, icon
+            var simpleConversions = [
+                ['/data/text', 'text', icon('fcc-fd-text'), true],
+                ["instance('casedb')/cases/case[@case_id = /data/case_id]/blah", 'blah', externalIcon(), false],
+                ["instance('casedb')/cases/case[@case_id = /data/case_id]", 'case', externalIcon(), false],
+                ["instance('casedb')/cases/case[@case_id = instance('commcaresession')/session/data/case_id]", 'case', externalIcon(), false],
+                ["instance('casedb')/cases/case[@case_id = instance('casedb')/cases/case[@case_id = instance('commcaresession')/session/data/case_id]/index/parent]/edd", 'edd', externalIcon(), false]
+                // ["/data/where-did-this-come-from", 'where-did-this-come-from', unknownIcon(), false],
+            ];
 
-        _.each(simpleConversions, function(val) {
-            it("from text to html: " + val[0], function() {
-                assert.strictEqual(
-                    wrapWithDiv(widgets.util.toRichText(val[0], formShim)).html(),
-                    wrapWithDiv(makeBubble(val[0], val[1], val[2], val[3])).html()
-                );
+            _.each(simpleConversions, function(val) {
+                it("from text to html: " + val[0], function() {
+                    assert.strictEqual(
+                        wrapWithDiv(widgets.util.toRichText(val[0], formShim)).html(),
+                        wrapWithDiv(makeBubble(val[0], val[1], val[2], val[3])).html()
+                    );
+                });
+
+                it("from text to html with output value: " + val[0], function() {
+                    assert.strictEqual(
+                        wrapWithDiv(widgets.util.toRichText(outputValueTemplateFn(val[0]), formShim)).html(),
+                        wrapWithDiv(makeOutputValue(val[0], val[1], val[2], val[3])).html()
+                    );
+                });
+
+                it("from html to text: " + val[0], function() {
+                    var bubble = $('<div>').append(makeBubble(val[0], val[1], val[2], val[3])).html();
+                    assert.strictEqual(widgets.util.fromRichText(bubble), val[0]);
+                });
             });
+        });
 
-            it("from text to html with output value: " + val[0], function() {
-                assert.strictEqual(
-                    wrapWithDiv(widgets.util.toRichText(outputValueTemplateFn(val[0]), formShim)).html(),
-                    wrapWithDiv(makeOutputValue(val[0], val[1], val[2], val[3])).html()
-                );
-            });
+        describe("equation conversions", function() {
+            var equations = [
+                [
+                    "/data/text = /data/othertext",
+                    wrapWithDiv(makeBubble('/data/text', 'text', icon('fcc-fd-text'), true)).html() + " = " +
+                    wrapWithDiv(makeBubble('/data/othertext', 'othertext', icon('fcc-fd-text'), true)).html()
+                ],
+                [
+                    "/data/text <= /data/othertext",
+                    wrapWithDiv(makeBubble('/data/text', 'text', icon('fcc-fd-text'), true)).html() + " &lt;= " +
+                    wrapWithDiv(makeBubble('/data/othertext', 'othertext', icon('fcc-fd-text'), true)).html()
+                ],
+            ];
 
-            it("from html to text: " + val[0], function() {
-                var bubble = $('<div>').append(makeBubble(val[0], val[1], val[2], val[3])).html();
-                assert.strictEqual(widgets.util.fromRichText(bubble), val[0]);
+            _.each(equations, function(val) {
+                it("from text to html: " + val[0], function() {
+                    assert.strictEqual(
+                        widgets.util.toRichText(val[0], formShim),
+                        val[1]
+                    );
+                });
             });
         });
 
