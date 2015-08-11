@@ -348,6 +348,7 @@ define([
                             name: mug.absolutePath,
                             questionId: mug.p.nodeID,
                             icon: mug.options.icon,
+                            title: mug.p.labelItext.forms[0].data[mug.p.labelItext.itextModel.defaultLanguage]
                         };
                     })
                     .filter(function(choice) { return choice.name; })

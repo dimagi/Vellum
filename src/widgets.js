@@ -308,7 +308,14 @@ define([
                 }
             });
 
-            editor.on('change', function() { widget.handleChange(); });
+            editor.on('change', function() {
+                widget.handleChange();
+                widget.input.find('.label-datanode').each(function(k, v) {
+                    var value = $(v);
+                    value.attr('title', value.attr('data-original-title'));
+                });
+            });
+
             editor.on('afterInsertHtml', function (e) {
                 addCloseButton(widget, widget.input);
                 addPopovers(widget.input);
@@ -797,28 +804,39 @@ define([
     function makeBubble(form, xpath, withClose, templateFn) {
         function _parseXPath(xpath, form) {
             if (/instance\('casedb'\)/.test(xpath)) {
-                return ['label-datanode-external', 'fcc fcc-fd-external-case'];
+                return {
+                    classes: ['label-datanode-external', 'fcc fcc-fd-external-case']
+                };
             }
 
             if (form) {
                 var mug = form.getMugByPath(xpath);
                 if (mug) {
-                    return ['label-datanode-internal', mug.options.icon];
+                    return {
+                        classes: ['label-datanode-internal', mug.options.icon],
+                        mug: mug
+                    };
                 }
             }
 
-            return ['label-datanode-external', 'fcc fcc-help'];
+            return {classes: ['label-datanode-external', 'fcc fcc-help']};
         }
 
         var bubbleClasses = _parseXPath(xpath, form),
+            mug = bubbleClasses.mug,
             dispValue = getBubblesDisplayValue(xpath),
-            icon = $('<i>').addClass(bubbleClasses[1]).html('&nbsp;'),
-            bubble = $('<span>').addClass('label label-datanode ' + bubbleClasses[0])
+            icon = $('<i>').addClass(bubbleClasses.classes[1]).html('&nbsp;'),
+            bubble = $('<span>').addClass('label label-datanode ' + bubbleClasses.classes[0])
                 .attr({
                     contenteditable: false,
                     draggable: true,
-                    'data-value': templateFn(xpath)
+                    'data-value': templateFn(xpath),
                 }).append(icon).append(dispValue);
+
+        if (mug && mug.p && mug.p.labelItext) {
+            var labelItext = mug.p.labelItext;
+            bubble.attr('title', labelItext.forms[0].data[labelItext.itextModel.defaultLanguage]);
+        }
 
         if (withClose) {
             bubble.append($("<button>").addClass('close').html("&times;"));
