@@ -28,13 +28,13 @@ define([
     'jquery',
     'underscore',
     'tests/utils',
-    'vellum/widgets'
+    'vellum/richtext'
 ], function(
     chai,
     $,
     _,
     util,
-    widgets
+    richtext
 ) {
     var assert = chai.assert,
         formShim = {
@@ -45,7 +45,10 @@ define([
                     },
                     "/data/othertext": {
                         options: { icon: 'fcc fcc-fd-text' },
-                    }
+                    },
+                    "/data/date": {
+                        options: { icon: 'fcc icon-calendar' },
+                    },
                 }[path];
             }
         };
@@ -101,21 +104,21 @@ define([
             _.each(simpleConversions, function(val) {
                 it("from text to html: " + val[0], function() {
                     assert.strictEqual(
-                        wrapWithDiv(widgets.util.toRichText(val[0], formShim)).html(),
+                        wrapWithDiv(richtext.toRichText(val[0], formShim)).html(),
                         wrapWithDiv(makeBubble(val[0], val[1], val[2], val[3])).html()
                     );
                 });
 
                 it("from text to html with output value: " + val[0], function() {
                     assert.strictEqual(
-                        wrapWithDiv(widgets.util.toRichText(outputValueTemplateFn(val[0]), formShim)).html(),
+                        wrapWithDiv(richtext.toRichText(outputValueTemplateFn(val[0]), formShim)).html(),
                         wrapWithDiv(makeOutputValue(val[0], val[1], val[2], val[3])).html()
                     );
                 });
 
                 it("from html to text: " + val[0], function() {
                     var bubble = $('<div>').append(makeBubble(val[0], val[1], val[2], val[3])).html();
-                    assert.strictEqual(widgets.util.fromRichText(bubble), val[0]);
+                    assert.strictEqual(richtext.fromRichText(bubble), val[0]);
                 });
             });
         });
@@ -137,15 +140,24 @@ define([
             _.each(equations, function(val) {
                 it("from text to html: " + val[0], function() {
                     assert.strictEqual(
-                        widgets.util.toRichText(val[0], formShim),
+                        richtext.toRichText(val[0], formShim),
                         val[1]
                     );
                 });
             });
         });
 
-        it("blah", function() {
-            assert.strictEqual("blah\nblah\n", widgets.util.fromRichText("<p>blah<br />blah</p>"));
+        describe("text conversions", function() {
+            var text = [
+                ["blah\nblah\n", "<p>blah<br />blah</p>"],
+            ];
+
+            _.each(text, function(val){
+                it("from html to text: " + val[1], function() {
+                    assert.strictEqual(
+                        val[0], richtext.fromRichText(val[1]));
+                });
+            });
         });
     });
 });

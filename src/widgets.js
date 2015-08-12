@@ -5,6 +5,7 @@ define([
     'jquery',
     'vellum/util',
     'vellum/logic',
+    'vellum/richtext',
     'ckeditor',
     'ckeditor-jquery'
 ], function (
@@ -14,6 +15,7 @@ define([
     $,
     util,
     logic,
+    richtext_utils,
     CKEDITOR
 ) {
     CKEDITOR.config.allowedContent = true;
@@ -247,7 +249,7 @@ define([
             input.find('[contenteditable=false]').each(function () {
                 var $this = $(this),
                     datavalue = $this.attr('data-value'),
-                    match = datavalue.match('output value="(.*)"'),
+                    match =  datavalue.match('output value="(.*)"'),
                     value = match ? match[1] : $this.attr('data-value');
                 $this.popout({
                     title: '',
@@ -346,14 +348,14 @@ define([
 
         widget.setValue = function (val) {
             widget.input.ckeditor().promise.then(function() {
-                editor.setData(toRichText(val, mug.form, true));
+                editor.setData(richtext_utils.toRichText(val, mug.form, true));
             });
         };
 
         widget.getValue = function () {
             var val = "";
             widget.input.ckeditor().promise.then(function() {
-                val = fromRichText(editor.getData());
+                val = richtext_utils.fromRichText(editor.getData());
             });
             return val.replace('&nbsp;', ' ').trim();
         };
@@ -780,119 +782,6 @@ define([
         return $el;
     }
 
-    /**
-     * @param path can be:
-     *   form: /data/group/text
-     *   instance: instance('blah')/blah_list/blah
-     */
-    function getBubblesDisplayValue(path) {
-        var steps = new logic.LogicExpression(path).getTopLevelPaths()[0].steps,
-            dispValue = steps[steps.length-1].name;
-        return dispValue;
-    }
-
-    /**
-     * Make a xpath bubble
-     *
-     * @param withClose - boolean include the close button
-     *
-     * @param templateFn - function(xpath) returns what the bubble should be
-     *                     transcribed to in XML
-     *
-     * @returns jquery object of the bubble
-     */
-    function makeBubble(form, xpath, withClose, templateFn) {
-        function _parseXPath(xpath, form) {
-            if (/instance\('casedb'\)/.test(xpath)) {
-                return {
-                    classes: ['label-datanode-external', 'fcc fcc-fd-external-case']
-                };
-            }
-
-            if (form) {
-                var mug = form.getMugByPath(xpath);
-                if (mug) {
-                    return {
-                        classes: ['label-datanode-internal', mug.options.icon],
-                        mug: mug
-                    };
-                }
-            }
-
-            return {classes: ['label-datanode-external', 'fcc fcc-help']};
-        }
-
-        var bubbleClasses = _parseXPath(xpath, form),
-            mug = bubbleClasses.mug,
-            dispValue = getBubblesDisplayValue(xpath),
-            icon = $('<i>').addClass(bubbleClasses.classes[1]).html('&nbsp;'),
-            bubble = $('<span>').addClass('label label-datanode ' + bubbleClasses.classes[0])
-                .attr({
-                    contenteditable: false,
-                    draggable: true,
-                    'data-value': templateFn(xpath),
-                }).append(icon).append(dispValue);
-
-        if (mug && mug.p && mug.p.labelItext) {
-            var labelItext = mug.p.labelItext;
-            bubble.attr('title', labelItext.forms[0].data[labelItext.itextModel.defaultLanguage]);
-        }
-
-        if (withClose) {
-            bubble.append($("<button>").addClass('close').html("&times;"));
-        }
-
-        return bubble;
-    }
-
-    function replaceOuputRef(form, value, withClose, noOutput) {
-        function simple(xpath) { return xpath; }
-        function outputValue(xpath) { return "<output value=\"" + xpath + "\" />"; }
-
-        // only support absolute path right now
-        if (!form.getMugByPath(value) && !/instance\(/.test(value)) {
-            return value;
-        }
-
-        var templateFn = noOutput ? simple : outputValue;
-        return makeBubble(form, value, withClose, templateFn);
-    }
-
-    function toRichText(val, form, withClose) {
-        if (!val) {return "";}
-        val = val.replace('&lt;', '<').replace('&gt;', '>').replace('&nbsp;', ' ');
-        var el = $('<div>').html(val);
-        el.find('output').replaceWith(function() {
-            return replaceOuputRef(form, this.attributes.value.value, withClose);
-        });
-        var l = new logic.LogicExpression(val),
-            paths = _.chain(l.getTopLevelPaths())
-                     .map(function(path) { return path.toXPath(); })
-                     .filter(function(path) {
-                         return !/^instance\('commcaresession'\)/.test(path);
-                     }).value();
-
-        _.each(paths, function(path) {
-            var newPath = replaceOuputRef(form, path, withClose, true);
-            el.html(el.html().replace(new RegExp(RegExp.escape(path).replace(/ /g, '\\s*')),
-                                      $('<div>').append(newPath).html()));
-        });
-        return el.html();
-    }
-
-    function fromRichText(val) {
-        var el = $('<div>');
-        val = val.replace(/(<p>)/ig,"").replace(/<\/p>/ig, "\n").replace(/(<br ?\/?>)/ig,"\n").replace('&nbsp;', ' ');
-        el = el.html(val);
-        el.find('.atwho-inserted .label').unwrap();
-        el.find('.label-datanode').replaceWith(function() {
-            return $(this).attr('data-value');
-        });
-
-        return el.html();
-    }
-
-
     return {
         base: base,
         normal: normal,
@@ -913,8 +802,6 @@ define([
             getMessages: getMessages,
             getUIElementWithEditButton: getUIElementWithEditButton,
             getUIElement: getUIElement,
-            toRichText: toRichText,
-            fromRichText: fromRichText,
         }
     };
 });

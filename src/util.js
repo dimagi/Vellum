@@ -343,13 +343,16 @@ define([
             at: "/data/",
             data: _.chain(mug.form.getMugList())
                    .map(function(mug) {
-                        return {
+                        var ret = {
                             id: mug.ufid,
                             name: mug.absolutePath,
                             questionId: mug.p.nodeID,
                             icon: mug.options.icon,
-                            title: mug.p.labelItext.forms[0].data[mug.p.labelItext.itextModel.defaultLanguage]
                         };
+                        if (mug.p && mug.p.labelItext) {
+                            ret.title = mug.p.labelItext.forms[0].data[mug.p.labelItext.itextModel.defaultLanguage];
+                        }
+                        return ret;
                     })
                     .filter(function(choice) { return choice.name; })
                     .value(),

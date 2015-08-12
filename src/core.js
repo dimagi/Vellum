@@ -20,6 +20,7 @@ define([
     'tpl!vellum/templates/modal_button',
     'vellum/mugs',
     'vellum/widgets',
+    'vellum/richtext',
     'vellum/parser',
     'vellum/datasources',
     'vellum/util',
@@ -51,6 +52,7 @@ define([
     modal_button,
     mugs,
     widgets,
+    richtext,
     parser,
     datasources,
     util,
@@ -454,7 +456,7 @@ define([
         var val = mug.getDisplayName(this.data.core.currentItextDisplayLanguage || 
             this.data.javaRosa.Itext.getDefaultLanguage());
         if (this.opts().features.rich_text) {
-            val = widgets.util.toRichText(val, this.data.core.form);
+            val = richtext.toRichText(val, this.data.core.form);
         }
         return val;
     };
@@ -732,7 +734,7 @@ define([
         if (target) {
             // the .change fires the validation controls
             if (this.opts().features.rich_text) {
-                target.ckeditor().editor.insertHtml(widgets.util.toRichText(path, _this.data.core.form, true) + " ");
+                target.ckeditor().editor.insertHtml(richtext.toRichText(path, _this.data.core.form, true) + " ");
             } else {
                 target.val(target.val() + path).change();
             }

@@ -13,6 +13,7 @@ define([
     'tpl!vellum/templates/markdown_help',
     'text!vellum/templates/button_remove.html',
     'vellum/widgets',
+    'vellum/richtext',
     'vellum/util',
     'vellum/tsv',
     'vellum/xml',
@@ -28,6 +29,7 @@ define([
     markdown_help,
     button_remove,
     widgets,
+    richtext,
     util,
     tsv,
     xml
@@ -1306,7 +1308,7 @@ define([
         var output = getOutputRef(path, dateFormat),
             form = vellum.data.core.form;
         if (RICH_TEXT) {
-            target.ckeditor().editor.insertHtml(widgets.util.toRichText(output, form, true), 'text');
+            target.ckeditor().editor.insertHtml(richtext.toRichText(output, form, true), 'text');
         } else {
             util.insertTextAtCursor(target, output, true);
         }

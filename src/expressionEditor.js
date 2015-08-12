@@ -6,6 +6,7 @@ define([
     'xpath',
     'xpathmodels',
     'vellum/widgets',
+    'vellum/richtext',
     'tpl!vellum/templates/xpath_validation_errors',
     'tpl!vellum/templates/xpath_expression',
     'tpl!vellum/templates/xpath',
@@ -18,6 +19,7 @@ define([
     xpath,
     xpathmodels,
     widgets,
+    richtext,
     xpath_validation_errors,
     xpath_expression,
     xpath_tpl
@@ -117,8 +119,8 @@ define([
             pane.children().each(function() {
                 var left, right;
                 if (options.rich_text) {
-                    left = widgets.util.fromRichText($($(this).find(".left-question")[0]).ckeditor().editor.getData());
-                    right = widgets.util.fromRichText($($(this).find(".right-question")[0]).ckeditor().editor.getData());
+                    left = richtext.fromRichText($($(this).find(".left-question")[0]).ckeditor().editor.getData());
+                    right = richtext.fromRichText($($(this).find(".right-question")[0]).ckeditor().editor.getData());
                 } else {
                     left = $($(this).find(".left-question")[0]).val();
                     right = $($(this).find(".right-question")[0]).val();
@@ -145,7 +147,7 @@ define([
             if ($div.find(".xpath-simple").hasClass('hide')) {
                 // advanced
                 if (options.rich_text) {
-                    return widgets.util.fromRichText(getExpressionInput().getData());
+                    return richtext.fromRichText(getExpressionInput().getData());
                 } else {
                     return getExpressionInput().val();
                 }
@@ -239,7 +241,7 @@ define([
 
                 var populateQuestionInputBox = function (input, expr, pairedExpr) {
                     if (options.rich_text) {
-                        input.ckeditor().editor.setData(widgets.util.toRichText(expr.toXPath(), options.mug.form, true));
+                        input.ckeditor().editor.setData(richtext.toRichText(expr.toXPath(), options.mug.form, true));
                     } else {
                         input.val(expr.toXPath());
                     }
@@ -376,7 +378,7 @@ define([
         // toggle simple/advanced mode
         var showAdvancedMode = function (text, showNotice) {
             if (options.rich_text) {
-                getExpressionInput().setData(widgets.util.toRichText(text, options.mug.form, true));
+                getExpressionInput().setData(richtext.toRichText(text, options.mug.form, true));
             } else {
                 getExpressionInput().val(text);
             }
@@ -434,7 +436,7 @@ define([
             $xpathUI.find('.fd-xpath-show-simple-button').click(function () {
                 var val;
                 if (options.rich_text) {
-                    val = widgets.util.fromRichText(getExpressionInput().getData());
+                    val = richtext.fromRichText(getExpressionInput().getData());
                 } else {
                     val = getExpressionInput().val();
                 }
@@ -457,7 +459,7 @@ define([
             $xpathUI.find('.fd-xpath-save-button').click(function() {
                 var uiExpression  = getExpressionFromUI();
                 if (options.rich_text) {
-                    getExpressionInput().setData(widgets.util.toRichText(uiExpression, options.mug.form, true));
+                    getExpressionInput().setData(richtext.toRichText(uiExpression, options.mug.form, true));
                 } else {
                     getExpressionInput().val(uiExpression);
                 }
