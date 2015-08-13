@@ -7,6 +7,27 @@ define([
     $,
     logic
 ){
+    var formats = {
+            'outputValue': {
+                serialize: function(currentValue) {
+                    return _.template('<output value="<%=xpath%>" />', {
+                        xpath: currentValue
+                    });
+                },
+            }
+        },
+        formatOrdering = ['date-format', 'outputValue'];
+
+    function applyFormats(dataAttrs) {
+        var currentValue = dataAttrs.value;
+        _.each(formatOrdering, function(format) {
+            if (dataAttrs[format]) {
+                currentValue = formats[format].serialize(currentValue, dataAttrs);
+            }
+        });
+        return currentValue;
+    }
+
     /**
      * @param path can be:
      *   form: /data/group/text
@@ -28,7 +49,7 @@ define([
      *
      * @returns jquery object of the bubble
      */
-    function makeBubble(form, xpath, withClose, templateFn) {
+    function makeBubble(form, xpath, withClose, extraAttrs) {
         function _parseXPath(xpath, form) {
             if (/instance\('casedb'\)/.test(xpath)) {
                 return {
@@ -57,8 +78,8 @@ define([
                 .attr({
                     contenteditable: false,
                     draggable: true,
-                    'data-value': templateFn(xpath),
-                }).append(icon).append(dispValue);
+                    'data-value': xpath,
+                }).attr(extraAttrs).append(icon).append(dispValue);
 
         if (mug && mug.p && mug.p.labelItext) {
             var labelItext = mug.p.labelItext;
@@ -73,31 +94,30 @@ define([
     }
 
     function replaceOuputRef(form, value, withClose, noOutput) {
-        function simple(xpath) { return xpath; }
-        function outputValue(xpath) { return "<output value=\"" + xpath + "\" />"; }
-
         function checkDate(xpath) {
             var regex = /format-date\(date\((.+)\), '(.+)'\)/,
                 match = regex.exec(xpath);
             if (match) {
                 var question = match[1],
                     dateFormat = match[2];
-                return makeBubble(form, question, withClose, outputValue).attr('data-format', dateFormat);
+                return makeBubble(form, question, withClose, {
+                                      'data-date-format': dateFormat,
+                                      'data-output-value': true
+                                  });
             }
             return false;
         }
 
-        var templateFn = noOutput ? simple : outputValue;
         // only support absolute path right now
         if (!form.getMugByPath(value) && !/instance\(/.test(value)) {
             var date = checkDate(value);
             if (date) {
                 return date;
             }
-            return templateFn(value).replace('<', '&lt;', 'g').replace('>', '&gt;', 'g');
+            return value;
         }
 
-        return makeBubble(form, value, withClose, templateFn);
+        return makeBubble(form, value, withClose, {'data-output-value': !noOutput});
     }
 
     function toRichText(val, form, withClose) {
@@ -128,7 +148,7 @@ define([
         el = el.html(val);
         el.find('.atwho-inserted .label').unwrap();
         el.find('.label-datanode').replaceWith(function() {
-            return $(this).attr('data-value');
+            return applyFormats($(this).data());
         });
 
         return el.html().replace('&lt;', '<', 'g').replace('&gt;', '>', 'g').replace('&nbsp;', ' ', 'g');

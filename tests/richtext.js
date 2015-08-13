@@ -15,7 +15,7 @@
  *
  * rich text "bubble":
  *   <span contenteditable="false" draggable="true" 
- *         data-value="what should be put into XML">
+ *         data-value="xpath" data-output-value=boolean>
  *     <i class="icon">&nbsp;</i>
  *     text to display inside bubble
  *     <i class="close">&times;</i>
@@ -60,11 +60,12 @@ define([
     function externalIcon () { return icon('fcc-fd-external-case'); }
     // function unknownIcon () { return icon('fcc-help'); }
 
-    function bubbleSpan(xpath, internal, templateFn) {
+    function bubbleSpan(xpath, internal, output) {
         var span = $('<span>').addClass('label label-datanode').attr({
             contenteditable: false,
             draggable: true,
-            'data-value': templateFn(xpath),
+            'data-value': xpath,
+            'data-output-value': output,
         });
         if (internal) {
             span.addClass('label-datanode-internal');
@@ -74,17 +75,16 @@ define([
         return span;
     }
 
-    function makeBubble(xpath, dispValue, icon, internal, templateFn) {
-        templateFn = templateFn || _.identity;
-        return bubbleSpan(xpath, internal, templateFn).append(icon).append(dispValue);
+    function makeBubble(xpath, dispValue, icon, internal, output) {
+        return bubbleSpan(xpath, internal, output || false).append(icon).append(dispValue);
     }
 
     function outputValueTemplateFn(path) {
-        return '<output value="' + path + '" />';
+        return '<output value="' + path + '"></output>';
     }
 
     function makeOutputValue(xpath, dispValue, icon, internal) {
-        return makeBubble(xpath, dispValue, icon, internal, outputValueTemplateFn);
+        return makeBubble(xpath, dispValue, icon, internal, true);
     }
 
     function wrapWithDiv(el) { return $('<div>').append(el); }
@@ -119,6 +119,11 @@ define([
                 it("from html to text: " + val[0], function() {
                     var bubble = $('<div>').append(makeBubble(val[0], val[1], val[2], val[3])).html();
                     assert.strictEqual(richtext.fromRichText(bubble), val[0]);
+                });
+
+                it("from html to text with ouput value: " + val[0], function() {
+                    var bubble = $('<div>').append(makeBubble(val[0], val[1], val[2], val[3], true)).html();
+                    assert.strictEqual(richtext.fromRichText(bubble), outputValueTemplateFn(val[0]));
                 });
             });
         });
