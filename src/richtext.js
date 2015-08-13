@@ -9,6 +9,19 @@ define([
 ){
     var formats = {
             'outputValue': {
+                deserialize: function(string) {
+                    var el = $('<div>').html(string), 
+                        outputs = {}, currentLength = -1;
+                    el.find('output').replaceWith(function() {
+                        currentLength++;
+                        outputs['outputValue' + currentLength] = {
+                            xpath: this.attributes.value.value,
+                            'data-output-value': true
+                        };
+                        return "<%=outputValue" + currentLength + "%>";
+                    });
+                    return [el.text(), outputs];
+                },
                 serialize: function(currentValue) {
                     return _.template('<output value="<%=xpath%>" />', {
                         xpath: currentValue
@@ -16,7 +29,7 @@ define([
                 },
             }
         },
-        formatOrdering = ['date-format', 'outputValue'];
+        formatOrdering = ['outputValue'];
 
     function applyFormats(dataAttrs) {
         var currentValue = dataAttrs.value;
@@ -26,6 +39,22 @@ define([
             }
         });
         return currentValue;
+    }
+
+    function deserializeString(string, form) {
+        var currentValue = string, templateArgs = {};
+        _.each(formatOrdering, function(format) {
+            var ret = formats[format].deserialize(currentValue);
+            currentValue = ret[0];
+            _.extend(templateArgs, _.object(_.map(ret[1], function(v, k) {
+                return [k, v];
+            })));
+        });
+
+        templateArgs = _.object(_.map(templateArgs, function(value, key) {
+            return [key, $('<div>').html(makeBubble(form, value.xpath, false, _.omit(value, 'xpath'))).html()];
+        }));
+        return _.template(currentValue, templateArgs);
     }
 
     /**
@@ -93,40 +122,20 @@ define([
         return bubble;
     }
 
-    function replaceOuputRef(form, value, withClose, noOutput) {
-        function checkDate(xpath) {
-            var regex = /format-date\(date\((.+)\), '(.+)'\)/,
-                match = regex.exec(xpath);
-            if (match) {
-                var question = match[1],
-                    dateFormat = match[2];
-                return makeBubble(form, question, withClose, {
-                                      'data-date-format': dateFormat,
-                                      'data-output-value': true
-                                  });
-            }
-            return false;
-        }
-
+    function replaceOuputRef(form, value, withClose) {
         // only support absolute path right now
         if (!form.getMugByPath(value) && !/instance\(/.test(value)) {
-            var date = checkDate(value);
-            if (date) {
-                return date;
-            }
             return value;
         }
 
-        return makeBubble(form, value, withClose, {'data-output-value': !noOutput});
+        return makeBubble(form, value, withClose, {'data-output-value': false});
     }
 
     function toRichText(val, form, withClose) {
         if (!val) {return "";}
         val = val.replace('&lt;', '<').replace('&gt;', '>').replace('&nbsp;', ' ');
+        val = deserializeString(val, form);
         var el = $('<div>').html(val);
-        el.find('output').replaceWith(function() {
-            return replaceOuputRef(form, this.attributes.value.value, withClose);
-        });
         var l = new logic.LogicExpression(val),
             paths = _.chain(l.getTopLevelPaths())
                      .map(function(path) { return path.toXPath(); })
@@ -135,7 +144,7 @@ define([
                      }).value();
 
         _.each(paths, function(path) {
-            var newPath = replaceOuputRef(form, path, withClose, true);
+            var newPath = replaceOuputRef(form, path, withClose);
             el.html(el.html().replace(new RegExp(RegExp.escape(path).replace(/ /g, '\\s*')),
                                       $('<div>').append(newPath).html()));
         });
