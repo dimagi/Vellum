@@ -5,6 +5,7 @@ define([
     'jquery',
     'vellum/util',
     'vellum/logic',
+    'vellum/richtext',
     'ckeditor',
     'ckeditor-jquery'
 ], function (
@@ -14,9 +15,12 @@ define([
     $,
     util,
     logic,
+    richtext_utils,
     CKEDITOR
 ) {
     CKEDITOR.config.allowedContent = true;
+    CKEDITOR.config.customConfig = '';
+    CKEDITOR.config.title = false;
 
     var base = function(mug, options) {
         // set properties shared by all widgets
@@ -241,23 +245,11 @@ define([
     var richtext = function(mug, options) {
         var widget = normal(mug, options), editor;
 
-        function fromRichText(val) {
-            var el = $('<div>');
-            val = val.replace(/(<p>)/ig,"").replace(/<\/p>/ig, "\r\n").replace(/(<br ?\/?>)/ig,"\n");
-            el = el.html(val);
-            el.find('.atwho-inserted .label').unwrap();
-            el.find('.label-datanode').replaceWith(function() {
-                return $(this).attr('data-value');
-            });
-
-            return el.html();
-        }
-
         function addPopovers(input) {
             input.find('[contenteditable=false]').each(function () {
                 var $this = $(this),
                     datavalue = $this.attr('data-value'),
-                    match = datavalue.match('output value="(.*)"'),
+                    match =  datavalue.match('output value="(.*)"'),
                     value = match ? match[1] : $this.attr('data-value');
                 $this.popout({
                     title: '',
@@ -289,10 +281,6 @@ define([
             });
         }
 
-        function toRichHtml(val, form, withClose) {
-            return toRichText(val, form, withClose).replace(/\r\n|\r|\n/ig, '<br />');
-        }
-
         widget.input = $("<div />")
             .attr("contenteditable", true)
             .attr("name", widget.id)
@@ -313,7 +301,23 @@ define([
                 }
             }, null, "teardown-mug-properties");
 
-            editor.on('change', function() { widget.handleChange(); });
+            mug.form.on('question-remove', function(e) {
+                if (e.mug.ufid === mug.ufid) {
+                    removePopovers(widget.input);
+                    if (editor) {
+                        editor.destroy();
+                    }
+                }
+            });
+
+            editor.on('change', function() {
+                widget.handleChange();
+                widget.input.find('.label-datanode').each(function(k, v) {
+                    var value = $(v);
+                    value.attr('title', value.attr('data-original-title'));
+                });
+            });
+
             editor.on('afterInsertHtml', function (e) {
                 addCloseButton(widget, widget.input);
                 addPopovers(widget.input);
@@ -322,7 +326,14 @@ define([
                 addCloseButton(widget, widget.input);
                 addPopovers(widget.input);
             });
-
+            editor.on('focus', function() {
+                var text = widget.input,
+                    selection = window.getSelection(),
+                    range = document.createRange();
+                range.selectNodeContents(text[0]);
+                selection.removeAllRanges();
+                selection.addRange(range);
+            });
         });
 
         widget.input.on('inserted.atwho', function(atwhoEvent, $li, browserEvent) {
@@ -337,14 +348,14 @@ define([
 
         widget.setValue = function (val) {
             widget.input.ckeditor().promise.then(function() {
-                editor.setData(toRichHtml(val, mug.form, true));
+                editor.setData(richtext_utils.toRichText(val, mug.form, true));
             });
         };
 
         widget.getValue = function () {
             var val = "";
             widget.input.ckeditor().promise.then(function() {
-                val = fromRichText(editor.getData());
+                val = richtext_utils.fromRichText(editor.getData());
             });
             return val.replace('&nbsp;', ' ').trim();
         };
@@ -771,45 +782,6 @@ define([
         return $el;
     }
 
-    function replaceOuputRef(form, value, withClose, noOutput) {
-        var template = "<output value=\"" + value + "\" />";
-        if (noOutput) {
-            template = value;
-        }
-        var v = value.split('/'),
-            dispValue = v[v.length-1],
-            mug = form.getMugByPath(value),
-            icon = mug ? mug.options.icon: 'fcc fcc-fd-external-case',
-            datanodeClass = mug ? 'label-datanode-internal' : 'label-datanode-external',
-            richText = $('<span>').addClass('label label-datanode')
-                .addClass(datanodeClass)
-                .attr({
-                    contenteditable: false,
-                    draggable: true,
-                    'data-value': template
-                }).append($('<i>').addClass(icon).html('&nbsp;')).append(dispValue);
-        if (withClose) {
-            richText.append($("<button>").addClass('close').html("&times;"));
-        }
-        return richText;
-    }
-
-    function toRichText(val, form, withClose) {
-        if (!val) {return "";}
-        val = val.replace('&lt;', '<').replace('&gt;', '>');
-        var el = $('<div>').html(val);
-        el.find('output').replaceWith(function() {
-            return replaceOuputRef(form, this.attributes.value.value, withClose);
-        });
-        var paths = new logic.LogicExpression(val).getPaths();
-        _.each(paths, function(path) {
-            var newPath = replaceOuputRef(form, path.toXPath(), withClose, true);
-            el.html(el.html().replace(path.toXPath(),
-                                      $('<div>').append(newPath).html()));
-        });
-        return el.html();
-    }
-
     return {
         base: base,
         normal: normal,
@@ -830,7 +802,6 @@ define([
             getMessages: getMessages,
             getUIElementWithEditButton: getUIElementWithEditButton,
             getUIElement: getUIElement,
-            toRichText: toRichText,
         }
     };
 });

@@ -14,7 +14,7 @@ define([
             util.init({
                 javaRosa: {langs: ['en']},
                 core: {onReady: done},
-                features: {'experimental_ui': false},
+                features: {'rich_text': false},
             });
         });
 

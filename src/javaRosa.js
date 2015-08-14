@@ -13,6 +13,7 @@ define([
     'tpl!vellum/templates/markdown_help',
     'text!vellum/templates/button_remove.html',
     'vellum/widgets',
+    'vellum/richtext',
     'vellum/util',
     'vellum/tsv',
     'vellum/xml',
@@ -28,6 +29,7 @@ define([
     markdown_help,
     button_remove,
     widgets,
+    richtext,
     util,
     tsv,
     xml
@@ -43,7 +45,7 @@ define([
         ],
         _nextItextItemKey = 1,
         NO_MARKDOWN_MUGS = ['Item', 'Group', 'FieldList', 'Repeat'],
-        EXPERIMENTAL_UI;
+        RICH_TEXT;
 
     function ItextItem(options) {
         this.forms = options.forms || [];
@@ -824,7 +826,7 @@ define([
         }
         options.id = id;
 
-        if (EXPERIMENTAL_UI) {
+        if (RICH_TEXT) {
             widget = widgets.richtext(mug, options);
         } else {
             widget = widgets.multilineText(mug, options);
@@ -836,12 +838,12 @@ define([
             var insertTpl = '<output value="${name}" />';
             $input.addClass('jstree-drop');
 
-            if (EXPERIMENTAL_UI) {
+            if (RICH_TEXT) {
                 insertTpl = '<span ' +
                     'class="label label-datanode label-datanode-internal" ' +
                     'contenteditable=false draggable=true ' +
-                    'data-value=\'&lt;output value="${name}" /&gt;\'>' +
-                    '<i class="${icon}">&nbsp;</i>${name}'+
+                    'data-value=\'&lt;output value="${name}" /&gt;\' title="${title}">' +
+                    '<i class="${icon}">&nbsp;</i>${questionId}'+
                     '<i class="close">&times;</i></span>';
             } else { 
                 $input.keydown(function (e) {
@@ -1305,8 +1307,8 @@ define([
     function insertOutputRef(vellum, target, path, mug, dateFormat) {
         var output = getOutputRef(path, dateFormat),
             form = vellum.data.core.form;
-        if (EXPERIMENTAL_UI) {
-            target.ckeditor().editor.insertHtml(widgets.util.toRichText(output, form, true), 'text');
+        if (RICH_TEXT) {
+            target.ckeditor().editor.insertHtml(richtext.toRichText(output, form, true), 'text');
         } else {
             util.insertTextAtCursor(target, output, true);
         }
@@ -1350,7 +1352,7 @@ define([
             this.data.javaRosa.ItextItem = ItextItem;
             this.data.javaRosa.ItextForm = ItextForm;
             this.data.javaRosa.ICONS = ICONS;
-            EXPERIMENTAL_UI = this.opts().features.experimental_ui;
+            RICH_TEXT = this.opts().features.rich_text;
         },
         handleDropFinish: function (target, path, mug) {
             var inItext = target &&

@@ -316,6 +316,7 @@ define([
                 },
             }
         }).on("inserted.atwho", function(event, $li, otherEvent) {
+            $(this).find('.atwho-inserted').children().unwrap();
             $input.val($input.data("selected-value"));
         });
     };
@@ -342,11 +343,16 @@ define([
             at: "/data/",
             data: _.chain(mug.form.getMugList())
                    .map(function(mug) {
-                        return {
+                        var ret = {
                             id: mug.ufid,
                             name: mug.absolutePath,
+                            questionId: mug.p.nodeID,
                             icon: mug.options.icon,
                         };
+                        if (mug.p && mug.p.labelItext) {
+                            ret.title = mug.p.labelItext.forms[0].data[mug.p.labelItext.itextModel.defaultLanguage];
+                        }
+                        return ret;
                     })
                     .filter(function(choice) { return choice.name; })
                     .value(),
@@ -371,6 +377,8 @@ define([
                     return value;
                 }
             }
+        }).on("inserted.atwho", function(event, $li, otherEvent) {
+            $(this).find('.atwho-inserted').children().unwrap();
         });
 
         mug.on("teardown-mug-properties", function () {

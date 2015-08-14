@@ -33,7 +33,7 @@ require([
                 core: {onReady: done},
                 features: {
                     advanced_itemsets: true,
-                    experimental_ui: false,
+                    rich_text: false,
                 }
             });
         }
