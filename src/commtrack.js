@@ -221,7 +221,7 @@ define([
                 mug.p.sectionId = "";
                 mug.p.entryId = "";
                 mug.p.quantity = "";
-                mug.p.date = "today()";
+                mug.p.date = "/data/meta/timeEnd";
                 addLedgerDBInstance(mug, form);
             },
             spec: {
@@ -298,7 +298,7 @@ define([
                 mug.p.sectionId = "";
                 mug.p.entryId = "";
                 mug.p.quantity = "";
-                mug.p.date = "today()";
+                mug.p.date = "/data/meta/timeEnd";
                 addLedgerDBInstance(mug, form);
             },
             spec: {

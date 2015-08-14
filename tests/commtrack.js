@@ -37,7 +37,7 @@ define([
             assert.equal(trans.p.entryId, "instance('commcaresession')/session/data/product_id");
             assert.equal(trans.p.src, "instance('commcaresession')/session/data/case_id");
             assert.equal(trans.p.dest, "instance('casedb')/casedb/case[@case_id=instance('commcaresession')/session/data/case_id]/index/parent");
-            assert.equal(trans.p.date, "today()");
+            assert.equal(trans.p.date, "/data/meta/timeEnd");
             assert.equal(trans.p.relevantAttr, "true()");
         });
 
@@ -108,7 +108,7 @@ define([
                 entry = xml.find("setvalue[value=3]"),
                 src = xml.find("setvalue[value=src]"),
                 dst = xml.find("setvalue[value=dst]"),
-                date = xml.find("setvalue[value='today()']");
+                date = xml.find("setvalue[value='/data/meta/timeEnd']");
             assert.equal(qty.attr("nodeset"),
                 "/data/group/transfer[@type='trans']/entry/@quantity");
             assert.equal(entry.attr("ref"),
