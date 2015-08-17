@@ -4,6 +4,7 @@ define([
     'underscore',
     'jquery',
     'vellum/util',
+    'vellum/richtext',
     'ckeditor',
     'ckeditor-jquery'
 ], function (
@@ -12,6 +13,7 @@ define([
     _,
     $,
     util,
+    richtext_utils,
     CKEDITOR
 ) {
     CKEDITOR.config.allowedContent = true;
@@ -236,6 +238,145 @@ define([
         };
 
         return widget;
+    };
+
+    var richtext = function(mug, options) {
+        var widget = normal(mug, options), editor;
+
+        function addPopovers(input) {
+            input.find('[contenteditable=false]').each(function () {
+                var $this = $(this),
+                    datavalue = $this.attr('data-value'),
+                    match =  datavalue.match('output value="(.*)"'),
+                    value = match ? match[1] : $this.attr('data-value');
+                $this.popout({
+                    title: '',
+                    content: value,
+                    template: '<div contenteditable="false" class="popover">' +
+                        '<div class="arrow"></div>' +
+                        '<div class="popover-inner">' +
+                        '<div class="popover-content"><p></p></div></div></div>',
+                    placement: 'bottom',
+                });
+            });
+        }
+
+        function removePopovers(input) {
+            input.find('[contenteditable=false]').each(function () {
+                $(this).popout('hide');
+            });
+        }
+
+        function addCloseButton(widget, input) {
+            input.find('[contenteditable=false]').each(function () {
+                var _this = this;
+                $(this).find('.close').click(function() {
+                    $(_this).popout('hide');
+                    _this.remove();
+                    widget.handleChange();
+                    return false;
+                });
+            });
+        }
+
+        widget.input = $("<div />")
+            .attr("contenteditable", true)
+            .attr("name", widget.id)
+            .addClass('input-block-level jstree-drop');
+        if (options.singleLine) {
+            widget.input.addClass('fd-input');
+        } else {
+            widget.input.addClass('fd-textarea');
+        }
+
+        widget.input.ckeditor().promise.then(function() {
+            editor = widget.input.ckeditor().editor;
+
+            mug.on('teardown-mug-properties', function() {
+                removePopovers(widget.input);
+                if (editor) {
+                    editor.destroy();
+                }
+            }, null, "teardown-mug-properties");
+
+            mug.form.on('question-remove', function(e) {
+                if (e.mug.ufid === mug.ufid) {
+                    removePopovers(widget.input);
+                    if (editor) {
+                        editor.destroy();
+                    }
+                }
+            });
+
+            editor.on('change', function() {
+                widget.handleChange();
+                widget.input.find('.label-datanode').each(function(k, v) {
+                    var value = $(v);
+                    value.attr('title', value.attr('data-original-title'));
+                });
+            });
+
+            editor.on('afterInsertHtml', function (e) {
+                addCloseButton(widget, widget.input);
+                addPopovers(widget.input);
+            });
+            editor.on('dataReady', function (e) {
+                addCloseButton(widget, widget.input);
+                addPopovers(widget.input);
+            });
+            editor.on('focus', function() {
+                var text = widget.input,
+                    selection = window.getSelection(),
+                    range = document.createRange();
+                range.selectNodeContents(text[0]);
+                selection.removeAllRanges();
+                selection.addRange(range);
+            });
+        });
+
+        widget.input.on('inserted.atwho', function(atwhoEvent, $li, browserEvent) {
+            $(this).find('.atwho-inserted').children().unwrap();
+            addCloseButton(widget, widget.input);
+            addPopovers(widget.input);
+        });
+
+        widget.getControl = function () {
+            return widget.input;
+        };
+
+        widget.setValue = function (val) {
+            widget.input.ckeditor().promise.then(function() {
+                editor.setData(richtext_utils.toRichText(val, mug.form, true));
+            });
+        };
+
+        widget.getValue = function () {
+            var val = "";
+            widget.input.ckeditor().promise.then(function() {
+                val = richtext_utils.fromRichText(editor.getData());
+            });
+            return val.replace('&nbsp;', ' ').trim();
+        };
+
+        return widget;
+    };
+
+    var richInput = function(mug, options) {
+        if (mug.options.richtext) {
+            options.singleLine = true;
+            return richtext(mug, options);
+        } else {
+            return text(mug, options);
+        }
+    };
+
+    var richTextarea = function(mug, options) {
+        if (mug.options.richtext) {
+            options.singleLine = false;
+            return richtext(mug, options);
+        } else {
+            return multilineText(mug, options);
+        }
     };
 
     var identifier = function (mug, options) {
@@ -646,6 +787,8 @@ define([
         normal: normal,
         text: text,
         multilineText: multilineText,
+        richInput: richInput,
+        richTextarea: richTextarea,
         identifier: identifier,
         droppableText: droppableText,
         checkbox: checkbox,
