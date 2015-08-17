@@ -13,6 +13,7 @@ define([
     'tpl!vellum/templates/markdown_help',
     'text!vellum/templates/button_remove.html',
     'vellum/widgets',
+    'vellum/richtext',
     'vellum/util',
     'vellum/tsv',
     'vellum/xml',
@@ -28,6 +29,7 @@ define([
     markdown_help,
     button_remove,
     widgets,
+    richtext,
     util,
     tsv,
     xml
@@ -816,55 +818,72 @@ define([
         var vellum = mug.form.vellum,
             Itext = vellum.data.javaRosa.Itext,
             // todo: id->class
-            id = "itext-" + language + "-" + options.itextType;
+            id = "itext-" + language + "-" + options.itextType,
+            widget, $input;
         if (options.idSuffix) {
             id = id + options.idSuffix;
         }
         options.id = id;
 
-        var widget = widgets.multilineText(mug, options),
-            $input = widget.input;
+        if (mug.options.richtext && options.path === 'labelItext') {
+            widget = widgets.richTextarea(mug, options);
+        } else {
+            widget = widgets.multilineText(mug, options);
+        }
+
+        $input = widget.input;
 
         if (options.path === 'labelItext') {
+            var insertTpl = '<output value="${name}" />';
+            $input.addClass('jstree-drop');
+
+            if (mug.options.richtext) {
+                insertTpl = '<span ' +
+                    'class="label label-datanode label-datanode-internal" ' +
+                    'contenteditable=false draggable=true ' +
+                    'data-value=\'&lt;output value="${name}" /&gt;\' title="${title}">' +
+                    '<i class="${icon}">&nbsp;</i>${questionId}'+
+                    '<i class="close">&times;</i></span>';
+            } else {
+                $input.keydown(function (e) {
+                    // deletion of entire output ref in one go
+                    if (e && e.which === 8 || e.which === 46) {
+                        var control = widget.getControl()[0],
+                            pos = util.getCaretPosition(control),
+                            val = widget.getValue(),
+                            outputBegin = '<output',
+                            outputEnd = '/>',
+                            start,
+                            end,
+                            match;
+                        if (e.which === 8) {
+                            match = val.substr(pos - 2, 2);
+                            if (match === outputEnd) {
+                                start = val.lastIndexOf(outputBegin, pos);
+                                end = pos;
+                            }
+                        } else if (e.which === 46) {
+                            match = val.substr(pos, outputBegin.length);
+                            if (match === outputBegin) {
+                                end = val.indexOf(outputEnd, pos);
+                                end = end === -1 ? end : end + 2;
+                                start = pos;
+                            }
+                        }
+                        if (start || end && start !== -1 && end !== -1) {
+                            var noRef = val.slice(0, start) + val.slice(end, val.length);
+                            widget.setValue(noRef);
+                            util.setCaretPosition(control, start);
+                            e.preventDefault();
+                        }
+                    }
+                });
+            }
+
             util.questionAutocomplete($input, mug, {
                 category: "Output Value",
-                insertTpl: '<output value="${name}" />',
+                insertTpl: insertTpl,
                 property: "labelItext",
-            });
-
-            $input.addClass('jstree-drop');
-            $input.keydown(function (e) {
-                // deletion of entire output ref in one go
-                if (e && e.which === 8 || e.which === 46) {
-                    var control = widget.getControl()[0],
-                        pos = util.getCaretPosition(control),
-                        val = widget.getValue(),
-                        outputBegin = '<output',
-                        outputEnd = '/>',
-                        start,
-                        end,
-                        match;
-                    if (e.which === 8) {
-                        match = val.substr(pos - 2, 2);
-                        if (match === outputEnd) {
-                            start = val.lastIndexOf(outputBegin, pos);
-                            end = pos;
-                        }
-                    } else if (e.which === 46) {
-                        match = val.substr(pos, outputBegin.length);
-                        if (match === outputBegin) {
-                            end = val.indexOf(outputEnd, pos);
-                            end = end === -1 ? end : end + 2;
-                            start = pos;
-                        }
-                    }
-                    if (start || end && start !== -1 && end !== -1) {
-                        var noRef = val.slice(0, start) + val.slice(end, val.length);
-                        widget.setValue(noRef);
-                        util.setCaretPosition(control, start);
-                        e.preventDefault();
-                    }
-                }
             });
         }
 
@@ -1286,7 +1305,11 @@ define([
     function insertOutputRef(vellum, target, path, mug, dateFormat) {
         var output = getOutputRef(path, dateFormat),
             form = vellum.data.core.form;
-        util.insertTextAtCursor(target, output, true);
+        if (vellum.opts().features.rich_text) {
+            target.ckeditor().editor.insertHtml(richtext.toRichText(output, form, true), 'text');
+        } else {
+            util.insertTextAtCursor(target, output, true);
+        }
         if (mug) {
             warnOnCircularReference('label', mug, path, 'output value', target.attr('name'));
             warnOnNonOutputableValue(form, mug, path);
