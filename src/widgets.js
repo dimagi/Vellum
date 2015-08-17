@@ -476,6 +476,7 @@ define([
             }
             return getUIElementWithEditButton(elem, function () {
                 widget.options.displayXPathEditor({
+                    richtext: mug.options.richtext,
                     leftPlaceholder: options.leftPlaceholder,
                     rightPlaceholder: options.rightPlaceholder,
                     leftAutocompleteChoices: autocompleteChoices,
