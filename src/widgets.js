@@ -3,14 +3,21 @@ define([
     'tpl!vellum/templates/widget_control_message',
     'underscore',
     'jquery',
-    'vellum/util'
+    'vellum/util',
+    'ckeditor',
+    'ckeditor-jquery'
 ], function (
     widget_control_keyvalue,
     widget_control_message,
     _,
     $,
-    util
+    util,
+    CKEDITOR
 ) {
+    CKEDITOR.config.allowedContent = true;
+    CKEDITOR.config.customConfig = '';
+    CKEDITOR.config.title = false;
+
     var base = function(mug, options) {
         // set properties shared by all widgets
         var widget = {};
