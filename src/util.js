@@ -316,6 +316,7 @@ define([
                 },
             }
         }).on("inserted.atwho", function(event, $li, otherEvent) {
+            $(this).find('.atwho-inserted').children().unwrap();
             $input.val($input.data("selected-value"));
         });
     };
@@ -371,6 +372,8 @@ define([
                     return value;
                 }
             }
+        }).on("inserted.atwho", function(event, $li, otherEvent) {
+            $(this).find('.atwho-inserted').children().unwrap();
         });
 
         mug.on("teardown-mug-properties", function () {
