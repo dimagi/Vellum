@@ -5,6 +5,7 @@ define([
     'vellum/util',
     'xpath',
     'xpathmodels',
+    'vellum/richtext',
     'tpl!vellum/templates/xpath_validation_errors',
     'tpl!vellum/templates/xpath_expression',
     'tpl!vellum/templates/xpath',
@@ -16,6 +17,7 @@ define([
     util,
     xpath,
     xpathmodels,
+    richtext,
     xpath_validation_errors,
     xpath_expression,
     xpath_tpl
@@ -73,6 +75,25 @@ define([
         var getExpressionInput = function () {
             return $div.find(".fd-xpath-editor-text");
         };
+
+        var setExpression = function(input, val) {
+            if (options.richtext) {
+                input.ckeditor().editor.setData(
+                    richtext.toRichText(val, options.mug.form, true)
+                );
+            } else {
+                input.val(val);
+            }
+        };
+
+        var getExpression = function(input) {
+            if (options.richtext) {
+                return richtext.fromRichText(input.ckeditor().editor.getData());
+            } else {
+                return input.val();
+            }
+        };
+
         var getValidationSummary = function () {
             return $div.find(".fd-xpath-validation-summary");
         };
@@ -87,8 +108,19 @@ define([
                 util.dropdownAutocomplete(input, choices);
             }
             else {
-                util.questionAutocomplete(input, options.mug,
-                                          {property: options.path});
+                var insertTpl = '${name}';
+                if (options.richtext) {
+                    insertTpl = '<span ' +
+                        'class="label label-datanode label-datanode-internal" ' +
+                        'contenteditable=false draggable=true ' +
+                        'data-value=\'${name}\'>' +
+                        '<i class="${icon}">&nbsp;</i>${name}'+
+                        '<i class="close">&times;</i></span>';
+                }
+                util.questionAutocomplete(input, options.mug, {
+                    property: options.path,
+                    insertTpl: insertTpl
+                });
             }
         };
 
@@ -98,8 +130,9 @@ define([
             var expressionParts = [];
             var joinType = getTopLevelJoinSelect().val();
             pane.children().each(function() {
-                var left = $($(this).find(".left-question")[0]).val();
-                var right = $($(this).find(".right-question")[0]).val();
+                var left = getExpression($(this).find(".left-question")),
+                    right = getExpression($(this).find(".right-question"));
+
                 // ignore empty expressions
                 if (left === "" && right === "") {
                     return;
@@ -120,7 +153,7 @@ define([
         var getExpressionFromUI = function () {
             if ($div.find(".xpath-simple").hasClass('hide')) {
                 // advanced
-                return getExpressionInput().val();
+                return getExpression(getExpressionInput());
             } else {
                 return getExpressionFromSimpleMode();
             }
@@ -162,7 +195,7 @@ define([
 
             var newExpressionUIElement = function (expOp) {
                 var tag = 'input', tagArgs = 'rows="5"';
-                if (options.rich_text) {
+                if (options.richtext) {
                     tag = 'div';
                     tagArgs = 'contenteditable="true"';
                 }
@@ -175,6 +208,10 @@ define([
                     tagArgs: tagArgs,
                 }));
 
+                if (options.richtext) {
+                    $expUI.find('.fd-input').ckeditor();
+                }
+
                 var getLeftQuestionInput = function () {
                     return $($expUI.find(".left-question")[0]);
                 };
@@ -185,9 +222,9 @@ define([
 
                 var validateExpression = function(item) {
                     options.change();
+                    var le = getExpression(getLeftQuestionInput()),
+                        re = getExpression(getRightQuestionInput());
 
-                    var le = getLeftQuestionInput().val(),
-                        re = getRightQuestionInput().val();
 
                     $expUI.find('.validation-results').addClass('hide');
 
@@ -199,7 +236,7 @@ define([
                 };
 
                 var populateQuestionInputBox = function (input, expr, pairedExpr) {
-                    input.val(expr.toXPath());
+                    setExpression(input, expr.toXPath());
                 };
 
                 // add event handlers to validate the inputs
@@ -332,7 +369,7 @@ define([
 
         // toggle simple/advanced mode
         var showAdvancedMode = function (text, showNotice) {
-            getExpressionInput().val(text);
+            setExpression(getExpressionInput(), text);
             addAutocomplete(getExpressionInput());
             getExpressionPane().empty();
 
@@ -360,7 +397,7 @@ define([
 
         var initXPathEditor = function() {
             var tag = 'textarea', tagArgs = 'rows="5"';
-            if (options.rich_text) {
+            if (options.richtext) {
                 tag = 'div';
                 tagArgs = 'contenteditable="true"';
             }
@@ -386,7 +423,7 @@ define([
             });
 
             $xpathUI.find('.fd-xpath-show-simple-button').click(function () {
-                showSimpleMode(getExpressionInput().val());
+                showSimpleMode(getExpression(getExpressionInput()));
             });
 
             $xpathUI.find('.fd-add-exp').click(function () {
@@ -404,7 +441,7 @@ define([
 
             $xpathUI.find('.fd-xpath-save-button').click(function() {
                 var uiExpression  = getExpressionFromUI();
-                getExpressionInput().val(uiExpression);
+                setExpression(getExpressionInput(), uiExpression);
                 var results = validate(uiExpression),
                     hasInstance = uiExpression.match('instance\\(');
                 if (results[0] || hasInstance) {
