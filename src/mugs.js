@@ -387,7 +387,13 @@ define([
                 if (lang !== defaultLang && disp === defaultDisp) {
                     disp += " [" + defaultLang + "]";
                 }
-                return $('<div>').text(disp).html();
+                if (this.options.richtext) {
+                    disp = disp.replace(/(<\/?p>)/ig,"");
+                    disp = disp.replace(/[\r\n|\n|\r]/ig," ");
+                    return $('<div>').html(disp).html();
+                } else {
+                    return $('<div>').text(disp).html();
+                }
             }
 
             return nodeID;
