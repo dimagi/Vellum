@@ -453,9 +453,12 @@ define([
     };
 
     fn.getMugDisplayName = function (mug) {
-        return mug.getDisplayName(
-            this.data.core.currentItextDisplayLanguage || 
+        var val = mug.getDisplayName(this.data.core.currentItextDisplayLanguage ||
             this.data.javaRosa.Itext.getDefaultLanguage());
+        if (this.opts().features.rich_text) {
+            val = richtext.toRichText(val, this.data.core.form);
+        }
+        return val;
     };
 
     fn.showSourceXMLModal = function (done) {
