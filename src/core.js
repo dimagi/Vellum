@@ -20,6 +20,7 @@ define([
     'tpl!vellum/templates/modal_button',
     'vellum/mugs',
     'vellum/widgets',
+    'vellum/richtext',
     'vellum/parser',
     'vellum/datasources',
     'vellum/util',
@@ -51,6 +52,7 @@ define([
     modal_button,
     mugs,
     widgets,
+    richtext,
     parser,
     datasources,
     util,
@@ -728,7 +730,11 @@ define([
 
         if (target) {
             // the .change fires the validation controls
-            target.val(target.val() + path).change();
+            if (this.opts().features.rich_text) {
+                target.ckeditor().editor.insertHtml(richtext.toRichText(path, _this.data.core.form, true) + " ");
+            } else {
+                target.val(target.val() + path).change();
+            }
 
             if (window.analytics) {
                 window.analytics.usage(
@@ -879,7 +885,7 @@ define([
             inst = $.jstree.reference(target);
         if (!inst && target.vellum("get") === source.vellum("get")) {
             // only when not dragging inside the tree
-            if (target.hasClass("jstree-drop")) {
+            if (target.hasClass("jstree-drop")  || target.parents('.jstree-drop').length > 0) {
                 data.helper.find('.jstree-icon').removeClass('jstree-er').addClass('jstree-ok');
             } else {
                 data.helper.find('.jstree-icon').removeClass('jstree-ok').addClass('jstree-er');
@@ -889,10 +895,14 @@ define([
         var vellum = $(data.data.obj.context).vellum("get"),
             target = $(data.event.target),
             inst = $.jstree.reference(target);
-        if (!inst && target.hasClass("jstree-drop") && vellum === target.vellum("get")) {
+
+        if (!inst && (target.hasClass("jstree-drop") || target.parents('.jstree-drop').length > 0) && vellum === target.vellum("get")) {
             if (data.data.origin) {
                 var node = data.data.origin.get_node(data.data.nodes[0]);
                 if (node.data && node.data.handleDrop) {
+                    if (!target.hasClass('jstree-drop')) {
+                        target = target.parents('.jstree-drop');
+                    }
                     node.data.handleDrop(target);
                 }
             }
