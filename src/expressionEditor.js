@@ -161,11 +161,18 @@ define([
             };
 
             var newExpressionUIElement = function (expOp) {
+                var tag = 'input', tagArgs = 'rows="5"';
+                if (options.rich_text) {
+                    tag = 'div';
+                    tagArgs = 'contenteditable="true"';
+                }
 
                 var $expUI = $(xpath_expression({
                     operationOpts: operationOpts,
                     leftPlaceholder: options.leftPlaceholder,
-                    rightPlaceholder: options.rightPlaceholder
+                    rightPlaceholder: options.rightPlaceholder,
+                    tag: tag,
+                    tagArgs: tagArgs,
                 }));
 
                 var getLeftQuestionInput = function () {
@@ -352,11 +359,19 @@ define([
         };
 
         var initXPathEditor = function() {
+            var tag = 'textarea', tagArgs = 'rows="5"';
+            if (options.rich_text) {
+                tag = 'div';
+                tagArgs = 'contenteditable="true"';
+            }
+
             var $xpathUI = $(xpath_tpl({
                 topLevelJoinOpts: [
                     ["True when ALL of the expressions are true.", expTypes.AND],
                     ["True when ANY of the expressions are true.", expTypes.OR]
-                ]
+                ],
+                tag: tag,
+                tagArgs: tagArgs,
             }));
             editorContent.empty().append($xpathUI);
 
