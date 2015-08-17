@@ -157,11 +157,10 @@ define(["underscore"], function (_) {
         ],
         features: {
             'group_in_field_list': true,
-            'help_markdown': true,
+            'rich_text': true,
             'advanced_itemsets': true,
             'experimental_ui': true,
             'printing': true,
-            'rich_text': true,
         }
     };
 

@@ -65,6 +65,7 @@ require([
         var dataTree;
         before(function (done) {
             util.init({
+                features: {rich_text: false},
                 plugins: plugins,
                 javaRosa: {langs: ['en']},
                 core: {

@@ -26,7 +26,8 @@ define([
         before(function (done) {
             util.init({
                 javaRosa: {langs: ['en']},
-                core: {onReady: done}
+                core: {onReady: done},
+                features: {rich_text: false},
             });
         });
 
@@ -132,6 +133,7 @@ define([
             before(function(done) {
                 util.init({
                     intents: {templates: templates},
+                    features: {rich_text: false},
                     core: {onReady: function () {
                         vellum = this;
                         mug = util.addQuestion("AndroidIntent", "intent");
