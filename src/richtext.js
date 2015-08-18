@@ -99,11 +99,13 @@ define([
             return {classes: ['label-datanode-external', 'fcc fcc-help']};
         }
 
-        var bubbleClasses = _parseXPath(xpath, form),
-            mug = bubbleClasses.mug,
+        var xpathInfo = _parseXPath(xpath, form),
+            mug = xpathInfo.mug,
+            bubbleClasses = xpathInfo.classes[0],
+            iconClasses = xpathInfo.classes[1],
             dispValue = getBubblesDisplayValue(xpath),
-            icon = $('<i>').addClass(bubbleClasses.classes[1]).html('&nbsp;'),
-            bubble = $('<span>').addClass('label label-datanode ' + bubbleClasses.classes[0])
+            icon = $('<i>').addClass(iconClasses).html('&nbsp;'),
+            bubble = $('<span>').addClass('label label-datanode ' + bubbleClasses)
                 .attr({
                     contenteditable: false,
                     draggable: true,
