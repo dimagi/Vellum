@@ -194,7 +194,7 @@ define([
             };
 
             var newExpressionUIElement = function (expOp) {
-                var tag = 'input', tagArgs = 'rows="5"';
+                var tag = 'input', tagArgs = '';
                 if (options.richtext) {
                     tag = 'div';
                     tagArgs = 'contenteditable="true"';
