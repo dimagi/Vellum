@@ -153,16 +153,39 @@ define([
         return el.html();
     }
 
+    /**
+     * Deconstructs html strings that have bubbles in them
+     * This should preserve whitespace as it appears in the editor
+     *
+     * Dependent on CKEditor, which uses p, br and &nbsp; to format content
+     *
+     * Expects the html to only be at most two levels deep (considering a
+     * bubble span as one level):
+     *   <p>
+     *     <br />
+     *     <span /> (info)
+     *   </p>
+     *
+     * @param val - HTML string that may or may not have bubble
+     *
+     * @returns - string with bubbles deconstructed into plain text
+     */
     function fromRichText(val) {
         var el = $('<div>');
-        val = val.replace(/(<p>)/ig,"").replace(/<\/p>/ig, "\n").replace(/(<br ?\/?>)/ig,"\n").replace('&nbsp;', ' ');
+
+        val = val.replace(/<p>/ig,"")
+                 .replace(/<\/p>/ig, "\n")
+                 .replace(/(<br ?\/?>)/ig,"\n")
+                 .replace(/&nbsp;/ig, ' ');
+
         el = el.html(val);
-        el.find('.atwho-inserted .label').unwrap();
         el.find('.label-datanode').replaceWith(function() {
             return applyFormats($(this).data());
         });
 
-        return el.html().replace('&lt;', '<', 'g').replace('&gt;', '>', 'g').replace('&nbsp;', ' ', 'g');
+        return el.html().replace(/&lt;/ig, '<')
+                        .replace(/&gt;/ig, '>')
+                        .replace(/&nbsp;/ig, ' ');
     }
 
     return {
