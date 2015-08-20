@@ -888,7 +888,7 @@ define([
             inst = $.jstree.reference(target);
         if (!inst && target.vellum("get") === source.vellum("get")) {
             // only when not dragging inside the tree
-            if (target.hasClass("jstree-drop")  || target.parents('.jstree-drop').length > 0) {
+            if (target.closest('.jstree-drop').length) {
                 data.helper.find('.jstree-icon').removeClass('jstree-er').addClass('jstree-ok');
             } else {
                 data.helper.find('.jstree-icon').removeClass('jstree-ok').addClass('jstree-er');
@@ -899,14 +899,11 @@ define([
             target = $(data.event.target),
             inst = $.jstree.reference(target);
 
-        if (!inst && (target.hasClass("jstree-drop") || target.parents('.jstree-drop').length > 0) && vellum === target.vellum("get")) {
+        if (!inst && (target.closest('.jstree-drop').length) && vellum === target.vellum("get")) {
             if (data.data.origin) {
                 var node = data.data.origin.get_node(data.data.nodes[0]);
                 if (node.data && node.data.handleDrop) {
-                    if (!target.hasClass('jstree-drop')) {
-                        target = target.parents('.jstree-drop');
-                    }
-                    node.data.handleDrop(target);
+                    node.data.handleDrop(target.closest('.jstree-drop'));
                 }
             }
         }
