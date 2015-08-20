@@ -243,8 +243,10 @@ define([
     var richtext = function(mug, options) {
         var widget = normal(mug, options), editor;
 
+        // Each bubble in rich text has a popover on click that will display
+        // the path
         function addPopovers(input) {
-            input.find('[contenteditable=false]').each(function () {
+            input.find('.label-datanode').each(function () {
                 var $this = $(this),
                     datavalue = $this.attr('data-value'),
                     match =  datavalue.match('output value="(.*)"'),
@@ -262,13 +264,13 @@ define([
         }
 
         function removePopovers(input) {
-            input.find('[contenteditable=false]').each(function () {
+            input.find('.label-datanode').each(function () {
                 $(this).popout('hide');
             });
         }
 
         function addCloseButton(widget, input) {
-            input.find('[contenteditable=false]').each(function () {
+            input.find('.label-datanode').each(function () {
                 var _this = this;
                 $(this).find('.close').click(function() {
                     $(_this).popout('hide');
@@ -312,6 +314,7 @@ define([
                 widget.handleChange();
                 widget.input.find('.label-datanode').each(function(k, v) {
                     var value = $(v);
+                    // ckeditor likes to move title attribute to data-original-title
                     value.attr('title', value.attr('data-original-title'));
                 });
             });
@@ -325,6 +328,8 @@ define([
                 addPopovers(widget.input);
             });
             editor.on('focus', function() {
+                // highlights text on focus. 
+                // todo: find out real wanted behavior
                 var text = widget.input,
                     selection = window.getSelection(),
                     range = document.createRange();
@@ -335,6 +340,8 @@ define([
         });
 
         widget.input.on('inserted.atwho', function(atwhoEvent, $li, browserEvent) {
+            // gets rid of atwho wrapper
+            // tod: find out why this is needed and move elsewhere
             $(this).find('.atwho-inserted').children().unwrap();
             addCloseButton(widget, widget.input);
             addPopovers(widget.input);
