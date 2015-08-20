@@ -1,3 +1,28 @@
+/*
+ * expected structure of a richtext widget:
+ *
+ * <div contenteditable="true" ... ckeditor stuff...>
+ *   <p>
+ *      User input text
+ *   </p>
+ * </div>
+ *
+ * Possible values for user's input text:
+ *
+ * text
+ *
+ * newline: <br />
+ *
+ * rich text "bubble":
+ *   <span contenteditable="false" draggable="true" 
+ *         data-value="xpath" data-output-value=boolean>
+ *     <i class="icon">&nbsp;</i>
+ *     text to display inside bubble
+ *     <i class="close">&times;</i>
+ *   </span>
+ *
+ * Any other HTML has undefined behavior
+ */
 define([
     'underscore',
     'jquery',
@@ -7,10 +32,33 @@ define([
     $,
     logic
 ){
+    /*
+     * formats specifies the serialization for different formats that can be
+     * applied to bubbles.
+     *
+     * This uses underscore templates and returns
+     * [templated_text, template values]
+     *
+     * serialize handles rich text -> xml and returns
+     * deserialize handles xml -> rich text
+     *
+     * Example
+     *   <span data-value='/data/value' data-output-value='true' />
+     *   is equivalent to
+     *   <output value='/data/value' />
+     *
+     *   deserialize would return
+     *       ["<%=outputValue0%>",
+     *        {outputValue0: {data-output-value: true, xpath: '/data/value'}}]
+     *   serialize would return "<output value="/data/value" />
+     *
+     * Notes:
+     *   uses outputValue as that's what $el.data() transforms data-output-value
+     */
     var formats = {
             'outputValue': {
                 deserialize: function(string) {
-                    var el = $('<div>').html(string), 
+                    var el = $('<div>').html(string),
                         outputs = {}, currentLength = -1;
                     el.find('output').replaceWith(function() {
                         currentLength++;
@@ -46,9 +94,7 @@ define([
         _.each(formatOrdering, function(format) {
             var ret = formats[format].deserialize(currentValue);
             currentValue = ret[0];
-            _.extend(templateArgs, _.object(_.map(ret[1], function(v, k) {
-                return [k, v];
-            })));
+            _.extend(templateArgs, ret[1]);
         });
 
         templateArgs = _.object(_.map(templateArgs, function(value, key) {
@@ -62,7 +108,7 @@ define([
      *   form: /data/group/text
      *   instance: instance('blah')/blah_list/blah
      */
-    function getBubblesDisplayValue(path) {
+    function getBubbleDisplayValue(path) {
         var steps = new logic.LogicExpression(path).getTopLevelPaths()[0].steps,
             dispValue = steps[steps.length-1].name;
         return dispValue;
@@ -103,7 +149,7 @@ define([
             mug = xpathInfo.mug,
             bubbleClasses = xpathInfo.classes[0],
             iconClasses = xpathInfo.classes[1],
-            dispValue = getBubblesDisplayValue(xpath),
+            dispValue = getBubbleDisplayValue(xpath),
             icon = $('<i>').addClass(iconClasses).html('&nbsp;'),
             bubble = $('<span>').addClass('label label-datanode ' + bubbleClasses)
                 .attr({
@@ -124,7 +170,12 @@ define([
         return bubble;
     }
 
-    function replaceOuputRef(form, value, withClose) {
+    /**
+     * @param value - a single xpath expression
+     *
+     * @returns - jquery object of xpath bubble
+     */
+    function replacePathWithBubble(form, value, withClose) {
         // only support absolute path right now
         if (!form.getMugByPath(value) && !/instance\(/.test(value)) {
             return value;
@@ -133,12 +184,21 @@ define([
         return makeBubble(form, value, withClose, {'data-output-value': false});
     }
 
+    /**
+     * Takes a value from xml and replaces xpaths with bubbles to display in the
+     * editor
+     *
+     * This does not add any <p> or <br> tags, only newlines as used in xml
+     *
+     * @returns - html string to be displayed in editor
+     */
     function toRichText(val, form, withClose) {
         if (!val) {return "";}
         val = val.replace('&lt;', '<').replace('&gt;', '>').replace('&nbsp;', ' ');
         val = deserializeString(val, form);
         var el = $('<div>').html(val);
         var l = new logic.LogicExpression(val),
+            // Uses top level paths, because filters should not be made to bubbles
             paths = _.chain(l.getTopLevelPaths())
                      .map(function(path) { return path.toXPath(); })
                      .filter(function(path) {
@@ -146,7 +206,7 @@ define([
                      }).uniq().value();
 
         _.each(paths, function(path) {
-            var newPath = replaceOuputRef(form, path, withClose);
+            var newPath = replacePathWithBubble(form, path, withClose);
             el.html(el.html().replace(new RegExp(RegExp.escape(path).replace(/ /g, '\\s*'), 'mg'),
                                       $('<div>').append(newPath).html()));
         });
