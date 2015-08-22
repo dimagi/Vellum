@@ -4,7 +4,7 @@ define([
     'underscore',
     'jquery',
     'vellum/util',
-    'vellum/richtext',
+    'vellum/richText',
     'ckeditor',
     'ckeditor-jquery'
 ], function (
@@ -13,7 +13,7 @@ define([
     _,
     $,
     util,
-    richtext_utils,
+    richText_utils,
     CKEDITOR
 ) {
     CKEDITOR.config.allowedContent = true;
@@ -240,7 +240,7 @@ define([
         return widget;
     };
 
-    var richtext = function(mug, options) {
+    var richText = function(mug, options) {
         var widget = normal(mug, options), editor;
 
         // Each bubble in rich text has a popover on click that will display
@@ -350,14 +350,14 @@ define([
 
         widget.setValue = function (val) {
             widget.input.ckeditor().promise.then(function() {
-                editor.setData(richtext_utils.toRichText(val, mug.form, true));
+                editor.setData(richText_utils.toRichText(val, mug.form, true));
             });
         };
 
         widget.getValue = function () {
             var val = "";
             widget.input.ckeditor().promise.then(function() {
-                val = richtext_utils.fromRichText(editor.getData());
+                val = richText_utils.fromRichText(editor.getData());
             });
             return val.replace('&nbsp;', ' ').trim();
         };
@@ -366,18 +366,18 @@ define([
     };
 
     var richInput = function(mug, options) {
-        if (mug.options.richtext) {
+        if (mug.options.richText) {
             options.singleLine = true;
-            return richtext(mug, options);
+            return richText(mug, options);
         } else {
             return text(mug, options);
         }
     };
 
     var richTextarea = function(mug, options) {
-        if (mug.options.richtext) {
+        if (mug.options.richText) {
             options.singleLine = false;
-            return richtext(mug, options);
+            return richText(mug, options);
         } else {
             return multilineText(mug, options);
         }
@@ -480,7 +480,7 @@ define([
             }
             return getUIElementWithEditButton(elem, function () {
                 widget.options.displayXPathEditor({
-                    richtext: mug.options.richtext,
+                    richText: mug.options.richText,
                     leftPlaceholder: options.leftPlaceholder,
                     rightPlaceholder: options.rightPlaceholder,
                     leftAutocompleteChoices: autocompleteChoices,
@@ -501,7 +501,7 @@ define([
             }, !!widget.isDisabled());
         };
 
-        if (mug.options.richtext) {
+        if (mug.options.richText) {
             insertTpl = '<span ' +
                 'class="label label-datanode label-datanode-internal" ' +
                 'contenteditable=false draggable=true data-value="${name}">' +

@@ -1,5 +1,5 @@
 /*
- * expected structure of a richtext widget:
+ * expected structure of a richText widget:
  *
  * <div contenteditable="true" ... ckeditor stuff...>
  *   <p>
@@ -28,13 +28,13 @@ define([
     'jquery',
     'underscore',
     'tests/utils',
-    'vellum/richtext'
+    'vellum/richText'
 ], function(
     chai,
     $,
     _,
     util,
-    richtext
+    richText
 ) {
     var assert = chai.assert,
         formShim = {
@@ -102,26 +102,26 @@ define([
             _.each(simpleConversions, function(val) {
                 it("from text to html: " + val[0], function() {
                     assert.strictEqual(
-                        wrapWithDiv(richtext.toRichText(val[0], formShim)).html(),
+                        wrapWithDiv(richText.toRichText(val[0], formShim)).html(),
                         wrapWithDiv(makeBubble(val[0], val[1], val[2], val[3])).html()
                     );
                 });
 
                 it("from text to html with output value: " + val[0], function() {
                     assert.strictEqual(
-                        wrapWithDiv(richtext.toRichText(outputValueTemplateFn(val[0]), formShim)).html(),
+                        wrapWithDiv(richText.toRichText(outputValueTemplateFn(val[0]), formShim)).html(),
                         wrapWithDiv(makeOutputValue(val[0], val[1], val[2], val[3])).html()
                     );
                 });
 
                 it("from html to text: " + val[0], function() {
                     var bubble = $('<div>').append(makeBubble(val[0], val[1], val[2], val[3])).html();
-                    assert.strictEqual(richtext.fromRichText(bubble), val[0]);
+                    assert.strictEqual(richText.fromRichText(bubble), val[0]);
                 });
 
                 it("from html to text with ouput value: " + val[0], function() {
                     var bubble = $('<div>').append(makeBubble(val[0], val[1], val[2], val[3], true)).html();
-                    assert.strictEqual(richtext.fromRichText(bubble), outputValueTemplateFn(val[0]));
+                    assert.strictEqual(richText.fromRichText(bubble), outputValueTemplateFn(val[0]));
                 });
             });
         });
@@ -148,7 +148,7 @@ define([
             _.each(equations, function(val) {
                 it("from text to html: " + val[0], function() {
                     assert.strictEqual(
-                        richtext.toRichText(val[0], formShim),
+                        richText.toRichText(val[0], formShim),
                         val[1]
                     );
                 });
@@ -163,7 +163,7 @@ define([
             _.each(text, function(val){
                 it("from html to text: " + val[1], function() {
                     assert.strictEqual(
-                        val[0], richtext.fromRichText(val[1]));
+                        val[0], richText.fromRichText(val[1]));
                 });
             });
         });

@@ -5,7 +5,7 @@ define([
     'vellum/util',
     'xpath',
     'xpathmodels',
-    'vellum/richtext',
+    'vellum/richText',
     'tpl!vellum/templates/xpath_validation_errors',
     'tpl!vellum/templates/xpath_expression',
     'tpl!vellum/templates/xpath',
@@ -17,7 +17,7 @@ define([
     util,
     xpath,
     xpathmodels,
-    richtext,
+    richText,
     xpath_validation_errors,
     xpath_expression,
     xpath_tpl
@@ -77,9 +77,9 @@ define([
         };
 
         var setExpression = function(input, val) {
-            if (options.richtext) {
+            if (options.richText) {
                 input.ckeditor().editor.setData(
-                    richtext.toRichText(val, options.mug.form, true)
+                    richText.toRichText(val, options.mug.form, true)
                 );
             } else {
                 input.val(val);
@@ -87,8 +87,8 @@ define([
         };
 
         var getExpression = function(input) {
-            if (options.richtext) {
-                return richtext.fromRichText(input.ckeditor().editor.getData());
+            if (options.richText) {
+                return richText.fromRichText(input.ckeditor().editor.getData());
             } else {
                 return input.val();
             }
@@ -109,7 +109,7 @@ define([
             }
             else {
                 var insertTpl = '${name}';
-                if (options.richtext) {
+                if (options.richText) {
                     insertTpl = '<span ' +
                         'class="label label-datanode label-datanode-internal" ' +
                         'contenteditable=false draggable=true ' +
@@ -195,7 +195,7 @@ define([
 
             var newExpressionUIElement = function (expOp) {
                 var tag = 'input', tagArgs = '';
-                if (options.richtext) {
+                if (options.richText) {
                     tag = 'div';
                     tagArgs = 'contenteditable="true"';
                 }
@@ -208,7 +208,7 @@ define([
                     tagArgs: tagArgs,
                 }));
 
-                if (options.richtext) {
+                if (options.richText) {
                     $expUI.find('.fd-input').ckeditor();
                 }
 
@@ -397,7 +397,7 @@ define([
 
         var initXPathEditor = function() {
             var tag = 'textarea', tagArgs = 'rows="5"';
-            if (options.richtext) {
+            if (options.richText) {
                 tag = 'div';
                 tagArgs = 'contenteditable="true"';
             }

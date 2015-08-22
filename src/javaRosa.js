@@ -13,7 +13,7 @@ define([
     'tpl!vellum/templates/markdown_help',
     'text!vellum/templates/button_remove.html',
     'vellum/widgets',
-    'vellum/richtext',
+    'vellum/richText',
     'vellum/util',
     'vellum/tsv',
     'vellum/xml',
@@ -29,7 +29,7 @@ define([
     markdown_help,
     button_remove,
     widgets,
-    richtext,
+    richText,
     util,
     tsv,
     xml
@@ -825,7 +825,7 @@ define([
         }
         options.id = id;
 
-        if (mug.options.richtext && options.path === 'labelItext') {
+        if (mug.options.richText && options.path === 'labelItext') {
             widget = widgets.richTextarea(mug, options);
         } else {
             widget = widgets.multilineText(mug, options);
@@ -837,7 +837,7 @@ define([
             var insertTpl = '<output value="${name}" />';
             $input.addClass('jstree-drop');
 
-            if (mug.options.richtext) {
+            if (mug.options.richText) {
                 insertTpl = '<span ' +
                     'class="label label-datanode label-datanode-internal" ' +
                     'contenteditable=false draggable=true ' +
@@ -1306,7 +1306,7 @@ define([
         var output = getOutputRef(path, dateFormat),
             form = vellum.data.core.form;
         if (vellum.opts().features.rich_text) {
-            target.ckeditor().editor.insertHtml(richtext.toRichText(output, form, true), 'text');
+            target.ckeditor().editor.insertHtml(richText.toRichText(output, form, true), 'text');
         } else {
             util.insertTextAtCursor(target, output, true);
         }

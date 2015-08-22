@@ -1,5 +1,5 @@
 /*
- * expected structure of a richtext widget:
+ * expected structure of a richText widget:
  *
  * <div contenteditable="true" ... ckeditor stuff...>
  *   <p>

@@ -226,7 +226,7 @@ define([
                     getUIElement(widget.input, labelText),
                     function () {
                         vellum.displaySecondaryEditor({
-                            richtext: mug.options.richtext,
+                            richText: mug.options.richText,
                             source: local_getValue(),
                             headerText: labelText,
                             loadEditor: loadDataSourceEditor,
@@ -331,7 +331,7 @@ define([
                         widgets.util.getUIElement(widget.input, labelText),
                         function () {
                             vellum.displaySecondaryEditor({
-                                richtext: mug.options.richtext,
+                                richText: mug.options.richText,
                                 source: getSource(mug),
                                 headerText: labelText,
                                 loadEditor: loadDataSourceEditor,
