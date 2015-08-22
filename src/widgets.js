@@ -304,9 +304,6 @@ define([
             mug.form.on('question-remove', function(e) {
                 if (e.mug.ufid === mug.ufid) {
                     removePopovers(widget.input);
-                    if (editor) {
-                        editor.destroy();
-                    }
                 }
             });
 
