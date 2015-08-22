@@ -147,5 +147,23 @@ define([
             $('#fd-question-edit-update').find('.fd-add-property').click();
             util.assertXmlEqual(call("createXML"), INDEX_PROPERTY_XML);
         });
+
+        it("should have @case_id in bind for create when in repeat", function() {
+            util.loadXML("");
+            util.addQuestion("Repeat", 'repeat');
+            var mug = util.addQuestion("SaveToCase", 'case', {
+                case_id: 'uuid()',
+                user_id: 'uuid()',
+                useCreate: true,
+                createProperty: {
+                    'case_type': 'type',
+                    'case_name': 'name'
+                }
+            });
+            assert.include(mug.options.getBindList(mug), {
+                nodeset: mug.absolutePath + "/case/@case_id",
+                calculate: 'uuid()'
+            });
+        });
     });
 });
