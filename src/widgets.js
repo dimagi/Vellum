@@ -366,7 +366,7 @@ define([
     };
 
     var richInput = function(mug, options) {
-        if (mug.options.richText) {
+        if (mug.supportsRichText()) {
             options.singleLine = true;
             return richText(mug, options);
         } else {
@@ -375,7 +375,7 @@ define([
     };
 
     var richTextarea = function(mug, options) {
-        if (mug.options.richText) {
+        if (mug.supportsRichText()) {
             options.singleLine = false;
             return richText(mug, options);
         } else {
@@ -480,7 +480,6 @@ define([
             }
             return getUIElementWithEditButton(elem, function () {
                 widget.options.displayXPathEditor({
-                    richText: mug.options.richText,
                     leftPlaceholder: options.leftPlaceholder,
                     rightPlaceholder: options.rightPlaceholder,
                     leftAutocompleteChoices: autocompleteChoices,
@@ -501,7 +500,7 @@ define([
             }, !!widget.isDisabled());
         };
 
-        if (mug.options.richText) {
+        if (mug.supportsRichText()) {
             insertTpl = '<span ' +
                 'class="label label-datanode label-datanode-internal" ' +
                 'contenteditable=false draggable=true data-value="${name}">' +

@@ -77,7 +77,7 @@ define([
         };
 
         var setExpression = function(input, val) {
-            if (options.richText) {
+            if (options.mug.supportsRichText()) {
                 input.ckeditor().editor.setData(
                     richText.toRichText(val, options.mug.form, true)
                 );
@@ -87,7 +87,7 @@ define([
         };
 
         var getExpression = function(input) {
-            if (options.richText) {
+            if (options.mug.supportsRichText()) {
                 return richText.fromRichText(input.ckeditor().editor.getData());
             } else {
                 return input.val();
@@ -109,7 +109,7 @@ define([
             }
             else {
                 var insertTpl = '${name}';
-                if (options.richText) {
+                if (options.mug.supportsRichText()) {
                     insertTpl = '<span ' +
                         'class="label label-datanode label-datanode-internal" ' +
                         'contenteditable=false draggable=true ' +
@@ -195,7 +195,7 @@ define([
 
             var newExpressionUIElement = function (expOp) {
                 var tag = 'input', tagArgs = '';
-                if (options.richText) {
+                if (options.mug.supportsRichText()) {
                     tag = 'div';
                     tagArgs = 'contenteditable="true"';
                 }
@@ -208,7 +208,7 @@ define([
                     tagArgs: tagArgs,
                 }));
 
-                if (options.richText) {
+                if (options.mug.supportsRichText()) {
                     $expUI.find('.fd-input').ckeditor();
                 }
 
@@ -397,7 +397,7 @@ define([
 
         var initXPathEditor = function() {
             var tag = 'textarea', tagArgs = 'rows="5"';
-            if (options.richText) {
+            if (options.mug.supportsRichText()) {
                 tag = 'div';
                 tagArgs = 'contenteditable="true"';
             }

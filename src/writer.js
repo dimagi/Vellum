@@ -16,7 +16,7 @@ define([
         xmlWriter.writeStartDocument();
         //Generate header boilerplate up to instance level
         xmlWriter.writeStartElement('h:html');
-        write_html_tag_boilerplate(xmlWriter);
+        write_html_tag_boilerplate(xmlWriter, form);
         xmlWriter.writeStartElement('h:head');
         xmlWriter.writeStartElement('h:title');
         xmlWriter.writeString(form.formName);
@@ -79,13 +79,16 @@ define([
         xmlWriter.writeAttributeString("name", form.formName || "New Form");
     };
 
-    function write_html_tag_boilerplate (xmlWriter) {
+    function write_html_tag_boilerplate (xmlWriter, form) {
         xmlWriter.writeAttributeString( "xmlns:h", "http://www.w3.org/1999/xhtml" );
         xmlWriter.writeAttributeString( "xmlns:orx", "http://openrosa.org/jr/xforms" );
         xmlWriter.writeAttributeString( "xmlns", "http://www.w3.org/2002/xforms" );
         xmlWriter.writeAttributeString( "xmlns:xsd", "http://www.w3.org/2001/XMLSchema" );
         xmlWriter.writeAttributeString( "xmlns:jr", "http://openrosa.org/javarosa" );
         xmlWriter.writeAttributeString( "xmlns:vellum", "http://commcarehq.org/xforms/vellum" );
+        if (form.useRichText === false) {
+            xmlWriter.writeAttributeString("vellum:ignore", 'richText');
+        }
     }
 
     var _writeInstanceAttributes = function (writer, instanceMetadata) {

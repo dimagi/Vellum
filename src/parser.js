@@ -62,6 +62,11 @@ define([
         if(title.length > 0) {
             form.formName = $(title).text();
         }
+
+        form.useRichText = true;
+        if(xml.find('[vellum\\:ignore=richText]').length > 0) {
+            form.useRichText = false;
+        }
         
         // set all instance metadatas
         form.instanceMetadata = instances.map(function (instance) {

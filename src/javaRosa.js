@@ -825,7 +825,7 @@ define([
         }
         options.id = id;
 
-        if (mug.options.richText && options.path === 'labelItext') {
+        if (mug.supportsRichText() && options.path === 'labelItext') {
             widget = widgets.richTextarea(mug, options);
         } else {
             widget = widgets.multilineText(mug, options);
@@ -837,7 +837,7 @@ define([
             var insertTpl = '<output value="${name}" />';
             $input.addClass('jstree-drop');
 
-            if (mug.options.richText) {
+            if (mug.supportsRichText()) {
                 insertTpl = '<span ' +
                     'class="label label-datanode label-datanode-internal" ' +
                     'contenteditable=false draggable=true ' +
@@ -1305,7 +1305,7 @@ define([
     function insertOutputRef(vellum, target, path, mug, dateFormat) {
         var output = getOutputRef(path, dateFormat),
             form = vellum.data.core.form;
-        if (vellum.opts().features.rich_text) {
+        if (mug.supportsRichText()) {
             target.ckeditor().editor.insertHtml(richText.toRichText(output, form, true), 'text');
         } else {
             util.insertTextAtCursor(target, output, true);

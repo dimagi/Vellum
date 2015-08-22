@@ -455,7 +455,7 @@ define([
     fn.getMugDisplayName = function (mug) {
         var val = mug.getDisplayName(this.data.core.currentItextDisplayLanguage ||
             this.data.javaRosa.Itext.getDefaultLanguage());
-        if (this.opts().features.rich_text) {
+        if (mug.supportsRichText()) {
             val = richText.toRichText(val, this.data.core.form);
         }
         return val;
@@ -643,7 +643,15 @@ define([
                     cleanValue: function (val) {
                         return val.replace(/ /g, '_');
                     }
-                }
+                },
+                {
+                    label: "Use Bubbles?",
+                    slug: "useRichText",
+                    type: "checkbox",
+                    value: function(jq, val) {
+                        return val ? jq.prop('checked', val): jq.prop('checked');
+                    }
+                },
             ];
 
         $modalBody.append($('<p />').text(
@@ -654,20 +662,27 @@ define([
 
         _.each(formProperties, function (prop) {
             var $propertyInput = $(control_group_stdInput({
-                label: prop.label
+                label: prop.label,
+                type: prop.type || 'text',
             }));
             $modalBody.append($propertyInput);
             $propertyInput.find('input')
                 .val(_this.data.core.form[prop.slug])
-                .on('keyup', function () {
+                .on('change', function () {
                     var $this = $(this),
                         currentVal = $this.val();
+                    if (typeof prop.value === 'function') {
+                        currentVal = prop.value($this);
+                    }
                     if (typeof prop.cleanValue === 'function') {
                         currentVal = prop.cleanValue(currentVal);
                         $this.val(currentVal);
                     }
                     _this.data.core.form.setAttr(prop.slug, currentVal);
                 });
+            if (typeof prop.value === 'function') {
+                prop.value($propertyInput.find('input'), _this.data.core.form[prop.slug]);
+            }
         });
 
         $modal.modal('show');
@@ -733,7 +748,9 @@ define([
 
         if (target) {
             // the .change fires the validation controls
-            if (this.opts().features.rich_text) {
+            if ((!mug && _this.data.core.form.useRichText !== false &&
+                 this.opts().features.rich_text) ||
+                 (mug && mug.supportsRichText())) {
                 target.ckeditor().editor.insertHtml(richText.toRichText(path, _this.data.core.form, true) + " ");
             } else {
                 target.val(target.val() + path).change();

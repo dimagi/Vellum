@@ -451,6 +451,9 @@ define([
                 return true;
             }
             return this.parentMug && this.parentMug.isInRepeat();
+        },
+        supportsRichText: function() {
+            return this.options.richText && this.form.useRichText !== false;
         }
     };
 
