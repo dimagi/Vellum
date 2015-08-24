@@ -54,7 +54,7 @@ define([
     function addSetValue(mug) {
         var path = mug.absolutePath;
 
-        if (createsCase(mug)) {
+        if (createsCase(mug) && !mug.isInRepeat()) {
             mug.form.addSetValue('xforms-ready', path + "/case/@case_id", mug.p.case_id);
         }
     }
@@ -444,6 +444,12 @@ define([
                 }
 
                 if (createsCase(mug)) {
+                    if (mug.isInRepeat()) {
+                        ret = ret.concat({
+                            nodeset: mug.absolutePath + "/case/@case_id",
+                            calculate: mug.p.case_id
+                        });
+                    }
                     ret = ret.concat(generateBinds('create', mug.p.createProperty));
                 }
                 if (updatesCase(mug)) {
