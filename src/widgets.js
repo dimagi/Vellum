@@ -3,12 +3,14 @@ define([
     'tpl!vellum/templates/widget_control_message',
     'underscore',
     'jquery',
+    'vellum/atwho',
     'vellum/util'
 ], function (
     widget_control_keyvalue,
     widget_control_message,
     _,
     $,
+    atwho,
     util
 ) {
     var base = function(mug, options) {
@@ -346,7 +348,7 @@ define([
             }, !!widget.isDisabled());
         };
 
-        util.questionAutocomplete(widget.input, mug,
+        atwho.questionAutocomplete(widget.input, mug,
                                   {property: options.path});
 
         return widget;

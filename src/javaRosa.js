@@ -14,6 +14,7 @@ define([
     'text!vellum/templates/button_remove.html',
     'vellum/widgets',
     'vellum/util',
+    'vellum/atwho',
     'vellum/tsv',
     'vellum/xml',
     'vellum/core'
@@ -29,6 +30,7 @@ define([
     button_remove,
     widgets,
     util,
+    atwho,
     tsv,
     xml
 ) {
@@ -826,7 +828,7 @@ define([
             $input = widget.input;
 
         if (options.path === 'labelItext') {
-            util.questionAutocomplete($input, mug, {
+            atwho.questionAutocomplete($input, mug, {
                 category: "Output Value",
                 insertTpl: '<output value="${name}" />',
                 property: "labelItext",

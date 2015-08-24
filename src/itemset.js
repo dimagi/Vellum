@@ -9,6 +9,7 @@ define([
     'vellum/mugs',
     'vellum/parser',
     'vellum/util',
+    'vellum/atwho',
     'vellum/debugutil'
 ], function (
     _,
@@ -21,6 +22,7 @@ define([
     mugs,
     parser,
     util,
+    atwho,
     debug
 ) {
     var mugTypes = mugs.baseMugTypes.normal,
@@ -434,7 +436,7 @@ define([
         input.attr("name", name);
         return {
             addAutocomplete: function(sources, changeFunction) {
-                util.dropdownAutocomplete(input, sources);
+                atwho.dropdownAutocomplete(input, sources);
                 input.on("blur change", function() {
                     if (_.isFunction(changeFunction)) {
                         changeFunction();
