@@ -181,7 +181,16 @@ define([
             // do not show Session node for now
             nodes = node(null, info)(source, path).children;
         }
-        return nodes;
+        var siblings = [];
+        _.each(nodes, function (node) {
+            siblings = siblings.concat(_.filter(node.children, function(child) {
+                return child.children.length;
+            }));
+            node.children = _.filter(node.children, function(child) {
+                return child.children.length === 0;
+            });
+        });
+        return nodes.concat(siblings);
     }
 
     function toggleExternalDataTree(vellum) {
