@@ -25,7 +25,7 @@ define([
 ) {
     var mugTypes = mugs.baseMugTypes.normal,
         Itemset, isAdvancedItemsetEnabled, opts,
-        END_FILTER = /\[[^\[]*\]$/;
+        END_FILTER = /\[[^\[\]]*\]$/;
 
     Itemset = util.extend(mugs.defaultOptions, {
         isControlOnly: true,
