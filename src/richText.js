@@ -56,6 +56,14 @@ define([
      *   uses outputValue as that's what $el.data() transforms data-output-value
      */
     var formats = {
+            'dateFormat': {
+                serialize: function(currentValue, dataAttrs) {
+                    return _.template("format-date(date(<%=xpath%>), '<%=dateFormat%>')", {
+                        xpath: currentValue,
+                        dateFormat: dataAttrs.dateFormat
+                    });
+                },
+            },
             'outputValue': {
                 serialize: function(currentValue) {
                     return _.template('<output value="<%=xpath%>" />', {
@@ -64,7 +72,7 @@ define([
                 },
             }
         },
-        formatOrdering = ['outputValue'];
+        formatOrdering = ['dateFormat', 'outputValue'];
 
     function applyFormats(dataAttrs) {
         var currentValue = dataAttrs.value;
@@ -151,15 +159,26 @@ define([
     function replacePathWithBubble(form, value, withClose) {
         var xpath = value,
             outputValueRegex = /<output\s+value="([^"]+)"/,
-            match = outputValueRegex.exec(value),
+            dateFormatRegex = /<output\s+value="format-date\(date\(([^)]+)\),\s*'([^']+)'\)"/,
+            match = dateFormatRegex.exec(value),
             extraAttrs = {
                 'data-output-value': false,
             };
 
         if (match) {
-            extraAttrs = { 'data-output-value': true };
+            extraAttrs = {
+                'data-output-value': true,
+                'data-date-format': match[2],
+            };
             xpath = match[1];
+        } else {
+            match = outputValueRegex.exec(value);
+            if (match) {
+                extraAttrs = { 'data-output-value': true };
+                xpath = match[1];
+            }
         }
+
 
         // only support absolute path right now
         if (!form.getMugByPath(xpath) && !/instance\('casedb'\)/.test(xpath)) {

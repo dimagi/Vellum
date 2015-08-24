@@ -14,7 +14,7 @@
  * newline: <br />
  *
  * rich text "bubble":
- *   <span contenteditable="false" draggable="true" 
+ *   <span contenteditable="false" draggable="true"
  *         data-value="xpath" data-output-value=boolean>
  *     <i class="icon">&nbsp;</i>
  *     text to display inside bubble
@@ -77,7 +77,6 @@ define([
     function makeBubble(xpath, dispValue, icon, internal, output) {
         return bubbleSpan(xpath, internal, output || false).append(icon).append(dispValue);
     }
-
     function outputValueTemplateFn(path) {
         return '<output value="' + path + '"></output>';
     }
@@ -122,6 +121,40 @@ define([
                 it("from html to text with ouput value: " + val[0], function() {
                     var bubble = $('<div>').append(makeBubble(val[0], val[1], val[2], val[3], true)).html();
                     assert.strictEqual(richText.fromRichText(bubble), outputValueTemplateFn(val[0]));
+                });
+            });
+        });
+
+        describe("date conversions", function() {
+            var dates = [
+                {
+                    xmlValue: "format-date(date(/data/date), '%d/%n/%y')",
+                    valueInBubble: '/data/date',
+                    bubbleDispValue: 'date',
+                    icon: icon('icon-calendar'),
+                    internalRef: true,
+                    extraAttrs: {
+                        'data-date-format': '%d/%n/%y',
+                    }
+                },
+            ];
+
+            _.each(dates, function(val) {
+                it("from text to html with output value: " + val.xmlValue, function() {
+                    var real = richText.toRichText(outputValueTemplateFn(val.xmlValue), formShim),
+                        test = makeOutputValue(val.valueInBubble, val.bubbleDispValue,
+                                              val.icon, val.internalRef).attr(val.extraAttrs);
+                    assert(wrapWithDiv(real)[0].isEqualNode(wrapWithDiv(test)[0]),
+                          '\n' + real + '\n' + wrapWithDiv(test).html());
+                });
+
+                it("from html to text with output value: " + val.xmlValue, function() {
+                    var bubble = $('<div>').append(
+                        makeBubble(val.valueInBubble, val.bubbleDispValue, val.icon,
+                                   val.internalRef, true).attr(val.extraAttrs)
+                    ).html();
+                    assert.strictEqual(richText.fromRichText(bubble),
+                                       outputValueTemplateFn(val.xmlValue));
                 });
             });
         });
