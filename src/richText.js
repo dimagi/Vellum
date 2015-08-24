@@ -57,19 +57,6 @@ define([
      */
     var formats = {
             'outputValue': {
-                deserialize: function(string) {
-                    var el = $('<div>').html(string),
-                        outputs = {}, currentLength = -1;
-                    el.find('output').replaceWith(function() {
-                        currentLength++;
-                        outputs['outputValue' + currentLength] = {
-                            xpath: this.attributes.value.value,
-                            'data-output-value': true
-                        };
-                        return "<%=outputValue" + currentLength + "%>";
-                    });
-                    return [el.text(), outputs];
-                },
                 serialize: function(currentValue) {
                     return _.template('<output value="<%=xpath%>" />', {
                         xpath: currentValue
@@ -87,20 +74,6 @@ define([
             }
         });
         return currentValue;
-    }
-
-    function deserializeString(string, form) {
-        var currentValue = string, templateArgs = {};
-        _.each(formatOrdering, function(format) {
-            var ret = formats[format].deserialize(currentValue);
-            currentValue = ret[0];
-            _.extend(templateArgs, ret[1]);
-        });
-
-        templateArgs = _.object(_.map(templateArgs, function(value, key) {
-            return [key, $('<div>').html(makeBubble(form, value.xpath, false, _.omit(value, 'xpath'))).html()];
-        }));
-        return _.template(currentValue, templateArgs);
     }
 
     /**
@@ -176,12 +149,24 @@ define([
      * @returns - jquery object of xpath bubble
      */
     function replacePathWithBubble(form, value, withClose) {
-        // only support absolute path right now
-        if (!form.getMugByPath(value) && !/instance\(/.test(value)) {
-            return value;
+        var xpath = value,
+            outputValueRegex = /<output\s+value="([^"]+)"/,
+            match = outputValueRegex.exec(value),
+            extraAttrs = {
+                'data-output-value': false,
+            };
+
+        if (match) {
+            extraAttrs = { 'data-output-value': true };
+            xpath = match[1];
         }
 
-        return makeBubble(form, value, withClose, {'data-output-value': false});
+        // only support absolute path right now
+        if (!form.getMugByPath(xpath) && !/instance\('casedb'\)/.test(xpath)) {
+            return value.replace('<', '&lt;').replace('>', '&gt;');
+        }
+
+        return makeBubble(form, xpath, withClose, extraAttrs);
     }
 
     /**
@@ -195,15 +180,15 @@ define([
     function toRichText(val, form, withClose) {
         if (!val) {return "";}
         val = val.replace('&lt;', '<').replace('&gt;', '>').replace('&nbsp;', ' ');
-        val = deserializeString(val, form);
         var el = $('<div>').html(val);
+        el.find('output').replaceWith(function() {
+            return replacePathWithBubble(form, this.outerHTML, withClose);
+        });
         var l = new logic.LogicExpression(val),
             // Uses top level paths, because filters should not be made to bubbles
             paths = _.chain(l.getTopLevelPaths())
                      .map(function(path) { return path.toXPath(); })
-                     .filter(function(path) {
-                         return !/^instance\('commcaresession'\)/.test(path);
-                     }).uniq().value();
+                     .uniq().value();
 
         _.each(paths, function(path) {
             var newPath = replacePathWithBubble(form, path, withClose);
