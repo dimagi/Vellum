@@ -49,6 +49,9 @@ define([
                     "/data/date": {
                         options: { icon: 'fcc icon-calendar' },
                     },
+                    "/data/group": {
+                        options: { icon: 'fcc icon-folder-open' },
+                    },
                 }[path];
             }
         };
@@ -197,6 +200,19 @@ define([
                 it("from html to text: " + val[1], function() {
                     assert.strictEqual(
                         val[0], richText.fromRichText(val[1]));
+                });
+            });
+        });
+
+        describe("doesn't convert", function() {
+            var nonConversions = [
+                "instance('casedb')/cases/case[@case_id = instance('casedb')/cases/case[@case_id = instance('commcaresession')/session/data/case_id]/index/parent]/edd[@other = 'blah']",
+                "/data/group[@prop = 'something']",
+            ];
+
+            _.each(nonConversions, function(val) {
+                it("from text to html: " + val, function() {
+                    assert.strictEqual(val, richText.toRichText(val, formShim));
                 });
             });
         });

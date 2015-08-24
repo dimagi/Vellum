@@ -206,6 +206,19 @@ define([
         var l = new logic.LogicExpression(val),
             // Uses top level paths, because filters should not be made to bubbles
             paths = _.chain(l.getTopLevelPaths())
+                     .filter(function(path) {
+                         var context = path.initial_context,
+                             numFilters = _.reduce(path.steps, function(memo, step) {
+                                return memo + step.predicates.length;
+                             }, 0);
+
+                         if (context === 'expr' && numFilters > 1 ||
+                             context === 'abs' && numFilters > 0) {
+                             return false;
+                         }
+
+                         return true;
+                     })
                      .map(function(path) { return path.toXPath(); })
                      .uniq().value();
 
