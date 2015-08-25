@@ -15,7 +15,7 @@ define([
             var now = +new Date(),
                 timedOut = (now - time) >= timeout;
 
-            if(timedOut || typeof(cache) === 'undefined') {
+            if(timedOut || _.isUndefined(cache)) {
                 cache = f.apply(f, arguments);
                 if (timedOut) {
                     time = now;
