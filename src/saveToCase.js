@@ -81,6 +81,7 @@ define([
                 });
                 widget.input.find('.fd-add-property').click(widget.addProperty);
                 widget.input.find('.fd-remove-property').click(widget.removeProperty);
+                widget.input.find('input').addClass('jstree-drop');
             };
 
             widget.setValue = function (value) {
