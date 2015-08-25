@@ -6,6 +6,7 @@ define([
     'vellum/parser',
     'vellum/tree',
     'vellum/util',
+    'vellum/atwho',
     'vellum/widgets',
     'tpl!vellum/templates/widget_update_case',
     'tpl!vellum/templates/widget_index_case',
@@ -20,6 +21,7 @@ define([
     parser,
     Tree,
     util,
+    atwho,
     widgets,
     widget_update_case,
     widget_index_case,
@@ -82,6 +84,9 @@ define([
                 widget.input.find('.fd-add-property').click(widget.addProperty);
                 widget.input.find('.fd-remove-property').click(widget.removeProperty);
                 widget.input.find('input').addClass('jstree-drop');
+                widget.input.find('input').each(function() {
+                    atwho.questionAutocomplete($(this), mug);
+                });
             };
 
             widget.setValue = function (value) {
