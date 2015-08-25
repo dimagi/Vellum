@@ -417,12 +417,12 @@ define([
                 }
 
                 return [new Tree.Node(actions, {
-                    getNodeID: function () { return "c:case"; },
+                    getNodeID: function () { return "case"; },
                     p: {rawDataAttributes: null},
                     options: { 
                         getExtraDataAttributes: function (mug) {
                             return {
-                                "xmlns:c": CASE_XMLNS,
+                                "xmlns": CASE_XMLNS,
                                 case_id: '',
                                 date_modified: '',
                                 user_id: '',
