@@ -7,6 +7,38 @@ define([
 ) {
     var that = {};
 
+    // stripped down version of http://codepen.io/ImagineProgramming/storydump/javascript-memoization-timeout
+    var timed = function timed(f, timeout) {
+        var cache, time = 0;
+
+        return function TimedMemoizedFunction() {
+            var now = +new Date(),
+                timedOut = (now - time) >= timeout;
+
+            if(timedOut || typeof(cache) === 'undefined') {
+                cache = f.apply(f, arguments);
+                if (timedOut) {
+                    time = now;
+                }
+            }
+
+            return cache;
+        };
+    };
+
+    var cachedMugData = timed(function(form) {
+        return _.chain(form.getMugList())
+                .map(function(mug) {
+                    return {
+                        id: mug.ufid,
+                        name: mug.absolutePath,
+                        icon: mug.options.icon,
+                    };
+                })
+                .filter(function(choice) { return choice.name; })
+                .value();
+    }, 500);
+
     /**
      * Turn a given input into an autocomplete, which will be populated
      * with a given set of choices and will also accept free text.
@@ -59,16 +91,7 @@ define([
 
         $input.atwho({
             at: "/data/",
-            data: _.chain(mug.form.getMugList())
-                   .map(function(mug) {
-                        return {
-                            id: mug.ufid,
-                            name: mug.absolutePath,
-                            icon: mug.options.icon,
-                        };
-                    })
-                    .filter(function(choice) { return choice.name; })
-                    .value(),
+            data: cachedMugData(mug.form),
             displayTpl: '<li><i class="${icon}" /> ${name}</li>',
             insertTpl: options.insertTpl,
             limit: 10,
