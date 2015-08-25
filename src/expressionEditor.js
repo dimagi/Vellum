@@ -3,6 +3,7 @@ define([
     'underscore',
     'vellum/debugutil',
     'vellum/util',
+    'vellum/atwho',
     'xpath',
     'xpathmodels',
     'tpl!vellum/templates/xpath_validation_errors',
@@ -14,6 +15,7 @@ define([
     _,
     debug,
     util,
+    atwho,
     xpath,
     xpathmodels,
     xpath_validation_errors,
@@ -84,10 +86,10 @@ define([
         };
         var addAutocomplete = function (input, choices) {
             if (choices) {
-                util.dropdownAutocomplete(input, choices);
+                atwho.dropdownAutocomplete(input, choices);
             }
             else {
-                util.questionAutocomplete(input, options.mug,
+                atwho.questionAutocomplete(input, options.mug,
                                           {property: options.path});
             }
         };
