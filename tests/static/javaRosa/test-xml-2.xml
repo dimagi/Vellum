@@ -14,8 +14,7 @@
 					<question1/>
 				</data>
 			</instance>
-			<bind nodeset="/data/question1" type="xsd:string"
-				jr:constraintMsg="jr:itext('question1-constraintMsg')"/>
+			<bind nodeset="/data/question1" type="xsd:string" />
 			<itext>
 				<translation lang="en" default="">
 					<text id="question1-label">
@@ -77,6 +76,7 @@
 			<label ref="jr:itext('question1-label')"/>
 			<hint ref="jr:itext('question1-hint')"/>
 			<help ref="jr:itext('question1-help')"/>
+			<alert ref="jr:itext('question1-constraintMsg')"/>
 		</input>
 	</h:body>
 </h:html>

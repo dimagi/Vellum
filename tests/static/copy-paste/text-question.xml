@@ -8,7 +8,7 @@
 					<txt />
 				</data>
 			</instance>
-			<bind nodeset="/data/txt" type="xsd:string" constraint="1 = 0" jr:constraintMsg="jr:itext('txt-constraintMsg')" relevant="x = y" required="true()" />
+			<bind nodeset="/data/txt" type="xsd:string" constraint="1 = 0" relevant="x = y" required="true()" />
 			<itext>
 				<translation lang="en" default="">
 					<text id="txt-label">
@@ -32,6 +32,7 @@
 	<h:body>
 		<input ref="/data/txt">
 			<label ref="jr:itext('txt-label')" />
+			<alert ref="jr:itext('txt-constraintMsg')" />
 		</input>
 	</h:body>
 </h:html>
