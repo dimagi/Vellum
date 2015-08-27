@@ -834,7 +834,6 @@ define([
                 property: "labelItext",
             });
 
-            $input.addClass('jstree-drop');
             $input.keydown(function (e) {
                 // deletion of entire output ref in one go
                 if (e && e.which === 8 || e.which === 46) {
@@ -868,6 +867,10 @@ define([
                     }
                 }
             });
+        }
+        if (options.path === 'labelItext' ||
+            options.path === 'constraintMsgItext') {
+            $input.addClass('jstree-drop');
         }
 
         widget.displayName = options.displayName;
