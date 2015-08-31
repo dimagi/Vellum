@@ -64,6 +64,7 @@
 			<label ref="jr:itext('default-label')" />
 			<hint ref="jr:itext('default-hint')">hint label</hint>
 			<help ref="jr:itext('default-help')" />
+			<alert ref="jr:itext('text-constraintMsg')" />
 		</input>
 	</h:body>
 </h:html>

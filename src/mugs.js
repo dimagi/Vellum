@@ -1114,6 +1114,7 @@ define([
         writeControlLabel: true,
         writeControlHint: true,
         writeControlHelp: true,
+        writeControlAlert: true,
         writeControlRefAttr: 'ref',
         // a function with signature `(xmlWriter, mug)` to write custom XML
         writeCustomXML: null,
@@ -1301,6 +1302,7 @@ define([
         },
         writeControlHint: false,
         writeControlHelp: false,
+        writeControlAlert: false,
         writeControlRefAttr: null,
         writeCustomXML: function (xmlWriter, mug) {
             var value = mug.p.nodeID;
@@ -1468,6 +1470,7 @@ define([
                     writeControlLabel: false,
                     writeControlHint: false,
                     writeControlHelp: false,
+                    writeControlAlert: false,
                     writeControlRefAttr: null,
                     writeCustomXML: function (xmlWriter, mug) {
                         if (r_count) {
