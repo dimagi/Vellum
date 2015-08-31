@@ -14,7 +14,8 @@
 					<question1/>
 				</data>
 			</instance>
-			<bind nodeset="/data/question1" type="xsd:string" />
+			<bind nodeset="/data/question1" type="xsd:string"
+				jr:constraintMsg="jr:itext('question1-constraintMsg')" />
 			<itext>
 				<translation lang="en" default="">
 					<text id="question1-label">

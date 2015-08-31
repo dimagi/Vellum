@@ -72,6 +72,7 @@ require([
                         "constraintMsgItext:hin-default",
                         "constraintMsgItext",
                         "constraintAttr",
+                        "constraintMsgAttr",
                         "relevantAttr",
                         "requiredAttr",
                     ], [
@@ -83,6 +84,7 @@ require([
                         "Nope",
                         "txt-constraintMsg",
                         "1 = 0",
+                        "jr:itext('txt-constraintMsg')",
                         "x = y",
                         "true",
                     ],
@@ -214,6 +216,7 @@ require([
                         "hintItext:hin-default",
                         "hintItext",
                         "constraintAttr",
+                        "constraintMsgAttr",
                         "hintLabel",
                     ], [
                         "/text",
@@ -249,6 +252,7 @@ require([
                         "hint",
                         "default-hint",
                         "1 = 0",
+                        "jr:itext('text-constraintMsg')",
                         "hint label",
                     ],
                 ]),
