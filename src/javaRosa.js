@@ -1063,6 +1063,7 @@ define([
 
         widget.toggleMarkdown = function() {
             parent.toggleClass("has-markdown");
+            widget.mug.form.fire('change');
         };
 
         markdownOutput = $('<div>').addClass("controls well markdown-output");
