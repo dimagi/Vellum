@@ -175,7 +175,7 @@ define([
         };
 
     var CASE_XMLNS = "http://commcarehq.org/case/transaction/v2",
-        VALID_PROP_REGEX = /^[a-z_]+$/i,
+        VALID_PROP_REGEX = /^[a-z0-9_]+$/i,
         saveToCaseMugOptions = {
             typeName: 'Save to Case',
             isTypeChangeable: false,
