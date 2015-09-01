@@ -161,6 +161,8 @@ define(["underscore"], function (_) {
             'advanced_itemsets': true,
             'experimental_ui': true,
             'printing': true,
+            'templated_intents': true,
+            'custom_intents': true,
         }
     };
 
