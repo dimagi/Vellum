@@ -120,6 +120,10 @@ require([
             it("should not write any markdown", function() {
                 util.assertXmlEqual(call('createXML'), NO_MARKDOWN_STARS_XML, {normalize_xmlns: true});
             });
+
+            it("should activate the save button", function() {
+                assert(util.saveButtonEnabled(), "save button is disabled");
+            });
         });
 
         describe("when a user explicitly wants markdown", function() {
@@ -147,6 +151,10 @@ require([
             it("should write markdown even if there are no markdown characters", function() {
                 $('[name=itext-en-label]').val("some markdown").change();
                 util.assertXmlEqual(call('createXML'), SIMPLE_MARKDOWN_NO_CHARS_XML, {normalize_xmlns: true});
+            });
+
+            it("should activate the save button", function() {
+                assert(util.saveButtonEnabled(), "save button is disabled");
             });
         });
     });

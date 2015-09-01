@@ -3,6 +3,7 @@ define([
     'tpl!vellum/templates/widget_control_message',
     'underscore',
     'jquery',
+    'vellum/atwho',
     'vellum/util',
     'vellum/richText',
     'ckeditor',
@@ -12,6 +13,7 @@ define([
     widget_control_message,
     _,
     $,
+    atwho,
     util,
     richText_utils,
     CKEDITOR
@@ -508,7 +510,7 @@ define([
                 '<i class="close">&times;</i></span>';
         }
 
-        util.questionAutocomplete(widget.input, mug, {
+        atwho.questionAutocomplete(widget.input, mug, {
             property: options.path,
             insertTpl: insertTpl,
         });

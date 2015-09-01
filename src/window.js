@@ -49,27 +49,27 @@ define([
                 availableHorizSpace,
                 position = (this.getCurrentTopOffset() === 0) ? 'fixed' : 'static',
                 $fdc = this.$f.find('.fd-ui-container');
+
             if (this.data.windowManager.fullscreen) {
                 $fdc.parent().css({height: null, width: null});
                 $fdc.css({height: null, width: null});
                 $fdc.parent().css({
-                    position: 'fixed',
                     top: 0,
                     bottom: 0,
                     left: 0,
                     right: 0,
-                    zIndex: 10000,
                     backgroundColor: 'white'
                 });
+                $fdc.css('width', $(window).width());
             } else {
                 $fdc.parent().css({
-                    position: '',
                     top: '',
                     bottom: '',
                     left: '',
                     right: '',
                     backgroundColor: 'white'
                 });
+                $fdc.css('width', $fdc.parent().width());
             }
             // so that the document doesn't have to resize for the footer.
             $fdc.parent().css('height', availableVertSpace + 'px');
@@ -77,8 +77,7 @@ define([
             availableVertSpace = availableVertSpace - this.getCurrentBottomOffset();
             $fdc.css('height', availableVertSpace + 'px');
 
-            $fdc.css('width', $fdc.parent().width())
-                .css('position', position)
+            $fdc.css('position', position)
                 .css('left', this.getCurrentLeftOffset() + 'px');
 
             availableHorizSpace = $fdc.width();

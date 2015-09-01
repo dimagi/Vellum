@@ -226,6 +226,9 @@ define([
             if (opts.writeControlHelp) {
                 createHelp(xmlWriter, mug);
             }
+            if (opts.writeControlAlert) {
+                createAlert(xmlWriter, mug);
+            }
             // Write custom attributes first
             var attributes = mug.p.rawControlAttributes;
             for (var k in attributes) {
@@ -299,6 +302,16 @@ define([
             xmlWriter.writeStartElement('help');
             var helpRef = "jr:itext('" + helpItext.id + "')";
             xmlWriter.writeAttributeString('ref', helpRef);
+            xmlWriter.writeEndElement();
+        }
+    }
+
+    function createAlert(xmlWriter, mug) {
+        var alertItext = mug.p.constraintMsgItext;
+        if (alertItext && !alertItext.isEmpty()) {
+            xmlWriter.writeStartElement('alert');
+            var alertRef = "jr:itext('" + alertItext.id + "')";
+            xmlWriter.writeAttributeString('ref', alertRef);
             xmlWriter.writeEndElement();
         }
     }

@@ -6,6 +6,7 @@ define([
     'vellum/parser',
     'vellum/tree',
     'vellum/util',
+    'vellum/atwho',
     'vellum/widgets',
     'tpl!vellum/templates/widget_update_case',
     'tpl!vellum/templates/widget_index_case',
@@ -20,6 +21,7 @@ define([
     parser,
     Tree,
     util,
+    atwho,
     widgets,
     widget_update_case,
     widget_index_case,
@@ -54,7 +56,7 @@ define([
     function addSetValue(mug) {
         var path = mug.absolutePath;
 
-        if (createsCase(mug)) {
+        if (createsCase(mug) && !mug.isInRepeat()) {
             mug.form.addSetValue('xforms-ready', path + "/case/@case_id", mug.p.case_id);
         }
     }
@@ -81,6 +83,10 @@ define([
                 });
                 widget.input.find('.fd-add-property').click(widget.addProperty);
                 widget.input.find('.fd-remove-property').click(widget.removeProperty);
+                widget.input.find('input').addClass('jstree-drop');
+                widget.input.find('input').each(function() {
+                    atwho.questionAutocomplete($(this), mug);
+                });
             };
 
             widget.setValue = function (value) {
@@ -417,12 +423,12 @@ define([
                 }
 
                 return [new Tree.Node(actions, {
-                    getNodeID: function () { return "c:case"; },
+                    getNodeID: function () { return "case"; },
                     p: {rawDataAttributes: null},
                     options: { 
                         getExtraDataAttributes: function (mug) {
                             return {
-                                "xmlns:c": CASE_XMLNS,
+                                "xmlns": CASE_XMLNS,
                                 case_id: '',
                                 date_modified: '',
                                 user_id: '',
@@ -444,6 +450,12 @@ define([
                 }
 
                 if (createsCase(mug)) {
+                    if (mug.isInRepeat()) {
+                        ret = ret.concat({
+                            nodeset: mug.absolutePath + "/case/@case_id",
+                            calculate: mug.p.case_id
+                        });
+                    }
                     ret = ret.concat(generateBinds('create', mug.p.createProperty));
                 }
                 if (updatesCase(mug)) {

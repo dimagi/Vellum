@@ -15,6 +15,7 @@ define([
     'vellum/widgets',
     'vellum/richText',
     'vellum/util',
+    'vellum/atwho',
     'vellum/tsv',
     'vellum/xml',
     'vellum/core'
@@ -31,6 +32,7 @@ define([
     widgets,
     richText,
     util,
+    atwho,
     tsv,
     xml
 ) {
@@ -880,11 +882,15 @@ define([
                 });
             }
 
-            util.questionAutocomplete($input, mug, {
+            atwho.questionAutocomplete($input, mug, {
                 category: "Output Value",
                 insertTpl: insertTpl,
                 property: "labelItext",
             });
+        }
+        if (options.path === 'labelItext' ||
+            options.path === 'constraintMsgItext') {
+            $input.addClass('jstree-drop');
         }
 
         widget.displayName = options.displayName;
@@ -1080,6 +1086,7 @@ define([
 
         widget.toggleMarkdown = function() {
             parent.toggleClass("has-markdown");
+            widget.mug.form.fire('change');
         };
 
         markdownOutput = $('<div>').addClass("controls well markdown-output");
@@ -1618,7 +1625,8 @@ define([
 
             var labelEl = controlElement.children('label'),
                 hintEl = controlElement.children('hint'),
-                helpEl = controlElement.children('help');
+                helpEl = controlElement.children('help'),
+                alertEl = controlElement.children('alert');
             if (labelEl.length && mug.getPresence("label") !== 'notallowed') {
                 var labelItext = parseItextRef(labelEl, "label");
                 if (labelItext.isEmpty()) {
@@ -1634,7 +1642,9 @@ define([
             if (helpEl.length && mug.getPresence("label") !== 'notallowed') {
                 mug.p.helpItext = parseItextRef(helpEl, "help");
             }
-            if (mug.p.constraintMsgAttr) {
+            if (alertEl.length && mug.getPresence("constraintMsgAttr") !== 'notallowed') {
+                mug.p.constraintMsgItext = parseItextRef(alertEl, "alert");
+            } else if (mug.p.constraintMsgAttr) {
                 var id = getITextID(mug.p.constraintMsgAttr);
                 if (id) {
                     mug.p.constraintMsgItext = getItextItem(id, "constraintMsg");

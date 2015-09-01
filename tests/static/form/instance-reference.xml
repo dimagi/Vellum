@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:orx="http://openrosa.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa" xmlns:vellum="http://commcarehq.org/xforms/vellum">
+	<h:head>
+		<h:title>Untitled Form</h:title>
+		<model>
+			<instance>
+				<data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/38975ec8a2d227893fa2ef64793d2afb4cb94dc7" uiVersion="1" version="1" name="Untitled Form">
+					<contact_chiefdom />
+				</data>
+			</instance>
+			<instance id="groups" src="jr://fixture/user-groups"/>
+			<bind nodeset="/data/contact_chiefdom" required="true()" />
+			<itext>
+				<translation lang="en" default="">
+					<text id="question7-label">
+						<value>Contact's Chiefdom</value>
+					</text>
+				</translation>
+			</itext>
+		</model>
+	</h:head>
+	<h:body>
+		<select1 ref="/data/contact_chiefdom">
+			<label ref="jr:itext('question7-label')" />
+			<itemset nodeset="instance('groups')/groups/group[count(group_data/data[@key = 'group_type'][. = 'chiefdom']) &gt; 0]">
+				<label ref="name" />
+				<value ref="@id" />
+			</itemset>
+		</select1>
+	</h:body>
+</h:html>

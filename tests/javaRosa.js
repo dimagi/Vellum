@@ -21,6 +21,8 @@ require([
     'text!static/javaRosa/no-label-text-one-lang.xml',
     'text!static/javaRosa/test-xml-1.xml',
     'text!static/javaRosa/test-xml-2.xml',
+    'text!static/javaRosa/test-xml-2-with-bind-constraint.xml',
+    'text!static/javaRosa/test-xml-2-with-only-bind-constraint.xml',
     'text!static/javaRosa/test-xml-3.xml',
     'text!static/javaRosa/test-xml-4.xml',
     'text!static/javaRosa/non-default-lang-first.xml'
@@ -46,6 +48,8 @@ require([
     NO_LABEL_TEXT_ONE_LANG_XML,
     TEST_XML_1,
     TEST_XML_2,
+    TEST_XML_2_WITH_BIND_CONSTRAINT,
+    TEST_XML_2_WITH_ONLY_BIND_CONSTRAINT,
     TEST_XML_3,
     TEST_XML_4,
     NON_DEFAULT_LANG_FIRST_XML
@@ -131,6 +135,23 @@ require([
             );
         });
 
+        it("should prefer alert over constraintMsg", function() {
+            util.loadXML(TEST_XML_2_WITH_BIND_CONSTRAINT);
+            util.assertXmlEqual(
+                call('createXML'),
+                util.xmlines(TEST_XML_2),
+                {normalize_xmlns: true}
+            );
+        });
+
+        it("should convert constraintMsg to alert", function() {
+            util.loadXML(TEST_XML_2_WITH_ONLY_BIND_CONSTRAINT);
+            util.assertXmlEqual(
+                call('createXML'),
+                util.xmlines(TEST_XML_2),
+                {normalize_xmlns: true}
+            );
+        });
         it("itext widget should change as default language value changes when equal", function () {
             util.loadXML(TEST_XML_1);
             util.addQuestion("Text", "temp");
@@ -792,7 +813,6 @@ require([
                 mug.dropMessage(property, "core-circular-reference-warning");
                 assert.deepEqual(mug.messages.get(property), []);
         });
-
     });
 
     describe("The javaRosa plugin language selector", function() {

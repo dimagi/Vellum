@@ -3,6 +3,7 @@ define([
     'underscore',
     'vellum/debugutil',
     'vellum/util',
+    'vellum/atwho',
     'xpath',
     'xpathmodels',
     'vellum/richText',
@@ -15,6 +16,7 @@ define([
     _,
     debug,
     util,
+    atwho,
     xpath,
     xpathmodels,
     richText,
@@ -105,7 +107,7 @@ define([
         };
         var addAutocomplete = function (input, choices) {
             if (choices) {
-                util.dropdownAutocomplete(input, choices);
+                atwho.dropdownAutocomplete(input, choices);
             }
             else {
                 var insertTpl = '${name}';
@@ -117,7 +119,7 @@ define([
                         '<i class="${icon}">&nbsp;</i>${name}'+
                         '<i class="close">&times;</i></span>';
                 }
-                util.questionAutocomplete(input, options.mug, {
+                atwho.questionAutocomplete(input, options.mug, {
                     property: options.path,
                     insertTpl: insertTpl
                 });

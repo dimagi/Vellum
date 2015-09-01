@@ -39,7 +39,7 @@
 				</data>
 			</instance>
 			<instance src="jr://instance/casedb" id="casedb"></instance>
-			<bind nodeset="/data/question1" type="xsd:string" constraint="/data/question20 = 2" jr:constraintMsg="jr:itext('question1-constraintMsg')" relevant="/data/question20" required="true()" />
+			<bind nodeset="/data/question1" type="xsd:string" constraint="/data/question20 = 2" relevant="/data/question20" jr:constraintMsg="jr:itext('question1-constraintMsg')" required="true()" />
 			<bind nodeset="/data/question2" />
 			<bind nodeset="/data/question30" />
 			<bind nodeset="/data/question3" />
@@ -314,6 +314,7 @@
 			<label ref="jr:itext('question1-label')">non-itext label</label>
 			<hint ref="jr:itext('question1-hint')">non-itext hint</hint>
 			<help ref="jr:itext('question1-help')" />
+			<alert ref="jr:itext('question1-constraintMsg')" />
 		</input>
 		<trigger ref="/data/question2" appearance="minimal">
 			<label ref="jr:itext('question2-label')" />
