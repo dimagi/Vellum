@@ -305,6 +305,18 @@ define([
         }
     });
 
+    function noIntents(features) {
+        return !features.custom_intents && !features.templated_intents;
+    }
+
+    function onlyTemplatedIntents(features) {
+        return features.templated_intents && !features.custom_intents;
+    }
+
+    function intents(features) {
+        return !noIntents(features);
+    }
+
     $.vellum.plugin("intents", {}, {
         init: function() {
             refreshCurrentMug = this.refreshCurrentMug.bind(this);
@@ -336,15 +348,33 @@ define([
         },
         getAdvancedQuestions: function () {
             var ret = this.__callOld();
-            ret.push("AndroidIntent");
-            if (this.opts().features.printing) {
-                ret.push("PrintIntent");
+            if (intents(this.opts().features)) {
+                ret.push("AndroidIntent");
+                if (this.opts().features.printing) {
+                    ret.push("PrintIntent");
+                }
             }
             return ret;
         },
         getMainProperties: function () {
-            return this.__callOld().concat(INTENT_SPECIFIC_SPECS);
-        }
+            var ret = this.__callOld().concat(INTENT_SPECIFIC_SPECS);
+            if (onlyTemplatedIntents(this.opts().features)) {
+                ret = _.without(ret, "androidIntentExtra", "androidIntentResponse");
+            }
+            return ret;
+        },
+        getAdvancedProperties: function() {
+            var ret = this.__callOld();
+
+            if (onlyTemplatedIntents(this.opts().features)) {
+                ret = ret.concat([
+                    "androidIntentExtra",
+                    "androidIntentResponse",
+                ]);
+            }
+
+            return ret;
+        },
     });
 
     return {
