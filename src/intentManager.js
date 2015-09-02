@@ -309,7 +309,7 @@ define([
         return !features.custom_intents && !features.templated_intents;
     }
 
-    function templatedIntents(features) {
+    function onlyTemplatedIntents(features) {
         return features.templated_intents && !features.custom_intents;
     }
 
@@ -358,7 +358,7 @@ define([
         },
         getMainProperties: function () {
             var ret = this.__callOld().concat(INTENT_SPECIFIC_SPECS);
-            if (templatedIntents(this.opts().features)) {
+            if (onlyTemplatedIntents(this.opts().features)) {
                 ret = _.without(ret, "androidIntentExtra", "androidIntentResponse");
             }
             return ret;
@@ -366,7 +366,7 @@ define([
         getAdvancedProperties: function() {
             var ret = this.__callOld();
 
-            if (templatedIntents(this.opts().features)) {
+            if (onlyTemplatedIntents(this.opts().features)) {
                 ret = ret.concat([
                     "androidIntentExtra",
                     "androidIntentResponse",
