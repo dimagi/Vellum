@@ -8,6 +8,7 @@ require([
     'vellum/itemset',
     'vellum/form',
     'text!static/itemset/test1.xml',
+    'text!static/itemset/test1-with-constraint.xml',
     'text!static/itemset/inner-filters.xml',
     'text!static/itemset/dropdown-fixture.xml'
 ], function (
@@ -20,6 +21,7 @@ require([
     itemset,
     form,
     TEST_XML_1,
+    TEST_XML_1_WITH_CONSTRAINT,
     INNER_FILTERS_XML,
     DROPDOWN_FIXTURE_XML
 ) {
@@ -134,6 +136,11 @@ require([
                 var newXml = TEST_XML_1.replace(/select1/g, 'select');
                 util.loadXML(newXml);
                 util.assertXmlEqual(call('createXML'), newXml);
+            });
+
+            it("preserves XML with a constraint", function() {
+                util.loadXML(TEST_XML_1_WITH_CONSTRAINT);
+                util.assertXmlEqual(call('createXML'), TEST_XML_1_WITH_CONSTRAINT);
             });
         });
 
