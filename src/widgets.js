@@ -452,8 +452,7 @@ define([
     var xPath = function (mug, options) {
         var widget = richInput(mug, options),
             super_getValue = widget.getValue,
-            super_setValue = widget.setValue,
-            insertTpl;
+            super_setValue = widget.setValue;
 
         widget.getValue = function() {
             var val = super_getValue();
@@ -502,17 +501,9 @@ define([
             }, !!widget.isDisabled());
         };
 
-        if (mug.supportsRichText()) {
-            insertTpl = '<span ' +
-                'class="label label-datanode label-datanode-internal" ' +
-                'contenteditable=false draggable=true data-value="${name}">' +
-                '<i class="${icon}">&nbsp;</i>${name}' +
-                '<i class="close">&times;</i></span>';
-        }
-
         atwho.questionAutocomplete(widget.input, mug, {
             property: options.path,
-            insertTpl: insertTpl,
+            useRichText: mug.supportsRichText()
         });
 
         return widget;

@@ -836,17 +836,9 @@ define([
         $input = widget.input;
 
         if (options.path === 'labelItext') {
-            var insertTpl = '<output value="${name}" />';
             $input.addClass('jstree-drop');
 
-            if (mug.supportsRichText()) {
-                insertTpl = '<span ' +
-                    'class="label label-datanode label-datanode-internal" ' +
-                    'contenteditable=false draggable=true ' +
-                    'data-value=\'&lt;output value="${name}" /&gt;\' title="${title}">' +
-                    '<i class="${icon}">&nbsp;</i>${questionId}'+
-                    '<i class="close">&times;</i></span>';
-            } else {
+            if (!mug.supportsRichText()) {
                 $input.keydown(function (e) {
                     // deletion of entire output ref in one go
                     if (e && e.which === 8 || e.which === 46) {
@@ -884,8 +876,10 @@ define([
 
             atwho.questionAutocomplete($input, mug, {
                 category: "Output Value",
-                insertTpl: insertTpl,
+                insertTpl: '<output value="${name}" />',
                 property: "labelItext",
+                outputValue: true,
+                useRichText: mug.supportsRichText(),
             });
         }
         if (options.path === 'labelItext' ||

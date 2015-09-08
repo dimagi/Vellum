@@ -110,18 +110,9 @@ define([
                 atwho.dropdownAutocomplete(input, choices);
             }
             else {
-                var insertTpl = '${name}';
-                if (options.mug.supportsRichText()) {
-                    insertTpl = '<span ' +
-                        'class="label label-datanode label-datanode-internal" ' +
-                        'contenteditable=false draggable=true ' +
-                        'data-value=\'${name}\'>' +
-                        '<i class="${icon}">&nbsp;</i>${name}'+
-                        '<i class="close">&times;</i></span>';
-                }
                 atwho.questionAutocomplete(input, options.mug, {
                     property: options.path,
-                    insertTpl: insertTpl
+                    useRichText: options.mug.supportsRichText(),
                 });
             }
         };
