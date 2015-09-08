@@ -632,13 +632,6 @@ define([
                     label: "Form Name",
                     slug: "formName"
                 },
-                {
-                    label: "Form ID",
-                    slug: "formID",
-                    cleanValue: function (val) {
-                        return val.replace(/ /g, '_');
-                    }
-                }
             ];
 
         $modalBody.append($('<p />').text(
