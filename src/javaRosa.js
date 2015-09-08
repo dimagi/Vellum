@@ -836,8 +836,6 @@ define([
         $input = widget.input;
 
         if (options.path === 'labelItext') {
-            $input.addClass('jstree-drop');
-
             if (!mug.supportsRichText()) {
                 $input.keydown(function (e) {
                     // deletion of entire output ref in one go
@@ -882,6 +880,7 @@ define([
                 useRichText: mug.supportsRichText(),
             });
         }
+
         if (options.path === 'labelItext' ||
             options.path === 'constraintMsgItext') {
             $input.addClass('jstree-drop');
