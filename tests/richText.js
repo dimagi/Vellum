@@ -95,8 +95,6 @@ define([
             // path, display value, icon
             var simpleConversions = [
                 ['/data/text', 'text', icon('fcc-fd-text'), true],
-                ["instance('casedb')/cases/case[@case_id = /data/case_id]/blah", 'blah', externalIcon(), false],
-                ["instance('casedb')/cases/case[@case_id = /data/case_id]", 'case', externalIcon(), false],
                 ["instance('casedb')/cases/case[@case_id = instance('commcaresession')/session/data/case_id]", 'case', externalIcon(), false],
                 ["instance('casedb')/cases/case[@case_id = instance('casedb')/cases/case[@case_id = instance('commcaresession')/session/data/case_id]/index/parent]/edd", 'edd', externalIcon(), false]
             ];
@@ -208,6 +206,7 @@ define([
             var nonConversions = [
                 "instance('casedb')/cases/case[@case_id = instance('casedb')/cases/case[@case_id = instance('commcaresession')/session/data/case_id]/index/parent]/edd[@other = 'blah']",
                 "/data/group[@prop = 'something']",
+                "instance('casedb')/cases/case[@case_id = /data/blah]",
             ];
 
             _.each(nonConversions, function(val) {

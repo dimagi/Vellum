@@ -210,9 +210,10 @@ define([
                          var context = path.initial_context,
                              numFilters = _.reduce(path.steps, function(memo, step) {
                                 return memo + step.predicates.length;
-                             }, 0);
+                             }, 0),
+                             hasSession = /commcaresession/.test(path.toXPath());
 
-                         if (context === 'expr' && numFilters > 1 ||
+                         if (context === 'expr' && (numFilters > 1 || !hasSession) ||
                              context === 'abs' && numFilters > 0) {
                              return false;
                          }
