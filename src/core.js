@@ -644,15 +644,18 @@ define([
                         return val.replace(/ /g, '_');
                     }
                 },
-                {
-                    label: "Use Bubbles?",
-                    slug: "useRichText",
-                    type: "checkbox",
-                    value: function(jq, val) {
-                        return val ? jq.prop('checked', val): jq.prop('checked');
-                    }
-                },
             ];
+
+        if (this.opts().features.rich_text) {
+            formProperties.push({
+                label: "Use Rich Text?",
+                slug: "useRichText",
+                type: "checkbox",
+                value: function(jq, val) {
+                    return val ? jq.prop('checked', val): jq.prop('checked');
+                }
+            });
+        }
 
         $modalBody.append($('<p />').text(
             "Note: changing the Form ID here will not automatically change " +
@@ -1140,6 +1143,7 @@ define([
         this.data.core.form = form = parser.parseXForm(
             formXML, options, this, _this.data.core.parseWarnings);
         form.formName = this.opts().core.formName || form.formName;
+        form.useRichText = this.opts().features.rich_text;
         if (formXML) {
             _this._resetMessages(_this.data.core.form.errors);
             _this._populateTree();
