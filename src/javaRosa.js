@@ -2235,6 +2235,7 @@ define([
 
     return {
         parseXLSItext: parseXLSItext,
-        generateItextXLS: generateItextXLS
+        generateItextXLS: generateItextXLS,
+        getOutputRef: getOutputRef,
     };
 });

@@ -28,13 +28,15 @@ define([
     'jquery',
     'underscore',
     'tests/utils',
-    'vellum/richText'
+    'vellum/richText',
+    'vellum/javaRosa'
 ], function(
     chai,
     $,
     _,
     util,
-    richText
+    richText,
+    javaRosa
 ) {
     var assert = chai.assert,
         formShim = {
@@ -157,6 +159,13 @@ define([
                     assert.strictEqual(richText.fromRichText(bubble),
                                        outputValueTemplateFn(val.xmlValue));
                 });
+            });
+
+            it("bubble a drag+drop reference", function() {
+                var fmt = "%d/%n/%y",
+                    tag = javaRosa.getOutputRef("/data/text", fmt),
+                    bubble = richText.toRichText(tag, formShim, false);
+                assert.strictEqual($(bubble).data('date-format'), fmt);
             });
         });
 
