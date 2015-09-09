@@ -36,24 +36,11 @@ define([
      * formats specifies the serialization for different formats that can be
      * applied to bubbles.
      *
-     * This uses underscore templates and returns
-     * [templated_text, template values]
-     *
-     * serialize handles rich text -> xml and returns
-     * deserialize handles xml -> rich text
-     *
-     * Example
-     *   <span data-value='/data/value' data-output-value='true' />
-     *   is equivalent to
-     *   <output value='/data/value' />
-     *
-     *   deserialize would return
-     *       ["<%=outputValue0%>",
-     *        {outputValue0: {data-output-value: true, xpath: '/data/value'}}]
-     *   serialize would return "<output value="/data/value" />
-     *
      * Notes:
      *   uses outputValue as that's what $el.data() transforms data-output-value
+     *
+     * For now, ordering matters.
+     * TODO: should each bubble contain the correct ordering?
      */
     var formats = {
             'dateFormat': {
@@ -74,6 +61,17 @@ define([
         },
         formatOrdering = ['dateFormat', 'outputValue'];
 
+    /**
+     * Takes in data attributes from a "bubble"
+     *
+     * Example
+     *   serializing the rich text
+     *     <span data-value='/data/value' data-output-value='true' ... />
+     *   with
+     *     applyFormats($bubble.data())
+     *   would return
+     *     <output value="/data/value" />
+     */
     function applyFormats(dataAttrs) {
         var currentValue = dataAttrs.value;
         _.each(formatOrdering, function(format) {
