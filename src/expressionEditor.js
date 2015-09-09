@@ -435,17 +435,8 @@ define([
             $xpathUI.find('.fd-xpath-save-button').click(function() {
                 var uiExpression  = getExpressionFromUI();
                 setExpression(getExpressionInput(), uiExpression);
-                var results = validate(uiExpression),
-                    hasInstance = uiExpression.match('instance\\(');
-                if (results[0] || hasInstance) {
-                    if (hasInstance) {
-                        window.alert(
-                            "This expression is too complex for us to verify; " +
-                            "specifically, it makes use of the 'instance' " +
-                            "construct. Please be aware that if you use this " +
-                            "construct you're on your own in verifying that " +
-                            "your expression is correct.");
-                    }
+                var results = validate(uiExpression);
+                if (results[0]) {
                     done(uiExpression);
                 } else {
                     getValidationSummary()
