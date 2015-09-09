@@ -44,10 +44,9 @@ define([
                 .value();
     }, 500);
 
-    function bubble(outputValue, internal) {
-        internal = internal || true;
+    function bubble(outputValue) {
         var retBub = $('<span>')
-            .addClass('label label-datanode')
+            .addClass('label label-datanode label-datanode-internal')
             .attr({
                 contenteditable: false,
                 draggable: true,
@@ -57,12 +56,6 @@ define([
             .append($('<i>').addClass('${icon}'))
             .append('${questionId}')
             .append($('<button>').addClass('close').append('&times;'));
-
-        if (internal) {
-            retBub.addClass('label-datanode-internal');
-        } else {
-            retBub.addClass('label-datanode-external');
-        }
 
         return $('<div>').append(retBub).html();
     }
