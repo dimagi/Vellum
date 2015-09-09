@@ -645,7 +645,7 @@ define([
                 slug: "useRichText",
                 type: "checkbox",
                 value: function(jq, val) {
-                    return val ? jq.prop('checked', val): jq.prop('checked');
+                    return val ? jq.prop('checked', val) : jq.prop('checked');
                 }
             });
         }
@@ -661,16 +661,12 @@ define([
                 .on('change', function () {
                     var $this = $(this),
                         currentVal = $this.val();
-                    if (typeof prop.value === 'function') {
+                    if (prop.value) {
                         currentVal = prop.value($this);
-                    }
-                    if (typeof prop.cleanValue === 'function') {
-                        currentVal = prop.cleanValue(currentVal);
-                        $this.val(currentVal);
                     }
                     _this.data.core.form.setAttr(prop.slug, currentVal);
                 });
-            if (typeof prop.value === 'function') {
+            if (prop.value) {
                 prop.value($propertyInput.find('input'), _this.data.core.form[prop.slug]);
             }
         });
