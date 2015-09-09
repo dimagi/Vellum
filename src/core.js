@@ -1130,7 +1130,8 @@ define([
         this.data.core.form = form = parser.parseXForm(
             formXML, options, this, _this.data.core.parseWarnings);
         form.formName = this.opts().core.formName || form.formName;
-        form.useRichText = this.opts().features.rich_text;
+        form.useRichText = _.isBoolean(form.useRichText) ? form.useRichText :
+                                                           this.opts().features.rich_text;
         form.writeIgnoreRichText = this.opts().features.rich_text;
         if (formXML) {
             _this._resetMessages(_this.data.core.form.errors);
