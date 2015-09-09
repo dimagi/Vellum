@@ -26,11 +26,13 @@
 define([
     'underscore',
     'jquery',
-    'vellum/logic'
+    'vellum/logic',
+    'xpathmodels'
 ], function(
     _,
     $,
-    logic
+    logic,
+    xpathmodels
 ){
     /*
      * formats specifies the serialization for different formats that can be
@@ -202,7 +204,9 @@ define([
         el.find('output').replaceWith(function() {
             return replacePathWithBubble(form, this.outerHTML, withClose);
         });
-        var l = new logic.LogicExpression(val),
+        var EXPR = xpathmodels.XPathInitialContextEnum.EXPR,
+            ROOT = xpathmodels.XPathInitialContextEnum.ROOT,
+            l = new logic.LogicExpression(val),
             // Uses top level paths, because filters should not be made to bubbles
             paths = _.chain(l.getTopLevelPaths())
                      .filter(function(path) {
@@ -212,8 +216,8 @@ define([
                              }, 0),
                              hasSession = /commcaresession/.test(path.toXPath());
 
-                         if (context === 'expr' && (numFilters > 1 || !hasSession) ||
-                             context === 'abs' && numFilters > 0) {
+                         if (context === EXPR && (numFilters > 1 || !hasSession) ||
+                             context === ROOT && numFilters > 0) {
                              return false;
                          }
 
