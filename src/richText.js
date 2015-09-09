@@ -155,6 +155,7 @@ define([
      * @returns - jquery object of xpath bubble
      */
     function replacePathWithBubble(form, value, withClose) {
+        // very coupled with javaRosa getOutputRef to insert output values
         var xpath = value,
             outputValueRegex = /<output\s+value="([^"]+)"/,
             dateFormatRegex = /<output\s+value="format-date\(date\(([^)]+)\),\s*'([^']+)'\)"/,
