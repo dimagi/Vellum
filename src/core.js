@@ -632,20 +632,7 @@ define([
                     label: "Form Name",
                     slug: "formName"
                 },
-                {
-                    label: "Form ID",
-                    slug: "formID",
-                    cleanValue: function (val) {
-                        return val.replace(/ /g, '_');
-                    }
-                }
             ];
-
-        $modalBody.append($('<p />').text(
-            "Note: changing the Form ID here will not automatically change " +
-            "the Form ID in existing references in your logic conditions.  " +
-            "If you change the Form ID, you must manually change any " +
-            "existing logic references."));
 
         _.each(formProperties, function (prop) {
             var $propertyInput = $(control_group_stdInput({
