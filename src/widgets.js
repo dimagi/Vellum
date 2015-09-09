@@ -15,7 +15,7 @@ define([
     $,
     atwho,
     util,
-    richText_utils,
+    richTextUtils,
     CKEDITOR
 ) {
     CKEDITOR.config.allowedContent = true;
@@ -352,14 +352,14 @@ define([
 
         widget.setValue = function (val) {
             widget.input.ckeditor().promise.then(function() {
-                editor.setData(richText_utils.toRichText(val, mug.form, true));
+                editor.setData(richTextUtils.toRichText(val, mug.form, true));
             });
         };
 
         widget.getValue = function () {
             var val = "";
             widget.input.ckeditor().promise.then(function() {
-                val = richText_utils.fromRichText(editor.getData());
+                val = richTextUtils.fromRichText(editor.getData());
             });
             return val.replace('&nbsp;', ' ').trim();
         };
