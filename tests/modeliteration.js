@@ -26,6 +26,7 @@ require([
     describe("The model iteration plugin", function () {
         before(function (done) {
             util.init({
+                features: {rich_text: false},
                 plugins: pluginsWithModelIteration,
                 javaRosa: { langs: ['en'] },
                 core: {

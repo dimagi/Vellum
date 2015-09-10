@@ -33,11 +33,28 @@ define([
                         id: mug.ufid,
                         name: mug.absolutePath,
                         icon: mug.options.icon,
+                        questionId: mug.p.nodeID,
                     };
                 })
                 .filter(function(choice) { return choice.name; })
                 .value();
     }, 500);
+
+    function bubble(outputValue) {
+        var retBub = $('<span>')
+            .addClass('label label-datanode label-datanode-internal')
+            .attr({
+                contenteditable: false,
+                draggable: true,
+                'data-value': "${name}",
+                'data-output-value': outputValue,
+            })
+            .append($('<i>').addClass('${icon}'))
+            .append('${questionId}')
+            .append($('<button>').addClass('close').append('&times;'));
+
+        return $('<div>').append(retBub).html();
+    }
 
     /**
      * Turn a given input into an autocomplete, which will be populated
@@ -67,6 +84,7 @@ define([
                 },
             }
         }).on("inserted.atwho", function(event, $li, otherEvent) {
+            $(this).find('.atwho-inserted').children().unwrap();
             $input.val($input.data("selected-value"));
         });
     };
@@ -81,13 +99,21 @@ define([
      *                  category: sent to analytics
      *                  insertTpl: string to add to input when question is selected
      *                  property: sent to analytics
+     *                  useRichText: use a bubble template
+     *                  outputValue: use output value in the template
      */
     that.questionAutocomplete = function ($input, mug, options) {
         options = _.defaults(options || {}, {
             category: 'Question Reference',
             insertTpl: '${name}',
             property: '',
+            outputValue: false,
+            useRichText: false,
         });
+
+        if (options.useRichText) {
+            options.insertTpl = bubble(options.outputValue);
+        }
 
         $input.atwho({
             at: "/data/",
@@ -113,6 +139,8 @@ define([
                     return value;
                 }
             }
+        }).on("inserted.atwho", function(event, $li, otherEvent) {
+            $(this).find('.atwho-inserted').children().unwrap();
         });
 
         mug.on("teardown-mug-properties", function () {

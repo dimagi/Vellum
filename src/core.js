@@ -20,6 +20,7 @@ define([
     'tpl!vellum/templates/modal_button',
     'vellum/mugs',
     'vellum/widgets',
+    'vellum/richText',
     'vellum/parser',
     'vellum/datasources',
     'vellum/util',
@@ -51,6 +52,7 @@ define([
     modal_button,
     mugs,
     widgets,
+    richText,
     parser,
     datasources,
     util,
@@ -451,9 +453,12 @@ define([
     };
 
     fn.getMugDisplayName = function (mug) {
-        return mug.getDisplayName(
-            this.data.core.currentItextDisplayLanguage || 
+        var val = mug.getDisplayName(this.data.core.currentItextDisplayLanguage ||
             this.data.javaRosa.Itext.getDefaultLanguage());
+        if (mug.supportsRichText()) {
+            val = richText.toRichText(val, this.data.core.form);
+        }
+        return val;
     };
 
     fn.showSourceXMLModal = function (done) {
@@ -634,22 +639,37 @@ define([
                 },
             ];
 
+        if (this.opts().features.rich_text) {
+            formProperties.push({
+                label: "Use Rich Text?",
+                slug: "useRichText",
+                type: "checkbox",
+                value: function(jq, val) {
+                    return val ? jq.prop('checked', val) : jq.prop('checked');
+                }
+            });
+        }
+
         _.each(formProperties, function (prop) {
             var $propertyInput = $(control_group_stdInput({
-                label: prop.label
+                label: prop.label,
+                type: prop.type || 'text',
             }));
             $modalBody.append($propertyInput);
             $propertyInput.find('input')
                 .val(_this.data.core.form[prop.slug])
-                .on('keyup', function () {
+                .on('change', function () {
                     var $this = $(this),
                         currentVal = $this.val();
-                    if (typeof prop.cleanValue === 'function') {
-                        currentVal = prop.cleanValue(currentVal);
-                        $this.val(currentVal);
+                    if (prop.value) {
+                        currentVal = prop.value($this);
                     }
                     _this.data.core.form.setAttr(prop.slug, currentVal);
+                    _this.refreshVisibleData();
                 });
+            if (prop.value) {
+                prop.value($propertyInput.find('input'), _this.data.core.form[prop.slug]);
+            }
         });
 
         $modal.modal('show');
@@ -715,7 +735,13 @@ define([
 
         if (target) {
             // the .change fires the validation controls
-            target.val(target.val() + path).change();
+            if ((!mug && _this.data.core.form.useRichText !== false &&
+                 this.opts().features.rich_text) ||
+                 (mug && mug.supportsRichText())) {
+                target.ckeditor().editor.insertHtml(richText.toRichText(path, _this.data.core.form, true) + " ");
+            } else {
+                target.val(target.val() + path).change();
+            }
 
             if (window.analytics) {
                 window.analytics.usage(
@@ -866,7 +892,7 @@ define([
             inst = $.jstree.reference(target);
         if (!inst && target.vellum("get") === source.vellum("get")) {
             // only when not dragging inside the tree
-            if (target.hasClass("jstree-drop")) {
+            if (target.closest('.jstree-drop').length) {
                 data.helper.find('.jstree-icon').removeClass('jstree-er').addClass('jstree-ok');
             } else {
                 data.helper.find('.jstree-icon').removeClass('jstree-ok').addClass('jstree-er');
@@ -876,11 +902,12 @@ define([
         var vellum = $(data.data.obj.context).vellum("get"),
             target = $(data.event.target),
             inst = $.jstree.reference(target);
-        if (!inst && target.hasClass("jstree-drop") && vellum === target.vellum("get")) {
+
+        if (!inst && (target.closest('.jstree-drop').length) && vellum === target.vellum("get")) {
             if (data.data.origin) {
                 var node = data.data.origin.get_node(data.data.nodes[0]);
                 if (node.data && node.data.handleDrop) {
-                    node.data.handleDrop(target);
+                    node.data.handleDrop(target.closest('.jstree-drop'));
                 }
             }
         }
@@ -1100,6 +1127,9 @@ define([
         this.data.core.form = form = parser.parseXForm(
             formXML, options, this, _this.data.core.parseWarnings);
         form.formName = this.opts().core.formName || form.formName;
+        form.useRichText = _.isBoolean(form.useRichText) ? form.useRichText :
+                                                           this.opts().features.rich_text;
+        form.writeIgnoreRichText = this.opts().features.rich_text;
         if (formXML) {
             _this._resetMessages(_this.data.core.form.errors);
             _this._populateTree();

@@ -4,15 +4,24 @@ define([
     'underscore',
     'jquery',
     'vellum/atwho',
-    'vellum/util'
+    'vellum/util',
+    'vellum/richText',
+    'ckeditor',
+    'ckeditor-jquery'
 ], function (
     widget_control_keyvalue,
     widget_control_message,
     _,
     $,
     atwho,
-    util
+    util,
+    richTextUtils,
+    CKEDITOR
 ) {
+    CKEDITOR.config.allowedContent = true;
+    CKEDITOR.config.customConfig = '';
+    CKEDITOR.config.title = false;
+
     var base = function(mug, options) {
         // set properties shared by all widgets
         var widget = {};
@@ -233,6 +242,136 @@ define([
         return widget;
     };
 
+    var richText = function(mug, options) {
+        var widget = normal(mug, options), editor;
+
+        // Each bubble in rich text has a popover on hover that will display
+        // the path
+        function addPopovers(input) {
+            input.find('.label-datanode').each(function () {
+                var $this = $(this),
+                    datavalue = $this.attr('data-value'),
+                    match =  datavalue.match('output value="(.*)"'),
+                    value = match ? match[1] : $this.attr('data-value');
+                $this.popout({
+                    title: '',
+                    content: value,
+                    template: '<div contenteditable="false" class="popover">' +
+                        '<div class="arrow"></div>' +
+                        '<div class="popover-inner">' +
+                        '<div class="popover-content"><p></p></div></div></div>',
+                    placement: 'bottom',
+                    trigger: 'hover',
+                });
+            });
+        }
+
+        function addCloseButton(widget, input) {
+            input.find('.label-datanode').each(function () {
+                var _this = this;
+                $(this).find('.close').click(function() {
+                    _this.remove();
+                    widget.handleChange();
+                    return false;
+                });
+            });
+        }
+
+        widget.input = $("<div />")
+            .attr("contenteditable", true)
+            .attr("name", widget.id)
+            .addClass('input-block-level jstree-drop');
+        if (options.singleLine) {
+            widget.input.addClass('fd-input');
+        } else {
+            widget.input.addClass('fd-textarea');
+        }
+
+        widget.input.ckeditor().promise.then(function() {
+            editor = widget.input.ckeditor().editor;
+
+            mug.on('teardown-mug-properties', function() {
+                if (editor) {
+                    editor.destroy();
+                }
+            }, null, "teardown-mug-properties");
+
+            editor.on('change', function() {
+                widget.handleChange();
+                widget.input.find('.label-datanode').each(function(k, v) {
+                    var value = $(v);
+                    // ckeditor likes to move title attribute to data-original-title
+                    value.attr('title', value.attr('data-original-title'));
+                });
+            });
+
+            editor.on('afterInsertHtml', function (e) {
+                addCloseButton(widget, widget.input);
+                addPopovers(widget.input);
+            });
+            editor.on('dataReady', function (e) {
+                addCloseButton(widget, widget.input);
+                addPopovers(widget.input);
+            });
+            editor.on('focus', function() {
+                // highlights text on focus. 
+                // todo: find out real wanted behavior
+                var text = widget.input,
+                    selection = window.getSelection(),
+                    range = document.createRange();
+                range.selectNodeContents(text[0]);
+                selection.removeAllRanges();
+                selection.addRange(range);
+            });
+        });
+
+        widget.input.on('inserted.atwho', function(atwhoEvent, $li, browserEvent) {
+            // gets rid of atwho wrapper
+            // tod: find out why this is needed and move elsewhere
+            $(this).find('.atwho-inserted').children().unwrap();
+            addCloseButton(widget, widget.input);
+            addPopovers(widget.input);
+        });
+
+        widget.getControl = function () {
+            return widget.input;
+        };
+
+        widget.setValue = function (val) {
+            widget.input.ckeditor().promise.then(function() {
+                editor.setData(richTextUtils.toRichText(val, mug.form, true));
+            });
+        };
+
+        widget.getValue = function () {
+            var val = "";
+            widget.input.ckeditor().promise.then(function() {
+                val = richTextUtils.fromRichText(editor.getData());
+            });
+            return val.replace('&nbsp;', ' ').trim();
+        };
+
+        return widget;
+    };
+
+    var richInput = function(mug, options) {
+        if (mug.supportsRichText()) {
+            options.singleLine = true;
+            return richText(mug, options);
+        } else {
+            return text(mug, options);
+        }
+    };
+
+    var richTextarea = function(mug, options) {
+        if (mug.supportsRichText()) {
+            options.singleLine = false;
+            return richText(mug, options);
+        } else {
+            return multilineText(mug, options);
+        }
+    };
+
     var identifier = function (mug, options) {
         var widget = text(mug, options),
             super_updateValue = widget.updateValue;
@@ -298,9 +437,10 @@ define([
     };
 
     var xPath = function (mug, options) {
-        var widget = text(mug, options),
+        var widget = richInput(mug, options),
             super_getValue = widget.getValue,
             super_setValue = widget.setValue;
+
         widget.getValue = function() {
             var val = super_getValue();
             if ($.trim(val) === "") {
@@ -348,8 +488,10 @@ define([
             }, !!widget.isDisabled());
         };
 
-        atwho.questionAutocomplete(widget.input, mug,
-                                  {property: options.path});
+        atwho.questionAutocomplete(widget.input, mug, {
+            property: options.path,
+            useRichText: mug.supportsRichText()
+        });
 
         return widget;
     };
@@ -641,6 +783,8 @@ define([
         normal: normal,
         text: text,
         multilineText: multilineText,
+        richInput: richInput,
+        richTextarea: richTextarea,
         identifier: identifier,
         droppableText: droppableText,
         checkbox: checkbox,

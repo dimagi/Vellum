@@ -38,7 +38,8 @@ define([
         before(function (done) {
             util.init({
                 javaRosa: {langs: ['en']},
-                core: {onReady: done}
+                core: {onReady: done},
+                features: {rich_text: false},
             });
         });
         it("should get and fix serialization errors for mugs with matching paths", function () {
