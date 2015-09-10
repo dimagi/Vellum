@@ -3,13 +3,15 @@ require([
     'jquery',
     'underscore',
     'tests/utils',
-    'text!static/all_question_types.xml'
+    'text!static/all_question_types.xml',
+    'text!static/questionTypes/image-capture.xml'
 ], function (
     chai,
     $,
     _,
     util,
-    TEST_XML
+    TEST_XML,
+    IMAGE_CAPTURE_XML
 ) {
     var call = util.call,
         clickQuestion = util.clickQuestion,
@@ -486,6 +488,20 @@ require([
             text.p.constraintMsgItext.set("A != B");
             text.p.constraintAttr = "";
             assert(!util.isTreeNodeValid(text), "question should not be valid");
+        });
+    });
+
+    describe("Image Questions", function() {
+        it("should default to small image size", function() {
+            util.loadXML("");
+            var image = util.addQuestion("Image", 'image');
+            assert.strictEqual(image.p.imageSize, 250);
+        });
+
+        it("should select original size if there is no option", function() {
+            util.loadXML(IMAGE_CAPTURE_XML);
+            var image = call("getMugByPath", "/data/image");
+            assert.strictEqual(image.p.imageSize, '');
         });
     });
 });
