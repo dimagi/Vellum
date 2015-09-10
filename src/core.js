@@ -665,6 +665,7 @@ define([
                         currentVal = prop.value($this);
                     }
                     _this.data.core.form.setAttr(prop.slug, currentVal);
+                    _this.refreshVisibleData();
                 });
             if (prop.value) {
                 prop.value($propertyInput.find('input'), _this.data.core.form[prop.slug]);
