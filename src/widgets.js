@@ -309,19 +309,10 @@ define([
                 addCloseButton(widget, widget.input);
                 addPopovers(widget.input);
             });
+
             editor.on('dataReady', function (e) {
                 addCloseButton(widget, widget.input);
                 addPopovers(widget.input);
-            });
-            editor.on('focus', function() {
-                // highlights text on focus. 
-                // todo: find out real wanted behavior
-                var text = widget.input,
-                    selection = window.getSelection(),
-                    range = document.createRange();
-                range.selectNodeContents(text[0]);
-                selection.removeAllRanges();
-                selection.addRange(range);
             });
         });
 
