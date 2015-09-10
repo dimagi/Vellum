@@ -35,7 +35,6 @@ define([
                         icon: mug.options.icon,
                         questionId: mug.p.nodeID,
                     };
-                    return ret;
                 })
                 .filter(function(choice) { return choice.name; })
                 .value();
