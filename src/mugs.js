@@ -1212,6 +1212,30 @@ define([
         typeName: 'Image Capture',
         icon: 'icon-camera',
         mediaType: "image/*", /* */
+        spec: {
+            imageSize: {
+                visibility: 'visible',
+                widget: widgets.dropdown,
+                defaultOptions: [
+                    { text: "Small", value: "250" },
+                    { text: "Medium", value: "500" },
+                    { text: "Large", value: "1000" },
+                    { text: "Original", value: "" },
+                ]
+            }
+        },
+        writeCustomXML: function (xmlWriter, mug) {
+            Audio.writeCustomXML(xmlWriter, mug);
+            if (mug.__className === "Image" && mug.p.imageSize) {
+                xmlWriter.writeAttributeString("jr:imageDimensionScaledMax", mug.p.imageSize + "px");
+            }
+        },
+        init: function (mug, form) {
+            Audio.init(mug, form);
+            if (mug.p.imageSize !== "") {
+                mug.p.imageSize = mug.p.imageSize || 250;
+            }
+        }
     });
 
     var Video = util.extend(Audio, {
@@ -1223,6 +1247,11 @@ define([
     var Signature = util.extend(Image, {
         typeName: 'Signature Capture',
         icon: 'fcc fcc-fd-signature',
+        spec: {
+            imageSize: {
+                visibility: 'hidden',
+            }
+        },
         init: function (mug, form) {
             Image.init(mug, form);
             mug.p.appearance = "signature";

@@ -385,7 +385,7 @@
 						<label ref="jr:itext('question22/question23/question41-label')" />
 						<repeat nodeset="/data/question22/question23/question41" />
 					</group>
-					<upload ref="/data/question22/question23/question24" mediatype="image/*">
+					<upload ref="/data/question22/question23/question24" mediatype="image/*" jr:imageDimensionScaledMax="250px">
 						<label ref="jr:itext('question22/question23/question24-label')" />
 					</upload>
 					<upload ref="/data/question22/question23/question25" mediatype="audio/*">
