@@ -245,7 +245,7 @@ define([
     var richText = function(mug, options) {
         var widget = normal(mug, options), editor;
 
-        // Each bubble in rich text has a popover on click that will display
+        // Each bubble in rich text has a popover on hover that will display
         // the path
         function addPopovers(input) {
             input.find('.label-datanode').each(function () {
@@ -261,13 +261,8 @@ define([
                         '<div class="popover-inner">' +
                         '<div class="popover-content"><p></p></div></div></div>',
                     placement: 'bottom',
+                    trigger: 'hover',
                 });
-            });
-        }
-
-        function removePopovers(input) {
-            input.find('.label-datanode').each(function () {
-                $(this).popout('hide');
             });
         }
 
@@ -275,7 +270,6 @@ define([
             input.find('.label-datanode').each(function () {
                 var _this = this;
                 $(this).find('.close').click(function() {
-                    $(_this).popout('hide');
                     _this.remove();
                     widget.handleChange();
                     return false;
@@ -297,17 +291,10 @@ define([
             editor = widget.input.ckeditor().editor;
 
             mug.on('teardown-mug-properties', function() {
-                removePopovers(widget.input);
                 if (editor) {
                     editor.destroy();
                 }
             }, null, "teardown-mug-properties");
-
-            mug.form.on('question-remove', function(e) {
-                if (e.mug.ufid === mug.ufid) {
-                    removePopovers(widget.input);
-                }
-            });
 
             editor.on('change', function() {
                 widget.handleChange();
