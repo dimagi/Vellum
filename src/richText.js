@@ -118,7 +118,6 @@ define([
                 if (mug) {
                     return {
                         classes: ['label-datanode-internal', mug.options.icon],
-                        mug: mug
                     };
                 }
             }
@@ -127,7 +126,6 @@ define([
         }
 
         var xpathInfo = _parseXPath(xpath, form),
-            mug = xpathInfo.mug,
             bubbleClasses = xpathInfo.classes[0],
             iconClasses = xpathInfo.classes[1],
             dispValue = getBubbleDisplayValue(xpath),
@@ -138,11 +136,6 @@ define([
                     draggable: true,
                     'data-value': xpath,
                 }).attr(extraAttrs).append(icon).append(dispValue);
-
-        if (mug && mug.p && mug.p.labelItext) {
-            var labelItext = mug.p.labelItext;
-            bubble.attr('title', labelItext.forms[0].data[labelItext.itextModel.defaultLanguage]);
-        }
 
         if (withClose) {
             bubble.append($("<button>").addClass('close').html("&times;"));

@@ -29,15 +29,12 @@ define([
     var cachedMugData = timed(function(form) {
         return _.chain(form.getMugList())
                 .map(function(mug) {
-                    var ret = {
+                    return {
                         id: mug.ufid,
                         name: mug.absolutePath,
                         icon: mug.options.icon,
                         questionId: mug.p.nodeID,
                     };
-                    if (mug.p && mug.p.labelItext) {
-                        ret.title = mug.p.labelItext.forms[0].data[mug.p.labelItext.itextModel.defaultLanguage];
-                    }
                     return ret;
                 })
                 .filter(function(choice) { return choice.name; })
