@@ -1221,7 +1221,11 @@ define([
                     { text: "Medium", value: "500" },
                     { text: "Large", value: "1000" },
                     { text: "Original", value: "" },
-                ]
+                ],
+                help: "This will resize the image before sending the form. " +
+                    "Use this option to send smaller images in areas of poor " +
+                    "connectivity.<ul><li>Small - 0.1 megapixels</li><li>" +
+                    "Medium - 0.2 megapixels</li><li>Large - 0.5 megapixels</li></ul>",
             }
         },
         writeCustomXML: function (xmlWriter, mug) {
