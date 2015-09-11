@@ -38,6 +38,10 @@ define([
                 return false;
             }
 
+            if (_.isFunction(mug.spec[widget.path].enabled)) {
+                return !mug.spec[widget.path].enabled();
+            }
+
             return mug.form.vellum.isPropertyLocked(mug.absolutePath,
                                                     widget.path);
         };
