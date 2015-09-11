@@ -9,7 +9,8 @@ require([
     'text!static/markdown/simple-markdown.xml',
     'text!static/markdown/simple-markdown-no-chars.xml',
     'text!static/markdown/no-markdown.xml',
-    'text!static/markdown/no-markdown-stars.xml'
+    'text!static/markdown/no-markdown-stars.xml',
+    'text!static/markdown/explicit-no-markdown.xml'
 ], function (
     options,
     util,
@@ -21,7 +22,8 @@ require([
     SIMPLE_MARKDOWN_XML,
     SIMPLE_MARKDOWN_NO_CHARS_XML,
     NO_MARKDOWN_XML,
-    NO_MARKDOWN_STARS_XML
+    NO_MARKDOWN_STARS_XML,
+    EXPLICIT_NO_MARKDOWN_XML
 ) {
     var assert = chai.assert,
         call = util.call;
@@ -156,6 +158,17 @@ require([
             it("should activate the save button", function() {
                 assert(util.saveButtonEnabled(), "save button is disabled");
             });
+        });
+
+        it("should not include markdown with vellum:ignore='markdown'", function() {
+            util.loadXML(EXPLICIT_NO_MARKDOWN_XML);
+            util.assertXmlEqual(call('createXML'), EXPLICIT_NO_MARKDOWN_XML);
+        });
+
+        it("should remove markdown when no markdown is specified", function() {
+            var form = util.loadXML(SIMPLE_MARKDOWN_XML);
+            form.noMarkdown = true;
+            util.assertXmlEqual(call('createXML'), EXPLICIT_NO_MARKDOWN_XML);
         });
     });
 });
