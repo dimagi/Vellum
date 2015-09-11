@@ -39,7 +39,6 @@ define([
         requires: 'widget',
         init: function (editor) {
             editor.widgets.add('bubbles', {
-                draggable: false,
                 template:
                     '<span class="label label-datanode label-datanode-internal">' +
                       '<i class="fcc fcc-fd-text">&nbsp;</i>' +
@@ -51,6 +50,18 @@ define([
                 downcast: function(element) {
                     element.setHtml(applyFormats($(element.getOuterHtml()).data()));
                     element.replaceWithChildren();
+                },
+                init: function() {
+                    var width = $(this.element.$).width();
+                    this.dragHandlerContainer.setStyles({
+                        'width': width + 'px',
+                        'background': '',
+                    });
+                    this.dragHandlerContainer.getChildren().getItem(0).setStyles({
+                        'width': width + 'px',
+                        'margin-top': '15px',
+                        'height': '25px',
+                    });
                 },
             });
         },
