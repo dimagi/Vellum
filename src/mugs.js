@@ -1214,6 +1214,7 @@ define([
         mediaType: "image/*", /* */
         spec: {
             imageSize: {
+                label: "Image Size",
                 visibility: 'visible',
                 widget: widgets.dropdown,
                 defaultOptions: [
