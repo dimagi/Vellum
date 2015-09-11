@@ -637,6 +637,14 @@ define([
                     label: "Form Name",
                     slug: "formName"
                 },
+                {
+                    label: "Disable Text Formatting",
+                    slug: "noMarkdown",
+                    type: "checkbox",
+                    value: function(jq, val) {
+                        return val ? jq.prop('checked', val) : jq.prop('checked');
+                    }
+                }
             ];
 
         if (this.opts().features.rich_text) {
@@ -1130,6 +1138,7 @@ define([
         form.useRichText = _.isBoolean(form.useRichText) ? form.useRichText :
                                                            this.opts().features.rich_text;
         form.writeIgnoreRichText = this.opts().features.rich_text;
+        form.noMarkdown = form.noMarkdown || false;
         if (formXML) {
             _this._resetMessages(_this.data.core.form.errors);
             _this._populateTree();
