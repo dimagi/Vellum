@@ -222,7 +222,7 @@ define([
      */
     function toRichText(val, form, withClose) {
         if (!val) {return "";}
-        val = val.replace('&lt;', '<').replace('&gt;', '>').replace('&nbsp;', ' ');
+        val = val.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&nbsp;/g, ' ');
         var el = $('<div>').html(val);
         el.find('output').replaceWith(function() {
             return replacePathWithBubble(form, this.outerHTML, withClose);
