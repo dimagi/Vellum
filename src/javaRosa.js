@@ -594,7 +594,7 @@ define([
 
     var itextLabelBlock = function (mug, options) {
         var block = baseItextBlock(mug, options);
-        if (_.contains(NO_MARKDOWN_MUGS, mug.__className)) {
+        if (_.contains(NO_MARKDOWN_MUGS, mug.__className) || mug.form.noMarkdown) {
             block.itextWidget = itextLabelWidget;
         } else {
             block.itextWidget = itextMarkdownWidget;
@@ -1752,7 +1752,7 @@ define([
                             xmlWriter.writeXML(xml.normalize(val));
                             xmlWriter.writeEndElement();
                         }
-                        if (item.hasMarkdown) {
+                        if (item.hasMarkdown && !this.data.core.form.noMarkdown) {
                             val = item.get('default', lang);
                             xmlWriter.writeStartElement("value");
                             xmlWriter.writeAttributeString('form', 'markdown');

@@ -91,6 +91,9 @@ define([
         if (form.writeIgnoreRichText && form.useRichText === false) {
             xmlWriter.writeAttributeString("vellum:ignore", 'richText');
         }
+        if (form.noMarkdown) {
+            xmlWriter.writeAttributeString("vellum:ignore", 'markdown');
+        }
     }
 
     var _writeInstanceAttributes = function (writer, instanceMetadata) {

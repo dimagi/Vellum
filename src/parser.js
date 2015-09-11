@@ -67,6 +67,9 @@ define([
         if(xml.find('[vellum\\:ignore=richText]').length > 0) {
             form.useRichText = false;
         }
+        if(xml.find('[vellum\\:ignore=markdown]').length > 0) {
+            form.noMarkdown = true;
+        }
         
         // set all instance metadatas
         form.instanceMetadata = instances.map(function (instance) {
