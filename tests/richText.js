@@ -14,8 +14,7 @@
  * newline: <br />
  *
  * rich text "bubble":
- *   <span contenteditable="false" draggable="true"
- *         data-value="xpath" data-output-value=boolean>
+ *   <span data-value="xpath" data-output-value=boolean>
  *     <i class="icon">&nbsp;</i>
  *     text to display inside bubble
  *     <i class="close">&times;</i>
@@ -66,8 +65,6 @@ define([
 
     function bubbleSpan(xpath, internal, output) {
         var span = $('<span>').addClass('label label-datanode').attr({
-            contenteditable: false,
-            draggable: true,
             'data-value': xpath,
             'data-output-value': output,
         });

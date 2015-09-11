@@ -44,8 +44,6 @@ define([
         var retBub = $('<span>')
             .addClass('label label-datanode label-datanode-internal')
             .attr({
-                contenteditable: false,
-                draggable: true,
                 'data-value': "${name}",
                 'data-output-value': outputValue,
             })
