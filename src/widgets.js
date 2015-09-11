@@ -254,7 +254,7 @@ define([
                     datavalue = $this.attr('data-value'),
                     match =  datavalue.match('output value="(.*)"'),
                     value = match ? match[1] : $this.attr('data-value');
-                $this.popout({
+                $this.siblings('.cke_widget_drag_handler_container').children().popout({
                     title: '',
                     content: value,
                     template: '<div contenteditable="false" class="popover">' +
