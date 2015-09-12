@@ -149,6 +149,9 @@ define([
                 if (mug.options.writeDataNodeXML) {
                     mug.options.writeDataNodeXML(xmlWriter, mug);
                 }
+                if (mug.p.comment) {
+                    xmlWriter.writeAttributeString('vellum:comment', mug.p.comment);
+                }
                 if (xmlnsAttr){
                     xmlWriter.writeAttributeString("xmlns", xmlnsAttr);
                 }

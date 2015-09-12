@@ -914,6 +914,11 @@ define([
                     return 'pass';
                 }
             },
+            comment: {
+                lstring: 'Comment',
+                visibility: 'visible',
+                widget: widgets.multilineText,
+            }
         },
 
         control: {
