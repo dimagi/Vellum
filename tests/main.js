@@ -114,6 +114,7 @@ require(['jquery', 'jquery.vellum'], function ($) {
         'tests/saveToCase',
         'tests/setvalue',
         'tests/richText',
+        'tests/comments',
     ], function (
         options
     ) {
