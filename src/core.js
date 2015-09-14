@@ -1661,7 +1661,7 @@ define([
             form = this.data.core.form,
             mugs = multiselect ? mug : [mug],
             $baseToolbar = $(question_toolbar({
-                comment: mug.p.comment,
+                comment: multiselect ? '' : mug.p.comment,
                 isDeleteable: mugs && mugs.length && _.every(mugs, function (mug) {
                     return _this.isMugRemoveable(mug, form.getAbsolutePath(mug));
                 }),
