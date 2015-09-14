@@ -176,7 +176,8 @@ define([
         var $el = $(el),
             nodeID = el.nodeName, 
             nodeVal = $el.children().length ? null : $el.text(),
-            extraXMLNS = $el.popAttr('xmlns') || null;
+            extraXMLNS = $el.popAttr('xmlns') || null,
+            comment = $el.popAttr('vellum:comment') || null;
         role = role || $el.attr('vellum:role');
 
         if (role && form.mugTypes.allTypes.hasOwnProperty(role) &&
@@ -192,6 +193,9 @@ define([
 
         if (extraXMLNS && (extraXMLNS !== form.formUuid)) {
             mug.p.xmlnsAttr = extraXMLNS;
+        }
+        if (comment) {
+            mug.p.comment = comment;
         }
         // add arbitrary attributes
         mug.p.rawDataAttributes = getAttributes(el);
