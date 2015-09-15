@@ -41,8 +41,8 @@ define([
         return $(_.template($(selector).text(), params));
     };
     
-    that.validAttributeRegex = /^[^<&'"]*$/;
-    that.invalidAttributeRegex = /[<&'"]/;
+    that.validAttributeRegex = /^[^<&'">]*$/;
+    that.invalidAttributeRegex = /[<&'">]/;
 
     /**
      * Check if value is a valid XML attribute value (additionally disallow all

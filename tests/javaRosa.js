@@ -607,6 +607,14 @@ require([
             assert.strictEqual($("[name='property-labelItext']").val(), 'select-blah___blah-labelItext');
         });
 
+        it("should not allow > in item labels", function() {
+            util.loadXML("");
+            util.addQuestion("Select", "select");
+            util.clickQuestion('select/item1');
+            $("[name='property-nodeID']").val("blah > blah").change();
+            assert.strictEqual($("[name='property-labelItext']").val(), 'select-blah___blah-labelItext');
+        });
+
         it("should not change with node id when blank", function() {
             util.loadXML("");
             util.addQuestion("Text", "text");
