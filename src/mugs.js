@@ -17,7 +17,6 @@ define([
     util,
     logic
 ) {
-    var ENABLE_IMAGE_RESIZER = true;
     /**
      * A question, containing data, bind, and control elements.
      */
@@ -1218,8 +1217,8 @@ define([
                 label: "Image Size",
                 visibility: 'visible',
                 widget: widgets.dropdown,
-                enabled: function() {
-                    return ENABLE_IMAGE_RESIZER;
+                enabled: function(mug) {
+                    return mug.options.resize_enabled;
                 },
                 defaultOptions: [
                     { text: "Small", value: "250" },
@@ -1546,7 +1545,7 @@ define([
             // Nestable Field List not supported in CommCare before v2.16
             group_in_field_list = opts.features.group_in_field_list,
             richText = opts.features.rich_text;
-        ENABLE_IMAGE_RESIZER = opts.features.image_resize;
+        Image.resize_enabled = opts.features.image_resize;
 
         this.auxiliaryTypes = mugTypes.auxiliary;
         this.normalTypes = mugTypes.normal;

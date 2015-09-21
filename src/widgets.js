@@ -39,7 +39,7 @@ define([
             }
 
             if (_.isFunction(mug.spec[widget.path].enabled)) {
-                return !mug.spec[widget.path].enabled();
+                return !mug.spec[widget.path].enabled(mug);
             }
 
             return mug.form.vellum.isPropertyLocked(mug.absolutePath,
