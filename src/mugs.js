@@ -1219,7 +1219,7 @@ define([
         mediaType: "image/*", /* */
         spec: {
             imageSize: {
-                label: "Image Size",
+                lstring: "Image Size",
                 visibility: 'visible',
                 widget: widgets.dropdown,
                 enabled: function(mug) {
