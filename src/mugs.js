@@ -81,6 +81,9 @@ define([
         getIcon: function () {
             return this.options.getIcon(this);
         },
+        instanceOf: function (name) {
+            return _.contains(this.options.prototypes, name);
+        },
         /**
          * Validate mug
          *
@@ -1000,6 +1003,7 @@ define([
     // question-type specific properties, gets reset when you change the
     // question type
     var defaultOptions = {
+        prototypes: [],
         typeName: "Base",
         tagName: "input",
         isDataOnly: false,
@@ -1214,6 +1218,7 @@ define([
     });
 
     var Image = util.extend(Audio, {
+        prototypes: Audio.prototypes.concat('Audio'),
         typeName: 'Image Capture',
         icon: 'icon-camera',
         mediaType: "image/*", /* */
@@ -1239,7 +1244,7 @@ define([
         },
         writeCustomXML: function (xmlWriter, mug) {
             Audio.writeCustomXML(xmlWriter, mug);
-            if (mug.__className === "Image" && mug.p.imageSize) {
+            if (mug.instanceOf("Image") && mug.p.imageSize) {
                 xmlWriter.writeAttributeString("jr:imageDimensionScaledMax", mug.p.imageSize + "px");
             }
         },
@@ -1600,6 +1605,9 @@ define([
         _.each(this.allTypes, function (Mug, name) {
             Mug.__className = name;
             Mug.richText = richText;
+            if (Mug.prototypes) {
+                Mug.prototypes.push(name);
+            }
 
             // set on this for easy access
             _this[name] = Mug;
