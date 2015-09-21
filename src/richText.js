@@ -52,6 +52,7 @@ define([
                     element.replaceWithChildren();
                 },
                 init: function() {
+                    // TODO: PR to ckeditor to make changing drag ui supported
                     var width = $(this.element.$).width();
                     this.dragHandlerContainer.setStyles({
                         'width': width + 'px',

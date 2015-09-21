@@ -113,6 +113,7 @@ define([
         if (options.useRichText) {
             options.insertTpl = bubble(options.outputValue);
             options.functionOverrides.insert = function(content, $li) {
+                // this references internal At.js object
                 this.query.el.remove();
                 $input.ckeditor().editor.insertHtml(content);
                 if (!this.$inputor.is(':focus')) {
