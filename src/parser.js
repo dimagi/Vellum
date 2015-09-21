@@ -282,7 +282,8 @@ define([
 
     function populateControlMug(mug, $cEl) {
         var labelEl = $cEl.children('label'),
-            hintEl = $cEl.children('hint');
+            hintEl = $cEl.children('hint'),
+            imageSize = $cEl.popAttr('jr:imageDimensionScaledMax');
         if (labelEl.length && mug.getPresence("label") !== 'notallowed') {
             var labelVal = xml.humanize(labelEl);
             if (labelVal) {
@@ -291,6 +292,9 @@ define([
         }
         if (hintEl.length && mug.getPresence("hintLabel") !== 'notallowed') {
             mug.p.hintLabel = xml.humanize(hintEl);
+        }
+        if (mug.__className === "Image") {
+            mug.p.imageSize = imageSize ? parseInt(imageSize) : "";
         }
     }
 

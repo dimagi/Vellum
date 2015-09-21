@@ -163,6 +163,7 @@ define(["underscore"], function (_) {
             'printing': true,
             'templated_intents': true,
             'custom_intents': true,
+            'image_resize': true,
         }
     };
 

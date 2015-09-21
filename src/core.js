@@ -1972,7 +1972,8 @@ define([
             "nodeID",
             "label",
             "readOnlyControl",
-            "itemsetData"
+            "itemsetData",
+            "imageSize",
         ];
     };
 

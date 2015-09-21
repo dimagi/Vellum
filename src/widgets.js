@@ -38,6 +38,10 @@ define([
                 return false;
             }
 
+            if (_.isFunction(mug.spec[widget.path].enabled)) {
+                return !mug.spec[widget.path].enabled(mug);
+            }
+
             return mug.form.vellum.isPropertyLocked(mug.absolutePath,
                                                     widget.path);
         };
@@ -652,6 +656,10 @@ define([
                 return _.isEqual(option.value ? JSON.parse(option.value) : '', val);
             });
         };
+
+        if (options.defaultOptions) {
+            widget.addOptions(options.defaultOptions);
+        }
 
         return widget;
     };

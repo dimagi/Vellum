@@ -1217,6 +1217,38 @@ define([
         typeName: 'Image Capture',
         icon: 'icon-camera',
         mediaType: "image/*", /* */
+        spec: {
+            imageSize: {
+                label: "Image Size",
+                visibility: 'visible',
+                widget: widgets.dropdown,
+                enabled: function(mug) {
+                    return mug.options.resize_enabled;
+                },
+                defaultOptions: [
+                    { text: "Small", value: "250" },
+                    { text: "Medium", value: "500" },
+                    { text: "Large", value: "1000" },
+                    { text: "Original", value: "" },
+                ],
+                help: "This will resize the image before sending the form. " +
+                    "Use this option to send smaller images in areas of poor " +
+                    "connectivity.<ul><li>Small - 0.1 megapixels</li><li>" +
+                    "Medium - 0.2 megapixels</li><li>Large - 0.5 megapixels</li></ul>",
+            }
+        },
+        writeCustomXML: function (xmlWriter, mug) {
+            Audio.writeCustomXML(xmlWriter, mug);
+            if (mug.__className === "Image" && mug.p.imageSize) {
+                xmlWriter.writeAttributeString("jr:imageDimensionScaledMax", mug.p.imageSize + "px");
+            }
+        },
+        init: function (mug, form) {
+            Audio.init(mug, form);
+            if (mug.p.imageSize !== "") {
+                mug.p.imageSize = mug.p.imageSize || 250;
+            }
+        }
     });
 
     var Video = util.extend(Audio, {
@@ -1228,6 +1260,11 @@ define([
     var Signature = util.extend(Image, {
         typeName: 'Signature Capture',
         icon: 'fcc fcc-fd-signature',
+        spec: {
+            imageSize: {
+                visibility: 'hidden',
+            }
+        },
         init: function (mug, form) {
             Image.init(mug, form);
             mug.p.appearance = "signature";
@@ -1513,6 +1550,7 @@ define([
             // Nestable Field List not supported in CommCare before v2.16
             group_in_field_list = opts.features.group_in_field_list,
             richText = opts.features.rich_text;
+        Image.resize_enabled = opts.features.image_resize;
 
         this.auxiliaryTypes = mugTypes.auxiliary;
         this.normalTypes = mugTypes.normal;
