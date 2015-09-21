@@ -47,7 +47,7 @@ define([
                 'data-value': "${name}",
                 'data-output-value': outputValue,
             })
-            .append($('<i>').addClass('${icon}'))
+            .append($('<i>').addClass('${icon}').append('&nbsp;'))
             .append('${questionId}')
             .append($('<button>').addClass('close').append('&times;'));
 
@@ -107,10 +107,18 @@ define([
             property: '',
             outputValue: false,
             useRichText: false,
+            functionOverrides: {},
         });
 
         if (options.useRichText) {
             options.insertTpl = bubble(options.outputValue);
+            options.functionOverrides.insert = function(content, $li) {
+                this.query.el.remove();
+                $input.ckeditor().editor.insertHtml(content);
+                if (!this.$inputor.is(':focus')) {
+                    this.$inputor.focus();
+                }
+            };
         }
 
         $input.atwho({
@@ -136,7 +144,8 @@ define([
                     }
                     return value;
                 }
-            }
+            },
+            functionOverrides: options.functionOverrides,
         }).on("inserted.atwho", function(event, $li, otherEvent) {
             $(this).find('.atwho-inserted').children().unwrap();
         });
