@@ -41,7 +41,7 @@ define([
             editor.widgets.add('bubbles', {
                 template:
                     '<span class="label label-datanode label-datanode-internal">' +
-                      '<i class="fcc fcc-fd-text">&nbsp;</i>' +
+                      '<i class="icon-question-sign">&nbsp;</i>' +
                       'test widget' +
                     '</span>',
                 upcast: function ( element ) {
