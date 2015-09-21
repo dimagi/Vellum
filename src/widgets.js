@@ -659,10 +659,6 @@ define([
 
         if (options.defaultOptions) {
             widget.addOptions(options.defaultOptions);
-
-            if (options.defaultValue) {
-                widget.setValue(options.defaultValue);
-            }
         }
 
         return widget;
