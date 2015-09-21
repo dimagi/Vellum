@@ -1003,8 +1003,8 @@ define([
     // question-type specific properties, gets reset when you change the
     // question type
     var defaultOptions = {
-        prototypes: [],
         typeName: "Base",
+        prototypes: [],
         tagName: "input",
         isDataOnly: false,
         isControlOnly: false,
@@ -1179,6 +1179,7 @@ define([
 
     var PhoneNumber = util.extend(Text, {
         typeName: 'Phone Number or Numeric ID',
+        prototypes: Text.prototypes.concat('Text'),
         icon: 'icon-signal',
         init: function (mug, form) {
             Text.init(mug, form);
@@ -1218,8 +1219,8 @@ define([
     });
 
     var Image = util.extend(Audio, {
-        prototypes: Audio.prototypes.concat('Audio'),
         typeName: 'Image Capture',
+        prototypes: Audio.prototypes.concat('Audio'),
         icon: 'icon-camera',
         mediaType: "image/*", /* */
         spec: {
@@ -1258,12 +1259,14 @@ define([
 
     var Video = util.extend(Audio, {
         typeName: 'Video Capture',
+        prototypes: Audio.prototypes.concat('Audio'),
         icon: 'icon-facetime-video',
         mediaType: "video/*", /* */
     });
 
     var Signature = util.extend(Image, {
         typeName: 'Signature Capture',
+        prototypes: Image.prototypes.concat('Image'),
         icon: 'fcc fcc-fd-signature',
         spec: {
             imageSize: {
@@ -1322,6 +1325,7 @@ define([
     // but must be able to view forms already containing longs.
     var Long = util.extend(Int, {
         typeName: 'Long',
+        prototypes: Int.prototypes.concat('Int'),
         dataType: 'xsd:long',
         icon: 'fcc fcc-fd-long',
         init: function (mug, form) {
@@ -1330,6 +1334,7 @@ define([
 
     var Double = util.extend(Int, {
         typeName: 'Decimal',
+        prototypes: Int.prototypes.concat('Int'),
         dataType: 'xsd:double',
         icon: 'fcc fcc-fd-decimal',
         init: function (mug, form) {
@@ -1440,6 +1445,7 @@ define([
 
     var MSelect = util.extend(BaseSelect, {
         typeName: 'Multiple Answer',
+        prototypes: BaseSelect.prototypes.concat('BaseSelect'),
         tagName: 'select',
         icon: 'fcc fcc-fd-multi-select',
         spec: {
@@ -1449,6 +1455,7 @@ define([
 
     var Select = util.extend(MSelect, {
         typeName: 'Single Answer',
+        prototypes: MSelect.prototypes.concat('MSelect'),
         tagName: 'select1',
         icon: 'fcc fcc-fd-single-select',
         defaultOperator: null
@@ -1486,6 +1493,7 @@ define([
     // nest other group types and it has a very different end-user functionality
     var FieldList = util.extend(Group, {
         typeName: 'Question List',
+        prototypes: Group.prototypes.concat('Group'),
         icon: 'icon-reorder',
         init: function (mug, form) {
             Group.init(mug, form);
@@ -1495,6 +1503,7 @@ define([
 
     var Repeat = util.extend(Group, {
         typeName: 'Repeat Group',
+        prototypes: Group.prototypes.concat('Group'),
         icon: 'icon-retweet',
         possibleDataParent: false,
         controlNodeChildren: function ($node) {
@@ -1606,6 +1615,8 @@ define([
             Mug.__className = name;
             Mug.richText = richText;
             if (Mug.prototypes) {
+                console.log(Mug.name);
+                console.log(Mug.prototypes);
                 Mug.prototypes.push(name);
             }
 
