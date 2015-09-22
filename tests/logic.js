@@ -113,6 +113,14 @@ require([
                 });
             });
         });
+
+        describe("should not add validation error for", function() {
+            it("meta reference", function () {
+                util.loadXML("");
+                var mug = util.addQuestion("Text", "text");
+                assert(util.isTreeNodeValid(mug), util.getMessages(mug));
+            });
+        });
     });
 
     describe("Logic expression", function() {
