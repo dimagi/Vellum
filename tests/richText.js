@@ -14,8 +14,7 @@
  * newline: <br />
  *
  * rich text "bubble":
- *   <span contenteditable="false" draggable="true"
- *         data-value="xpath" data-output-value=boolean>
+ *   <span data-value="xpath" data-output-value=boolean>
  *     <i class="icon">&nbsp;</i>
  *     text to display inside bubble
  *     <i class="close">&times;</i>
@@ -66,8 +65,6 @@ define([
 
     function bubbleSpan(xpath, internal, output) {
         var span = $('<span>').addClass('label label-datanode').attr({
-            contenteditable: false,
-            draggable: true,
             'data-value': xpath,
             'data-output-value': output,
         });
@@ -115,16 +112,6 @@ define([
                         wrapWithDiv(makeOutputValue(val[0], val[1], val[2], val[3])).html()
                     );
                 });
-
-                it("from html to text: " + val[0], function() {
-                    var bubble = $('<div>').append(makeBubble(val[0], val[1], val[2], val[3])).html();
-                    assert.strictEqual(richText.fromRichText(bubble), val[0]);
-                });
-
-                it("from html to text with ouput value: " + val[0], function() {
-                    var bubble = $('<div>').append(makeBubble(val[0], val[1], val[2], val[3], true)).html();
-                    assert.strictEqual(richText.fromRichText(bubble), outputValueTemplateFn(val[0]));
-                });
             });
         });
 
@@ -149,15 +136,6 @@ define([
                                               val.icon, val.internalRef).attr(val.extraAttrs);
                     assert(wrapWithDiv(real)[0].isEqualNode(wrapWithDiv(test)[0]),
                           '\n' + real + '\n' + wrapWithDiv(test).html());
-                });
-
-                it("from html to text with output value: " + val.xmlValue, function() {
-                    var bubble = $('<div>').append(
-                        makeBubble(val.valueInBubble, val.bubbleDispValue, val.icon,
-                                   val.internalRef, true).attr(val.extraAttrs)
-                    ).html();
-                    assert.strictEqual(richText.fromRichText(bubble),
-                                       outputValueTemplateFn(val.xmlValue));
                 });
             });
 

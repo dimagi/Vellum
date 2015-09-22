@@ -14,8 +14,7 @@
  * newline: <br />
  *
  * rich text "bubble":
- *   <span contenteditable="false" draggable="true" 
- *         data-value="xpath" data-output-value=boolean>
+ *   <span data-value="xpath" data-output-value=boolean>
  *     <i class="icon">&nbsp;</i>
  *     text to display inside bubble
  *     <i class="close">&times;</i>
@@ -27,13 +26,48 @@ define([
     'underscore',
     'jquery',
     'vellum/logic',
-    'xpathmodels'
+    'xpathmodels',
+    'ckeditor'
 ], function(
     _,
     $,
     logic,
-    xpathmodels
+    xpathmodels,
+    CKEDITOR
 ){
+    CKEDITOR.plugins.add('bubbles', {
+        requires: 'widget',
+        init: function (editor) {
+            editor.widgets.add('bubbles', {
+                template:
+                    '<span class="label label-datanode label-datanode-internal">' +
+                      '<i class="icon-question-sign">&nbsp;</i>' +
+                      'test widget' +
+                    '</span>',
+                upcast: function ( element ) {
+                    return element.name === 'span' && element.hasClass('label-datanode');
+                },
+                downcast: function(element) {
+                    element.setHtml(applyFormats($(element.getOuterHtml()).data()));
+                    element.replaceWithChildren();
+                },
+                init: function() {
+                    // TODO: PR to ckeditor to make changing drag ui supported
+                    var width = $(this.element.$).width();
+                    this.dragHandlerContainer.setStyles({
+                        'width': width + 'px',
+                        'background': '',
+                    });
+                    this.dragHandlerContainer.getChildren().getItem(0).setStyles({
+                        'width': width + 'px',
+                        'margin-top': '15px',
+                        'height': '25px',
+                    });
+                },
+            });
+        },
+    });
+
     /*
      * formats specifies the serialization for different formats that can be
      * applied to bubbles.
@@ -55,7 +89,7 @@ define([
             },
             'outputValue': {
                 serialize: function(currentValue) {
-                    return _.template('<output value="<%=xpath%>" />', {
+                    return _.template('&lt;output value="<%=xpath%>" /&gt;', {
                         xpath: currentValue
                     });
                 },
@@ -132,8 +166,6 @@ define([
             icon = $('<i>').addClass(iconClasses).html('&nbsp;'),
             bubble = $('<span>').addClass('label label-datanode ' + bubbleClasses)
                 .attr({
-                    contenteditable: false,
-                    draggable: true,
                     'data-value': xpath,
                 }).attr(extraAttrs).append(icon).append(dispValue);
 
@@ -191,7 +223,7 @@ define([
      */
     function toRichText(val, form, withClose) {
         if (!val) {return "";}
-        val = val.replace('&lt;', '<').replace('&gt;', '>').replace('&nbsp;', ' ');
+        val = val.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&nbsp;/g, ' ');
         var el = $('<div>').html(val);
         el.find('output').replaceWith(function() {
             return replacePathWithBubble(form, this.outerHTML, withClose);
@@ -245,20 +277,14 @@ define([
      */
     function fromRichText(val) {
         var el = $('<div>');
-
         val = val.replace(/<p>/ig,"")
                  .replace(/<\/p>/ig, "\n")
-                 .replace(/(<br ?\/?>)/ig,"\n")
-                 .replace(/&nbsp;/ig, ' ');
+                 .replace(/(<br ?\/?>)/ig,"\n");
 
         el = el.html(val);
-        el.find('.label-datanode').replaceWith(function() {
-            return applyFormats($(this).data());
-        });
+        el.find('.label-datanode').children().unwrap();
 
-        return el.html().replace(/&lt;/ig, '<')
-                        .replace(/&gt;/ig, '>')
-                        .replace(/&nbsp;/ig, ' ');
+        return el.text();
     }
 
     return {

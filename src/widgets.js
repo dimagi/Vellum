@@ -21,6 +21,7 @@ define([
     CKEDITOR.config.allowedContent = true;
     CKEDITOR.config.customConfig = '';
     CKEDITOR.config.title = false;
+    CKEDITOR.config.extraPlugins = 'bubbles';
 
     var base = function(mug, options) {
         // set properties shared by all widgets
@@ -257,7 +258,7 @@ define([
                     datavalue = $this.attr('data-value'),
                     match =  datavalue.match('output value="(.*)"'),
                     value = match ? match[1] : $this.attr('data-value');
-                $this.popout({
+                $this.siblings('.cke_widget_drag_handler_container').children().popout({
                     title: '',
                     content: value,
                     template: '<div contenteditable="false" class="popover">' +
@@ -313,19 +314,10 @@ define([
                 addCloseButton(widget, widget.input);
                 addPopovers(widget.input);
             });
+
             editor.on('dataReady', function (e) {
                 addCloseButton(widget, widget.input);
                 addPopovers(widget.input);
-            });
-            editor.on('focus', function() {
-                // highlights text on focus. 
-                // todo: find out real wanted behavior
-                var text = widget.input,
-                    selection = window.getSelection(),
-                    range = document.createRange();
-                range.selectNodeContents(text[0]);
-                selection.removeAllRanges();
-                selection.addRange(range);
             });
         });
 
