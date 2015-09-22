@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:orx="http://openrosa.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa" xmlns:vellum="http://commcarehq.org/xforms/vellum">
+	<h:head>
+		<h:title>Untitled Form</h:title>
+		<model>
+			<instance>
+				<data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/1D568275-1D19-46DB-8C54-2C9765DF6335" uiVersion="1" version="1" name="Untitled Form">
+					<itemset />
+					<hidden />
+				</data>
+			</instance>
+			<bind nodeset="/data/itemset" />
+			<itext>
+				<translation lang="en" default="">
+					<text id="itemset-label">
+						<value>itemset</value>
+					</text>
+				</translation>
+			</itext>
+		</model>
+	</h:head>
+	<h:body>
+		<select1 ref="/data/itemset">
+			<label ref="jr:itext('itemset-label')" />
+			<itemset nodeset="/data/hidden[final_age &gt; 16][sex = 'F']">
+				<label ref="label" />
+				<value ref="value" />
+			</itemset>
+		</select1>
+	</h:body>
+</h:html>
