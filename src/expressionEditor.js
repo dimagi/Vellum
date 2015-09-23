@@ -107,6 +107,9 @@ define([
         };
         var addAutocomplete = function (input, choices) {
             if (choices) {
+                if (_.isFunction(choices)) {
+                    choices = choices();
+                }
                 atwho.dropdownAutocomplete(input, choices);
             }
             else {
