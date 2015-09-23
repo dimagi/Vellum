@@ -98,10 +98,12 @@ define([
                 },
                 validationFunc: function (mug) {
                     if (!mug.options.lookupTablesEnabled) {
-                        return "You no longer have access to Lookup Tables in your application. " +
+                        return _.template("You no longer have access to Lookup Tables in your application. " +
                             "Lookup Tables are available on the Standard plan and higher.\n" +
                             "Before you can make a new version of your application, " +
-                            "you must [change your subscription](" + changeSubscriptionLink + ") or delete this question.";
+                            "you must <%= link %> or delete this question")({
+                            link: changeSubscriptionLink ? "[change your subscription](" + changeSubscriptionLink + ")": "change your subscription"
+                        });
                     }
                     var itemsetData = mug.p.itemsetData;
                     if (!itemsetData.nodeset) {
