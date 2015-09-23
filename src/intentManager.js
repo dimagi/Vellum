@@ -45,9 +45,13 @@ define([
             templates = _.object(_.map(opts && opts.templates, function (temp) {
                 return [temp.id, temp];
             })),
-            control = $('<div class="control-row row" />')
-                .append($('<div class="span8" />').append(input))
-                .append($('<div class="span4" />').append(tempMenu));
+            control = $('<div class="control-row row" />');
+
+            if (!onlyTemplatedIntents(options.vellum.opts().features)) {
+                control = control.append($('<div class="span8" />').append(input))
+                                 .append($('<div class="span2" />'));
+            }
+            control = control.append($('<div class="span2" />').append(tempMenu));
 
         tempMenu.find('.dropdown-menu a').click(function (e) {
             e.preventDefault();
