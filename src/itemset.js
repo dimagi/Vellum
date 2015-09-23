@@ -27,6 +27,7 @@ define([
 ) {
     var mugTypes = mugs.baseMugTypes.normal,
         Itemset, isAdvancedItemsetEnabled, opts,
+        changeSubscriptionLink,
         END_FILTER = /\[[^\[\]]*\]$/;
 
     Itemset = util.extend(mugs.defaultOptions, {
@@ -97,8 +98,10 @@ define([
                 },
                 validationFunc: function (mug) {
                     if (!mug.options.lookupTablesEnabled) {
-                        return "You do not have access to lookup tables in your application. " +
-                            "This application may not build.";
+                        return "You no longer have access to Lookup Tables in your application. " +
+                            "Lookup Tables are available on the Standard plan and higher. " +
+                            "Before you can make a new version of your application, " +
+                            "you must " + changeSubscriptionLink + " or delete this question.";
                     }
                     var itemsetData = mug.p.itemsetData;
                     if (!itemsetData.nodeset) {
@@ -187,6 +190,7 @@ define([
             opts = this.opts().itemset;
             isAdvancedItemsetEnabled = this.opts().features.advanced_itemsets;
             Itemset.lookupTablesEnabled = this.opts().features.lookup_tables;
+            changeSubscriptionLink = this.opts().core.externalLinks.changeSubscription;
         },
         getSelectQuestions: function () {
             var questions = this.__callOld();
