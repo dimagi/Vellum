@@ -206,7 +206,6 @@ define([
                 if (!refMug &&
                     (!mug.options.ignoreReferenceWarning || !mug.options.ignoreReferenceWarning(mug)) &&
                     _this.opts.allowedDataNodeReferences.indexOf(pathWithoutRoot) === -1 &&
-                    !pathWithoutRoot.startsWith('meta/') &&
                     !(property === "dataParent" && pathString === form.getBasePath().slice(0,-1)))
                 {
                     unknowns.push(xpath);
