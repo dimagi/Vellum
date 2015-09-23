@@ -10,7 +10,8 @@ require([
     'text!static/itemset/test1.xml',
     'text!static/itemset/test1-with-constraint.xml',
     'text!static/itemset/inner-filters.xml',
-    'text!static/itemset/dropdown-fixture.xml'
+    'text!static/itemset/dropdown-fixture.xml',
+    'text!static/itemset/data-itemset.xml'
 ], function (
     options,
     util,
@@ -23,7 +24,8 @@ require([
     TEST_XML_1,
     TEST_XML_1_WITH_CONSTRAINT,
     INNER_FILTERS_XML,
-    DROPDOWN_FIXTURE_XML
+    DROPDOWN_FIXTURE_XML,
+    DATA_ITEMSET_XML
 ) {
     var assert = chai.assert,
         call = util.call,
@@ -164,6 +166,14 @@ require([
                 clickQuestion("question2/itemset");
 
                 assert($('[name=property-itemsetData]').is('select'));
+            });
+
+            describe("with a /data/ fixture", function() {
+                it("doesn't warn on no src", function() {
+                    util.loadXML(DATA_ITEMSET_XML);
+                    var mug = util.getMug('/data/itemset/itemset');
+                    assert.strictEqual(mug.spec.itemsetData.validationFunc(mug), 'pass');
+                });
             });
 
             describe("with a custom fixture", function() {

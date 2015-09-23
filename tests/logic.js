@@ -113,6 +113,27 @@ require([
                 });
             });
         });
+
+        describe("should not add validation error for", function() {
+            var allowedReferences = [
+                "meta/deviceID",
+                "meta/instanceID",
+                "meta/username",
+                "meta/userID",
+                "meta/timeStart",
+                "meta/timeEnd",
+                "meta/location",
+            ];
+
+            _.each(allowedReferences, function(ref) {
+                it(ref, function () {
+                    util.loadXML("");
+                    var mug = util.addQuestion("Text", "text");
+                    mug.p.calculateAttr = "/data/" + ref;
+                    assert(util.isTreeNodeValid(mug), util.getMessages(mug));
+                });
+            });
+        });
     });
 
     describe("Logic expression", function() {

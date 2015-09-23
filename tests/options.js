@@ -95,7 +95,8 @@ define(["underscore"], function (_) {
                 "meta/username",
                 "meta/userID",
                 "meta/timeStart",
-                "meta/timeEnd"
+                "meta/timeEnd",
+                "meta/location",
             ],
             dataSourcesEndpoint: function (callback) { callback(dataSources); },
             saveType: "patch",

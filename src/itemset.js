@@ -110,12 +110,14 @@ define([
                         return "Choice Label must be specified.";
                     }
 
-                    var sources = getDataSources(),
+                    var instance = itemsetData.instance,
+                        instanceSrc = instance ? instance.src : '',
+                        sources = getDataSources(),
                         fixtures = datasources.getPossibleFixtures(sources),
                         notCustom = _.some(fixtures, function (fixture) {
-                            return fixture.src === itemsetData.instance.src;
+                            return fixture.src === instanceSrc;
                         }),
-                        choices = datasources.autocompleteChoices(sources, itemsetData.instance.src),
+                        choices = datasources.autocompleteChoices(sources, instanceSrc),
                         filterRegex = /\[[^\[]+]/g,
                         strippedValue = itemsetData.valueRef.replace(filterRegex, ""),
                         strippedLabel = itemsetData.labelRef.replace(filterRegex, "");
