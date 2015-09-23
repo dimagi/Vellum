@@ -101,6 +101,9 @@ define(["underscore"], function (_) {
             dataSourcesEndpoint: function (callback) { callback(dataSources); },
             saveType: "patch",
             saveUrl: function (data) {},
+            externalLinks: {
+                changeSubscription: "#",
+            },
         },
         javaRosa: {
             langs: ['en', 'hin'],
